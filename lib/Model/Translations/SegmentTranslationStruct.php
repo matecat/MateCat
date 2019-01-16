@@ -28,7 +28,7 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
 
 
     public function isReviewedStatus() {
-        return in_array( $this->status, Constants_TranslationStatus::$REVISION_STATUSES);
+        return Constants_TranslationStatus::isReviewedStatus( $this->status );
     }
 
     /**

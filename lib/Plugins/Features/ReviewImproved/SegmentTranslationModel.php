@@ -28,7 +28,6 @@ class SegmentTranslationModel {
     protected $chunk_review;
 
     public function __construct( \SegmentTranslationModel $model ) {
-
         $this->model = $model;
         $this->chunk = \Chunks_ChunkDao::getBySegmentTranslation( $this->model->getTranslation() );
 
@@ -39,7 +38,6 @@ class SegmentTranslationModel {
         ] );
 
         return $this->chunk_review = $reviews[ 0 ];
-
     }
 
     public function recountPenaltyPoints() {

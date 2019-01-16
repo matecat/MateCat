@@ -7,6 +7,7 @@ use API\V2\Json\ProjectUrls;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
 use Features\ReviewExtended\Observer\SegmentTranslationObserver;
+use Jobs_JobStruct;
 use SegmentTranslationModel;
 use Features\ReviewExtended\ChunkReviewModel;
 
@@ -58,6 +59,14 @@ class ReviewExtended extends AbstractRevisionFeature {
             $model->recountAndUpdatePassFailResult();
         }
 
+    }
+
+    public function updateReviewedWordsCount( $count, Jobs_JobStruct $job ) {
+        $chunkStruct = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
+        if ( $chunkStruct ) {
+            $chunkReviewModel = new ChunkReviewModel($chunkStruct);
+            $chunkReviewModel->addWordsCount( $count ) ;
+        }
     }
 
 }

@@ -11,6 +11,7 @@ use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\JobPasswordValidator;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;
+use Translations\BulkStatusChangeModel;
 
 
 class JobStatusController extends KleinController {
@@ -37,26 +38,27 @@ class JobStatusController extends KleinController {
     }
 
     public function changeSegmentsStatus() {
-
         $segments_id = filter_var( $this->request->segments_id, FILTER_VALIDATE_INT, FILTER_FORCE_ARRAY );
-        $status      = strtoupper( $this->request->status );
-        if ( in_array( $status, [ \Constants_TranslationStatus::STATUS_TRANSLATED, \Constants_TranslationStatus::STATUS_APPROVED ] ) ) {
-            $unchangeble_segments = \Translations_SegmentTranslationDao::getUnchangebleStatus( $segments_id, $status );
 
-            $segments_id = array_diff( $segments_id, $unchangeble_segments );
+        $bulk_status_change = new BulkStatusChangeModel( $this->job, $segments_id ) ;
+        if ( $bulk_status_change->anyChangeableSegmentStatus() ) {
+            try {
+                $bulk_status_change->changeStatusTo( $this->request->status ) ;
 
-            if ( !empty( $segments_id ) ) {
-                try{
-                    $stats = \Translations_SegmentTranslationDao::changeStatusBySegmentsIds( $this->job, $segments_id, $status );
-                }
-                catch(\Exception $e){
-                    $this->response->json( [ 'data' => true, 'unchangeble_segments' => $segments_id] );
-                    return;
-                }
+                $this->response->json( [
+                        'data'                 => true,
+                        'unchangeble_segments' => $bulk_status_change->getUnchangebleSegments(),
+                        'stats'                => $bulk_status_change->getStats()
+                ] );
             }
-
-            $this->response->json( [ 'data' => true, 'unchangeble_segments' => $unchangeble_segments, 'stats' => $stats ] );
+            catch(\Exception $e){
+                $this->response->json( [
+                        'data'                 => true,
+                        'unchangeble_segments' => $bulk_status_change->getUnchangebleSegments()
+                ] );
+                return;
+            }
         }
-    }
 
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Features ;
 
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use Features\ReviewImproved\ChunkReviewModel;
 
@@ -40,7 +41,14 @@ class ReviewImproved extends AbstractRevisionFeature {
             $model = new ChunkReviewModel($review);
             $model->recountAndUpdatePassFailResult();
         }
+    }
 
+    public function updateReviewedWordsCount( $count, Jobs_JobStruct $job ) {
+        $chunkStruct = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
+        if ( $chunkStruct ) {
+            $chunkReviewModel = new ChunkReviewModel($chunkStruct);
+            $chunkReviewModel->addWordsCount( $count ) ;
+        }
     }
 
 }

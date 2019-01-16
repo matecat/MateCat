@@ -274,6 +274,27 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    public static function getCountForReviwedWordsBySegmentId( $job_id, $segment_ids ) {
+        $sql = " SELECT SUM( raw_word_count ) FROM segments s
+            JOIN segment_translations st ON st.id_segment = s.id
+            WHERE st.id_job = ?
+           AND match_type != 'ICE'
+           AND id_segment IN (" . str_repeat( '?,', count( $segment_ids ) - 1 ) . '?' . ")
+            " ;
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $condition = array_merge( [ $job_id ], $segment_ids );
+        $stmt->execute( $condition );
+
+        $result = $stmt->fetch();
+        if ( $result ) {
+            return $result[0];
+        } else {
+            return 0;
+        }
+    }
+
     public static function changeStatusBySegmentsIds( Jobs_JobStruct $job, $segments_ids, $status) {
         $update_values = [];
         $where_values = [];
@@ -286,7 +307,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         }
 
         $queryTotals = "
-           SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
+           SELECT $sum_sql as total, COUNT(id_segment) as countSeg, status
 
            FROM segment_translations
               INNER JOIN  segments
@@ -356,7 +377,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
 
             $sql = "SELECT id_segment FROM segment_translations WHERE status NOT IN( "
                     . str_repeat( '?,', count( $where_values ) -1 ) . '?'
@@ -370,9 +390,5 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 return (int)$id_segment;
             } );
         }
-
-
     }
-
-
 }
