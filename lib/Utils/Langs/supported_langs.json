@@ -289,8 +289,7 @@
             "isocode":"cb",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"cb-PH",
-            "languageRegionCode":"fil-PH"
+            "rfc3066code":"cb-PH"
         }
     ,
         {
@@ -598,7 +597,7 @@
                 "en":"Filipino"
             }],
             "isocode":"fil",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"fil-PH"
         }
@@ -1885,7 +1884,6 @@
             "isocode":"tl",
             "enabled":true,
             "rtl":false,
-            "languageRegionCode":"fil-PH",
             "rfc3066code":"tl-PH"
         }
     ,
