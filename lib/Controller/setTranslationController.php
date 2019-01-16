@@ -366,6 +366,7 @@ class setTranslationController extends ajaxController {
         $_Translation[ 'suggestion_position' ]    = $this->chosen_suggestion_index;
         $_Translation[ 'warning' ]                = $check->thereAreWarnings();
         $_Translation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
+        $_Translation[ 'match_type' ]             = $old_translation['match_type'];
 
         /**
          * Evaluate new Avg post-editing effort for the job:

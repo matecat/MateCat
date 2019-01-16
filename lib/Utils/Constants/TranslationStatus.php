@@ -53,4 +53,8 @@ class Constants_TranslationStatus {
             self::STATUS_REBUTTED
     );
 
+    public static function isReviewedStatus( $status ) {
+        return in_array( $status, Constants_TranslationStatus::$REVISION_STATUSES );
+    }
+
 }

@@ -31,6 +31,24 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
         return in_array( $this->status, Constants_TranslationStatus::$REVISION_STATUSES);
     }
 
+    public function isModifiedICE() {
+       return $this->match_type == Constants_SegmentTranslationsMatchType::ICE &&
+        $this->time_to_edit > 0 ;
+    }
+
+    public function isUnModifiedICE() {
+        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE &&
+                $this->time_to_edit == 0 ;
+    }
+
+    public function isICE() {
+        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE ;
+    }
+
+    public function isTranslationStatus() {
+        return ! $this->isReviewedStatus() ;
+    }
+
     /**
      * @return Jobs_JobStruct
      */
