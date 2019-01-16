@@ -640,8 +640,9 @@ class FastAnalysis extends AbstractDaemon {
                 break;
         }
 
+        //Set NO_MATCH word count multiplier for internal fuzzy matches on standard_words
         $standard_words = $eq_word;
-        if ( $segmentArray[ 'match_type' ] == "INTERNAL" or $segmentArray[ 'match_type' ] == "MT" ) {
+        if ( $match_type == "INTERNAL" ) {
             $standard_words = $segmentArray[ 'wc' ] * $equivalentWordMapping[ "NO_MATCH" ] / 100;
         }
 
