@@ -79,7 +79,7 @@ class Engines_MMT extends Engines_AbstractEngine {
         $forceMMTAcceptAnalysisRequests = $this->featureSet->filter( 'forceMMTAcceptAnalysisRequests', false );
         if( !$forceMMTAcceptAnalysisRequests ) {
             if ( $this->_isAnalysis && $this->_skipAnalysis ) {
-                return [];
+                return $this->fallback( $_config );
             }
         }
 
