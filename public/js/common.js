@@ -869,6 +869,7 @@ APP = {
             var team = this.getLastTeamSelected(APP.USER.STORE.teams);
             $('.user-menu-container .organization-name').text(team.name);
         } else {
+            APP.USER.loadUserData();
             setTimeout(this.setTeamNameInMenu.bind(this), 500);
         }
     },

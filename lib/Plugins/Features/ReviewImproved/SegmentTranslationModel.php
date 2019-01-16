@@ -8,7 +8,6 @@
 
 namespace Features\ReviewImproved;
 
-use Features\TranslationVersions\SegmentTranslationModel as VersionModel;
 use LQA\ChunkReviewStruct;
 use LQA\ChunkReviewDao;
 
@@ -27,11 +26,6 @@ class SegmentTranslationModel {
      * @var ChunkReviewStruct
      */
     protected $chunk_review;
-
-    /**
-     * @var bool
-     */
-    protected $did_change_reviewed_words_count = false;
 
     public function __construct( \SegmentTranslationModel $model ) {
 
@@ -61,9 +55,6 @@ class SegmentTranslationModel {
      */
 
     public function addOrSubtractCachedReviewedWordsCount() {
-
-        $version_model = new VersionModel( $this->model );
-
         /**
          * If this model triggers a new version, then we can jump to
          * the check for reviewed state transition directly, because translation
@@ -76,44 +67,10 @@ class SegmentTranslationModel {
          *
          */
 
-        $this->checkReviewedStateTransition();
-
-        // if ( $version_model->triggersNewVersion() ) {
-        //     $this->checkReviewedStateTransition();
-        // } else {
-        //     $this->checkTranslationIssuesExist();
-        // }
-
-    }
-
-    /**
-     * @return bool
-     */
-    public function didChangeReviewedWordsCount() {
-        return $this->did_change_reviewed_words_count;
-    }
-
-
-    protected function checkReviewedStateTransition() {
         if ( $this->model->entersReviewedState() ) {
             $this->addCount();
         } elseif ( $this->model->exitsReviewedState() ) {
             $this->subtractCount();
-        }
-
-    }
-
-    protected function checkTranslationIssuesExist() {
-        $translation = $this->model->getTranslation();
-
-        $entries = \LQA\EntryDao::findAllByTranslationVersion(
-                $translation->id_segment,
-                $translation->id_job,
-                $translation->version_number
-        );
-
-        if ( count( $entries ) == 0 ) {
-            $this->checkReviewedStateTransition();
         }
     }
 
@@ -122,20 +79,27 @@ class SegmentTranslationModel {
      */
     public function getChunkReview() {
         return $this->chunk_review;
-
     }
 
     protected function addCount() {
         $segment = $this->model->getSegmentStruct();
         $model   = new ChunkReviewModel( $this->chunk_review );
-        $model->addWordsCount( $segment->raw_word_count );
-
+        $model->addWordsCount( $this->getWordCountWithPropagation( $segment->raw_word_count ) );
     }
 
     protected function subtractCount() {
         $segment = $this->model->getSegmentStruct();
         $model   = new ChunkReviewModel( $this->chunk_review );
-        $model->subtractWordsCount( $segment->raw_word_count );
+        $model->subtractWordsCount( $this->getWordCountWithPropagation( $segment->raw_word_count ) );
+    }
+
+    protected function getWordCountWithPropagation( $count ) {
+        if ( $this->model->didPropagate() ) {
+            return $count + ( $count * count( $this->model->getPropagatedIds() ) ) ;
+        }
+        else {
+            return $count ;
+        }
     }
 
 }
