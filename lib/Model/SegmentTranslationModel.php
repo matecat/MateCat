@@ -16,6 +16,8 @@ class SegmentTranslationModel extends AbstractModelSubject {
      */
     private $job;
 
+    private $propagated_ids;
+
     public function __construct(Translations_SegmentTranslationStruct $translation) {
         $this->translation = $translation;
         $this->job = $translation->getJob();
@@ -34,6 +36,18 @@ class SegmentTranslationModel extends AbstractModelSubject {
         $this->old_translation = $translation ;
     }
 
+    public function setPropagatedIds( $propagated_ids ) {
+        $this->propagated_ids = $propagated_ids ;
+    }
+
+    public function getPropagatedIds() {
+        return $this->propagated_ids ;
+    }
+
+    public function didPropagate() {
+        return !empty( $this->propagated_ids ) ;
+    }
+
     /**
      * @return Translations_SegmentTranslationStruct
      */
@@ -49,13 +63,7 @@ class SegmentTranslationModel extends AbstractModelSubject {
     }
 
     public function entersReviewedState() {
-        /*return
-                (($this->old_translation->match_type == "ICE" && $this->old_translation->isReviewedStatus() && $this->old_translation->time_to_edit <= 0) OR !
-                        $this->old_translation->isReviewedStatus()) and
-            $this->translation->isReviewedStatus();*/
-
-        return
-                ! $this->old_translation->isReviewedStatus() and
+        return ! $this->old_translation->isReviewedStatus() and
                 $this->translation->isReviewedStatus();
     }
 

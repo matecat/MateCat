@@ -13,17 +13,6 @@ use \Features\ReviewImproved\SegmentTranslationModel as ReviewImprovedSegmentTra
 
 class SegmentTranslationModel extends ReviewImprovedSegmentTranslationModel {
 
-
-    protected function checkReviewedStateTransition() {
-
-        if ( $this->model->entersReviewedState() ) {
-            $this->addCount();
-        } elseif ( $this->model->exitsReviewedState() ) {
-            $this->subtractCount();
-        }
-
-    }
-
     public function recountPenaltyPoints() {
 
         $penaltyPoints                      = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );

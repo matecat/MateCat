@@ -173,7 +173,7 @@ class downloadFileController extends downloadController {
                  */
                 $_target_lang = $this->featureSet->filter(
                         'changeXliffTargetLangCode',
-                        Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
+                        $jobData[ 'target' ]
                         , $file[ 'xliffFilePath' ]
                 );
 
