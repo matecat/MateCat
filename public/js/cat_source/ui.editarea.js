@@ -285,31 +285,9 @@ $.extend( UI, {
     },
     keyPressEditAreaEventHandler: function (e, sid) {
         if( (e.which == 60) && (UI.tagLockEnabled) ) { // opening tag sign
-            if(UI.tagMenuOpen) {
-                e.preventDefault();
-                return false;
-            }
             SegmentActions.showTagsMenu(sid);
             // UI.openTagAutocompletePanel();
         }
-        if( (e.which == 62) && (UI.tagLockEnabled) ) { // closing tag sign
-            if( UI.tagMenuOpen ) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        // setTimeout(function() {
-        //     if( UI.tagMenuOpen ) {
-        //         tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
-        //         UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
-        //
-        //         if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
-        //             var editareaHtml = UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>');
-        //             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), editareaHtml);
-        //         }
-        //         UI.checkAutocompleteTags();
-        //     }
-        // }, 50);
     },
     inputEditAreaEventHandler: function (e) {
         SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'waiting_for_check_result');

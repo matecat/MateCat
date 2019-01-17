@@ -11,9 +11,18 @@ class TagsMenu extends React.Component {
         super(props);
         this.state = {};
         this.menuHeight = 300;
+        let missingTags = this.getMissingTags();
+        let uniqueSourceTags = TagsMenu.arrayUnique(this.props.sourceTags);
+        let addedTags = _.filter(uniqueSourceTags, function ( item ) {
+            return missingTags.indexOf(item.replace(/&quot;/g, '"')) === -1 ;
+        });
         this.state = {
             selectedItem: 0,
-            tags : TagsMenu.arrayUnique(this.props.sourceTags)
+            missingTags : missingTags,
+            addedTags : addedTags,
+            totalTags : missingTags.concat(addedTags),
+            filteredTags: [],
+            filter: ""
         };
         this.handleKeydownFunction = this.handleKeydownFunction.bind(this);
         this.handleResizeEvent = this.handleResizeEvent.bind(this);
@@ -60,18 +69,86 @@ class TagsMenu extends React.Component {
         return { x: x, y: y };
     }
 
+    getMissingTags() {
+        var sourceClone = $( '.source', UI.currentSegment ).clone();
+        //Remove inside-attribute for ph with equiv-text tags
+        sourceClone.find('.locked.inside-attribute').remove();
+        var sourceTags = sourceClone.html()
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+        //get target tags from the segment
+        var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
+        //Remove from the target the tags with mismatch
+        targetClone.find('.locked.mismatch').remove();
+        var newhtml = targetClone.html();
+        //Remove inside-attribute for ph with equiv-text tags
+        targetClone.find('.locked.inside-attribute').remove();
+
+        var targetTags = targetClone.html()
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+        if(targetTags == null ) {
+            targetTags = [];
+        } else {
+            targetTags = targetTags.map(function(elem) {
+                return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+            });
+        }
+        var missingTags = sourceTags.map(function(elem) {
+            return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+        });
+        //remove from source tags all the tags in target segment
+        for(var i = 0; i < targetTags.length; i++ ){
+            var pos = missingTags.indexOf(targetTags[i]);
+            if( pos > -1){
+                missingTags.splice(pos,1);
+            }
+        }
+        return missingTags;
+    }
+
     getItemsMenuHtml() {
         let menuItems = [];
+        let textDecoded;
+        let tagIndex = 0;
+        _.each(this.state.missingTags, ( item, index ) => {
+            if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
+                return;
+            } else if ( this.state.filter !== "" ) {
+                textDecoded = UI.transformTextForLockTags(item);
+                let regExp = new RegExp("(<span.*?>.*?)(" + htmlEncode(this.state.filter) + ")(.*?<\\/span>)", 'i');
+                textDecoded = textDecoded.replace(regExp, "$1<b>$2</b>$3");
+            } else {
+                textDecoded = UI.transformTextForLockTags(item);
+            }
 
-        _.each(this.state.tags, ( item, index ) => {
-            let textDecoded = UI.transformTextForLockTags(item);
-            let classSelected = ( this.state.selectedItem === index ) ? "active" : "";
-            menuItems.push(<a className={"item " + classSelected} key={index} data-original="item"
+            let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
+            menuItems.push(<div className={"item missing-tag " + classSelected} key={"missing"+ tagIndex} data-original="item"
                               dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
                               onClick={this.selectTag.bind(this, textDecoded)}
-                              ref={(elem)=>{this["item" + index]=elem;}}
-                              />
+                              ref={(elem)=>{this["item" + tagIndex]=elem;}}
+                />
             );
+            tagIndex++;
+        });
+        _.each(this.state.addedTags, ( item, index ) => {
+            let textDecoded;
+            if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
+                return;
+            } else if ( this.state.filter !== "" ) {
+                textDecoded = UI.transformTextForLockTags(item);
+                let regExp = new RegExp("(<span.*?>.*?)(" + htmlEncode(this.state.filter) + ")(.*?<\\/span>)", 'i');
+                textDecoded = textDecoded.replace(regExp, "$1<b>$2</b>$3");
+            } else {
+                textDecoded = UI.transformTextForLockTags(item);
+            }
+            let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
+            menuItems.push(<div className={"item added-tag " + classSelected} key={"added" + index} data-original="item"
+                              dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
+                              onClick={this.selectTag.bind(this, textDecoded)}
+                              ref={(elem)=>{this["item" + tagIndex ]=elem;}}
+                />
+            );
+            tagIndex++;
         });
         return menuItems;
     }
@@ -130,7 +207,7 @@ class TagsMenu extends React.Component {
     handleKeydownFunction( event) {
         if ( event.key === 'Enter' ) {
             event.preventDefault();
-            let tag = this.state.tags[this.state.selectedItem];
+            let tag = this.state.totalTags[this.state.selectedItem];
             if ( !_.isUndefined(tag) ) {
                 tag = UI.transformTextForLockTags(tag);
                 this.selectTag(tag)
@@ -150,7 +227,33 @@ class TagsMenu extends React.Component {
             this.setState({
                 selectedItem: this.getNextIdx("next")
             });
+        } else if ( event.key ===  'Backspace' && this.state.filter.length > 0) {
+            this.filterTags(event.key);
+        } else if (event.code === "Space" || event.keyCode >= 48 && event.keyCode <= 90 ||
+            event.keyCode >= 96 && event.keyCode <= 111 ||
+            event.keyCode >= 186 && event.keyCode <=222){
+            this.filterTags(event.key);
         }
+    }
+
+    filterTags(newCharacter) {
+        let filter;
+        let tags;
+        if ( newCharacter === 'Backspace' ) {
+            filter = this.state.filter.substring(0, this.state.filter.length-1);
+            tags = this.state.missingTags.concat(this.state.addedTags);
+        } else {
+            filter = this.state.filter + newCharacter;
+            tags = _.clone(this.state.totalTags);
+        }
+        let filteredTags = _.filter(tags, (tag)=>{
+            return htmlDecode(tag).indexOf(filter) !== -1;
+        });
+        this.setState({
+            selectedItem: 0,
+            totalTags : filteredTags,
+            filter: filter
+        });
     }
 
     handleResizeEvent( event ) {
@@ -159,7 +262,7 @@ class TagsMenu extends React.Component {
 
     getNextIdx(direction) {
         let idx = this.state.selectedItem;
-        let length = this.state.tags.length;
+        let length = this.state.totalTags.length;
         switch (direction) {
             case 'next': return (idx + 1) % length;
             case 'prev': return (idx === 0) && length - 1 || idx - 1;
