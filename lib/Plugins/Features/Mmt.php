@@ -30,6 +30,7 @@ use Klein\Klein;
 use Log;
 use Projects_ProjectStruct;
 use stdClass;
+use TaskRunner\Commons\QueueElement;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -179,6 +180,16 @@ class Mmt extends BaseFeature {
             $config[ 'job_id' ] = $jobStruct->id;
             $config[ 'secret_key' ] = self::getSecretKey();
 
+        }
+
+        return $config;
+
+    }
+
+    public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement ){
+
+        if( $engine instanceof Engines_MMT ){
+            $config[ 'secret_key' ] = self::getSecretKey();
         }
 
         return $config;
