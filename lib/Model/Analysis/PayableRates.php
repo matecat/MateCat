@@ -301,15 +301,16 @@ class Analysis_PayableRates {
      */
     public static function pee2payable( $pee ) {
         $pee = floatval( $pee );
+
         // payable = ( aX^2 + bX + c ) * 100
         return round( ( -0.00032 * ( pow( $pee, 2 ) ) + 0.034 * $pee + 0.1 ) * 100, 1 );
     }
 
-    public static function proposalPee( $payable ){
+    public static function proposalPee( $payable ) {
         return min( 95, max( 75, $payable ) );
     }
 
-    public static function wordsSavingDiff( $actual_payable, $proposal_payable, $word_count ){
+    public static function wordsSavingDiff( $actual_payable, $proposal_payable, $word_count ) {
         return round( ( $actual_payable - $proposal_payable ) * $word_count );
     }
 
