@@ -3431,10 +3431,10 @@ header .filter:before {
 	vertical-align: text-top;
 
 }
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
+body.tagModes:not(.tagmode-default-extended) .targetarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
 body.tagModes .splitArea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .targetarea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
 body.tagModes .splitArea .locked.endTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
