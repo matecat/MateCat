@@ -9,8 +9,10 @@
 namespace AsyncTasks\Workers;
 
 
+use INIT;
 use Jobs_JobStruct;
 use SegmentTranslationChangeVector;
+use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -39,6 +41,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         /** @var Jobs_JobStruct $job */
         $job         = new Jobs_JobStruct( $params['job']->toArray() ) ;
         $status      = $params['destination_status'] ;
+        $client_id   = $params['client_id'];
 
         $this->_checkDatabaseConnection();
 
@@ -67,6 +70,30 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         $database->commit();
 
+        if ( $client_id ) {
+            $segment_ids = $params['segment_ids']->toArray();
+            $payload = [
+                    'segment_ids' => array_values( $segment_ids ),
+                    'status'      => $status
+            ] ;
+
+            $message = json_encode( array(
+                    '_type' => 'bulk_segment_status_change',
+                    'data' => array(
+                            'id_job'    => $job->id,
+                            'passwords' => $job->password,
+                            'id_client' => $client_id,
+                            'payload'   => $payload,
+                    )
+            ));
+
+            $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
+            $stomp->connect();
+            $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
+                    $message,
+                    array( 'persistent' => 'true' )
+            );
+        }
     }
 
 }
