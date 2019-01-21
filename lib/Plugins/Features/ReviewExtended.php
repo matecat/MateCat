@@ -4,11 +4,13 @@
 namespace Features ;
 
 use API\V2\Json\ProjectUrls;
-use Features\ReviewExtended\Model\ChunkReviewDao;
-use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
-use Features\ReviewExtended\Observer\SegmentTranslationObserver;
-use SegmentTranslationModel;
 use Features\ReviewExtended\ChunkReviewModel;
+use Features\ReviewExtended\Model\ChunkReviewDao;
+use Features\ReviewExtended\Observer\SegmentTranslationObserver;
+use Features\ReviewExtended\SegmentTranslationModel;
+use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
+use LQA\ChunkReviewStruct;
+use SegmentTranslationChangeVector;
 
 class ReviewExtended extends AbstractRevisionFeature {
     const FEATURE_CODE = 'review_extended' ;
@@ -20,15 +22,6 @@ class ReviewExtended extends AbstractRevisionFeature {
     public static function projectUrls( ProjectUrls $formatted ) {
         $projectUrlsDecorator = new ProjectUrlsDecorator( $formatted->getData() );
         return $projectUrlsDecorator;
-    }
-
-    protected function attachObserver( SegmentTranslationModel $translation_model ){
-        /**
-         * This implementation may seem overkill since we are already into review improved feature
-         * so we could avoid to delegate to an observer. This is done with aim to the future when
-         * the SegmentTranslationModel will be used directly into setTranslation controller.
-         */
-        $translation_model->attach( new SegmentTranslationObserver() );
     }
 
     /**
@@ -58,6 +51,26 @@ class ReviewExtended extends AbstractRevisionFeature {
             $model->recountAndUpdatePassFailResult();
         }
 
+    }
+
+    /**
+     * @param SegmentTranslationChangeVector $translation
+     *
+     * @return SegmentTranslationModel
+     */
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
+        return new SegmentTranslationModel( $translation );
+    }
+
+    public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
+        $model = new SegmentTranslationModel( $translation );
+        $model->addOrSubtractCachedReviewedWordsCount();
+        // we need to recount score globally because of autopropagation.
+        $model->recountPenaltyPoints();
+    }
+
+    public function getChunkReviewModel(ChunkReviewStruct $chunk_review) {
+        return new ChunkReviewModel( $chunk_review );
     }
 
 }

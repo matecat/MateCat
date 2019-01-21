@@ -7,10 +7,12 @@
  */
 namespace API\V2;
 
+use AMQHandler;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\JobPasswordValidator;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;
+use WorkerClient;
 
 
 class JobStatusController extends KleinController {
@@ -42,12 +44,21 @@ class JobStatusController extends KleinController {
         $status      = strtoupper( $this->request->status );
         if ( in_array( $status, [ \Constants_TranslationStatus::STATUS_TRANSLATED, \Constants_TranslationStatus::STATUS_APPROVED ] ) ) {
             $unchangeble_segments = \Translations_SegmentTranslationDao::getUnchangebleStatus( $segments_id, $status );
-
             $segments_id = array_diff( $segments_id, $unchangeble_segments );
+
 
             if ( !empty( $segments_id ) ) {
                 try{
-                    $stats = \Translations_SegmentTranslationDao::changeStatusBySegmentsIds( $this->job, $segments_id, $status );
+                    WorkerClient::init( new AMQHandler() ) ;
+                    WorkerClient::enqueue('JOBS', '\AsyncTasks\Workers\BulkSegmentStatusChangeWorker',
+                            [
+                                    'segment_ids'        => $segments_id,
+                                    'job'                => $this->job,
+                                    'destination_status' => $status,
+                                    'id_user'            => ( $this->userIsLogged() ? $this->getUser()->uid : null ),
+                                    'is_review'          => ( $status == \Constants_TranslationStatus::STATUS_APPROVED )
+                            ], [ 'persistent' => true ]
+                    );
                 }
                 catch(\Exception $e){
                     $this->response->json( [ 'data' => true, 'unchangeble_segments' => $segments_id] );

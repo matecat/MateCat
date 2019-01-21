@@ -2,8 +2,11 @@
 
 namespace Features ;
 
-use LQA\ChunkReviewDao;
 use Features\ReviewImproved\ChunkReviewModel;
+use Features\ReviewImproved\SegmentTranslationModel;
+use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
+use SegmentTranslationChangeVector;
 
 class ReviewImproved extends AbstractRevisionFeature {
     const FEATURE_CODE = 'review_improved' ;
@@ -40,7 +43,19 @@ class ReviewImproved extends AbstractRevisionFeature {
             $model = new ChunkReviewModel($review);
             $model->recountAndUpdatePassFailResult();
         }
+    }
 
+    public function getChunkReviewModel(ChunkReviewStruct $chunk_review) {
+        return new ChunkReviewModel( $chunk_review );
+    }
+
+    /**
+     * @param SegmentTranslationChangeVector $translation
+     *
+     * @return ISegmentTranslationModel
+     */
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
+        return new SegmentTranslationModel( $translation );
     }
 
 }

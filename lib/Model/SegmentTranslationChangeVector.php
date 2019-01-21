@@ -1,6 +1,6 @@
 <?php
 
-class SegmentTranslationModel extends AbstractModelSubject {
+class SegmentTranslationChangeVector {
 
     /**
      * @var Translations_SegmentTranslationStruct

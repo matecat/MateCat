@@ -7,6 +7,9 @@
  * Time: 10.45
  *
  */
+
+require_once 'queries.php';
+
 class WordCount_Counter {
 
     /**
