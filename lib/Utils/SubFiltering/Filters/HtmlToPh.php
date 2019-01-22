@@ -178,6 +178,11 @@ class HtmlToPh extends AbstractHandler {
             }
         }
 
+        //HTML Partial, add wrong HTML to preserve string content
+        if( !empty( $buffer ) ){
+            $output .= $buffer;
+        }
+
         return $output;
 
     }
