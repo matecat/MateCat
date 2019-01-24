@@ -4570,7 +4570,7 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
 
 body.rtl-source.tagModes.tagmode-default-extended .suggestion_source .locked,
 body.rtl-source.tagModes.tagmode-default-extended .source .locked,
-body.rtl-target.tagModes.tagmode-default-extended .editarea .locked,
+body.rtl-target.tagModes.tagmode-default-extended .targetarea .locked,
 body.rtl-target.tagModes.tagmode-default-extended .spliArea .locked,
 body.rtl-target.tagModes.tagmode-default-extended .translation .locked {
     direction: ltr;
