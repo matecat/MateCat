@@ -769,7 +769,7 @@
             }],
             "isocode":"ha",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"ha-HAU"
         }
     ,
@@ -999,7 +999,7 @@
             }],
             "isocode":"kn",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"kr-KAU"
         }
     ,
