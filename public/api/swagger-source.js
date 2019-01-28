@@ -87,7 +87,7 @@ var spec = {
                         "in": "formData",
                         "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards. Multiple languages must be comma separated ( it-IT,fr-FR,es-ES case sensitive)",
                         "required": true,
-                        "type": "integer"
+                        "type": "string"
                     },
                     {
                         "name": "tms_engine",

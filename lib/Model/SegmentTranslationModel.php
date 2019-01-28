@@ -62,17 +62,41 @@ class SegmentTranslationModel extends AbstractModelSubject {
         return $this->old_translation ;
     }
 
-    public function entersReviewedState() {
-        return ! $this->old_translation->isReviewedStatus() and
-                $this->translation->isReviewedStatus();
+    /**
+     * @return bool
+     */
+    public function isEnteringReviewedState() {
+        return (
+                    $this->old_translation->isTranslationStatus() &&
+                    $this->translation->isReviewedStatus() &&
+                    ! $this->isUnmodifiedICE()
+                )
+                ||
+                (
+                    $this->old_translation->isReviewedStatus() &&
+                    $this->translation->isReviewedStatus() &&
+                    $this->isModifyingICE()
+                );
     }
 
-    public function exitsReviewedState() {
-        return
-            ! $this->translation->isReviewedStatus() and
-            $this->old_translation->isReviewedStatus();
+    protected function isModifyingICE() {
+        return $this->old_translation->isICE() &&
+                $this->old_translation->translation != $this->translation->translation &&
+                $this->old_translation->version_number == 0 ;
     }
 
+    protected  function isUnmodifiedICE() {
+        return $this->old_translation->isICE() && $this->translation->version_number == 0 ;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isExitingReviewedState() {
+        return $this->old_translation->isReviewedStatus() &&
+                $this->translation->isTranslationStatus() &&
+                $this->old_translation->version_number > 0 ;
+    }
 
     /**
      * @return Segments_SegmentStruct

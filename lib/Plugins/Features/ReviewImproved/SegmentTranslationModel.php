@@ -67,9 +67,9 @@ class SegmentTranslationModel {
          *
          */
 
-        if ( $this->model->entersReviewedState() ) {
+        if ( $this->model->isEnteringReviewedState() ) {
             $this->addCount();
-        } elseif ( $this->model->exitsReviewedState() ) {
+        } elseif ( $this->model->isExitingReviewedState() ) {
             $this->subtractCount();
         }
     }
