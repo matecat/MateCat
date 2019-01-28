@@ -95,7 +95,11 @@ class SegmentTranslationModel extends AbstractModelSubject {
     public function isExitingReviewedState() {
         return $this->old_translation->isReviewedStatus() &&
                 $this->translation->isTranslationStatus() &&
-                $this->old_translation->version_number > 0 ;
+                (
+                        ( $this->old_translation->version_number > 0  && $this->old_translation->isICE() )
+                        ||
+                        ( $this->old_translation->version_number == 0 && !$this->old_translation->isICE() )
+                ) ;
     }
 
     /**
