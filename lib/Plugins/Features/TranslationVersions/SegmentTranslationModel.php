@@ -6,11 +6,11 @@ namespace Features\TranslationVersions;
 class SegmentTranslationModel {
 
     /**
-     * @var \SegmentTranslationModel
+     * @var \SegmentTranslationChangeVector
      */
     private $parent_model;
 
-    public function __construct( \SegmentTranslationModel $parent_model ) {
+    public function __construct( \SegmentTranslationChangeVector $parent_model ) {
         $this->parent_model = $parent_model ;
     }
 

@@ -114,7 +114,7 @@ class SegmentsFilter extends React.Component {
             this.setState({
                 filtering: false,
             });
-            SegmentFilter.clearFilter();
+            setTimeout(()=>SegmentFilter.clearFilter);
         }
     }
 

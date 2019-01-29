@@ -5,10 +5,10 @@ namespace Features\ReviewImproved\Observer;
 
 use Features\ReviewImproved\SegmentTranslationModel;
 
-class SegmentTranslationObserver implements \SplObserver {
+class SegmentTranslationObserver {
 
     /**
-     * @var \SegmentTranslationModel
+     * @var \SegmentTranslationChangeVector
      */
     private $subject;
 

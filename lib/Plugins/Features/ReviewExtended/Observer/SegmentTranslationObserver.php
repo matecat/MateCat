@@ -8,7 +8,7 @@ use Features\ReviewExtended\SegmentTranslationModel;
 class SegmentTranslationObserver implements \SplObserver {
 
     /**
-     * @var \SegmentTranslationModel
+     * @var \SegmentTranslationChangeVector
      */
     private $subject;
 

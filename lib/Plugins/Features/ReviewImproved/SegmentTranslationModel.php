@@ -8,12 +8,13 @@
 
 namespace Features\ReviewImproved;
 
+use Features\ISegmentTranslationModel;
 use LQA\ChunkReviewStruct;
 use LQA\ChunkReviewDao;
 
-class SegmentTranslationModel {
+class SegmentTranslationModel implements ISegmentTranslationModel  {
     /**
-     * @var \SegmentTranslationModel
+     * @var \SegmentTranslationChangeVector
      */
     protected $model;
 
@@ -27,7 +28,7 @@ class SegmentTranslationModel {
      */
     protected $chunk_review;
 
-    public function __construct( \SegmentTranslationModel $model ) {
+    public function __construct( \SegmentTranslationChangeVector $model ) {
 
         $this->model = $model;
         $this->chunk = \Chunks_ChunkDao::getBySegmentTranslation( $this->model->getTranslation() );
