@@ -340,7 +340,7 @@ class Filter {
      */
     public function realignIDInLayer1( $source, $target ){
 
-        $pattern = '|<ph id ?= ?["\'](?:mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
+        $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
         preg_match_all( $pattern, $source, $src_tags, PREG_PATTERN_ORDER );
         preg_match_all( $pattern, $target, $trg_tags, PREG_PATTERN_ORDER );
 
@@ -348,17 +348,31 @@ class Filter {
             return $target; //WRONG NUMBER OF TAGS, in the translation there is a tag mismatch, let the user fix it
         }
 
-        $start_offset = 0;
-        foreach ( $trg_tags[ 1 ] as $trg_tag_position => $b64 ){
+        $notFoundTargetTags = [];
 
-            $src_tag_position = array_search( $b64, $src_tags[ 1 ], true );
-            unset( $src_tags[ 1 ][ $src_tag_position ] ); // remove the index to allow array_search to find the equal next one if it is present
+        $start_offset = 0;
+        foreach ( $trg_tags[ 2 ] as $trg_tag_position => $b64 ){
+
+            $src_tag_position = array_search( $b64, $src_tags[ 2 ], true );
+
+            if( $src_tag_position === false ){
+                //this means that the content of a tag is changed in the translation
+                $notFoundTargetTags[ $trg_tag_position ] = $b64;
+                continue;
+            } else {
+                unset( $src_tags[ 2 ][ $src_tag_position ] ); // remove the index to allow array_search to find the equal next one if it is present
+//                unset( $trg_tags[ 2 ][ $trg_tag_position ] ); // remove the index to allow array_search to find the equal next one if it is present
+            }
 
             //replace ONLY ONE element AND the EXACT ONE
             $tag_position_in_string = strpos( $target, $trg_tags[ 0 ][ $trg_tag_position ], $start_offset );
             $target = substr_replace( $target, $src_tags[ 0 ][ $src_tag_position ], $tag_position_in_string, strlen( $trg_tags[ 0 ][ $trg_tag_position ] ) );
             $start_offset = $tag_position_in_string + strlen( $src_tags[ 0 ][ $src_tag_position ] ); // set the next starting point
 
+        }
+
+        if( !empty( $notFoundTargetTags ) ){
+            //do something ?!? how to re-align if they are changed in value and changed in position?
         }
 
         return $target;
