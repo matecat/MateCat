@@ -21,11 +21,10 @@ SSE = {
 SSE.Message = function ( data ) {
     this._type = data._type;
     this.data = data;
-    this.types = new Array( 'comment', 'ack', 'contribution', 'concordance' );
+    this.types = new Array( 'comment', 'ack', 'contribution', 'concordance', 'bulk_segment_status_change' );
     this.eventIdentifier = 'sse:' + this._type;
 
     this.isValid = function () {
-
         return (this.types.indexOf( this._type ) !== -1);
     }
 };
@@ -46,6 +45,9 @@ NOTIFICATIONS = {
         var self = this;
         this.source.addEventListener( 'message', function ( e ) {
             var message = new SSE.Message( JSON.parse( e.data ) );
+
+            console.log( message ) ;
+
             if ( message.isValid() ) {
                 $( document ).trigger( message.eventIdentifier, message );
             }

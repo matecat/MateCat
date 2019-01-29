@@ -8,9 +8,11 @@ use Chunks_ChunkDao;
 use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
+use Features\ReviewExtended\SegmentTranslationModel;
 use Features\ReviewImproved\ChunkReviewModel;
 use INIT;
 use FilesStorage ;
+use ISegmentTranslationModel;
 use Log;
 use LQA\ChunkReviewDao;
 use LQA\ModelDao;
@@ -18,7 +20,7 @@ use Projects_ProjectDao;
 use Translations_SegmentTranslationStruct;
 use Utils;
 use ZipArchive ;
-use SegmentTranslationModel;
+use SegmentTranslationChangeVector;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
 use Projects_ProjectStruct ;
@@ -272,27 +274,32 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     public function setTranslationCommitted($params) {
         $new_translation = $params['translation'];
         $old_translation = $params['old_translation'];
-        $propagated_ids = $params['propagated_ids'] ;
+        $propagated_ids  = $params['propagated_ids'] ;
 
         $new_translation_struct = new Translations_SegmentTranslationStruct( $new_translation );
         $old_translation_struct = new Translations_SegmentTranslationStruct( $old_translation );
 
-        $translation_model = new SegmentTranslationModel( $new_translation_struct );
+        $translation_model = new SegmentTranslationChangeVector( $new_translation_struct );
+
         $translation_model->setPropagatedIds( $propagated_ids );
         $translation_model->setOldTranslation( $old_translation_struct );
 
-        $this->attachObserver( $translation_model );
-        $translation_model->notify();
+        $this->updateRevisionScore( $translation_model );
+
     }
 
-    protected function attachObserver( SegmentTranslationModel $translation_model ){
-        /**
-         * This implementation may seem overkill since we are already into review improved feature
-         * so we could avoid to delegate to an observer. This is done with aim to the future when
-         * the SegmentTranslationModel will be used directly into setTranslation controller.
-         */
-        $translation_model->attach( new SegmentTranslationObserver() );
+    public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
+        $model = $this->getSegmentTranslationModel( $translation );
+        $model->addOrSubtractCachedReviewedWordsCount();
+        $model->recountPenaltyPoints();
     }
+
+    /**
+     * @param SegmentTranslationChangeVector $translation
+     * @return \Features\ISegmentTranslationModel
+     *
+     */
+    abstract protected function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) ;
 
     /**
      * project_completion_event_saved
