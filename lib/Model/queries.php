@@ -601,54 +601,61 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
     return $results;
 }
 
-function addTranslation( array $_Translation ) {
+function addTranslation( Translations_SegmentTranslationStruct $translation_struct ) {
+
+    $keys_fo_insert = [
+            'id_segment', 'id_job', 'status', 'time_to_edit', 'translation', 'serialized_errors_list',
+            'suggestion_position', 'warning', 'translation_date', 'version_number', 'autopropagated_from'
+    ] ;
+
+    $translation = $translation_struct->toArray( $keys_fo_insert ) ;
 
     $db = Database::obtain();
 
     $query = "INSERT INTO `segment_translations` ";
 
-    foreach ( $_Translation as $key => $val ) {
+    foreach ( $translation as $key => $val ) {
 
         if ( $key == 'translation' ) {
-            $_Translation[ $key ] = "'" . $db->escape( $val ) . "'";
+            $translation[ $key ] = "'" . $db->escape( $val ) . "'";
             continue;
         }
 
         if ( strtolower( $val ) == 'now()' || strtolower( $val ) == 'current_timestamp()' || strtolower( $val ) == 'sysdate()' ) {
-            $_Translation[ $key ] = "NOW()";
+            $translation[ $key ] = "NOW()";
         } elseif ( is_numeric( $val ) ) {
-            $_Translation[ $key ] = (float)$val;
+            $translation[ $key ] = (float)$val;
         } elseif ( is_bool( $val ) ) {
-            $_Translation[ $key ] = var_export( $val, true );
+            $translation[ $key ] = var_export( $val, true );
         } elseif ( strtolower( $val ) == 'null' || empty( $val ) ) {
-            $_Translation[ $key ] = "NULL";
+            $translation[ $key ] = "NULL";
         } else {
-            $_Translation[ $key ] = "'" . $db->escape( $val ) . "'";
+            $translation[ $key ] = "'" . $db->escape( $val ) . "'";
         }
     }
 
-    $query .= "(" . implode( ", ", array_keys( $_Translation ) ) . ") VALUES (" . implode( ", ", array_values( $_Translation ) ) . ")";
+    $query .= "(" . implode( ", ", array_keys( $translation ) ) . ") VALUES (" . implode( ", ", array_values( $translation ) ) . ")";
 
     $query .= "
 				ON DUPLICATE KEY UPDATE
-				status = {$_Translation['status']},
-                suggestion_position = {$_Translation['suggestion_position']},
-                serialized_errors_list = {$_Translation['serialized_errors_list']},
+				status = {$translation['status']},
+                suggestion_position = {$translation['suggestion_position']},
+                serialized_errors_list = {$translation['serialized_errors_list']},
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
-                translation = {$_Translation['translation']},
-                translation_date = {$_Translation['translation_date']},
-                warning = {$_Translation[ 'warning' ]}";
+                translation = {$translation['translation']},
+                translation_date = {$translation['translation_date']},
+                warning = {$translation[ 'warning' ]}";
 
-    if ( array_key_exists( 'version_number', $_Translation ) ) {
-        $query .= "\n, version_number = {$_Translation['version_number']}";
+    if ( array_key_exists( 'version_number', $translation ) ) {
+        $query .= "\n, version_number = {$translation['version_number']}";
     }
 
 
-    if ( isset( $_Translation[ 'autopropagated_from' ] ) ) {
+    if ( isset( $translation[ 'autopropagated_from' ] ) ) {
         $query .= " , autopropagated_from = NULL";
     }
 
-    if ( empty( $_Translation[ 'translation' ] ) && !is_numeric( $_Translation[ 'translation' ] ) ) {
+    if ( empty( $translation[ 'translation' ] ) && !is_numeric( $translation[ 'translation' ] ) ) {
         $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found after DB Escape: \n\n " . var_export( array_merge( [ 'db_query' => $query ], $_POST ), true );
         Log::doLog( $msg );
         Utils::sendErrMailReport( $msg );
@@ -661,7 +668,7 @@ function addTranslation( array $_Translation ) {
         $db->query( $query );
     } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
-        throw new PDOException( "Error occurred storing (UPDATE) the translation for the segment {$_Translation['id_segment']} - Error: {$e->getCode()}" );
+        throw new PDOException( "Error occurred storing (UPDATE) the translation for the segment {$translation['id_segment']} - Error: {$e->getCode()}" );
     }
 
     return $db->affected_rows;
@@ -809,6 +816,10 @@ function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
     return $affectedRows;
 }
 
+
+/**
+ * @deprecated remove this funciton and
+ */
 
 function getCurrentTranslation( $id_job, $id_segment ) {
 

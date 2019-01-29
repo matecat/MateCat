@@ -152,11 +152,17 @@ class CatUtils {
 
     }
 
-    public static function addSegmentTranslation( array $_Translation, array &$errors ) {
+    /**
+     * @param Translations_SegmentTranslationStruct $translation
+     * @param array                                 $errors
+     *
+     * @return array
+     */
+    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, array &$errors ) {
 
         try {
             //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
-            addTranslation( $_Translation );
+            addTranslation( $translation );
         } catch ( Exception $e ) {
             $errors[] = [ "code" => -101, "message" => $e->getMessage() ];
         }

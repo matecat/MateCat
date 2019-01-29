@@ -15,9 +15,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @return Translations_SegmentTranslationStruct
      */
 
-    public static function findBySegmentAndJob( $id_segment, $id_job ) {
-        Log::doLog( $id_segment, $id_job );
-
+    public static function findBySegmentAndJob( $id_segment, $id_job, $ttl = 0 ) {
         $conn = Database::obtain()->getConnection();
 
         $sql = "SELECT * FROM segment_translations WHERE " .
@@ -26,15 +24,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
 
-        $stmt->execute( array(
-            'id_segment' => $id_segment,
-            'id_job'     => $id_job
-        ));
-
-        $stmt->setFetchMode(PDO::FETCH_CLASS,
-            'Translations_SegmentTranslationStruct');
-
-        return $stmt->fetch();
+        $thisDao = new self();
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Translations_SegmentTranslationStruct(), [
+                'id_job'     => $id_job,
+                'id_segment' => $id_segment
+        ] )[ 0 ];
     }
 
     /**
