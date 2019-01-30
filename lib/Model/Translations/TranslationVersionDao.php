@@ -370,7 +370,7 @@ JOIN
         ));
     }
 
-    public function saveVersion( $old_translation, $new_translation ) {
+    public function saveVersion( Translations_TranslationVersionStruct $old_translation ) {
         $sql = "INSERT INTO segment_translation_versions " .
                 " ( id_job, id_segment, translation, version_number, time_to_edit, is_review, old_status, new_status ) " .
                 " VALUES " .
@@ -381,18 +381,18 @@ JOIN
         $stmt = $conn->prepare( $sql );
 
         return $stmt->execute( [
-                'id_job'         => $old_translation[ 'id_job' ],
-                'id_segment'     => $old_translation[ 'id_segment' ],
-                'translation'    => $old_translation[ 'translation' ],
-                'version_number' => $old_translation[ 'version_number' ],
-                'time_to_edit'   => $old_translation[ 'time_to_edit' ],
-                'is_review'      => $old_translation[ 'is_review' ],
-                'old_status'     => $old_translation[ 'db_status' ],
-                'new_status'     => $new_translation[ 'db_status' ],
+                'id_job'         => $old_translation->id_job,
+                'id_segment'     => $old_translation->id_segment,
+                'translation'    => $old_translation->translation,
+                'version_number' => $old_translation->version_number,
+                'time_to_edit'   => $old_translation->time_to_edit,
+                'is_review'      => $old_translation->is_review,
+                'old_status'     => $old_translation->old_status,
+                'new_status'     => $old_translation->new_status,
         ] );
     }
 
-    public function updateVersion( $old_translation ) {
+    public function updateVersion( Translations_TranslationVersionStruct $old_translation ) {
         $sql = "UPDATE segment_translation_versions
                 SET translation = :translation, time_to_edit = :time_to_edit
                 WHERE id_job = :id_job AND id_segment = :id_segment
@@ -402,11 +402,11 @@ JOIN
         $stmt = $conn->prepare($sql );
 
         $stmt->execute( array(
-                'id_job'         => $old_translation['id_job'],
-                'id_segment'     => $old_translation['id_segment'] ,
-                'translation'    => $old_translation['translation'],
-                'version_number' => $old_translation['version_number'],
-                'time_to_edit'   => $old_translation['time_to_edit']
+                'id_job'         => $old_translation->id_job,
+                'id_segment'     => $old_translation->id_segment ,
+                'translation'    => $old_translation->translation,
+                'version_number' => $old_translation->version_number,
+                'time_to_edit'   => $old_translation->time_to_edit
         ));
 
         return $stmt->rowCount() ;
