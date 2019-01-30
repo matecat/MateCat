@@ -794,18 +794,30 @@ class setTranslationController extends ajaxController {
         }
     }
 
+    /**
+     * This method does consistency check on the input data comparing pervious version and current version.
+     * This method was introduced to prevent inconsistent reviewed_words_count.
+     *
+     * @param Translations_SegmentTranslationStruct $new_translation
+     * @param Translations_SegmentTranslationStruct $old_translation
+     *
+     * @throws ControllerReturnException
+     */
     protected function _validateSegmentTranslationChange(
             Translations_SegmentTranslationStruct $new_translation,
             Translations_SegmentTranslationStruct $old_translation
     ) {
+        /*
+         * Next condition checks for ICE being set to TRANSLATED status when no change to the ICE is made.
+         */
         if (
+                $old_translation->isICE() &&
                 $new_translation->translation == $old_translation->translation &&
-                $new_translation->isReviewedStatus() &&
-                $old_translation->isTranslationStatus()
+                $new_translation->isTranslationStatus() && !$old_translation->isTranslationStatus()
         )  {
-            $db->rollback();
-            $msg = "Status change not allowed with identical translation" ;
-            $this->result[ 'errors' ][] = [ "code" => -1, "message" => $msg ];
+            Database::obtain()->rollback() ;
+            $msg = "Status change not allowed with identical translation on segment {$old_translation->id_segment}." ;
+            $this->result[ 'errors' ][] = [ "code" => -2000, "message" => $msg ];
             throw new ControllerReturnException( $msg , -1 ) ;
         }
     }
