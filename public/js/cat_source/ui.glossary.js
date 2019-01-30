@@ -107,6 +107,8 @@ if (true)
                 return b.length - a.length;
             });
             $.each( matches, function ( index, k ) {
+                if ( k.length > 1) return;
+
                 var glossaryTerm_noPlaceholders = UI.decodePlaceholdersToText( k, true );
 
                 if ( matchesToRemove.indexOf( glossaryTerm_noPlaceholders ) != -1 ) return true ;
