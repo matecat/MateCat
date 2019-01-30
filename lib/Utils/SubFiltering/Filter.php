@@ -262,7 +262,7 @@ class Filter {
         $channel = new Pipeline();
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new LtGtDoubleEncode() );
+//        $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new SubFilteredPhToHtml() );

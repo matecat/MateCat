@@ -95,7 +95,7 @@ class HtmlToPh extends AbstractHandler {
                         if ( $this->isTagValid( $buffer ) ){
                             $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
                         } else {
-                            $output .= $buffer;
+                            $output .= ( new LtGtEncode() )->transform( $buffer );
                         }
 
                         $buffer = '';
