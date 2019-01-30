@@ -268,24 +268,22 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param $new_translation
-     * @param $old_translation
+     * @param $params['translation'] Translations_SegmentTranslationStruct
+     * @param $params['old_translation'] Translations_SegmentTranslationStruct
+     * @param $params['propagated_ids'] array
+     *
      */
-    public function setTranslationCommitted($params) {
+    public function setTranslationCommitted( $params) {
         $new_translation = $params['translation'];
         $old_translation = $params['old_translation'];
         $propagated_ids  = $params['propagated_ids'] ;
 
-        $new_translation_struct = new Translations_SegmentTranslationStruct( $new_translation );
-        $old_translation_struct = new Translations_SegmentTranslationStruct( $old_translation );
-
-        $translation_model = new SegmentTranslationChangeVector( $new_translation_struct );
+        $translation_model = new SegmentTranslationChangeVector( $new_translation );
 
         $translation_model->setPropagatedIds( $propagated_ids );
-        $translation_model->setOldTranslation( $old_translation_struct );
+        $translation_model->setOldTranslation( $old_translation );
 
         $this->updateRevisionScore( $translation_model );
-
     }
 
     public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
