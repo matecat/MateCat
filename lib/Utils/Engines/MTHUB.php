@@ -154,7 +154,7 @@ class Engines_MTHUB extends Engines_AbstractEngine {
         }
         $parameters['source'] = $this->_fixLangCode($_config[ 'source' ]);        
         $parameters['target'] = $this->_fixLangCode($_config[ 'target' ]);
-        $parameters['segments'] = array(substr($_config[ 'segment' ], 0, 1000));//maximum length of each segment is 1000 characters
+        $parameters['segments'] = array(substr($_config[ 'segment' ], 0, 2000));//maximum length of each segment is 2000 characters
 
         $this->_setAdditionalCurlParams( array(
                         CURLOPT_HTTPHEADER     => array("Content-Type: application/json"),
