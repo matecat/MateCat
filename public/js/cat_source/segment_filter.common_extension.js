@@ -36,7 +36,7 @@ if ( SegmentFilter.enabled() )
 
         if ( UI.Segment.findEl( nextFiltered ).length && index !== list.length - 1) {
             original_gotoNextSegment.apply(undefined, arguments);
-        } if (UI.Segment.findEl( nextFiltered ).length && index === 0) {
+        } else if (UI.Segment.findEl( nextFiltered ).length && index === 0) {
             original_gotoPreviousSegment.apply(undefined, arguments);
         } else if ( nextFiltered ) {
             UI.render({ segmentToOpen: nextFiltered });
