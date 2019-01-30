@@ -21,7 +21,6 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
     protected $curl_additional_params = array();
 
-    const IOS_STRINGS_REGEXP = '#%[\']*[\+]*(([0-9]+)?\.[0-9]+|[0-9]+\$|[0-9]+)*(h{1,2}|l{1,2}|[qLztj])?[@%dDuUxXoOfFeEgGcCsSpaAi]{1}#';
     protected $_patterns_found = array();
 
     public $doLog = true;
@@ -86,38 +85,11 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
      * @return string
      */
     public function _preserveSpecialStrings( $_string ) {
-
-        preg_match_all( self::IOS_STRINGS_REGEXP, $_string, $matches );
-        $matches = $matches[ 0 ];
-
-        $placeholders = array();
-        for ( $i = 0; $i < count( $matches ); $i++ ) {
-            $placeholders[ ] = CatUtils::generate_password();
-        }
-
-        $this->_patterns_found = @array_combine(
-                $matches,
-                $placeholders
-        );
-
-        if( ! is_array( $this->_patterns_found ) ) return $_string;
-        foreach ( $this->_patterns_found as $str => $placeholder ) {
-            $_string = str_replace( $str, $placeholder, $_string );
-        }
-
         return $_string;
     }
 
     public function _resetSpecialStrings( $_string ) {
-
-        if( ! is_array( $this->_patterns_found ) ) return $_string;
-
-        foreach ( $this->_patterns_found as $str => $placeholder ) {
-            $_string = str_ireplace( $placeholder, $str, $_string );
-        }
-
         return $_string;
-
     }
 
     /**
