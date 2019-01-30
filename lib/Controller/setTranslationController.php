@@ -879,7 +879,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->job_password         = $this->password;
         $contributionStruct->id_segment           = $this->id_segment;
         $contributionStruct->segment              = $Filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
-        $contributionStruct->translation          = $this->__postInput[ 'translation' ];
+        $contributionStruct->translation          = $Filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = $this->user->uid;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
