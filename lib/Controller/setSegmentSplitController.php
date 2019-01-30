@@ -80,7 +80,7 @@ class setSegmentSplitController extends ajaxController {
         }
 
         //check Job password
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
+        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->job_pass );
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 
     }
