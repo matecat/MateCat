@@ -16,6 +16,14 @@ use RedisHandler;
 trait HotSwap {
 
     /**
+     * To use this trait, in a plugin call this method in
+     *
+     * <code>
+     *     public function beforeInsertJobStruct( \Jobs_JobStruct $jobStruct ){
+     *             $this->swapOn( $jobStruct );
+     *     }
+     *</code>
+     *
      * @param Jobs_JobStruct $jobStruct
      *
      * @param int            $newMT
@@ -32,6 +40,14 @@ trait HotSwap {
     }
 
     /**
+     * To use this trait, in a plugin call this method in
+     *
+     * <code>
+     *     public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
+     *             $this->swapOff( $project_id );
+     *     }
+     *</code>
+     *
      * @param $project_id
      *
      * @throws \Exceptions\ValidationError

@@ -35,7 +35,9 @@ class ChunkTranslationVersionController extends KleinController {
 
         $results = \Translations_TranslationVersionDao::getVersionsForChunk( $this->chunk );
 
-        $formatted = new JsonFormatter( $results );
+        $this->featureSet->loadForProject( $this->chunk->getProject() );
+
+        $formatted = new JsonFormatter( $results, false, $this->featureSet );
 
         $this->response->json( array(
                 'versions' => $formatted->render()

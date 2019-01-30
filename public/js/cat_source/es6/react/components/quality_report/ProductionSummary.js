@@ -43,6 +43,7 @@ class ProductionSummary extends React.Component {
         let score = parseFloat(this.props.jobInfo.get('quality_summary').get('score'));
         let limit = (this.props.jobInfo.get('quality_summary').get('passfail') !== "") ? parseInt(JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit):0;
         let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
+        let reviewedWordsCount = this.props.jobInfo.get('quality_summary').get('total_reviews_words_count') ;
         let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") : null;
         let jobPassedClass = (jobPassed === null) ? "" : ((jobPassed)? "qr-pass" : "qr-fail");
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
@@ -84,8 +85,8 @@ class ProductionSummary extends React.Component {
                 <div className="percent">{parseInt(stats.get('PROGRESS_PERC_FORMATTED'))}%</div>
             </div>
             <div className="qr-effort">
-                <div className="qr-label">Words</div>
-                <div className="qr-info"><b>{stats.get('TOTAL_FORMATTED')}</b></div>
+                <div className="qr-label">Reviewed Words</div>
+                <div className="qr-info"><b>{reviewedWordsCount}</b></div>
             </div>
 
             {/*{config.project_type !== "old" ? (*/}

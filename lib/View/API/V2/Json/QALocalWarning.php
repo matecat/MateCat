@@ -12,6 +12,7 @@ namespace API\V2\Json;
 
 use CatUtils;
 use QA;
+use SubFiltering\Filter;
 
 class QALocalWarning extends QAWarning {
 
@@ -31,6 +32,7 @@ class QALocalWarning extends QAWarning {
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function render() {
 
@@ -49,10 +51,7 @@ class QALocalWarning extends QAWarning {
                 ]
         ];
 
-        $noticesJson = $this->QA->getNoticesJSON();
-
-        $exceptionList                = QA::JSONtoExceptionList( $noticesJson );
-
+        $exceptionList = $this->QA->getEexeptionList();
 
         $issues_detail[ QA::ERROR ]   = $exceptionList[ QA::ERROR ];
         $issues_detail[ QA::WARNING ] = $exceptionList[ QA::WARNING ];
@@ -81,17 +80,19 @@ class QALocalWarning extends QAWarning {
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
 
+            $Filter = Filter::getInstance();
+
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {
-                $malformedStructs[ 'source' ][ $k ] = CatUtils::rawxliff2view( $rawSource );
+                $malformedStructs[ 'source' ][ $k ] = $Filter->fromLayer1ToLayer2( $rawSource );
             }
 
             foreach ( $malformedStructs[ 'target' ] as $k => $rawTarget ) {
-                $malformedStructs[ 'target' ][ $k ] = CatUtils::rawxliff2view( $rawTarget );
+                $malformedStructs[ 'target' ][ $k ] = $Filter->fromLayer1ToLayer2( $rawTarget );
             }
 
             $targetTagPositionError = $this->QA->getTargetTagPositionError();
             foreach ( $targetTagPositionError as $item => $value ) {
-                $targetTagPositionError[ $item ] = CatUtils::rawxliff2view( $value );
+                $targetTagPositionError[ $item ] = $value;
             }
 
             $out[ 'details' ]                              = [];
@@ -99,7 +100,7 @@ class QALocalWarning extends QAWarning {
             $out[ 'details' ][ 'id_segment' ]              = $this->id_segment;
             $out[ 'details' ][ 'tag_mismatch' ]            = $malformedStructs;
             $out[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $targetTagPositionError;
-            $out[ 'total' ]                                = count( json_decode($noticesJson) );
+            $out[ 'total' ]                                = count( json_decode( $this->QA->getNoticesJSON() ) );
         }
 
         return $out;

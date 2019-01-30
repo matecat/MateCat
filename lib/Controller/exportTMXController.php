@@ -55,12 +55,16 @@ class exportTMXController extends downloadController {
                     'message' => 'Job password missing'
             );
         }
+
+        $this->featureSet = new FeatureSet();
+
     }
 
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *
      * @return mixed
+     * @throws \Exceptions\NotFoundError
      */
     function doAction() {
 
@@ -71,25 +75,16 @@ class exportTMXController extends downloadController {
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
         //Removed from within the foreach cycle, the job is always the same...
-        $jobData = $this->jobInfo = Jobs_JobDao::getByIdAndPassword( $this->jobID, $this->jobPass );
+        $jobData = $this->jobInfo = Chunks_ChunkDao::getByIdAndPassword( $this->jobID, $this->jobPass );
+        $this->featureSet->loadForProject( $this->jobInfo->getProject() );
 
-        $pCheck = new AjaxPasswordCheck();
-
-        //check for Password correctness
-        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->jobPass ) ) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            Log::doLog( $msg );
-            Utils::sendErrMailReport( $msg );
-
-            return null;
-        }
 
         $projectData = getProject( $jobData[ 'id_project' ] );
 
         $source = $jobData[ 'source' ];
         $target = $jobData[ 'target' ];
 
-        $tmsService = new TMSService();
+        $tmsService = new TMSService( $this->featureSet );
 
         switch( $this->type ){
             case 'csv':

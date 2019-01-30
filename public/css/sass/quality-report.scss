@@ -522,6 +522,11 @@ header {
                                                             &.violet-tag {
                                                                 color: #e22bff !important;
                                                             }
+
+                                                            &.tag-html-container-open,
+                                                            &.tag-html-container-close {
+                                                                display: none !important;
+                                                            }
                                                         }
                                                         .qr-issues-list {
                                                             display: flex;

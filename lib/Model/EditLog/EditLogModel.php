@@ -1,5 +1,8 @@
 <?php
 
+use SubFiltering\Filters\PlaceHoldXliffTags;
+use SubFiltering\Filters\RestoreXliffTagsForView;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -16,6 +19,11 @@ class EditLog_EditLogModel {
     private static $segments_per_page = 50;
     private static $start_id = -1;
     private static $sort_by = "sid";
+
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet;
 
     private $jid = "";
     private $password = "";
@@ -48,10 +56,14 @@ class EditLog_EditLogModel {
     ];
 
 
-    public function __construct( $jid, $password ) {
+    public function __construct( $jid, $password, FeatureSet $featureSet = null ) {
         $this->db       = Database::obtain();
         $this->jid      = $jid;
         $this->password = $password;
+        if( $featureSet == null ){
+            $featureSet = new FeatureSet();
+        }
+        $this->featureSet = $featureSet;
     }
 
     public function controllerDoAction() {
@@ -232,8 +244,9 @@ class EditLog_EditLogModel {
 
             $displaySeg->pe_effort_perc .= "%";
 
-            $sug_for_diff = CatUtils::placehold_xliff_tags( $seg->suggestion );
-            $tra_for_diff = CatUtils::placehold_xliff_tags( $seg->translation );
+            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+            $sug_for_diff = ( new PlaceHoldXliffTags() )->transform( $Filter->fromLayer0ToLayer1( $seg->suggestion ) );
+            $tra_for_diff = ( new PlaceHoldXliffTags() )->transform( $Filter->fromLayer0ToLayer1( $seg->translation ) );
 
             if ( $seg->suggestion <> $seg->translation ) {
                 // we will use diff_PE until ter_diff will not work properly
@@ -242,7 +255,7 @@ class EditLog_EditLogModel {
                 $displaySeg->diff = '';
             }
 
-            $displaySeg->diff = CatUtils::restore_xliff_tags_for_view( $displaySeg->diff );
+            $displaySeg->diff = ( new RestoreXliffTagsForView() )->transform( $displaySeg->diff );
 
             // BUG: While suggestions source is not correctly set
             if ( ( $displaySeg->suggestion_match == "85%" ) || ( $displaySeg->suggestion_match == "86%" ) ) {
@@ -290,9 +303,9 @@ class EditLog_EditLogModel {
             $displaySeg->suggestion_view = preg_replace( $array_patterns, $array_replacements, $seg->suggestion );
             $displaySeg->diff            = preg_replace( $array_patterns, $array_replacements, $displaySeg->diff );
 
-            $displaySeg->source          = trim( CatUtils::rawxliff2view( $seg->source ) );
-            $displaySeg->suggestion_view = trim( CatUtils::rawxliff2view( $seg->suggestion ) );
-            $displaySeg->translation     = trim( CatUtils::rawxliff2view( $seg->translation ) );
+            $displaySeg->source          = trim( $Filter->fromLayer0ToLayer2( $seg->source ) );
+            $displaySeg->suggestion_view = trim( $Filter->fromLayer0ToLayer2( $seg->suggestion ) );
+            $displaySeg->translation     = trim( $Filter->fromLayer0ToLayer2( $seg->translation ) );
 
             //NOT USED //TODO REMOVE FROM Dao, Struct, MyMemory-Match, and Re-USE the field in database for raw_word_count ?!?
             if ( $seg->mt_qe == 0 ) {

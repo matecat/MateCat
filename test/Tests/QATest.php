@@ -11,7 +11,7 @@ SRC;
 <g id="43">bang &amp; olufsen &lt; 3 ' &gt; 1</g> <x id="33"/>
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
         $this->assertEquals( $source_seg, $source_expected );
 
 
@@ -27,7 +27,7 @@ SRC;
 &lt;g id="43"&gt;bang & olufsen &lt; 3 ' &gt; 1&lt;/g&gt; &lt;x id="33"/&gt;
 SRC;
 
-        $source_seg = CatUtils::rawxliff2view( $source_seg );
+        $source_seg = CatUtils::layer0ToLayer2( $source_seg );
         $this->assertEquals( $source_seg, $source_expected );
 
     }
@@ -75,8 +75,8 @@ SRC;
 <g id="6"> 1 </g><g id="7">st  </g><g id="8">&nbsp;Section of Tokyo, Osaka</g>
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
@@ -119,8 +119,8 @@ SRC;
 <g id="7">st </g><g id="8"> &nbsp;Section of Tokyo, Osaka</g>
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
@@ -161,8 +161,8 @@ SRC;
 <g id="6"> <g id="7">st </g><g id="8">Section of Tokyo, Osaka </g> </g>
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 //Log::doLog("---------------");
 //        Log::doLog($source_seg);
 //        Log::doLog($target_seg);
@@ -207,8 +207,8 @@ TRG;
 <g id="6"> 1 </g><g id="7">st  </g><g id="8">&nbsp;Section of Tokyo, Osaka</g>
 SRC;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
@@ -251,8 +251,8 @@ SRC;
 <g id="6"> <g id="7">st</g><g id="8">&nbsp;Section of Tokyo <g id="9"> <g id="10">Station </g></g>, Osaka </g></g>
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
@@ -416,8 +416,8 @@ SRC;
 <g id="6"> <g id="7">st<x id="1236"/></g><g id="8">&nbsp;Section of Tokyo <g id="9"> <g id="10">Station </g></g>, Osaka </g></g>
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
@@ -487,8 +487,8 @@ SRC;
 <g id="6"> 1 </g><g id="7">ª  </g><g id="8"> Sezione di Tokyo, Osaka</g>
 SRC;
 
-        $segment = CatUtils::view2rawxliff( $segment );
-        $translation = CatUtils::view2rawxliff( $translation );
+        $segment = CatUtils::layer2ToLayer0( $segment );
+        $translation = CatUtils::layer2ToLayer0( $translation );
 
         $qaRealign = new QA( $segment, $translation );
         $qaRealign->tryRealignTagID();
@@ -503,7 +503,7 @@ SRC;
         $translation = <<<SRC
 <g id="7"> 1 </g><g id="8">&#170;  </g><x id="abc" /><g id="9">&nbsp;Sezione di Tokyo, Osaka</g>
 SRC;
-        $translation = CatUtils::view2rawxliff( $translation );
+        $translation = CatUtils::layer2ToLayer0( $translation );
 
         $qaRealign = new QA( $segment, $translation );
         $qaRealign->tryRealignTagID();
@@ -523,8 +523,8 @@ SRC;
         $translation = <<<SRC
 <g id="7"> 1 </g><g id="8">&#170;  </g><x id="abc" /><g id="9">&nbsp;Sezione di Tokyo, Osaka</g>
 SRC;
-        $segment = CatUtils::view2rawxliff( $segment );
-        $translation = CatUtils::view2rawxliff( $translation );
+        $segment = CatUtils::layer2ToLayer0( $segment );
+        $translation = CatUtils::layer2ToLayer0( $translation );
 
         $qaRealign = new QA( $segment, $translation );
         $qaRealign->tryRealignTagID();
@@ -637,8 +637,8 @@ SRC;
 
         $target_seg = urldecode('L%27Autorit%C3%A0+di+Sicurezza+Nazionale+%28NSA%29%2C+l%27Autorit%C3%A0+di+Sicurezza+Designata+%28DSA%29+o+qualsiasi+altra+autorit%C3%A0+nazionale+competente+di+ciascuno+Stato+membro+assicura%2C+per+quanto+possibile%0Aai+sensi+delle+disposizioni+legislative+e+regolamentari+nazionali%2C%0Ache+i+contraenti+e+i+subcontraenti+registrati+nel+suo+territorio%0Aadottino+le+misure+adeguate+per+proteggere+le+ICUE+nelle+trattative+precontrattuali+e+nell%27esecuzione+di+un+contratto+classificato.');
 
-        $segment = CatUtils::view2rawxliff( $source_seg );
-        $translation = CatUtils::view2rawxliff( $target_seg );
+        $segment = CatUtils::layer2ToLayer0( $source_seg );
+        $translation = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new QA($segment, $translation);
         $check->performConsistencyCheck();
@@ -660,8 +660,8 @@ SRC;
 <g id="pt2"> WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Internal Revenue Service di oggi hanno chiesto un commento pubblico sulle questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che verranno applicate a certi datori di lavoro a partire dal 2014. </g>
 TRG;
 
-        $source_seg = CatUtils::view2rawxliff( $source_seg );
-        $target_seg = CatUtils::view2rawxliff( $target_seg );
+        $source_seg = CatUtils::layer2ToLayer0( $source_seg );
+        $target_seg = CatUtils::layer2ToLayer0( $target_seg );
 
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();

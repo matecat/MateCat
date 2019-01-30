@@ -166,6 +166,7 @@ $.extend(UI, {
      * @returns {*}
      */
     transformTagsWithHtmlAttribute: function (tx) {
+        var returnValue;
         try {
             var base64Array=[];
             var phIDs =[];
@@ -189,9 +190,12 @@ $.extend(UI, {
                 return "<span contenteditable='false' class='locked tag-html-container-open' contenteditable='false'>" + text + "base64:" + base + "</span>";
             });
             // delete(base64Array);
-            return tx;
+            returnValue = tx;
         } catch (e) {
             console.error("Error parsing tag ph in transformTagsWithHtmlAttribute function");
+            returnValue = "";
+        } finally {
+            return returnValue;
         }
 
 
@@ -466,14 +470,13 @@ $.extend(UI, {
         $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
         $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
 
+        $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
         if( !_.isUndefined(d.tag_mismatch.order) && d.tag_mismatch.order.length > 0 ) {
             $( '#segment-' + d.id_segment + ' .editarea .locked:not(.mismatch)' ).filter( function () {
                 var clone = $( this ).clone();
                 clone.find( '.inside-attribute' ).remove();
                 return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
             } ).addClass( 'order-error' );
-        } else {
-            $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
         }
 	},	
 
@@ -782,7 +785,7 @@ $.extend(UI, {
         area.find('span.space-marker').replaceWith(' ');
         area.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
         area = this.encodeTagsWithHtmlAttribute(area);
-        return area.text();
+        return view2rawxliff( area.text() );
     },
 
     prepareTextToSend: function (text) {

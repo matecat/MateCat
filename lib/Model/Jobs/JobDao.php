@@ -15,6 +15,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     protected static $_sql_get_jobs_by_project = "SELECT * FROM jobs WHERE id_project = ? ORDER BY id, job_first_segment ASC;";
 
+    protected static $_sql_get_by_segment_translation = "select * from jobs where id = :id_job AND jobs.job_first_segment <= :id_segment AND jobs.job_last_segment >= :id_segment ";
+
     /**
      * This method is not static and used to cache at Redis level the values for this Job
      *
@@ -86,27 +88,62 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $id_job
-     * @param     $password
-     * @param int $ttl
+     * @param Translations_SegmentTranslationStruct $translation
+     * @param int                                   $ttl
+     * @param DataAccess_IDaoStruct                 $fetchObject
      *
-     * @return Jobs_JobStruct
+     * @return DataAccess_IDaoStruct|Jobs_JobStruct
      */
-    public static function getByIdAndPassword( $id_job, $password, $ttl = 0 ) {
+    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, $ttl = 0, DataAccess_IDaoStruct $fetchObject = null ) {
+
+        $thisDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( static::$_sql_get_by_segment_translation );
+
+        if( $fetchObject == null ){
+            $fetchObject = new Jobs_JobStruct();
+        }
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [
+                'id_job'     => $translation->id_job,
+                'id_segment' => $translation->id_segment
+        ] )[ 0 ];
+
+    }
+
+    /**
+     * @param                                        $id_job
+     * @param                                        $password
+     * @param int                                    $ttl
+     * @param DataAccess_IDaoStruct                  $fetchObject
+     *
+     * @return DataAccess_IDaoStruct|Jobs_JobStruct
+     */
+    public static function getByIdAndPassword( $id_job, $password, $ttl = 0, DataAccess_IDaoStruct $fetchObject = null ) {
+
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT * FROM jobs WHERE " .
                 " id = :id_job AND password = :password "
         );
 
-        $thisDao = new self();
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [
+        if( $fetchObject == null ){
+            $fetchObject = new Jobs_JobStruct();
+        }
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [
                 'id_job' => $id_job,
                 'password' => $password
         ] )[ 0 ];
 
     }
 
+    /**
+     * @param $project_id
+     *
+     * @return bool|int
+     */
     public function destroyCacheByProjectId( $project_id ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_sql_get_jobs_by_project );
@@ -115,18 +152,23 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $id_project
-     * @param int $ttl
+     * @param                            $id_project
+     * @param int                        $ttl
+     * @param DataAccess_IDaoStruct|null $fetchObject
      *
      * @return DataAccess_IDaoStruct[]|Jobs_JobStruct[]
      */
-    public static function getByProjectId( $id_project, $ttl = 0 ) {
+    public static function getByProjectId( $id_project, $ttl = 0, DataAccess_IDaoStruct $fetchObject = null ) {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_sql_get_jobs_by_project );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_project ] );
+        if( $fetchObject == null ){
+            $fetchObject = new Jobs_JobStruct();
+        }
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_project ] );
 
     }
 
@@ -185,29 +227,50 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     /**
      *
-     * @param int $id_job
-     *
-     * @param int $ttl
+     * @param                                        $id_job
+     * @param int                                    $ttl
+     * @param DataAccess_IDaoStruct|null                  $fetchObject
      *
      * @return DataAccess_IDaoStruct[]|Jobs_JobStruct[]
      */
-    public static function getById( $id_job, $ttl = 0 ) {
+    public static function getById( $id_job, $ttl = 0, DataAccess_IDaoStruct $fetchObject = null ) {
+
+        if( $fetchObject == null ){
+            $fetchObject = new Jobs_JobStruct();
+        }
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ? ORDER BY job_first_segment");
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_job ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ $id_job ] );
 
     }
 
     /**
-     * For now this is used by tests
+     * @param                            $id_project
+     * @param                            $id_job
+     * @param                            $ttl
+     * @param DataAccess_IDaoStruct|null $fetchObject
      *
-     * TODO Upgrade Project manager class with this method
-     *
+     * @return Jobs_JobStruct[]|DataAccess_IDaoStruct[]
+     */
+    public static function getByIdProjectAndIdJob( $id_project, $id_job, $ttl = 0, DataAccess_IDaoStruct $fetchObject = null ) {
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = :id_project AND id = :id_job" );
+
+        if( $fetchObject == null ){
+            $fetchObject = new Jobs_JobStruct();
+        }
+
+        return ( new self() )->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [ 'id_project' => $id_project, 'id_job' => $id_job ] );
+    }
+
+    /**
      * @param Jobs_JobStruct $jobStruct
      *
      * @return Jobs_JobStruct
+     * @throws ReflectionException
      */
     public static function createFromStruct( Jobs_JobStruct $jobStruct ){
 

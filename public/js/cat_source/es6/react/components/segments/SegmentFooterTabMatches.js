@@ -125,7 +125,7 @@ class SegmentFooterTabMatches extends React.Component {
         target = view2rawxliff(target);
         source = view2rawxliff(source);
         matches.splice(index, 1);
-        UI.setDeleteSuggestion(source, target);
+        UI.setDeleteSuggestion(source, target, match.id);
         this.setState({
             matches: matches
         });

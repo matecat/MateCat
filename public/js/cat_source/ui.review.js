@@ -106,12 +106,15 @@ if ( config.enableReview && config.isReview ) {
 
             trackChanges: function (editarea) {
                 var $segment = $(editarea).closest('section');
-                var source = $segment.find('.original-translation').html();
+                var source = UI.postProcessEditarea($segment, '.original-translation');
                 source = UI.clenaupTextFromPleaceholders( source );
+                //Fix for &amp in original-translation
+                source = source.replace(/&amp;/g, "&");
 
-                var target = $(editarea).text();
-                var diffHTML = trackChangesHTML( source, htmlEncode(target) );
-
+                var target = UI.postProcessEditarea($segment, '.targetarea');
+                target = UI.clenaupTextFromPleaceholders( target );
+                var diffHTML = trackChangesHTML( htmlEncode(source), htmlEncode(target) );
+                diffHTML = UI.transformTextForLockTags(diffHTML);
                 $('.sub-editor.review .track-changes p', $segment).html( diffHTML );
             },
             openNextTranslated: function (sid) {

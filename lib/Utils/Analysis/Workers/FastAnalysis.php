@@ -416,16 +416,7 @@ class FastAnalysis extends AbstractDaemon {
 
             $list_id_jobs_password = $jid_pass[ 1 ];
 
-            if ( array_key_exists( $v[ 'match_type' ], $equivalentWordMapping ) ) {
-                $eq_word = ( $v[ 'wc' ] * $equivalentWordMapping[ $v[ 'match_type' ] ] / 100 );
-            } else {
-                $eq_word = $v[ 'wc' ];
-            }
-
-            $standard_words = $eq_word;
-            if ( $v[ 'match_type' ] == "INTERNAL" or $v[ 'match_type' ] == "MT" ) {
-                $standard_words = $v[ 'wc' ] * $equivalentWordMapping[ "NO_MATCH" ] / 100;
-            }
+            list( $eq_word, $standard_words, $match_type ) = $this->_getWordCountForSegment( $v, $equivalentWordMapping );
 
             $total_eq_wc += $eq_word;
             $total_standard_wc += $standard_words;
@@ -438,7 +429,7 @@ class FastAnalysis extends AbstractDaemon {
                 $data[ 'id_job' ]       = (int)$id_job;
                 $data[ 'id_segment' ]   = (int)$v[ 'id' ];
                 $data[ 'segment_hash' ] = $db->escape( $v[ 'segment_hash' ] );
-                $data[ 'match_type' ]   = $db->escape( $v[ 'match_type' ] );
+                $data[ 'match_type' ]   = $db->escape( $match_type );
 
                 $data[ 'eq_word_count' ]       = (float)$eq_word;
                 $data[ 'standard_word_count' ] = (float)$standard_words;
@@ -628,6 +619,35 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         return $db->affected_rows;
+    }
+
+    protected function _getWordCountForSegment( $segmentArray, $equivalentWordMapping ){
+
+        switch( $segmentArray[ 'match_type' ] ){
+            case '75%-84%':
+            case '85%-94%':
+            case '95%-99%':
+                $eq_word = ( $segmentArray[ 'wc' ] * $equivalentWordMapping[ 'INTERNAL' ] / 100 );
+                $match_type = 'INTERNAL';
+                break;
+            case( array_key_exists( $segmentArray[ 'match_type' ], $equivalentWordMapping ) ):
+                $eq_word = ( $segmentArray[ 'wc' ] * $equivalentWordMapping[ $segmentArray[ 'match_type' ] ] / 100 );
+                $match_type = $segmentArray[ 'match_type' ];
+                break;
+            default:
+                $eq_word = $segmentArray[ 'wc' ];
+                $match_type = "NO_MATCH";
+                break;
+        }
+
+        //Set NO_MATCH word count multiplier for internal fuzzy matches on standard_words
+        $standard_words = $eq_word;
+        if ( $match_type == "INTERNAL" ) {
+            $standard_words = $segmentArray[ 'wc' ] * $equivalentWordMapping[ "NO_MATCH" ] / 100;
+        }
+
+        return [ $eq_word, $standard_words, $match_type ];
+
     }
 
     /**

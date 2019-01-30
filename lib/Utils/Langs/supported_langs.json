@@ -234,6 +234,17 @@
     ,
         {
             "localized":[{
+                "en":"Bosnian (Cyrillic)"
+            }],
+            "isocode":"bs",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"bs-Cyrl-BA",
+            "languageRegionCode":"bs-Cyrl-BA"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Breton"
             }],
             "isocode":"br",
@@ -289,8 +300,7 @@
             "isocode":"cb",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"cb-PH",
-            "languageRegionCode":"fil-PH"
+            "rfc3066code":"cb-PH"
         }
     ,
         {
@@ -311,6 +321,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"cha-GU"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Cherokee"
+            }],
+            "isocode":"chr",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"chr-US"
         }
     ,
         {
@@ -598,7 +618,7 @@
                 "en":"Filipino"
             }],
             "isocode":"fil",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"fil-PH"
         }
@@ -749,7 +769,7 @@
             }],
             "isocode":"ha",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"ha-HAU"
         }
     ,
@@ -821,6 +841,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"is-IS"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Igbo"
+            }],
+            "isocode":"ig",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ibo-NG"
         }
     ,
         {
@@ -905,6 +935,16 @@
     ,
         {
             "localized":[{
+                "en":"K'iche'"
+            }],
+            "isocode":"quc",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"quc-GT"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Kabuverdianu"
             }],
             "isocode":"kea",
@@ -959,7 +999,7 @@
             }],
             "isocode":"kn",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"kr-KAU"
         }
     ,
@@ -1041,6 +1081,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"guz-KE"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Konkani"
+            }],
+            "isocode":"kok",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"kok-IN"
         }
     ,
         {
@@ -1497,6 +1547,16 @@
     ,
         {
             "localized":[{
+                "en":"Punjabi (Pakistan)"
+            }],
+            "isocode":"pa",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"pnb-PK"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Papiamentu"
             }],
             "isocode":"pap",
@@ -1618,6 +1678,16 @@
     ,
         {
             "localized":[{
+                "en":"Romansh"
+            }],
+            "isocode":"rm",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"roh-CH"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Rundi"
             }],
             "isocode":"run",
@@ -1735,6 +1805,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"sna-ZW"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Sindhi"
+            }],
+            "isocode":"sd",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"snd-PK"
         }
     ,
         {
@@ -1885,7 +1965,6 @@
             "isocode":"tl",
             "enabled":true,
             "rtl":false,
-            "languageRegionCode":"fil-PH",
             "rfc3066code":"tl-PH"
         }
     ,
@@ -2072,6 +2151,16 @@
     ,
         {
             "localized":[{
+                "en":"Uyghur"
+            }],
+            "isocode":"ug",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"uig-CN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Ukrainian"
             }],
             "isocode":"uk",
@@ -2165,7 +2254,7 @@
                 "en":"Wolof"
             }],
             "isocode":"wo",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"wo-SN"
         }

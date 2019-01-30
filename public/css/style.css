@@ -3732,6 +3732,11 @@ span.locked.tag-html-container-close {
     color: #e000ff !important;
 }
 
+span.deleted .locked,
+span.added .locked {
+    background-color: unset !important;
+}
+
 .editor .editarea .locked.order-error,
 .editor .editarea .locked.order-error,
 .source .locked.order-error {
@@ -4501,17 +4506,17 @@ section .toolbar .autofillTag {
 
 }
 
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .targetarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .targetarea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .targetarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
@@ -4543,7 +4548,7 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.sta
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.rtl-target.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .targetarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
@@ -4565,7 +4570,7 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
 
 body.rtl-source.tagModes.tagmode-default-extended .suggestion_source .locked,
 body.rtl-source.tagModes.tagmode-default-extended .source .locked,
-body.rtl-target.tagModes.tagmode-default-extended .editarea .locked,
+body.rtl-target.tagModes.tagmode-default-extended .targetarea .locked,
 body.rtl-target.tagModes.tagmode-default-extended .spliArea .locked,
 body.rtl-target.tagModes.tagmode-default-extended .translation .locked {
     direction: ltr;

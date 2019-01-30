@@ -10,30 +10,39 @@
 namespace API\V2\Json;
 
 
-use CatUtils;
+use SubFiltering\Filter;
 
 class SegmentTranslationMismatches {
 
     protected $data;
     protected $thereArePropagations;
+    protected $featureSet;
 
     /**
      * SegmentTranslationMismatches constructor.
      *
      * from query: getWarning( id_job, password )
      *
-     * @param array $Translation_mismatches
-     * @param       $thereArePropagations
+     * @param array            $Translation_mismatches
+     * @param                  $thereArePropagations
+     * @param \FeatureSet|null $featureSet
      */
-    public function __construct( $Translation_mismatches, $thereArePropagations ) {
+    public function __construct( $Translation_mismatches, $thereArePropagations, \FeatureSet $featureSet = null ) {
         $this->data                 = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
+        if( $featureSet == null ){
+            $featureSet = new FeatureSet();
+        }
+        $this->featureSet = $featureSet;
     }
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function render() {
+
+        $Filter = Filter::getInstance( $this->featureSet );
 
         $result = [
                 'editable'       => [],
@@ -45,13 +54,13 @@ class SegmentTranslationMismatches {
 
             if ( $row[ 'editable' ] ) {
                 $result[ 'editable' ][] = [
-                        'translation' => CatUtils::rawxliff2view( $row[ 'translation' ] ),
+                        'translation' => $Filter->fromLayer0ToLayer2( $row[ 'translation' ] ),
                         'TOT'         => $row[ 'TOT' ],
                         'involved_id' => explode( ",", $row[ 'involved_id' ] )
                 ];
             } else {
                 $result[ 'not_editable' ][] = [
-                        'translation' => CatUtils::rawxliff2view( $row[ 'translation' ] ),
+                        'translation' => $Filter->fromLayer0ToLayer2( $row[ 'translation' ] ),
                         'TOT'         => $row[ 'TOT' ],
                         'involved_id' => explode( ",", $row[ 'involved_id' ] )
                 ];

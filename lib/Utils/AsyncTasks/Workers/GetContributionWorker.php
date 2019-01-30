@@ -15,6 +15,7 @@ use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Database;
 use PDOException;
+use SubFiltering\Filter;
 use TaskRunner\Commons\AbstractWorker,
         TaskRunner\Commons\QueueElement,
         TaskRunner\Exceptions\EndQueueException,
@@ -183,7 +184,7 @@ class GetContributionWorker extends AbstractWorker {
         if ( !$contributionStruct->concordanceSearch ) {
             //execute these lines only in segment contribution search,
             //in case of user concordance search skip these lines
-            $this->updateAnalysisSuggestion( $matches, $contributionStruct );
+            $this->updateAnalysisSuggestion( $matches, $contributionStruct, $featureSet );
         }
 
         $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
@@ -268,6 +269,8 @@ class GetContributionWorker extends AbstractWorker {
      */
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, \FeatureSet $featureSet ) {
 
+        $Filter = Filter::getInstance( $featureSet );
+
         foreach ( $matches as &$match ) {
 
             if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
@@ -275,13 +278,14 @@ class GetContributionWorker extends AbstractWorker {
                 $match[ 'match' ] = 'MT';
 
                 $QA = new PostProcess( $match[ 'raw_segment' ], $match[ 'raw_translation' ] );
+                $QA->setFeatureSet( $featureSet );
                 $QA->realignMTSpaces();
 
                 //this should every time be ok because MT preserve tags, but we use the check on the errors
                 //for logic correctness
                 if ( !$QA->thereAreErrors() ) {
                     $match[ 'raw_translation' ] = $QA->getTrgNormalized();
-                    $match[ 'translation' ]     = CatUtils::rawxliff2view( $match[ 'raw_translation' ] );
+                    $match[ 'translation' ]     = $Filter->fromLayer0ToLayer2( $match[ 'raw_translation' ] );
                 } else {
                     $this->_doLog( $QA->getErrors() );
                 }
@@ -442,13 +446,22 @@ class GetContributionWorker extends AbstractWorker {
         return ( strlen( $stringB ) < strlen( $stringA ) ) ? -1 : 1;
     }
 
-    private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct ) {
+    /**
+     * @param                           $matches
+     * @param ContributionRequestStruct $contributionStruct
+     * @param \FeatureSet               $featureSet
+     *
+     * @throws \Exception
+     */
+    private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, \FeatureSet $featureSet ) {
 
         if ( count( $matches ) > 0 ) {
 
+            $Filter = Filter::getInstance( $featureSet );
+
             foreach ( $matches as $k => $m ) {
 
-                $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
+                $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
 
                 if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
                     $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!

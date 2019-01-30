@@ -17,6 +17,7 @@ use Features\ReviewImproved;
 use Features\ReviewImproved\Model\QualityReportDao;
 use Features\TranslationVersions;
 use FeatureSet;
+use SubFiltering\Filter;
 use Translations_TranslationVersionDao;
 use ZipArchiveExtended;
 
@@ -65,6 +66,7 @@ class QualityReportSegmentModel {
             $last_translations = $this->makeSegmentsVersionsUniform( $segments_revisions );
         }
 
+        $Filter = Filter::getInstance( $featureSet );
 
         $files = [];
         foreach ( $data as $i => $seg ) {
@@ -83,10 +85,10 @@ class QualityReportSegmentModel {
 
             $seg->parsed_time_to_edit = CatUtils::parse_time_to_edit( $seg->time_to_edit );
 
-            $seg->segment = CatUtils::rawxliff2view( $seg->segment );
+            $seg->segment = $Filter->fromLayer0ToLayer2( $seg->segment );
 
-            $seg->translation = CatUtils::rawxliff2view( $seg->translation );
-            $seg->suggestion = CatUtils::rawxliff2view( $seg->suggestion );
+            $seg->translation = $Filter->fromLayer0ToLayer2( $seg->translation );
+            $seg->suggestion = $Filter->fromLayer0ToLayer2( $seg->suggestion );
 
             foreach ( $issues as $issue ) {
                 if ( $issue->segment_id == $seg->sid ) {
@@ -105,7 +107,7 @@ class QualityReportSegmentModel {
             if(isset($last_translations) && !empty($last_translations)){
                 foreach ( $last_translations as $last_translation ) {
                     if ( $last_translation->id_segment == $seg->sid ) {
-                        $last_translation->translation = CatUtils::rawxliff2view( $last_translation->translation );
+                        $last_translation->translation = $Filter->fromLayer0ToLayer2( $last_translation->translation );
                         $find_last_translation_version = $last_translation;
                         break;
                     }
@@ -117,7 +119,7 @@ class QualityReportSegmentModel {
             if ( isset( $last_revisions ) && !empty($last_revisions) ) {
                 foreach ( $last_revisions as $last_revision ) {
                     if ( $last_revision->id_segment == $seg->sid ) {
-                        $last_revision->translation = CatUtils::rawxliff2view( $last_revision->translation );
+                        $last_revision->translation = $Filter->fromLayer0ToLayer2( $last_revision->translation );
                         $find_last_revision_version = $last_revision;
                         break;
                     }

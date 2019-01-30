@@ -13,6 +13,7 @@ use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
 use Jobs\SplitQueue;
 use Segments\ContextGroupDao;
+use SubFiltering\Filter;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
 
@@ -82,6 +83,7 @@ class ProjectManager {
      * @var Database|IDatabase
      */
     protected $dbHandler;
+    protected $filter;
 
     /**
      * ProjectManager constructor.
@@ -176,6 +178,8 @@ class ProjectManager {
         if ( !empty( $this->projectStructure[ 'id_customer' ] ) ) {
             $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure[ 'id_customer' ] );
         }
+
+        $this->filter = Filter::getInstance( $this->features );
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
                 'filter_project_manager_array_files',
@@ -807,6 +811,7 @@ class ProjectManager {
             $segmentElement[ 'source' ]        = $this->projectStructure[ 'source_language' ];
             $segmentElement[ 'target' ]        = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
             $segmentElement[ 'payable_rates' ] = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ]->getArrayCopy();
+            $segmentElement[ 'segment' ] = Filter::getInstance( $this->features )->fromLayer0ToLayer1( $segmentElement[ 'segment' ] );
 
         }
 
@@ -1643,7 +1648,7 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $wordCount = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
+                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
@@ -1672,7 +1677,7 @@ class ProjectManager {
 
                                     if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
-                                        $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
+                                        $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
                                         //add an empty string to avoid casting to int: 0001 -> 1
                                         //useful for idiom internal xliff id
@@ -1707,7 +1712,7 @@ class ProjectManager {
                                     'xliff_mrk_id'            => $seg_source[ 'mid' ],
                                     'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
                                     'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
-                                    'segment'                 => CatUtils::raw2DatabaseXliff( $seg_source[ 'raw-content' ] ),
+                                    'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
                                     'segment_hash'            => md5( $seg_source[ 'raw-content' ] ),
                                     'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
                                     'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
@@ -1729,7 +1734,7 @@ class ProjectManager {
 
                     } else {
 
-                        $wordCount = CatUtils::segment_raw_wordcount( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
+                        $wordCount = CatUtils::segment_raw_word_count( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
 
                         $prec_tags = null;
                         $succ_tags = null;
@@ -1747,7 +1752,7 @@ class ProjectManager {
 
                                 if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ], $xliff_trans_unit ) ) {
 
-                                    $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
+                                    $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
 
                                     //add an empty string to avoid casting to int: 0001 -> 1
                                     //useful for idiom internal xliff id
@@ -1779,7 +1784,7 @@ class ProjectManager {
                                 'id_project'          => $this->projectStructure[ 'id_project' ],
                                 'internal_id'         => $xliff_trans_unit[ 'attr' ][ 'id' ],
                                 'xliff_ext_prec_tags' => ( !is_null( $prec_tags ) ? $prec_tags : null ),
-                                'segment'             => CatUtils::raw2DatabaseXliff( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
+                                'segment'             => $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
                                 'segment_hash'        => md5( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ),
                                 'xliff_ext_succ_tags' => ( !is_null( $succ_tags ) ? $succ_tags : null ),
                                 'raw_word_count'      => $wordCount,
@@ -2065,8 +2070,8 @@ class ProjectManager {
                 continue;
             }
 
-            $config[ 'segment' ] = CatUtils::raw2DatabaseXliff( $source_extract_external[ 'seg' ] );
-            $config[ 'translation' ]    = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
+            $config[ 'segment' ] = $this->filter->fromRawXliffToLayer0( $this->filter->fromLayer0ToLayer1( $source_extract_external[ 'seg' ] ) );
+            $config[ 'translation' ]    = $this->filter->fromRawXliffToLayer0( $this->filter->fromLayer0ToLayer1( $target_extract_external[ 'seg' ] ) );
             $config[ 'context_after' ]  = null;
             $config[ 'context_before' ] = null;
 

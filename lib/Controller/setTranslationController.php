@@ -2,6 +2,7 @@
 
 use \Contribution\ContributionSetStruct, \Contribution\Set;
 use Analysis\DqfQueueHandler;
+use SubFiltering\Filters\FromViewNBSPToSpaces;
 
 class setTranslationController extends ajaxController {
 
@@ -119,16 +120,10 @@ class setTranslationController extends ajaxController {
         $this->id_translator         = $this->__postInput[ 'id_translator' ];
         $this->client_target_version = ( empty( $this->__postInput[ 'version' ] ) ? '0' : $this->__postInput[ 'version' ] );
 
-        list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
-        list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'segment' ] ), ' ' );
-
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
 
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
         $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'splitStatuses' ] ) ); //strtoupper transforms null to ""
-
-        //PATCH TO FIX BOM INSERTIONS
-        $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
 
         Log::doLog( $this->__postInput );
 
@@ -159,17 +154,6 @@ class setTranslationController extends ajaxController {
     }
 
     protected function _checkData() {
-        $this->parseIDSegment();
-
-        if ( empty( $this->id_segment ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing id_segment" );
-        }
-
-        if ( $this->isSplittedSegment() ) {
-            $this->setStatusForSplittedSegment();
-        }
-
-        $this->checkStatus( $this->status );
 
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][] = array( "code" => -2, "message" => "missing id_job" );
@@ -179,9 +163,7 @@ class setTranslationController extends ajaxController {
             $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
             if ( empty( $this->jobData ) ) {
-                $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
-                Log::doLog( $msg );
-                Utils::sendErrMailReport( $msg );
+                $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
             }
 
             //add check for job status archived.
@@ -189,18 +171,12 @@ class setTranslationController extends ajaxController {
                 $this->result[ 'errors' ][] = array( "code" => -3, "message" => "job archived" );
             }
 
-            //check for Password correctness ( remove segment split )
-            $pCheck = new AjaxPasswordCheck();
-            if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->password, $this->id_segment ) ) {
-                $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
-            }
-
             /**
              * Here we instantiate new objects in order to migrate towards
              * a more object oriented approach.
              */
-            $this->project    = Projects_ProjectDao::findByJobId( $this->id_job );
             $this->chunk      = Chunks_ChunkDao::getByIdAndPassword($this->id_job, $this->password );
+            $this->project    = $this->chunk->getProject();
 
             $this->featureSet->loadForProject( $this->project ) ;
 
@@ -212,12 +188,32 @@ class setTranslationController extends ajaxController {
             throw new Exception( $msg, -1 );
         }
 
+
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ), ' ' );
+        list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'segment' ] ), ' ' );
+
+        //PATCH TO FIX BOM INSERTIONS
+        $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
+
         if ( is_null( $this->translation ) || $this->translation === '' ) {
             Log::doLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
 
             // won't save empty translation but there is no need to return an errors
             throw new Exception( "Empty Translation \n\n" . var_export( $_POST, true ), 0 );
         }
+
+        $this->parseIDSegment();
+
+        if ( empty( $this->id_segment ) ) {
+            $this->result[ 'errors' ][] = array( "code" => -1, "message" => "missing id_segment" );
+        }
+
+        if ( $this->isSplittedSegment() ) {
+            $this->setStatusForSplittedSegment();
+        }
+
+        $this->checkStatus( $this->status );
 
     }
 
@@ -251,6 +247,13 @@ class setTranslationController extends ajaxController {
 
     }
 
+    /**
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
     protected function _getContexts(){
 
         //Get contexts
@@ -264,11 +267,22 @@ class setTranslationController extends ajaxController {
 
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $this->context_before = $segmentsList->id_before->segment;
-        $this->context_after  = $segmentsList->id_after->segment;
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
+        $this->context_after  = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
 
     }
 
+    /**
+     * @return int|mixed
+     * @throws Exceptions_RecordNotFound
+     * @throws ReflectionException
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
     public function doAction() {
         try {
 
@@ -297,16 +311,18 @@ class setTranslationController extends ajaxController {
 
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
-        $check = new QA( $this->segment[ 'segment' ], $this->translation );
+        $spaceHandler = new FromViewNBSPToSpaces();
+        $check = new QA( $spaceHandler->transform( $this->__postInput[ 'segment' ] ), $spaceHandler->transform( $this->__postInput[ 'translation' ] ) );
+        $check->setFeatureSet( $this->featureSet );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
-
             $err_json    = $check->getWarningsJSON();
             $translation = $this->translation;
         } else {
             $err_json    = '';
-            $translation = $check->getTrgNormalized();
+            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+            $translation = $Filter->fromLayer1ToLayer0( $check->getTrgNormalized() );
         }
 
         /*
@@ -361,7 +377,7 @@ class setTranslationController extends ajaxController {
         $_Translation[ 'id_job' ]                 = $this->id_job;
         $_Translation[ 'status' ]                 = $this->status;
         $_Translation[ 'time_to_edit' ]           = $this->time_to_edit;
-        $_Translation[ 'translation' ]            = preg_replace( '/[\0]+$/u', '', $translation );
+        $_Translation[ 'translation' ]            = $translation;
         $_Translation[ 'serialized_errors_list' ] = $err_json;
         $_Translation[ 'suggestion_position' ]    = $this->chosen_suggestion_index;
         $_Translation[ 'warning' ]                = $check->thereAreWarnings();
@@ -381,7 +397,7 @@ class setTranslationController extends ajaxController {
          */
 
         $this->updateJobPEE( $old_translation, $_Translation );
-        $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password );
+        $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
 
@@ -633,20 +649,27 @@ class setTranslationController extends ajaxController {
 
         $this->evalSetContribution( $_Translation, $old_translation );
 
-        $this->logForTagProjection(CatUtils::rawxliff2view($this->translation));
-
     }
 
     /**
      * This method returns a representation of the saved translation which
      * should be as much as possible compliant with the future API v2.
      *
+     * @param $saved_translation
+     *
+     * @return array
+     * @throws Exceptions_RecordNotFound
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function getTranslationObject( $saved_translation ) {
+        $filter = \SubFiltering\Filter::getInstance( $this->featureSet );
         $translation = array(
                 'version_number' => @$saved_translation['version_number'],
                 'sid'            => $saved_translation['id_segment'],
-                'translation'    => \CatUtils::rawxliff2view( $saved_translation['translation'] ),
+                'translation'    =>$filter->fromLayer0ToLayer2( $saved_translation['translation'] ),
                 'status'         => $saved_translation['status']
         );
         return $translation ;
@@ -819,14 +842,6 @@ class setTranslationController extends ajaxController {
         return $old_count ;
     }
 
-    private function logForTagProjection($msg) {
-        $logfile = \Log::$fileName;  //Todo: check why is null
-
-        \Log::$fileName = 'tagProjection.log';
-        \Log::doLog( $msg );
-        \Log::$fileName = $logfile;
-    }
-
     /**
      * @param $_Translation
      * @param $old_translation
@@ -856,18 +871,20 @@ class setTranslationController extends ajaxController {
         /**
          * Set the new contribution in queue
          */
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+
         $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = self::isRevision();
         $contributionStruct->id_job               = $this->id_job;
         $contributionStruct->job_password         = $this->password;
         $contributionStruct->id_segment           = $this->id_segment;
-        $contributionStruct->segment              = $this->segment[ 'segment' ];
-        $contributionStruct->translation          = $_Translation[ 'translation' ];
+        $contributionStruct->segment              = $Filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
+        $contributionStruct->translation          = $this->__postInput[ 'translation' ];
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = $this->user->uid;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
-        $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
-        $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
+        $contributionStruct->oldSegment           = $Filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
+        $contributionStruct->oldTranslation       = $Filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
         $contributionStruct->propagationRequest   = $this->propagate;
         $contributionStruct->id_mt                = $this->jobData->id_mt_engine;
 

@@ -19,9 +19,6 @@ class QAGlobalWarning extends QAWarning {
 
     protected $structure;
 
-    const TAGS_CATEGORY = "TAGS";
-    const MISMATCH_CATEGORY = "MISMATCH";
-
     /**
      * QAGlobalWarning constructor.
      *

@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers CatUtils::rawXliff2view
+ * @covers CatUtils::layer0ToLayer2
  * this battery of tests sends one string in input as $source_segment to CatUtils::rawXliff2view method and
  * verifies that the output is equal to the $expected_segment.
  * User: dinies
@@ -15,7 +15,7 @@ class RawXliff2ViewTest extends AbstractTest
     protected $expected_segment;
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view1()
     {
@@ -26,12 +26,12 @@ LAB;
 &lt;g id="1"&gt;[AH1]&lt;/g&gt;&lt;g id="2"&gt;Is fold & crease the same??&lt;/g&gt;
 LAB;
 
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view_2()
     {
@@ -41,12 +41,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;SIA “Bio2You”,&lt;/g&gt;&lt;g id="2"&gt; Reg. no&lt;/g&gt;&lt;g id="3"&gt;40103243404, &lt;/g&gt;&lt;g id="4"&gt;address: Ganibu Dambis 24A, Riga, Latvia &nbsp;("the Franchisor") &nbsp;&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view3()
     {
@@ -56,12 +56,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;USB &lt;/g&gt;&lt;g id="2"&gt;(to wake to your USB music)&lt;/g&gt;&lt;g id="1"&gt;DISC &lt;/g&gt;&lt;g id="2"&gt;(to wake to your DISC music)&lt;/g&gt;&lt;g id="1"&gt;BUZZER &lt;/g&gt;&lt;g id="2"&gt;(to wake to a buzzer sound)&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view4()
     {
@@ -72,12 +72,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;併症や &lt;/g&gt;&lt;g id="2"&gt;QOL&lt;/g&gt;&lt;g id="3"&gt; 低下の観点から外科切除は行わない傾向に&lt;/g&gt;&lt;g id="1"&gt;胃悪性リンパ腫の治療は，これまで外科的切除が積極 的に行われてきたが，最近では胃温存療法が外科的切除 に劣らない治療成績を示し&lt;/g&gt;&lt;g id="2"&gt;1)&lt;/g&gt;&lt;g id="3"&gt;，外科的切除に伴う術後合&lt;/g&gt;&lt;g id="2"&gt;考&lt;/g&gt;&lt;g id="3"&gt; &nbsp; &lt;/g&gt;&lt;g id="4"&gt;察&lt;/g&gt;&lt;g id="1"&gt;Antecolic gastrojejunostomy with a braun anastomosi&lt;/g&gt;&lt;g id="2"&gt;8)&lt;/g&gt;&lt;g id="3"&gt;.&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view5()
     {
@@ -87,12 +87,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;入院時検査所見&lt;/g&gt;&lt;g id="2"&gt;: TP 5.7 mg&lt;/g&gt;&lt;g id="3"&gt;／&lt;/g&gt;&lt;g id="4"&gt;dL&lt;/g&gt;&lt;g id="5"&gt;，&lt;/g&gt;&lt;g id="6"&gt;Alb&lt;/g&gt;&lt;g id="7"&gt; &lt;/g&gt;&lt;g id="8"&gt;2.9 mg&lt;/g&gt;&lt;g id="9"&gt;／&lt;/g&gt;&lt;g id="10"&gt;dL&lt;/g&gt;&lt;g id="11"&gt; と低&lt;/g&gt;&lt;g id="1"&gt;入院時現症&lt;/g&gt;&lt;g id="2"&gt;:&lt;/g&gt;&lt;g id="3"&gt; 腹部に明らかな腫瘤は触れず，表在リン&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view6()
     {
@@ -102,12 +102,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;[0065] &lt;/g&gt;&lt;g id="2"&gt;y&lt;/g&gt;&lt;g id="3"&gt;1&lt;/g&gt;&lt;g id="4"&gt;(&lt;/g&gt;&lt;g id="5"&gt;z&lt;/g&gt;&lt;g id="6"&gt;O&lt;/g&gt;&lt;g id="7"&gt;, t&lt;/g&gt;&lt;g id="8"&gt;m&lt;/g&gt;&lt;g id="9"&gt;) &lt;/g&gt;&lt;g id="10"&gt;= min&lt;/g&gt;&lt;g id="11"&gt;[&lt;/g&gt;&lt;g id="12"&gt;y&lt;/g&gt;&lt;g id="13"&gt;1&lt;/g&gt;&lt;g id="14"&gt;(&lt;/g&gt;&lt;g id="15"&gt;z, t&lt;/g&gt;&lt;g id="16"&gt;m&lt;/g&gt;&lt;g id="17"&gt;)]&lt;/g&gt;&lt;g id="18"&gt;; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;/g&gt;&lt;g id="19"&gt;0 : : : z ::: L &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/g&gt;&lt;g id="20"&gt;(Equation 16)&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view7()
     {
@@ -117,12 +117,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;•••••••••&lt;/g&gt;&lt;g id="2"&gt; EMILIA-ROMAGNA&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view8()
     {
@@ -132,12 +132,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;lip = &lt;/g&gt;&lt;g id="2"&gt;0 : &nbsp; &lt;/g&gt;&lt;g id="3"&gt;: &lt;g id="4"&gt;lip = &lt;/g&gt;&lt;/g&gt;&lt;g id="5"&gt;0&lt;/g&gt;&lt;g id="1"&gt;c:::::&gt;&lt;/g&gt;&lt;g id="2"&gt; &nbsp;200&lt;/g&gt;&lt;g id="1"&gt;\ &lt;/g&gt;&lt;g id="2"&gt;FRONT&lt;/g&gt;&lt;g id="2"&gt;v· &nbsp; &nbsp;&lt;/g&gt;&lt;g id="3"&gt;• . .&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view9()
     {
@@ -147,12 +147,12 @@ LAB;
         $this->expected_segment = <<<LAB
 In certain embodiments, the value of &lt;g id="2"&gt;E &lt;/g&gt;may vary or be determined by a user.
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view10()
     {
@@ -162,12 +162,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="2"&gt;L &nbsp;&lt;g id="3"&gt;0&lt;/g&gt;&lt;/g&gt;, and &lt;g id="4"&gt;C &lt;/g&gt;is the orifice flow coefficient.
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view11()
     {
@@ -177,12 +177,12 @@ LAB;
         $this->expected_segment = <<<LAB
 リストン鉗子をかけた大弯口側端へ，&lt;ex id="1"/&gt;&lt;g id="2"&gt;Bill-roth &lt;/g&gt;&lt;bx id="3"/&gt;Ⅱ法に準じて胃空腸端側吻合を行った。
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view12()
     {
@@ -192,12 +192,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;R-CHOP &lt;/g&gt;&lt;g id="2"&gt;療法中に幽門部狭窄を来し胃空腸バイパス術を施行した&lt;/g&gt;&lt;g id="3"&gt; &lt;/g&gt;&lt;g id="4"&gt;胃原発 &lt;/g&gt;&lt;g id="5"&gt;Diffuse Large B-Cell Lymphoma&lt;/g&gt;&lt;g id="6"&gt; の &lt;/g&gt;&lt;g id="7"&gt;1&lt;/g&gt;&lt;g id="8"&gt; 例&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view13()
     {
@@ -207,12 +207,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;•••••••••&lt;/g&gt;&lt;g id="2"&gt; EMILIA-ROMAGNA&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view14()
     {
@@ -222,12 +222,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;[0054] &lt;/g&gt;&lt;g id="2"&gt;y&lt;g id="3"&gt;(&lt;/g&gt;z&lt;/g&gt;&lt;g id="4"&gt;1&lt;/g&gt;&lt;g id="5"&gt;, t&lt;/g&gt;&lt;g id="6"&gt;m&lt;/g&gt;&lt;g id="7"&gt;) &lt;/g&gt;&lt;g id="8"&gt;= d - r&lt;/g&gt;&lt;g id="9"&gt;O &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/g&gt;&lt;g id="10"&gt;(Equation 11)&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view15()
     {
@@ -237,12 +237,12 @@ LAB;
         $this->expected_segment = <<<LAB
 In such case Franch&lt;ex id="1"/&gt;&lt;bx id="2"/&gt;isor receives back its all instalments, furniture and goods at cost of Franchisee, and the Franchisee must cover all unearned profit of the Franchisor.
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view16()
     {
@@ -252,12 +252,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;9.4&lt;/g&gt;&lt;g id="2"&gt; On expiry of this Agreement all licences referred to in this Clause 9 shall expire and the Franchisee agrees to immediately cease use of all of the Franchisor's intellectual property.&lt;/g&gt;&lt;g id="1"&gt;9.3&lt;/g&gt;&lt;g id="2"&gt; This Agreement does not convey or transfer to the Franchisee any ownership or interest in any intellectual prop&lt;/g&gt;&lt;g id="3"&gt;erty owned by the Franchisor.&lt;/g&gt;&lt;g id="1"&gt;9.2&lt;/g&gt;&lt;g id="2"&gt; The Trade Mark shall not be used&lt;/g&gt;&lt;g id="3"&gt; in any manner liable to invalidate the registration of the Trade Mark and the Franchisee shall not permit them to be used by third parties.&lt;/g&gt;&lt;g id="1"&gt;9.1&lt;/g&gt;&lt;g id="2"&gt; The Franchisor grants to the Franchisee licence in the Territory to use its logos, trade marks, service marks, trade names, literature, copyrights, database rights and patents subject to the restrictions in Clause 9.2.&lt;/g&gt;&lt;g id="1"&gt;8.3. provide Franchisor with &lt;/g&gt;&lt;g id="2"&gt;daily, weekly and monthly reports.&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view17()
     {
@@ -267,12 +267,12 @@ LAB;
         $this->expected_segment = <<<LAB
 A tale scopo verrà implementato il programma custom “&lt;g id="2"&gt;Rilascio Massivo Contratti Migrati E4E&lt;/g&gt;” &lt;ex id="1"/&gt;&lt;g id="3"&gt;(&lt;/g&gt;&lt;g id="4"&gt;ZMM4R_IT_P_RILFDM&lt;/g&gt;) che imposterà l’&lt;bx id="5"/&gt;“Indicatore di Rilascio” (EKKO-FRGKE) = 3 (PO Non Changeable) per tutti i Documenti di acquisto indicati in un file di &lt;g id="6"&gt;Input&lt;/g&gt; in formato Excel da specificare in Selection Screen (vd.
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view18()
     {
@@ -282,12 +282,12 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;总之，通过对&lt;/g&gt;&lt;g id="2"&gt;2012-2015年间美企所中国军情研究的统计和特点分析，可以做出以下判断：美企所是保守主义思想浓&lt;/g&gt;&lt;bx id="3"/&gt;厚的智库，对中国军事力量的正常发展观点激进，态度偏激；美企所近年来中国军情研究主要聚焦在南海、东海等海洋领土争端问题上；美企所提出的诸如加强“航行自由”、联盟体系的建议在美国政府的政策举措上有所表现。&lt;g id="2"&gt;从上文&lt;/g&gt;&lt;g id="3"&gt;对26篇文章的内容简述，可以清晰地看出，美企所非常关注中国海空军力的发展，并以此作为加强美军在亚太地区军力部署、更新作战概念、增加军费预算的理由。&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view19()
     {
@@ -302,12 +302,12 @@ LAB;
         $this->expected_segment = <<<'LAB'
 &lt;/g&gt;##$_0A$##&lt;g id="1"&gt;me@GW: Hoa aus Vietnam&lt;/g&gt;&lt;g id="2"&gt;##$_0A$##Ihr wahrgewordener Traum, und wie sie ihr Lieblingsfach in den Arbeitsalltag integriert.##$_0A$####$_0A$##&lt;x id="3"/&gt;##$_0A$##&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view20()
     {
@@ -317,13 +317,13 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g &#66438; &#66505;&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
 
     /**
      * @group regression
-     * @covers CatUtils::rawXliff2view
+     * @covers CatUtils::layer0ToLayer2
      */
     public function test_raw_X_liff2view21()
     {
@@ -333,7 +333,7 @@ LAB;
         $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;ψ&lt;/g&gt;&#128564;&lt;g &#128518;id="2"&gt;&#128736;λ&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
     public function test_raw_X_liff2view22()
@@ -457,7 +457,7 @@ LAB;
         $this->expected_segment = <<<'LAB'
 &lt;g id="2"&gt;sIL-2R&lt;/g&gt;&lt;g id="3"&gt; は &lt;/g&gt;&lt;g id="4"&gt;447&lt;/g&gt;&lt;g id="5"&gt; &lt;/g&gt;&lt;g id="6"&gt;U&lt;/g&gt;&lt;g id="7"&gt;／&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;入院時検査所見&lt;/g&gt;&lt;g id="2"&gt;: TP 5.7 mg&lt;/g&gt;&lt;g id="3"&gt;／&lt;/g&gt;&lt;g id="4"&gt;dL&lt;/g&gt;&lt;g id="5"&gt;，&lt;/g&gt;&lt;g id="6"&gt;Alb&lt;/g&gt;&lt;g id="7"&gt; &lt;/g&gt;&lt;g id="8"&gt;2.9 mg&lt;/g&gt;&lt;g id="9"&gt;／&lt;/g&gt;&lt;g id="10"&gt;dL&lt;/g&gt;&lt;g id="11"&gt; と低&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;入院時現症&lt;/g&gt;&lt;g id="2"&gt;:&lt;/g&gt;&lt;g id="3"&gt; 腹部に明らかな腫瘤は触れず，表在リン&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;既往歴&lt;/g&gt;&lt;g id="2"&gt;:&lt;/g&gt;&lt;g id="3"&gt; 糖尿病，脂質異常症。&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Fig. 2 &nbsp;&lt;/g&gt;&lt;g id="2"&gt;After&lt;g id="3"&gt; &lt;/g&gt;two cycle of R-CHOP chemotherapy&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Fig. 1 &nbsp;&lt;/g&gt;&lt;g id="2"&gt;Radiological findings on arrival&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;連絡先&lt;/g&gt;&lt;g id="2"&gt;:&lt;/g&gt;&lt;g id="3"&gt; 〒 &lt;/g&gt;&lt;g id="4"&gt;515-8566&lt;/g&gt;&lt;g id="5"&gt; 松阪市川井町字小望 &lt;/g&gt;&lt;g id="6"&gt;102&lt;/g&gt;&lt;g id="7"&gt; 松阪中央総合病院・内科 玉井 康将&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;＊1&lt;/g&gt;&lt;g id="2"&gt; 松阪中央病院・内科 &lt;/g&gt;&lt;g id="3"&gt;＊2&lt;/g&gt;&lt;g id="4"&gt; 三重大学医学系研究科・血液・腫瘍内科学&lt;/g&gt;##$_0A$##し 現病歴&lt;ex id="1"/&gt;&lt;g id="2"&gt;:&lt;/g&gt;&lt;g id="3"&gt; 胃部不快感にて近医受診し，上部消化管内視 かし，化学療法の効果により出血，穿孔，消化管閉塞と 鏡検査で体下部小弯から幽門輪に広がる巨大な不整潰瘍 いった重篤な合併症が生じた際は手術適応になる場合が を認め，精査加療目的で当院入院となった。&lt;/g&gt;##$_0A$##的切除に劣らない治療成績を示し，手術の危険性，&lt;ex id="5"/&gt;&lt;g id="6"&gt;QOL&lt;/g&gt;&lt;g id="7"&gt; 主訴&lt;/g&gt;&lt;g id="8"&gt;:&lt;/g&gt;&lt;g id="9"&gt; 胃部不快感。&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;（&lt;/g&gt;&lt;g id="2"&gt;DLBCL&lt;/g&gt;&lt;g id="3"&gt;）に対する治療法は，外科的切除に加えて術後 化学療法が行われていたが，最近では胃温存療法が外科 患者&lt;/g&gt;&lt;g id="4"&gt;: 59&lt;/g&gt;&lt;bx id="5"/&gt; 歳，男性。##$_0A$##&lt;g id="2"&gt;症&lt;/g&gt;&lt;g id="3"&gt; &nbsp; &lt;/g&gt;&lt;g id="4"&gt;例&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;限局期限局胃原発 &lt;/g&gt;&lt;g id="2"&gt;diffuse large B-cell lymphoma&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;果が得られた &lt;/g&gt;&lt;g id="2"&gt;1&lt;/g&gt;&lt;g id="3"&gt; 例を経験したので報告する。&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;胃空腸バイパス術を行い，&lt;/g&gt;&lt;g id="2"&gt;QOL&lt;/g&gt;&lt;g id="3"&gt; を損なわずに良好な結&lt;/g&gt;##$_0A$##化学療法により通過障害を来しても胃空腸バイパス術にて経口で栄養状態を維持し，&lt;ex id="27"/&gt;&lt;g id="28"&gt;QOL&lt;/g&gt;&lt;g id="29"&gt; を損なわずに化学療法を継続 することができた症例を経験したので報告する。&lt;/g&gt;##$_0A$##胃切除後の化学療法は &lt;ex id="25"/&gt;&lt;g id="26"&gt;QOL&lt;/g&gt;&lt;bx id="27"/&gt; を低下させ る。##$_0A$##評価の &lt;ex id="21"/&gt;&lt;g id="22"&gt;CT&lt;/g&gt;&lt;g id="23"&gt;，&lt;/g&gt;&lt;g id="24"&gt;PET-CT&lt;/g&gt;&lt;bx id="25"/&gt; では完全寛解であった。##$_0A$##手術後，&lt;ex id="19"/&gt;&lt;g id="20"&gt;Alb&lt;/g&gt;&lt;bx id="21"/&gt; と体重の改善を認めた。##$_0A$##その後，嘔吐はなく食事摂取が可能となり，&lt;ex id="15"/&gt;&lt;g id="16"&gt;R-CHOP&lt;/g&gt;&lt;g id="17"&gt; 療法 &lt;/g&gt;&lt;g id="18"&gt;6&lt;/g&gt;&lt;bx id="19"/&gt; コースを終了できた。##$_0A$##&lt;g id="10"&gt;R-CHOP&lt;/g&gt;&lt;g id="11"&gt; 療法 &lt;/g&gt;&lt;g id="12"&gt;2&lt;/g&gt;&lt;g id="13"&gt; コー ス後頻回に嘔吐を認め，&lt;/g&gt;&lt;g id="14"&gt;CT&lt;/g&gt;&lt;bx id="15"/&gt; および上部内視鏡検査を施行したところ，腫瘍は縮小していたが幽門部の狭窄を認めた。##$_0A$##&lt;g id="1"&gt;で病変部と胃周囲リンパ節に &lt;/g&gt;&lt;g id="2"&gt;FDG&lt;/g&gt;&lt;g id="3"&gt; 集積を認めたため，&lt;/g&gt;&lt;g id="4"&gt;Lugano&lt;/g&gt;&lt;g id="5"&gt; 分類Ⅱ&lt;/g&gt;&lt;g id="6"&gt;1&lt;/g&gt;&lt;g id="7"&gt;期胃原発 &lt;/g&gt;&lt;g id="8"&gt;DLBCL&lt;/g&gt;&lt;g id="9"&gt; と診断した。&lt;/g&gt;##$_0A$##胃生検で潰瘍部から &lt;ex id="3"/&gt;&lt;g id="4"&gt;diffuse large B-cell lymphoma&lt;/g&gt;&lt;g id="5"&gt;（&lt;/g&gt;&lt;g id="6"&gt;DLBCL&lt;/g&gt;&lt;g id="7"&gt;），&lt;/g&gt;&lt;g id="8"&gt;PET-CT&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;要旨 症例は &lt;/g&gt;&lt;g id="2"&gt;59&lt;/g&gt;&lt;bx id="3"/&gt; 歳，男性。##$_0A$##&lt;g id="13"&gt;13&lt;/g&gt;&lt;g id="14"&gt;,&lt;/g&gt;&lt;g id="15"&gt; &lt;/g&gt;&lt;g id="16"&gt;2011&lt;/g&gt;&lt;g id="17"&gt;)&lt;/g&gt;##$_0A$##&lt;g id="5"&gt;3&lt;/g&gt;&lt;g id="6"&gt;,&lt;/g&gt;&lt;g id="7"&gt; &lt;/g&gt;&lt;g id="8"&gt;2010&lt;/g&gt;&lt;g id="9"&gt;／&lt;/g&gt;&lt;g id="10"&gt;Accepted Jan&lt;/g&gt;&lt;g id="11"&gt;.&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;（&lt;/g&gt;&lt;g id="2"&gt;Received Dec&lt;/g&gt;&lt;g id="3"&gt;.&lt;/g&gt;##$_0A$##Key words: Gastric lymphoma, Diffuse large&lt;ex id="21"/&gt;&lt;g id="22"&gt;-&lt;/g&gt;&lt;g id="23"&gt;B&lt;/g&gt;&lt;g id="24"&gt;-&lt;/g&gt;&lt;g id="25"&gt;cell lymphoma, Stenosis, Gastrojejunal bypass&lt;/g&gt;##$_0A$##A computed tomography&lt;ex id="17"/&gt;&lt;g id="18"&gt;（&lt;/g&gt;&lt;g id="19"&gt;CT&lt;/g&gt;&lt;g id="20"&gt;）&lt;/g&gt;&lt;bx id="21"/&gt;examination and endoscopy showed that the tumor decreased, but a tight stenosis was located at the pylorus.##$_0A$##With a diagnosis of diffuse large B&lt;ex id="9"/&gt;&lt;g id="10"&gt;-&lt;/g&gt;&lt;g id="11"&gt;cell lymphoma&lt;/g&gt;&lt;g id="12"&gt;（&lt;/g&gt;&lt;g id="13"&gt;DLBCL&lt;/g&gt;&lt;g id="14"&gt;）&lt;/g&gt;&lt;g id="15"&gt;based on biopsy findings, the patient was treated with R&lt;/g&gt;&lt;g id="16"&gt;-&lt;/g&gt;&lt;bx id="17"/&gt;CHOP chemotherapy.##$_0A$##&lt;g id="1"&gt;A 59&lt;/g&gt;&lt;g id="2"&gt;-&lt;/g&gt;&lt;g id="3"&gt;year&lt;/g&gt;&lt;g id="4"&gt;-&lt;/g&gt;&lt;g id="5"&gt;old man presented to his general practitioner&lt;/g&gt;&lt;g id="6"&gt;（&lt;/g&gt;&lt;g id="7"&gt;GP&lt;/g&gt;&lt;g id="8"&gt;）&lt;/g&gt;&lt;bx id="9"/&gt;complaining of gastric discomfort.##$_0A$##&lt;g id="1"&gt;A Case of Gastric Stenosis Due to Primary Gastric Malignant Lymphoma during Administration of R&lt;/g&gt;&lt;g id="2"&gt;-&lt;/g&gt;&lt;g id="3"&gt;CHOP: Yasuyuki Tamai&lt;/g&gt;&lt;g id="4"&gt;＊1&lt;/g&gt;&lt;g id="5"&gt;, Eiko Murakami&lt;/g&gt;&lt;g id="6"&gt;＊1&lt;/g&gt;&lt;g id="7"&gt;, Yoshiki Nakamori&lt;/g&gt;&lt;g id="8"&gt;＊2&lt;/g&gt;&lt;g id="9"&gt;, Minoru Mizutani&lt;/g&gt;&lt;g id="10"&gt;＊1&lt;/g&gt;&lt;g id="11"&gt; and Takao Sekine&lt;/g&gt;&lt;g id="12"&gt;＊1&lt;/g&gt;&lt;g id="13"&gt;（&lt;g id="14"&gt;＊1&lt;/g&gt;&lt;/g&gt;&lt;g id="15"&gt;Dept&lt;/g&gt;&lt;g id="16"&gt;. &lt;g id="17"&gt;of Hematology&lt;/g&gt;, &lt;g id="18"&gt;Matsusaka&lt;/g&gt; &lt;g id="19"&gt;Chuo General Hospital&lt;/g&gt;,&lt;g id="20"&gt; &lt;/g&gt;&lt;/g&gt;&lt;g id="21"&gt;＊2&lt;/g&gt;&lt;g id="22"&gt;Dept&lt;/g&gt;&lt;g id="23"&gt;.&lt;g id="24"&gt; of Hematology and Oncology&lt;/g&gt;,&lt;g id="25"&gt; Mie University Graduate School of Medicine&lt;/g&gt;&lt;/g&gt;&lt;g id="26"&gt;)&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;〔&lt;/g&gt;&lt;g id="2"&gt;Jpn J Cancer Chemother&lt;/g&gt;&lt;g id="3"&gt; &lt;/g&gt;&lt;g id="4"&gt;38&lt;/g&gt;&lt;g id="5"&gt;º8¼: 1371-1373,&lt;/g&gt;&lt;g id="6"&gt; &lt;/g&gt;&lt;g id="7"&gt;August, 2011&lt;/g&gt;&lt;g id="8"&gt;〕&lt;/g&gt;##$_0A$##玉井 康将&lt;g id="2"&gt;＊1&lt;/g&gt; &nbsp; 村上 瑛子&lt;g id="3"&gt;＊1&lt;/g&gt; &nbsp; 中森 良樹&lt;g id="4"&gt;＊2&lt;/g&gt; &nbsp; 水 谷 &nbsp;実&lt;g id="5"&gt;＊1&lt;/g&gt; &nbsp; 関根 隆夫&lt;g id="6"&gt;＊1&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;R-CHOP &lt;/g&gt;&lt;g id="2"&gt;療法中に幽門部狭窄を来し胃空腸バイパス術を施行した&lt;/g&gt;&lt;g id="3"&gt; &lt;/g&gt;&lt;g id="4"&gt;胃原発 &lt;/g&gt;&lt;g id="5"&gt;Diffuse Large B-Cell Lymphoma&lt;/g&gt;&lt;g id="6"&gt; の &lt;/g&gt;&lt;g id="7"&gt;1&lt;/g&gt;&lt;g id="8"&gt; 例&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;● &lt;/g&gt;&lt;g id="2"&gt;症 例&lt;/g&gt;&lt;g id="3"&gt; ●&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;2011 &lt;/g&gt;&lt;g id="2"&gt;年&lt;/g&gt;&lt;g id="3"&gt; 8 &lt;/g&gt;&lt;g id="4"&gt;月&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;第 &lt;/g&gt;&lt;g id="2"&gt;38&lt;/g&gt;&lt;g id="3"&gt; 巻 第 &lt;/g&gt;&lt;g id="4"&gt;8&lt;/g&gt;&lt;g id="5"&gt; 号&lt;/g&gt;##$_0A$##Družba Exim Ex d.o.o., Letališka 27, Ljubljana sporoča, da je na svoji spletni strani &lt;g id="2"&gt;www.eximex.si&lt;/g&gt; pomotoma uporabila znamke družbe SCA Capital N V, Culliganlaan 1 D, Machelen (Brabant), Belgija, in sicer naslednje znamke: SMARTONE, lotus, lotus PROFESSIONAL, SmartOne Lotus PROFESSIONAL, SmartOne lotus PROFESSIONAL.##$_0A$##&lt;g id="1"&gt;30373-7 &lt;/g&gt;&lt;g id="2"&gt;Cordón de algodón marrón.&lt;/g&gt;&lt;g id="3"&gt;.&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;R.E.A. 288572 (FC) - Codice&lt;/g&gt;&lt;g id="2"&gt; Fiscale&lt;/g&gt;&lt;g id="3"&gt; e&lt;/g&gt;&lt;g id="4"&gt; Partita&lt;/g&gt;&lt;g id="5"&gt; IVA&lt;/g&gt;&lt;g id="6"&gt; 03154520401&lt;/g&gt;##$_0A$##info@irsternr, it - &lt;g id="2"&gt;www.irst.emr.it&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;T.&lt;/g&gt;&lt;g id="2"&gt; +39.0543.739100 -&lt;/g&gt;&lt;g id="3"&gt; F.&lt;/g&gt;&lt;g id="4"&gt; +39.0543.739123&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Istituto&lt;/g&gt;&lt;g id="2"&gt; Scientifico Romagnolo&lt;/g&gt;&lt;g id="3"&gt; per&lt;/g&gt;&lt;g id="4"&gt; lo Studio&lt;/g&gt;&lt;g id="5"&gt; e la Cura&lt;/g&gt;&lt;g id="6"&gt; dei Tumori (IRST) S.r.l. IRCCS&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;PEC:&lt;/g&gt;&lt;g id="2"&gt; &lt;g id="3"&gt;direzione.generale@irstiegalmail.it&lt;/g&gt;##$_0A$##&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;direzione.generale@irst.emr.it&lt;/g&gt;&lt;g id="2"&gt; -&lt;/g&gt;&lt;g id="3"&gt; &lt;g id="4"&gt;www.irst.emr.it&lt;/g&gt;##$_0A$##&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;T. +39.0543.739412/9415 -&lt;/g&gt;&lt;g id="2"&gt; F.&lt;/g&gt;&lt;g id="3"&gt; +39.0543.739123&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Via P. Maroncelli, 40&lt;/g&gt;&lt;g id="2"&gt; -&lt;/g&gt;&lt;g id="3"&gt; 47014&lt;/g&gt;&lt;g id="4"&gt; Meldola&lt;/g&gt;&lt;g id="5"&gt; (FC)&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Direzione&lt;/g&gt;&lt;g id="2"&gt; Sanitaria&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;R.E A. 288572&lt;/g&gt;&lt;g id="2"&gt; (FC) - Codice Fiscale&lt;/g&gt;&lt;g id="3"&gt; e Partita&lt;/g&gt;&lt;g id="4"&gt; IVA 03154520401&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;info@irst.emr.it&lt;/g&gt;&lt;g id="2"&gt; - &lt;g id="3"&gt;www.irst.emr.it&lt;/g&gt;&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;T. +39.0543.739100&lt;/g&gt;&lt;g id="2"&gt; -&lt;/g&gt;&lt;g id="3"&gt; F. +39.0543.739123&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Via&lt;/g&gt;&lt;g id="2"&gt; P.&lt;/g&gt;&lt;g id="3"&gt; Maroncelli, 40 - 47014 Meldola (FC)&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;Istituto Scientifico Romagnolo per&lt;/g&gt;&lt;g id="3"&gt; lo Studio&lt;/g&gt;&lt;g id="4"&gt; e&lt;/g&gt;&lt;g id="5"&gt; la Cura dei&lt;/g&gt;&lt;g id="6"&gt; Tumori (IRST) S.r.l. IRCCS&lt;/g&gt;##$_0A$##PEC: &lt;g id="2"&gt;direzione.generale@irst.legalmail.it&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;direzione.generale@irstemrit -&lt;/g&gt;&lt;g id="2"&gt; &lt;g id="3"&gt;www.irst.emr.it&lt;/g&gt;##$_0A$##&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Via P. Maroncelli, 40 - 47014&lt;/g&gt;&lt;g id="2"&gt; Meldola&lt;/g&gt;&lt;g id="3"&gt; (FC)&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Direzione&lt;/g&gt;&lt;g id="2"&gt; Sanitaria&lt;/g&gt;##$_0A$##OGGETTO: Protocollo &lt;g id="2"&gt;S-AVANT &lt;/g&gt;dal titolo "Follow-up dello studio AVANT a 8 e 10 anni (mediana del follow-up) nei pazienti con tumore al colon" di GERCOR: &lt;g id="3"&gt;AUTORIZZAZIONE &lt;/g&gt;##$_0A$##&lt;g id="2"&gt;Alla c.a. Dott.ssa &lt;/g&gt;&lt;g id="3"&gt;Kelly Lutchia GERCOR 151 rue du Faubourg St. Antoine 75011 Paris - Francia&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;codice interno: &lt;g id="2"&gt;L2P1212 &lt;/g&gt;&lt;/g&gt;&lt;bx id="3"/&gt; (Reg.##$_0A$##&lt;g id="1"&gt;Prot.: &lt;/g&gt;&lt;g id="2"&gt;/q6.5 &lt;/g&gt;&lt;g id="3"&gt;V,1/&lt;/g&gt;&lt;g id="4"&gt; /2e) f6&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;Meldola, &lt;/g&gt;&lt;g id="2"&gt;2&lt;/g&gt;&lt;g id="3"&gt;4&lt;/g&gt;&lt;g id="4"&gt;.7fr&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;:::•.:*&lt;/g&gt;&lt;g id="2"&gt; •&lt;/g&gt;&lt;g id="3"&gt; '&lt;/g&gt;&lt;g id="4"&gt; Istituto Scientifico Romagnolo per&lt;/g&gt;&lt;g id="5"&gt; lo&lt;/g&gt;&lt;g id="6"&gt; Studio e la Cura dei Tumori&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;•••••••••&lt;/g&gt;&lt;g id="2"&gt; EMILIA-ROMAGNA&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;'••&lt;/g&gt;&lt;g id="2"&gt; • • •&lt;/g&gt;&lt;g id="3"&gt; *** SERVIZIO SANITARIO REGIONALE&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;PER LO&lt;/g&gt;&lt;g id="2"&gt; STUDIO&lt;/g&gt;&lt;g id="3"&gt; E LA CURA DEI TUM RI&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;ISTITUTO &lt;/g&gt;&lt;g id="2"&gt;SCIENTIFC• ROMAGNOLO&lt;/g&gt;##$_0A$##8&lt;ex id="1"/&gt;&lt;g id="2"&gt; 800&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;I &nbsp; &lt;/g&gt;&lt;g id="3"&gt;820 &lt;/g&gt;&lt;g id="4"&gt;1 1 &nbsp; &lt;/g&gt;&lt;g id="5"&gt;822 &lt;/g&gt;&lt;g id="6"&gt;I&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;-&lt;/g&gt;&lt;g id="2"&gt;810 &nbsp; &nbsp;&lt;/g&gt;&lt;g id="3"&gt;\ &lt;/g&gt;&lt;g id="4"&gt;/&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;INTERFACE &lt;/g&gt;&lt;g id="2"&gt;808&lt;/g&gt;&lt;g id="3"&gt; 806&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;COMMUNICATION &lt;/g&gt;&lt;g id="2"&gt;812 &nbsp; 802 804&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;DISPLAY &nbsp; &lt;/g&gt;&lt;g id="2"&gt;PROCESSOR MEMORY MODULE&lt;/g&gt;##$_0A$##0 &nbsp; 0.2 0.4 0.6 0.8 &lt;g id="1"&gt;1&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;I I I I &lt;/g&gt;&lt;g id="2"&gt;I &lt;/g&gt;&lt;g id="3"&gt;I &lt;/g&gt;&lt;g id="4"&gt;I &lt;/g&gt;&lt;g id="5"&gt;I &lt;/g&gt;&lt;g id="6"&gt;I&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;_ _ _ _ _ _ _ J&lt;/g&gt;&lt;g id="2"&gt;I&lt;/g&gt;##$_0A$##0.02&lt;g id="1"&gt; &nbsp;I&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;I &lt;/g&gt;&lt;g id="2"&gt;I &lt;/g&gt;&lt;g id="3"&gt;I&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;tP &nbsp; &nbsp;&lt;/g&gt;&lt;g id="2"&gt;0.04&lt;/g&gt;&lt;g id="3"&gt; &nbsp; &nbsp;I&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;- - - - - - - l &nbsp; &lt;/g&gt;&lt;g id="2"&gt;L 2&lt;/g&gt;&lt;g id="3"&gt;----&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;I&lt;/g&gt;&lt;g id="2"&gt; &nbsp; I&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;I &lt;/g&gt;&lt;g id="3"&gt;---------------!&lt;/g&gt;&lt;g id="4"&gt;........... 1&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;I I I I I I &lt;/g&gt;&lt;g id="2"&gt;I&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;I &lt;/g&gt;&lt;g id="2"&gt;....&lt;/g&gt;&lt;g id="3"&gt;.....&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;I &lt;/g&gt;&lt;g id="2"&gt;....&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;I &lt;/g&gt;&lt;g id="2"&gt;....&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;....&lt;/g&gt;&lt;g id="3"&gt;....&lt;/g&gt;&lt;g id="4"&gt;..r....&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;D(mm) &nbsp; &lt;/g&gt;&lt;g id="2"&gt;1.5&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;f(z) &nbsp;&lt;/g&gt;&lt;g id="2"&gt;0.5&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;......&lt;/g&gt;&lt;g id="2"&gt;...... &nbsp; &nbsp;&lt;/g&gt;&lt;g id="3"&gt;I&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;z&lt;/g&gt;&lt;g id="2"&gt;0 &lt;/g&gt;&lt;g id="3"&gt;ALONG THE HORIZONTAL LENGTH OF&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;304 &nbsp; &lt;/g&gt;&lt;g id="2"&gt;WELLBORES AND FRONT PROPAGATION&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;302 &nbsp; &lt;/g&gt;&lt;g id="3"&gt;INITIALIZE ALGORITHM WITH UNIFORM FLOW CONTROL DEVICE PLACEMENT &lt;/g&gt;&lt;g id="4"&gt;f(z) &lt;/g&gt;&lt;g id="5"&gt;= 1&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;y/d &nbsp; &lt;/g&gt;&lt;g id="2"&gt;0.85&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;--=--=--=--=--=--=--=--=--=--=--=--=--::- &lt;/g&gt;&lt;g id="3"&gt;=&lt;/g&gt;&lt;g id="4"&gt;--=&lt;/g&gt;&lt;g id="5"&gt;. &nbsp; &nbsp; &nbsp;·&lt;/g&gt;&lt;g id="6"&gt;--=--:-..:::--&lt;/g&gt;&lt;g id="7"&gt;-c;..::,&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;n &lt;/g&gt;&lt;g id="3"&gt;=&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;1 &lt;/g&gt;&lt;g id="2"&gt;16&lt;/g&gt;##$_0A$##&lt;g id="3"&gt;d &lt;/g&gt;&lt;g id="4"&gt;.I&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;lip = &lt;/g&gt;&lt;g id="2"&gt;0 : &nbsp; &lt;/g&gt;&lt;g id="3"&gt;: &lt;g id="4"&gt;lip = &lt;/g&gt;&lt;/g&gt;&lt;g id="5"&gt;0&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;c:::::&gt;&lt;/g&gt;&lt;g id="2"&gt; &nbsp;200&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;\ &lt;/g&gt;&lt;g id="2"&gt;FRONT&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;v· &nbsp; &nbsp;&lt;/g&gt;&lt;g id="3"&gt;• . .&lt;/g&gt;##$_0A$##&lt;g id="2"&gt;"· &lt;/g&gt;&lt;g id="3"&gt;. &lt;/g&gt;&lt;g id="4"&gt;. &lt;/g&gt;&lt;g id="5"&gt;.&lt;/g&gt;&lt;g id="6"&gt;. "&lt;/g&gt;&lt;g id="7"&gt;. &lt;/g&gt;&lt;g id="8"&gt;. ·fl' &nbsp;.&lt;/g&gt;##$_0A$##&lt;g id="1"&gt;: &lt;/g&gt;&lt;g id="2"&gt;. &lt;g id="3"&gt;v&lt;/g&gt;&lt;/g&gt;##$_0A$##&lt;g id="3"&gt;..&lt;/g&gt;&lt;g id="4"&gt;-·. &nbsp; &lt;g id="5"&gt;:v .&lt;/g&gt;&lt;/g&gt;##$_0A$##1 &nbsp; &nbsp; &lt;g id="2"&gt;1&lt;/g&gt;##$_0A$##1 &nbsp; &nbsp; &lt;g id="3"&gt;1 &nbsp; &nbsp; &lt;/g&gt;1##$_0A$##I &nbsp; &lt;g id="3"&gt;1 &nbsp; &nbsp; &lt;/g&gt;1##$_0A$##1 &nbsp; &nbsp; 1 &nbsp; &nbsp; &lt;g id="2"&gt;1&lt;/g&gt;##$_0A$##1 &nbsp; &lt;g id="2"&gt;1&lt;/g&gt;
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::rawxliff2view($this->source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::layer0ToLayer2($this->source_segment));
     }
 
 

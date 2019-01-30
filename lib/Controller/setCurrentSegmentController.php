@@ -119,7 +119,7 @@ class setCurrentSegmentController extends ajaxController {
 
         $this->result[ 'nextSegmentId' ] = $nextSegmentId;
         $this->result[ 'error_data' ]    = $dbReviseStruct;
-        $this->result[ 'original' ]      = CatUtils::rawxliff2view( $_dbReviseStruct->original_translation );
+        $this->result[ 'original' ]      = SubFiltering\Filter::getInstance( $this->featureSet )->fromLayer0ToLayer2( $_dbReviseStruct->original_translation );
 
     }
 

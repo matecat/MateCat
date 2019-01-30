@@ -51,7 +51,7 @@ class editlogController extends viewController {
 
         $this->featureSet->filter( 'beginDoAction', $this );
 
-        $this->model = new EditLog_EditLogModel( $this->jid, $this->password );
+        $this->model = new EditLog_EditLogModel( $this->jid, $this->password, $this->featureSet );
 
         if ( isset( $this->start_id ) && !empty( $this->start_id ) ) {
             $this->model->setStartId( $this->start_id );

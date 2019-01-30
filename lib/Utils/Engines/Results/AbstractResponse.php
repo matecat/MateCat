@@ -19,17 +19,34 @@ abstract class Engines_Results_AbstractResponse {
 
     protected $_rawResponse = "";
 
-    public static function getInstance( $result ){
+    /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
+
+    public static function getInstance( $result, FeatureSet $featureSet = null ){
 
         $class = get_called_class(); // late static binding, note: php >= 5.3
+
+        /**
+         * @var Engines_Results_AbstractResponse $instance
+         */
         $instance = new $class( $result );
 
         if ( is_array( $result ) and array_key_exists( "error", $result ) ) {
             $instance->error = new Engines_Results_ErrorMatches( $result[ 'error' ] );
         }
 
+        if( $featureSet !== null ){
+            $instance->featureSet( $featureSet );
+        }
+
         return $instance;
 
+    }
+
+    public function featureSet( FeatureSet $featureSet ){
+        $this->featureSet = $featureSet;
     }
 
     /**

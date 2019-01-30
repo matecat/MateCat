@@ -29,11 +29,11 @@ class SegmentQR extends React.Component {
 
     }
     initializeDiff() {
-        if (this.state.translateDiffOn) {
-            return this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("suggestion")), TagsUtils.htmlEncode(this.props.segment.get("last_translation")));
-        } else {
-            let revise = TagsUtils.htmlEncode(this.props.segment.get("last_revision"));
-            return this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("last_translation")), revise);
+        if ( this.state.translateDiffOn ) {
+            return this.getDiffPatch(this.props.segment.get("suggestion"), this.props.segment.get("last_translation"));
+        } else if ( this.state.reviseDiffOn ){
+            let revise = this.props.segment.get("last_revision");
+            return this.getDiffPatch(this.props.segment.get("last_translation"), revise);
         }
     }
     openAutomatedQa() {
@@ -104,7 +104,7 @@ class SegmentQR extends React.Component {
                 translateDiffOn: false,
             });
         } else {
-            let diffHtml = this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("suggestion")), TagsUtils.htmlEncode(this.props.segment.get("last_translation")));
+            let diffHtml = this.getDiffPatch(this.props.segment.get("suggestion"), this.props.segment.get("last_translation"));
             this.setState({
                 translateDiffOn: true,
                 reviseDiffOn: false,
@@ -118,8 +118,8 @@ class SegmentQR extends React.Component {
                 reviseDiffOn: false,
             });
         } else {
-            let revise = TagsUtils.htmlEncode(this.props.segment.get("last_revision"));
-            let diffHtml = this.getDiffPatch(TagsUtils.htmlEncode(this.props.segment.get("last_translation")), revise);
+            let revise = this.props.segment.get("last_revision");
+            let diffHtml = this.getDiffPatch(this.props.segment.get("last_translation"), revise);
             this.setState({
                 translateDiffOn: false,
                 reviseDiffOn: true,
@@ -180,8 +180,8 @@ class SegmentQR extends React.Component {
     }
     render () {
         let source = this.decodeTextAndTransformTags(this.props.segment.get("segment"));
-        let suggestion = this.decodeTextAndTransformTags(TagsUtils.htmlEncode(this.props.segment.get("suggestion")));
-        let target = this.decodeTextAndTransformTags(TagsUtils.htmlEncode(this.props.segment.get("last_translation")));
+        let suggestion = this.decodeTextAndTransformTags(this.props.segment.get("suggestion"));
+        let target = this.decodeTextAndTransformTags(this.props.segment.get("last_translation"));
         let revise = this.decodeTextAndTransformTags(this.props.segment.get("last_revision"));
         let suggestionMatch = ( this.props.segment.get("match_type") === "ICE") ? 101 : parseInt(this.props.segment.get("suggestion_match"));
         let suggestionMatchClass = (suggestionMatch === 101)? 'per-blu': (suggestionMatch === 100)? 'per-green' : (suggestionMatch > 0 && suggestionMatch <=99)? 'per-orange' : '';

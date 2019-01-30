@@ -84,34 +84,9 @@ class getTagProjectionController extends ajaxController {
             return -1;
         }
 
-        //get Job Infos, we need only a row of jobs ( split )
-        $job_data = getJobData( (int)$this->id_job, $this->password );
-
-        $pCheck = new AjaxPasswordCheck();
-        //check for Password correctness
-        if ( empty( $job_data ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -101, "message" => "error fetching job data" );
-        }
-
-        if ( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
-            $this->result[ 'errors' ][] = array( "code" => -10, "message" => "wrong password" );
-        }
-
-        if ( !empty( $this->result[ 'errors' ] ) ) {
-            $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
-            Log::doLog( $msg );
-            Utils::sendErrMailReport( $msg );
-
-            return -1;
-        }
-
-        $config = array();
-
-        $config[ 's' ]    = CatUtils::view2rawxliff( $this->source );
-        $config[ 't' ]    = CatUtils::view2rawxliff( $this->target );
-        $config[ 'sl' ]   = CatUtils::view2rawxliff( $this->source_lang );
-        $config[ 'tl' ]   = CatUtils::view2rawxliff( $this->target_lang );
-        $config[ 'hint' ] = CatUtils::view2rawxliff( $this->suggestion );
+        //check Job password
+        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
+        $this->featureSet->loadForProject( $jobStruct->getProject() );
 
         $this->getTagProjection();
 
@@ -123,13 +98,15 @@ class getTagProjectionController extends ajaxController {
          * @var $engine Engines_MyMemory
          */
         $engine = Engine::getInstance( 1 );
+        $engine->setFeatureSet( $this->featureSet );
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
 
         $config                  = array();
-        $config[ 'source' ]      = CatUtils::view2rawxliff( $this->source );
-        $config[ 'target' ]      = CatUtils::view2rawxliff( $this->target );
+        $config[ 'source' ]      = $Filter->fromLayer2ToLayer1( $this->source );
+        $config[ 'target' ]      = $Filter->fromLayer2ToLayer1( $this->target );
         $config[ 'source_lang' ] = $this->source_lang;
         $config[ 'target_lang' ] = $this->target_lang;
-        $config[ 'suggestion' ]  = CatUtils::view2rawxliff( $this->suggestion );
+        $config[ 'suggestion' ]  = $Filter->fromLayer2ToLayer1( $this->suggestion );
 
         $result = $engine->getTagProjection( $config );
         if( empty( $result->error ) ){

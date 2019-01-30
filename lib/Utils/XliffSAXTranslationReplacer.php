@@ -27,6 +27,16 @@ class XliffSAXTranslationReplacer {
 
     protected static $INTERNAL_TAG_PLACEHOLDER;
 
+    /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
+
+    /**
+     * @var \SubFiltering\Filter
+     */
+    protected $filter;
+
     public function __construct( $originalXliffFilename, $segments, $transUnits, $trg_lang = null, $outputFile = null ) {
 
         self::$INTERNAL_TAG_PLACEHOLDER = "§" .
@@ -70,7 +80,14 @@ class XliffSAXTranslationReplacer {
         $this->sourceInTarget = $emptyTarget;
     }
 
-    public function replaceTranslation() {
+    public function replaceTranslation( FeatureSet $featureSet = null ) {
+
+        if( $featureSet == null ){
+            $featureSet = new FeatureSet();
+        }
+
+        $this->featureSet = $featureSet;
+        $this->filter = \SubFiltering\Filter::getInstance( $featureSet );
 
         //write xml header
         fwrite( $this->outputFP, '<?xml version="1.0" encoding="UTF-8"?>' );
@@ -507,7 +524,7 @@ class XliffSAXTranslationReplacer {
             $translation = $seg [ 'translation' ];
             if ( empty( $seg[ 'locked' ] ) ) {
                 //consistency check
-                $check = new QA ( $seg [ 'segment' ], $translation );
+                $check = new QA ( $this->filter->fromLayer0ToLayer1( $seg [ 'segment' ] ), $this->filter->fromLayer0ToLayer1( $translation ) );
                 $check->performTagCheckOnly();
                 if ( $check->thereAreErrors() ) {
                     $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg [ 'segment' ] . '|||UNTRANSLATED_CONTENT_END|||';

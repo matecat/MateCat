@@ -1,4 +1,7 @@
-<?php include_once INIT::$UTILS_ROOT . '/Log.php';
+<?php
+
+use SubFiltering\Filters\LtGtEncode;
+use SubFiltering\Filters\RestoreXliffTagsForView;
 
 /**
  * Class errObject
@@ -113,6 +116,11 @@ class errObject {
  * 14) Mismatch of Special chars ( and spaces ) before a tag or after a closing g tag
  */
 class QA {
+
+    /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
 
     /**
      * RAW Source string segment for comparison
@@ -326,6 +334,21 @@ class QA {
 
     );
 
+    /**
+     * <code>
+     * $errorMap = [
+     *      'code'  => (int),
+     *      'debug' => (string),
+     *      'tip'   => (string)
+     * ]
+     * </code>
+     * @param array $errorMap
+     */
+    public function addCustomError( Array $errorMap ){
+        $this->_errorMap[ $errorMap[ 'code' ] ] = $errorMap[ 'debug' ];
+        $this->_tipMap[ $errorMap[ 'code' ] ] = $errorMap[ 'tip' ];
+    }
+
     protected static $asciiPlaceHoldMap = array(
             '00' => array( 'symbol' => 'NULL', 'placeHold' => '##$_00$##', 'numeral' => 0x00 ),
             '01' => array( 'symbol' => 'SOH', 'placeHold' => '##$_01$##', 'numeral' => 0x01 ),
@@ -530,6 +553,13 @@ class QA {
                 break;
         }
 
+    }
+
+    /**
+     * @return array
+     */
+    public function getEexeptionList(){
+        return $this->exceptionList;
     }
 
     /**
@@ -831,9 +861,45 @@ class QA {
     }
 
     /**
+     * @param FeatureSet $featureSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featureSet ) {
+        $this->featureSet = $featureSet;
+
+        return $this;
+    }
+
+    /**
+     * @return FeatureSet
+     * @throws Exception
+     */
+    protected function getFeatureSet() {
+        if( $this->featureSet == null ){
+            $this->featureSet = new FeatureSet();
+        }
+        return $this->featureSet;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSourceSeg() {
+        return $this->source_seg;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTargetSeg() {
+        return $this->target_seg;
+    }
+
+    /**
      * After initialization by Constructor, the dom is parsed and map structures are built
      *
-     * @throws Exception
+     * @throws Exception|DOMException
      */
     protected function _prepareDOMStructures() {
 
@@ -1130,12 +1196,12 @@ class QA {
         $totalResult     = [ 'source' => [], 'target' => [] ];
         $source_segments = array_merge( $clonedSrc, $clonedClosingSrc );
         foreach ( $source_segments as $source_segment ) {
-            $totalResult[ 'source' ][] = CatUtils::restore_xliff_tags_for_view( $source_segment );
+            $totalResult[ 'source' ][] = $source_segment;
         }
 
         $target_segments = array_merge( $clonedTrg, $clonedClosingTrg );
         foreach ( $target_segments as $target_segment ) {
-            $totalResult[ 'target' ][] = CatUtils::restore_xliff_tags_for_view( $target_segment );
+            $totalResult[ 'target' ][] = $target_segment;
         }
 
 
@@ -1250,7 +1316,7 @@ class QA {
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $open_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $complete_malformedTrgStruct[ $pos ] );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1259,7 +1325,7 @@ class QA {
         foreach ( $closing_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $closing_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $complete_malformedTrgStruct[ $pos ] );
+                $this->tagPositionError[] = ( new LtGtEncode() )->transform( $complete_malformedTrgStruct[ $pos ] );
 
                 return;
             }
@@ -1275,7 +1341,7 @@ class QA {
         foreach ( $selfClosingTags_trg as $pos => $tag ) {
             if ( str_replace(" ", "", $selfClosingTags_src[ $pos ] ) != str_replace(" ", "", $tag ) ) {
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = CatUtils::restore_xliff_tags_for_view( $selfClosingTags_trg[ $pos ] );
+                $this->tagPositionError[] = ( new RestoreXliffTagsForView() )->transform( $selfClosingTags_trg[ $pos ] );
 
                 return;
             }
@@ -1391,6 +1457,7 @@ class QA {
     }
 
     //
+
     /**
      * Try to perform an heuristic re-align of tags id by position.
      *
@@ -1401,6 +1468,7 @@ class QA {
      * if no errors where found the dom is reloaded and tags map are updated.
      *
      * @return errObject[]|null
+     * @throws Exception|DOMException
      */
     public function tryRealignTagID() {
 
@@ -1415,14 +1483,15 @@ class QA {
         $targetNumDiff = count( $this->trgDomMap[ 'DOMElement' ] ) - count( $this->srcDomMap[ 'DOMElement' ] );
         $diffTagG      = count( @$this->trgDomMap[ 'g' ] ) - count( @$this->srcDomMap[ 'g' ] );
         $diffTagX      = count( @$this->trgDomMap[ 'x' ] ) - count( @$this->srcDomMap[ 'x' ] );
-		$diffTagBX     = count(@$this->trgDomMap['bx']) - count(@$this->srcDomMap['bx']);
-		$diffTagEX     = count(@$this->trgDomMap['ex']) - count(@$this->srcDomMap['ex']);
+		$diffTagBX     = count( @$this->trgDomMap['bx']) - count(@$this->srcDomMap['bx'] );
+		$diffTagEX     = count( @$this->trgDomMap['ex']) - count(@$this->srcDomMap['ex'] );
+		$diffTagPH     = count( @$this->trgDomMap['ph']) - count(@$this->srcDomMap['ph'] );
 
         //there are the same number of tags in source and target
         if ( $targetNumDiff == 0 && !empty( $this->srcDomMap[ 'refID' ] ) ) {
 
             //if tags are in exact number
-            if( $diffTagG == 0 && $diffTagX == 0 && $diffTagBX == 0 && $diffTagEX == 0 ){
+            if( $diffTagG == 0 && $diffTagX == 0 && $diffTagBX == 0 && $diffTagEX == 0 && $diffTagPH == 0 ){
 
                 //Steps:
 
@@ -1446,6 +1515,11 @@ class QA {
 					$pattern[] = '|<ex id ?= ?["\']{1}(' . $tagID . ')["\']{1} ?/>|ui';
 					$replacement[] = '<ex id="###' . $this->srcDomMap['ex'][$pos] . '###" />';
 				}
+
+                foreach( $this->trgDomMap['ph'] as $pos => $tagID ){
+                    $pattern[] = '|<ph id ?= ?["\']{1}(' . $tagID . ')["\']{1} (equiv-text=["\'].+?["\'] ?)/>|ui';
+                    $replacement[] = '<ph id="###' . $this->srcDomMap['ph'][$pos] . '###" $2/>';
+                }
 
                 $result = preg_replace( $pattern, $replacement, $this->target_seg, 1 );
 
@@ -1642,10 +1716,12 @@ class QA {
      * @param int $trgNodeCount
      *
      * @return int
+     * @throws \Exception
      */
     protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
+
         if ( $srcNodeCount != $trgNodeCount ) {
-            $this->_addError( self::ERR_COUNT );
+            $this->_addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_COUNT, $this ) );
         }
 
         return $trgNodeCount - $srcNodeCount;
@@ -1855,7 +1931,7 @@ class QA {
             }
 
             //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-            $matches[ 1 ] = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $matches[ 1 ] );
+            $matches[ 1 ] = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'CatUtils', 'htmlentitiesFromUnicode' ], $matches[ 1 ] );
 
             /*
              * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

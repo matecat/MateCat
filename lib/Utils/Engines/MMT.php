@@ -73,14 +73,9 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     public function get( $_config ) {
 
-        /**
-         * Allow plugins to force to send requests to MMT even if in analysis
-         */
-        $forceMMTAcceptAnalysisRequests = $this->featureSet->filter( 'forceMMTAcceptAnalysisRequests', false );
-        if( !$forceMMTAcceptAnalysisRequests ) {
-            if ( $this->_isAnalysis && $this->_skipAnalysis ) {
-                return [];
-            }
+        //This is not really needed because by default in analysis the Engine_MMT is accepted by MyMemory
+        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+            return [];
         }
 
         $client = $this->_getClient();
@@ -95,7 +90,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     100 - $this->getPenalty() . "%",
                     "MT-" . $this->getName(),
                     date( "Y-m-d" )
-            ) )->get_as_array();
+            ) )->getMatches();
         } catch( Exception $e ){
             return $this->fallback( $_config );
         }
@@ -113,6 +108,7 @@ class Engines_MMT extends Engines_AbstractEngine {
         $newEngineStruct->uid                                 = 0;
         $newEngineStruct->type                                = Constants_Engines::MT;
         $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
+        $newEngineStruct->others                              = [];
 
         $gtEngine = Engine::createTempInstance( $newEngineStruct );
 

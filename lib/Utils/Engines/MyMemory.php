@@ -56,31 +56,31 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         switch ( $functionName ) {
             case 'tags_projection' :
-                $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded );
+                $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet );
                 break;
             case 'api_key_check_auth_url':
-                $result_object = Engines_Results_MyMemory_AuthKeyResponse::getInstance( $decoded );
+                $result_object = Engines_Results_MyMemory_AuthKeyResponse::getInstance( $decoded, $this->featureSet );
                 break;
             case 'api_key_create_user_url':
-                $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded );
+                $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded, $this->featureSet );
                 break;
             case 'glossary_import_relative_url':
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
-                $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded );
+                $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded, $this->featureSet );
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
             case 'tmx_export_email_url' :
             case 'glossary_export_relative_url' :
-                $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded );
+                $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded, $this->featureSet );
                 break;
             case 'analyze_url':
-                $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded );
+                $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded, $this->featureSet );
                 break;
             case 'contribute_relative_url':
             case 'update_relative_url':
-                $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded );
+                $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded, $this->featureSet );
                 break;
             default:
 
@@ -91,7 +91,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                     }
                 }
 
-                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded );
+                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded, $this->featureSet );
                 break;
         }
 
@@ -266,6 +266,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]       = $_config[ 'email' ];
+        $parameters[ 'id' ]       = $_config[ 'id_match' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {
@@ -276,7 +277,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         ( !$_config[ 'isGlossary' ] ? $function = "delete_relative_url" : $function = "gloss_delete_relative_url" );
 
-        $this->call( $function, $parameters );
+        $this->call( $function, $parameters, true );
 
         /*
          * If the segment to be deleted is not present in the current TM,

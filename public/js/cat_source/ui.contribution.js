@@ -326,7 +326,7 @@ $.extend(UI, {
         });
         SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), [], errors);
     },
-	setDeleteSuggestion: function(source, target) {
+	setDeleteSuggestion: function(source, target, id) {
 
         return APP.doRequest({
             data: {
@@ -337,7 +337,8 @@ $.extend(UI, {
                 password: config.password,
                 seg: source,
                 tra: target,
-                id_translator: config.id_translator
+                id_translator: config.id_translator,
+                id_match: id
             },
             error: function() {
                 UI.failedConnection(0, 'deleteContribution');

@@ -1,8 +1,15 @@
 <?php
 
+use SubFiltering\Filter;
+
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class TMSService {
+
+    /**
+     * @var FeatureSet
+     */
+    protected $featureSet;
 
     /**
      * @var string The name of the uploaded TMX
@@ -28,14 +35,21 @@ class TMSService {
 
     /**
      *
+     * @param FeatureSet|null $featureSet
+     *
      * @throws Exception
      */
-    public function __construct() {
+    public function __construct( FeatureSet $featureSet = null ) {
 
         //get MyMemory service
         $this->mymemory_engine = Engine::getInstance( 1 );
 
         $this->output_type = 'translation';
+
+        if( $featureSet == null ){
+            $featureSet = new FeatureSet();
+        }
+        $this->featureSet = $featureSet;
 
     }
 
@@ -424,6 +438,7 @@ class TMSService {
      */
     public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
 
+        $Filter = Filter::getInstance( $this->featureSet );
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
@@ -503,12 +518,12 @@ class TMSService {
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
         <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
-        <prop type="x-MateCAT-filename">' . CatUtils::rawxliff2rawview( $row[ 'filename' ] ) . '</prop>
+        <prop type="x-MateCAT-filename">' . $Filter->fromLayer0ToRawXliff( $row[ 'filename' ] ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
         '. $chunkPropString . '
         '. $tmOrigin .'
         <tuv xml:lang="' . $sourceLang . '">
-            <seg>' . CatUtils::rawxliff2rawview( $row[ 'segment' ] ) . '</seg>
+            <seg>' . $Filter->fromLayer0ToRawXliff( $row[ 'segment' ] ) . '</seg>
         </tuv>';
 
             //if segment is confirmed or we want show all segments
@@ -522,7 +537,7 @@ class TMSService {
 
                 $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
-            <seg>' . CatUtils::rawxliff2rawview( $row[ 'translation' ] ) . '</seg>
+            <seg>' . $Filter->fromLayer0ToRawXliff( $row[ 'translation' ] ) . '</seg>
         </tuv>';
 
             }

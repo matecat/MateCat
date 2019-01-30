@@ -9,9 +9,8 @@
 class Engines_Results_MyMemory_TagProjectionResponse extends Engines_Results_AbstractResponse {
 
     public function __construct( $response ){
-
-        $this->responseData    = isset( $response[ 'data' ][ 'translation' ] ) ? CatUtils::rawxliff2view( $response[ 'data' ][ 'translation' ] ) : '';
-
+        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $this->responseData    = isset( $response[ 'data' ][ 'translation' ] ) ? $Filter->fromLayer0ToLayer2( $response[ 'data' ][ 'translation' ] ) : '';
     }
 
 }

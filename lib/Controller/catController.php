@@ -518,7 +518,7 @@ class catController extends viewController {
     private function getEditLogClass() {
         $return = "";
 
-        $editLogModel = new EditLog_EditLogModel( $this->jid, $this->password );
+        $editLogModel = new EditLog_EditLogModel( $this->jid, $this->password, $this->featureSet );
         $issue = $editLogModel->getMaxIssueLevel();
 
         $dao = new EditLog_EditLogDao(Database::obtain());
