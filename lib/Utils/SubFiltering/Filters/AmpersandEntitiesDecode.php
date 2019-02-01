@@ -11,15 +11,16 @@ namespace SubFiltering\Filters;
 
 use SubFiltering\Commons\AbstractHandler;
 
-class HtmlToEntities extends AbstractHandler {
+class AmpersandEntitiesDecode extends AbstractHandler {
 
     /**
      * @param $segment
      *
      * @return string
+     *               &(amp;(lt|gt|amp;);
      */
     public function transform( $segment ){
-        return htmlspecialchars( $segment, ENT_XML1, 'UTF-8', true );
+        return str_replace( '&amp;', '&', $segment );
     }
 
 }

@@ -29,6 +29,12 @@ class StandardPHToMateCatCustomPH extends AbstractHandler {
             }
         }
 
+        preg_match_all( '/ph id\s*=\s*[\'"]((?!__mtc_).*?)[\'"] equiv-text\s*?=\s*?(["\'])(?!base64:)(.*?)\2/', $segment, $html, PREG_SET_ORDER );
+        foreach ( $html as $tag_attribute ) {
+            //replace subsequent elements excluding already encoded
+            $segment = str_replace( $tag_attribute[ 0 ], 'ph id="' . $tag_attribute[ 1 ] . '" equiv-text="base64:' . base64_encode( $tag_attribute[ 3 ] ) . "\"", $segment );
+        }
+
         return $segment;
 
     }
