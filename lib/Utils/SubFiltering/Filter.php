@@ -12,13 +12,18 @@ namespace SubFiltering;
 use FeatureSet;
 use SubFiltering\Commons\Pipeline;
 use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
+use SubFiltering\Filters\AmpersandEntityEncode;
 use SubFiltering\Filters\EncodeToRawXML;
+use SubFiltering\Filters\AmpersandEntitiesDecode;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
+use SubFiltering\Filters\HtmlToPhToLayer2;
+use SubFiltering\Filters\LtGtDoubleDecode;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\MateCatCustomPHToStandardPH;
+use SubFiltering\Filters\NormalizeXMLEntitiesFromLayer2;
+use SubFiltering\Filters\RestoreSubFilteredPhToHtml;
 use SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use SubFiltering\Filters\UnicodeToEntities;
-use SubFiltering\Filters\HtmlToEntities;
 use SubFiltering\Filters\HtmlToPh;
 use SubFiltering\Filters\LtGtDoubleEncode;
 use SubFiltering\Filters\LtGtDecode;
@@ -119,10 +124,10 @@ class Filter {
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new SpacesToNBSPForView() );
         $channel->addLast( new UnicodeToEntities() );
-        $channel->addLast( new HtmlToPh() );
+        $channel->addLast( new LtGtDecode() );
+        $channel->addLast( new HtmlToPhToLayer2() );
         $channel->addLast( new TwigToPh() );
         $channel->addLast( new SprintfToPH() );
-        $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new RestoreXliffTagsForView() );
         $channel->addLast( new PlaceHoldCtrlCharsForView() );
         $channel->addLast( new LtGtEncode() );
@@ -172,10 +177,12 @@ class Filter {
      */
     public function fromLayer2ToLayer1( $segment ) {
         $channel = new Pipeline();
+        $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
+        $channel->addLast( new LtGtDoubleDecode() ); //fix eventually broken HTML
+        $channel->addLast( new LtGtDecode() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new FromViewNBSPToSpaces() );
-        $channel->addLast( new HtmlToEntities() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
@@ -200,15 +207,23 @@ class Filter {
     public function fromLayer2ToLayer0( $segment ) {
 
         $channel = new Pipeline();
+
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
+        $channel->addLast( new LtGtDoubleDecode() ); //fix eventually broken HTML
+
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
+
         $channel->addLast( new EncodeToRawXML() );
-        $channel->addLast( new HtmlToEntities() );
         $channel->addLast( new RestoreXliffTagsContent() );
+
+        $channel->addLast( new AmpersandEntityEncode() );
+        $channel->addLast( new RestoreSubFilteredPhToHtml() );
+        $channel->addLast( new AmpersandEntitiesDecode() );
+
+        $channel->addLast( new LtGtEncode() );
         $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
-        $channel->addLast( new SubFilteredPhToHtml() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer2ToLayer0', $channel );
         return $channel->transform( $segment );
@@ -261,13 +276,10 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new MateCatCustomPHToStandardPH() );
-        $channel->addLast( new PlaceHoldXliffTags() );
-//        $channel->addLast( new LtGtDoubleEncode() );
-        $channel->addLast( new RestoreXliffTagsContent() );
-        $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new EncodeToRawXML() );
+        $channel->addLast( new LtGtEncode() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
