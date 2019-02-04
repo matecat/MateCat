@@ -20,6 +20,7 @@ use SubFiltering\Filters\HtmlToPhToLayer2;
 use SubFiltering\Filters\LtGtDoubleDecode;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\MateCatCustomPHToStandardPH;
+use SubFiltering\Filters\NormalizeXMLEntitiesFromLayer2;
 use SubFiltering\Filters\RestoreSubFilteredPhToHtml;
 use SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use SubFiltering\Filters\UnicodeToEntities;
@@ -176,6 +177,7 @@ class Filter {
      */
     public function fromLayer2ToLayer1( $segment ) {
         $channel = new Pipeline();
+        $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new LtGtDoubleDecode() ); //fix eventually broken HTML
         $channel->addLast( new LtGtDecode() );
         $channel->addLast( new PlaceHoldXliffTags() );
@@ -211,6 +213,7 @@ class Filter {
 
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
+
         $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
 
@@ -276,6 +279,7 @@ class Filter {
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new EncodeToRawXML() );
+        $channel->addLast( new LtGtEncode() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );

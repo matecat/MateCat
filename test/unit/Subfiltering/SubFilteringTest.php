@@ -73,7 +73,7 @@ class SubFilteringTest extends AbstractTest {
      */
     public function testComplexXML(){
 
-        $segment = '&lt;p&gt; Airbnb &amp;amp; Co. &amp; <ph id="PlaceHolder1" equiv-text="{0}"/> <ph id="PlaceHolder2" equiv-text="/users/settings?test=123&amp;ciccio=1"/> &lt;a href="/users/settings?test=123&amp;amp;ciccio=1" target="_blank"&gt;';
+        $segment = '&lt;p&gt; Airbnb &amp;amp; Co. &amp; <ph id="PlaceHolder1" equiv-text="{0}"/> &quot; &apos;<ph id="PlaceHolder2" equiv-text="/users/settings?test=123&amp;ciccio=1"/> &lt;a href="/users/settings?test=123&amp;amp;ciccio=1" target="_blank"&gt;';
         $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $this->filter->fromLayer0ToLayer2( $segment );
 
@@ -121,5 +121,28 @@ class SubFilteringTest extends AbstractTest {
         $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $tmpLayer2 ) );
 
     }
+
+    /**
+     * @throws \Exception
+     */
+    public function testPlainTextInXML(){
+
+        $segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand
+
+is &lt; 70 dB(A).';
+
+        $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $this->filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $tmpLayer2 = ( new LtGtDecode() )->transform( $segmentL2 );
+        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $tmpLayer2 ) );
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $tmpLayer2 ) );
+
+    }
+
+
 
 }
