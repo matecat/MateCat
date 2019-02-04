@@ -143,6 +143,23 @@ is &lt; 70 dB(A).';
 
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function testComplexHTML(){
 
+        $segment = '<g id="1">	Si noti che ci vogliono circa 3 ore dopo aver ingerito</g><g id="2">&lt;a </g><g id="3"/>href<g id="4"> =</g><g id="5">"https://www.supersmart.com/fr--Phytonutriments--CBD-25-mg--0771--WNN" target<x id="6"/>=<x id="7"/><x id="8"/>"_blank"</g><g id="9">&gt;</g><g id="10">una capsula di CBD da 25 mg</g><g id="11">&lt;/a&gt;</g><bx id="12"/> affinché i livelli ematici raggiungano il picco.';
+
+        $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $this->filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $tmpLayer2 = ( new LtGtDecode() )->transform( $segmentL2 );
+        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $tmpLayer2 ) );
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $tmpLayer2 ) );
+
+    }
 
 }
