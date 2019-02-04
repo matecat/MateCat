@@ -10,8 +10,9 @@
 namespace SubFiltering\Filters;
 
 use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
 
-class SubFilteredPhToHtml extends AbstractHandler {
+class RestoreSubFilteredPhToHtml extends AbstractHandler {
 
     /**
      * @param $segment
@@ -21,9 +22,9 @@ class SubFilteredPhToHtml extends AbstractHandler {
     public function transform( $segment ){
 
         //pipeline for restore PH tag of subfiltering to original encoded HTML
-        preg_match_all( '|<ph id\s*=\s*["\']mtc_[0-9]+["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/>|siU', $segment, $html, PREG_SET_ORDER ); // Ungreedy
+        preg_match_all( '|' . Constants::LTPLACEHOLDER . 'ph id\s*=\s*["\']mtc_[0-9]+["\'] equiv-text\s*=\s*["\']base64:([^"\']+)["\']\s*\/' . Constants::GTPLACEHOLDER . '|siU', $segment, $html, PREG_SET_ORDER ); // Ungreedy
         foreach ( $html as $subfilter_tag ) {
-            $segment = str_replace( $subfilter_tag[0], html_entity_decode( base64_decode( $subfilter_tag[ 1 ] ), ENT_NOQUOTES | ENT_XML1 ), $segment );
+            $segment = str_replace( $subfilter_tag[0], base64_decode( $subfilter_tag[ 1 ] ), $segment );
         }
 
         return $segment;

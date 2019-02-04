@@ -31,7 +31,7 @@ class HtmlToPh extends AbstractHandler {
     public function transform( $segment ) {
 
         $originalSplit = preg_split( '//u', $segment, -1, PREG_SPLIT_NO_EMPTY );
-        $strippedSplit = preg_split( '//u', strip_tags( $segment ), -1, PREG_SPLIT_NO_EMPTY );
+        $strippedSplit = preg_split( '//u', str_replace( [ "<", ">" ], "", $segment ), -1, PREG_SPLIT_NO_EMPTY );
 
         if ( $originalSplit == $strippedSplit ) {
             return $segment;
@@ -95,7 +95,7 @@ class HtmlToPh extends AbstractHandler {
                         if ( $this->isTagValid( $buffer ) ){
                             $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
                         } else {
-                            $output .= ( new LtGtEncode() )->transform( $buffer );
+                            $output .= $this->_fixWrongBuffer( $buffer );
                         }
 
                         $buffer = '';
@@ -122,11 +122,11 @@ class HtmlToPh extends AbstractHandler {
                         $buffer .= $char;
                         break;
 
-                    case ' ': //0x0A
+                    case ' ': //0x20, is a space
                     case '\n':
                         if ( $buffer === '<' ) {
-                            $state      = static::STATE_PLAINTEXT;
-                            $output     .= '< ';
+                            $state      = static::STATE_PLAINTEXT; // but we work in XML text, so encode it
+                            $output     .= $this->_fixWrongBuffer( '< ' );
                             $buffer = '';
 
                             break;
@@ -180,11 +180,17 @@ class HtmlToPh extends AbstractHandler {
 
         //HTML Partial, add wrong HTML to preserve string content
         if( !empty( $buffer ) ){
-            $output .= str_replace( "<", "&lt;", $buffer );
+            $output .= $this->_fixWrongBuffer( $buffer );
         }
 
         return $output;
 
+    }
+
+    protected function _fixWrongBuffer( $buffer ){
+        $buffer = str_replace( "<", "&lt;", $buffer );
+        $buffer = str_replace( ">", "&gt;", $buffer );
+        return $buffer;
     }
 
     /**
@@ -203,12 +209,12 @@ class HtmlToPh extends AbstractHandler {
         /*
          * accept tags start with:
          * - starting with / ( optional )
-         * - starting with a letter a-zA-Z
-         * - every character
+         * - NOT starting with a number
+         * - containing [a-zA-Z0-9\-\._] at least 1
          * - ending with a letter a-zA-Z or a quote "' or /
          *
          */
-        if ( preg_match( '#<[/]{0,1}[a-zA-Z].*?(?:[a-zA-Z]|["\']{0,1}|[/]{0,1})>#isU', $buffer ) ){
+        if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-zA-Z0-9\-\._]+?(?:\s[:A-Z_a-z]+=.+)?>#', $buffer ) ){
             if( is_numeric( substr( $buffer, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[hH][1-6][^>]*>#', $buffer ) ){ //H tag are an exception
                 //tag can not end with a number
                 return false;
