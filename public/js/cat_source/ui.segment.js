@@ -187,7 +187,8 @@
             }).done( function( data ) {
                 UI.render({
                     segmentToScroll: UI.getSegmentId(UI.currentSegment),
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment),
+                    applySearch: UI.body.hasClass('searchActive')
                 });
                 UI.checkWarnings(false);
             });
@@ -212,7 +213,8 @@
             }).done( function( data ) {
                 UI.render({
                     segmentToScroll: UI.getSegmentId(UI.currentSegment),
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment),
+                    applySearch: UI.body.hasClass('searchActive')
                 });
                 UI.checkWarnings(false);
             });
