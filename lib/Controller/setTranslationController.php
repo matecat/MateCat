@@ -822,25 +822,23 @@ class setTranslationController extends ajaxController {
         }
     }
 
-    private function __evaluateVersionSave( &$new_translation, &$old_translation ) {
+    private function __evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation,
+                                            Translations_SegmentTranslationStruct $old_translation
+    ) {
         if ( $this->VersionsHandler == null ) {
             return;
         }
 
-        /**
-         * Translation version handler: save old translation.
-         */
-
         $version_saved = $this->VersionsHandler->saveVersion( $new_translation, $old_translation );
 
         if ( $version_saved ) {
-            $new_translation['version_number'] = $old_translation['version_number'] + 1;
+            $new_translation->version_number = $old_translation->version_number + 1;
         } else {
-            $new_translation['version_number'] = $old_translation['version_number'];
+            $new_translation->version_number = $old_translation->version_number ;
         }
 
-        if ( $new_translation['version_number'] == null ) {
-            $new_translation['version_number'] = 0 ;
+        if ( $new_translation->version_number == null ) {
+            $new_translation->version_number = 0 ;
         }
     }
 

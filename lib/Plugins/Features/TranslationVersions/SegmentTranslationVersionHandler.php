@@ -100,44 +100,38 @@ class SegmentTranslationVersionHandler {
             return false;
         }
 
-        $new_translation->version_number  += 1 ;
-
         // From now on, translations are treated as arrays and get attributes attached
         // just to be passed to version save. Create two arrays for the purpose.
-        $new_version = new Translations_TranslationVersionStruct($new_translation->toArray());
+        $new_version = new Translations_TranslationVersionStruct($old_translation->toArray());
 
         // XXX: this is to be reviewed
         $new_version->is_review = ( $old_translation->status == Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
         $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ] ;
         $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ] ;
-        return $this->saveOrUpdateOldVersion( $new_version );
 
-    }
+        /**
+         * In some cases, version 0 may already be there among saved_versions, because
+         * an issue for ReviewExtended has been saved on version 0.
+         *
+         * In any other case we expect the version record NOT to be there when we reach this point.
+         *
+         * @param Translations_TranslationVersionStruct $version
+         *
+         * @return bool|int
+         *
+         */
 
-    /**
-     * In some cases, version 0 may already be there among saved_versions, because
-     * an issue for ReviewExtended has been saved on version 0.
-     *
-     * In any other case we expect the version record NOT to be there when we reach this point.
-     *
-     * @param Translations_TranslationVersionStruct $version
-     *
-     * @return bool|int
-     *
-     */
-
-    private function saveOrUpdateOldVersion( Translations_TranslationVersionStruct $version ) {
         $this->prepareDao();
 
         $version_record = $this->dao->getVersionNumberForTranslation(
-                $this->id_job, $this->id_segment, $version->version_number
+                $this->id_job, $this->id_segment, $new_version->version_number
         );
 
         if ( $version_record ) {
-            return $this->dao->updateVersion( $version ) ;
+            return $this->dao->updateVersion( $new_version ) ;
         }
 
-        return $this->dao->saveVersion( $version );
+        return $this->dao->saveVersion( $new_version );
     }
 
     /**
