@@ -22,6 +22,8 @@ class editlogDownloadController extends downloadController {
         $this->password  = $__postInput[ "password" ];
         $this->setFilename( "Edit-log-export-" . $this->id_job . ".csv" );
 
+        $this->featureSet = new FeatureSet();
+
     }
 
     public function doAction() {
