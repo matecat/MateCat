@@ -150,6 +150,9 @@ class TagsMenu extends React.Component {
             );
             tagIndex++;
         });
+        if ( menuItems.length === 0 ) {
+            menuItems.push(<div className={"item added-tag no-results"} key={0} data-original="item">No results</div> );
+        }
         return menuItems;
     }
 

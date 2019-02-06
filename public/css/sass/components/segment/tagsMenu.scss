@@ -1,10 +1,25 @@
 .tags-auto-complete-menu {
-    .item.added-tag span{
-        color: #5dba62 !important;
-    }
-    .item.missing-tag span {
-        color: #E1565A !important;
-    }
 
+    .item {
+        max-width: 200px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        padding: 9px !important;
+    }
+    .item.added-tag {
+        span ,a {
+            color: #5dba62 !important;
+        }
+    }
+    .item.missing-tag {
+        span, a {
+            color: #E1565A !important;
+        }
+    }
+    .item span {
+        padding: 0;
+        font-size: 14px;
+    }
 
 }
