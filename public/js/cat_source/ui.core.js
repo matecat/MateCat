@@ -2316,7 +2316,7 @@ UI = {
 
         // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
-        if ($('.rangySelectionBoundary').closest('.editarea').length) {
+        if ($('.rangySelectionBoundary').closest('.editarea').length && !$('body').hasClass('rtl-target')) {
             $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
         }
         if(action !== 'paste'){

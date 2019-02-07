@@ -66,7 +66,7 @@ class Editarea extends React.Component {
 
         }
     }
-    onMouseUpEvent(e) {
+    checkEditToolbar() {
         let self = this;
         setTimeout(function () {
             if(!$(self.editAreaRef).find('.locked.selected').length) {
@@ -76,6 +76,9 @@ class Editarea extends React.Component {
                 }
             }
         }, 100);
+    }
+    onMouseUpEvent(e) {
+        this.checkEditToolbar();
     }
     onMouseDownEvent() {
         // Hide Edit Toolbar
@@ -126,6 +129,9 @@ class Editarea extends React.Component {
     onKeyPressEvent(e) {
         UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e);
 		this.emitTrackChanges();
+    }
+    onKeyUpEvent(e) {
+        this.checkEditToolbar();
     }
     onCopyText(e) {
         UI.handleCopyEvent(e);
@@ -225,6 +231,7 @@ class Editarea extends React.Component {
                     onCut={this.onCutText.bind(this)}
                     onKeyDown={this.onKeyDownEvent}
                     onKeyPress={this.onKeyPressEvent}
+                    onKeyUp={this.onKeyUpEvent.bind(this)}
                     onCopy={this.onCopyText.bind(this)}
                     onInput={this.onInputEvent}
                     onPaste={this.onPasteEvent}
