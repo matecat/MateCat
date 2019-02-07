@@ -482,13 +482,15 @@ var SegmentActions = {
         } else {
             UI.addInStorage('unlocked-'+ segment.sid, true);
             UI.editAreaClick(UI.getEditAreaBySegmentId(segment.sid));
+            setTimeout(()=> UI.cacheObjects(UI.getEditAreaBySegmentId(segment.sid)));
+
         }
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_UNLOCKED_SEGMENT,
             fid: fid,
             sid: segment.sid,
             unlocked: unlocked
-        });
+        }, );
     },
 
     setBulkSelectionInterval(from, to, fid) {

@@ -312,7 +312,7 @@ $.extend( UI, {
                 e.preventDefault();
                 return false;
             }
-            UI.openTagAutocompletePanel();
+            setTimeout(UI.openTagAutocompletePanel);
         }
         if( (e.which == 62) && (UI.tagLockEnabled) ) { // closing tag sign
             if($('.tag-autocomplete').length) {
