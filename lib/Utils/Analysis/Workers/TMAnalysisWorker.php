@@ -139,7 +139,7 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _updateRecord( QueueElement $queueElement ) {
 
         $filter     = Filter::getInstance( $this->featureSet );
-        $suggestion = $filter->fromLayer2ToLayer1( $this->_matches[ 0 ][ 'raw_translation' ] );
+        $suggestion = $this->_matches[ 0 ][ 'raw_translation' ]; //No layering needed
 
         $suggestion_match  = $this->_matches[ 0 ][ 'match' ];
         $suggestion_json   = json_encode( $this->_matches );
