@@ -10,15 +10,20 @@ namespace API\V3;
 
 use API\V2\KleinController;
 use CatUtils;
+use Exception;
 use Langs_Languages;
 
 
 class CountWordController extends KleinController {
 
+    protected $language;
+
     protected function afterConstruct() {
+
         $this->language = !empty( $this->request->language ) ? $this->request->language : 'en-US';
+
         if ( empty( $this->request->string ) ) {
-            $this->result[ 'errors' ][] = [ "code" => -1, "message" => "String field must to be sent" ];
+            throw new Exception( "String field must to be sent", 400 );
         }
 
         $langs = Langs_Languages::getInstance();
@@ -26,19 +31,13 @@ class CountWordController extends KleinController {
         try {
             $langs->validateLanguage( $this->language );
         } catch ( \Exception $e ) {
-            $this->result[ 'errors' ][] = [ "code" => -2, "message" => $e->getMessage() ];
+            throw new Exception( $e->getMessage(), 400 );
         }
 
-        if ( !empty( $this->result[ 'errors' ] ) ) {
-            $this->response->json( $this->result );
-
-            return;
-        }
     }
 
-    public function wordsCount() {
-        $words_count                   = CatUtils::segment_raw_word_count( $this->request->string, $this->language );
-        $this->result[ 'words_count' ] = $words_count;
-        $this->response->json( $this->result );
+    public function rawWords() {
+        $words_count                 = CatUtils::segment_raw_word_count( $this->request->text, $this->language );
+        $this->response->json( [ 'word_count' => $words_count ] );
     }
 }
