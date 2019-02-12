@@ -211,6 +211,30 @@ API.SEGMENT = {
         });
     },
 
+    getCrossLanguageMatches: function (idSegment, primaryLang, secondaryLang, txt, contextBefore, idBefore, contextAfter, idAfter) {
+        var data = {
+            action: 'getContribution',
+            password: config.password,
+            is_concordance: 0,
+            id_segment: idSegment,
+            text: txt,
+            id_job: config.id_job,
+            num_results: UI.numContributionMatchesResults,
+            id_client: config.id_client,
+            //remove this
+            context_before: contextBefore,
+            id_before: idBefore,
+            context_after: contextAfter,
+            id_after: idAfter,
+        };
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "post",
+            url : "/?action=getContribution"
+        });
+    },
+
     /**
      * Return a list of contribution from a id_segment
      * @param id_segment

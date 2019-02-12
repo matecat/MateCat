@@ -1518,6 +1518,7 @@ section.loaded .submenu {
     z-index: 1;
     border-bottom: 1px solid #cccccc;
     cursor: pointer;
+    user-select: none;
 }
 
 .submenu li.active {

@@ -1,16 +1,16 @@
 @import "vendor_mc/semantic/matecat_semantic";
-@import "vendor_mc/jquery.atwho";
+@import url(vendor_mc/jquery.atwho.css);
 @import "commons/matecat_fonts";
 @import "commons/icons";
 @import "commons/buttons";
 @import 'common-main';
-@import '../style';
-@import '../mbc-style';
-@import '../lxq-style';
-@import '../lexiqa';
-@import '../segment-notes';
-@import '../project-completion-feature';
-@import '../editlog';
+@import url(../style.css);
+@import url(../mbc-style.css);
+@import url(../lxq-style.css);
+@import url(../lexiqa.css);
+@import url(../segment-notes.css);
+@import url(../project-completion-feature.css);
+@import url(../editlog.css);
 @import 'components/header/segmentsFilter';
 @import 'revise';
 //components

@@ -340,6 +340,37 @@ var SegmentActions = {
             });
     },
 
+    getCrossLanguageMatches: function ( id ) {
+        const id_segment_original = id.split('-')[0];
+        let primaryLang, secondaryLang, txt;
+        let $segment = UI.getSegmentById(id);
+        if( config.brPlaceholdEnabled ) {
+            txt = UI.postProcessEditarea($segment, '.source');
+        } else {
+            txt = $('.source', $segment).text();
+        }
+
+        //If tag projection enabled in the source there are not tags, so I take the data-original value
+        if (UI.checkCurrentSegmentTPEnabled($segment)) {
+            txt = $segment.find('.source').data('original');
+            txt = htmlDecode(txt).replace(/&quot;/g, '\"');
+            txt = htmlDecode(txt);
+        }
+
+        txt = view2rawxliff(txt);
+
+        //TODO: remove
+        var contextBefore = UI.getContextBefore(id);
+        var idBefore = UI.getIdBefore(id);
+        var contextAfter = UI.getContextAfter(id);
+        var idAfter = UI.getIdAfter(id);
+
+        return API.SEGMENT.getCrossLanguageMatches(id_segment_original, primaryLang, secondaryLang , txt, contextBefore, idBefore, contextAfter, idAfter)
+            .fail(function (  ) {
+                UI.failedConnection( 0, 'updateGlossaryItem' );
+            });
+    },
+
     setTabIndex: function ( sid, tab, index ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_TAB_INDEX,
@@ -362,6 +393,14 @@ var SegmentActions = {
             actionType: SegmentConstants.CONCORDANCE_RESULT,
             sid: sid,
             data: data
+        });
+    },
+
+    modifyTabVisibility: function(tabName, visible) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.MODIFY_TAB_VISIBILITY,
+            tabName: tabName,
+            visible: visible
         });
     },
 

@@ -188,12 +188,6 @@ $.extend(UI, {
 		this.renderContributions(data, segment);
 		this.saveInUndoStack();
 		this.blockButtons = false;  //Used for offline mode
-
-        // TODO Move to SegmentFooter Component
-		// if (data.matches && data.matches.length > 0) {
-		// 	$('.submenu li.tab-switcher-tm a span', segment).text(' (' + data.matches.length + ')');
-		// }
-
     },
 
     renderContributions: function(data, segment) {

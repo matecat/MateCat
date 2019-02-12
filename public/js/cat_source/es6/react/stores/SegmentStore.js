@@ -132,6 +132,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
                 segment.fid = fid;
                 segment.edit_area_locked = false;
+                segment.original_sid = segment.sid;
                 newSegments.push(this);
             }
 
@@ -498,6 +499,9 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
+            break;
+        case SegmentConstants.MODIFY_TAB_VISIBILITY:
+            SegmentStore.emitChange(action.actionType, action.tabName, action.visible);
             break;
         case SegmentConstants.CREATE_FOOTER:
             SegmentStore.emitChange(action.actionType, action.sid);
