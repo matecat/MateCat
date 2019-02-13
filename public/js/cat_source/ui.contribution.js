@@ -147,6 +147,11 @@ $.extend(UI, {
             return $.Deferred().resolve();
         }
 
+        //Cross language matches
+        if ( UI.crossLanguageSettings ) {
+
+        }
+
 		return APP.doRequest({
 			data: {
 				action: 'getContribution',

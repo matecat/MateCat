@@ -3,8 +3,6 @@
 
  */
 var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
 class SegmentFooterMultiMatches extends React.Component {
 
     constructor(props) {
