@@ -59,6 +59,7 @@ class getContributionController extends ajaxController {
         $this->switch_languages   = $this->__postInput[ 'from_target' ];
         $this->password           = $this->__postInput[ 'password' ];
         $this->id_client          = $this->__postInput[ 'id_client' ];
+        $this->cross_language     = $this->__postInput[ 'cross_language' ] ;
 
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
@@ -123,6 +124,7 @@ class getContributionController extends ajaxController {
         $contributionRequest->concordanceSearch = $this->concordance_search;
         $contributionRequest->fromTarget        = $this->switch_languages;
         $contributionRequest->resultNum         = $this->num_results;
+        $contributionRequest->crossLangTargets  = $this->cross_language;
 
         if ( self::isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
