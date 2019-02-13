@@ -3,6 +3,9 @@
 
  */
 var React = require('react');
+let SegmentConstants = require('../../constants/SegmentConstants');
+let SegmentStore = require('../../stores/SegmentStore');
+
 class SegmentFooterMultiMatches extends React.Component {
 
     constructor(props) {
@@ -13,9 +16,9 @@ class SegmentFooterMultiMatches extends React.Component {
         this.parseMatches = this.parseMatches.bind(this);
     }
 
-    parseMatches(ev, message) {
-        if (this.props.segment.original_sid === message.data.id_segment) {
-            var matchesProcessed = this.processContributions(message.data.matches);
+    parseMatches(sid, fid, matches) {
+        if ( this.props.segment.original_sid === sid ) {
+            var matchesProcessed = this.processContributions(matches);
             if (this._isMounted) {
                 this.setState({
                     matches: matchesProcessed
@@ -87,12 +90,12 @@ class SegmentFooterMultiMatches extends React.Component {
                 {match.suggestion_info}
             </li>
             <li className="graydesc">
-                Target:
-                <span className="bold"> en-US</span>
-            </li>
-            <li className="graydesc">
                 Source:
                 <span className="bold"> {match.cb}</span>
+            </li>
+            <li className="graydesc">
+                Target:
+                <span className="bold" style={{fontSize: '14px'}}> en-US</span>
             </li>
         </ul>;
     }
@@ -108,13 +111,12 @@ class SegmentFooterMultiMatches extends React.Component {
 
     componentDidMount() {
         this._isMounted = true;
-        SegmentActions.getCrossLanguageMatches(this.props.segment.sid);
-        $( document ).on( 'sse:contribution', this.parseMatches);
+        SegmentStore.addListener(SegmentConstants.SET_CL_CONTRIBUTIONS, this.parseMatches);
     }
 
     componentWillUnmount() {
         this._isMounted = false;
-        $( document ).off( 'sse:contribution', this.parseMatches);
+        SegmentStore.removeListener(SegmentConstants.SET_CL_CONTRIBUTIONS, this.parseMatches);
     }
 
     allowHTML(string) {

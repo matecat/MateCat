@@ -29,6 +29,7 @@ module.exports = keyMirror({
     CLOSE_TABS: null,
     SET_DEFAULT_TAB: null,
     SET_CONTRIBUTIONS: null,
+    SET_CL_CONTRIBUTIONS: null,
     CHOOSE_CONTRIBUTION: null,
     RENDER_GLOSSARY: null,
     SET_SEGMENT_ORIGINAL_TRANSLATION: null,

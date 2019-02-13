@@ -19,6 +19,13 @@ if (config.translation_matches_enabled) {
         }
     } );
 
+    $( document ).on( 'sse:contribution', function ( ev, message ) {
+        if ( message.data.matches.length > 0 ) {
+            var $segment = UI.getSegmentById(message.data.id_segment);
+            SegmentActions.setSegmentCrossLanguageContributions(message.data.id_segment, UI.getSegmentFileId($segment), message.data.matches, []);
+        }
+    } );
+
 $.extend(UI, {
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
 		if (typeof (decode) == "undefined") {
@@ -149,7 +156,7 @@ $.extend(UI, {
 
         //Cross language matches
         if ( UI.crossLanguageSettings ) {
-
+            var crossLangsArray = [UI.crossLanguageSettings.primary, UI.crossLanguageSettings.secondary];
         }
 
 		return APP.doRequest({
@@ -166,7 +173,8 @@ $.extend(UI, {
                 id_before: idBefore,
                 context_after: contextAfter,
                 id_after: idAfter,
-                id_client: config.id_client
+                id_client: config.id_client,
+                cross_language: crossLangsArray
 			},
 			context: $('#segment-' + id),
 			error: function() {

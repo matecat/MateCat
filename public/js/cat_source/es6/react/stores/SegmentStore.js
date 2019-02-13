@@ -390,6 +390,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
     },
 
+    setCrossLanguageContributionsToCache: function (sid, fid, contributions,errors) {
+        const index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'cl_contributions'], {
+            matches: contributions,
+            errors: errors
+        });
+    },
+
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
 
@@ -508,6 +516,10 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);
+            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
+            break;
+        case SegmentConstants.SET_CL_CONTRIBUTIONS:
+            SegmentStore.setCrossLanguageContributionsToCache(action.sid, action.fid, action.matches, action.errors);
             SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
