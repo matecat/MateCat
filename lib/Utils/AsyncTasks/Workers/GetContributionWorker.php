@@ -87,8 +87,6 @@ class GetContributionWorker extends AbstractWorker {
             foreach( $contributionStruct->crossLangTargets as $lang ) {
                 list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet );
 
-                $matches = $this->_sortMatches( $mt_result, $matches );
-
                 $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
                 $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
 
@@ -98,7 +96,7 @@ class GetContributionWorker extends AbstractWorker {
             }
 
             usort( $crossLangMatches, [ "self", "__compareScore" ] );
-            // $crossLangMatches = array_reverse( $crossLangMatches );
+            $crossLangMatches = array_reverse( $crossLangMatches );
             $crossLangMatches = array_slice( $crossLangMatches, 0, $contributionStruct->resultNum );
 
             $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
