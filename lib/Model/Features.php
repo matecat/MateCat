@@ -6,7 +6,6 @@ use Features\ProjectCompletion;
 use Features\QaCheckBlacklist;
 use Features\QaCheckGlossary;
 use Features\ReviewExtended;
-use Features\ReviewImproved;
 use Features\TranslationVersions;
 use Features\Mmt;
 use Klein\Klein;
@@ -34,7 +33,6 @@ class Features {
 
     const PROJECT_COMPLETION   = ProjectCompletion::FEATURE_CODE;
     const TRANSLATION_VERSIONS = TranslationVersions::FEATURE_CODE;
-    const REVIEW_IMPROVED      = ReviewImproved::FEATURE_CODE;
     const QACHECK_GLOSSARY     = QaCheckGlossary::FEATURE_CODE;
     const QACHECK_BLACKLIST    = QaCheckBlacklist::FEATURE_CODE;
     const DQF                  = Dqf::FEATURE_CODE;
@@ -44,7 +42,6 @@ class Features {
     protected $VALID_CODES = [
             Features::PROJECT_COMPLETION,
             Features::TRANSLATION_VERSIONS,
-            Features::REVIEW_IMPROVED,
             Features::QACHECK_GLOSSARY,
             Features::QACHECK_BLACKLIST,
             Features::DQF,

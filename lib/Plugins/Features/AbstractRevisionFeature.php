@@ -5,32 +5,26 @@ namespace Features ;
 use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkDao;
+use Chunks_ChunkStruct;
 use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
-use Features\ReviewExtended\SegmentTranslationModel;
-use Features\ReviewImproved\ChunkReviewModel;
+use Features\ProjectCompletion\CompletionEventStruct;
+use Features\ReviewExtended\IChunkReviewModel;
+use Features\ReviewImproved\Controller\QualityReportController;
+use Features\ReviewImproved\Model\ArchivedQualityReportModel;
+use Features\ReviewImproved\Model\QualityReportModel;
+use FilesStorage;
 use INIT;
-use FilesStorage ;
-use ISegmentTranslationModel;
+use Jobs_JobStruct;
 use Log;
 use LQA\ChunkReviewDao;
 use LQA\ModelDao;
 use Projects_ProjectDao;
-use Translations_SegmentTranslationStruct;
-use Utils;
-use ZipArchive ;
+use Projects_ProjectStruct;
 use SegmentTranslationChangeVector;
-use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
-use Features\ReviewImproved\Controller;
-use Projects_ProjectStruct ;
-use Jobs_JobStruct ;
-
-use Features\ProjectCompletion\CompletionEventStruct ;
-
-use Chunks_ChunkStruct ;
-use Features\ReviewImproved\Model\ArchivedQualityReportModel ;
-use Features\ReviewImproved\Model\QualityReportModel ;
+use Utils;
+use ZipArchive;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
 
@@ -216,12 +210,14 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                 'first_record_password' => $first_password
         ] );
 
+        $project = Projects_ProjectDao::findById( $projectStructure['id_project'] ) ;
+
         $reviews = ChunkReviewDao::findByIdJob( $id_job );
         foreach( $reviews as $review ) {
-            $model = new ChunkReviewModel($review);
+            /** @var IChunkReviewModel $model */
+            $model = array_filter( $project->getFeatures()->run('getChunkReviewModel', $review ) ) [ 0 ] ;
             $model->recountAndUpdatePassFailResult();
         }
-
     }
 
     /**
@@ -255,8 +251,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $new_reviews[0]->penalty_points = $penalty_points;
         $new_reviews[0]->reviewed_words_count = $reviewed_words_count ;
 
-        $model = new ChunkReviewModel( $new_reviews[0] );
-        $model->updatePassFailResult();
+
+        $project = Projects_ProjectDao::findById( $projectStructure['id_project'] ) ;
+        /** @var IChunkReviewModel $model */
+        $model = array_filter( $project->getFeatures()->run('getChunkReviewModel', $new_reviews[ 0 ] ) ) [ 0 ] ;
+        $model->recountAndUpdatePassFailResult();
 
     }
 
@@ -482,10 +481,16 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     public static function callbackQualityReport($request, $response, $service, $app) {
-        $controller = new Controller\QualityReportController( $request, $response, $service, $app);
+        $controller = new QualityReportController( $request, $response, $service, $app);
         $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
         $controller->setView( $template_path );
         $controller->respond();
     }
+
+    public function revise_summary_project_type($old_value) {
+        return 'new' ;
+    }
+
+
 
 }
