@@ -8,11 +8,12 @@
 
 namespace Features\ReviewExtended;
 
+use Features\ISegmentTranslationModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use SegmentTranslationChangeVector;
 
-class SegmentTranslationModel  {
+class SegmentTranslationModel  implements  ISegmentTranslationModel {
     /**
      * @var SegmentTranslationChangeVector
      */

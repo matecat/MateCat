@@ -13,16 +13,14 @@ use Features\ReviewExtended\Model\ChunkReviewDao;
 
 use LQA\ChunkReviewStruct;
 
-class ChunkReviewModel {
+class ChunkReviewModel implements IChunkReviewModel {
 
     /**
      * @var \LQA\ChunkReviewStruct
      */
-    protected $chunk_review_model;
-
+    protected $chunk_review;
 
     protected $penalty_points;
-
 
     public function __construct( ChunkReviewStruct $chunk_review ) {
         $this->chunk_review = $chunk_review ;
