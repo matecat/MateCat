@@ -38,7 +38,8 @@ class getContributionController extends ajaxController {
                 'context_after'  => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'id_before'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_after'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_client'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ]
+                'id_client'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'cross_language'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ]
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );

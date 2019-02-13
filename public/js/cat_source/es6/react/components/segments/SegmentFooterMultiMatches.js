@@ -64,6 +64,7 @@ class SegmentFooterMultiMatches extends React.Component {
             item.suggestionDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText(this.segment));
             item.translationDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText( this.translation));
             item.sourceDiff = item.suggestionDecodedHtml;
+            item.target = this.target;
             if (this.match !== "MT" && parseInt(this.match) > 74) {
                 let sourceDecoded = UI.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
                 let matchDecoded = UI.removePhTagsWithEquivTextIntoText( this.segment );
@@ -95,7 +96,7 @@ class SegmentFooterMultiMatches extends React.Component {
             </li>
             <li className="graydesc">
                 Target:
-                <span className="bold" style={{fontSize: '14px'}}> en-US</span>
+                <span className="bold" style={{fontSize: '14px'}}> {match.target}</span>
             </li>
         </ul>;
     }

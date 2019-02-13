@@ -19,7 +19,7 @@ if (config.translation_matches_enabled) {
         }
     } );
 
-    $( document ).on( 'sse:contribution', function ( ev, message ) {
+    $( document ).on( 'sse:cross_language_matches', function ( ev, message ) {
         if ( message.data.matches.length > 0 ) {
             var $segment = UI.getSegmentById(message.data.id_segment);
             SegmentActions.setSegmentCrossLanguageContributions(message.data.id_segment, UI.getSegmentFileId($segment), message.data.matches, []);
