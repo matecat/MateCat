@@ -20,10 +20,15 @@ if (config.translation_matches_enabled) {
     } );
 
     $( document ).on( 'sse:cross_language_matches', function ( ev, message ) {
-        // if ( message.data.matches.length > 0 ) {
-            var $segment = UI.getSegmentById(message.data.id_segment);
+        var $segment = UI.getSegmentById(message.data.id_segment);
+        var $segmentSplitted = UI.getSegmentById(message.data.id_segment + "-1");
+        if ( $segment.length > 0 ) {
             SegmentActions.setSegmentCrossLanguageContributions(message.data.id_segment, UI.getSegmentFileId($segment), message.data.matches, []);
-        // }
+        } else if ($segmentSplitted.length > 0 ) {
+            $('section[id^="segment-' + message.data.id_segment + '"]').each(function (  ) {
+                SegmentActions.setSegmentCrossLanguageContributions(UI.getSegmentId($(this)), UI.getSegmentFileId($(this)), message.data.matches, []);
+            });
+        }
     } );
 
 $.extend(UI, {

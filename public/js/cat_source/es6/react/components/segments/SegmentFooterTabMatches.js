@@ -141,7 +141,7 @@ class SegmentFooterTabMatches extends React.Component {
             </li>
             <li className="graydesc">
                 Source:
-                <span className="bold"> {match.cb}</span>
+                <span className="bold" style={{fontSize: '14px'}}> {match.cb}</span>
             </li>
         </ul>;
     }

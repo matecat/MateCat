@@ -11,13 +11,13 @@ class SegmentFooterMultiMatches extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            matches: []
+            matches: undefined
         };
         this.parseMatches = this.parseMatches.bind(this);
     }
 
     parseMatches(sid, fid, matches) {
-        if ( this.props.segment.original_sid === sid ) {
+        if ( this.props.segment.sid === sid ) {
             var matchesProcessed = this.processContributions(matches);
             if (this._isMounted) {
                 this.setState({
@@ -92,7 +92,7 @@ class SegmentFooterMultiMatches extends React.Component {
             </li>
             <li className="graydesc">
                 Source:
-                <span className="bold"> {match.cb}</span>
+                <span className="bold" style={{fontSize: '14px'}}> {match.cb}</span>
             </li>
             <li className="graydesc">
                 Target:
@@ -126,11 +126,11 @@ class SegmentFooterMultiMatches extends React.Component {
 
     render() {
         var matches = [];
-        if ( this.state.matches.length > 0 ) {
+        if ( this.state.matches && this.state.matches.length > 0 ) {
             var self = this;
             this.state.matches.forEach(function (match, index) {
                 var item =
-                    <ul key={match.id}
+                    <ul key={match.id + index}
                         className="suggestion-item crosslang-item graysmall"
                         data-item={(index + 1)}
                         data-id={match.id}
@@ -154,7 +154,7 @@ class SegmentFooterMultiMatches extends React.Component {
                     </ul>;
                 matches.push(item);
             });
-        } else if ( this.state.matches.length === 0 ){
+        } else if (this.state.matches && this.state.matches.length === 0 ){
             if((config.mt_enabled)&&(!config.id_translator)) {
                 matches.push( <ul key={0} className="graysmall message">
                     <li>There are no matches for this segment in the languages you have selected. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li>
