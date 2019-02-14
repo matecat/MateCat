@@ -2184,12 +2184,14 @@
             }
             UI.crossLanguageSettings = {primary: primary, secondary: secondary};
             localStorage.setItem("multiMatchLangs", JSON.stringify(UI.crossLanguageSettings));
-            if ( primary ) {
-                SegmentActions.modifyTabVisibility('multiMatches', true);
-                $('section.loaded').removeClass('loaded');
-                UI.getContribution(UI.currentSegment, 0);
-            } else {
-                SegmentActions.modifyTabVisibility('multiMatches', false);
+            if ( UI.getContribution ) {
+                if ( primary ) {
+                    SegmentActions.modifyTabVisibility( 'multiMatches', true );
+                    $( 'section.loaded' ).removeClass( 'loaded' );
+                    UI.getContribution( UI.currentSegment, 0 );
+                } else {
+                    SegmentActions.modifyTabVisibility( 'multiMatches', false );
+                }
             }
         },
 
