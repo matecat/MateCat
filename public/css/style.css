@@ -1624,7 +1624,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor.matches .overflow {
-    min-height: 65px;
+    min-height: 50px;
 }
 .sub-editor.matches .overflow span.loader {
     bottom: 20px;

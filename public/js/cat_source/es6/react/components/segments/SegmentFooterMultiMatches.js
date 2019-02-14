@@ -125,8 +125,8 @@ class SegmentFooterMultiMatches extends React.Component {
     }
 
     render() {
+        var matches = [];
         if ( this.state.matches.length > 0 ) {
-            var matches = [];
             var self = this;
             this.state.matches.forEach(function (match, index) {
                 var item =
@@ -154,6 +154,16 @@ class SegmentFooterMultiMatches extends React.Component {
                     </ul>;
                 matches.push(item);
             });
+        } else if ( this.state.matches.length === 0 ){
+            if((config.mt_enabled)&&(!config.id_translator)) {
+                matches.push( <ul key={0} className="graysmall message">
+                    <li>There are no matches for this segment in the languages you have selected. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li>
+                </ul>);
+            } else {
+                matches.push( <ul key={0} className="graysmall message">
+                    <li>There are no matches for this segment in the languages you have selected.</li>
+                </ul>);
+            }
         }
         return (
             <div
@@ -171,6 +181,7 @@ class SegmentFooterMultiMatches extends React.Component {
                 <div className="engine-errors"></div>
             </div>
         )
+
     }
 }
 
