@@ -60,11 +60,8 @@
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
 
-<body tal:condition="true:job_archived">
-<div metal:use-macro="unsupported_browser.html/job_archived"/>
-</body>
 
-<body class="reviselog" tal:condition="php: supportedBrowser NE 0 && !job_archived">
+<body class="reviselog" tal:condition="php: supportedBrowser NE 0 ">
 <!--metal:use-macro="header.html/main_header"-->
 <header>
     <!--<div class="wrapper">-->
