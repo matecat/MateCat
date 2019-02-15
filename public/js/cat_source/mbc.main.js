@@ -445,7 +445,8 @@ if ( MBC.enabled() )
 
         var renderCommentIconLinks = function () {
             $( 'section' ).each( function ( i, el ) {
-                renderCommentIconLink( el );
+                if ( $(el).find('.mbc-comment-notification').length === 0 && $(el).find('.mbc-comment-balloon-outer').length === 0)
+                    renderCommentIconLink( el );
             } );
         };
 

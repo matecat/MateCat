@@ -712,9 +712,9 @@ UI = {
 			this.renderFiles(d.data.files, where, false);
 
 			// if getting segments before, UI points to the segment triggering the event
-			// if ((where == 'before') && (numsegToAdd)) {
-			// 	this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
-			// }
+			if ((where == 'before') && (numsegToAdd)) {
+				this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
+			}
 
 			if (this.body.hasClass('searchActive')) {
 				segLimit = (where == 'before') ? firstSeg : lastSeg;
