@@ -734,7 +734,7 @@ UI = {
 		}
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
-		this.setWaypoints();
+		setTimeout(UI.setWaypoints.bind(this), 2000);
         $(window).trigger('segmentsAdded',{ resp : d.data.files });
 	},
 
@@ -2195,7 +2195,7 @@ UI = {
         }
 		this.detectFirstLast();
 		this.lastSegmentWaypoint = this.lastSegment.waypoint(function(direction) {
-			if (direction === 'down') {
+			if (direction === 'down' && !UI.noMoreSegmentsAfter) {
 				this.destroy();
 				if (UI.infiniteScroll) {
 					if (!UI.blockGetMoreSegments) {
@@ -2210,7 +2210,7 @@ UI = {
 		}, UI.downOpts);
 
         this.firstSegmentWaypoint = this.firstSegment.waypoint(function(direction) {
-			if (direction === 'up') {
+			if (direction === 'up' && !UI.noMoreSegmentsBefore) {
                 this.destroy();
 				UI.getMoreSegments('before');
 			}
