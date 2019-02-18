@@ -85,7 +85,7 @@ class GetContributionWorker extends AbstractWorker {
             $crossLangMatches = [] ;
 
             foreach( $contributionStruct->crossLangTargets as $lang ) {
-                list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet );
+                list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
 
                 $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
                 $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
@@ -359,11 +359,15 @@ class GetContributionWorker extends AbstractWorker {
     /**
      * @param ContributionRequestStruct $contributionStruct
      * @param                           $jobStruct
+     * @param                           $targetLang
      * @param                           $featureSet
+     *
+     * @param bool                      $isCrossLang
      *
      * @return array
      */
-    protected function _getMatches( ContributionRequestStruct $contributionStruct, $jobStruct, $targetLang, $featureSet ) {
+    protected function _getMatches( ContributionRequestStruct $contributionStruct, $jobStruct, $targetLang, $featureSet, $isCrossLang = false) {
+
         $_config              = [];
         $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
         $_config[ 'source' ]  = $jobStruct->source;
@@ -417,6 +421,9 @@ class GetContributionWorker extends AbstractWorker {
 
         }
 
+        if ( $isCrossLang ) {
+            $_config['get_mt'] = false ;
+        }
 
         /**
          * if No TM server and No MT selected $_TMS is not defined
