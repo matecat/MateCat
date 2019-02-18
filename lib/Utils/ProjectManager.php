@@ -2123,7 +2123,9 @@ class ProjectManager {
                                 'suggestion'          => null,
                                 'trans-unit'          => $translation_row[ 4 ],
                                 'payable_rates'       => $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ]
-                        ]
+                        ],
+
+                        $this->projectStructure
                 );
 
                 /* WARNING do not change the order of the keys */
