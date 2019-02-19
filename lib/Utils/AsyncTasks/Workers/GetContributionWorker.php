@@ -285,7 +285,7 @@ class GetContributionWorker extends AbstractWorker {
                 //for logic correctness
                 if ( !$QA->thereAreErrors() ) {
                     $match[ 'raw_translation' ] = $QA->getTrgNormalized();
-                    $match[ 'translation' ]     = $Filter->fromLayer0ToLayer2( $match[ 'raw_translation' ] );
+                    $match[ 'translation' ]     = $Filter->fromLayer1ToLayer2( $match[ 'raw_translation' ] );
                 } else {
                     $this->_doLog( $QA->getErrors() );
                 }

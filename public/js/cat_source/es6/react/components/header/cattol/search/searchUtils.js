@@ -582,18 +582,17 @@ let SearchUtils = {
             let marksArray = currentSegmentFind.find("mark").toArray();
             let currentMarkIndex = marksArray.indexOf($(current)[0]);
             let nextIndex = (type === "prev") ? currentMarkIndex - 1 : currentMarkIndex + 1;
-            if ( marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
+            if ( $(current) && marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
                 $(current).removeClass('currSearchItem');
                 $(marksArray[nextIndex]).addClass('currSearchItem');
                 if (unmark)
                     $(current).replaceWith($(current).text());
                 UI.goingToNext = false;
             } else { // jump to results in subsequents segments
-
-                let seg = (current.length) ? $(current).parents('section') : $('mark.searchMarker').first().parents('section');
-                if (seg.length) {
+                let $currentSegment = $(current).length ? $(current).parents('section') : UI.currentSegment;
+                if ($currentSegment.length) {
                     this.gotoSearchResultAfter({
-                        el: $(seg).attr('id').split('-')[1],
+                        el: $($currentSegment).attr('id').split('-')[1],
                         unmark: unmark
                     }, type);
                 } else {
