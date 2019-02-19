@@ -1634,6 +1634,7 @@ UI = {
 		}
 	},
     segmentQA : function( segment ) {
+	    if ( UI.tagMenuOpen ) return;
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
         }

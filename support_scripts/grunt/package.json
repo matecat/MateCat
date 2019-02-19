@@ -42,7 +42,8 @@
     "react-dom": "^16.0.0",
     "semantic-ui": "^2.4.0",
     "showdown": "^1.8.0",
-    "sprintf-js": "^1.1.1"
+    "sprintf-js": "^1.1.1",
+    "escape-string-regexp": "^1.0.5"
   },
   "devDependencies": {},
   "babel": {

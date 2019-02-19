@@ -8,16 +8,18 @@
         padding: 9px !important;
     }
     .item.added-tag {
-        span ,a {
+        color: #5dba62 !important;
+        & a {
             color: #5dba62 !important;
         }
     }
     .item.missing-tag {
-        span, a {
+        color: #E1565A !important;
+        & a {
             color: #E1565A !important;
         }
     }
-    .item span {
+    .item {
         padding: 0;
         font-size: 14px;
     }

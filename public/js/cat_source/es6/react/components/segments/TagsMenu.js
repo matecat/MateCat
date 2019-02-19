@@ -4,6 +4,7 @@
  */
 var React = require('react');
 var ReactDOM = require('react-dom');
+const escapeStringRegexp = require('escape-string-regexp');
 
 class TagsMenu extends React.Component {
 
@@ -111,13 +112,15 @@ class TagsMenu extends React.Component {
         let menuItems = [];
         let textDecoded;
         let tagIndex = 0;
+
         _.each(this.state.missingTags, ( item, index ) => {
             if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
                 return;
-            } else if ( this.state.filter !== "" ) {
-                textDecoded = UI.transformTextForLockTags(item);
-                let regExp = new RegExp("(<span.*?>.*?)(" + htmlEncode(this.state.filter) + ")(.*?<\\/span>)", 'i');
-                textDecoded = textDecoded.replace(regExp, "$1<b>$2</b>$3");
+            }
+            let textDecoded = UI.transformTextForLockTags(item);
+            let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
+            if ( this.state.filter !== "" ) {
+                label = label.replace(htmlEncode(this.state.filter), "<b>" + htmlEncode(this.state.filter) + "</b>");
             } else {
                 textDecoded = UI.transformTextForLockTags(item);
             }
@@ -125,32 +128,33 @@ class TagsMenu extends React.Component {
             let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
             let indexTag = _.clone(tagIndex);
             menuItems.push(<div className={"item missing-tag " + classSelected} key={"missing"+ _.clone(tagIndex)} data-original="item"
-                              dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
-                              onClick={this.selectTag.bind(this, textDecoded)}
-                              ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
+                                dangerouslySetInnerHTML={ this.allowHTML(label) }
+                                onClick={this.selectTag.bind(this, textDecoded)}
+                                ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
                 />
             );
             tagIndex++;
         });
         _.each(this.state.addedTags, ( item, index ) => {
-            let textDecoded;
             if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
                 return;
-            } else if ( this.state.filter !== "" ) {
-                textDecoded = UI.transformTextForLockTags(item);
-                let regExp = new RegExp("(<span.*?>.*?)(" + htmlEncode(this.state.filter) + ")(.*?<\\/span>)", 'i');
-                textDecoded = textDecoded.replace(regExp, "$1<b>$2</b>$3");
+            }
+            let textDecoded = UI.transformTextForLockTags(item);
+            let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
+            if ( this.state.filter !== "" ) {
+                label = label.replace(htmlEncode(this.state.filter), "<b>" + htmlEncode(this.state.filter) + "</b>");
             } else {
                 textDecoded = UI.transformTextForLockTags(item);
             }
+
             let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
             let indexTag = _.clone(tagIndex);
-            let html = <div className={"item added-tag " + classSelected} key={"added" + _.clone(tagIndex)} data-original="item"
-                            dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
-                            onClick={this.selectTag.bind(this, textDecoded)}
-                            ref={(elem)=>{this.tagsRefs["item" + indexTag ]=elem;}}
-            />
-            menuItems.push(html);
+            menuItems.push(<div className={"item added-tag " + classSelected} key={"missing"+ _.clone(tagIndex)} data-original="item"
+                                dangerouslySetInnerHTML={ this.allowHTML(label) }
+                                onClick={this.selectTag.bind(this, textDecoded)}
+                                ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
+                />
+            );
             tagIndex++;
         });
         if ( menuItems.length === 0 ) {
@@ -159,6 +163,7 @@ class TagsMenu extends React.Component {
         return menuItems;
     }
 
+
     openTagAutocompletePanel() {
         var endCursor = document.createElement("span");
         endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
@@ -166,15 +171,17 @@ class TagsMenu extends React.Component {
     }
 
     chooseTagAutocompleteOption(tag) {
-        // if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
-            setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
-        // }
+        setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
         saveSelection();
 
         // Todo: refactor this part
-        var editareaClone = UI.editarea.clone();
+        let editareaClone = UI.editarea.clone();
+        let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(this.state.filter) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
+
         editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
         editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+
+        this.state.filter !== "" && editareaClone.html(editareaClone.html().replace(regeExp, '$2'));
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
@@ -245,6 +252,10 @@ class TagsMenu extends React.Component {
     filterTags(newCharacter) {
         let filter;
         let tags;
+        if (newCharacter === " " && this.state.filter === "" ) {
+            return;
+        }
+
         if ( newCharacter === 'Backspace' ) {
             filter = this.state.filter.substring(0, this.state.filter.length-1);
             tags = this.state.missingTags.concat(this.state.addedTags);
@@ -253,8 +264,14 @@ class TagsMenu extends React.Component {
             tags = _.clone(this.state.totalTags);
         }
         let filteredTags = _.filter(tags, (tag)=>{
-            return htmlDecode(tag).indexOf(filter) !== -1;
+            if ( tag.indexOf('equiv-text') > -1 ) {
+                let tagHtml = UI.transformTextForLockTags(tag);
+                return $(tagHtml).find('.inside-attribute').text().indexOf(filter) !== -1;
+            } else {
+                return htmlDecode( tag ).indexOf( filter ) !== -1;
+            }
         });
+
         this.setState({
             selectedItem: 0,
             totalTags : filteredTags,
