@@ -11,6 +11,7 @@ class TagsMenu extends React.Component {
         super(props);
         this.state = {};
         this.menuHeight = 300;
+        this.tagsRefs = {};
         let missingTags = this.getMissingTags();
         let uniqueSourceTags = TagsMenu.arrayUnique(this.props.sourceTags);
         let addedTags = _.filter(uniqueSourceTags, function ( item ) {
@@ -122,10 +123,11 @@ class TagsMenu extends React.Component {
             }
 
             let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
-            menuItems.push(<div className={"item missing-tag " + classSelected} key={"missing"+ tagIndex} data-original="item"
+            let indexTag = _.clone(tagIndex);
+            menuItems.push(<div className={"item missing-tag " + classSelected} key={"missing"+ _.clone(tagIndex)} data-original="item"
                               dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
                               onClick={this.selectTag.bind(this, textDecoded)}
-                              ref={(elem)=>{this["item" + tagIndex]=elem;}}
+                              ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
                 />
             );
             tagIndex++;
@@ -142,12 +144,13 @@ class TagsMenu extends React.Component {
                 textDecoded = UI.transformTextForLockTags(item);
             }
             let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
-            menuItems.push(<div className={"item added-tag " + classSelected} key={"added" + index} data-original="item"
-                              dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
-                              onClick={this.selectTag.bind(this, textDecoded)}
-                              ref={(elem)=>{this["item" + tagIndex ]=elem;}}
-                />
-            );
+            let indexTag = _.clone(tagIndex);
+            let html = <div className={"item added-tag " + classSelected} key={"added" + _.clone(tagIndex)} data-original="item"
+                            dangerouslySetInnerHTML={ this.allowHTML(textDecoded) }
+                            onClick={this.selectTag.bind(this, textDecoded)}
+                            ref={(elem)=>{this.tagsRefs["item" + indexTag ]=elem;}}
+            />
+            menuItems.push(html);
             tagIndex++;
         });
         if ( menuItems.length === 0 ) {
@@ -297,7 +300,7 @@ class TagsMenu extends React.Component {
     }
 
     ensureActiveItemVisible() {
-        var itemComponent = this['item'+this.state.selectedItem];
+        var itemComponent = this.tagsRefs['item'+this.state.selectedItem];
         if (itemComponent) {
             var domNode = ReactDOM.findDOMNode(itemComponent);
             this.scrollElementIntoViewIfNeeded(domNode);
@@ -307,7 +310,7 @@ class TagsMenu extends React.Component {
     scrollElementIntoViewIfNeeded(domNode) {
         var containerDomNode = ReactDOM.findDOMNode( this.menu );
         $(containerDomNode).animate({
-            scrollTop: $(domNode)[0].offsetTop
+            scrollTop: $(domNode)[0].offsetTop - 20
         }, 150);
     }
 
