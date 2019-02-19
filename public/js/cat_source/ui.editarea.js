@@ -286,7 +286,6 @@ $.extend( UI, {
     keyPressEditAreaEventHandler: function (e, sid) {
         if( (e.which == 60) && (UI.tagLockEnabled) ) { // opening tag sign
             SegmentActions.showTagsMenu(sid);
-            // UI.openTagAutocompletePanel();
         }
     },
     inputEditAreaEventHandler: function (e) {

@@ -240,8 +240,9 @@ class TagsMenu extends React.Component {
             this.setState({
                 selectedItem: this.getNextIdx("next")
             });
-        } else if ( event.key ===  'Backspace' && this.state.filter.length > 0) {
-            this.filterTags(event.key);
+        } else if ( event.key ===  'Backspace' ) {
+            this.state.filter.length > 0 && this.filterTags(event.key);
+            this.state.filter.length === 0 && SegmentActions.closeTagsMenu();
         } else if (event.code === "Space" || event.keyCode >= 48 && event.keyCode <= 90 ||
             event.keyCode >= 96 && event.keyCode <= 111 ||
             event.keyCode >= 186 && event.keyCode <=222){

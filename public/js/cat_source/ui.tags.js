@@ -480,79 +480,11 @@ $.extend(UI, {
         }
 	},	
 
-	// TAG AUTOCOMPLETE
-	checkAutocompleteTags: function() {
-		var added = this.getPartialTagAutocomplete();
-		$('.tag-autocomplete li.hidden').removeClass('hidden');
-		$('.tag-autocomplete li').each(function() {
-			var str = $(this).text();
-			if( str.substring(0, added.length) === added ) {
-				$(this).removeClass('hidden');
-			} else {
-				$(this).addClass('hidden');	
-			}
-		});
-		if(!$('.tag-autocomplete li:not(.hidden)').length) { // no tags matching what the user is writing
-
-			$('.tag-autocomplete').addClass('empty');
-			if(UI.preCloseTagAutocomplete) {
-				UI.closeTagAutocompletePanel();
-				return false;				
-			}
-			UI.preCloseTagAutocomplete = true;
-		} else {
-
-			$('.tag-autocomplete li.current').removeClass('current');
-			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
-			$('.tag-autocomplete').removeClass('empty');
-			UI.preCloseTagAutocomplete = false;
-		}
-	},
-    //TODO remove ??
 	closeTagAutocompletePanel: function() {
         SegmentActions.closeTagsMenu();
 		$('.tag-autocomplete-endcursor').remove();
-		UI.preCloseTagAutocomplete = false; //TODO ???
 	},
-	getPartialTagAutocomplete: function() {
-		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
-		added = (added === null)? '' : htmlDecode(added[0].replace(/<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
-		return added;
-	},
-    //TODO Remove
-	openTagAutocompletePanel: function() {
-        var self = this;
-        if(!UI.sourceTags.length) return false;
-        $('.tag-autocomplete-marker').remove();
 
-        var node = document.createElement("span");
-        node.setAttribute('class', 'tag-autocomplete-marker');
-        insertNodeAtCursor(node);
-        var endCursor = document.createElement("span");
-        endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
-        insertNodeAtCursor(endCursor);
-        var offset = $('.tag-autocomplete-marker').offset();
-        var addition = ($(':first-child', UI.editarea).hasClass('tag-autocomplete-endcursor'))? 30 : 20;
-        $('.tag-autocomplete-marker').remove();
-        UI.body.append('<div class="tag-autocomplete"><ul></ul></div>');
-        var arrayUnique = function(a) {
-            return a.reduce(function(p, c) {
-                if (p.indexOf(c) < 0) p.push(c);
-                return p;
-            }, []);
-        };
-        var sourceTagsUnique = arrayUnique(UI.sourceTags);
-        $.each(sourceTagsUnique, function(index, text) {
-            var textDecoded = UI.transformTextForLockTags(text);
-            $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + ' data-original="' + text + '">' + textDecoded + '</li>');
-        });
-        if ( window.innerHeight - offset.top < $('.tag-autocomplete').height() + 100 ) {
-            offset.top = offset.top - $('.tag-autocomplete').height() - 30;
-        }
-        $('.tag-autocomplete').css('top', offset.top + addition);
-        $('.tag-autocomplete').css('left', offset.left);
-        this.checkAutocompleteTags();
-	},
     hasSourceOrTargetTags: function ( segment ) {
         return ( $(segment).find( '.locked' ).length > 0 || (UI.sourceTags && UI.sourceTags.length > 0) )
     },
@@ -570,7 +502,6 @@ $.extend(UI, {
         return $(sourceTags).length > $(targetTags).length || !_.isEqual(sourceTags.sort(), targetTags.sort());
 
     },
-
     /**
      * Add at the end of the target the missing tags
      */
@@ -635,63 +566,6 @@ $.extend(UI, {
         }, 100);
     },
 
-    /**
-     * Auto fill the next tags in the target area based on the source tags
-     */
-    autoFillNextTagInTarget: function() {
-        //get source tags from the segment
-        var sourceClone = $( '.source', UI.currentSegment ).clone();
-        //Remove inside-attribute for ph with equiv-text tags
-        sourceClone.find('.locked.inside-attribute').remove();
-        var sourceTags = sourceClone.html()
-            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
-        sourceTags = sourceTags.map(function(elem) {
-            return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
-        });
-        if ( sourceTags.length === 0 ) {
-            return false;
-        }
-        saveSelection();
-        var targetTags = [];
-        //get target tags from the segment
-        var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
-        targetClone.find('br.end').remove();
-        targetClone.find('.locked.inside-attribute').remove();
-        targetTags = targetClone.html()
-            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
-
-        if(targetTags == null ) {
-            targetTags = [];
-        } else {
-            targetTags = targetTags.map(function(elem) {
-                return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
-            });
-        }
-
-        var nextTag = _.find( sourceTags, function ( elem, index ) {
-            //Special case for tag without id like g close tag
-            if ( elem === "&lt;/g&gt;" ) {
-                return  targetTags.indexOf(elem) === -1 || _.filter(sourceTags.slice(0,index+1), (i)=>{return i===elem;}).length > _.filter(targetTags, (i)=>{return i===elem;}).length
-            } else {
-                return  targetTags.indexOf(elem) === -1;
-            }
-        });
-
-        if ( _.isUndefined(nextTag) ) {
-            return;
-        }
-
-        var nodeToInsert = $(UI.transformTextForLockTags(nextTag));
-        insertNodeAtCursor(nodeToInsert[0]);
-        newHtml = UI.editarea.html();
-
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
-        //lock tags and run again getWarnings
-        setTimeout(function (  ) {
-            restoreSelection();
-            UI.segmentQA(UI.currentSegment);
-        });
-    },
     /**
      * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>z)
      * (Note that in the data-original attribute there are the &amp;lt instead of &lt)
