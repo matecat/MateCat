@@ -85,22 +85,36 @@ class SegmentTranslationChangeVector {
                 $this->old_translation->version_number == 0 ;
     }
 
+    /**
+     * We need to know if the record is an umodified ICE
+     * Unmodified ICEs are locked ICEs which have new version number equal to 0.
+     *
+     * @return bool
+     */
     protected  function isUnmodifiedICE() {
-        return $this->old_translation->isICE() && $this->translation->version_number == 0 ;
+        return $this->old_translation->isICE() &&               // segment is ICE
+                $this->translation->version_number == 0 &&      // version number is not changing
+                $this->old_translation->locked == 1             // in some cases ICEs are not locked. Only consider locked ICEs
+                ;
     }
 
     /**
+     * Exits reviewed state when it's not editing an ICE for the first time.
      * @return bool
      */
     public function isExitingReviewedState() {
         return $this->old_translation->isReviewedStatus() &&
                 $this->translation->isTranslationStatus() &&
-                (
-                        ( $this->old_translation->version_number > 0  && $this->old_translation->isICE() )
-                        ||
-                        ( $this->old_translation->version_number == 0 && !$this->old_translation->isICE() )
-                ) ;
+                ! $this->_isEditingICEforTheFirstTime() ;
     }
+
+    protected function _isEditingICEforTheFirstTime() {
+        return ( $this->old_translation->isICE() &&
+                $this->old_translation->version_number == 0 &&
+                $this->translation->version_number == 1
+        );
+    }
+
 
     /**
      * @return Segments_SegmentStruct
