@@ -47,28 +47,6 @@ $.extend(UI, {
 		this.tagLockEnabled = true;
         SegmentActions.enableTagLock();
 	},
-    //TODO This method do the same of UI.transformTextForLockTags that receive the text not the segment
-	markSuggestionTags: function(segment) {
-		$('.footer .suggestion_source', segment).each(function() {
-            $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-			if (UI.isFirefox) {
-				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
-			} else {
-				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
-			}
-            UI.detectTagType(this);
-        });
-		$('.footer .translation').each(function() {
-            $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-			if (UI.isFirefox) {
-				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
-			} else {
-				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
-			}
-            UI.detectTagType(this);
-        });
-
-    },
 
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
@@ -178,16 +156,16 @@ $.extend(UI, {
             });
 
             tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?"(.*?\/&gt;)/gi, function (match, text) {
-                return match.replace(text, "<span contenteditable='false' class='locked tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
+                return match.replace(text, "<span contenteditable='false' class='locked locked-inside tag-html-container-close' contenteditable='false'>\"" + text + "</span>");
             });
             tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
                 base64Array.push(text);
                 var id = phIDs.shift();
-                return "<span contenteditable='false' class='locked inside-attribute' contenteditable='false' data-original='base64:" + text+ "'><a>("+ id + ")</a>" + Base64.decode(text) + "</span>";
+                return "<span contenteditable='false' class='locked locked-inside inside-attribute' contenteditable='false' data-original='base64:" + text+ "'><a>("+ id + ")</a>" + Base64.decode(text) + "</span>";
             });
             tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
                 var base = base64Array.shift();
-                return "<span contenteditable='false' class='locked tag-html-container-open' contenteditable='false'>" + text + "base64:" + base + "</span>";
+                return "<span contenteditable='false' class='locked locked-inside tag-html-container-open' contenteditable='false'>" + text + "base64:" + base + "</span>";
             });
             // delete(base64Array);
             returnValue = tx;
@@ -238,7 +216,7 @@ $.extend(UI, {
         if (!this.tagLockEnabled || config.tagLockCustomizable ) {
             return false;
         }
-        $('span.locked', area).each(function () {
+        $('span.locked:not(.locked-inside)', area).each(function () {
             if($(this).text().startsWith('</')) {
                 $(this).addClass('endTag')
             } else {
@@ -344,6 +322,7 @@ $.extend(UI, {
             this.nearTagOnLeft(index-1, ar);
         }
     },
+
     checkTagProximity: function () {
         if(!UI.editarea || UI.editarea.html() == '') return false;
 
@@ -362,11 +341,11 @@ $.extend(UI, {
                     var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
                     var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
 
+                    UI.removeHighlightCorrespondingTags(UI.editarea);
                     if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
                         (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
-                        UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
+                        UI.highlightCorrespondingTags($(UI.editarea.find('.locked:not(.locked-inside)')[indexTags]));
                     }
-                    UI.removeHighlightCorrespondingTags(UI.editarea);
 
                     UI.numCharsUntilTagRight = null;
                     UI.numCharsUntilTagLeft = null;
