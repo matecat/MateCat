@@ -34,14 +34,13 @@ module.exports = function(grunt) {
 	    cssBase + 'jquery.powertip.min.css',
 	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
-        cssBase + 'sass/review_improved.scss',
-        cssBase + 'sass/segmentsFilter.scss',
-        cssBase + 'sass/cattool.scss',
-        cssBase + 'sass/speech2text.scss',
-        cssBase + 'sass/notifications.scss',
+        cssBase + 'sass/*.scss',
         cssBase + 'sass/commons/*.scss',
+        cssBase + 'sass/components/*/*.scss',
+        cssBase + 'sass/modals/*',
         cssBase + 'sass/vendor_mc/*',
-        cssBase + '../holidays/*.css'
+        cssBase + '../holidays/*.css',
+        cssBase + ''
     ];
     var cssWatchFilesUploadPage = [
         cssBase + 'sass/variables.scss',
