@@ -185,7 +185,7 @@ if(config.splitSegmentEnabled) {
             var oldSegment = $('#segment-' + oldSid);
             var alreadySplitted = (oldSegment.length)? false : true;
             if(onlyOne) splitGroup = [];
-            $('.test-invisible').remove();
+            $('.temp-highlight-tags').remove();
 
             SegmentActions.splitSegments(oldSid, newSegments, splitGroup, this.currentFileId);
             UI.registerFooterTabs();

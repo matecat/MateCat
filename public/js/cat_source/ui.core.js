@@ -1679,7 +1679,7 @@ UI = {
                     UI.markTagMismatch(d.details);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
-                    UI.removeHighlightCorrespondingTags(UI.getSegmentById(segment.id));
+                    UI.removeHighlightErrorsTags(UI.getSegmentById(segment.id));
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
@@ -2355,7 +2355,7 @@ UI = {
     clickOnTranslatedButton: function (button) {
         var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
         //??
-        $('.test-invisible').remove();
+        $('.temp-highlight-tags').remove();
 
         // UI.setSegmentModified( UI.currentSegment, false ) ;
 

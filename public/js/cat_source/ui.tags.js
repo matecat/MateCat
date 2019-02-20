@@ -330,12 +330,12 @@ $.extend(UI, {
         if(selection.rangeCount < 1) return false;
         var range = selection.getRangeAt(0);
         if(!range.collapsed) return true;
-        UI.editarea.find('.test-invisible').remove();
-        pasteHtmlAtCaret('<span class="test-invisible"></span>');
+        UI.editarea.find('.temp-highlight-tags').remove();
+        pasteHtmlAtCaret('<span class="temp-highlight-tags"/>');
         var htmlEditarea = $.parseHTML(UI.editarea.html());
         if (htmlEditarea) {
             $.each(htmlEditarea, function (index) {
-                if($(this).hasClass('test-invisible')) {
+                if($(this).hasClass('temp-highlight-tags')) {
                     UI.numCharsUntilTagRight = 0;
                     UI.numCharsUntilTagLeft = 0;
                     var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
@@ -349,14 +349,14 @@ $.extend(UI, {
 
                     UI.numCharsUntilTagRight = null;
                     UI.numCharsUntilTagLeft = null;
-                    UI.editarea.find('.test-invisible').remove();
+                    UI.editarea.find('.temp-highlight-tags').remove();
                     UI.editarea.get(0).normalize();
                     return false;
                 }
             });
         }
         // TODO test.inivisible break some doms with text
-        $('body').find('.test-invisible').remove();
+        $('body').find('.temp-highlight-tags').remove();
 
 
     },
@@ -417,8 +417,12 @@ $.extend(UI, {
         }
         $(el).addClass('highlight');
     },
+
     removeHighlightCorrespondingTags: function (segment$) {
         segment$.find('.locked.highlight').removeClass('highlight');
+    },
+
+    removeHighlightErrorsTags: function (segment$) {
         segment$.find('.locked.mismatch').removeClass('mismatch');
         segment$.find('.locked.order-error').removeClass('order-error');
     },
