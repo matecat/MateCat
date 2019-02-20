@@ -329,9 +329,16 @@ $.extend(UI, {
         var selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
         var range = selection.getRangeAt(0);
-        if(!range.collapsed) return true;
         UI.editarea.find('.temp-highlight-tags').remove();
-        pasteHtmlAtCaret('<span class="temp-highlight-tags"/>');
+        if(!range.collapsed) {
+            if ( UI.editarea.find( '.locked.selected' ).length > 0 ) {
+                UI.editarea.find( '.locked.selected' ).after('<span class="temp-highlight-tags"/>');
+            } else {
+                return true
+            }
+        } else {
+            pasteHtmlAtCaret('<span class="temp-highlight-tags"/>');
+        }
         var htmlEditarea = $.parseHTML(UI.editarea.html());
         if (htmlEditarea) {
             $.each(htmlEditarea, function (index) {

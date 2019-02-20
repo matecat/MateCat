@@ -363,19 +363,20 @@ $.extend(UI, {
             '.editor .source .locked a,.editor .editarea .locked a', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			var elem = $(this).hasClass('locked') ? this : this.parentNode;
-            if($(elem).hasClass('selected')) {
-                $(elem).removeClass('selected');
-                setCursorPosition(elem, 'end');
+			var elem = $(this).hasClass('locked') && !$(this).hasClass('inside-attribute')? $(this) : $(this).closest('.locked:not(.inside-attribute)');
+            if( elem.hasClass('selected') ) {
+                elem.removeClass('selected');
+                setCursorPosition(elem[0], 'end');
             } else {
-                setCursorPosition(elem);
-                selectText(elem);
+                setCursorPosition(elem[0]);
+                selectText(elem[0]);
                 UI.removeSelectedClassToTags();
-                $(elem).addClass('selected');
+                elem.addClass('selected');
 				if(!UI.body.hasClass('tagmode-default-extended')) {
 				    $('.editor .tagModeToggle').click();
                 }
             }
+            UI.checkTagProximity();
 
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
             e.preventDefault();
