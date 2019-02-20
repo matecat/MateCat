@@ -41,8 +41,17 @@ $.extend(UI, {
             UI.gotoNextSegment();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
-            $('.editor .next-untranslated:not(.disabled)').click();
-            $('.editor .next-unapproved:not(.disabled)').click();
+            if ( config.isReview ) {
+                $('.editor .next-unapproved:not(.disabled)').click();
+            } else {
+                if ( $('.editor .next-untranslated:not(.disabled)').length > 0 ) {
+                    $('.editor .next-untranslated:not(.disabled)').click();
+                } else if ( $('.editor .translated:not(.disabled)').length > 0 ) {
+                    $('.editor .translated').click();
+                } else if ( $('.editor .guesstags').length > 0 ) {
+                    $('.editor .guesstags').click();
+                }
+            }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             if ( config.isReview ) {
