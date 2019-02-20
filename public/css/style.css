@@ -3780,6 +3780,7 @@ span.added .locked {
 .editor .editarea .locked.highlight {
     border-radius: 8px;
     border: 2px solid #7EB30C;
+    padding: 1px;
 }
 
 .d-open {
