@@ -78,7 +78,9 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
-            SegmentActions.showTagsMenu(UI.getSegmentId(UI.currentSegment));
+            if ((UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment)) {
+                SegmentActions.showTagsMenu(UI.getSegmentId(UI.currentSegment));
+            }
         }).on('keydown.shortcuts', null, "ctrl+u", function(e) {
             // to prevent the underline shortcut
             e.preventDefault();
