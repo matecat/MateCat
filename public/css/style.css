@@ -3756,7 +3756,6 @@ span.added .locked {
 .locked.mismatch-old .locked {
     background-color: #fdeae2;
     color: #e1595d;
-    border: 1px solid #e1565a;
     box-shadow: inset 0 0 0 2px  #e1565a;
 }
 

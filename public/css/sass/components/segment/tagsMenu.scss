@@ -1,11 +1,16 @@
 .tags-auto-complete-menu {
-
+    cursor: pointer;
+    border-color: #96C8DA;
     .item {
         max-width: 200px;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
         padding: 9px !important;
+        font-size: 14px;
+        &:hover {
+            background: rgba(0, 0, 0, 0.05) !important;
+        }
     }
     .item.added-tag {
         color: #5dba62 !important;
@@ -15,13 +20,27 @@
     }
     .item.missing-tag {
         color: #E1565A !important;
+        font-size: 16px;
         & a {
             color: #E1565A !important;
         }
     }
-    .item {
-        padding: 0;
-        font-size: 14px;
-    }
 
+    
+}
+.ui.vertical.menu {
+    .head-tag-list {
+        padding: 10px;
+        line-height: 17px;
+        font-weight: bold;
+    }
+}
+.target .locked.mismatch {
+    background-color: #fdeae2;
+    color: #e1595d;
+    box-shadow: inset 0 0px 0 2px #e1565a;
+    font-weight: 100;
+    padding: 4px 6px;
+    position: relative;
+    top: -1px;
 }
