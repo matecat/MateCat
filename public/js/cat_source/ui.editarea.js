@@ -284,7 +284,7 @@ $.extend( UI, {
         }, 100);
     },
     keyPressEditAreaEventHandler: function (e, sid) {
-        if( (e.which == 60) && (UI.tagLockEnabled) ) { // opening tag sign
+        if( (e.which == 60) && (UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment)) { // opening tag sign
             SegmentActions.showTagsMenu(sid);
         }
     },

@@ -23,7 +23,7 @@ class CountWordController extends KleinController {
         $this->language = !empty( $this->request->language ) ? $this->request->language : 'en-US';
 
         if ( empty( $this->request->text ) ) {
-            throw new Exception( "Text field must to be sent", 400 );
+            throw new Exception( "Invalid text field", 400 );
         }
 
         $langs = Langs_Languages::getInstance();
