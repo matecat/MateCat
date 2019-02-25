@@ -176,9 +176,9 @@ class Features {
              * Try to load MateCat core plugins, so they can install it's own routes
              *
              * @deprecated because all MateCat internal route should not have a "plugins" namespace in the route, but they should have it's own controllers defined
-             *             Ex: http://xxxx/plugins/review_improved/quality_report/xxx/xxxxxxx
+             *             Ex: http://xxxx/plugins/review_extended/quality_report/xxx/xxxxxxx
              *             should be something like
-             *             http://xxxx/review_improved/quality_report/xxx/xxxxxxx
+             *             http://xxxx/review_extended/quality_report/xxx/xxxxxxx
              */
             $cls = static::getPluginClass( $plugin_code );
 

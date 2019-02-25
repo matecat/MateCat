@@ -6,10 +6,7 @@ use AbstractControllers\IController;
 use AMQHandler;
 use API\V2\Exceptions\AuthenticationError;
 use BasicFeatureStruct;
-use catController;
-use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
-use Exception;
 use Exceptions\ValidationError;
 use Features;
 use Features\Dqf\Model\RevisionChildProject;
@@ -19,15 +16,9 @@ use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Features\Dqf\Utils\Metadata;
 use Features\Dqf\Utils\ProjectMetadata;
 use Features\ProjectCompletion\CompletionEventStruct;
-use Features\ReviewImproved\Model\ArchivedQualityReportModel;
+use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use INIT;
-use Jobs\MetadataDao;
-use Jobs_JobStruct;
 use Klein\Klein;
-use Klein\Request;
-use Klein\ServiceProvider;
-use Log;
-use LQA\ChunkReviewDao;
 use Monolog\Logger;
 use PHPTALWithAppend;
 use Projects_ProjectStruct;
@@ -46,7 +37,7 @@ class Dqf extends BaseFeature {
 
     public static $dependencies = [
             Features::PROJECT_COMPLETION,
-            Features::REVIEW_IMPROVED,
+            Features::REVIEW_EXTENDED,
             Features::TRANSLATION_VERSIONS
     ] ;
 
@@ -269,12 +260,12 @@ class Dqf extends BaseFeature {
             return ;
         }
 
-        // At this point we are sure ReviewImproved::loadAndValidateModelFromJsonFile was called already
+        // At this point we are sure ReviewExtended::loadAndValidateModelFromJsonFile was called already
         // @see FeatureSet::getSortedFeatures
 
-        if ( $projectStructure['features']['review_improved']['__meta']['qa_model'] ) {
+        if ( $projectStructure['features']['review_extended']['__meta']['qa_model'] ) {
             // override QA model
-            $projectStructure['features']['review_improved']['__meta']['qa_model'] = json_decode(
+            $projectStructure['features']['review_extended']['__meta']['qa_model'] = json_decode(
                     file_get_contents( INIT::$ROOT . '/inc/dqf/qa_model.json' ), true
             );
         }

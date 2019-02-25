@@ -50,28 +50,11 @@ class ReviewExtended extends AbstractRevisionFeature {
 
     }
 
-    /**
-     * @param SegmentTranslationChangeVector $translation
-     *
-     * @return SegmentTranslationModel
-     */
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
-        return new SegmentTranslationModel( $translation );
-    }
-
     public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
         $model = new SegmentTranslationModel( $translation );
         $model->addOrSubtractCachedReviewedWordsCount();
         // we need to recount score globally because of autopropagation.
         $model->recountPenaltyPoints();
-    }
-
-    public function getChunkReviewModel(ChunkReviewStruct $chunk_review) {
-        return new ChunkReviewModel( $chunk_review );
-    }
-
-    public function getTranslationIssueModel($id_job, $password, $issue) {
-        return new TranslationIssueModel( $id_job, $password, $issue );
     }
 
 }

@@ -20,6 +20,7 @@ use FeatureSet;
 use Langs_LanguageDomains;
 use Langs_Languages;
 use ManageUtils;
+use RevisionFactory;
 use Utils;
 use WordCount_Struct;
 
@@ -112,9 +113,7 @@ class Chunk extends \API\V2\Json\Chunk {
                 $quality_overall = 'fail';
             }
 
-            /** TODO: tricking the IDE, this is actually to be changed into an interface  */
-            /** @var ReviewExtended\ChunkReviewModel $chunkReviewModel */
-            $chunkReviewModel = array_filter( $featureSet->run('getChunkReviewModel', $chunkReview ) )[ 0 ] ;
+            $chunkReviewModel = RevisionFactory::getInstance()->getChunkReviewModel( $chunkReview ) ;
 
             $score = number_format( $chunkReviewModel->getScore(), 2, ".", "");
 

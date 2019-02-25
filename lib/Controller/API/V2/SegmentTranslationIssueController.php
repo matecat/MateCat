@@ -6,6 +6,7 @@ use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use Features\ReviewExtended\TranslationIssueModel;
 use LQA\EntryDao as EntryDao ;
 use Database;
+use RevisionFactory;
 
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 
@@ -110,11 +111,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {
         $project = \Projects_ProjectDao::findByJobId($this->request->id_job);
         $this->featureSet->loadForProject($project);
-        $returnable = array_filter( $this->featureSet->run('getTranslationIssueModel', $id_job, $password, $issue ) );
 
-        /** @var TranslationIssueModel $model */
-        $model = $returnable [ 0 ] ;
-        return $model ;
+        return RevisionFactory::getInstance()->getTranslationIssueModel( $id_job, $password, $issue ) ;
     }
 
     protected function afterConstruct() {
