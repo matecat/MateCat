@@ -240,7 +240,10 @@ class TagsMenu extends React.Component {
         setTimeout(function () {
             restoreSelection();
         });
-        UI.segmentQA(UI.currentSegment);
+        setTimeout(function () {
+            UI.segmentQA(UI.currentSegment);
+        });
+
     }
 
     selectTag(tag) {
