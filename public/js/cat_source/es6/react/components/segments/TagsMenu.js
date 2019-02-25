@@ -187,17 +187,29 @@ class TagsMenu extends React.Component {
 
 
     openTagAutocompletePanel() {
+
+        if ($('.selected', UI.editarea).length) {
+            let range =  window.getSelection().getRangeAt(0);
+            setCursorAfterNode(range, $('.selected', UI.editarea)[0]);
+        }
         var endCursor = document.createElement("span");
         endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
         insertNodeAtCursor(endCursor);
+
     }
 
     chooseTagAutocompleteOption(tag) {
         setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
         saveSelection();
-
         // Todo: refactor this part
         let editareaClone = UI.editarea.clone();
+        if ($('.selected', $(editareaClone)).length) {
+            if ( $('.selected', $(editareaClone)).hasClass('inside-attribute') ) {
+                $('.selected', $(editareaClone)).parent('span.locked').remove();
+            } else {
+                $('.selected', $(editareaClone)).remove();
+            }
+        }
         let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(this.state.filter) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
 
         editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
@@ -350,7 +362,7 @@ class TagsMenu extends React.Component {
     scrollElementIntoViewIfNeeded(domNode) {
         var containerDomNode = ReactDOM.findDOMNode( this.menu );
         $(containerDomNode).animate({
-            scrollTop: $(domNode)[0].offsetTop - 20
+            scrollTop: $(domNode)[0].offsetTop - 60
         }, 150);
     }
 
