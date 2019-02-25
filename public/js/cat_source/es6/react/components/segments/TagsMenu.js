@@ -125,7 +125,7 @@ class TagsMenu extends React.Component {
                 let textDecoded = UI.transformTextForLockTags(item);
                 let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
                 if (this.state.filter !== "") {
-                    label = label.replace(htmlEncode(this.state.filter), "<b>" + htmlEncode(this.state.filter) + "</b>");
+                    label = label.replace(htmlEncode(this.state.filter), "<mark>" + htmlEncode(this.state.filter) + "</mark>");
                 } else {
                     textDecoded = UI.transformTextForLockTags(item);
                 }
@@ -155,7 +155,7 @@ class TagsMenu extends React.Component {
                 let textDecoded = UI.transformTextForLockTags(item);
                 let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
                 if ( this.state.filter !== "" ) {
-                    label = label.replace(htmlEncode(this.state.filter), "<b>" + htmlEncode(this.state.filter) + "</b>");
+                    label = label.replace(htmlEncode(this.state.filter), "<mark>" + htmlEncode(this.state.filter) + "</mark>");
                 } else {
                     textDecoded = UI.transformTextForLockTags(item);
                 }
