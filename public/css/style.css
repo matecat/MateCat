@@ -3701,13 +3701,14 @@ span.locked.tag-html-container-close {
     border-radius: 7px;
     padding: 3px 4px 3px 2px;
     vertical-align: middle;
+    cursor: pointer;
+    transition: 0.3s ease;
 }
 
 
 .editarea .locked:hover,
 .source .locked:hover {
     background-color: #dddff0;
-    transition: 0.3s ease;
 }
 
 
@@ -3744,7 +3745,6 @@ span.added .locked {
 .source .locked.order-error {
     background-color: #fff4e3;
     color: #ea862c;
-    border: 1px solid #ea862c;
     box-shadow: inset 0 0 0 2px #ea862c;
 }
 
@@ -3772,7 +3772,9 @@ span.added .locked {
 .locked.order-error.selected,
 .editarea .locked.mismatch.selected,
 .source .locked.mismatch.selected {
+    transition: 0.3s ease;
     background-color: #c6dcfa !important;
+    cursor: grab !important;
 }
 
 .editor .cc-search .input .locked {
