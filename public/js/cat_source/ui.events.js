@@ -274,8 +274,9 @@ $.extend(UI, {
                 UI.setEditingSegment( null );
                 UI.closeSegment(UI.currentSegment, 1);
             };
-
-            UI.removeSelectedClassToTags();
+            if( !UI.tagMenuOpen ) {
+                UI.removeSelectedClassToTags();
+            }
             if ( $(e.target).parents('body') ) return ; // detatched from DOM
             if ( eventFromReact(e) ) return;
 
