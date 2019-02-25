@@ -110,57 +110,79 @@ class TagsMenu extends React.Component {
 
     getItemsMenuHtml() {
         let menuItems = [];
+        let missingItems = [];
+        let addedItems = [];
         let textDecoded;
         let tagIndex = 0;
-
-        _.each(this.state.missingTags, ( item, index ) => {
-            if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
-                return;
-            }
-            let textDecoded = UI.transformTextForLockTags(item);
-            let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
-            if ( this.state.filter !== "" ) {
-                label = label.replace(htmlEncode(this.state.filter), "<b>" + htmlEncode(this.state.filter) + "</b>");
-            } else {
-                textDecoded = UI.transformTextForLockTags(item);
-            }
-
-            let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
-            let indexTag = _.clone(tagIndex);
-            menuItems.push(<div className={"item missing-tag " + classSelected} key={"missing"+ _.clone(tagIndex)} data-original="item"
-                                dangerouslySetInnerHTML={ this.allowHTML(label) }
-                                onClick={this.selectTag.bind(this, textDecoded)}
-                                ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
-                />
+        if ( this.state.missingTags.length > 0 ) {
+            missingItems.push(<div className="head-tag-list"> Missing source <span
+                className="locked monad startTag mismatch">tags</span> in the target </div>
             );
-            tagIndex++;
-        });
-        _.each(this.state.addedTags, ( item, index ) => {
-            if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
-                return;
-            }
-            let textDecoded = UI.transformTextForLockTags(item);
-            let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
-            if ( this.state.filter !== "" ) {
-                label = label.replace(htmlEncode(this.state.filter), "<b>" + htmlEncode(this.state.filter) + "</b>");
-            } else {
-                textDecoded = UI.transformTextForLockTags(item);
-            }
+            _.each(this.state.missingTags, (item, index) => {
+                if (this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1) {
+                    return;
+                }
+                let textDecoded = UI.transformTextForLockTags(item);
+                let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
+                if (this.state.filter !== "") {
+                    label = label.replace(htmlEncode(this.state.filter), "<b>" + htmlEncode(this.state.filter) + "</b>");
+                } else {
+                    textDecoded = UI.transformTextForLockTags(item);
+                }
 
-            let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
-            let indexTag = _.clone(tagIndex);
-            menuItems.push(<div className={"item added-tag " + classSelected} key={"missing"+ _.clone(tagIndex)} data-original="item"
-                                dangerouslySetInnerHTML={ this.allowHTML(label) }
-                                onClick={this.selectTag.bind(this, textDecoded)}
-                                ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
-                />
-            );
-            tagIndex++;
-        });
-        if ( menuItems.length === 0 ) {
+                let classSelected = (this.state.selectedItem === tagIndex) ? "active" : "";
+                let indexTag = _.clone(tagIndex);
+                missingItems.push(<div className={"item missing-tag " + classSelected}
+                                       key={"missing" + _.clone(tagIndex)}
+                                       data-original="item"
+                                       dangerouslySetInnerHTML={this.allowHTML(label)}
+                                       onClick={this.selectTag.bind(this, textDecoded)}
+                                       ref={(elem) => {
+                                           this.tagsRefs["item" + indexTag] = elem;
+                                       }}
+                    />
+                );
+                tagIndex++;
+            });
+        }
+        if ( this.state.addedTags.length > 0 ) {
+            addedItems.push(<div className="head-tag-list"> Added tags</div>);
+            _.each(this.state.addedTags, ( item, index ) => {
+
+                if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
+                    return;
+                }
+                let textDecoded = UI.transformTextForLockTags(item);
+                let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
+                if ( this.state.filter !== "" ) {
+                    label = label.replace(htmlEncode(this.state.filter), "<b>" + htmlEncode(this.state.filter) + "</b>");
+                } else {
+                    textDecoded = UI.transformTextForLockTags(item);
+                }
+
+                let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
+                let indexTag = _.clone(tagIndex);
+                addedItems.push(<div className={"item added-tag " + classSelected} key={"missing"+ _.clone(tagIndex)} data-original="item"
+                                    dangerouslySetInnerHTML={ this.allowHTML(label) }
+                                    onClick={this.selectTag.bind(this, textDecoded)}
+                                    ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
+                    />
+                );
+                tagIndex++;
+            });
+        }
+
+        if ( missingItems.length === 0 && addedItems.length === 0 ) {
             menuItems.push(<div className={"item added-tag no-results"} key={0} data-original="item">No results</div> );
         }
-        return menuItems;
+        return <div className="ui vertical menu">
+            <div>
+            {missingItems}
+            </div>
+            <div>
+            {addedItems}
+            </div>
+        </div>;
     }
 
 
@@ -337,8 +359,8 @@ class TagsMenu extends React.Component {
         let style = {
             position: "fixed",
             zIndex: 2,
-            maxHeight: "300px",
-            overflowX: "auto",
+            maxHeight: "30%",
+            overflowY: "auto",
             top: coord.y,
             left: coord.x
         };
@@ -346,9 +368,7 @@ class TagsMenu extends React.Component {
         let tags = this.getItemsMenuHtml();
         return <div className="tags-auto-complete-menu" style={style}
                     ref={(menu)=>{this.menu=menu;}}>
-                <div className="ui vertical menu">
                     {tags}
-                </div>
         </div>;
     }
 }

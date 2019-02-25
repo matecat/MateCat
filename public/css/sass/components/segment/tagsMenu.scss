@@ -1,27 +1,69 @@
-.tags-auto-complete-menu {
+.target {
+    .tags-auto-complete-menu {
+        cursor: pointer;
+        border: 1px solid #96C8DA !important;
+        background: #FFF;
+        box-sizing: border-box;
+        max-width: 250px;
+        border-radius: 2px;
+        .ui.vertical.menu {
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
+            box-shadow: none;
+            border: none;
+            .menu-container {
 
-    .item {
-        max-width: 200px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        padding: 9px !important;
-    }
-    .item.added-tag {
-        color: #5dba62 !important;
-        & a {
-            color: #5dba62 !important;
+            }
+            .head-tag-list {
+                position: -webkit-sticky;
+                position: sticky;
+                top: 0;
+                padding: 10px;
+                font-weight: bold;
+                line-height: 17px;
+                border-bottom: 1px solid #e0e3e8;
+                background: white;
+                z-index: 1;
+            }
+
+            .item {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                padding: 9px !important;
+                font-size: 14px;
+                white-space: nowrap;
+                &:before {
+                    background: #FFF;
+                }
+
+                &:hover {
+                    background: rgba(0, 0, 0, 0.05) !important;
+                }
+                &.added-tag {
+                    color: #5dba62 !important;
+
+                    & a {
+                        color: #5dba62 !important;
+                    }
+                }
+                &.missing-tag {
+                    color: #E1565A !important;
+                    font-size: 16px;
+
+                    & a {
+                        color: #E1565A !important;
+                    }
+                }
+            }
         }
     }
-    .item.missing-tag {
-        color: #E1565A !important;
-        & a {
-            color: #E1565A !important;
-        }
+    .locked.mismatch {
+        background-color: #fdeae2;
+        color: #e1595d;
+        box-shadow: inset 0 0px 0 2px #e1565a;
+        font-weight: 100;
+        padding: 4px 6px;
+        position: relative;
+        top: -1px;
     }
-    .item {
-        padding: 0;
-        font-size: 14px;
-    }
-
 }
