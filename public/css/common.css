@@ -813,6 +813,10 @@ color:#333;}
 .options-box.dqf_options_box {
     display: none;
 }
+
+.options-box.multi-match p {
+    height: 60px;
+}
 .advanced-options-box .options-box:last-child {
     border-bottom: 0;
 }

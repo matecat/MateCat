@@ -22,6 +22,7 @@
             UI.initOptionsTip();
             UI.initTmxTooltips();
             UI.checkTMKeysUpdateChecks();
+            UI.checkCrossLanguageSettings();
             $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
                 e.preventDefault();
                 UI.closeTMPanel();
@@ -354,6 +355,8 @@
                     e.preventDefault();
                     UI.clickOnShareButton($(this).parent().find('.share-button'));
                 }
+            }).on('change', '#multi-match-1, #multi-match-2', function ( ) {
+                UI.storeMultiMatchLangs();
             });
             $(".popup-tm.slide-panel").on("scroll", function(){
                 if (!isVisible($(".active-tm-container thead"))) {
@@ -2167,6 +2170,43 @@
                     UI.showErrorOnActiveTMTable('There was a problem sharing the key, try again or contact the support.');
                 }
             });
+        },
+
+        storeMultiMatchLangs: function (  ) {
+            var primary = ( $('#multi-match-1').val() ) ? $('#multi-match-1').val() : undefined;
+            var secondary = ( $('#multi-match-2').val() ) ? $('#multi-match-2').val() : undefined;
+            if ( primary ) {
+                $('#multi-match-2').removeAttr('disabled');
+            } else {
+                $('#multi-match-2').attr('disabled', true);
+                $('#multi-match-2').val('');
+                secondary = undefined;
+            }
+            UI.crossLanguageSettings = {primary: primary, secondary: secondary};
+            localStorage.setItem("multiMatchLangs", JSON.stringify(UI.crossLanguageSettings));
+            if ( UI.getContribution ) {
+                if ( primary ) {
+                    SegmentActions.modifyTabVisibility( 'multiMatches', true );
+                    $( 'section.loaded' ).removeClass( 'loaded' );
+                    UI.getContribution( UI.currentSegment, 0 );
+                } else {
+                    SegmentActions.modifyTabVisibility( 'multiMatches', false );
+                }
+            }
+        },
+
+        checkCrossLanguageSettings: function (  ) {
+            var settings = localStorage.getItem("multiMatchLangs");
+            if ( settings ) {
+                var selectPrimary = $('#multi-match-1');
+                var selectSecondary = $('#multi-match-2');
+                settings = JSON.parse(settings)
+                UI.crossLanguageSettings = settings;
+                selectPrimary.val(settings.primary);
+                selectSecondary.val(settings.secondary);
+                if ( settings.primary )
+                    selectSecondary.removeAttr('disabled');
+            }
         }
 
     });

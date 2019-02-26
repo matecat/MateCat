@@ -45,7 +45,9 @@
     "sprintf-js": "^1.1.1",
     "escape-string-regexp": "^1.0.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt-notify": "^0.4.5"
+  },
   "babel": {
     "presets": [
       "env",
