@@ -1518,6 +1518,7 @@ section.loaded .submenu {
     z-index: 1;
     border-bottom: 1px solid #cccccc;
     cursor: pointer;
+    user-select: none;
 }
 
 .submenu li.active {
@@ -1623,7 +1624,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor.matches .overflow {
-    min-height: 65px;
+    min-height: 50px;
 }
 .sub-editor.matches .overflow span.loader {
     bottom: 20px;

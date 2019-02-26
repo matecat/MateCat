@@ -63,6 +63,7 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     public $fromTarget = false;
 
 
+    public $crossLangTargets = [] ;
 
 
     # Private members

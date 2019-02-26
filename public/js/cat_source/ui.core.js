@@ -712,9 +712,9 @@ UI = {
 			this.renderFiles(d.data.files, where, false);
 
 			// if getting segments before, UI points to the segment triggering the event
-			// if ((where == 'before') && (numsegToAdd)) {
-			// 	this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
-			// }
+			if ((where == 'before') && (numsegToAdd)) {
+				this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
+			}
 
 			if (this.body.hasClass('searchActive')) {
 				segLimit = (where == 'before') ? firstSeg : lastSeg;
@@ -927,9 +927,12 @@ UI = {
 	renderUntranslatedOutOfView: function() {
 		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
-		window.location.hash = this.nextUntranslatedSegmentId;
+		var segmentToScroll = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
+        window.location.hash = segmentToScroll;
         UI.unmountSegments();
-		this.render();
+		this.render({
+            segmentToScroll: segmentToScroll
+        });
 	},
 	reloadWarning: function() {
 		this.renderUntranslatedOutOfView();
@@ -2387,7 +2390,7 @@ UI = {
             if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
             } else {
 
-                if (!UI.noMoreSegmentsAfter) {
+                if (UI.noMoreSegmentsAfter) {
                     UI.reloadWarning();
                 }
             }
