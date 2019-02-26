@@ -33,9 +33,11 @@
                 text-overflow: ellipsis;
                 overflow: hidden;
                 padding: 9px !important;
+                width: 100% !important;
                 font-size: 14px;
                 white-space: nowrap;
                 cursor: pointer;
+
                 &:before {
                     background: #FFF;
                 }
