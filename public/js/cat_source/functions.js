@@ -510,6 +510,7 @@ function setBrowserHistoryBehavior() {
 
         function updateAppByPopState() {
             var segment = UI.getSegmentById( UI.parsedHash.segmentId );
+            if ( UI.currentSegmentId === UI.parsedHash.segmentId ) return;
             if ( segment.length ) {
                 UI.gotoSegment( UI.parsedHash.segmentId );
             } else {

@@ -11,7 +11,6 @@ class SegmentsContainer extends React.Component {
 
     constructor(props) {
         super(props);
-        console.time("Time: SegmentsContainer Mount/Update"+this.props.fid);
         this.state = {
             segments : [],
             splitGroup: [],

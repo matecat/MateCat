@@ -927,9 +927,12 @@ UI = {
 	renderUntranslatedOutOfView: function() {
 		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
-		window.location.hash = this.nextUntranslatedSegmentId;
+		var segmentToScroll = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
+        window.location.hash = segmentToScroll;
         UI.unmountSegments();
-		this.render();
+		this.render({
+            segmentToScroll: segmentToScroll
+        });
 	},
 	reloadWarning: function() {
 		this.renderUntranslatedOutOfView();
@@ -2383,7 +2386,7 @@ UI = {
             if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
             } else {
 
-                if (!UI.noMoreSegmentsAfter) {
+                if (UI.noMoreSegmentsAfter) {
                     UI.reloadWarning();
                 }
             }
