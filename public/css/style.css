@@ -42,7 +42,8 @@ header .wrapper {
     padding: 5px 0px;
 }
 
-.text .item,
+.text .source.item,
+.text .target.item,
 .white li {
     width: 45.5%;
     table-layout: fixed;
@@ -2743,7 +2744,7 @@ body.rtl-target .editor .editarea span {
     float: left;
     width: 99%;
     height: 100%;
-    padding-bottom: 0;
+    padding-bottom: 5px;
     padding-top: 5px;
     font-size: 16px;
 
@@ -3685,7 +3686,7 @@ span.locked.tag-html-container-close {
     font-style: italic;
     background-color: #eef0f3;
     border-radius: 7px;
-    padding: 3px;
+    padding: 3px 4px 3px 2px;
 }
 
 .opened .editarea .locked,
@@ -3699,14 +3700,16 @@ span.locked.tag-html-container-close {
     font-style: italic;
     background-color: #f2f4f7;
     border-radius: 7px;
-    padding: 3px;
+    padding: 3px 4px 3px 2px;
+    vertical-align: middle;
+    cursor: pointer;
+    transition: 0.3s ease;
 }
 
 
 .editarea .locked:hover,
 .source .locked:hover {
     background-color: #dddff0;
-    transition: 0.3s ease;
 }
 
 
@@ -3743,7 +3746,7 @@ span.added .locked {
 .source .locked.order-error {
     background-color: #fff4e3;
     color: #ea862c;
-    border: 1px solid #ea862c;
+    box-shadow: inset 0 0 0 2px #ea862c;
 }
 
 .editor .editarea .locked.mismatch,
@@ -3754,7 +3757,7 @@ span.added .locked {
 .locked.mismatch-old .locked {
     background-color: #fdeae2;
     color: #e1595d;
-    border: 1px solid #e1565a;
+    box-shadow: inset 0 0 0 2px  #e1565a;
 }
 
 .editor .editarea .locked.order-error:hover,
@@ -3770,7 +3773,9 @@ span.added .locked {
 .locked.order-error.selected,
 .editarea .locked.mismatch.selected,
 .source .locked.mismatch.selected {
+    transition: 0.3s ease;
     background-color: #c6dcfa !important;
+    cursor: grab !important;
 }
 
 .editor .cc-search .input .locked {
@@ -3779,7 +3784,7 @@ span.added .locked {
 
 .editor .editarea .locked.highlight {
     border-radius: 8px;
-    border: 2px solid #7EB30C;
+    box-shadow: inset 0px 0 0 2px #7EB30C;
 }
 
 .d-open {
@@ -3796,7 +3801,9 @@ span.added .locked {
         margin-right: 22px
     }
 
-    .text .item, .white li {
+    .text .source.item,
+    .text .target.item,
+    .white li {
         width: 46% !important;
     }
 
@@ -3838,7 +3845,9 @@ span.added .locked {
         margin-right: 16px
     }
 
-    .text .item, .white li {
+    .text .source.item,
+    .text .target.item,
+    .white li {
         width: 45.3% !important
     }
 
@@ -3949,7 +3958,9 @@ span.added .locked {
         width: 200px !important
     }
 
-    .text .item, .white li, .track-changes {
+    .text .source.item,
+    .text .target.item,
+    .white li, .track-changes {
         width: 44% !important
     }
 

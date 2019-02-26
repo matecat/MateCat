@@ -75,12 +75,13 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
-        })
-        //     .on('keydown.shortcuts', null, UI.shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
-        //     e.preventDefault();
-        //     UI.autoFillNextTagInTarget()
-        // })
-            .on('keydown.shortcuts', null, "ctrl+u", function(e) {
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if ((UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment)) {
+                SegmentActions.showTagsMenu(UI.getSegmentId(UI.currentSegment));
+            }
+        }).on('keydown.shortcuts', null, "ctrl+u", function(e) {
             // to prevent the underline shortcut
             e.preventDefault();
         }).on('keydown.shortcuts', null, "ctrl+b", function(e) {
@@ -171,10 +172,6 @@ $.extend(UI, {
 			UI.addWord(UI.selectedMisspelledElement.text());
 		}).on('click', '.reloadPage', function() {
 			location.reload(true);
-		}).on('click', '.tag-autocomplete li', function(e) {
-			e.preventDefault();
-			UI.chooseTagAutocompleteOption($(this));
-
 		});
 
 		$(window).on('mousedown', function(e) {
@@ -277,8 +274,9 @@ $.extend(UI, {
                 UI.setEditingSegment( null );
                 UI.closeSegment(UI.currentSegment, 1);
             };
-
-            UI.removeSelectedClassToTags();
+            if( !UI.tagMenuOpen ) {
+                UI.removeSelectedClassToTags();
+            }
             if ( $(e.target).parents('body') ) return ; // detatched from DOM
             if ( eventFromReact(e) ) return;
 
@@ -300,7 +298,8 @@ $.extend(UI, {
                 if ( UI.body.hasClass('editing') &&
                     !UI.body.hasClass('side-tools-opened') &&
 					!UI.body.hasClass("side-popup" ) &&
-                    !UI.body.hasClass('search-open')) {
+                    !UI.body.hasClass('search-open') &&
+                    !UI.tagMenuOpen ) {
                         UI.setEditingSegment( null );
                         UI.closeSegment(UI.currentSegment, 1);
                         UI.closeTagAutocompletePanel();
@@ -367,19 +366,20 @@ $.extend(UI, {
             '.editor .source .locked a,.editor .editarea .locked a', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			var elem = $(this).hasClass('locked') ? this : this.parentNode;
-            if($(elem).hasClass('selected')) {
-                $(elem).removeClass('selected');
-                setCursorPosition(elem, 'end');
+			var elem = $(this).hasClass('locked') && !$(this).hasClass('inside-attribute')? $(this) : $(this).closest('.locked:not(.inside-attribute)');
+            if( elem.hasClass('selected') ) {
+                elem.removeClass('selected');
+                setCursorPosition(elem[0], 'end');
             } else {
-                setCursorPosition(elem);
-                selectText(elem);
+                setCursorPosition(elem[0]);
+                selectText(elem[0]);
                 UI.removeSelectedClassToTags();
-                $(elem).addClass('selected');
+                elem.addClass('selected');
 				if(!UI.body.hasClass('tagmode-default-extended')) {
 				    $('.editor .tagModeToggle').click();
                 }
             }
+            UI.checkTagProximity();
 
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
             e.preventDefault();

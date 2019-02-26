@@ -1,0 +1,76 @@
+.target {
+    .tags-auto-complete-menu {
+        background: #FFF;
+        box-sizing: border-box;
+        max-width: 250px;
+        border-radius: 2px;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        .ui.vertical.menu {
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
+            box-shadow: none;
+            border: none;
+            .menu-container {
+
+            }
+            .head-tag-list {
+                position: -webkit-sticky;
+                position: sticky;
+                top: 0;
+                padding: 10px;
+                font-weight: bold;
+                line-height: 17px;
+                border-bottom: 1px solid #e0e3e8;
+                z-index: 1;
+                &.missing {
+                    background-color: #fdeae2;
+                }
+                &.added {
+                    background-color: #eaf9ea;
+                }
+            }
+            .item {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                padding: 9px !important;
+                width: 100% !important;
+                font-size: 14px;
+                white-space: nowrap;
+                cursor: pointer;
+
+                &:before {
+                    background: #FFF;
+                }
+                &:hover {
+                    background: rgba(0, 0, 0, 0.05) !important;
+                }
+                &.added-tag {
+                    color: #767676 !important;
+
+                    & a {
+                        color: #767676 !important;
+                    }
+                }
+                &.missing-tag {
+                    color: #000 !important;
+                    font-size: 16px;
+                    & a {
+                        color: #000 !important;
+                    }
+                }
+                mark {
+                    background: #FFFF00;
+                }
+            }
+        }
+    }
+    .head-tag-list .locked.mismatch {
+        background-color: #fdeae2;
+        color: #e1595d;
+        box-shadow: inset 0 0px 0 2px #e1565a;
+        font-weight: 100;
+        padding: 4px 6px;
+        position: relative;
+        top: -1px;
+    }
+}

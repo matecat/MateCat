@@ -127,7 +127,7 @@ class Editarea extends React.Component {
         UI.keydownEditAreaEventHandler.call(this.editAreaRef, e);
     }
     onKeyPressEvent(e) {
-        UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e);
+        UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e, this.props.segment.sid);
 		this.emitTrackChanges();
     }
     onKeyUpEvent(e) {
