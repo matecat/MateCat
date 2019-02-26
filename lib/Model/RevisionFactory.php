@@ -33,6 +33,19 @@ class RevisionFactory {
 
     public function getChunkReviewModel( \LQA\ChunkReviewStruct $chunkReviewStruct ) {
         return $this->revision->getChunkReviewModel( $chunkReviewStruct );
-
     }
+
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
+        return $this->revision->getSegmentTranslationModel( $translation ) ;
+    }
+
+    public function getTranslationIssueModel( $id_job, $password, $issue) {
+        return $this->revision->getTranslationIssueModel( $id_job, $password, $issue ) ;
+    }
+
+    public static function initFromProject( Projects_ProjectStruct $project ) {
+        $project->getFeatures();
+        return static::getInstance() ;
+    }
+
 }
