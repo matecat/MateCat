@@ -349,8 +349,12 @@ class catController extends viewController {
                 if( $team->type == Constants_Teams::PERSONAL ){
                     $ownerMail = $team->getMembers()[0]->getUser()->getEmail();
                 } else {
-
-                    $ownerMail = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->project->id_assignee )->getEmail();
+                    $assignee = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->project->id_assignee );
+                    if ($assignee) {
+                        $ownerMail = $assignee->getEmail();
+                    } else {
+                        $ownerMail = INIT::$SUPPORT_MAIL;
+                    }
                     $membersIdList = array_map( function( $memberStruct ){
                         /**
                          * @var $memberStruct \Teams\MembershipStruct

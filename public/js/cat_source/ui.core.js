@@ -734,7 +734,7 @@ UI = {
 		}
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
-		this.setWaypoints();
+		setTimeout(UI.setWaypoints.bind(this), 2000);
         $(window).trigger('segmentsAdded',{ resp : d.data.files });
 	},
 
@@ -927,9 +927,12 @@ UI = {
 	renderUntranslatedOutOfView: function() {
 		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
-		window.location.hash = this.nextUntranslatedSegmentId;
+		var segmentToScroll = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
+        window.location.hash = segmentToScroll;
         UI.unmountSegments();
-		this.render();
+		this.render({
+            segmentToScroll: segmentToScroll
+        });
 	},
 	reloadWarning: function() {
 		this.renderUntranslatedOutOfView();
@@ -2191,7 +2194,7 @@ UI = {
         }
 		this.detectFirstLast();
 		this.lastSegmentWaypoint = this.lastSegment.waypoint(function(direction) {
-			if (direction === 'down') {
+			if (direction === 'down' && !UI.noMoreSegmentsAfter) {
 				this.destroy();
 				if (UI.infiniteScroll) {
 					if (!UI.blockGetMoreSegments) {
@@ -2206,7 +2209,7 @@ UI = {
 		}, UI.downOpts);
 
         this.firstSegmentWaypoint = this.firstSegment.waypoint(function(direction) {
-			if (direction === 'up') {
+			if (direction === 'up' && !UI.noMoreSegmentsBefore) {
                 this.destroy();
 				UI.getMoreSegments('before');
 			}
@@ -2383,7 +2386,7 @@ UI = {
             if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
             } else {
 
-                if (!UI.noMoreSegmentsAfter) {
+                if (UI.noMoreSegmentsAfter) {
                     UI.reloadWarning();
                 }
             }

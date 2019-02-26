@@ -201,7 +201,7 @@ class GetContributionWorker extends AbstractWorker {
                 //this should every time be ok because MT preserve tags, but we use the check on the errors
                 //for logic correctness
                 if ( !$QA->thereAreErrors() ) {
-                    $match[ 'raw_translation' ] = $Filter->fromLayer1ToLayer2( $QA->getTrgNormalized() );
+                    $match[ 'raw_translation' ] = $QA->getTrgNormalized();
                     $match[ 'translation' ]     = $Filter->fromLayer1ToLayer2( $match[ 'raw_translation' ] );
                 } else {
                     $this->_doLog( $QA->getErrors() );
