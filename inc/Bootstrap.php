@@ -353,7 +353,13 @@ class Bootstrap {
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
             register_shutdown_function( 'Bootstrap::sessionClose' );
-            INIT::$PROTOCOL = isset( $_SERVER[ 'HTTPS' ] ) ? "https" : "http";
+            // Get HTTPS server status
+            $localProto = isset( $_SERVER[ 'HTTPS' ] ) ? "https" : "http";
+            // Override if header is set from load balancer
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+                $localProto = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+            }
+            INIT::$PROTOCOL = $localProto;
             INIT::$HTTPHOST = INIT::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
 
         } else {
