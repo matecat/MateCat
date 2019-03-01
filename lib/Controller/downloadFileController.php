@@ -354,14 +354,16 @@ class downloadFileController extends downloadController {
                         }
 
                         $this->outputContent = self::composeZip( $output_content ); //add zip archive content here;
+                        $this->mimeType      = self::$ZIP_ARCHIVE;
 
                     } else {
 
-                        # TODO: this is a good point to test transmission back
-                        $output_content = array_pop( $output_content );
-
                         //always an array with 1 element, pop it, Ex: array( array() )
-                        $this->setZipContent( $output_content );
+                        $this->setOutputContent( array_pop( $output_content ) );
+                        if ( $this->forceXliff ) {
+                            $this->mimeType = self::$XLIFF_FILE;
+                        }
+
                     }
 
                 }
@@ -469,18 +471,6 @@ class downloadFileController extends downloadController {
         }
 
         echo json_encode( $response );
-    }
-
-    /**
-     * @param ZipContentObject $output_content
-     *
-     * @throws Exception
-     */
-    protected function setZipContent( ZipContentObject $output_content ) {
-
-        $this->_filename     = self::sanitizeFileExtension( $output_content->output_filename );
-        $this->outputContent = $output_content->getContent();
-
     }
 
     /**

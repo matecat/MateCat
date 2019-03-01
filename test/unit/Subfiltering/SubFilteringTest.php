@@ -162,4 +162,22 @@ is &lt; 70 dB(A).';
 
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function testHtmlInXML_2(){
+
+        $segment = '&amp;lt;b&amp;gt;Esta reserva requer um depósito no valor de %1$s, &amp;lt;/b&amp;gt;que pré-autorizaremos na sua forma de pagamento 48 horas antes do check-in.';
+        $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment ); var_dump( $segmentL1 );
+        $segmentL2 = $this->filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $tmpLayer2 = ( new LtGtDecode() )->transform( $segmentL2 );
+        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $tmpLayer2 ) );
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $tmpLayer2 ) );
+
+    }
+
 }
