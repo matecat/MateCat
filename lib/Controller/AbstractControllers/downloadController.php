@@ -4,18 +4,24 @@
  * User: domenico
  * Date: 27/01/14
  * Time: 18.57
- * 
+ *
  */
 
 abstract class downloadController extends controller {
 
-    public $id_job ;
+    public $id_job;
     public $password;
 
     protected $outputContent = "";
-    protected $_filename     = "unknown";
+    protected $_filename     = "";
 
-    protected $_user_provided_filename ;
+    protected $mimeType = "application/octet-stream";
+
+    protected static $ZIP_ARCHIVE = "application/zip";
+    protected static $XLIFF_FILE  = "application/xliff+xml";
+
+
+    protected $_user_provided_filename;
 
     /**
      * @var Jobs_JobStruct
@@ -28,9 +34,10 @@ abstract class downloadController extends controller {
      * @return Jobs_JobStruct
      */
     public function getJob( $ttl = 0 ) {
-        if( empty( $this->job ) ){
-            $this->job = Jobs_JobDao::getById( $this->id_job, $ttl )[0];
+        if ( empty( $this->job ) ) {
+            $this->job = Jobs_JobDao::getById( $this->id_job, $ttl )[ 0 ];
         }
+
         return $this->job;
     }
 
@@ -38,9 +45,23 @@ abstract class downloadController extends controller {
      * @param string $content
      *
      * @return $this
+     * @throws Exception
      */
-    public function setOutputContent( $content ) {
-        $this->outputContent = $content;
+    public function setOutputContent( ZipContentObject $content ) {
+
+        if ( empty( $this->_filename ) ) {
+            $this->_filename = self::sanitizeFileExtension( $content->output_filename );
+        }
+        $this->outputContent = $content->getContent();
+
+        $extension           = FilesStorage::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
+        switch ( strtolower( $extension ) ) {
+            case "xlf":
+            case "sdlxliff":
+            case "xliff":
+                $this->mimeType = self::$XLIFF_FILE;
+                break;
+        }
 
         return $this;
     }
@@ -80,10 +101,10 @@ abstract class downloadController extends controller {
         if ( isset( $this->downloadToken ) && !empty( $this->downloadToken ) ) {
             setcookie(
                     $this->downloadToken,
-                    ( empty( $tokenContent ) ? json_encode( array(
+                    ( empty( $tokenContent ) ? json_encode( [
                             "code"    => 0,
                             "message" => "Download complete."
-                    ) ) : json_encode( $tokenContent ) ),
+                    ] ) : json_encode( $tokenContent ) ),
                     2147483647            // expires January 1, 2038
             );
             $this->downloadToken = null;
@@ -95,35 +116,33 @@ abstract class downloadController extends controller {
         try {
             $this->unlockToken();
 
-            if ( empty( $this->project) ) {
-                $this->project = \Projects_ProjectDao::findByJobId($this->id_job);
+            if ( empty( $this->project ) ) {
+                $this->project = \Projects_ProjectDao::findByJobId( $this->id_job );
             }
 
-            if ( empty($this->_filename ) ) {
+            if ( empty( $this->_filename ) ) {
                 $this->_filename = $this->getDefaultFileName( $this->project );
             }
 
-            $isGDriveProject = \Projects_ProjectDao::isGDriveProject($this->project->id);
+            $isGDriveProject = \Projects_ProjectDao::isGDriveProject( $this->project->id );
 
             $forceXliff = intval( filter_input( INPUT_GET, 'forceXliff' ) );
 
-            if( !$isGDriveProject || $forceXliff === 1 ) {
+            if ( !$isGDriveProject || $forceXliff === 1 ) {
                 $buffer = ob_get_contents();
                 ob_get_clean();
-                ob_start("ob_gzhandler");  // compress page before sending
+                ob_start( "ob_gzhandler" );  // compress page before sending
                 $this->nocache();
-                header("Content-Type: application/force-download");
-                header("Content-Type: application/octet-stream");
-                header("Content-Type: application/download");
-                header("Content-Disposition: attachment; filename=\"$this->_filename\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
-                header("Expires: 0");
-                header("Connection: close");
+                header( "Content-Type: $this->mimeType" );
+                header( "Content-Disposition: attachment; filename=\"$this->_filename\"" ); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
+                header( "Expires: 0" );
+                header( "Connection: close" );
                 echo $this->outputContent;
                 exit;
             }
-        } catch (Exception $e) {
+        } catch ( Exception $e ) {
             echo "<pre>";
-            print_r($e);
+            print_r( $e );
             echo "\n\n\n";
             echo "</pre>";
             exit;
@@ -139,30 +158,30 @@ abstract class downloadController extends controller {
      * @return string
      */
     public function getDefaultFileName( Projects_ProjectStruct $project ) {
-            $files = Files_FileDao::getByProjectId( $project->id );
+        $files = Files_FileDao::getByProjectId( $project->id );
 
-            if ( count(  $files ) > 1 ) {
-                return $this->project->name . ".zip" ;
-            } else {
-                return $files[0]->filename ;
-            }
+        if ( count( $files ) > 1 ) {
+            return $this->project->name . ".zip";
+        } else {
+            return $files[ 0 ]->filename;
         }
+    }
 
     /**
      * @param ZipContentObject[] $output_content
-     * @param string $outputFile
+     * @param string             $outputFile
      *
      * @return string The zip binary
      */
-    protected static function composeZip( Array $output_content, $outputFile=null , $isOriginalFile=false) {
-        if(empty($outputFile)){
-            $outputFile = tempnam("/tmp", "zipmatecat");
+    protected static function composeZip( Array $output_content, $outputFile = null, $isOriginalFile = false ) {
+        if ( empty( $outputFile ) ) {
+            $outputFile = tempnam( "/tmp", "zipmatecat" );
         }
 
-        $zip  = new ZipArchive();
+        $zip = new ZipArchive();
         $zip->open( $outputFile, ZipArchive::OVERWRITE );
 
-        $rev_index_name = array();
+        $rev_index_name = [];
 
         foreach ( $output_content as $f ) {
 
@@ -171,7 +190,7 @@ abstract class downloadController extends controller {
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
 
-            if($isOriginalFile!=true) {
+            if ( $isOriginalFile != true ) {
                 $fName = self::sanitizeFileExtension( $fName );
             }
 
@@ -188,8 +207,8 @@ abstract class downloadController extends controller {
             $rev_index_name[ $fName ] = $fName;
 
             $content = $f->getContent();
-            if( !empty( $content ) ){
-                $zip->addFromString( $fName, $content);
+            if ( !empty( $content ) ) {
+                $zip->addFromString( $fName, $content );
             }
         }
 
@@ -205,7 +224,7 @@ abstract class downloadController extends controller {
 
         $pathinfo = FilesStorage::pathinfo_fix( $filename );
 
-        switch (strtolower( $pathinfo[ 'extension' ] )) {
+        switch ( strtolower( $pathinfo[ 'extension' ] ) ) {
             case 'pdf':
             case 'bmp':
             case 'png':

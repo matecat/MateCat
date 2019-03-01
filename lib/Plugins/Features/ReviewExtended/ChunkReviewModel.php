@@ -103,6 +103,14 @@ class ChunkReviewModel implements IChunkReviewModel {
         ChunkReviewDao::updateStruct( $this->chunk_review, array(
                         'fields' => array('reviewed_words_count', 'is_pass', 'penalty_points'))
         );
+
+        $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, array(
+             'fields' => array('reviewed_words_count', 'is_pass', 'penalty_points'))
+        );
+
+        $this->chunk_review->getChunk()->getProject()->getFeatures()->run(
+                'chunkReviewUpdated', $this->chunk_review, $update_result, $this
+        );
     }
 
     /**
