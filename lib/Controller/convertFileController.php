@@ -75,7 +75,7 @@ class convertFileController extends ajaxController {
             $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Error: missing file name." );
         }
 
-        if( !Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ){
+        if( !Utils::isTokenValid( $this->cookieDir ) ){
             $this->result[ 'code' ]     = -19; // No Good, Default
             $this->result[ 'errors' ][] = array( "code" => -19, "message" => "Invalid Upload Token Found." );
             return false;

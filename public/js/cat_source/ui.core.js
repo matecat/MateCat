@@ -1844,6 +1844,7 @@ UI = {
             id_before: idBefore,
             context_after: contextAfter,
             id_after: idAfter,
+            by_status: byStatus
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);

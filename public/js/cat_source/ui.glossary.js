@@ -136,10 +136,10 @@ if (true)
                 while(matchInTags) {
 
                     //regex start index matches the beginning of the tag.
-                    //so we add the position of the glossary entry into the glossary element
-                    var elemIndex = matchInTags.index + matchInTags[0].indexOf(matchInTags[1]);
+                    //so we add the position of the tag
+                    var elemIndex = matchInTags.index ;
 
-                    // create an object containing the start and end position of the current match
+                    // create an object containing the start and end position of the tag where the glossary match appear
                     // into the initial string
                     int = {
                         startPos: elemIndex,
@@ -160,7 +160,7 @@ if (true)
                     //check if this glossary element was found into a tag.
                     var matchInTag = intervalForTags.filter(
                             function(elem){
-                                return elem.startPos == match.index;
+                                return match.index >= elem.startPos && match.index <= elem.endPos;
                             }
                     );
 
