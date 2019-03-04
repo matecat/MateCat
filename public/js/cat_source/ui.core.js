@@ -793,7 +793,7 @@ UI = {
 			}
 
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
-			    var segToScrollElem = $('#segment-' + options.segmentToScroll);
+			    var segToScrollElem = ( UI.getSegmentById(options.segmentToScroll).length > 0 ) ? UI.getSegmentById(options.segmentToScroll) : UI.getSegmentsSplit(options.segmentToScroll)[0];
 				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
 				UI.openSegment(segToScrollElem);
 			} else if (options.segmentToOpen) {
@@ -816,9 +816,9 @@ UI = {
 				$('mark.currSearchItem').removeClass('currSearchItem');
 				SearchUtils.markSearchResults(options);
 				if (SearchUtils.searchMode == 'normal') {
-					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
+					$('section[id^="segment-' + options.segmentToScroll + '"] mark.searchMarker').first().addClass('currSearchItem');
 				} else {
-					$('#segment-' + options.segmentToScroll + ' .targetarea mark.searchMarker').first().addClass('currSearchItem');
+					$('section[id^="segment-' + options.segmentToScroll + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
 				}
 			}
 		}
@@ -1147,7 +1147,7 @@ UI = {
         var segment_id = UI.currentSegmentId;
         var escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
         // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
-        var mainStr = htmlEncode(UI.postProcessEditarea(UI.currentSegment));
+        var mainStr = htmlEncode(UI.postProcessEditarea(UI.currentSegment)).replace(/&amp;/g, "&");
         $('.sub-editor.alternatives .overflow', segment).empty();
         $.each(d.data.editable, function(index) {
             // Decode the string from the server
@@ -1155,7 +1155,6 @@ UI = {
             // Make the diff between the text with the same codification
             var diff_obj = UI.execDiff(mainStr, transDecoded);
             var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-            var html =
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
                 '<li class="sugg-source">' +
                 '   <span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
