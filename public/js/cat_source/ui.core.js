@@ -793,7 +793,7 @@ UI = {
 			}
 
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
-			    var segToScrollElem = $('#segment-' + options.segmentToScroll);
+			    var segToScrollElem = ( UI.getSegmentById(options.segmentToScroll).length > 0 ) ? UI.getSegmentById(options.segmentToScroll) : UI.getSegmentsSplit(options.segmentToScroll)[0];
 				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
 				UI.openSegment(segToScrollElem);
 			} else if (options.segmentToOpen) {
@@ -816,9 +816,9 @@ UI = {
 				$('mark.currSearchItem').removeClass('currSearchItem');
 				SearchUtils.markSearchResults(options);
 				if (SearchUtils.searchMode == 'normal') {
-					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
+					$('section[id^="segment-' + options.segmentToScroll + '"] mark.searchMarker').first().addClass('currSearchItem');
 				} else {
-					$('#segment-' + options.segmentToScroll + ' .targetarea mark.searchMarker').first().addClass('currSearchItem');
+					$('section[id^="segment-' + options.segmentToScroll + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
 				}
 			}
 		}

@@ -560,12 +560,16 @@
             return $('#segment-' + id);
         },
 
+        getSegmentsSplit: function(id) {
+            return $('section[id^="segment-'+ id +'"][data-split-original-id="'+id+'"]');
+        },
+
         getEditAreaBySegmentId: function(id) {
             return $('#segment-' + id + ' .targetarea');
         },
 
         segmentIsLoaded: function(segmentId) {
-            return UI.getSegmentById(segmentId).length > 0 ;
+            return UI.getSegmentById(segmentId).length > 0 || UI.getSegmentsSplit(segmentId).length > 0 ;
         },
         getContextBefore: function(segmentId) {
             var segment = $('#segment-' + segmentId);
