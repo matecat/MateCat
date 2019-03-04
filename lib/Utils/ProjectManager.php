@@ -635,14 +635,28 @@ class ProjectManager {
             //Try to extract segments after all checks for the CURRENT file ( we are iterating through files )
             try {
 
+                $exceptionsFound = 0;
                 foreach ( $filesStructure as $fid => $file_info ) {
-                    $this->_extractSegments( $fid, $file_info );
+
+                    try {
+                        $this->_extractSegments( $fid, $file_info );
+                    } catch( Exception $e ){
+                        if( $e->getCode() == -1 && count( $filesStructure ) > 1 && $exceptionsFound < count( $filesStructure ) ){
+                            Log::doLog( "No text to translate in the file {$e->getMessage()}." );
+                            $exceptionsFound += 1;
+                            continue;
+                        } else {
+                            throw $e;
+                        }
+                    }
+
                     if ( $this->total_segments > 100000 || ( $this->total_segments * count( $this->projectStructure[ 'target_language' ] ) ) > 420000 ) {
                         //Allow projects with only one target language and 100000 segments ( ~ 550.000 words )
                         //OR
                         //A multi language project with max 420000 segments ( EX: 42000 segments in 10 languages ~ 2.700.000 words )
                         throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL, 128 );
                     }
+
                 }
 
             } catch ( Exception $e ) {
