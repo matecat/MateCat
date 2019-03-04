@@ -3662,6 +3662,7 @@ span.locked.tag-html-container-close {
 
 .locked.inside-attribute {
     background-color: unset !important;
+    box-shadow: unset !important;
 }
 
 
