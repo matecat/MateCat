@@ -48,15 +48,12 @@ header .wrapper {
     width: 45.5%;
     table-layout: fixed;
     float: left;
-    /*    margin: 0px 1px 0px 0;*/
     padding: 3px 1%;
     text-align: left;
     list-style: none;
     height: 95%;
     outline: none;
-    word-wrap: break-word;
-    word-break: normal;
-    line-height: 25px;
+    line-height: 23px;
 }
 
 .text .source.item {
@@ -1442,7 +1439,6 @@ section.editor .body > .text {
     color: #666;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
-    border-top: 1px solid #f2f4f7;
 }
 
 /*
@@ -3680,29 +3676,26 @@ span.locked.tag-html-container-close {
 .ice-locked .targetarea .locked,
 .footer .locked,
 .splitArea .locked {
+    display: inline-flex;
+    background-color: #f4f6f8;
+    box-shadow: inset 0 0 0 2px #f4f6f8;
+    border-radius: 7px;
     font-size: 15px;
     color: #767676;
     font-style: italic;
-    background-color: #eef0f3;
-    border-radius: 7px;
-    padding: 3px 4px 3px 2px;
+    padding: 0px 4px 0px 2px;
+    vertical-align: middle;
+    margin: 1px;
 }
 
 .opened .editarea .locked,
 .opened .source .locked,
 .opened .target .locked,
-.opened .ice-locked .targetarea .locked,
+.opened .ice-locked .targetarea .locked,.splitArea .locked
 .opened .footer .locked,
 .opened .splitArea .locked {
-    font-size: 15px;
-    color: #767676;
-    font-style: italic;
     background-color: #f2f4f7;
-    border-radius: 7px;
-    padding: 3px 4px 3px 2px;
-    vertical-align: middle;
-    cursor: pointer;
-    transition: 0.3s ease;
+    box-shadow: inset 0 0 0 2px #e0e3e8;
 }
 
 
@@ -4548,10 +4541,6 @@ body span.endTag {
 }
 body:not(.tagModes) .tagModeToggle {
     display: none;
-}
-
-body.tagModes .startTag, body.tagModes .endTag, body.editor.tagModes .startTag, body.editor.tagModes .endTag {
-    vertical-align: middle;
 }
 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
