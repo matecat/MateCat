@@ -80,7 +80,8 @@ class TagsMenu extends React.Component {
         //get target tags from the segment
         var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
         //Remove from the target the tags with mismatch
-        targetClone.find('.locked.mismatch').remove();
+        // targetClone.find('.locked.mismatch').remove();
+
         var newhtml = targetClone.html();
         //Remove inside-attribute for ph with equiv-text tags
         targetClone.find('.locked.inside-attribute').remove();
