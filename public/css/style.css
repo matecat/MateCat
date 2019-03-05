@@ -3679,12 +3679,12 @@ span.locked.tag-html-container-close {
 .splitArea .locked {
     display: inline-flex;
     background-color: #f4f6f8;
-    box-shadow: inset 0 0 0 2px #f4f6f8;
+    box-shadow: inset 0 0 0 2px #e4e8ea;
     border-radius: 7px;
     font-size: 15px;
     color: #767676;
     font-style: italic;
-    padding: 0px 4px 0px 2px;
+    padding: 0 4px 0 2px;
     vertical-align: middle;
     margin: 1px;
 }
@@ -3769,6 +3769,20 @@ span.added .locked {
     transition: 0.3s ease;
     background-color: #c6dcfa !important;
     cursor: grab !important;
+}
+
+.locked.selected:active,
+.locked .selected,
+.locked.order-error.selected,
+.editarea .locked.mismatch.selected,
+.source .locked.mismatch.selected {
+    position: relative;
+    cursor: grabbing !important;
+    -moz-transform: scale(1.1, 1.1);
+    -ms-transform: scale(1.1, 1.1);
+    -webkit-transform: scale(1.1, 1.1);
+    transform: scale(1.1, 1.1);
+    transition: 0.1s ease;
 }
 
 .editor .cc-search .input .locked {
