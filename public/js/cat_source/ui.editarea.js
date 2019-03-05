@@ -60,6 +60,7 @@ $.extend( UI, {
                 }
                 UI.saveInUndoStack('cancel');
                 UI.segmentQA(UI.currentSegment);
+                UI.checkTagProximity();
             } else {
                 var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                 var numSpacesBefore = $('.space-marker', UI.editarea).length;

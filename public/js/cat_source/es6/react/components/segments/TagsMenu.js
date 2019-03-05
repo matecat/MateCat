@@ -24,7 +24,8 @@ class TagsMenu extends React.Component {
             addedTags : addedTags,
             totalTags : missingTags.concat(addedTags),
             filteredTags: [],
-            filter: ""
+            filter: "",
+            coord : this.getSelectionCoords()
         };
         this.handleKeydownFunction = this.handleKeydownFunction.bind(this);
         this.handleResizeEvent = this.handleResizeEvent.bind(this);
@@ -256,6 +257,7 @@ class TagsMenu extends React.Component {
         });
         setTimeout(function () {
             UI.segmentQA(UI.currentSegment);
+            UI.checkTagProximity();
         });
 
     }
@@ -332,7 +334,13 @@ class TagsMenu extends React.Component {
     }
 
     handleResizeEvent( event ) {
-        this.forceUpdate()
+        let sel = window.getSelection();
+        if ( $(sel.focusNode).closest('.editarea').length > 0 ) {
+            let coord = this.getSelectionCoords();
+            this.setState({
+                coord
+            })
+        }
     }
 
     getNextIdx(direction) {
@@ -384,14 +392,14 @@ class TagsMenu extends React.Component {
     }
 
     render() {
-        var coord = this.getSelectionCoords();
+
         let style = {
             position: "fixed",
             zIndex: 2,
             maxHeight: "30%",
             overflowY: "auto",
-            top: coord.y,
-            left: coord.x
+            top: this.state.coord.y,
+            left: this.state.coord.x
         };
 
         let tags = this.getItemsMenuHtml();
