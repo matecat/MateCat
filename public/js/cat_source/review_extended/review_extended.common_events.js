@@ -26,6 +26,7 @@ if (ReviewExtended.enabled()) {
         if (data.sid === UI.getSegmentId(UI.currentSegment)) {
             UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
         }
+        UI.reloadQualityReport();
     });
 
     $( document ).on( 'keydown', function ( e ) {
