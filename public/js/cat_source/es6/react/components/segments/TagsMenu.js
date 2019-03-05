@@ -172,16 +172,25 @@ class TagsMenu extends React.Component {
             });
         }
 
-        if ( missingItems.length === 0 && addedItems.length === 0 ) {
+        if ( missingItems.length <= 1 && addedItems.length <= 1 ) {
             menuItems.push(<div className={"item added-tag no-results"} key={0} data-original="item">No results</div> );
+            return <div className="ui vertical menu">
+                <div>
+                {menuItems}
+                </div>
+            </div>;
         }
         return <div className="ui vertical menu">
+            {missingItems.length > 1 &&
             <div>
-            {missingItems}
+                {missingItems}
             </div>
+            }
+            {addedItems.length > 1 &&
             <div>
-            {addedItems}
+                {addedItems}
             </div>
+            }
         </div>;
     }
 
@@ -210,12 +219,16 @@ class TagsMenu extends React.Component {
                 $('.selected', $(editareaClone)).remove();
             }
         }
-        let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(this.state.filter) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
+        let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(htmlEncode(this.state.filter)) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
+        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\/span>)(<span.*?<\\/span>)(&lt;)+'+ htmlEncode(this.state.filter), 'gi');
 
-        editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
         editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+        editareaClone.find('.tag-autocomplete-endcursor').after(editareaClone.find('.tag-autocomplete-endcursor').html());
+        editareaClone.find('.tag-autocomplete-endcursor').html('');
 
+        editareaClone.html(editareaClone.html().replace(regStartTarget, '$2$3$1'));
         this.state.filter !== "" && editareaClone.html(editareaClone.html().replace(regeExp, '$2'));
+
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
