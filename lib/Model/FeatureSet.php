@@ -13,6 +13,10 @@ use Features\BaseFeature;
  */
 class FeatureSet {
 
+
+    /**
+     * @var BasicFeatureStruct[]
+     */
     private $features = [] ;
 
     /**
