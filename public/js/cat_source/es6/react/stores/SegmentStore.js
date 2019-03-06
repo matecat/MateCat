@@ -132,6 +132,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
                 segment.fid = fid;
                 segment.edit_area_locked = false;
+                segment.original_sid = segment.sid;
                 newSegments.push(this);
             }
 
@@ -389,6 +390,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
     },
 
+    setCrossLanguageContributionsToCache: function (sid, fid, contributions,errors) {
+        const index = this.getSegmentIndex(sid, fid);
+        this._segments[fid] = this._segments[fid].setIn([index, 'cl_contributions'], {
+            matches: contributions,
+            errors: errors
+        });
+    },
+
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
 
@@ -499,11 +508,19 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
             break;
+        case SegmentConstants.MODIFY_TAB_VISIBILITY:
+            SegmentStore.emitChange(action.actionType, action.tabName, action.visible);
+            break;
         case SegmentConstants.CREATE_FOOTER:
             SegmentStore.emitChange(action.actionType, action.sid);
             break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);
+            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
+            break;
+        case SegmentConstants.SET_CL_CONTRIBUTIONS:
+            SegmentStore.setCrossLanguageContributionsToCache(action.sid, action.fid, action.matches, action.errors);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:

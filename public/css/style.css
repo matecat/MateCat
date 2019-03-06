@@ -1515,6 +1515,7 @@ section.loaded .submenu {
     z-index: 1;
     border-bottom: 1px solid #cccccc;
     cursor: pointer;
+    user-select: none;
 }
 
 .submenu li.active {
@@ -1620,7 +1621,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor.matches .overflow {
-    min-height: 65px;
+    min-height: 50px;
 }
 .sub-editor.matches .overflow span.loader {
     bottom: 20px;
@@ -3724,10 +3725,10 @@ span.locked.tag-html-container-close {
     color: #767676
 }
 
-.opened .targetarea .locked a,
-.opened .source .locked a {
-    color: #e000ff !important;
-}
+/*.opened .targetarea .locked a,*/
+/*.opened .source .locked a {*/
+    /*color: #e000ff !important;*/
+/*}*/
 
 span.deleted .locked,
 span.added .locked {

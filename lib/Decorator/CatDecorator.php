@@ -88,7 +88,8 @@ class CatDecorator {
         $this->template->showReplaceOptionsInSearch = true ;
 
         $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
-
+        //languages for tm panel
+        $this->template->languages_array_obj = $this->lang_handler->getEnabledLanguages( 'en' ) ;
         $this->decorateForCJK();
 
         $this->assignOptions();
@@ -96,6 +97,8 @@ class CatDecorator {
         $this->template->chunk_completion_undoable = true ;
         $this->template->translation_matches_enabled = true ;
         $this->template->allow_link_to_analysis = true ;
+
+
     }
 
     /**

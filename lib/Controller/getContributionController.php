@@ -38,7 +38,8 @@ class getContributionController extends ajaxController {
                 'context_after'  => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'id_before'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_after'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_client'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ]
+                'id_client'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'cross_language'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FORCE_ARRAY ]
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -59,6 +60,7 @@ class getContributionController extends ajaxController {
         $this->switch_languages   = $this->__postInput[ 'from_target' ];
         $this->password           = $this->__postInput[ 'password' ];
         $this->id_client          = $this->__postInput[ 'id_client' ];
+        $this->cross_language     = $this->__postInput[ 'cross_language' ] ;
 
         if ( $this->id_translator == 'unknown_translator' ) {
             $this->id_translator = "";
@@ -123,6 +125,7 @@ class getContributionController extends ajaxController {
         $contributionRequest->concordanceSearch = $this->concordance_search;
         $contributionRequest->fromTarget        = $this->switch_languages;
         $contributionRequest->resultNum         = $this->num_results;
+        $contributionRequest->crossLangTargets  = $this->cross_language;
 
         if ( self::isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;

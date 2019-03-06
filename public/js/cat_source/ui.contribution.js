@@ -19,6 +19,18 @@ if (config.translation_matches_enabled) {
         }
     } );
 
+    $( document ).on( 'sse:cross_language_matches', function ( ev, message ) {
+        var $segment = UI.getSegmentById(message.data.id_segment);
+        var $segmentSplitted = UI.getSegmentById(message.data.id_segment + "-1");
+        if ( $segment.length > 0 ) {
+            SegmentActions.setSegmentCrossLanguageContributions(message.data.id_segment, UI.getSegmentFileId($segment), message.data.matches, []);
+        } else if ($segmentSplitted.length > 0 ) {
+            $('section[id^="segment-' + message.data.id_segment + '"]').each(function (  ) {
+                SegmentActions.setSegmentCrossLanguageContributions(UI.getSegmentId($(this)), UI.getSegmentFileId($(this)), message.data.matches, []);
+            });
+        }
+    } );
+
 $.extend(UI, {
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
 		if (typeof (decode) == "undefined") {
@@ -147,6 +159,11 @@ $.extend(UI, {
             return $.Deferred().resolve();
         }
 
+        //Cross language matches
+        if ( UI.crossLanguageSettings ) {
+            var crossLangsArray = [UI.crossLanguageSettings.primary, UI.crossLanguageSettings.secondary];
+        }
+
 		return APP.doRequest({
 			data: {
 				action: 'getContribution',
@@ -161,7 +178,8 @@ $.extend(UI, {
                 id_before: idBefore,
                 context_after: contextAfter,
                 id_after: idAfter,
-                id_client: config.id_client
+                id_client: config.id_client,
+                cross_language: crossLangsArray
 			},
 			context: $('#segment-' + id),
 			error: function() {
@@ -188,12 +206,6 @@ $.extend(UI, {
 		this.renderContributions(data, segment);
 		this.saveInUndoStack();
 		this.blockButtons = false;  //Used for offline mode
-
-        // TODO Move to SegmentFooter Component
-		// if (data.matches && data.matches.length > 0) {
-		// 	$('.submenu li.tab-switcher-tm a span', segment).text(' (' + data.matches.length + ')');
-		// }
-
     },
 
     renderContributions: function(data, segment) {

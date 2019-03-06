@@ -271,6 +271,15 @@ var SegmentActions = {
             errors: errors
         });
     },
+    setSegmentCrossLanguageContributions: function (sid, fid, contributions, errors) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_CL_CONTRIBUTIONS,
+            sid: sid,
+            fid: fid,
+            matches: contributions,
+            errors: errors
+        });
+    },
     chooseContribution: function (sid, index) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
@@ -373,6 +382,14 @@ var SegmentActions = {
             actionType: SegmentConstants.CONCORDANCE_RESULT,
             sid: sid,
             data: data
+        });
+    },
+
+    modifyTabVisibility: function(tabName, visible) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.MODIFY_TAB_VISIBILITY,
+            tabName: tabName,
+            visible: visible
         });
     },
 

@@ -60,6 +60,7 @@ $.extend( UI, {
                 }
                 UI.saveInUndoStack('cancel');
                 UI.segmentQA(UI.currentSegment);
+                UI.checkTagProximity();
             } else {
                 var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                 var numSpacesBefore = $('.space-marker', UI.editarea).length;
@@ -284,7 +285,7 @@ $.extend( UI, {
         }, 100);
     },
     keyPressEditAreaEventHandler: function (e, sid) {
-        if( (e.which == 60) && (UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment)) { // opening tag sign
+        if( (e.which == 60) && (UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment) && !UI.tagMenuOpen) { // opening tag sign
             SegmentActions.showTagsMenu(sid);
         }
     },
