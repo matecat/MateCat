@@ -12,6 +12,10 @@ class ZipContentObject extends stdClass {
     public $input_filename;
     public $document_content;
 
+    /**
+     * @return string
+     * @throws Exception
+     */
     public function getContent() {
         if ( !empty( $this->document_content ) ) {
             return $this->document_content;

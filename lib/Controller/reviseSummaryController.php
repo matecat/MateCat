@@ -125,15 +125,11 @@ class reviseSummaryController extends viewController {
         );
 
         $codes = $this->featureSet->getCodes();
-        if(in_array(Features\ReviewImproved::FEATURE_CODE, $codes) OR in_array(Features\ReviewExtended::FEATURE_CODE, $codes)){
-            $this->project_type = "new";
-        }
-        else {
-            $this->project_type = "old";
-        }
+
+        $this->project_type = 'old' ;
+        $this->project_type = $this->featureSet->filter('revise_summary_project_type', $this->project_type);
 
         $this->_saveActivity();
-
 	}
 
     protected function _saveActivity(){

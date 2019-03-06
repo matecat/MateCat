@@ -6,7 +6,6 @@ use Features\ProjectCompletion;
 use Features\QaCheckBlacklist;
 use Features\QaCheckGlossary;
 use Features\ReviewExtended;
-use Features\ReviewImproved;
 use Features\TranslationVersions;
 use Features\Mmt;
 use Klein\Klein;
@@ -34,7 +33,6 @@ class Features {
 
     const PROJECT_COMPLETION   = ProjectCompletion::FEATURE_CODE;
     const TRANSLATION_VERSIONS = TranslationVersions::FEATURE_CODE;
-    const REVIEW_IMPROVED      = ReviewImproved::FEATURE_CODE;
     const QACHECK_GLOSSARY     = QaCheckGlossary::FEATURE_CODE;
     const QACHECK_BLACKLIST    = QaCheckBlacklist::FEATURE_CODE;
     const DQF                  = Dqf::FEATURE_CODE;
@@ -44,7 +42,6 @@ class Features {
     protected $VALID_CODES = [
             Features::PROJECT_COMPLETION,
             Features::TRANSLATION_VERSIONS,
-            Features::REVIEW_IMPROVED,
             Features::QACHECK_GLOSSARY,
             Features::QACHECK_BLACKLIST,
             Features::DQF,
@@ -179,9 +176,9 @@ class Features {
              * Try to load MateCat core plugins, so they can install it's own routes
              *
              * @deprecated because all MateCat internal route should not have a "plugins" namespace in the route, but they should have it's own controllers defined
-             *             Ex: http://xxxx/plugins/review_improved/quality_report/xxx/xxxxxxx
+             *             Ex: http://xxxx/plugins/review_extended/quality_report/xxx/xxxxxxx
              *             should be something like
-             *             http://xxxx/review_improved/quality_report/xxx/xxxxxxx
+             *             http://xxxx/review_extended/quality_report/xxx/xxxxxxx
              */
             $cls = static::getPluginClass( $plugin_code );
 

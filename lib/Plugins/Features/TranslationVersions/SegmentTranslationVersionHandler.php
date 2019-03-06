@@ -87,7 +87,7 @@ class SegmentTranslationVersionHandler {
 
         /**
          * This is where we decide if a new translation version is to be generated.
-         * This should be moved in a review_improved specific model.
+         * This should be moved in a review_extended specific model.
          * TODO: refactor.
          *
          */

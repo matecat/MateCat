@@ -37,7 +37,7 @@ class CatDecorator extends \AbstractDecorator {
 
         $this->template->lqa_flat_categories = $this->getCategoriesAsJson($model);
         $this->template->review_type = 'extended';
-        $this->template->review_improved = true;
+        $this->template->review_extended = true;
         $this->template->project_type = null;
         $this->template->segmentFilterEnabled = true;
 

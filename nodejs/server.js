@@ -14,8 +14,8 @@ var config = ini.parseSync( path.resolve( __dirname, 'config.ini' ) );
 const COMMENTS_TYPE = 'comment';
 const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
-const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
+const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 
 // Init logger
 winston.add( winston.transports.DailyRotateFile, {filename: path.resolve( __dirname, config.log.file )} );

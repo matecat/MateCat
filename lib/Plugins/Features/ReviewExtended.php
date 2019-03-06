@@ -8,16 +8,13 @@ use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\ReviewExtended\Observer\SegmentTranslationObserver;
 use Features\ReviewExtended\SegmentTranslationModel;
+use Features\ReviewExtended\TranslationIssueModel;
 use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
 use LQA\ChunkReviewStruct;
 use SegmentTranslationChangeVector;
 
 class ReviewExtended extends AbstractRevisionFeature {
     const FEATURE_CODE = 'review_extended' ;
-
-    protected static $conflictingDependencies = [
-        ReviewImproved::FEATURE_CODE
-    ];
 
     public static function projectUrls( ProjectUrls $formatted ) {
         $projectUrlsDecorator = new ProjectUrlsDecorator( $formatted->getData() );
@@ -53,24 +50,11 @@ class ReviewExtended extends AbstractRevisionFeature {
 
     }
 
-    /**
-     * @param SegmentTranslationChangeVector $translation
-     *
-     * @return SegmentTranslationModel
-     */
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
-        return new SegmentTranslationModel( $translation );
-    }
-
     public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
         $model = new SegmentTranslationModel( $translation );
         $model->addOrSubtractCachedReviewedWordsCount();
         // we need to recount score globally because of autopropagation.
         $model->recountPenaltyPoints();
-    }
-
-    public function getChunkReviewModel(ChunkReviewStruct $chunk_review) {
-        return new ChunkReviewModel( $chunk_review );
     }
 
 }
