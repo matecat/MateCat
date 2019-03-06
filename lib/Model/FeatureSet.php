@@ -13,6 +13,10 @@ use Features\BaseFeature;
  */
 class FeatureSet {
 
+
+    /**
+     * @var BasicFeatureStruct[]
+     */
     private $features = [] ;
 
     /**
@@ -296,7 +300,6 @@ class FeatureSet {
         foreach ( $this->features as $feature ) {
             $returnable[ $feature->feature_code ] = $this->runOnFeature($method, $feature, $args);
         }
-        return $returnable ;
     }
 
     /**

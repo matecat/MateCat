@@ -4,13 +4,11 @@
 namespace Features ;
 
 use API\V2\Json\ProjectUrls;
+use BasicFeatureStruct;
 use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
-use Features\ReviewExtended\Observer\SegmentTranslationObserver;
 use Features\ReviewExtended\SegmentTranslationModel;
-use Features\ReviewExtended\TranslationIssueModel;
 use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
-use LQA\ChunkReviewStruct;
 use SegmentTranslationChangeVector;
 
 class ReviewExtended extends AbstractRevisionFeature {
@@ -55,6 +53,18 @@ class ReviewExtended extends AbstractRevisionFeature {
         $model->addOrSubtractCachedReviewedWordsCount();
         // we need to recount score globally because of autopropagation.
         $model->recountPenaltyPoints();
+    }
+
+    /**
+     * @param $projectFeatures
+     * @param $controller \NewController|\createProjectController
+     *
+     * @return mixed
+     */
+    public function filterCreateProjectFeatures( $projectFeatures, $controller ) {
+        $projectFeatures[ self::FEATURE_CODE ] = new BasicFeatureStruct( [ 'feature_code' => self::FEATURE_CODE ] );
+        $controller->getFeatureSet()->filter('filterOverrideReviewExtended', $projectFeatures, $controller );
+        return $projectFeatures ;
     }
 
 }
