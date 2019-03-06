@@ -366,6 +366,7 @@ class TagsMenu extends React.Component {
         document.removeEventListener( "keydown", this.handleKeydownFunction );
         window.removeEventListener( "resize", this.handleResizeEvent );
         $("#outer").off("scroll", this.handleResizeEvent);
+        $('.tag-autocomplete-endcursor').remove();
         UI.tagMenuOpen = false;
     }
 
