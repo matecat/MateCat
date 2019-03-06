@@ -3725,10 +3725,10 @@ span.locked.tag-html-container-close {
     color: #767676
 }
 
-.opened .targetarea .locked a,
-.opened .source .locked a {
-    color: #e000ff !important;
-}
+/*.opened .targetarea .locked a,*/
+/*.opened .source .locked a {*/
+    /*color: #e000ff !important;*/
+/*}*/
 
 span.deleted .locked,
 span.added .locked {
