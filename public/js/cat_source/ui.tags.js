@@ -100,8 +100,8 @@ $.extend(UI, {
     },
 
     transformTextForLockTags: function ( tx ) {
-        var brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
-        var brTx2 =  "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+        var brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked style-tag \">$1</_plh_>";
+        var brTx2 =  "<span contenteditable=\"false\" class=\"locked style-tag\">$1</span>";
 
         tx = tx.replace( /&amp;/gi, "&" )
             .replace( /<span/gi, "<_plh_" )
