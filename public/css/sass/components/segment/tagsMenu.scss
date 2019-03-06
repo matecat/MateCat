@@ -77,3 +77,62 @@
         top: -1px;
     }
 }
+
+.style-tag {
+    display: inline-flex;
+    background: #F2F4F7;
+    box-shadow: inset 0 0 0 2px #E5E9F1;
+    border-radius: 7px;
+    font-size: 15px;
+    color: #767676;
+    font-style: italic;
+    padding: 0 4px 0 2px;
+    vertical-align: middle;
+    margin: 1px;
+    cursor: pointer;
+    &::selection {
+        background: transparent !important;
+    }
+    &:hover {
+        background: #E5E9F1;
+        cursor: pointer;
+    }
+    &.selected {
+        background: #E5E9F1;
+        box-shadow: inset 0 0 0 2px #3B4A5C;
+        cursor: grab;
+        &:active {
+            cursor: grabbing;
+            position: relative;
+            -moz-transform: scale(1.1, 1.1);
+            -ms-transform: scale(1.1, 1.1);
+            -webkit-transform: scale(1.1, 1.1);
+            transform: scale(1.1, 1.1);
+            transition: 0.1s ease;
+        }
+    }
+    a {
+        color: #3B4A5C;
+        font-weight: 700;
+    }
+    &.mismatch {
+        background-color: #fdeae2;
+        box-shadow: inset 0 0 0 2px #f9dcd1;
+        &:hover {
+            background-color: #f9dcd1;
+        }
+        &.selected {
+            box-shadow: inset 0 0 0 2px #e1565a;
+            background: #f9d7ca;
+        }
+        a {
+            color: red;
+        }
+    }
+}
+
+
+span::selection, span a::selection {
+    background-color: transparent;
+    color: inherit;
+}
