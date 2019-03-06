@@ -105,7 +105,9 @@ class SegmentTranslationModel extends AbstractModelSubject {
     public function isExitingReviewedState() {
         return $this->old_translation->isReviewedStatus() &&
                 $this->translation->isTranslationStatus() &&
-                ! $this->_isEditingICEforTheFirstTime() ;
+                ! $this->_isEditingICEforTheFirstTime() &&
+                ! $this->_isChangingICEtoTranslatedWithNoChange() ;
+    ;
     }
 
     protected function _isEditingICEforTheFirstTime() {
@@ -113,6 +115,13 @@ class SegmentTranslationModel extends AbstractModelSubject {
                 $this->old_translation->version_number == 0 &&
                 $this->translation->version_number == 1
         );
+    }
+
+    protected function _isChangingICEtoTranslatedWithNoChange() {
+        return $this->old_translation->isICE() &&
+                $this->translation->isTranslationStatus() &&
+                $this->old_translation->isReviewedStatus() &&
+                $this->old_translation->version_number == $this->translation->version_number ;
     }
 
 
