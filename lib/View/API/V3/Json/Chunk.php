@@ -15,13 +15,14 @@ use CatUtils;
 use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
 use Features\ReviewExtended;
-use Features\ReviewImproved;
-use Langs_Languages;
+use Features\ReviewExtended\Model\QualityReportDao;
+use FeatureSet;
 use Langs_LanguageDomains;
+use Langs_Languages;
 use ManageUtils;
+use RevisionFactory;
 use Utils;
 use WordCount_Struct;
-use FeatureSet;
 
 class Chunk extends \API\V2\Json\Chunk {
 
@@ -83,9 +84,9 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $chunkReview = CatUtils::getQualityInfoFromJobStruct( $jStruct, $project, $featureSet );
 
-        if ( in_array( ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
+        if ( $featureSet->hasRevisionFeature() ) {
             $reviseIssues     = [];
-            $qualityReportDao = new ReviewImproved\Model\QualityReportDao();
+            $qualityReportDao = new QualityReportDao();
             $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $jStruct->id, $jStruct->password );
             foreach ( $qa_data as $issue ) {
                 if ( !isset( $reviseIssues[ $issue->id_category ] ) ) {
@@ -112,7 +113,8 @@ class Chunk extends \API\V2\Json\Chunk {
                 $quality_overall = 'fail';
             }
 
-            $chunkReviewModel = new ReviewImproved\ChunkReviewModel($chunkReview);
+            $chunkReviewModel = RevisionFactory::getInstance()->getChunkReviewModel( $chunkReview ) ;
+
             $score = number_format( $chunkReviewModel->getScore(), 2, ".", "");
 
             $total_issues_weight = $chunkReviewModel->getPenaltyPoints();

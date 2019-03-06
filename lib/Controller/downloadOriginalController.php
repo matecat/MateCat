@@ -85,28 +85,23 @@ class downloadOriginalController extends downloadController {
             $output_content[ $key ] = new ZipContentObject( $iFile );
         }
 
-        if ( $this->download_type == 'all' ) {
 
-            if ( count( $output_content ) > 1 ) {
+        if ( count( $output_content ) > 1 ) {
 
-                $this->_filename = $this->getDefaultFileName( $this->project );
-                $pathInfo        = FilesStorage::pathinfo_fix( $this->_filename );
+            $this->_filename = $this->getDefaultFileName( $this->project );
+            $pathInfo        = FilesStorage::pathinfo_fix( $this->_filename );
 
-                if ( $pathInfo[ 'extension' ] != 'zip' ) {
-                    $this->_filename = $pathInfo[ 'basename' ] . ".zip";
-                }
-
-                $this->outputContent = self::composeZip( $output_content,null,true ); //add zip archive content here;
-
-            } elseif ( count( $output_content ) == 1 ) {
-                $this->setOutputContent( $output_content );
+            if ( $pathInfo[ 'extension' ] != 'zip' ) {
+                $this->_filename = $pathInfo[ 'basename' ] . ".zip";
             }
 
-        } else {
+            $this->outputContent = self::composeZip( $output_content,null,true ); //add zip archive content here;
+            $this->mimeType = self::$ZIP_ARCHIVE;
 
-            $this->setOutputContent( $output_content );
-
+        } elseif ( count( $output_content ) == 1 ) {
+            $this->setOutputContent( array_pop( $output_content ) );
         }
+
 
         /**
          * Retrieve user information
@@ -122,20 +117,6 @@ class downloadOriginalController extends downloadController {
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
 
-    }
-
-    /**
-     * There is a foreach, but this should be always one element
-     *
-     * @param $output_content ZipContentObject[]
-     *
-     * @return $this|void
-     */
-    public function setOutputContent( $output_content ) {
-        foreach ( $output_content as $oc ) {
-            $this->_filename     = $oc->output_filename;
-            $this->outputContent = $oc->getContent();
-        }
     }
 
 }

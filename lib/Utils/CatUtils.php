@@ -688,13 +688,10 @@ class CatUtils {
      * @throws Exception
      */
     public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
-
         $values = self::getQualityInfoFromJobStruct( $job, $project, $featureSet );
-
         $result = null;
-        $codes  = $featureSet->getCodes();
 
-        if ( in_array( Features::REVIEW_IMPROVED, $codes ) || in_array( Features::REVIEW_EXTENDED, $codes ) ) {
+        if ( $featureSet->hasRevisionFeature() ) {
 
             if ( @$values->is_pass == null ) {
                 $result = $values->is_pass;
@@ -724,7 +721,7 @@ class CatUtils {
 
         $result = null;
 
-        if ( in_array( \Features\ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( \Features\ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
+        if ( $featureSet->hasRevisionFeature() ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password );
             $result = $review;
         } else {

@@ -8,9 +8,9 @@
 
 namespace API\V3;
 
+use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
 use CatUtils;
-use Exception;
 use Langs_Languages;
 
 
@@ -23,7 +23,7 @@ class CountWordController extends KleinController {
         $this->language = !empty( $this->request->language ) ? $this->request->language : 'en-US';
 
         if ( empty( $this->request->text ) ) {
-            throw new Exception( "Invalid text field", 400 );
+            throw new ValidationError( "Invalid text field", 400 );
         }
 
         $langs = Langs_Languages::getInstance();
@@ -31,7 +31,7 @@ class CountWordController extends KleinController {
         try {
             $langs->validateLanguage( $this->language );
         } catch ( \Exception $e ) {
-            throw new Exception( $e->getMessage(), 400 );
+            throw new ValidationError( $e->getMessage(), 400 );
         }
 
     }

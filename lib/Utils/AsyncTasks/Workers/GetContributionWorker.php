@@ -444,9 +444,8 @@ class GetContributionWorker extends AbstractWorker {
             }
         }
 
-        /**
-         *
-         */
+        $mt_result = [] ;
+
         if ( $jobStruct->id_mt_engine > 1 /* Request MT Directly */ && !$contributionStruct->concordanceSearch ) {
 
             if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
@@ -474,9 +473,6 @@ class GetContributionWorker extends AbstractWorker {
         if ( !empty( $tms_match ) ) {
             $matches = $tms_match;
         }
-
-
-
 
         return array( $mt_result, $matches );
     }

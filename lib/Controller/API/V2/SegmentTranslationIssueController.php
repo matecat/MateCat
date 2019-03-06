@@ -3,9 +3,10 @@
 namespace API\V2  ;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
-use Features\ReviewImproved;
+use Features\ReviewExtended\TranslationIssueModel;
 use LQA\EntryDao as EntryDao ;
 use Database;
+use RevisionFactory;
 
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 
@@ -48,10 +49,10 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         $struct = new \LQA\EntryStruct( $data );
 
-        $model = new ReviewImproved\TranslationIssueModel(
-            $this->request->id_job,
-            $this->request->password,
-            $struct
+        $model = $this->_getSegmentTranslationIssueModel(
+                $this->request->id_job,
+                $this->request->password,
+                $struct
         ) ;
 
         if ( $this->request->diff ) {
@@ -90,32 +91,28 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     public function delete() {
-
-        $project = \Projects_ProjectDao::findByJobId($this->request->id_job);
-
-        $this->featureSet->loadForProject($project);
-        $codes = $this->featureSet->getCodes();
-
-        if(in_array(\Features::REVIEW_EXTENDED, $codes)){
-            $model = new \Features\ReviewExtended\TranslationIssueModel(
-                    $this->request->id_job,
-                    $this->validator->getChunkReview()->password,
-                    $this->validator->issue
-            );
-        }
-        else {
-            $model = new ReviewImproved\TranslationIssueModel(
-                    $this->request->id_job,
-                    $this->validator->getChunkReview()->password,
-                    $this->validator->issue
-            );
-        }
-
-
+        $model = $this->_getSegmentTranslationIssueModel(
+                $this->request->id_job,
+                $this->validator->getChunkReview()->password,
+                $this->validator->issue
+        );
 
         $model->delete();
-
         $this->response->code(200);
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @param $issue
+     *
+     * @return 0|TranslationIssueModel
+     */
+    protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {
+        $project = \Projects_ProjectDao::findByJobId($this->request->id_job);
+        $this->featureSet->loadForProject($project);
+
+        return RevisionFactory::getInstance()->getTranslationIssueModel( $id_job, $password, $issue ) ;
     }
 
     protected function afterConstruct() {

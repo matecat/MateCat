@@ -465,6 +465,7 @@ let SearchUtils = {
         let searchMarker = (this.searchMode === 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 		    let segId = UI.getSegmentId( $(this) );
+		    segId = segId.split('-')[0]; // splitted segments
             if ( SearchUtils.searchResultsSegments.indexOf(segId) > -1 ) {
                 let isCurrent = $(this).find('.currSearchItem').length > 0;
                 let isTagged = $(this).find('.searchMarker').length > 0;
@@ -702,9 +703,15 @@ let SearchUtils = {
         className = (className) ? className : '.source'
         _.each(this.searchResultsSegments, function ( item ) {
             let $obj = UI.getSegmentById(item);
-            if ($obj.length) {
+            $obj = ( $obj.length > 0 ) ? $obj : UI.getSegmentsSplit(item);
+            if ($obj.length === 1) {
                 $obj = $obj.find(className);
                 $objects.push($obj);
+            } else if ( $obj.length > 1 ) { //splitted segments
+                _.each($obj, (item)=> {
+                    item = $(item).find(className);
+                    $objects.push(item);
+                });
             }
         });
         return $objects;
