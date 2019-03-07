@@ -1499,6 +1499,7 @@ LXQ.init  = function () {
                             };
                             LXQ.lexiqaData.lexiqaWarnings[element.segid] = {};
                             var seg = UI.getSegmentById( element.segid );
+                            if ( seg.length === 0 ) return;
                             var translation = $( UI.targetContainerSelector(), seg ).text();
                             results.results[element.segid].forEach( function ( qadata ) {
                                 LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] = qadata;

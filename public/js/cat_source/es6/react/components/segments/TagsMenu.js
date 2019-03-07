@@ -24,7 +24,8 @@ class TagsMenu extends React.Component {
             addedTags : addedTags,
             totalTags : missingTags.concat(addedTags),
             filteredTags: [],
-            filter: ""
+            filter: "",
+            coord : this.getSelectionCoords()
         };
         this.handleKeydownFunction = this.handleKeydownFunction.bind(this);
         this.handleResizeEvent = this.handleResizeEvent.bind(this);
@@ -80,7 +81,8 @@ class TagsMenu extends React.Component {
         //get target tags from the segment
         var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
         //Remove from the target the tags with mismatch
-        targetClone.find('.locked.mismatch').remove();
+        // targetClone.find('.locked.mismatch').remove();
+
         var newhtml = targetClone.html();
         //Remove inside-attribute for ph with equiv-text tags
         targetClone.find('.locked.inside-attribute').remove();
@@ -116,7 +118,7 @@ class TagsMenu extends React.Component {
         let tagIndex = 0;
         if ( this.state.missingTags.length > 0 ) {
             missingItems.push(<div className="head-tag-list missing"> Missing source <span
-                className="locked monad startTag mismatch">tags</span> in the target </div>
+                className="style-tag mismatch">tags</span> in the target </div>
             );
             _.each(this.state.missingTags, (item, index) => {
                 if (this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1) {
@@ -146,7 +148,7 @@ class TagsMenu extends React.Component {
             });
         }
         if ( this.state.addedTags.length > 0 ) {
-            addedItems.push(<div className="head-tag-list added"> Added tags</div>);
+            addedItems.push(<div className="head-tag-list added"> Added <span className="style-tag">tags</span> in the target</div>);
             _.each(this.state.addedTags, ( item, index ) => {
 
                 if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
@@ -172,16 +174,25 @@ class TagsMenu extends React.Component {
             });
         }
 
-        if ( missingItems.length === 0 && addedItems.length === 0 ) {
-            menuItems.push(<div className={"item added-tag no-results"} key={0} data-original="item">No results</div> );
+        if ( missingItems.length <= 1 && addedItems.length <= 1 ) {
+            menuItems.push(<div className={"item added-tag no-results"} key={0} data-original="item">No matches</div> );
+            return <div className="ui vertical menu">
+                <div>
+                {menuItems}
+                </div>
+            </div>;
         }
         return <div className="ui vertical menu">
+            {missingItems.length > 1 &&
             <div>
-            {missingItems}
+                {missingItems}
             </div>
+            }
+            {addedItems.length > 1 &&
             <div>
-            {addedItems}
+                {addedItems}
             </div>
+            }
         </div>;
     }
 
@@ -210,12 +221,16 @@ class TagsMenu extends React.Component {
                 $('.selected', $(editareaClone)).remove();
             }
         }
-        let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(this.state.filter) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
+        let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(htmlEncode(this.state.filter)) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
+        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\/span>)(<span.*?<\\/span>)(&lt;)+'+ htmlEncode(this.state.filter), 'gi');
 
-        editareaClone.html(editareaClone.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
         editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+        editareaClone.find('.tag-autocomplete-endcursor').after(editareaClone.find('.tag-autocomplete-endcursor').html());
+        editareaClone.find('.tag-autocomplete-endcursor').html('');
 
+        editareaClone.html(editareaClone.html().replace(regStartTarget, '$2$3$1'));
         this.state.filter !== "" && editareaClone.html(editareaClone.html().replace(regeExp, '$2'));
+
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
@@ -242,6 +257,7 @@ class TagsMenu extends React.Component {
         });
         setTimeout(function () {
             UI.segmentQA(UI.currentSegment);
+            UI.checkTagProximity();
         });
 
     }
@@ -318,7 +334,13 @@ class TagsMenu extends React.Component {
     }
 
     handleResizeEvent( event ) {
-        this.forceUpdate()
+        let sel = window.getSelection();
+        if ( $(sel.focusNode).closest('.editarea').length > 0 ) {
+            let coord = this.getSelectionCoords();
+            this.setState({
+                coord
+            })
+        }
     }
 
     getNextIdx(direction) {
@@ -344,6 +366,7 @@ class TagsMenu extends React.Component {
         document.removeEventListener( "keydown", this.handleKeydownFunction );
         window.removeEventListener( "resize", this.handleResizeEvent );
         $("#outer").off("scroll", this.handleResizeEvent);
+        $('.tag-autocomplete-endcursor').remove();
         UI.tagMenuOpen = false;
     }
 
@@ -370,14 +393,14 @@ class TagsMenu extends React.Component {
     }
 
     render() {
-        var coord = this.getSelectionCoords();
+
         let style = {
             position: "fixed",
             zIndex: 2,
             maxHeight: "30%",
             overflowY: "auto",
-            top: coord.y,
-            left: coord.x
+            top: this.state.coord.y,
+            left: this.state.coord.x
         };
 
         let tags = this.getItemsMenuHtml();

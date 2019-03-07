@@ -2,14 +2,16 @@
     .tags-auto-complete-menu {
         background: #FFF;
         box-sizing: border-box;
-        max-width: 250px;
+        max-width: 300px;
         border-radius: 2px;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        border: 1px solid #dadada;
         .ui.vertical.menu {
             -webkit-box-shadow: none;
             -moz-box-shadow: none;
             box-shadow: none;
             border: none;
+            width: 18rem;
             .menu-container {
 
             }
@@ -17,22 +19,28 @@
                 position: -webkit-sticky;
                 position: sticky;
                 top: 0;
-                padding: 10px;
+                padding: 1rem 1.14rem;
                 font-weight: bold;
                 line-height: 17px;
+                border-top: 1px solid #e9e3e8;
                 border-bottom: 1px solid #e0e3e8;
                 z-index: 1;
-                &.missing {
-                    background-color: #fdeae2;
-                }
-                &.added {
-                    background-color: #eaf9ea;
+                background: #FFF;
+                pointer-events: none;
+                display: flex;
+                align-items: center;
+                .style-tag {
+                    padding: 4px 7px;
+                    margin: 0 5px;
+                    &.mismatch {
+                        color: #E1565A;
+                    }
                 }
             }
             .item {
                 text-overflow: ellipsis;
                 overflow: hidden;
-                padding: 9px !important;
+                padding: 0.78rem 1.14rem;
                 width: 100% !important;
                 font-size: 14px;
                 white-space: nowrap;
@@ -73,4 +81,63 @@
         position: relative;
         top: -1px;
     }
+}
+
+.style-tag {
+    display: inline-flex;
+    background: #F2F4F7;
+    box-shadow: inset 0 0 0 2px #E5E9F1;
+    border-radius: 7px;
+    font-size: 15px;
+    color: #767676;
+    font-style: italic;
+    padding: 0 4px 0 2px;
+    vertical-align: middle;
+    margin: 1px;
+    cursor: pointer;
+    &::selection {
+        background: transparent !important;
+    }
+    &:hover {
+        background: #E5E9F1;
+        cursor: pointer;
+    }
+    &.selected {
+        background: #E5E9F1;
+        box-shadow: inset 0 0 0 2px #3B4A5C;
+        cursor: grab;
+        &:active {
+            cursor: grabbing;
+            position: relative;
+            -moz-transform: scale(1.1, 1.1);
+            -ms-transform: scale(1.1, 1.1);
+            -webkit-transform: scale(1.1, 1.1);
+            transform: scale(1.1, 1.1);
+            transition: 0.1s ease;
+        }
+    }
+    a {
+        color: #3B4A5C;
+        font-weight: 700;
+    }
+    &.mismatch {
+        background-color: #fdeae2;
+        box-shadow: inset 0 0 0 2px #f9dcd1;
+        &:hover {
+            background-color: #f9dcd1;
+        }
+        &.selected {
+            box-shadow: inset 0 0 0 2px #e1565a;
+            background: #f9d7ca;
+        }
+        a {
+            color: #E1565A;
+        }
+    }
+}
+
+
+span::selection, span a::selection {
+    background-color: transparent;
+    color: inherit;
 }
