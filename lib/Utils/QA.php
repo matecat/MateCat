@@ -655,7 +655,7 @@ class QA {
      * @return string Json
      */
     public function getNoticesJSON() {
-        return json_encode( $this->checkErrorNone( self::INFO, true ) );
+        return json_encode( $this->checkErrorNone( self::INFO, false ) );
     }
 
     /**
