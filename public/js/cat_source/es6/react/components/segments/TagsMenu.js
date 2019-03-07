@@ -118,7 +118,7 @@ class TagsMenu extends React.Component {
         let tagIndex = 0;
         if ( this.state.missingTags.length > 0 ) {
             missingItems.push(<div className="head-tag-list missing"> Missing source <span
-                className="locked monad startTag mismatch">tags</span> in the target </div>
+                className="style-tag mismatch">tags</span> in the target </div>
             );
             _.each(this.state.missingTags, (item, index) => {
                 if (this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1) {
@@ -148,7 +148,7 @@ class TagsMenu extends React.Component {
             });
         }
         if ( this.state.addedTags.length > 0 ) {
-            addedItems.push(<div className="head-tag-list added"> Added tags</div>);
+            addedItems.push(<div className="head-tag-list added"> Added <span className="style-tag">tags</span> in the target</div>);
             _.each(this.state.addedTags, ( item, index ) => {
 
                 if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
