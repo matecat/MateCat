@@ -152,12 +152,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws \Exceptions\ValidationError
      */
     public function postProjectCreate($projectStructure) {
-        Log::doLog( $this->feature );
-
         $this->setQaModelFromJsonFile( $projectStructure );
-
         $this->createChunkReviewRecords( $projectStructure );
-
     }
 
     /**
