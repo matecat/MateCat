@@ -31,7 +31,7 @@ class SegmentFooterTabRevise extends React.Component {
 
         return  <div key={"container_" + this.props.code}
                      className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
-                     id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
+                     id={"segment-" + this.props.id_segment + "-" + this.props.tab_class}>
             <div className="error-type">
                 <h3>Select the type of issue</h3>
                 <table>
