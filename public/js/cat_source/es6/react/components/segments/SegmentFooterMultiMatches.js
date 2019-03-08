@@ -169,7 +169,7 @@ class SegmentFooterMultiMatches extends React.Component {
             <div
                 key={"container_" + this.props.code}
                 className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
-                id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
+                id={"segment-" + this.props.id_segment +'-'+ this.props.tab_class}>
                 <div className="overflow">
                     { !_.isUndefined(matches) && matches.length > 0 ? (
                         matches
