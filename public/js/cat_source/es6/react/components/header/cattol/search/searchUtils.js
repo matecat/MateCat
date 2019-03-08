@@ -584,10 +584,10 @@ let SearchUtils = {
             let currentMarkIndex = marksArray.indexOf($(current)[0]);
             let nextIndex = (type === "prev") ? currentMarkIndex - 1 : currentMarkIndex + 1;
             if ( $(current) && marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
-                $(current).removeClass('currSearchItem');
-                $(marksArray[nextIndex]).addClass('currSearchItem');
                 if (unmark)
                     $(current).replaceWith($(current).text());
+                $(current).removeClass('currSearchItem');
+                $(marksArray[nextIndex]).addClass('currSearchItem');
                 UI.goingToNext = false;
             } else { // jump to results in subsequents segments
                 let $currentSegment = $(current).length ? $(current).parents('section') : UI.currentSegment;
