@@ -165,7 +165,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     protected function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
 
-        $chunks     = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 600 );
+        $chunks     = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
 
         foreach ( $chunks as $k => $chunk ) {
             $data = [
