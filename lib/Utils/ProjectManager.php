@@ -2140,7 +2140,7 @@ class ProjectManager {
                         'segment_hash'        => $translation_row [ 3 ],
                         'status'              => $iceLockArray[ 'status' ],
                         'translation'         => $translation_row [ 2 ],
-                        'locked'              => $iceLockArray[ 'locked' ],
+                        'locked'              => 0, // not allowed to change locked status for pre-translations
                         'match_type'          => $iceLockArray[ 'match_type' ],
                         'eq_word_count'       => $iceLockArray[ 'eq_word_count' ],
                         'suggestion_match'    => $iceLockArray[ 'suggestion_match' ],
