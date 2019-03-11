@@ -427,6 +427,7 @@ class FeatureSet {
             }
         }
 
+        $this->features = $this->filter('filterFeaturesMerged', $this->features ) ;
         $this->sortFeatures();
 
     }
