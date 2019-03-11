@@ -74,14 +74,14 @@ class Features {
 
                     $manifest = @include_once( $fileInfo->getPathname() . DIRECTORY_SEPARATOR . 'manifest.php' );
                     if ( !empty( $manifest ) ) { //Autoload external plugins
-
-                        static::$_INSTANCE->PLUGIN_PATHS[ $manifest[ 'FEATURE_CODE' ] ] = $fileInfo->getPathname() . DIRECTORY_SEPARATOR . "lib";
-                        static::$_INSTANCE->VALID_CODES[] = $manifest[ 'FEATURE_CODE' ];
-                        //load class for autoloading
-                        static::$_INSTANCE->PLUGIN_CLASSES[ $manifest[ 'FEATURE_CODE' ] ]    = $manifest[ 'PLUGIN_CLASS' ];
-
+                        if ( array_key_exists( 'FEATURE_CODE', $manifest )) {
+                            static::populateVars( $manifest, $fileInfo->getPathname() ) ;
+                        } else {
+                            foreach( $manifest as $key => $manifest ) {
+                                static::populateVars( $manifest, $fileInfo->getPathname() ) ;
+                            }
+                        }
                     }
-
                 }
 
             }
@@ -89,6 +89,13 @@ class Features {
         }
 
         return static::$_INSTANCE;
+    }
+
+    public static function populateVars( $manifest, $pathName ) {
+        static::$_INSTANCE->PLUGIN_PATHS[ $manifest[ 'FEATURE_CODE' ] ] =  $pathName . DIRECTORY_SEPARATOR . "lib";
+        static::$_INSTANCE->VALID_CODES[] = $manifest[ 'FEATURE_CODE' ];
+        //load class for autoloading
+        static::$_INSTANCE->PLUGIN_CLASSES[ $manifest[ 'FEATURE_CODE' ] ]    = $manifest[ 'PLUGIN_CLASS' ];
     }
 
     /**
