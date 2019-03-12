@@ -72,7 +72,7 @@ class SegmentFooter extends React.Component {
             multiMatches: {
                 label: 'Crosslanguage Matches',
                 code : 'cl',
-                tab_class : 'matches',
+                tab_class : 'cross-matches',
                 enabled: !!(UI.crossLanguageSettings && UI.crossLanguageSettings.primary),
                 visible: !!(UI.crossLanguageSettings && UI.crossLanguageSettings.primary),
                 open: false,

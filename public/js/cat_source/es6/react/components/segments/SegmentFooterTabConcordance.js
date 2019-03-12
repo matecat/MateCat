@@ -226,7 +226,7 @@ class SegmentFooterTabConcordance extends React.Component {
 
             <div key={"container_" + this.props.code}
                  className={"tab sub-editor " + this.props.active_class + " " + this.props.tab_class + " " + isExtendedClass + " " + haveResults}
-                 id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
+                 id={"segment-" + this.props.id_segment + "-" + this.props.tab_class}>
                 <div className="overflow">
                     {html}
                     <div className="results">

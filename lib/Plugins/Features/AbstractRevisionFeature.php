@@ -10,6 +10,7 @@ use Chunks_ChunkStruct;
 use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
+use Features;
 use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
@@ -31,6 +32,10 @@ use ZipArchive;
 abstract class AbstractRevisionFeature extends BaseFeature {
 
     protected $revisionInstance;
+
+    protected static $dependencies = [
+            Features::TRANSLATION_VERSIONS
+    ];
 
     public function __construct( BasicFeatureStruct $feature ) {
         parent::__construct( $feature );
@@ -152,12 +157,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws \Exceptions\ValidationError
      */
     public function postProjectCreate($projectStructure) {
-        Log::doLog( $this->feature );
-
         $this->setQaModelFromJsonFile( $projectStructure );
-
         $this->createChunkReviewRecords( $projectStructure );
-
     }
 
     /**
@@ -169,7 +170,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     protected function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
 
-        $chunks     = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 600 );
+        $chunks     = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
 
         foreach ( $chunks as $k => $chunk ) {
             $data = [
