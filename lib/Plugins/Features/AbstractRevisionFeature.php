@@ -10,6 +10,7 @@ use Chunks_ChunkStruct;
 use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
+use Features;
 use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
@@ -31,6 +32,10 @@ use ZipArchive;
 abstract class AbstractRevisionFeature extends BaseFeature {
 
     protected $revisionInstance;
+
+    protected static $dependencies = [
+            Features::TRANSLATION_VERSIONS
+    ];
 
     public function __construct( BasicFeatureStruct $feature ) {
         parent::__construct( $feature );
