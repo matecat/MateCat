@@ -69,7 +69,14 @@
                 mark {
                     background: #FFFF00;
                 }
+                &.no-results {
+                    cursor: default;
+                    pointer-events: none;
+                    height: 100%;
+                    padding: 13px !important;
+                }
             }
+
         }
     }
     .head-tag-list .locked.mismatch {
@@ -134,10 +141,33 @@
             color: #E1565A;
         }
     }
+    .tag-html-container-open,
+    .tag-html-container-close {
+        display: none !important;
+    }
+    &::selection, & a::selection {
+        background-color: transparent;
+        color: inherit;
+    }
 }
 
-
-span::selection, span a::selection {
-    background-color: transparent;
-    color: inherit;
+//Quality report
+.qr-wrapper {
+    .style-tag {
+        cursor: default;
+    }
+    .added {
+        background: rgba(158, 255, 0, 0.2);
+        span.locked {
+            background: rgba(158, 255, 0, 0.2) !important;
+        }
+    }
+    .deleted {
+        background: rgba(255, 46, 0, 0.1) ;
+        text-decoration: line-through ;
+        span.locked{
+            background: rgba(255, 46, 0, 0.1) !important;
+            text-decoration: line-through !important;
+        }
+    }
 }

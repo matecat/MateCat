@@ -175,7 +175,7 @@ class TagsMenu extends React.Component {
         }
 
         if ( missingItems.length <= 1 && addedItems.length <= 1 ) {
-            menuItems.push(<div className={"item added-tag no-results"} key={0} data-original="item">No matches</div> );
+            menuItems.push(<div className={"item no-results"} key={0} data-original="item">No matches</div> );
             return <div className="ui vertical menu">
                 <div>
                 {menuItems}
