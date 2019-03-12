@@ -214,7 +214,7 @@ class SegmentTarget extends React.Component {
             //Tag Mode Buttons
 
             if (this.props.tagModesEnabled && !this.props.enableTagProjection && UI.tagLockEnabled) {
-                var buttonClass = ($('body').hasClass("tagmode-default-extended")) ? "active" : "";
+                var buttonClass = ($('body').hasClass("tagmode-default-compressed")) ? "" : "active";
                 tagModeButton =
                     <a href="#" className={"tagModeToggle " + buttonClass} alt="Display full/short tags"
                        title="Display full/short tags">
