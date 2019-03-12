@@ -131,7 +131,8 @@
             var currentSegment = (segment)? segment : UI.currentSegment;
             if (currentSegment && this.enableTagProjection) {
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
-                var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment) && currentSegment.hasClass('enableTP');
+                var segmentNoTags = UI.removeAllTags( htmlDecode(currentSegment.find('.source').data('original')));
+                var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment) && currentSegment.hasClass('enableTP') && segmentNoTags !== '';
                 // The segment is already been tagged
                 var dataAttribute = currentSegment.attr('data-tagprojection');
                 // If the segment has already be tagged
@@ -232,7 +233,7 @@
         decodeText: function(segment, text) {
             var decoded_text;
             if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
-                && !UI.checkXliffTagsInText(segment.translation) ) {
+                && !UI.checkXliffTagsInText(segment.translation) && UI.removeAllTags(segment.segment) !== '' ) {
                 decoded_text = UI.removeAllTags(text);
             } else {
                 decoded_text = text;
