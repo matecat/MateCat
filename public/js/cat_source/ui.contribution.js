@@ -220,6 +220,9 @@ $.extend(UI, {
         if (!$('.sub-editor.matches', segment).length) {
             SegmentActions.createFooter(UI.getSegmentId(segment));
         }
+
+        SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.errors);
+
         if ( data.matches && data.matches.length > 0 && _.isUndefined(data.matches[0].error)) {
             var editareaLength = editarea.text().trim().length;
             var translation = data.matches[0].translation;
@@ -229,7 +232,6 @@ $.extend(UI, {
             var segment_id = segment.attr('id');
             $('.sub-editor.matches .overflow .graysmall .message, .tab.sub-editor.matches .engine-error-item', segment).remove();
             // $('.tab-switcher-tm .number', segment).text('');
-            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, []);
 
             if (editareaLength === 0) {
 
@@ -262,17 +264,8 @@ $.extend(UI, {
 
             $('.translated', segment).removeAttr('disabled');
             $('.draft', segment).removeAttr('disabled');
-        } else {
-            // TODO Move to SegmentFooter Component
-            $('.tab-switcher-tm .number', segment).text('');
-            if((config.mt_enabled)&&(!config.id_translator)) {
-                $('.sub-editor.matches .overflow', segment).html('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a' +
-                    ' href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
-            } else {
-                $('.sub-editor.matches .overflow', segment).html('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
-            }
-            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.errors);
         }
+
         SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
     },
     showContributionError: function(segment) {

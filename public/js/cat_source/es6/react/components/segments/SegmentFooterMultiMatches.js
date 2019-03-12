@@ -32,7 +32,7 @@ class SegmentFooterMultiMatches extends React.Component {
         var matchesProcessed = [];
         // SegmentActions.createFooter(this.props.id_segment);
         $.each(matches, function(index) {
-            if ( _.isUndefined(this.segment) || (this.segment === '') || (this.translation === '') ) return false;
+            if ( _.isUndefined(this.segment) || (this.segment === '') || (this.translation === '') ) return true;
             var item = {};
             item.id = this.id;
             item.disabled = (this.id == '0') ? true : false;
@@ -169,7 +169,7 @@ class SegmentFooterMultiMatches extends React.Component {
             <div
                 key={"container_" + this.props.code}
                 className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
-                id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
+                id={"segment-" + this.props.id_segment +'-'+ this.props.tab_class}>
                 <div className="overflow">
                     { !_.isUndefined(matches) && matches.length > 0 ? (
                         matches
