@@ -4382,31 +4382,7 @@ section .toolbar .autofillTag {
 
 }
 
-body.tagModes.tagmode-default-compressed .targetarea .locked.startTag,
-body.tagModes.tagmode-default-compressed .source .locked.startTag,
-body.tagModes.tagmode-default-compressed .suggestion_source .locked.startTag,
-body.tagModes.tagmode-default-compressed .translation .locked.startTag,
-body.tagModes.tagmode-default-compressed .splitArea .locked.startTag,
-body.tagModes.tagmode-default-compressed .targetarea .locked.selfClosingTag,
-body.tagModes.tagmode-default-compressed .source .locked.selfClosingTag,
-body.tagModes.tagmode-default-compressed .suggestion_source .locked.selfClosingTag,
-body.tagModes.tagmode-default-compressed .translation .locked.selfClosingTag,
-body.tagModes.tagmode-default-compressed .splitArea .locked.selfClosingTag,
-body.tagModes.tagmode-default-compressed .targetarea .locked.endTag,
-body.tagModes.tagmode-default-compressed .source .locked.endTag,
-body.tagModes.tagmode-default-compressed .suggestion_source .locked.endTag,
-body.tagModes.tagmode-default-compressed .translation .locked.endTag,
-body.tagModes.tagmode-default-compressed .endTag {
-    visibility: hidden;
-    text-indent: -9995px;
-    display: inline-block;
-    overflow: hidden;
-    position: relative;
-    margin: 0px 4px;
-    width: 7px;
-    height: 8px;
-    padding-top: 0px;
-}
+
 
 body span.endTag {
     top: -3.4px;
@@ -4414,41 +4390,6 @@ body span.endTag {
 body:not(.tagModes) .tagModeToggle {
     display: none;
 }
-
-body.rtl-target.tagModes.tagmode-default-compressed .editarea .locked.startTag,
-body.rtl-target.tagModes.tagmode-default-compressed .translation .locked.startTag,
-body.rtl-source.tagModes.tagmode-default-compressed .source .locked.startTag,
-body.rtl-source.tagModes.tagmode-default-compressed .suggestion_source .locked.startTag,
-body.rtl-target.tagModes.tagmode-default-compressed .splitArea .locked.startTag,
-body.tagModes.tagmode-default-compressed .targetarea .locked.endTag,
-body.tagModes.tagmode-default-compressed .source .locked.endTag,
-body.tagModes.tagmode-default-compressed .suggestion_source .locked.endTag,
-body.tagModes.tagmode-default-compressed .translation .locked.endTag,
-body.tagModes.tagmode-default-compressed .splitArea .locked.endTag {
-    -ms-transform: rotate(-180deg); /* IE 9 */
-    -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
-    transform: rotate(-180deg);
-}
-
-body.rtl-source.tagModes.tagmode-default-compressed .suggestion_source .locked.endTag,
-body.rtl-source.tagModes.tagmode-default-compressed .source .locked.endTag,
-body.rtl-target.tagModes.tagmode-default-compressed .editarea .locked.endTag,
-body.rtl-target.tagModes.tagmode-default-compressed .spliArea .locked.endTag,
-body.rtl-target.tagModes.tagmode-default-compressed .translation .locked.endTag {
-    -ms-transform: rotate(0deg); /* IE 9 */
-    -webkit-transform: rotate(0deg); /* Chrome, Safari, Opera */
-    transform: rotate(0deg);
-}
-
-body.rtl-source.tagModes.tagmode-default-extended .suggestion_source .locked,
-body.rtl-source.tagModes.tagmode-default-extended .source .locked,
-body.rtl-target.tagModes.tagmode-default-extended .targetarea .locked,
-body.rtl-target.tagModes.tagmode-default-extended .spliArea .locked,
-body.rtl-target.tagModes.tagmode-default-extended .translation .locked {
-    direction: ltr;
-    display: inline-block;
-}
-
 body.rtl-source.tagModes.tagmode-default-extended .suggestion_source .monad.marker,
 body.rtl-source.tagModes.tagmode-default-extended .source .monad.marker,
 body.rtl-target.tagModes.tagmode-default-extended .editarea .monad.marker,
