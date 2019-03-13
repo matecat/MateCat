@@ -110,8 +110,7 @@
         cursor: pointer;
     }
     &.selected {
-        background: #E5E9F1;
-        box-shadow: inset 0 0 0 2px #3B4A5C;
+        background: #c0c3ca;
         cursor: grab;
         &:active {
             cursor: grabbing;
@@ -122,6 +121,10 @@
             transform: scale(1.1, 1.1);
             transition: 0.1s ease;
         }
+    }
+    &.highlight {
+        box-shadow: inset 0 0 0 2px #3b4a5c96;
+        color: #424242;
     }
     a {
         color: #3B4A5C;
@@ -246,7 +249,7 @@ body.rtl-source{
     .translation .locked.endTag,
     .endTag {
         visibility: hidden;
-        text-indent: -9995px;
+        text-indent: -9998px;
         display: inline-block;
         overflow: hidden;
         position: relative;

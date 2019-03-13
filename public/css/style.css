@@ -4382,11 +4382,6 @@ section .toolbar .autofillTag {
 
 }
 
-
-
-body span.endTag {
-    top: -3.4px;
-}
 body:not(.tagModes) .tagModeToggle {
     display: none;
 }
