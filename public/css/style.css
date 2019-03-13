@@ -918,6 +918,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     background: -moz-linear-gradient(top, #09beec, #119ec4);
     background: linear-gradient(top, #09beec, #119ec4);
     text-transform: uppercase;
+    user-select: none;
 }
 
 .buttons .approved.disabled,
@@ -1093,6 +1094,7 @@ article .approved:active {
     font-size: 18px;
     margin: -6px 25px -7px 25px;
     color: #fff !important;
+    user-select: none;
 }
 
 .approved,
