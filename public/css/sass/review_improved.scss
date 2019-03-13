@@ -635,9 +635,9 @@ a.cancel-project:hover {
 }
 
 
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag
+body.tagModes.tagmode-default-compressed .errorTaggingArea .locked.startTag,
+body.tagModes.tagmode-default-compressed .errorTaggingArea .locked.selfClosingTag,
+body.tagModes.tagmode-default-compressed .errorTaggingArea .locked.endTag
 {
 /*visibility: hidden;*/
 text-indent: -9995px;
@@ -651,22 +651,22 @@ padding-top: 0;
 }
 
 
-body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag
+body.rtl-target.tagModes.tagmode-default-compressed .errorTaggingArea .locked.startTag,
+body.tagModes.tagmode-default-compressed .errorTaggingArea .locked.endTag
 {
  -ms-transform: rotate(-180deg); /* IE 9 */
     -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
     transform: rotate(-180deg);
 }
-body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag
+body.rtl-target.tagModes.tagmode-default-compressed .errorTaggingArea .locked.endTag
 {
  -ms-transform: rotate(0deg); /* IE 9 */
     -webkit-transform: rotate(0deg); /* Chrome, Safari, Opera */
     transform: rotate(0deg);
 }
 
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag:before
+body.tagModes.tagmode-default-compressed .errorTaggingArea .locked.startTag:before,
+body.tagModes.tagmode-default-compressed .errorTaggingArea .locked.endTag:before
 {
 content: "\f04b";
 visibility: visible;
@@ -678,7 +678,7 @@ transform: scaleY(1.4);
 left: 10000px;
 }
 
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag:before {
+body.tagModes.tagmode-default-compressed .errorTaggingArea .locked.selfClosingTag:before {
 content: "\e604";
 visibility: visible;
 position: absolute;

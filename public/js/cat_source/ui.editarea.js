@@ -33,15 +33,6 @@ $.extend( UI, {
             return;
         }
         var selection, range, r, rr, referenceNode;
-        if ((code == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
-            return true;
-            // ONly for console.log
-            // var rangeObject = getRangeObject(window.getSelection());
-            // for(var key in rangeObject.endContainer) {
-            //     console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
-            // }
-        }
-
         //check if inside search
         if (UI.body.hasClass('searchActive')) {
             var el = this;
