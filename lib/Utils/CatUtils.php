@@ -219,6 +219,8 @@ class CatUtils {
      * @param mixed $job_stats
      *
      * @return mixed $job_stats
+     * @deprecated Formatting strings server-side for javascript rendered pages is deprecated.
+     *
      */
     protected static function _getStatsForJob( $job_stats ) {
 

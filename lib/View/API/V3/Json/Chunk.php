@@ -119,7 +119,10 @@ class Chunk extends \API\V2\Json\Chunk {
             $total_reviews_words_count = $chunkReviewModel->getReviewedWordsCount();
 
             $model = $project->getLqaModel() ;
-            $categories = $model->getSerializedCategories();
+            $categories = array_map( function( $cat ) {
+                unset( $cat['id'] );
+                return $cat ;
+            }, $model->getCategoriesAndSeverities() );
 
         } else {
 
