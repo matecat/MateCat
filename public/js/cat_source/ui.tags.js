@@ -348,7 +348,7 @@ $.extend(UI, {
                     var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
                     var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
 
-                    UI.removeHighlightCorrespondingTags(UI.editarea);
+                    UI.removeHighlightCorrespondingTags(UI.currentSegment);
                     if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
                         (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
                         UI.highlightCorrespondingTags($(UI.editarea.find('.locked:not(.locked-inside)')[indexTags]));
@@ -364,8 +364,10 @@ $.extend(UI, {
         }
         // TODO test.inivisible break some doms with text
         $('body').find('.temp-highlight-tags').remove();
-
-
+    },
+    highlightCorrespondingTagsinSource: function(elem) {
+        UI.removeHighlightCorrespondingTags(UI.currentSegment.find('.source'));
+        UI.highlightCorrespondingTags(elem);
     },
     highlightCorrespondingTags: function (el) {
         var pairEl;

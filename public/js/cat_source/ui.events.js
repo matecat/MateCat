@@ -375,7 +375,10 @@ $.extend(UI, {
                 selectText(elem[0]);
                 UI.removeSelectedClassToTags();
                 elem.addClass('selected');
-				if(UI.body.hasClass('tagmode-default-compressed')) {
+                if ( elem.closest('.source').length > 0 ) {
+                    UI.highlightCorrespondingTagsinSource(elem);
+                }
+                if(UI.body.hasClass('tagmode-default-compressed')) {
 				    $('.editor .tagModeToggle').click();
                 }
             }
