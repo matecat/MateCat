@@ -12,9 +12,7 @@ use CatUtils;
 use Chunks_ChunkStruct;
 use Constants_Revise;
 use Constants_TranslationStatus;
-use Features\ReviewExtended;
-use Features\ReviewImproved;
-use Features\ReviewImproved\Model\QualityReportDao;
+use Features\ReviewExtended\Model\QualityReportDao;
 use Features\TranslationVersions;
 use FeatureSet;
 use SubFiltering\Filter;
@@ -41,8 +39,10 @@ class QualityReportSegmentModel {
         $featureSet->loadForProject( $chunk->getProject() );
 
         $codes = $featureSet->getCodes();
-        if ( in_array( ReviewExtended::FEATURE_CODE, $codes ) OR in_array( ReviewImproved::FEATURE_CODE, $codes ) ) {
+
+        if ( $featureSet->hasRevisionFeature() ) {
             $issues = QualityReportDao::getIssuesBySegments( $segments_id, $chunk->id );
+
         } else {
             $reviseDao          = new \Revise_ReviseDAO();
             $segments_revisions = $reviseDao->readBySegments( $segments_id, $chunk->id );

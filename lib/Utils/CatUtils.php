@@ -152,11 +152,17 @@ class CatUtils {
 
     }
 
-    public static function addSegmentTranslation( array $_Translation, array &$errors ) {
+    /**
+     * @param Translations_SegmentTranslationStruct $translation
+     * @param array                                 $errors
+     *
+     * @return array
+     */
+    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, array &$errors ) {
 
         try {
             //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
-            addTranslation( $_Translation );
+            addTranslation( $translation );
         } catch ( Exception $e ) {
             $errors[] = [ "code" => -101, "message" => $e->getMessage() ];
         }
@@ -684,13 +690,10 @@ class CatUtils {
      * @throws Exception
      */
     public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
-
         $values = self::getQualityInfoFromJobStruct( $job, $project, $featureSet );
-
         $result = null;
-        $codes  = $featureSet->getCodes();
 
-        if ( in_array( Features::REVIEW_IMPROVED, $codes ) || in_array( Features::REVIEW_EXTENDED, $codes ) ) {
+        if ( $featureSet->hasRevisionFeature() ) {
 
             if ( @$values->is_pass == null ) {
                 $result = $values->is_pass;
@@ -720,7 +723,7 @@ class CatUtils {
 
         $result = null;
 
-        if ( in_array( \Features\ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( \Features\ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
+        if ( $featureSet->hasRevisionFeature() ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password );
             $result = $review;
         } else {

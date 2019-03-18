@@ -15,6 +15,7 @@ const COMMENTS_TYPE = 'comment';
 const CONTRIBUTIONS_TYPE = 'contribution';
 const CONCORDANCE_TYPE = 'concordance';
 const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
+const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 
 // Init logger
 winston.add( winston.transports.DailyRotateFile, {filename: path.resolve( __dirname, config.log.file )} );
@@ -127,6 +128,11 @@ var checkCandidate = function ( type, response, message ) {
                 response._clientId === message.data.id_client;
             break;
         case CONCORDANCE_TYPE:
+            candidate = response._matecatJobId === message.data.id_job &&
+                message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
+                response._clientId === message.data.id_client;
+            break;
+        case BULK_STATUS_CHANGE_TYPE:
             candidate = response._matecatJobId === message.data.id_job &&
                 message.data.passwords.indexOf( response._matecatPw ) !== -1 &&
                 response._clientId === message.data.id_client;

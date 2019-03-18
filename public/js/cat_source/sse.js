@@ -21,7 +21,7 @@ SSE = {
 SSE.Message = function ( data ) {
     this._type = data._type;
     this.data = data;
-    this.types = ['comment', 'ack', 'contribution', 'concordance', 'cross_language_matches'];
+    this.types = new Array( 'comment', 'ack', 'contribution', 'concordance', 'bulk_segment_status_change', 'cross_language_matches' );
     this.eventIdentifier = 'sse:' + this._type;
 
     this.isValid = function () {

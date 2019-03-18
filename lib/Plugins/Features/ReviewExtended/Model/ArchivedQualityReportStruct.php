@@ -6,7 +6,7 @@
  * Time: 17:42
  */
 
-namespace Features\ReviewImproved\Model;
+namespace Features\ReviewExtended\Model;
 
 
 class ArchivedQualityReportStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {

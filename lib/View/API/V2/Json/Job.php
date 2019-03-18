@@ -14,18 +14,14 @@ use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
-use Features\ReviewExtended;
-use Features\ReviewImproved;
-use Langs_Languages;
+use FeatureSet;
 use Langs_LanguageDomains;
-use LQA\ChunkReviewDao;
+use Langs_Languages;
 use ManageUtils;
-use Routes;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
 use Utils;
 use WordCount_Struct;
-use FeatureSet;
 
 class Job {
 
@@ -123,7 +119,7 @@ class Job {
 
         $warningsCount = $jStruct->getWarningsCount();
 
-        if(in_array(ReviewImproved::FEATURE_CODE, $featureSet->getCodes()) || in_array(ReviewExtended::FEATURE_CODE, $featureSet->getCodes())){
+        if( $featureSet->hasRevisionFeature() ) {
             $reviseIssues = new \stdClass();
 
         } else{

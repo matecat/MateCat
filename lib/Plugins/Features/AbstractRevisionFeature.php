@@ -3,37 +3,47 @@
 namespace Features ;
 
 use API\V2\Exceptions\ValidationError;
+use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkDao;
+use Chunks_ChunkStruct;
 use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
-use Features\ReviewImproved\ChunkReviewModel;
+use Features;
+use Features\ProjectCompletion\CompletionEventStruct;
+use Features\ReviewExtended\IChunkReviewModel;
+use Features\ReviewExtended\Model\ArchivedQualityReportModel;
+use Features\ReviewExtended\Model\QualityReportModel;
+use FilesStorage;
 use INIT;
-use FilesStorage ;
+use Jobs_JobStruct;
 use Log;
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
 use Projects_ProjectDao;
-use Translations_SegmentTranslationStruct;
+use Projects_ProjectStruct;
+use RevisionFactory;
+use SegmentTranslationChangeVector;
 use Utils;
-use ZipArchive ;
-use SegmentTranslationModel;
-use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
-use Features\ReviewImproved\Controller;
-use Projects_ProjectStruct ;
-use Jobs_JobStruct ;
-
-use Features\ProjectCompletion\CompletionEventStruct ;
-
-use Chunks_ChunkStruct ;
-use Features\ReviewImproved\Model\ArchivedQualityReportModel ;
-use Features\ReviewImproved\Model\QualityReportModel ;
+use ZipArchive;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
 
+    protected $revisionInstance;
+
+    protected static $dependencies = [
+            Features::TRANSLATION_VERSIONS
+    ];
+
+    public function __construct( BasicFeatureStruct $feature ) {
+        parent::__construct( $feature );
+        RevisionFactory::getInstance( $this ) ;
+    }
+
     /**
-     * In ReviewImproved, UI forces the `propagation` parameter to false to avoid prompt and autopropagation of
+     * In ReviewExtended, UI forces the `propagation` parameter to false to avoid prompt and autopropagation of
      * revision status changes.
      *
      * This param must be reset to default value `true` when contribution is evaluted, otherwise the
@@ -59,7 +69,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * filter_review_password
      *
      * If this method is reached it means that the project we are
-     * working on has ReviewImproved feature enabled, and that we
+     * working on has ReviewExtended feature enabled, and that we
      * are in reivew mode.
      *
      * Assuming the provided password is a "review_password".
@@ -147,12 +157,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws \Exceptions\ValidationError
      */
     public function postProjectCreate($projectStructure) {
-        Log::doLog( $this->feature );
-
         $this->setQaModelFromJsonFile( $projectStructure );
-
         $this->createChunkReviewRecords( $projectStructure );
-
     }
 
     /**
@@ -214,12 +220,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                 'first_record_password' => $first_password
         ] );
 
+        $project = Projects_ProjectDao::findById( $projectStructure['id_project'] ) ;
+
         $reviews = ChunkReviewDao::findByIdJob( $id_job );
         foreach( $reviews as $review ) {
-            $model = new ChunkReviewModel($review);
+            $model = RevisionFactory::getInstance()->getChunkReviewModel( $review ) ;
             $model->recountAndUpdatePassFailResult();
         }
-
     }
 
     /**
@@ -253,9 +260,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $new_reviews[0]->penalty_points = $penalty_points;
         $new_reviews[0]->reviewed_words_count = $reviewed_words_count ;
 
-        $model = new ChunkReviewModel( $new_reviews[0] );
-        $model->updatePassFailResult();
-
+        $model = RevisionFactory::getInstance()->getChunkReviewModel( $new_reviews[0] );
+        $model->recountAndUpdatePassFailResult();
     }
 
     /**
@@ -266,32 +272,28 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param $new_translation
-     * @param $old_translation
+     * @param $params['translation'] Translations_SegmentTranslationStruct
+     * @param $params['old_translation'] Translations_SegmentTranslationStruct
+     * @param $params['propagated_ids'] array
+     *
      */
-    public function setTranslationCommitted($params) {
+    public function setTranslationCommitted( $params) {
         $new_translation = $params['translation'];
         $old_translation = $params['old_translation'];
-        $propagated_ids = $params['propagated_ids'] ;
+        $propagated_ids  = $params['propagated_ids'] ;
 
-        $new_translation_struct = new Translations_SegmentTranslationStruct( $new_translation );
-        $old_translation_struct = new Translations_SegmentTranslationStruct( $old_translation );
+        $translation_model = new SegmentTranslationChangeVector( $new_translation );
 
-        $translation_model = new SegmentTranslationModel( $new_translation_struct );
         $translation_model->setPropagatedIds( $propagated_ids );
-        $translation_model->setOldTranslation( $old_translation_struct );
+        $translation_model->setOldTranslation( $old_translation );
 
-        $this->attachObserver( $translation_model );
-        $translation_model->notify();
+        $this->updateRevisionScore( $translation_model );
     }
 
-    protected function attachObserver( SegmentTranslationModel $translation_model ){
-        /**
-         * This implementation may seem overkill since we are already into review improved feature
-         * so we could avoid to delegate to an observer. This is done with aim to the future when
-         * the SegmentTranslationModel will be used directly into setTranslation controller.
-         */
-        $translation_model->attach( new SegmentTranslationObserver() );
+    public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
+        $model = $this->getSegmentTranslationModel( $translation );
+        $model->addOrSubtractCachedReviewedWordsCount();
+        $model->recountPenaltyPoints();
     }
 
     /**
@@ -387,7 +389,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     private function setQaModelFromJsonFile( $projectStructure ) {
 
-        $model_json = $projectStructure['features'][ 'review_improved' ]['__meta']['qa_model'];
+        $model_json = $projectStructure['features'][ 'review_extended' ]['__meta']['qa_model'];
 
         $model_record = ModelDao::createModelFromJsonDefinition( $model_json );
 
@@ -400,7 +402,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * Validate the project is valid in the scope of ReviewImproved feature.
+     * Validate the project is valid in the scope of ReviewExtended feature.
      * A project is valid if we area able to find a qa_model.json file inside
      * a __meta folder. The qa_model.json file must be valid too.
      *
@@ -408,6 +410,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @param      $projectStructure
      * @param null|string $jsonPath
+     *
+     *
      */
 
     public static function loadAndValidateModelFromJsonFile( $projectStructure, $jsonPath = null ) {
@@ -456,31 +460,49 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         }
 
         $projectStructure['features'] = array(
-                'review_improved' => array(
+                'review_extended' => array(
                         '__meta' => array(
                                 'qa_model' => $decoded_model
                         )
                 )
         );
-
     }
-
 
     /**
-     * Install routes for this plugin
+     * @param ChunkReviewStruct $chunkReviewStruct
      *
-     * @param \Klein\Klein $klein
+     * @return IChunkReviewModel
      */
-    public static function loadRoutes( \Klein\Klein $klein ) {
-        $klein->respond('GET', '/quality_report/[:id_job]/[:password]',                    array(__CLASS__, 'callbackQualityReport')  );
-        $klein->respond('GET', '/quality_report/[:id_job]/[:password]/versions/[:version]', array(__CLASS__, 'callbackQualityReport')  );
+    public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
+        $class_name = get_class( $this ) . '\ChunkReviewModel' ;
+        return new $class_name( $chunkReviewStruct );
     }
 
-    public static function callbackQualityReport($request, $response, $service, $app) {
-        $controller = new Controller\QualityReportController( $request, $response, $service, $app);
-        $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
-        $controller->setView( $template_path );
-        $controller->respond();
+    /**
+     * @param SegmentTranslationChangeVector $translation
+     *
+     * @return ISegmentTranslationModel
+     */
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
+        $class_name = get_class( $this ) . '\SegmentTranslationModel' ;
+        return new $class_name( $translation );
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @param $issue
+     *
+     * @return mixed
+     */
+    public function getTranslationIssueModel( $id_job, $password, $issue) {
+        $class_name = get_class( $this ) . '\TranslationIssueModel' ;
+        return new $class_name( $id_job, $password, $issue );
+    }
+
+
+    public function revise_summary_project_type( $old_value ) {
+        return 'new' ;
     }
 
 }

@@ -13,6 +13,10 @@ use Features\BaseFeature;
  */
 class FeatureSet {
 
+
+    /**
+     * @var BasicFeatureStruct[]
+     */
     private $features = [] ;
 
     /**
@@ -36,9 +40,7 @@ class FeatureSet {
                     throw new Exception( '`feature_code` property not found on ' . var_export( $feature, true ) );
                 }
             }
-
             $this->merge( $_features );
-
         }
     }
 
@@ -47,6 +49,42 @@ class FeatureSet {
      */
     public function getCodes() {
         return array_values( array_map( function( $feature ) { return $feature->feature_code ; }, $this->features) );
+    }
+
+    /**
+     * Finds if any of the features loaded are extending AbstractRevisionFeature.
+     *
+     * @deprecated This method was introduced for refactoring purpose and should not be used
+     *             for new implementations.
+     */
+    public function hasRevisionFeature() {
+       return $this->detectInstanceOf('Features\AbstractRevisionFeature' ) ;
+    }
+
+    /**
+     * This function scans all features' class hierarchy tree and returns the first
+     * feature that matches the given input name.
+     *
+     * This method is useful to find if the featurese has any special base or abstract
+     * feature which may require special conditionals.
+     *
+     * @param $class_name
+     * @deprecated This method was introduced for to facilitate refactoring and should not be
+     *             used for new implementations.
+     *
+     * @return bool
+     */
+    public function detectInstanceOf( $class_name ) {
+        foreach ( $this->features as $feature ) {
+            $name = Features::getPluginClass( $feature->feature_code );
+            if ( $name ) {
+                $obj = new $name($feature);
+                if ( in_array( $class_name, class_parents( $obj ) ) ) {
+                    return $obj ;
+                }
+            }
+        }
+        return false ;
     }
 
     /**
@@ -257,9 +295,10 @@ class FeatureSet {
      */
     public function run( $method ) {
         $args = array_slice( func_get_args(), 1 );
+        $returnable = [];
 
         foreach ( $this->features as $feature ) {
-            $this->runOnFeature($method, $feature, $args);
+            $returnable[ $feature->feature_code ] = $this->runOnFeature($method, $feature, $args);
         }
     }
 
@@ -388,6 +427,7 @@ class FeatureSet {
             }
         }
 
+        $this->features = $this->filter('filterFeaturesMerged', $this->features ) ;
         $this->sortFeatures();
 
     }
@@ -429,12 +469,11 @@ class FeatureSet {
      */
     private function runOnFeature($method, BasicFeatureStruct $feature, $args) {
         $name = Features::getPluginClass( $feature->feature_code );
-
         if ( $name ) {
             $obj = new $name($feature);
 
             if (method_exists($obj, $method)) {
-                call_user_func_array(array($obj, $method), $args);
+                return call_user_func_array(array($obj, $method), $args);
             }
         }
     }

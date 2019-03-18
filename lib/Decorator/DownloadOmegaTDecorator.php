@@ -15,16 +15,16 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
      */
     protected $controller;
 
-    public function decorate(){
+    public function decorate() {
 
         $output_content = [];
 
         //set the file Name
-        $pathinfo        = FilesStorage::pathinfo_fix( $this->controller->getDefaultFileName( $this->controller->getProject() ) );
+        $pathinfo = FilesStorage::pathinfo_fix( $this->controller->getDefaultFileName( $this->controller->getProject() ) );
         $this->controller->setFilename( $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "." . $pathinfo[ 'extension' ] );
 
 
-        if ( $pathinfo['extension'] != 'zip') {
+        if ( $pathinfo[ 'extension' ] != 'zip' ) {
             $this->controller->setFilename( $this->controller->getFilename() . ".zip" );
         }
 
@@ -51,19 +51,19 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
 
         $tm_id                    = uniqid( 'tm' );
         $mt_id                    = uniqid( 'mt' );
-        $output_content[ $tm_id ] = array(
+        $output_content[ $tm_id ] = [
                 'document_content' => '',
                 'output_filename'  => $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "_TM . tmx"
-        );
+        ];
 
         foreach ( $tmFile as $lineNumber => $content ) {
             $output_content[ $tm_id ][ 'document_content' ] .= $content;
         }
 
-        $output_content[ $mt_id ] = array(
+        $output_content[ $mt_id ] = [
                 'document_content' => '',
                 'output_filename'  => $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "_MT . tmx"
-        );
+        ];
 
         foreach ( $mtFile as $lineNumber => $content ) {
             $output_content[ $mt_id ][ 'document_content' ] .= $content;
@@ -93,7 +93,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
         $a[] = $zip->addEmptyDir( $zip_baseDir . "tm" );
         $a[] = $zip->addEmptyDir( $zip_baseDir . "tm/auto" );
 
-        $rev_index_name = array();
+        $rev_index_name = [];
 
         // Staff with content
         foreach ( $output_content as $key => $f ) {
@@ -134,8 +134,8 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
 
         // Close and send to users
         $zip->close();
-        $zip_content = file_get_contents( "$file" );
-        unlink( $file );
+        $zip_content                  = new ZipContentObject();
+        $zip_content->input_filename  = $file;
 
         $this->controller->setOutputContent( $zip_content );
 
@@ -172,7 +172,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
 			</project>
 			</omegat>';
 
-        $omegatTokenizerMap = array(
+        $omegatTokenizerMap = [
                 "AR" => "LuceneArabicTokenizer",
                 "HY" => "LuceneArmenianTokenizer",
                 "EU" => "LuceneBasqueTokenizer",
@@ -206,7 +206,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
                 "TH" => "LuceneThaiTokenizer",
                 "TR" => "LuceneTurkishTokenizer"
 
-        );
+        ];
 
         $source_lang     = substr( $source, 0, 2 );
         $target_lang     = substr( $target, 0, 2 );
@@ -221,8 +221,8 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
         }
 
         return str_replace(
-                array( "@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@" ),
-                array( $source, $target, $sourceTokenizer, $targetTokenizer ),
+                [ "@@@SOURCE@@@", "@@@TARGET@@@", "@@@TOK_SOURCE@@@", "@@@TOK_TARGET@@@" ],
+                [ $source, $target, $sourceTokenizer, $targetTokenizer ],
                 $omegatFile );
 
 

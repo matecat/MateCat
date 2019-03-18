@@ -6,13 +6,14 @@
  * Time: 8:51 PM
  */
 
-namespace Features\ReviewImproved\Model;
+namespace Features\ReviewExtended\Model;
 
 use ArrayObject;
 use Chunks_ChunkStruct;
-use Features\ReviewImproved\ChunkReviewModel;
+use Features\ReviewExtended\IChunkReviewModel;
 use LQA\ChunkReviewDao;
 use RecursiveArrayObject;
+use RevisionFactory;
 use Users_UserDao;
 
 
@@ -34,7 +35,7 @@ class QualityReportModel {
     private $chunk_review;
 
     /**
-     * @var ChunkReviewModel
+     * @var IChunkReviewModel
      */
     private $chunk_review_model;
 
@@ -103,7 +104,8 @@ class QualityReportModel {
 
     public function getChunkReviewModel() {
         if ( $this->chunk_review_model == null ) {
-            $this->chunk_review_model = new ChunkReviewModel( $this->getChunkReview() );
+            $this->chunk_review_model = RevisionFactory::initFromProject($this->getProject())
+                    ->getChunkReviewModel( $this->getChunkReview() ) ;
         }
 
         return $this->chunk_review_model;

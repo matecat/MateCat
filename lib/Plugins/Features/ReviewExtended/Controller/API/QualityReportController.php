@@ -6,14 +6,14 @@
  * Time: 2:32 PM
  */
 
-namespace Features\ReviewImproved\Controller\API;
+namespace Features\ReviewExtended\Controller\API;
 
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
 use Projects_ProjectStruct;
-use Features\ReviewImproved\Model\ArchivedQualityReportDao;
-use Features\ReviewImproved\Model\QualityReportModel ;
+use Features\ReviewExtended\Model\ArchivedQualityReportDao;
+use Features\ReviewExtended\Model\QualityReportModel ;
 use QualityReport\QualityReportSegmentModel;
 
 class QualityReportController extends KleinController

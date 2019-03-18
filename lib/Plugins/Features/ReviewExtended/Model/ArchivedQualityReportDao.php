@@ -6,15 +6,15 @@
  * Time: 16:33
  */
 
-namespace Features\ReviewImproved\Model;
+namespace Features\ReviewExtended\Model;
 use Chunks_ChunkStruct ;
 
-use Features\ReviewImproved\Model\ArchivedQualityReportStruct ;
+use Features\ReviewExtended\Model\ArchivedQualityReportStruct ;
 
 class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
 
     const TABLE       = "qa_archived_reports";
-    const STRUCT_TYPE = "\\Features\\ReviewImproved\\Model\\ArchivedQualityReportStruct" ;
+    const STRUCT_TYPE = "\\Features\\ReviewExtended\\Model\\ArchivedQualityReportStruct" ;
 
     protected static $auto_increment_field = array('id');
 
@@ -36,7 +36,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
                 version = :version " ;
 
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'Features\ReviewImproved\Model\ArchivedQualityReportStruct' );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'Features\ReviewExtended\Model\ArchivedQualityReportStruct' );
         $stmt->execute( array(
                 'id_job'              => $chunk->id,
                 'password'            => $chunk->password,
@@ -52,7 +52,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
     /**
      * @param Chunks_ChunkStruct $chunk
      *
-     * @return \Features\ReviewImproved\Model\ArchivedQualityReportStruct[]
+     * @return \Features\ReviewExtended\Model\ArchivedQualityReportStruct[]
      *
      */
     public function getAllByChunk( Chunks_ChunkStruct $chunk ) {
@@ -61,7 +61,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
                 job_first_segment = :job_first_segment AND job_last_segment = :job_last_segment ";
 
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'Features\ReviewImproved\Model\ArchivedQualityReportStruct' );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'Features\ReviewExtended\Model\ArchivedQualityReportStruct' );
         $stmt->execute( array(
                 'id_job'              => $chunk->id,
                 'password'            => $chunk->password,
@@ -76,9 +76,9 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
         $conn = $this->getConnection()->getConnection();
         $stmt = $conn->prepare("
             SELECT MAX(version) FROM qa_archived_reports
-              WHERE id_job = :id_job 
-                AND password = :password 
-                AND job_first_segment = :job_first_segment 
+              WHERE id_job = :id_job
+                AND password = :password
+                AND job_first_segment = :job_first_segment
                 AND job_last_segment = :job_last_segment
             ") ;
 

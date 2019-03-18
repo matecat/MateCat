@@ -2,11 +2,14 @@
 
 namespace Features\TranslationVersions ;
 
+use Constants_TranslationStatus;
+use Translations_SegmentTranslationStruct;
 use Translations_TranslationVersionDao;
 use Constants;
 use Projects_ProjectDao;
 use Features ;
 use Log, \Exception, Utils, \Database;
+use Translations_TranslationVersionStruct;
 
 /**
  * Class SegmentTranslationVersionHandler
@@ -77,11 +80,14 @@ class SegmentTranslationVersionHandler {
      * @param $page
      */
 
-    public function saveVersion( $new_translation, $old_translation ) {
+    public function saveVersion(
+            Translations_SegmentTranslationStruct $new_translation,
+            Translations_SegmentTranslationStruct $old_translation
+    ) {
 
         /**
          * This is where we decide if a new translation version is to be generated.
-         * This should be moved in a review_improved specific model.
+         * This should be moved in a review_extended specific model.
          * TODO: refactor.
          *
          */
@@ -94,49 +100,38 @@ class SegmentTranslationVersionHandler {
             return false;
         }
 
+        // From now on, translations are treated as arrays and get attributes attached
+        // just to be passed to version save. Create two arrays for the purpose.
+        $new_version = new Translations_TranslationVersionStruct($old_translation->toArray());
 
-        $new_translation['version_number'] += 1 ;
+        // XXX: this is to be reviewed
+        $new_version->is_review = ( $old_translation->status == Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
+        $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ] ;
+        $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ] ;
 
-        $old_translation[ 'is_review' ] = ( $old_translation[ 'status' ] == \Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
+        /**
+         * In some cases, version 0 may already be there among saved_versions, because
+         * an issue for ReviewExtended has been saved on version 0.
+         *
+         * In any other case we expect the version record NOT to be there when we reach this point.
+         *
+         * @param Translations_TranslationVersionStruct $version
+         *
+         * @return bool|int
+         *
+         */
 
-        $old_translation = $this->evaluateDbStatus( $old_translation );
-        $new_translation = $this->evaluateDbStatus( $new_translation );
-
-        return $this->saveOrUpdateOldVersion( $old_translation, $new_translation );
-
-    }
-
-    private function evaluateDbStatus( $translation ) {
-        if ( $translation[ 'status' ] == \Constants_TranslationStatus::STATUS_APPROVED ) {
-            $translation[ 'db_status' ] = \Constants_TranslationStatus::DB_STATUS_APPROVED;
-        } elseif ( $translation[ 'status' ] == \Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            $translation[ 'db_status' ] = \Constants_TranslationStatus::DB_STATUS_TRANSLATED;
-        } else {
-            $translation[ 'db_status' ] = null;
-        }
-
-        return $translation;
-    }
-
-    /**
-     * In some cases, version 0 may already be there among saved_versions, because
-     * an issue for ReviewExtended has been saved on version 0.
-     *
-     * In any other case we expect the version record NOT to be there when we reach this point.
-     */
-
-    private function saveOrUpdateOldVersion( $old_translation, $new_translation) {
         $this->prepareDao();
 
         $version_record = $this->dao->getVersionNumberForTranslation(
-                $this->id_job, $this->id_segment, $old_translation['version_number']
+                $this->id_job, $this->id_segment, $new_version->version_number
         );
 
         if ( $version_record ) {
-            return $this->dao->updateVersion( $old_translation ) ;
+            return $this->dao->updateVersion( $new_version ) ;
         }
 
-        return $this->dao->saveVersion( $old_translation, $new_translation );
+        return $this->dao->saveVersion( $new_version );
     }
 
     /**
@@ -154,9 +149,12 @@ class SegmentTranslationVersionHandler {
      *
      * @return bool
      */
-    private function translationIsEqual( $new_translation, $old_translation ) {
-        $old = html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES)  ;
-        $new = html_entity_decode($new_translation['translation'], ENT_XML1 | ENT_QUOTES)  ;
+    private function translationIsEqual(
+            Translations_SegmentTranslationStruct $new_translation,
+            Translations_SegmentTranslationStruct $old_translation
+    ) {
+        $old = html_entity_decode($old_translation->translation, ENT_XML1 | ENT_QUOTES)  ;
+        $new = html_entity_decode($new_translation->translation, ENT_XML1 | ENT_QUOTES)  ;
 
         return $new == $old ;
     }

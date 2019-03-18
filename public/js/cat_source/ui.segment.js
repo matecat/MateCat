@@ -1,4 +1,9 @@
 (function($, undefined) {
+
+    $( document ).on( 'sse:bulk_segment_status_change', function ( ev, message ) {
+        UI.bulkChangeStatusCallback(message.data.segment_ids, message.data.status);
+    } );
+
     $.extend(UI, {
 
         getSegmentStatus: function (segment) {
@@ -722,7 +727,7 @@
                 });
             } else {
                 return API.SEGMENT.approveSegments(segmentsArray).then(function ( response ) {
-                    self.bulkChangeStatusCallback(response, segmentsArray, "APPROVED");
+                    self.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
                 });
             }
         },
@@ -736,12 +741,17 @@
                 });
             } else {
                 return API.SEGMENT.translateSegments(segmentsArray).then(function ( response ) {
-                    self.bulkChangeStatusCallback(response, segmentsArray, "TRANSLATED");
+                    self.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
                 });
             }
         },
-        bulkChangeStatusCallback: function( response, segmentsArray, status) {
-            if (response.data && response.unchangeble_segments.length === 0) {
+        checkUnchangebleSegments: function(response) {
+            if (response.unchangeble_segments.length > 0) {
+                UI.showTranslateAllModalWarnirng();
+            }
+        },
+        bulkChangeStatusCallback: function( segmentsArray, status) {
+            if (segmentsArray.length > 0) {
                 segmentsArray.forEach(function ( item ) {
                     var $segment = UI.getSegmentById(item);
                     if ( $segment.length > 0) {
@@ -750,22 +760,8 @@
                         UI.setSegmentModified( $segment, false ) ;
                         UI.disableTPOnSegment( $segment )
                     }
-                })
-            } else if (response.unchangeble_segments.length > 0) {
-                var arrayMapped = _.map(segmentsArray, function ( item ) {
-                    return parseInt(item);
                 });
-                var array = _.difference(arrayMapped, response.unchangeble_segments);
-                array.forEach(function ( item ) {
-                    var $segment = UI.getSegmentById(item);
-                    if ( $segment > 0) {
-                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
-                        SegmentActions.setStatus(item, fileId, status);
-                        UI.setSegmentModified( $segment, false ) ;
-                        UI.disableTPOnSegment( $segment )
-                    }
-                });
-                UI.showTranslateAllModalWarnirng();
+                setTimeout(CatToolActions.reloadSegmentFilter, 500);
             }
         },
         disableSegmentButtons: function ( sid ) {

@@ -6,11 +6,12 @@
  * Time: 2:39 PM
  */
 
-namespace Features\ReviewImproved\Model;
+namespace Features\ReviewExtended\Model;
 
+use DataAccess_AbstractDao;
 use Database ;
 
-class QualityReportDao extends \DataAccess_AbstractDao {
+class QualityReportDao extends DataAccess_AbstractDao {
 
     protected function _buildResult( $result_array ) {
 
@@ -90,22 +91,22 @@ SELECT
   issues.id as issue_id,
   issues.create_date as issue_create_date,
   issues.replies_count as issue_replies_count,
-  
-  -- start_offset and end_offset were introduced for DQF. We are taking for granted a string with 
-  -- both start_node and end_node equal to 0 ( no tags in target string ). 
+
+  -- start_offset and end_offset were introduced for DQF. We are taking for granted a string with
+  -- both start_node and end_node equal to 0 ( no tags in target string ).
   issues.start_offset  as issue_start_offset,
   issues.end_offset    as issue_end_offset,
 
   qa_categories.label   as issue_category,
   qa_categories.options as category_options,
-  
+
   issues.severity     as issue_severity,
   issues.comment      as issue_comment,
   issues.target_text  as target_text,
   issues.uid          as issue_uid,
-  
-  translation_warnings.scope as warning_scope, 
-  translation_warnings.data as warning_data, 
+
+  translation_warnings.scope as warning_scope,
+  translation_warnings.data as warning_data,
   translation_warnings.severity as warning_severity
 
 FROM segment_translations st
@@ -140,17 +141,17 @@ FROM segment_translations st
 
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
-    
-  LEFT JOIN translation_warnings 
-    ON translation_warnings.id_segment = s.id 
-      AND translation_warnings.id_job = jobs.id 
+
+  LEFT JOIN translation_warnings
+    ON translation_warnings.id_segment = s.id
+      AND translation_warnings.id_job = jobs.id
 
 WHERE
 
-s.show_in_cattool AND 
-( 
-  st.status IN ( :approved, :rejected ) 
-  OR 
+s.show_in_cattool AND
+(
+  st.status IN ( :approved, :rejected )
+  OR
   translation_warnings.id_segment IS NOT NULL
 )
 
@@ -191,27 +192,27 @@ SQL;
   issues.id as issue_id,
   issues.create_date as issue_create_date,
   issues.replies_count as issue_replies_count,
-  
-  -- start_offset and end_offset were introduced for DQF. We are taking for granted a string with 
-  -- both start_node and end_node equal to 0 ( no tags in target string ). 
+
+  -- start_offset and end_offset were introduced for DQF. We are taking for granted a string with
+  -- both start_node and end_node equal to 0 ( no tags in target string ).
   issues.start_offset  as issue_start_offset,
   issues.end_offset    as issue_end_offset,
 
   qa_categories.label   as issue_category,
   qa_categories.options as category_options,
-  
+
   issues.severity     as issue_severity,
   issues.comment      as issue_comment,
   issues.target_text  as target_text,
   issues.uid          as issue_uid,
-  
-  translation_warnings.scope as warning_scope, 
-  translation_warnings.data as warning_data, 
+
+  translation_warnings.scope as warning_scope,
+  translation_warnings.data as warning_data,
   translation_warnings.severity as warning_severity
 
 FROM  qa_entries issues
 
-JOIN ( 
+JOIN (
 		SELECT ? as id_segment
 		".$prepare_str_segments_id."
 ) AS SLIST USING( id_segment )
@@ -221,12 +222,12 @@ JOIN (
 
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
-    
-  LEFT JOIN translation_warnings 
-    ON translation_warnings.id_segment = issues.id_segment 
-    
+
+  LEFT JOIN translation_warnings
+    ON translation_warnings.id_segment = issues.id_segment
+
     WHERE issues.id_job = ?
-      
+
   ";
 
         $conn = Database::obtain()->getConnection();
@@ -246,19 +247,19 @@ JOIN (
   qa_categories.label   as issue_category_label,
   issues.id_category as id_category,
   issues.severity     as issue_severity
-  
+
 FROM  qa_entries issues
 
-JOIN jobs j ON issues.id_job = j.id 
+JOIN jobs j ON issues.id_job = j.id
     AND issues.id_segment >= j.job_first_segment
     AND issues.id_segment <= j.job_last_segment
-  
+
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
-    
-    
+
+
     WHERE j.id = ? AND j.password = ?
-      
+
   ";
 
         $conn = Database::obtain()->getConnection();
