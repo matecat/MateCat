@@ -73,7 +73,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     }
 
     thereAreSubcategories() {
-        return this.issueCategories[0].subcategories && this.issueCategories[0].subcategories.length > 0;
+        return this.issueCategories[0].subcategories && this.issueCategories[0].get('subcategories').length > 0;
     }
 
     getCategoriesHtml() {
@@ -105,8 +105,8 @@ class ReviewExtendedIssuePanel extends React.Component{
             let selectedValue = "";
             let subcategoriesComponents = [];
 
-            if ( category.subcategories.length > 0 ) {
-                category.subcategories.forEach( (category, ii) => {
+            if ( category.get('subcategories').length > 0 ) {
+                category.get('subcategories').forEach( (category, ii) => {
                     let key = '' + i + '-' + ii;
                     let kk = 'category-selector-' + key ;
                     let selectedValue = "";

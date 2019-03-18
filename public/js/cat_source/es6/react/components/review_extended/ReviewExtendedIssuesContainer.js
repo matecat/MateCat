@@ -18,7 +18,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
         let issuesObj = {}
         this.props.issues.forEach( issue => {
             let cat = this.findCategory(issue.id_category);
-            let id = (this.isSubCategory(cat)) ? cat.id_parent: cat.id;
+            let id = (this.isSubCategory(cat)) ? cat.get('id_parent'): cat.get('id');
 
             if (!issuesObj[id]) {
                 issuesObj[id] = [];
@@ -39,7 +39,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
     }
 
     thereAreSubcategories() {
-        return this.issueNestedCategories[0].subcategories && this.issueNestedCategories[0].subcategories.length > 0;
+        return this.issueNestedCategories[0].subcategories && this.issueNestedCategories[0].get('subcategories').length > 0;
     }
 
     getSubCategoriesHtml() {
@@ -48,7 +48,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
         _.each(parsedIssues, (issuesList, id) =>  {
             let cat = this.findCategory(id);
             let issues = this.getIssuesSortedComponentList(issuesList);
-            let catHtml = <div key={cat.id}>
+            let catHtml = <div key={cat.get('id')}>
                 <div className="re-item-head pad-left-5">{cat.label}</div>
                 {issues}
             </div>;

@@ -121,10 +121,7 @@ class Chunk extends \API\V2\Json\Chunk {
             $total_reviews_words_count = $chunkReviewModel->getReviewedWordsCount();
 
             $model = $project->getLqaModel() ;
-            $categories = array_map( function( $cat ) {
-                unset( $cat['id'] );
-                return $cat ;
-            }, $model->getCategoriesAndSeverities() );
+            $categories = $model->getCategoriesAndSeverities() ;
 
         } else {
 
@@ -206,7 +203,7 @@ class Chunk extends \API\V2\Json\Chunk {
                         'categories'          => $categories,
                         'total_issues_weight' => (int)$total_issues_weight,
                         'total_reviews_words_count' => (int)$total_reviews_words_count,
-                        'passfail'            => (isset($model)?json_encode( ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] ):'')
+                        'passfail'            => (isset($model) ? ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] : '')
                 ]
 
         ];

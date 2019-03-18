@@ -22,17 +22,17 @@ class FilterSegments extends React.Component {
     getSeverities() {
         let severities = [];
         let severitiesNames = [];
-        this.lqaNestedCategories.categories.forEach((cat)=>{
-            if (cat.subcategories.length === 0) {
-                cat.severities.forEach((sev)=>{
+        this.lqaNestedCategories.forEach((cat)=>{
+            if (cat.get('subcategories').length === 0) {
+                cat.get('severities').forEach((sev)=>{
                     if (severitiesNames.indexOf(sev.label) === -1 ) {
                         severities.push(sev);
                         severitiesNames.push(sev.label);
                     }
                 });
             } else {
-                cat.subcategories.forEach((subCat)=>{
-                    subCat.severities.forEach((sev)=>{
+                cat.get('subcategories').forEach((subCat)=>{
+                    subCat.get('severities').forEach((sev)=>{
                         if (severitiesNames.indexOf(sev.label) === -1 ) {
                             severities.push(sev);
                             severitiesNames.push(sev.label);
@@ -133,7 +133,7 @@ class FilterSegments extends React.Component {
                 {item.label}
             </div>;
         });
-        let optionsCategory = this.lqaNestedCategories.categories.map((item, index) => {
+        let optionsCategory = this.lqaNestedCategories.map((item, index) => {
             return <div className="item" key={index} data-value={item.id}>
                 {item.label}
             </div>;

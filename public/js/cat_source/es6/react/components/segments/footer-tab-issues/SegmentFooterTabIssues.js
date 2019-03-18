@@ -167,8 +167,8 @@ class SegmentFooterTabIssues extends React.Component {
             categoryOption,
             self = this;
         this.state.categoriesIssue.forEach( function ( category, i ) {
-            if (category.subcategories && category.subcategories.length > 0) {
-                let subCategories = category.subcategories.map(function ( item ) {
+            if (category.subcategories && category.get('subcategories').length > 0) {
+                let subCategories = category.get('subcategories').map(function ( item ) {
                     return <div key={item.id} className="item" data-value={item.id} onClick={self.categoryOptionChange.bind(self, item)}>{item.label}</div>;
                 });
                 categoryOption = <div className="item" data-value={category.id} key={i}>
@@ -204,7 +204,7 @@ class SegmentFooterTabIssues extends React.Component {
 
 
         if ( this.state.categorySelected ) {
-            this.state.categorySelected.severities.forEach( ( severity, i ) => {
+            this.state.categorySelected.get('severities').forEach( ( severity, i ) => {
                 severityOption = <option value={severity.label} key={i}>{severity.label}</option>;
                 categorySeverities.push( severityOption );
             } );

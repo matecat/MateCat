@@ -23,7 +23,7 @@ class ReviewIssueCategorySelector extends React.Component{
         });
         if ( this.props.category.severities ) {
             var default_severity = <option key={'value-'} value="" >---</option>;
-            var severities = this.props.category.severities.map(function(severity, i) {
+            var severities = this.props.category.get('severities').map(function(severity, i) {
                 return <option key={'value-' + severity.label} value={severity.label}>{severity.label}</option> ;
             }.bind(this));
 

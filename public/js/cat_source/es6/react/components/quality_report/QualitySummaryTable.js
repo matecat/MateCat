@@ -2,10 +2,10 @@
 class QualitySummaryTable extends React.Component {
     constructor (props) {
         super(props);
-        this.lqaNestedCategories = JSON.parse(this.props.jobInfo.get('quality_summary').get('categories'));
+        this.lqaNestedCategories = this.props.jobInfo.get('quality_summary').get('categories');
         this.thereAreSubCategories = false;
         this.getTotalSeverities();
-        this.qaLimit = JSON.parse(this.props.jobInfo.get('quality_summary').get('passfail')).options.limit;
+        this.qaLimit = this.props.jobInfo.getIn(['quality_summary', 'passfail', 'options', 'limit']) ;
         if (this.thereAreSubCategories) {
             this.htmlBody = this.getBodyWithSubtagories();
         } else {
@@ -17,9 +17,9 @@ class QualitySummaryTable extends React.Component {
     getTotalSeverities() {
         this.severities = [];
         this.severitiesNames = [];
-        this.lqaNestedCategories.categories.forEach((cat)=>{
-            if (cat.subcategories.length === 0) {
-                cat.severities.forEach((sev)=>{
+        this.lqaNestedCategories.forEach((cat)=>{
+            if (cat.get('subcategories').length === 0) {
+                cat.get('severities').forEach((sev)=>{
                     if (this.severitiesNames.indexOf(sev.label) === -1 ) {
                         this.severities.push(sev);
                         this.severitiesNames.push(sev.label);
@@ -27,8 +27,8 @@ class QualitySummaryTable extends React.Component {
                 });
             } else {
                 this.thereAreSubCategories = true;
-                cat.subcategories.forEach((subCat)=>{
-                    subCat.severities.forEach((sev)=>{
+                cat.get('subcategories').forEach((subCat)=>{
+                    subCat.get('severities').forEach((sev)=>{
                         if (this.severitiesNames.indexOf(sev.label) === -1 ) {
                             this.severities.push(sev);
                             this.severitiesNames.push(sev.label);
@@ -47,8 +47,8 @@ class QualitySummaryTable extends React.Component {
     }
     getCategorySeverities(categoryId) {
         let severities;
-        this.lqaNestedCategories.categories.forEach((cat)=>{
-            if ( categoryId === cat.id ) {
+        this.lqaNestedCategories.forEach((cat)=>{
+            if ( categoryId === cat.get('id') ) {
                 severities = (cat.severities) ? cat.severities : cat.subcategories[0].severities;
             }
         });
@@ -76,15 +76,15 @@ class QualitySummaryTable extends React.Component {
     }
     getBody() {
         let  html = [];
-        this.lqaNestedCategories.categories.forEach((cat, index)=>{
+        this.lqaNestedCategories.forEach((cat, index)=>{
             let catHtml = [];
             catHtml.push(
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
-            let totalIssues = this.getIssuesForCategory(cat.id);
+            let totalIssues = this.getIssuesForCategory(cat.get('id'));
             let catTotalWeightValue = 0;
             this.severities.forEach((currentSev)=>{
-                let severityFound = cat.severities.filter((sev)=>{
+                let severityFound = cat.get('severities').filter((sev)=>{
                     return sev.label === currentSev.label;
                 });
                 if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
@@ -95,7 +95,7 @@ class QualitySummaryTable extends React.Component {
                 }
             });
             let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
-            let line = <div className="qr-body-list" key={cat.id+index}>
+            let line = <div className="qr-body-list" key={cat.get('id')+index}>
                         {catHtml}
                         {catTotalWeightHtml}
                     </div>;
@@ -107,20 +107,20 @@ class QualitySummaryTable extends React.Component {
     }
     getBodyWithSubtagories() {
         let  html = [];
-        this.lqaNestedCategories.categories.forEach((cat, index)=>{
+        this.lqaNestedCategories.forEach((cat, index)=>{
             let catHtml = [];
             catHtml.push(
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
             let totalIssues;
             if (!cat.severities) {
-                totalIssues = this.getIssuesForCategory(cat.id);
+                totalIssues = this.getIssuesForCategory(cat.get('id'));
             } else {
-                totalIssues = this.getIssuesForCategory(cat.id);
+                totalIssues = this.getIssuesForCategory(cat.get('id'));
             }
             let catTotalWeightValue = 0;
             this.severities.forEach((currentSev)=>{
-                let catSeverities = this.getCategorySeverities(cat.id);
+                let catSeverities = this.getCategorySeverities(cat.get('id'));
                 let severityFound = catSeverities.filter((sev)=>{
                     return sev.label === currentSev.label;
                 });
@@ -132,7 +132,7 @@ class QualitySummaryTable extends React.Component {
                 }
             });
             let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
-            let line = <div className="qr-body-list" key={cat.id+index}>
+            let line = <div className="qr-body-list" key={cat.get('id')+index}>
                         {catHtml}
                         {catTotalWeightHtml}
                     </div>;

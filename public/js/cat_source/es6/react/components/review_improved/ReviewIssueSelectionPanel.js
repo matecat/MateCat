@@ -108,8 +108,8 @@ class ReviewIssueSelectionPanel extends React.Component{
                     selectedValue={selectedValue}
                     nested={false} category={category} />);
 
-            if ( category.subcategories.length > 0 ) {
-                category.subcategories.forEach( function(category, ii) {
+            if ( category.get('subcategories').length > 0 ) {
+                category.get('subcategories').forEach( function(category, ii) {
                     if (category.severities != null) {
                         withSeverities++ ;
                     }

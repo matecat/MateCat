@@ -2,7 +2,7 @@
 class QualitySummaryTableOldRevise extends React.Component {
     constructor (props) {
         super(props);
-        this.lqaNestedCategories = JSON.parse(this.props.jobInfo.get('quality_summary').get('categories'));
+        this.lqaNestedCategories = this.props.jobInfo.get('quality_summary').get('categories');
         this.getTotalSeverities();
         this.htmlBody = this.getBody();
         this.htmlHead = this.getHeader();
@@ -11,17 +11,17 @@ class QualitySummaryTableOldRevise extends React.Component {
     getTotalSeverities() {
         this.severities = [];
         this.severitiesNames = [];
-        this.lqaNestedCategories.categories.forEach((cat)=>{
-            if (cat.subcategories.length === 0) {
-                cat.severities.forEach((sev)=>{
+        this.lqaNestedCategories.forEach((cat)=>{
+            if (cat.get('subcategories').length === 0) {
+                cat.get('severities').forEach((sev)=>{
                     if (this.severitiesNames.indexOf(sev.label) === -1 ) {
                         this.severities.push(sev);
                         this.severitiesNames.push(sev.label);
                     }
                 });
             } else {
-                cat.subcategories.forEach((subCat)=>{
-                    subCat.severities.forEach((sev)=>{
+                cat.get('subcategories').forEach((subCat)=>{
+                    subCat.get('severities').forEach((sev)=>{
                         if (this.severitiesNames.indexOf(sev.label) === -1 ) {
                             this.severities.push(sev);
                             this.severitiesNames.push(sev.label);
@@ -72,15 +72,15 @@ class QualitySummaryTableOldRevise extends React.Component {
     getBody() {
         let  html = [];
         this.totalWeight = 0;
-        this.lqaNestedCategories.categories.forEach((cat, index)=>{
+        this.lqaNestedCategories.forEach((cat, index)=>{
             let catHtml = [];
             catHtml.push(
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
-            let totalIssues = this.getIssuesForCategory(cat.id);
+            let totalIssues = this.getIssuesForCategory(cat.get('id'));
             let catTotalWeightValue = 0, toleratedIssuesValue = 0, voteValue = "";
             this.severities.forEach((currentSev)=>{
-                let severityFound = cat.severities.filter((sev)=>{
+                let severityFound = cat.get('severities').filter((sev)=>{
                     return sev.label === currentSev.label;
                 });
                 if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
@@ -96,7 +96,7 @@ class QualitySummaryTableOldRevise extends React.Component {
             let toleratedIssuesHtml = <div className="qr-element total-severity qr-old">{toleratedIssuesValue}</div>;
             let voteClass = (voteValue.toLowerCase() === 'poor' || voteValue.toLowerCase() === 'fail') ? 'job-not-passed' : "job-passed";
             let voteHtml = <div className={"qr-element total-severity qr-old " + voteClass}>{voteValue}</div>;
-            let line = <div className="qr-body-list" key={cat.id+index+cat.label}>
+            let line = <div className="qr-body-list" key={cat.get('id')+index+cat.label}>
                 {catHtml}
                 {catTotalWeightHtml}
                 {toleratedIssuesHtml}
