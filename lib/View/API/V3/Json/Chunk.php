@@ -118,7 +118,7 @@ class Chunk extends \API\V2\Json\Chunk {
             $score = number_format( $chunkReviewModel->getScore(), 2, ".", "");
 
             $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
-            $total_reviews_words_count = $chunkReviewModel->getReviewedWordsCount();
+            $total_reviewed_words_count = $chunkReviewModel->getReviewedWordsCount();
 
             $model = $project->getLqaModel() ;
             $categories = $model->getCategoriesAndSeverities() ;
@@ -160,7 +160,7 @@ class Chunk extends \API\V2\Json\Chunk {
             $score = 0;
 
             $total_issues_weight = 0;
-            $total_reviews_words_count = 0;
+            $total_reviewed_words_count = 0;
 
             $categories = CatUtils::getSerializedCategories( $reviseClass );
         }
@@ -202,7 +202,7 @@ class Chunk extends \API\V2\Json\Chunk {
                         'score'               => floatval($score),
                         'categories'          => $categories,
                         'total_issues_weight' => (int)$total_issues_weight,
-                        'total_reviews_words_count' => (int)$total_reviews_words_count,
+                        'total_reviewed_words_count' => (int)$total_reviewed_words_count,
                         'passfail'            => (isset($model) ? ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] : '')
                 ]
 

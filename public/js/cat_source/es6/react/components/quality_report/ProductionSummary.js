@@ -43,7 +43,7 @@ class ProductionSummary extends React.Component {
         let score = parseFloat(this.props.jobInfo.get('quality_summary').get('score'));
         let limit = (this.props.jobInfo.get('quality_summary').get('passfail') !== "") ? parseInt(this.props.jobInfo.get(['quality_summary', 'passfail', 'options', 'limit'])):0;
         let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
-        let reviewedWordsCount = this.props.jobInfo.get('quality_summary').get('total_reviews_words_count') ;
+        let reviewedWordsCount = this.props.jobInfo.get('quality_summary').get('total_reviewed_words_count') ;
         let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") : null;
         let jobPassedClass = (jobPassed === null) ? "" : ((jobPassed)? "qr-pass" : "qr-fail");
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
@@ -92,7 +92,7 @@ class ProductionSummary extends React.Component {
             {/*{config.project_type !== "old" ? (*/}
             {/*<div className="qr-effort qr-review-words">*/}
                 {/*<div className="qr-label" data-html={tooltipText2} ref={(tooltip) => this.tooltipRev = tooltip}>Reviewed <i className="icon-info icon" /></div>*/}
-                {/*<div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviews_words_count')}</b></div>*/}
+                {/*<div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviewed_words_count')}</b></div>*/}
             {/*</div>*/}
             {/*) :null}*/}
 
