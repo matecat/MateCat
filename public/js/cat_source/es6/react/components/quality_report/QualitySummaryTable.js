@@ -18,20 +18,20 @@ class QualitySummaryTable extends React.Component {
         this.severities = [];
         this.severitiesNames = [];
         this.lqaNestedCategories.forEach((cat)=>{
-            if (cat.get('subcategories').length === 0) {
+            if (cat.get('subcategories').size === 0) {
                 cat.get('severities').forEach((sev)=>{
-                    if (this.severitiesNames.indexOf(sev.label) === -1 ) {
-                        this.severities.push(sev);
-                        this.severitiesNames.push(sev.label);
+                    if (this.severitiesNames.indexOf( sev.get('label') ) === -1 ) {
+                        this.severities.push(sev.toJS());
+                        this.severitiesNames.push(sev.get('label'));
                     }
                 });
             } else {
                 this.thereAreSubCategories = true;
                 cat.get('subcategories').forEach((subCat)=>{
                     subCat.get('severities').forEach((sev)=>{
-                        if (this.severitiesNames.indexOf(sev.label) === -1 ) {
-                            this.severities.push(sev);
-                            this.severitiesNames.push(sev.label);
+                        if (this.severitiesNames.indexOf(sev.get('label')) === -1 ) {
+                            this.severities.push(sev.toJS());
+                            this.severitiesNames.push(sev.get('label'));
                         }
                     });
                 });
@@ -49,7 +49,7 @@ class QualitySummaryTable extends React.Component {
         let severities;
         this.lqaNestedCategories.forEach((cat)=>{
             if ( categoryId === cat.get('id') ) {
-                severities = (cat.severities) ? cat.severities : cat.subcategories[0].severities;
+                severities = ( cat.get('severities') ) ? cat.get('severities') : cat.get('subcategories').get(0).get('severities');
             }
         });
         return severities;
@@ -79,22 +79,22 @@ class QualitySummaryTable extends React.Component {
         this.lqaNestedCategories.forEach((cat, index)=>{
             let catHtml = [];
             catHtml.push(
-                <div className="qr-element qr-issue-name">{cat.label}</div>
+                <div className="qr-element qr-issue-name" key={cat.get('label')}>{cat.get('label')}</div>
             );
             let totalIssues = this.getIssuesForCategory(cat.get('id'));
             let catTotalWeightValue = 0;
-            this.severities.forEach((currentSev)=>{
+            this.severities.forEach((currentSev, i)=>{
                 let severityFound = cat.get('severities').filter((sev)=>{
-                    return sev.label === currentSev.label;
+                    return sev.get('label') === currentSev.label;
                 });
-                if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
-                    catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
-                    catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.label)}</div>);
+                if (severityFound.size > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label ) ) {
+                    catTotalWeightValue = catTotalWeightValue + ( totalIssues.get('founds').get(currentSev.label) * severityFound.get(0).get('penalty') );
+                    catHtml.push(<div className="qr-element severity" key={'sev-'+i}>{totalIssues.get('founds').get(currentSev.label)}</div>);
                 } else {
-                    catHtml.push(<div className="qr-element severity"/>);
+                    catHtml.push(<div className="qr-element severity" key={'sev-'+i}/>);
                 }
             });
-            let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
+            let catTotalWeightHtml = <div className="qr-element total-severity" key={'total-'+index}>{catTotalWeightValue}</div>;
             let line = <div className="qr-body-list" key={cat.get('id')+index}>
                         {catHtml}
                         {catTotalWeightHtml}
@@ -113,22 +113,22 @@ class QualitySummaryTable extends React.Component {
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
             let totalIssues;
-            if (!cat.severities) {
+            if ( !cat.get('severities') ) {
                 totalIssues = this.getIssuesForCategory(cat.get('id'));
             } else {
                 totalIssues = this.getIssuesForCategory(cat.get('id'));
             }
             let catTotalWeightValue = 0;
-            this.severities.forEach((currentSev)=>{
+            this.severities.forEach((currentSev, i)=>{
                 let catSeverities = this.getCategorySeverities(cat.get('id'));
                 let severityFound = catSeverities.filter((sev)=>{
                     return sev.label === currentSev.label;
                 });
                 if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
                     catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
-                    catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.label)}</div>);
+                    catHtml.push(<div className="qr-element severity" key={'severity' + i}>{totalIssues.get('founds').get(currentSev.label)}</div>);
                 } else {
-                    catHtml.push(<div className="qr-element severity"/>);
+                    catHtml.push(<div className="qr-element severity" key={'severity' + i}/>);
                 }
             });
             let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;

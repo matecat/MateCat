@@ -1053,6 +1053,7 @@ footer {
 
 .one.column.spinner {
     margin: 30px 15px 15px;
+    z-index: 1;
     .ui.active.inverted.dimmer {
         background: #f4f5f8;
     }

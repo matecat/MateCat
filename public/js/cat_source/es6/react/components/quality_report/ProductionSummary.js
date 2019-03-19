@@ -41,10 +41,10 @@ class ProductionSummary extends React.Component {
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
         let score = parseFloat(this.props.jobInfo.get('quality_summary').get('score'));
-        let limit = (this.props.jobInfo.get('quality_summary').get('passfail') !== "") ? parseInt(this.props.jobInfo.get(['quality_summary', 'passfail', 'options', 'limit'])):0;
+        let limit = (this.props.jobInfo.get('quality_summary').get('passfail') ) ? parseInt(this.props.jobInfo.getIn(['quality_summary', 'passfail', 'options', 'limit'])):0;
         let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
         let reviewedWordsCount = this.props.jobInfo.get('quality_summary').get('total_reviews_words_count') ;
-        let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") : null;
+        let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") && reviewedWordsCount > 0 : null;
         let jobPassedClass = (jobPassed === null) ? "" : ((jobPassed)? "qr-pass" : "qr-fail");
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
         let stats = this.props.jobInfo.get('stats');
