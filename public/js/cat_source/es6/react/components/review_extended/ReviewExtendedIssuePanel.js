@@ -73,7 +73,7 @@ class ReviewExtendedIssuePanel extends React.Component{
     }
 
     thereAreSubcategories() {
-        return this.issueCategories[0].subcategories && this.issueCategories[0].get('subcategories').length > 0;
+        return this.issueCategories[0].subcategories && this.issueCategories[0].subcategories.length > 0;
     }
 
     getCategoriesHtml() {
