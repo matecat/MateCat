@@ -165,8 +165,6 @@ class Chunk extends \API\V2\Json\Chunk {
             $categories = CatUtils::getSerializedCategories( $reviseClass );
         }
 
-        $stats = CatUtils::getFastStatsForJob( $jobStats, false );
-
         $result = [
                 'id'                      => (int)$jStruct->id,
                 'password'                => $jStruct->password,
@@ -187,7 +185,7 @@ class Chunk extends \API\V2\Json\Chunk {
                 'private_tm_key'          => $this->getKeyList( $jStruct ),
                 'warnings_count'          => $warningsCount->warnings_count,
                 'warning_segments'        => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                   => $stats,
+                'stats'                   => $this->_getStats( $jobStats ) ,
                 'outsource'               => $outsource,
                 'translator'              => $translator,
                 'total_raw_wc'            => (int)$jStruct->total_raw_wc,
@@ -202,7 +200,6 @@ class Chunk extends \API\V2\Json\Chunk {
                         'total_reviewed_words_count' => (int)$total_reviewed_words_count,
                         'passfail'            => (isset($model) ? ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] : '')
                 ]
-
         ];
 
         /**
@@ -224,6 +221,12 @@ class Chunk extends \API\V2\Json\Chunk {
 
         return $result;
 
+    }
+
+    protected function _getStats( $jobStats ) {
+        $stats = CatUtils::getPlainStatsForJobs( $jobStats );
+        unset( $stats ['id'] );
+        return array_change_key_case( $stats, CASE_LOWER );
     }
 
 }
