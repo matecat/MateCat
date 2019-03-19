@@ -795,7 +795,7 @@ class CatUtils {
             ];
         }
 
-        return json_encode( [ 'categories' => $categories ] );
+        return $categories ;
     }
 
 }
