@@ -39,7 +39,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
     }
 
     thereAreSubcategories() {
-        return this.issueNestedCategories[0].subcategories && this.issueNestedCategories[0].get('subcategories').length > 0;
+        return this.issueNestedCategories[0].subcategories && this.issueNestedCategories[0].subcategories.length > 0;
     }
 
     getSubCategoriesHtml() {

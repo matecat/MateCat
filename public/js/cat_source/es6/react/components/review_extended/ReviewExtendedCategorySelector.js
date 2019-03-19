@@ -39,14 +39,14 @@ class ReviewExtendedCategorySelector extends React.Component{
         let select = null;
         let severities;
         let containerClass = (this.props.category.severities > 2) ? "" : "severity-buttons" ;
-        if ( this.props.category.get('severities').length > 3 ) {
-            severities = this.props.category.get('severities').map(function(severity, i) {
+        if ( this.props.category.severities.length > 3 ) {
+            severities = this.props.category.severities.map((severity, i) =>{
                 return <div onClick={this.onChangeSelect.bind(this)}
                             className="item"  key={'value-' + severity.label}
                             data-value={severity.label}>
                         <b>{severity.label}</b>
                     </div> ;
-            }.bind(this));
+            });
 
             select = <div className="ui icon top right pointing dropdown basic tiny button"
                 ref={(input) => { this.selectRef = input;}}
@@ -60,7 +60,7 @@ class ReviewExtendedCategorySelector extends React.Component{
                 </div>
 
             </div>
-        } else if ( this.props.category.get('severities').length === 3 ) {
+        } else if ( this.props.category.severities.length === 3 ) {
             let button1 =  <button key={'value-' + this.props.category.severities[0].label}
                                    onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
                                    className="ui left attached button"
@@ -83,7 +83,7 @@ class ReviewExtendedCategorySelector extends React.Component{
                             {button2}
                             {button3}
                     </div>
-        } else if ( this.props.category.get('severities').length === 2 ) {
+        } else if ( this.props.category.severities.length === 2 ) {
             let button1 =  <button key={'value-' + this.props.category.severities[0].label}
                                    onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
                                    className="ui left attached button"
