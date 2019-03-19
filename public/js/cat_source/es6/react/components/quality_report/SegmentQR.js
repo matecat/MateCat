@@ -23,7 +23,7 @@ class SegmentQR extends React.Component {
             'icons' : {
                 'ERROR' : 'icon-cancel-circle icon red',
                 'WARNING' : 'icon-warning2 icon orange',
-                'INFO' : ''
+                'INFO' : 'icon-info icon'
             }
         }
 

@@ -12,19 +12,19 @@ class QualitySummaryTableOldRevise extends React.Component {
         this.severities = [];
         this.severitiesNames = [];
         this.lqaNestedCategories.forEach((cat)=>{
-            if (cat.get('subcategories').length === 0) {
+            if (cat.get('subcategories').size === 0) {
                 cat.get('severities').forEach((sev)=>{
-                    if (this.severitiesNames.indexOf(sev.label) === -1 ) {
+                    if (this.severitiesNames.indexOf(sev.get('label')) === -1 ) {
                         this.severities.push(sev);
-                        this.severitiesNames.push(sev.label);
+                        this.severitiesNames.push(sev.get('label'));
                     }
                 });
             } else {
                 cat.get('subcategories').forEach((subCat)=>{
                     subCat.get('severities').forEach((sev)=>{
-                        if (this.severitiesNames.indexOf(sev.label) === -1 ) {
+                        if (this.severitiesNames.indexOf(sev.get('label')) === -1 ) {
                             this.severities.push(sev);
-                            this.severitiesNames.push(sev.label);
+                            this.severitiesNames.push(sev.get('label'));
                         }
                     });
                 });
@@ -41,9 +41,9 @@ class QualitySummaryTableOldRevise extends React.Component {
     getHeader() {
         let html = [];
         this.severities.forEach((sev, index)=>{
-            let item = <div className="qr-title qr-severity" key={sev.label+index}>
-                <div className="qr-info">{sev.label}</div>
-                <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
+            let item = <div className="qr-title qr-severity" key={sev.get('label')+index}>
+                <div className="qr-info">{sev.get('label')}</div>
+                <div className="qr-label">Weight: <b>{sev.get('penalty')}</b></div>
             </div>;
             html.push(item);
         });
@@ -75,19 +75,19 @@ class QualitySummaryTableOldRevise extends React.Component {
         this.lqaNestedCategories.forEach((cat, index)=>{
             let catHtml = [];
             catHtml.push(
-                <div className="qr-element qr-issue-name">{cat.label}</div>
+                <div className="qr-element qr-issue-name">{cat.get('label')}</div>
             );
             let totalIssues = this.getIssuesForCategory(cat.get('id'));
             let catTotalWeightValue = 0, toleratedIssuesValue = 0, voteValue = "";
             this.severities.forEach((currentSev)=>{
                 let severityFound = cat.get('severities').filter((sev)=>{
-                    return sev.label === currentSev.label;
+                    return sev.get('label') === currentSev.get('label');
                 });
-                if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
-                    catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
+                if (severityFound.size > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.get('label')) ) {
+                    catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.get('label')) * severityFound.get(0).get('penalty') );
                     toleratedIssuesValue = totalIssues.get('allowed');
                     voteValue = totalIssues.get('vote');
-                    catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.label)}</div>);
+                    catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.get('label'))}</div>);
                 } else {
                     catHtml.push(<div className="qr-element severity"/>);
                 }
@@ -96,7 +96,7 @@ class QualitySummaryTableOldRevise extends React.Component {
             let toleratedIssuesHtml = <div className="qr-element total-severity qr-old">{toleratedIssuesValue}</div>;
             let voteClass = (voteValue.toLowerCase() === 'poor' || voteValue.toLowerCase() === 'fail') ? 'job-not-passed' : "job-passed";
             let voteHtml = <div className={"qr-element total-severity qr-old " + voteClass}>{voteValue}</div>;
-            let line = <div className="qr-body-list" key={cat.get('id')+index+cat.label}>
+            let line = <div className="qr-body-list" key={cat.get('id')+index+cat.get('label')}>
                 {catHtml}
                 {catTotalWeightHtml}
                 {toleratedIssuesHtml}
