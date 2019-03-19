@@ -185,7 +185,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         if ( (isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) OR (isset( $options[ 'filter' ][ 'severity' ] ) &&  $options[ 'filter' ][ 'severity' ] != '') ) {
 
             $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job ";
-            $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment ";
+            $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment AND sr.id_job = st.id_job ";
 
             if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) {
                 if ( in_array( $options[ 'filter' ][ 'issue_category' ], Constants_Revise::$categoriesDbNames ) ) {
@@ -199,7 +199,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
             if ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) {
                 $options_conditions_query                .= " AND (e.severity = :severity OR 
-            (sr.err_typing = :severity OR sr.err_translation OR sr.err_terminology = :severity OR sr.err_language = :severity OR sr.err_style = :severity)) ";
+            (sr.err_typing = :severity OR sr.err_translation = :severity OR sr.err_terminology = :severity OR sr.err_language = :severity OR sr.err_style = :severity)) ";
                 $options_conditions_values[ 'severity' ] = $options[ 'filter' ][ 'severity' ];
             }
 
