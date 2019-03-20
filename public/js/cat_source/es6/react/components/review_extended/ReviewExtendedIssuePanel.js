@@ -122,6 +122,17 @@ class ReviewExtendedIssuePanel extends React.Component{
                         />
                     );
                 } );
+            } else {
+                subcategoriesComponents.push(
+                    <ReviewExtendedCategorySelector
+                        key={'default'}
+                        selectedValue={selectedValue}
+                        sendIssue={this.sendIssue.bind(this)}
+                        nested={true}
+                        category={category}
+                        sid={this.props.sid}
+                    />
+                );
             }
             let html = <div key={category.id}>
                 <div className="re-item-head pad-left-10">{category.label}</div>
