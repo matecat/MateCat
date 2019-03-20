@@ -62,27 +62,25 @@ class ProductionSummary extends React.Component {
                     <div className="progr">
                         <div className="meter">
                             <a className="warning-bar translate-tooltip" data-variation="tiny"
-                               data-html={"Rejected " + parseInt(stats.get('REJECTED_PERC'))+"%"}
-                               style={{width: parseInt(stats.get('REJECTED_PERC'))+"%"}}
-
-                            />
+                               data-html={"Rejected " + Math.round(stats.get('rejected')/stats.get('total')*100) +"%"}
+                               style={{width: Math.round(stats.get('rejected')/stats.get('total')*100)+"%"}}/>
 
                             <a className="approved-bar translate-tooltip" data-variation="tiny"
-                               data-html={"Approved " + parseInt(stats.get('APPROVED_PERC'))+"%"}
-                               style={{width: parseInt(stats.get('APPROVED_PERC'))+"%"}}/>
+                               data-html={"Approved " + Math.round(stats.get('approved')/stats.get('total')*100) +"%"}
+                               style={{width:Math.round(stats.get('approved')/stats.get('total')*100)+"%"}}/>
 
                             <a className="translated-bar translate-tooltip" data-variation="tiny"
-                               data-html={"Translated " + parseInt(stats.get('TRANSLATED_PERC'))+"%"}
-                               style={{width: parseInt(stats.get('TRANSLATED_PERC'))+"%"}}/>
+                               data-html={"Translated " + Math.round(stats.get('translated')/stats.get('total')*100) +"%"}
+                               style={{width:Math.round(stats.get('translated')/stats.get('total')*100)+"%"}}/>
 
                             <a className="draft-bar translate-tooltip" data-variation="tiny"
-                               data-html={"Draft " + parseInt(stats.get('DRAFT_PERC'))+"%"}
-                               style={{width: parseInt(stats.get('DRAFT_PERC'))+"%"}}/>
+                               data-html={"Draft " + Math.round(stats.get('draft')/stats.get('total')*100) +"%"}
+                               style={{width:Math.round(stats.get('draft')/stats.get('total')*100)+"%"}}/>
 
                         </div>
                     </div>
                 </div>
-                <div className="percent">{parseInt(stats.get('PROGRESS_PERC_FORMATTED'))}%</div>
+                <div className="percent">{Math.round((stats.get('approved')+Math.round(stats.get('translated')))/stats.get('total')*100)}%</div>
             </div>
             <div className="qr-effort">
                 <div className="qr-label">Reviewed Words</div>
