@@ -397,6 +397,7 @@ $.extend(UI, {
 			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
 			// in the current segment
 			e.preventDefault();
+			$(e.target).addClass('disabled');
 			UI.startSegmentTagProjection();
 			return false;
 		}).on('click', '.editor .outersource .copy', function(e) {
