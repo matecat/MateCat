@@ -45,6 +45,25 @@ class QualitySummaryTable extends React.Component {
             });
         }
     }
+    getIssuesForCategoryWithSubcategory(category, sevLabel) {
+        let total = 0;
+        if (this.props.jobInfo.get('quality_summary').size > 0 ) {
+            if ( category.subcategories.length > 0 ) {
+                category.subcategories.forEach((sub)=>{
+                    if ( !_.isUndefined(this.props.jobInfo.get('quality_summary').get('revise_issues').get(sub.id) ) &&
+                        this.props.jobInfo.get('quality_summary').get('revise_issues').get(sub.id).get('founds').get(sevLabel)
+                    ) {
+                        total +=   this.props.jobInfo.get('quality_summary').get('revise_issues').get(sub.id).get('founds').get(sevLabel);
+                    }
+                });
+            } else {
+                if ( this.props.jobInfo.get('quality_summary').get('revise_issues').get(category.id) ) {
+                    total = this.props.jobInfo.get('quality_summary').get('revise_issues').get(category.id).get('founds').get(sevLabel)
+                }
+            }
+        }
+        return total;
+    }
     getCategorySeverities(categoryId) {
         let severities;
         this.lqaNestedCategories.categories.forEach((cat)=>{
@@ -112,21 +131,16 @@ class QualitySummaryTable extends React.Component {
             catHtml.push(
                 <div className="qr-element qr-issue-name">{cat.label}</div>
             );
-            let totalIssues;
-            if (!cat.severities) {
-                totalIssues = this.getIssuesForCategory(cat.id);
-            } else {
-                totalIssues = this.getIssuesForCategory(cat.id);
-            }
             let catTotalWeightValue = 0;
             this.severities.forEach((currentSev)=>{
                 let catSeverities = this.getCategorySeverities(cat.id);
                 let severityFound = catSeverities.filter((sev)=>{
                     return sev.label === currentSev.label;
                 });
-                if (severityFound.length > 0 && !_.isUndefined(totalIssues) && totalIssues.get('founds').get(currentSev.label) ) {
-                    catTotalWeightValue = catTotalWeightValue + (totalIssues.get('founds').get(currentSev.label) * severityFound[0].penalty);
-                    catHtml.push(<div className="qr-element severity">{totalIssues.get('founds').get(currentSev.label)}</div>);
+                let totalIssues = this.getIssuesForCategoryWithSubcategory(cat, currentSev.label);
+                if (severityFound.length > 0 && totalIssues > 0 ) {
+                    catTotalWeightValue = catTotalWeightValue + (totalIssues * severityFound[0].penalty);
+                    catHtml.push(<div className="qr-element severity">{totalIssues}</div>);
                 } else {
                     catHtml.push(<div className="qr-element severity"/>);
                 }
