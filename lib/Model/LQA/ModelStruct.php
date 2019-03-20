@@ -21,7 +21,11 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
      * @return string
      */
     public function getSerializedCategories() {
-        return CategoryDao::getSerializedModel( $this->id );
+        return json_encode( ['categories' => CategoryDao::getCatgoriesAndSeverities( $this->id ) ] ) ;
+    }
+
+    public function getCategoriesAndSeverities() {
+        return CategoryDao::getCatgoriesAndSeverities( $this->id );
     }
 
     /**

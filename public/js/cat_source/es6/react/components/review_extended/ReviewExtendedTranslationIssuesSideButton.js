@@ -7,7 +7,9 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
         super(props);
         this.state = {
             issues_count : this.setIssueCount()
-        }
+        };
+        this.setSegmentPreloadedIssues = this.setSegmentPreloadedIssues.bind(this);
+        this.setSegmentVersions = this.setSegmentVersions.bind(this);
     }
 
     setIssueCount() {
@@ -33,7 +35,7 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
             });
         }
     }
-    setSegmentPreloadedIssues(sid, issues) {
+    setSegmentPreloadedIssues(sid, issues){
         if (parseInt(this.props.sid) === parseInt(sid)) {
 
             this.setState({
@@ -43,8 +45,8 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
     }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions.bind(this));
-        SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES, this.setSegmentPreloadedIssues.bind(this));
+        SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions);
+        SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES, this.setSegmentPreloadedIssues);
     }
 
     componentWillUnmount() {

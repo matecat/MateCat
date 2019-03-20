@@ -82,10 +82,10 @@ class CategoryDao extends \DataAccess_AbstractDao {
     /**
      * Returns a json encoded representation of categories and subcategories
      *
-     * @return string
+     * @return array
      */
 
-    public static function getSerializedModel( $id_model ) {
+    public static function getCatgoriesAndSeverities( $id_model ) {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model ORDER BY COALESCE(id_parent, 0) ";
 
         $conn = \Database::obtain()->getConnection();
@@ -136,7 +136,7 @@ class CategoryDao extends \DataAccess_AbstractDao {
             );
         }, array_values($out) );
 
-        return json_encode( array('categories' => $categories ) );
+        return $categories ;
     }
 
 
