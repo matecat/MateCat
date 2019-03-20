@@ -9,7 +9,6 @@
 class Constants_ProjectStatus {
 
     const STATUS_NOT_READY_FOR_ANALYSIS = 'NOT_READY_FOR_ANALYSIS';
-    const STATUS_LOCKED_BY_FAST         = 'STATUS_LOCKED_BY_FAST';
     const STATUS_NOT_TO_ANALYZE         = 'NOT_TO_ANALYZE';
     const STATUS_EMPTY                  = 'EMPTY';
     const STATUS_NEW                    = 'NEW';
@@ -25,7 +24,6 @@ class Constants_ProjectStatus {
             self::STATUS_EMPTY,
             self::STATUS_NOT_TO_ANALYZE,
             self::STATUS_NOT_READY_FOR_ANALYSIS,
-            self::STATUS_LOCKED_BY_FAST
     ];
 
     public static function isAllowedStatus( $status ){
