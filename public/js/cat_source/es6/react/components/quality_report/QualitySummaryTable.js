@@ -129,31 +129,31 @@ class QualitySummaryTable extends React.Component {
         this.lqaNestedCategories.forEach((cat, index)=>{
             let catHtml = [];
             catHtml.push(
-                <div className="qr-element qr-issue-name">{cat.label}</div>
+                <div className="qr-element qr-issue-name" key={cat.get('label') + index}>{cat.get('label')}</div>
             );
             let catTotalWeightValue = 0;
             this.severities.forEach((currentSev, i)=>{
                 let catSeverities = this.getCategorySeverities(cat.get('id'));
                 let severityFound = catSeverities.filter((sev)=>{
-                    return sev.label === currentSev.label;
+                    return sev.get('label') === currentSev.label;
                 });
-                let totalIssues = this.getIssuesForCategoryWithSubcategory(cat, currentSev.label);
-                if (severityFound.length > 0 && totalIssues > 0 ) {
-                    catTotalWeightValue = catTotalWeightValue + (totalIssues * severityFound[0].penalty);
-                    catHtml.push(<div className="qr-element severity">{totalIssues}</div>);
+                let totalIssues = this.getIssuesForCategoryWithSubcategory(cat.toJS(), currentSev.label);
+                if (severityFound.size > 0 && totalIssues > 0 ) {
+                    catTotalWeightValue = catTotalWeightValue + (totalIssues * severityFound.get(0).get('penalty'));
+                    catHtml.push(<div className="qr-element severity" key={currentSev.label + cat.get('id')}>{totalIssues}</div>);
                 } else {
                     catHtml.push(<div className="qr-element severity" key={'severity' + i}/>);
                 }
             });
-            let catTotalWeightHtml = <div className="qr-element total-severity">{catTotalWeightValue}</div>;
+            let catTotalWeightHtml = <div className="qr-element total-severity" key={"totalW"+cat.get('id')}>{catTotalWeightValue}</div>;
             let line = <div className="qr-body-list" key={cat.get('id')+index}>
-                        {catHtml}
-                        {catTotalWeightHtml}
-                    </div>;
+                {catHtml}
+                {catTotalWeightHtml}
+            </div>;
             html.push(line);
         });
         return <div className="qr-body">
-        {html}
+            {html}
         </div>
     }
     render () {
