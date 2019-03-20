@@ -177,6 +177,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 Constants_TranslationStatus::$TRANSLATION_STATUSES,
                 Constants_TranslationStatus::$REVISION_STATUSES
         );
+
+
         if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array($options[ 'filter' ][ 'status' ], $statuses) ) {
             $options_conditions_query              .= " AND st.status = :status ";
             $options_conditions_values[ 'status' ] = $options[ 'filter' ][ 'status' ];
@@ -189,12 +191,27 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
             if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) {
                 if ( in_array( $options[ 'filter' ][ 'issue_category' ], Constants_Revise::$categoriesDbNames ) ) {
+
                     $options_conditions_query .= " AND (sr." . $options[ 'filter' ][ 'issue_category' ] . " != '' AND sr." . $options[ 'filter' ][ 'issue_category' ] . " != 'none')";
                 } else {
-                    $options_conditions_query .= " AND e.id_category = :id_category ";
-                    $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
-                }
 
+                    if ( is_array( $options[ 'filter' ][ 'issue_category' ] ) ) {
+                        $placeholders = implode(', ', array_map( function($id) {
+                            return ':issue_category_' . $id ;
+                        }, $options[ 'filter'][ 'issue_category' ] ) );
+
+                        $options_conditions_query .= " AND e.id_category IN ( $placeholders ) ";
+
+                        foreach( $options[ 'filter' ][ 'issue_category' ] as $id_category ) {
+                            $options_conditions_values[ 'issue_category_' . $id_category ] = $id_category ;
+                        }
+                    }
+
+                    else {
+                        $options_conditions_query .= " AND e.id_category = :id_category ";
+                        $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
+                    }
+                }
             }
 
             if ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) {

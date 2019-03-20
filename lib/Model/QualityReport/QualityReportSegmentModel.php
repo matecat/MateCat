@@ -13,8 +13,11 @@ use Chunks_ChunkStruct;
 use Constants_Revise;
 use Constants_TranslationStatus;
 use Features\ReviewExtended\Model\QualityReportDao;
+use Features\ReviewExtended\Model\QualityReportModel;
 use Features\TranslationVersions;
 use FeatureSet;
+use LQA\CategoryDao;
+use LQA\CategoryStruct;
 use SubFiltering\Filter;
 use Translations_TranslationVersionDao;
 use ZipArchiveExtended;
@@ -23,8 +26,20 @@ class QualityReportSegmentModel {
 
     public function getSegmentsIdForQR( Chunks_ChunkStruct $chunk, $step = 10, $ref_segment, $where = "after", $options = [] ) {
 
-        $segmentsDao = new \Segments_SegmentDao;
+        if ( isset( $options[ 'filter' ][ 'issue_category' ] ) ) {
+            $subCategories = ( new CategoryDao() )->findByIdModelAndIdParent(
+                    $chunk->getProject()->id_qa_model,
+                    $options['filter']['issue_category']
+            );
 
+            if ( !empty( $subCategories ) > 0 ) {
+                $options[ 'filter' ][ 'issue_category' ] = array_map( function( CategoryStruct $subcat ) {
+                    return $subcat->id ;
+                }, $subCategories );
+            }
+        }
+
+        $segmentsDao = new \Segments_SegmentDao;
         $segments_id = $segmentsDao->getSegmentsIdForQR( $chunk->id, $chunk->password, $step, $ref_segment, $where, $options );
 
         return $segments_id;
