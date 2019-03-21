@@ -948,19 +948,14 @@ Close icon ballon - Right panel
 
 
 .mbc-comment-icon-button {
-    opacity:0;
-    -webkit-transition: opacity 1s ease-in-out;
-    -moz-transition: opacity 1s ease-in-out;
-    -ms-transition: opacity 1s ease-in-out;
-    -o-transition: opacity 1s ease-in-out;
-    transition: opacity 1s ease-in-out;
+    visibility: hidden;
+  display:block;
 }
 
 section:hover .mbc-comment-icon-button,
 .segment-side-buttons:hover .mbc-comment-icon-button,
 .mbc-comment-icon-button:hover
  { 
-    opacity: 1;
-    display:block;
+    visibility: visible;
 }
 
