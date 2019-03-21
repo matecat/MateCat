@@ -29,7 +29,7 @@ class UploadHandler {
     }
 
     protected function getFullUrl() {
-        $https = !empty( $_SERVER[ 'HTTPS' ] ) && $_SERVER[ 'HTTPS' ] !== 'off';
+        $https = INIT::$PROTOCOL === 'https';
         return
                 ( $https ? 'https://' : 'http://' ) .
                 ( !empty( $_SERVER[ 'REMOTE_USER' ] ) ? $_SERVER[ 'REMOTE_USER' ] . '@' : '' ) .
