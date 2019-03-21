@@ -10,6 +10,7 @@ class UploadHandler {
 
         $this->options = [
                 'script_url'              => $this->getFullUrl() . '/',
+                'upload_token'            => $_COOKIE[ 'upload_session' ],
                 'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_session' ] ),
                 'upload_url'              => $this->getFullUrl() . '/files/',
                 'param_name'              => 'files',
@@ -79,7 +80,7 @@ class UploadHandler {
             return false;
         }
 
-        if( !Utils::isTokenValid( $this->options[ 'upload_dir' ] ) ){
+        if( !Utils::isTokenValid( $this->options[ 'upload_token' ] ) ){
             $file->error = "Invalid Upload Token.";
             return false;
         }
