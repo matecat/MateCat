@@ -94,7 +94,9 @@ class Executor implements SplObserver {
      */
     protected function _logMsg( $msg ) {
 //        \INIT::$DEBUG = false;
-        if ( INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+        if ( INIT::$DEBUG ) {
+            echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+        }
         Log::doLog( $msg );
     }
 
@@ -112,10 +114,10 @@ class Executor implements SplObserver {
      */
     protected function __construct( Context $_context ) {
 
-        $this->_executorPID = posix_getpid();
-        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID;
+        $this->_executorPID          = posix_getpid();
+        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . (int)INIT::$INSTANCE_ID;
 
-        Log::$fileName     = $_context->loggerName;
+        Log::$fileName = $_context->loggerName;
 
         $this->_executionContext = $_context;
 
@@ -131,7 +133,7 @@ class Executor implements SplObserver {
 
             $this->_queueHandler->subscribe( $this->_executionContext->queue_name );
 
-        } catch ( Exception $ex ){
+        } catch ( Exception $ex ) {
 
             $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
             $this->_logMsg( $msg );
@@ -155,7 +157,7 @@ class Executor implements SplObserver {
             die ( "This script can be run only in CLI Mode.\n\n" );
         }
 
-        declare( ticks = 10 );
+        declare( ticks=10 );
         set_time_limit( 0 );
 
         if ( !extension_loaded( "pcntl" ) && (bool)ini_get( "enable_dl" ) ) {
@@ -165,9 +167,9 @@ class Executor implements SplObserver {
             $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
         } else {
 
-            pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
-            pcntl_signal( SIGINT,  array( get_called_class(), 'sigSwitch' ) );
-            pcntl_signal( SIGHUP,  array( get_called_class(), 'sigSwitch' ) );
+            pcntl_signal( SIGTERM, [ get_called_class(), 'sigSwitch' ] );
+            pcntl_signal( SIGINT, [ get_called_class(), 'sigSwitch' ] );
+            pcntl_signal( SIGHUP, [ get_called_class(), 'sigSwitch' ] );
 
             $msg = str_pad( " Signal Handler Installed ", 50, "-", STR_PAD_BOTH );
 
@@ -175,6 +177,7 @@ class Executor implements SplObserver {
 
         static::$__INSTANCE = new static( $queueContext );
         static::$__INSTANCE->_logMsg( $msg );
+
         return static::$__INSTANCE;
 
     }
@@ -221,7 +224,7 @@ class Executor implements SplObserver {
 
                 //read Message frame from the queue
                 /**
-                 * @var $msgFrame \StompFrame
+                 * @var $msgFrame     \StompFrame
                  * @var $queueElement QueueElement
                  */
                 list( $msgFrame, $queueElement ) = $this->_readAMQFrame();
@@ -242,45 +245,45 @@ class Executor implements SplObserver {
                 /**
                  * Do not re-instantiate an already existent object
                  */
-                if( ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ){
+                if ( ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ) {
                     $this->_worker = new $queueElement->classLoad( $this->_queueHandler );
                     $this->_worker->attach( $this );
                     $this->_worker->setPid( $this->_executor_instance_id );
-                    $this->_worker->setContext( $this->_executionContext  );
+                    $this->_worker->setContext( $this->_executionContext );
                 }
 
                 $this->_worker->process( $queueElement );
 
-            } catch ( EndQueueException $e ){
+            } catch ( EndQueueException $e ) {
 
                 $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : End queue limit reached. Acknowledged. - " . $e->getMessage() ); // ERROR End Queue
 
-            } catch ( ReQueueException $e ){
+            } catch ( ReQueueException $e ) {
 
                 $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : Error executing task. Re-Queue - " . $e->getMessage() ); // ERROR Re-queue
 
                 //set/increment the reQueue number
-                $queueElement->reQueueNum     = ++$queueElement->reQueueNum;
-                $amqHandlerPublisher          = new AMQHandler();
+                $queueElement->reQueueNum = ++$queueElement->reQueueNum;
+                $amqHandlerPublisher      = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
                 $amqHandlerPublisher->disconnect();
 
-            } catch( EmptyElementException $e ){
+            } catch ( EmptyElementException $e ) {
 
 //                $this->_logMsg( $e->getMessage() );
 
-            } catch( PDOException $e ){
+            } catch ( PDOException $e ) {
 
                 $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage() );
-                $queueElement->reQueueNum     = ++$queueElement->reQueueNum;
-                $amqHandlerPublisher          = new AMQHandler();
+                $queueElement->reQueueNum = ++$queueElement->reQueueNum;
+                $amqHandlerPublisher      = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
                 $amqHandlerPublisher->disconnect();
-                sleep(2);
+                sleep( 2 );
 
-            } catch ( Exception $e ){
+            } catch ( Exception $e ) {
 
-                $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************"  );
+                $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************" );
                 $this->_logMsg( "Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() );
 
             }
@@ -290,7 +293,7 @@ class Executor implements SplObserver {
 
             $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") - QueueElement acknowledged." );
 
-        } while( $this->RUNNING );
+        } while ( $this->RUNNING );
 
         self::cleanShutDown();
 
@@ -333,15 +336,15 @@ class Executor implements SplObserver {
                 throw new FrameException( "--- (Executor " . $this->_executor_instance_id . ") : no frame found. Starting next cycle." );
             }
 
-        } catch ( Exception $e ) {
-//            self::_TimeStampMsg( $e->getMessage() );
-//            self::_TimeStampMsg( $e->getTraceAsString() );
-            $this->_logMsg( $e->getMessage() );
-            throw new FrameException( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
+        } catch ( FrameException $e ) {
+            throw new FrameException( $e->getMessage() );
             /* jump the ack */
+        } catch ( Exception $e ) {
+            $this->_logMsg( $e->getMessage() );
+            throw new FrameException( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***", -1, $e );
         }
 
-        return array( $msgFrame, $queueElement );
+        return [ $msgFrame, $queueElement ];
 
     }
 

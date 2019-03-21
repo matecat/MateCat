@@ -205,7 +205,7 @@ class Upload {
 
             $mod_name = $this->fixFileName( $fileUp->name );
 
-            if( !$this->_isValidFileName( $mod_name ) ){
+            if( !Utils::isValidFileName( $mod_name ) ){
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
                         new Exception ( __METHOD__ . " -> Invalid File Name '" . ZipArchiveExtended::getFileName( $fileUp->name ) ."'" )
@@ -283,26 +283,6 @@ class Upload {
         }
 
         return $string;
-
-    }
-
-    protected function _isValidFileName( $string ) {
-
-        if (
-            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '../' ) !== false ||
-            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '/../' ) !== false ||
-            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '/..' ) !== false ||
-            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2E%2E%2F' ) !== false ||
-            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2F%2E%2E%2F' ) !== false ||
-            strpos( $this->dirUpload . DIRECTORY_SEPARATOR . $string, '%2F%2E%2E' ) !== false ||
-            strpos( $string, '.' ) === 0 ||
-            strpos( $string, '%2E' ) === 0
-        ) {
-            //Directory Traversal! or Linux hidden file uploaded
-            return false;
-        }
-
-        return true;
 
     }
 
