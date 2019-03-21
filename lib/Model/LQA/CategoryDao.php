@@ -19,6 +19,20 @@ class CategoryDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_parent
+     *
+     * @return mixed
+     */
+    public function findByIdModelAndIdParent( $id_model, $id_parent ) {
+        $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model AND id_parent = :id_parent " ;
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [ 'id_model' => $id_model, 'id_parent' => $id_parent ] );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\CategoryStruct' );
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @param $data
      * @return mixed
      * @deprecated  This method uses insert and find, refactor it to remove this need.

@@ -96,8 +96,6 @@ class QualityReportController extends KleinController
         ]);
     }
 
-
-
     public function versions() {
         $dao = new ArchivedQualityReportDao();
         $versions = $dao->getAllByChunk( $this->chunk ) ;
