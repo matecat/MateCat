@@ -79,9 +79,13 @@ class UploadHandler {
             return false;
         }
 
-        if ( !$this->_isValidFileName( $file ) ) {
-            $file->error = "Invalid File Name";
+        if( !Utils::isTokenValid( $this->options[ 'upload_dir' ] ) ){
+            $file->error = "Invalid Upload Token.";
+            return false;
+        }
 
+        if ( !Utils::isValidFileName( $file->name ) ) {
+            $file->error = "Invalid File Name";
             return false;
         }
 
@@ -543,26 +547,6 @@ class UploadHandler {
         }
 
         return false;
-    }
-
-    protected function _isValidFileName( $fileUp ) {
-
-        if (
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '../' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '/../' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '/..' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2E%2E%2F' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2F%2E%2E%2F' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2F%2E%2E' ) !== false ||
-                strpos( $fileUp->name, '.' ) === 0 ||
-                strpos( $fileUp->name, '%2E' ) === 0
-        ) {
-            //Directory Traversal!
-            return false;
-        }
-
-        return true;
-
     }
 
 }
