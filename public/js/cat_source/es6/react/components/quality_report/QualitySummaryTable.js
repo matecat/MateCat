@@ -77,9 +77,9 @@ class QualitySummaryTable extends React.Component {
         let html = [];
         this.severities.forEach((sev, index)=>{
             let item = <div className="qr-title qr-severity" key={sev.label+index}>
-                        <div className="qr-info">{sev.label}</div>
-                        <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
-                    </div>;
+                <div className="qr-info">{sev.label}</div>
+                <div className="qr-label">Weight: <b>{sev.penalty}</b></div>
+            </div>;
             html.push(item);
         });
         let totalScore = Math.round(this.props.jobInfo.get('quality_summary').get('total_issues_weight'));
@@ -91,7 +91,7 @@ class QualitySummaryTable extends React.Component {
                 <div className="qr-info"><b>{totalScore}</b></div>
             </div>
 
-            </div>
+        </div>
     }
     getBody() {
         let  html = [];
@@ -115,13 +115,13 @@ class QualitySummaryTable extends React.Component {
             });
             let catTotalWeightHtml = <div className="qr-element total-severity" key={'total-'+index}>{catTotalWeightValue}</div>;
             let line = <div className="qr-body-list" key={cat.get('id')+index}>
-                        {catHtml}
-                        {catTotalWeightHtml}
-                    </div>;
+                {catHtml}
+                {catTotalWeightHtml}
+            </div>;
             html.push(line);
         });
         return <div className="qr-body">
-        {html}
+            {html}
         </div>
     }
     getBodyWithSubtagories() {
@@ -158,8 +158,8 @@ class QualitySummaryTable extends React.Component {
     }
     render () {
         return <div className="qr-quality shadow-1">
-                {this.htmlHead}
-                {this.htmlBody}
+            {this.htmlHead}
+            {this.htmlBody}
         </div>
     }
 }
