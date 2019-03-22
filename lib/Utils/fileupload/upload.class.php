@@ -30,7 +30,7 @@ class UploadHandler {
     }
 
     protected function getFullUrl() {
-        $https = !empty( $_SERVER[ 'HTTPS' ] ) && $_SERVER[ 'HTTPS' ] !== 'off';
+        $https = INIT::$PROTOCOL === 'https';
         return
                 ( $https ? 'https://' : 'http://' ) .
                 ( !empty( $_SERVER[ 'REMOTE_USER' ] ) ? $_SERVER[ 'REMOTE_USER' ] . '@' : '' ) .
@@ -71,22 +71,41 @@ class UploadHandler {
         ) ) );
     }
 
+    /**
+     * @param $fileName
+     *
+     * @throws Exception
+     */
+    protected static function _validateFileName( $fileName ){
+        if ( !Utils::isValidFileName( $fileName ) ) {
+            throw new Exception( "Invalid File Name" );
+        }
+    }
+
+    /**
+     * @param $token
+     *
+     * @throws Exception
+     */
+    protected static function _validateToken( $token ){
+        if( !Utils::isTokenValid( $token ) ){
+            throw new Exception( "Invalid Upload Token." );
+        }
+    }
+
     protected function validate( $uploaded_file, $file, $error, $index ) {
         //TODO: these errors are shown in the UI but are not user friendly.
 
         if ( $error ) {
             $file->error = $error;
-
             return false;
         }
 
-        if( !Utils::isTokenValid( $this->options[ 'upload_token' ] ) ){
-            $file->error = "Invalid Upload Token.";
-            return false;
-        }
-
-        if ( !Utils::isValidFileName( $file->name ) ) {
-            $file->error = "Invalid File Name";
+        try {
+            self::_validateFileName( $file->name );
+            self::_validateToken( $this->options[ 'upload_token' ] );
+        } catch( Exception $e ){
+            $file->error = $e->getMessage();
             return false;
         }
 
@@ -397,6 +416,15 @@ class UploadHandler {
         if ( isset( $_REQUEST[ 'file' ] ) ) {
             $raw_file  = explode( DIRECTORY_SEPARATOR, $_REQUEST[ 'file' ] );
             $file_name = array_pop( $raw_file );
+        }
+
+        try {
+            self::_validateFileName( $file_name );
+            self::_validateToken( $this->options[ 'upload_token' ] );
+        } catch( Exception $e ){
+            header( 'Content-type: application/json' );
+            echo json_encode( [ "code" => -1, "error" => $e->getMessage() ] );
+            return false;
         }
 
         $file_info = FilesStorage::pathinfo_fix( $file_name );
