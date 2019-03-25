@@ -421,10 +421,16 @@
                 id = UI.parsedHash.splittedSegmentId ;
             }
 
+            if ( typeof id === 'undefined' ) {
+                console.debug( 'id is undefined', id);
+                return ;
+            }
+
             if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
                 MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
             } else {
-                SegmentActivator.activate(id);
+                var el = $("section:not(.opened) #segment-" + id + "-target").find(".editarea");
+                $(el).click();
             }
         },
         isReadonlySegment : function( segment ) {

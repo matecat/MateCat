@@ -66,7 +66,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         },
 
         getSegmentVersionsIssues: function (segmentId, fileId) {
-            // TODO Uniform behavior of ReviewExtended and ReviewImproved
             API.SEGMENT.getSegmentVersionsIssues(segmentId)
                 .done(function (response) {
                     UI.addIssuesToSegment(fileId, segmentId, response.versions)
