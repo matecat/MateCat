@@ -10,6 +10,7 @@ class UploadHandler {
 
         $this->options = [
                 'script_url'              => $this->getFullUrl() . '/',
+                'upload_token'            => $_COOKIE[ 'upload_session' ],
                 'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_session' ] ),
                 'upload_url'              => $this->getFullUrl() . '/files/',
                 'param_name'              => 'files',
@@ -29,7 +30,7 @@ class UploadHandler {
     }
 
     protected function getFullUrl() {
-        $https = !empty( $_SERVER[ 'HTTPS' ] ) && $_SERVER[ 'HTTPS' ] !== 'off';
+        $https = INIT::$PROTOCOL === 'https';
         return
                 ( $https ? 'https://' : 'http://' ) .
                 ( !empty( $_SERVER[ 'REMOTE_USER' ] ) ? $_SERVER[ 'REMOTE_USER' ] . '@' : '' ) .
@@ -79,9 +80,13 @@ class UploadHandler {
             return false;
         }
 
-        if ( !$this->_isValidFileName( $file ) ) {
-            $file->error = "Invalid File Name";
+        if( !Utils::isTokenValid( $this->options[ 'upload_token' ] ) ){
+            $file->error = "Invalid Upload Token.";
+            return false;
+        }
 
+        if ( !Utils::isValidFileName( $file->name ) ) {
+            $file->error = "Invalid File Name";
             return false;
         }
 
@@ -543,26 +548,6 @@ class UploadHandler {
         }
 
         return false;
-    }
-
-    protected function _isValidFileName( $fileUp ) {
-
-        if (
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '../' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '/../' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '/..' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2E%2E%2F' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2F%2E%2E%2F' ) !== false ||
-                strpos( $this->options[ 'upload_dir' ] . $fileUp->name, '%2F%2E%2E' ) !== false ||
-                strpos( $fileUp->name, '.' ) === 0 ||
-                strpos( $fileUp->name, '%2E' ) === 0
-        ) {
-            //Directory Traversal!
-            return false;
-        }
-
-        return true;
-
     }
 
 }

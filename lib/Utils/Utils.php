@@ -431,6 +431,26 @@ class Utils {
         return true;
     }
 
+    public static function isValidFileName( $fileUpName ) {
+
+        if (
+                stripos( $fileUpName, '../' ) !== false ||
+                stripos( $fileUpName, '/../' ) !== false ||
+                stripos( $fileUpName, '/..' ) !== false ||
+                stripos( $fileUpName, '%2E%2E%2F' ) !== false ||
+                stripos( $fileUpName, '%2F%2E%2E%2F' ) !== false ||
+                stripos( $fileUpName, '%2F%2E%2E' ) !== false ||
+                stripos( $fileUpName, '.' ) === 0 ||
+                stripos( $fileUpName, '%2E' ) === 0
+        ) {
+            //Directory Traversal!
+            return false;
+        }
+
+        return true;
+
+    }
+
     public static function filterLangDetectArray( $arr ) {
         return filter_var( $arr, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
     }
