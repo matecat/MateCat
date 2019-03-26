@@ -1514,6 +1514,17 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
         }
     }
 }
+.matecat-modal-content {
+    .boxed {
+        padding: 25px 15px 0;
+        text-align: left;
+        label {
+            position: relative;
+            top: -2px;
+            padding-right: 2px;
+        }
+    }
+}
 
 [data-name="confirmCopyAllSources"] {
     input, label {
