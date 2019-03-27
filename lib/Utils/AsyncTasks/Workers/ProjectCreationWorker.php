@@ -44,7 +44,7 @@ class ProjectCreationWorker extends AbstractWorker {
          */
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
 
-            $msg = "\n\n Error Set Contribution  \n\n " . var_export( $queueElement, true );
+            $msg = "\n\n Error Project Creation  \n\n " . var_export( $queueElement, true );
             \Utils::sendErrMailReport( $msg );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
             throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
