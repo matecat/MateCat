@@ -407,23 +407,16 @@ section:not(.opened) .translation-issues-button {
 }
 
 .translation-issues-button .revise-button {
-    opacity:0;
-    -webkit-transition: opacity 1s ease-in-out;
-  -moz-transition: opacity 1s ease-in-out;
-  -ms-transition: opacity 1s ease-in-out;
-  -o-transition: opacity 1s ease-in-out;
-  transition: opacity 1s ease-in-out;
+    visibility: hidden;
+    display:block;
 }
 
 
 section:hover .translation-issues-button .revise-button,
 .translation-issues-button:hover .revise-button,
 .segment-side-buttons:hover .translation-issues-button .revise-button,
-.has-object
-
- {
-    opacity:1!important;
-    display:block;
+.has-object {
+    visibility: visible;
 }
 
 .revise-button-counter {
