@@ -260,12 +260,6 @@ article {
     border-top: 12px solid #e5e9f1;
 }
 
-//********Import from review improved ***********//
-
-section.editAreaLocked.opened {
-
-}
-
 section {
 
 
@@ -346,9 +340,84 @@ section {
         //}
     }
 
+    .segment-side-buttons .revise-button {
+        text-decoration: none !important;
+        font-size: 28px;
+        color: #666;
+        font-weight: bold;
+    }
+
+
+    .translation-issues-button {
+        cursor: pointer;
+        padding: 10px 0;
+        width: 50px;
+    }
+
+    &:not(.opened) .translation-issues-button {
+        padding: 5px 7px 5px;
+    }
+
+    .translation-issues-button .revise-button {
+        visibility: hidden;
+        display:block;
+    }
+
+
+    &:hover .translation-issues-button .revise-button,
+    .translation-issues-button:hover .revise-button,
+    .segment-side-buttons:hover .translation-issues-button .revise-button,
+    .has-object {
+        visibility: visible;
+    }
+
+    .revise-button-counter {
+        left: 30px;
+        position: absolute;
+        top: 55px;
+        background: #dc2e34;
+        color: #fff;
+        border: 1px solid #fff;
+        border-radius: 14px;
+        display: block;
+        font-size: 11px;
+        font-weight: bold;
+        padding: 0 7px;
+        text-align: center;
+        width: 8px;
+        height: 15px;
+        line-height: 1.5;
+    }
+
+    &:not(.opened) .revise-button-counter {
+        top: 50px;
+    }
 
 }
+
+
+
 .undo-issue-deleted {
     cursor: pointer;
 }
+
+body {
+    &.review-side-panel-opened article {
+        -webkit-transform: translate3d(0, 0, 0);
+        -webkit-backface-visibility: hidden;
+        -webkit-perspective: 1000;
+        -webkit-transition: width .2s ease;
+        transition: width .2s ease;
+        width: 69%;
+    }
+    /* code to hide scroll of the body */
+    &.review-side-panel-opened {
+        overflow-y: hidden!important;
+    }
+
+    &.review-side-panel-opened a.cancel-project:before {
+        margin-right: 5px;
+    }
+}
+
 //*******************************************************/

@@ -19,7 +19,6 @@
     "grunt": "~1.0.3",
     "grunt-browserify": "^5.2.0",
     "grunt-contrib-concat": "~1.0.1",
-    "grunt-contrib-handlebars": "^1.0.0",
     "grunt-contrib-jshint": "^2.0.0",
     "grunt-contrib-watch": "~1.0.0",
     "grunt-sass": "~2.0.0",

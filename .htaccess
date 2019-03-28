@@ -21,6 +21,8 @@ RewriteRule ^$ /support [QSA,L]
 
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
+RewriteRule ^action/convertFile[/]?$ index.php?action=convertFile [QSA,L]
+
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
 RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5 [L]
 
