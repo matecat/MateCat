@@ -1,11 +1,11 @@
 [server]
-address = 0.0.0.0
+address = localhost
 port = 7788
 path = /channel/updates
 
 [queue]
-name = /queue/matecat_sse_comments
-host = localhost
+name = /topic/matecat_sse_notifications
+host = activemq-0.svc.production.matecat.cloud
 port = 61613
 login = login
 passcode = passcode
