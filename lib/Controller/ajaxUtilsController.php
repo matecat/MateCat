@@ -69,7 +69,7 @@ class ajaxUtilsController extends ajaxController {
             case 'clearNotCompletedUploads':
                 try {
                     ConnectedServices\GDrive\Session::cleanupSessionFiles();
-                    if( !empty( $_COOKIE[ 'upload_session' ] ) ){
+                    if( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ){
                         Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
                     }
                 } catch ( Exception $e ) {
