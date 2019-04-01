@@ -7,6 +7,7 @@ use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
+use Constants;
 use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
@@ -166,26 +167,31 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param       $id_project
      * @param array $options
      *
+     * @return ChunkReviewStruct
      * @throws \Exceptions\ValidationError
      */
-    protected function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
+    public function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
 
-        $chunks     = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
+        $chunks = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
+
+        if ( ! isset( $options['source_page'] ) ) {
+            $options['source_page'] = Constants::SOURCE_PAGE_REVISION ;
+        }
 
         foreach ( $chunks as $k => $chunk ) {
             $data = [
-                    'id_project' => $id_project,
-                    'id_job'     => $chunk->id,
-                    'password'   => $chunk->password
+                    'id_project'  => $id_project,
+                    'id_job'      => $chunk->id,
+                    'password'    => $chunk->password,
+                    'source_page' => $options['source_page']
             ];
 
             if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
                 $data[ 'review_password' ] = $options[ 'first_record_password' ];
             }
 
-            ChunkReviewDao::createRecord( $data );
+            return ChunkReviewDao::createRecord( $data );
         }
-
     }
 
     /**

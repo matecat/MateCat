@@ -37,6 +37,7 @@ class catController extends viewController {
 
     public $target_code;
     public $source_code;
+    private $revision ;
 
     /**
      * @var Chunks_ChunkStruct
@@ -80,15 +81,16 @@ class catController extends viewController {
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                )
+                ),
+                'revision' => array( 'filter' => FILTER_VALIDATE_INT ),
         );
 
         $getInput   = (object)filter_input_array( INPUT_GET, $filterArgs );
 
-        $this->jid        = $getInput->jid;
-        $this->password   = $getInput->password;
-
+        $this->jid             = $getInput->jid;
+        $this->password        = $getInput->password;
         $this->review_password = $getInput->password;
+        $this->revision        = $getInput->revision ;
 
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
 
@@ -100,7 +102,6 @@ class catController extends viewController {
         ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
         $this->featureSet->loadForProject( $this->project ) ;
-
     }
 
     /**
@@ -508,6 +509,10 @@ class catController extends viewController {
 
     public function getReviewPassword() {
         return $this->review_password ;
+    }
+
+    public function getRevisionNumber() {
+        return $this->revision ;
     }
 
 

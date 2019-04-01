@@ -182,7 +182,7 @@ class QualityReportSegmentModel {
                     'translation'    => $segment_version->original_translation,
                     'version_number' => 0,
                     'creation_date'  => null,
-                    'is_review'      => 0
+                    'source_page'    => 1
             ] );
         }
 

@@ -15,7 +15,7 @@ class RevisionFactory {
     /**
      * @param \Features\BaseFeature|null $revisionFeature
      *
-     * @return \Features\AbstractRevisionFeature
+     * @return RevisionFactory
      * @throws Exception
      */
     public static function getInstance( $revisionFeature = null ) {
@@ -46,6 +46,13 @@ class RevisionFactory {
     public static function initFromProject( Projects_ProjectStruct $project ) {
         $project->getFeatures();
         return static::getInstance() ;
+    }
+
+    /**
+     * @return \Features\AbstractRevisionFeature|\Features\BaseFeature
+     */
+    public function getFeature() {
+        return $this->revision ;
     }
 
 }

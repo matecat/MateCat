@@ -60,7 +60,7 @@ abstract class ajaxController extends controller {
         echo $toJson;
     }
 
-    public static function isRevision(){
+    public static function isRevision() {
         $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
         $is_revision_url = strpos( $_from_url['path'] , "/revise" ) === 0;
         return $is_revision_url;

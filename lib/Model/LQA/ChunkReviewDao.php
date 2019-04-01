@@ -10,9 +10,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         'id'
     );
 
-    protected function _buildResult( $array_result ) {
-
-    }
+    protected function _buildResult( $array_result ) { }
 
     public function updatePassword($id_job, $password, $old_password) {
         $sql = "UPDATE qa_chunk_reviews SET password = :new_password
@@ -192,7 +190,49 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             )
         );
         return $stmt->fetch() ;
+    }
 
+    /**
+     * @param $id_job
+     *
+     * @return ChunkReviewStruct
+     */
+    public function findLatestRevisionByIdJob( $id_job) {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+                " WHERE id_job = :id_job " .
+                " ORDER BY id DESC LIMIT 1 " ;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
+        $stmt->execute(
+                array(
+                        'id_job' => $id_job,
+                )
+        );
+        return $stmt->fetch() ;
+    }
+
+    /**
+     * @return ChunkReviewStruct
+     */
+    public function findByReviewPasswordAndJobIdAndSourcePage( $review_password, $id_job, $source_page ) {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+                " WHERE review_password = :review_password " .
+                " AND id_job = :id_job " .
+                " AND source_page = :source_page " ;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
+        $stmt->execute(
+                array(
+                        'review_password' => $review_password,
+                        'id_job'          => $id_job,
+                        'source_page'     => $source_page
+                )
+        );
+        return $stmt->fetch() ;
     }
 
     /**
@@ -214,13 +254,14 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
                 'id_project',
                 'id_job',
                 'password',
-                'review_password'
+                'review_password',
+                'source_page'
         ] );
 
         $sql = "INSERT INTO " . self::TABLE .
-            " ( id_project, id_job, password, review_password ) " .
+            " ( id_project, id_job, password, review_password, source_page ) " .
             " VALUES " .
-            " ( :id_project, :id_job, :password, :review_password ) ";
+            " ( :id_project, :id_job, :password, :review_password, :source_page ) ";
 
         $conn = \Database::obtain()->getConnection();
 

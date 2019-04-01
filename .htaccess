@@ -27,7 +27,7 @@ RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
 RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5 [L]
 
 RewriteRule ^(revise)[/]?$ index.php?action=cat [L]
-RewriteRule ^(revise)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5 [L]
+RewriteRule ^(revise)([^/]*)?/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$5&password=$6&revision=$2 [L]
 
 RewriteRule ^(analyze-old)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyzeOld&pid=$3&password=$4 [L]
 RewriteRule ^(jobanalysis-old)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyzeOld&pid=$2&jid=$3&password=$4 [L]
