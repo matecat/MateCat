@@ -323,6 +323,29 @@ $.extend(UI, {
         }
     },
 
+    markSelectedTag: function($tag) {
+        var elem = $tag.hasClass('locked') && !$tag.hasClass('inside-attribute')? $tag : $tag.closest('.locked:not(.inside-attribute)');
+        if( elem.hasClass('selected') ) {
+            elem.removeClass('selected');
+            setCursorPosition(elem[0], 'end');
+        } else {
+            setCursorPosition(elem[0]);
+            selectText(elem[0]);
+            UI.removeSelectedClassToTags();
+            elem.addClass('selected');
+            if(UI.body.hasClass('tagmode-default-compressed')) {
+                $('.editor .tagModeToggle').click();
+            }
+        }
+        if ( elem.closest('.source').length > 0 ) {
+            UI.removeHighlightCorrespondingTags(elem.closest('.source'));
+            UI.highlightCorrespondingTags(elem);
+            UI.highlightEquivalentTaginSourceOrTarget(elem.closest('.source'), UI.editarea);
+        } else {
+            UI.checkTagProximity();
+        }
+    },
+
     checkTagProximity: function () {
         if(!UI.editarea || UI.editarea.html() == '') return false;
 
@@ -341,6 +364,7 @@ $.extend(UI, {
         }
         var htmlEditarea = $.parseHTML(UI.editarea.html());
         if (htmlEditarea) {
+            UI.removeHighlightCorrespondingTags(UI.editarea);
             $.each(htmlEditarea, function (index) {
                 if($(this).hasClass('temp-highlight-tags')) {
                     UI.numCharsUntilTagRight = 0;
@@ -348,7 +372,6 @@ $.extend(UI, {
                     var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
                     var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
 
-                    UI.removeHighlightCorrespondingTags(UI.currentSegment);
                     if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
                         (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
                         UI.highlightCorrespondingTags($(UI.editarea.find('.locked:not(.locked-inside)')[indexTags]));
@@ -362,12 +385,29 @@ $.extend(UI, {
                 }
             });
         }
-        // TODO test.inivisible break some doms with text
         $('body').find('.temp-highlight-tags').remove();
+        UI.highlightEquivalentTaginSourceOrTarget(UI.editarea, UI.currentSegment.find('.source'));
     },
-    highlightCorrespondingTagsinSource: function(elem) {
-        UI.removeHighlightCorrespondingTags(UI.currentSegment.find('.source'));
-        UI.highlightCorrespondingTags(elem);
+    /**
+     * Search in container for a highlighted tad and switch on the corresponding
+     * tag in source or target
+     * @param containerSearch The container where to search for the tag
+     * @param containerHighlight
+     */
+    highlightEquivalentTaginSourceOrTarget: function(containerSearch, containerHighlight) {
+        UI.removeHighlightCorrespondingTags(containerHighlight);
+        var highlightedTag = containerSearch.find('.startTag.locked.highlight, .selfClosingTag.locked.highlight');
+        if ( highlightedTag.length > 0 ) {
+            var sourceTag, text;
+            if ( highlightedTag.find('.locked-inside').length > 0 ) {
+                text = highlightedTag.find('.inside-attribute').text();
+                sourceTag = containerHighlight.find('span.inside-attribute:contains('+text+')').parent();
+            } else {
+                text = $(highlightedTag.get(0)).text();
+                sourceTag = containerHighlight.find('span.locked:contains('+text+')');
+            }
+            UI.highlightCorrespondingTags(sourceTag);
+        }
     },
     highlightCorrespondingTags: function (el) {
         var pairEl;

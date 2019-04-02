@@ -98,7 +98,7 @@
     font-size: 15px;
     color: #767676;
     font-style: italic;
-    padding: 0 4px 0 2px;
+    padding: 0 6px 0 3px;
     vertical-align: middle;
     margin: 1px;
     cursor: pointer;
@@ -108,23 +108,6 @@
     &:hover {
         background: #E5E9F1;
         cursor: pointer;
-    }
-    &.selected {
-        background: #c0c3ca;
-        cursor: grab;
-        &:active {
-            cursor: grabbing;
-            position: relative;
-            -moz-transform: scale(1.1, 1.1);
-            -ms-transform: scale(1.1, 1.1);
-            -webkit-transform: scale(1.1, 1.1);
-            transform: scale(1.1, 1.1);
-            transition: 0.1s ease;
-        }
-    }
-    &.highlight {
-        box-shadow: inset 0 0 0 2px #3b4a5c96;
-        color: #424242;
     }
     a {
         color: #3B4A5C;
@@ -140,8 +123,24 @@
             box-shadow: inset 0 0 0 2px #e1565a;
             background: #f9d7ca;
         }
-        a {
+        &, a {
             color: #E1565A;
+        }
+    }
+    &.highlight {
+        box-shadow: inset 0 0 0 2px #3b4a5c96;
+        color: #424242;
+    }
+    &.selected {
+        cursor: grab;
+        &:active {
+            cursor: grabbing;
+            position: relative;
+            -moz-transform: scale(1.1, 1.1);
+            -ms-transform: scale(1.1, 1.1);
+            -webkit-transform: scale(1.1, 1.1);
+            transform: scale(1.1, 1.1);
+            transition: 0.1s ease;
         }
     }
     .tag-html-container-open,
