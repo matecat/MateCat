@@ -124,10 +124,11 @@ class catController extends viewController {
                 $this->password,
                 $this->jid
             );
-
         }
 
         $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+
+        $this->featureSet->run('catControllerChunkFound', $this);
     }
 
     public function doAction() {

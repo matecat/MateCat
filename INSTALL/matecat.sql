@@ -882,7 +882,7 @@ CREATE TABLE `segment_translation_events` (
 --
 
 DROP TABLE IF EXISTS `segment_translation_versions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET @saved_cs_client    = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segment_translation_versions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,

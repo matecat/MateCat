@@ -585,7 +585,7 @@ class setTranslationController extends ajaxController {
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
-                    'source_page_code' => $this->_getSourcePageCode()
+                    'source_page_code' => $this->getSourcePageCode()
             ] );
 
         } catch ( Exception $e ){
@@ -687,13 +687,6 @@ class setTranslationController extends ajaxController {
                 'status'         => $saved_translation['status']
         );
         return $translation ;
-    }
-
-    private function _getSourcePageCode() {
-        $code = $this->isRevision() ? Constants::SOURCE_PAGE_REVISION :
-                Constants::SOURCE_PAGE_TRANSLATE ;
-
-        return $this->featureSet->filter('filterSourcePageCode', $code ) ;
     }
 
     private function recountJobTotals( $old_status ) {

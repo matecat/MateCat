@@ -60,10 +60,24 @@ abstract class ajaxController extends controller {
         echo $toJson;
     }
 
+    /**
+     * @return bool
+     */
     public static function isRevision() {
         $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
         $is_revision_url = strpos( $_from_url['path'] , "/revise" ) === 0;
         return $is_revision_url;
+    }
+
+    public function getSourcePageCode() {
+        if ( !static::isRevision() ) {
+            $sourcePage = Constants::SOURCE_PAGE_TRANSLATE ;
+        }
+        else {
+            $sourcePage = Constants::SOURCE_PAGE_REVISION ;
+        }
+
+        return $this->featureSet->filter('filterSourcePage', $sourcePage ) ;
     }
 
     public function parseIDSegment(){

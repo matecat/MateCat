@@ -372,10 +372,10 @@ JOIN
 
     public function saveVersion( Translations_TranslationVersionStruct $old_translation ) {
         $sql = "INSERT INTO segment_translation_versions " .
-                " ( id_job, id_segment, translation, version_number, time_to_edit, is_review, old_status, new_status ) " .
+                " ( id_job, id_segment, translation, version_number, time_to_edit, source_page, old_status, new_status ) " .
                 " VALUES " .
                 " (:id_job, :id_segment, :translation, 
-:version_number, :time_to_edit, :is_review, :old_status, :new_status )";
+:version_number, :time_to_edit, :source_page, :old_status, :new_status )";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -386,7 +386,9 @@ JOIN
                 'translation'    => $old_translation->translation,
                 'version_number' => $old_translation->version_number,
                 'time_to_edit'   => $old_translation->time_to_edit,
-                'is_review'      => $old_translation->is_review,
+
+                'source_page'    => $old_translation->source_page,
+
                 'old_status'     => $old_translation->old_status,
                 'new_status'     => $old_translation->new_status,
         ] );

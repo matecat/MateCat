@@ -9,9 +9,8 @@ class SecondPassReview extends AbstractMatecatMigration {
             "ALTER TABLE qa_chunk_reviews CHANGE `num_errors` `source_page` int(11); ",
             "UPDATE qa_chunk_reviews SET source_page = 2 ; ",
             "ALTER TABLE qa_chunk_reviews DROP INDEX `id_job_password` ; ",
-            "CREATE UNIQUE INDEX `job_pw_source_page` ON qa_chunk_reviews (`id_job`, `password`, `source_page`);"
+            "CREATE UNIQUE INDEX `job_pw_source_page` ON qa_chunk_reviews (`id_job`, `password`, `source_page`);",
     ] ;
-
 
     public $sql_down = [
             " ALTER TABLE segment_translation_versions CHANGE `source_page` `is_review` tinyint(4); ",
