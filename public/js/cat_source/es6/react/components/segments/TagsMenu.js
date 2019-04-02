@@ -73,6 +73,7 @@ class TagsMenu extends React.Component {
     }
 
     getMissingTags() {
+        const selfClosedTag = "&lt;/g&gt;";
         var sourceClone = $( '.source', UI.currentSegment ).clone();
         //Remove inside-attribute for ph with equiv-text tags
         sourceClone.find('.locked.inside-attribute').remove();
@@ -101,10 +102,16 @@ class TagsMenu extends React.Component {
             return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
         });
         //remove from source tags all the tags in target segment
+        let pos, lastFoundTagPos = 0;
         for(var i = 0; i < targetTags.length; i++ ){
-            var pos = missingTags.indexOf(targetTags[i]);
+            if ( targetTags[i] === selfClosedTag ) {
+                pos = missingTags.indexOf(targetTags[i], lastFoundTagPos);
+            } else {
+                pos = missingTags.indexOf(targetTags[i]);
+            }
             if( pos > -1){
                 missingTags.splice(pos,1);
+                lastFoundTagPos = pos;
             }
         }
         return missingTags;

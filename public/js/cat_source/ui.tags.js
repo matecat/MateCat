@@ -323,6 +323,28 @@ $.extend(UI, {
         }
     },
 
+    markSelectedTag: function($tag) {
+        var elem = $tag.hasClass('locked') && !$tag.hasClass('inside-attribute')? $tag : $tag.closest('.locked:not(.inside-attribute)');
+        if( elem.hasClass('selected') ) {
+            elem.removeClass('selected');
+            setCursorPosition(elem[0], 'end');
+        } else {
+            setCursorPosition(elem[0]);
+            selectText(elem[0]);
+            UI.removeSelectedClassToTags();
+            elem.addClass('selected');
+            if(UI.body.hasClass('tagmode-default-compressed')) {
+                $('.editor .tagModeToggle').click();
+            }
+        }
+        if ( elem.closest('.source').length > 0 ) {
+            UI.removeHighlightCorrespondingTags(elem.closest('.source'));
+            UI.highlightCorrespondingTags(elem);
+        } else {
+            UI.checkTagProximity();
+        }
+    },
+
     checkTagProximity: function () {
         if(!UI.editarea || UI.editarea.html() == '') return false;
 
@@ -341,6 +363,7 @@ $.extend(UI, {
         }
         var htmlEditarea = $.parseHTML(UI.editarea.html());
         if (htmlEditarea) {
+            UI.removeHighlightCorrespondingTags(UI.editarea);
             $.each(htmlEditarea, function (index) {
                 if($(this).hasClass('temp-highlight-tags')) {
                     UI.numCharsUntilTagRight = 0;
@@ -348,7 +371,6 @@ $.extend(UI, {
                     var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
                     var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
 
-                    UI.removeHighlightCorrespondingTags(UI.editarea);
                     if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
                         (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
                         UI.highlightCorrespondingTags($(UI.editarea.find('.locked:not(.locked-inside)')[indexTags]));

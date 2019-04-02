@@ -274,8 +274,9 @@ $.extend(UI, {
                 UI.setEditingSegment( null );
                 UI.closeSegment(UI.currentSegment, 1);
             };
-            if( !UI.tagMenuOpen ) {
+            if( !UI.tagMenuOpen && UI.currentSegment ) {
                 UI.removeSelectedClassToTags();
+                UI.removeHighlightCorrespondingTags(UI.currentSegment);
             }
             if ( $(e.target).parents('body') ) return ; // detatched from DOM
             if ( eventFromReact(e) ) return;
@@ -366,21 +367,7 @@ $.extend(UI, {
             '.editor .source .locked a,.editor .editarea .locked a', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			var elem = $(this).hasClass('locked') && !$(this).hasClass('inside-attribute')? $(this) : $(this).closest('.locked:not(.inside-attribute)');
-            if( elem.hasClass('selected') ) {
-                elem.removeClass('selected');
-                setCursorPosition(elem[0], 'end');
-            } else {
-                setCursorPosition(elem[0]);
-                selectText(elem[0]);
-                UI.removeSelectedClassToTags();
-                elem.addClass('selected');
-				if(UI.body.hasClass('tagmode-default-compressed')) {
-				    $('.editor .tagModeToggle').click();
-                }
-            }
-            UI.checkTagProximity();
-
+			UI.markSelectedTag($(this));
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
             e.preventDefault();
             UI.clickOnTranslatedButton(this);
