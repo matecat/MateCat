@@ -109,23 +109,6 @@
         background: #E5E9F1;
         cursor: pointer;
     }
-    &.selected {
-        background: #c0c3ca;
-        cursor: grab;
-        &:active {
-            cursor: grabbing;
-            position: relative;
-            -moz-transform: scale(1.1, 1.1);
-            -ms-transform: scale(1.1, 1.1);
-            -webkit-transform: scale(1.1, 1.1);
-            transform: scale(1.1, 1.1);
-            transition: 0.1s ease;
-        }
-    }
-    &.highlight {
-        box-shadow: inset 0 0 0 2px #3b4a5c96;
-        color: #424242;
-    }
     a {
         color: #3B4A5C;
         font-weight: 700;
@@ -142,6 +125,23 @@
         }
         a {
             color: #E1565A;
+        }
+    }
+    &.highlight {
+        box-shadow: inset 0 0 0 2px #3b4a5c96;
+        color: #424242;
+    }
+    &.selected {
+        background: #c0c3ca;
+        cursor: grab;
+        &:active {
+            cursor: grabbing;
+            position: relative;
+            -moz-transform: scale(1.1, 1.1);
+            -ms-transform: scale(1.1, 1.1);
+            -webkit-transform: scale(1.1, 1.1);
+            transform: scale(1.1, 1.1);
+            transition: 0.1s ease;
         }
     }
     .tag-html-container-open,
