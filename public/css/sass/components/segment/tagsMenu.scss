@@ -98,7 +98,7 @@
     font-size: 15px;
     color: #767676;
     font-style: italic;
-    padding: 0 4px 0 2px;
+    padding: 0 6px 0 3px;
     vertical-align: middle;
     margin: 1px;
     cursor: pointer;
@@ -123,7 +123,7 @@
             box-shadow: inset 0 0 0 2px #e1565a;
             background: #f9d7ca;
         }
-        a {
+        &, a {
             color: #E1565A;
         }
     }
@@ -132,7 +132,6 @@
         color: #424242;
     }
     &.selected {
-        background: #c0c3ca;
         cursor: grab;
         &:active {
             cursor: grabbing;

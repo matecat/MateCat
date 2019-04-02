@@ -11,13 +11,15 @@ class TagsMenu extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
-        this.menuHeight = 300;
+
         this.tagsRefs = {};
         let missingTags = this.getMissingTags();
         let uniqueSourceTags = TagsMenu.arrayUnique(this.props.sourceTags);
         let addedTags = _.filter(uniqueSourceTags, function ( item ) {
             return missingTags.indexOf(item.replace(/&quot;/g, '"')) === -1 ;
         });
+        this.menuHeight = window.innerHeight*30/100;
+        this.menuWidth = 300;
         this.state = {
             selectedItem: 0,
             missingTags : missingTags,
@@ -68,6 +70,9 @@ class TagsMenu extends React.Component {
         }
         if ( (window.innerHeight - y) < (this.menuHeight + 200) ) {
             y = y - this.menuHeight - 20;
+        }
+        if ( (window.innerWidth - x) < (this.menuWidth + 100) ) {
+            x = x - this.menuWidth + 20;
         }
         return { x: x, y: y };
     }
