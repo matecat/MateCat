@@ -54,4 +54,33 @@ class SecondPassReview extends BaseFeature {
         }
         return $sourcePage ;
     }
+
+
+    /**
+     *
+     * @param $project
+     */
+    public function filter_manage_single_project( $project ) {
+        $chunks = array();
+
+        foreach( $project['jobs'] as $job ) {
+            $chunks[] = array( $job['id'], $job['password'] );
+        }
+
+        $chunk_reviews = \Features\SecondPassReview\Model\ChunkReviewDao::findSecondRevisionsChunkReviewsByChunkIds( $chunks );
+
+        foreach( $project['jobs'] as $kk => $job ) {
+            /**
+             * Inner cycle to match chunk_reviews records and modify
+             * the data structure.
+             */
+            foreach( $chunk_reviews as $chunk_review ) {
+                if ( $chunk_review->id_job == $job['id'] && $chunk_review->password == $job['password'] ) {
+                    $project['jobs'][$kk][ 'second_pass_review' ][] = $chunk_review->review_password ;
+                }
+            }
+        }
+
+        return $project ;
+    }
 }

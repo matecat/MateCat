@@ -2,6 +2,8 @@
 
 namespace LQA ;
 
+use Constants;
+
 class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     const TABLE = "qa_chunk_reviews";
@@ -116,18 +118,25 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     /**
      * @param array $chunk_ids Example: array( array($id_job, $password), ... )
      *
+     * @param null  $source_page
+     *
      * @return ChunkReviewStruct[]
      */
 
-    public static function findChunkReviewsByChunkIds( array $chunk_ids ) {
-        $sql_condition = '' ;
+    public static function findChunkReviewsByChunkIds( array $chunk_ids, $source_page = null ) {
+
+        if ( is_null( $source_page ) ) {
+            $source_page = Constants::SOURCE_PAGE_REVISION ;
+        }
+
+        $sql_condition = " WHERE source_page = $source_page " ;
 
         if ( count($chunk_ids)  > 0 ) {
             $conditions = array_map( function($ids) {
                 return " ( jobs.id = " . $ids[0] .
                 " AND jobs.password = '" . $ids[1] . "' ) ";
             }, $chunk_ids );
-            $sql_condition =  "WHERE " . implode( ' OR ', $conditions ) ;
+            $sql_condition .=  " AND " . implode( ' OR ', $conditions ) ;
         }
 
         $sql = "SELECT qa_chunk_reviews.* " .
