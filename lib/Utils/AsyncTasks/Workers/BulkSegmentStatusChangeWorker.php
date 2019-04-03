@@ -29,6 +29,8 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
     /**
      * @param AbstractElement $queueElement
+     *
+     * @return mixed|void
      */
     public function process( AbstractElement $queueElement ) {
         /**

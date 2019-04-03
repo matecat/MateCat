@@ -69,7 +69,7 @@ abstract class ajaxController extends controller {
         return $is_revision_url;
     }
 
-    public function getSourcePageCode() {
+    public function getRefererSourcePageCode() {
         if ( !static::isRevision() ) {
             $sourcePage = Constants::SOURCE_PAGE_TRANSLATE ;
         }

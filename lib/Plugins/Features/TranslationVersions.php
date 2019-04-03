@@ -8,7 +8,7 @@ class TranslationVersions extends BaseFeature {
 
     const FEATURE_CODE = 'translation_versions';
 
-    public function setTranslationCommitted( $params ) {
+    public function preSetTranslationCommitted( $params ) {
         // evaluate if the record is to be created, either the
         // status changed or the translation changed
 

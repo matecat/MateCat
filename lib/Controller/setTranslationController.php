@@ -565,6 +565,16 @@ class setTranslationController extends ajaxController {
 
         }
 
+        $this->featureSet->run('preSetTranslationCommitted', [
+                'translation'      => $new_translation,
+                'old_translation'  => $old_translation,
+                'propagated_ids'   => $propagationTotal['propagated_ids'],
+                'chunk'            => $this->chunk,
+                'segment'          => $this->segment,
+                'user'             => $this->user,
+                'source_page_code' => $this->getRefererSourcePageCode()
+        ] );
+
         //COMMIT THE TRANSACTION
         try {
             $db->commit();
@@ -585,7 +595,7 @@ class setTranslationController extends ajaxController {
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
-                    'source_page_code' => $this->getSourcePageCode()
+                    'source_page_code' => $this->getRefererSourcePageCode()
             ] );
 
         } catch ( Exception $e ){
@@ -782,7 +792,7 @@ class setTranslationController extends ajaxController {
                     $this->id_segment,
                     $this->user->uid,
                     $this->jobData['id_project'],
-                    $this->isRevision()
+                    $this->getRefererSourcePageCode()
             );
         }
     }

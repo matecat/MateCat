@@ -6,8 +6,6 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     const TABLE = 'segment_translation_versions';
 
-    public $source_page ;
-
     protected static $primary_keys = ['id_job', 'id_segment', 'version_number'];
 
     protected function _buildResult( $array_result ) {
@@ -370,27 +368,23 @@ JOIN
         ));
     }
 
-    public function saveVersion( Translations_TranslationVersionStruct $old_translation ) {
+    public function saveVersion( Translations_TranslationVersionStruct $new_version ) {
         $sql = "INSERT INTO segment_translation_versions " .
-                " ( id_job, id_segment, translation, version_number, time_to_edit, source_page, old_status, new_status ) " .
+                " ( id_job, id_segment, translation, version_number, time_to_edit, old_status, new_status ) " .
                 " VALUES " .
-                " (:id_job, :id_segment, :translation, 
-:version_number, :time_to_edit, :source_page, :old_status, :new_status )";
+                " (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status ) ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         return $stmt->execute( [
-                'id_job'         => $old_translation->id_job,
-                'id_segment'     => $old_translation->id_segment,
-                'translation'    => $old_translation->translation,
-                'version_number' => $old_translation->version_number,
-                'time_to_edit'   => $old_translation->time_to_edit,
-
-                'source_page'    => $old_translation->source_page,
-
-                'old_status'     => $old_translation->old_status,
-                'new_status'     => $old_translation->new_status,
+                'id_job'         => $new_version->id_job,
+                'id_segment'     => $new_version->id_segment,
+                'translation'    => $new_version->translation,
+                'version_number' => $new_version->version_number,
+                'time_to_edit'   => $new_version->time_to_edit,
+                'old_status'     => $new_version->old_status,
+                'new_status'     => $new_version->new_status,
         ] );
     }
 

@@ -27,17 +27,13 @@ class SegmentTranslationVersionHandler {
     private $id_segment ;
     private $project ;
     private $feature_enalbed ;
-    private $source_page ;
 
-    public function __construct($id_job, $id_segment, $uid, $id_project, $is_review) {
-        $this->id_job     = $id_job ;
-        $this->id_segment = $id_segment ;
-        $this->uid        = $uid ;
-        $this->source_page  = ( $is_review ?
-            Constants::SOURCE_PAGE_REVISION :
-            Constants::SOURCE_PAGE_TRANSLATE
-        );
+    public function __construct($id_job, $id_segment, $uid, $id_project) {
+        $this->id_job       = $id_job ;
+        $this->id_segment   = $id_segment ;
+        $this->uid          = $uid ;
 
+        // TODO: refactor, why id_project should be null
         if (null !== $id_project) {
             $this->project = Projects_ProjectDao::findById( $id_project );
 
@@ -102,10 +98,9 @@ class SegmentTranslationVersionHandler {
 
         // From now on, translations are treated as arrays and get attributes attached
         // just to be passed to version save. Create two arrays for the purpose.
-        $new_version = new Translations_TranslationVersionStruct($old_translation->toArray());
+        $new_version = new Translations_TranslationVersionStruct( $old_translation->toArray() );
 
         // XXX: this is to be reviewed
-        $new_version->is_review = ( $old_translation->status == Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
         $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ] ;
         $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ] ;
 
@@ -161,14 +156,7 @@ class SegmentTranslationVersionHandler {
 
     private function prepareDao() {
         $this->db         = Database::obtain();
-        $this->dao = new Translations_TranslationVersionDao( $this->db );
-        $this->dao->source_page = $this->source_page ;
-
-        // TODO: ^^^ this is safe for now because we have
-        // one connection for request, so the object returned
-        // by the obtain is the same we started the transaction
-        // on in setTranslation.
-
+        $this->dao        = new Translations_TranslationVersionDao( $this->db );
     }
 
 }
