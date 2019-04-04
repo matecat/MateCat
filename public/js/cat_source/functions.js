@@ -18,6 +18,7 @@ function focusOnPlaceholder() {
 		range.moveToElementText(placeholder);
 		range.select();
 	}
+    placeholder.remove();
 }
 
 function truncate_filename(n, len) {

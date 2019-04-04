@@ -197,6 +197,7 @@ class Editarea extends React.Component {
                 self.emitTrackChanges();
             }
         });
+        focusOnPlaceholder();
     }
     render() {
         let lang = '';
