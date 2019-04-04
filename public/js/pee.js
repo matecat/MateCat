@@ -142,7 +142,7 @@
                     {l1: "en-GB",  l2: "mi-NZ"},
                     {l1: "en-GB",  l2: "US-HI"},
                     {l1: "en-GB",  l2: "sm-SM"},
-                    {l1: "en-GB",  l2: "ha-HAU"},
+                    {l1: "en-GB",  l2: "ha-NG"},
                     {l1: "en-GB",  l2: "tg-TJ"},
                     {l1: "en-GB",  l2: "so-SO"},
                     {l1: "en-GB",  l2: "ne-NP"},
