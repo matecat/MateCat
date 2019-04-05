@@ -216,9 +216,6 @@ JOIN (
 		".$prepare_str_segments_id."
 ) AS SLIST USING( id_segment )
 
-  LEFT JOIN qa_entry_comments comments
-    ON comments.id_qa_entry = issues.id
-
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
     
