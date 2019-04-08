@@ -429,8 +429,8 @@
             if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
                 MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
             } else {
-                var el = $("section:not(.opened) #segment-" + id + "-target").find(".editarea");
-                $(el).click();
+                var el = $("section:not(.opened)#segment-" + id);
+                UI.editAreaClick($(UI.targetContainerSelector(), el));
             }
         },
         isReadonlySegment : function( segment ) {
