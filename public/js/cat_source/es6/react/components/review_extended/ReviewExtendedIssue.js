@@ -191,7 +191,7 @@ class ReviewExtendedIssue extends React.Component {
                 renderHtmlCommentLines = <div className="re-comment-list">
                     {this.props.issue.target_text ?
                         (
-							<div className="re-highlighted"><span className="re-selected-text"><b>Highlighted text:</b></span>{this.props.issue.target_text}</div>
+							<div className="re-highlighted"><span className="re-selected-text"><b>Selected text:</b></span>{this.props.issue.target_text}</div>
                         ) : (null)}
                     {htmlCommentLines}
 				</div>;

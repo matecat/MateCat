@@ -18,6 +18,7 @@ function focusOnPlaceholder() {
 		range.moveToElementText(placeholder);
 		range.select();
 	}
+    placeholder.remove();
 }
 
 function truncate_filename(n, len) {
@@ -409,8 +410,8 @@ function insertHtmlAfterSelection(html) {
 // register a different activation function.
 // The function is defined in review_improved module.
 SegmentActivator.registry.push(function( sid ) {
-    var el = $("section:not(.opened) #segment-" + sid + "-target").find(".editarea");
-    $(el).click();
+    var el = $("section:not(.opened)#segment-" + sid );
+    UI.editAreaClick($(UI.targetContainerSelector(), el));
 });
 
 function ParsedHash( hash ) {
