@@ -446,3 +446,26 @@
         <a href="https://cloud.google.com/translate/" target="_blank" class="continuebtn btn-ok">Find out more</a>
     </template>
 </div>
+
+<div metal:define-macro="template-mthub">
+    <!-- inizio blocco mthub -->
+    <template id="mt-provider-mthub-fields">
+        <p>Fill out the form with the connection data to your own MT-HUB system.</p>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <div class="mt-error-key">Error message</div>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name"/>
+        <div class="provider-data">
+            <div class="provider-field">
+                <label>Key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" />
+            </div>
+        </div>
+    </template>
+
+    <template id="mt-provider-mthub-msg">
+        <p><strong>MT-HUB</strong> </p>
+        <a href="mailto:info@prompsit.com" class="continuebtn btn-ok">Contact</a>
+    </template>
+    <!-- fine blocco mthub -->
+</div>

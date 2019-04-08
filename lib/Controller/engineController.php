@@ -254,7 +254,21 @@ class engineController extends ajaxController {
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
                 break;
+                
+            case strtolower( Constants_Engines::MTHUB ):
 
+                /**
+                 * Create a record of type MTHUB
+                 */
+                $newEngineStruct = EnginesModel_MTHUBStruct::getStruct();
+
+                $newEngineStruct->name                                = $this->name;
+                $newEngineStruct->uid                                 = $this->user->uid;
+                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;                
+                
             default:
 
                 $validEngine = $newEngineStruct = $this->featureSet->filter( 'buildNewEngineStruct', false, (object)[
