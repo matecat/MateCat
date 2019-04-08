@@ -11,32 +11,31 @@ namespace SubFiltering;
 
 use FeatureSet;
 use SubFiltering\Commons\Pipeline;
-use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
-use SubFiltering\Filters\AmpersandEntityEncode;
-use SubFiltering\Filters\EncodeToRawXML;
 use SubFiltering\Filters\AmpersandEntitiesDecode;
+use SubFiltering\Filters\AmpersandEntityEncode;
+use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
+use SubFiltering\Filters\EncodeToRawXML;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
+use SubFiltering\Filters\HtmlToPh;
 use SubFiltering\Filters\HtmlToPhToLayer2;
+use SubFiltering\Filters\LtGtDecode;
 use SubFiltering\Filters\LtGtDoubleDecode;
+use SubFiltering\Filters\LtGtDoubleEncode;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\MateCatCustomPHToStandardPH;
-use SubFiltering\Filters\NormalizeXMLEntitiesFromLayer2;
-use SubFiltering\Filters\RestoreSubFilteredPhToHtml;
-use SubFiltering\Filters\StandardPHToMateCatCustomPH;
-use SubFiltering\Filters\UnicodeToEntities;
-use SubFiltering\Filters\HtmlToPh;
-use SubFiltering\Filters\LtGtDoubleEncode;
-use SubFiltering\Filters\LtGtDecode;
 use SubFiltering\Filters\PlaceHoldCtrlCharsForView;
 use SubFiltering\Filters\PlaceHoldXliffTags;
 use SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
+use SubFiltering\Filters\RestoreSubFilteredPhToHtml;
 use SubFiltering\Filters\RestoreXliffTagsContent;
 use SubFiltering\Filters\RestoreXliffTagsForView;
-use SubFiltering\Filters\SprintfToPH;
-use SubFiltering\Filters\SubFilteredPhToHtml;
 use SubFiltering\Filters\SpacesToNBSPForView;
+use SubFiltering\Filters\SprintfToPH;
+use SubFiltering\Filters\StandardPHToMateCatCustomPH;
+use SubFiltering\Filters\SubFilteredPhToHtml;
 use SubFiltering\Filters\TwigToPh;
+use SubFiltering\Filters\UnicodeToEntities;
 
 /**
  * Class Filter
