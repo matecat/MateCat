@@ -550,7 +550,7 @@ class Utils {
 
 	// Previously in FileFormatConverter
 	//remove UTF-8 BOM
-	public static function stripBOM( $string, $utf = 8 ) {
+	public static function stripFileBOM( $string, $utf = 8 ) {
 		//depending on encoding, different slices are to be cut
 		switch ( $utf ) {
 			case 16:
@@ -567,6 +567,11 @@ class Utils {
 
 		return $string;
 	}
+
+	public static function stripBOM( $string ){
+        //PATCH TO FIX BOM INSERTIONS
+        return str_replace( "\xEF\xBB\xBF", '', $string );
+    }
 
 	public static function isJobBasedOnMateCatFilters($jobId) {
 
