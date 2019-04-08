@@ -108,7 +108,7 @@ class OCRCheck {
             'ar-SA'  => 'Arabic',
             'dv-DV'  => 'Maldivian',
             'fa-IR'  => 'Persian',
-            'ha-HAU' => 'Hausa',
+            'ha-NG'  => 'Hausa',
             'he-IL'  => 'Hebrew',
             'jv-ID'  => 'Javanese',
             'kr-KAU' => 'Kanuri',

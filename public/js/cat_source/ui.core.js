@@ -803,14 +803,14 @@ UI = {
             //     UI.openSegment(UI.editarea);
             // }
 
-			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-                setTimeout(function () {
-                    var next = UI.findNextSegment(UI.startSegmentId);
-                    if (next) {
-                        UI.gotoSegment(next.attr('data-split-original-id'));
-                    }
-                }, 100);
-			}
+			// if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
+            //     setTimeout(function () {
+            //         var next = UI.findNextSegment(UI.startSegmentId);
+            //         if (next) {
+            //             UI.gotoSegment(next.attr('data-split-original-id'));
+            //         }
+            //     }, 100);
+			// }
 
 			if (options.applySearch) {
 				$('mark.currSearchItem').removeClass('currSearchItem');

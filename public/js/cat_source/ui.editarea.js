@@ -315,7 +315,7 @@ $.extend( UI, {
     },
     handleEditAreaPaste(elem, e) {
         var clonedElem = elem.cloneNode(true);
-        if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+        if (e && e.clipboardData && e.clipboardData.getData) {
             if (/text\/html/.test(e.clipboardData.types)) {
                 txt = htmlEncode(e.clipboardData.getData('text/plain'));
             }
@@ -329,11 +329,6 @@ $.extend( UI, {
             $(clonedElem).find('#placeHolder').before(txt);
             var newHtml = $(clonedElem).html();
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
-            // To restore the cursor position
-            setTimeout(function (  ) {
-                focusOnPlaceholder();
-                UI.editarea.find('#placeHolder').remove();
-            }, 200);
             if (e.preventDefault) {
                 e.stopPropagation();
                 e.preventDefault();
