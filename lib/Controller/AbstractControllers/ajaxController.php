@@ -69,7 +69,7 @@ abstract class ajaxController extends controller {
         return $is_revision_url;
     }
 
-    public function getRefererSourcePageCode() {
+    public static function getRefererSourcePageCode( FeatureSet $featureSet ) {
         if ( !static::isRevision() ) {
             $sourcePage = Constants::SOURCE_PAGE_TRANSLATE ;
         }
@@ -77,7 +77,7 @@ abstract class ajaxController extends controller {
             $sourcePage = Constants::SOURCE_PAGE_REVISION ;
         }
 
-        return $this->featureSet->filter('filterSourcePage', $sourcePage ) ;
+        return $featureSet->filter('filterSourcePage', $sourcePage ) ;
     }
 
     public function parseIDSegment(){

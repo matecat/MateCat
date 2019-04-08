@@ -209,6 +209,7 @@ abstract class KleinController implements IController {
             $validator->validate();
         }
         $this->validators = [];
+        $this->afterValidate();
     }
 
     protected function appendValidator( Base $validator ){
@@ -259,6 +260,10 @@ abstract class KleinController implements IController {
 
         \Log::doLog( $log_string . " " . json_encode( $this->params ) );
         \Log::$fileName = $previous_filename ;
+    }
+
+    protected function afterValidate() {
+
     }
 
 }

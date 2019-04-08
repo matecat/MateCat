@@ -21,6 +21,7 @@ class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $create_date ;
     public $target_text ;
     public $rebutted_at ;
+    public $source_page ;
 
     protected $_diff;
 

@@ -572,7 +572,7 @@ class setTranslationController extends ajaxController {
                 'chunk'            => $this->chunk,
                 'segment'          => $this->segment,
                 'user'             => $this->user,
-                'source_page_code' => $this->getRefererSourcePageCode()
+                'source_page_code' => self::getRefererSourcePageCode( $this->featureSet )
         ] );
 
         //COMMIT THE TRANSACTION
@@ -595,7 +595,7 @@ class setTranslationController extends ajaxController {
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
-                    'source_page_code' => $this->getRefererSourcePageCode()
+                    'source_page_code' => self::getRefererSourcePageCode( $this->featureSet )
             ] );
 
         } catch ( Exception $e ){
@@ -792,7 +792,7 @@ class setTranslationController extends ajaxController {
                     $this->id_segment,
                     $this->user->uid,
                     $this->jobData['id_project'],
-                    $this->getRefererSourcePageCode()
+                    self::getRefererSourcePageCode()
             );
         }
     }

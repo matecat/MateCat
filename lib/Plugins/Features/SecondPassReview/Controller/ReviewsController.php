@@ -46,7 +46,11 @@ class ReviewsController extends KleinController {
                 ]
         );
 
-        $this->response->json( $record->attributes(['id']) ) ;
+        $this->response->json( [ 'chunk_review' => [
+                'id'              => $record->id ,
+                'id_job'          => $record->id_job ,
+                'review_password' => $record->review_password
+        ] ] ) ;
     }
 
     protected function afterConstruct() {
