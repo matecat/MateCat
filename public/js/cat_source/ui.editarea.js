@@ -29,6 +29,8 @@ $.extend( UI, {
         if (e.ctrlKey || e.shiftKey || e.metaKey){
             if ( code === 37 || code === 39 ) { //ctrl + left/right arrows
                 UI.saveInUndoStack('arrow');
+            } else if (code === 13 ){
+                UI.handleReturn(e);
             }
             return;
         }
