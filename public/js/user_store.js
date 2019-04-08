@@ -10,7 +10,11 @@ APP.USER.STORE = {} ;
      * @returns {*|{type}|nothing}
      */
     var loadUserData = function() {
-        return $.getJSON('/api/app/user').done(function( data ) {
+        return $.ajax({
+            url: '/api/app/user',
+            dataType: 'json',
+            async: false
+        }).done(function( data ) {
             APP.USER.STORE = data ;
         });
     };

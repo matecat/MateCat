@@ -283,7 +283,7 @@ class downloadFileController extends downloadController {
 
 
                     //strip previously added BOM
-                    $encodingConvertedFile[ 1 ] = Utils::stripBOM( $encodingConvertedFile[ 1 ], 16 );
+                    $encodingConvertedFile[ 1 ] = Utils::stripFileBOM( $encodingConvertedFile[ 1 ], 16 );
 
                     //store new content
                     $output_content[ $fileID ][ 'document_content' ] = $encodingConvertedFile[ 1 ];
