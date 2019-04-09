@@ -547,6 +547,7 @@ module.exports = function(grunt) {
     grunt.registerTask('bundle:js', [
         'browserify:libs',
         'browserify:components',
+        'browserify:qualityReport',
         'concat:libs',
         'concat:libs_upload',
         'concat:semantic',
