@@ -238,7 +238,7 @@ class SegmentFooter extends React.Component {
 
     setHideMatchesCookie(hideMatches) {
         let cookieName = (config.isReview)? 'hideMatchesReview' : 'hideMatches';
-        Cookies.set(cookieName + '-' + config.id_job, hideMatches, { expires: 30 });
+        Cookies.set(cookieName + '-' + config.id_job, hideMatches, { expires: 3 });
     }
 
     getHideMatchesCookie() {
