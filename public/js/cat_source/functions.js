@@ -389,31 +389,6 @@ function insertHtmlAfterSelection(html) {
     }
 }
 
-(function(undefined) {
-    SegmentActivator = {};
-    SegmentActivator.registry = [];
-    SegmentActivator.activate = function( sid ) {
-        if ( typeof sid === 'undefined' ) {
-            console.debug( 'sid is undefined', sid);
-            return ;
-        }
-
-        for (var i = 0; i < this.registry.length ; ++i) {
-            var callback = this.registry[i];
-             callback( sid );
-        }
-    };
-})();
-
-// This activation function is only valid if the editarea is present
-// in ReviewImproved the editara class is not present so we need to
-// register a different activation function.
-// The function is defined in review_improved module.
-SegmentActivator.registry.push(function( sid ) {
-    var el = $("section:not(.opened)#segment-" + sid );
-    UI.editAreaClick($(UI.targetContainerSelector(), el));
-});
-
 function ParsedHash( hash ) {
     var split ;
     var actionSep = ',' ;
