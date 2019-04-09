@@ -159,7 +159,7 @@ ALIGNER_ALIGN_JOB_BIG[loggerName]    = "align_job_big.log"
 ;;#####   Segment Create    #####
 ;;###############################
 ALIGNER_SEGMENT_CREATE[queue_name]    = "aligner_segment_create"
-ALIGNER_SEGMENT_CREATE[pid_set_name]  = "ch_pid_segment_create"
-ALIGNER_SEGMENT_CREATE[max_executors] = 1
-ALIGNER_SEGMENT_CREATE[redis_key]     = "segment_create_list"
-ALIGNER_SEGMENT_CREATE[loggerName]    = "segment_create.log"
+ALIGNER_SEGMENT_CREATE[pid_set_name]  = "ch_pid_aligner_segment_create"
+ALIGNER_SEGMENT_CREATE[max_executors] = 5
+ALIGNER_SEGMENT_CREATE[redis_key]     = "aligner_segment_create_list"
+ALIGNER_SEGMENT_CREATE[loggerName]    = "aligner_segment_create.log"
