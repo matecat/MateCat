@@ -54,6 +54,7 @@ $.extend(UI, {
             }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
+            e.stopPropagation();
             if ( config.isReview ) {
                 $('body.review .editor .approved:not(.disabled)').click();
             } else {
