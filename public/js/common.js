@@ -4,9 +4,11 @@ APP = {
     init: function () {
         this.setLoginEvents();
         if (config.isLoggedIn) {
-            APP.teamStorageName = 'teamId-' + config.userMail;
-            this.setTeamNameInMenu();
-            this.setUserImage()
+            var self = this;
+            APP.USER.loadUserData().done(function ( ) {
+                self.setTeamNameInMenu();
+                self.setUserImage();
+            });
         }
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
@@ -869,8 +871,10 @@ APP = {
             var team = this.getLastTeamSelected(APP.USER.STORE.teams);
             $('.user-menu-container .organization-name').text(team.name);
         } else {
-            APP.USER.loadUserData();
-            setTimeout(this.setTeamNameInMenu.bind(this), 500);
+            var self = this;
+            APP.USER.loadUserData().done(function (  ) {
+                self.setTeamNameInMenu.bind(self);
+            });
         }
     },
 
