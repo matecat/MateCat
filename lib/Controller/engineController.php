@@ -254,6 +254,34 @@ class engineController extends ajaxController {
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
 
                 break;
+                
+            case strtolower( Constants_Engines::MTHUB ):
+
+                /**
+                 * Create a record of type MTHUB
+                 */
+                $newEngineStruct = EnginesModel_MTHUBStruct::getStruct();
+
+                $newEngineStruct->name                                = $this->name;
+                $newEngineStruct->uid                                 = $this->user->uid;
+                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
+            case strtolower(Constants_Engines::INTENTO):
+                /**
+                 * Create a record of type Intento
+                 */
+                $newEngineStruct = EnginesModel_IntentoStruct::getStruct();
+                $newEngineStruct->name                                 = $this->name;
+                $newEngineStruct->uid                                  = $this->user->uid;
+                $newEngineStruct->type                                 = Constants_Engines::MT;
+                $newEngineStruct->extra_parameters['apikey']           = $this->engineData['secret'];
+                $newEngineStruct->extra_parameters['provider']         = $this->engineData['provider'];
+                $newEngineStruct->extra_parameters['providerkey']      = $this->engineData['providerkey'];
+                $newEngineStruct->extra_parameters['providercategory'] = $this->engineData['providercategory'];
+                break;
 
             default:
 

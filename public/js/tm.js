@@ -540,12 +540,14 @@
                 UI.showErrorOnKeyInput('The key is already present in this project.');
                 return false;
             } else if (keyInactive) {
-                UI.showErrorOnKeyInput('The key is already assigned to one of your Inactive TMs. <a class="active-tm-key-link">Click here to activate it</a>');
-                $('.active-tm-key-link').off('click');
-                $('.active-tm-key-link').on('click', function() {
-                    UI.clearTMPanel();
-                    UI.activateInactiveKey(keyValue);
-                });
+                UI.showErrorOnKeyInput('The key is already assigned to one of your Inactive TMs. <a class="active-tm-key-link activate-key">Click here to activate it</a>');
+                setTimeout(function (  ) {
+                    $('.activate-key').off('click');
+                    $('.activate-key').on('click', function() {
+                        UI.clearTMPanel();
+                        UI.activateInactiveKey(keyValue);
+                    });
+                }, 500);
                 return false;
             }
 
@@ -568,11 +570,14 @@
                         }
                     } else {
                         UI.showErrorOnKeyInput('The key is not valid. <a class="active-tm-key-link">Restore generated key</a>');
-                        $('.active-tm-key-link').off('click');
-                        $('.active-tm-key-link').on('click', function() {
-                            UI.openAddNewTm();
-                            UI.removeErrorOnKeyInput();
-                        });
+                        setTimeout(function (  ) {
+                            $('.active-tm-key-link').off('click');
+                            $('.active-tm-key-link').on('click', function() {
+                                UI.openAddNewTm();
+                                UI.removeErrorOnKeyInput();
+                            });
+                        }, 500);
+
                     }
                 }
             });

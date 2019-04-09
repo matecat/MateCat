@@ -1466,11 +1466,11 @@ LXQ.init  = function () {
                         LXQ.lexiqaData.lexiqaWarnings = {};
 
                         results.segments.forEach( function ( element ) {
+                            LXQ.lexiqaData.segments.push(element.segid);
                             if ( element.errornum === 0 ) {
                                 return;
-                            }
 
-                            LXQ.lexiqaData.segments.push(element.segid);
+                            }
 
                             //highlight the respective segments here
                             var highlights = {
@@ -1563,15 +1563,17 @@ LXQ.init  = function () {
         },
         updateWarningsUI: function () {
             LXQ.lexiqaData.segments.sort();
-            SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
+            var segments = LXQ.lexiqaData.segments.filter(function ( id_segment ) {
+                return LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty( id_segment )
+            });
+            SegmentActions.qaComponentsetLxqIssues(segments)
 
         },
         removeSegmentWarning: function (idSegment) {
             if ((ind = LXQ.lexiqaData.segments.indexOf(idSegment))>=0) {
                 LXQ.lexiqaData.segments.splice(ind,1);
                 delete LXQ.lexiqaData.lexiqaWarnings[idSegment];
-                LXQ.lexiqaData.segments.sort();
-                SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
+                this.updateWarningsUI();
             }
         }
     });
