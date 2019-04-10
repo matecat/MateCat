@@ -8,14 +8,17 @@
 
 namespace Features\TranslationVersions\Model;
 
+use TransactionableTrait;
 
-class SegmentTranslationEventModel {
+class SegmentTranslationEventModel  {
+    use TransactionableTrait ;
 
     protected $old_translation ;
     protected $translation ;
     protected $user ;
     protected $propagated_ids ;
     protected $source_page_code ;
+
 
     public function __construct($old_translation, $translation, $user, $source_page_code) {
         $this->old_translation  = $old_translation ;
@@ -33,8 +36,7 @@ class SegmentTranslationEventModel {
             return ;
         }
 
-        $conn = new SegmentTranslationEventDao();
-        $conn->getConnection()->begin() ;
+        $this->openTransaction() ;
 
         $struct                 = new SegmentTranslationEventStruct() ;
         $struct->id_job         = $this->translation['id_job'] ;
@@ -51,7 +53,7 @@ class SegmentTranslationEventModel {
             $dao->insertForPropagation($this->propagated_ids, $struct);
         }
 
-        $conn->getConnection()->commit();
+        $this->commitTransaction() ;
     }
 
     protected function _savePropagatedIds() {

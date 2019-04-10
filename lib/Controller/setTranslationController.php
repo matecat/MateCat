@@ -792,7 +792,7 @@ class setTranslationController extends ajaxController {
                     $this->id_segment,
                     $this->user->uid,
                     $this->jobData['id_project'],
-                    self::getRefererSourcePageCode()
+                    self::getRefererSourcePageCode( $this->featureSet )
             );
         }
     }
