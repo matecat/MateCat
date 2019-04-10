@@ -69,6 +69,13 @@ abstract class ajaxController extends controller {
         return $is_revision_url;
     }
 
+    /**
+     * TODO: move this method to a Utils static class
+     *
+     * @param FeatureSet $featureSet
+     *
+     * @return mixed
+     */
     public static function getRefererSourcePageCode( FeatureSet $featureSet ) {
         if ( !static::isRevision() ) {
             $sourcePage = Constants::SOURCE_PAGE_TRANSLATE ;
