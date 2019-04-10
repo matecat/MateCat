@@ -694,7 +694,11 @@ APP = {
     },
 
     getUserShortName: function (user) {
-        return (user.first_name[0] + user.last_name[0]).toUpperCase();
+        if ( user && user.first_name && user.last_name ) {
+            return (user.first_name[0] + user.last_name[0]).toUpperCase();
+        } else {
+            return "AU";
+        }
     },
 
     getLastTeamSelected: function (teams) {
