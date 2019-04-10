@@ -328,6 +328,20 @@ let ManageActions = {
         UI.setPopupTeamsCookie();
     },
 
+    getSecondPassReview: function(idProject, passwordProject, idJob) {
+        API.PROJECTS.getSecondPassReview(idProject, passwordProject, idJob).then( function ( data ) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.ADD_SECOND_PASS,
+                idProject: idProject,
+                passwordProject: passwordProject,
+                idJob: idJob,
+                secondPAssPassword: data.chunk_review.review_password
+            });
+        });
+
+
+    },
+
     /********* Modals *********/
 
     openModifyTeamModal: function (team) {

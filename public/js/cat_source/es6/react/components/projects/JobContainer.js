@@ -230,6 +230,7 @@ class JobContainer extends React.Component {
             jobId={this.props.job.get('id')}
             review_password={this.props.job.get('review_password')}
             project={this.props.project}
+            job={this.props.job}
             isChunk={this.props.isChunk}
             status={this.props.job.get('status')}
             isChunkOutsourced = {this.props.isChunkOutsourced}

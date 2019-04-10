@@ -22,6 +22,23 @@ class JobMenu extends React.Component {
         return <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
     }
 
+    getSecondPassReviewMenuLink() {
+        if (this.props.project.has('features') && this.props.project.get('features').indexOf('second_pass_review') > -1 ){
+            if ( this.props.job.has('second_pass_review') ) {
+                let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('second_pass_review').get(0);
+                return <a className="item" target="_blank" href={url}><i className="icon-edit icon"/>Revise 2</a>
+            } else {
+                return <a className="item" target="_blank" onClick={()=>this.retrieveSecondPassReviewLink()}><i className="icon-edit icon"/>Generate Revise 2</a>
+            }
+        }
+        return '';
+    }
+
+    retrieveSecondPassReviewLink(event) {
+        // event.preventDefault();
+        ManageActions.getSecondPassReview(this.props.project.get('id'), this.props.project.get('password'), this.props.jobId);
+    }
+
     componentDidMount() {}
 
     componentDidUpdate() {}
@@ -50,6 +67,7 @@ class JobMenu extends React.Component {
             <a className="item" onClick={this.props.changePasswordFn.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
             {splitButton}
             {this.getReviseMenuLink()}
+            {this.getSecondPassReviewMenuLink()}
             {this.getMoreLinks()}
             <div className="divider"/>
             <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
