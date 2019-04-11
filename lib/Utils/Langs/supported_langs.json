@@ -1949,12 +1949,32 @@
     ,
         {
             "localized":[{
-                "en":"Spanish Latin America"
+                "en":"Spanish Argentina"
+            }],
+            "isocode":"es",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"es-AR"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Spanish Mexico"
             }],
             "isocode":"es",
             "enabled":true,
             "rtl":false,
             "rfc3066code":"es-MX"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Spanish Latin America"
+            }],
+            "isocode":"es",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"es-419"
         }
     ,
         {
