@@ -220,7 +220,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.ADD_SECOND_PASS:
-            ProjectsStore.setSecondPassUrl(action.idProject, action.passwordProject, action.idJob, action.secondPAssPassword);
+            ProjectsStore.setSecondPassUrl(action.idProject, action.idJob, action.passwordJob, action.secondPAssPassword);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.HIDE_PROJECT:

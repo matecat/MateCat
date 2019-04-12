@@ -3,6 +3,7 @@ class JobMenu extends React.Component {
 
     constructor(props) {
         super(props);
+        this.setState();
     }
 
     openSplitModal() {
@@ -15,6 +16,14 @@ class JobMenu extends React.Component {
 
     getMoreLinks() {
 
+    }
+
+    openSecondPassUrl() {
+        if ( this.props.job.has('second_pass_review') ) {
+            let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('second_pass_review').get(0);
+            console.log('Open url');
+            window.open(url);
+        }
     }
 
     getReviseMenuLink() {
@@ -36,12 +45,16 @@ class JobMenu extends React.Component {
 
     retrieveSecondPassReviewLink(event) {
         // event.preventDefault();
-        ManageActions.getSecondPassReview(this.props.project.get('id'), this.props.project.get('password'), this.props.jobId);
+        ManageActions.getSecondPassReview(this.props.project.get('id'), this.props.project.get('password'), this.props.jobId, this.props.job.get('password'));
     }
 
     componentDidMount() {}
 
-    componentDidUpdate() {}
+    componentDidUpdate(prevProps) {
+        if ( this.props.job.has('second_pass_review') && !prevProps.job.has('second_pass_review') ) {
+            this.openSecondPassUrl();
+        }
+    }
 
     componentWillUpdate() {}
 
