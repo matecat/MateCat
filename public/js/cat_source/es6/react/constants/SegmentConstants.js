@@ -61,5 +61,7 @@ module.exports = keyMirror({
     SET_SEGMENT_WARNINGS: null,
     UPDATE_GLOBAL_WARNINGS: null,
     QA_LEXIQA_ISSUES: null,
-    LOCK_EDIT_AREA: null
+    LOCK_EDIT_AREA: null,
+    OPEN_TAGS_MENU: null,
+    CLOSE_TAGS_MENU: null
 });

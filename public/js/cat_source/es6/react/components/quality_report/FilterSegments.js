@@ -22,20 +22,20 @@ class FilterSegments extends React.Component {
     getSeverities() {
         let severities = [];
         let severitiesNames = [];
-        this.lqaNestedCategories.categories.forEach((cat)=>{
-            if (cat.subcategories.length === 0) {
-                cat.severities.forEach((sev)=>{
-                    if (severitiesNames.indexOf(sev.label) === -1 ) {
+        this.lqaNestedCategories.forEach((cat)=>{
+            if (cat.get('subcategories').size === 0) {
+                cat.get('severities').forEach((sev)=>{
+                    if (severitiesNames.indexOf(sev.get('label')) === -1 ) {
                         severities.push(sev);
-                        severitiesNames.push(sev.label);
+                        severitiesNames.push(sev.get('label'));
                     }
                 });
             } else {
-                cat.subcategories.forEach((subCat)=>{
-                    subCat.severities.forEach((sev)=>{
-                        if (severitiesNames.indexOf(sev.label) === -1 ) {
+                cat.get('subcategories').forEach((subCat)=>{
+                    subCat.get('severities').forEach((sev)=>{
+                        if (severitiesNames.indexOf(sev.get('label')) === -1 ) {
                             severities.push(sev);
-                            severitiesNames.push(sev.label);
+                            severitiesNames.push(sev.get('label'));
                         }
                     });
                 });
@@ -133,14 +133,14 @@ class FilterSegments extends React.Component {
                 {item.label}
             </div>;
         });
-        let optionsCategory = this.lqaNestedCategories.categories.map((item, index) => {
-            return <div className="item" key={index} data-value={item.id}>
-                {item.label}
+        let optionsCategory = this.lqaNestedCategories.map((item, index) => {
+            return <div className="item" key={index} data-value={item.get('id')}>
+                {item.get('label')}
             </div>;
         });
         let optionsSeverities = this.severities.map((item, index) => {
-            return <div className="item" key={index} data-value={item.label}>
-                {item.label}
+            return <div className="item" key={index} data-value={item.get('label')}>
+                {item.get('label')}
             </div>;
         });
         let statusFilterClass = (this.state.filter.status && this.state.filter.status !== "") ? "filtered" : "not-filtered";

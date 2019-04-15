@@ -34,11 +34,10 @@ module.exports = function(grunt) {
 	    cssBase + 'jquery.powertip.min.css',
 	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
-        cssBase + 'sass/segmentsFilter.scss',
-        cssBase + 'sass/cattool.scss',
-        cssBase + 'sass/speech2text.scss',
-        cssBase + 'sass/notifications.scss',
+        cssBase + 'sass/*.scss',
         cssBase + 'sass/commons/*.scss',
+        cssBase + 'sass/components/*/*.scss',
+        cssBase + 'sass/modals/*',
         cssBase + 'sass/vendor_mc/*',
         cssBase + '../holidays/*.css'
     ];
@@ -548,6 +547,7 @@ module.exports = function(grunt) {
     grunt.registerTask('bundle:js', [
         'browserify:libs',
         'browserify:components',
+        'browserify:qualityReport',
         'concat:libs',
         'concat:libs_upload',
         'concat:semantic',

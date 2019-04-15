@@ -3392,38 +3392,20 @@ header .filter:before,
 .export-tmx-button-label:before,
 .canceladd-export-tmx:before,
 .icon-copy-key:before,
-.login-modal .login-container-right li:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .targetarea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .targetarea .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .targetarea .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .suggestion_source .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .translation .locked.endTag:before
- {
-	font-family: 'icomoon';
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
+.login-modal .login-container-right li:before {
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
 
-	/* Better Font Rendering =========== */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+    /* Better Font Rendering =========== */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
+
 
 header .filter:before {
     content: "\f0b0";
@@ -3434,40 +3416,6 @@ header .filter:before {
 		padding: 0 10px 0 0;
 	vertical-align: text-top;
 
-}
-body.tagModes:not(.tagmode-default-extended) .targetarea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
-body.tagModes .splitArea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .targetarea .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
-body.tagModes .splitArea .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before
-{
-content: "\f04b";
-visibility: visible;
-position: absolute;
-font-size: 7px;
-transform: scaleY(1.4);
- -webkit-transform: scaleY(1.4);
- -ms-transform: scaleY(1.4);
-left: 10000px;
-}
-
-body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
-body.tagModes .splitArea .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
-{
-content: "\e604";
-visibility: visible;
-position: absolute;
-font-size: 10px;
-top: -2px;
-left: 9999px;
 }
 
 
@@ -3513,30 +3461,6 @@ left: 9999px;
     margin-left: -40px;
     padding: 11px;
     color: #3aa9dd;
-}
-
-body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag:before,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag:before,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.endTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag:before
-{
-	left: auto !important;
-	right: 10000px !important;
-}
-body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag:before,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag:before,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before
-{
-	left: auto !important;
-	right: 9998px !important;
 }
 
 .icon-tag-expand:before {

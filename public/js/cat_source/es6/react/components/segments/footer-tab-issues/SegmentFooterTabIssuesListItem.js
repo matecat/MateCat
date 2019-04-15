@@ -26,7 +26,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
     }
 
     findCategory( id ) {
-        return this.state.categories.find( category => {
+        return this.state.get('categories').find( category => {
             return id == category.id
         } )
     }

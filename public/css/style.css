@@ -42,20 +42,19 @@ header .wrapper {
     padding: 5px 0px;
 }
 
-.text .item,
+.text .source.item,
+.text .target.item,
 .white li {
     width: 45.5%;
     table-layout: fixed;
     float: left;
-    /*    margin: 0px 1px 0px 0;*/
     padding: 3px 1%;
     text-align: left;
     list-style: none;
     height: 95%;
     outline: none;
-    word-wrap: break-word;
-    word-break: normal;
-    line-height: 25px;
+    line-height: 23px;
+    word-break: break-word;
 }
 
 .text .source.item {
@@ -718,8 +717,8 @@ section {
     float: left;
     width: 100%;
     height: 100%;
-    -webkit-transition: all 100ms ease-in;
-    transition: all 100ms ease-in;
+    /*-webkit-transition: all 100ms ease-in;*/
+    /*transition: all 100ms ease-in;*/
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -1361,8 +1360,6 @@ section .body > .text {
     position: relative;
     background: #ffffff;
     float: left;
-    -webkit-transition: all 100ms ease-in;
-    -moz-transition: all 100ms ease-in;
     min-height: 87px;
 }
 
@@ -1443,7 +1440,6 @@ section.editor .body > .text {
     color: #666;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
-    border-top: 1px solid #f2f4f7;
 }
 
 /*
@@ -2590,6 +2586,7 @@ body.archived section .status-container a.status:hover {
     box-shadow: inset 0 1px 2px #ccc;
     -webkit-box-shadow: inset 0 1px 2px #ccc;
     /*font-variant-ligatures: none;*/
+    cursor: text;
 }
 .editor.editarea
 .highlighted1{
@@ -2745,7 +2742,7 @@ body.rtl-target .editor .editarea span {
     float: left;
     width: 99%;
     height: 100%;
-    padding-bottom: 0;
+    padding-bottom: 5px;
     padding-top: 5px;
     font-size: 16px;
 
@@ -3655,135 +3652,6 @@ section.modified.editor .status {
 .download-chrome img {
     margin-top: 5px;
 }
-
-.editarea .locked:hover,
-.source .locked:hover {
-    cursor: pointer;
-}
-
-span.locked.tag-html-container-open,
-span.locked.tag-html-container-close {
-    display: none !important;
-}
-
-.locked.inside-attribute {
-    background-color: unset !important;
-}
-
-
-
-.locked::selection, span.locked a::selection {
-    background-color: transparent;
-}
-
-.editarea .locked,
-.source .locked,
-.target .locked,
-.ice-locked .targetarea .locked,
-.footer .locked,
-.splitArea .locked {
-    font-size: 15px;
-    color: #767676;
-    font-style: italic;
-    background-color: #eef0f3;
-    border-radius: 7px;
-    padding: 3px;
-}
-
-.opened .editarea .locked,
-.opened .source .locked,
-.opened .target .locked,
-.opened .ice-locked .targetarea .locked,
-.opened .footer .locked,
-.opened .splitArea .locked {
-    font-size: 15px;
-    color: #767676;
-    font-style: italic;
-    background-color: #f2f4f7;
-    border-radius: 7px;
-    padding: 3px;
-}
-
-
-.editarea .locked:hover,
-.source .locked:hover {
-    background-color: #dddff0;
-    transition: 0.3s ease;
-}
-
-
-
-.editor .editarea .locked.mismatch:hover,
-.editor .editarea .locked.mismatch:hover,
-.source .locked.mismatch:hover,
-.locked.mismatch-old
-{
-    background-color: #f9d7ca;
-    transition: 0.3s ease;
-}
-
-.source .locked a,
-.target .locked a,
-.ice-locked .targetarea .locked a,
-.footer .locked a,
-.splitArea .locked a {
-    color: #767676
-}
-
-.opened .targetarea .locked a,
-.opened .source .locked a {
-    color: #e000ff !important;
-}
-
-span.deleted .locked,
-span.added .locked {
-    background-color: unset !important;
-}
-
-.editor .editarea .locked.order-error,
-.editor .editarea .locked.order-error,
-.source .locked.order-error {
-    background-color: #fff4e3;
-    color: #ea862c;
-    border: 1px solid #ea862c;
-}
-
-.editor .editarea .locked.mismatch,
-.source .locked.mismatch,
-.locked.mismatch-old,
-.editor .editarea .locked.mismatch,
-.source .locked.mismatch,
-.locked.mismatch-old .locked {
-    background-color: #fdeae2;
-    color: #e1595d;
-    border: 1px solid #e1565a;
-}
-
-.editor .editarea .locked.order-error:hover,
-.editor .editarea .locked.order-error:hover,
-.source .locked.order-error:hover
-{
-    background-color: #fde6c8;
-    transition: 0.3s ease;
-}
-
-.locked.selected,
-.locked .selected,
-.locked.order-error.selected,
-.editarea .locked.mismatch.selected,
-.source .locked.mismatch.selected {
-    background-color: #c6dcfa !important;
-}
-
-.editor .cc-search .input .locked {
-    font-size: 13px;
-}
-
-.editor .editarea .locked.highlight {
-    border-radius: 8px;
-    border: 2px solid #7EB30C;
-}
-
 .d-open {
     bottom: 20px !important;
 }
@@ -3798,7 +3666,9 @@ span.added .locked {
         margin-right: 22px
     }
 
-    .text .item, .white li {
+    .text .source.item,
+    .text .target.item,
+    .white li {
         width: 46% !important;
     }
 
@@ -3840,7 +3710,9 @@ span.added .locked {
         margin-right: 16px
     }
 
-    .text .item, .white li {
+    .text .source.item,
+    .text .target.item,
+    .white li {
         width: 45.3% !important
     }
 
@@ -3951,7 +3823,9 @@ span.added .locked {
         width: 200px !important
     }
 
-    .text .item, .white li, .track-changes {
+    .text .source.item,
+    .text .target.item,
+    .white li, .track-changes {
         width: 44% !important
     }
 
@@ -4509,77 +4383,9 @@ section .toolbar .autofillTag {
 
 }
 
-body.tagModes:not(.tagmode-default-extended) .targetarea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .targetarea .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .targetarea .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .endTag {
-    visibility: hidden;
-    text-indent: -9995px;
-    display: inline-block;
-    overflow: hidden;
-    position: relative;
-    margin: 0px 4px;
-    width: 7px;
-    height: 8px;
-    padding-top: 0px;
-}
-
-body span.endTag {
-    top: -3.4px;
-}
 body:not(.tagModes) .tagModeToggle {
     display: none;
 }
-
-body.tagModes .startTag, body.tagModes .endTag, body.editor.tagModes .startTag, body.editor.tagModes .endTag {
-    vertical-align: middle;
-}
-
-body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .targetarea .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
-body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag {
-    -ms-transform: rotate(-180deg); /* IE 9 */
-    -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
-    transform: rotate(-180deg);
-}
-
-body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
-body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .spliArea .locked.endTag,
-body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag {
-    -ms-transform: rotate(0deg); /* IE 9 */
-    -webkit-transform: rotate(0deg); /* Chrome, Safari, Opera */
-    transform: rotate(0deg);
-}
-
-body.rtl-source.tagModes.tagmode-default-extended .suggestion_source .locked,
-body.rtl-source.tagModes.tagmode-default-extended .source .locked,
-body.rtl-target.tagModes.tagmode-default-extended .targetarea .locked,
-body.rtl-target.tagModes.tagmode-default-extended .spliArea .locked,
-body.rtl-target.tagModes.tagmode-default-extended .translation .locked {
-    direction: ltr;
-    display: inline-block;
-}
-
 body.rtl-source.tagModes.tagmode-default-extended .suggestion_source .monad.marker,
 body.rtl-source.tagModes.tagmode-default-extended .source .monad.marker,
 body.rtl-target.tagModes.tagmode-default-extended .editarea .monad.marker,
@@ -4686,7 +4492,7 @@ body.tagmarkDisabled .toolbar .autofillTag {
     cursor: pointer
 }
 
-body:not(.tagmode-default-extended) .editor[data-tagmode='crunched'] .textarea-container .tagMode li.crunched,
+body.tagmode-default-compressed .editor[data-tagmode='crunched'] .textarea-container .tagMode li.crunched,
 body.tagmode-default-extended .textarea-container .tagMode li.extended,
 .editor[data-tagmode='extended'] .textarea-container .tagMode li.extended,
 .textarea-container .tagMode li:hover {

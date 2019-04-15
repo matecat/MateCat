@@ -40,13 +40,13 @@ class ReviewExtendedCategorySelector extends React.Component{
         let severities;
         let containerClass = (this.props.category.severities > 2) ? "" : "severity-buttons" ;
         if ( this.props.category.severities.length > 3 ) {
-            severities = this.props.category.severities.map(function(severity, i) {
+            severities = this.props.category.severities.map((severity, i) =>{
                 return <div onClick={this.onChangeSelect.bind(this)}
                             className="item"  key={'value-' + severity.label}
                             data-value={severity.label}>
                         <b>{severity.label}</b>
                     </div> ;
-            }.bind(this));
+            });
 
             select = <div className="ui icon top right pointing dropdown basic tiny button"
                 ref={(input) => { this.selectRef = input;}}

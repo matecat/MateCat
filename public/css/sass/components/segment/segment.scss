@@ -60,6 +60,7 @@ section{
                 width: 48%;
                 margin: 0 1%;
                 color: #6A6A69;
+                min-height: 41px;
                 &.error-alert{
                     background: #FDEAE2;
                     .icon-column{
@@ -90,6 +91,7 @@ section{
             ul{
                 width: 100%;
                 display: table;
+                min-height: 41px;
                 li{
                     display: table-cell;
                     height: 100%;
@@ -115,7 +117,8 @@ section{
                         line-height: 13px;
                     }
                     .error-solution{
-                        font-size: 90%;
+                        margin-top: 5px;
+                        font-size: 96%;
                     }
                 }
             }

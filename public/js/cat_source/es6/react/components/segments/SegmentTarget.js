@@ -5,6 +5,7 @@
  */
 var React = require('react');
 var EditArea = require('./Editarea').default;
+var TagsMenu = require('./TagsMenu').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
 
@@ -15,13 +16,17 @@ class SegmentTarget extends React.Component {
         super(props);
         this.state = {
             translation: this.props.segment.decoded_translation,
-            originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation : this.props.segment.translation)
+            originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
+                : this.props.segment.translation),
+            showTagsMenu: false
         };
         this.replaceTranslation = this.replaceTranslation.bind(this);
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.toggleTagLock = this.toggleTagLock.bind(this);
+        this.showTagsMenu = this.showTagsMenu.bind(this);
+        this.hideTagsMenu = this.hideTagsMenu.bind(this);
     }
 
     replaceTranslation(sid, translation) {
@@ -35,6 +40,20 @@ class SegmentTarget extends React.Component {
     toggleTagLock(sid, source) {
         this.setState({
             translation: this.props.segment.decoded_translation
+        });
+    }
+
+    showTagsMenu(sid) {
+        if ( this.props.segment.sid == sid ) {
+            this.setState({
+                showTagsMenu: true
+            });
+        }
+    }
+
+    hideTagsMenu() {
+        this.setState({
+            showTagsMenu: false
         });
     }
 
@@ -174,7 +193,14 @@ class SegmentTarget extends React.Component {
                     locked={this.props.locked}
                     readonly={this.props.readonly}
                 />
+                { this.state.showTagsMenu ? (
 
+                    <TagsMenu sourceTags={UI.sourceTags}
+
+
+                    />
+
+                ): null}
                 {s2tMicro}
                 <div className="original-translation" style={{display: 'none'}}
                      dangerouslySetInnerHTML={this.allowHTML(this.state.originalTranslation)}/>
@@ -201,6 +227,8 @@ class SegmentTarget extends React.Component {
         // SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.replaceTranslation);
         SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
         SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
+        SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         this.afterRenderActions();
 
@@ -210,7 +238,9 @@ class SegmentTarget extends React.Component {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
         // SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.replaceTranslation);
         SegmentStore.removeListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
-        SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.removeListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.removeListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
+        SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
     }
 

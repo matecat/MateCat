@@ -194,9 +194,6 @@ class setTranslationController extends ajaxController {
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ), ' ' );
         list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'segment' ] ), ' ' );
 
-        //PATCH TO FIX BOM INSERTIONS
-        $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
-
         if ( is_null( $this->translation ) || $this->translation === '' ) {
             Log::doLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
 
@@ -325,6 +322,9 @@ class setTranslationController extends ajaxController {
             $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
             $translation = $Filter->fromLayer1ToLayer0( $check->getTrgNormalized() );
         }
+
+        //PATCH TO FIX BOM INSERTIONS
+        $translation = Utils::stripBOM( $translation );
 
         /*
          * begin stats counter

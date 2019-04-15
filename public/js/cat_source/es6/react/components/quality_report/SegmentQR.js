@@ -23,7 +23,7 @@ class SegmentQR extends React.Component {
             'icons' : {
                 'ERROR' : 'icon-cancel-circle icon red',
                 'WARNING' : 'icon-warning2 icon orange',
-                'INFO' : ''
+                'INFO' : 'icon-info icon'
             }
         }
 
@@ -88,10 +88,9 @@ class SegmentQR extends React.Component {
         let html = [];
         let issues = this.props.segment.get('issues');
         issues.map((issue, index)=>{
-            let item = <div className="qr-issue human critical" key={issue.get('issue_id'+index)}>
-                            <div className="qr-error">{issue.get('issue_category')}: </div>
-                            {/*<div className="sub-type-error">Subtype </div>*/}
-                            <div className="qr-severity"><b>[{issue.get('issue_severity')}]</b></div>
+            let item = <div className="qr-issue human critical" key={'qr-issue' + index}>
+                            <div className="qr-error" key={'error-qr' + index}>{issue.get('issue_category')}: </div>
+                            <div className="qr-severity" key={'severity-qr' + index}><b key={'sev' + index}>[{issue.get('issue_severity')}]</b></div>
                         </div>;
             html.push(item);
         });
@@ -336,7 +335,7 @@ class SegmentQR extends React.Component {
 
                         {this.state.automatedQaOpen ?
 
-                            <div className="qr-issues-list">
+                            <div className="qr-issues-list" key={'automated-qa'}>
                                 {this.getAutomatedQaHtml()}
                             </div>
 
@@ -344,7 +343,7 @@ class SegmentQR extends React.Component {
 
                         {this.state.humanQaOpen ?
 
-                            <div className="qr-issues-list">
+                            <div className="qr-issues-list" key={'human-qa'}>
                                 {this.getHumanQaHtml()}
                             </div>
 

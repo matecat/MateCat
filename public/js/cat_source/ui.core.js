@@ -803,14 +803,14 @@ UI = {
             //     UI.openSegment(UI.editarea);
             // }
 
-			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-                setTimeout(function () {
-                    var next = UI.findNextSegment(UI.startSegmentId);
-                    if (next) {
-                        UI.gotoSegment(next.attr('data-split-original-id'));
-                    }
-                }, 100);
-			}
+			// if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
+            //     setTimeout(function () {
+            //         var next = UI.findNextSegment(UI.startSegmentId);
+            //         if (next) {
+            //             UI.gotoSegment(next.attr('data-split-original-id'));
+            //         }
+            //     }, 100);
+			// }
 
 			if (options.applySearch) {
 				$('mark.currSearchItem').removeClass('currSearchItem');
@@ -1635,6 +1635,7 @@ UI = {
 		}
 	},
     segmentQA : function( segment ) {
+	    if ( UI.tagMenuOpen ) return;
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
         }
@@ -1679,7 +1680,7 @@ UI = {
                     UI.markTagMismatch(d.details);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
-                    UI.removeHighlightCorrespondingTags(UI.getSegmentById(segment.id));
+                    UI.removeHighlightErrorsTags(UI.getSegmentById(segment.id));
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
@@ -2356,7 +2357,7 @@ UI = {
     clickOnTranslatedButton: function (button) {
         var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
         //??
-        $('.test-invisible').remove();
+        $('.temp-highlight-tags').remove();
 
         // UI.setSegmentModified( UI.currentSegment, false ) ;
 

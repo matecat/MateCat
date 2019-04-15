@@ -53,7 +53,11 @@ class SegmentsDetails extends React.Component {
     }
 
     render () {
+        let totalSegments = 0;
 
+        this.props.files && this.props.files.keySeq().forEach(( key, index ) => {
+            totalSegments = totalSegments + this.props.files.get(key).get('segments').size;
+        });
         return <div className="qr-segment-details-container">
             <div className="qr-segments-summary">
                 <div className="qr-filter-container">
@@ -70,7 +74,7 @@ class SegmentsDetails extends React.Component {
 
                 ) }
 
-                {this.props.moreSegments && this.props.files && this.props.files.size !== 0 ? (
+                {this.props.moreSegments && this.props.files && this.props.files.size !== 0 && totalSegments >=20 ? (
                     <div className="ui one column grid">
                         <div className="one column spinner" style={{height: "100px"}}>
                             <div className="ui active inverted dimmer">

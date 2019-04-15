@@ -75,7 +75,7 @@ class QualityReport extends React.Component {
                                 <JobSummary jobInfo={this.state.jobInfo}/>
                                 <SegmentsDetails files={this.state.segmentFiles}
                                                  urls={this.state.jobInfo.get('urls')}
-                                                 categories={JSON.parse(this.state.jobInfo.get('quality_summary').get('categories'))}
+                                                 categories={this.state.jobInfo.get('quality_summary').get('categories')}
                                                  moreSegments={this.state.moreSegments}
                                 />
                             </div>

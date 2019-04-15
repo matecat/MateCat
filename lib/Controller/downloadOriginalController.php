@@ -88,18 +88,21 @@ class downloadOriginalController extends downloadController {
 
         if ( count( $output_content ) > 1 ) {
 
-            $this->_filename = $this->getDefaultFileName( $this->project );
+            $this->setFilename( $this->getDefaultFileName( $this->project ) );
             $pathInfo        = FilesStorage::pathinfo_fix( $this->_filename );
 
             if ( $pathInfo[ 'extension' ] != 'zip' ) {
-                $this->_filename = $pathInfo[ 'basename' ] . ".zip";
+                $this->setFilename( $pathInfo[ 'basename' ] . ".zip" );
             }
 
             $this->outputContent = self::composeZip( $output_content,null,true ); //add zip archive content here;
-            $this->mimeType = self::$ZIP_ARCHIVE;
+            $this->setMimeType();
 
         } elseif ( count( $output_content ) == 1 ) {
-            $this->setOutputContent( array_pop( $output_content ) );
+            $oContent = array_pop( $output_content );
+            $this->setFilename( $oContent->output_filename );
+            $this->setOutputContent( $oContent );
+            $this->setMimeType();
         }
 
 
