@@ -50,7 +50,7 @@ class ProjectCompletionStatusModel {
             $revise    = $this->dataForChunkStatus($chunk, true) ;
 
             $featureSet = new FeatureSet();
-            $featureSet->loadFromUserEmail( $this->project->id_customer );
+            $featureSet->loadForProject( $this->project );
 
             $revise['password'] = $featureSet->filter('filter_job_password_to_review_password',
                     $chunk->password,
