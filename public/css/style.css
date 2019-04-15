@@ -54,6 +54,7 @@ header .wrapper {
     height: 95%;
     outline: none;
     line-height: 23px;
+    word-break: break-word;
 }
 
 .text .source.item {

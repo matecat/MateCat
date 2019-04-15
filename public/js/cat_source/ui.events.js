@@ -41,6 +41,7 @@ $.extend(UI, {
             UI.gotoNextSegment();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
+            e.stopPropagation();
             if ( config.isReview ) {
                 $('.editor .next-unapproved:not(.disabled)').click();
             } else {

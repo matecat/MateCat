@@ -361,13 +361,15 @@ section {
     .translation-issues-button .revise-button {
         visibility: hidden;
         display:block;
+        &.has-object {
+            visibility: visible;
+        }
     }
 
 
     &:hover .translation-issues-button .revise-button,
     .translation-issues-button:hover .revise-button,
-    .segment-side-buttons:hover .translation-issues-button .revise-button,
-    .has-object {
+    .segment-side-buttons:hover .translation-issues-button .revise-button {
         visibility: visible;
     }
 
