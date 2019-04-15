@@ -115,13 +115,14 @@ API.SEGMENT = {
         });
     },
 
-    deleteGlossaryItem: function ( source, target ) {
+    deleteGlossaryItem: function ( source, target, id ) {
         var data = {
             exec: 'delete',
             segment: source,
             translation: target,
             id_job: config.id_job,
-            password: config.password
+            password: config.password,
+            id: id
         };
         return $.ajax({
             data: data,
