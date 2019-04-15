@@ -10,6 +10,7 @@
 namespace SubFiltering\Filters;
 
 use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
 
 /**
  * Class HtmlToPh
@@ -219,6 +220,15 @@ class HtmlToPh extends AbstractHandler {
                 //tag can not end with a number
                 return false;
             }
+
+            //this case covers when filters create an xliff tag inside an html tag:
+            //EX:
+            //original:  &lt;a href=\"<x id="1">\"&gt;
+            //  <a href=\"##LESSTHAN##eCBpZD0iMSIv##GREATERTHAN##\">
+            if( strpos( $buffer, Constants::LTPLACEHOLDER ) !== false || strpos( $buffer, Constants::GTPLACEHOLDER ) !== false ){
+                return false;
+            }
+
             return true;
         }
 
