@@ -362,7 +362,13 @@ class downloadFileController extends downloadController {
 
                         //always an array with 1 element, pop it, Ex: array( array() )
                         $oContent = array_pop( $output_content );
-                        $this->setFilename( self::forceOcrExtension( $oContent->output_filename . ( $this->forceXliff ? ".xlf" : null  ) ) );
+
+                        if ( $pathinfo[ 'extension' ] == 'zip' ) {
+                            $this->setFilename( $oContent->output_filename );
+                        } else {
+                            $this->setFilename( self::forceOcrExtension( $oContent->output_filename . ( $this->forceXliff ? ".xlf" : null  ) ) );
+                        }
+
                         $this->setOutputContent( $oContent );
                         $this->setMimeType();
 

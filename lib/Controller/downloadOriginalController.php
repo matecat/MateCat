@@ -102,6 +102,7 @@ class downloadOriginalController extends downloadController {
             $oContent = array_pop( $output_content );
             $this->setFilename( $oContent->output_filename );
             $this->setOutputContent( $oContent );
+            $this->setMimeType();
         }
 
 
