@@ -949,7 +949,11 @@ Close icon ballon - Right panel
 
 .mbc-comment-icon-button {
     visibility: hidden;
-  display:block;
+    display:block;
+}
+.mbc-comment-icon-button.has-object {
+    visibility: visible;
+    display:block;
 }
 
 section:hover .mbc-comment-icon-button,

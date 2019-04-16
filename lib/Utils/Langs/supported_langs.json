@@ -685,6 +685,16 @@
     ,
         {
             "localized":[{
+                "en":"Gamargu"
+            }],
+            "isocode":"mfi",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mfi-NG"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Garo"
             }],
             "isocode":"grt",
@@ -711,6 +721,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"de-DE"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Glavda"
+            }],
+            "isocode":"glw",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"glw-NG"
         }
     ,
         {
@@ -770,7 +790,7 @@
             "isocode":"ha",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"ha-HAU"
+            "rfc3066code":"ha-NG"
         }
     ,
         {
@@ -791,6 +811,16 @@
             "enabled":true,
             "rtl":true,
             "rfc3066code":"he-IL"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Higi"
+            }],
+            "isocode":"hig",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"hig-NG"
         }
     ,
         {
@@ -1185,6 +1215,16 @@
     ,
         {
             "localized":[{
+                "en":"Luganda"
+            }],
+            "isocode":"lug",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"lug-UG"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Luo"
             }],
             "isocode":"luo",
@@ -1281,6 +1321,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"mt-MT"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Mandara"
+            }],
+            "isocode":"mfi",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"mfi-CM"
         }
     ,
         {
@@ -1422,6 +1472,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"mfe-MU"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Ndau"
+            }],
+            "isocode":"ndc",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ndc-MZ"
         }
     ,
         {
@@ -1748,6 +1808,16 @@
     ,
         {
             "localized":[{
+                "en":"Sena"
+            }],
+            "isocode":"seh",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"seh-ZW"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Serbian Latin"
             }],
             "isocode":"sr",
@@ -1879,12 +1949,32 @@
     ,
         {
             "localized":[{
-                "en":"Spanish Latin America"
+                "en":"Spanish Argentina"
+            }],
+            "isocode":"es",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"es-AR"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Spanish Mexico"
             }],
             "isocode":"es",
             "enabled":true,
             "rtl":false,
             "rfc3066code":"es-MX"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Spanish Latin America"
+            }],
+            "isocode":"es",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"es-419"
         }
     ,
         {
@@ -2097,6 +2187,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"ts-ZA"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Tswa"
+            }],
+            "isocode":"tsc",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"tsc-MZ"
         }
     ,
         {

@@ -12,6 +12,7 @@ use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
 use SegmentTranslationChangeVector;
 
 class ReviewExtended extends AbstractRevisionFeature {
+
     const FEATURE_CODE = 'review_extended' ;
 
     public static function projectUrls( ProjectUrls $formatted ) {

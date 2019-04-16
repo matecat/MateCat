@@ -29,19 +29,12 @@ $.extend( UI, {
         if (e.ctrlKey || e.shiftKey || e.metaKey){
             if ( code === 37 || code === 39 ) { //ctrl + left/right arrows
                 UI.saveInUndoStack('arrow');
+            } else if (code === 13 ){
+                UI.handleReturn(e);
             }
             return;
         }
         var selection, range, r, rr, referenceNode;
-        if ((code == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
-            return true;
-            // ONly for console.log
-            // var rangeObject = getRangeObject(window.getSelection());
-            // for(var key in rangeObject.endContainer) {
-            //     console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
-            // }
-        }
-
         //check if inside search
         if (UI.body.hasClass('searchActive')) {
             var el = this;
@@ -60,6 +53,7 @@ $.extend( UI, {
                 }
                 UI.saveInUndoStack('cancel');
                 UI.segmentQA(UI.currentSegment);
+                UI.checkTagProximity();
             } else {
                 var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                 var numSpacesBefore = $('.space-marker', UI.editarea).length;
@@ -120,16 +114,6 @@ $.extend( UI, {
             }
         }
 
-        if (code == 8) { // backspace
-            if($('.tag-autocomplete').length) {
-                UI.closeTagAutocompletePanel();
-                setTimeout(function() {
-                    UI.openTagAutocompletePanel();
-                    var added = UI.getPartialTagAutocomplete();
-                    if(added === '') UI.closeTagAutocompletePanel();
-                }, 10);
-            }
-        }
         if (code == 9) { // tab
             if(!UI.hiddenTextEnabled) return;
 
@@ -165,11 +149,8 @@ $.extend( UI, {
         }
 
         if (code == 38) { // top arrow
-            if($('.tag-autocomplete').length) {
-                if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
-                    $('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
-                    return false;
-                }
+            if(UI.tagMenuOpen) {
+                return false
             }
             selection = window.getSelection();
             range = selection.getRangeAt(0);
@@ -210,8 +191,7 @@ $.extend( UI, {
         }
 
         if (code == 40) { // down arrow
-            if($('.tag-autocomplete').length) {
-                $('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');
+            if( UI.tagMenuOpen ) {
                 return false;
             }
             selection = window.getSelection();
@@ -243,9 +223,7 @@ $.extend( UI, {
         }
 
         if (code == 13) { // return
-            if($('.tag-autocomplete').length) {
-                e.preventDefault();
-                $('.tag-autocomplete li.current').click();
+            if( UI.tagMenuOpen ) {
                 return false;
             } else {
                 UI.handleReturn(e);
@@ -298,40 +276,11 @@ $.extend( UI, {
             UI.saveInUndoStack();
             UI.checkTagProximity();
         }, 100);
-
-
-        // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
-
     },
-    keyPressEditAreaEventHandler: function (e) {
-        // if (e.ctrlKey || e.shiftKey){
-        //     return;
-        // }
-        if( (e.which == 60) && (UI.tagLockEnabled) ) { // opening tag sign
-            if($('.tag-autocomplete').length) {
-                e.preventDefault();
-                return false;
-            }
-            setTimeout(UI.openTagAutocompletePanel);
+    keyPressEditAreaEventHandler: function (e, sid) {
+        if( (e.which == 60) && (UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment) && !UI.tagMenuOpen) { // opening tag sign
+            SegmentActions.showTagsMenu(sid);
         }
-        if( (e.which == 62) && (UI.tagLockEnabled) ) { // closing tag sign
-            if($('.tag-autocomplete').length) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        setTimeout(function() {
-            if($('.tag-autocomplete').length) {
-                tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
-                UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
-
-                if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
-                    var editareaHtml = UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>');
-                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), editareaHtml);
-                }
-                UI.checkAutocompleteTags();
-            }
-        }, 50);
     },
     inputEditAreaEventHandler: function (e) {
         SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'waiting_for_check_result');
@@ -366,7 +315,7 @@ $.extend( UI, {
     },
     handleEditAreaPaste(elem, e) {
         var clonedElem = elem.cloneNode(true);
-        if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+        if (e && e.clipboardData && e.clipboardData.getData) {
             if (/text\/html/.test(e.clipboardData.types)) {
                 txt = htmlEncode(e.clipboardData.getData('text/plain'));
             }
@@ -380,11 +329,6 @@ $.extend( UI, {
             $(clonedElem).find('#placeHolder').before(txt);
             var newHtml = $(clonedElem).html();
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
-            // To restore the cursor position
-            setTimeout(function (  ) {
-                focusOnPlaceholder();
-                UI.editarea.find('#placeHolder').remove();
-            }, 200);
             if (e.preventDefault) {
                 e.stopPropagation();
                 e.preventDefault();

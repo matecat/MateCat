@@ -330,7 +330,7 @@ class QA {
          *  3 =>  'bad target xml',
          */
         29 => "Should be < g ... > ... < /g >",
-        1000 => "Press the < key to add tags or delete extra tags."
+        1000 => "Press 'alt + t' shortcut to add tags or delete extra tags."
 
     );
 
@@ -655,7 +655,7 @@ class QA {
      * @return string Json
      */
     public function getNoticesJSON() {
-        return json_encode( $this->checkErrorNone( self::INFO, true ) );
+        return json_encode( $this->checkErrorNone( self::INFO, false ) );
     }
 
     /**

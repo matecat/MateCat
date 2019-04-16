@@ -79,6 +79,7 @@ class BulkSelectionBar extends React.Component {
         if(this.props.isReview){
             UI.approveFilteredSegments(this.state.segmentsArray).then(response =>{
                 this.onClickBack();
+                UI.reloadQualityReport();
             });
         }else{
             UI.translateFilteredSegments(this.state.segmentsArray).then(response =>{

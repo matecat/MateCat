@@ -5,6 +5,9 @@ use LexiQA\LexiQADecorator;
 
 class CatDecorator {
 
+    /**
+     * @var catController
+     */
     private $controller;
 
     /**
@@ -41,7 +44,10 @@ class CatDecorator {
     }
 
     public function decorate() {
-        $this->template->isReview                         = $this->controller->isRevision();
+        $this->template->pageTitle                        = $this->_buildPageTitle();
+        $this->template->revisionNumber                   = $this->controller->getRevisionNumber();
+        $this->template->isReview                         = $this->controller->getRevisionNumber() > 0  ;
+
         $this->template->header_quality_report_item_class = '';
         $this->template->review_password                  = $this->controller->getReviewPassword();
 
@@ -215,6 +221,23 @@ class CatDecorator {
             $this->template->isCJK = false;
         }
 
+    }
+
+    /**
+     * @return string
+     */
+    protected function _buildPageTitle() {
+        if ( $this->controller->getRevisionNumber() && $this->controller->getRevisionNumber() > 1 ) {
+            $pageTitle = 'Revise ' . $this->controller->getRevisionNumber() . ' - ' ;
+        }
+        elseif ( $this->controller->getRevisionNumber() ) {
+            $pageTitle = 'Revise - ' ;
+        }
+        else {
+            $pageTitle = 'Translate - ' ;
+        }
+        return $pageTitle . $this->controller->getProject()->name . ' - ' .
+                $this->controller->getChunk()->id ;
     }
 
 }

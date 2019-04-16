@@ -29,8 +29,8 @@ let TAGS_UTILS =  {
     },
 
     transformTextForLockTags: function ( tx ) {
-        let brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked\">$1</_plh_>";
-        let brTx2 =  "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+        var brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked style-tag \">$1</_plh_>";
+        var brTx2 =  "<span contenteditable=\"false\" class=\"locked style-tag\">$1</span>";
 
         tx = tx.replace( /&amp;/gi, "&" )
             .replace( /<span/gi, "<_plh_" )
@@ -48,11 +48,11 @@ let TAGS_UTILS =  {
             .replace( /\&lt;\/div\>/gi, "</div>" )
             .replace( /\&lt;br\>/gi, "<br />" )
             .replace( /\&lt;br \/>/gi, "<br />" )
-            .replace( /\&lt;mark/gi, "<mark" )
+            .replace( /\&lt;mark /gi, "<mark " )
             .replace( /\&lt;\/mark/gi, "</mark" )
-            .replace( /\&lt;ins/gi, "<ins" ) // For translation conflicts tab
+            .replace( /\&lt;ins /gi, "<ins " ) // For translation conflicts tab
             .replace( /\&lt;\/ins/gi, "</ins" ) // For translation conflicts tab
-            .replace( /\&lt;del/gi, "<del" ) // For translation conflicts tab
+            .replace( /\&lt;del /gi, "<del " ) // For translation conflicts tab
             .replace( /\&lt;\/del/gi, "</del" ) // For translation conflicts tab
             .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
             .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );

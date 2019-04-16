@@ -118,10 +118,10 @@ class Chunk extends \API\V2\Json\Chunk {
             $score = number_format( $chunkReviewModel->getScore(), 2, ".", "");
 
             $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
-            $total_reviews_words_count = $chunkReviewModel->getReviewedWordsCount();
+            $total_reviewed_words_count = $chunkReviewModel->getReviewedWordsCount();
 
             $model = $project->getLqaModel() ;
-            $categories = $model->getSerializedCategories();
+            $categories = $model->getCategoriesAndSeverities() ;
 
         } else {
 
@@ -160,12 +160,10 @@ class Chunk extends \API\V2\Json\Chunk {
             $score = 0;
 
             $total_issues_weight = 0;
-            $total_reviews_words_count = 0;
+            $total_reviewed_words_count = 0;
 
             $categories = CatUtils::getSerializedCategories( $reviseClass );
         }
-
-        $stats = CatUtils::getFastStatsForJob( $jobStats, false );
 
         $result = [
                 'id'                      => (int)$jStruct->id,
@@ -181,16 +179,13 @@ class Chunk extends \API\V2\Json\Chunk {
                 'total_time_to_edit'      => $jStruct->total_time_to_edit,
                 'avg_post_editing_effort' => $jStruct->avg_post_editing_effort,
                 'open_threads_count'      => (int)$jStruct->getOpenThreadsCount(),
-                'create_timestamp'        => strtotime( $jStruct->create_date ),
                 'created_at'              => Utils::api_timestamp( $jStruct->create_date ),
-                'create_date'             => $jStruct->create_date,
-                'formatted_create_date'   => ManageUtils::formatJobDate( $jStruct->create_date ),
                 'quality_overall'         => $quality_overall,
                 'pee'                     => $jStruct->getPeeForTranslatedSegments(),
                 'private_tm_key'          => $this->getKeyList( $jStruct ),
                 'warnings_count'          => $warningsCount->warnings_count,
                 'warning_segments'        => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                   => $stats,
+                'stats'                   => $this->_getStats( $jobStats ) ,
                 'outsource'               => $outsource,
                 'translator'              => $translator,
                 'total_raw_wc'            => (int)$jStruct->total_raw_wc,
@@ -202,10 +197,9 @@ class Chunk extends \API\V2\Json\Chunk {
                         'score'               => floatval($score),
                         'categories'          => $categories,
                         'total_issues_weight' => (int)$total_issues_weight,
-                        'total_reviews_words_count' => (int)$total_reviews_words_count,
-                        'passfail'            => (isset($model)?json_encode( ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] ):'')
+                        'total_reviewed_words_count' => (int)$total_reviewed_words_count,
+                        'passfail'            => (isset($model) ? ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] : '')
                 ]
-
         ];
 
         /**
@@ -227,6 +221,12 @@ class Chunk extends \API\V2\Json\Chunk {
 
         return $result;
 
+    }
+
+    protected function _getStats( $jobStats ) {
+        $stats = CatUtils::getPlainStatsForJobs( $jobStats );
+        unset( $stats ['id'] );
+        return array_change_key_case( $stats, CASE_LOWER );
     }
 
 }
