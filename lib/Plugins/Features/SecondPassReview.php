@@ -18,8 +18,6 @@ use LQA\ChunkReviewDao;
 class SecondPassReview extends BaseFeature {
     const FEATURE_CODE = 'second_pass_review' ;
 
-    protected $autoActivateOnProject = false ;
-
     protected static $dependencies = [
             Features::REVIEW_EXTENDED
     ];
