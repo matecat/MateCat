@@ -346,7 +346,8 @@ $.extend(UI, {
         }
     },
 
-    checkTagProximity: function () {
+    checkTagProximityFn: function () {
+        console.log('ChgeckTagsssssssssssssssssss');
         if(!UI.editarea || UI.editarea.html() == '') return false;
 
         var selection = window.getSelection();
