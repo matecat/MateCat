@@ -216,7 +216,7 @@ header {
                                 &.qr-fail {
                                     background: rgba(255, 0, 0, 0.23);
                                 }
-                                &.qr-pass, &.qr-fail {
+                                &.qr-pass, &.qr-fail, &.qr-norevision {
                                     margin-right: -1px;
                                     .qr-info {
                                         display: flex;

@@ -45,7 +45,7 @@ class ProductionSummary extends React.Component {
         let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
         let reviewedWordsCount = this.props.jobInfo.get('quality_summary').get('total_reviewed_words_count') ;
         let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") && reviewedWordsCount > 0 : null;
-        let jobPassedClass = (jobPassed === null) ? "" : ((jobPassed)? "qr-pass" : "qr-fail");
+        let jobPassedClass = (jobPassed === null || reviewedWordsCount === 0) ? "qr-norevision" : ((jobPassed)? "qr-pass" : "qr-fail");
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
         let stats = this.props.jobInfo.get('stats');
         return <div className="qr-production shadow-1">
@@ -115,12 +115,12 @@ class ProductionSummary extends React.Component {
                 {/*<div className="qr-label">Based on Reviewed Words</div>*/}
                 <div className="qr-info">
                     <div className="qr-tolerated-score"><b>{score}</b></div>
-                    { jobPassed === null ? (
+                    { jobPassed === null || reviewedWordsCount === 0 ? (
                         <div>
                             <div className="qr-label">
                                 Quality score
                             </div>
-                            <div className="qr-pass-score"></div>
+                            <div className="qr-pass-score">No revision</div>
                         </div>
                     ) : (jobPassed ? (
                         <div>
