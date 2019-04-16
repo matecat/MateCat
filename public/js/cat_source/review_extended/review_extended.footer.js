@@ -3,7 +3,8 @@ ReviewExtendedFooter = {
     enabled : function() {
         return Review.type === 'extended-footer' ;
     },
-    type : config.reviewType
+    type : config.reviewType,
+    number: config.revisionNumber
 };
 
 if ( ReviewExtendedFooter.enabled() ) {

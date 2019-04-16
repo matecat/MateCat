@@ -4,10 +4,8 @@
 
 if (ReviewExtended.enabled()) {
     $(document).on('files:appended', function () {
-        // if (config.isReview) {
-            SegmentActions.mountTranslationIssues();
-            ReviewExtended.getSegmentsIssues();
-        // }
+        SegmentActions.mountTranslationIssues();
+        ReviewExtended.getSegmentsIssues();
     });
 
     $( window ).on( 'segmentClosed', function ( e ) {
