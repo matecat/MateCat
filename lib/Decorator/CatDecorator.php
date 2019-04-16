@@ -223,4 +223,21 @@ class CatDecorator {
 
     }
 
+    /**
+     * @return string
+     */
+    protected function _buildPageTitle() {
+        if ( $this->controller->getRevisionNumber() && $this->controller->getRevisionNumber() > 1 ) {
+            $pageTitle = 'Revise ' . $this->controller->getRevisionNumber() . ' - ' ;
+        }
+        elseif ( $this->controller->getRevisionNumber() ) {
+            $pageTitle = 'Revise - ' ;
+        }
+        else {
+            $pageTitle = 'Translate - ' ;
+        }
+        return $pageTitle . $this->controller->getProject()->name . ' - ' .
+                $this->controller->getChunk()->id ;
+    }
+
 }

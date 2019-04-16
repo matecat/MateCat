@@ -4,8 +4,9 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title tal:condition="not:isReview">Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
-        <title tal:condition="true:isReview">Revise - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+
+        <title tal:content="pageTitle">Page Title</title>
+
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
@@ -101,7 +102,8 @@
                 tag_projection_languages: ${tag_projection_languages},
                 languages_array : ${languages_array},
                 segmentation_rule : '${segmentation_rule}',
-                segmentFilterEnabled: true
+                segmentFilterEnabled: true,
+                revisionNumber : ${revisionNumber | string:null}
             };
 
             var renderStart = new Date();
