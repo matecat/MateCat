@@ -19,6 +19,8 @@ class FeatureSet {
      */
     private $features = [] ;
 
+    protected  $_ignoreDependencies = false ;
+
     /**
      * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
      * Otherwise it is populated with mandatory features.
@@ -123,8 +125,15 @@ class FeatureSet {
      */
      public function loadForProject( Projects_ProjectStruct $project ) {
          $this->clear();
+         $this->_setIgnoreDependencies( true ) ;
          $this->loadAutoActivableAutoloadFeatures();
-         $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
+         $codes = FeatureSet::splitString($project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
+         $this->loadFromCodes( $codes ) ;
+         $this->_setIgnoreDependencies( false ) ;
+    }
+
+    protected function _setIgnoreDependencies(  $value ) {
+         $this->_ignoreDependencies = $value ;
     }
 
     public function clear() {
@@ -395,7 +404,9 @@ class FeatureSet {
      */
     private function merge( $new_features ) {
 
-        $this->_loadFeatureDependencies();
+        if ( ! $this->_ignoreDependencies ) {
+            $this->_loadFeatureDependencies();
+        }
 
         $all_features = [] ;
         $conflictingDeps = [] ;
@@ -407,10 +418,13 @@ class FeatureSet {
 
             $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
 
-            $deps = array_map( function( $code ) {
-                return new BasicFeatureStruct(['feature_code' => $code ]);
-            }, $baseFeature->getDependencies() );
+            $deps = [] ;
 
+            if (!$this->_ignoreDependencies ) {
+                $deps = array_map( function( $code ) {
+                    return new BasicFeatureStruct(['feature_code' => $code ]);
+                }, $baseFeature->getDependencies() );
+            }
 
             $all_features = array_merge( $all_features, $deps, [$feature]  ) ;
         }

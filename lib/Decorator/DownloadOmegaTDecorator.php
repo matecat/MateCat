@@ -98,7 +98,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
         // Staff with content
         foreach ( $output_content as $key => $f ) {
 
-            $f[ 'output_filename' ] = downloadController::sanitizeFileExtension( $f[ 'output_filename' ] );
+            $f[ 'output_filename' ] = downloadController::forceOcrExtension( $f[ 'output_filename' ] );
 
             //Php Zip bug, utf-8 not supported
             $fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'output_filename' ] );

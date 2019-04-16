@@ -15,10 +15,10 @@ abstract class downloadController extends controller {
     protected $outputContent = "";
     protected $_filename     = "";
 
-    protected $mimeType = "application/octet-stream";
-
-    protected static $ZIP_ARCHIVE = "application/zip";
-    protected static $XLIFF_FILE  = "application/xliff+xml";
+    protected static $ZIP_ARCHIVE  = "application/zip";
+    protected static $XLIFF_FILE   = "application/xliff+xml";
+    protected static $OCTET_STREAM = "application/octet-stream";
+    protected        $mimeType     = "application/octet-stream";
 
 
     protected $_user_provided_filename;
@@ -42,28 +42,35 @@ abstract class downloadController extends controller {
     }
 
     /**
-     * @param string $content
+     * @param ZipContentObject $content
      *
      * @return $this
      * @throws Exception
      */
     public function setOutputContent( ZipContentObject $content ) {
-
-        if ( empty( $this->_filename ) ) {
-            $this->_filename = self::sanitizeFileExtension( $content->output_filename );
-        }
         $this->outputContent = $content->getContent();
 
-        $extension           = FilesStorage::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
+        return $this;
+    }
+
+    protected function setMimeType() {
+
+        $extension = FilesStorage::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
+
         switch ( strtolower( $extension ) ) {
             case "xlf":
             case "sdlxliff":
             case "xliff":
                 $this->mimeType = self::$XLIFF_FILE;
                 break;
-        }
+            case "zip":
+                $this->mimeType = self::$ZIP_ARCHIVE;
+                break;
+            default:
+                $this->mimeType = self::$OCTET_STREAM;
+                break;
 
-        return $this;
+        }
     }
 
     /**
@@ -191,7 +198,7 @@ abstract class downloadController extends controller {
             $fName = str_replace( '_.', ".", $fName );
 
             if ( $isOriginalFile != true ) {
-                $fName = self::sanitizeFileExtension( $fName );
+                $fName = self::forceOcrExtension( $fName );
             }
 
             $nFinfo = FilesStorage::pathinfo_fix( $fName );
@@ -220,7 +227,7 @@ abstract class downloadController extends controller {
         return $zip_content;
     }
 
-    public static function sanitizeFileExtension( $filename ) {
+    public static function forceOcrExtension( $filename ) {
 
         $pathinfo = FilesStorage::pathinfo_fix( $filename );
 

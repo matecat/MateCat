@@ -322,9 +322,10 @@ class downloadFileController extends downloadController {
             try {
 
                 $pathinfo        = FilesStorage::pathinfo_fix( $this->getDefaultFileName( $this->project ) );
-                $this->_filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
+
+                    $this->setFilename( $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ] );
                     $this->startRemoteFileService( $output_content );
 
                     if ( $this->openOriginalFiles ) {
@@ -333,6 +334,7 @@ class downloadFileController extends downloadController {
                         $this->updateRemoteFiles( $output_content );
                         $this->outputResultForRemoteFiles();
                     }
+
                 } else {
                     $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
@@ -347,22 +349,28 @@ class downloadFileController extends downloadController {
 
                         if ( $pathinfo[ 'extension' ] != 'zip' ) {
                             if ( $this->forceXliff ) {
-                                $this->_filename = $this->id_job . ".zip";
+                                $this->setFilename( $this->id_job . ".zip" );
                             } else {
-                                $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                                $this->setFilename( $pathinfo[ 'basename' ] . ".zip" );
                             }
                         }
 
                         $this->outputContent = self::composeZip( $output_content ); //add zip archive content here;
-                        $this->mimeType      = self::$ZIP_ARCHIVE;
+                        $this->setMimeType();
 
                     } else {
 
                         //always an array with 1 element, pop it, Ex: array( array() )
-                        $this->setOutputContent( array_pop( $output_content ) );
-                        if ( $this->forceXliff ) {
-                            $this->mimeType = self::$XLIFF_FILE;
+                        $oContent = array_pop( $output_content );
+
+                        if ( $pathinfo[ 'extension' ] == 'zip' ) {
+                            $this->setFilename( $oContent->output_filename );
+                        } else {
+                            $this->setFilename( self::forceOcrExtension( $oContent->output_filename . ( $this->forceXliff ? ".xlf" : null  ) ) );
                         }
+
+                        $this->setOutputContent( $oContent );
+                        $this->setMimeType();
 
                     }
 
