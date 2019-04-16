@@ -441,8 +441,7 @@ class catController extends viewController {
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        //FIXME: temporarily disabled
-        $this->template->editLogClass         = ""; //$this->getEditLogClass();
+
         $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
         $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
@@ -509,39 +508,25 @@ class catController extends viewController {
     /**
      * @return string
      */
-
     public function getReviewPassword() {
         return $this->review_password ;
     }
 
+    /**
+     * Returns number indicating the current revision phase.
+     * Returns null when in translate page.
+     *
+     * @return int|null
+     */
     public function getRevisionNumber() {
-        return $this->revision ;
+        return catController::isRevision() ? (
+                $this->revision == null ? 1 : $this->revision
+        ) : null ;
     }
-
 
     public function getQaOverall() {
         // TODO: is this str_replace really required?
         return str_replace( ' ', '', $this->qa_overall );
-    }
-
-    /**
-     * @return string
-     */
-    private function getEditLogClass() {
-        $return = "";
-
-        $editLogModel = new EditLog_EditLogModel( $this->jid, $this->password, $this->featureSet );
-        $issue = $editLogModel->getMaxIssueLevel();
-
-        $dao = new EditLog_EditLogDao(Database::obtain());
-
-        if( !$dao->isEditLogEmpty($this->jid, $this->password)) {
-            if ( $issue > 0 ) {
-                $return = "edit_" . $issue;
-            }
-        }
-
-        return $return;
     }
 
     public function isCurrentProjectGDrive() {
