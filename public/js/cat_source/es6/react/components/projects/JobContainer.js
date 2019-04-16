@@ -574,7 +574,7 @@ class JobContainer extends React.Component {
         return (!nextProps.job.equals(this.props.job) ||
         nextProps.lastAction !== this.props.lastAction ||
         nextState.showDownloadProgress !== this.state.showDownloadProgress ||
-        nextState.openOutsource !== this.state.openOutsource)
+        nextState.openOutsource !== this.state.openOutsource )
     }
 
     componentDidUpdate(prevProps, prevState) {

@@ -45,16 +45,14 @@ class JobMenu extends React.Component {
 
     retrieveSecondPassReviewLink(event) {
         // event.preventDefault();
-        ManageActions.getSecondPassReview(this.props.project.get('id'), this.props.project.get('password'), this.props.jobId, this.props.job.get('password'));
+        ManageActions.getSecondPassReview(this.props.project.get('id'), this.props.project.get('password'), this.props.jobId, this.props.job.get('password')).then(()=>{
+            this.openSecondPassUrl();
+        });
     }
 
     componentDidMount() {}
 
-    componentDidUpdate(prevProps) {
-        if ( this.props.job.has('second_pass_review') && !prevProps.job.has('second_pass_review') ) {
-            this.openSecondPassUrl();
-        }
-    }
+    componentDidUpdate(prevProps) {}
 
     componentWillUpdate() {}
 
