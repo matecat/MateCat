@@ -129,7 +129,7 @@ class TagsMenu extends React.Component {
         let textDecoded;
         let tagIndex = 0;
         if ( this.state.missingTags.length > 0 ) {
-            missingItems.push(<div className="head-tag-list missing"> Missing source <span
+            missingItems.push(<div className="head-tag-list missing" key={"missing-header"}> Missing source <span
                 className="style-tag mismatch">tags</span> in the target </div>
             );
             _.each(this.state.missingTags, (item, index) => {
@@ -144,15 +144,14 @@ class TagsMenu extends React.Component {
                     textDecoded = UI.transformTextForLockTags(item);
                 }
 
-                let classSelected = (this.state.selectedItem === tagIndex) ? "active" : "";
-                let indexTag = _.clone(tagIndex);
+                let classSelected = (this.state.selectedItem === index) ? "active" : "";
                 missingItems.push(<div className={"item missing-tag " + classSelected}
-                                       key={"missing" + _.clone(tagIndex)}
+                                       key={"missing" + index}
                                        data-original="item"
                                        dangerouslySetInnerHTML={this.allowHTML(label)}
                                        onClick={this.selectTag.bind(this, textDecoded)}
                                        ref={(elem) => {
-                                           this.tagsRefs["item" + indexTag] = elem;
+                                           this.tagsRefs["item" + index] = elem;
                                        }}
                     />
                 );
@@ -160,7 +159,7 @@ class TagsMenu extends React.Component {
             });
         }
         if ( this.state.addedTags.length > 0 ) {
-            addedItems.push(<div className="head-tag-list added"> Added <span className="style-tag">tags</span> in the target</div>);
+            addedItems.push(<div className="head-tag-list added" key={"added-header"}> Added <span className="style-tag">tags</span> in the target</div>);
             _.each(this.state.addedTags, ( item, index ) => {
 
                 if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
@@ -174,12 +173,11 @@ class TagsMenu extends React.Component {
                     textDecoded = UI.transformTextForLockTags(item);
                 }
 
-                let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
-                let indexTag = _.clone(tagIndex);
-                addedItems.push(<div className={"item added-tag " + classSelected} key={"missing"+ _.clone(tagIndex)} data-original="item"
+                let classSelected = ( this.state.selectedItem === index ) ? "active" : "";
+                addedItems.push(<div className={"item added-tag " + classSelected} key={"added"+ index} data-original="item"
                                     dangerouslySetInnerHTML={ this.allowHTML(label) }
                                     onClick={this.selectTag.bind(this, textDecoded)}
-                                    ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
+                                    ref={(elem)=>{this.tagsRefs["item" + index]=elem;}}
                     />
                 );
                 tagIndex++;
