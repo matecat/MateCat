@@ -397,6 +397,9 @@ section {
     .revise-button-2 {
         background: #BC6AC9;
     }
+    &.approved-step-2 .status {
+        background-color: #BC6AC9 !important;
+    }
 }
 
 

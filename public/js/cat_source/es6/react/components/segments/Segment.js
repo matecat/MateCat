@@ -18,7 +18,13 @@ class Segment extends React.Component {
 
     constructor(props) {
         super(props);
-
+        this.segmentStatus = {
+            approved: 'APPROVED',
+            translated : 'TRANSLATED',
+            draft: 'DRAFT',
+            new: 'NEW',
+            rejected: 'REJECTED'
+        };
         this.reviewExtendedFooter = 'extended-footer';
 
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
@@ -95,6 +101,9 @@ class Segment extends React.Component {
         }
         if ( this.props.segment.muted ) {
             classes.push( 'muted' );
+        }
+        if ( this.props.segment.status === this.segmentStatus.approved && this.props.segment.revision_number ) {
+            classes.push( 'approved-step-'+ this.props.segment.revision_number);
         }
         return classes;
     }
@@ -220,7 +229,7 @@ class Segment extends React.Component {
     lockUnlockSegment(event) {
         event.preventDefault();
         event.stopPropagation();
-        SegmentActions.setSegmentLocked( this.props.segment, this.props.fid, !this.props.segment.unlocked );
+        SegmentActions.setSegmentLocked( this.props.segment, this.props.fid, !this.props.segment.unlocked );status-container
     }
 
     checkSegmentClasses() {
