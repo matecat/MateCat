@@ -1,11 +1,4 @@
-/* 
-Document:       common
-Created:         7-ago-2013, 14.49.42
-Author:          andreamartines
-Description:      Common CSS rules.
- */
-
- html, body {
+html, body {
     height: 100%;
 }
 
