@@ -71,8 +71,8 @@ class Segment extends React.Component {
             }
         }
 
-        if ( this.state.status ) {
-            classes.push( 'status-' + this.state.status.toLowerCase() );
+        if ( this.props.segment.status ) {
+            classes.push( 'status-' + this.props.segment.status.toLowerCase() );
         }
         else {
             classes.push('status-new');
@@ -102,7 +102,7 @@ class Segment extends React.Component {
         if ( this.props.segment.muted ) {
             classes.push( 'muted' );
         }
-        if ( this.props.segment.status === this.segmentStatus.approved && this.props.segment.revision_number ) {
+        if ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number ) {
             classes.push( 'approved-step-'+ this.props.segment.revision_number);
         }
         return classes;
