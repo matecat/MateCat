@@ -48,7 +48,8 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             var className = "revise-button-" + ReviewExtended.number;
             div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved').addClass(className);
             var nextSegment = UI.currentSegment.next();
-            var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
+            var nextSelector = this.getSelectorForNextSegment();
+            var goToNextApprovedButton = !nextSegment.is(nextSelector);
             var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
             div.find('.next-untranslated').parent().remove();
             div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition').removeClass('primary').addClass('green');
@@ -291,7 +292,14 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             };
 
             UI.setRevision( data );
-        }
+        },
+        getSelectorForNextSegment: function() {
+            if ( ReviewExtended.number === 1 ) {
+                return '.status-translated';
+            } else if ( ReviewExtended.number === 2 ){
+                return 'section.status-translated, section.status-approved.approved-step-1';
+            }
+        },
 
     });
 }

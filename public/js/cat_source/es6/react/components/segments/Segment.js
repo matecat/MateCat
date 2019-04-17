@@ -229,7 +229,7 @@ class Segment extends React.Component {
     lockUnlockSegment(event) {
         event.preventDefault();
         event.stopPropagation();
-        SegmentActions.setSegmentLocked( this.props.segment, this.props.fid, !this.props.segment.unlocked );status-container
+        SegmentActions.setSegmentLocked( this.props.segment, this.props.fid, !this.props.segment.unlocked );
     }
 
     checkSegmentClasses() {
@@ -346,6 +346,8 @@ class Segment extends React.Component {
         let timeToEdit = "";
 
         let readonly = this.state.readonly;
+        let showLockIcon = this.props.segment.ice_locked === '1' ||
+            ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number === 2 && config.revisionNumber !== 2);
         let segment_classes = this.checkSegmentClasses();
         let split_group = this.props.segment.split_group || [];
         let autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
@@ -387,7 +389,7 @@ class Segment extends React.Component {
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
 
-                    {this.props.segment.ice_locked === '1' ? (
+                    {showLockIcon ? (
                         !readonly ? (
                             this.props.segment.unlocked ? (
                                 <div className="ice-locked-icon"

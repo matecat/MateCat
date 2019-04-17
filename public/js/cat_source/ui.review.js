@@ -122,17 +122,18 @@ if ( config.enableReview && config.isReview ) {
                 var el = $('#segment-' + sid);
 
                 var translatedList = [];
+                var nextSegmentSelector = this.getSelectorForNextSegment();
                 // find in next segments in the current file
-                if(el.nextAll('.status-translated').length) {
-                    translatedList = el.nextAll('.status-translated');
+                if(el.nextAll(nextSegmentSelector).length) {
+                    translatedList = el.nextAll(nextSegmentSelector);
                     if( translatedList.length ) {
                         translatedList.first().find(UI.targetContainerSelector()).click();
                     }
                     // find in next segments in the next files
-                } else if(el.parents('article').nextAll('section.status-translated').length) {
+                } else if(el.parents('article').nextAll(nextSegmentSelector).length) {
 
                     file = el.parents('article');
-                    file.nextAll('section.status-translated').each(function () {
+                    file.nextAll(nextSegmentSelector).each(function () {
                         if (!$(this).is(UI.currentSegment)) {
                             translatedList = $(this);
                             translatedList.first().find(UI.targetContainerSelector()).click();
@@ -140,8 +141,8 @@ if ( config.enableReview && config.isReview ) {
                         }
                     });
                     // else find from the beginning of the currently loaded segments in all files
-                } else if ($('section.status-translated').length) {
-                    $('section.status-translated').each(function () {
+                } else if ($(nextSegmentSelector).length) {
+                    $(nextSegmentSelector).each(function () {
                         if (!$(this).is(UI.currentSegment)) {
                             translatedList = $(this);
                             translatedList.first().find(UI.targetContainerSelector()).click();
@@ -169,6 +170,9 @@ if ( config.enableReview && config.isReview ) {
                         callback();
                     }
                 }
+            },
+            getSelectorForNextSegment: function() {
+                return 'section.status-translated'
             },
             setRevision: function( data ){
                 APP.doRequest({
