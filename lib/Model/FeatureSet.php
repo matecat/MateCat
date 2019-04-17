@@ -116,7 +116,12 @@ class FeatureSet {
     }
 
     /**
-     * Features are attached to project via project_metadata.
+     * Load features that should be enabled on project scope.
+     *
+     * This fetures include
+     *
+     * 1. the ones explicity defined `project_metadata`;
+     * 2. the ones in autoload array that can be forcedly enabled on project.
      *
      * @param Projects_ProjectStruct $project
      *
@@ -125,10 +130,11 @@ class FeatureSet {
      */
      public function loadForProject( Projects_ProjectStruct $project ) {
          $this->clear();
-         $this->_setIgnoreDependencies( true ) ;
-         $this->loadAutoActivableAutoloadFeatures();
-         $codes = FeatureSet::splitString($project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) );
-         $this->loadFromCodes( $codes ) ;
+         $this->_setIgnoreDependencies( true );
+         $this->loadForceableProjectFeatures();
+         $this->loadFromCodes(
+                 FeatureSet::splitString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) )
+         );
          $this->_setIgnoreDependencies( false ) ;
     }
 
@@ -170,16 +176,15 @@ class FeatureSet {
     }
 
     /**
-     * Loads features that can be activated automatically on project creation phase, reading from
-     * the list of AUTOLOAD_PLUGINS ( config.ini )
+     * Loads features that can be forced on projects, even if they are not assigned to project explicitly,
+     * reading from AUTOLOAD_PLUGINS.
      *
      * @throws Exception
      */
-    public function loadAutoActivableAutoloadFeatures() {
-
+    public function loadForceableProjectFeatures() {
         $returnable = array_filter( $this->__getAutoloadPlugins(), function ( BasicFeatureStruct $feature ) {
             $concreteClass = $feature->toNewObject();
-            return $concreteClass->isAutoActivableOnProject();
+            return $concreteClass->isForceableOnProject() ;
         } );
 
         $this->merge( $returnable );

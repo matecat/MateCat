@@ -175,6 +175,7 @@ class ProjectManager {
         $this->dbHandler = Database::obtain();
 
         $this->features = new FeatureSet( $this->_getRequestedFeatures() );
+
         if ( !empty( $this->projectStructure[ 'id_customer' ] ) ) {
             $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure[ 'id_customer' ] );
         }
