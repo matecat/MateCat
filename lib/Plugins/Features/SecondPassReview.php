@@ -9,6 +9,7 @@
 namespace Features;
 
 use catController;
+use Chunks_ChunkStruct;
 use Exceptions\NotFoundException;
 use Features;
 use Features\SecondPassReview\Utils;
@@ -82,5 +83,34 @@ class SecondPassReview extends BaseFeature {
         }
 
         return $project ;
+    }
+
+    public function filterGetSegmentsResult($data, Chunks_ChunkStruct $chunk ) {
+        reset( $data['files'] ) ;
+
+        $firstFile = current( $data['files'] ) ;
+        $lastFile  = end( $data['files'] );
+        $firstSid = $firstFile['segments'][0]['sid'];
+
+        $lastSegment = end( $lastFile['segments'] );
+        $lastSid = $lastSegment['sid'];
+
+        $segment_translation_events = ( new Features\TranslationVersions\Model\SegmentTranslationEventDao())->getLatestEventIdsByJob(
+                $chunk->id, $firstSid, $lastSid );
+
+        $by_id_segment = [] ;
+        foreach( $segment_translation_events as $record ) {
+            $by_id_segment[ $record->id_segment ] = $record ;
+        }
+
+        foreach ( $data['files'] as $file => $content ) {
+            foreach( $content['segments'] as $key => $segment ) {
+                $data ['files'] [ $file ] ['segments'] [ $key ] ['revision_number'] = Utils::sourcePageToRevisionNumber(
+                        $by_id_segment[ $segment['sid'] ]->source_page
+                );
+            }
+        }
+
+        return $data ;
     }
 }
