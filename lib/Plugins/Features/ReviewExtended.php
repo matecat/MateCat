@@ -13,8 +13,6 @@ use SegmentTranslationChangeVector;
 
 class ReviewExtended extends AbstractRevisionFeature {
 
-    protected $autoActivateOnProject = false ;
-
     const FEATURE_CODE = 'review_extended' ;
 
     public static function projectUrls( ProjectUrls $formatted ) {
