@@ -68,7 +68,7 @@ p.button-aligned-right {
     overflow: visible;
     max-height: inherit;
     font-size: 24px;
-    background: #4D4D4D url(../img/logo-ico.png) 12px 12px no-repeat;
+    background: #4D4D4D url(../../img/logo-ico.png) 12px 12px no-repeat;
     padding: 10px 10px 7px 58px;
     background-size: 35px;
     /* border-bottom: 1px solid #000; */
@@ -103,7 +103,7 @@ p.button-aligned-right {
 }
 
 .outer {
-    background: url(../img/bg_login_button.gif) 0 0 repeat;
+    background: url(../../img/bg_login_button.gif) 0 0 repeat;
     border-radius: 6px;
     margin: 0 auto -10px auto;
     width: 330px;
@@ -111,7 +111,7 @@ p.button-aligned-right {
 }
 .outer:hover
         {
-        background: url(../img/bg_login_button_hover.gif) 0 0 repeat;
+        background: url(../../img/bg_login_button_hover.gif) 0 0 repeat;
         }
 
 .inner
@@ -331,20 +331,20 @@ p.translator_name {
 
 .outsource.modal.loading .delivery
 {
-	background: url(../img/loader.gif) #f6f6f6 center center no-repeat;
+	background: url(../../img/loader.gif) #f6f6f6 center center no-repeat;
 	background-size: 20px;
 }
 
 .outsource.modal.loading .tprice
 {
-    background: url(../img/loader.gif) #f6f6f6 center 30px no-repeat;
+    background: url(../../img/loader.gif) #f6f6f6 center 30px no-repeat;
     background-size: 20px;
     padding-top: 47px;
 }
 
 .outsource.modal.loading .translator_info_box
 {
-    background: url(../img/loader.gif) center 20px no-repeat;
+    background: url(../../img/loader.gif) center 20px no-repeat;
     background-size: 20px;
     padding-top: 45px;
     border-left: none;

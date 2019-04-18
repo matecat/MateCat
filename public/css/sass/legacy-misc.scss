@@ -100,15 +100,15 @@ table .btn {
 }
 
 th.header {
-    background: #efefef url(../img/bg.gif) right center no-repeat !important;
+    background: #efefef url(../../img/bg.gif) right center no-repeat !important;
 }
 
 th.headerSortUp, th.tablesorter-headerAsc {
-    background: #efefef url(../img/asc.gif) right center no-repeat !important;
+    background: #efefef url(../../img/asc.gif) right center no-repeat !important;
 }
 
 th.headerSortDown, th.tablesorter-headerDesc {
-    background: #efefef url(../img/desc.gif) right center no-repeat !important;
+    background: #efefef url(../../img/desc.gif) right center no-repeat !important;
 }
 
 .searchbox {
@@ -286,7 +286,7 @@ table {
 }
 
 .logosmall {
-    background: url(../img/logo-ico.png) no-repeat;
+    background: url(../../img/logo-ico.png) no-repeat;
     padding-top: 30px;
     background-size: 45px;
 }
@@ -344,7 +344,7 @@ code {
 }
 
 .missing-outsource-data {
-    background: url(../img/loading-black.gif) 40px 10px no-repeat;
+    background: url(../../img/loading-black.gif) 40px 10px no-repeat;
     background-size: 20px;
     background-position: center;
 }

@@ -613,7 +613,7 @@ p.split-shortcut {
 }
 
 .splitInner .sid {
-    background: url(../img/split-bg.png) no-repeat;
+    background: url(../../img/split-bg.png) no-repeat;
     background-position: 48.5% 16px;
 }
 
@@ -797,7 +797,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 .projectbar .top, .projectbar .down {
     float: right !important;
     margin-right: 11px;
-    background: url(../img/updown.gif) 3px 2px no-repeat;
+    background: url(../../img/updown.gif) 3px 2px no-repeat;
     display: block;
     width: 12px;
     height: 12px;
@@ -820,7 +820,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 }
 
 .projectbar .down {
-    background: url(../img/updown.gif) 3px -18px no-repeat;
+    background: url(../../img/updown.gif) 3px -18px no-repeat;
     margin-top: 12px
 }
 
@@ -866,7 +866,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 }
 
 .tools .wrapper {
-    background: url(../img/tools.gif) 5px 3px no-repeat;
+    background: url(../../img/tools.gif) 5px 3px no-repeat;
     height: 27px;
 }
 
@@ -880,7 +880,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 .editable_editarea:hover {
     border: 1px solid #adadad;
-    background: url(../img/corner-editor.gif) bottom right no-repeat;
+    background: url(../../img/corner-editor.gif) bottom right no-repeat;
     -moz-box-shadow: inset 0 1px 1px #000;
     -webkit-box-shadow: inset 0 1px 1px #000;
     cursor: pointer;
@@ -1220,7 +1220,7 @@ article .approved:active {
 
 .copysource {
     width: 35px !important;
-    background: #f6f6f6 url(../img/tools/copysource.gif) center center no-repeat;
+    background: #f6f6f6 url(../../img/tools/copysource.gif) center center no-repeat;
     margin: -8px 15px -8px 15px;
     -webkit-transition: all 100ms ease-in;
     background-size: 18px 11px;
@@ -1232,7 +1232,7 @@ article .approved:active {
     float: left;
     margin-left: 47%;
     margin-top: 5px;
-    background: url(../img/outercopy.png) center 1px no-repeat;
+    background: url(../../img/outercopy.png) center 1px no-repeat;
     width: 50px !important;
     z-index: 1000;
     background-size: 42px;
@@ -1240,7 +1240,7 @@ article .approved:active {
 }
 
 .outersource .copy:hover {
-    background: url(../img/outercopy.png) 4px -69px no-repeat;
+    background: url(../../img/outercopy.png) 4px -69px no-repeat;
     background-size: 42px;
 
 }
@@ -1268,7 +1268,7 @@ article .approved:active {
 
 .tagmenu {
     width: 40px;
-    background: #f6f6f6 url(../img/tools/tagmenu.gif) center center no-repeat;
+    background: #f6f6f6 url(../../img/tools/tagmenu.gif) center center no-repeat;
     float: right;
     margin: 8px -1px 0 0;
     -webkit-transition: all 100ms ease-in;
@@ -1299,21 +1299,21 @@ body .main-container {
 }
 #outer.loadingBefore {
     display: block;
-    background: url(../img/loading.gif) 48% bottom no-repeat;
+    background: url(../../img/loading.gif) 48% bottom no-repeat;
     float: left;
     background-size: 20px 20px;
     position: relative;
 }
 
 #outer.loadingBefore {
-    background: url(../img/loading.gif) 48% top no-repeat !important;
+    background: url(../../img/loading.gif) 48% top no-repeat !important;
     padding-top: 40px;
     background-size: 30px 30px !important;
 }
 
 #outer.loading {
     display: block;
-    background: url(../img/loading.gif) 48% center no-repeat;
+    background: url(../../img/loading.gif) 48% center no-repeat;
     background-size: 30px 30px !important;
     float: left;
     position: relative;
@@ -1542,7 +1542,7 @@ body.noGlossary .tab-switcher-gl {
 
 .submenu .notification {
     margin: -1px 5px 0px 0px;
-    background: url(../img/header-bg.jpg) 0 0 repeat-x;
+    background: url(../../img/header-bg.jpg) 0 0 repeat-x;
     color: #fff !important
 }
 
@@ -1577,7 +1577,7 @@ body.noGlossary .tab-switcher-gl {
 }
 
 .notification {
-    background: #f5f5f5 url(../img/point.gif) 0 0 repeat-x;
+    background: #f5f5f5 url(../../img/point.gif) 0 0 repeat-x;
     -moz-border-radius: 2px;
     border-radius: 2px;
     display: block;
@@ -1671,7 +1671,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor .cc-search.loading, .sub-editor .gl-search.loading {
-    background: url(../img/loading.gif) 50% 22px no-repeat;
+    background: url(../../img/loading.gif) 50% 22px no-repeat;
     float: left;
     width: 100%;
     background-size: 20px 20px;
@@ -1694,7 +1694,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .sub-editor.glossary .gl-search.setting .set-glossary {
-    background: url(../img/loading.gif);
+    background: url(../../img/loading.gif);
     background-size: 20px;
     cursor: pointer;
 }
@@ -1837,7 +1837,7 @@ body .footer.showMatches .sub-editor.open {
     right: 10px;
     height: 20px;
     width: 20px;
-    background: url(../img/search-arrow.png) 0 0 no-repeat;
+    background: url(../../img/search-arrow.png) 0 0 no-repeat;
     display: none;
     background-size: 16px 8px
 }
@@ -1973,7 +1973,7 @@ body.searchActive .search-display {
     left: auto !important;
     right: 100px;
     top: 12px;
-    background: url(../img/loading-black.gif) 0 0 no-repeat !important
+    background: url(../../img/loading-black.gif) 0 0 no-repeat !important
 }
 
 /*.replace-box {
@@ -2213,14 +2213,14 @@ body.searchActive .search-display {
 .back {
     width: 30px;
     float: left;
-    background: #f6f6f6 url(../img/back.gif) center center no-repeat;
+    background: #f6f6f6 url(../../img/back.gif) center center no-repeat;
     margin: 10px 0 15px 20px;
 }
 
 .forward {
     width: 30px;
     float: left;
-    background: #f6f6f6 url(../img/forward.gif) center center no-repeat;
+    background: #f6f6f6 url(../../img/forward.gif) center center no-repeat;
     margin: 10px 0 15px -1px;
 }
 
@@ -2239,7 +2239,7 @@ body.searchActive .search-display {
 .loader {
     width: 20px;
     height: 20px;
-    background: url(../img/loading.gif) 0 0 no-repeat !important;
+    background: url(../../img/loading.gif) 0 0 no-repeat !important;
     position: absolute;
     bottom: 11px;
     display: none;
@@ -2347,7 +2347,7 @@ section.editor .loader_on {
 }
 
 .white {
-    background: #fff url(../img/gray-point.gif) repeat-y 46.5% center !important;
+    background: #fff url(../../img/gray-point.gif) repeat-y 46.5% center !important;
     font-size: 16px !important;
     position: relative;
     line-height: 22px;
@@ -2780,7 +2780,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .light {
-    background: #f7f8f9 url(../img/freccia.png) 49% 10px no-repeat;
+    background: #f7f8f9 url(../../img/freccia.png) 49% 10px no-repeat;
 }
 
 .buttons {
@@ -2799,7 +2799,7 @@ body.rtl-target .editor .editarea span {
 
 /*TAG*/
 .b-open {
-    background: #09beec url(../img/b-open.png) right center no-repeat;
+    background: #09beec url(../../img/b-open.png) right center no-repeat;
     padding: 3px 7px 3px 3px;
     height: 20px;
     color: #fff;
@@ -2808,7 +2808,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .b-close {
-    background: #09beec url(../img/b-close.png) left center no-repeat;
+    background: #09beec url(../../img/b-close.png) left center no-repeat;
     padding: 3px 3px 3px 7px;
     height: 20px;
     color: #fff;
@@ -2904,7 +2904,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .message li {
-    background: url(../img/bad.png) 22px center no-repeat;
+    background: url(../../img/bad.png) 22px center no-repeat;
     padding-left: 40px !important;
     background-size: 12px 12px
 }
@@ -3131,7 +3131,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .error-img {
-    background: #c5351c url(../img/warning.png) no-repeat center;
+    background: #c5351c url(../../img/warning.png) no-repeat center;
     background-size: 17px;
     width: 22px;
     height: 22px;
@@ -3250,7 +3250,7 @@ section.status-rejected .status {
 }
 
 body[data-offline-mode="light-off"] section.setTranslationPending .status {
-    background-image: url(../img/offline-bg.png) !important;
+    background-image: url(../../img/offline-bg.png) !important;
     background-color: #0798bc !important;
     background-repeat: no-repeat !important;
     background-position: center center;
@@ -3274,7 +3274,7 @@ section.editor.status-rejected .status {
 }
 
 section.modified .status {
-    background-image: url(../img/stripes.png) !important;
+    background-image: url(../../img/stripes.png) !important;
     background-repeat: repeat !important;
     background-size: 140% !important;
 }
@@ -3328,7 +3328,7 @@ section.modified.editor .status {
     display: block;
     width: 20px;
     height: 20px;
-    background: url(../img/arrow-menucolor.png) 0 0 no-repeat;
+    background: url(../../img/arrow-menucolor.png) 0 0 no-repeat;
     position: absolute;
     margin: -8px 0 0 123px;
     background-size: 10px 8px
@@ -3337,7 +3337,7 @@ section.modified.editor .status {
 .arrow {
     border: 0 !important;
 }
-.arrow-mcolor{display:block;width:20px;height:20px;background:url(../img/arrow-menucolor.png) 0 0 no-repeat;position:absolute;margin:-8px 0 0 123px;background-size:10px 8px}
+.arrow-mcolor{display:block;width:20px;height:20px;background:url(../../img/arrow-menucolor.png) 0 0 no-repeat;position:absolute;margin:-8px 0 0 123px;background-size:10px 8px}
 .arrow{border:0 !important; }
 .approvedStatusMenu{border-right:9px solid #7cc576}
 .translatedStatusMenu{border-right:9px solid #09beec}
@@ -3476,7 +3476,7 @@ section.modified.editor .status {
     border-radius: 2px;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
-    background: #f6f6f6 url(../img/blackarrow.png) center center no-repeat;
+    background: #f6f6f6 url(../../img/blackarrow.png) center center no-repeat;
     float: left;
     margin: -1px 0 0 -2px !important;
     cursor: pointer;
@@ -3507,20 +3507,20 @@ section.modified.editor .status {
 @font-face {
     font-family: Calibri;
     src: local(Calibri),
-    url('fonts/calibri-webfont.woff') format('woff'),
-    url('fonts/calibri-webfont.ttf') format('truetype'),
-    url('fonts/calibri-webfont.eot'),
-    url('fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
+    url('../fonts/calibri-webfont.woff') format('woff'),
+    url('../fonts/calibri-webfont.ttf') format('truetype'),
+    url('../fonts/calibri-webfont.eot'),
+    url('../fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
 }
 
 @font-face {
     font-family: Calibri;
     font-weight: bold;
     src: local('Calibri Bold'),
-    url('fonts/calibri_bold-webfont.woff') format('woff'),
-    url('fonts/calibri_bold-webfont.ttf') format('truetype'),
-    url('fonts/calibri_bold-webfont.eot'),
-    url('fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
+    url('../fonts/calibri_bold-webfont.woff') format('woff'),
+    url('../fonts/calibri_bold-webfont.ttf') format('truetype'),
+    url('../fonts/calibri_bold-webfont.eot'),
+    url('../fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
 }
 
 #downloadNotifier {
@@ -3531,7 +3531,7 @@ section.modified.editor .status {
     display: block;
     width: 100px;
     height: 100px;
-    background: url(../img/download.png) 0px 0px no-repeat;
+    background: url(../../img/download.png) 0px 0px no-repeat;
     z-index: 100000;
 }
 
@@ -3591,7 +3591,7 @@ section.modified.editor .status {
 /*alert*/
 
 .alert {
-    background: rgba(0, 0, 0, 0.8) url(../img/dots.png) 0 0 repeat;
+    background: rgba(0, 0, 0, 0.8) url(../../img/dots.png) 0 0 repeat;
     border-radius: 5px;
     width: 200px;
     position: fixed;
@@ -3627,7 +3627,7 @@ section.modified.editor .status {
     -moz-box-shadow: 0 1px 3px #666;
     -webkit-box-shadow: 0 1px 10px #666;
     border: 1px solid #000;
-    background: rgba(0, 0, 0, 0.8) url(../img/dots.png) 0 0 repeat;
+    background: rgba(0, 0, 0, 0.8) url(../../img/dots.png) 0 0 repeat;
     -webkit-transition: all 1500ms ease-in;
     transition: all 1500ms ease-in;
     -webkit-animation-name: Floatingx;
@@ -3906,19 +3906,19 @@ body.archived .footer {
     position: fixed;
     width: 20px;
     height: 16px;
-    background: url(../img/arrow-menucolor.png) 0 0 no-repeat;
+    background: url(../../img/arrow-menucolor.png) 0 0 no-repeat;
     display: none;
     z-index: 9999;
 }
 
 #segmentPointer.down {
     margin: 400px 0 0 -10px;
-    background-image: url(../img/arrow-menucolor-down.png) !important;
+    background-image: url(../../img/arrow-menucolor-down.png) !important;
 }
 
 #segmentPointer.up {
     margin: -10px 0 0 -10px;
-    background-image: url(../img/arrow-menucolor.png) !important;
+    background-image: url(../../img/arrow-menucolor.png) !important;
 }
 
 #authentication {
@@ -4068,7 +4068,7 @@ body.searchActive #filterSwitch .numbererror:empty {
     width: 16px;
     height: 16px;
     margin: 6px 8px 0 0;
-    background: url(../img/settings.png) 0 0 no-repeat;
+    background: url(../../img/settings.png) 0 0 no-repeat;
     background-size: 16px 16px;
     text-indent: -9999px;
     opacity: 0.5;
@@ -4202,7 +4202,7 @@ del.diff {
     /*width: 20px !important;*/
     top: 3px;
     font-size: 10px;
-    background: url(../img/dot.png) 0px 0px no-repeat;
+    background: url(../../img/dot.png) 0px 0px no-repeat;
     background-size: 6px;
     /*
 	color: #ccc;
@@ -4308,7 +4308,7 @@ section .toolbar .autofillTag {
     display: inline !important;
     margin-left: 6px;
     padding: 1px 2px 3px 40px;
-    background-image: url(../img/soft-return1.png);
+    background-image: url(../../img/soft-return1.png);
     background-size: 16px;
     background-repeat: no-repeat;
     background-position: center left;
@@ -4639,12 +4639,12 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 
     .outersource .copy {
         top: 7px;
-        background: url(../img/outercopy@2x.png) center 1px no-repeat;
+        background: url(../../img/outercopy@2x.png) center 1px no-repeat;
         background-size: 12px 11px;
     }
 
     .outersource .copy:hover {
-        background: url(../img/outercopy@2x.png) 4px -69px no-repeat;
+        background: url(../../img/outercopy@2x.png) 4px -69px no-repeat;
         background-size: 42px;
 
     }

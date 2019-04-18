@@ -16,8 +16,8 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>API - Matecat</title>
-    <link href="/public/css/style.css" rel="stylesheet" type="text/css"/>
-    <link href="/public/css/legacy-misc.css" rel="stylesheet" type="text/css"/>
+    <link href="/public/css/build/style.css" rel="stylesheet" type="text/css"/>
+    <link href="/public/css/build/legacy-misc.css" rel="stylesheet" type="text/css"/>
     <link href="/public/css/build/common.css" rel="stylesheet" type="text/css"/>
 
     <link rel="stylesheet" type="text/css" href="/public/api/dist/lib/swagger-ui.css">
