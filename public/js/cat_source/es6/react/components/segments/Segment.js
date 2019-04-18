@@ -229,6 +229,16 @@ class Segment extends React.Component {
     lockUnlockSegment(event) {
         event.preventDefault();
         event.stopPropagation();
+        if ( !this.props.segment.unlocked && config.revisionNumber !== 2 ) {
+            var props = {
+                text: "You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.",
+                successText: "Ok",
+                successCallback: function() {
+                    APP.ModalWindow.onCloseModal();
+                }
+            };
+            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Modify locked and approved segment ");
+        }
         SegmentActions.setSegmentLocked( this.props.segment, this.props.fid, !this.props.segment.unlocked );
     }
 
