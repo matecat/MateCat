@@ -11,7 +11,6 @@ class SegmentsContainer extends React.Component {
 
     constructor(props) {
         super(props);
-        console.time("Time: SegmentsContainer Mount/Update"+this.props.fid);
         this.state = {
             segments : [],
             splitGroup: [],
@@ -73,7 +72,6 @@ class SegmentsContainer extends React.Component {
     getSegments() {
         let items = [];
         let self = this;
-        let isReviewImproved = !!(this.props.isReviewImproved);
         let isReviewExtended = !!(this.props.isReviewExtended);
         this.state.segments.forEach(function (segImmutable) {
             let segment = segImmutable.toJS();
@@ -82,7 +80,6 @@ class SegmentsContainer extends React.Component {
                 segment={segment}
                 timeToEdit={self.state.timeToEdit}
                 fid={self.props.fid}
-                isReviewImproved={isReviewImproved}
                 isReviewExtended={isReviewExtended}
                 enableTagProjection={self.props.enableTagProjection}
                 decodeTextFn={self.props.decodeTextFn}

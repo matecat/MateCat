@@ -19,7 +19,6 @@
     "grunt": "~1.0.3",
     "grunt-browserify": "^5.2.0",
     "grunt-contrib-concat": "~1.0.1",
-    "grunt-contrib-handlebars": "^1.0.0",
     "grunt-contrib-jshint": "^2.0.0",
     "grunt-contrib-watch": "~1.0.0",
     "grunt-sass": "~2.0.0",
@@ -42,9 +41,12 @@
     "react-dom": "^16.0.0",
     "semantic-ui": "^2.4.0",
     "showdown": "^1.8.0",
-    "sprintf-js": "^1.1.1"
+    "sprintf-js": "^1.1.1",
+    "escape-string-regexp": "^1.0.5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "grunt-notify": "^0.4.5"
+  },
   "babel": {
     "presets": [
       "env",

@@ -177,6 +177,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 Constants_TranslationStatus::$TRANSLATION_STATUSES,
                 Constants_TranslationStatus::$REVISION_STATUSES
         );
+
+
         if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array($options[ 'filter' ][ 'status' ], $statuses) ) {
             $options_conditions_query              .= " AND st.status = :status ";
             $options_conditions_values[ 'status' ] = $options[ 'filter' ][ 'status' ];
@@ -185,21 +187,36 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         if ( (isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) OR (isset( $options[ 'filter' ][ 'severity' ] ) &&  $options[ 'filter' ][ 'severity' ] != '') ) {
 
             $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job ";
-            $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment ";
+            $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment AND sr.id_job = st.id_job ";
 
             if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) {
                 if ( in_array( $options[ 'filter' ][ 'issue_category' ], Constants_Revise::$categoriesDbNames ) ) {
+
                     $options_conditions_query .= " AND (sr." . $options[ 'filter' ][ 'issue_category' ] . " != '' AND sr." . $options[ 'filter' ][ 'issue_category' ] . " != 'none')";
                 } else {
-                    $options_conditions_query .= " AND e.id_category = :id_category ";
-                    $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
-                }
 
+                    if ( is_array( $options[ 'filter' ][ 'issue_category' ] ) ) {
+                        $placeholders = implode(', ', array_map( function($id) {
+                            return ':issue_category_' . $id ;
+                        }, $options[ 'filter'][ 'issue_category' ] ) );
+
+                        $options_conditions_query .= " AND e.id_category IN ( $placeholders ) ";
+
+                        foreach( $options[ 'filter' ][ 'issue_category' ] as $id_category ) {
+                            $options_conditions_values[ 'issue_category_' . $id_category ] = $id_category ;
+                        }
+                    }
+
+                    else {
+                        $options_conditions_query .= " AND e.id_category = :id_category ";
+                        $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
+                    }
+                }
             }
 
             if ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) {
                 $options_conditions_query                .= " AND (e.severity = :severity OR 
-            (sr.err_typing = :severity OR sr.err_translation OR sr.err_terminology = :severity OR sr.err_language = :severity OR sr.err_style = :severity)) ";
+            (sr.err_typing = :severity OR sr.err_translation = :severity OR sr.err_terminology = :severity OR sr.err_language = :severity OR sr.err_style = :severity)) ";
                 $options_conditions_values[ 'severity' ] = $options[ 'filter' ][ 'severity' ];
             }
 

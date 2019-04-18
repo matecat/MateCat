@@ -1,6 +1,8 @@
 <?php
 
 
+use Features\ReviewExtended\Model\QualityReportDao;
+
 class setRevisionController extends ajaxController {
 
     private   $_postInput;
@@ -149,9 +151,9 @@ class setRevisionController extends ajaxController {
 
         $chunkReview = CatUtils::getQualityInfoFromJobStruct( $job_data, $project, $this->featureSet );
 
-        if ( in_array( Features\ReviewImproved::FEATURE_CODE, $this->featureSet->getCodes() ) || in_array( Features\ReviewExtended::FEATURE_CODE, $this->featureSet->getCodes() ) ) {
+        if ( $this->featureSet->hasRevisionFeature() ) {
             $reviseIssues     = [];
-            $qualityReportDao = new Features\ReviewImproved\Model\QualityReportDao();
+            $qualityReportDao = new QualityReportDao() ;
             $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $job_data->id, $job_data->password );
             foreach ( $qa_data as $issue ) {
                 if ( !isset( $reviseIssues[ $issue->id_category ] ) ) {

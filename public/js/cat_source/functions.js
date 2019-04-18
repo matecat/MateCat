@@ -18,6 +18,7 @@ function focusOnPlaceholder() {
 		range.moveToElementText(placeholder);
 		range.select();
 	}
+    placeholder.remove();
 }
 
 function truncate_filename(n, len) {
@@ -388,31 +389,6 @@ function insertHtmlAfterSelection(html) {
     }
 }
 
-(function(undefined) {
-    SegmentActivator = {};
-    SegmentActivator.registry = [];
-    SegmentActivator.activate = function( sid ) {
-        if ( typeof sid === 'undefined' ) {
-            console.debug( 'sid is undefined', sid);
-            return ;
-        }
-
-        for (var i = 0; i < this.registry.length ; ++i) {
-            var callback = this.registry[i];
-             callback( sid );
-        }
-    };
-})();
-
-// This activation function is only valid if the editarea is present
-// in ReviewImproved the editara class is not present so we need to
-// register a different activation function.
-// The function is defined in review_improved module.
-SegmentActivator.registry.push(function( sid ) {
-    var el = $("section:not(.opened) #segment-" + sid + "-target").find(".editarea");
-    $(el).click();
-});
-
 function ParsedHash( hash ) {
     var split ;
     var actionSep = ',' ;
@@ -422,7 +398,7 @@ function ParsedHash( hash ) {
 
     var processObject = function( obj ) {
         _obj = obj ;
-    }
+    };
 
     var processString = function( hash ) {
         if ( hash.indexOf('#') == 0 ) hash = hash.substr(1);
@@ -510,6 +486,7 @@ function setBrowserHistoryBehavior() {
 
         function updateAppByPopState() {
             var segment = UI.getSegmentById( UI.parsedHash.segmentId );
+            if ( UI.currentSegmentId === UI.parsedHash.segmentId ) return;
             if ( segment.length ) {
                 UI.gotoSegment( UI.parsedHash.segmentId );
             } else {
@@ -970,10 +947,6 @@ function isTranslated(section) {
         section.hasClass('status-draft')
     );
 }
-
-// function template( name, data ) {
-//     return $( MateCat.Templates[ name ]( data ) );
-// }
 
 function eventFromReact(e) {
     return e.target.hasAttribute('data-reactid');

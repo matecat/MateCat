@@ -73,7 +73,8 @@ class ReviewExtendedIssuePanel extends React.Component{
     }
 
     thereAreSubcategories() {
-        return this.issueCategories[0].subcategories && this.issueCategories[0].subcategories.length > 0;
+        return this.issueCategories[0].subcategories && this.issueCategories[0].subcategories.length > 0 ||
+            this.issueCategories[1].subcategories && this.issueCategories[1].subcategories.length > 0;
     }
 
     getCategoriesHtml() {
@@ -122,6 +123,17 @@ class ReviewExtendedIssuePanel extends React.Component{
                         />
                     );
                 } );
+            } else {
+                subcategoriesComponents.push(
+                    <ReviewExtendedCategorySelector
+                        key={'default'}
+                        selectedValue={selectedValue}
+                        sendIssue={this.sendIssue.bind(this)}
+                        nested={true}
+                        category={category}
+                        sid={this.props.sid}
+                    />
+                );
             }
             let html = <div key={category.id}>
                 <div className="re-item-head pad-left-10">{category.label}</div>

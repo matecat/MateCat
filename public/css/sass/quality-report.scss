@@ -5,6 +5,7 @@
 @import "commons/progress-mc-bar";
 @import "commons/buttons";
 @import "commons/nav-bar";
+@import "components/segment/tagsMenu";
 
 $color-red: #FB2A0D;
 $color-orange: #FBAA0D;
@@ -215,7 +216,7 @@ header {
                                 &.qr-fail {
                                     background: rgba(255, 0, 0, 0.23);
                                 }
-                                &.qr-pass, &.qr-fail {
+                                &.qr-pass, &.qr-fail, &.qr-norevision {
                                     margin-right: -1px;
                                     .qr-info {
                                         display: flex;
@@ -476,11 +477,6 @@ header {
                                                             direction: rtl !important;
                                                             text-align: right !important;
                                                         }
-                                                        .qr-tags,
-                                                        span.locked {
-                                                            direction: ltr;
-                                                            display: inline-block;
-                                                        }
                                                     }
                                                     .qr-text {
                                                         width: 66%;
@@ -490,43 +486,10 @@ header {
                                                         color: #5f5f5f;
                                                         .added {
                                                             background: rgba(158, 255, 0, 0.2);
-                                                            .qr-tags,
-                                                            span.locked {
-                                                                background: rgba(158, 255, 0, 0.2) !important;
-                                                            }
                                                         }
                                                         .deleted {
                                                             background: rgba(255, 46, 0, 0.1) ;
                                                             text-decoration: line-through ;
-                                                            .qr-tags,
-                                                            span.locked{
-                                                                background: rgba(255, 46, 0, 0.1) !important;
-                                                                text-decoration: line-through !important;
-                                                            }
-                                                        }
-
-                                                        .qr-tags,
-                                                        span.locked{
-                                                            color: #767676;
-                                                            font-style: italic;
-                                                            background: #f2f4f7;
-                                                            border-radius: 7px;
-                                                            padding: 3px;
-                                                            font-size: 14px;
-                                                            &.start-tag {
-
-                                                            }
-                                                            &.end-tag {
-
-                                                            }
-                                                            &.violet-tag {
-                                                                color: #e22bff !important;
-                                                            }
-
-                                                            &.tag-html-container-open,
-                                                            &.tag-html-container-close {
-                                                                display: none !important;
-                                                            }
                                                         }
                                                         .qr-issues-list {
                                                             display: flex;
@@ -1053,6 +1016,7 @@ footer {
 
 .one.column.spinner {
     margin: 30px 15px 15px;
+    z-index: 1;
     .ui.active.inverted.dimmer {
         background: #f4f5f8;
     }

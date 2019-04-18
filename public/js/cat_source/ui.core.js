@@ -734,7 +734,7 @@ UI = {
 		}
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
-		this.setWaypoints();
+		setTimeout(UI.setWaypoints.bind(this), 2000);
         $(window).trigger('segmentsAdded',{ resp : d.data.files });
 	},
 
@@ -793,7 +793,7 @@ UI = {
 			}
 
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
-			    var segToScrollElem = $('#segment-' + options.segmentToScroll);
+			    var segToScrollElem = ( UI.getSegmentById(options.segmentToScroll).length > 0 ) ? UI.getSegmentById(options.segmentToScroll) : UI.getSegmentsSplit(options.segmentToScroll)[0];
 				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
 				UI.openSegment(segToScrollElem);
 			} else if (options.segmentToOpen) {
@@ -803,22 +803,22 @@ UI = {
             //     UI.openSegment(UI.editarea);
             // }
 
-			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-                setTimeout(function () {
-                    var next = UI.findNextSegment(UI.startSegmentId);
-                    if (next) {
-                        UI.gotoSegment(next.attr('data-split-original-id'));
-                    }
-                }, 100);
-			}
+			// if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
+            //     setTimeout(function () {
+            //         var next = UI.findNextSegment(UI.startSegmentId);
+            //         if (next) {
+            //             UI.gotoSegment(next.attr('data-split-original-id'));
+            //         }
+            //     }, 100);
+			// }
 
 			if (options.applySearch) {
 				$('mark.currSearchItem').removeClass('currSearchItem');
 				SearchUtils.markSearchResults(options);
 				if (SearchUtils.searchMode == 'normal') {
-					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
+					$('section[id^="segment-' + options.segmentToScroll + '"] mark.searchMarker').first().addClass('currSearchItem');
 				} else {
-					$('#segment-' + options.segmentToScroll + ' .targetarea mark.searchMarker').first().addClass('currSearchItem');
+					$('section[id^="segment-' + options.segmentToScroll + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
 				}
 			}
 		}
@@ -927,9 +927,12 @@ UI = {
 	renderUntranslatedOutOfView: function() {
 		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
-		window.location.hash = this.nextUntranslatedSegmentId;
+		var segmentToScroll = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
+        window.location.hash = segmentToScroll;
         UI.unmountSegments();
-		this.render();
+		this.render({
+            segmentToScroll: segmentToScroll
+        });
 	},
 	reloadWarning: function() {
 		this.renderUntranslatedOutOfView();
@@ -1038,7 +1041,6 @@ UI = {
                 var mountPoint = $(".article-segments-container-" + fid)[0];
                 this.SegmentsContainers[fid] = ReactDOM.render(React.createElement(SegmentsContainer, {
                     fid: fid,
-                    isReviewImproved: ReviewImproved.enabled() && Review.enabled(),
                     isReviewExtended: ReviewExtended.enabled(),
                     reviewType: Review.type,
                     enableTagProjection: UI.enableTagProjection,
@@ -1144,7 +1146,7 @@ UI = {
         var segment_id = UI.currentSegmentId;
         var escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
         // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
-        var mainStr = htmlEncode(UI.postProcessEditarea(UI.currentSegment));
+        var mainStr = htmlEncode(UI.postProcessEditarea(UI.currentSegment)).replace(/&amp;/g, "&");
         $('.sub-editor.alternatives .overflow', segment).empty();
         $.each(d.data.editable, function(index) {
             // Decode the string from the server
@@ -1152,7 +1154,6 @@ UI = {
             // Make the diff between the text with the same codification
             var diff_obj = UI.execDiff(mainStr, transDecoded);
             var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-            var html =
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
                 '<li class="sugg-source">' +
                 '   <span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
@@ -1634,6 +1635,7 @@ UI = {
 		}
 	},
     segmentQA : function( segment ) {
+	    if ( UI.tagMenuOpen ) return;
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
         }
@@ -1678,7 +1680,7 @@ UI = {
                     UI.markTagMismatch(d.details);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.id,{});
-                    UI.removeHighlightCorrespondingTags(UI.getSegmentById(segment.id));
+                    UI.removeHighlightErrorsTags(UI.getSegmentById(segment.id));
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
@@ -1841,6 +1843,7 @@ UI = {
             id_before: idBefore,
             context_after: contextAfter,
             id_after: idAfter,
+            by_status: byStatus
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);
@@ -2038,14 +2041,15 @@ UI = {
 
 	processErrors: function(err, operation) {
 		$.each(err, function() {
+		    var codeInt = parseInt( this.code );
+
 			if (operation == 'setTranslation') {
-				if (this.code != '-10') { // is not a password error
+				if ( codeInt != -10) {
 					APP.alert({msg: "Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 				}
 			}
 
-			if (this.code == '-10' && operation != 'getSegments' ) {
-//				APP.alert("Job canceled or assigned to another translator");
+			if ( codeInt == -10 && operation != 'getSegments' ) {
 				APP.alert({
 					msg: 'Job canceled or assigned to another translator',
 					callback: 'reloadPage'
@@ -2054,15 +2058,18 @@ UI = {
 				// This Alert, will be NEVER displayed because are no-blocking
 				// Transform location.reload(); to a callable function passed as callback to alert
 			}
-			if (this.code == '-1000') {
+			if ( codeInt == -1000) {
 				console.log('ERROR -1000');
 				console.log('operation: ', operation);
                 UI.startOfflineMode();
-//				UI.failedConnection(0, 'no');
 			}
-            if (this.code == '-101') {
+            if ( codeInt == -101) {
                 console.log('ERROR -101');
                 UI.startOfflineMode();
+            }
+
+            if ( codeInt <= -2000 ) {
+			    APP.alert({ msg: this.message }) ;
             }
 		});
 	},
@@ -2191,7 +2198,7 @@ UI = {
         }
 		this.detectFirstLast();
 		this.lastSegmentWaypoint = this.lastSegment.waypoint(function(direction) {
-			if (direction === 'down') {
+			if (direction === 'down' && !UI.noMoreSegmentsAfter) {
 				this.destroy();
 				if (UI.infiniteScroll) {
 					if (!UI.blockGetMoreSegments) {
@@ -2206,7 +2213,7 @@ UI = {
 		}, UI.downOpts);
 
         this.firstSegmentWaypoint = this.firstSegment.waypoint(function(direction) {
-			if (direction === 'up') {
+			if (direction === 'up' && !UI.noMoreSegmentsBefore) {
                 this.destroy();
 				UI.getMoreSegments('before');
 			}
@@ -2350,7 +2357,7 @@ UI = {
     clickOnTranslatedButton: function (button) {
         var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
         //??
-        $('.test-invisible').remove();
+        $('.temp-highlight-tags').remove();
 
         // UI.setSegmentModified( UI.currentSegment, false ) ;
 
@@ -2383,7 +2390,7 @@ UI = {
             if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
             } else {
 
-                if (!UI.noMoreSegmentsAfter) {
+                if (UI.noMoreSegmentsAfter) {
                     UI.reloadWarning();
                 }
             }

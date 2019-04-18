@@ -309,6 +309,7 @@ if ( MBC.enabled() )
             inputForm.addClass( 'mbc-reply-input' );
             root.find( '.mbc-comment-balloon-inner' ).append( inputForm );
             el.find('.segment-side-container').prepend( root.show() );
+            inputForm.find( 'textarea' ).focus();
             addTagging();
         };
 
@@ -445,7 +446,8 @@ if ( MBC.enabled() )
 
         var renderCommentIconLinks = function () {
             $( 'section' ).each( function ( i, el ) {
-                renderCommentIconLink( el );
+                if ( $(el).find('.mbc-comment-notification').length === 0 && $(el).find('.mbc-comment-balloon-outer').length === 0)
+                    renderCommentIconLink( el );
             } );
         };
 
@@ -822,6 +824,10 @@ if ( MBC.enabled() )
                 } else {
                     openSegmentComment(section);
                 }
+                setTimeout(function (  ) {
+                    $( '.mbc-comment-balloon-inner' ).find('.mbc-comment-textarea').click();
+                    $( '.mbc-comment-balloon-inner' ).find('.mbc-comment-textarea').focus();
+                }, 700);
             } );
 
             $( delegate ).on( 'click', '.mbc-comment-balloon-inner .re-close-balloon', function ( e ) {

@@ -201,7 +201,7 @@ class downloadFileController extends downloadController {
                 if ( $this->forceXliff ) {
                     //clean the output filename by removing
                     // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
-                    $output_content[ $fileID ][ 'output_filename' ] = preg_replace( '#[0-9a-f]+\.[0-9_]+\.out\.#i', '', FilesStorage::basename_fix( $outputPath ) );
+                    $output_content[ $fileID ][ 'output_filename' ] = $current_filename .= ".xlf";
 
                     if ( $fileType[ 'proprietary_short_name' ] === 'matecat_converter' ) {
                         // Set the XLIFF extension to .xlf
@@ -283,7 +283,7 @@ class downloadFileController extends downloadController {
 
 
                     //strip previously added BOM
-                    $encodingConvertedFile[ 1 ] = Utils::stripBOM( $encodingConvertedFile[ 1 ], 16 );
+                    $encodingConvertedFile[ 1 ] = Utils::stripFileBOM( $encodingConvertedFile[ 1 ], 16 );
 
                     //store new content
                     $output_content[ $fileID ][ 'document_content' ] = $encodingConvertedFile[ 1 ];
@@ -322,9 +322,10 @@ class downloadFileController extends downloadController {
             try {
 
                 $pathinfo        = FilesStorage::pathinfo_fix( $this->getDefaultFileName( $this->project ) );
-                $this->_filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
+
+                    $this->setFilename( $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ] );
                     $this->startRemoteFileService( $output_content );
 
                     if ( $this->openOriginalFiles ) {
@@ -333,6 +334,7 @@ class downloadFileController extends downloadController {
                         $this->updateRemoteFiles( $output_content );
                         $this->outputResultForRemoteFiles();
                     }
+
                 } else {
                     $output_content = $this->getOutputContentsWithZipFiles( $output_content );
 
@@ -347,21 +349,29 @@ class downloadFileController extends downloadController {
 
                         if ( $pathinfo[ 'extension' ] != 'zip' ) {
                             if ( $this->forceXliff ) {
-                                $this->_filename = $this->id_job . ".zip";
+                                $this->setFilename( $this->id_job . ".zip" );
                             } else {
-                                $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                                $this->setFilename( $pathinfo[ 'basename' ] . ".zip" );
                             }
                         }
 
                         $this->outputContent = self::composeZip( $output_content ); //add zip archive content here;
+                        $this->setMimeType();
 
                     } else {
 
-                        # TODO: this is a good point to test transmission back
-                        $output_content = array_pop( $output_content );
-
                         //always an array with 1 element, pop it, Ex: array( array() )
-                        $this->setZipContent( $output_content );
+                        $oContent = array_pop( $output_content );
+
+                        if ( $pathinfo[ 'extension' ] == 'zip' ) {
+                            $this->setFilename( $oContent->output_filename );
+                        } else {
+                            $this->setFilename( self::forceOcrExtension( $oContent->output_filename . ( $this->forceXliff ? ".xlf" : null  ) ) );
+                        }
+
+                        $this->setOutputContent( $oContent );
+                        $this->setMimeType();
+
                     }
 
                 }
@@ -469,18 +479,6 @@ class downloadFileController extends downloadController {
         }
 
         echo json_encode( $response );
-    }
-
-    /**
-     * @param ZipContentObject $output_content
-     *
-     * @throws Exception
-     */
-    protected function setZipContent( ZipContentObject $output_content ) {
-
-        $this->_filename     = self::sanitizeFileExtension( $output_content->output_filename );
-        $this->outputContent = $output_content->getContent();
-
     }
 
     /**

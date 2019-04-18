@@ -19,6 +19,20 @@ class CategoryDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_parent
+     *
+     * @return mixed
+     */
+    public function findByIdModelAndIdParent( $id_model, $id_parent ) {
+        $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model AND id_parent = :id_parent " ;
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [ 'id_model' => $id_model, 'id_parent' => $id_parent ] );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\CategoryStruct' );
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @param $data
      * @return mixed
      * @deprecated  This method uses insert and find, refactor it to remove this need.
@@ -68,10 +82,10 @@ class CategoryDao extends \DataAccess_AbstractDao {
     /**
      * Returns a json encoded representation of categories and subcategories
      *
-     * @return string
+     * @return array
      */
 
-    public static function getSerializedModel( $id_model ) {
+    public static function getCatgoriesAndSeverities( $id_model ) {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model ORDER BY COALESCE(id_parent, 0) ";
 
         $conn = \Database::obtain()->getConnection();
@@ -122,7 +136,7 @@ class CategoryDao extends \DataAccess_AbstractDao {
             );
         }, array_values($out) );
 
-        return json_encode( array('categories' => $categories ) );
+        return $categories ;
     }
 
 

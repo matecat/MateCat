@@ -16,6 +16,14 @@ class OAuthSignInModel {
     protected $profilePictureUrl ;
 
     public function __construct( $firstName, $lastName, $email ) {
+        if ( empty($firstName) ) {
+            $firstName = "Anonymous";
+        }
+
+        if ( empty($lastName) ) {
+            $lastName = "User";
+        }
+
         $this->user = new Users_UserStruct( [
                 'first_name' => $firstName,
                 'last_name' => $lastName,

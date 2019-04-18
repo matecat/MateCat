@@ -14,6 +14,7 @@ use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Database;
+use FeatureSet;
 use PDOException;
 use SubFiltering\Filter;
 use TaskRunner\Commons\AbstractWorker,
@@ -62,124 +63,12 @@ class GetContributionWorker extends AbstractWorker {
 
         $jobStruct = $contributionStruct->getJobStruct();
 
-        $featureSet = new \FeatureSet();
+        $featureSet = new FeatureSet();
         $featureSet->loadForProject( $contributionStruct->getProjectStruct() );
 
+        list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $jobStruct->target, $featureSet );
 
-        $_config              = [];
-        $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
-        $_config[ 'source' ]  = $jobStruct->source;
-        $_config[ 'target' ]  = $jobStruct->target;
-
-        $_config[ 'email' ] = \INIT::$MYMEMORY_API_KEY;
-
-        $_config[ 'context_before' ] = $contributionStruct->getContexts()->context_before;
-        $_config[ 'context_after' ]  = $contributionStruct->getContexts()->context_after;
-        $_config[ 'id_user' ]        = $this->_extractAvailableKeysForUser( $contributionStruct );
-        $_config[ 'num_result' ]     = $contributionStruct->resultNum;
-        $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
-
-        if( $contributionStruct->concordanceSearch && $contributionStruct->fromTarget ){
-            //invert direction
-            $_config[ 'target' ]  = $jobStruct->source;
-            $_config[ 'source' ]  = $jobStruct->target;
-        }
-
-        if ( $jobStruct->id_tms == 1 ) {
-
-            /**
-             * MyMemory Enabled
-             */
-
-            $_config[ 'get_mt' ]  = true;
-            $_config[ 'mt_only' ] = false;
-            if ( $jobStruct->id_mt_engine != 1 ) {
-                /**
-                 * Don't get MT contribution from MyMemory ( Custom MT )
-                 */
-                $_config[ 'get_mt' ] = false;
-            }
-
-            if( $jobStruct->only_private_tm ){
-                $_config[ 'onlyprivate' ] = true;
-            }
-
-            $_TMS = true; /* MyMemory */
-
-        } else if ( $jobStruct->id_tms == 0 && $jobStruct->id_mt_engine == 1 ) {
-
-            /**
-             * MyMemory disabled but MT Enabled and it is NOT a Custom one
-             * So tell to MyMemory to get MT only
-             */
-            $_config[ 'get_mt' ]  = true;
-            $_config[ 'mt_only' ] = true;
-
-            $_TMS = true; /* MyMemory */
-
-        }
-
-        /**
-         * if No TM server and No MT selected $_TMS is not defined
-         * so we want not to perform TMS Call
-         *
-         */
-        if ( isset( $_TMS ) ) {
-
-            $tmEngine = $contributionStruct->getTMEngine( $featureSet );
-            $config = array_merge( $tmEngine->getConfigStruct(), $_config );
-
-            $temp_matches = $tmEngine->get( $config );
-            if ( !empty( $temp_matches )) {
-                $tms_match = $temp_matches->get_matches_as_array();
-            }
-
-        }
-
-        if ( $jobStruct->id_mt_engine > 1 /* Request MT Directly */ && !$contributionStruct->concordanceSearch ) {
-
-            if( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
-                /**
-                 * @var $mt_engine \Engines_MMT
-                 */
-                $mt_engine = $contributionStruct->getMTEngine( $featureSet );
-
-                $config    = $mt_engine->getConfigStruct();
-
-                //if a callback is not set only the first argument is returned, get the config params from the callback
-                $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
-
-                $config[ 'segment' ] = $contributionStruct->getContexts()->segment;
-                $config[ 'source' ]  = $jobStruct->source;
-                $config[ 'target' ]  = $jobStruct->target;
-                $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
-                $config[ 'segid' ]   = $contributionStruct->segmentId;
-
-                $mt_result = $mt_engine->get( $config );
-
-//                if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-//                    $errors = [
-//                            'errors' => [
-//                                    $mt_result[ 'error' ]
-//                            ]
-//                    ];
-//                }
-
-            }
-
-        }
-
-        $matches = [];
-        if ( !empty( $tms_match ) ) {
-            $matches = $tms_match;
-        }
-
-        if ( !empty( $mt_result ) ) {
-            $matches[ ] = $mt_result;
-            usort( $matches, [ "self", "__compareScore" ] );
-            //this is necessary since usort sorts is ascending order, thus inverting the ranking
-            $matches = array_reverse( $matches );
-        }
+        $matches = $this->_sortMatches( $mt_result, $matches );
 
         if ( !$contributionStruct->concordanceSearch ) {
             //execute these lines only in segment contribution search,
@@ -188,9 +77,30 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
-        $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet );
+        $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $jobStruct->target );
 
-        $this->publishPayload( $matches, $contributionStruct );
+        $this->_publishPayload( $matches, $contributionStruct );
+
+        if ( !empty( $contributionStruct->crossLangTargets ) ) {
+            $crossLangMatches = [] ;
+
+            foreach( $contributionStruct->crossLangTargets as $lang ) {
+                list( $mt_result, $matches ) = $this->_getMatches( $contributionStruct, $jobStruct, $lang, $featureSet, true );
+
+                $matches = array_slice( $matches, 0, $contributionStruct->resultNum );
+                $this->normalizeTMMatches( $matches, $contributionStruct, $featureSet, $lang );
+
+                foreach( $matches as $match ) {
+                    $crossLangMatches[] = $match ;
+                }
+            }
+
+            usort( $crossLangMatches, [ "self", "__compareScore" ] );
+            $crossLangMatches = array_reverse( $crossLangMatches );
+            $crossLangMatches = array_slice( $crossLangMatches, 0, $contributionStruct->resultNum );
+
+            $this->_publishPayload( $crossLangMatches, $contributionStruct, true );
+        }
 
     }
 
@@ -198,9 +108,9 @@ class GetContributionWorker extends AbstractWorker {
      * @param array                     $content
      * @param ContributionRequestStruct $contributionStruct
      *
-     * @throws \StompException
+     * @param bool                      $isCrossLang
      */
-    protected function publishPayload( array $content, ContributionRequestStruct $contributionStruct ) {
+    protected function _publishPayload( array $content, ContributionRequestStruct $contributionStruct, $isCrossLang = false ) {
 
         $payload = [
                 'id_segment' => $contributionStruct->segmentId,
@@ -208,8 +118,13 @@ class GetContributionWorker extends AbstractWorker {
         ];
 
         $type = 'contribution';
+
         if( $contributionStruct->concordanceSearch ){
             $type = 'concordance';
+        }
+
+        if ( $isCrossLang ) {
+            $type = 'cross_language_matches' ;
         }
 
         $message = json_encode( [
@@ -263,15 +178,17 @@ class GetContributionWorker extends AbstractWorker {
     /**
      * @param array                     $matches
      * @param ContributionRequestStruct $contributionStruct
-     * @param \FeatureSet               $featureSet
+     * @param FeatureSet                $featureSet
      *
-     * @throws \Exception
+     * @param                           $targetLang
      */
-    public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, \FeatureSet $featureSet ) {
+    public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct,
+                                        FeatureSet $featureSet, $targetLang ) {
 
         $Filter = Filter::getInstance( $featureSet );
 
         foreach ( $matches as &$match ) {
+            $match['target'] = $targetLang ;
 
             if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
 
@@ -285,7 +202,7 @@ class GetContributionWorker extends AbstractWorker {
                 //for logic correctness
                 if ( !$QA->thereAreErrors() ) {
                     $match[ 'raw_translation' ] = $QA->getTrgNormalized();
-                    $match[ 'translation' ]     = $Filter->fromLayer0ToLayer2( $match[ 'raw_translation' ] );
+                    $match[ 'translation' ]     = $Filter->fromLayer1ToLayer2( $match[ 'raw_translation' ] );
                 } else {
                     $this->_doLog( $QA->getErrors() );
                 }
@@ -350,12 +267,12 @@ class GetContributionWorker extends AbstractWorker {
     /**
      * @param array                     $match
      * @param ContributionRequestStruct $contributionStruct
-     * @param \FeatureSet               $featureSet
+     * @param FeatureSet               $featureSet
      *
      * @return array
      * @throws \Exception
      */
-    protected function _matchRewrite( array $match, ContributionRequestStruct $contributionStruct, \FeatureSet $featureSet ){
+    protected function _matchRewrite( array $match, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ){
 
         //Rewrite ICE matches as 101%
         if( $match[ 'match' ] == '100%' ){
@@ -439,6 +356,144 @@ class GetContributionWorker extends AbstractWorker {
         return $regularExpressions;
     }
 
+    /**
+     * @param ContributionRequestStruct $contributionStruct
+     * @param                           $jobStruct
+     * @param                           $targetLang
+     * @param                           $featureSet
+     *
+     * @param bool                      $isCrossLang
+     *
+     * @return array
+     */
+    protected function _getMatches( ContributionRequestStruct $contributionStruct, $jobStruct, $targetLang, $featureSet, $isCrossLang = false) {
+
+        $_config              = [];
+        $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
+        $_config[ 'source' ]  = $jobStruct->source;
+        $_config[ 'target' ]  = $targetLang;
+
+        $_config[ 'email' ] = INIT::$MYMEMORY_API_KEY;
+
+        $_config[ 'context_before' ] = $contributionStruct->getContexts()->context_before;
+        $_config[ 'context_after' ]  = $contributionStruct->getContexts()->context_after;
+        $_config[ 'id_user' ]        = $this->_extractAvailableKeysForUser( $contributionStruct );
+        $_config[ 'num_result' ]     = $contributionStruct->resultNum;
+        $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
+
+        if ( $contributionStruct->concordanceSearch && $contributionStruct->fromTarget ) {
+            //invert direction
+            $_config[ 'target' ] = $jobStruct->source;
+            $_config[ 'source' ] = $targetLang ;
+        }
+
+        if ( $jobStruct->id_tms == 1 ) {
+
+            /**
+             * MyMemory Enabled
+             */
+
+            $_config[ 'get_mt' ]  = true;
+            $_config[ 'mt_only' ] = false;
+            if ( $jobStruct->id_mt_engine != 1 ) {
+                /**
+                 * Don't get MT contribution from MyMemory ( Custom MT )
+                 */
+                $_config[ 'get_mt' ] = false;
+            }
+
+            if ( $jobStruct->only_private_tm ) {
+                $_config[ 'onlyprivate' ] = true;
+            }
+
+            $_TMS = true; /* MyMemory */
+
+        } else if ( $jobStruct->id_tms == 0 && $jobStruct->id_mt_engine == 1 ) {
+
+            /**
+             * MyMemory disabled but MT Enabled and it is NOT a Custom one
+             * So tell to MyMemory to get MT only
+             */
+            $_config[ 'get_mt' ]  = true;
+            $_config[ 'mt_only' ] = true;
+
+            $_TMS = true; /* MyMemory */
+
+        }
+
+        if ( $isCrossLang ) {
+            $_config['get_mt'] = false ;
+        }
+
+        /**
+         * if No TM server and No MT selected $_TMS is not defined
+         * so we want not to perform TMS Call
+         */
+        /**
+         *
+         * This calls the TMEngine to get memories
+         */
+        if ( isset( $_TMS ) ) {
+
+            $tmEngine = $contributionStruct->getTMEngine( $featureSet );
+            $config   = array_merge( $tmEngine->getConfigStruct(), $_config );
+
+            $temp_matches = $tmEngine->get( $config );
+            if ( !empty( $temp_matches ) ) {
+                $tms_match = $temp_matches->get_matches_as_array();
+            }
+        }
+
+        $mt_result = [] ;
+
+        if ( $jobStruct->id_mt_engine > 1 /* Request MT Directly */ && !$contributionStruct->concordanceSearch ) {
+
+            if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
+                /**
+                 * @var $mt_engine \Engines_MMT
+                 */
+                $mt_engine = $contributionStruct->getMTEngine( $featureSet );
+
+                $config = $mt_engine->getConfigStruct();
+
+                //if a callback is not set only the first argument is returned, get the config params from the callback
+                $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
+
+                $config[ 'segment' ] = $contributionStruct->getContexts()->segment;
+                $config[ 'source' ]  = $jobStruct->source;
+                $config[ 'target' ]  = $jobStruct->target;
+                $config[ 'email' ]   = INIT::$MYMEMORY_API_KEY;
+                $config[ 'segid' ]   = $contributionStruct->segmentId;
+
+                $mt_result = $mt_engine->get( $config );
+            }
+        }
+
+        $matches = [];
+        if ( !empty( $tms_match ) ) {
+            $matches = $tms_match;
+        }
+
+        return array( $mt_result, $matches );
+    }
+
+    /**
+     * @param $mt_result
+     * @param $matches
+     *
+     * @return array
+     */
+    protected function _sortMatches( $mt_result, $matches ) {
+        if ( !empty( $mt_result ) ) {
+            $matches[] = $mt_result;
+            usort( $matches, [ "self", "__compareScore" ] );
+            //this is necessary since usort sorts is ascending order, thus inverting the ranking
+            $matches = array_reverse( $matches );
+        }
+
+        return $matches;
+    }
+
     private function _sortByLenDesc( $stringA, $stringB ){
         if ( strlen( $stringA ) == strlen( $stringB ) ) {
             return 0;
@@ -449,11 +504,11 @@ class GetContributionWorker extends AbstractWorker {
     /**
      * @param                           $matches
      * @param ContributionRequestStruct $contributionStruct
-     * @param \FeatureSet               $featureSet
+     * @param FeatureSet               $featureSet
      *
      * @throws \Exception
      */
-    private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, \FeatureSet $featureSet ) {
+    private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
 
         if ( count( $matches ) > 0 ) {
 

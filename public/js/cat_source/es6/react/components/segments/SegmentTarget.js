@@ -5,6 +5,7 @@
  */
 var React = require('react');
 var EditArea = require('./Editarea').default;
+var TagsMenu = require('./TagsMenu').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
 
@@ -15,13 +16,17 @@ class SegmentTarget extends React.Component {
         super(props);
         this.state = {
             translation: this.props.segment.decoded_translation,
-            originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation : this.props.segment.translation)
+            originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
+                : this.props.segment.translation),
+            showTagsMenu: false
         };
         this.replaceTranslation = this.replaceTranslation.bind(this);
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.toggleTagLock = this.toggleTagLock.bind(this);
+        this.showTagsMenu = this.showTagsMenu.bind(this);
+        this.hideTagsMenu = this.hideTagsMenu.bind(this);
     }
 
     replaceTranslation(sid, translation) {
@@ -38,6 +43,20 @@ class SegmentTarget extends React.Component {
         });
     }
 
+    showTagsMenu(sid) {
+        if ( this.props.segment.sid == sid ) {
+            this.setState({
+                showTagsMenu: true
+            });
+        }
+    }
+
+    hideTagsMenu() {
+        this.setState({
+            showTagsMenu: false
+        });
+    }
+
     setOriginalTranslation(sid, translation) {
         if (this.props.segment.sid == sid) {
             this.setState({
@@ -47,17 +66,13 @@ class SegmentTarget extends React.Component {
     }
 
     beforeRenderActions() {
-        if (!this.props.isReviewImproved) {
-            var area = $("#segment-" + this.props.segment.sid + " .targetarea");
-            this.props.beforeRenderOrUpdate(area);
-        }
+        var area = $("#segment-" + this.props.segment.sid + " .targetarea");
+        this.props.beforeRenderOrUpdate(area);
     }
 
     afterRenderActions() {
-        if (!this.props.isReviewImproved) {
-            var area = $("#segment-" + this.props.segment.sid + " .targetarea");
-            this.props.afterRenderOrUpdate(area);
-        }
+        var area = $("#segment-" + this.props.segment.sid + " .targetarea");
+        this.props.afterRenderOrUpdate(area);
     }
 
     onClickEvent(event) {
@@ -102,51 +117,13 @@ class SegmentTarget extends React.Component {
         return {__html: string};
     }
 
-    componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
-        // SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.replaceTranslation);
-        SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
-        SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
-        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
-        this.afterRenderActions();
-
-    }
-
-    componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
-        // SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.replaceTranslation);
-        SegmentStore.removeListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
-        SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
-        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
-    }
-
-    componentWillMount() {
-        this.beforeRenderActions();
-    }
-
-    componentWillUpdate() {
-        this.beforeRenderActions();
-    }
-
-    componentDidUpdate() {
-        this.afterRenderActions();
-    }
-
-    render() {
+    getTargetArea(translation) {
         var textAreaContainer = "";
-        let translation = this.state.translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
 
-        if ( this.props.isReviewImproved ) {
-            textAreaContainer = <div data-mount="segment_text_area_container">
-                <div className="textarea-container" onClick={this.onClickEvent.bind( this )}>
-                    <div className="targetarea issuesHighlightArea errorTaggingArea"
-                         dangerouslySetInnerHTML={this.allowHTML( translation )}/>
-                </div>
-            </div>
-        } else if ( this.props.segment.edit_area_locked ) {
+        if ( this.props.segment.edit_area_locked ) {
             textAreaContainer = <div className="segment-text-area-container" data-mount="segment_text_area_container">
                 <div className="textarea-container" onClick={this.onClickEvent.bind( this )} onMouseUp={this.selectIssueText.bind(this)}
-                ref={(div)=> this.issuesHighlightArea = div}>
+                     ref={(div)=> this.issuesHighlightArea = div}>
                     <div className="targetarea issuesHighlightArea errorTaggingArea"
                          dangerouslySetInnerHTML={this.allowHTML( translation )}/>
                 </div>
@@ -216,7 +193,14 @@ class SegmentTarget extends React.Component {
                     locked={this.props.locked}
                     readonly={this.props.readonly}
                 />
+                { this.state.showTagsMenu ? (
 
+                    <TagsMenu sourceTags={UI.sourceTags}
+
+
+                    />
+
+                ): null}
                 {s2tMicro}
                 <div className="original-translation" style={{display: 'none'}}
                      dangerouslySetInnerHTML={this.allowHTML(this.state.originalTranslation)}/>
@@ -235,10 +219,51 @@ class SegmentTarget extends React.Component {
                 </div>
             </div>;
         }
+        return textAreaContainer;
+    }
+
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
+        // SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.replaceTranslation);
+        SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
+        SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
+        this.afterRenderActions();
+
+    }
+
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
+        // SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.replaceTranslation);
+        SegmentStore.removeListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.removeListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
+        SegmentStore.removeListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
+        SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
+        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
+    }
+
+    componentWillMount() {
+        this.beforeRenderActions();
+    }
+
+    componentWillUpdate() {
+        this.beforeRenderActions();
+    }
+
+    componentDidUpdate() {
+        this.afterRenderActions();
+    }
+
+    render() {
+        let translation = this.state.translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
+
+
         return (
             <div className="target item" id={"segment-" + this.props.segment.sid + "-target"}>
 
-                {textAreaContainer}
+                {this.getTargetArea(translation)}
                 <p className="warnings"/>
 
                 <ul className="buttons toggle" data-mount="main-buttons"

@@ -236,6 +236,17 @@ var SegmentActions = {
             id: sid,
         });
     },
+    showTagsMenu: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_TAGS_MENU,
+            sid: sid,
+        });
+    },
+    closeTagsMenu: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_TAGS_MENU
+        });
+    },
     /************ FOOTER ***************/
     registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({
@@ -254,6 +265,15 @@ var SegmentActions = {
     setSegmentContributions: function (sid, fid, contributions, errors) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_CONTRIBUTIONS,
+            sid: sid,
+            fid: fid,
+            matches: contributions,
+            errors: errors
+        });
+    },
+    setSegmentCrossLanguageContributions: function (sid, fid, contributions, errors) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_CL_CONTRIBUTIONS,
             sid: sid,
             fid: fid,
             matches: contributions,
@@ -362,6 +382,14 @@ var SegmentActions = {
             actionType: SegmentConstants.CONCORDANCE_RESULT,
             sid: sid,
             data: data
+        });
+    },
+
+    modifyTabVisibility: function(tabName, visible) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.MODIFY_TAB_VISIBILITY,
+            tabName: tabName,
+            visible: visible
         });
     },
 

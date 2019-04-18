@@ -579,7 +579,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
     filerow.removeClass( 'ready' ).addClass( 'converting' ).data( 'session', session );
 
     var request = $.ajax( {
-        url: '?action=convertFile',
+        url: 'action/convertFile/',
         data: {
             action: 'convertFile',
             file_name: fname,

@@ -15,9 +15,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @return Translations_SegmentTranslationStruct
      */
 
-    public static function findBySegmentAndJob( $id_segment, $id_job ) {
-        Log::doLog( $id_segment, $id_job );
-
+    public static function findBySegmentAndJob( $id_segment, $id_job, $ttl = 0 ) {
         $conn = Database::obtain()->getConnection();
 
         $sql = "SELECT * FROM segment_translations WHERE " .
@@ -26,15 +24,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
 
-        $stmt->execute( array(
-            'id_segment' => $id_segment,
-            'id_job'     => $id_job
-        ));
-
-        $stmt->setFetchMode(PDO::FETCH_CLASS,
-            'Translations_SegmentTranslationStruct');
-
-        return $stmt->fetch();
+        $thisDao = new self();
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Translations_SegmentTranslationStruct(), [
+                'id_job'     => $id_job,
+                'id_segment' => $id_segment
+        ] )[ 0 ];
     }
 
     /**
@@ -274,102 +268,50 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function changeStatusBySegmentsIds( Jobs_JobStruct $job, $segments_ids, $status) {
-        $update_values = [];
-        $where_values = [];
-        $conn          = Database::obtain()->getConnection();
+    public static function updateSegmentStatusBySegmentId( $id_job, $id_segment, $status ) {
+        $sql = "UPDATE segment_translations SET status = :status WHERE id_job = :id_job AND id_segment = :id_segment " ;
+        $conn         = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql ) ;
+        $stmt->execute( ['id_job' => $id_job, 'id_segment' => $id_segment, 'status' => $status ] ) ;
 
-        if ( $job->getProject()->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
-            $sum_sql = "SUM(segments.raw_word_count)";
-        } else {
-            $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
-        }
-
-        $queryTotals = "
-           SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
-
-           FROM segment_translations
-              INNER JOIN  segments
-              ON segments.id = segment_translations.id_segment
-           WHERE id_job = ?
-           AND status != ?
-           AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")
-           GROUP BY status
-    ";
-
-        $where_values[] = $job->id;
-        $where_values[] = $status;
-        $where_values   = array_merge( $where_values, $segments_ids );
-
-        $stmt = $conn->prepare( $queryTotals );
-
-        $stmt->execute( $where_values );
-
-        $totals = $stmt->fetchAll();
-
-        $old_wStruct = new WordCount_Struct();
-        $old_wStruct->setIdJob( $job->id );
-        $old_wStruct->setJobPassword( $job->password );
-        $old_wStruct->setNewWords( $job->new_words );
-        $old_wStruct->setDraftWords( $job->draft_words );
-        $old_wStruct->setTranslatedWords( $job->translated_words );
-        $old_wStruct->setApprovedWords( $job->approved_words );
-        $old_wStruct->setRejectedWords( $job->rejected_words );
-
-
-        $counter = new WordCount_Counter( $old_wStruct );
-
-        $newCounterValues = [];
-
-        foreach ( $totals as $__pos => $old_value ) {
-            $counter->setOldStatus( $old_value[ 'status' ] );
-            $counter->setNewStatus( $status );
-            $newCounterValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
-        }
-
-        $newTotals = $counter->updateDB( $newCounterValues );
-
-        $sql = "UPDATE segment_translations SET status = ? WHERE id_job = ? AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
-
-        $stmt            = $conn->prepare( $sql );
-        $update_values[] = $status;
-        $update_values[] = $job->id;
-        $update_values   = array_merge( $update_values, $segments_ids );
-
-        $stmt->execute( $update_values );
-
-
-        $job_stats = CatUtils::getFastStatsForJob( $newTotals );
-
-        return $job_stats;
+        return $stmt->rowCount() ;
     }
 
     public static function getUnchangebleStatus( $segments_ids, $status ) {
-
-        //if translated all segments are changeble
-        if ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            return [];
-        }
-
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
 
         if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
 
-            $sql = "SELECT id_segment FROM segment_translations WHERE status NOT IN( "
-                    . str_repeat( '?,', count( $where_values ) -1 ) . '?'
-                    . " ) AND id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ")";
-
-            $where_values = array_merge( $where_values, $segments_ids );
-            $stmt         = $conn->prepare( $sql );
-            $stmt->execute( $where_values );
-
-            return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
-                return (int)$id_segment;
-            } );
+        } elseif ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED ;
+            $where_values[] = Constants_TranslationStatus::STATUS_DRAFT ;
+            $where_values[] = Constants_TranslationStatus::STATUS_NEW ;
         }
+        else {
+            throw new Exception('not allowed to change status to '. $status ) ;
+        }
+
+        $status_placeholders       = str_repeat( '?,', count( $where_values ) -1 ) . '?' ;
+        $segments_ids_placeholders = str_repeat( '?,', count( $segments_ids ) - 1 ) . '?';
+
+        $sql = "SELECT id_segment FROM segment_translations
+                    WHERE
+                    (
+                      status NOT IN( $status_placeholders )  OR
+                      translation IS NULL OR
+                      translation = ''
+                    ) AND id_segment IN ( $segments_ids_placeholders )
+                    ";
+
+        $where_values = array_merge( $where_values, $segments_ids );
+        $stmt         = $conn->prepare( $sql );
+        $stmt->execute( $where_values );
+
+        return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
+            return (int)$id_segment;
+        } );
 
 
     }

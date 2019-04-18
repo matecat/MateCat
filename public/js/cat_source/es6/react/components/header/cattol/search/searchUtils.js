@@ -465,6 +465,7 @@ let SearchUtils = {
         let searchMarker = (this.searchMode === 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 		    let segId = UI.getSegmentId( $(this) );
+		    segId = segId.split('-')[0]; // splitted segments
             if ( SearchUtils.searchResultsSegments.indexOf(segId) > -1 ) {
                 let isCurrent = $(this).find('.currSearchItem').length > 0;
                 let isTagged = $(this).find('.searchMarker').length > 0;
@@ -582,18 +583,17 @@ let SearchUtils = {
             let marksArray = currentSegmentFind.find("mark").toArray();
             let currentMarkIndex = marksArray.indexOf($(current)[0]);
             let nextIndex = (type === "prev") ? currentMarkIndex - 1 : currentMarkIndex + 1;
-            if ( marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
-                $(current).removeClass('currSearchItem');
-                $(marksArray[nextIndex]).addClass('currSearchItem');
+            if ( $(current) && marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
                 if (unmark)
                     $(current).replaceWith($(current).text());
+                $(current).removeClass('currSearchItem');
+                $(marksArray[nextIndex]).addClass('currSearchItem');
                 UI.goingToNext = false;
             } else { // jump to results in subsequents segments
-
-                let seg = (current.length) ? $(current).parents('section') : $('mark.searchMarker').first().parents('section');
-                if (seg.length) {
+                let $currentSegment = $(current).length ? $(current).parents('section') : UI.currentSegment;
+                if ($currentSegment.length) {
                     this.gotoSearchResultAfter({
-                        el: $(seg).attr('id').split('-')[1],
+                        el: $($currentSegment).attr('id').split('-')[1],
                         unmark: unmark
                     }, type);
                 } else {
@@ -703,9 +703,15 @@ let SearchUtils = {
         className = (className) ? className : '.source'
         _.each(this.searchResultsSegments, function ( item ) {
             let $obj = UI.getSegmentById(item);
-            if ($obj.length) {
+            $obj = ( $obj.length > 0 ) ? $obj : UI.getSegmentsSplit(item);
+            if ($obj.length === 1) {
                 $obj = $obj.find(className);
                 $objects.push($obj);
+            } else if ( $obj.length > 1 ) { //splitted segments
+                _.each($obj, (item)=> {
+                    item = $(item).find(className);
+                    $objects.push(item);
+                });
             }
         });
         return $objects;

@@ -26,7 +26,7 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute(array('id_job' => $chunk->id, 'password' => $chunk->password  ));
+        $stmt->execute( array( 'id_job' => $chunk->id, 'password' => $chunk->password ) );
         $count =  $stmt->fetch();
 
         $penalty_points = $count[0] == null ? 0 : $count[0];

@@ -119,15 +119,6 @@ JOBS[loggerName]    = "jobs.log"
 ;ALIGNER_TMX_IMPORT[redis_key]     = "tmx_import_list"
 ;ALIGNER_TMX_IMPORT[loggerName]    = "tmx_import.log"
 
-;;###############################
-;;#####      Align Job      #####
-;;###############################
-;ALIGNER_ALIGN_JOB[queue_name]   = "aligner_align_job"
-;ALIGNER_ALIGN_JOB[pid_set_name]  = "ch_pid_align_job"
-;ALIGNER_ALIGN_JOB[max_executors] = 1
-;ALIGNER_ALIGN_JOB[redis_key]     = "align_job_list"
-;ALIGNER_ALIGN_JOB[loggerName]    = "align_job.log"
-
 ;;##############################
 ;;##### Key Name setContribution #####
 ;;##############################
@@ -136,3 +127,39 @@ CONTRIBUTION_GET[pid_set_name]  = "ch_pid_get_contribution"
 CONTRIBUTION_GET[max_executors] = 50
 CONTRIBUTION_GET[redis_key]     = "get_contribution_list"
 CONTRIBUTION_GET[loggerName]    = "get_contribution.log"
+
+;;###############################
+;;#####   Align Job Small   #####
+;;###############################
+ALIGNER_ALIGN_JOB_SMALL[queue_name]    = "aligner_align_job_small"
+ALIGNER_ALIGN_JOB_SMALL[pid_set_name]  = "ch_pid_align_job_small"
+ALIGNER_ALIGN_JOB_SMALL[max_executors] = 1
+ALIGNER_ALIGN_JOB_SMALL[redis_key]     = "align_job_small_list"
+ALIGNER_ALIGN_JOB_SMALL[loggerName]    = "align_job_small.log"
+
+;;###############################
+;;#####   Align Job Medium  #####
+;;###############################
+ALIGNER_ALIGN_JOB_MEDIUM[queue_name]    = "aligner_align_job_medium"
+ALIGNER_ALIGN_JOB_MEDIUM[pid_set_name]  = "ch_pid_align_job_medium"
+ALIGNER_ALIGN_JOB_MEDIUM[max_executors] = 1
+ALIGNER_ALIGN_JOB_MEDIUM[redis_key]     = "align_job_medium_list"
+ALIGNER_ALIGN_JOB_MEDIUM[loggerName]    = "align_job_medium.log"
+
+;;###############################
+;;#####    Align Job Big    #####
+;;###############################
+ALIGNER_ALIGN_JOB_BIG[queue_name]    = "aligner_align_job_big"
+ALIGNER_ALIGN_JOB_BIG[pid_set_name]  = "ch_pid_align_job_big"
+ALIGNER_ALIGN_JOB_BIG[max_executors] = 1
+ALIGNER_ALIGN_JOB_BIG[redis_key]     = "align_job_big_list"
+ALIGNER_ALIGN_JOB_BIG[loggerName]    = "align_job_big.log"
+
+;;###############################
+;;#####   Segment Create    #####
+;;###############################
+ALIGNER_SEGMENT_CREATE[queue_name]    = "aligner_segment_create"
+ALIGNER_SEGMENT_CREATE[pid_set_name]  = "ch_pid_aligner_segment_create"
+ALIGNER_SEGMENT_CREATE[max_executors] = 5
+ALIGNER_SEGMENT_CREATE[redis_key]     = "aligner_segment_create_list"
+ALIGNER_SEGMENT_CREATE[loggerName]    = "aligner_segment_create.log"

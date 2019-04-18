@@ -180,23 +180,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     }
 
-    public function getProjectFeatures(){
-
-        return $this->cachable( __function__, $this, function () {
-
-            $allMetaData = $this->getProjectMetadata();
-
-            foreach( $allMetaData as $metadataStruct ){
-                if( $metadataStruct->key == Projects_MetadataDao::FEATURES_KEY ){
-                    return $metadataStruct->value;
-                }
-            }
-            return null;
-
-        } );
-
-    }
-
     public function getWarningsCount(){
 
         return $this->cachable( __function__, $this, function ( $jobStruct ) {
@@ -296,6 +279,14 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     public function getIsReview(){
         return $this->is_review;
+    }
+
+    public function isArchiveable() {
+        $lastUpdate  = new DateTime( $this->last_update );
+        $oneMonthAgo = new DateTime();
+        $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
+
+        return $lastUpdate < $oneMonthAgo && !$this->isCanceled() ;
     }
 
 }

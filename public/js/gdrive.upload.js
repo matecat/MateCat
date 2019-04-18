@@ -124,10 +124,12 @@ APP.addGDriveFile = function(exportIds) {
     };
 
     var encodedJson = encodeURIComponent(JSON.stringify(jsonDoc));
-
-    $( '<div/>', {
-        'class': 'modal-gdrive'
-    }).appendTo( $( 'body' ));
+    var html = '<div class="modal-gdrive">'+
+       ' <div class="ui active inverted dimmer">'+
+            '<div class="ui massive text loader">Uploading Files</div>'+
+        '</div>'+
+    '</div>';
+    $(html).appendTo( $( 'body' ));
 
     $.getJSON('/webhooks/gdrive/open?isAsync=true&state=' + encodedJson, function(response) {
         $('.modal-gdrive').remove();

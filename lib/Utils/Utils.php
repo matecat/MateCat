@@ -431,6 +431,26 @@ class Utils {
         return true;
     }
 
+    public static function isValidFileName( $fileUpName ) {
+
+        if (
+                stripos( $fileUpName, '../' ) !== false ||
+                stripos( $fileUpName, '/../' ) !== false ||
+                stripos( $fileUpName, '/..' ) !== false ||
+                stripos( $fileUpName, '%2E%2E%2F' ) !== false ||
+                stripos( $fileUpName, '%2F%2E%2E%2F' ) !== false ||
+                stripos( $fileUpName, '%2F%2E%2E' ) !== false ||
+                stripos( $fileUpName, '.' ) === 0 ||
+                stripos( $fileUpName, '%2E' ) === 0
+        ) {
+            //Directory Traversal!
+            return false;
+        }
+
+        return true;
+
+    }
+
     public static function filterLangDetectArray( $arr ) {
         return filter_var( $arr, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
     }
@@ -530,7 +550,7 @@ class Utils {
 
 	// Previously in FileFormatConverter
 	//remove UTF-8 BOM
-	public static function stripBOM( $string, $utf = 8 ) {
+	public static function stripFileBOM( $string, $utf = 8 ) {
 		//depending on encoding, different slices are to be cut
 		switch ( $utf ) {
 			case 16:
@@ -547,6 +567,11 @@ class Utils {
 
 		return $string;
 	}
+
+	public static function stripBOM( $string ){
+        //PATCH TO FIX BOM INSERTIONS
+        return str_replace( "\xEF\xBB\xBF", '', $string );
+    }
 
 	public static function isJobBasedOnMateCatFilters($jobId) {
 

@@ -168,7 +168,8 @@ API.SEGMENT = {
     approveSegments: function ( segments ) {
         var data = {
             segments_id: segments,
-            status: 'approved'
+            status: 'approved',
+            client_id: config.id_client
         };
         return $.ajax({
             async: true,
@@ -180,7 +181,8 @@ API.SEGMENT = {
     translateSegments: function ( segments ) {
         var data = {
             segments_id: segments,
-            status: 'translated'
+            status: 'translated',
+            client_id: config.id_client
         };
         return $.ajax({
             async: true,

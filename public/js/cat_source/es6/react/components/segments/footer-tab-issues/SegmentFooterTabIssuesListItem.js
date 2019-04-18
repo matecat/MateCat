@@ -26,7 +26,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
     }
 
     findCategory( id ) {
-        return this.state.categories.find( category => {
+        return this.state.get('categories').find( category => {
             return id == category.id
         } )
     }
@@ -68,7 +68,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
     addComment(e){
         e.preventDefault();
         let self = this;
-        // send action invokes ReviewImproved function
+
         if ( !this.state.comment_text || this.state.comment_text.length === 0 ) {
             return ;
         }
@@ -89,6 +89,11 @@ class SegmentFooterTabIssuesListItem extends React.Component {
                 })
             })
             .fail( this.handleFail );
+    }
+
+    handleFail() {
+        genericErrorAlertMessage() ;
+        this.setState({ sendDisabled : false });
     }
 
     setCommentView(event){

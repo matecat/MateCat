@@ -11,6 +11,7 @@ $.extend(UI, {
         UI.body = $('body');
         UI.checkSegmentsArray = {} ;
         UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
+        UI.checkCrossLanguageSettings();
         UI.setShortcuts();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
@@ -37,6 +38,7 @@ $.extend(UI, {
             LXQ.initPopup();
         }
         NOTIFICATIONS.start();
+        UI.checkTagProximity =  _.debounce( UI.checkTagProximityFn, 1000);
     },
 	init: function() {
 

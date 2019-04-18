@@ -8,8 +8,6 @@ let SegmentActions = require('../../actions/SegmentActions');
 let SegmentConstants = require('../../constants/SegmentConstants');
 let SegmentHeader = require('./SegmentHeader').default;
 let SegmentFooter = require('./SegmentFooter').default;
-let SegmentBody = require('./SegmentBody').default;
-let TranslationIssuesSideButtons = require('../review/TranslationIssuesSideButton').default;
 let IssuesContainer = require('./footer-tab-issues/SegmentFooterTabIssues').default;
 let ReviewExtendedPanel = require('../review_extended/ReviewExtendedPanel').default;
 let WrapperLoader = require('../../common/WrapperLoader').default;
@@ -44,7 +42,7 @@ class Segment extends React.Component {
             readonly: readonly,
             inBulk: false,
             tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
-            && !UI.checkXliffTagsInText(this.props.segment.translation),
+            && !UI.checkXliffTagsInText(this.props.segment.translation) && UI.removeAllTags(this.props.segment.segment) !== '',
             showRevisionPanel: false,
             selectedTextObj: null
         }
@@ -88,9 +86,6 @@ class Segment extends React.Component {
             this.dataAttrTagged = "nottagged";
         } else {
             this.dataAttrTagged = "tagged";
-        }
-        if (this.props.isReviewImproved) {
-            classes.push("reviewImproved");
         }
         if (this.props.segment.edit_area_locked) {
             classes.push("editAreaLocked");
@@ -212,7 +207,7 @@ class Segment extends React.Component {
                 ( !this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit()))
             )
         ) {
-            return <TranslationIssuesSideButtons
+            return <TranslationIssuesSideButton
                     sid={this.props.segment.sid.split('-')[0]}
                     reviewType={this.props.reviewType}
                     segment={this.props.segment}
@@ -427,7 +422,6 @@ class Segment extends React.Component {
                     <SegmentBody
                         segment={this.props.segment}
                         readonly={this.state.readonly}
-                        isReviewImproved={this.props.isReviewImproved}
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}

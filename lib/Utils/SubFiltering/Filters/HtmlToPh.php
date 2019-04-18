@@ -10,6 +10,7 @@
 namespace SubFiltering\Filters;
 
 use SubFiltering\Commons\AbstractHandler;
+use SubFiltering\Commons\Constants;
 
 /**
  * Class HtmlToPh
@@ -214,11 +215,20 @@ class HtmlToPh extends AbstractHandler {
          * - ending with a letter a-zA-Z or a quote "' or /
          *
          */
-        if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-zA-Z0-9\-\._]+?(?:\s[:A-Z_a-z]+=.+)?>#', $buffer ) ){
+        if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-zA-Z0-9\-\._]+?(?:\s[:A-Z_a-z]+=.+?)?\s*[\/]{0,1}>#', $buffer ) ){
             if( is_numeric( substr( $buffer, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[hH][1-6][^>]*>#', $buffer ) ){ //H tag are an exception
                 //tag can not end with a number
                 return false;
             }
+
+            //this case covers when filters create an xliff tag inside an html tag:
+            //EX:
+            //original:  &lt;a href=\"<x id="1">\"&gt;
+            //  <a href=\"##LESSTHAN##eCBpZD0iMSIv##GREATERTHAN##\">
+            if( strpos( $buffer, Constants::LTPLACEHOLDER ) !== false || strpos( $buffer, Constants::GTPLACEHOLDER ) !== false ){
+                return false;
+            }
+
             return true;
         }
 

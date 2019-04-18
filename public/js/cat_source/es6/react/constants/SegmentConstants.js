@@ -25,9 +25,11 @@ module.exports = keyMirror({
     UPDATE_ALL_SEGMENTS:null,
     CREATE_FOOTER: null,
     REGISTER_TAB: null,
+    MODIFY_TAB_VISIBILITY: null,
     CLOSE_TABS: null,
     SET_DEFAULT_TAB: null,
     SET_CONTRIBUTIONS: null,
+    SET_CL_CONTRIBUTIONS: null,
     CHOOSE_CONTRIBUTION: null,
     RENDER_GLOSSARY: null,
     SET_SEGMENT_ORIGINAL_TRANSLATION: null,
@@ -59,5 +61,7 @@ module.exports = keyMirror({
     SET_SEGMENT_WARNINGS: null,
     UPDATE_GLOBAL_WARNINGS: null,
     QA_LEXIQA_ISSUES: null,
-    LOCK_EDIT_AREA: null
+    LOCK_EDIT_AREA: null,
+    OPEN_TAGS_MENU: null,
+    CLOSE_TAGS_MENU: null
 });

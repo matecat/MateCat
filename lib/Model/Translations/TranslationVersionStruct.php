@@ -13,4 +13,7 @@ class Translations_TranslationVersionStruct extends DataAccess_AbstractDaoSilent
 
     public $is_review ;
     public $raw_diff ;
+
+    public $old_status ;
+    public $new_status ;
 }

@@ -5,17 +5,7 @@
 // Underscores seem to be a better convention.
 window.MC = {} ;
 
-window.MC.SegmentFixedButton = require('./components/SegmentFixedButton').default;
-window.MC.SegmentRebuttedButton = require('./components/SegmentRebuttedButton').default;
-window.MC.SegmentMainButtons = require('./components/SegmentMainButtons').default ;
-
 window.classnames = require('classnames');
-
-window.ReviewSidePanel = require('./components/review_improved/ReviewSidePanel').default ;
-window.ReviewTranslationIssueCommentsContainer = require('./components/review_improved/ReviewTranslationIssueCommentsContainer').default ;
-window.ReviewIssueCategorySelector = require('./components/review_improved/ReviewIssueCategorySelector').default ;
-window.QualityReportVersions = require('./components/review_improved/QualityReportVersions').default ;
-
 
 window.Review_QualityReportButton = require('./components/review/QualityReportButton').default ;
 
@@ -70,10 +60,14 @@ window.SegmentActions = require('./actions/SegmentActions');
 window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
 window.Segment = require('./components/segments/Segment').default;
+window.SegmentBody = require('./components/segments/SegmentBody').default;
+window.SegmentTarget = require('./components/segments/SegmentTarget').default;
 window.SegmentFooter = require('./components/segments/SegmentFooter').default;
 window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatches').default;
 window.SegmentTabMessages = require('./components/segments/SegmentFooterTabMessages').default;
 window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
+
+window.TranslationIssuesSideButton = require('./components/review/TranslationIssuesSideButton').default;
 
 window.SearchUtils = require('./components/header/cattol/search/searchUtils');
 

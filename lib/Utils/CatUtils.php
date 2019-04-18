@@ -152,11 +152,17 @@ class CatUtils {
 
     }
 
-    public static function addSegmentTranslation( array $_Translation, array &$errors ) {
+    /**
+     * @param Translations_SegmentTranslationStruct $translation
+     * @param array                                 $errors
+     *
+     * @return array
+     */
+    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, array &$errors ) {
 
         try {
             //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
-            addTranslation( $_Translation );
+            addTranslation( $translation );
         } catch ( Exception $e ) {
             $errors[] = [ "code" => -101, "message" => $e->getMessage() ];
         }
@@ -219,6 +225,8 @@ class CatUtils {
      * @param mixed $job_stats
      *
      * @return mixed $job_stats
+     * @deprecated Formatting strings server-side for javascript rendered pages is deprecated.
+     *
      */
     protected static function _getStatsForJob( $job_stats ) {
 
@@ -296,42 +304,6 @@ class CatUtils {
         $job_stats[ 'DOWNLOAD_STATUS' ] = $t;
 
         return $job_stats;
-
-    }
-
-    /**
-     * Public interface to single Job Stats Info
-     *
-     *
-     * @param int    $jid
-     * @param int    $fid
-     * @param string $jPassword
-     *
-     * @return mixed $job_stats
-     *
-     * <pre>
-     *      $job_stats = array(
-     *          'id'                           => (int),
-     *          'TOTAL'                        => (int),
-     *          'TRANSLATED'                   => (int),
-     *          'APPROVED'                     => (int),
-     *          'REJECTED'                     => (int),
-     *          'DRAFT'                        => (int),
-     *          'ESTIMATED_COMPLETION'         => (int),
-     *          'WORDS_PER_HOUR'               => (int),
-     *      );
-     * </pre>
-     *
-     */
-    public static function getStatsForJob( $jid, $fid = null, $jPassword = null ) {
-
-        $job_stats = getStatsForJob( $jid, $fid, $jPassword );
-        $job_stats = $job_stats[ 0 ];
-
-        $job_stats = self::_getStatsForJob( $job_stats ); //true set estimation check if present
-
-        return self::_performanceEstimationTime( $job_stats );
-
     }
 
     /**
@@ -340,25 +312,10 @@ class CatUtils {
      * @param bool             $performanceEstimation
      *
      * @return array
+     * @deprecated because if the use of pre-formatted values
      */
     public static function getFastStatsForJob( WordCount_Struct $wCount, $performanceEstimation = true ) {
-
-        $job_stats         = [];
-        $job_stats[ 'id' ] = $wCount->getIdJob();
-//        $job_stats[ 'NEW' ]        = $wCount->getNewWords();
-        $job_stats[ 'DRAFT' ]      = $wCount->getNewWords() + $wCount->getDraftWords();
-        $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
-        $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
-        $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
-
-        //sometimes new_words + draft_words < 0 (why?). If it happens, set draft words to 0
-        if ( $job_stats[ 'DRAFT' ] < 0 ) {
-            $job_stats[ 'DRAFT' ] = 0;
-        }
-
-        //avoid division by zero warning
-        $total                = $wCount->getTotal();
-        $job_stats[ 'TOTAL' ] = ( $total == 0 ? 1 : $total );
+        $job_stats            = self::getPlainStatsForJobs( $wCount );
         $job_stats            = self::_getStatsForJob( $job_stats ); //true set estimation check if present
 
         if ( !$performanceEstimation ) {
@@ -366,7 +323,6 @@ class CatUtils {
         }
 
         return self::_performanceEstimationTime( $job_stats );
-
     }
 
     /**
@@ -375,8 +331,6 @@ class CatUtils {
      * @return array
      */
     public static function getStatsForFile( $fid ) {
-
-
         $file_stats = getStatsForFile( $fid );
 
         $file_stats                         = $file_stats[ 0 ];
@@ -384,7 +338,6 @@ class CatUtils {
         $file_stats[ 'TOTAL_FORMATTED' ]    = number_format( $file_stats[ 'TOTAL' ], 0, ".", "," );
         $file_stats[ 'REJECTED_FORMATTED' ] = number_format( $file_stats[ 'REJECTED' ], 0, ".", "," );
         $file_stats[ 'DRAFT_FORMATTED' ]    = number_format( $file_stats[ 'DRAFT' ], 0, ".", "," );
-
 
         return $file_stats;
     }
@@ -682,13 +635,10 @@ class CatUtils {
      * @throws Exception
      */
     public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
-
         $values = self::getQualityInfoFromJobStruct( $job, $project, $featureSet );
-
         $result = null;
-        $codes  = $featureSet->getCodes();
 
-        if ( in_array( Features::REVIEW_IMPROVED, $codes ) || in_array( Features::REVIEW_EXTENDED, $codes ) ) {
+        if ( $featureSet->hasRevisionFeature() ) {
 
             if ( @$values->is_pass == null ) {
                 $result = $values->is_pass;
@@ -718,7 +668,7 @@ class CatUtils {
 
         $result = null;
 
-        if ( in_array( \Features\ReviewImproved::FEATURE_CODE, $featureSet->getCodes() ) || in_array( \Features\ReviewExtended::FEATURE_CODE, $featureSet->getCodes() ) ) {
+        if ( $featureSet->hasRevisionFeature() ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password );
             $result = $review;
         } else {
@@ -790,7 +740,32 @@ class CatUtils {
             ];
         }
 
-        return json_encode( [ 'categories' => $categories ] );
+        return $categories ;
+    }
+
+    /**
+     * @param WordCount_Struct $wCount
+     *
+     * @return array
+     */
+    public static function getPlainStatsForJobs( WordCount_Struct $wCount ) {
+        $job_stats         = [];
+        $job_stats[ 'id' ] = $wCount->getIdJob();
+        $job_stats[ 'DRAFT' ]      = $wCount->getNewWords() + $wCount->getDraftWords();
+        $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
+        $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
+        $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
+
+        //sometimes new_words + draft_words < 0 (why?). If it happens, set draft words to 0
+        if ( $job_stats[ 'DRAFT' ] < 0 ) {
+            $job_stats[ 'DRAFT' ] = 0;
+        }
+
+        //avoid division by zero warning
+        $total                = $wCount->getTotal();
+        $job_stats[ 'TOTAL' ] = ( $total == 0 ? 1 : $total );
+
+        return $job_stats;
     }
 
 }

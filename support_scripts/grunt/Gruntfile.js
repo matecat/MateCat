@@ -34,12 +34,10 @@ module.exports = function(grunt) {
 	    cssBase + 'jquery.powertip.min.css',
 	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
-        cssBase + 'sass/review_improved.scss',
-        cssBase + 'sass/segmentsFilter.scss',
-        cssBase + 'sass/cattool.scss',
-        cssBase + 'sass/speech2text.scss',
-        cssBase + 'sass/notifications.scss',
+        cssBase + 'sass/*.scss',
         cssBase + 'sass/commons/*.scss',
+        cssBase + 'sass/components/*/*.scss',
+        cssBase + 'sass/modals/*',
         cssBase + 'sass/vendor_mc/*',
         cssBase + '../holidays/*.css'
     ];
@@ -67,34 +65,11 @@ module.exports = function(grunt) {
         .toString(16).substring(1);
     }
 
-    function stripPrefixForTemplates(filePath) {
-        /**
-         * Strip '../../public/js/cat_source/templates/'
-         * from template identifiers.
-         */
-        var dirsToStrip = 6 ;
-        var strippedPath = filePath.split('/')
-        .splice( dirsToStrip ).join('/')
-        .replace('.hbs', '') ;
 
-        return strippedPath ;
-    }
 
     // Configuration goes here
     grunt.initConfig( {
-        handlebars: {
-            options: {
-                namespace: 'MateCat.Templates',
-                processPartialName: stripPrefixForTemplates,
-                processName: stripPrefixForTemplates
-            },
-            all: {
-                src : [
-                    basePath + 'cat_source/templates/**/*.hbs'
-                ],
-                dest : buildPath + 'templates.js'
-            }
-        },
+
 
         /**
          * = Browseriry
@@ -138,20 +113,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/es6/react/*.js'
                 ],
                 dest: buildPath + 'cat-react.js'
-            },
-            qaReportsVersions: {
-                options: {
-                    transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
-                    ],
-                    browserifyOptions: {
-                        paths: [ __dirname + '/node_modules' ]
-                    }
-                },
-                src: [
-                    basePath + 'cat_source/es6/react/components/review_improved/review_improved.qa_report.js',
-                ],
-                dest: buildPath + 'qa-report-improved.js'
             },
             qualityReport: {
                 options: {
@@ -202,7 +163,6 @@ module.exports = function(grunt) {
                     }
                 },
                 src: [
-                    basePath + 'build/templates.js',
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
                     basePath + 'cat_source/ui.editarea.js',
@@ -246,19 +206,9 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/review_extended/review_extended.footer.js',
                     basePath + 'cat_source/review_extended/review_extended.ui_extension.js',
                     basePath + 'cat_source/review_extended/review_extended.common_events.js',
-                    basePath + 'cat_source/review_improved/review_improved.js',
-                    basePath + 'cat_source/review_improved/review_improved.common_extensions.js',
-                    basePath + 'cat_source/review_improved/review_improved.common_events.js',
-                    basePath + 'cat_source/review_improved/review_improved.translate_extensions.js',
-                    basePath + 'cat_source/review_improved/review_improved.translate_events.js',
-                    basePath + 'cat_source/review_improved/review_improved.review_extension.js',
-                    basePath + 'cat_source/review_improved/review_improved.review_events.js',
-                    basePath + 'cat_source/review_improved/review_improved.rangy-hack.js',
 
                     basePath + 'cat_source/segment_filter.js',
                     basePath + 'cat_source/segment_filter.*.js',
-
-                    // basePath + 'cat_source/handlebars-helpers.js',
 
                     basePath + 'cat_source/speech2text.js',
                     basePath + 'tm.js',
@@ -275,7 +225,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     basePath + 'lib/jquery-dateFormat.min.js',
-                    basePath + 'lib/handlebars.runtime-v4.0.5.js',
+                    // basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery.waypoints.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
@@ -406,7 +356,6 @@ module.exports = function(grunt) {
             },
             js: {
                 files: [
-                    basePath + 'cat_source/templates/**/*.hbs',
                     basePath + 'cat_source/*.js',
                     basePath + 'tm.js',
                     basePath + 'login.js',
@@ -575,12 +524,12 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-text-replace');
     grunt.loadNpmTasks('grunt-strip');
-    grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-sass');
     grunt.loadNpmTasks('grunt-browserify');
 
@@ -596,10 +545,8 @@ module.exports = function(grunt) {
      * like libraries.
      */
     grunt.registerTask('bundle:js', [
-        'handlebars',
         'browserify:libs',
         'browserify:components',
-        'browserify:qaReportsVersions',
         'browserify:qualityReport',
         'concat:libs',
         'concat:libs_upload',
@@ -617,7 +564,7 @@ module.exports = function(grunt) {
      * development:js
      *
      * This task includes compilation of frequently changed develpment files.
-     * This includes handlebars templates, react modules via browserify, and
+     * This includes templates, react modules via browserify, and
      * reconcats other javascript files.
      * Concat also build the sourceMap. For further reload speed try to turn
      * off sourceMap.
@@ -634,7 +581,6 @@ module.exports = function(grunt) {
      * when it's not needed.
      */
     grunt.registerTask('concat:js', [
-        'handlebars',
         'concat:app',
         'concat:common',
         'replace:version'

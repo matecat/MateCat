@@ -12,7 +12,7 @@ class Search extends React.Component {
         this.defaultState = {
             isReview: props.isReview,
             searchable_statuses: props.searchable_statuses,
-            showReplaceOptionsInSearch: ( !ReviewImproved.enabled() ) || ( ReviewImproved.enabled() && !config.isReview ),
+            showReplaceOptionsInSearch: true,
             search: {
                 enableReplace: false,
                 matchCase: false,
