@@ -19,6 +19,7 @@ class glossaryController extends ajaxController {
     private $newtranslation;
     private $comment;
     private $automatic;
+    private $id_match;
     /**
      * @var Engines_MyMemory
      */
@@ -33,32 +34,34 @@ class glossaryController extends ajaxController {
 
         parent::__construct();
 
-        $filterArgs = array(
-            'exec'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'segment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'newsegment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'translation' => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'newtranslation' => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'comment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'automatic'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-        );
+        $filterArgs = [
+                'exec'           => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'id_job'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'segment'        => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'newsegment'     => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'translation'    => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'newtranslation' => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'comment'        => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'automatic'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'id'             => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
+        ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->exec        = $__postInput[ 'exec' ];
-        $this->id_job      = $__postInput[ 'id_job' ];
-        $this->password    = $__postInput[ 'password' ];
-        $this->segment     = $__postInput[ 'segment' ];
+        $this->exec           = $__postInput[ 'exec' ];
+        $this->id_job         = $__postInput[ 'id_job' ];
+        $this->password       = $__postInput[ 'password' ];
+        $this->segment        = $__postInput[ 'segment' ];
         $this->newsegment     = $__postInput[ 'newsegment' ];
-        $this->translation = $__postInput[ 'translation' ];
+        $this->translation    = $__postInput[ 'translation' ];
         $this->newtranslation = $__postInput[ 'newtranslation' ];
-        $this->comment     = $__postInput[ 'comment' ];
-        $this->automatic   = $__postInput[ 'automatic' ];
+        $this->comment        = $__postInput[ 'comment' ];
+        $this->automatic      = $__postInput[ 'automatic' ];
+        $this->id_match       = $__postInput[ 'id' ];
     }
 
     public function doAction() {
@@ -414,6 +417,7 @@ class glossaryController extends ajaxController {
              */
             foreach ( $tm_keys as $tm_key ) {
                 $config[ 'id_user' ] = $tm_key->key;
+                $config['id_match'] = $this->id_match;
                 $TMS_RESULT = $this->_TMS->delete( $config );
                 $set_code[ ] = $TMS_RESULT;
             }
