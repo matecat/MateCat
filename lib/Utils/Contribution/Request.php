@@ -29,7 +29,7 @@ class Request {
     public static function contribution( ContributionRequestStruct $contribution ){
 
         try{
-            WorkerClient::enqueue( 'CONTRIBUTION_GET', '\AsyncTasks\Workers\GetContributionWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+            WorkerClient::enqueue( 'CONTRIBUTION_GET', '\AsyncTasks\Workers\GetContributionWorker', $contribution, array( 'persistent' => false ) );
         } catch ( Exception $e ){
 
             # Handle the error, logging, ...
