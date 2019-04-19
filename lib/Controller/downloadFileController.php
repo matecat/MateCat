@@ -347,14 +347,13 @@ class downloadFileController extends downloadController {
                             $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
                         }
 
-                        if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                            if ( $this->forceXliff ) {
-                                $this->setFilename( $this->id_job . ".zip" );
-                            } else {
-                                $this->setFilename( $pathinfo[ 'basename' ] . ".zip" );
-                            }
+                        if ( $this->forceXliff ) {
+                            $_fName = $this->id_job;
+                        } else {
+                            $_fName = $pathinfo[ 'basename' ];
                         }
 
+                        $this->setFilename( $_fName . ".zip" );
                         $this->outputContent = self::composeZip( $output_content ); //add zip archive content here;
                         $this->setMimeType();
 

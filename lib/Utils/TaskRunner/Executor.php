@@ -206,6 +206,8 @@ class Executor implements SplObserver {
      * Main method
      *
      * @param null $args
+     *
+     * @throws \StompException
      */
     public function main( $args = null ) {
 
@@ -233,7 +235,7 @@ class Executor implements SplObserver {
 
 //                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in next cycle." );
 //                $this->_logMsg( $e->getMessage() );
-                usleep( 1000000 );
+                usleep( 500000 );
                 continue;
 
             }
@@ -394,6 +396,10 @@ class Executor implements SplObserver {
         $this->_logMsg( $subject->getLogMsg() );
         Log::$fileName = $this->_executionContext->loggerName;
 
+    }
+
+    public function forceAck( SplSubject $subject ){
+        //TODO
     }
 
 }
