@@ -69,7 +69,7 @@ class setTranslationController extends ajaxController {
     }
 
     protected function getTimer() {
-        return ( microtime( true ) - $this->startExecutionTime ) / 1000; //get milliseconds
+        return round( microtime( true ) - $this->startExecutionTime, 4 ); //get milliseconds
     }
 
     public function finalize() {
