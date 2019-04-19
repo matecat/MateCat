@@ -250,7 +250,7 @@ UI = {
 
             var saveBehaviour = true;
             if (operation != 'noSave') {
-                if ((operation == 'translated') || (operation == 'Save'))
+                if ((operation == 'translated') || (operation == 'save'))
                     saveBehaviour = false;
             }
 
