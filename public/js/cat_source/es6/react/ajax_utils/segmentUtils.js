@@ -59,7 +59,7 @@ API.SEGMENT = {
 
         var path = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
             config.id_job, config.password, idSegment);
-        data.revisionNumber = config.revisionNumber;
+        data.revision_number = config.revisionNumber;
         return $.ajax({
             data: data,
             type: "POST",

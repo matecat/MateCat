@@ -4,6 +4,7 @@ namespace API\V2  ;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use Features\ReviewExtended\TranslationIssueModel;
+use Features\SecondPassReview;
 use LQA\EntryDao as EntryDao ;
 use Database;
 use RevisionFactory;
@@ -48,10 +49,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             'is_full_segment'     => false,
             'comment'             => $this->request->comment,
             'uid'                 => $this->user->uid,
-            'source_page'         => \ajaxController::getRefererSourcePageCode(
-                    $this->project->getFeatures()
-            )
-
+            'source_page'         => SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number ),
         );
 
         $struct = new \LQA\EntryStruct( $data );
@@ -71,7 +69,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $categories = $this->validator->translation
                     ->getJob()->getProject()
                     ->getLqaModel()->getCategories();
-
 
         $json = new JsonFormatter( $categories );
         $rendered = $json->renderItem( $struct );
