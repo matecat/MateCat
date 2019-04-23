@@ -75,7 +75,6 @@ API.SEGMENT = {
             idSegment,
             idIssue
         );
-        data.revisionNumber = config.revisionNumber;
         return $.ajax({
             url: replies_path,
             type: 'POST',
