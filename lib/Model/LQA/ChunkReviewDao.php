@@ -91,7 +91,6 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      */
     public static function getReviewedWordsCountForChunk( \Chunks_ChunkStruct $chunk ) {
         $statuses = \Constants_TranslationStatus::$REVISION_STATUSES ;
-        $match_type = \Constants_SegmentTranslationsMatchType::ICE;
         $statuses_placeholder = str_repeat ('?, ',  count ( $statuses ) - 1) . '?';
 
         $sql = "SELECT SUM(segments.raw_word_count) FROM segment_translations st
@@ -99,7 +98,11 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             JOIN jobs on jobs.id = st.id_job
             WHERE jobs.id = ? AND jobs.password = ?
             AND st.status IN ( $statuses_placeholder )
-            AND st.match_type != ?
+
+            AND ( st.match_type != 'ICE'
+                OR ( st.match_type = 'ICE' AND locked AND st.version_number > 0 )
+                OR ( st.match_type = 'ICE' AND not locked ) )
+
             AND st.id_segment
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
              ";
@@ -107,7 +110,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        $stmt->execute( array_merge( [$chunk->id , $chunk->password ],  $statuses, [$match_type] ) ) ;
+        $stmt->execute( array_merge( [$chunk->id , $chunk->password ],  $statuses ) ) ;
 
         $count =  $stmt->fetch();
 
