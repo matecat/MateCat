@@ -11,10 +11,14 @@ class TranslationVersions extends BaseFeature {
     public function preSetTranslationCommitted( $params ) {
         // evaluate if the record is to be created, either the
         // status changed or the translation changed
+        $user = $params['user'] ;
 
-        $user             = $params['user'] ;
-        $translation      = $params['translation'] ;
+        /** @var \Translations_SegmentTranslationStruct $translation */
+        $translation = $params['translation'] ;
+
+        /** @var \Translations_SegmentTranslationStruct $old_translation */
         $old_translation  = $params['old_translation'];
+
         $propagated_ids   = $params['propagated_ids'];
         $source_page_code = $params['source_page_code'];
 

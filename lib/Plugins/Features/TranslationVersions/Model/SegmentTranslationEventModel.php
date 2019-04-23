@@ -9,6 +9,7 @@
 namespace Features\TranslationVersions\Model;
 
 use TransactionableTrait;
+use Translations_SegmentTranslationStruct;
 
 class SegmentTranslationEventModel  {
     use TransactionableTrait ;
@@ -20,7 +21,10 @@ class SegmentTranslationEventModel  {
     protected $source_page_code ;
 
 
-    public function __construct($old_translation, $translation, $user, $source_page_code) {
+    public function __construct( Translations_SegmentTranslationStruct $old_translation,
+                                 Translations_SegmentTranslationStruct $translation,
+                                 $user, $source_page_code) {
+
         $this->old_translation  = $old_translation ;
         $this->translation      = $translation ;
         $this->user             = $user ;
@@ -56,16 +60,13 @@ class SegmentTranslationEventModel  {
         $this->commitTransaction() ;
     }
 
-    protected function _savePropagatedIds() {
-    }
-
     /**
      * @return bool
      */
     protected function _saveRequired() {
         return (
-                $this->old_translation['translation'] != $this->translation['translation'] ||
-                $this->old_translation['status']      != $this->translation['status']
+                $this->old_translation->translation != $this->translation->translation ||
+                $this->old_translation->status      != $this->translation->status
                 );
     }
 
