@@ -2,6 +2,7 @@
 
 namespace API\V2\Json;
 
+use Features\SecondPassReview;
 use FeatureSet;
 use LQA\EntryStruct;
 use SubFiltering\Filter;
@@ -99,7 +100,10 @@ class SegmentVersion {
                         'comment'             => $record->qa_comment,
                         'create_date'         => $record->qa_create_date,
                         'target_text'         => $record->qa_target_text,
-                        'rebutted_at'         => $record->qa_rebutted_at
+                        'rebutted_at'         => $record->qa_rebutted_at,
+                        'revision_number'     => SecondPassReview\Utils::sourcePageToRevisionNumber(
+                                $record->qa_souce_page
+                        )
                 ] ) )->setDiff( $version[ 'diff' ] );
             }
 
