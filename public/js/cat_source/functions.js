@@ -953,7 +953,7 @@ function eventFromReact(e) {
 }
 
 function hackIntercomButton(on ) {
-    var button = $( document ).find( '.intercom-button' );
+    var button = $( document ).find( '.support-tip-button' );
     if ( on ) {
         button.data( 'mbc-zindex', button.css( 'z-index' ) );
         button.css( 'z-index', -1 );
