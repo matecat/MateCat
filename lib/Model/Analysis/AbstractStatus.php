@@ -202,6 +202,9 @@ abstract class Analysis_AbstractStatus {
 
             $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ] = $segInfo[ 'filename' ];
 
+            $total_file_payable = $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 0 ] += $segInfo[ 'eq_word_count' ];
+            $this->result[ 'data' ][ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 1 ]                       = number_format( $total_file_payable, 0, ".", "," );
+
         }
 
         $this->_resultSet = array(); //free memory
