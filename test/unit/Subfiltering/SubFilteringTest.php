@@ -228,4 +228,22 @@ is &lt; 70 dB(A).';
 
     }
 
+    public function testFalseError(){
+
+        $raw_segment = 'You can always <ph id="mtc_1" equiv-text="base64:JXt1bmRvX2xpbmtfc3RhcnR9"/>undo these changes<ph id="mtc_2" equiv-text="base64:JXt1bmRvX2xpbmtfZW5kfQ=="/>.';
+        $suggestion_raw = '\u0130stedi\u011finiz zaman <ph id="mtc_1" equiv-text="base64:JXt1bmRvX2xpbmtfc3RhcnR9"/>bu de\u011fi\u015fiklikleri geri alabilirsiniz<ph id="mtc_2" equiv-text="base64:JXt1bmRvX2xpbmtfZW5kfQ=="/>.';
+
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
+        
+        $check = new \PostProcess( $raw_segment, $suggestion_raw );
+        $check->setFeatureSet( $featureSet );
+        $check->realignMTSpaces();
+
+        //this should every time be ok because MT preserve tags, but we use the check on the errors
+        //for logic correctness
+        $this->assertFalse( $check->thereAreErrors() );
+
+    }
+
 }
