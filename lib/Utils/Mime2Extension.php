@@ -2212,6 +2212,10 @@ $reference = [
                 [
                         0 => 'mie',
                 ],
+        'application/x-mif'                                                         =>
+                [
+                        0 => 'mif',
+                ],
         'application/x-mobipocket-ebook'                                            =>
                 [
                         0 => 'prc',
