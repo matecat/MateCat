@@ -1,5 +1,7 @@
 <?php
 
+use SubFiltering\Filter;
+
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
@@ -345,15 +347,20 @@ class CatUtils {
     /**
      * Remove Tags and treat numbers as one word
      *
-     * @param        $string
-     * @param string $source_lang
+     * @param                 $string
+     * @param string          $source_lang
+     *
+     * @param Filter|null     $Filter
      *
      * @return mixed|string
-     * @throws Exception
+     * @throws \Exception
      */
-    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US' ) {
+    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', Filter $Filter = null ) {
 
-        $Filter = SubFiltering\Filter::getInstance();
+        if( $Filter === null ){
+            $Filter = SubFiltering\Filter::getInstance();
+        }
+
         $string = $Filter->fromLayer0ToLayer1( $string );
 
         //return empty on string composed only by spaces
@@ -409,15 +416,17 @@ class CatUtils {
     /**
      * Count words in a string
      *
-     * @param        $string
-     * @param string $source_lang
+     * @param                 $string
+     * @param string          $source_lang
+     *
+     * @param Filter|null     $filter
      *
      * @return float|int
      * @throws Exception
      */
-    public static function segment_raw_word_count( $string, $source_lang = 'en-US' ) {
+    public static function segment_raw_word_count( $string, $source_lang = 'en-US', Filter $filter = null ) {
 
-        $string = self::clean_raw_string_4_word_count( $string, $source_lang );
+        $string = self::clean_raw_string_4_word_count( $string, $source_lang, $filter );
 
         /**
          * Escape dash and underscore and replace them with Macro and Cedilla characters!

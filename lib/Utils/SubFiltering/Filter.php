@@ -15,7 +15,6 @@ use SubFiltering\Filters\AmpersandEntitiesDecode;
 use SubFiltering\Filters\AmpersandEntityEncode;
 use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use SubFiltering\Filters\EncodeToRawXML;
-use SubFiltering\Filters\FromLayer2ToLayer1XML;
 use SubFiltering\Filters\FromLayer2ToRawXML;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
 use SubFiltering\Filters\HtmlToPh;
@@ -99,9 +98,9 @@ class Filter {
 
         if( static::$_INSTANCE === null ){
             static::$_INSTANCE = new Filter();
-            static::$_INSTANCE->_featureSet( $featureSet );
         }
 
+        static::$_INSTANCE->_featureSet( $featureSet );
         return static::$_INSTANCE;
 
     }

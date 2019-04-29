@@ -630,9 +630,9 @@ article.mbc-commenting-closed .mbc-comment-balloon-outer {
  ******
  */
 article.mbc-commenting-opened {
-  -webkit-transform: translate3d(0, 0, 0);
+  /*-webkit-transform: translate3d(0, 0, 0);*/
   -webkit-backface-visibility: hidden;
-  -webkit-perspective: 1000;
+  /*-webkit-perspective: 1000;*/
   -webkit-transition: width .2s ease;
   transition: width .2s ease;
   width: 69%;
