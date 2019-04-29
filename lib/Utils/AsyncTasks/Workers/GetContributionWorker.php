@@ -141,7 +141,7 @@ class GetContributionWorker extends AbstractWorker {
         $stomp->connect();
         $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
                 $message,
-                [ 'persistent' => 'true' ]
+                [ 'persistent' => 'false' ]
         );
 
         $this->_doLog( $message );
