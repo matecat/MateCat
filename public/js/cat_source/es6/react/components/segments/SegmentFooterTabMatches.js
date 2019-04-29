@@ -72,6 +72,7 @@ class SegmentFooterTabMatches extends React.Component {
                 let diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
                 item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
+                item.sourceDiff = UI.decodePlaceholdersToText(item.sourceDiff);
             }
             if ( !_.isUndefined(this.tm_properties) ) {
                 item.tm_properties = this.tm_properties;
