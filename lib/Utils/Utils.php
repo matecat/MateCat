@@ -518,7 +518,6 @@ class Utils {
             }
 
             if( $raise && $error != JSON_ERROR_NONE ){
-                Log::doLog( $msg );
                 throw new Exception( $msg, $error );
             }
 

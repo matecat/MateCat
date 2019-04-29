@@ -250,7 +250,7 @@ UI = {
 
             var saveBehaviour = true;
             if (operation != 'noSave') {
-                if ((operation == 'translated') || (operation == 'Save'))
+                if ((operation == 'translated') || (operation == 'save'))
                     saveBehaviour = false;
             }
 
@@ -797,20 +797,10 @@ UI = {
 				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
 				UI.openSegment(segToScrollElem);
 			} else if (options.segmentToOpen) {
-                $('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
+                var segToScrollElem = UI.getSegmentById(options.segmentToOpen);
+                this.scrollSegment(segToScrollElem, options.segmentToOpen, options.highlight );
+                UI.openSegment(segToScrollElem);
             }
-            // else if ( UI.editarea.length && ($('#segment-' + UI.currentSegmentId).length) && (!$('#segment-' + UI.currentSegmentId).hasClass('opened'))) {
-            //     UI.openSegment(UI.editarea);
-            // }
-
-			// if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-            //     setTimeout(function () {
-            //         var next = UI.findNextSegment(UI.startSegmentId);
-            //         if (next) {
-            //             UI.gotoSegment(next.attr('data-split-original-id'));
-            //         }
-            //     }, 100);
-			// }
 
 			if (options.applySearch) {
 				$('mark.currSearchItem').removeClass('currSearchItem');
