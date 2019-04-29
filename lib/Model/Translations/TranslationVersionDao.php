@@ -153,7 +153,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     qa.translation_version as qa_translation_version,
     qa.target_text as qa_target_text,
     qa.penalty_points as qa_penalty_points,
-    qa.rebutted_at as qa_rebutted_at
+    qa.rebutted_at as qa_rebutted_at,
+    qa.source_page as qa_source_page
 
     FROM segment_translations st LEFT JOIN qa_entries qa
         ON st.id_segment = qa.id_segment AND st.id_job = qa.id_job AND
@@ -195,7 +196,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      qa.translation_version as qa_translation_version,
      qa.target_text as qa_target_text,
      qa.penalty_points as qa_penalty_points,
-     qa.rebutted_at as qa_rebutted_at
+     qa.rebutted_at as qa_rebutted_at,
+     qa.source_page as qa_source_page
 
     FROM segment_translation_versions stv 
     
