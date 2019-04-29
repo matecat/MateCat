@@ -194,7 +194,7 @@ class OutsourceInfo extends React.Component {
                                 <div className="item open-chat">
                                     <div className="content">
 
-                                        <div className="ui button intercom-button">
+                                        <div className="ui button support-tip-button">
                                             <i className="big icon-uniE970 middle aligned icon" />
                                             Open chat
                                         </div>

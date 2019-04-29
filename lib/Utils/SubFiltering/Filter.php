@@ -15,6 +15,8 @@ use SubFiltering\Filters\AmpersandEntitiesDecode;
 use SubFiltering\Filters\AmpersandEntityEncode;
 use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
 use SubFiltering\Filters\EncodeToRawXML;
+use SubFiltering\Filters\FromLayer2ToLayer1XML;
+use SubFiltering\Filters\FromLayer2ToRawXML;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
 use SubFiltering\Filters\HtmlToPh;
 use SubFiltering\Filters\HtmlToPhToLayer2;
@@ -178,9 +180,8 @@ class Filter {
         $channel = new Pipeline();
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new LtGtDoubleDecode() ); //fix eventually broken HTML
-        $channel->addLast( new LtGtDecode() );
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new EncodeToRawXML() );
+        $channel->addLast( new FromLayer2TorawXML() );
         $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
@@ -193,6 +194,9 @@ class Filter {
     /**
      *
      * Used to transform the UI structures ( Layer 2 ) to allow them to be stored in database ( Layer 0 )
+     *
+     * It is assumed that the UI send strings having XLF tags not encoded and HTML in XML encoding representation:
+     * - &lt;b&gt;de <ph id="mtc_1" equiv-text="base64:JTEkcw=="/>, <x id="1" /> &lt;/b&gt;que
      *
      * @param $segment
      *
@@ -213,7 +217,8 @@ class Filter {
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
 
-        $channel->addLast( new EncodeToRawXML() );
+        $channel->addLast( new FromLayer2ToRawXML() );
+
         $channel->addLast( new RestoreXliffTagsContent() );
 
         $channel->addLast( new AmpersandEntityEncode() );

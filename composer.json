@@ -1,7 +1,8 @@
 {
     "require-dev": {
         "phpunit/phpunit": "^4.8",
-        "robmorgan/phinx": "^0.4.6"
+        "robmorgan/phinx": "^0.4.6",
+        "onelogin/php-saml": "^2.13"
     },
     "require": {
         "php": ">=5.3.0",
@@ -13,7 +14,6 @@
         "defuse/php-encryption": "2.0.*",
         "phpmailer/phpmailer": "~5.2",
         "symfony/filesystem": "^2.8.9",
-        "onelogin/php-saml": "^2.13",
         "symfony/console": "^2.8"
     }
 }

@@ -8,16 +8,16 @@ module.exports = function(grunt) {
     var incPath = '../../inc/';
     var cssBase = '../../public/css/';
 
-    var cssFiles = [
-        basePath + '../css/common.css',
-        basePath + '../css/style.css',
-        basePath + '../css/mbc-style.css',
-        basePath + '../css/segment-notes.css',
-        basePath + '../css/project-completion-feature.css',
-        basePath + '../css/editlog.css',
-	    basePath + '../css/lxq-style.css',
-	    basePath + '../css/lexiqa.css',
-    ];
+    // var cssFiles = [
+    //     basePath + '../css/scss/common.scss',
+    //     basePath + '../css/style.css',
+    //     basePath + '../css/mbc-style.css',
+    //     basePath + '../css/scss/segment-notes.scss',
+    //     basePath + '../css/project-completion-feature.css',
+    //     basePath + '../css/editlog.css',
+	//     basePath + '../css/lxq-style.css',
+	//     basePath + '../css/lexiqa.css',
+    // ];
 
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
@@ -472,6 +472,26 @@ module.exports = function(grunt) {
                     cssBase + 'sass/vendor_mc/semantic/matecat_semantic.scss'
                 ],
                 dest: cssBase + 'build/semantic.css'
+            },
+            distLegacy: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+                },
+                src: [
+                    cssBase + 'sass/legacy-misc.scss'
+                ],
+                dest: cssBase + 'build/legacy-misc.css'
+            },
+            distStyleOld: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+                },
+                src: [
+                    cssBase + 'sass/style.scss'
+                ],
+                dest: cssBase + 'build/style.css'
             }
         },
         jshint: {
