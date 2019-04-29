@@ -7,17 +7,8 @@
  * 
  */
 
-use \TaskRunner\Commons\Context,
-    \Analysis\Queue\RedisKeys;
-
-use \Stomp,
-    \RedisHandler,
-    \INIT,
-    \Exception,
-    \MultiCurlHandler,
-    \Utils,
-    \Log
-;
+use Analysis\Queue\RedisKeys;
+use TaskRunner\Commons\Context;
 
 class AMQHandler extends Stomp {
 
@@ -71,11 +62,14 @@ class AMQHandler extends Stomp {
     /**
      * @param string $queueName
      *
+     * @param null   $properties
+     * @param null   $sync
+     *
      * @return bool
+     * @throws StompException
      * @throws Exception
-     * @throws \StompException
      */
-    public function subscribe( $queueName = null ){
+    public function subscribe( $queueName = null, $properties = null, $sync = null ){
 
         if ( empty($queueName) ){
             $queueName = RedisKeys::DEFAULT_QUEUE_NAME;
@@ -91,7 +85,7 @@ class AMQHandler extends Stomp {
 
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
         $this->connect();
-        $this->setReadTimeout( 5, 0 );
+        $this->setReadTimeout( 0, 250000 );
         $this->queueName = $queueName;
         return parent::subscribe( '/queue/' . (int)INIT::$INSTANCE_ID . "_" . $queueName );
 

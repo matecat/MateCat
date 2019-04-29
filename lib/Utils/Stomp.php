@@ -26,7 +26,7 @@ require_once 'Stomp/Exception.php';
  *
  * @package Stomp
  * @author Hiram Chirino <hiram@hiramchirino.com>
- * @author Dejan Bosanac <dejan@nighttale.net> 
+ * @author Dejan Bosanac <dejan@nighttale.net>
  * @author Michael Caplan <mcaplan@labnet.net>
  * @version $Revision: 43 $
  */
@@ -45,29 +45,29 @@ class Stomp
      * @var int
      */
 	public $prefetchSize = 1;
-    
+
 	/**
      * Client id used for durable subscriptions
      *
      * @var string
      */
 	public $clientId = null;
-    
-    protected $_brokerUri = null;
-    protected $_socket = null;
-    protected $_hosts = array();
-    protected $_params = array();
-    protected $_subscriptions = array();
-    protected $_defaultPort = 61613;
-    protected $_currentHost = - 1;
-    protected $_attempts = 10;
-    protected $_username = '';
-    protected $_password = '';
+
+    protected $_brokerUri                 = null;
+    protected $_socket                    = null;
+    protected $_hosts                     = array();
+    protected $_params                    = array();
+    protected $_subscriptions             = array();
+    protected $_defaultPort               = 61613;
+    protected $_currentHost               = - 1;
+    protected $_attempts                  = 10;
+    protected $_username                  = '';
+    protected $_password                  = '';
     protected $_sessionId;
-    protected $_read_timeout_seconds = 60;
-    protected $_read_timeout_milliseconds = 0;
-    protected $_connect_timeout_seconds = 60;
-    
+    protected $_read_timeout_seconds      = 60;
+    protected $_read_timeout_microseconds = 0;
+    protected $_connect_timeout_seconds   = 60;
+
     /**
      * Constructor
      *
@@ -107,12 +107,14 @@ class Stomp
             throw new StompException("Bad Broker URL {$this->_brokerUri}");
         }
     }
+
     /**
      * Process broker URL
      *
      * @param string $url Broker URL
+     *
+     * @return void
      * @throws StompException
-     * @return boolean
      */
     protected function _processUrl ($url)
     {
@@ -135,16 +137,16 @@ class Stomp
             require_once 'Stomp/Exception.php';
             throw new StompException("No broker defined");
         }
-        
+
         // force disconnect, if previous established connection exists
         $this->disconnect();
-        
+
         $i = $this->_currentHost;
         $att = 0;
         $connected = false;
         $connect_errno = null;
         $connect_errstr = null;
-        
+
         while (! $connected && $att ++ < $this->_attempts) {
             if (isset($this->_params['randomize']) && $this->_params['randomize'] == 'true') {
                 $i = rand(0, count($this->_hosts) - 1);
@@ -213,7 +215,7 @@ class Stomp
             }
         }
     }
-    
+
     /**
      * Check if client session has ben established
      *
@@ -232,14 +234,17 @@ class Stomp
     {
         return $this->_sessionId;
     }
+
     /**
-     * Send a message to a destination in the messaging system 
+     * Send a message to a destination in the messaging system
      *
-     * @param string $destination Destination queue
-     * @param string|StompFrame $msg Message
-     * @param array $properties
-     * @param boolean $sync Perform request synchronously
+     * @param string            $destination Destination queue
+     * @param string|StompFrame $msg         Message
+     * @param array             $properties
+     * @param boolean           $sync        Perform request synchronously
+     *
      * @return boolean
+     * @throws StompException
      */
     public function send ($destination, $msg, $properties = array(), $sync = null)
     {
@@ -409,11 +414,15 @@ class Stomp
         $this->_writeFrame($frame);
         return $this->_waitForReceipt($frame, $sync);
     }
+
     /**
      * Roll back a transaction in progress
      *
-     * @param string $transactionId
+     * @param string  $transactionId
      * @param boolean $sync Perform request synchronously
+     *
+     * @return bool
+     * @throws StompException
      */
     public function abort ($transactionId = null, $sync = null)
     {
@@ -430,7 +439,7 @@ class Stomp
      * Acknowledge consumption of a message from a subscription
 	 * Note: This operation is always asynchronous
      *
-     * @param string|StompFrame $messageMessage ID
+     * @param string|StompFrame $message Message ID
      * @param string $transactionId
      * @return boolean
      * @throws StompException
@@ -441,7 +450,7 @@ class Stomp
             $headers = $message->headers;
             if (isset($transactionId)) {
                 $headers['transaction'] = $transactionId;
-            }			
+            }
             $frame = new StompFrame('ACK', $headers);
             $this->_writeFrame($frame);
             return true;
@@ -456,9 +465,11 @@ class Stomp
             return true;
         }
     }
+
     /**
      * Graceful disconnect from the server
      *
+     * @throws StompException
      */
     public function disconnect ()
     {
@@ -479,10 +490,13 @@ class Stomp
         $this->_username = '';
         $this->_password = '';
     }
+
     /**
      * Write frame to server
      *
      * @param StompFrame $stompFrame
+     *
+     * @throws StompException
      */
     protected function _writeFrame (StompFrame $stompFrame)
     {
@@ -498,34 +512,35 @@ class Stomp
             $this->_writeFrame($stompFrame);
         }
     }
-    
+
     /**
      * Set timeout to wait for content to read
      *
-     * @param int $seconds_to_wait  Seconds to wait for a frame
-     * @param int $milliseconds Milliseconds to wait for a frame
+     * @param int $seconds Seconds to wait for a frame
+     * @param int $microseconds    Microseconds to wait for a frame
      */
-    public function setReadTimeout($seconds, $milliseconds = 0) 
+    public function setReadTimeout( $seconds, $microseconds = 0 )
     {
-        $this->_read_timeout_seconds = $seconds;
-        $this->_read_timeout_milliseconds = $milliseconds;
+        $this->_read_timeout_seconds      = $seconds;
+        $this->_read_timeout_microseconds = $microseconds;
     }
-    
+
     /**
      * Read response frame from server
      *
-     * @return StompFrame False when no frame to read
+     * @return bool|StompFrame
+     * @throws StompException
      */
     public function readFrame ()
     {
         if (!$this->hasFrameToRead()) {
             return false;
         }
-        
+
         $rb = 10240;
         $data = '';
         $end = false;
-        
+
         do {
             $read = fread($this->_socket, $rb);
             if ($read === false) {
@@ -539,7 +554,7 @@ class Stomp
             }
             $len = strlen($data);
         } while ($len < 2 || $end == false);
-        
+
         list ($header, $body) = explode("\n\n", $data, 2);
         $header = explode("\n", $header);
         $headers = array();
@@ -561,20 +576,21 @@ class Stomp
         }
         return $frame;
     }
-    
+
     /**
      * Check if there is a frame to read
      *
      * @return boolean
+     * @throws StompException
      */
     public function hasFrameToRead()
     {
         $read = array($this->_socket);
         $write = null;
         $except = null;
-        
-        $has_frame_to_read = @stream_select($read, $write, $except, $this->_read_timeout_seconds, $this->_read_timeout_milliseconds);
-        
+
+        $has_frame_to_read = @stream_select($read, $write, $except, $this->_read_timeout_seconds, $this->_read_timeout_microseconds);
+
         if ($has_frame_to_read !== false)
             $has_frame_to_read = count($read);
 
@@ -584,26 +600,29 @@ class Stomp
         } else if ($has_frame_to_read > 0) {
             return true;
         } else {
-            return false; 
+            return false;
         }
     }
-    
+
     /**
      * Reconnects and renews subscriptions (if there were any)
-     * Call this method when you detect connection problems     
+     * Call this method when you detect connection problems
+     * @throws StompException
      */
     protected function _reconnect ()
     {
         $subscriptions = $this->_subscriptions;
-        
+
         $this->connect($this->_username, $this->_password);
         foreach ($subscriptions as $dest => $properties) {
             $this->subscribe($dest, $properties);
         }
     }
+
     /**
-     * Graceful object desruction
+     * Graceful object destruction
      *
+     * @throws StompException
      */
     public function __destruct()
     {
