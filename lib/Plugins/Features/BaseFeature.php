@@ -29,8 +29,16 @@ abstract class BaseFeature implements IBaseFeature {
     /**
      * @var bool This property defines if the feature is automatically active when projects are created,
      *           or if it requires an explicit activation from the user when the project is created.
+     *           If this property is true, the feature is added to project's metadata `features` string.
      */
     protected $autoActivateOnProject = true ;
+
+    /**
+     * @var bool This property defines if the feature is to be included in project features even if
+     *           it's not defined in project features. This should be set to `true` when adding features
+     *           that should be enabled systemwide, even on older projects.
+     */
+    protected $forceOnProject = false ;
 
     protected static $dependencies = [];
 
@@ -70,6 +78,10 @@ abstract class BaseFeature implements IBaseFeature {
 
     public function isAutoActivableOnProject() {
         return $this->autoActivateOnProject ;
+    }
+
+    public function isForceableOnProject() {
+        return $this->forceOnProject ;
     }
 
     public static function getDependencies() {
