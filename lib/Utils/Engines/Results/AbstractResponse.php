@@ -11,6 +11,7 @@ abstract class Engines_Results_AbstractResponse {
     public $responseStatus = "";
     public $responseDetails = "";
     public $responseData = "";
+    public $mtLangSupported = true;
 
     /**
      * @var \Engines_Results_ErrorMatches
