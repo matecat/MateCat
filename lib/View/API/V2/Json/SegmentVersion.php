@@ -101,9 +101,7 @@ class SegmentVersion {
                         'create_date'         => $record->qa_create_date,
                         'target_text'         => $record->qa_target_text,
                         'rebutted_at'         => $record->qa_rebutted_at,
-                        'revision_number'     => SecondPassReview\Utils::sourcePageToRevisionNumber(
-                                $record->qa_souce_page
-                        )
+                        'source_page'         => $record->qa_source_page
                 ] ) )->setDiff( $version[ 'diff' ] );
             }
 
