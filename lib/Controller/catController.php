@@ -410,7 +410,7 @@ class catController extends viewController {
 
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
 
-        $this->template->first_job_segment   = $this->chunk->job_first_segment ;
+        $this->template->first_job_segment   = json_decode($this->firstSegmentOfFiles)[0]->first_segment;
         $this->template->last_job_segment    = $this->chunk->job_last_segment ;
 
         $this->template->owner_email         = $this->job_owner;
