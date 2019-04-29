@@ -179,6 +179,8 @@ class ProjectManager {
             $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure[ 'id_customer' ] );
         }
 
+        \Log::doLog( $this->features->getCodes() );
+
         $this->filter = Filter::getInstance( $this->features );
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
@@ -1653,7 +1655,7 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
+                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
@@ -1739,7 +1741,7 @@ class ProjectManager {
 
                     } else {
 
-                        $wordCount = CatUtils::segment_raw_word_count( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $this->projectStructure[ 'source_language' ] );
+                        $wordCount = CatUtils::segment_raw_word_count( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter );
 
                         $prec_tags = null;
                         $succ_tags = null;
@@ -2129,8 +2131,8 @@ class ProjectManager {
                                 'trans-unit'          => $translation_row[ 4 ],
                                 'payable_rates'       => $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ]
                         ],
-
-                        $this->projectStructure
+                        $this->projectStructure,
+                        $this->filter
                 );
 
                 /* WARNING do not change the order of the keys */
