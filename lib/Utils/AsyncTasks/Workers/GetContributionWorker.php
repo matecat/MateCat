@@ -109,6 +109,8 @@ class GetContributionWorker extends AbstractWorker {
      * @param ContributionRequestStruct $contributionStruct
      *
      * @param bool                      $isCrossLang
+     *
+     * @throws \StompException
      */
     protected function _publishPayload( array $content, ContributionRequestStruct $contributionStruct, $isCrossLang = false ) {
 
@@ -181,6 +183,8 @@ class GetContributionWorker extends AbstractWorker {
      * @param FeatureSet                $featureSet
      *
      * @param                           $targetLang
+     *
+     * @throws \Exception
      */
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct,
                                         FeatureSet $featureSet, $targetLang ) {
