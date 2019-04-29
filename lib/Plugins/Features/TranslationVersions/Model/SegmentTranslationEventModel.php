@@ -14,8 +14,16 @@ use Translations_SegmentTranslationStruct;
 class SegmentTranslationEventModel  {
     use TransactionableTrait ;
 
+    /**
+     * @var Translations_SegmentTranslationStruct
+     */
     protected $old_translation ;
+
+    /**
+     * @var Translations_SegmentTranslationStruct
+     */
     protected $translation ;
+
     protected $user ;
     protected $propagated_ids ;
     protected $source_page_code ;
@@ -36,6 +44,7 @@ class SegmentTranslationEventModel  {
     }
 
     public function save() {
+
         if ( !$this->_saveRequired() ) {
             return ;
         }
@@ -50,7 +59,9 @@ class SegmentTranslationEventModel  {
         $struct->version_number = $this->translation['version_number'] ;
         $struct->source_page    = $this->source_page_code ;
 
-        $id = SegmentTranslationEventDao::insertStruct( $struct ) ;
+        $struct->setTimestamp('create_date', time() );
+
+        SegmentTranslationEventDao::insertStruct( $struct ) ;
 
         if ( ! empty( $this->propagated_ids ) ) {
             $dao = new SegmentTranslationEventDao();
@@ -64,10 +75,31 @@ class SegmentTranslationEventModel  {
      * @return bool
      */
     protected function _saveRequired() {
+
         return (
                 $this->old_translation->translation != $this->translation->translation ||
-                $this->old_translation->status      != $this->translation->status
-                );
+                $this->old_translation->status      != $this->translation->status ||
+                $this->source_page_code != $this->_getLatestEventSourcePageCode()
+        );
+    }
+
+    /**
+     * Returns the source_page code of the latest event of the given segment
+     *
+     * @return null
+     */
+    protected function _getLatestEventSourcePageCode() {
+        $latestEvent = ( new SegmentTranslationEventDao())->getLatestEventIdsByJob(
+                $this->old_translation->id_job,
+                $this->old_translation->id_segment,
+                $this->old_translation->id_segment
+        ) ;
+
+        if ( count( $latestEvent ) ) {
+            return $latestEvent[0]->source_page ;
+        } else {
+            return null ;
+        }
     }
 
 }

@@ -578,8 +578,8 @@ class setTranslationController extends ajaxController {
             $translationStruct->target_chunk_lengths = array(
                     'len' => $this->split_chunk_lengths, 'statuses' => $this->split_statuses
             );
-            $translationDao                          = new TranslationsSplit_SplitDAO( Database::obtain() );
-            $result                                  = $translationDao->update( $translationStruct );
+            $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+            $result         = $translationDao->update( $translationStruct );
 
         }
 
