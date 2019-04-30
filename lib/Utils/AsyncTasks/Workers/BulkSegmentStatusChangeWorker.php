@@ -49,7 +49,14 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $database->begin() ;
 
         foreach( $params['segment_ids'] as $segment ) {
+
             $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob($segment, $job->id);
+
+            if( empty( $old_translation ) ){
+                //no segment found
+                continue;
+            }
+
             $new_translation = clone $old_translation ;
             $new_translation->status = $status ;
 

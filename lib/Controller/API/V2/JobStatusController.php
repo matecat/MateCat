@@ -42,7 +42,8 @@ class JobStatusController extends KleinController {
 
     public function changeSegmentsStatus() {
 
-        $segments_id = filter_var( $this->request->segments_id, FILTER_VALIDATE_INT, FILTER_FORCE_ARRAY );
+        $segments_id = $this->sanitizeSegmentIDs( $this->request->segments_id );
+
         $status      = strtoupper( $this->request->status );
 
         if ( in_array( $status, [
@@ -74,6 +75,18 @@ class JobStatusController extends KleinController {
 
             $this->response->json( [ 'data' => true, 'unchangeble_segments' => $unchangeble_segments ] );
         }
+    }
+
+    protected function sanitizeSegmentIDs( $segment_list ) {
+        foreach ( $segment_list as $pos => $integer ) {
+            $result = (int)$integer;
+            if ( empty( $result ) ) {
+                unset( $segment_list[ $pos ] );
+                continue;
+            }
+            $segment_list[ $pos ] = $result;
+        }
+        return array_unique( $segment_list );
     }
 
 }
