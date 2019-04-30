@@ -6,13 +6,19 @@
  * Time: 13:09
  */
 
-namespace Features\SecondPassReview ;
+namespace Features\SecondPassReview\Decorator ;
+use AbstractCatDecorator;
+use Features\SecondPassReview\Model\ChunkReviewDao;
 
-use AbstractDecorator;
-
-class CatDecorator extends AbstractDecorator {
+class CatDecorator extends AbstractCatDecorator {
 
     public function decorate() {
-        // TODO: Implement decorate() method.
+        $secondRevisions = ChunkReviewDao::findSecondRevisionsChunkReviewsByChunkIds( [ [
+                        $this->controller->getChunk()->id,
+                        $this->controller->getChunk()->password
+                ] ]  ) ;
+
+        $this->template->secondRevisionsCount = count( $secondRevisions );
+
     }
 }
