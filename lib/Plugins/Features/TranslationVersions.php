@@ -28,6 +28,7 @@ class TranslationVersions extends BaseFeature {
         $event->setPropagatedIds( $propagated_ids ) ;
         $event->save() ;
 
+
     }
 
 }

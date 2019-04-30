@@ -1,43 +1,38 @@
 <?php
 
+use Features\TranslationVersions\Model\SegmentTranslationEventModel;
+
 class SegmentTranslationChangeVector {
 
     /**
      * @var Translations_SegmentTranslationStruct
      */
     private $translation;
+
     /**
      * @var Translations_SegmentTranslationStruct
      */
     private $old_translation;
 
     /**
-     * @var Jobs_JobStruct
+     * @var Chunks_ChunkStruct
      */
-    private $job;
+    private $chunk;
 
     private $propagated_ids;
 
-    public function __construct(Translations_SegmentTranslationStruct $translation) {
-        $this->translation = $translation;
-        $this->job = $translation->getJob();
-    }
-
     /**
-     * @return bool
+     * @var SegmentTranslationEventModel
      */
-    public function translationTextChanged() {
-        return $this->translation->translation != $this->old_translation->translation ;
-    }
-    /**
-     * @param Translations_SegmentTranslationStruct $translation
-     */
-    public function setOldTranslation( Translations_SegmentTranslationStruct $translation ) {
-        $this->old_translation = $translation ;
-    }
+    protected $eventModel ;
 
-    public function setPropagatedIds( $propagated_ids ) {
-        $this->propagated_ids = $propagated_ids ;
+    public function __construct( SegmentTranslationEventModel $eventModel ) {
+        $this->eventModel = $eventModel ;
+
+        $this->translation     = $eventModel->getTranslation() ;
+        $this->old_translation = $eventModel->getOldTranslation() ;
+        $this->chunk           = $eventModel->getTranslation()->getChunk() ;
+        $this->propagated_ids  = $eventModel->getPropagatedIds() ;
     }
 
     public function getPropagatedIds() {
@@ -107,7 +102,6 @@ class SegmentTranslationChangeVector {
                 $this->translation->isTranslationStatus() &&
                 ! $this->_isEditingICEforTheFirstTime() &&
                 ! $this->_isChangingICEtoTranslatedWithNoChange() ;
-    ;
     }
 
     protected function _isEditingICEforTheFirstTime() {
@@ -131,8 +125,8 @@ class SegmentTranslationChangeVector {
     public function getSegmentStruct() {
         $dao = new \Segments_SegmentDao( Database::obtain() );
         return $dao->getByChunkIdAndSegmentId(
-            $this->job->id,
-            $this->job->password,
+            $this->chunk->id,
+            $this->chunk->password,
             $this->translation->id_segment
         );
     }

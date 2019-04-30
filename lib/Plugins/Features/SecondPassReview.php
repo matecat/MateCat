@@ -13,6 +13,7 @@ use Chunks_ChunkStruct;
 use Exceptions\NotFoundException;
 use Features;
 use Features\SecondPassReview\Utils;
+use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use Klein\Klein;
 use LQA\ChunkReviewDao;
 
@@ -95,7 +96,7 @@ class SecondPassReview extends BaseFeature {
         $lastSegment = end( $lastFile['segments'] );
         $lastSid = $lastSegment['sid'];
 
-        $segment_translation_events = ( new Features\TranslationVersions\Model\SegmentTranslationEventDao())->getLatestEventIdsByJob(
+        $segment_translation_events = ( new SegmentTranslationEventDao())->getLatestEventsInSegmentInterval(
                 $chunk->id, $firstSid, $lastSid );
 
         $by_id_segment = [] ;

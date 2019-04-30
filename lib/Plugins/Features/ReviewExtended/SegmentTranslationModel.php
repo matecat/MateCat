@@ -12,8 +12,12 @@ use Features\ISegmentTranslationModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use SegmentTranslationChangeVector;
+use TransactionableTrait;
 
 class SegmentTranslationModel  implements  ISegmentTranslationModel {
+
+    use TransactionableTrait ;
+
     /**
      * @var SegmentTranslationChangeVector
      */
@@ -69,11 +73,15 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
          *
          */
 
+        $this->openTransaction() ;
+
         if ( $this->model->isEnteringReviewedState() ) {
             $this->addCount();
         } elseif ( $this->model->isExitingReviewedState() ) {
             $this->subtractCount();
         }
+
+        $this->commitTransaction();
     }
 
     /**

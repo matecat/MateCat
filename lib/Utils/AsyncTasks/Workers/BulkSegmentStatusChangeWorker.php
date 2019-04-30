@@ -9,14 +9,18 @@
 namespace AsyncTasks\Workers;
 
 
+use Database;
+use Features;
+use Features\SecondPassReview\Utils;
+use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 use INIT;
 use Jobs_JobStruct;
-use SegmentTranslationChangeVector;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use Translations_SegmentTranslationDao;
+use Users_UserDao;
 use WordCount_Counter;
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
@@ -44,10 +48,12 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $job         = new Jobs_JobStruct( $params['job']->toArray() ) ;
         $status      = $params['destination_status'] ;
         $client_id   = $params['client_id'];
+        $user        = ( new Users_UserDao())->getByUid( $params['id_user'] );
+        $source_page = Utils::revisionNumberToSourcePage( $params['revision_number'] );
 
         $this->_checkDatabaseConnection();
 
-        $database = \Database::obtain() ;
+        $database = Database::obtain() ;
         $database->begin() ;
 
         foreach( $params['segment_ids'] as $segment ) {
@@ -57,10 +63,10 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
             Translations_SegmentTranslationDao::updateSegmentStatusBySegmentId( $job->id, $segment, $status );
 
-            $translation = new SegmentTranslationChangeVector( $new_translation ) ;
-            $translation->setOldTranslation( $old_translation );
-
-            $job->getProject()->getFeatures()->run('updateRevisionScore', $translation );
+            if ( $job->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
+                $segmentTransaltionEvent = new SegmentTranslationEventModel( $old_translation, $new_translation, $user, $source_page ) ;
+                $segmentTransaltionEvent->save();
+            }
         }
 
         if ( !empty( $params['segment_ids'] ) ) {

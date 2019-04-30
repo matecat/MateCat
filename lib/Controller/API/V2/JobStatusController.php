@@ -62,7 +62,8 @@ class JobStatusController extends KleinController {
                                     'job'                => $this->job,
                                     'destination_status' => $status,
                                     'id_user'            => ( $this->userIsLogged() ? $this->getUser()->uid : null ),
-                                    'is_review'          => ( $status == Constants_TranslationStatus::STATUS_APPROVED )
+                                    'is_review'          => ( $status == Constants_TranslationStatus::STATUS_APPROVED ),
+                                    'revision_number'    => $this->request->revision_number
                             ], [ 'persistent' => true ]
                     );
                 }

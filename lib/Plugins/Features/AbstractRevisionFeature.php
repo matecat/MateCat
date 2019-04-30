@@ -16,6 +16,7 @@ use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\Model\QualityReportModel;
+use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 use FilesStorage;
 use INIT;
 use Jobs_JobStruct;
@@ -272,28 +273,19 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     /**
      * Entry point for project data validation for this feature.
+     *
+     * @param $projectStructure
      */
     public function validateProjectCreation($projectStructure)  {
         self::loadAndValidateModelFromJsonFile($projectStructure);
     }
 
     /**
-     * @param $params['translation'] Translations_SegmentTranslationStruct
-     * @param $params['old_translation'] Translations_SegmentTranslationStruct
-     * @param $params['propagated_ids'] array
-     *
+     * @param SegmentTranslationEventModel $event
      */
-    public function setTranslationCommitted( $params) {
-        $new_translation = $params['translation'];
-        $old_translation = $params['old_translation'];
-        $propagated_ids  = $params['propagated_ids'] ;
-
-        $translation_model = new SegmentTranslationChangeVector( $new_translation );
-
-        $translation_model->setPropagatedIds( $propagated_ids );
-        $translation_model->setOldTranslation( $old_translation );
-
-        $this->updateRevisionScore( $translation_model );
+    public function translationEventSaved( SegmentTranslationEventModel $event ) {
+        $translation_model = new SegmentTranslationChangeVector( $event );
+        $this->updateRevisionScore( $translation_model ) ;
     }
 
     public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {

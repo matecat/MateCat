@@ -19,6 +19,6 @@ class CatDecorator extends AbstractCatDecorator {
                 ] ]  ) ;
 
         $this->template->secondRevisionsCount = count( $secondRevisions );
-
     }
+
 }

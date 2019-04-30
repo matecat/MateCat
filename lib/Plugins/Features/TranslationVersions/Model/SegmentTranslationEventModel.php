@@ -8,6 +8,7 @@
 
 namespace Features\TranslationVersions\Model;
 
+use Exception;
 use TransactionableTrait;
 use Translations_SegmentTranslationStruct;
 
@@ -28,6 +29,12 @@ class SegmentTranslationEventModel  {
     protected $propagated_ids ;
     protected $source_page_code ;
 
+    /**
+     * @var int|SegmentTranslationEventStruct
+     */
+    protected $prior_event = -1 ;
+
+    protected $current_event = -1 ;
 
     public function __construct( Translations_SegmentTranslationStruct $old_translation,
                                  Translations_SegmentTranslationStruct $translation,
@@ -43,7 +50,18 @@ class SegmentTranslationEventModel  {
         $this->propagated_ids = $propagated_ids ;
     }
 
+    public function getPropagatedIds() {
+        return $this->propagated_ids ;
+    }
+
+    /**
+     *
+     */
     public function save() {
+
+        if ( $this->current_event !== -1 ) {
+            throw new Exception('The current event was persisted already. Use getCurrentEvent to retrieve it.') ;
+        }
 
         if ( !$this->_saveRequired() ) {
             return ;
@@ -51,22 +69,27 @@ class SegmentTranslationEventModel  {
 
         $this->openTransaction() ;
 
-        $struct                 = new SegmentTranslationEventStruct() ;
-        $struct->id_job         = $this->translation['id_job'] ;
-        $struct->id_segment     = $this->translation['id_segment'] ;
-        $struct->uid            = ( $this->user->uid != null ? $this->user->uid : 0 );
-        $struct->status         = $this->translation['status'] ;
-        $struct->version_number = $this->translation['version_number'] ;
-        $struct->source_page    = $this->source_page_code ;
+        $this->current_event                 = new SegmentTranslationEventStruct() ;
+        $this->current_event->id_job         = $this->translation['id_job'] ;
+        $this->current_event->id_segment     = $this->translation['id_segment'] ;
+        $this->current_event->uid            = ( $this->user->uid != null ? $this->user->uid : 0 );
+        $this->current_event->status         = $this->translation['status'] ;
+        $this->current_event->version_number = $this->translation['version_number'] ;
+        $this->current_event->source_page    = $this->source_page_code ;
 
-        $struct->setTimestamp('create_date', time() );
+        $this->current_event->setTimestamp('create_date', time() );
 
-        SegmentTranslationEventDao::insertStruct( $struct ) ;
+        $this->current_event->id = SegmentTranslationEventDao::insertStruct( $this->current_event ) ;
 
         if ( ! empty( $this->propagated_ids ) ) {
             $dao = new SegmentTranslationEventDao();
-            $dao->insertForPropagation($this->propagated_ids, $struct);
+            $dao->insertForPropagation($this->propagated_ids, $this->current_event);
         }
+
+        $this->translation->getChunk()
+                ->getProject()
+                ->getFeatures()
+                ->run('translationEventSaved', $this );
 
         $this->commitTransaction() ;
     }
@@ -75,31 +98,49 @@ class SegmentTranslationEventModel  {
      * @return bool
      */
     protected function _saveRequired() {
-
         return (
                 $this->old_translation->translation != $this->translation->translation ||
                 $this->old_translation->status      != $this->translation->status ||
-                $this->source_page_code != $this->_getLatestEventSourcePageCode()
+                $this->source_page_code             != $this->getPriorEvent()->source_page
         );
     }
 
     /**
-     * Returns the source_page code of the latest event of the given segment
-     *
-     * @return null
+     * @return Translations_SegmentTranslationStruct
      */
-    protected function _getLatestEventSourcePageCode() {
-        $latestEvent = ( new SegmentTranslationEventDao())->getLatestEventIdsByJob(
-                $this->old_translation->id_job,
-                $this->old_translation->id_segment,
-                $this->old_translation->id_segment
-        ) ;
-
-        if ( count( $latestEvent ) ) {
-            return $latestEvent[0]->source_page ;
-        } else {
-            return null ;
-        }
+    public function getOldTranslation() {
+        return $this->old_translation;
     }
+
+    /**
+     * @return Translations_SegmentTranslationStruct
+     */
+    public function getTranslation() {
+        return $this->translation;
+    }
+
+    protected function _getPriorSourcePageCode() {
+        $this->getPriorEvent();
+        return $this->prior_event == null ? null : $this->prior_event->source_page ;
+    }
+
+    public function getPriorEvent() {
+        if ( $this->prior_event === -1 ) {
+            $this->prior_event = ( new SegmentTranslationEventDao() )->getLatestEventForSegment(
+                    $this->old_translation->id_job,
+                    $this->old_translation->id_segment
+            ) ;
+        }
+        return $this->prior_event ;
+    }
+
+    public function getCurrentEvent() {
+        if ( $this->current_event == -1 ) {
+            throw new Exception('The current segment was not persisted yet. Run save() first.');
+        }
+        return $this->current_event ;
+    }
+
+
 
 }
