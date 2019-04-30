@@ -12,7 +12,7 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
         $this->responseData    = isset( $result[ 'responseData' ] ) ? $result[ 'responseData' ] : '';
         $this->responseDetails = isset( $result[ 'responseDetails' ] ) ? $result[ 'responseDetails' ] : '';
         $this->responseStatus  = isset( $result[ 'responseStatus' ] ) ? $result[ 'responseStatus' ] : '';
-
+        $this->mtLangSupported = !is_null( $result[ 'mtLangSupported' ] ) ? $result[ 'mtLangSupported' ] : true;
 
         if ( is_array( $result ) and !empty( $result ) and array_key_exists( 'matches', $result ) ) {
 
