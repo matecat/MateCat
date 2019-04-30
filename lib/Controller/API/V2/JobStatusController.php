@@ -5,6 +5,7 @@
  * Date: 26/03/2018
  * Time: 12:35
  */
+
 namespace API\V2;
 
 use AMQHandler;
@@ -31,7 +32,7 @@ class JobStatusController extends KleinController {
 
     protected function afterConstruct() {
 
-        $jobValidator = new JobPasswordValidator( $this ) ;
+        $jobValidator = new JobPasswordValidator( $this );
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
             $this->job     = $jobValidator->getJob();
             $this->project = $this->job->getProject();
@@ -42,20 +43,21 @@ class JobStatusController extends KleinController {
 
     public function changeSegmentsStatus() {
 
-        $segments_id = filter_var( $this->request->segments_id, FILTER_VALIDATE_INT, FILTER_FORCE_ARRAY );
-        $status      = strtoupper( $this->request->status );
+        $segments_id = $this->sanitizeSegmentIDs( $this->request->segments_id );
+
+        $status = strtoupper( $this->request->status );
 
         if ( in_array( $status, [
                 Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED
         ] ) ) {
             $unchangeble_segments = Translations_SegmentTranslationDao::getUnchangebleStatus( $segments_id, $status );
-            $segments_id = array_diff( $segments_id, $unchangeble_segments );
+            $segments_id          = array_diff( $segments_id, $unchangeble_segments );
 
             if ( !empty( $segments_id ) ) {
 
-                try{
-                    WorkerClient::init( new AMQHandler() ) ;
-                    WorkerClient::enqueue('JOBS', '\AsyncTasks\Workers\BulkSegmentStatusChangeWorker',
+                try {
+                    WorkerClient::init( new AMQHandler() );
+                    WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\BulkSegmentStatusChangeWorker',
                             [
                                     'segment_ids'        => $segments_id,
                                     'client_id'          => $this->request->client_id,
@@ -65,15 +67,28 @@ class JobStatusController extends KleinController {
                                     'is_review'          => ( $status == Constants_TranslationStatus::STATUS_APPROVED )
                             ], [ 'persistent' => true ]
                     );
-                }
-                catch(\Exception $e){
+                } catch ( \Exception $e ) {
                     $this->response->json( [ 'data' => true, 'unchangeble_segments' => $segments_id ] );
+
                     return;
                 }
             }
 
             $this->response->json( [ 'data' => true, 'unchangeble_segments' => $unchangeble_segments ] );
         }
+    }
+
+    protected function sanitizeSegmentIDs( $segment_list ) {
+        foreach ( $segment_list as $pos => $integer ) {
+            $result = (int)$integer;
+            if ( empty( $result ) ) {
+                unset( $segment_list[ $pos ] );
+                continue;
+            }
+            $segment_list[ $pos ] = $result;
+        }
+
+        return array_unique( $segment_list );
     }
 
 }

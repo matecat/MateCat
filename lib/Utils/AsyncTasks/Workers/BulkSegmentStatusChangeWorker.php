@@ -21,10 +21,10 @@ use WordCount_Counter;
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
-    protected $maxRequeueNum  = 3 ;
+    protected $maxRequeueNum = 3;
 
     public function getLoggerName() {
-        return 'bulk_segment_status_change.log' ;
+        return 'bulk_segment_status_change.log';
     }
 
     /**
@@ -35,63 +35,70 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
          * @var $queueElement QueueElement
          */
         $this->_checkForReQueueEnd( $queueElement );
-        $this->_doLog('data: ' . var_export( $queueElement->params->toArray(), true ) ) ;
+        $this->_doLog( 'data: ' . var_export( $queueElement->params->toArray(), true ) );
 
-        $params = $queueElement->params->toArray() ;
+        $params = $queueElement->params->toArray();
         /** @var Jobs_JobStruct $job */
-        $job         = new Jobs_JobStruct( $params['job']->toArray() ) ;
-        $status      = $params['destination_status'] ;
-        $client_id   = $params['client_id'];
+        $job       = new Jobs_JobStruct( $params[ 'job' ]->toArray() );
+        $status    = $params[ 'destination_status' ];
+        $client_id = $params[ 'client_id' ];
 
         $this->_checkDatabaseConnection();
 
-        $database = \Database::obtain() ;
-        $database->begin() ;
+        $database = \Database::obtain();
+        $database->begin();
 
-        foreach( $params['segment_ids'] as $segment ) {
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob($segment, $job->id);
-            $new_translation = clone $old_translation ;
-            $new_translation->status = $status ;
+        foreach ( $params[ 'segment_ids' ] as $segment ) {
+
+            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment, $job->id );
+
+            if ( empty( $old_translation ) ) {
+                //no segment found
+                continue;
+            }
+
+            $new_translation         = clone $old_translation;
+            $new_translation->status = $status;
 
             Translations_SegmentTranslationDao::updateSegmentStatusBySegmentId( $job->id, $segment, $status );
 
-            $translation = new SegmentTranslationChangeVector( $new_translation ) ;
+            $translation = new SegmentTranslationChangeVector( $new_translation );
             $translation->setOldTranslation( $old_translation );
 
-            $job->getProject()->getFeatures()->run('updateRevisionScore', $translation );
+            $job->getProject()->getFeatures()->run( 'updateRevisionScore', $translation );
         }
 
-        if ( !empty( $params['segment_ids'] ) ) {
+        if ( !empty( $params[ 'segment_ids' ] ) ) {
             $counter = new WordCount_Counter();
             $counter->initializeJobWordCount( $job->id, $job->password );
         }
 
-        $this->_doLog('completed') ;
+        $this->_doLog( 'completed' );
 
         $database->commit();
 
         if ( $client_id ) {
-            $segment_ids = $params['segment_ids']->toArray();
-            $payload = [
+            $segment_ids = $params[ 'segment_ids' ]->toArray();
+            $payload     = [
                     'segment_ids' => array_values( $segment_ids ),
                     'status'      => $status
-            ] ;
+            ];
 
-            $message = json_encode( array(
+            $message = json_encode( [
                     '_type' => 'bulk_segment_status_change',
-                    'data' => array(
+                    'data'  => [
                             'id_job'    => $job->id,
                             'passwords' => $job->password,
                             'id_client' => $client_id,
                             'payload'   => $payload,
-                    )
-            ));
+                    ]
+            ] );
 
             $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
             $stomp->connect();
             $stomp->send( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME,
                     $message,
-                    array( 'persistent' => 'true' )
+                    [ 'persistent' => 'true' ]
             );
         }
     }
