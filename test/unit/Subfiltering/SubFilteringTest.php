@@ -246,4 +246,22 @@ is &lt; 70 dB(A).';
 
     }
 
+    public function testVariablesWithHTML(){
+
+        $db_segment = 'Airbnb account.%{\n}%{&lt;br&gt;}%{\n}1) From ';
+        $segment_from_UI = 'Airbnb account.<ph id="mtc_1" equiv-text="base64:JXtcbn0="/>%{<ph id="mtc_2" equiv-text="base64:Jmx0O2JyJmd0Ow=="/>}<ph id="mtc_3" equiv-text="base64:JXtcbn0="/>1) From ';
+        $segment_to_UI = 'Airbnb account.&lt;ph id="mtc_1" equiv-text="base64:JXtcbn0="/&gt;%{&lt;ph id="mtc_2" equiv-text="base64:Jmx0O2JyJmd0Ow=="/&gt;}&lt;ph id="mtc_3" equiv-text="base64:JXtcbn0="/&gt;1) From&nbsp;';
+
+        $segmentL2 = $this->filter->fromLayer0ToLayer2( $db_segment );
+
+        $this->assertEquals( $segment_to_UI, $segmentL2 );
+
+        $this->assertEquals( $db_segment, $this->filter->fromLayer1ToLayer0( $segment_from_UI ) );
+
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segment_from_UI ) );
+
+        $this->assertEquals( $segment_from_UI, $this->filter->fromLayer0ToLayer1( $db_segment ) );
+
+    }
+
 }
