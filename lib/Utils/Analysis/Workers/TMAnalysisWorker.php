@@ -19,6 +19,7 @@ use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EmptyElementException;
 use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\NotSupportedMTException;
 use TaskRunner\Exceptions\ReQueueException;
 
 use Analysis\Queue\RedisKeys;
@@ -452,9 +453,17 @@ class TMAnalysisWorker extends AbstractWorker {
          *
          */
         $matches   = [];
-        $tms_match = $this->_getTM( $tmsEngine, $_config );
-        if ( !empty( $tms_match ) ) {
-            $matches = $tms_match;
+        try {
+
+            $tms_match = $this->_getTM( $tmsEngine, $_config );
+            if ( !empty( $tms_match ) ) {
+                $matches = $tms_match;
+            }
+
+        } catch( ReQueueException $rEx ){
+            throw $rEx;  // just to make code more readable, re-throw exception
+        } catch( NotSupportedMTException $nMTEx ){
+            // Do nothing, skip frame
         }
 
         $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement );
@@ -464,21 +473,9 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         /**
-         * If No results found. Re-Queue
+         * If No results found. Ack and Continue
          */
         if ( empty( $matches ) || !is_array( $matches ) ) {
-
-            // strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT ( the returned record can NOT be empty ). Try again
-            if ( $id_mt_engine == 1 ) {
-                $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested." );
-                throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.", self::ERR_REQUEUE );
-            } else {
-                $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from Custom MT Engine. Empty field received even if MT was called." );
-                if ( isset( $mt ) ) {
-                    $queueElement = $this->featureSet->filter( 'handleMTAnalysisRetry', $queueElement, $mt );
-                }
-            }
-
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment." );
             $this->_forceSetSegmentAnalyzed( $queueElement );
             throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT );
@@ -531,6 +528,14 @@ class TMAnalysisWorker extends AbstractWorker {
 
     }
 
+    /**
+     * @param \Engines_AbstractEngine $tmsEngine
+     * @param                         $_config
+     *
+     * @return \Engines_Results_MyMemory_Matches[]|null
+     * @throws NotSupportedMTException
+     * @throws ReQueueException
+     */
     protected function _getTM( \Engines_AbstractEngine $tmsEngine, $_config ) {
 
         $tms_match = null;
@@ -544,6 +549,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $config = $tmsEngine->getConfigStruct();
         $config = array_merge( $config, $_config );
 
+        /** @var $tms_match \Engines_Results_MyMemory_TMS */
         $tms_match = $tmsEngine->get( $config );
 
         /**
@@ -552,10 +558,19 @@ class TMAnalysisWorker extends AbstractWorker {
          * MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc.. )
          */
         if ( !empty( $tms_match->error ) )  {
-
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received." );
             throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received.", self::ERR_REQUEUE );
+        }
 
+        if( $tms_match->mtLangSupported == false ){
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. MT not supported." );
+            throw new NotSupportedMTException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. MT not supported.", self::ERR_EMPTY_ELEMENT );
+        }
+
+        // strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT ( the returned record can NOT be empty ). Try again
+        if ( empty( $tms_match ) && $_config[ 'get_mt' ] == true ) {
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested." );
+            throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.", self::ERR_REQUEUE );
         }
 
         if( !empty( $tms_match ) ){
