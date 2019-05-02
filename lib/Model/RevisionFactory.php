@@ -39,6 +39,13 @@ class RevisionFactory {
         return $this->revision->getSegmentTranslationModel( $translation ) ;
     }
 
+    /**
+     * @param $id_job
+     * @param $password
+     * @param $issue
+     *
+     * @return mixed
+     */
     public function getTranslationIssueModel( $id_job, $password, $issue) {
         return $this->revision->getTranslationIssueModel( $id_job, $password, $issue ) ;
     }

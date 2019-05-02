@@ -51,9 +51,7 @@ class ReviewExtended extends AbstractRevisionFeature {
 
     public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
         $model = new SegmentTranslationModel( $translation );
-        $model->addOrSubtractCachedReviewedWordsCount();
-        // we need to recount score globally because of autopropagation.
-        $model->recountPenaltyPoints();
+        $model->evaluateReviewedWordsTransition();
     }
 
     /**

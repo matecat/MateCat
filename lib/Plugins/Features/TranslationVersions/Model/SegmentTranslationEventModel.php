@@ -34,6 +34,9 @@ class SegmentTranslationEventModel  {
      */
     protected $prior_event = -1 ;
 
+    /**
+     * @var int|SegmentTranslationEventStruct
+     */
     protected $current_event = -1 ;
 
     public function __construct( Translations_SegmentTranslationStruct $old_translation,
@@ -44,6 +47,8 @@ class SegmentTranslationEventModel  {
         $this->translation      = $translation ;
         $this->user             = $user ;
         $this->source_page_code = $source_page_code ;
+
+        $this->getPriorEvent() ;
     }
 
     public function setPropagatedIds( $propagated_ids ) {
@@ -55,8 +60,19 @@ class SegmentTranslationEventModel  {
     }
 
     /**
-     *
+     * @return bool
      */
+    public function isUpperRevision() {
+        return $this->getPriorEvent()->source_page < $this->getCurrentEvent()->source_page ;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLowerRevision() {
+        return $this->getPriorEvent()->source_page > $this->getCurrentEvent()->source_page ;
+    }
+
     public function save() {
 
         if ( $this->current_event !== -1 ) {
@@ -134,6 +150,10 @@ class SegmentTranslationEventModel  {
         return $this->prior_event ;
     }
 
+    /**
+     * @return SegmentTranslationEventStruct
+     * @throws Exception
+     */
     public function getCurrentEvent() {
         if ( $this->current_event == -1 ) {
             throw new Exception('The current segment was not persisted yet. Run save() first.');

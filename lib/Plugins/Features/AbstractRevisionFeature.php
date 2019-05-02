@@ -290,8 +290,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
         $model = $this->getSegmentTranslationModel( $translation );
-        $model->addOrSubtractCachedReviewedWordsCount();
-        $model->recountPenaltyPoints();
+        $model->evaluateReviewedWordsTransition();
     }
 
     /**

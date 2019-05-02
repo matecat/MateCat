@@ -1,6 +1,8 @@
 <?php
 
+use Exception;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
+use Segments_SegmentDao;
 
 class SegmentTranslationChangeVector {
 
@@ -19,8 +21,6 @@ class SegmentTranslationChangeVector {
      */
     private $chunk;
 
-    private $propagated_ids;
-
     /**
      * @var SegmentTranslationEventModel
      */
@@ -32,15 +32,14 @@ class SegmentTranslationChangeVector {
         $this->translation     = $eventModel->getTranslation() ;
         $this->old_translation = $eventModel->getOldTranslation() ;
         $this->chunk           = $eventModel->getTranslation()->getChunk() ;
-        $this->propagated_ids  = $eventModel->getPropagatedIds() ;
     }
 
     public function getPropagatedIds() {
-        return $this->propagated_ids ;
+        return $this->eventModel->getPropagatedIds() ;
     }
 
     public function didPropagate() {
-        return !empty( $this->propagated_ids ) ;
+        return count( $this->eventModel->getPropagatedIds() ) > 0 ;
     }
 
     /**
@@ -50,11 +49,58 @@ class SegmentTranslationChangeVector {
         return $this->translation;
     }
 
+    public function getEventModel() {
+        return $this->eventModel;
+    }
+
+    /**
+     * @return Translations_SegmentTranslationStruct
+     * @throws Exception
+     */
     public function getOldTranslation() {
         if ( is_null( $this->old_translation ) ) {
-            throw new \Exception('Old translation is not set');
+            throw new Exception('Old translation is not set');
         }
         return $this->old_translation ;
+    }
+
+    public function getDestinationSourcePage() {
+        return $this->eventModel->getCurrentEvent()->source_page ;
+    }
+
+    public function getOriginSourcePage() {
+        return $this->eventModel->getPriorEvent()->source_page ;
+    }
+
+    public function isBeingUpperReviewed() {
+        return $this->old_translation->isReviewedStatus() &&
+        $this->translation->isReviewedStatus() &&
+        $this->eventModel->isUpperRevision() ;
+    }
+
+    public function isBeingLowerReviewed() {
+        return $this->old_translation->isReviewedStatus() &&
+                $this->translation->isReviewedStatus() &&
+                $this->eventModel->isLowerRevision() ;
+    }
+
+    /**
+     * This method returns the list of source pages to invalidate in regards of reviewed words count.
+     *
+     * If a segment moves from R2 to R1 this returns [3]   ( = source page of R2 ).
+     * If a segment moves from R1 to TR this returns [3,2] ( = source pages of R2 and R1 ).
+     *
+     * @return array
+     */
+    function getRollbackRevisionsSpan() {
+        $source = $this->eventModel->getPriorEvent()->source_page ;
+        $dest   = $this->eventModel->getCurrentEvent()->source_page ;
+        $list   = [] ;
+
+        while( $source > $dest && $source > Constants::SOURCE_PAGE_TRANSLATE ) {
+            $list[] = $source-- ;
+        }
+        return $list ;
     }
 
     /**
@@ -123,7 +169,7 @@ class SegmentTranslationChangeVector {
      * @return Segments_SegmentStruct
      */
     public function getSegmentStruct() {
-        $dao = new \Segments_SegmentDao( Database::obtain() );
+        $dao = new Segments_SegmentDao( Database::obtain() );
         return $dao->getByChunkIdAndSegmentId(
             $this->chunk->id,
             $this->chunk->password,

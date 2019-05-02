@@ -41,7 +41,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
      *
      * @return \Features\TranslationVersions\Model\SegmentTranslationEventStruct[]
      */
-    public function getLatestEventsInSegmentInterval( $id_job, $min_segment, $max_segment) {
+    public function getLatestEventsInSegmentInterval( $id_job, $min_segment, $max_segment ) {
         $sql = "SELECT * FROM segment_translation_events WHERE id IN (  " .
                 " SELECT max(id) FROM segment_translation_events " .
                 " WHERE id_job = :id_job  " .
@@ -55,7 +55,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
             'id_job'      => $id_job,
             'min_segment' => $min_segment,
             'max_segment' => $max_segment
-        ]);
+        ] );
 
         return $stmt->fetchAll();
     }

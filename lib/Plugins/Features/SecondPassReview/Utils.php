@@ -9,6 +9,8 @@
 
 namespace Features\SecondPassReview;
 
+use LQA\ModelStruct;
+
 class Utils {
     public static function revisionNumberToSourcePage($number) {
         return $number + 1 ;
@@ -19,6 +21,20 @@ class Utils {
             return null ;
         } else {
             return $number - 1 ;
+        }
+    }
+
+    public static function filterLQAModelLimit( ModelStruct $lqaModel, $sourcePage ) {
+        $limit = $lqaModel->getLimit() ;
+
+        if ( is_array( $limit ) ) {
+            /**
+             * Limit array index equals to $source_page -2.
+             */
+            return isset( $limit[ $sourcePage - 2 ] ) ? $limit[ $sourcePage - 2 ] : end( $limit ) ;
+        }
+        else {
+            return $limit ;
         }
     }
 }
