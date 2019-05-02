@@ -28,6 +28,8 @@ abstract class ajaxController extends controller {
      */
     protected function __construct() {
 
+        $this->startTimer();
+
         $buffer = ob_get_contents();
         ob_get_clean();
         // ob_start("ob_gzhandler");        // compress page before sending //Not supported for json response on ajax calls
@@ -53,11 +55,10 @@ abstract class ajaxController extends controller {
      */
     public function finalize() {
         $toJson = json_encode( $this->result );
-
-        //Log Errors
-        Utils::raiseJsonExceptionError( false );
-
         echo $toJson;
+
+        $this->logPageCall();
+
     }
 
     public static function isRevision(){

@@ -13,6 +13,9 @@ use FeatureSet;
 
 interface IController {
 
+    /**
+     * @return null|\Users_UserStruct
+     */
     public function getUser();
 
     public function userIsLogged();

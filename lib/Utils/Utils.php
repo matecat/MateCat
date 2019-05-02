@@ -109,8 +109,7 @@ class Utils {
                 'userAgent' => $u_agent,
                 'name'      => $bname,
                 'version'   => $version,
-                'platform'  => $platform,
-                'pattern'   => $pattern
+                'platform'  => $platform
         );
     }
 

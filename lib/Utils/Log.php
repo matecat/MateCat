@@ -15,11 +15,9 @@ if ( @include 'vendor/autoload.php' ) {
     Log::$useMonolog = true;
 }
 
-use Monolog\Logger;
-use Monolog\Handler\RedisHandler;
-use Monolog\Formatter\LogstashFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 class Log {
 
@@ -53,7 +51,7 @@ class Log {
             try {
 
                 self::initMonolog() ;
-                self::$logger->debug( rtrim( $stringData ) );
+                self::$logger->debug( $stringData );
 
             } catch ( Exception $e ) {
                 file_put_contents( self::getFileNamePath(), $stringData, FILE_APPEND );
@@ -67,7 +65,7 @@ class Log {
 
     protected static function initMonolog() {
         $fileHandler   = new StreamHandler( self::getFileNamePath() );
-        $fileFormatter = new LineFormatter( null, null, true, true );
+        $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
         $fileHandler->setFormatter( $fileFormatter );
         self::$logger = new Logger( 'MateCat', array( $fileHandler ) );
     }

@@ -1,7 +1,7 @@
 <?php
 
-use \Contribution\ContributionSetStruct, \Contribution\Set;
-use Analysis\DqfQueueHandler;
+use Contribution\ContributionSetStruct;
+use Contribution\Set;
 use Exceptions\ControllerReturnException;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
 
@@ -62,30 +62,12 @@ class setTranslationController extends ajaxController {
     protected $context_before;
     protected $context_after;
 
-
-    protected $startExecutionTime;
-    protected function startTimer() {
-        $this->startExecutionTime = microtime( true );
-    }
-
-    protected function getTimer() {
-        return round( microtime( true ) - $this->startExecutionTime, 4 ); //get milliseconds
-    }
-
-    public function finalize() {
-        parent::finalize();
-        Log::$fileName = "set_translation_time.log";
-        Log::doLog( [ 'Total Time: ' => $this->getTimer() ] );
-    }
-
     /**
      * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
      */
     private $VersionsHandler ;
 
     public function __construct() {
-
-        $this->startTimer();
 
         parent::__construct();
 
