@@ -34,7 +34,7 @@ class ChangeProjectPasswordController  extends ajaxController {
         $this->new_password = $__postInput[ 'new_pass' ];
         $this->old_password = $__postInput[ 'old_pass' ];
 
-        Log::doLog("ChangeProjectPasswordController params: id_project=$this->id_project new_pass=$this->new_password old_pass=$this->old_password");
+        Log::doJsonLog("ChangeProjectPasswordController params: id_project=$this->id_project new_pass=$this->new_password old_pass=$this->old_password");
     }
 
     public function doAction() {
@@ -44,7 +44,7 @@ class ChangeProjectPasswordController  extends ajaxController {
             $pStruct = Projects_ProjectDao::findByIdAndPassword( $this->id_project, $this->old_password );
         } catch ( NotFoundException $e ) {
             $this->api_output[ 'message' ] = 'Wrong id or pass';
-            Log::doLog( "ChangeProjectPasswordController error: " . $this->api_output[ 'message' ] );
+            Log::doJsonLog( "ChangeProjectPasswordController error: " . $this->api_output[ 'message' ] );
 
             return -1; //FAIL
         }
@@ -59,7 +59,7 @@ class ChangeProjectPasswordController  extends ajaxController {
         $this->api_output[ 'id_project' ]   = $this->id_project;
         $this->api_output[ 'project_pass' ] = $this->new_password;
 
-        Log::doLog( "ChangeProjectPasswordController result: " . $this->api_output[ 'status' ] );
+        Log::doJsonLog( "ChangeProjectPasswordController result: " . $this->api_output[ 'status' ] );
 
     }
 

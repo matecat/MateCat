@@ -144,9 +144,12 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
         );
         $mh->multiExec();
 
+        if( $this->doLog ){
+            $mh->verbose = true;
+        }
+
         if ( $mh->hasError( $resourceHash ) ) {
             $curl_error = $mh->getError( $resourceHash );
-            Log::doLog( 'Curl Error: (http status ' . $curl_error[ 'http_code' ] .') '. $curl_error[ 'errno' ] . " - " . $curl_error[ 'error' ] . " " . var_export( parse_url( $url ), true ) );
             $responseRawValue = $mh->getSingleContent( $resourceHash );
             $rawValue = array(
                     'error' => array(
@@ -162,14 +165,6 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
         $mh->multiCurlCloseAll();
 
-        if( $this->doLog ){
-            $curl_parameters = $this->curl_additional_params + $curl_options;
-            if( isset( $curl_parameters[ CURLOPT_POSTFIELDS ] ) ){
-                Log::doLog( $uniq_uid . " ... Post Parameters ... \n" . var_export( $curl_parameters[ CURLOPT_POSTFIELDS ], true ) );
-            }
-            Log::doLog( $uniq_uid . " ... Received... " . var_export( $rawValue, true ) );
-        }
-
         return $rawValue;
 
     }
@@ -183,7 +178,7 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
         $this->error = array(); // reset last error
         if ( !$this->$function ) {
-            Log::doLog( 'Requested method ' . $function . ' not Found.' );
+            //Log::doJsonLog( 'Requested method ' . $function . ' not Found.' );
             $this->result = array(
                     'error' => array(
                             'code'    => -43,

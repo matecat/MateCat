@@ -115,7 +115,7 @@ class outsourceToController extends ajaxController {
             $this->typeOfService = "professional";
         }
 
-        //        Log::doLog(  $this->jobList  );
+        //        Log::doJsonLog(  $this->jobList  );
         /**
          * The Job List form
          *
@@ -176,7 +176,7 @@ class outsourceToController extends ajaxController {
          *   );
          */
         $client_output = $outsourceTo->getQuotesResult();
-//        Log::doLog( $client_output );
+//        Log::doJsonLog( $client_output );
 
         $this->result[ 'code' ]       = 1;
         $this->result[ 'data' ]       = array_values( $client_output );

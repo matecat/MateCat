@@ -113,8 +113,8 @@ class setSegmentSplitController extends ajaxController {
             $this->result['data'] = 'OK';
         }
         else{
-            Log::doLog("Failed while splitting/merging segment.");
-            Log::doLog($translationStruct);
+            Log::doJsonLog("Failed while splitting/merging segment.");
+            Log::doJsonLog($translationStruct);
         }
     }
 

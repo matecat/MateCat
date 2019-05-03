@@ -57,7 +57,7 @@ abstract class AbstractEmail
             array( 'persistent' => WorkerClient::$_HANDLER->persistent )
         );
 
-        Log::doLog( 'Message has been sent' );
+        Log::doJsonLog( 'Message has been sent' );
     }
 
     protected function _buildMessageContent(){

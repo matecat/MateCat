@@ -82,16 +82,16 @@ abstract class AbstractDaemon {
             }
             if ( !function_exists( 'pcntl_signal' ) ) {
                 $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
-                static::_TimeStampMsg( $msg );
+                //static::_TimeStampMsg( $msg );
             } else {
-                static::_TimeStampMsg( str_pad( " Registering signal handlers ", 60, "*", STR_PAD_BOTH ) );
+                //static::_TimeStampMsg( str_pad( " Registering signal handlers ", 60, "*", STR_PAD_BOTH ) );
 
                 pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
                 pcntl_signal( SIGINT, array( get_called_class(), 'sigSwitch' ) );
                 pcntl_signal( SIGHUP, array( get_called_class(), 'sigSwitch' ) );
                 $msg = str_pad( " Signal Handler Installed ", 60, "-", STR_PAD_BOTH );
 
-                static::_TimeStampMsg( "$msg" );
+                //static::_TimeStampMsg( "$msg" );
             }
             static::$__INSTANCE = new static(  $config_file, $queueIndex );
         }
@@ -126,7 +126,7 @@ abstract class AbstractDaemon {
      */
     protected static function _TimeStampMsg( $msg ) {
         if ( \INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
-        Log::doLog( $msg );
+        Log::doJsonLog( $msg );
     }
 
     /**

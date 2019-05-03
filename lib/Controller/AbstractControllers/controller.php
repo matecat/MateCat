@@ -168,7 +168,7 @@ abstract class controller implements IController {
             );
 
         } catch ( Exception $e ) {
-            Log::doLog( 'User not logged.' );
+            Log::doJsonLog( 'User not logged.' );
         }
         $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
 

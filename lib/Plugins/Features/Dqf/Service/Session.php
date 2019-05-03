@@ -57,7 +57,7 @@ class Session implements ISession {
         $content = json_decode( $client->curl()->getSingleContent( $request ), true );
         $response = new LoginResponseStruct( $content['loginResponse'] );
 
-        Log::doLog(" SessionId " . $response->sessionId );
+        Log::doJsonLog(" SessionId " . $response->sessionId );
 
         $this->sessionId = $response->sessionId ;
         $this->expires = $response->expires ;

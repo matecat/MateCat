@@ -220,7 +220,7 @@ class UploadHandler {
     protected function handle_file_upload( $uploaded_file, $name, $size, $type, $error, $index = null ) {
 
         Log::$fileName = "upload.log";
-        Log::doLog( $uploaded_file );
+        Log::doJsonLog( $uploaded_file );
 
         $file       = new stdClass();
         $file->name = $this->trim_file_name( $name );
@@ -240,17 +240,17 @@ class UploadHandler {
                     $res = file_put_contents(
                             $file_path, fopen( $uploaded_file, 'r' ), FILE_APPEND
                     );
-                    Log::doLog( $res );
+                    Log::doJsonLog( $res );
                 } else {
                     $res = move_uploaded_file( $uploaded_file, $file_path );
-                    Log::doLog( $res );
+                    Log::doJsonLog( $res );
                 }
             } else {
                 // Non-multipart uploads (PUT method support)
                 $res = file_put_contents(
                         $file_path, fopen( 'php://input', 'r' ), $append_file ? FILE_APPEND : 0
                 );
-                Log::doLog( $res );
+                Log::doJsonLog( $res );
             }
 
             clearstatcache();
@@ -266,7 +266,7 @@ class UploadHandler {
             $file->size = $file_size;
             $this->set_file_delete_url( $file );
 
-            Log::doLog( "Size on disk: $file_size - Declared size: $file->size" );
+            Log::doJsonLog( "Size on disk: $file_size - Declared size: $file->size" );
 
             //As opposed with isset(), property_exists() returns TRUE even if the property has the value NULL.
             if ( property_exists( $file, 'error' ) ) {

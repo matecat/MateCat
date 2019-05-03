@@ -198,7 +198,7 @@ class XliffSAXTranslationReplacer {
                 if ( $name == 'file' && $k == 'target-language' && !empty( $this->target_lang ) ) {
                     //replace Target language with job language provided from constructor
                     $tag .= "$k=\"$this->target_lang\" ";
-                    //Log::doLog($k . " => " . $this->target_lang);
+                    //Log::doJsonLog($k . " => " . $this->target_lang);
                 } else {
                     //put attributes in it
                     $tag .= "$k=\"$v\" ";
@@ -326,7 +326,7 @@ class XliffSAXTranslationReplacer {
                     if ( $warning ) {
                         $old_fname     = Log::$fileName;
                         Log::$fileName = "XliffSax_Polling.log";
-                        Log::doLog( "WARNING: PHP Notice polling. CurrentId: '" . $this->currentId . "' - Filename: '" . $this->segments[ 0 ][ 'filename' ] . "' - First Segment: '" . $this->segments[ 0 ][ 'sid' ] . "'" );
+                        Log::doJsonLog( "WARNING: PHP Notice polling. CurrentId: '" . $this->currentId . "' - Filename: '" . $this->segments[ 0 ][ 'filename' ] . "' - First Segment: '" . $this->segments[ 0 ][ 'sid' ] . "'" );
                         Log::$fileName = $old_fname;
                     }
 
@@ -528,7 +528,7 @@ class XliffSAXTranslationReplacer {
                 $check->performTagCheckOnly();
                 if ( $check->thereAreErrors() ) {
                     $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg [ 'segment' ] . '|||UNTRANSLATED_CONTENT_END|||';
-                    Log::doLog( "tag mismatch on\n" . print_r( $seg, true ) . "\n(because of: " . print_r( $check->getErrors(), true ) . ")" );
+                    Log::doJsonLog( "tag mismatch on\n" . print_r( $seg, true ) . "\n(because of: " . print_r( $check->getErrors(), true ) . ")" );
                 }
             }
 

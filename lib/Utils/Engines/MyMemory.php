@@ -615,7 +615,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             throw new Exception( $this->result->error->message, $this->result->responseStatus );
         }
 
-        Log::doLog('TMX exported to E-mail.');
+        Log::doJsonLog('TMX exported to E-mail.');
         return $this->result;
     }
 
@@ -660,7 +660,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( 'api_key_check_auth_url', $postFields );
 
         if ( !$this->result->responseStatus == 200 ) {
-            Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
+            Log::doJsonLog( "Error: The check for MyMemory private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
             throw new Exception( "Error: The private TM key you entered ( $apiKey ) seems to be invalid. Please, check that the key is correct.", -2 );
         }
 
@@ -782,7 +782,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $curl_parameters = implode( "&", $segmentsToBeDetected ) . "&of=json";
 
-        Log::doLog( "DETECT LANG :", $segmentsToBeDetected );
+        Log::doJsonLog( "DETECT LANG :", $segmentsToBeDetected );
 
         $options = array(
                 CURLOPT_HEADER         => false,
@@ -800,12 +800,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $mh        = new MultiCurlHandler();
         $tokenHash = $mh->createResource( $url, $options );
-        Log::doLog( "DETECT LANG TOKENHASH: $tokenHash" );
+        Log::doJsonLog( "DETECT LANG TOKENHASH: $tokenHash" );
 
         $mh->multiExec();
 
         $res = $mh->getAllContents();
-        Log::doLog( "DETECT LANG RES:", $res );
+        Log::doJsonLog( "DETECT LANG RES:", $res );
 
         return json_decode( $res[ $tokenHash ], true );
     }

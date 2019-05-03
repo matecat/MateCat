@@ -100,7 +100,7 @@ class Mmt extends BaseFeature {
              * @var $newTestCreatedMT Engines_MMT
              */
             $me_result = $newTestCreatedMT->checkAccount();
-            Log::doLog( $me_result );
+            Log::doJsonLog( $me_result );
 
             $keyList = self::_getKeyringOwnerKeys( $userStruct );
             if( !empty( $keyList ) ){
@@ -223,7 +223,7 @@ class Mmt extends BaseFeature {
             $keyList = $_keyDao->read( $dh );
         } catch ( Exception $e ) {
             $keyList = [];
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
         }
 
         return $keyList;
@@ -337,8 +337,8 @@ class Mmt extends BaseFeature {
                 Database::obtain()->commit();
 
             } catch( Exception $e ){
-                Log::doLog( $e->getMessage() );
-                Log::doLog( $e->getTraceAsString() );
+                Log::doJsonLog( $e->getMessage() );
+                Log::doJsonLog( $e->getTraceAsString() );
             }
 
             unset( $tmpFileObject );
@@ -450,7 +450,7 @@ class Mmt extends BaseFeature {
                 }
 
             } catch ( Exception $e ){
-                Log::doLog( $e->getMessage() );
+                Log::doJsonLog( $e->getMessage() );
             }
         }
 

@@ -171,7 +171,7 @@ abstract class AbstractWorker implements SplSubject {
      * @param $msg string
      */
     protected function _doLog( $msg ){
-        $this->_logMsg = get_class( $this ) . " - " . print_r( $msg, true );
+        $this->_logMsg = $msg;
         $this->notify();
     }
 
@@ -188,7 +188,7 @@ abstract class AbstractWorker implements SplSubject {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip." );
             $this->_endQueueCallback( $queueElement );
         } elseif ( isset( $queueElement->reQueueNum ) ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
+//            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
     }
 

@@ -38,10 +38,14 @@ trait TimeLogger {
 
         /** @var $this IController|TimeLogger */
 
+        $_request_uri = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        if( isset( $_request_uri[ 'query' ] ) ){
+            parse_str( $_request_uri[ 'query' ], $str );
+            $_request_uri[ 'query' ] = $str;
+        }
+
         $object = [
-                "context"       => get_class( $this ),
                 "client_ip"     => Utils::getRealIpAddr(),
-                "user_token"    => \Log::$uniqID,
                 "user"          => ( $this->userIsLogged() ? [
                         "uid"        => $this->getUser()->getUid(),
                         "email"      => $this->getUser()->getEmail(),
@@ -50,12 +54,11 @@ trait TimeLogger {
                 ] : [ "uid" => 0 ] ),
                 "custom_object" => $this->timingCustomObject,
                 "browser"       => Utils::getBrowser(),
-                "request_uri"   => $_SERVER[ 'REQUEST_URI' ],
-                "time"          => time(),
+                "request_uri"   => $_request_uri,
                 "Total Time"    => $this->getTimer()
         ];
 
-        Log::doLogRaw( json_encode( $object ) );
+        Log::doJsonLog( $object );
 
     }
 

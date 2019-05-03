@@ -306,9 +306,6 @@ class createProjectController extends ajaxController {
 
         $arFiles = $newArFiles;
 
-        \Log::doLog( '------------------------------' );
-        \Log::doLog( $arFiles );
-
         $projectManager = new ProjectManager();
 
         $projectStructure = $projectManager->getProjectStructure();

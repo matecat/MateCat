@@ -86,7 +86,7 @@ class Bootstrap {
             WorkerClient::init();
             Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         } catch( \Exception $e ){
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
         }
 
         if ( !is_dir( INIT::$STORAGE_DIR ) ) {
@@ -201,7 +201,7 @@ class Bootstrap {
                 $output .= "</pre>";
 
                 Log::$fileName = 'fatal_errors.txt';
-                Log::doLog( $output );
+                Log::doJsonLog( $output );
                 Utils::sendErrMailReport( $output );
 
                 header( "HTTP/1.1 200 OK" );
