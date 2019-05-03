@@ -143,6 +143,8 @@ class analyzeController extends viewController {
 
         $this->template->outsource_service_login    = $this->_outsource_login_API ;
 
+        $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
+
         $this->__evalModalBoxForLogin();
 
         $this->decorator = new AnalyzeDecorator( $this, $this->template );

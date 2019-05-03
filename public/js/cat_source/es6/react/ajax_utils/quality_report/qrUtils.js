@@ -12,18 +12,24 @@ let QUALITY_REPORT =  {
         return $.ajax({
             data: data,
             type: "GET",
-            url : "/api/v3/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v3/jobs/"+ config.id_job +"/" + config.password + "/quality-report/segments"
         });
     },
 
     getUserData() {
-        return $.getJSON('/api/app/user');
+        return $.ajax({
+            type: "GET",
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + 'api/app/user'
+        });
     },
 
     getQRinfo() {
         return $.ajax({
             type: "GET",
-            url : "/api/v3/jobs/"+ config.id_job +"/" + config.password
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() +"api/v3/jobs/"+ config.id_job +"/" + config.password
         });
     }
 };

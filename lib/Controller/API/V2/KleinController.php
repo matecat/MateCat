@@ -176,7 +176,7 @@ abstract class KleinController implements IController {
             $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ;
         }
 
-        if( empty( $this->user ) ){
+        if( !empty( $this->user ) ){
             $this->userIsLogged = true;
         }
 

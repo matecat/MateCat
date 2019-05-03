@@ -483,6 +483,8 @@ class catController extends viewController {
         //Maybe some plugin want disable the Split from the config
         $this->template->splitSegmentEnabled = 'false';
 
+        $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
+
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 

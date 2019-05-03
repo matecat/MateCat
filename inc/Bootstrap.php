@@ -362,6 +362,8 @@ class Bootstrap {
             INIT::$PROTOCOL = $localProto;
             INIT::$HTTPHOST = INIT::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
 
+            ini_set( 'session.cookie_domain', '.' . INIT::$COOKIE_DOMAIN );
+
         } else {
             INIT::$HTTPHOST = $env[ 'CLI_HTTP_HOST' ];
         }

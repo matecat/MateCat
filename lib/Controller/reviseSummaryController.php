@@ -223,6 +223,8 @@ class reviseSummaryController extends viewController {
         $this->template->first_job_segment   = $this->data->job_first_segment ;
 
         $this->template->project_type = $this->project_type;
+
+        $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
     }
 
     /**
