@@ -321,7 +321,6 @@ class newProjectController extends viewController {
         $this->featureSet->appendDecorators( 'NewProjectDecorator', $this, $this->template );
 
         $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
-        $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
         if ( $this->isLoggedIn() ) {
             $this->template->teams = ( new \Teams\MembershipDao() )->findUserTeams( $this->user );
         }
