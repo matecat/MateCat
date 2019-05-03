@@ -32,7 +32,7 @@ class SegmentBody extends React.Component {
             return false;
         }
 
-        if (UI.noTagsInSegment({area: area, starting: false })) {
+        if ( !this.props.segment.decoded_translation.indexOf('class="locked') > 0 ) {
             return false;
         }
         return true;
@@ -64,7 +64,7 @@ class SegmentBody extends React.Component {
     }
 
     beforeRenderOrUpdate(area) {
-        if (this.checkLockTags(area)) {
+        if ( area.length > 0 && this.checkLockTags(area) ) {
             var segment = area.closest('section');
             if (LXQ.enabled()) {
                 $.powerTip.destroy($('.tooltipa', segment));
@@ -74,7 +74,7 @@ class SegmentBody extends React.Component {
     }
 
     afterRenderOrUpdate(area) {
-        if (this.checkLockTags(area)) {
+        if ( area.length > 0 && this.checkLockTags(area)) {
             var segment = area.closest('section');
 
             var prevNumTags = $('span.locked', area).length;
