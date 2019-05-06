@@ -287,11 +287,18 @@ $.extend( UI, {
         SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
         UI.currentSegment.data('modified', true);
         UI.currentSegment.trigger('modified');
-
+        UI.updateSegmentTranslation();
         UI.registerQACheck();
     },
+    updateSegmentTranslationFn: function() {
+        saveSelection();
+        let editareaClone = UI.editarea.clone();
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+        setTimeout(function () {
+            restoreSelection();
+        });
+    },
     pasteEditAreaEventHandler: function (e) {
-
         UI.saveInUndoStack('paste');
         $('#placeHolder').remove();
         var node = document.createElement("span");
