@@ -109,7 +109,7 @@ BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
 </IfModule>
 
 <IfModule mod_headers.c>
-Header set Access-Control-Allow-Origin "http://dev.matecat.com"
+Header set Access-Control-Allow-Origin "http[s]?://(dev|www|ms|parkip|beta|legacyconverters|freddy)\.matecat(\-staging)?\.com"
 Header set Access-Control-Allow-Credentials "true"
 Header set Access-Control-Allow-Methods "POST,PUT,OPTIONS,DELETE"
 Header append Vary User-Agent env=!dont-vary
