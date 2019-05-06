@@ -137,6 +137,10 @@ class Log {
         }
     }
 
+    public static function doJsonLog( $content, $filename = null ){
+        self::doLog( $content );
+    }
+
     public static function getLogger() {
         if ( !self::$useMonolog ) {
             throw new Exception('Logger is not set. Is monolog available?');
