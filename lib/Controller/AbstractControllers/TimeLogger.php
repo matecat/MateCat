@@ -52,7 +52,7 @@ trait TimeLogger {
                         "first_name" => $this->getUser()->getFirstName(),
                         "lat_name"   => $this->getUser()->getLastName()
                 ] : [ "uid" => 0 ] ),
-                "custom_object" => $this->timingCustomObject,
+                "custom_object" => (object)$this->timingCustomObject,
                 "browser"       => Utils::getBrowser(),
                 "request_uri"   => $_request_uri,
                 "Total Time"    => $this->getTimer()
