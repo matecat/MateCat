@@ -2,23 +2,6 @@
 	Component: ui.tags
  */
 $.extend(UI, {
-    noTagsInSegment: function(options) {
-        var editarea = options.area;
-        var starting = options.starting;
-
-        if (starting) return false;
-
-        try{
-            if ( $(editarea).html().match(/\&lt;.*?\&gt;/gi) ) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch(e){
-            return true;
-        }
-
-	},
 	tagCompare: function(sourceTags, targetTags, prova) {
 
 		var mismatch = false;
