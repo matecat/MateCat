@@ -13,7 +13,7 @@ var LXQ = {
             config.lxq_enabled = 1;
             // Todo Call Service to enable Tag Lexiqa
             var path = sprintf(
-                '/api/v2/jobs/%s/%s/options',
+                APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
                 config.id_job, config.password
             );
             var data = {
@@ -22,7 +22,8 @@ var LXQ = {
             $.ajax({
                 url: path,
                 type: 'POST',
-                data : data
+                data : data,
+                xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 if ($('#lexiqa-popup').hasClass('lxq-visible')) {
                     $('#lexiqabox').trigger('click');
@@ -44,7 +45,7 @@ var LXQ = {
         if (config.lxq_enabled) {
             config.lxq_enabled = 0;
             var path = sprintf(
-                '/api/v2/jobs/%s/%s/options',
+                APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
                 config.id_job, config.password
             );
             var data = {
@@ -53,7 +54,8 @@ var LXQ = {
             $.ajax({
                 url: path,
                 type: 'POST',
-                data : data
+                data : data,
+                xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 if ($('#lexiqa-popup').hasClass('lxq-visible')) {
                     $('#lexiqabox').trigger('click');

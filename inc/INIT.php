@@ -30,6 +30,7 @@ class INIT {
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
+    public static $COOKIE_DOMAIN;
     public static $PROTOCOL;
     public static $DEBUG               = true;
     public static $PRINT_ERRORS        = false;
@@ -42,6 +43,8 @@ class INIT {
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
     public static $USE_COMPILED_ASSETS = false;
+    public static $ENABLE_MULTI_DOMAIN_API;
+
 
     /**
      * Use or not the js tracking codes macro import ( Ex: google analytics code injection )

@@ -168,6 +168,7 @@ abstract class viewController extends controller {
         $this->template->css_resources = array();
         $this->template->authURL = $this->getAuthUrl() ;
         $this->template->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
     }
 
     /**

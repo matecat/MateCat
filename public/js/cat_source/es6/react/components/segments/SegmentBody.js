@@ -81,33 +81,26 @@ class SegmentBody extends React.Component {
                 LXQ.reloadPowertip(segment);
             }
 
-            if (UI.hasSourceOrTargetTags(segment)) {
+            if (this.hasSourceOrTargetTags(segment)) {
                 segment.addClass('hasTagsToggle');
+                UI.detectTagType(area);
 
             } else {
                 segment.removeClass('hasTagsToggle');
             }
 
-            if (UI.hasMissingTargetTags(segment)) {
+            if (this.hasMissingTargetTags(segment)) {
                 segment.addClass('hasTagsAutofill');
             } else {
                 segment.removeClass('hasTagsAutofill');
             }
-
-            // $('span.locked', area).addClass('monad');
-
-            UI.detectTagType(area);
         }
     }
 
     hasSourceOrTargetTags() {
         var regExp = UI.getXliffRegExpression();
         var sourceTags = this.props.segment.segment.match( regExp );
-        if ( sourceTags.length > 0 ) {
-            return true;
-        } else {
-
-        }
+        return sourceTags && sourceTags.length > 0 ;
     }
 
     hasMissingTargetTags() {

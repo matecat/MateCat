@@ -21,7 +21,8 @@ API.PROJECTS = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=getProjects"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=getProjects"
         });
 
     },
@@ -30,7 +31,8 @@ API.PROJECTS = {
         return $.ajax({
             async: true,
             type: "get",
-            url : "/api/v2/projects/" + id +"/" + config.password
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/projects/" + id +"/" + config.password
         });
     },
     /**
@@ -58,7 +60,8 @@ API.PROJECTS = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=changeJobsStatus"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=changeJobsStatus"
         });
     },
 
@@ -66,7 +69,8 @@ API.PROJECTS = {
         return $.ajax({
             async: true,
             type: "get",
-            url : "/api/v2/activity/project/" + id + "/" + pass + "/last",
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/activity/project/" + id + "/" + pass + "/last",
         });
     },
 
@@ -77,7 +81,8 @@ API.PROJECTS = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/teams/" + idOrg + "/projects/" + idProject,
         });
     },
     changeProjectAssignee: function (idOrg, idProject, newUserId) {
@@ -89,7 +94,8 @@ API.PROJECTS = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "put",
-            url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/teams/" + idOrg + "/projects/" + idProject,
         });
     },
 
@@ -100,7 +106,8 @@ API.PROJECTS = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/teams/" + project.id_team + "/projects/" + project.id
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/teams/" + project.id_team + "/projects/" + project.id
         });
     },
     getVolumeAnalysis: function () {
@@ -113,7 +120,8 @@ API.PROJECTS = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=getVolumeAnalysis"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=getVolumeAnalysis"
         });
     },
     getJobVolumeAnalysis: function () {
@@ -126,7 +134,8 @@ API.PROJECTS = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=getVolumeAnalysis"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=getVolumeAnalysis"
         });
     },
     getCompletionStatus: function () {
@@ -139,7 +148,8 @@ API.PROJECTS = {
         return $.ajax({
             data: data,
             type: "GET",
-            url : "/api/v2/projects/" + pid + "/" + jpassword + "/completion_status"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/projects/" + pid + "/" + jpassword + "/completion_status"
         });
     }
 };
