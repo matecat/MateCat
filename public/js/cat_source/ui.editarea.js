@@ -288,18 +288,6 @@ $.extend( UI, {
         UI.currentSegment.data('modified', true);
         UI.currentSegment.trigger('modified');
 
-        if ( UI.hasSourceOrTargetTags( e.target ) ) {
-            SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsToggle');
-        } else {
-            SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsToggle');
-        }
-
-        if ( UI.hasMissingTargetTags( $(e.target).closest('section') ) ) {
-            SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsAutofill');
-        } else {
-            SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsAutofill');
-        }
-
         UI.registerQACheck();
     },
     pasteEditAreaEventHandler: function (e) {

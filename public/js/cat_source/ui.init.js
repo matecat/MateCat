@@ -38,7 +38,7 @@ $.extend(UI, {
             LXQ.initPopup();
         }
         NOTIFICATIONS.start();
-        UI.checkTagProximity =  _.debounce( UI.checkTagProximityFn, 1000);
+        UI.checkTagProximity =  _.debounce( UI.checkTagProximityFn, 500);
     },
 	init: function() {
 

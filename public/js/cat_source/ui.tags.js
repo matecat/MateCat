@@ -501,7 +501,7 @@ $.extend(UI, {
 	},
 
     hasSourceOrTargetTags: function ( segment ) {
-        return ( $(segment).find( '.locked' ).length > 0 || (UI.sourceTags && UI.sourceTags.length > 0) )
+        return ((UI.sourceTags && UI.sourceTags.length > 0 || $(segment).find( '.locked' ).length > 0 ) )
     },
     hasMissingTargetTags: function ( segment ) {
         if ( segment.length == 0 ) return ;
