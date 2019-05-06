@@ -287,23 +287,18 @@ $.extend( UI, {
         SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
         UI.currentSegment.data('modified', true);
         UI.currentSegment.trigger('modified');
-
-        if ( UI.hasSourceOrTargetTags( e.target ) ) {
-            SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsToggle');
-        } else {
-            SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsToggle');
-        }
-
-        if ( UI.hasMissingTargetTags( $(e.target).closest('section') ) ) {
-            SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsAutofill');
-        } else {
-            SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsAutofill');
-        }
-
+        UI.updateSegmentTranslation();
         UI.registerQACheck();
     },
+    updateSegmentTranslationFn: function() {
+        saveSelection();
+        let editareaClone = UI.editarea.clone();
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+        setTimeout(function () {
+            restoreSelection();
+        });
+    },
     pasteEditAreaEventHandler: function (e) {
-
         UI.saveInUndoStack('paste');
         $('#placeHolder').remove();
         var node = document.createElement("span");
