@@ -127,7 +127,7 @@ APP = {
     },
     getRandomUrl : function() {
         if ( config.enableMultiDomainApi ) {
-            return '//' + Math.floor(Math.random()*100) + '.ajax.' + location.host;
+            return '//' + Math.floor(Math.random()*100) + '.ajax.' + location.host + '/';
         } else {
             return config.basepath;
         }
