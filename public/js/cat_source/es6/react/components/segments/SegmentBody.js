@@ -83,6 +83,7 @@ class SegmentBody extends React.Component {
 
             if (this.hasSourceOrTargetTags(segment)) {
                 segment.addClass('hasTagsToggle');
+                UI.detectTagType(area);
 
             } else {
                 segment.removeClass('hasTagsToggle');
@@ -93,10 +94,6 @@ class SegmentBody extends React.Component {
             } else {
                 segment.removeClass('hasTagsAutofill');
             }
-
-            // $('span.locked', area).addClass('monad');
-
-            UI.detectTagType(area);
         }
     }
 
