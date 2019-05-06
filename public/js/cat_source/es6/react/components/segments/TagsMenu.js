@@ -144,14 +144,15 @@ class TagsMenu extends React.Component {
                     textDecoded = UI.transformTextForLockTags(item);
                 }
 
-                let classSelected = (this.state.selectedItem === index) ? "active" : "";
+                let classSelected = (this.state.selectedItem === tagIndex) ? "active" : "";
+                let indexTag = _.clone(tagIndex);
                 missingItems.push(<div className={"item missing-tag " + classSelected}
-                                       key={"missing" + index}
+                                       key={"missing" + indexTag}
                                        data-original="item"
                                        dangerouslySetInnerHTML={this.allowHTML(label)}
                                        onClick={this.selectTag.bind(this, textDecoded)}
                                        ref={(elem) => {
-                                           this.tagsRefs["item" + index] = elem;
+                                           this.tagsRefs["item" + indexTag] = elem;
                                        }}
                     />
                 );
@@ -173,11 +174,12 @@ class TagsMenu extends React.Component {
                     textDecoded = UI.transformTextForLockTags(item);
                 }
 
-                let classSelected = ( this.state.selectedItem === index ) ? "active" : "";
-                addedItems.push(<div className={"item added-tag " + classSelected} key={"added"+ index} data-original="item"
+                let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
+                let indexTag = _.clone(tagIndex);
+                addedItems.push(<div className={"item added-tag " + classSelected} key={"added"+ indexTag} data-original="item"
                                     dangerouslySetInnerHTML={ this.allowHTML(label) }
                                     onClick={this.selectTag.bind(this, textDecoded)}
-                                    ref={(elem)=>{this.tagsRefs["item" + index]=elem;}}
+                                    ref={(elem)=>{this.tagsRefs["item" + indexTag]=elem;}}
                     />
                 );
                 tagIndex++;
