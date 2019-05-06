@@ -77,13 +77,8 @@ class SegmentBody extends React.Component {
         if ( area.length > 0 && this.checkLockTags(area)) {
             var segment = area.closest('section');
 
-            var prevNumTags = $('span.locked', area).length;
-
             if (LXQ.enabled()) {
                 LXQ.reloadPowertip(segment);
-            }
-            if ($('span.locked', area).length != prevNumTags){
-                UI.closeTagAutocompletePanel();
             }
 
             if (UI.hasSourceOrTargetTags(segment)) {
@@ -99,10 +94,31 @@ class SegmentBody extends React.Component {
                 segment.removeClass('hasTagsAutofill');
             }
 
-            $('span.locked', area).addClass('monad');
+            // $('span.locked', area).addClass('monad');
 
             UI.detectTagType(area);
         }
+    }
+
+    hasSourceOrTargetTags() {
+        var regExp = UI.getXliffRegExpression();
+        var sourceTags = this.props.segment.segment.match( regExp );
+        if ( sourceTags.length > 0 ) {
+            return true;
+        } else {
+
+        }
+    }
+
+    hasMissingTargetTags() {
+        var regExp = UI.getXliffRegExpression();
+        var sourceTags = this.props.segment.segment.match( regExp );
+        if ( sourceTags && sourceTags.length === 0 ) {
+            return false;
+        }
+        var targetTags = this.props.segment.translation.match( regExp );
+
+        return targetTags && sourceTags.length > targetTags.length || targetTags && !_.isEqual(sourceTags.sort(), targetTags.sort());
     }
 
     getStatusMenu() {
