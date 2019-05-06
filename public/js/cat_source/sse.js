@@ -14,7 +14,7 @@ SSE = {
                 throw new Exception( 'source mapping not found' );
         }
 
-        return new EventSource( SSE.baseURL + source );
+        return new EventSource( '//' + Math.floor(Math.random()*100) + '.ajax.' + SSE.baseURL +  source );
     }
 };
 
