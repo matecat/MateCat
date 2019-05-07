@@ -58,8 +58,6 @@ abstract class viewController extends controller {
      */
     public function __construct() {
 
-        $this->startTimer();
-
         if ( !Bootstrap::areMandatoryKeysPresent() ) {
             $controllerInstance = new CustomPage();
             $controllerInstance->setTemplate( "badConfiguration.html" );
@@ -139,8 +137,6 @@ abstract class viewController extends controller {
          * Execute Template Rendering
          */
         echo $this->template->execute();
-
-        $this->logPageCall();
 
     }
 
