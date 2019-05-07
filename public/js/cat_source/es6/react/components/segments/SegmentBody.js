@@ -106,7 +106,7 @@ class SegmentBody extends React.Component {
     hasMissingTargetTags() {
         var regExp = UI.getXliffRegExpression();
         var sourceTags = this.props.segment.segment.match( regExp );
-        if ( sourceTags && sourceTags.length === 0 ) {
+        if ( !sourceTags || sourceTags.length === 0 ) {
             return false;
         }
         var targetTags = this.props.segment.translation.match( regExp );
