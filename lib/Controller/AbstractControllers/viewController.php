@@ -3,9 +3,6 @@
  * Created by PhpStorm.
  */
 
-use AbstractControllers\IController;
-use Utils;
-
 
 /**
  * Abstract class for all html views

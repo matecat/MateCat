@@ -109,8 +109,8 @@ BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
 </IfModule>
 
 <IfModule mod_headers.c>
-SetEnvIfNoCase Origin "https?://(dev|www|ms|parkip|beta|legacyconverters|freddy)\.matecat(-staging)?\.com" ACAO=$0
-Header set Access-Control-Allow-Origin %{ACAO}e env=ACAO
+SetEnvIfNoCase Origin "https?://.*?$" CORS=$0
+Header set Access-Control-Allow-Origin %{CORS}e env=CORS
 Header set Access-Control-Allow-Credentials "true"
 Header set Access-Control-Allow-Methods "POST,PUT,OPTIONS,DELETE"
 Header append Vary User-Agent env=!dont-vary
