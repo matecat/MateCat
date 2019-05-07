@@ -413,7 +413,7 @@ class Utils {
                 substr( $hash, 20, 12 ) .
                 '}';
 
-        \Log::doJsonLog('created GUID', $guid );
+        \Log::doJsonLog( $guid );
 
         return $guid;
     }
