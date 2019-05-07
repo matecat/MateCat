@@ -253,7 +253,7 @@ abstract class DataAccess_AbstractDao {
                 "key"        => $key,
                 "sql"        => preg_replace( "/[ ]+/", " ", str_replace( "\n", " ", $sqlQuery ) ),
             //"result_set" => $value,
-        ], Log::getContext(), "query_cache.log" );
+        ], "query_cache.log" );
     }
 
     /**
@@ -551,8 +551,8 @@ abstract class DataAccess_AbstractDao {
                 self::structKeys( $struct )
         );
 
-        \Log::doJsonLog( "SQL", $sql );
-        \Log::doJsonLog( "data", $data );
+        \Log::doJsonLog( $sql );
+        \Log::doJsonLog( $data );
 
         return $stmt->execute( $data );
     }
