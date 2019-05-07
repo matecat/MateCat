@@ -325,7 +325,7 @@ $.extend(UI, {
             UI.highlightCorrespondingTags(elem);
             UI.highlightEquivalentTaginSourceOrTarget(elem.closest('.source'), UI.editarea);
         } else {
-            UI.checkTagProximity();
+            UI.checkTagProximityFn();
         }
     },
 
