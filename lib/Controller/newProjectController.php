@@ -131,7 +131,7 @@ class newProjectController extends viewController {
         } else {
 
             if ( !isset( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) ) {
-                setcookie( \Constants::COOKIE_SOURCE_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
+                setcookie( \Constants::COOKIE_SOURCE_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
                 $this->noSourceLangHistory = true;
             } else {
 
@@ -168,7 +168,7 @@ class newProjectController extends viewController {
         // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
             $this->guid = Utils::createToken();
-            setcookie( "upload_session", $this->guid, time() + 86400, '/' );
+            setcookie( "upload_session", $this->guid, time() + 86400, '/', \INIT::$COOKIE_DOMAIN );
         } else {
             $this->guid = $_COOKIE[ 'upload_session' ];
         }
@@ -349,7 +349,7 @@ class newProjectController extends viewController {
             $this->noTargetLangHistory = true;
         } else {
             if ( !isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) ) {
-                setcookie( \Constants::COOKIE_TARGET_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
+                setcookie( \Constants::COOKIE_TARGET_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
                 $this->noTargetLangHistory = true;
             } else {
                 if ( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] != \Constants::EMPTY_VAL ) {

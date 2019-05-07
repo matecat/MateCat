@@ -347,26 +347,28 @@ class Bootstrap {
             if ( property_exists( 'INIT', $KEY ) ) {
                 INIT::${$KEY} = $value;
             }
-
         }
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
             register_shutdown_function( 'Bootstrap::sessionClose' );
-            // Get HTTPS server status
-            $localProto = isset( $_SERVER[ 'HTTPS' ] ) ? "https" : "http";
-            // Override if header is set from load balancer
-            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-                $localProto = $_SERVER['HTTP_X_FORWARDED_PROTO'];
-            }
-            INIT::$PROTOCOL = $localProto;
-            INIT::$HTTPHOST = INIT::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
 
+            // Get HTTPS server status
+            // Override if header is set from load balancer
+            $localProto = 'http';
+            foreach ( [ 'HTTPS', 'HTTP_X_FORWARDED_PROTO' ] as $_key ) {
+                if ( isset( $_SERVER[ $_key ] ) ) {
+                    $localProto = 'https';
+                    break;
+                }
+            }
+
+            INIT::$PROTOCOL = $localProto;
             ini_set( 'session.cookie_domain', '.' . INIT::$COOKIE_DOMAIN );
 
-        } else {
-            INIT::$HTTPHOST = $env[ 'CLI_HTTP_HOST' ];
         }
+
+        INIT::$HTTPHOST = INIT::$CLI_HTTP_HOST;
 
         INIT::obtain(); //load configurations
 

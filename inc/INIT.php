@@ -30,19 +30,21 @@ class INIT {
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
+    public static $CLI_HTTP_HOST;
     public static $COOKIE_DOMAIN;
+    public static $AJAX_DOMAINS            = 100;
     public static $PROTOCOL;
-    public static $DEBUG               = true;
-    public static $PRINT_ERRORS        = false;
+    public static $DEBUG                   = true;
+    public static $PRINT_ERRORS            = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
-    public static $INSTANCE_ID         = 0;
-    public static $REDIS_SERVERS       = array();
+    public static $INSTANCE_ID             = 0;
+    public static $REDIS_SERVERS           = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
-    public static $USE_COMPILED_ASSETS = false;
+    public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
 
 
