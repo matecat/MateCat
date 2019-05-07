@@ -281,29 +281,29 @@ class Utils {
 		return $output;
 	}
 
-	public static function getRealIpAddr() {
+    public static function getRealIpAddr() {
 
-		foreach ( array(
-					'HTTP_CLIENT_IP',
-					'HTTP_X_FORWARDED_FOR',
-					'HTTP_X_FORWARDED',
-					'HTTP_X_CLUSTER_CLIENT_IP',
-					'HTTP_FORWARDED_FOR',
-					'HTTP_FORWARDED',
-					'REMOTE_ADDR'
-			       ) as $key ) {
-			if ( array_key_exists( $key, $_SERVER ) === true) {
-				foreach ( explode(',', $_SERVER[$key]) as $ip ) {
-					if( filter_var( trim($ip), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4|FILTER_FLAG_IPV6 ) !== false ) {
+        foreach ( [
+                      'HTTP_CLIENT_IP',
+                      'HTTP_X_FORWARDED_FOR',
+                      'HTTP_X_FORWARDED',
+                      'HTTP_X_CLUSTER_CLIENT_IP',
+                      'HTTP_FORWARDED_FOR',
+                      'HTTP_FORWARDED',
+                      'REMOTE_ADDR'
+                  ] as $key ) {
+            if ( isset( $_SERVER[ $key ] ) ) {
+                foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
+                    if ( filter_var( trim( $ip ), FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6 ) !== false ) {
                         return $ip;
                     }
-				}
-			}
-		}
+                }
+            }
+        }
 
-	}
+    }
 
-	public static function sendErrMailReport( $htmlContent, $subject = null ){
+    public static function sendErrMailReport( $htmlContent, $subject = null ){
 
         if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
           return true ;

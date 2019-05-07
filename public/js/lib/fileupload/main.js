@@ -791,16 +791,12 @@ testProgress = function(filerow,filesize,session,progress) {
 checkInit = function () {
     setTimeout( function () {
         if ( $( 'body' ).hasClass( 'initialized' ) ) {
-
             UI.checkFailedConversionsNumber();
-
-            checkConversions();
             return;
         } else {
             checkInit();
         }
-        ;
-    }, 100 );
+    }, 200 );
 };
 
 checkAnalyzability = function ( who ) {
@@ -862,46 +858,6 @@ disableAnalyze = function () {
 setFileReadiness = function () {
     $( '.upload-table tr' ).each( function () {
         if ( !$( this ).hasClass( 'converting' ) ) $( this ).addClass( 'ready' );
-    } )
-}
-
-checkConversions = function () {
-    console.log( 'check conversions' );
-    if ( !config.conversionEnabled ) return;
-    $( '.upload-table tr:not(.has-errors)' ).each( function () {
-
-        var name = $( '.name', this ).text();
-        var extension = name.split( '.' )[name.split( '.' ).length - 1];
-
-        $.ajax( {
-            url: '?action=checkFileConversion',
-            data: {
-                file_name: name
-            },
-            type: 'POST',
-            dataType: 'json',
-            context: $( this ),
-            success: function ( d ) {
-                if ( d.converted == '1' ) {
-                    console.log( d.file_name + ' già convertito' );
-                } else {
-                    console.log( d.file_name + ' non ancora convertito' );
-                    var filename = d.file_name;
-                    var filerow = this;
-                    if ( filerow.hasClass( 'converting' ) ) return;
-                    console.log( 'ACTION: success of checkConversions' );
-                    convertFile( filename, filerow );
-
-
-                    if ( $( '.upload-table tr' ).length ) {
-                        $( '.upload-files' ).addClass( 'uploaded' );
-                    } else {
-                        $( '.upload-files' ).removeClass( 'uploaded' );
-                    }
-                }
-            }
-        } );
-
     } )
 };
 
