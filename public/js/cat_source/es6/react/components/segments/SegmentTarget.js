@@ -52,9 +52,11 @@ class SegmentTarget extends React.Component {
     }
 
     hideTagsMenu() {
-        this.setState({
-            showTagsMenu: false
-        });
+        if ( this.state.showTagsMenu ) {
+            this.setState({
+                showTagsMenu: false
+            });
+        }
     }
 
     setOriginalTranslation(sid, translation) {

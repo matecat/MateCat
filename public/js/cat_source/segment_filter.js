@@ -26,7 +26,7 @@ if (SegmentFilter.enabled())
         var text = 'Sample is trying to focus on segment #' + segmentId + ', but ' +
                 'segment is no longer in the sample' ;
 
-        return function() {
+        return (function() {
             if ( notification ) APP.removeNotification( notification ) ;
 
             notification = APP.addNotification({
@@ -38,7 +38,7 @@ if (SegmentFilter.enabled())
                 type        : 'warning',
                 allowHtml   : true
             });
-        } ;
+        })() ;
 
     } ;
 
@@ -134,8 +134,8 @@ if (SegmentFilter.enabled())
                 if ( !lastSegmentId ) {
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
+                    UI.scrollSegment( segment$, segmentToOpen );
                     if (segment$.length) {
-                        UI.scrollSegment( segment$, segmentToOpen );
                         UI.openSegment( segment$ );
                     }
                 } else if ( lastSegmentId && !segmentIsInSample( lastSegmentId, data[ 'segment_ids' ] ) ) {
@@ -143,9 +143,9 @@ if (SegmentFilter.enabled())
                 } else {
                     segmentToOpen = lastSegmentId ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
+                    UI.scrollSegment(segment$, segmentToOpen);
                     if (segment$) {
                         UI.openSegment(segment$)
-                        UI.scrollSegment(segment$, segmentToOpen);
                     }
                 }
 

@@ -412,7 +412,7 @@ class catController extends viewController {
 
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
 
-        $this->template->first_job_segment   = $this->chunk->job_first_segment ;
+        $this->template->first_job_segment   = json_decode($this->firstSegmentOfFiles)[0]->first_segment;
         $this->template->last_job_segment    = $this->chunk->job_last_segment ;
 
         $this->template->owner_email         = $this->job_owner;
@@ -482,7 +482,7 @@ class catController extends viewController {
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
         //Maybe some plugin want disable the Split from the config
-        $this->template->splitSegmentEnabled = var_export(true, true);
+        $this->template->splitSegmentEnabled = 'false';
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
