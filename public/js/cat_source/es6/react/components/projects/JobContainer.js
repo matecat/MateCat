@@ -312,7 +312,7 @@ class JobContainer extends React.Component {
 
     getQRIcon() {
         var icon = '';
-        var quality = this.props.job.get('quality_overall');
+        var quality = this.props.job.get('quality_summary').get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
             let tooltipText = "Overall quality: " + quality.toUpperCase();
@@ -384,7 +384,7 @@ class JobContainer extends React.Component {
 
     getQRMenuItem() {
         var icon = '';
-        var quality = this.props.job.get('quality_overall');
+        var quality = this.props.job.get('quality_summary').get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
             let tooltipText = "Overall quality: " + quality.toUpperCase();
@@ -521,7 +521,7 @@ class JobContainer extends React.Component {
             number: 0,
             icon: ''
         };
-        let quality = this.props.job.get('quality_overall');
+        let quality = this.props.job.get('quality_summary').get('quality_overall');
         if (quality && quality === "poor" || quality === "fail") {
             n.number++;
             n.icon = this.getQRIcon();
