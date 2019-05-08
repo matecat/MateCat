@@ -644,7 +644,7 @@ class CatUtils {
      * @throws Exception
      */
     public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
-        $values = self::getQualityInfoOrChunkReviewStructFromJobStruct( $job, $project, $featureSet );
+        $values = self::getQualityInfoOrChunkReviewStructFromJobStruct( $job, $featureSet );
         $result = null;
 
         if ( $featureSet->hasRevisionFeature() ) {

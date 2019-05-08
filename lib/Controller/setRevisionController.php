@@ -149,7 +149,7 @@ class setRevisionController extends ajaxController {
          * Refresh error counters in the job table
          */
 
-        $chunkReview = CatUtils::getQualityInfoOrChunkReviewStructFromJobStruct( $job_data, $project, $this->featureSet );
+        $chunkReview = CatUtils::getQualityInfoOrChunkReviewStructFromJobStruct( $job_data, $this->featureSet );
 
         if ( $this->featureSet->hasRevisionFeature() ) {
             $reviseIssues     = [];

@@ -2236,7 +2236,7 @@ body.searchActive .search-display {
     background:#fff;
 }
 
-.loader {
+.loader:not(.ui) {
     width: 20px;
     height: 20px;
     background: url(../../img/loading.gif) 0 0 no-repeat !important;
