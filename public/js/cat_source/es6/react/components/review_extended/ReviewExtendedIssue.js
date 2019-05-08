@@ -225,7 +225,7 @@ class ReviewExtendedIssue extends React.Component {
 						<div className="icon-buttons">
 							<button className={"ui icon basic tiny button issue-note " + commentViewButtonClass} onClick={this.setCommentView.bind( this )} title="Comments">
 								<i className={iconCommentClass}/></button>
-                            {this.props.isReview ? (
+                            {this.props.isReview && this.props.issue.revision_number <= this.props.currentReview ? (
 								<button className="ui icon basic tiny button issue-delete" onClick={this.deleteIssue.bind( this )} title="Delete issue card"><i className="icon-trash-o icon"/>
 								</button>) : (null)}
 						</div>
