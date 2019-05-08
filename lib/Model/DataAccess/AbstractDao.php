@@ -587,8 +587,8 @@ abstract class DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );
 
-        Log::getLogger()->debug( "insert SQL: " . $sql );
-        Log::getLogger()->debug( "insert data:", $data );
+        Log::doJsonLog( "insert SQL: " . $sql );
+        Log::doJsonLog( "insert data:", $data );
 
         if ( $stmt->execute( $data ) ) {
             if ( count( static::$auto_increment_field ) ) {
