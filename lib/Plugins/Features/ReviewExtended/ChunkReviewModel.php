@@ -98,10 +98,6 @@ class ChunkReviewModel implements IChunkReviewModel {
     public function updatePassFailResult() {
         $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit() ) ;
 
-        ChunkReviewDao::updateStruct( $this->chunk_review, array(
-                        'fields' => array('reviewed_words_count', 'is_pass', 'penalty_points'))
-        );
-
         $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, array(
              'fields' => array('reviewed_words_count', 'is_pass', 'penalty_points'))
         );
