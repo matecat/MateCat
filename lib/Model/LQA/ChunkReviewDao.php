@@ -119,20 +119,21 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param array $chunk_ids Example: array( array($id_job, $password), ... )
+     * @param array    $chunk_ids Example: array( array($id_job, $password), ... )
      *
-     * @param null  $source_page
+     * @param int|null $source_page
      *
      * @return ChunkReviewStruct[]
      */
 
-    public static function findChunkReviewsByChunkIds( array $chunk_ids, $source_page = null ) {
+    public static function findChunkReviewsByChunkIds( array $chunk_ids, $source_page = Constants::SOURCE_PAGE_REVISION ) {
 
-        if ( is_null( $source_page ) ) {
-            $source_page = Constants::SOURCE_PAGE_REVISION ;
+        if ( ! is_null( $source_page ) ) {
+            $sql_condition = " WHERE source_page = $source_page " ;
         }
-
-        $sql_condition = " WHERE source_page = $source_page " ;
+        else {
+            $sql_condition = '' ;
+        }
 
         if ( count($chunk_ids)  > 0 ) {
             $conditions = array_map( function($ids) {
@@ -146,7 +147,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " FROM jobs INNER JOIN qa_chunk_reviews ON " .
             " jobs.id = qa_chunk_reviews.id_job AND " .
             " jobs.password = qa_chunk_reviews.password " .
-             $sql_condition ;
+             $sql_condition . " ORDER BY source_page " ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

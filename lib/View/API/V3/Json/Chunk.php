@@ -14,12 +14,13 @@ use API\V2\Json\ProjectUrls;
 use CatUtils;
 use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
-use Features\ReviewExtended;
 use Features\ReviewExtended\Model\QualityReportDao;
+use Features\SecondPassReview;
 use FeatureSet;
 use Langs_LanguageDomains;
 use Langs_Languages;
-use ManageUtils;
+use LQA\ChunkReviewDao;
+use Projects_ProjectStruct;
 use RevisionFactory;
 use Utils;
 use WordCount_Struct;
@@ -38,7 +39,7 @@ class Chunk extends \API\V2\Json\Chunk {
         $featureSet = $project->getFeatures();
         return [
                 'job' => [
-                        'id'     => (int)$chunk->id,
+                        'id'     => (int) $chunk->id,
                         'chunks' => [ $this->renderItem( $chunk, $project, $featureSet ) ]
                 ]
         ];
@@ -47,13 +48,13 @@ class Chunk extends \API\V2\Json\Chunk {
     /**
      * @param                         $jStruct Chunks_ChunkStruct
      *
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct $project
      * @param FeatureSet              $featureSet
      *
      * @return array
      * @throws \Exception
      */
-    public function renderItem( Chunks_ChunkStruct $jStruct, \Projects_ProjectStruct $project, FeatureSet $featureSet ) {
+    public function renderItem( Chunks_ChunkStruct $jStruct, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
         $outsourceInfo = $jStruct->getOutsource();
         $tStruct       = $jStruct->getTranslator();
@@ -82,88 +83,7 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $warningsCount = $jStruct->getWarningsCount();
 
-        $chunkReview = CatUtils::getQualityInfoFromJobStruct( $jStruct, $project, $featureSet );
 
-        if ( $featureSet->hasRevisionFeature() ) {
-            $reviseIssues     = [];
-            $qualityReportDao = new QualityReportDao();
-            $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $jStruct->id, $jStruct->password );
-            foreach ( $qa_data as $issue ) {
-                if ( !isset( $reviseIssues[ $issue->id_category ] ) ) {
-                    $reviseIssues[ $issue->id_category ] = [
-                            'name'   => $issue->issue_category_label,
-                            'founds' => [
-                                    $issue->issue_severity => 1
-                            ]
-                    ];
-                } else {
-                    if ( !isset( $reviseIssues[ $issue->id_category ][ 'founds' ][ $issue->issue_severity ] ) ) {
-                        $reviseIssues[ $issue->id_category ][ 'founds' ][ $issue->issue_severity ] = 1;
-                    } else {
-                        $reviseIssues[ $issue->id_category ][ 'founds' ][ $issue->issue_severity ]++;
-                    }
-                }
-            }
-
-            if( @$chunkReview->is_pass == null ){
-                $quality_overall = $chunkReview->is_pass;
-            } elseif( !empty( $chunkReview->is_pass ) ){
-                $quality_overall = 'excellent';
-            } else {
-                $quality_overall = 'fail';
-            }
-
-            $chunkReviewModel = RevisionFactory::getInstance()->getChunkReviewModel( $chunkReview ) ;
-
-            $score = number_format( $chunkReviewModel->getScore(), 2, ".", "");
-
-            $total_issues_weight = $chunkReviewModel->getPenaltyPoints();
-            $total_reviewed_words_count = $chunkReviewModel->getReviewedWordsCount();
-
-            $model = $project->getLqaModel() ;
-            $categories = $model->getCategoriesAndSeverities() ;
-
-        } else {
-
-            $reviseClass = new \Constants_Revise();
-
-            $jobQA = new \Revise_JobQA(
-                    $jStruct->id,
-                    $jStruct->password,
-                    $jobStats->getTotal(),
-                    $reviseClass
-            );
-
-            list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $jStruct->id,
-                    $jStruct->password,
-                    $jobStats->getTotal() );
-
-            /**
-             * @var $jobQA \Revise_JobQA
-             */
-            $jobQA->retrieveJobErrorTotals();
-            $jobQA->evalJobVote();
-            $qa_data = $jobQA->getQaData();
-
-            $reviseIssues = [];
-            foreach ( $qa_data as $issue ) {
-                $reviseIssues[ "err_" . str_replace( " ", "_", strtolower( $issue[ 'field' ] ) ) ] = [
-                        'allowed' => $issue[ 'allowed' ],
-                        'found'   => $issue[ 'found' ],
-                        'founds'  => $issue[ 'founds' ],
-                        'vote'    => $issue[ 'vote' ]
-                ];
-            }
-
-            $quality_overall = strtolower( $chunkReview[ 'minText' ] );
-
-            $score = 0;
-
-            $total_issues_weight = 0;
-            $total_reviewed_words_count = 0;
-
-            $categories = CatUtils::getSerializedCategories( $reviseClass );
-        }
 
         $result = [
                 'id'                      => (int)$jStruct->id,
@@ -180,7 +100,6 @@ class Chunk extends \API\V2\Json\Chunk {
                 'avg_post_editing_effort' => $jStruct->avg_post_editing_effort,
                 'open_threads_count'      => (int)$jStruct->getOpenThreadsCount(),
                 'created_at'              => Utils::api_timestamp( $jStruct->create_date ),
-                'quality_overall'         => $quality_overall,
                 'pee'                     => $jStruct->getPeeForTranslatedSegments(),
                 'private_tm_key'          => $this->getKeyList( $jStruct ),
                 'warnings_count'          => $warningsCount->warnings_count,
@@ -188,19 +107,32 @@ class Chunk extends \API\V2\Json\Chunk {
                 'stats'                   => $this->_getStats( $jobStats ) ,
                 'outsource'               => $outsource,
                 'translator'              => $translator,
-                'total_raw_wc'            => (int)$jStruct->total_raw_wc,
-                'quality_summary' => [
-                        'equivalent_class'    => $jStruct->getQualityInfo(),
-                        'quality_overall'     => $quality_overall,
-                        'errors_count'        => (int)$jStruct->getErrorsCount(),
-                        'revise_issues'       => $reviseIssues,
-                        'score'               => floatval($score),
-                        'categories'          => $categories,
-                        'total_issues_weight' => (int)$total_issues_weight,
-                        'total_reviewed_words_count' => (int)$total_reviewed_words_count,
-                        'passfail'            => (isset($model) ? ['type' => $model->pass_type, 'options' => json_decode($model->pass_options)] : '')
-                ]
+                'total_raw_wc'            => (int) $jStruct->total_raw_wc
         ];
+
+
+        if ( $featureSet->hasRevisionFeature() ) {
+            $chunkReviews = ChunkReviewDao::findChunkReviewsByChunkIds([ [ $jStruct->id, $jStruct->password ] ], null );
+
+            foreach( $chunkReviews as $index => $chunkReview ) {
+                list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
+                        $this->revisionQualityVars( $jStruct, $project, $chunkReview );
+
+                $result = $this->populateQualitySummarySection($result, $index,
+                        $jStruct, $quality_overall, $reviseIssues, $score, $categories,
+                        $total_issues_weight, $total_reviewed_words_count, $passfail );
+            }
+
+        } else {
+            $qualityInfoArray = CatUtils::getQualityInfoFromJobStruct( $jStruct, $featureSet );
+
+            list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
+                    $this->legacyRevisionQualityVars( $jStruct, $featureSet, $jobStats, $qualityInfoArray );
+
+            $result = $this->populateQualitySummarySection($result, 0,
+                    $jStruct, $quality_overall, $reviseIssues, $score, $categories,
+                    $total_issues_weight, $total_reviewed_words_count, $passfail );
+        }
 
         /**
          * @var $projectData ShapelessConcreteStruct[]
@@ -223,10 +155,158 @@ class Chunk extends \API\V2\Json\Chunk {
 
     }
 
+    /**
+     * @param $result
+     * @param $index
+     * @param $jStruct
+     * @param $quality_overall
+     * @param $reviseIssues
+     * @param $score
+     * @param $categories
+     * @param $total_issues_weight
+     * @param $total_reviewed_words_count
+     * @param $passfail
+     *
+     * @return mixed
+     */
+    protected function populateQualitySummarySection( $result, $index, $jStruct, $quality_overall, $reviseIssues, $score, $categories,
+                                                         $total_issues_weight, $total_reviewed_words_count, $passfail ) {
+
+        $key = ( $index == 0 ? 'quality_summary' : 'quality_summary_' . ( $index + 1 ) );
+
+        $result[ $key ] = [
+                'equivalent_class'    => $jStruct->getQualityInfo(),
+                'quality_overall'     => $quality_overall,
+                'errors_count'        => (int)$jStruct->getErrorsCount(),
+                'revise_issues'       => $reviseIssues,
+                'score'               => floatval($score),
+                'categories'          => $categories,
+                'total_issues_weight' => (int)$total_issues_weight,
+                'total_reviewed_words_count' => (int)$total_reviewed_words_count,
+                'passfail'            => $passfail,
+        ];
+
+        return $result ;
+    }
+
     protected function _getStats( $jobStats ) {
         $stats = CatUtils::getPlainStatsForJobs( $jobStats );
         unset( $stats ['id'] );
         return array_change_key_case( $stats, CASE_LOWER );
+    }
+
+    /**
+     * @param Chunks_ChunkStruct $jStruct
+     * @param FeatureSet         $featureSet
+     * @param                    $jobStats
+     * @param                    $chunkReview
+     *
+     * @return array
+     * @internal param $reviseIssues
+     */
+    protected function legacyRevisionQualityVars( Chunks_ChunkStruct $jStruct, FeatureSet $featureSet, WordCount_Struct $jobStats, $chunkReview ) {
+        $reviseIssues = [];
+
+        $reviseClass = new \Constants_Revise();
+
+        $jobQA = new \Revise_JobQA(
+                $jStruct->id,
+                $jStruct->password,
+                $jobStats->getTotal(),
+                $reviseClass
+        );
+
+        list( $jobQA, $reviseClass ) = $featureSet->filter( "overrideReviseJobQA", [
+                $jobQA, $reviseClass
+        ], $jStruct->id,
+                $jStruct->password,
+                $jobStats->getTotal() );
+
+        /**
+         * @var $jobQA \Revise_JobQA
+         */
+        $jobQA->retrieveJobErrorTotals();
+        $jobQA->evalJobVote();
+        $qa_data = $jobQA->getQaData();
+
+        foreach ( $qa_data as $issue ) {
+            $reviseIssues[ "err_" . str_replace( " ", "_", strtolower( $issue[ 'field' ] ) ) ] = [
+                    'allowed' => $issue[ 'allowed' ],
+                    'found'   => $issue[ 'found' ],
+                    'founds'  => $issue[ 'founds' ],
+                    'vote'    => $issue[ 'vote' ]
+            ];
+        }
+
+        $quality_overall = strtolower( $chunkReview[ 'minText' ] );
+
+        $score = 0;
+
+        $total_issues_weight = 0;
+        $total_reviewed_words_count = 0;
+
+        $categories = CatUtils::getSerializedCategories( $reviseClass );
+        $passfail = ''  ;
+
+        return array(
+                $passfail,
+                $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories
+        );
+    }
+
+    /**
+     * @param Chunks_ChunkStruct     $jStruct
+     * @param Projects_ProjectStruct $project
+     * @param                        $chunkReview
+     *
+     * @return array
+     * @internal param $reviseIssues
+     */
+    protected function revisionQualityVars( Chunks_ChunkStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
+        $reviseIssues = [];
+
+        $qualityReportDao = new QualityReportDao();
+        $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $jStruct->id, $jStruct->password );
+        foreach ( $qa_data as $issue ) {
+            if ( !isset( $reviseIssues[ $issue->id_category ] ) ) {
+                $reviseIssues[ $issue->id_category ] = [
+                        'name'   => $issue->issue_category_label,
+                        'founds' => [
+                                $issue->issue_severity => 1
+                        ]
+                ];
+            } else {
+                if ( !isset( $reviseIssues[ $issue->id_category ][ 'founds' ][ $issue->issue_severity ] ) ) {
+                    $reviseIssues[ $issue->id_category ][ 'founds' ][ $issue->issue_severity ] = 1;
+                } else {
+                    $reviseIssues[ $issue->id_category ][ 'founds' ][ $issue->issue_severity ]++;
+                }
+            }
+        }
+
+        if ( @$chunkReview->is_pass == null ) {
+            $quality_overall = $chunkReview->is_pass;
+        } elseif ( !empty( $chunkReview->is_pass ) ) {
+            $quality_overall = 'excellent';
+        } else {
+            $quality_overall = 'fail';
+        }
+
+        $chunkReviewModel = RevisionFactory::getInstance()->getChunkReviewModel( $chunkReview );
+
+        $score = number_format( $chunkReviewModel->getScore(), 2, ".", "" );
+
+        $total_issues_weight        = $chunkReviewModel->getPenaltyPoints();
+        $total_reviewed_words_count = $chunkReviewModel->getReviewedWordsCount();
+
+        $model      = $project->getLqaModel();
+        $categories = $model->getCategoriesAndSeverities();
+        $passfail = [ 'type' => $model->pass_type, 'options' => json_decode($model->pass_options) ] ;
+
+        return array(
+                $passfail,
+                $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories
+        );
     }
 
 }
