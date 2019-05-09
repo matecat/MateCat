@@ -15,7 +15,8 @@ class QualityReport extends React.Component {
         this.state = {
             segmentFiles: null,
             jobInfo: null,
-            moreSegments: true
+            moreSegments: true,
+            revisionToShow: 'r1'
         };
         this.renderSegmentsFiles = this.renderSegmentsFiles.bind(this);
         this.renderJobInfo = this.renderJobInfo.bind(this);
@@ -39,6 +40,22 @@ class QualityReport extends React.Component {
         });
     }
 
+    initDropDown() {
+        let self = this;
+        if ( this.reviewDropdown ) {
+            $(this.reviewDropdown).dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    if (value && value !== "") {
+                        self.setState({
+                            revisionToShow: value
+                        });
+                    }
+                }
+            });
+            this.dropdownInitialized = true;
+        }
+    }
+
     componentWillMount() {
         QRActions.loadInitialAjaxData();
     }
@@ -47,12 +64,19 @@ class QualityReport extends React.Component {
         QRStore.addListener(QRConstants.RENDER_SEGMENTS, this.renderSegmentsFiles);
         QRStore.addListener(QRConstants.RENDER_REPORT, this.renderJobInfo);
         QRStore.addListener(QRConstants.NO_MORE_SEGMENTS, this.noMoreSegments);
+        setTimeout(this.initDropDown.bind(this), 100);
         // console.log("Render Quality Report");
     }
     componentWillUnmount() {
         QRStore.removeListener(QRConstants.RENDER_SEGMENTS, this.renderSegmentsFiles);
         QRStore.removeListener(QRConstants.RENDER_REPORT, this.renderJobInfo);
         QRStore.removeListener(QRConstants.NO_MORE_SEGMENTS, this.noMoreSegments);
+    }
+
+    componentDidUpdate() {
+        if (!this.dropdownInitialized) {
+            this.initDropDown();
+        }
     }
 
     render () {
@@ -71,7 +95,31 @@ class QualityReport extends React.Component {
                         <div className="qr-bg-head"/>
                         { this.state.jobInfo ? (
                             <div className="qr-job-summary">
-                                <h3>Job Summary</h3>
+                                <div className="qr-header">
+                                    <h3>QR Job Summary</h3>
+                                    <div className="qr-filter-list">
+                                        <div className="filter-dropdown right-10">
+                                            <div className={"filter-reviewType active"}>
+                                                <div className="ui top left pointing dropdown basic tiny button right-0" style={{marginBottom: '12px'}} ref={(dropdown)=>this.reviewDropdown=dropdown}>
+                                                    <div className="text">
+                                                        <div  className={"ui revision-color empty circular label"} />
+                                                        Revision
+                                                    </div>
+                                                    <div className="menu">
+                                                        <div className="item" data-value="r1">
+                                                            <div  className={"ui revision-color empty circular label"} />
+                                                            Revision
+                                                        </div>
+                                                        <div className="item" data-value="r2">
+                                                            <div  className={"ui second-revision-color empty circular label"} />
+                                                            2nd Revision
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <JobSummary jobInfo={this.state.jobInfo}/>
                                 <SegmentsDetails files={this.state.segmentFiles}
                                                  urls={this.state.jobInfo.get('urls')}

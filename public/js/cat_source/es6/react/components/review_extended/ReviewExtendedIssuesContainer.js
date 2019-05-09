@@ -63,16 +63,18 @@ class ReviewExtendedIssuesContainer extends React.Component {
             }
         });
         if ( this.is2ndPassReviewEnabled ) {
+            let r1Active = (this.reviewType === 1 && htmlR1.length > 0) || (htmlR1.length > 0 && htmlR2.length === 0);
+            let r2Active = (this.reviewType === 2 && htmlR2.length > 0) || (htmlR2.length > 0 && htmlR1.length === 0);
             return <div>
                 <div className="ui top attached tabular menu" ref={(tabs)=>this.tabs=tabs}>
-                    <a className={classnames("item", this.reviewType === 1 && 'active', htmlR1.length === 0 && "disabled")} data-tab="r1">R1 issues</a>
-                    <a className={classnames("item", this.reviewType === 2 && 'active', htmlR2.length === 0 && "disabled")} data-tab="r2">R2 issues</a>
+                    <a className={classnames("item", r1Active && 'active', htmlR1.length === 0 && "disabled")} data-tab="r1">R1 issues</a>
+                    <a className={classnames("item", r2Active && 'active', htmlR2.length === 0 && "disabled")} data-tab="r2">R2 issues</a>
                 </div>
 
-                <div className={classnames("ui bottom attached tab segment", htmlR1.length === 0 && "disabled", this.reviewType === 1 && 'active')} data-tab="r1" style={{padding: '0px', width: '99.5%', maxHeight: '200px', overflowY: 'auto'}}>
+                <div className={classnames("ui bottom attached tab segment", htmlR1.length === 0 && "disabled", r1Active && 'active')} data-tab="r1" style={{padding: '0px', width: '99.5%', maxHeight: '200px', overflowY: 'auto'}}>
                     {htmlR1}
                 </div>
-                <div className={classnames("ui bottom attached tab segment", htmlR2.length === 0 && "disabled", this.reviewType === 2 && 'active')} data-tab="r2" style={{padding: '0px', width: '99.5%', maxHeight: '200px', overflowY: 'auto'}}>
+                <div className={classnames("ui bottom attached tab segment", htmlR2.length === 0 && "disabled", r2Active && 'active')} data-tab="r2" style={{padding: '0px', width: '99.5%', maxHeight: '200px', overflowY: 'auto'}}>
                     {htmlR2}
                 </div>
             </div>;
@@ -88,16 +90,17 @@ class ReviewExtendedIssuesContainer extends React.Component {
             issues = this.getIssuesSortedComponentList(this.props.issues)
         }
         if ( this.is2ndPassReviewEnabled ) {
+            let r1Active = (this.reviewType === 1 && issues.r1.length > 0) || (issues.r1.length > 0 && issues.r2.length === 0);
+            let r2Active = (this.reviewType === 2 && issues.r2.length > 0) || (issues.r2.length > 0 && issues.r1.length === 0);
             return <div>
                     <div className="ui top attached tabular menu" ref={(tabs)=>this.tabs=tabs}>
-                        <a className={classnames("item", this.reviewType === 1 && 'active', issues.r1.length === 0 && "disabled")} data-tab="r1">R1 issues</a>
-                        <a className={classnames("item", this.reviewType === 2 && 'active', issues.r2.length === 0 && "disabled")} data-tab="r2">R2 issues</a>
+                        <a className={classnames("item", r1Active && 'active', issues.r1.length === 0 && "disabled")} data-tab="r1">R1 issues</a>
+                        <a className={classnames("item", r2Active && 'active', issues.r2.length === 0 && "disabled")} data-tab="r2">R2 issues</a>
                     </div>
 
-                    <div className={classnames("ui bottom attached tab segment", this.reviewType === 1 && 'active', issues.r1.length === 0 && "disabled")} data-tab="r1" style={{padding: '0px', width: '99.5%', maxHeight: '200px', overflowY: 'auto'}}>
-                        {issues.r1}
+                    <div className={classnames("ui bottom attached tab segment", r1Active && 'active', issues.r1.length === 0 && "disabled")} data-tab="r1" style={{padding: '0px', width: '99.5%', maxHeight: '200px', overflowY: 'auto'}}>                        {issues.r1}
                     </div>
-                    <div className={classnames("ui bottom attached tab segment" , this.reviewType === 2 && 'active', issues.r2.length === 0 && "disabled")} data-tab="r2" style={{padding: '0px', width: '99.5%', maxHeight: '200px', overflowY: 'auto'}}>
+                    <div className={classnames("ui bottom attached tab segment", r2Active && 'active', issues.r2.length === 0 && "disabled")} data-tab="r2" style={{padding: '0px', width: '99.5%', maxHeight: '200px', overflowY: 'auto'}}>
                         {issues.r2}
                     </div>
                 </div>;
