@@ -243,7 +243,7 @@ abstract class KleinController implements IController {
                 $cookieContent,
                 2147483647,            // expires January 1, 2038
                 "/",
-                $_SERVER[ 'HTTP_HOST' ]
+                \INIT::$COOKIE_DOMAIN
         );
 
         $this->downloadToken = null;

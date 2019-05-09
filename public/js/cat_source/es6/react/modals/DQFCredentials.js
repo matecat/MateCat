@@ -78,7 +78,8 @@ class DQFCredentials extends React.Component {
         let dqfCheck = $('.dqf-box #dqf_switch');
         return $.ajax({
             type: 'DELETE',
-            url: '/api/app/dqf/user/metadata',
+            url: APP.getRandomUrl() + 'api/app/dqf/user/metadata',
+            xhrFields: { withCredentials: true }
         }).done( function( data ) {
             APP.USER.STORE.metadata = data;
             dqfCheck.trigger('dqfDisable');

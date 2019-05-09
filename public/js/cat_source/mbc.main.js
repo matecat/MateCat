@@ -713,8 +713,8 @@ if ( MBC.enabled() )
                 return $.ajax({
                     async: true,
                     type: "get",
-                    // url : "/api/v2/teams/" + teamId + "/members"
-                    url : "/api/app/teams/" + teamId + "/members/public"
+                    xhrFields: { withCredentials: true },
+                    url : APP.getRandomUrl() + "api/app/teams/" + teamId + "/members/public"
                 }).done(function ( data ) {
                     var team = {
                         uid: "team",
