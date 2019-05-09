@@ -64,7 +64,7 @@ class SegmentBody extends React.Component {
     }
 
     beforeRenderOrUpdate(area) {
-        if ( area.length > 0 && this.checkLockTags(area) ) {
+        if ( area && area.length > 0 && this.checkLockTags(area) ) {
             var segment = area.closest('section');
             if (LXQ.enabled()) {
                 $.powerTip.destroy($('.tooltipa', segment));
@@ -74,7 +74,7 @@ class SegmentBody extends React.Component {
     }
 
     afterRenderOrUpdate(area) {
-        if ( area.length > 0 && this.checkLockTags(area)) {
+        if ( area && area.length > 0 && this.checkLockTags(area)) {
             var segment = area.closest('section');
 
             if (LXQ.enabled()) {
