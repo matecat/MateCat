@@ -1,4 +1,4 @@
-/* 
+/*
 Document:       common
 Created:         7-ago-2013, 14.49.42
 Author:          andreamartines
@@ -68,7 +68,7 @@ ul
 {
     float: left;
     border: 0;
-    background: url(../img/logo.png) 0px 2px no-repeat;
+    background: url(../../img/logo.png) 0px 2px no-repeat;
     width: 145px;
     height: 31px;
     background-size: 130px 26px;
@@ -402,7 +402,7 @@ border-bottom: 3px solid #1B5D7B!important;
     .logoblack
     {
 	    border: 0;
-	    background: url(../img/logoblack.png) 0px 2px no-repeat;
+	    background: url(../../img/logoblack.png) 0px 2px no-repeat;
 	    display: block;
 	    width: 145px;
 	    height: 31px;
@@ -468,7 +468,7 @@ border-bottom: 3px solid #1B5D7B!important;
 
 .topMenu ::-webkit-scrollbar-thumb {
 
-	background:#ccc url(../img/bgscrollbar.png) center center no-repeat;
+	background:#ccc url(../../img/bgscrollbar.png) center center no-repeat;
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
 }
 /*end-scrollbar*/
@@ -771,7 +771,7 @@ color:#333;}
 
 
     .modal .popup p.waiting {
-        background: url(../img/loading.gif) 38% 3px no-repeat !important;
+        background: url(../../img/loading.gif) 38% 3px no-repeat !important;
         background-size: 24px !important;
     }
 
@@ -1088,7 +1088,7 @@ background-color: #D6D6D6;
 
 
 
-.uploadloader{background:url(../img/loader.gif) center center no-repeat;display:block;width:20px;height:20px;float:right;margin-top:35px;display:none;position:absolute;right:260px;background-size: 20px 20px;}
+.uploadloader{background:url(../../img/loader.gif) center center no-repeat;display:block;width:20px;height:20px;float:right;margin-top:35px;display:none;position:absolute;right:260px;background-size: 20px 20px;}
 .pending .uploadloader {display: block!important; position: relative;float: left;
 top: inherit;
 margin-top: 0;
@@ -1228,7 +1228,7 @@ text-align: right;
 	    overflow: visible;
 	    max-height: inherit;
 	    font-size: 24px;
-	    background: #4D4D4D url(../img/logo-ico.png) 12px 12px no-repeat;
+	    background: #4D4D4D url(../../img/logo-ico.png) 12px 12px no-repeat;
 	    padding: 10px 10px 7px 58px;
         background-size: 35px;
 	    /*border-bottom: 1px solid #000;*/
@@ -1260,7 +1260,7 @@ text-align: right;
     }
 
     .popup .outer {
-	    background: url(../img/bg_login_button.gif) 0 0 repeat;
+	    background: url(../../img/bg_login_button.gif) 0 0 repeat;
 	    border-radius: 6px;
 	    margin: 0 auto -10px auto;
 	    width: 330px;
@@ -1275,7 +1275,7 @@ margin-left: 10px;
 
 .popup .outer:hover
 {
-	background: url(../img/bg_login_button_hover.gif) 0 0 repeat;
+	background: url(../../img/bg_login_button_hover.gif) 0 0 repeat;
 }
 
 .popup .inner
@@ -2933,7 +2933,7 @@ tr.new.badgrants .fileupload
 #activetm .startUploading,
 #inactivetm .startUploading
 {
-    background: url(../img/loading.gif) 77.5% 16px no-repeat !important;
+    background: url(../../img/loading.gif) 77.5% 16px no-repeat !important;
 background-size: 2% !important;
 }
 #activetm .uploadprogress,
@@ -3037,7 +3037,7 @@ section.currSearchSegment mark.searchMarker
 }
 .offline .cat {
 	height:215px;
-	background:url(../img/offline.png) no-repeat center center;
+	background:url(../../img/offline.png) no-repeat center center;
 }
 
 .offline header {
@@ -3057,40 +3057,40 @@ font-weight: normal !important;
 
 .claim span {font-weight:bold; color:#39699a;}
 
-.extdoc {background: url(../img/matecat_file_icons.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
-.extppt {background: url(../img/matecat_file_icons.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
-.exthtm {background: url(../img/matecat_file_icons.png) 6px -70px no-repeat !important;} /* .htm, .html, .xhtml */
-.extpdf {background: url(../img/matecat_file_icons.png) 6px -104px no-repeat !important;} /* .pdf */
-.extxls {background: url(../img/matecat_file_icons.png) 6px -140px no-repeat !important;} /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
-.exttxt {background: url(../img/matecat_file_icons.png) 6px -172px no-repeat !important;} /* .txt */
-.extxif {background: url(../img/matecat_file_icons.png) 6px -208px no-repeat !important;} /* .xliff */
-.extttx {background: url(../img/matecat_file_icons.png) 6px -242px no-repeat !important;} /* .ttx */
-.extitd {background: url(../img/matecat_file_icons.png) 6px -276px no-repeat !important;} /* .itd */
-.extxlf {background: url(../img/matecat_file_icons.png) 6px -310px no-repeat !important;} /* .xlf */
-.extmif {background: url(../img/matecat_file_icons.png) 6px -342px no-repeat !important;} /* .mif */
-.extidd {background: url(../img/matecat_file_icons.png) 6px -378px no-repeat !important;} /* .idml, .inx, .icml */
-.extqxp {background: url(../img/matecat_file_icons.png) 6px -412px no-repeat !important;} /* .xtg */
-.extxml {background: url(../img/matecat_file_icons.png) 6px -446px no-repeat !important;} /* .xml */
-.extrcc {background: url(../img/matecat_file_icons.png) 6px -484px no-repeat !important;} /* .rc */
-.extres {background: url(../img/matecat_file_icons.png) 6px -516px no-repeat !important;} /* .resx */
-.extsgl {background: url(../img/matecat_file_icons.png) 6px -552px no-repeat !important;} /* .sgml */
-.extsgm {background: url(../img/matecat_file_icons.png) 6px -584px no-repeat !important;}  /* .sgm */
-.extpro {background: url(../img/matecat_file_icons.png) 6px -618px no-repeat !important;} /* .properties */
-.extdit {background: url(../img/matecat_file_icons.png) 6px -652px no-repeat !important;} /* .dita */
-.exttag {background: url(../img/matecat_file_icons.png) 6px -686px no-repeat !important;} /* .tag */
-.exttmx {background: url(../img/matecat_file_icons.png) 6px -722px no-repeat !important;} /* .tmx */
-.extstr {background: url(../img/matecat_file_icons.png) 6px -758px no-repeat !important;} /* .str */
-.extzip {background: url(../img/matecat_file_icons.png) 6px -792px no-repeat !important;} /* .zip */
-.exticml {background: url(../img/matecat_file_icons.png) 6px -826px no-repeat !important;} /* .icml */
-.extimg {background: url(../img/matecat_file_icons.png) 6px -860px no-repeat !important;} /* .bmp, .gif, .jpeg, .png, .tiff */
-.extwix {background: url(../img/matecat_file_icons.png) 6px -894px no-repeat !important;} /* .wix */
-.extsrt {background: url(../img/matecat_file_icons.png) 6px -928px no-repeat !important;} /* .srt */
-.extpo {background: url(../img/matecat_file_icons.png) 6px -962px no-repeat !important;} /* .po */
-.extg {background: url(../img/matecat_file_icons.png) 6px -996px no-repeat !important;} /* .g */
-.exts {background: url(../img/matecat_file_icons_ts.png) 6px -0px no-repeat !important;} /* .ts */
-.extgsli {background: url(../img/matecat_file_icons.png) 6px -1033px no-repeat !important;} /* Google Slides */
-.extgdoc {background: url(../img/matecat_file_icons.png) 6px -1070px no-repeat !important;} /* Google Document */
-.extgsheet {background: url(../img/matecat_file_icons.png) 6px -1107px no-repeat !important;} /* Google Sheet */
+.extdoc {background: url(../../img/matecat_file_icons.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
+.extppt {background: url(../../img/matecat_file_icons.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
+.exthtm {background: url(../../img/matecat_file_icons.png) 6px -70px no-repeat !important;} /* .htm, .html, .xhtml */
+.extpdf {background: url(../../img/matecat_file_icons.png) 6px -104px no-repeat !important;} /* .pdf */
+.extxls {background: url(../../img/matecat_file_icons.png) 6px -140px no-repeat !important;} /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
+.exttxt {background: url(../../img/matecat_file_icons.png) 6px -172px no-repeat !important;} /* .txt */
+.extxif {background: url(../../img/matecat_file_icons.png) 6px -208px no-repeat !important;} /* .xliff */
+.extttx {background: url(../../img/matecat_file_icons.png) 6px -242px no-repeat !important;} /* .ttx */
+.extitd {background: url(../../img/matecat_file_icons.png) 6px -276px no-repeat !important;} /* .itd */
+.extxlf {background: url(../../img/matecat_file_icons.png) 6px -310px no-repeat !important;} /* .xlf */
+.extmif {background: url(../../img/matecat_file_icons.png) 6px -342px no-repeat !important;} /* .mif */
+.extidd {background: url(../../img/matecat_file_icons.png) 6px -378px no-repeat !important;} /* .idml, .inx, .icml */
+.extqxp {background: url(../../img/matecat_file_icons.png) 6px -412px no-repeat !important;} /* .xtg */
+.extxml {background: url(../../img/matecat_file_icons.png) 6px -446px no-repeat !important;} /* .xml */
+.extrcc {background: url(../../img/matecat_file_icons.png) 6px -484px no-repeat !important;} /* .rc */
+.extres {background: url(../../img/matecat_file_icons.png) 6px -516px no-repeat !important;} /* .resx */
+.extsgl {background: url(../../img/matecat_file_icons.png) 6px -552px no-repeat !important;} /* .sgml */
+.extsgm {background: url(../../img/matecat_file_icons.png) 6px -584px no-repeat !important;}  /* .sgm */
+.extpro {background: url(../../img/matecat_file_icons.png) 6px -618px no-repeat !important;} /* .properties */
+.extdit {background: url(../../img/matecat_file_icons.png) 6px -652px no-repeat !important;} /* .dita */
+.exttag {background: url(../../img/matecat_file_icons.png) 6px -686px no-repeat !important;} /* .tag */
+.exttmx {background: url(../../img/matecat_file_icons.png) 6px -722px no-repeat !important;} /* .tmx */
+.extstr {background: url(../../img/matecat_file_icons.png) 6px -758px no-repeat !important;} /* .str */
+.extzip {background: url(../../img/matecat_file_icons.png) 6px -792px no-repeat !important;} /* .zip */
+.exticml {background: url(../../img/matecat_file_icons.png) 6px -826px no-repeat !important;} /* .icml */
+.extimg {background: url(../../img/matecat_file_icons.png) 6px -860px no-repeat !important;} /* .bmp, .gif, .jpeg, .png, .tiff */
+.extwix {background: url(../../img/matecat_file_icons.png) 6px -894px no-repeat !important;} /* .wix */
+.extsrt {background: url(../../img/matecat_file_icons.png) 6px -928px no-repeat !important;} /* .srt */
+.extpo {background: url(../../img/matecat_file_icons.png) 6px -962px no-repeat !important;} /* .po */
+.extg {background: url(../../img/matecat_file_icons.png) 6px -996px no-repeat !important;} /* .g */
+.exts {background: url(../../img/matecat_file_icons_ts.png) 6px -0px no-repeat !important;} /* .ts */
+.extgsli {background: url(../../img/matecat_file_icons.png) 6px -1033px no-repeat !important;} /* Google Slides */
+.extgdoc {background: url(../../img/matecat_file_icons.png) 6px -1070px no-repeat !important;} /* Google Document */
+.extgsheet {background: url(../../img/matecat_file_icons.png) 6px -1107px no-repeat !important;} /* Google Sheet */
 
 
 #jobMenu span {
@@ -3155,40 +3155,40 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) {
 	.preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
-    .extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
-    .extppt {background: url(../img/matecat_file_icons2x.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
-    .exthtm {background: url(../img/matecat_file_icons2x.png) 6px -70px no-repeat !important;} /* .htm, .html, .xhtml */
-    .extpdf {background: url(../img/matecat_file_icons2x.png) 6px -104px no-repeat !important;} /* .pdf */
-    .extxls {background: url(../img/matecat_file_icons2x.png) 6px -140px no-repeat !important;} /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
-    .exttxt {background: url(../img/matecat_file_icons2x.png) 6px -172px no-repeat !important;} /* .txt */
-    .extxif {background: url(../img/matecat_file_icons2x.png) 6px -208px no-repeat !important;} /* .xliff */
-    .extttx {background: url(../img/matecat_file_icons2x.png) 6px -242px no-repeat !important;} /* .ttx */
-    .extitd {background: url(../img/matecat_file_icons2x.png) 6px -276px no-repeat !important;} /* .itd */
-    .extxlf {background: url(../img/matecat_file_icons2x.png) 6px -310px no-repeat !important;} /* .xlf */
-    .extmif {background: url(../img/matecat_file_icons2x.png) 6px -342px no-repeat !important;} /* .mif */
-    .extidd {background: url(../img/matecat_file_icons2x.png) 6px -378px no-repeat !important;} /* .idml, .inx, .icml */
-    .extqxp {background: url(../img/matecat_file_icons2x.png) 6px -412px no-repeat !important;} /* .xtg */
-    .extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;} /* .xml */
-    .extrcc {background: url(../img/matecat_file_icons2x.png) 6px -484px no-repeat !important;} /* .rc */
-    .extres {background: url(../img/matecat_file_icons2x.png) 6px -516px no-repeat !important;} /* .resx */
-    .extsgl {background: url(../img/matecat_file_icons2x.png) 6px -552px no-repeat !important;} /* .sgml */
-    .extsgm {background: url(../img/matecat_file_icons2x.png) 6px -584px no-repeat !important;}  /* .sgm */
-    .extpro {background: url(../img/matecat_file_icons2x.png) 6px -618px no-repeat !important;} /* .properties */
-    .extdit {background: url(../img/matecat_file_icons2x.png) 6px -652px no-repeat !important;} /* .dita */
-    .exttag {background: url(../img/matecat_file_icons2x.png) 6px -686px no-repeat !important;} /* .tag */
-    .exttmx {background: url(../img/matecat_file_icons2x.png) 6px -722px no-repeat !important;} /* .tmx */
-    .extstr {background: url(../img/matecat_file_icons2x.png) 6px -758px no-repeat !important;} /* .str */
-    .extzip {background: url(../img/matecat_file_icons2x.png) 6px -792px no-repeat !important;} /* .zip */
-    .exticml {background: url(../img/matecat_file_icons2x.png) 6px -826px no-repeat !important;} /* .icml */
-    .extimg {background: url(../img/matecat_file_icons2x.png) 6px -860px no-repeat !important;} /* .bmp, .gif, .jpeg, .png, .tiff */
-    .extwix {background: url(../img/matecat_file_icons2x.png) 6px -894px no-repeat !important;} /* .wix */
-    .extsrt {background: url(../img/matecat_file_icons2x.png) 6px -928px no-repeat !important;} /* .srt */
-    .extpo {background: url(../img/matecat_file_icons2x.png) 6px -962px no-repeat !important;} /* .po */
-    .extg {background: url(../img/matecat_file_icons2x.png) 6px -996px no-repeat !important;} /* .g */
-    .exts {background: url(../img/matecat_file_icons_ts2x.png) 6px 0px no-repeat !important;} /* .ts */
-    .extgsli {background: url(../img/matecat_file_icons2x.png) 6px -1033px no-repeat !important;} /* Google Slides */
-    .extgdoc {background: url(../img/matecat_file_icons2x.png) 6px -1070px no-repeat !important;} /* Google Document */
-    .extgsheet {background: url(../img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;} /* Google Sheet */
+    .extdoc {background: url(../../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
+    .extppt {background: url(../../img/matecat_file_icons2x.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
+    .exthtm {background: url(../../img/matecat_file_icons2x.png) 6px -70px no-repeat !important;} /* .htm, .html, .xhtml */
+    .extpdf {background: url(../../img/matecat_file_icons2x.png) 6px -104px no-repeat !important;} /* .pdf */
+    .extxls {background: url(../../img/matecat_file_icons2x.png) 6px -140px no-repeat !important;} /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
+    .exttxt {background: url(../../img/matecat_file_icons2x.png) 6px -172px no-repeat !important;} /* .txt */
+    .extxif {background: url(../../img/matecat_file_icons2x.png) 6px -208px no-repeat !important;} /* .xliff */
+    .extttx {background: url(../../img/matecat_file_icons2x.png) 6px -242px no-repeat !important;} /* .ttx */
+    .extitd {background: url(../../img/matecat_file_icons2x.png) 6px -276px no-repeat !important;} /* .itd */
+    .extxlf {background: url(../../img/matecat_file_icons2x.png) 6px -310px no-repeat !important;} /* .xlf */
+    .extmif {background: url(../../img/matecat_file_icons2x.png) 6px -342px no-repeat !important;} /* .mif */
+    .extidd {background: url(../../img/matecat_file_icons2x.png) 6px -378px no-repeat !important;} /* .idml, .inx, .icml */
+    .extqxp {background: url(../../img/matecat_file_icons2x.png) 6px -412px no-repeat !important;} /* .xtg */
+    .extxml {background: url(../../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;} /* .xml */
+    .extrcc {background: url(../../img/matecat_file_icons2x.png) 6px -484px no-repeat !important;} /* .rc */
+    .extres {background: url(../../img/matecat_file_icons2x.png) 6px -516px no-repeat !important;} /* .resx */
+    .extsgl {background: url(../../img/matecat_file_icons2x.png) 6px -552px no-repeat !important;} /* .sgml */
+    .extsgm {background: url(../../img/matecat_file_icons2x.png) 6px -584px no-repeat !important;}  /* .sgm */
+    .extpro {background: url(../../img/matecat_file_icons2x.png) 6px -618px no-repeat !important;} /* .properties */
+    .extdit {background: url(../../img/matecat_file_icons2x.png) 6px -652px no-repeat !important;} /* .dita */
+    .exttag {background: url(../../img/matecat_file_icons2x.png) 6px -686px no-repeat !important;} /* .tag */
+    .exttmx {background: url(../../img/matecat_file_icons2x.png) 6px -722px no-repeat !important;} /* .tmx */
+    .extstr {background: url(../../img/matecat_file_icons2x.png) 6px -758px no-repeat !important;} /* .str */
+    .extzip {background: url(../../img/matecat_file_icons2x.png) 6px -792px no-repeat !important;} /* .zip */
+    .exticml {background: url(../../img/matecat_file_icons2x.png) 6px -826px no-repeat !important;} /* .icml */
+    .extimg {background: url(../../img/matecat_file_icons2x.png) 6px -860px no-repeat !important;} /* .bmp, .gif, .jpeg, .png, .tiff */
+    .extwix {background: url(../../img/matecat_file_icons2x.png) 6px -894px no-repeat !important;} /* .wix */
+    .extsrt {background: url(../../img/matecat_file_icons2x.png) 6px -928px no-repeat !important;} /* .srt */
+    .extpo {background: url(../../img/matecat_file_icons2x.png) 6px -962px no-repeat !important;} /* .po */
+    .extg {background: url(../../img/matecat_file_icons2x.png) 6px -996px no-repeat !important;} /* .g */
+    .exts {background: url(../../img/matecat_file_icons_ts2x.png) 6px 0px no-repeat !important;} /* .ts */
+    .extgsli {background: url(../../img/matecat_file_icons2x.png) 6px -1033px no-repeat !important;} /* Google Slides */
+    .extgdoc {background: url(../../img/matecat_file_icons2x.png) 6px -1070px no-repeat !important;} /* Google Document */
+    .extgsheet {background: url(../../img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;} /* Google Sheet */
 
 /*.popup {background: #fff url(../img/borderfix.png) repeat-x!important;}*/
 
@@ -3288,11 +3288,11 @@ color: #000;
 
 @font-face {
     font-family: 'icomoon';
-    src:  url('fonts/icomoon.eot?7sjwen');
-    src:  url('fonts/icomoon.eot?7sjwen#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?7sjwen') format('truetype'),
-    url('fonts/icomoon.woff?7sjwen') format('woff'),
-    url('fonts/icomoon.svg?7sjwen#icomoon') format('svg');
+    src:  url('../fonts/icomoon.eot?7sjwen');
+    src:  url('../fonts/icomoon.eot?7sjwen#iefix') format('embedded-opentype'),
+    url('../fonts/icomoon.ttf?7sjwen') format('truetype'),
+    url('../fonts/icomoon.woff?7sjwen') format('woff'),
+    url('../fonts/icomoon.svg?7sjwen#icomoon') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -4059,7 +4059,7 @@ text-align: left;
 
 
 .icon-gdrive:before {
-    content: url(../img/logo-drive-16-gray.png);
+    content: url(../../img/logo-drive-16-gray.png);
 }
 
 .icon-preview-bottom-window:before {
@@ -4092,20 +4092,20 @@ body.side-popup {
 @font-face {
     font-family: Calibri;
     src: local(Calibri),
-    url('fonts/calibri-webfont.woff') format('woff'),
-    url('fonts/calibri-webfont.ttf') format('truetype'),
-    url('fonts/calibri-webfont.eot'),
-    url('fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
+    url('../fonts/calibri-webfont.woff') format('woff'),
+    url('../fonts/calibri-webfont.ttf') format('truetype'),
+    url('../fonts/calibri-webfont.eot'),
+    url('../fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
 }
 
 @font-face {
     font-family: Calibri;
     font-weight: bold;
     src: local('Calibri Bold'),
-    url('fonts/calibri_bold-webfont.woff') format('woff'),
-    url('fonts/calibri_bold-webfont.ttf') format('truetype'),
-    url('fonts/calibri_bold-webfont.eot'),
-    url('fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
+    url('../fonts/calibri_bold-webfont.woff') format('woff'),
+    url('../fonts/calibri_bold-webfont.ttf') format('truetype'),
+    url('../fonts/calibri_bold-webfont.eot'),
+    url('../fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
 }
 
 #menu-site li {
