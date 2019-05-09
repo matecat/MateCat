@@ -50,7 +50,7 @@ class AuthCookie {
             try {
                 return SimpleJWT::getValidPayload( $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
             } catch ( DomainException $e ) {
-                Log::doLog( $e->getMessage() . " " . $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
+                Log::doJsonLog( $e->getMessage() . " " . $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
                 self::destroyAuthentication();
             }
         }

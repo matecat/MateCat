@@ -225,13 +225,13 @@ trait Translated {
             $quote_response = json_decode( self::request( $quote_url ) );
             Utils::raiseJsonExceptionError();
             if ( $quote_response->code != 1 ) {
-                \Log::doLog( $quote_response );
+                \Log::doJsonLog( $quote_response );
                 $this->failureEmailObject->setErrorMessage( $quote_response );
                 $this->failureEmailObject->send();
                 throw new Exception( $quote_response->message );
             }
         } catch ( Exception $e ) {
-            \Log::doLog( $e->getMessage() );
+            \Log::doJsonLog( $e->getMessage() );
             $this->failureEmailObject->setErrorMessage( $e->getMessage() );
             $this->failureEmailObject->send();
 
@@ -257,7 +257,7 @@ trait Translated {
             }
             $this->successEmailObject->send();
         } catch ( Exception $e ) {
-            \Log::doLog( $e->getMessage() );
+            \Log::doJsonLog( $e->getMessage() );
             $this->failureEmailObject->setErrorMessage( $e->getMessage() );
             $this->failureEmailObject->send();
 

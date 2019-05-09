@@ -524,7 +524,7 @@ class CatUtils {
         file_put_contents( $tmpOrigFName, $documentContent );
 
         $cmd = "file -i $tmpOrigFName";
-        Log::doLog( $cmd );
+        Log::doJsonLog( $cmd );
 
         $file_info = shell_exec( $cmd );
         list( , $charset ) = explode( "=", $file_info );
@@ -623,7 +623,7 @@ class CatUtils {
         if ( $wStruct->getTotal() == 0 && ( $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
             $wCounter = new WordCount_Counter();
             $wStruct  = $wCounter->initializeJobWordCount( $job[ 'jid' ], $job[ 'jpassword' ] );
-            Log::doLog( "BackWard compatibility set Counter." );
+            Log::doJsonLog( "BackWard compatibility set Counter." );
 
             return $wStruct;
         }
@@ -724,7 +724,7 @@ class CatUtils {
         if ( $wStruct->getTotal() == 0 && ( $analysis_status == Constants_ProjectStatus::STATUS_DONE || $analysis_status == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
             $wCounter = new WordCount_Counter();
             $wStruct  = $wCounter->initializeJobWordCount( $job->id, $job->password );
-            Log::doLog( "BackWard compatibility set Counter." );
+            Log::doJsonLog( "BackWard compatibility set Counter." );
 
             return $wStruct;
         }

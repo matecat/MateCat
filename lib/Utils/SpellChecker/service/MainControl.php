@@ -59,7 +59,7 @@ class SpellCheckerServer {
                 break;
         }
 
-        Log::doLog( __METHOD__ . " Handled Signal $signo " );
+        Log::doJsonLog( __METHOD__ . " Handled Signal $signo " );
 
     }
 
@@ -77,7 +77,7 @@ class SpellCheckerServer {
         $this->logger = $logger;
 
         if ( self::$PID_PATH == null || touch( self::$PID_PATH . 'writeTest' ) === false ) {
-            Log::doLog( "Attenzione, il path di backup dei messaggi falliti non è definito o non è permessa la scrittura.\n" . self::$PID_PATH . 'writeTest' );
+            Log::doJsonLog( "Attenzione, il path di backup dei messaggi falliti non è definito o non è permessa la scrittura.\n" . self::$PID_PATH . 'writeTest' );
             throw new Exception( "Attenzione, il path di backup dei messaggi falliti non è definito o non è permessa la scrittura." );
         } else {
             unlink( self::$PID_PATH . 'writeTest' );
@@ -101,11 +101,11 @@ class SpellCheckerServer {
         if( self::$cycles >= self::$MAX_CYCLES_NUM ){
             try{
 
-                Log::doLog( "*** " . self::$MAX_CYCLES_NUM . " Cycles Achieved, destroying References and Re-create ***" );
+                Log::doJsonLog( "*** " . self::$MAX_CYCLES_NUM . " Cycles Achieved, destroying References and Re-create ***" );
 
                 self::$cycles = 0;
             } catch( Exception $e ){
-                Log::doLog( $e->getMessage() . "\n" . $e->getTraceAsString() );
+                Log::doJsonLog( $e->getMessage() . "\n" . $e->getTraceAsString() );
 
             }
         }
@@ -128,7 +128,7 @@ class SpellCheckerServer {
 
             if (! function_exists ( 'pcntl_signal' )) {
                 $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
-                Log::doLog( $msg );
+                Log::doJsonLog( $msg );
                 self::__TimeStampMsg( $msg."\n" );
             } else {
 
@@ -137,7 +137,7 @@ class SpellCheckerServer {
                 pcntl_signal( SIGHUP,  array ( 'SpellCheckerServer', 'sigSwitch' ) );
 
                 $msg = "-------------- Signal Handler Installed  --------------";
-                Log::doLog( $msg );
+                Log::doJsonLog( $msg );
                 self::__TimeStampMsg( "$msg\n" );
 
             }
@@ -157,7 +157,7 @@ class SpellCheckerServer {
         $this->_loadProcesses();
 
         $msg = "-------------- Starting Main Control --------------";
-        Log::doLog( $msg );
+        Log::doJsonLog( $msg );
         self::__TimeStampMsg( "$msg\n" );
 
         do {
@@ -179,13 +179,13 @@ class SpellCheckerServer {
         stream_socket_shutdown($this->server, STREAM_SHUT_RDWR );
 
         $msg = "-------------- EXITING GRACEFULLY --------------";
-        Log::doLog( $msg );
+        Log::doJsonLog( $msg );
         self::__TimeStampMsg( "$msg\n" );
 
         $this->_delPidFile();
 
         $msg = "-------------- MAIN CONTROL HALTED. --------------";
-        Log::doLog( $msg );
+        Log::doJsonLog( $msg );
         self::__TimeStampMsg( "$msg\n" );
 
     }
@@ -203,7 +203,7 @@ class SpellCheckerServer {
 
             $this->processList[ $fileInfo->getFilename() ] = new Process( $exec, $cwd );
 
-            Log::doLog( $exec );
+            Log::doJsonLog( $exec );
 
             usleep(200000); //sleep 0.2 sec, avoid machine overload
 
@@ -216,12 +216,12 @@ class SpellCheckerServer {
         /* @var $process Process */
         foreach ( $this->processList as $lang => $process ) {
             $process->close();
-            Log::doLog( "Process unload " . $lang . " - Is still Running: " . var_export( $process->isRunning(), true ) );
+            Log::doJsonLog( "Process unload " . $lang . " - Is still Running: " . var_export( $process->isRunning(), true ) );
             unset($process);
             unset($this->processList[$lang]);
         }
 
-        Log::doLog( "Processes unload complete" );
+        Log::doJsonLog( "Processes unload complete" );
 
     }
 
@@ -267,7 +267,7 @@ class SpellCheckerServer {
                 $process = $this->_getProcess( $request['language'] );
                 $clientRequest = "*{$request['string']}\n#\n";
                 var_dump($clientRequest);
-                Log::doLog($request['string']);
+                Log::doJsonLog($request['string']);
                 fwrite( $process->pipes[0], $clientRequest );
                 $response = 'OK';
                 break;

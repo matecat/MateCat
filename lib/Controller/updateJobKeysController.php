@@ -166,10 +166,10 @@ class updateJobKeysController extends ajaxController {
         try {
             $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData['tm_keys'], $this->userRole, $this->user->uid );
 
-            Log::doLog('Before:');
-            Log::doLog($this->jobData['tm_keys']);
-            Log::doLog('After:');
-            Log::doLog(json_encode($totalTmKeys));
+            Log::doJsonLog('Before:');
+            Log::doJsonLog($this->jobData['tm_keys']);
+            Log::doJsonLog('After:');
+            Log::doJsonLog(json_encode($totalTmKeys));
             TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $totalTmKeys );
 
             if ($this->jobOwnerIsMe() ) {

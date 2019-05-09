@@ -151,7 +151,7 @@ class WordCount_Counter {
         $id_job = $wordCount_Struct->getIdJob();;
         $password = $wordCount_Struct->getJobPassword();
 
-        Log::doLog( sprintf(
+        Log::doJsonLog( sprintf(
                         "Requested updateCounts for job %s-%s",
                         $id_job,
                         $password
@@ -263,7 +263,7 @@ class WordCount_Counter {
     public function initializeJobWordCount( $id_job, $jPassword ) {
 
         $_details = getStatsForJob( $id_job, null, $jPassword );
-        //Log::doLog( "--- trying to Iitialize/reset job total word count." );
+        //Log::doJsonLog( "--- trying to Iitialize/reset job total word count." );
 
         $job_details = array_pop( $_details ); //get the row
 
@@ -277,7 +277,7 @@ class WordCount_Counter {
         $wStruct->setRejectedWords( $job_details[ Constants_TranslationStatus::STATUS_REJECTED ] );
         initializeWordCount( $wStruct );
 
-        //Log::doLog( $wStruct );
+        //Log::doJsonLog( $wStruct );
 
         return $wStruct;
 

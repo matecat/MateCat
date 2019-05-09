@@ -94,10 +94,10 @@ class SearchModel {
 				";
 
                 Log::$fileName = 'ReplaceAll_Failures.log';
-                Log::doLog( $sql );
-                Log::doLog( $resultSet );
-                Log::doLog( $sqlInsert );
-                Log::doLog( $msg );
+                Log::doJsonLog( $sql );
+                Log::doJsonLog( $resultSet );
+                Log::doJsonLog( $sqlInsert );
+                Log::doJsonLog( $msg );
 
                 Utils::sendErrMailReport( $msg );
 
@@ -106,7 +106,7 @@ class SearchModel {
             }
 
             //we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
-            //Log::doLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
+            //Log::doJsonLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
 
         }
 
@@ -181,7 +181,7 @@ class SearchModel {
             $stmt->execute();
             $results = $stmt->fetchAll( PDO::FETCH_ASSOC );
         } catch ( PDOException $e ) {
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
             throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
         }
 
@@ -201,7 +201,7 @@ class SearchModel {
             $stmt = $this->db->getConnection()->prepare( $sql );
             $stmt->execute( $data );
         } catch ( PDOException $e ) {
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
             throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
         }
 

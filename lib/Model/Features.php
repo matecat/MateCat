@@ -145,7 +145,7 @@ class Features {
         $cls =  "$baseClass\\Decorator\\$decoratorName" ;
 
         // if this line is missing it won't log load errors.
-        Log::doLog('loading Decorator ' . $cls );
+        Log::doJsonLog('loading Decorator ' . $cls );
 
         if ( class_exists( $cls ) ) {
             return $cls;

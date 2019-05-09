@@ -64,8 +64,8 @@ class ChildProjectRevisionBatchService  {
     protected function _createCurlResource( RevisionRequestStruct $struct ) {
         $url = "/project/child/%s/file/%s/targetLang/%s/translation/%s/batchReview" ;
         
-        Log::doLog( $struct->getParams() ) ;
-        Log::doLog( $this->session->filterHeaders( $struct) ) ;
+        Log::doJsonLog( $struct->getParams() ) ;
+        Log::doJsonLog( $this->session->filterHeaders( $struct) ) ;
 
         $resource = $this->client->createResource( $url, 'post', [
                 'headers'    => $this->session->filterHeaders( $struct ),

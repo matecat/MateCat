@@ -36,7 +36,7 @@ class LanguageStatsRunner extends AbstractDaemon {
             $jobStatsDao = new Jobs_JobStatsDao( Database::obtain() );
 
             foreach ( $languages as $source_language ) {
-                Log::doLog( "Current source_language: $source_language" );
+                Log::doJsonLog( "Current source_language: $source_language" );
                 echo "Current source_language: $source_language\n";
 
                 $languageStats = $jobStatsDao->readBySource( $source_language );
@@ -48,7 +48,7 @@ class LanguageStatsRunner extends AbstractDaemon {
                         continue;
                     }
 
-                    Log::doLog( "Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" . $languageCoupleStat->fuzzy_band . ")" );
+                    Log::doJsonLog( "Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" . $languageCoupleStat->fuzzy_band . ")" );
                     echo "Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" . $languageCoupleStat->fuzzy_band . ")\n";
 
                     $languageCoupleStat->date                      = $firstDayOfLastMonth;
@@ -61,7 +61,7 @@ class LanguageStatsRunner extends AbstractDaemon {
                 //if there is some data for this language couple, insert it
                 if ( count( $languageStats ) > 0 ) {
 
-                    Log::doLog( "Found some stats. Saving in DB.." );
+                    Log::doJsonLog( "Found some stats. Saving in DB.." );
                     echo "Found some stats. Saving in DB..\n";
 
                     $result = $lsDao->createList( $languageStats );
@@ -75,7 +75,7 @@ class LanguageStatsRunner extends AbstractDaemon {
 
             }
 
-            Log::doLog( "Everything completed. I can die." );
+            Log::doJsonLog( "Everything completed. I can die." );
             echo "Everything completed. I can die.\n";
 
             //for the moment, this daemon is single-loop-execution

@@ -53,7 +53,7 @@ class GDriveController extends KleinController {
     private function doImport() {
 
         $state = json_decode( $this->request->param('state'), TRUE );
-        \Log::doLog( $state );
+        \Log::doJsonLog( $state );
 
         // TODO: check why this is necessary here.
         if ( $this->isAsyncReq && $this->gdriveUserSession->hasFiles() ) {

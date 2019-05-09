@@ -58,7 +58,7 @@ class changeJobsStatusController extends ajaxController {
             //check for Password correctness
             if ( !$access ) {
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export( $_POST, true ) . "\n";
-                Log::doLog( $msg );
+                Log::doJsonLog( $msg );
                 Utils::sendErrMailReport( $msg );
                 return null;
             }

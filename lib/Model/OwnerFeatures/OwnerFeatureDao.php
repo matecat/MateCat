@@ -45,7 +45,7 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
             " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
         );
 
-        Log::doLog( $obj->attributes() );
+        Log::doJsonLog( $obj->attributes() );
 
         $values = array_diff_key( $obj->attributes(), array('id' => null) );
 

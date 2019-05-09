@@ -44,7 +44,7 @@ class Queue {
             $output = "**** Project Enqueue failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $projectStructure, true );
-            Log::doLog( $output );
+            Log::doJsonLog( $output );
             throw $e;
 
         }

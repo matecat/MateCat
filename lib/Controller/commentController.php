@@ -169,12 +169,12 @@ class commentController extends ajaxController {
         // segmnt ids.
 
         if (empty($_SERVER['HTTP_REFERER'])) {
-            Log::doLog('Skipping email due to missing referrer link');
+            Log::doJsonLog('Skipping email due to missing referrer link');
             return;
         }
         @list($url, $anchor) = explode('#', $_SERVER['HTTP_REFERER']);
         $url .= '#' . $this->struct->id_segment ;
-        Log::doLog($url);
+        Log::doJsonLog($url);
 
         $project_data = $this->projectData();
 

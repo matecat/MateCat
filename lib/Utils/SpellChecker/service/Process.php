@@ -56,7 +56,7 @@ class Process {
     }
 
     public function write( $string ){
-        Log::doLog(trim($string) . "\n");
+        Log::doJsonLog(trim($string) . "\n");
         fwrite( $this->pipes[0], trim($string) . "\n" );
     }
 
@@ -71,7 +71,7 @@ class Process {
             if( !$this->isRunning() ) {
                 $status = $this->getProcessInfo();
                 $this->pid = -1;
-                Log::doLog( "Child exited with code: {$status['exitcode']} ");
+                Log::doJsonLog( "Child exited with code: {$status['exitcode']} ");
                 return $status['exitcode'];
             }
 
@@ -99,7 +99,7 @@ class Process {
 
                         //log Errors
                         if( $desc == 2 ){
-                            Log::doLog($data);
+                            Log::doJsonLog($data);
                         } else {
                             //append to data
                             $this->_data .= $data;
@@ -119,7 +119,7 @@ class Process {
 
         }
 
-        Log::doLog($this->_data);
+        Log::doJsonLog($this->_data);
 
         return $this->_data;
 

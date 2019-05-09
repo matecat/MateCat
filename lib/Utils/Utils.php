@@ -109,8 +109,7 @@ class Utils {
                 'userAgent' => $u_agent,
                 'name'      => $bname,
                 'version'   => $version,
-                'platform'  => $platform,
-                'pattern'   => $pattern
+                'platform'  => $platform
         );
     }
 
@@ -274,8 +273,8 @@ class Utils {
 
 		$info = curl_getinfo($ch);
 
-		//Log::doLog($d);
-		//Log::doLog($output);
+		//Log::doJsonLog($d);
+		//Log::doJsonLog($output);
 
 		curl_close($ch);
 
@@ -325,7 +324,7 @@ class Utils {
 		WorkerClient::init( new AMQHandler() );
 		\WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
 
-		Log::doLog( 'Message has been sent' );
+		Log::doJsonLog( 'Message has been sent' );
 		return true;
 
 	}
@@ -414,7 +413,7 @@ class Utils {
                 substr( $hash, 20, 12 ) .
                 '}';
 
-        \Log::doLog('created GUID', $guid ); 
+        \Log::doJsonLog( $guid );
 
         return $guid;
     }
@@ -472,7 +471,7 @@ class Utils {
                 }
                 $outcome = unlink( $fileInfo->getPathname() );
                 if ( !$outcome ) {
-                    Log::doLog( "fail deleting " . $fileInfo->getPathname() );
+                    Log::doJsonLog( "fail deleting " . $fileInfo->getPathname() );
                 }
             }
         }
@@ -592,9 +591,9 @@ class Utils {
 
 		} catch (\Exception $e ){
 			$msg = " CRITICAL: " . $jobId . " has no files in storage... " . $e->getMessage();
-			Log::doLog( str_repeat("*", strlen( $msg ) + 10 ) );
-			Log::doLog( "*****$msg*****" );
-			Log::doLog( str_repeat("*", strlen( $msg ) + 10 ) );
+			Log::doJsonLog( str_repeat("*", strlen( $msg ) + 10 ) );
+			Log::doJsonLog( "*****$msg*****" );
+			Log::doJsonLog( str_repeat("*", strlen( $msg ) + 10 ) );
 		}
 
 	}

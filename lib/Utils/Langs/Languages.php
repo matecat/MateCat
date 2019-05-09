@@ -26,7 +26,7 @@ class Langs_Languages {
 
         $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
         if ( !file_exists( $file ) ) {
-            Log::doLog( "no language defs found in $file" );
+            Log::doJsonLog( "no language defs found in $file" );
             exit;
         }
         $string = file_get_contents( $file );

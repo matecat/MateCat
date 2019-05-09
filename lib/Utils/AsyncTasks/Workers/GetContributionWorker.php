@@ -129,7 +129,7 @@ class GetContributionWorker extends AbstractWorker {
             $type = 'cross_language_matches' ;
         }
 
-        $message = json_encode( [
+        $_object = [
                 '_type' => $type,
                 'data'  => [
                         'id_job'    => $contributionStruct->getJobStruct()->id,
@@ -137,7 +137,9 @@ class GetContributionWorker extends AbstractWorker {
                         'payload'   => $payload,
                         'id_client' => $contributionStruct->id_client,
                 ]
-        ] );
+        ];
+
+        $message = json_encode( $_object );
 
         $stomp = new Stomp( INIT::$QUEUE_BROKER_ADDRESS );
         $stomp->connect();
@@ -146,7 +148,7 @@ class GetContributionWorker extends AbstractWorker {
                 [ 'persistent' => 'false' ]
         );
 
-        $this->_doLog( $message );
+        $this->_doLog( $_object );
 
     }
 

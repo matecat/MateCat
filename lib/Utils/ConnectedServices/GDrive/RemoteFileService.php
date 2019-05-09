@@ -67,7 +67,7 @@ class RemoteFileService extends AbstractRemoteFileService
             // Exception Caught, check if the token is expired:
             $this->__checkTokenExpired();
 
-            Log::doLog( 'Failed to access file from Google Drive: ' . $e->getMessage() );
+            Log::doJsonLog( 'Failed to access file from Google Drive: ' . $e->getMessage() );
         }
     }
 

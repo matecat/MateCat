@@ -1,4 +1,5 @@
 <?php
+
 use Database;
 
 /**
@@ -217,8 +218,8 @@ abstract class DataAccess_AbstractDao {
                 self::$cache_con->get( 1 );
             } catch ( Exception $e ) {
                 self::$cache_con = null;
-                Log::doLog( $e->getMessage() );
-                Log::doLog( "No Redis server(s) configured." );
+                Log::doJsonLog( $e->getMessage() );
+                Log::doJsonLog( "No Redis server(s) configured." );
             }
 
         }
@@ -236,14 +237,23 @@ abstract class DataAccess_AbstractDao {
 
         $this->_cacheSetConnection();
 
-        $_existingResult = null;
+        $value = null;
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            $cacheQuery = md5( $query );
-            Log::doLog( "Fetching from cache $cacheQuery - query: \"" . $query . "\"" );
-            $_existingResult = unserialize( self::$cache_con->get( $cacheQuery ) );
+            $key   = md5( $query );
+            $value = unserialize( self::$cache_con->get( $key ) );
+            $this->_logCache( "GET", $key, $value, $query );
         }
 
-        return $_existingResult;
+        return $value;
+    }
+
+    protected function _logCache( $type, $key, $value, $sqlQuery ) {
+        Log::doJsonLog( [
+                "type"       => $type,
+                "key"        => $key,
+                "sql"        => preg_replace( "/[ ]+/", " ", str_replace( "\n", " ", $sqlQuery ) ),
+            //"result_set" => $value,
+        ], "query_cache.log" );
     }
 
     /**
@@ -258,7 +268,9 @@ abstract class DataAccess_AbstractDao {
         }
 
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            self::$cache_con->setex( md5( $query ), $this->cacheTTL, serialize( $value ) );
+            $key = md5( $query );
+            self::$cache_con->setex( $key, $this->cacheTTL, serialize( $value ) );
+            $this->_logCache( "SET", $key, $value, $query );
         }
     }
 
@@ -339,7 +351,7 @@ abstract class DataAccess_AbstractDao {
             return $_cacheResult;
         }
 
-                /** @noinspection PhpMethodParametersCountMismatchInspection */
+        /** @noinspection PhpMethodParametersCountMismatchInspection */
         $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
@@ -372,7 +384,8 @@ abstract class DataAccess_AbstractDao {
      * @deprecated Use instead PDO::setFetchMode()
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      */
-    protected function _buildResult( $array_result ){}
+    protected function _buildResult( $array_result ) {
+    }
 
     /**
      * Returns a string suitable for insert of the fields
@@ -391,11 +404,11 @@ abstract class DataAccess_AbstractDao {
     public static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false, $on_duplicate_fields = null ) {
 
         if ( is_null( static::TABLE ) ) {
-            throw new Exception('TABLE constant is not defined');
+            throw new Exception( 'TABLE constant is not defined' );
         }
 
-        $first  = array();
-        $second = array();
+        $first  = [];
+        $second = [];
 
         $sql_ignore = $ignore ? " IGNORE " : "";
 
@@ -411,8 +424,8 @@ abstract class DataAccess_AbstractDao {
                     unset( $mask[ array_search( $key, $mask ) ] );
                     continue;
                 }
-                $first[]  = "`$key`" ;
-                $second[] = ":$key" ;
+                $first[]  = "`$key`";
+                $second[] = ":$key";
             }
         }
 
@@ -435,7 +448,7 @@ abstract class DataAccess_AbstractDao {
      */
 
     protected static function buildUpdateSet( $attrs, $mask ) {
-        $map = array();
+        $map = [];
         $pks = static::$primary_keys;
 
         if ( empty( $mask ) ) {
@@ -461,7 +474,7 @@ abstract class DataAccess_AbstractDao {
      */
 
     protected static function buildPkeyCondition( $attrs ) {
-        $map = array();
+        $map = [];
 
         foreach ( $attrs as $key => $value ) {
             if ( in_array( $key, static::$primary_keys ) ) {
@@ -512,18 +525,18 @@ abstract class DataAccess_AbstractDao {
      * @throws \Exceptions\ValidationError
      * @throws ReflectionException
      */
-    public static function updateStruct( DataAccess_IDaoStruct $struct, $options = array() ) {
+    public static function updateStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
         $struct->ensureValid();
 
         $attrs = $struct->attributes();
 
         $fields = [];
 
-        if ( isset( $options['fields'] ) ) {
-            if ( !is_array( $options['fields'] )) {
-                throw new Exception('`fields` must be an array' );
+        if ( isset( $options[ 'fields' ] ) ) {
+            if ( !is_array( $options[ 'fields' ] ) ) {
+                throw new Exception( '`fields` must be an array' );
             }
-            $fields = $options['fields'] ;
+            $fields = $options[ 'fields' ];
         }
 
         $sql = " UPDATE " . static::TABLE;
@@ -538,8 +551,8 @@ abstract class DataAccess_AbstractDao {
                 self::structKeys( $struct )
         );
 
-        \Log::doLog( "SQL", $sql );
-        \Log::doLog( "data", $data );
+        \Log::doJsonLog( $sql );
+        \Log::doJsonLog( $data );
 
         return $stmt->execute( $data );
     }
@@ -558,24 +571,24 @@ abstract class DataAccess_AbstractDao {
      * @return bool|string
      * @throws Exception
      */
-    public static function insertStruct( DataAccess_IDaoStruct $struct, $options = array() ) {
+    public static function insertStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
 
-        $ignore   = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
-        $no_nulls = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
+        $ignore              = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
+        $no_nulls            = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
         $on_duplicate_fields = ( isset( $options[ 'on_duplicate_update' ] ) && !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : null );
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
         $mask = array_diff( $mask, static::$auto_increment_field );
 
-        $sql  = self::buildInsertStatement( $struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields );
+        $sql = self::buildInsertStatement( $struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );
 
-        Log::getLogger()->debug( "insert SQL: " . $sql );
-        Log::getLogger()->debug( "insert data:", $data );
+        Log::doJsonLog( "insert SQL: " . $sql );
+        Log::doJsonLog( "insert data:", $data );
 
         if ( $stmt->execute( $data ) ) {
             if ( count( static::$auto_increment_field ) ) {
@@ -607,11 +620,12 @@ abstract class DataAccess_AbstractDao {
      * @throws Exception
      */
     public static function insertStructWithAutoIncrements( $struct, $options = [] ) {
-        $auto_increment_fields        = static::$auto_increment_field ;
-        static::$auto_increment_field = [] ;
-        $id                           = self::insertStruct( $struct, $options ) ;
-        static::$auto_increment_field =  $auto_increment_fields ;
-        return $id ;
+        $auto_increment_fields        = static::$auto_increment_field;
+        static::$auto_increment_field = [];
+        $id                           = self::insertStruct( $struct, $options );
+        static::$auto_increment_field = $auto_increment_fields;
+
+        return $id;
     }
 
     /**
