@@ -351,7 +351,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                 ]
         ] );
 
-        Log::doLog( "CompletionEventController deleting event: " . var_export( $event->getArrayCopy(), true ) );
+        Log::doJsonLog( "CompletionEventController deleting event: " . var_export( $event->getArrayCopy(), true ) );
 
     }
 
@@ -423,7 +423,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $fs = new FilesStorage();
         $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure['uploadToken'] );
 
-        Log::doLog( $zip_file );
+        Log::doJsonLog( $zip_file );
 
         if ( $zip_file !== false ) {
             $zip = new ZipArchive();
@@ -433,7 +433,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         // File is not a zip OR model was not found in zip
 
-        Log::doLog( "QA model is : " . var_export( $qa_model, true ) ) ;
+        Log::doJsonLog( "QA model is : " . var_export( $qa_model, true ) ) ;
 
         if ( $qa_model === false ) {
             if( $jsonPath == null ){

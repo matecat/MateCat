@@ -127,7 +127,7 @@ class downloadTMXController extends ajaxController {
             $output .= "</pre>";
 
             Log::$fileName = 'php_errors.txt';
-            Log::doLog( $output );
+            Log::doJsonLog( $output );
 
             Utils::sendErrMailReport( $output, "Download TMX Error: user Not Logged" );
             exit;
@@ -189,7 +189,7 @@ class downloadTMXController extends ajaxController {
             $r .= "</pre>";
 
             Log::$fileName = 'php_errors.txt';
-            Log::doLog( $r );
+            Log::doJsonLog( $r );
 
             Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );
 

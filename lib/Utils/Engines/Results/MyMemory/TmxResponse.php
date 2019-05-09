@@ -27,7 +27,7 @@ class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractRespo
 
         }
         else {
-            Log::doLog($response);
+            Log::doJsonLog($response);
         }
     }
 

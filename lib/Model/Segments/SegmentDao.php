@@ -1,16 +1,17 @@
 <?php
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
-    const TABLE = 'segments' ;
-    protected static $auto_increment_field = ['id'];
+    const TABLE = 'segments';
+    protected static $auto_increment_field = [ 'id' ];
 
     public function countByFile( Files_FileStruct $file ) {
         $conn = $this->con->getConnection();
-        $sql = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file " ;
+        $sql  = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file ";
 
-        $stmt = $conn->prepare( $sql ) ;
-        $stmt->execute( array( 'id_file' => $file->id ) ) ;
-        return (int) $stmt->fetch()[0] ;
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [ 'id_file' => $file->id ] );
+
+        return (int)$stmt->fetch()[ 0 ];
     }
 
     /**
@@ -23,47 +24,50 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      *
      * @return Segments_SegmentStruct[]
      */
-    public function getByFileId( $id_file, $fields_list = array() ) {
+    public function getByFileId( $id_file, $fields_list = [] ) {
         $conn = $this->con->getConnection();
 
         if ( empty( $fields_list ) ) {
-            $fields_list[] = '*' ;
+            $fields_list[] = '*';
         }
 
-        $sql = " SELECT " . implode(', ', $fields_list ) . " FROM segments WHERE id_file = :id_file " ;
-        $stmt = $conn->prepare( $sql ) ;
+        $sql  = " SELECT " . implode( ', ', $fields_list ) . " FROM segments WHERE id_file = :id_file ";
+        $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
-        $stmt->execute( array( 'id_file' => $id_file ) ) ;
+        $stmt->execute( [ 'id_file' => $id_file ] );
 
-        return $stmt->fetchAll() ;
+        return $stmt->fetchAll();
     }
 
     /**
      * @param Chunks_ChunkStruct $chunk
+     *
      * @return mixed
      */
-    function countByChunk( Chunks_ChunkStruct $chunk) {
-        $conn = $this->con->getConnection();
+    function countByChunk( Chunks_ChunkStruct $chunk ) {
+        $conn  = $this->con->getConnection();
         $query = "SELECT COUNT(1) FROM segments s
             JOIN segment_translations st ON s.id = st.id_segment
             JOIN jobs ON st.id_job = jobs.id
             WHERE jobs.id = :id_job
             AND jobs.password = :password
             AND s.show_in_cattool ;
-            "  ;
-        $stmt = $conn->prepare( $query ) ;
-        $stmt->execute( array( 'id_job' => $chunk->id, 'password' => $chunk->password ) ) ;
-        $result = $stmt->fetch() ;
-        return (int) $result[ 0 ] ;
+            ";
+        $stmt  = $conn->prepare( $query );
+        $stmt->execute( [ 'id_job' => $chunk->id, 'password' => $chunk->password ] );
+        $result = $stmt->fetch();
+
+        return (int)$result[ 0 ];
     }
 
     /**
      * @param $id_job
      * @param $password
      * @param $id_segment
+     *
      * @return \Segments_SegmentStruct
      */
-    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment) {
+    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment ) {
         $conn = $this->con->getConnection();
 
         $query = " SELECT segments.* FROM segments " .
@@ -72,15 +76,15 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 " INNER JOIN files f ON f.id = fj.id_file " .
                 " WHERE jobs.id = :id_job AND jobs.password = :password" .
                 " AND segments.id_file = f.id " .
-                " AND segments.id = :id_segment " ;
+                " AND segments.id = :id_segment ";
 
         $stmt = $conn->prepare( $query );
 
-        $stmt->execute( array(
-                'id_job'   => $id_job,
-                'password' => $password,
-                'id_segment'=> $id_segment
-        ) );
+        $stmt->execute( [
+                'id_job'     => $id_job,
+                'password'   => $password,
+                'id_segment' => $id_segment
+        ] );
 
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
 
@@ -108,10 +112,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $query );
 
-        $stmt->execute( array(
+        $stmt->execute( [
                 'id_job'   => $id_job,
                 'password' => $password
-        ) );
+        ] );
 
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
 
@@ -128,7 +132,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $query = "select * from segments where id = :id";
         $stmt  = $conn->prepare( $query );
-        $stmt->execute( array( 'id' => (int)$id_segment ) );
+        $stmt->execute( [ 'id' => (int)$id_segment ] );
 
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
 
@@ -140,18 +144,19 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      *
      * @return object
      */
-    public function getContextAndSegmentByIDs( $id_list ){
+    public function getContextAndSegmentByIDs( $id_list ) {
         $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ASC";
-        $stmt = $this->_getStatementForCache( $query );
+        $stmt  = $this->_getStatementForCache( $query );
         /** @var $res Segments_SegmentStruct[] */
-        $res = $this->_fetchObject( $stmt,
+        $res             = $this->_fetchObject( $stmt,
                 new Segments_SegmentStruct(),
                 $id_list
         );
         $reverse_id_list = array_flip( $id_list );
-        foreach( $res as $element ){
+        foreach ( $res as $element ) {
             $id_list[ $reverse_id_list[ $element->id ] ] = $element;
         }
+
         return (object)$id_list;
     }
 
@@ -172,19 +177,19 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $options_conditions_query  = "";
         $options_join_query        = "";
         $options_conditions_values = [];
-        $statuses = array_merge(
+        $statuses                  = array_merge(
                 Constants_TranslationStatus::$INITIAL_STATUSES,
                 Constants_TranslationStatus::$TRANSLATION_STATUSES,
                 Constants_TranslationStatus::$REVISION_STATUSES
         );
 
 
-        if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array($options[ 'filter' ][ 'status' ], $statuses) ) {
+        if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array( $options[ 'filter' ][ 'status' ], $statuses ) ) {
             $options_conditions_query              .= " AND st.status = :status ";
             $options_conditions_values[ 'status' ] = $options[ 'filter' ][ 'status' ];
         }
 
-        if ( (isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) OR (isset( $options[ 'filter' ][ 'severity' ] ) &&  $options[ 'filter' ][ 'severity' ] != '') ) {
+        if ( ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) OR ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) ) {
 
             $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job ";
             $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment AND sr.id_job = st.id_job ";
@@ -196,19 +201,17 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 } else {
 
                     if ( is_array( $options[ 'filter' ][ 'issue_category' ] ) ) {
-                        $placeholders = implode(', ', array_map( function($id) {
-                            return ':issue_category_' . $id ;
-                        }, $options[ 'filter'][ 'issue_category' ] ) );
+                        $placeholders = implode( ', ', array_map( function ( $id ) {
+                            return ':issue_category_' . $id;
+                        }, $options[ 'filter' ][ 'issue_category' ] ) );
 
                         $options_conditions_query .= " AND e.id_category IN ( $placeholders ) ";
 
-                        foreach( $options[ 'filter' ][ 'issue_category' ] as $id_category ) {
-                            $options_conditions_values[ 'issue_category_' . $id_category ] = $id_category ;
+                        foreach ( $options[ 'filter' ][ 'issue_category' ] as $id_category ) {
+                            $options_conditions_values[ 'issue_category_' . $id_category ] = $id_category;
                         }
-                    }
-
-                    else {
-                        $options_conditions_query .= " AND e.id_category = :id_category ";
+                    } else {
+                        $options_conditions_query                   .= " AND e.id_category = :id_category ";
                         $options_conditions_values[ 'id_category' ] = $options[ 'filter' ][ 'issue_category' ];
                     }
                 }
@@ -307,8 +310,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 break;
         }
 
-        $stmt = $db->prepare( $subQuery );
-        $conditions_values = array_merge([ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment ], $options_conditions_values);
+        $stmt              = $db->prepare( $subQuery );
+        $conditions_values = array_merge( [ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment ], $options_conditions_values );
         $stmt->execute( $conditions_values );
         $segments_id = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
@@ -327,10 +330,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return \QualityReport_QualityReportSegmentStruct[]
      */
 
-    public function getSegmentsForQr($segments_id, $job_id, $job_password){
+    public function getSegmentsForQr( $segments_id, $job_id, $job_password ) {
         $db = Database::obtain()->getConnection();
 
-        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
 
         $query = "SELECT 
                 s.id AS sid,
@@ -360,14 +363,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 RIGHT JOIN files f ON f.id = fj.id_file AND s.id_file = f.id
                 JOIN (
                     SELECT ? as id_segment
-                    ".$prepare_str_segments_id."
+                    " . $prepare_str_segments_id . "
                  ) AS SLIST USING( id_segment )
                  WHERE j.id = ? AND j.password = ?
             ORDER BY sid ASC";
 
-        $stmt = $db->prepare($query);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct");
-        $stmt->execute(array_merge($segments_id, array($job_id, $job_password)));
+        $stmt = $db->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct" );
+        $stmt->execute( array_merge( $segments_id, [ $job_id, $job_password ] ) );
 
         $results = $stmt->fetchAll();
 
@@ -400,7 +403,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                             ) VALUES ";
 
 
-        Log::doLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
+        Log::doJsonLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
 
         $tuple_marks = "( " . rtrim( str_repeat( "?, ", 12 ), ", " ) . " )";  //set to 13 when implements id_project
 
@@ -409,11 +412,11 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             $query = $baseQuery . rtrim( str_repeat( $tuple_marks . ", ", count( $chunk ) ), ", " );
 
             $values = [];
-            foreach( $chunk as $segStruct ){
+            foreach ( $chunk as $segStruct ) {
 
-                $values[] =$segStruct->id;
-                $values[] =$segStruct->internal_id;
-                $values[] =$segStruct->id_file;
+                $values[] = $segStruct->id;
+                $values[] = $segStruct->internal_id;
+                $values[] = $segStruct->id_file;
                 /* $values[] = $segStruct->id_project */
                 $values[] = $segStruct->segment;
                 $values[] = $segStruct->segment_hash;
@@ -431,10 +434,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
                 $stm = $this->con->getConnection()->prepare( $query );
                 $stm->execute( $values );
-                Log::doLog( "Segments: Executed Query " . ( $i + 1 ) );
+                Log::doJsonLog( "Segments: Executed Query " . ( $i + 1 ) );
 
             } catch ( PDOException $e ) {
-                Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
+                Log::doJsonLog( "Segment import - DB Error: " . $e->getMessage() );
                 throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
             }
 

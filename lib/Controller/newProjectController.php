@@ -48,14 +48,14 @@ class newProjectController extends viewController {
         try {
             $this->evalSourceLangHistory();
         } catch ( Lang_InvalidLanguageException $e ) {
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
             $this->template->noSourceLangHistory = true;
         }
 
         try {
             $this->evalTragetLangHistory();
         } catch ( Lang_InvalidLanguageException $e ) {
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
             $this->template->noTargetLangHistory = true;
         }
 
@@ -85,7 +85,7 @@ class newProjectController extends viewController {
                 }
 
             } catch ( Exception $e ) {
-                Log::doLog( $e->getMessage() );
+                Log::doJsonLog( $e->getMessage() );
             }
         }
     }

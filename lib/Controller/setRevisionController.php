@@ -140,7 +140,7 @@ class setRevisionController extends ajaxController {
         try {
             $reviseDAO->create( $revisionStruct );
         } catch ( Exception $e ) {
-            Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
+            Log::doJsonLog( __METHOD__ . " -> " . $e->getMessage() );
             $this->result[ 'errors' ] [] = [ 'code' => -4, 'message' => "Insert failed" ];
             return;
         }
@@ -208,7 +208,7 @@ class setRevisionController extends ajaxController {
                 $quality_overall = strtolower( $chunkReview[ 'minText' ] );
 
             } catch ( Exception $e ) {
-                Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
+                Log::doJsonLog( __METHOD__ . " -> " . $e->getMessage() );
                 $this->result[ 'errors' ] [] = [ 'code' => -5, 'message' => "Did not update job error counters." ];
 
                 return;

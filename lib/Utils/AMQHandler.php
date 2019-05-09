@@ -243,7 +243,7 @@ class AMQHandler extends Stomp {
     public function reQueue( $failed_segment, Context $queueInfo ) {
 
         if ( !empty( $failed_segment ) ) {
-            Log::doLog( "Failed " . var_export( $failed_segment, true ) );
+            Log::doJsonLog( "Failed " . var_export( $failed_segment, true ) );
             $this->send( $queueInfo->queue_name, json_encode( $failed_segment ), [ 'persistent' => $this->persistent ] );
         }
 

@@ -454,7 +454,7 @@ class FastAnalysis extends AbstractDaemon {
 
                 } elseif( $perform_Tms_Analysis ) {
 
-                    Log::doLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
+                    Log::doJsonLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
                     // this segment must not be sent to the TM analysis queue
                     unset( $this->segments[ $k ] );
 
@@ -687,7 +687,7 @@ HD;
         try {
             $results = $db->fetch_array( $query );
         } catch ( PDOException $e ) {
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
             throw $e;
         }
 

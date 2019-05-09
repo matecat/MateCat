@@ -428,9 +428,9 @@ class QA {
 //        try {
 //            throw new Exception('');
 //        } catch( Exception $e ){
-//            Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+//            Log::doJsonLog( $errCode . " :: " . $this->_errorMap[$errCode]);
 //            $trace = $e->getTrace();
-//            Log::doLog( $trace[1] );
+//            Log::doJsonLog( $trace[1] );
 //        }
 
         switch ( $errCode ) {
@@ -762,8 +762,8 @@ class QA {
         preg_match_all( self::$regexpAscii, $source_seg, $matches_src );
         preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
 
-//        Log::doLog($source_seg);
-//        Log::doLog($target_seg);
+//        Log::doJsonLog($source_seg);
+//        Log::doJsonLog($target_seg);
 
         if ( !empty( $matches_src[ 1 ] ) ) {
             $test_src = $source_seg;
@@ -839,9 +839,9 @@ class QA {
             $target_seg = $test_trg;
         }
 
-//        Log::doLog($_POST);
-//        Log::doLog($source_seg);
-//        Log::doLog($target_seg);
+//        Log::doJsonLog($_POST);
+//        Log::doJsonLog($source_seg);
+//        Log::doJsonLog($target_seg);
 //        Log::hexDump($source_seg);
 //        Log::hexDump($target_seg);
 
@@ -1070,13 +1070,13 @@ class QA {
 
                 //set depth and increment for next occurrence
                 $srcDomElements[ 'DOMText' ][ $depth++ ] = $plainRef;
-                //Log::doLog( "Found DOMText in Source " . var_export($plainRef,TRUE) );
+                //Log::doJsonLog( "Found DOMText in Source " . var_export($plainRef,TRUE) );
             }
 
             $srcDomElements[ 'elemCount' ]++;
 
         }
-        //Log::doLog($srcDomElements);
+        //Log::doJsonLog($srcDomElements);
     }
 
     /**
@@ -1117,8 +1117,8 @@ class QA {
             }
 
 
-//            Log::doLog($xmlString);
-//            Log::doLog($errorList);
+//            Log::doJsonLog($xmlString);
+//            Log::doJsonLog($errorList);
 
             $this->_addError( $targetErrorType );
         }
@@ -1145,23 +1145,23 @@ class QA {
      */
     protected function _getTagDiff() {
 
-//        Log::doLog( $this->source_seg );
-//        Log::doLog( $this->target_seg );
+//        Log::doJsonLog( $this->source_seg );
+//        Log::doJsonLog( $this->target_seg );
 
         preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
         preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
-//        Log::doLog( $malformedXmlSrcStruct );
-//        Log::doLog( $malformedXmlTrgStruct );
+//        Log::doJsonLog( $malformedXmlSrcStruct );
+//        Log::doJsonLog( $malformedXmlTrgStruct );
 
         //this is for </g>
         preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
         $_closingSrcTag = $matches[ 1 ];
-//        Log::doLog(  $matches );
+//        Log::doJsonLog(  $matches );
         preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
-//        Log::doLog(  $matches );
+//        Log::doJsonLog(  $matches );
         $_closingTrgTag = $matches[ 1 ];
 
         $clonedSrc = $malformedXmlSrcStruct;
@@ -1205,7 +1205,7 @@ class QA {
         }
 
 
-//        Log::doLog($totalResult);
+//        Log::doJsonLog($totalResult);
 
         $this->malformedXmlStructDiff = $totalResult;
 
@@ -1292,8 +1292,8 @@ class QA {
      */
     protected function _checkTagPositions() {
 
-//        Log::doLog( $this->source_seg );
-//        Log::doLog( $this->target_seg );
+//        Log::doJsonLog( $this->source_seg );
+//        Log::doJsonLog( $this->target_seg );
 
         preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->source_seg, $matches );
         $complete_malformedSrcStruct   = $matches[ 1 ];
@@ -1305,13 +1305,13 @@ class QA {
         $open_malformedXmlTrgStruct    = $matches[ 2 ];
         $closing_malformedXmlTrgStruct = $matches[ 3 ];
 
-//        Log::doLog($complete_malformedSrcStruct);
-//        Log::doLog($open_malformedXmlSrcStruct);
-//        Log::doLog($closing_malformedXmlSrcStruct);
+//        Log::doJsonLog($complete_malformedSrcStruct);
+//        Log::doJsonLog($open_malformedXmlSrcStruct);
+//        Log::doJsonLog($closing_malformedXmlSrcStruct);
 //
-//        Log::doLog($complete_malformedTrgStruct);
-//        Log::doLog($open_malformedXmlTrgStruct);
-//        Log::doLog($closing_malformedXmlTrgStruct);
+//        Log::doJsonLog($complete_malformedTrgStruct);
+//        Log::doJsonLog($open_malformedXmlTrgStruct);
+//        Log::doJsonLog($closing_malformedXmlTrgStruct);
 
         foreach ( $open_malformedXmlTrgStruct as $pos => $tag ) {
             if ( str_replace(" ", "", $open_malformedXmlSrcStruct[ $pos ] ) != str_replace(" ", "", $tag ) ) {
@@ -1380,8 +1380,8 @@ class QA {
         $target_tags = $target_tags[ 0 ];
         if ( count( $source_tags ) != count( $target_tags ) ) {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
-//            Log::doLog($source_tags);
-//            Log::doLog($target_tags);
+//            Log::doJsonLog($source_tags);
+//            Log::doJsonLog($target_tags);
 //            Log::hexDump($this->source_seg);
 //            Log::hexDump($this->target_seg);
             for ( $i = 0; $i < $num; $i++ ) {
@@ -1399,12 +1399,12 @@ class QA {
         if ( ( count( $source_tags ) != count( $target_tags ) ) ) {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
-//            Log::doLog($this->source_seg);
-//            Log::doLog($this->target_seg);
+//            Log::doJsonLog($this->source_seg);
+//            Log::doJsonLog($this->target_seg);
 //            Log::hexDump($this->source_seg);
 //            Log::hexDump($this->target_seg);
-//            Log::doLog($source_tags);
-//            Log::doLog($target_tags);
+//            Log::doJsonLog($source_tags);
+//            Log::doJsonLog($target_tags);
 
             for ( $i = 0; $i < $num; $i++ ) {
                 $this->_addError( self::ERR_BOUNDARY_TAIL );
@@ -1420,12 +1420,12 @@ class QA {
         if ( ( count( $source_tags ) != count( $target_tags ) ) ) {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
-//            Log::doLog($this->source_seg);
-//            Log::doLog($this->target_seg);
+//            Log::doJsonLog($this->source_seg);
+//            Log::doJsonLog($this->target_seg);
 //            Log::hexDump($this->source_seg);
 //            Log::hexDump($this->target_seg);
-//            Log::doLog($source_tags);
-//            Log::doLog($target_tags);
+//            Log::doJsonLog($source_tags);
+//            Log::doJsonLog($target_tags);
 
             for ( $i = 0; $i < $num; $i++ ) {
                 $this->_addError( self::ERR_BOUNDARY_HEAD );
@@ -1475,7 +1475,7 @@ class QA {
         try {
             $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
-            Log::doLog( "tryRealignTagID: " . $ex->getMessage() );
+            Log::doJsonLog( "tryRealignTagID: " . $ex->getMessage() );
 
             return $this->getErrors();
         }
@@ -1538,9 +1538,9 @@ class QA {
                     return; //ALL RIGHT
                 }
 
-//                Log::doLog($result);
-//                Log::doLog($pattern);
-//                Log::doLog($replacement);
+//                Log::doJsonLog($result);
+//                Log::doJsonLog($pattern);
+//                Log::doJsonLog($replacement);
 
             }
 
@@ -1572,7 +1572,7 @@ class QA {
             $diffArray = array_diff_assoc( $this->srcDomMap[ 'refID' ], $this->trgDomMap[ 'refID' ] );
             if ( !empty( $diffArray ) && !empty( $this->trgDomMap[ 'DOMElement' ] ) ) {
                 $this->_addError( self::ERR_TAG_ID );
-//            Log::doLog($diffArray);
+//            Log::doJsonLog($diffArray);
             }
         }
 
@@ -1696,7 +1696,7 @@ class QA {
 //                 */
 //                $Node = $element;
 //
-//                Log::doLog( 'Found: ' . $availableParentList->item($i)->textContent );
+//                Log::doJsonLog( 'Found: ' . $availableParentList->item($i)->textContent );
 //            }
 //        }
 
@@ -1740,8 +1740,8 @@ class QA {
         $_srcNodeContent = $srcNodeContent;
         $_trgNodeContent = $trgNodeContent; //not Used
 
-//                Log::doLog($srcNodeContent);
-//                Log::doLog($trgNodeContent);
+//                Log::doJsonLog($srcNodeContent);
+//                Log::doJsonLog($trgNodeContent);
 
 
         $srcHasHeadNBSP = $this->_hasHeadNBSP( $srcNodeContent );
@@ -1828,10 +1828,10 @@ class QA {
 //        //add another check for nested tag with ending spaces
 //        $trailingSrcChar = mb_substr($srcNodeContent, $srcLen - 2, 2, 'utf-8');
 //        $trailingTrgChar = mb_substr($trgNodeContent, $trgLen - 2, 2, 'utf-8');
-//        Log::doLog('"'.$srcNodeContent.'"');
-//        Log::doLog('"'.$trgNodeContent.'"');
-//        Log::doLog('"'.$trailingSrcChar.'"');
-//        Log::doLog('"'.$trailingTrgChar.'"');
+//        Log::doJsonLog('"'.$srcNodeContent.'"');
+//        Log::doJsonLog('"'.$trgNodeContent.'"');
+//        Log::doJsonLog('"'.$trailingSrcChar.'"');
+//        Log::doJsonLog('"'.$trailingTrgChar.'"');
 //        if ( ( $trailingSrcChar == "  " || $trailingTrgChar == "  " ) && $trailingSrcChar != $trailingTrgChar) {
 //            $this->_addError(self::ERR_WS_TAIL);
 //        }
@@ -1912,8 +1912,8 @@ class QA {
 //            try {
 //                throw new Exception();
 //            } catch ( Exception $e ){
-//                Log::doLog( "\n" . $this->trgDom->saveXML() );
-//                Log::doLog( $e->getTraceAsString() . "\n\n");
+//                Log::doJsonLog( "\n" . $this->trgDom->saveXML() );
+//                Log::doJsonLog( $e->getTraceAsString() . "\n\n");
 //            }
 
             /**

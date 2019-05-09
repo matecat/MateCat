@@ -339,8 +339,8 @@ var SegmentActions = {
             });
     },
 
-    deleteGlossaryItem: function ( source, target ) {
-        return API.SEGMENT.deleteGlossaryItem(source, target)
+    deleteGlossaryItem: function ( source, target, id ) {
+        return API.SEGMENT.deleteGlossaryItem(source, target, id)
             .fail(function (  ) {
                 UI.failedConnection( 0, 'deleteGlossaryItem' );
             });

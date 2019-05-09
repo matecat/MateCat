@@ -77,12 +77,12 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
             $minJobMaxJob = $stmt->fetch();
 
             $minJob       = (int)$minJobMaxJob[ 'min' ];
-            Log::doLog( "Parsing Jobs starting from $minJob." );
+            Log::doJsonLog( "Parsing Jobs starting from $minJob." );
             echo "Parsing Jobs starting from $minJob.\n";
 
             if( $maxJobToProcess !== false && $minJob < (int)$maxJobToProcess ){ // exclude old files if they exists
                 $maxJob       = (int)$maxJobToProcess;
-                Log::doLog( "Parsing Jobs until $maxJob reached." );
+                Log::doJsonLog( "Parsing Jobs until $maxJob reached." );
                 echo "Parsing Jobs until $maxJob reached.\n";
                 //review configs
                 sleep( 5 );
@@ -117,7 +117,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                     $_target               = $job[ 'target' ];
                     $_mt_engine_class_name = $job[ 'class_load' ];
 
-                    Log::doLog( "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments" );
+                    Log::doJsonLog( "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments" );
                     echo "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments\n";
 
                     $job_stats = [
@@ -152,7 +152,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         if ( $firstSeg > $_job_last_segment ) {
                             $firstSeg = $_job_last_segment;
                         }
-                        Log::doLog( "starting from segment $firstSeg" );
+                        Log::doJsonLog( "starting from segment $firstSeg" );
                         echo "starting from segment $firstSeg\n";
 
                         $stmt = $db->getConnection()->prepare( self::$querySegments . self::NR_OF_SEGS );
@@ -209,7 +209,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         $time_to_edit_job    = $job_stats[ $fuzzy_band ][ 'time_to_edit_job' ];
                         $raw_wc_job          = $job_stats[ $fuzzy_band ][ 'raw_wc_job' ];
 
-                        Log::doLog( "job pee[".$fuzzy_band."]: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB" );
+                        Log::doJsonLog( "job pee[".$fuzzy_band."]: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB" );
                         echo "job pee[".$fuzzy_band."]: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB\n";
 
                         $jobStatsObj                          = new PeeJobStatsStruct();
@@ -226,7 +226,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
 
                     }
 
-                    Log::doLog( "done" );
+                    Log::doJsonLog( "done" );
                     echo "done.\n";
 
                     if ( !file_put_contents( self::$last_job_file_name, $_jid ) ) {
@@ -247,10 +247,10 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                 }
             }
 
-            Log::doLog( "took " . ( time() - $start ) / 60 . " minutes" );
+            Log::doJsonLog( "took " . ( time() - $start ) / 60 . " minutes" );
             echo "took " . ( time() - $start ) / 60 . " minutes\n";
 
-            Log::doLog( "Everything completed. I can die." );
+            Log::doJsonLog( "Everything completed. I can die." );
             echo "Everything completed. I can die.\n";
 
             //for the moment, this daemon is single-loop-execution

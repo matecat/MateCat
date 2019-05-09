@@ -45,7 +45,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         " ORDER BY translation_date DESC " .
         " LIMIT 1 " ;
 
-      Log::doLog( $query );
+      Log::doJsonLog( $query );
 
       $stmt = $conn->prepare( $query );
 
@@ -202,7 +202,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         try {
             $affectedRows = $db->update( 'segment_translations', $data, $where );
         } catch ( PDOException $e ) {
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
 
             return $e->getCode() * -1;
         }

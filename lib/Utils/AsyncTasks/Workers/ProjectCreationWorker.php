@@ -50,7 +50,7 @@ class ProjectCreationWorker extends AbstractWorker {
             throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
 
         } elseif ( isset( $queueElement->reQueueNum ) ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
+//            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
         }
 
     }

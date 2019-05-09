@@ -118,8 +118,8 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
         $this->data_key_content = $__getInput[ $this->dataKeyName ];
 
-        Log::doLog( $_GET );
-        Log::doLog( $_SERVER['QUERY_STRING'] );
+        Log::doJsonLog( $_GET );
+        Log::doJsonLog( $_SERVER['QUERY_STRING'] );
 
 	}
 

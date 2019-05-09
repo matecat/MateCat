@@ -7,10 +7,13 @@ use API\V2\Exceptions\AuthenticationError;
 use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
+use AbstractControllers\TimeLogger;
 use FeatureSet;
 use Users_UserDao;
 
 abstract class KleinController implements IController {
+
+    use TimeLogger;
 
     /**
      * @var \Klein\Request
@@ -93,6 +96,10 @@ abstract class KleinController implements IController {
     }
 
     public function __construct( $request, $response, $service, $app ) {
+
+        $this->startTimer();
+        $this->timingLogFileName  = 'api_calls_time.log';
+
         $this->request  = $request;
         $this->response = $response;
         $this->service  = $service;
@@ -117,7 +124,6 @@ abstract class KleinController implements IController {
     }
 
     public function respond( $method ) {
-        $start = microtime(true) ;
 
         $this->performValidations();
 
@@ -125,9 +131,7 @@ abstract class KleinController implements IController {
             $this->$method();
         }
 
-        $end = microtime(true) ;
-
-        $this->_logWithTime( $end - $start ) ;
+        $this->_logWithTime() ;
 
     }
 
@@ -176,7 +180,7 @@ abstract class KleinController implements IController {
             $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ;
         }
 
-        if( empty( $this->user ) ){
+        if( !empty( $this->user ) ){
             $this->userIsLogged = true;
         }
 
@@ -247,18 +251,16 @@ abstract class KleinController implements IController {
 
     protected function afterConstruct() {}
 
-    protected function _logWithTime( $time ) {
-        $previous_filename = \Log::$fileName ;
-        \Log::$fileName = 'API.log' ;
+    protected function _logWithTime() {
 
-        $log_string = " " . $this->request->method() . " " . $this->request->pathname() . " " . round( $time, 4 ) ;
+        $log_object = [ "method" => $this->request->method(), "pathname" => $this->request->pathname() ];
 
         if ( $this->api_key ) {
-            $log_string .= " key:" . $this->api_key ;
+            $log_object[ "key" ] = $this->api_key;
         }
 
-        \Log::doLog( $log_string . " " . json_encode( $this->params ) );
-        \Log::$fileName = $previous_filename ;
+        $this->logPageCall();
+
     }
 
 }

@@ -109,14 +109,12 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                     " AND id_job = $obj->id_job " .
                     " AND resolve_date IS NULL ";
 
-            Log::doLog( $update );
-
             $this->con->query( $update );
 
             $this->con->commit();
         } catch ( Exception $e ) {
             $err = $this->con->get_error();
-            Log::doLog( "Error: " . var_export( $err, true ) );
+            Log::doJsonLog( "Error: " . var_export( $err, true ) );
             $this->con->rollback();
         }
 
@@ -138,8 +136,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         if ( $input->uid ) {
             $query .= " AND uid <> $obj->uid ";
         }
-
-        Log::doLog( $query );
 
         $this->con->query( $query );
 

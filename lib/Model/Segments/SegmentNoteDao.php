@@ -36,7 +36,7 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
         }
 
         $chunked = array_chunk( $insert_values, $chunk_size ) ;
-        Log::doLog( "Notes: Total Rows to insert: " . count( $chunked ) );
+        Log::doJsonLog(  "Notes: Total Rows to insert: " . count( $chunked )  );
 
         $conn = Database::obtain()->getConnection();
 
@@ -47,16 +47,16 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
                 $stmt = $conn->prepare( $template . implode( ', ', $values_sql_array )) ;
                 $flattened_values = array_reduce( $chunk, 'array_merge', array() );
                 $stmt->execute( $flattened_values ) ;
-                Log::doLog( "Notes: Executed Query " . ( $i + 1 ) );
+                Log::doJsonLog(  "Notes: Executed Query " . ( $i + 1 )  );
             }
 
         } catch ( Exception $e ){
-            Log::doLog( "Notes import - DB Error: " . $e->getMessage() . " - \n" );
+            Log::doJsonLog(  "Notes import - DB Error: " . $e->getMessage() );
             /** @noinspection PhpUndefinedVariableInspection */
-            Log::doLog( "Notes import - Statement: " . $stmt->queryString . "\n" );
-            Log::doLog( "Notes Chunk Dump: " . var_export( $chunk , true ) . "\n" );
+            Log::doJsonLog(  "Notes import - Statement: " . $stmt->queryString );
+            Log::doJsonLog(  "Notes Chunk Dump: " . var_export( $chunk , true ) );
             /** @noinspection PhpUndefinedVariableInspection */
-            Log::doLog( "Notes Flattened Values Dump: " . var_export( $flattened_values , true ) . "\n" );
+            Log::doJsonLog(  "Notes Flattened Values Dump: " . var_export( $flattened_values , true ) );
             throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0 , $e );
         }
 
