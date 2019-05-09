@@ -187,7 +187,7 @@ class downloadFileController extends downloadController {
 
                 //run parsing
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation();
+                $xsp->replaceTranslation( $this->featureSet );
 
                 //free memory
                 unset( $xsp );
