@@ -2,6 +2,23 @@
 	Component: ui.tags
  */
 $.extend(UI, {
+    noTagsInSegment: function(options) {
+        var editarea = options.area;
+        var starting = options.starting;
+
+        if (starting) return false;
+
+        try{
+            if ( $(editarea).html().match(/\&lt;.*?\&gt;/gi) ) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch(e){
+            return true;
+        }
+
+    },
 	tagCompare: function(sourceTags, targetTags, prova) {
 
 		var mismatch = false;
@@ -503,7 +520,20 @@ $.extend(UI, {
     hasSourceOrTargetTags: function ( segment ) {
         return ((UI.sourceTags && UI.sourceTags.length > 0 || $(segment).find( '.locked' ).length > 0 ) )
     },
+    hasMissingTargetTags: function ( segment ) {
+        if ( segment.length == 0 ) return ;
+        var regExp = this.getXliffRegExpression();
+        var sourceTags = $( '.source', segment ).html()
+            .match( regExp );
+        if ( $(sourceTags).length === 0 ) {
+            return false;
+        }
+        var targetTags = $( '.targetarea', segment ).html()
+            .match( regExp );
 
+        return $(sourceTags).length > $(targetTags).length || !_.isEqual(sourceTags.sort(), targetTags.sort());
+
+    },
     /**
      * Add at the end of the target the missing tags
      */
