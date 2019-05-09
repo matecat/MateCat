@@ -21,6 +21,7 @@ class Editarea extends React.Component {
         this.onKeyDownEvent = this.onKeyDownEvent.bind(this);
         this.onKeyPressEvent = this.onKeyPressEvent.bind(this);
         this.onPasteEvent = this.onPasteEvent.bind(this);
+        this.keyPressed = false;
     }
 
     allowHTML(string) {
@@ -113,11 +114,14 @@ class Editarea extends React.Component {
     }
 
     onInputEvent(e) {
-        UI.inputEditAreaEventHandler.call(this.editAreaRef, e);
-        this.checkEmptyText();
-        this.emitTrackChanges();
+        if (!this.keyPressed) {
+            UI.inputEditAreaEventHandler.call(this.editAreaRef, e);
+            this.checkEmptyText();
+            this.emitTrackChanges();
+        }
     }
     onKeyDownEvent(e) {
+        this.keyPressed = true;
     	//on textarea the event of ctrz+z have a preventDefault.
 		//We added this lines for fix the bug
 		//TODO:delete preventDefault on ui.events.js
@@ -131,6 +135,7 @@ class Editarea extends React.Component {
 		this.emitTrackChanges();
     }
     onKeyUpEvent(e) {
+        this.keyPressed = false;
         this.checkEditToolbar();
     }
     onCopyText(e) {
@@ -234,7 +239,7 @@ class Editarea extends React.Component {
                     onKeyPress={this.onKeyPressEvent}
                     onKeyUp={this.onKeyUpEvent.bind(this)}
                     onCopy={this.onCopyText.bind(this)}
-                    onInput={this.onInputEvent}
+                    onInput={_.debounce(this.onInputEvent, 500)}
                     onPaste={this.onPasteEvent}
                     ref={(ref) => this.editAreaRef = ref}
                     tabIndex="-1"
