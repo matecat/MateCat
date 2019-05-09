@@ -82,14 +82,14 @@
         if ( highlight ) { 
             scrollPromise.done( function() {
                 SegmentActions.highlightEditarea(segment.find(".editarea").data("sid"));
-                if (LXQ.enabled) LXQ.redoHighlighting(segment.find(".editarea").data("sid"), true);
-                if (LXQ.enabled) LXQ.redoHighlighting(segment.find(".editarea").data("sid"), false);
+                if (LXQ.enabled()) LXQ.redoHighlighting(segment.find(".editarea").data("sid"), true);
+                if (LXQ.enabled()) LXQ.redoHighlighting(segment.find(".editarea").data("sid"), false);
             }); 
         }
         else {
             scrollPromise.done( function() {
-                if (LXQ.enabled) LXQ.redoHighlighting(segment.find(".editarea").data("sid"), true);
-                if (LXQ.enabled) LXQ.redoHighlighting(segment.find(".editarea").data("sid"), false);
+                if (LXQ.enabled()) LXQ.redoHighlighting(segment.find(".editarea").data("sid"), true);
+                if (LXQ.enabled()) LXQ.redoHighlighting(segment.find(".editarea").data("sid"), false);
             }); 
         }
         return scrollPromise ; 
