@@ -39,7 +39,6 @@ class manageController extends viewController {
     public function setTemplateVars() {
 
         $this->template->outsource_service_login = $this->_outsource_login_API;
-
         $this->decorator = new ManageDecorator( $this, $this->template );
         $this->decorator->decorate();
 

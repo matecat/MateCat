@@ -1244,11 +1244,12 @@ UI = {
 	},
     retrieveStatistics: function () {
         var path = sprintf(
-            '/api/v1/jobs/%s/%s/stats',
+            APP.getRandomUrl() + 'api/v1/jobs/%s/%s/stats',
             config.id_job, config.password
         );
         $.ajax({
             url: path,
+            xhrFields: { withCredentials: true },
             type: 'get',
         }).done( function( data ) {
             if (data.stats){

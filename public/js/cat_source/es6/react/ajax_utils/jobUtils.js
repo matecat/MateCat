@@ -79,7 +79,8 @@ API.JOB = {
             async: true,
             data: data,
             type: "POST",
-            url : "/api/v2/jobs/" + job.id +"/" + job.password + "/translator"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/jobs/" + job.id +"/" + job.password + "/translator"
         });
     },
 

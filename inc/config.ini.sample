@@ -112,3 +112,5 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 ; @see http://www.lexiqa.net
 LXQ_LICENSE = false
 LXQ_PARTNERID = false
+
+ENABLE_MULTI_DOMAIN_API = 'no'

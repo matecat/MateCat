@@ -90,7 +90,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         deleteTranslationIssue : function( context ) {
             var parsed = JSON.parse( context );
             var issue_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
+                APP.getRandomUrl() + 'api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
                 config.id_job, config.review_password,
                 parseInt(parsed.id_segment),
                 parsed.id_issue
@@ -99,7 +99,8 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             var fid = UI.getSegmentFileId(UI.getSegmentById(parsed.id_segment));
             $.ajax({
                 url: issue_path,
-                type: 'DELETE'
+                type: 'DELETE',
+                xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 UI.deleteSegmentIssues(fid, parsed.id_segment, issue_id);
                 UI.reloadQualityReport();

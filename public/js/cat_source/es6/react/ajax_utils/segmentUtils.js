@@ -32,36 +32,40 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=setTranslation"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=setTranslation"
         });
     },
 
     getSegmentsIssues: function ( idSegment ) {
-        var path  = sprintf('/api/v2/jobs/%s/%s/translation-issues',
+        var path  = sprintf(APP.getRandomUrl() + 'api/v2/jobs/%s/%s/translation-issues',
             config.id_job, config.password, idSegment);
         return $.ajax({
             type: "get",
+            xhrFields: { withCredentials: true },
             url : path
         });
     },
 
     getSegmentVersionsIssues: function (idSegment) {
 
-        var path  = sprintf("/api/v2/jobs/%s/%s/revise/segments/%s/translation-versions",
+        var path  = sprintf(APP.getRandomUrl() + "api/v2/jobs/%s/%s/revise/segments/%s/translation-versions",
             config.id_job, config.password, idSegment);
         return $.ajax({
             type: "get",
+            xhrFields: { withCredentials: true },
             url : path
         });
     },
 
     sendSegmentVersionIssue: function (idSegment, data) {
 
-        var path = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
+        var path = sprintf(APP.getRandomUrl() + 'api/v2/jobs/%s/%s/segments/%s/translation-issues',
             config.id_job, config.password, idSegment);
         return $.ajax({
             data: data,
             type: "POST",
+            xhrFields: { withCredentials: true },
             url : path
         });
     },
@@ -69,7 +73,7 @@ API.SEGMENT = {
     sendSegmentVersionIssueComment: function (idSegment, idIssue, data) {
 
         var replies_path = sprintf(
-            '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
+            APP.getRandomUrl() + 'api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/comments',
             config.id_job, config.password,
             idSegment,
             idIssue
@@ -78,6 +82,7 @@ API.SEGMENT = {
         return $.ajax({
             url: replies_path,
             type: 'POST',
+            xhrFields: { withCredentials: true },
             data : data
         })
     },
@@ -94,7 +99,8 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=glossary"
         });
     },
 
@@ -111,7 +117,8 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=glossary"
         });
     },
 
@@ -127,7 +134,8 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=glossary"
         });
     },
 
@@ -143,7 +151,8 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=glossary"
         });
     },
 
@@ -163,7 +172,8 @@ API.SEGMENT = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=glossary"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=glossary"
         });
     },
     approveSegments: function ( segments ) {
@@ -176,7 +186,8 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url : "/api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
         });
     },
     translateSegments: function ( segments ) {
@@ -189,7 +200,8 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url : "/api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/jobs/" + config.id_job + "/"+ config.password + "/segments/status"
         });
     },
 
@@ -210,7 +222,8 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url : "/?action=getContribution"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=getContribution"
         });
     },
 
@@ -247,7 +260,8 @@ API.SEGMENT = {
             async: true,
             data: data,
             type: "post",
-            url: "/?action=getContribution"
+            xhrFields: { withCredentials: true },
+            url: APP.getRandomUrl() + "?action=getContribution"
         });
     }
 
