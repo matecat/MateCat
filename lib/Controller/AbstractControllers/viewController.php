@@ -3,9 +3,6 @@
  * Created by PhpStorm.
  */
 
-use AbstractControllers\IController;
-use Utils;
-
 
 /**
  * Abstract class for all html views
@@ -60,11 +57,11 @@ abstract class viewController extends controller {
 
         $this->startTimer();
 
-	    if( !Bootstrap::areMandatoryKeysPresent() ) {
-	        $controllerInstance = new CustomPage();
-	        $controllerInstance->setTemplate( "badConfiguration.html" );
-	        $controllerInstance->setCode( 503 );
-	        $controllerInstance->doAction();
+        if ( !Bootstrap::areMandatoryKeysPresent() ) {
+            $controllerInstance = new CustomPage();
+            $controllerInstance->setTemplate( "badConfiguration.html" );
+            $controllerInstance->setCode( 503 );
+            $controllerInstance->doAction();
             die(); // do not complete klein response, set 404 header in render404 instead of 200
         }
 
