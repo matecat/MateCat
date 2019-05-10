@@ -26,14 +26,16 @@ API.OUTSOURCE = {
         return $.ajax({
             data: data,
             type: "POST",
-            url : "/?action=outsourceTo"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=outsourceTo"
         });
     },
 
     fetchChangeRates( ) {
         return $.ajax({
             type: "POST",
-            url : "/?action=fetchChangeRates"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=fetchChangeRates"
         });
 
     },
