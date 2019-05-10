@@ -287,7 +287,7 @@ $.extend( UI, {
         SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
         UI.currentSegment.data('modified', true);
         UI.currentSegment.trigger('modified');
-        UI.updateSegmentTranslation();
+        //UI.updateSegmentTranslation();
         UI.registerQACheck();
     },
     updateSegmentTranslationFn: function() {
