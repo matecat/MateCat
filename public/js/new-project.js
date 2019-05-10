@@ -564,7 +564,7 @@ $.extend(UI.UPLOAD_PAGE, {
 
             APP.doRequest({
                 data: APP.getCreateProjectParams(),
-
+                url: config.basepath + '?action=createProject',  //Sometime is necessary to forcibly disable random url call!! :D
                 beforeSend: function (){
                     $('.error-message').hide();
                     $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
