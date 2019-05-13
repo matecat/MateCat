@@ -126,11 +126,12 @@ APP = {
         } );
     },
     getRandomUrl : function() {
+
         if ( config.enableMultiDomainApi ) {
             return '//' + Math.floor(Math.random() * config.ajaxDomainsNumber ) + '.ajax.' + location.host + '/';
-        } else {
-            return config.basepath;
         }
+        return config.basepath;
+
     },
     doRequest: function ( req, log ) {
 
