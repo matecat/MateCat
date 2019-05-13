@@ -481,7 +481,7 @@ class catController extends viewController {
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
         //Maybe some plugin want disable the Split from the config
-        $this->template->splitSegmentEnabled = 'false';
+        $this->template->splitSegmentEnabled = var_export(true, true);
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
