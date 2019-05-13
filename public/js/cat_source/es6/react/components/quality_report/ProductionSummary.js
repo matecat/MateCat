@@ -4,7 +4,7 @@ class ProductionSummary extends React.Component {
     getTimeToEdit() {
         let str_pad_left = function(string,pad,length) {
             return (new Array(length+1).join(pad)+string).slice(-length);
-        }
+        };
         let time = parseInt(this.props.jobInfo.get("total_time_to_edit")/1000);
         let hours = Math.floor(time / 3600);
         let minutes = Math.floor( time % 3600 / 60);
@@ -40,10 +40,10 @@ class ProductionSummary extends React.Component {
             '<a style="text-decoration: underline" href="https://www.matecat.com/support/revising-projects/quality-report-matecat/" target="_blank">Learn more</a>' +
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
-        let score = parseFloat(this.props.jobInfo.get('quality_summary').get('score'));
-        let limit = (this.props.jobInfo.get('quality_summary').get('passfail') ) ? parseInt(this.props.jobInfo.getIn(['quality_summary', 'passfail', 'options', 'limit'])):0;
-        let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
-        let reviewedWordsCount = this.props.jobInfo.get('quality_summary').get('total_reviewed_words_count') ;
+        let score = parseFloat(this.props.qualitySummary.get('score'));
+        let limit = (this.props.qualitySummary.get('passfail') ) ? parseInt(this.props.qualitySummary.getIn(['passfail', 'options', 'limit'])):0;
+        let qualityOverall = this.props.qualitySummary.get('quality_overall');
+        let reviewedWordsCount = this.props.qualitySummary.get('total_reviewed_words_count') ;
         let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") && reviewedWordsCount > 0 : null;
         let jobPassedClass = (jobPassed === null || reviewedWordsCount === 0) ? "qr-norevision" : ((jobPassed)? "qr-pass" : "qr-fail");
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
@@ -90,7 +90,7 @@ class ProductionSummary extends React.Component {
             {/*{config.project_type !== "old" ? (*/}
             {/*<div className="qr-effort qr-review-words">*/}
                 {/*<div className="qr-label" data-html={tooltipText2} ref={(tooltip) => this.tooltipRev = tooltip}>Reviewed <i className="icon-info icon" /></div>*/}
-                {/*<div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviewed_words_count')}</b></div>*/}
+                {/*<div className="qr-info"><b>{this.props.qualitySummary.get('total_reviewed_words_count')}</b></div>*/}
             {/*</div>*/}
             {/*) :null}*/}
 

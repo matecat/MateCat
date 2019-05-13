@@ -16,11 +16,20 @@ class QualityReport extends React.Component {
             segmentFiles: null,
             jobInfo: null,
             moreSegments: true,
-            revisionToShow: 'r1'
+            revisionToShow: this.getUrlParameter()
         };
         this.renderSegmentsFiles = this.renderSegmentsFiles.bind(this);
         this.renderJobInfo = this.renderJobInfo.bind(this);
         this.noMoreSegments = this.noMoreSegments.bind(this);
+    }
+    getUrlParameter() {
+        let url = new URL(window.location.href);
+        let revType = url.searchParams.get('revision_type');
+        return (revType) ? revType : '1'
+    }
+
+    updateUrlParameter( revisionType ) {
+        history.pushState(null, '', '?revision_type=' + revisionType);
     }
 
     renderSegmentsFiles(files) {
@@ -46,6 +55,7 @@ class QualityReport extends React.Component {
             $(this.reviewDropdown).dropdown({
                 onChange: function(value, text, $selectedItem) {
                     if (value && value !== "") {
+                        self.updateUrlParameter(value);
                         self.setState({
                             revisionToShow: value
                         });
@@ -89,6 +99,10 @@ class QualityReport extends React.Component {
             left: 0,
             zIndex: 3
         };
+        let quality_summary;
+        if ( this.state.jobInfo ) {
+            quality_summary = (this.state.revisionToShow === '1') ? 'quality_summary' : 'quality_summary_2';
+        }
         return <div className="qr-container">
                 <div className="qr-container-inside">
                     <div className="qr-job-summary-container">
@@ -97,20 +111,28 @@ class QualityReport extends React.Component {
                             <div className="qr-job-summary">
                                 <div className="qr-header">
                                     <h3>QR Job Summary</h3>
+                                    { this.state.jobInfo.has('quality_summary_2') ? (
                                     <div className="qr-filter-list">
                                         <div className="filter-dropdown right-10">
                                             <div className={"filter-reviewType active"}>
                                                 <div className="ui top left pointing dropdown basic tiny button right-0" style={{marginBottom: '12px'}} ref={(dropdown)=>this.reviewDropdown=dropdown}>
-                                                    <div className="text">
-                                                        <div  className={"ui revision-color empty circular label"} />
-                                                        Revision
-                                                    </div>
-                                                    <div className="menu">
-                                                        <div className="item" data-value="r1">
+                                                    { this.state.revisionToShow === '1' ? (
+                                                        <div className="text">
                                                             <div  className={"ui revision-color empty circular label"} />
                                                             Revision
                                                         </div>
-                                                        <div className="item" data-value="r2">
+                                                    ) : (
+                                                        <div className="text">
+                                                            <div  className={"ui second-revision-color empty circular label"} />
+                                                            2nd Revision
+                                                        </div>
+                                                    )}
+                                                    <div className="menu">
+                                                        <div className="item" data-value="1">
+                                                            <div  className={"ui revision-color empty circular label"} />
+                                                            Revision
+                                                        </div>
+                                                        <div className="item" data-value="2">
                                                             <div  className={"ui second-revision-color empty circular label"} />
                                                             2nd Revision
                                                         </div>
@@ -118,12 +140,14 @@ class QualityReport extends React.Component {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> ) : null }
                                 </div>
-                                <JobSummary jobInfo={this.state.jobInfo}/>
+                                <JobSummary jobInfo={this.state.jobInfo}
+                                            qualitySummary={this.state.jobInfo.get(quality_summary)}
+                                />
                                 <SegmentsDetails files={this.state.segmentFiles}
                                                  urls={this.state.jobInfo.get('urls')}
-                                                 categories={this.state.jobInfo.get('quality_summary').get('categories')}
+                                                 categories={this.state.jobInfo.get(quality_summary).get('categories')}
                                                  moreSegments={this.state.moreSegments}
                                 />
                             </div>
