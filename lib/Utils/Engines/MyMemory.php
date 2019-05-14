@@ -9,6 +9,8 @@
  */
 class Engines_MyMemory extends Engines_AbstractEngine {
 
+    protected $content_type = 'json';
+
     protected $_config = array(
             'segment'       => null,
             'translation'   => null,
@@ -178,7 +180,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         if ( isset( $segment_file_chr[ 1 ] ) ) {
             $this->rebuildResult( $segment_file_chr[ 1 ] );
         }
-
 
         return $this->result;
 
