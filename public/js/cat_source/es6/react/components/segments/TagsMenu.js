@@ -82,14 +82,14 @@ class TagsMenu extends React.Component {
         var sourceClone = $( '.source', UI.currentSegment ).clone();
         //Remove inside-attribute for ph with equiv-text tags
         sourceClone.find('.locked.inside-attribute').remove();
-        var sourceTags = sourceClone.html()
-            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+        var sourceHtml = sourceClone.html();
+        sourceHtml = sourceHtml.replace(/<mark class="inGlossary">/g, '');
+        sourceHtml = sourceHtml.replace(/<\/mark>/g, '');
+        var sourceTags = sourceHtml.match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
         //get target tags from the segment
         var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
-        //Remove from the target the tags with mismatch
-        // targetClone.find('.locked.mismatch').remove();
 
-        var newhtml = targetClone.html();
+
         //Remove inside-attribute for ph with equiv-text tags
         targetClone.find('.locked.inside-attribute').remove();
 
