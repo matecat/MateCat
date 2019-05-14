@@ -528,6 +528,7 @@ class XliffSAXTranslationReplacer {
             if ( empty( $seg[ 'locked' ] ) ) {
                 //consistency check
                 $check = new QA ( $this->filter->fromLayer0ToLayer1( $segment ), $this->filter->fromLayer0ToLayer1( $translation ) );
+                $check->setFeatureSet( $this->featureSet );
                 $check->performTagCheckOnly();
                 if ( $check->thereAreErrors() ) {
                     $translation = '|||UNTRANSLATED_CONTENT_START|||' . $segment . '|||UNTRANSLATED_CONTENT_END|||';
