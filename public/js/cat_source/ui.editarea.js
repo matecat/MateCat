@@ -7,7 +7,8 @@ $.extend( UI, {
             e.preventDefault();
             UI.preOpenConcordance();
         }).on('keydown', '.editor .editarea', 'shift+return', function(e) {
-            UI.handleReturn(e);
+            e.preventDefault();
+            UI.handleSoftReturn(e);
         }).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if (!UI.hiddenTextEnabled) return;
             e.preventDefault();
@@ -29,8 +30,6 @@ $.extend( UI, {
         if (e.ctrlKey || e.shiftKey || e.metaKey){
             if ( code === 37 || code === 39 ) { //ctrl + left/right arrows
                 UI.saveInUndoStack('arrow');
-            } else if (code === 13 ){
-                UI.handleReturn(e);
             }
             return;
         }

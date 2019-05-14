@@ -491,6 +491,18 @@ UI = {
         this.unnestMarkers();
     },
 
+    handleSoftReturn: function(e) {
+        if(!this.hiddenTextEnabled) return;
+        e.preventDefault();
+        var node = document.createElement("span");
+        var br = document.createElement("br");
+        node.setAttribute('class', 'monad softReturn ' + config.crPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.appendChild(br);
+        insertNodeAtCursor(node);
+        this.unnestMarkers();
+    },
+
     getIconClass: function (ext) {
         c = (
             (ext == 'doc') ||
