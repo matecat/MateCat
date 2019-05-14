@@ -37,6 +37,7 @@ use SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use SubFiltering\Filters\SubFilteredPhToHtml;
 use SubFiltering\Filters\TwigToPh;
 use SubFiltering\Filters\UnicodeToEntities;
+use SubFiltering\Filters\SplitPlaceholder;
 
 /**
  * Class Filter
