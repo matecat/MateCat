@@ -274,6 +274,17 @@ class INIT {
 
     public static $SKIP_SQL_CACHE = false ;
 
+    /**
+     * FileStorage Configuration
+     */
+    public static $FILE_STORAGE_METHOD = 's3';
+
+    /**
+     * S3 Configuration
+     */
+    public static $S3_AUTH_USER = 'mamma';
+    public static $S3_AUTH_PASS = 'papa';
+
     public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
