@@ -122,7 +122,6 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
         if( $this->__tms == null ){
             $this->__tms = \Engine::getInstance( $this->getJobStruct()->id_tms );
             $this->__tms->setFeatureSet( $featureSet );
-            $this->__tms->doLog = true;
         }
         return $this->__tms;
     }
@@ -137,7 +136,6 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
         if( $this->__mt_engine == null ){
             $this->__mt_engine = \Engine::getInstance( $this->getJobStruct()->id_mt_engine );
             $this->__mt_engine->setFeatureSet( $featureSet );
-            $this->__mt_engine->doLog = true;
         }
         return $this->__mt_engine;
     }
