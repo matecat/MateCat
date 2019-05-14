@@ -515,19 +515,22 @@ class XliffSAXTranslationReplacer {
     protected function prepareSegment( $seg, $trans_unit_translation = "" ) {
         $end_tags = "";
 
+        $channel = new SubFiltering\Filters\RemoveDangerousChars();
+        $segment = $channel->transform( $seg [ 'segment' ] );
+        $translation = $channel->transform( $seg [ 'translation' ] );
+
         //We don't need transform/sanitize from wiew to xliff because the values comes from Database
         //QA non sense for source/source check, until source can be changed. For now SKIP
         if ( is_null( $seg [ 'translation' ] ) || $seg [ 'translation' ] == '' ) {
-            $translation = $seg [ 'segment' ];
+            $translation = $segment;
         } else {
 
-            $translation = $seg [ 'translation' ];
             if ( empty( $seg[ 'locked' ] ) ) {
                 //consistency check
-                $check = new QA ( $this->filter->fromLayer0ToLayer1( $seg [ 'segment' ] ), $this->filter->fromLayer0ToLayer1( $translation ) );
+                $check = new QA ( $this->filter->fromLayer0ToLayer1( $segment ), $this->filter->fromLayer0ToLayer1( $translation ) );
                 $check->performTagCheckOnly();
                 if ( $check->thereAreErrors() ) {
-                    $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg [ 'segment' ] . '|||UNTRANSLATED_CONTENT_END|||';
+                    $translation = '|||UNTRANSLATED_CONTENT_START|||' . $segment . '|||UNTRANSLATED_CONTENT_END|||';
                     Log::doJsonLog( "tag mismatch on\n" . print_r( $seg, true ) . "\n(because of: " . print_r( $check->getErrors(), true ) . ")" );
                 }
             }

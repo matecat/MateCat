@@ -136,10 +136,6 @@ class downloadFileController extends downloadController {
 
                 $transUnits = [];
 
-                //prepare regexp for nest step
-                $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
-                $regexpAscii  = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
-
                 foreach ( $data as $i => $k ) {
                     //create a secondary indexing mechanism on segments' array; this will be useful
                     //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
@@ -148,20 +144,6 @@ class downloadFileController extends downloadController {
                     $transUnits[ $internalId ] [] = $i;
 
                     $data[ 'matecat|' . $internalId ] [] = $i;
-
-                    //remove binary chars in some xliff files
-                    $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
-                    $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
-
-                    //clean invalid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
-                    $sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
-                    $sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
-                    if ( $sanitized_src != null ) {
-                        $data[ $i ][ 'segment' ] = $sanitized_src;
-                    }
-                    if ( $sanitized_trg != null ) {
-                        $data[ $i ][ 'translation' ] = $sanitized_trg;
-                    }
 
                 }
 
