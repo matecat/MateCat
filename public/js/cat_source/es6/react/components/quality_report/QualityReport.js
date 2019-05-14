@@ -149,6 +149,7 @@ class QualityReport extends React.Component {
                                                  urls={this.state.jobInfo.get('urls')}
                                                  categories={this.state.jobInfo.get(quality_summary).get('categories')}
                                                  moreSegments={this.state.moreSegments}
+                                                 secondPassReviewEnabled={this.state.jobInfo.has('quality_summary_2')}
                                 />
                             </div>
                         ) : (

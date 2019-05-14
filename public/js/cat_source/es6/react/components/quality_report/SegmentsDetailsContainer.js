@@ -14,7 +14,7 @@ class SegmentsDetails extends React.Component {
         if ( this.props.files ) {
             this.props.files.keySeq().forEach(( key, index ) => {
                 let file = <FileDetails key={key} file={this.props.files.get(key)} urls={this.props.urls}/>
-                files.push(file)
+                files.push(file);
                 this.lastSegment = this.props.files.get(key).get('segments').last().get('sid');
             });
         }
