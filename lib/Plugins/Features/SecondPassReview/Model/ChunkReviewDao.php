@@ -18,7 +18,6 @@ class ChunkReviewDao extends \Features\ReviewExtended\Model\ChunkReviewDao {
      * @return \LQA\ChunkReviewStruct[]
      */
     public static function findSecondRevisionsChunkReviewsByChunkIds( array $chunk_ids ) {
-
         $source_page = Constants::SOURCE_PAGE_REVISION ;
 
         $sql_condition = " WHERE source_page > $source_page " ;
@@ -44,5 +43,6 @@ class ChunkReviewDao extends \Features\ReviewExtended\Model\ChunkReviewDao {
 
         return $stmt->fetchAll();
     }
+
 
 }
