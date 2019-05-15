@@ -13,6 +13,7 @@ use API\V2\Json\JobTranslator;
 use API\V2\Json\ProjectUrls;
 use CatUtils;
 use Chunks_ChunkStruct;
+use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\SecondPassReview;
@@ -118,7 +119,7 @@ class Chunk extends \API\V2\Json\Chunk {
                 list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
                         $this->revisionQualityVars( $jStruct, $project, $chunkReview );
 
-                $result = $this->populateQualitySummarySection($result, $index,
+                $result = $this->populateQualitySummarySection($result, $chunkReview->source_page,
                         $jStruct, $quality_overall, $reviseIssues, $score, $categories,
                         $total_issues_weight, $total_reviewed_words_count, $passfail );
             }
@@ -129,7 +130,7 @@ class Chunk extends \API\V2\Json\Chunk {
             list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
                     $this->legacyRevisionQualityVars( $jStruct, $featureSet, $jobStats, $qualityInfoArray );
 
-            $result = $this->populateQualitySummarySection($result, 0,
+            $result = $this->populateQualitySummarySection($result, Constants::SOURCE_PAGE_REVISION,
                     $jStruct, $quality_overall, $reviseIssues, $score, $categories,
                     $total_issues_weight, $total_reviewed_words_count, $passfail );
         }
@@ -169,12 +170,15 @@ class Chunk extends \API\V2\Json\Chunk {
      *
      * @return mixed
      */
-    protected function populateQualitySummarySection( $result, $index, $jStruct, $quality_overall, $reviseIssues, $score, $categories,
+    protected function populateQualitySummarySection( $result, $source_page, $jStruct, $quality_overall, $reviseIssues, $score, $categories,
                                                          $total_issues_weight, $total_reviewed_words_count, $passfail ) {
 
-        $key = ( $index == 0 ? 'quality_summary' : 'quality_summary_' . ( $index + 1 ) );
+        if ( !isset( $result['quality_summary'] ) ) {
+            $result['quality_summary'] = [];
+        }
 
-        $result[ $key ] = [
+        $result['quality_summary'][] = [
+                'revision_number'     => SecondPassReview\Utils::sourcePageToRevisionNumber( $source_page ),
                 'equivalent_class'    => $jStruct->getQualityInfo(),
                 'quality_overall'     => $quality_overall,
                 'errors_count'        => (int)$jStruct->getErrorsCount(),
