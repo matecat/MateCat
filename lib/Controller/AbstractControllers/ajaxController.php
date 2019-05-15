@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * Date: 27/01/14
  * Time: 18.57
- * 
+ *
  */
 
 /**
@@ -18,7 +18,7 @@ abstract class ajaxController extends controller {
      *
      * @var array
      */
-    protected $result = array("errors" => array(), "data" => array());
+    protected $result = [ "errors" => [], "data" => [] ];
 
     protected $id_segment;
     protected $split_num = null;
@@ -28,22 +28,24 @@ abstract class ajaxController extends controller {
      */
     protected function __construct() {
 
+        $this->startTimer();
+
         $buffer = ob_get_contents();
         ob_get_clean();
         // ob_start("ob_gzhandler");        // compress page before sending //Not supported for json response on ajax calls
-        header('Content-Type: application/json; charset=utf-8');
+        header( 'Content-Type: application/json; charset=utf-8' );
 
 
-	    if( !Bootstrap::areMandatoryKeysPresent() ) {
-			$output = INIT::$CONFIG_VERSION_ERR_MESSAGE;
-			$this->result     = array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() );
-			$this->api_output = array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() );
-            \Log::doLog("Error: " . INIT::$CONFIG_VERSION_ERR_MESSAGE);
-			$this->finalize();
-			exit;
-		}
+        if ( !Bootstrap::areMandatoryKeysPresent() ) {
+            $output           = INIT::$CONFIG_VERSION_ERR_MESSAGE;
+            $this->result     = [ "errors" => [ [ "code" => -1000, "message" => $output ] ], "data" => [] ];
+            $this->api_output = [ "errors" => [ [ "code" => -1000, "message" => $output ] ], "data" => [] ];
+            \Log::doJsonLog( "Error: " . INIT::$CONFIG_VERSION_ERR_MESSAGE );
+            $this->finalize();
+            exit;
+        }
 
-		$this->featureSet = new FeatureSet();
+        $this->featureSet = new FeatureSet();
 
     }
 
@@ -53,11 +55,10 @@ abstract class ajaxController extends controller {
      */
     public function finalize() {
         $toJson = json_encode( $this->result );
-
-        //Log Errors
-        Utils::raiseJsonExceptionError( false );
-
         echo $toJson;
+
+        $this->logPageCall();
+
     }
 
     /**
@@ -87,7 +88,7 @@ abstract class ajaxController extends controller {
         return $featureSet->filter('filterSourcePage', $sourcePage ) ;
     }
 
-    public function parseIDSegment(){
+    public function parseIDSegment() {
         @list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
     }
 

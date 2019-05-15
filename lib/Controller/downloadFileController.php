@@ -80,7 +80,7 @@ class downloadFileController extends downloadController {
         //check for Password correctness
         if ( empty( $jobData ) ) {
             $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            Log::doLog( $msg );
+            Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
 
             return null;
@@ -127,7 +127,7 @@ class downloadFileController extends downloadController {
                 //make dir if doesn't exist
                 if ( !file_exists( dirname( $outputPath ) ) ) {
 
-                    Log::doLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) . '' );
+                    Log::doJsonLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) . '' );
                     mkdir( dirname( $outputPath ), 0775, true );
 
                 }
@@ -135,10 +135,6 @@ class downloadFileController extends downloadController {
                 $data = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
 
                 $transUnits = [];
-
-                //prepare regexp for nest step
-                $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
-                $regexpAscii  = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
 
                 foreach ( $data as $i => $k ) {
                     //create a secondary indexing mechanism on segments' array; this will be useful
@@ -148,20 +144,6 @@ class downloadFileController extends downloadController {
                     $transUnits[ $internalId ] [] = $i;
 
                     $data[ 'matecat|' . $internalId ] [] = $i;
-
-                    //remove binary chars in some xliff files
-                    $sanitized_src = preg_replace( $regexpAscii, '', $data[ $i ][ 'segment' ] );
-                    $sanitized_trg = preg_replace( $regexpAscii, '', $data[ $i ][ 'translation' ] );
-
-                    //clean invalid xml entities ( charactes with ascii < 32 and different from 0A, 0D and 09
-                    $sanitized_src = preg_replace( $regexpEntity, '', $sanitized_src );
-                    $sanitized_trg = preg_replace( $regexpEntity, '', $sanitized_trg );
-                    if ( $sanitized_src != null ) {
-                        $data[ $i ][ 'segment' ] = $sanitized_src;
-                    }
-                    if ( $sanitized_trg != null ) {
-                        $data[ $i ][ 'translation' ] = $sanitized_trg;
-                    }
 
                 }
 
@@ -186,8 +168,8 @@ class downloadFileController extends downloadController {
                 }
 
                 //run parsing
-                Log::doLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation();
+                Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
+                $xsp->replaceTranslation( $this->featureSet );
 
                 //free memory
                 unset( $xsp );
@@ -232,11 +214,11 @@ class downloadFileController extends downloadController {
 
                 if ( empty( INIT::$FILTERS_ADDRESS ) || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
                     $convertBackToOriginal = false;
-                    Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
+                    Log::doJsonLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
                 } else {
                     //TODO: dos2unix ??? why??
                     //force unix type files
-                    Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
+                    Log::doJsonLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal, true ) );
                 }
 
                 if ( $convertBackToOriginal ) {
@@ -380,7 +362,7 @@ class downloadFileController extends downloadController {
                 $msg           = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export( $e->getTraceAsString(), true );
                 $msg           .= "\n\n Request: " . var_export( $_REQUEST, true );
                 Log::$fileName = 'fatal_errors.txt';
-                Log::doLog( $msg );
+                Log::doJsonLog( $msg );
                 Utils::sendErrMailReport( $msg );
                 $this->unlockToken(
                         [
@@ -397,7 +379,7 @@ class downloadFileController extends downloadController {
         try {
             Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
         } catch ( Exception $e ) {
-            Log::doLog( 'Failed to delete dir:' . $e->getMessage() );
+            Log::doJsonLog( 'Failed to delete dir:' . $e->getMessage() );
         }
 
         $this->_saveActivity();

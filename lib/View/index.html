@@ -77,7 +77,7 @@
                 isGDriveProject : ${isGDriveProject|string:false},
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
                 translation_matches_enabled : ${translation_matches_enabled} ,
-
+                isCJK: ${isCJK},
                 /**
                  * We proose that lxq_server is in a configuration file
                  * lxq_license: {lxq_license},
@@ -101,6 +101,9 @@
                 tag_projection_languages: ${tag_projection_languages},
                 languages_array : ${languages_array},
                 segmentation_rule : '${segmentation_rule}',
+                segmentFilterEnabled: true,
+                enableMultiDomainApi: ${enableMultiDomainApi | string:false},
+                ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
                 segmentFilterEnabled: true,
                 revisionNumber : ${revisionNumber | string:null},
                 secondRevisionsCount : ${ secondRevisionsCount | string: 0}

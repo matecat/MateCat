@@ -109,7 +109,7 @@ class Session {
                     $renameFileRefSuccess = rename($originalUploadRefFile, $newUploadRefFile);
 
                     if (!$renameDirSuccess || !$renameFileRefSuccess) {
-                        Log::doLog('Error when moving cache file dir to ' . $newCacheFileDir);
+                        Log::doJsonLog('Error when moving cache file dir to ' . $newCacheFileDir);
                         $success = false;
                     }
                 }
@@ -297,7 +297,7 @@ class Session {
 
             unset( $this->session[ self::FILE_LIST ] [ $fileId ] );
 
-            Log::doLog( 'File ' . $fileId . ' removed.' );
+            Log::doJsonLog( 'File ' . $fileId . ' removed.' );
 
             $success = true;
         }
@@ -491,7 +491,7 @@ class Session {
                 throw new Exception( 'Unable to get the file URL.' );
             }
         } catch (Exception $e) {
-            \Log::doLog( $e->getMessage() );
+            \Log::doJsonLog( $e->getMessage() );
 
             return false ;
         }

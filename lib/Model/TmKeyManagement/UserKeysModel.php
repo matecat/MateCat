@@ -46,7 +46,7 @@ class UserKeysModel {
 
         } catch ( Exception $e ) {
             $keyList = array();
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
         }
 
         $reverse_lookup_user_personal_keys = array( 'pos' => array(), 'elements' => array() );

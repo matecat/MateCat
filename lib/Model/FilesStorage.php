@@ -49,7 +49,7 @@ class FilesStorage {
             $this->cacheDir = INIT::$CACHE_REPOSITORY;
         }
 
-        if( $zip ){
+        if ( $zip ) {
             $this->zipDir = $zip;
         } else {
             $this->zipDir = INIT::$ZIP_REPOSITORY;
@@ -57,9 +57,9 @@ class FilesStorage {
 
     }
 
-    public static function moveFileFromUploadSessionToQueuePath( $upload_session ){
+    public static function moveFileFromUploadSessionToQueuePath( $upload_session ) {
 
-        $destination = INIT::$QUEUE_PROJECT_REPOSITORY. DIRECTORY_SEPARATOR . $upload_session;
+        $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $upload_session;
         mkdir( $destination, 0755 );
         foreach (
                 $iterator = new \RecursiveIteratorIterator(
@@ -115,7 +115,7 @@ class FilesStorage {
         list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
 
         //compose path
-        $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR. $id . DIRECTORY_SEPARATOR . "orig";
+        $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
 
         //return file
         $filePath = $this->getSingleFileInPath( $path );
@@ -132,13 +132,13 @@ class FilesStorage {
      * Cache Handling Methods --- START
      */
 
-    public static function composeCachePath( $hash ){
+    public static function composeCachePath( $hash ) {
 
-        $cacheTree = array(
+        $cacheTree = [
                 'firstLevel'  => $hash{0} . $hash{1},
                 'secondLevel' => $hash{2} . $hash{3},
                 'thirdLevel'  => substr( $hash, 4 )
-        );
+        ];
 
         return $cacheTree;
 
@@ -171,7 +171,7 @@ class FilesStorage {
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //don't save in cache when a specified filter version is forced
-        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false &&  is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
+        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
             return true;
         }
 
@@ -198,15 +198,16 @@ class FilesStorage {
             $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $xliffPath ) . @$force_extension;
         } else {
             //move original
-            $raw_file_path = explode(DIRECTORY_SEPARATOR, $originalPath);
-            $file_name = array_pop($raw_file_path);
+            $raw_file_path = explode( DIRECTORY_SEPARATOR, $originalPath );
+            $file_name     = array_pop( $raw_file_path );
 
-            $outcome1 = copy( $originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name  );
+            $outcome1 = copy( $originalPath, $cacheDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $file_name );
 
-            if( !$outcome1 ){
+            if ( !$outcome1 ) {
                 //Original directory deleted!!!
                 //CLEAR ALL CACHE
                 Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+
                 return $outcome1;
             }
 
@@ -225,10 +226,12 @@ class FilesStorage {
             //Original directory deleted!!!
             //CLEAR ALL CACHE - FATAL
             Utils::deleteDir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang );
+
             return $outcome2;
         }
 
         unlink( $xliffPath );
+
         return true;
 
     }
@@ -241,7 +244,7 @@ class FilesStorage {
      *
      * @return bool
      */
-    public function cacheZipArchive( $hash, $zipPath ){
+    public function cacheZipArchive( $hash, $zipPath ) {
 
         $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER;
 
@@ -253,17 +256,18 @@ class FilesStorage {
         //create cache dir structure
         $created = mkdir( $thisZipDir, 0755, true );
 
-        if( !$created ){
+        if ( !$created ) {
             return $created;
         }
 
         //move original
         $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $zipPath ) );
 
-        if( !$outcome1 ){
+        if ( !$outcome1 ) {
             //Original directory deleted!!!
             //CLEAR ALL CACHE
             Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
+
             return $outcome1;
         }
 
@@ -276,27 +280,27 @@ class FilesStorage {
 
     }
 
-    public function linkZipToProject( $create_date, $zipHash, $projectID ){
+    public function linkZipToProject( $create_date, $zipHash, $projectID ) {
 
         $datePath = date_create( $create_date )->format( 'Ymd' );
 
         $fileName = FilesStorage::basename_fix( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
 
         //destination dir
-        $newZipDir  = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID ;
+        $newZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
 
         //check if doesn't exist
         if ( !is_dir( $newZipDir ) ) {
             //make files' directory structure
-            if( ! mkdir( $newZipDir, 0755, true ) ) {
+            if ( !mkdir( $newZipDir, 0755, true ) ) {
                 return false;
             }
         }
 
         //link original
-        $outcome1 = $this->link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) , $newZipDir . DIRECTORY_SEPARATOR . $fileName );
+        $outcome1 = $this->link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ), $newZipDir . DIRECTORY_SEPARATOR . $fileName );
 
-        if( !$outcome1 ){
+        if ( !$outcome1 ) {
             //Failed to copy the original file zip
             return $outcome1;
         }
@@ -314,40 +318,40 @@ class FilesStorage {
      *
      * @return string
      */
-    public function getOriginalZipPath( $projectDate, $projectID, $zipName ){
+    public function getOriginalZipPath( $projectDate, $projectID, $zipName ) {
 
-        $datePath = date_create( $projectDate )->format('Ymd');
-        $zipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
-
-        return $zipDir;
-
-    }
-
-    public function getOriginalZipDir( $projectDate, $projectID ){
-
-        $datePath = date_create( $projectDate )->format('Ymd');
-        $zipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
+        $datePath = date_create( $projectDate )->format( 'Ymd' );
+        $zipDir   = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
 
         return $zipDir;
 
     }
 
-    public function getHashesFromDir( $dirToScan ){
+    public function getOriginalZipDir( $projectDate, $projectID ) {
+
+        $datePath = date_create( $projectDate )->format( 'Ymd' );
+        $zipDir   = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
+
+        return $zipDir;
+
+    }
+
+    public function getHashesFromDir( $dirToScan ) {
 
         //fetch cache links, created by converter, from a directory
-        $linkFiles = scandir( $dirToScan );
-        $zipFilesHash = array();
-        $filesHashInfo    = array();
+        $linkFiles     = scandir( $dirToScan );
+        $zipFilesHash  = [];
+        $filesHashInfo = [];
         //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
         foreach ( $linkFiles as $k => $linkFile ) {
 
-            if( strpos( $linkFile, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ){
-                $zipFilesHash[ ] = $linkFile;
+            if ( strpos( $linkFile, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
+                $zipFilesHash[] = $linkFile;
                 unset( $linkFiles[ $k ] );
             } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
                 unset( $linkFiles[ $k ] );
             } else {
-                $filesHashInfo[ 'sha' ][] = $linkFiles[ $k ];
+                $filesHashInfo[ 'sha' ][]                        = $linkFiles[ $k ];
                 $filesHashInfo[ 'fileName' ][ $linkFiles[ $k ] ] = file(
                         $dirToScan . DIRECTORY_SEPARATOR . $linkFiles[ $k ],
                         FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
@@ -356,10 +360,10 @@ class FilesStorage {
 
         }
 
-        return array(
+        return [
                 'conversionHashes' => $filesHashInfo,
                 'zipHashes'        => $zipFilesHash
-        );
+        ];
 
     }
 
@@ -374,6 +378,7 @@ class FilesStorage {
     public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $lang, $uid, $realFileName ) {
         //get upload dir
         $dir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
+
         //create a file in it, which is called as the hash that indicates the location of the cache for storage
         return $this->_linkToCache( $dir, $hash, $lang, $realFileName );
     }
@@ -389,6 +394,7 @@ class FilesStorage {
     public function linkSessionToCacheForOriginalFiles( $hash, $lang, $uid, $realFileName ) {
         //get upload dir
         $dir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
+
         //create a file in it, which is called as the hash that indicates the location of the cache for storage
         return $this->_linkToCache( $dir, $hash, $lang, $realFileName );
     }
@@ -401,15 +407,15 @@ class FilesStorage {
      *
      * @return int
      */
-    protected function _linkToCache( $dir, $hash, $lang, $realFileName ){
-        return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, $realFileName . "\n" , FILE_APPEND | LOCK_EX );
+    protected function _linkToCache( $dir, $hash, $lang, $realFileName ) {
+        return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, $realFileName . "\n", FILE_APPEND | LOCK_EX );
     }
 
     /*
      * Cache Handling Methods --- END
      */
 
-    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ){
+    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ) {
         @list( $shasum, $srcLang ) = explode( "|", $linkFile );
 
         $iterator = new DirectoryIterator( $uploadDirPath );
@@ -425,7 +431,8 @@ class FilesStorage {
                     stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
 
                 unlink( $fileInfo->getPathname() );
-                Log::doLog( "Deleted Hash " . $fileInfo->getPathname() );
+                Log::doJsonLog( "Deleted Hash " . $fileInfo->getPathname() );
+
             }
         }
 
@@ -440,8 +447,8 @@ class FilesStorage {
         $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
 
-        \Log::doLog( $fileDir ); 
-        \Log::doLog( $cacheDir ); 
+        \Log::doJsonLog( $fileDir );
+        \Log::doJsonLog( $cacheDir );
 
         $res = true;
         //check if doesn't exist
@@ -458,17 +465,17 @@ class FilesStorage {
         //make links from cache to files
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //orig, suppress error because of xliff files have not original one
-        $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig" ; 
-        \Log::doLog( $origDir ); 
+        $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig";
+        \Log::doJsonLog( $origDir );
 
-        $origFilePath = $this->getSingleFileInPath( $origDir );
+        $origFilePath    = $this->getSingleFileInPath( $origDir );
         $tmpOrigFileName = $origFilePath;
-        if( is_file( $origFilePath ) ){
+        if ( is_file( $origFilePath ) ) {
 
             /*
              * Force the new filename if it is provided
              */
-            if ( !empty( $newFileName ) ){
+            if ( !empty( $newFileName ) ) {
                 $tmpOrigFileName = $newFileName;
             }
             $res &= $this->link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpOrigFileName ) );
@@ -479,29 +486,29 @@ class FilesStorage {
         /*
          * Force the new filename if it is provided
          */
-        $d = $cacheDir . DIRECTORY_SEPARATOR . "work" ; 
-        \Log::doLog( $d ); 
+        $d = $cacheDir . DIRECTORY_SEPARATOR . "work";
+        \Log::doJsonLog( $d );
         $convertedFilePath = $this->getSingleFileInPath( $d );
 
-        \Log::doLog( $convertedFilePath ); 
+        \Log::doJsonLog( $convertedFilePath );
 
         $tmpConvertedFilePath = $convertedFilePath;
-        if ( !empty( $newFileName ) ){
-            if( !DetectProprietaryXliff::isXliffExtension( FilesStorage::pathinfo_fix( $newFileName ) ) ){
-                $convertedExtension = FilesStorage::pathinfo_fix( $convertedFilePath, PATHINFO_EXTENSION );
+        if ( !empty( $newFileName ) ) {
+            if ( !DetectProprietaryXliff::isXliffExtension( FilesStorage::pathinfo_fix( $newFileName ) ) ) {
+                $convertedExtension   = FilesStorage::pathinfo_fix( $convertedFilePath, PATHINFO_EXTENSION );
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }
         }
 
-        \Log::doLog( $convertedFilePath );  // <--------- TODO: this is empty! 
+        \Log::doJsonLog( $convertedFilePath );  // <--------- TODO: this is empty!
 
-        $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath ) ; 
+        $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FilesStorage::basename_fix( $tmpConvertedFilePath );
 
-        \Log::doLog( $dest ); 
+        \Log::doJsonLog( $dest );
 
         $res &= $this->link( $convertedFilePath, $dest );
 
-        if( !$res ){
+        if ( !$res ) {
             throw new UnexpectedValueException( 'Internal Error: Failed to create/copy the file on disk from cache.', -13 );
         }
 
@@ -511,12 +518,12 @@ class FilesStorage {
 
         //check if it actually exist
         $filePath = false;
-        $files = array();
+        $files    = [];
         try {
             $files = new DirectoryIterator( $path );
         } catch ( Exception $e ) {
             //directory does not exists
-            Log::doLog( "Directory $path does not exists. If you are creating a project check the source language." );
+            Log::doJsonLog( "Directory $path does not exists. If you are creating a project check the source language." );
         }
 
         foreach ( $files as $key => $file ) {
@@ -562,7 +569,7 @@ class FilesStorage {
 
         foreach ( $results as $k => $result ) {
             //try fetching from files dir
-            $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
+            $filePath                            = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
             $results[ $k ][ 'originalFilePath' ] = $filePath;
         }
 
@@ -622,29 +629,29 @@ class FilesStorage {
      * @return bool|string
      */
     public function getTemporaryUploadedZipFile( $uploadToken ) {
-        $files  = scandir( INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
-        $zip_name = null; 
-        $zip_file = null; 
+        $files    = scandir( INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
+        $zip_name = null;
+        $zip_file = null;
 
-        foreach($files as $file) {
-            Log::doLog( $file );
-            if ( strpos( $file, FilesStorage::ORIGINAL_ZIP_PLACEHOLDER) !== false ) {
-                $zip_name = $file ;
+        foreach ( $files as $file ) {
+            Log::doJsonLog( $file );
+            if ( strpos( $file, FilesStorage::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
+                $zip_name = $file;
             }
         }
 
-        $files = scandir(INIT::$ZIP_REPOSITORY .  '/' . $zip_name);
-        foreach ($files as $file) {
-            if ( strpos( $file, '.zip') !== false ) {
+        $files = scandir( INIT::$ZIP_REPOSITORY . '/' . $zip_name );
+        foreach ( $files as $file ) {
+            if ( strpos( $file, '.zip' ) !== false ) {
                 $zip_file = $file;
                 break;
             }
         }
 
         if ( $zip_name == null && $zip_file == null ) {
-            return FALSE ; 
+            return false;
         } else {
-            return INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file ;
+            return INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file;
         }
     }
 
@@ -705,12 +712,13 @@ class FilesStorage {
         return $return_array;
     }
 
-    private function link($source, $destination) {
-        return link($source, $destination);
+    private function link( $source, $destination ) {
+        return link( $source, $destination );
     }
 
     /**
      * @param array $segments_metadata
+     *
      * @throws UnexpectedValueException
      */
     public static function storeFastAnalysisFile( $id_project, Array $segments_metadata = [] ) {
@@ -729,10 +737,10 @@ class FilesStorage {
      * @throws UnexpectedValueException
      *
      */
-    public static function getFastAnalysisData( $id_project ){
+    public static function getFastAnalysisData( $id_project ) {
 
         $analysisData = unserialize( file_get_contents( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser" ) );
-        if( $analysisData === false ){
+        if ( $analysisData === false ) {
             throw new UnexpectedValueException( 'Internal Error: Failed to retrieve analysis information from disk.', -15 );
         }
 
@@ -745,11 +753,11 @@ class FilesStorage {
      *
      * @return bool
      */
-    public static function deleteFastAnalysisFile( $id_project ){
+    public static function deleteFastAnalysisFile( $id_project ) {
         return unlink( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser" );
     }
 
-    public function getZipDir(){
+    public function getZipDir() {
         return $this->zipDir;
     }
 

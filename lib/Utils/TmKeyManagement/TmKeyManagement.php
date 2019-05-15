@@ -126,8 +126,8 @@ class TmKeyManagement_TmKeyManagement {
             $tmKey = json_decode( $tmKey, true );
 
             if ( is_null( $tmKey ) ) {
-                Log::doLog( __METHOD__ . " -> Invalid JSON." );
-                Log::doLog( var_export( $tmKey, true ) );
+                Log::doJsonLog( __METHOD__ . " -> Invalid JSON." );
+                Log::doJsonLog( var_export( $tmKey, true ) );
                 throw new Exception ( "Invalid JSON: " . var_export( $jsonTmKeys_array, true ), -2 );
             }
 
@@ -515,7 +515,7 @@ class TmKeyManagement_TmKeyManagement {
                         }
 
                     } catch ( Exception $e ) {
-                        Log::doLog( $e->getMessage() );
+                        Log::doJsonLog( $e->getMessage() );
                     }
 
                 }

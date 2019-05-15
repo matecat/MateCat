@@ -4,8 +4,8 @@ set_time_limit(0);
 include_once 'main.php';
 
 Log::$fileName = "archive_jobs.log";
-Log::doLog("[ARCHIVEJOBS] started");
-Log::doLog("[ARCHIVEJOBS] inactivity days threshold: ". INIT::JOB_ARCHIVABILITY_THRESHOLD );
+Log::doJsonLog("[ARCHIVEJOBS] started");
+Log::doJsonLog("[ARCHIVEJOBS] inactivity days threshold: ". INIT::JOB_ARCHIVABILITY_THRESHOLD );
 
 $lastArchivedIdFileName = ".last_archived_id";
 
@@ -19,7 +19,7 @@ $first_id = $first_id * 1;
 
 $last_id = getMaxJobUntilDaysAgo( INIT::JOB_ARCHIVABILITY_THRESHOLD );
 
-Log::doLog("[ARCHIVEJOBS] last job id is: " . $last_id );
+Log::doJsonLog("[ARCHIVEJOBS] last job id is: " . $last_id );
 
 //number of rows to be selected for each query,
 //after some tests,decide to set the upper bound to 100
@@ -27,13 +27,13 @@ $row_interval = 50;
 
 for($i = $first_id; $i <= $last_id; $i += $row_interval){
     echo "[ARCHIVEJOBS] searching jobs between $i and ".($i + $row_interval)."\n";
-	Log::doLog("[ARCHIVEJOBS] searching jobs between $i and ".($i + $row_interval));
+	Log::doJsonLog("[ARCHIVEJOBS] searching jobs between $i and ".($i + $row_interval));
 
     //check for jobs with no new segment translations and take them
     $jobs = getArchivableJobs( range( $i, $i + $row_interval ) );
 
 	if ( $jobs < 0 ) {
-		Log::doLog( "[ARCHIVEJOBS] skipping batch.." );
+		Log::doJsonLog( "[ARCHIVEJOBS] skipping batch.." );
 		continue;
 	}
 
@@ -41,19 +41,19 @@ for($i = $first_id; $i <= $last_id; $i += $row_interval){
 
     if( $jobsToBeArchived == 0){
         echo "[ARCHIVEJOBS] " . $jobsToBeArchived . " found. Skipping batch.\n";
-		Log::doLog("[ARCHIVEJOBS] " . $jobsToBeArchived . " found. Skipping batch.");
+		Log::doJsonLog("[ARCHIVEJOBS] " . $jobsToBeArchived . " found. Skipping batch.");
 	} else {
         echo "[ARCHIVEJOBS] " . $jobsToBeArchived . " found.\n";
-        Log::doLog( "[ARCHIVEJOBS] " . $jobsToBeArchived . " found." );
+        Log::doJsonLog( "[ARCHIVEJOBS] " . $jobsToBeArchived . " found." );
 
         $ret = batchArchiveJobs( $jobs, INIT::JOB_ARCHIVABILITY_THRESHOLD );
 
         if( $ret >= 0 ){
             echo "[ARCHIVEJOBS] " . $ret . " jobs successfully archived\n";
-            Log::doLog("[ARCHIVEJOBS] " . $ret . " jobs successfully archived");
+            Log::doJsonLog("[ARCHIVEJOBS] " . $ret . " jobs successfully archived");
         } else {
             echo "[ARCHIVEJOBS] FAILED !!!\n";
-            Log::doLog("[ARCHIVEJOBS] FAILED !!!");
+            Log::doJsonLog("[ARCHIVEJOBS] FAILED !!!");
         }
 
     }
@@ -63,4 +63,4 @@ for($i = $first_id; $i <= $last_id; $i += $row_interval){
 }
 file_put_contents($lastArchivedIdFileName, $last_id);
 
-Log::doLog("[ARCHIVEJOBS] Goodbye");
+Log::doJsonLog("[ARCHIVEJOBS] Goodbye");

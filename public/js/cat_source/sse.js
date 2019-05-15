@@ -14,7 +14,12 @@ SSE = {
                 throw new Exception( 'source mapping not found' );
         }
 
-        return new EventSource( SSE.baseURL + source );
+        if ( config.enableMultiDomainApi ) {
+            return new EventSource( '//' + Math.floor(Math.random() * config.ajaxDomainsNumber ) + '.ajax.' + SSE.baseURL +  source );
+        } else {
+            return new EventSource( '//' + SSE.baseURL + source );
+        }
+
     }
 };
 

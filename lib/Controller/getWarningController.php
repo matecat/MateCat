@@ -20,6 +20,7 @@ class getWarningController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
+        $this->readLoginInfo();
 
         $filterArgs = array(
 
@@ -53,9 +54,9 @@ class getWarningController extends ajaxController {
             $this->__postInput->segment_status = 'draft';
         }
 
-        if ( !empty( $this->__postInput->logs ) && $this->__postInput->logs != '[]' ) {
+        if ( !empty( $this->__postInput->logs ) && $this->__postInput->logs != '[]' ) { //FIXME remove client implementation and logging
             Log::$fileName = 'clientLog.log';
-            Log::doLog( json_decode( $this->__postInput->logs ) );
+            Log::doJsonLog( json_decode( $this->__postInput->logs ) );
             Log::$fileName = 'log.txt';
         }
 

@@ -13,7 +13,7 @@ var LXQ = {
             config.lxq_enabled = 1;
             // Todo Call Service to enable Tag Lexiqa
             var path = sprintf(
-                '/api/v2/jobs/%s/%s/options',
+                APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
                 config.id_job, config.password
             );
             var data = {
@@ -22,7 +22,8 @@ var LXQ = {
             $.ajax({
                 url: path,
                 type: 'POST',
-                data : data
+                data : data,
+                xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 if ($('#lexiqa-popup').hasClass('lxq-visible')) {
                     $('#lexiqabox').trigger('click');
@@ -44,7 +45,7 @@ var LXQ = {
         if (config.lxq_enabled) {
             config.lxq_enabled = 0;
             var path = sprintf(
-                '/api/v2/jobs/%s/%s/options',
+                APP.getRandomUrl() + 'api/v2/jobs/%s/%s/options',
                 config.id_job, config.password
             );
             var data = {
@@ -53,7 +54,8 @@ var LXQ = {
             $.ajax({
                 url: path,
                 type: 'POST',
-                data : data
+                data : data,
+                xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 if ($('#lexiqa-popup').hasClass('lxq-visible')) {
                     $('#lexiqabox').trigger('click');
@@ -97,7 +99,7 @@ LXQ.init  = function () {
         var segment = data.segment;
         //new API?
         if (data.segment.raw) {
-          segment = data.segment.raw
+          segment = data.segment.raw;
         }
         var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
         var id_segment = UI.getSegmentId(segment);
@@ -1066,6 +1068,7 @@ LXQ.init  = function () {
 
 
         var shouldHighlighWarningsForSegment = function (segId,value) {
+            //return true;
             //var segId = UI.getSegmentId(seg);
             if (segId!==false){
             if (!LXQ.lexiqaData.segmentsInfo.hasOwnProperty(segId))
@@ -1497,24 +1500,31 @@ LXQ.init  = function () {
                                     blacklist: []
                                 }
                             };
+                            
+                            let seg = UI.getSegmentById( element.segid );
+                            let translation = "";
+                            if (seg.length>0) {
+                                translation = $( UI.targetContainerSelector(), seg ).text(); 
+                            }
                             LXQ.lexiqaData.lexiqaWarnings[element.segid] = {};
-                            var seg = UI.getSegmentById( element.segid );
-                            if ( seg.length === 0 ) return;
-                            var translation = $( UI.targetContainerSelector(), seg ).text();
+                            
+                                
                             results.results[element.segid].forEach( function ( qadata ) {
                                 LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] = qadata;
+                                
                                 if ( !qadata.ignored ) {
                                     qadata.color = LXQ.colors[qadata.category];
-                                    if ( qadata.insource ) {
-                                        highlights.source[qadata.category].push( qadata );
-                                    }
-                                    else {
-                                        if ( qadata.end <= translation.length )
-                                            highlights.target[qadata.category].push( qadata );
+                                    if (seg.length>0) {
+                                        if ( qadata.insource ) {
+                                            highlights.source[qadata.category].push( qadata );
+                                        }
+                                        else {
+                                            if ( qadata.end <= translation.length )
+                                                highlights.target[qadata.category].push( qadata );
 
+                                        }
                                     }
                                 }
-
                             } );
                             if ( LXQ.getVisibleWarningsCountForSegment( element.segid ) > 0 ) {
                                 errorCnt++;
@@ -1526,7 +1536,7 @@ LXQ.init  = function () {
                                 return; //this segment has not been loaded yet...
 
                             LXQ.shouldHighlighWarningsForSegment( element.segid, element.show );
-
+                            
                             var source_val = $( ".source", seg ).html();
                             QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(seg);
                             source_val = LXQ.highLightText( source_val, highlights.source, true, LXQ.shouldHighlighWarningsForSegment( seg ), true, seg );
@@ -1566,7 +1576,7 @@ LXQ.init  = function () {
             var segments = LXQ.lexiqaData.segments.filter(function ( id_segment ) {
                 return LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty( id_segment )
             });
-            SegmentActions.qaComponentsetLxqIssues(segments)
+            SegmentActions.qaComponentsetLxqIssues(segments);
 
         },
         removeSegmentWarning: function (idSegment) {

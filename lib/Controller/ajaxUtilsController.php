@@ -53,12 +53,12 @@ class ajaxUtilsController extends ajaxController {
                     $keyExists = $tmxHandler->checkCorrectKey();
                 } catch ( Exception $e ){
                     /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */
-                    Log::doLog( $e->getMessage() );
+                    Log::doJsonLog( $e->getMessage() );
                 }
 
                 if ( !isset($keyExists) || $keyExists === false ) {
                     $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
-                    Log::doLog( __METHOD__ . " -> TM key is not valid." );
+                    Log::doJsonLog( __METHOD__ . " -> TM key is not valid." );
                     $this->result[ 'success' ] = false;
                 } else {
                     $this->result[ 'errors' ] = array();
@@ -73,7 +73,7 @@ class ajaxUtilsController extends ajaxController {
                         Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
                     }
                 } catch ( Exception $e ) {
-                    Log::doLog( "ajaxUtils::clearNotCompletedUploads : " . $e->getMessage() ); 
+                    Log::doJsonLog( "ajaxUtils::clearNotCompletedUploads : " . $e->getMessage() );
                 }
                 setcookie( "upload_session", null, -1, '/' );
                 unset( $_COOKIE[ 'upload_session' ] );

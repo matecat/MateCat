@@ -166,7 +166,7 @@ class GlossariesController extends AbstractStatefulKleinController {
         $r .= "\n\n\n";
         $r .= "</pre>";
         Log::$fileName = 'php_errors.txt';
-        Log::doLog( $r );
+        Log::doJsonLog( $r );
         Utils::sendErrMailReport( $r, "API: Download Glossary Error: " . $e->getMessage() );
 
     }
@@ -223,7 +223,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
             $oldPath             = $fileInfo->file_path;
             $fileInfo->file_path = $tmpFileName;
-            Log::doLog( "Originally uploaded File path: " . $oldPath . " - Override: " . $fileInfo->file_path );
+            Log::doJsonLog( "Originally uploaded File path: " . $oldPath . " - Override: " . $fileInfo->file_path );
 
             unlink( $oldPath );
 

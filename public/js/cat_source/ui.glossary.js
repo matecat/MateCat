@@ -118,8 +118,8 @@ if (true)
 
                 var re = new RegExp( '\b'+ glossaryTerm_escaped.trim() + '\b', "gi" );
 
-                //If source languace is Cyrillic
-                if ( cleanString.match(/[\w\u0430-\u044f]+/ig) ) {
+                //If source languace is Cyrillic or CJK
+                if ( cleanString.match(/[\w\u0430-\u044f]+/ig) || config.isCJK) {
                     re = new RegExp( glossaryTerm_escaped.trim(), "gi" );
                 }
                 var regexInTags = new RegExp( "<[^>]*?("+glossaryTerm_escaped.trim()+")[^>]*?>" , "gi" );

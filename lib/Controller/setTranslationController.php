@@ -1,7 +1,7 @@
 <?php
 
-use \Contribution\ContributionSetStruct, \Contribution\Set;
-use Analysis\DqfQueueHandler;
+use Contribution\ContributionSetStruct;
+use Contribution\Set;
 use Exceptions\ControllerReturnException;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
 
@@ -62,30 +62,12 @@ class setTranslationController extends ajaxController {
     protected $context_before;
     protected $context_after;
 
-
-    protected $startExecutionTime;
-    protected function startTimer() {
-        $this->startExecutionTime = microtime( true );
-    }
-
-    protected function getTimer() {
-        return round( microtime( true ) - $this->startExecutionTime, 4 ); //get milliseconds
-    }
-
-    public function finalize() {
-        parent::finalize();
-        Log::$fileName = "set_translation_time.log";
-        Log::doLog( [ 'Total Time: ' => $this->getTimer() ] );
-    }
-
     /**
      * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
      */
     private $VersionsHandler ;
 
     public function __construct() {
-
-        $this->startTimer();
 
         parent::__construct();
 
@@ -144,7 +126,7 @@ class setTranslationController extends ajaxController {
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
         $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'splitStatuses' ] ) ); //strtoupper transforms null to ""
 
-        Log::doLog( $this->__postInput );
+        Log::doJsonLog( $this->__postInput );
 
     }
 
@@ -209,11 +191,11 @@ class setTranslationController extends ajaxController {
 
 
         $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
-        list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ), ' ' );
-        list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'segment' ] ), ' ' );
+        list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ), '' );
+        list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'segment' ] ), '' );
 
         if ( is_null( $this->translation ) || $this->translation === '' ) {
-            Log::doLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
+            Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
 
             // won't save empty translation but there is no need to return an errors
             throw new Exception( "Empty Translation \n\n" . var_export( $_POST, true ), 0 );
@@ -310,7 +292,7 @@ class setTranslationController extends ajaxController {
                 Utils::sendErrMailReport( $e->getMessage() );
             }
 
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
 
             return $e->getCode();
 
@@ -343,6 +325,9 @@ class setTranslationController extends ajaxController {
 
         //PATCH TO FIX BOM INSERTIONS
         $translation = Utils::stripBOM( $translation );
+
+        $splitHandler = new \SubFiltering\Filters\SplitPlaceholder();
+        $translation = $splitHandler->transform($translation);
 
         /*
          * begin stats counter
@@ -419,7 +404,7 @@ class setTranslationController extends ajaxController {
         if ( !empty( $this->result[ 'errors' ] ) ) {
             $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " .
                 var_export( array_merge( $this->result, $_POST ), true );
-            Log::doLog( $msg );
+            Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
             $db->rollback();
 
@@ -471,7 +456,7 @@ class setTranslationController extends ajaxController {
 
             } catch ( Exception $e ) {
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
-                Log::doLog( $msg );
+                Log::doJsonLog( $msg );
                 Utils::sendErrMailReport( $msg );
                 $db->rollback();
 
@@ -515,7 +500,7 @@ class setTranslationController extends ajaxController {
 
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
-                Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+                Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
                 $db->rollback();
 
                 return $e->getCode();
@@ -530,7 +515,7 @@ class setTranslationController extends ajaxController {
             updateTotalTimeToEdit( $this->id_job, $this->password, $this->time_to_edit );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
-            Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+            Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
             $db->rollback();
 
             return $e->getCode();
@@ -598,7 +583,7 @@ class setTranslationController extends ajaxController {
             $db->commit();
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = array( "code" => -101, "message" => $e->getMessage() );
-            Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+            Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
             $db->rollback();
 
             return $e->getCode();
@@ -617,7 +602,7 @@ class setTranslationController extends ajaxController {
             ] );
 
         } catch ( Exception $e ){
-            Log::doLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+            Log::doJsonLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
         }
 
         try {
@@ -629,7 +614,7 @@ class setTranslationController extends ajaxController {
                     'segment'         => $this->segment
             ));
         } catch ( Exception $e ){
-            Log::doLog( "Exception in filterSetTranslationResult callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+            Log::doJsonLog( "Exception in filterSetTranslationResult callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
         }
 
         //EVERY time an user changes a row in his job when the job is completed,
@@ -643,7 +628,7 @@ class setTranslationController extends ajaxController {
             if ( $update_completed < 0 ) {
                 $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
                 $redisHandler->getConnection()->del( 'job_completeness:' . $this->id_job );
-                Log::doLog( $msg );
+                Log::doJsonLog( $msg );
                 Utils::sendErrMailReport( $msg );
             }
         }
@@ -963,7 +948,7 @@ class setTranslationController extends ajaxController {
             $element->__toString();
             \Utils::raiseJsonExceptionError( true );
         } catch ( Exception $e ){
-            Log::doLog( $contributionStruct );
+            Log::doJsonLog( $contributionStruct );
         }
         /** TODO Remove */
 

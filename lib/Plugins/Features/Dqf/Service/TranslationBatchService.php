@@ -49,8 +49,8 @@ class TranslationBatchService extends AbstractService {
     protected function _createCurlResource( ChildProjectTranslationRequestStruct $struct ) {
         $url = "/project/child/%s/file/%s/targetLang/%s/sourceSegment/translation/batch" ;
 
-        Log::doLog( $struct->getParams() ) ;
-        Log::doLog( $this->session->filterHeaders( $struct) ) ;
+        Log::doJsonLog( $struct->getParams() ) ;
+        Log::doJsonLog( $this->session->filterHeaders( $struct) ) ;
 
         $resource = $this->client->createResource( $url, 'post', [
                 'headers'    => $this->session->filterHeaders( $struct ),

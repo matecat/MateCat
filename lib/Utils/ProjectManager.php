@@ -180,7 +180,7 @@ class ProjectManager {
             $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure[ 'id_customer' ] );
         }
 
-        \Log::doLog( $this->features->getCodes() );
+        $this->_log( $this->features->getCodes() );
 
         $this->filter = Filter::getInstance( $this->features );
 
@@ -190,6 +190,10 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+    }
+
+    protected function _log( $_msg ){
+        Log::doJsonLog( $_msg );
     }
 
     /**
@@ -474,7 +478,7 @@ class ProjectManager {
         try {
             $this->_pushTMXToMyMemory();
         } catch ( Exception $e ) {
-            Log::doLog( $e->getMessage() );
+            $this->_log( $e->getMessage() );
 
             //exit project creation
             return false;
@@ -543,7 +547,7 @@ class ProjectManager {
         try {
             $this->_zipFileHandling( $linkFiles );
         } catch ( Exception $e ) {
-            Log::doLog( $e );
+            $this->_log( $e );
             //Zip file Handling
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code" => $e->getCode(), "message" => $e->getMessage()
@@ -651,13 +655,13 @@ class ProjectManager {
                     $this->_extractSegments( $fid, $file_info );
                 } catch ( Exception $e ) {
 
-                    Log::doLog( $totalFilesStructure );
-                    Log::doLog( "Code: " . $e->getCode() );
-                    Log::doLog( "Count fileSt.: " . count( $totalFilesStructure ) );
-                    Log::doLog( "Exceptions: " . $exceptionsFound );
+                    $this->_log( $totalFilesStructure );
+                    $this->_log( "Code: " . $e->getCode() );
+                    $this->_log( "Count fileSt.: " . count( $totalFilesStructure ) );
+                    $this->_log( "Exceptions: " . $exceptionsFound );
 
                     if ( $e->getCode() == -1 && count( $totalFilesStructure ) > 1 && $exceptionsFound < count( $totalFilesStructure ) ) {
-                        Log::doLog( "No text to translate in the file {$e->getMessage()}." );
+                        $this->_log( "No text to translate in the file {$e->getMessage()}." );
                         $exceptionsFound += 1;
                         continue;
                     } else {
@@ -711,7 +715,7 @@ class ProjectManager {
         $this->projectStructure[ 'status' ] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? Constants_ProjectStatus::STATUS_NEW : Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
         if ( $this->show_in_cattool_segs_counter == 0 ) {
-            Log::doLog( "Segment Search: No segments in this project - \n" );
+            $this->_log( "Segment Search: No segments in this project - \n" );
             $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_EMPTY;
         }
 
@@ -779,7 +783,7 @@ class ProjectManager {
             $output .= "Aborting...\n";
             $output .= "</pre>";
 
-            Log::doLog( $output );
+            $this->_log( $output );
 
             Utils::sendErrMailReport( $output, $e->getMessage() );
 
@@ -788,13 +792,13 @@ class ProjectManager {
     }
 
     private function __clearFailedProject( Exception $e ) {
-        Log::doLog( $e->getMessage() );
-        Log::doLog( $e->getTraceAsString() );
-        Log::doLog( "Deleting Records." );
+        $this->_log( $e->getMessage() );
+        $this->_log( $e->getTraceAsString() );
+        $this->_log( "Deleting Records." );
         ( new Projects_ProjectDao() )->deleteFailedProject( $this->projectStructure[ 'id_project' ] );
         ( new Files_FileDao() )->deleteFailedProjectFiles( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
-        Log::doLog( "Deleted Project ID: " . $this->projectStructure[ 'id_project' ] );
-        Log::doLog( "Deleted Files ID: " . json_encode( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() ) );
+        $this->_log( "Deleted Project ID: " . $this->projectStructure[ 'id_project' ] );
+        $this->_log( "Deleted Files ID: " . json_encode( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() ) );
     }
 
     private function writeFastAnalysisData() {
@@ -955,7 +959,7 @@ class ProjectManager {
                                 "code" => $e->getCode(), "message" => $e->getMessage()
                         ];
 
-                        Log::doLog( $e->getMessage() . "\n" . $e->getTraceAsString() );
+                        $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );
 
                         //exit project creation
                         throw new Exception( $e );
@@ -1010,7 +1014,7 @@ class ProjectManager {
 
                         $this->checkTMX = 0;
 
-                        Log::doLog( $this->projectStructure[ 'result' ] );
+                        $this->_log( $this->projectStructure[ 'result' ] );
                     }
 
                 }
@@ -1028,7 +1032,7 @@ class ProjectManager {
                     "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
             ];
 
-            Log::doLog( $this->projectStructure[ 'result' ] );
+            $this->_log( $this->projectStructure[ 'result' ] );
 
             throw new Exception( "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project." );
         }
@@ -1038,8 +1042,8 @@ class ProjectManager {
     protected function _doCheckForErrors() {
 
         if ( count( $this->projectStructure[ 'result' ][ 'errors' ] ) ) {
-            Log::doLog( "Project Creation Failed. Sent to Output all errors." );
-            Log::doLog( $this->projectStructure[ 'result' ][ 'errors' ] );
+            $this->_log( "Project Creation Failed. Sent to Output all errors." );
+            $this->_log( $this->projectStructure[ 'result' ][ 'errors' ] );
 
             return false;
         }
@@ -1061,7 +1065,7 @@ class ProjectManager {
 
             if ( !$result ) {
 
-                Log::doLog( "Failed to store the Zip file $zipHash - \n" );
+                $this->_log( "Failed to store the Zip file $zipHash - \n" );
                 throw new Exception( "Failed to store the original Zip $zipHash ", -10 );
                 //Exit
             }
@@ -1108,7 +1112,7 @@ class ProjectManager {
 
             }
 
-            Log::doLog( $projectStructure[ 'private_tm_key' ] );
+            $this->_log( $projectStructure[ 'private_tm_key' ] );
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
@@ -1203,7 +1207,7 @@ class ProjectManager {
 
         //for each language detected, check if it's not equal to the source language
         $langsDetected = $res[ 'responseData' ][ 'translatedText' ];
-        Log::dolog( __CLASS__ . " - DETECT LANG RES:", $langsDetected );
+        $this->_log( __CLASS__ . " - DETECT LANG RES:", $langsDetected );
         if ( $res !== null &&
                 is_array( $langsDetected ) &&
                 count( $langsDetected ) == count( $this->projectStructure[ 'array_files' ] )
@@ -1223,14 +1227,14 @@ class ProjectManager {
                     $sourceLang = $this->projectStructure[ 'source_language' ];
                 }
 
-                Log::dolog( __CLASS__ . " - DETECT LANG COMPARISON:", "$fileLang@@$sourceLang" );
+                $this->_log( __CLASS__ . " - DETECT LANG COMPARISON:", "$fileLang@@$sourceLang" );
                 //get extended language name using google language code
                 $languageExtendedName = Langs_GoogleLanguageMapper::getLanguageCode( $fileLang );
 
                 //get extended language name using standard language code
                 $langClass                  = Langs_Languages::getInstance();
                 $sourceLanguageExtendedName = strtolower( $langClass->getLocalizedName( $sourceLang ) );
-                Log::dolog( __CLASS__ . " - DETECT LANG NAME COMPARISON:", "$sourceLanguageExtendedName@@$languageExtendedName" );
+                $this->_log( __CLASS__ . " - DETECT LANG NAME COMPARISON:", "$sourceLanguageExtendedName@@$languageExtendedName" );
 
                 //Check job's detected language. In case of undefined language, mark it as valid
                 if ( $fileLang !== 'und' &&
@@ -1453,7 +1457,7 @@ class ProjectManager {
                 $msg .= "Tried to perform SQL: \n" . print_r( $stmt->queryString, true ) . " \n\n";
                 $msg .= "Failed Statement is: \n" . print_r( $jobInfo, true ) . "\n";
 //                Utils::sendErrMailReport( $msg );
-                Log::doLog( $msg );
+                $this->_log( $msg );
                 throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
             }
 
@@ -1541,7 +1545,7 @@ class ProjectManager {
 
             $first_job[ 'tm_keys' ] = json_encode( $owner_tm_keys );
         } catch ( Exception $e ) {
-            Log::doLog( __METHOD__ . " -> Merge Jobs error - TM key problem: " . $e->getMessage() );
+            $this->_log( __METHOD__ . " -> Merge Jobs error - TM key problem: " . $e->getMessage() );
         }
 
         $totalAvgPee     = 0;
@@ -1611,7 +1615,7 @@ class ProjectManager {
 
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
-            Log::doLog( "Xliff Import: Error parsing. " . join( "\n", $xliff[ 'parser-errors' ] ) );
+            $this->_log( "Xliff Import: Error parsing. " . join( "\n", $xliff[ 'parser-errors' ] ) );
             throw new Exception( $file_info[ 'original_filename' ], -4 );
         }
 
@@ -1820,7 +1824,7 @@ class ProjectManager {
         // *NOTE*: PHP>=5.3 throws UnexpectedValueException, but PHP 5.2 throws ErrorException
         //use generic
         if ( count( $this->projectStructure[ 'segments' ][ $fid ] ) == 0 || $_fileCounter_Show_In_Cattool == 0 ) {
-            Log::doLog( "Segment import - no segments found in {$file_info[ 'original_filename' ]}\n" );
+            $this->_log( "Segment import - no segments found in {$file_info[ 'original_filename' ]}\n" );
             throw new Exception( $file_info[ 'original_filename' ], -1 );
         } else {
             //increment global counter
@@ -1871,9 +1875,9 @@ class ProjectManager {
 
     protected function _storeSegments( $fid ) {
 
-        Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
+        $this->_log( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         $sequenceIds = $this->dbHandler->nextSequence( Database::SEQ_ID_SEGMENT, count( $this->projectStructure[ 'segments' ][ $fid ] ) );
-        Log::doLog( "Id sequence reserved." );
+        $this->_log( "Id sequence reserved." );
 
         //Update/Initialize the min-max sequences id
         if ( !isset( $this->min_max_segments_id[ 'job_first_segment' ] ) ) {
@@ -2178,12 +2182,12 @@ class ProjectManager {
 
             $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ?, ? )";
 
-            Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
+            $this->_log( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
 
             //split the query in to chunks if there are too much segments
             $query_translations_values = array_chunk( $query_translations_values, 100 );
 
-            Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
+            $this->_log( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
 
             foreach ( $query_translations_values as $i => $chunk ) {
 
@@ -2193,9 +2197,9 @@ class ProjectManager {
                     $stmt  = $this->dbHandler->getConnection()->prepare( $query );
                     $stmt->execute( iterator_to_array( new RecursiveIteratorIterator( new RecursiveArrayIterator( $chunk ) ), false ) );
 
-                    Log::doLog( "Pre-Translations: Executed Query " . ( $i + 1 ) );
+                    $this->_log( "Pre-Translations: Executed Query " . ( $i + 1 ) );
                 } catch ( PDOException $e ) {
-                    Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
+                    $this->_log( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
                     throw new PDOException( "Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
                 }
 
@@ -2669,7 +2673,7 @@ class ProjectManager {
                     "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($filePathName)"
             ];
             if ( PHP_SAPI != 'cli' ) {
-                setcookie( "upload_session", "", time() - 10000 );
+                setcookie( "upload_session", "", time() - 10000, '/', \INIT::$COOKIE_DOMAIN );
             }
         }
 
@@ -2706,7 +2710,7 @@ class ProjectManager {
                 $keyExists = $this->tmxServiceWrapper->checkCorrectKey();
 
                 if ( !isset( $keyExists ) || $keyExists === false ) {
-                    Log::doLog( __METHOD__ . " -> TM key is not valid." );
+                    $this->_log( __METHOD__ . " -> TM key is not valid." );
 
                     throw new Exception( "TM key is not valid: " . $_tmKey[ 'key' ], -4 );
                 }
@@ -2767,7 +2771,7 @@ class ProjectManager {
 
                     $memoryKeysToBeInserted[] = $newMemoryKey;
                 } else {
-                    Log::doLog( 'skip insertion' );
+                    $this->_log( 'skip insertion' );
                 }
 
             }
@@ -2778,7 +2782,7 @@ class ProjectManager {
                 $featuresSet->run( 'postTMKeyCreation', $memoryKeysToBeInserted, $this->projectStructure[ 'uid' ] );
 
             } catch ( Exception $e ) {
-                Log::doLog( $e->getMessage() );
+                $this->_log( $e->getMessage() );
 
                 # Here we handle the error, displaying HTML, logging, ...
                 $output = "<pre>\n";

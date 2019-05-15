@@ -266,7 +266,7 @@ class Chunk extends \API\V2\Json\Chunk {
         $reviseIssues = [];
 
         $qualityReportDao = new QualityReportDao();
-        $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $jStruct->id, $jStruct->password );
+        $qa_data          = $qualityReportDao->getReviseIssuesByChunk( $jStruct->id, $jStruct->password, $chunkReview->source_page );
         foreach ( $qa_data as $issue ) {
             if ( !isset( $reviseIssues[ $issue->id_category ] ) ) {
                 $reviseIssues[ $issue->id_category ] = [
@@ -301,7 +301,7 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $model      = $project->getLqaModel();
         $categories = $model->getCategoriesAndSeverities();
-        $passfail = [ 'type' => $model->pass_type, 'options' => json_decode($model->pass_options) ] ;
+        $passfail = [ 'type' => $model->pass_type, 'options' => [ 'limit' => $chunkReviewModel->getQALimit() ] ] ;
 
         return array(
                 $passfail,

@@ -2,8 +2,6 @@
 /**
  * Created by PhpStorm.
  */
-use AbstractControllers\IController;
-use Utils;
 
 
 /**
@@ -38,9 +36,9 @@ abstract class viewController extends controller {
      */
     protected $authURL;
 
-    protected $login_required = false ;
+    protected $login_required = false;
 
-    protected $supportedBrowser ;
+    protected $supportedBrowser;
 
     /**
      * Try to identify the browser of users
@@ -57,13 +55,15 @@ abstract class viewController extends controller {
      */
     public function __construct() {
 
-	    if( !Bootstrap::areMandatoryKeysPresent() ) {
-	        $controllerInstance = new CustomPage();
-	        $controllerInstance->setTemplate( "badConfiguration.html" );
-	        $controllerInstance->setCode( 503 );
-	        $controllerInstance->doAction();
+        $this->startTimer();
+
+        if ( !Bootstrap::areMandatoryKeysPresent() ) {
+            $controllerInstance = new CustomPage();
+            $controllerInstance->setTemplate( "badConfiguration.html" );
+            $controllerInstance->setCode( 503 );
+            $controllerInstance->doAction();
             die(); // do not complete klein response, set 404 header in render404 instead of 200
-	    }
+        }
 
         //load Template Engine
         require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
@@ -82,7 +82,7 @@ abstract class viewController extends controller {
      */
     public function checkLoginRequiredAndRedirect() {
         if ( !$this->login_required ) {
-            return true ;
+            return true;
         }
 
         //prepare redirect flag
@@ -92,13 +92,13 @@ abstract class viewController extends controller {
         if ( !$this->isLoggedIn() ) {
             //take note of url we wanted to go after
             $_SESSION[ 'wanted_url' ] = $_SERVER[ 'REQUEST_URI' ];
-            $mustRedirectToLogin = true;
+            $mustRedirectToLogin      = true;
         }
 
         if ( $mustRedirectToLogin ) {
-            FlashMessage::set('popup', 'login', FlashMessage::SERVICE );
+            FlashMessage::set( 'popup', 'login', FlashMessage::SERVICE );
 
-            header( 'Location: ' . Routes::appRoot() )  ;
+            header( 'Location: ' . Routes::appRoot() );
             exit;
         }
 
@@ -106,7 +106,7 @@ abstract class viewController extends controller {
     }
 
     public function setLoginRequired( $value ) {
-        $this->login_required = $value ;
+        $this->login_required = $value;
     }
 
     /**
@@ -121,7 +121,7 @@ abstract class viewController extends controller {
 
         $this->setTemplateVars();
 
-        $this->featureSet->run('appendDecorators', $this, $this->template);
+        $this->featureSet->run( 'appendDecorators', $this, $this->template );
 
         $this->setTemplateFinalVars();
 
@@ -136,6 +136,9 @@ abstract class viewController extends controller {
          * Execute Template Rendering
          */
         echo $this->template->execute();
+
+        $this->logPageCall();
+
     }
 
     /**
@@ -154,15 +157,17 @@ abstract class viewController extends controller {
      */
     private function setInitialTemplateVars() {
 
-        if ( is_null( $this->template) ) {
-            throw new Exception('Tamplate is not defined');
+        if ( is_null( $this->template ) ) {
+            throw new Exception( 'Tamplate is not defined' );
         }
 
-        $this->template->footer_js = array();
-        $this->template->config_js = array() ;
-        $this->template->css_resources = array();
-        $this->template->authURL = $this->getAuthUrl() ;
-        $this->template->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        $this->template->footer_js            = [];
+        $this->template->config_js            = [];
+        $this->template->css_resources        = [];
+        $this->template->authURL              = $this->getAuthUrl();
+        $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+        $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
+        $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
     }
 
     /**
@@ -173,14 +178,14 @@ abstract class viewController extends controller {
      */
     private function setTemplateFinalVars() {
 
-        $this->template->logged_user   = $this->user->shortName() ;
-        $this->template->extended_user = $this->user->fullName() ;
+        $this->template->logged_user   = $this->user->shortName();
+        $this->template->extended_user = $this->user->fullName();
 
-        $this->template->isLoggedIn    = $this->userIsLogged;
-        $this->template->userMail      = $this->user->email;
+        $this->template->isLoggedIn = $this->userIsLogged;
+        $this->template->userMail   = $this->user->email;
         $this->collectFlashMessages();
 
-        $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured() ;
+        $this->template->googleDriveEnabled = Bootstrap::isGDriveConfigured();
 
     }
 
@@ -190,9 +195,9 @@ abstract class viewController extends controller {
      *
      */
     protected function setBrowserSupport() {
-        $browser_info = Utils::getBrowser() ;
-        $this->supportedBrowser = Utils::isSupportedWebBrowser($browser_info);
-        $this->platform = strtolower( $browser_info[ 'platform' ] );
+        $browser_info           = Utils::getBrowser();
+        $this->supportedBrowser = Utils::isSupportedWebBrowser( $browser_info );
+        $this->platform         = strtolower( $browser_info[ 'platform' ] );
     }
 
     /**
@@ -205,16 +210,18 @@ abstract class viewController extends controller {
     /**
      * @return string
      */
-    public function getAuthUrl(){
-        if ( is_null($this->authURL ) ) {
+    public function getAuthUrl() {
+        if ( is_null( $this->authURL ) ) {
             $this->client  = OauthClient::getInstance()->getClient();
             $this->authURL = $this->client->createAuthUrl();
         }
-        return $this->authURL ;
+
+        return $this->authURL;
     }
 
-    public static function isRevision(){
-        $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+    public static function isRevision() {
+        //TODO: IMPROVE
+        $_from_url       = parse_url( $_SERVER[ 'REQUEST_URI' ] );
         $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
         return $is_revision_url;
     }
@@ -223,7 +230,7 @@ abstract class viewController extends controller {
         $this->renderCustomHTTP( $customTemplate, 404 );
     }
 
-    protected function renderCustomHTTP( $customTemplate, $httpCode ){
+    protected function renderCustomHTTP( $customTemplate, $httpCode ) {
         $status = new \Klein\HttpStatus( $httpCode );
         header( "HTTP/1.0 " . $status->getFormattedString() );
         $this->makeTemplate( $customTemplate );
@@ -240,8 +247,8 @@ abstract class viewController extends controller {
         try {
 
             $this->template = $skeleton_file;
-            if( !$this->template instanceof PHPTAL ) {
-                $this->template                   = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
+            if ( !$this->template instanceof PHPTAL ) {
+                $this->template = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
             }
 
             $this->template->basepath            = INIT::$BASEURL;
@@ -252,9 +259,9 @@ abstract class viewController extends controller {
             $this->template->platform            = $this->platform;
             $this->template->enabledBrowsers     = INIT::$ENABLED_BROWSERS;
 
-            $this->template->maxFileSize          = INIT::$MAX_UPLOAD_FILE_SIZE;
-            $this->template->maxTMXFileSize       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-            $this->template->dqf_enabled          = false ;
+            $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
+            $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+            $this->template->dqf_enabled    = false;
 
             ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );
@@ -269,8 +276,8 @@ abstract class viewController extends controller {
     }
 
     protected function collectFlashMessages() {
-        $messages = FlashMessage::flush() ;
-        $this->template->flashMessages = $messages ;
+        $messages                      = FlashMessage::flush();
+        $this->template->flashMessages = $messages;
     }
 
     /**

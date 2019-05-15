@@ -28,7 +28,7 @@ class SplitQueue {
             $output  = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $jobStruct, true );
-            Log::doLog( $output );
+            Log::doJsonLog( $output );
             Utils::sendErrMailReport( $output );
 
         }

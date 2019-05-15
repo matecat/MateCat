@@ -77,7 +77,7 @@ class getTagProjectionController extends ajaxController {
             $this->result[ 'errors' ][] = array( "code" => -4, "message" => "id_job not valid" );
 
             $msg = "\n\n Critical. Quit. \n\n " . var_export( array_merge( $this->result, $_POST ), true );
-            Log::doLog( $msg );
+            Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
 
             // critical. Quit.
@@ -126,9 +126,9 @@ class getTagProjectionController extends ajaxController {
     public function logTagProjection( $msg = null ) {
 
         if( !$msg ){
-            \Log::doLog( $this->result[ 'data' ] );
+            \Log::doJsonLog( $this->result[ 'data' ] );
         } else {
-            \Log::doLog( $msg );
+            \Log::doJsonLog( $msg );
         }
 
     }

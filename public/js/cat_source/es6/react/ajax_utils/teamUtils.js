@@ -23,9 +23,10 @@ API.TEAM = {
     },
     getTeamMembers: function (teamId) {
         return $.ajax({
-            async: true,
             type: "get",
-            url : "/api/v2/teams/" + teamId + "/members"
+            async: true,
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/teams/" + teamId + "/members"
         });
     },
     createTeam: function (teamName, members) {
@@ -38,7 +39,8 @@ API.TEAM = {
             async: true,
             data: data,
             type: "POST",
-            url : "/api/v2/teams"
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/teams"
         });
 
     },
@@ -50,13 +52,15 @@ API.TEAM = {
         return $.ajax({
             data: data,
             type: "post",
-            url : "/api/v2/teams/"+ team.id +"/members",
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/teams/"+ team.id +"/members",
         });
     },
     removeUserFromTeam: function (team, userId) {
         return $.ajax({id_team: team.id,
             type: "delete",
-            url : "/api/v2/teams/"+ team.id +"/members/" + userId,
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/teams/"+ team.id +"/members/" + userId,
         });
     },
     changeTeamName: function (team, newName) {
@@ -66,7 +70,8 @@ API.TEAM = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/teams/" + team.id,
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v2/teams/" + team.id,
         });
     },
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace Features\TranslationVersions ;
+namespace Features\TranslationVersions;
 
 use Constants_TranslationStatus;
 use Translations_SegmentTranslationStruct;
 use Translations_TranslationVersionDao;
 use Constants;
 use Projects_ProjectDao;
-use Features ;
+use Features;
 use Log, \Exception, Utils, \Database;
 use Translations_TranslationVersionStruct;
 
@@ -28,42 +28,45 @@ class SegmentTranslationVersionHandler {
     private $project ;
     private $feature_enalbed ;
 
+
     public function __construct($id_job, $id_segment, $uid, $id_project) {
-        $this->id_job       = $id_job ;
-        $this->id_segment   = $id_segment ;
-        $this->uid          = $uid ;
+        $this->id_job     = $id_job ;
+        $this->id_segment = $id_segment ;
+        $this->uid        = $uid ;
+
 
         // TODO: refactor, why id_project should be null
-        if (null !== $id_project) {
+        if ( null !== $id_project ) {
             $this->project = Projects_ProjectDao::findById( $id_project );
 
             $this->feature_enalbed = $this->project->isFeatureEnabled(
-                Features::TRANSLATION_VERSIONS
+                    Features::TRANSLATION_VERSIONS
             );
         }
 
-        Log::doLog( 'feature_enalbed', var_export( $this->feature_enalbed, true));
+        Log::doJsonLog( 'feature_enabled ' . var_export( $this->feature_enalbed, true ) );
     }
 
     /**
      * @param $params
+     *
      * @throws Exception
      */
     public function savePropagation( $params ) {
-        $params = Utils::ensure_keys($params, array(
-            'propagation', 'job_data'
-        ));
+        $params = Utils::ensure_keys( $params, [
+                'propagation', 'job_data'
+        ] );
 
         if ( $this->feature_enalbed !== true ) {
-            return ;
+            return;
         }
 
         $this->prepareDao();
 
         $this->dao->savePropagation(
-            $params['propagation'],
-            $this->id_segment,
-            $params['job_data']
+                $params[ 'propagation' ],
+                $this->id_segment,
+                $params[ 'job_data' ]
         );
     }
 
@@ -89,9 +92,9 @@ class SegmentTranslationVersionHandler {
          */
 
         if (
-            ! $this->feature_enalbed ||
-            empty( $old_translation ) ||
-            $this->translationIsEqual( $new_translation, $old_translation )
+                !$this->feature_enalbed ||
+                empty( $old_translation ) ||
+                $this->translationIsEqual( $new_translation, $old_translation )
         ) {
             return false;
         }
@@ -101,8 +104,9 @@ class SegmentTranslationVersionHandler {
         $new_version = new Translations_TranslationVersionStruct( $old_translation->toArray() );
 
         // XXX: this is to be reviewed
-        $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ] ;
-        $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ] ;
+        $new_version->is_review  = ( $old_translation->status == Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
+        $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ];
+        $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ];
 
         /**
          * In some cases, version 0 may already be there among saved_versions, because
@@ -123,7 +127,7 @@ class SegmentTranslationVersionHandler {
         );
 
         if ( $version_record ) {
-            return $this->dao->updateVersion( $new_version ) ;
+            return $this->dao->updateVersion( $new_version );
         }
 
         return $this->dao->saveVersion( $new_version );
@@ -148,15 +152,16 @@ class SegmentTranslationVersionHandler {
             Translations_SegmentTranslationStruct $new_translation,
             Translations_SegmentTranslationStruct $old_translation
     ) {
-        $old = html_entity_decode($old_translation->translation, ENT_XML1 | ENT_QUOTES)  ;
-        $new = html_entity_decode($new_translation->translation, ENT_XML1 | ENT_QUOTES)  ;
+        $old = html_entity_decode( $old_translation->translation, ENT_XML1 | ENT_QUOTES );
+        $new = html_entity_decode( $new_translation->translation, ENT_XML1 | ENT_QUOTES );
 
-        return $new == $old ;
+        return $new == $old;
     }
 
     private function prepareDao() {
-        $this->db         = Database::obtain();
-        $this->dao        = new Translations_TranslationVersionDao( $this->db );
+        $this->db               = Database::obtain();
+        $this->dao              = new Translations_TranslationVersionDao( $this->db );
+        $this->dao->source_page = $this->source_page;
     }
 
 }

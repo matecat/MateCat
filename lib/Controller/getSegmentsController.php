@@ -30,7 +30,6 @@ class getSegmentsController extends ajaxController {
 
     private $segment_notes ;
 
-
     public function __construct() {
 
         parent::__construct();

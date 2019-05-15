@@ -46,6 +46,8 @@ interface IChunkReviewModel {
 
     public function getReviewedWordsCount();
 
+    public function getQALimit();
+
     /**
      *
      * @throws \Exception

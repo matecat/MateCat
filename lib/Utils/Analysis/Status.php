@@ -57,7 +57,7 @@ class Status {
             return ( INIT::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning( $redisHandler ) && !self::tmAnalysisIsRunning( $redisHandler ) );
         } catch ( \Exception $ex ) {
             $msg = "****** No REDIS instances found. ******";
-            Log::doLog( $msg );
+            Log::doJsonLog( $msg );
 
             return false;
         }

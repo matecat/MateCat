@@ -107,7 +107,12 @@ class ChunkReviewModel implements IChunkReviewModel {
         );
     }
 
-    protected function getQALimit() {
+    /**
+     * Returns the proper limit for the current review stage.
+     *
+     * @return array|mixed
+     */
+    public function getQALimit() {
         $project = Projects_ProjectDao::findById( $this->chunk_review->id_project );
         $lqa_model = $project->getLqaModel();
         return SecondPassReview\Utils::filterLQAModelLimit( $lqa_model, $this->chunk_review->source_page ) ;
