@@ -23,10 +23,14 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
     protected $_patterns_found = array();
 
-    public $doLog = true;
-
     protected $_isAnalysis   = false;
     protected $_skipAnalysis = false;
+
+    /**
+     * @var bool
+     */
+    protected $logging = true;
+    protected $content_type = 'xml';
 
     protected $featureSet ;
 
@@ -142,11 +146,8 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
         $resourceHash = $mh->createResource( $url,
                 $this->curl_additional_params + $curl_options, $uniq_uid
         );
-        $mh->multiExec();
 
-        if( $this->doLog ){
-            $mh->verbose = true;
-        }
+        $mh->multiExec();
 
         if ( $mh->hasError( $resourceHash ) ) {
             $curl_error = $mh->getError( $resourceHash );
@@ -164,6 +165,16 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
         }
 
         $mh->multiCurlCloseAll();
+
+        if( $this->logging ){
+            $log = $mh->getSingleLog( $resourceHash );
+            if( $this->content_type == 'json' ){
+                $log[ 'response' ] = json_decode( $rawValue, true );
+            } else {
+                $log[ 'response' ] = $rawValue;
+            }
+            \Log::doJsonLog( $log );
+        }
 
         return $rawValue;
 

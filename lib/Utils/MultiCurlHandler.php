@@ -49,13 +49,19 @@ class MultiCurlHandler {
     protected $multi_curl_results = [];
 
     /**
-     * Container for the curl results
+     * Container for the curl info results
      *
      * @var array
      */
     protected $multi_curl_info = [];
 
-    public $verbose        = true;
+    /**
+     * Container for the curl logs
+     * @var array
+     */
+    protected $multi_curl_log = [];
+
+    public $verbose        = false;
     public $high_verbosity = false;
 
     /**
@@ -154,21 +160,6 @@ class MultiCurlHandler {
             //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
             $this->multi_curl_info[ $tokenHash ][ 'errno' ] = @$_info[ (int)$curl_resource ][ 'result' ];
 
-            //TIMING
-            $logging = [
-                    'Total Time'          => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ],
-                    'Connect Time'        => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_connect_time' ],
-                    'Pre-Transfer Time'   => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_pretransfer_time' ],
-                    'Start Transfer Time' => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_start_transfer_time' ],
-                    'Transfer Time'       => round( (
-                                    (
-                                            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ] -
-                                            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_start_transfer_time' ]
-                                    ) * 1000000 ) ) . "μs"
-            ];
-
-            $this->multi_curl_info[ $tokenHash ][ 'timing' ] = $logging;
-
             //HEADERS
             if ( isset( $this->curl_headers_requests[ $tokenHash ] ) ) {
                 $header                                    = substr( $this->multi_curl_results[ $tokenHash ], 0, $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ] );
@@ -180,27 +171,40 @@ class MultiCurlHandler {
                 $this->curl_headers_requests[ $tokenHash ] = $header;
             }
 
-            $logging[ "resource_hash" ] = $tokenHash;
-            $logging[ "url" ]        = $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ];
+            //TIMING nad LOGGING
+            $this->multi_curl_log[ $tokenHash ] = [];
+            $this->multi_curl_log[ $tokenHash ][ 'timing' ] = [
+                    'Total Time'          => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ],
+                    'Connect Time'        => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_connect_time' ],
+                    'Pre-Transfer Time'   => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_pretransfer_time' ],
+                    'Start Transfer Time' => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_start_transfer_time' ],
+                    'Transfer Time'       => round( (
+                                    (
+                                            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ] -
+                                            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_start_transfer_time' ]
+                                    ) * 1000000 ) ) . "μs"
+            ];
 
-            if ( $this->verbose ) {
+            $this->multi_curl_log[ $tokenHash ][ "resource_hash" ] = $tokenHash;
+            $this->multi_curl_log[ $tokenHash ][ "url" ]           = $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ];
 
-                if ( $this->high_verbosity ) {
-                    $logging[ 'options' ]                      = @$this->curl_options_requests[ $tokenHash ];
-                    $logging[ 'options' ][ "post_parameters" ] = @$this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ];
-                    unset( $logging[ 'options' ][ CURLOPT_POSTFIELDS ] );
-                } else {
-                    $logging[ 'options' ][ "post_parameters" ] = @$this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ];
-                }
-
-                if ( $this->hasError( $tokenHash ) ) {
-                    $logging[ "error" ]      = $this->getError( $tokenHash );
-                    $logging[ "error_body" ] = $this->getSingleContent( $tokenHash );
-                }
-
+            if ( $this->high_verbosity ) {
+                $this->multi_curl_log[ $tokenHash ][ 'options' ]                      = @$this->curl_options_requests[ $tokenHash ];
+                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = @$this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ];
+                unset( $this->multi_curl_info[ $tokenHash ][ 'logging' ][ 'options' ][ CURLOPT_POSTFIELDS ] );
+            } else {
+                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = @$this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ];
             }
 
-            $this->_log( $logging );
+            if ( $this->hasError( $tokenHash ) ) {
+                $this->multi_curl_log[ $tokenHash ][ "error" ]      = $this->getError( $tokenHash );
+                $this->multi_curl_log[ $tokenHash ][ "error_body" ] = $this->getSingleContent( $tokenHash );
+            }
+            //TIMING nad LOGGING
+
+            if ( $this->verbose ) {
+                $this->_log( $this->multi_curl_log[ $tokenHash ] );
+            }
 
         }
     }
@@ -305,10 +309,12 @@ class MultiCurlHandler {
     /**
      * Return all server responses
      *
+     * @param callable $function
+     *
      * @return array
      */
-    public function getAllContents() {
-        return $this->multi_curl_results;
+    public function getAllContents( Callable $function = null ) {
+        return $this->_callbackExecute( $this->multi_curl_results, $function );
     }
 
     /**
@@ -323,16 +329,25 @@ class MultiCurlHandler {
     /**
      * Get single result content from responses array by it's unique Index
      *
-     * @param $tokenHash
+     * @param               $tokenHash
+     *
+     * @param callable|null $function
      *
      * @return string|bool|null
      */
-    public function getSingleContent( $tokenHash ) {
+    public function getSingleContent( $tokenHash, Callable $function = null ) {
         if ( array_key_exists( $tokenHash, $this->multi_curl_results ) ) {
-            return $this->multi_curl_results[ $tokenHash ];
+            return $this->_callbackExecute( $this->multi_curl_results[ $tokenHash ], $function );
         }
-
         return null;
+    }
+
+    public function getSingleLog( $tokenHash ){
+        return @$this->multi_curl_log[ $tokenHash ];
+    }
+
+    public function getAllLogs(){
+        return $this->multi_curl_log;
     }
 
     /**
@@ -343,11 +358,7 @@ class MultiCurlHandler {
      * @return array|null
      */
     public function getSingleInfo( $tokenHash ) {
-        if ( array_key_exists( $tokenHash, $this->multi_curl_info ) ) {
-            return $this->multi_curl_info[ $tokenHash ];
-        }
-
-        return null;
+        return @$this->multi_curl_info[ $tokenHash ];
     }
 
     public function getOptionRequest( $tokenHash ) {
@@ -387,6 +398,35 @@ class MultiCurlHandler {
         }, array_keys( $this->multi_curl_info ) );
 
         return array_filter( $map );  // <- remove null array entries
+    }
+
+    public function clear(){
+        $this->multiCurlCloseAll();
+        $this->curl_headers_requests = [];
+        $this->curl_options_requests = [];
+        $this->multi_curl_results = [];
+        $this->multi_curl_info = [];
+        $this->multi_curl_log = [];
+    }
+
+    protected function _callbackExecute( $record, Callable $function = null ){
+
+        if( is_callable( $function ) ){
+
+            $is_array = is_array( $record );
+            if( !$is_array ){
+                $record = [ $record ];
+            }
+
+            $record = array_map( $function, $record );
+
+            if( !$is_array ){
+                $record = $record[0];
+            }
+
+        }
+
+        return $record;
     }
 
 } 

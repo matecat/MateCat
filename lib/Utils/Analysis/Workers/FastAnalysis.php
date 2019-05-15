@@ -304,8 +304,6 @@ class FastAnalysis extends AbstractDaemon {
         self::_TimeStampMsg( "Pid $pid: " . count( $this->segments ) . " segments" );
         self::_TimeStampMsg( "Sending query to MyMemory analysis..." );
 
-        $myMemory->doLog = true; //tell to the engine to not log the output
-
         /**
          * @var $result \Engines_Results_MyMemory_AnalyzeResponse
          */
