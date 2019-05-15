@@ -5,13 +5,6 @@ class QualitySummaryTable extends React.Component {
         this.lqaNestedCategories = this.props.qualitySummary.get('categories');
         this.thereAreSubCategories = false;
         this.getTotalSeverities();
-        this.qaLimit = this.props.qualitySummary.getIn(['passfail', 'options', 'limit']) ;
-        if (this.thereAreSubCategories) {
-            this.htmlBody = this.getBodyWithSubtagories();
-        } else {
-            this.htmlBody = this.getBody();
-        }
-        this.htmlHead = this.getHeader();
 
     }
     getTotalSeverities() {
@@ -124,7 +117,7 @@ class QualitySummaryTable extends React.Component {
             {html}
         </div>
     }
-    getBodyWithSubtagories() {
+    getBodyWithSubcategories() {
         let  html = [];
         this.lqaNestedCategories.forEach((cat, index)=>{
             let catHtml = [];
@@ -156,10 +149,18 @@ class QualitySummaryTable extends React.Component {
             {html}
         </div>
     }
+
     render () {
+        let htmlBody;
+        let htmlHead = this.getHeader();
+        if (this.thereAreSubCategories) {
+            htmlBody = this.getBodyWithSubcategories();
+        } else {
+            htmlBody = this.getBody();
+        }
         return <div className="qr-quality shadow-1">
-            {this.htmlHead}
-            {this.htmlBody}
+            {htmlHead}
+            {htmlBody}
         </div>
     }
 }
