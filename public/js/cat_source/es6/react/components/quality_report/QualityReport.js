@@ -101,7 +101,8 @@ class QualityReport extends React.Component {
         };
         let quality_summary;
         if ( this.state.jobInfo ) {
-            quality_summary = (this.state.revisionToShow === '1') ? 'quality_summary' : 'quality_summary_2';
+
+            quality_summary = this.state.jobInfo.get('quality_summary').find((value)=>{ return value.get('revision_number') === parseInt(this.state.revisionToShow) });
         }
         return <div className="qr-container">
                 <div className="qr-container-inside">
@@ -111,7 +112,7 @@ class QualityReport extends React.Component {
                             <div className="qr-job-summary">
                                 <div className="qr-header">
                                     <h3>QR Job Summary</h3>
-                                    { this.state.jobInfo.has('quality_summary_2') ? (
+                                    { this.state.jobInfo.get('quality_summary').size > 1 ? (
                                     <div className="qr-filter-list">
                                         <div className="filter-dropdown right-10">
                                             <div className={"filter-reviewType active"}>
@@ -143,13 +144,13 @@ class QualityReport extends React.Component {
                                     </div> ) : null }
                                 </div>
                                 <JobSummary jobInfo={this.state.jobInfo}
-                                            qualitySummary={this.state.jobInfo.get(quality_summary)}
+                                            qualitySummary={quality_summary}
                                 />
                                 <SegmentsDetails files={this.state.segmentFiles}
                                                  urls={this.state.jobInfo.get('urls')}
-                                                 categories={this.state.jobInfo.get(quality_summary).get('categories')}
+                                                 categories={quality_summary.get('categories')}
                                                  moreSegments={this.state.moreSegments}
-                                                 secondPassReviewEnabled={this.state.jobInfo.has('quality_summary_2')}
+                                                 secondPassReviewEnabled={quality_summary.has('quality_summary_2')}
                                 />
                             </div>
                         ) : (
