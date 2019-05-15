@@ -51,7 +51,7 @@ class ConvertFileWrapper extends convertFileController {
      */
     public function checkResult() {
 
-//        Log::doLog( $this->resultStack );
+//        Log::doJsonLog( $this->resultStack );
 
         $failure = false;
         foreach ( $this->resultStack as $res ) {

@@ -33,7 +33,7 @@ class copyAllSource2TargetController extends ajaxController {
         $this->id_job = $postInput[ 'id_job' ];
         $this->pass   = $postInput[ 'pass' ];
 
-        Log::doLog( "Requested massive copy-source-to-target for job $this->id_job." );
+        Log::doJsonLog( "Requested massive copy-source-to-target for job $this->id_job." );
 
         if ( empty( $this->id_job ) ) {
             $errorCode = -1;
@@ -71,7 +71,7 @@ class copyAllSource2TargetController extends ajaxController {
 
         try {
             $segments = $this->getNewSegments( $first_seg, $last_seg );
-            Log::doLog( "SEGS: " . implode( ",", $segments ) );
+            Log::doJsonLog( "SEGS: " . implode( ",", $segments ) );
 
             $affected_rows = $this->copySegmentInTranslation( $first_seg, $last_seg );
         } catch ( Exception $e ) {
@@ -87,7 +87,7 @@ class copyAllSource2TargetController extends ajaxController {
                 'code'              => 1,
                 'segments_modified' => $affected_rows
         );
-        Log::doLog( $this->result[ 'data' ] );
+        Log::doJsonLog( $this->result[ 'data' ] );
     }
 
 
@@ -195,7 +195,7 @@ class copyAllSource2TargetController extends ajaxController {
      * @param $errorCode int
      */
     private function addError( $errorCode ) {
-        Log::doLog( $this->getErrorMessage( $errorCode ) );
+        Log::doJsonLog( $this->getErrorMessage( $errorCode ) );
         $this->result[ 'errors' ][] = array(
                 'code'    => $errorCode,
                 'message' => $this->getOutputErrorMessage( $errorCode )

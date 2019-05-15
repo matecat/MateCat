@@ -78,7 +78,7 @@ class TMSService {
         } catch ( Exception $e ) {
 
             /* PROVIDED KEY IS NOT VALID OR WRONG, Key IS NOT SET */
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
             throw $e;
 
         }
@@ -98,7 +98,7 @@ class TMSService {
         try {
             $newUser = $this->mymemory_engine->createMyMemoryKey();
         } catch ( Exception $e ) {
-            //            Log::doLog( $e->getMessage() );
+            //            Log::doJsonLog( $e->getMessage() );
             throw new Exception( $e->getMessage(), -7 );
         }
 
@@ -119,7 +119,7 @@ class TMSService {
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
 
         } catch ( Exception $e ) {
-//            Log::doLog( $e->getMessage() );
+//            Log::doJsonLog( $e->getMessage() );
             throw new Exception( $e->getMessage(), -8 );
         }
 
@@ -134,7 +134,7 @@ class TMSService {
     public function addTmxInMyMemory() {
         $this->checkCorrectKey();
 
-        Log::doLog( $this->file );
+        Log::doJsonLog( $this->file );
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
@@ -178,7 +178,7 @@ class TMSService {
 
         $this->checkCorrectKey();
 
-        Log::doLog( $this->file );
+        Log::doJsonLog( $this->file );
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
@@ -229,11 +229,11 @@ class TMSService {
 
         $allMemories = $this->mymemory_engine->getStatus( $this->tm_key, $name_space_replaced );
 
-//        Log::doLog( $allMemories );
+//        Log::doJsonLog( $allMemories );
 
         if ( $allMemories->responseStatus != "200" || count( $allMemories->responseData[ 'tm' ] ) == 0 ) {
 
-            Log::doLog( "Can't find TMX files to check for status" );
+            Log::doJsonLog( "Can't find TMX files to check for status" );
 
             //what the hell? No memories although I've just loaded some? Eject!
             throw new Exception( "Can't find TMX files to check for status", -15 );
@@ -259,7 +259,7 @@ class TMSService {
             case "0":
                 //wait for the daemon to process it
                 //LOADING
-                Log::doLog( "waiting for \"" . $current_tm[ 'file_name' ] . "\" to be loaded into MyMemory" );
+                Log::doJsonLog( "waiting for \"" . $current_tm[ 'file_name' ] . "\" to be loaded into MyMemory" );
                 $result[ 'data' ]      = array(
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
@@ -271,7 +271,7 @@ class TMSService {
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
-                Log::doLog( "\"" . $current_tm[ 'file_name' ] . "\" has been loaded into MyMemory" );
+                Log::doJsonLog( "\"" . $current_tm[ 'file_name' ] . "\" has been loaded into MyMemory" );
                 $result[ 'data' ]      = array(
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],

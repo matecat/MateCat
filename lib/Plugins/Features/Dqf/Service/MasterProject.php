@@ -36,7 +36,7 @@ class MasterProject {
 
         $content = json_decode( $client->curl()->getSingleContent( $request ), true );
 
-        Log::doLog( var_export( $content, true ) ) ;
+        Log::doJsonLog( var_export( $content, true ) ) ;
 
         if ( $client->curl()->hasError( $request ) ) {
             throw new Exception('Error during project creation: ' . json_encode( $client->curl()->getErrors() ) ) ;
@@ -66,7 +66,7 @@ class MasterProject {
 
         $content = json_decode( $client->curl()->getSingleContent( $request ), true );
 
-        Log::doLog( var_export( $content, true ) ) ;
+        Log::doJsonLog( var_export( $content, true ) ) ;
 
         if ( $client->curl()->hasError( $request ) ) {
             throw new Exception('Error while fetching project: ' . json_encode( $client->curl()->getErrors() ) ) ;

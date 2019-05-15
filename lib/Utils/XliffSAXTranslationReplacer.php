@@ -198,7 +198,7 @@ class XliffSAXTranslationReplacer {
                 if ( $name == 'file' && $k == 'target-language' && !empty( $this->target_lang ) ) {
                     //replace Target language with job language provided from constructor
                     $tag .= "$k=\"$this->target_lang\" ";
-                    //Log::doLog($k . " => " . $this->target_lang);
+                    //Log::doJsonLog($k . " => " . $this->target_lang);
                 } else {
                     //put attributes in it
                     $tag .= "$k=\"$v\" ";
@@ -326,7 +326,7 @@ class XliffSAXTranslationReplacer {
                     if ( $warning ) {
                         $old_fname     = Log::$fileName;
                         Log::$fileName = "XliffSax_Polling.log";
-                        Log::doLog( "WARNING: PHP Notice polling. CurrentId: '" . $this->currentId . "' - Filename: '" . $this->segments[ 0 ][ 'filename' ] . "' - First Segment: '" . $this->segments[ 0 ][ 'sid' ] . "'" );
+                        Log::doJsonLog( "WARNING: PHP Notice polling. CurrentId: '" . $this->currentId . "' - Filename: '" . $this->segments[ 0 ][ 'filename' ] . "' - First Segment: '" . $this->segments[ 0 ][ 'sid' ] . "'" );
                         Log::$fileName = $old_fname;
                     }
 
@@ -515,20 +515,24 @@ class XliffSAXTranslationReplacer {
     protected function prepareSegment( $seg, $trans_unit_translation = "" ) {
         $end_tags = "";
 
+        $channel = new SubFiltering\Filters\RemoveDangerousChars();
+        $segment = $channel->transform( $seg [ 'segment' ] );
+        $translation = $channel->transform( $seg [ 'translation' ] );
+
         //We don't need transform/sanitize from wiew to xliff because the values comes from Database
         //QA non sense for source/source check, until source can be changed. For now SKIP
         if ( is_null( $seg [ 'translation' ] ) || $seg [ 'translation' ] == '' ) {
-            $translation = $seg [ 'segment' ];
+            $translation = $segment;
         } else {
 
-            $translation = $seg [ 'translation' ];
             if ( empty( $seg[ 'locked' ] ) ) {
                 //consistency check
-                $check = new QA ( $this->filter->fromLayer0ToLayer1( $seg [ 'segment' ] ), $this->filter->fromLayer0ToLayer1( $translation ) );
+                $check = new QA ( $this->filter->fromLayer0ToLayer1( $segment ), $this->filter->fromLayer0ToLayer1( $translation ) );
+                $check->setFeatureSet( $this->featureSet );
                 $check->performTagCheckOnly();
                 if ( $check->thereAreErrors() ) {
-                    $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg [ 'segment' ] . '|||UNTRANSLATED_CONTENT_END|||';
-                    Log::doLog( "tag mismatch on\n" . print_r( $seg, true ) . "\n(because of: " . print_r( $check->getErrors(), true ) . ")" );
+                    $translation = '|||UNTRANSLATED_CONTENT_START|||' . $segment . '|||UNTRANSLATED_CONTENT_END|||';
+                    Log::doJsonLog( "tag mismatch on\n" . print_r( $seg, true ) . "\n(because of: " . print_r( $check->getErrors(), true ) . ")" );
                 }
             }
 

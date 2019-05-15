@@ -114,7 +114,7 @@ class ConversionHandler {
             $cachedXliffPath = $fs->getXliffFromCache( $sha1, $this->source_lang );
 
             if ( !$cachedXliffPath ) {
-                Log::doLog( "Failed to fetch xliff for $sha1 from disk cache (is file there?)" );
+                Log::doJsonLog( "Failed to fetch xliff for $sha1 from disk cache (is file there?)" );
             }
         }
 
@@ -272,7 +272,7 @@ class ConversionHandler {
 
         } catch ( Exception $e ) {
 
-            Log::doLog( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
+            Log::doJsonLog( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
             $this->result[ 'errors' ] [] = [
                     'code'    => $e->getCode(),
                     'message' => "Zip error: " . $e->getMessage(),

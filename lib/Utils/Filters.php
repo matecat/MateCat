@@ -47,7 +47,7 @@ class Filters {
             }
 
             $url = rtrim(INIT::$FILTERS_ADDRESS, '/') . $endpoint;
-            Log::doLog( "Calling: " . $url );
+            Log::doJsonLog( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
         }
@@ -195,7 +195,7 @@ class Filters {
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
                 ) );
         } catch ( Exception $ex ) {
-            Log::doLog( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
+            Log::doJsonLog( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
             return;
         }
 
@@ -228,9 +228,9 @@ class Filters {
         try {
             $preparedStatement = $conn->prepare( $query );
             $preparedStatement->execute( array_values( $info ) );
-            Log::doLog( $info );
+            Log::doJsonLog( $info );
         } catch ( Exception $ex ) {
-            Log::doLog( "Unable to log the conversion: " . $ex->getMessage() );
+            Log::doJsonLog( "Unable to log the conversion: " . $ex->getMessage() );
         }
 
         if ( $response[ 'isSuccess' ] !== true ) {
@@ -261,7 +261,7 @@ class Filters {
         $backupFile = $backupDir . DIRECTORY_SEPARATOR . date( "His" ) . '-' . basename( $sentFile );
 
         if ( !rename( $sentFile, $backupFile ) ) {
-            Log::doLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
+            Log::doJsonLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
         } else {
             $sentFile = $backupFile;
         }

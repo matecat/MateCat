@@ -12,6 +12,9 @@ CHECK_FS = no
 
 [development]
 CLI_HTTP_HOST = "http://localhost" ; Set the hostname for batch processes ( they do not know the global variable $_SERVER )
+COOKIE_DOMAIN = "localhost"
+ENABLE_MULTI_DOMAIN_API = no
+
 DB_SERVER = "localhost"
 DB_DATABASE = "matecat"
 DB_USER = "matecat_user"
@@ -21,7 +24,7 @@ REDIS_SERVERS = "tcp://localhost:6379?database=0"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
+SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
@@ -56,6 +59,9 @@ DQF_GENERIC_PASSWORD = "generic-user-password"
 ;----------------------------------------
 [staging]
 CLI_HTTP_HOST = "http://localhost" ; Set the hostname for batch processes ( they do not know the global variable $_SERVER )
+COOKIE_DOMAIN = "localhost"
+ENABLE_MULTI_DOMAIN_API = no
+
 DB_SERVER = "localhost"
 DB_DATABASE = "matecat"
 DB_USER = "matecat_user"
@@ -65,7 +71,7 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
+SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
@@ -87,6 +93,9 @@ LXQ_PARTNERID = false
 ;----------------------------------------
 [production]
 CLI_HTTP_HOST = "http://localhost" ; Set the hostname for batch processes ( they do not know the global variable $_SERVER )
+COOKIE_DOMAIN = "localhost"
+ENABLE_MULTI_DOMAIN_API = no
+
 DB_SERVER = "localhost"
 DB_DATABASE = "matecat"
 DB_USER = "matecat"
@@ -96,7 +105,7 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-SSE_BASE_URL = "http://localhost/sse"          ;no trailing slash here
+SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'

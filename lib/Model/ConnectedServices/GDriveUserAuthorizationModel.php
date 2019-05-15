@@ -41,8 +41,8 @@ class GDriveUserAuthorizationModel {
         $this->__collectProperties( $code );
 
         // We have the user info email and name, we can save it along with the gdrive token to identify it.
-        \Log::doLog( $this->token ) ;
-        \Log::doLog( $this->userInfo ) ;
+        \Log::doJsonLog( $this->token ) ;
+        \Log::doJsonLog( $this->userInfo ) ;
 
         $dao = new ConnectedServiceDao();
         $service = $dao->findUserServicesByNameAndEmail(

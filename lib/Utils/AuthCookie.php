@@ -18,7 +18,7 @@ class AuthCookie {
     //set a cookie with a username
     public static function setCredentials( $username, $uid ) {
         list( $new_cookie_data, $new_expire_date ) = static::generateSignedAuthCookie( $username, $uid );
-        setcookie( INIT::$AUTHCOOKIENAME, $new_cookie_data, $new_expire_date, '/' );
+        setcookie( INIT::$AUTHCOOKIENAME, $new_cookie_data, $new_expire_date, '/', \INIT::$COOKIE_DOMAIN  );
     }
 
     public static function generateSignedAuthCookie( $username, $uid ) {
@@ -35,7 +35,7 @@ class AuthCookie {
 
     public static function destroyAuthentication() {
         unset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
-        setcookie( INIT::$AUTHCOOKIENAME, '', 0, '/' );
+        setcookie( INIT::$AUTHCOOKIENAME, '', 0, '/', \INIT::$COOKIE_DOMAIN  );
         session_destroy();
     }
 
@@ -50,7 +50,7 @@ class AuthCookie {
             try {
                 return SimpleJWT::getValidPayload( $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
             } catch ( DomainException $e ) {
-                Log::doLog( $e->getMessage() . " " . $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
+                Log::doJsonLog( $e->getMessage() . " " . $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
                 self::destroyAuthentication();
             }
         }

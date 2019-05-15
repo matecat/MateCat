@@ -32,19 +32,16 @@ class MMTServiceAPIWrapper extends MMTServiceApi {
         $handler->multiExec();
         $handler->multiCurlCloseAll();
         $rawContent = $handler->getSingleContent( $resource );
-        Log::doLog( "$resource ... Received... " . var_export( $rawContent, true ) );
+
+        $log = $handler->getSingleLog( $resource );
+        $log[ 'response' ] = $rawContent;
+        Log::doJsonLog( $log );
+
         return $rawContent;
 
     }
 
     public function close_curl( $curl ) {}
-
-    protected function send( $method, $url, $params = null, $multipart = FALSE, $timeout = null) {
-        if ( !$multipart && $params ) {
-            Log::doLog( "... Request Parameters ... " . var_export( http_build_query( $params ), true ) );
-        }
-        return parent::send( $method, $url, $params, $multipart, $timeout );
-    }
 
     protected function curl_get_error_number( $curlResource ){
         return $this->curlHandler->getError( $this->resourceHash )[ 'errno' ];

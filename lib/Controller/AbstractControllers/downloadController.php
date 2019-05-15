@@ -113,6 +113,8 @@ abstract class downloadController extends controller {
                             "message" => "Download complete."
                     ] ) : json_encode( $tokenContent ) ),
                     2147483647            // expires January 1, 2038
+                    , '/',
+                    \INIT::$COOKIE_DOMAIN
             );
             $this->downloadToken = null;
         }

@@ -53,14 +53,14 @@ class GDriveController extends KleinController {
     private function doImport() {
 
         $state = json_decode( $this->request->param('state'), TRUE );
-        \Log::doLog( $state );
+        \Log::doJsonLog( $state );
 
         // TODO: check why this is necessary here.
         if ( $this->isAsyncReq && $this->gdriveUserSession->hasFiles() ) {
             $this->guid = $_SESSION[ "upload_session" ];
         } else {
             $this->guid = Utils::createToken();
-            setcookie( "upload_session", $this->guid, time() + 86400, '/' );
+            setcookie( "upload_session", $this->guid, time() + 86400, '/', \INIT::$COOKIE_DOMAIN );
             $_SESSION[ "upload_session" ] = $this->guid;
 
             $this->gdriveUserSession->clearFiles();
@@ -98,7 +98,7 @@ class GDriveController extends KleinController {
                 }
             }
         } else {
-            setcookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
+            setcookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
         }
 
         if ( isset ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
@@ -111,7 +111,7 @@ class GDriveController extends KleinController {
                 }
             }
         } else {
-            setcookie( Constants::COOKIE_TARGET_LANG, Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
+            setcookie( Constants::COOKIE_TARGET_LANG, Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
         }
 
         $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
@@ -158,7 +158,7 @@ class GDriveController extends KleinController {
 
             $newCookieVal = $newSourceLang . '||' . $ckSourceLang;
 
-            setcookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/' );
+            setcookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
         } else {
             $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $originalSourceLang;
         }

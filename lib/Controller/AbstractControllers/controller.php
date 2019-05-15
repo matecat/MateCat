@@ -7,11 +7,14 @@
  */
 
 use AbstractControllers\IController;
+use AbstractControllers\TimeLogger;
 
 /**
  * Abstract Class controller
  */
 abstract class controller implements IController {
+
+    use TimeLogger;
 
     protected $model;
     protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
@@ -54,7 +57,7 @@ abstract class controller implements IController {
         return $this->user;
     }
 
-    public function userIsLogged(){
+    public function userIsLogged() {
         return $this->userIsLogged;
     }
 
@@ -68,17 +71,19 @@ abstract class controller implements IController {
      */
     public static function getInstance() {
 
-        if( isset( $_REQUEST['api'] ) && filter_input( INPUT_GET, 'api', FILTER_VALIDATE_BOOLEAN ) ){
+        if ( isset( $_REQUEST[ 'api' ] ) && filter_input( INPUT_GET, 'api', FILTER_VALIDATE_BOOLEAN ) ) {
 
-            if( !isset( $_REQUEST['action'] ) || empty( $_REQUEST['action'] ) ){
+            if ( !isset( $_REQUEST[ 'action' ] ) || empty( $_REQUEST[ 'action' ] ) ) {
                 header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "api/docs", true, 303 ); //Redirect 303 See Other
                 die();
             }
 
-            $_REQUEST[ 'action' ][0] = strtoupper( $_REQUEST[ 'action' ][ 0 ] );
-            $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', function ( $c ) { return strtoupper( $c[ 1 ] ); }, $_REQUEST[ 'action' ] );
+            $_REQUEST[ 'action' ][ 0 ] = strtoupper( $_REQUEST[ 'action' ][ 0 ] );
+            $_REQUEST[ 'action' ]      = preg_replace_callback( '/_([a-z])/', function ( $c ) {
+                return strtoupper( $c[ 1 ] );
+            }, $_REQUEST[ 'action' ] );
 
-            $_POST[ 'action' ]    = $_REQUEST[ 'action' ];
+            $_POST[ 'action' ] = $_REQUEST[ 'action' ];
 
             //set the log to the API Log
             Log::$fileName = 'API.log';
@@ -86,10 +91,10 @@ abstract class controller implements IController {
         }
 
         //Default :  catController
-        $action = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );
+        $action     = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );
         $actionList = explode( '\\', $action ); // do not accept namespaces ( Security issue: directory traversal )
-        $action = end( $actionList ); // do not accept namespaces ( Security issue: directory traversal )
-        $className = $action . "Controller";
+        $action     = end( $actionList ); // do not accept namespaces ( Security issue: directory traversal )
+        $className  = $action . "Controller";
 
         //Put here all actions we want to be performed by ALL controllers
         require_once INIT::$MODEL_ROOT . '/queries.php';
@@ -117,14 +122,14 @@ abstract class controller implements IController {
      *
      */
     protected function nocache() {
-        header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
-        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-        header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-        header("Cache-Control: post-check=0, pre-check=0", false);
-        header("Pragma: no-cache");
+        header( "Expires: Tue, 03 Jul 2001 06:00:00 GMT" );
+        header( "Last-Modified: " . gmdate( "D, d M Y H:i:s" ) . " GMT" );
+        header( "Cache-Control: no-store, no-cache, must-revalidate, max-age=0" );
+        header( "Cache-Control: post-check=0, pre-check=0", false );
+        header( "Pragma: no-cache" );
     }
 
-    public function sessionStart(){
+    public function sessionStart() {
         Bootstrap::sessionStart();
     }
 
@@ -134,15 +139,14 @@ abstract class controller implements IController {
      * Sessions enabled on INIT Class
      *
      */
-    public function disableSessions(){
+    public function disableSessions() {
         Bootstrap::sessionClose();
     }
 
     /**
      * @return mixed
      */
-    public function getModel()
-    {
+    public function getModel() {
         return $this->model;
     }
 
@@ -154,8 +158,8 @@ abstract class controller implements IController {
 
         try {
 
-            $userDao    = new Users_UserDao( Database::obtain() );
-            $loggedUser = $userDao->setCacheTTL( 3600 )->read( $this->user )[ 0 ]; // one hour cache
+            $userDao            = new Users_UserDao( Database::obtain() );
+            $loggedUser         = $userDao->setCacheTTL( 3600 )->read( $this->user )[ 0 ]; // one hour cache
             $this->userIsLogged = (
                     !empty( $loggedUser->uid ) &&
                     !empty( $loggedUser->email ) &&
@@ -164,7 +168,7 @@ abstract class controller implements IController {
             );
 
         } catch ( Exception $e ) {
-            Log::doLog( 'User not logged.' );
+            Log::doJsonLog( 'User not logged.' );
         }
         $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
 
@@ -178,8 +182,8 @@ abstract class controller implements IController {
         if ( empty( $_SESSION[ 'cid' ] ) ) {
             $username_from_cookie = AuthCookie::getCredentials();
             if ( $username_from_cookie ) {
-                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
-                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
+                $_SESSION[ 'cid' ] = $username_from_cookie[ 'username' ];
+                $_SESSION[ 'uid' ] = $username_from_cookie[ 'uid' ];
             }
         }
     }

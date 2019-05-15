@@ -86,8 +86,8 @@ class ProjectValidator extends Base {
     }
 
     private function inProjectScope() {
-        Log::doLog( $this->api_record->getUser()->email );
-        Log::doLog( $this->project->id_customer );
+        Log::doJsonLog( $this->api_record->getUser()->email );
+        Log::doJsonLog( $this->project->id_customer );
 
         return $this->api_record->getUser()->email == $this->project->id_customer;
     }

@@ -544,7 +544,6 @@ class TMAnalysisWorker extends AbstractWorker {
          * @var $tmsEngine \Engines_MyMemory
          */
         $tmsEngine->setFeatureSet( $this->featureSet );
-        $tmsEngine->doLog = true;
 
         $config = $tmsEngine->getConfigStruct();
         $config = array_merge( $config, $_config );

@@ -25,7 +25,7 @@ class Activity {
             $output  = "**** Activity Log failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $activityLog, true );
-            Log::doLog( $output );
+            Log::doJsonLog( $output );
             Utils::sendErrMailReport( $output );
 
         }

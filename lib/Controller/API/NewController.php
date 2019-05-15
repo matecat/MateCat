@@ -148,7 +148,7 @@ class NewController extends ajaxController {
         } catch( Exception $ex ){
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ] = $ex->getMessage();
-            Log::doLog( $ex->getMessage() );
+            Log::doJsonLog( $ex->getMessage() );
             return $ex->getCode();
         }
 
@@ -322,7 +322,7 @@ class NewController extends ajaxController {
         //for now we sent to api output only the LAST error message, but we log all
         if ( !empty( $this->result[ 'errors' ] ) ) {
             $msg = "Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
-            Log::doLog( $msg );
+            Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
 
             return -1; //exit code
@@ -354,7 +354,7 @@ class NewController extends ajaxController {
 
                 $fileObjects = $conversionHandler->extractZipFile();
 
-                \Log::doLog( 'fileObjets', $fileObjects );
+                \Log::doJsonLog( 'fileObjets', $fileObjects );
 
                 //call convertFileWrapper and start conversions for each file
 
@@ -479,7 +479,7 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ] = 'Project Conversion Failure';
             $this->api_output[ 'debug' ]   = $status;
             $this->result[ 'errors' ]      = $status;
-            Log::doLog( $status );
+            Log::doJsonLog( $status );
 
             return -1;
         }
@@ -688,7 +688,7 @@ class NewController extends ajaxController {
                 return false;
             }
 
-            Log::doLog( $key );
+            Log::doJsonLog( $key );
             $this->user = $key->getUser();
 
             $this->userIsLogged = (
@@ -735,7 +735,7 @@ class NewController extends ajaxController {
             $assoc                     = true;
             $this->postInput[ 'metadata' ] = html_entity_decode( $this->postInput[ 'metadata' ] );
             $this->metadata            = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
-            Log::doLog( "Passed parameter metadata as json string." );
+            Log::doJsonLog( "Passed parameter metadata as json string." );
         }
 
         //override metadata with explicitly declared keys ( we maintain metadata for backward compatibility )

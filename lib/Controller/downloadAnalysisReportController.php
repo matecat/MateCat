@@ -60,7 +60,7 @@ class downloadAnalysisReportController extends downloadController {
         //check for Password correctness
         if ( !$access ) {
             $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            Log::doLog( $msg );
+            Log::doJsonLog( $msg );
             Utils::sendErrMailReport( $msg );
             return null;
         }

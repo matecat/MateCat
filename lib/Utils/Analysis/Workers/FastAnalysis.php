@@ -304,8 +304,6 @@ class FastAnalysis extends AbstractDaemon {
         self::_TimeStampMsg( "Pid $pid: " . count( $this->segments ) . " segments" );
         self::_TimeStampMsg( "Sending query to MyMemory analysis..." );
 
-        $myMemory->doLog = true; //tell to the engine to not log the output
-
         /**
          * @var $result \Engines_Results_MyMemory_AnalyzeResponse
          */
@@ -454,7 +452,7 @@ class FastAnalysis extends AbstractDaemon {
 
                 } elseif( $perform_Tms_Analysis ) {
 
-                    Log::doLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
+                    Log::doJsonLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
                     // this segment must not be sent to the TM analysis queue
                     unset( $this->segments[ $k ] );
 
@@ -687,7 +685,7 @@ HD;
         try {
             $results = $db->fetch_array( $query );
         } catch ( PDOException $e ) {
-            Log::doLog( $e->getMessage() );
+            Log::doJsonLog( $e->getMessage() );
             throw $e;
         }
 

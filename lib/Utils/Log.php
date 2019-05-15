@@ -15,11 +15,9 @@ if ( @include 'vendor/autoload.php' ) {
     Log::$useMonolog = true;
 }
 
-use Monolog\Logger;
-use Monolog\Handler\RedisHandler;
-use Monolog\Formatter\LogstashFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 
 class Log {
 
@@ -52,8 +50,8 @@ class Log {
 
             try {
 
-                self::initMonolog() ;
-                self::$logger->debug( rtrim( $stringData ) );
+                self::initMonolog();
+                self::$logger->debug( $stringData );
 
             } catch ( Exception $e ) {
                 file_put_contents( self::getFileNamePath(), $stringData, FILE_APPEND );
@@ -67,9 +65,9 @@ class Log {
 
     protected static function initMonolog() {
         $fileHandler   = new StreamHandler( self::getFileNamePath() );
-        $fileFormatter = new LineFormatter( null, null, true, true );
+        $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
         $fileHandler->setFormatter( $fileFormatter );
-        self::$logger = new Logger( 'MateCat', array( $fileHandler ) );
+        self::$logger = new Logger( 'MateCat', [ $fileHandler ] );
     }
 
     protected static function getFileNamePath() {
@@ -78,7 +76,8 @@ class Log {
         } else {
             $name = LOG_REPOSITORY . "/" . LOG_FILENAME;
         }
-        return $name ;
+
+        return $name;
     }
 
     protected static function _getHeader() {
@@ -105,6 +104,28 @@ class Log {
 
     }
 
+    public static function getContext() {
+
+        $trace = debug_backtrace( 2 );
+        $_ip   = Utils::getRealIpAddr();
+
+        $context         = [];
+        $context[ 'ip' ] = !empty( $_ip ) ? $_ip : gethostbyname( gethostname() );
+
+        if ( isset( $trace[ 3 ][ 'class' ] ) ) {
+            $context[ 'class' ] = $trace[ 3 ][ 'class' ];
+        }
+
+        if ( isset( $trace[ 3 ][ 'function' ] ) ) {
+            $context[ 'function' ] = $trace[ 3 ][ 'function' ];
+        }
+
+        $context[ 'line' ] = $trace[ 2 ][ 'line' ];
+
+        return $context;
+
+    }
+
     public static function doLog() {
 
         $head = self::_getHeader();
@@ -121,34 +142,40 @@ class Log {
 
         }
 
-        self::_writeTo( $string );
+        self::_writeTo( rtrim( $string ) );
     }
 
-    public static function doLogRaw($string, $filename=null) {
+    public static function doJsonLog( $content, $filename = null ) {
         if ( !is_null( $filename ) ) {
-            $old_name = Log::$fileName ;
-            Log::$fileName = $filename ;
+            $old_name      = Log::$fileName;
+            Log::$fileName = $filename;
         }
 
-        self::_writeTo( $string );
+        $_logObject = [
+                "log" => [
+                        "token_hash" => self::$uniqID,
+                        "context"    => self::getContext(),
+                        "time"       => time(),
+                        "date"       => date( DATE_W3C ),
+                        "content"    => $content
+                ]
+        ];
+
+        self::_writeTo( json_encode( $_logObject ) );
 
         if ( !is_null( $filename ) ) {
-            Log::$fileName = $old_name ;
+            Log::$fileName = $old_name;
         }
-    }
-
-    public static function doJsonLog( $content, $filename = null ){
-        self::doLog( $content );
     }
 
     public static function getLogger() {
         if ( !self::$useMonolog ) {
-            throw new Exception('Logger is not set. Is monolog available?');
+            throw new Exception( 'Logger is not set. Is monolog available?' );
         }
 
-        self::initMonolog() ;
+        self::initMonolog();
 
-        return self::$logger ;
+        return self::$logger;
     }
 
     /**
@@ -191,7 +218,7 @@ class Log {
             }
 
             if ( $j === 7 ) {
-                $hexi .= ' ';
+                $hexi  .= ' ';
                 $ascii .= ' ';
             }
 
@@ -201,9 +228,9 @@ class Log {
                 $dump .= sprintf( "%04$x  %-49s  %s", $offset, $hexi, $ascii );
 
                 // Reset vars
-                $hexi = $ascii = '';
+                $hexi   = $ascii = '';
                 $offset += 16;
-                $j = 0;
+                $j      = 0;
 
                 // Add newline            
                 if ( $i !== $len - 1 ) {
@@ -230,15 +257,16 @@ class Log {
      * Ugly workaround to reset the logger, so the method _writeTo re-initialize the logger configuration
      *
      */
-    public static function resetLogger(){
+    public static function resetLogger() {
         self::$logger = null;
     }
 
     public static function getRequestID() {
-        if ( self::$requestID  == null ) {
-            self::$requestID = uniqid() ;
+        if ( self::$requestID == null ) {
+            self::$requestID = uniqid();
         }
-        return self::$requestID ;
+
+        return self::$requestID;
     }
 
 }

@@ -279,7 +279,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 AND jobs.id_project = :id_project
                 ";
 
-        \Log::doLog( $sql );
+        \Log::doJsonLog( $sql );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

@@ -13,7 +13,7 @@ class EntryDao extends \DataAccess_AbstractDao {
             " qa_entry_comments WHERE id_qa_entry = :id " .
             " ) WHERE id = :id ";
 
-        \Log::doLog( $sql );
+        \Log::doJsonLog( $sql );
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -167,7 +167,7 @@ class EntryDao extends \DataAccess_AbstractDao {
      * required on the clients.
      */
     private static function ensureStartAndStopPositionAreOrdered($data) {
-        \Log::doLog( $data );
+        \Log::doJsonLog( $data );
 
         if ( $data['start_node'] == $data['end_node'] ) {
             // if start node and stop node are the same, just order the offsets if needed

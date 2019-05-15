@@ -292,7 +292,7 @@ class FeatureSet {
                         throw $e;
                     }
                     catch ( Exception $e ) {
-                        Log::doLog("Exception running filter " . $method . ": " . $e->getMessage() );
+                        Log::doJsonLog("Exception running filter " . $method . ": " . $e->getMessage() );
                     }
                 }
             }

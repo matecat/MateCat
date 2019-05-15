@@ -125,18 +125,27 @@ APP = {
             checkbox_label: options['checkbox-label']
         } );
     },
+    getRandomUrl : function() {
+
+        if ( config.enableMultiDomainApi ) {
+            return '//' + Math.floor(Math.random() * config.ajaxDomainsNumber ) + '.ajax.' + location.host + '/';
+        }
+        return config.basepath;
+
+    },
     doRequest: function ( req, log ) {
 
         var logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
         var version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
-        var builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        var builtURL = (req.url) ? req.url : this.getRandomUrl() + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
         var reqType = (req.type) ? req.type : 'POST';
         var setup = {
             url: builtURL,
 
 			data: req.data,
 			type: reqType,
-			dataType: 'json'
+			dataType: 'json',
+            xhrFields: { withCredentials: true },
 			//TODO set timeout longer than server curl for TM/MT
 		};
 

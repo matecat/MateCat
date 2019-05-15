@@ -249,7 +249,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         foreach ( $res as $jobCredentials => $outsourceInfo ) {
             $result_outsource = json_decode( $outsourceInfo, true );
 
-            Log::doLog( $outsourceInfo );
+            Log::doJsonLog( $outsourceInfo );
 
             // if some error occurred, or the job has not been outsourced yet, then skip this job
             if( $result_outsource[ "code" ] != 1 || $result_outsource[ "outsourced" ] != 1 ) {
@@ -348,7 +348,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                     'of'            => 'json'
             ], PHP_QUERY_RFC3986 );
 
-            Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
+            Log::doJsonLog( "Not Found in Cache. Call url for Quote:  " . $url );
             $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
 
         }
@@ -366,16 +366,16 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
             // if some error occurred, log it and skip this job
             if ( $mh->hasError( $jpid ) ) {
-                Log::doLog( $mh->getError( $jpid ) );
+                Log::doJsonLog( $mh->getError( $jpid ) );
                 continue;
             }
 
-            Log::doLog( $quote );
+            Log::doJsonLog( $quote );
 
             // parse the result and check if the vendor returned some error. In case, skip the quote
             $result_quote = json_decode( $quote, TRUE );
             if ( $result_quote[ 'code' ] != 1 ) {
-                Log::doLog( "HTS returned an error. Skip quote" );
+                Log::doJsonLog( "HTS returned an error. Skip quote" );
                 continue;
             }
 
@@ -388,7 +388,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             // See GUIDE->"NORMAL QUOTES vs OUTSOURCED QUOTES" for details
             $this->__addCartElement( $itemCart );
 
-            Log::doLog( $itemCart );
+            Log::doJsonLog( $itemCart );
         }
     }
 

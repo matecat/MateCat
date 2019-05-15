@@ -29,10 +29,13 @@ $.extend( UI, {
         return false;
     },
     reloadQualityReport : function() {
-        var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
+        var path  = sprintf(APP.getRandomUrl() + 'api/v2/jobs/%s/%s/quality-report',
             config.id_job, config.password);
-
-        $.getJSON( path )
+        $.ajax( {
+            type: "GET",
+            xhrFields: {withCredentials: true},
+            url: path
+        })
             .done( function( data ) {
                 var review = data['quality-report'].chunk.review ;
 

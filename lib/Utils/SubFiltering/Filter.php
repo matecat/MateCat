@@ -26,6 +26,7 @@ use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\MateCatCustomPHToStandardPH;
 use SubFiltering\Filters\PlaceHoldCtrlCharsForView;
 use SubFiltering\Filters\PlaceHoldXliffTags;
+use SubFiltering\Filters\RemoveDangerousChars;
 use SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use SubFiltering\Filters\RestoreSubFilteredPhToHtml;
@@ -37,6 +38,7 @@ use SubFiltering\Filters\StandardPHToMateCatCustomPH;
 use SubFiltering\Filters\SubFilteredPhToHtml;
 use SubFiltering\Filters\TwigToPh;
 use SubFiltering\Filters\UnicodeToEntities;
+use SubFiltering\Filters\SplitPlaceholder;
 
 /**
  * Class Filter
@@ -332,6 +334,7 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new RemoveDangerousChars() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */

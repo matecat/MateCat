@@ -50,7 +50,7 @@ class Chunks_ChunkCompletionUpdateDao extends DataAccess_AbstractDao {
 
         $sql = $sql . implode( $conditions );
 
-        \Log::doLog( $sql );
+        \Log::doJsonLog( $sql );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

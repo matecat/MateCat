@@ -30,18 +30,23 @@ class INIT {
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
+    public static $CLI_HTTP_HOST;
+    public static $COOKIE_DOMAIN;
+    public static $AJAX_DOMAINS            = 100;
     public static $PROTOCOL;
-    public static $DEBUG               = true;
-    public static $PRINT_ERRORS        = false;
+    public static $DEBUG                   = true;
+    public static $PRINT_ERRORS            = false;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
-    public static $INSTANCE_ID         = 0;
-    public static $REDIS_SERVERS       = array();
+    public static $INSTANCE_ID             = 0;
+    public static $REDIS_SERVERS           = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
-    public static $USE_COMPILED_ASSETS = false;
+    public static $USE_COMPILED_ASSETS     = false;
+    public static $ENABLE_MULTI_DOMAIN_API = false;
+
 
     /**
      * Use or not the js tracking codes macro import ( Ex: google analytics code injection )
@@ -97,7 +102,7 @@ class INIT {
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
-    public static $AUTHCOOKIENAME = 'matecat_login_v4';
+    public static $AUTHCOOKIENAME = 'matecat_login_v5';
     public static $SUPPORT_MAIL = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
