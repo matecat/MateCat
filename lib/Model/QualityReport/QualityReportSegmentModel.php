@@ -14,7 +14,7 @@ use Constants;
 use Constants_Revise;
 use Constants_TranslationStatus;
 use Features\ReviewExtended\Model\QualityReportDao;
-use Features\ReviewExtended\Model\QualityReportModel;
+use Features\SecondPassReview;
 use Features\TranslationVersions;
 use FeatureSet;
 use LQA\CategoryDao;
@@ -137,10 +137,6 @@ class QualityReportSegmentModel {
             }
 
         } else {
-
-            if ( !isset( $segments_revisions ) ) {
-            }
-
             $last_translations = $this->makeSegmentsVersionsUniform( $segments_id );
         }
 
@@ -256,6 +252,50 @@ class QualityReportSegmentModel {
      * @param $codes
      */
     protected function _populateLastTranslationAndRevision( $seg, Filter $Filter, $last_translations, $last_revisions, $codes ) {
+        $last_translation = $this->_findLastTransaltion( $seg, $Filter, $last_translations );
+
+        // last revision version object
+        $last_segment_revisions = $this->_findLastRevision( $seg, $Filter, $last_revisions );
+
+        if ( $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED OR $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
+            if ( !empty( $last_translation ) ) {
+                $seg->last_translation = $last_translation->translation;
+            }
+
+            if ( !empty( $last_segment_revisions ) ) {
+                $seg->last_revisions = [] ;
+                foreach( $last_segment_revisions as $source_page => $revision ) {
+                    $seg->last_revisions[] = [
+                            'revision_number' => SecondPassReview\Utils::sourcePageToRevisionNumber( $source_page ) ,
+                            'translation'     => $revision->translation
+                    ];
+                }
+
+            }
+        }
+
+        if ( !in_array( TranslationVersions::FEATURE_CODE, $codes ) ) {
+            if ( $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
+                $seg->last_revisions[] = [
+                    'revision_number' => 1,
+                    'translation' => $seg->translation
+                ] ;
+
+            }
+            if ( $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+                $seg->last_translation = $seg->translation;
+            }
+        }
+    }
+
+    /**
+     * @param        $seg
+     * @param Filter $Filter
+     * @param        $last_translations
+     *
+     * @return null
+     */
+    protected function _findLastTransaltion( $seg, Filter $Filter, $last_translations ) {
         $find_last_translation_version = null;
         if ( isset( $last_translations ) && !empty( $last_translations ) ) {
             foreach ( $last_translations as $last_translation ) {
@@ -267,37 +307,32 @@ class QualityReportSegmentModel {
             }
         }
 
-        // last revision version object
-        $find_last_revision_version = null;
+        return $find_last_translation_version;
+    }
+
+    /**
+     * @param        $seg
+     * @param Filter $Filter
+     * @param        $last_revisions
+     *
+     * @return null
+     */
+    protected function _findLastRevision( $seg, Filter $Filter, $last_revisions ) {
+        $segment_last_revisions = [] ;
+
         if ( !empty( $last_revisions ) ) {
             foreach ( $last_revisions as $source_page => $source_page_revisions ) {
                 foreach ( $source_page_revisions as $last_revision ) {
                     if ( $last_revision->id_segment == $seg->sid ) {
                         $last_revision->translation = $Filter->fromLayer0ToLayer2( $last_revision->translation );
-                        $find_last_revision_version = $last_revision;
+                        $segment_last_revisions[ $source_page ] = $last_revision;
                         break;
                     }
                 }
             }
         }
 
-        if ( $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED OR $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
-            if ( !empty( $find_last_translation_version ) ) {
-                $seg->last_translation = $find_last_translation_version->translation;
-            }
-            if ( !empty( $find_last_revision_version ) ) {
-                $seg->last_revision = $find_last_revision_version->translation;
-            }
-        }
-
-        if ( !in_array( TranslationVersions::FEATURE_CODE, $codes ) ) {
-            if ( $seg->status == Constants_TranslationStatus::STATUS_APPROVED ) {
-                $seg->last_revision = $seg->translation;
-            }
-            if ( $seg->status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
-                $seg->last_translation = $seg->translation;
-            }
-        }
+        return $segment_last_revisions;
     }
 
 

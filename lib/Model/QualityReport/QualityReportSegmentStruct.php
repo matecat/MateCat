@@ -65,7 +65,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $last_translation;
 
-    public $last_revision;
+    public $last_revisions;
 
     public $pee_translation_revise;
 
@@ -108,11 +108,15 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
     }
 
     public function getPEEBwtTranslationRevise() {
-        if(empty($this->last_translation) OR empty($this->last_revision)){
+        if(empty($this->last_translation) OR empty($this->last_revisions)){
             return 0;
         }
 
-        return self::calculatePEE($this->last_translation, $this->last_revision, $this->target);
+        // TODO refactor
+        $last_revision_record = end( $this->last_revisions);
+        $last_revision = $last_revision_record['translation'];
+
+        return self::calculatePEE($this->last_translation, $last_revision, $this->target);
     }
 
     static function calculatePEE($str_1, $str_2, $target){
