@@ -113,7 +113,7 @@ class Chunk extends \API\V2\Json\Chunk {
 
 
         if ( $featureSet->hasRevisionFeature() ) {
-            $chunkReviews = ChunkReviewDao::findChunkReviewsByChunkIds([ [ $jStruct->id, $jStruct->password ] ], null );
+            $chunkReviews = (new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( [ [ $jStruct->id, $jStruct->password ] ] );
 
             foreach( $chunkReviews as $index => $chunkReview ) {
                 list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =

@@ -120,7 +120,8 @@ class QualityReportSegmentModel {
         $commentsDao  = new \Comments_CommentDao;
         $comments     = $commentsDao->getThreadsBySegments( $segments_id, $this->chunk->id );
         $codes        = $featureSet->getCodes();
-        $chunkReviews = ChunkReviewDao::findChunkReviewsByChunkIds( [ [ $this->chunk->id, $this->chunk->password ] ] ) ;
+        $chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([ [ $this->chunk->id, $this->chunk->password ] ] ) ;
+
         $last_revisions = [] ;
 
         if ( in_array( TranslationVersions::FEATURE_CODE, $codes ) ) {
