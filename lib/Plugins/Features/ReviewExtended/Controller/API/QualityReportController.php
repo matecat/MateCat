@@ -40,15 +40,15 @@ class QualityReportController extends KleinController
         return $this;
     }
 
-    private $model ;
+    protected $model ;
 
     public function show() {
         $this->model = new QualityReportModel( $this->chunk );
         $this->model->setDateFormat('c');
 
-        $this->response->json( array(
+        $this->response->json( [
                 'quality-report' => $this->model->getStructure()
-        ));
+        ] );
     }
 
     public function segments() {
