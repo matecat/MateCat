@@ -41,8 +41,7 @@ $.extend( UI, {
 
                 window.quality_report_btn_component.setState({
                     is_pass : review.is_pass,
-                    score : review.score,
-                    percentage_reviewed : review.percentage
+                    score : review.score
                 });
             });
     }
