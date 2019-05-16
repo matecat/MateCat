@@ -73,6 +73,8 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $version_number;
 
+    public $source_page ;
+
     /**
      * @return float
      */

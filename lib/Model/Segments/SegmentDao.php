@@ -335,6 +335,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
 
+        reset( $segments_id ) ;
+        $min = current( $segments_id );
+        $max = end( $segments_id );
+
         $query = "SELECT 
                 s.id AS sid,
                 s.segment,
@@ -354,23 +358,35 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.edit_distance,
                 st.locked,
                 st.match_type,
-                st.version_number
+                st.version_number,
+                ste.source_page
                 
                 FROM segments s
                 RIGHT JOIN segment_translations st ON st.id_segment = s.id
                 RIGHT JOIN jobs j ON j.id = st.id_job
                 RIGHT JOIN files_job fj ON fj.id_job = j.id
                 RIGHT JOIN files f ON f.id = fj.id_file AND s.id_file = f.id
+
+                LEFT JOIN (
+                    SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
+                        SELECT max(id) FROM segment_translation_events
+                        WHERE id_job = ?
+                        AND id_segment >= ? AND id_segment <= ?
+                        GROUP BY id_segment ) ORDER BY id_segment
+                ) ste ON ste.ste_id_segment = s.id
+
                 JOIN (
                     SELECT ? as id_segment
                     " . $prepare_str_segments_id . "
                  ) AS SLIST USING( id_segment )
+
                  WHERE j.id = ? AND j.password = ?
+
             ORDER BY sid ASC";
 
         $stmt = $db->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct" );
-        $stmt->execute( array_merge( $segments_id, [ $job_id, $job_password ] ) );
+        $stmt->execute( array_merge( [$job_id, $min, $max], $segments_id, [ $job_id, $job_password ] ) );
 
         $results = $stmt->fetchAll();
 
