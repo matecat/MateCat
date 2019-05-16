@@ -14,6 +14,13 @@ class SegmentQR extends React.Component {
 
         this.revise = (this.revise && this.revise.size > 0) ? this.revise.get('translation') : false;
         this.revise2 = (this.revise2 && this.revise2.size > 0) ? this.revise2.get('translation') : false;
+        //If second pass separate the issues
+        if ( this.props.secondPassReviewEnabled ) {
+            this.issuesR1 = this.props.segment.get('issues').filter((value)=>{ return value.get('revision_number') === 1 });
+            this.issuesR2 = this.props.segment.get('issues').filter((value)=>{ return value.get('revision_number') === 2 });
+        }
+
+
 
         this.state = {
             translateDiffOn: false,
@@ -21,7 +28,10 @@ class SegmentQR extends React.Component {
             revise2DiffOn: false,
             htmlDiff: "",
             automatedQaOpen: this.props.segment.get('issues').size === 0 && this.props.segment.get('warnings').get('total') > 0 ,
-            humanQaOpen: this.props.segment.get('issues').size > 0
+            humanQaOpen: !this.props.secondPassReviewEnabled && this.props.segment.get('issues').size > 0,
+            r1QaOpen: this.props.secondPassReviewEnabled && this.issuesR1 && this.issuesR1.size > 0,
+            r2QaOpen: this.props.secondPassReviewEnabled && this.issuesR2 && this.issuesR2.size > 0 && _.isUndefined(this.issuesR1)
+
         };
         this.state.htmlDiff = this.initializeDiff();
         this.errorObj = {
@@ -52,13 +62,29 @@ class SegmentQR extends React.Component {
     openAutomatedQa() {
         this.setState({
             automatedQaOpen: true,
-            humanQaOpen: false
+            humanQaOpen: false,
+            r1QaOpen: false,
+            r2QaOpen: false
         });
     }
     openHumandQa() {
         this.setState({
             automatedQaOpen: false,
             humanQaOpen: true
+        });
+    }
+    openR1Qa() {
+        this.setState({
+            automatedQaOpen: false,
+            r1QaOpen: true,
+            r2QaOpen: false
+        });
+    }
+    openR2Qa() {
+        this.setState({
+            automatedQaOpen: false,
+            r1QaOpen: false,
+            r2QaOpen: true
         });
     }
     getAutomatedQaHtml() {
@@ -97,9 +123,8 @@ class SegmentQR extends React.Component {
 
         return html;
     }
-    getHumanQaHtml() {
+    getHumanQaHtml(issues) {
         let html = [];
-        let issues = this.props.segment.get('issues');
         issues.map((issue, index)=>{
             let item = <div className="qr-issue human critical" key={'qr-issue' + index}>
                             <div className="qr-error" key={'error-qr' + index}>{issue.get('issue_category')}: </div>
@@ -145,7 +170,7 @@ class SegmentQR extends React.Component {
     showRevise2Diff() {
         if (this.state.revise2DiffOn) {
             this.setState({
-                reviseDiffOn: false,
+                revise2DiffOn: true,
             });
         } else {
             let revise2 = this.revise2;
@@ -241,7 +266,7 @@ class SegmentQR extends React.Component {
         let suggestionClasses = classnames({
             "segment-container": true,
             "qr-suggestion": true,
-            "shadow-1" : (this.state.translateDiffOn || (this.state.reviseDiffOn && !this.target)),
+            "shadow-1" : (this.state.translateDiffOn || (this.state.reviseDiffOn && !this.target) || (this.state.revise2DiffOn && !this.revise)),
             "rtl-lang" : config.target_rtl
         });
         let translateClasses = classnames({
@@ -339,16 +364,26 @@ class SegmentQR extends React.Component {
 
                     />
                 ) : null}
-                {( this.state.automatedQaOpen || this.state.humanQaOpen ) ? (
+                {( this.state.automatedQaOpen || this.state.humanQaOpen || this.state.r1QaOpen || this.state.r2QaOpen ) ? (
                 <div className="segment-container qr-issues">
                     <div className="segment-content qr-segment-title">
                         <b>QA</b>
                         <div className="ui basic mini buttons segment-production">
 
-                            {this.props.segment.get('issues').size > 0 ? (
+                            {this.props.segment.get('issues').size > 0 && !this.props.secondPassReviewEnabled ? (
                                 <div className={"ui button human-qa " + (this.state.humanQaOpen ? "active" : "") + " " + (this.props.segment.get('warnings').get('total') > 0 ? "" : "no-hover")}
                                      onClick={this.openHumandQa.bind(this)}>
                                     Human<b> ({this.props.segment.get('issues').size})</b></div>
+                            ) : null}
+
+                            { this.issuesR1 && this.issuesR1.size > 0 && this.props.secondPassReviewEnabled ? (
+                                <div className={"ui button human-qa " + (this.state.r1QaOpen ? "active" : "") } style={{padding: '8px'}}
+                                     onClick={this.openR1Qa.bind(this)}>R1<b> ({this.issuesR1.size})</b></div>
+                            ) : null}
+
+                            {this.issuesR2 && this.issuesR2.size > 0 && this.props.secondPassReviewEnabled ? (
+                                <div className={"ui button human-qa " + (this.state.r2QaOpen ? "active" : "") } style={{padding: '8px'}}
+                                     onClick={this.openR2Qa.bind(this)}>R2<b> ({this.issuesR2.size})</b></div>
                             ) : null}
 
                             {this.props.segment.get('warnings').get('total') > 0 ? (
@@ -372,7 +407,22 @@ class SegmentQR extends React.Component {
                         {this.state.humanQaOpen ?
 
                             <div className="qr-issues-list" key={'human-qa'}>
-                                {this.getHumanQaHtml()}
+                                {this.getHumanQaHtml(this.props.segment.get('issues'))}
+                            </div>
+
+                            : (null) }
+
+                        {this.state.r1QaOpen ?
+
+                            <div className="qr-issues-list" key={'human-qa'}>
+                                {this.getHumanQaHtml(this.issuesR1)}
+                            </div>
+
+                            : (null) }
+                        {this.state.r2QaOpen ?
+
+                            <div className="qr-issues-list" key={'human-qa'}>
+                                {this.getHumanQaHtml(this.issuesR2)}
                             </div>
 
                             : (null) }
