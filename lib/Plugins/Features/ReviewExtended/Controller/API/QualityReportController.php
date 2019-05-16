@@ -11,6 +11,7 @@ namespace Features\ReviewExtended\Controller\API;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
+use Features\SecondPassReview;
 use Projects_ProjectStruct;
 use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel ;
@@ -78,6 +79,7 @@ class QualityReportController extends KleinController
         if ( count( $segments_id ) > 0 ) {
             $segments = $qrSegmentModel->getSegmentsForQR( $segments_id );
 
+            $this->_formatSegments( $segments ) ;
 
             $this->response->json( [
                     'files' =>$segments
@@ -86,6 +88,21 @@ class QualityReportController extends KleinController
             $this->response->json( ['files' =>[] ]);
         }
 
+    }
+
+    protected function _formatSegments( &$segments ) {
+        foreach( $segments as $file ) {
+            foreach( $file['segments'] as $segment ) {
+                if ( !empty( $segment->issues ) ) {
+                    foreach( $segment->issues  as $key => $issue ) {
+                        $segment->issues[ $key ]['revision_number'] = SecondPassReview\Utils::sourcePageToRevisionNumber(
+                                $segment->issues[ $key ]['source_page']
+                        );
+                        unset( $segment->issues[ $key ]['source_page'] );
+                    }
+                }
+            }
+        }
     }
 
     public function general(){

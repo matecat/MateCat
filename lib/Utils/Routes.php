@@ -127,10 +127,15 @@ class Routes {
         return "$host/?action=downloadFile&" . http_build_query( $params, null, '&', PHP_QUERY_RFC3986 ) ;
     }
 
-    public static function revise( $project_name, $id_job, $password, $source, $target, $options = array() ) {
+    public static function revise( $project_name, $id_job, $password, $source, $target, $options = [] ) {
         $host = self::httpHost( $options );
+        $revise = 'revise' ;
 
-        return "$host/revise/$project_name/$source-$target/$id_job-$password";
+        if ( isset( $options['revision_number']) && $options['revision_number'] > 1 ) {
+            $revise .= $options['revision_number'] ;
+        }
+
+        return "$host/$revise/$project_name/$source-$target/$id_job-$password";
     }
 
     public static function translate( $project_name, $id_job, $password, $source, $target, $options = array() ) {

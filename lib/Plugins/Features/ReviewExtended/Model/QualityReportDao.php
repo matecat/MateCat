@@ -193,6 +193,7 @@ SQL;
   issues.id as issue_id,
   issues.create_date as issue_create_date,
   issues.replies_count as issue_replies_count,
+  issues.source_page as source_page,
 
   -- start_offset and end_offset were introduced for DQF. We are taking for granted a string with
   -- both start_node and end_node equal to 0 ( no tags in target string ).
