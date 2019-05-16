@@ -79,7 +79,7 @@ class QualityReportController extends KleinController
         if ( count( $segments_id ) > 0 ) {
             $segments = $qrSegmentModel->getSegmentsForQR( $segments_id );
 
-            $this->_formatSegments( $segments ) ;
+            $segments = $this->_formatSegments( $segments ) ;
 
             $this->response->json( [
                     'files' =>$segments
@@ -90,19 +90,37 @@ class QualityReportController extends KleinController
 
     }
 
-    protected function _formatSegments( &$segments ) {
-        foreach( $segments as $file ) {
-            foreach( $file['segments'] as $segment ) {
+    /**
+     * Change the response json to remove source_page property and change it to revision number.
+     *
+     * @param $files
+     *
+     * @return array
+     */
+    protected function _formatSegments( $files ) {
+        $outputArray = [] ;
+
+        foreach( $files as $k0 => $file ) {
+            foreach( $file['segments'] as $k1 => $segment ) {
                 if ( !empty( $segment->issues ) ) {
-                    foreach( $segment->issues  as $key => $issue ) {
-                        $segment->issues[ $key ]['revision_number'] = SecondPassReview\Utils::sourcePageToRevisionNumber(
-                                $segment->issues[ $key ]['source_page']
+                    foreach( $segment->issues  as $k2 => $issue ) {
+                        $segment->issues[ $k2 ]['revision_number'] = SecondPassReview\Utils::sourcePageToRevisionNumber(
+                                $segment->issues[ $k2 ]['source_page']
                         );
-                        unset( $segment->issues[ $key ]['source_page'] );
+                        unset( $segment->issues[ $k2 ]['source_page'] );
                     }
                 }
+
+                $outputArray [$k0 ] [ 'segments' ] [ $k1 ] = $file['segments'] [ $k1 ]->toArray();
+
+                $outputArray [$k0 ] [ 'segments' ] [ $k1 ] [ 'revision_number' ] = SecondPassReview\Utils::sourcePageToRevisionNumber(
+                        $outputArray [$k0 ] [ 'segments' ] [ $k1 ] [ 'source_page' ]
+                );
+                unset( $outputArray [$k0 ] [ 'segments' ] [ $k1 ] [ 'source_page']  );
             }
         }
+
+        return $outputArray ;
     }
 
     public function general(){
