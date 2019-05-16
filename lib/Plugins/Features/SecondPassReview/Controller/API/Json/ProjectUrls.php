@@ -27,9 +27,6 @@ class ProjectUrls extends \API\V2\Json\ProjectUrls {
             $reviews = ( new ChunkReviewDao())->findAllChunkReviewsByChunkIds([[
                     $record['jid'], $record['jpassword'] ]]) ;
 
-
-            $this->jobs[ $record['jid'] ][ 'chunks' ][ $record['jpassword'] ] [ 'reviews' ] = [] ;
-
             foreach( $reviews as $review ) {
                 $revisionNumber = SecondPassReview\Utils::sourcePageToRevisionNumber( $review->source_page ) ;
                 $reviseUrl = Routes::revise(

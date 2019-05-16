@@ -402,6 +402,9 @@ header {
                                                     color: #09beec;
                                                 }
                                                 .status-approved {
+                                                    &.approved-r2 {
+                                                        color: #BC6AC9;
+                                                    }
                                                     font-size: 20px;
                                                     color: #7eaf3e;
                                                 }

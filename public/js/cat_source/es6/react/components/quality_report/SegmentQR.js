@@ -221,12 +221,15 @@ class SegmentQR extends React.Component {
         window.open(this.props.urls.get("translate_url") + "#" + this.props.segment.get("sid"))
     }
 
-    openReviseLink() {
-        window.open(this.props.urls.get("revise_url") + "#" + this.props.segment.get("sid"))
+    openReviseLink(revise) {
+        if (typeof this.props.urls.get("revise_url") === 'string' || this.props.urls.get("revise_url") instanceof String) {
+            window.open(this.props.urls.get("revise_url") + "#" + this.props.segment.get("sid"))
+        } else {
+            let url = this.props.urls.get("revise_urls").find((value)=>{ return value.get('revision_number') === revise }).get('url');
+            window.open(url + "#" + this.props.segment.get("sid"))
+        }
     }
-    openRevise2Link() {
-        window.open(this.props.urls.get("revise_url") + "#" + this.props.segment.get("sid"))
-    }
+
     decodeTextAndTransformTags( text) {
         if (text) {
             let decodedText = TagsUtils.decodePlaceholdersToText(text);
@@ -301,7 +304,10 @@ class SegmentQR extends React.Component {
                 </div>
                 <div className="segment-status-container">
                     <div className="qr-label">Segment status</div>
-                    <div className={"qr-info status-" + this.props.segment.get("status").toLowerCase()}><b>{this.props.segment.get("status")}</b></div>
+                    <div className={classnames("qr-info", "status-" + this.props.segment.get("status").toLowerCase(),
+                        this.props.secondPassReviewEnabled && this.props.segment.get("revision_number") && 'approved-r'+this.props.segment.get("revision_number"))}>
+                        <b>{this.props.segment.get("status")}</b>
+                    </div>
                 </div>
             </div>
 
@@ -340,7 +346,7 @@ class SegmentQR extends React.Component {
                     <SegmentQRLine  segment={this.props.segment}
                                     classes={revisedClasses}
                                     label={'Revision'}
-                                    onClickLabel={this.openReviseLink.bind(this)}
+                                    onClickLabel={this.openReviseLink.bind(this, 1)}
                                     text={revise}
                                     showDiffButton={true}
                                     onClickDiff={this.showReviseDiff.bind(this)}
@@ -355,7 +361,7 @@ class SegmentQR extends React.Component {
                     <SegmentQRLine  segment={this.props.segment}
                                     classes={revised2Classes}
                                     label={'2nd Revision'}
-                                    onClickLabel={this.openRevise2Link.bind(this)}
+                                    onClickLabel={this.openReviseLink.bind(this, 2)}
                                     text={revise2}
                                     showDiffButton={true}
                                     onClickDiff={this.showRevise2Diff.bind(this)}
