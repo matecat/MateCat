@@ -1,12 +1,24 @@
 import TagsUtils from "../../utils/textUtils"
 import classnames from "classnames";
+import SegmentQRLine from "./SegmentQRLine";
+
 class SegmentQR extends React.Component {
     constructor(props) {
         super(props);
 
+        this.source = this.props.segment.get("segment");
+        this.suggestion = this.props.segment.get("suggestion");
+        this.target = !_.isNull(this.props.segment.get('last_translation')) && this.props.segment.get("last_translation");
+        this.revise = !_.isNull(this.props.segment.get("last_revisions")) && this.props.segment.get("last_revisions").find((value)=>{ return value.get('revision_number') === 1 });
+        this.revise2 = !_.isNull(this.props.segment.get("last_revisions")) && this.props.segment.get("last_revisions").find((value)=>{ return value.get('revision_number') === 2 });
+
+        this.revise = (this.revise && this.revise.size > 0) ? this.revise.get('translation') : false;
+        this.revise2 = (this.revise2 && this.revise2.size > 0) ? this.revise2.get('translation') : false;
+
         this.state = {
-            translateDiffOn: !_.isNull(this.props.segment.get('last_translation')) && _.isNull(this.props.segment.get('last_revisions')),
-            reviseDiffOn: !_.isNull(this.props.segment.get('last_revisions')) && !_.isNull(this.props.segment.get('last_translation')),
+            translateDiffOn: false,
+            reviseDiffOn: false,
+            revise2DiffOn: false,
             htmlDiff: "",
             automatedQaOpen: this.props.segment.get('issues').size === 0 && this.props.segment.get('warnings').get('total') > 0 ,
             humanQaOpen: this.props.segment.get('issues').size > 0
@@ -31,10 +43,10 @@ class SegmentQR extends React.Component {
     }
     initializeDiff() {
         if ( this.state.translateDiffOn ) {
-            return this.getDiffPatch(this.props.segment.get("suggestion"), this.props.segment.get("last_translation"));
+            return this.getDiffPatch(this.suggestion, this.target);
         } else if ( this.state.reviseDiffOn ){
-            let revise = this.props.segment.get("last_revisions").get(0).get('translation');
-            return this.getDiffPatch(this.props.segment.get("last_translation"), revise);
+            let revise = this.revise;
+            return this.getDiffPatch(this.target, revise);
         }
     }
     openAutomatedQa() {
@@ -104,10 +116,11 @@ class SegmentQR extends React.Component {
                 translateDiffOn: false,
             });
         } else {
-            let diffHtml = this.getDiffPatch(this.props.segment.get("suggestion"), this.props.segment.get("last_translation"));
+            let diffHtml = this.getDiffPatch(this.suggestion, this.target);
             this.setState({
                 translateDiffOn: true,
                 reviseDiffOn: false,
+                revise2DiffOn: false,
                 htmlDiff: diffHtml
             });
         }
@@ -118,11 +131,30 @@ class SegmentQR extends React.Component {
                 reviseDiffOn: false,
             });
         } else {
-            let revise = this.props.segment.get("last_revisions").get(0).get('translation');
-            let diffHtml = this.getDiffPatch(this.props.segment.get("last_translation"), revise);
+            let revise = this.revise;
+            let textToDiff = this.target ? this.target : this.suggestion;
+            let diffHtml = this.getDiffPatch(textToDiff, revise);
             this.setState({
                 translateDiffOn: false,
                 reviseDiffOn: true,
+                revise2DiffOn: false,
+                htmlDiff: diffHtml
+            });
+        }
+    }
+    showRevise2Diff() {
+        if (this.state.revise2DiffOn) {
+            this.setState({
+                reviseDiffOn: false,
+            });
+        } else {
+            let revise2 = this.revise2;
+            let textToDiff = this.revise ? this.revise : (this.target)? this.target : this.suggestion;
+            let diffHtml = this.getDiffPatch(textToDiff, revise2);
+            this.setState({
+                translateDiffOn: false,
+                reviseDiffOn: false,
+                revise2DiffOn: true,
                 htmlDiff: diffHtml
             });
         }
@@ -167,6 +199,9 @@ class SegmentQR extends React.Component {
     openReviseLink() {
         window.open(this.props.urls.get("revise_url") + "#" + this.props.segment.get("sid"))
     }
+    openRevise2Link() {
+        window.open(this.props.urls.get("revise_url") + "#" + this.props.segment.get("sid"))
+    }
     decodeTextAndTransformTags( text) {
         if (text) {
             let decodedText = TagsUtils.decodePlaceholdersToText(text);
@@ -179,13 +214,12 @@ class SegmentQR extends React.Component {
         return { __html: string };
     }
     render () {
-        let source = this.decodeTextAndTransformTags(this.props.segment.get("segment"));
-        let suggestion = this.decodeTextAndTransformTags(this.props.segment.get("suggestion"));
-        let target = this.decodeTextAndTransformTags(this.props.segment.get("last_translation"));
-        let revise = !_.isNull(this.props.segment.get("last_revisions")) && this.decodeTextAndTransformTags(this.props.segment.get("last_revisions").get(0).get('translation'));
-        let revise2 = this.props.secondPassReviewEnabled && !_.isNull(this.props.segment.get("last_revisions")) && !_.isUndefined(this.props.segment.get("last_revisions").get(1)) && this.decodeTextAndTransformTags(this.props.segment.get("last_revisions").get(1).get('translation'));
-        let suggestionMatch = ( this.props.segment.get("match_type") === "ICE") ? 101 : parseInt(this.props.segment.get("suggestion_match"));
-        let suggestionMatchClass = (suggestionMatch === 101)? 'per-blu': (suggestionMatch === 100)? 'per-green' : (suggestionMatch > 0 && suggestionMatch <=99)? 'per-orange' : '';
+        let source = this.decodeTextAndTransformTags(this.source);
+        let suggestion = this.decodeTextAndTransformTags(this.suggestion);
+        let target = this.target && this.decodeTextAndTransformTags(this.target);
+        let revise = this.revise && this.decodeTextAndTransformTags(this.revise);
+        let revise2 = this.revise2 && this.decodeTextAndTransformTags(this.revise2);
+
         if (this.state.translateDiffOn) {
             target = this.decodeTextAndTransformTags(this.state.htmlDiff);
         }
@@ -202,12 +236,12 @@ class SegmentQR extends React.Component {
 
         let segmentBodyClass = classnames({
             "qr-segment-body shadow-1": true,
-            "qr-diff-on": (this.state.translateDiffOn || this.state.reviseDiffOn),
+            "qr-diff-on": (this.state.translateDiffOn || this.state.reviseDiffOn || this.state.revise2DiffOn),
         });
         let suggestionClasses = classnames({
             "segment-container": true,
             "qr-suggestion": true,
-            "shadow-1" : (this.state.translateDiffOn),
+            "shadow-1" : (this.state.translateDiffOn || (this.state.reviseDiffOn && !this.target)),
             "rtl-lang" : config.target_rtl
         });
         let translateClasses = classnames({
@@ -219,7 +253,13 @@ class SegmentQR extends React.Component {
         let revisedClasses = classnames({
             "segment-container": true,
             "qr-revised": true,
-            "shadow-1" : (this.state.reviseDiffOn),
+            "shadow-1" : (this.state.reviseDiffOn || this.state.revise2DiffOn),
+            "rtl-lang" : config.target_rtl
+        });
+        let revised2Classes = classnames({
+            "segment-container": true,
+            "qr-revised": true,
+            "shadow-1" : (this.state.revise2DiffOn),
             "rtl-lang" : config.target_rtl
         });
         return <div className="qr-single-segment">
@@ -242,96 +282,62 @@ class SegmentQR extends React.Component {
 
 
             <div className={segmentBodyClass}>
+                    <SegmentQRLine  segment={this.props.segment}
+                                    classes={sourceClass}
+                                    label={'Source'}
+                                    text={source}
+                                    showSegmentWords={true}
+                    />
+                    <SegmentQRLine  segment={this.props.segment}
+                                    classes={suggestionClasses}
+                                    label={'Suggestion'}
+                                    showSuggestionSource={true}
+                                    text={suggestion}
 
-                    <div className={sourceClass}>
-                        <div className="segment-content qr-segment-title">
-                            <b>Source</b>
-                        </div>
-                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(source) }/>
-                        <div className="segment-content qr-spec">
-                            <div>Words:</div>
-                            <div><b>{parseInt(this.props.segment.get("raw_word_count"))}</b></div>
-                        </div>
-                    </div>
+                    />
 
-                    <div className={suggestionClasses}>
-                        <div className="segment-content qr-segment-title">
-                            <b>Suggestion</b>
-                        </div>
-                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(suggestion) }/>
-                        <div className="segment-content qr-spec">
-                            <div className={ this.props.segment.get("suggestion_source") === "MT" ? ('per-yellow'): null}>
-                                <b>{this.props.segment.get("suggestion_source")}</b>
-                            </div>
-                            {this.props.segment.get("suggestion_source") !== "MT" ? (
-                                <div className={"tm-percent " + suggestionMatchClass}>{suggestionMatch}%</div>
-                            ) : null}
-
-                        </div>
-                    </div>
                 {this.props.segment.get('last_translation') ? (
-                    <div className={translateClasses}>
-                        <a className="segment-content qr-segment-title">
-                            <b onClick={this.openTranslateLink.bind(this)}>Translation</b>
-                            <button className={(this.state.translateDiffOn ? "active" : "")} onClick={this.showTranslateDiff.bind(this)}  title="Show Diff">
-                                <i className="icon-eye2 icon" />
-                            </button>
-                        </a>
-                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(target) }/>
 
-                            <div className="segment-content qr-spec">
-                                {this.props.segment.get('ice_locked') === '1' ? (
-                                <div>
-                                    <b>ICE Match</b>
-                                </div>
-                                ) :  null}
-                                {this.props.segment.get('ice_modified') ? (
-                                    <div>(Modified)</div>
-                                ) : null}
-                            </div>
-                    </div>
+                    <SegmentQRLine  segment={this.props.segment}
+                                    classes={translateClasses}
+                                    label={'Translation'}
+                                    onClickLabel={this.openTranslateLink.bind(this)}
+                                    text={target}
+                                    showDiffButton={true}
+                                    onClickDiff={this.showTranslateDiff.bind(this)}
+                                    diffActive={this.state.translateDiffOn}
+                                    showIceMatchInfo={true}
+
+                    />
+
                 ) : null}
-                {!_.isNull(this.props.segment.get("last_revisions")) && this.props.segment.get('last_revisions').get(0) ? (
-                    <div className={revisedClasses}>
-                        <a className="segment-content qr-segment-title">
-                            <b onClick={this.openReviseLink.bind(this)}>Revision</b>
-                            { this.props.segment.get('ice_locked') === '0' || (this.props.segment.get('ice_locked') === '1' && this.props.segment.get('ice_modified')) ? (
-                            <button className={(this.state.reviseDiffOn ? "active" : "")} onClick={this.showReviseDiff.bind(this)} title="Show Diff">
-                                <i className="icon-eye2 icon" />
-                            </button>
-                            ) : null }
-                        </a>
-                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(revise) } >
-                        </div>
-                        <div className="segment-content qr-spec">
-                            { (this.props.segment.get('ice_locked') === '1' && !this.props.segment.get('ice_modified')) ? (
-                                <div>
-                                    <b>ICE Match</b>
-                                </div>
-                            ) :  null}
-                        </div>
-                    </div>
+                {!_.isNull(this.props.segment.get("last_revisions")) && revise ? (
+                    <SegmentQRLine  segment={this.props.segment}
+                                    classes={revisedClasses}
+                                    label={'Revision'}
+                                    onClickLabel={this.openReviseLink.bind(this)}
+                                    text={revise}
+                                    showDiffButton={true}
+                                    onClickDiff={this.showReviseDiff.bind(this)}
+                                    diffActive={this.state.reviseDiffOn}
+                                    showIceMatchInfo={_.isNull(target)}
+
+                    />
+
                 ) : null}
-                {!_.isNull(this.props.segment.get("last_revisions")) && this.props.segment.get('last_revisions').get(1) ? (
-                    <div className={revisedClasses}>
-                        <a className="segment-content qr-segment-title">
-                            <b onClick={this.openReviseLink.bind(this)}>2nd Revision</b>
-                            { this.props.segment.get('ice_locked') === '0' || (this.props.segment.get('ice_locked') === '1' && this.props.segment.get('ice_modified')) ? (
-                                <button className={(this.state.reviseDiffOn ? "active" : "")} onClick={this.showReviseDiff.bind(this)} title="Show Diff">
-                                    <i className="icon-eye2 icon" />
-                                </button>
-                            ) : null }
-                        </a>
-                        <div className="segment-content qr-text" dangerouslySetInnerHTML={ this.allowHTML(revise1) } >
-                        </div>
-                        <div className="segment-content qr-spec">
-                            { (this.props.segment.get('ice_locked') === '1' && !this.props.segment.get('ice_modified')) ? (
-                                <div>
-                                    <b>ICE Match</b>
-                                </div>
-                            ) :  null}
-                        </div>
-                    </div>
+                {!_.isNull(this.props.segment.get("last_revisions")) && revise2 ? (
+
+                    <SegmentQRLine  segment={this.props.segment}
+                                    classes={revised2Classes}
+                                    label={'2nd Revision'}
+                                    onClickLabel={this.openRevise2Link.bind(this)}
+                                    text={revise2}
+                                    showDiffButton={true}
+                                    onClickDiff={this.showRevise2Diff.bind(this)}
+                                    diffActive={this.state.revise2DiffOn}
+                                    showIceMatchInfo={_.isNull(target) && _.isNull(revise)}
+
+                    />
                 ) : null}
                 {( this.state.automatedQaOpen || this.state.humanQaOpen ) ? (
                 <div className="segment-container qr-issues">
