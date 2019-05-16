@@ -65,3 +65,5 @@ route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]',    
 $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
     route( '/quality-report', 'GET', '\Features\SecondPassReview\Controller\API\QualityReportController', 'show' );
 });
+
+route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET',  'API\App\StatsController', 'stats' );
