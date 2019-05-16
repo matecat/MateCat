@@ -12,6 +12,7 @@ use catController;
 use Chunks_ChunkStruct;
 use Exceptions\NotFoundException;
 use Features;
+use Features\SecondPassReview\Controller\API\Json\ProjectUrls;
 use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use Klein\Klein;
@@ -23,6 +24,12 @@ class SecondPassReview extends BaseFeature {
     protected static $dependencies = [
             Features::REVIEW_EXTENDED
     ];
+
+
+    public static function projectUrls( $formatted ) {
+        $projectUrlsDecorator = new ProjectUrls( $formatted->getData() );
+        return $projectUrlsDecorator;
+    }
 
     public static function loadRoutes( Klein $klein ) {
         route( '/project/[:id_project]/[:password]/reviews', 'POST',
