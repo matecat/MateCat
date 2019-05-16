@@ -197,7 +197,6 @@ class QualityReportSegmentModel {
         }
 
         return $issues_categories;
-
     }
 
     /**

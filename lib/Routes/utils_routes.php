@@ -67,3 +67,8 @@ $klein->with('/api/app/jobs/[:id_job]/[:password]', function() {
 });
 
 route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET',  'API\App\StatsController', 'stats' );
+
+
+$klein->with('/api/app/projects/[:id_project]/[:password]', function() {
+    route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
+});

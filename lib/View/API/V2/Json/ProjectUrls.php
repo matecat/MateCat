@@ -158,6 +158,5 @@ class ProjectUrls {
             $record['source'],
             $record['target']
         );
-
     }
 }
