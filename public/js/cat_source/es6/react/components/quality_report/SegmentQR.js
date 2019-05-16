@@ -266,13 +266,13 @@ class SegmentQR extends React.Component {
         let suggestionClasses = classnames({
             "segment-container": true,
             "qr-suggestion": true,
-            "shadow-1" : (this.state.translateDiffOn || (this.state.reviseDiffOn && !this.target) || (this.state.revise2DiffOn && !this.revise)),
+            "shadow-1" : (this.state.translateDiffOn || (this.state.reviseDiffOn && !this.target) || (this.state.revise2DiffOn && !this.revise && !this.target)),
             "rtl-lang" : config.target_rtl
         });
         let translateClasses = classnames({
             "segment-container": true,
             "qr-translated": true,
-            "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn ),
+            "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn ||  (this.state.revise2DiffOn && !this.revise )),
             "rtl-lang" : config.target_rtl
         });
         let revisedClasses = classnames({

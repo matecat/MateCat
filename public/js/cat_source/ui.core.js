@@ -1256,7 +1256,7 @@ UI = {
 	},
     retrieveStatistics: function () {
         var path = sprintf(
-            APP.getRandomUrl() + 'api/v1/jobs/%s/%s/stats',
+            APP.getRandomUrl() + 'api/app/jobs/%s/%s/stats',
             config.id_job, config.password
         );
         $.ajax({

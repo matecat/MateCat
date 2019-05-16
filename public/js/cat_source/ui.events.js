@@ -477,6 +477,8 @@ $(document).ready(function() {
 			vote                : config.overall_quality_class,
 			quality_report_href : config.quality_report_href + qrParam
 		}), $('#quality-report-button')[0] );
-
+	if ( config.secondRevisionsCount ) {
+        UI.reloadQualityReport();
+    }
 });
 
