@@ -101,6 +101,11 @@ class QualityReportController extends KleinController
         $outputArray = [] ;
 
         foreach( $files as $k0 => $file ) {
+
+            if ( !isset( $outputArray [ $k0 ] [ 'filename' ] ) ) {
+                $outputArray [$k0 ] [ 'filename' ]  = $file['filename'] ;
+            }
+
             foreach( $file['segments'] as $k1 => $segment ) {
                 if ( !empty( $segment->issues ) ) {
                     foreach( $segment->issues  as $k2 => $issue ) {
