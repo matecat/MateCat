@@ -164,6 +164,21 @@ class SegmentTranslationChangeVector {
                 $this->old_translation->version_number == $this->translation->version_number ;
     }
 
+    /**
+     * Equivalent word count is the same on both segment translation structs (new and old).
+     * The new translation struct lacks of this information because it's not populated by a database query.
+     * So we look for this count on the old translation.
+     *
+     * In case of ICE match, this method returns raw_words_count in order to be compatible with job stats.
+     */
+    public function getRawOrEquivalentWordsCount() {
+        if ( $this->old_translation->isICE() ) {
+            return $this->getSegmentStruct()->raw_word_count ;
+        }
+        else {
+            return $this->old_translation->eq_word_count ;
+        }
+    }
 
     /**
      * @return Segments_SegmentStruct

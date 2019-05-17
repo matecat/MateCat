@@ -71,7 +71,7 @@ class StatsController extends KleinController {
         foreach( $chunkReviews as $chunkReview ) {
             $response['stats']['reviews'][] = [
                     'revision_number' => SecondPassReview\Utils::sourcePageToRevisionNumber( $chunkReview->source_page ),
-                    'reviewed_words' => $chunkReview->reviewed_words_count
+                    'reviewed_words' => $chunkReview->eq_reviewed_words_count
             ] ;
         }
     }

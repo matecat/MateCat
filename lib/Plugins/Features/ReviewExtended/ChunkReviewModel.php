@@ -34,10 +34,12 @@ class ChunkReviewModel implements IChunkReviewModel {
      * Adds reviewed words count and recomputes result
      *
      * @param $count
+     * @param $eq_count
      */
 
-    public function addWordsCount( $count ) {
+    public function addWordsCount( $count, $eq_count ) {
         $this->chunk_review->reviewed_words_count += $count ;
+        $this->chunk_review->eq_reviewed_words_count += $eq_count ;
         $this->updatePassFailResult() ;
     }
 
@@ -45,9 +47,11 @@ class ChunkReviewModel implements IChunkReviewModel {
      * Subtracts reviewed_words_count and recomputes result
      *
      * @param $count
+     * @param $eq_count
      */
-    public function subtractWordsCount( $count ) {
+    public function subtractWordsCount( $count, $eq_count ) {
         $this->chunk_review->reviewed_words_count -= $count ;
+        $this->chunk_review->eq_reviewed_words_count -= $eq_count ;
         $this->updatePassFailResult() ;
     }
 
@@ -98,8 +102,9 @@ class ChunkReviewModel implements IChunkReviewModel {
     public function updatePassFailResult() {
         $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit() ) ;
 
-        $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, array(
-             'fields' => array('reviewed_words_count', 'is_pass', 'penalty_points'))
+        $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, [
+             'fields' => array('eq_reviewed_words_count', 'reviewed_words_count', 'is_pass', 'penalty_points')
+            ]
         );
 
         $this->chunk_review->getChunk()->getProject()->getFeatures()->run(

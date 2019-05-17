@@ -124,9 +124,10 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
 
         $model   = new ChunkReviewModel( $this->affectedChunkReviews[ 0 ] );
 
-        $model->addWordsCount( $this->getWordCountWithPropagation(
-                $this->model->getSegmentStruct()->raw_word_count
-        ) );
+        $model->addWordsCount(
+                $this->getWordCountWithPropagation( $this->model->getSegmentStruct()->raw_word_count ) ,
+                $this->getWordCountWithPropagation( $this->model->getRawOrEquivalentWordsCount() )
+        );
     }
 
     protected function subtractCount() {
@@ -141,7 +142,10 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
             $this->affectedChunkReviews[] = $chunkReview[ 0 ]  ;
 
             $model = new ChunkReviewModel( $chunkReview[ 0 ] );
-            $model->subtractWordsCount( $this->getWordCountWithPropagation( $segment->raw_word_count ) );
+            $model->subtractWordsCount(
+                    $this->getWordCountWithPropagation( $segment->raw_word_count ),
+                    $this->getWordCountWithPropagation( $this->model->getRawOrEquivalentWordsCount() )
+            );
         }
     }
 
