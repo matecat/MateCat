@@ -102,6 +102,7 @@
     vertical-align: middle;
     margin: 1px;
     cursor: pointer;
+    word-break: break-all;
     &::selection {
         background: transparent !important;
     }
