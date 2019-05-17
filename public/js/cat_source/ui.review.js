@@ -37,8 +37,9 @@ $.extend( UI, {
             url: path
         })
             .done( function( data ) {
+                var revNumber = (config.revisionNumber) ?  config.revisionNumber : 1;
                 var review = data['quality-report'].chunk.reviews.find(function ( value ) {
-                    return value.revision_number === config.revisionNumber;
+                    return value.revision_number === revNumber;
                 }) ;
 
                 window.quality_report_btn_component.setState({

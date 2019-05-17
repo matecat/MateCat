@@ -18,7 +18,7 @@ class JobSummary extends React.Component {
                 <QualitySummaryTable jobInfo={this.props.jobInfo}
                                      qualitySummary={this.props.qualitySummary}/>
                 ) : (
-                <QualitySummaryTableOld jobInfo={this.props.jobInfo}/>
+                <QualitySummaryTableOld jobInfo={this.props.jobInfo} qualitySummary={this.props.qualitySummary}/>
             )
 
             ) : null}
