@@ -4,8 +4,10 @@ namespace API\App;
 
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use CatUtils;
 use Chunks_ChunkStruct;
 use Features\SecondPassReview;
+use FeatureSet;
 use LQA\ChunkReviewDao;
 use WordCount_Struct;
 
@@ -46,38 +48,24 @@ class StatsController extends KleinController {
         $wStruct->setApprovedWords( $this->chunk->approved_words );
         $wStruct->setRejectedWords( $this->chunk->rejected_words );
 
-        $job_stats = \CatUtils::getFastStatsForJob( $wStruct );
-
+        $job_stats = CatUtils::getFastStatsForJob( $wStruct );
         $job_stats['ANALYSIS_COMPLETE'] = $this->chunk->getProject()->analysisComplete() ;
 
-        $response = array( 'stats' => $job_stats );
-        $this->_attachReviewsStats( $response );
+        $chunk_reviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( [[
+                $this->chunk->id, $this->chunk->password
+        ]] ) ;
 
+        $response = [
+            'stats' => SecondPassReview\Utils::formatStats( $job_stats, $chunk_reviews )
+        ];
 
-        $this->featureSet = new \FeatureSet();
+        $this->featureSet = new FeatureSet();
         $this->featureSet->loadForProject( $this->chunk->getProject( 60 * 60 ) )  ;
         $response = $this->featureSet->filter('filterStatsControllerResponse', $response, [ 'chunk' => $this->chunk ] );
         $this->response->json( $response ) ;
     }
 
-    protected function _attachReviewsStats( &$response ){
-        $chunkReviews = ( new ChunkReviewDao())->findAllChunkReviewsByChunkIds( [[
-                        $this->chunk->id , $this->chunk->password
-                ]]
-        ) ;
-
-        $response['stats']['reviews'] = [] ;
-
-        foreach( $chunkReviews as $chunkReview ) {
-            $response['stats']['reviews'][] = [
-                    'revision_number' => SecondPassReview\Utils::sourcePageToRevisionNumber( $chunkReview->source_page ),
-                    'reviewed_words' => $chunkReview->eq_reviewed_words_count
-            ] ;
-        }
-    }
-
     protected function afterConstruct() {
-
         $Validator = ( new ChunkPasswordValidator( $this ) );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
@@ -85,7 +73,6 @@ class StatsController extends KleinController {
         } );
 
         $this->appendValidator( $Validator );
-
     }
 
 }

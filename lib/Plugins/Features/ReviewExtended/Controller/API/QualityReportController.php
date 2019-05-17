@@ -103,7 +103,7 @@ class QualityReportController extends KleinController
         foreach( $files as $k0 => $file ) {
 
             if ( !isset( $outputArray [ $k0 ] [ 'filename' ] ) ) {
-                $outputArray [$k0 ] [ 'filename' ]  = $file['filename'] ;
+                $outputArray [ $k0 ] [ 'filename' ]  = $file['filename'] ;
             }
 
             foreach( $file['segments'] as $k1 => $segment ) {
@@ -116,12 +116,12 @@ class QualityReportController extends KleinController
                     }
                 }
 
-                $outputArray [$k0 ] [ 'segments' ] [ $k1 ] = $file['segments'] [ $k1 ]->toArray();
+                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] = $file['segments'] [ $k1 ]->toArray();
 
-                $outputArray [$k0 ] [ 'segments' ] [ $k1 ] [ 'revision_number' ] = SecondPassReview\Utils::sourcePageToRevisionNumber(
-                        $outputArray [$k0 ] [ 'segments' ] [ $k1 ] [ 'source_page' ]
+                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'revision_number' ] = SecondPassReview\Utils::sourcePageToRevisionNumber(
+                        $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'source_page' ]
                 );
-                unset( $outputArray [$k0 ] [ 'segments' ] [ $k1 ] [ 'source_page']  );
+                unset( $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'source_page']  );
             }
         }
 

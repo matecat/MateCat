@@ -12,6 +12,18 @@ namespace Features\SecondPassReview;
 use LQA\ModelStruct;
 
 class Utils {
+
+    public static function formatStats( $statsArray, $chunkReviews ) {
+        $statsArray ['reviews'] = [] ;
+        foreach( $chunkReviews as $chunkReview ) {
+            $statsArray['reviews'][] = [
+                    'revision_number' => Utils::sourcePageToRevisionNumber( $chunkReview->source_page ),
+                    'reviewed_words' => $chunkReview->eq_reviewed_words_count
+            ] ;
+        }
+        return $statsArray ;
+    }
+
     public static function revisionNumberToSourcePage($number) {
         return $number + 1 ;
     }
