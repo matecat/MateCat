@@ -105,6 +105,7 @@ if (SegmentFilter.enabled())
             this.filteringSegments = true;
             data = { filter: data } ;
             data.filter.revision = config.isReview;
+            data.revision_number = config.revisionNumber;
             var password = (config.isReview) ? config.review_password : config.password;
             var path = sprintf('/api/v2/jobs/%s/%s/segments-filter?%s',
                               config.id_job, password, $.param( data ) );

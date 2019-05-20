@@ -9,6 +9,7 @@ let QUALITY_REPORT =  {
         if (filter) {
             data.filter = filter;
         }
+        data.revision_number = config.revisionNumber;
         return $.ajax({
             data: data,
             type: "GET",

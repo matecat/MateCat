@@ -314,10 +314,18 @@ class Search extends React.Component {
     render() {
 
         let options = config.searchable_statuses.map(function (item, index) {
-            return <div className="item" key={index} data-value={item.value}>
-                <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
-                {item.label}
-            </div>;
+            return (<React.Fragment key={index}>
+                <div className="item" key={index} data-value={item.value}>
+                    <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
+                    {item.label}
+                </div>
+                { config.secondRevisionsCount && item.value === 'APPROVED' ? (
+                <div className="item" key={index+'-2'} data-value={'APPROVED'}>
+                    <div  className={"ui "+ item.label.toLowerCase() +"-2ndpass-color empty circular label"} />
+                    {item.label}
+                </div>
+                ) : null }
+                </React.Fragment>);
         });
         let findIsDisabled = true;
         if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "") {

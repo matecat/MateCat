@@ -47,6 +47,12 @@ class FilterSegments extends React.Component {
     filterSelectChanged(type, value) {
         let filter = jQuery.extend({}, this.state.filter);
         filter[type] = value;
+        if ( type === 'status' && value === 'APPROVED-2') {
+            filter.revision_number = 2;
+            filter[type] = 'APPROVED';
+        } else {
+            filter.revision_number = null;
+        }
         this.setState({
             filter: filter
         });
@@ -127,11 +133,20 @@ class FilterSegments extends React.Component {
     }
 
     render () {
-        let optionsStatus = config.searchable_statuses.map(function (item, index) {
-            return <div className="item" key={index} data-value={item.value}>
+        let optionsStatus = config.searchable_statuses.map( (item, index)=> {
+            return <React.Fragment key={index}>
+
+                <div className="item" key={index} data-value={item.value}>
                 <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
                 {item.label}
-            </div>;
+            </div>
+            { this.props.secondPassReviewEnabled && item.value === 'APPROVED' ? (
+                <div className="item" key={index+'-2'} data-value={'APPROVED-2'}>
+                    <div  className={"ui "+ item.label.toLowerCase() +"-2ndpass-color empty circular label"} />
+                    {item.label}
+                </div>
+            ) : null }
+            </React.Fragment>
         });
         let optionsCategory = this.lqaNestedCategories.map((item, index) => {
             return <div className="item" key={index} data-value={item.get('id')}>

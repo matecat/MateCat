@@ -313,11 +313,19 @@ class SegmentsFilter extends React.Component {
 
     render () {
         let buttonArrowsClass = 'qa-arrows-disbled';
-        let options = config.searchable_statuses.map(function (item, index) {
-            return <div className="item" key={index} data-value={item.value}>
+        let options = config.searchable_statuses.map( (item, index) => {
+            return <React.Fragment key={index}>
+                    <div className="item" key={index} data-value={item.value}>
                         <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
                             {item.label}
-                    </div>;
+                    </div>
+                { config.secondRevisionsCount && item.value === 'APPROVED' ? (
+                    <div className="item" key={index+'-2'} data-value={'APPROVED'}>
+                        <div  className={"ui "+ item.label.toLowerCase() +"-2ndpass-color empty circular label"} />
+                        {item.label}
+                    </div>
+                ) : null }
+            </React.Fragment>;
         });
         let moreOptions = this.state.moreFilters.map(function (item, index) {
             return <div key={index} data-value={item.value} className="item">

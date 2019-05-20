@@ -63,7 +63,9 @@ class SegmentsDetails extends React.Component {
                 <div className="qr-filter-container">
                     <h3>Segment details</h3>
                     <Filters applyFilter={this.filterSegments.bind(this)}
-                            categories={this.props.categories}
+                             categories={this.props.categories}
+                             secondPassReviewEnabled={this.props.secondPassReviewEnabled}
+
                     />
                 </div>
                 {this.props.files && this.props.files.size === 0 ?

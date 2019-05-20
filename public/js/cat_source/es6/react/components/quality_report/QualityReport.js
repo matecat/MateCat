@@ -129,11 +129,11 @@ class QualityReport extends React.Component {
                                                         </div>
                                                     )}
                                                     <div className="menu">
-                                                        <div className="item" data-value="1">
+                                                        <div className="item" data-value="1" key={'option-revision'}>
                                                             <div  className={"ui revision-color empty circular label"} />
                                                             Revision
                                                         </div>
-                                                        <div className="item" data-value="2">
+                                                        <div className="item" data-value="2" key={'option-revision-2'}>
                                                             <div  className={"ui second-revision-color empty circular label"} />
                                                             2nd Revision
                                                         </div>
