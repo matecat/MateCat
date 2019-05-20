@@ -11,7 +11,6 @@ namespace Features;
 
 
 use Analysis\Workers\FastAnalysis;
-use ArrayObject;
 use BasicFeatureStruct;
 use Constants_Engines;
 use Contribution\ContributionSetStruct;
@@ -25,6 +24,7 @@ use EnginesModel_EngineDAO;
 use EnginesModel_EngineStruct;
 use EnginesModel_MMTStruct;
 use Exception;
+use FilesStorage\FilesStorageFactory;
 use Jobs_JobStruct;
 use Klein\Klein;
 use Log;
@@ -440,7 +440,8 @@ class Mmt extends BaseFeature {
                      * @var Engines_MMT $MMTEngine
                      */
                     $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                    $fileName = \FsFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
+                    $fs = FilesStorageFactory::create();
+                    $fileName = $fs::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
                     $result = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
 
                     if( $result->responseStatus >= 400 ){

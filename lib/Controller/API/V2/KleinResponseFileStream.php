@@ -9,11 +9,9 @@
 namespace API\V2;
 
 
-use FilesStorage\FsFilesStorage;
-use Klein\DataCollection\HeaderDataCollection;
-use Klein\Klein;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
 use Klein\Response;
-use Klein\DataCollection\ResponseCookieDataCollection;
 
 class KleinResponseFileStream  {
 
@@ -22,9 +20,15 @@ class KleinResponseFileStream  {
      */
     protected $response ;
 
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
+
     public function __construct(Response $response )
     {
         $this->response = $response ;
+        $this->files_storage = FilesStorageFactory::create();
     }
 
     /**
@@ -52,7 +56,8 @@ class KleinResponseFileStream  {
         $this->response->noCache();
 
         if ( null !== $filename ) {
-            $filename = FsFilesStorage::basename_fix( $filename );
+            $fs = $this->files_storage;
+            $filename = $fs::basename_fix( $filename );
         }
 
         $this->response->header('Content-type', $mimeType );

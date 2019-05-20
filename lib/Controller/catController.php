@@ -1,9 +1,10 @@
 <?php
+
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Engines_Intento as Intento;
 use Exceptions\NotFoundException;
 use TmKeyManagement\UserKeysModel;
-use Engines_Intento as Intento;
 
 /**
  * Description of catController

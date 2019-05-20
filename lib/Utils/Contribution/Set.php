@@ -9,12 +9,9 @@
  */
 
 namespace Contribution;
-use \Exception,
-        \Log,
-        \WorkerClient
-    ;
-
-use TaskRunner\Commons\ContextList;
+use Exception;
+use Log;
+use WorkerClient;
 
 /**
  * Class Set

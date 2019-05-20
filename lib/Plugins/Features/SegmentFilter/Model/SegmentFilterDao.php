@@ -8,7 +8,6 @@
 
 namespace Features\SegmentFilter\Model;
 
-use Features\SegmentFilter\Model\FilterDefinition;
 use Chunks_ChunkStruct;
 
 

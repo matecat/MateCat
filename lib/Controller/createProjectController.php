@@ -1,6 +1,8 @@
 <?php
 
 use ConnectedServices\GDrive as GDrive;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
 use ProjectQueue\Queue;
 
 class createProjectController extends ajaxController {
@@ -34,6 +36,11 @@ class createProjectController extends ajaxController {
     private $projectFeatures = [];
 
     public $postInput;
+
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
 
     public function __construct() {
 
@@ -160,6 +167,8 @@ class createProjectController extends ajaxController {
             $this->__setTeam( $this->postInput[ 'id_team' ] );
         }
 
+        $this->files_storage = FilesStorageFactory::create();
+
     }
 
     /**
@@ -275,11 +284,11 @@ class createProjectController extends ajaxController {
 
         $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
         $newArFiles = [];
+        $fs = $this->files_storage;
 
         foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == FilesStorage\FsFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+            if ( 'zip' == $fs::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
-                $fs = new FilesStorage\FsFilesStorage();
                 $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
 
                 $linkFiles = scandir( $uploadDir );
@@ -361,7 +370,7 @@ class createProjectController extends ajaxController {
             return -1;
         }
 
-        FilesStorage\FsFilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+        $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
 
         Queue::sendProject( $projectStructure );
 

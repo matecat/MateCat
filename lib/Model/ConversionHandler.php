@@ -1,5 +1,8 @@
 <?php
 
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -34,15 +37,22 @@ class ConversionHandler {
      */
     public $features;
 
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
+
     public function __construct() {
         $this->result = [
                 'code' => 1 //set OK default
         ];
+
+        $this->files_storage = FilesStorageFactory::create();
     }
 
     public function doAction() {
 
-
+        $fs              = $this->files_storage;
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
         $file_path       = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
 
@@ -51,7 +61,7 @@ class ConversionHandler {
             $this->result[ 'errors' ][] = [
                     "code"    => -6,
                     "message" => "Error during upload. Please retry.",
-                    'debug'   => FilesStorage\FsFilesStorage::basename_fix( $this->file_name )
+                    'debug'   => $fs::basename_fix( $this->file_name )
             ];
 
             return -1;
@@ -85,7 +95,7 @@ class ConversionHandler {
                 $this->result[ 'errors' ][] = [
                         "code"    => -7,
                         "message" => 'Matecat Open-Source does not support ' . ucwords( DetectProprietaryXliff::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-                        'debug'   => FilesStorage\FsFilesStorage::basename_fix( $this->file_name )
+                        'debug'   => $fs::basename_fix( $this->file_name )
                 ];
 
                 return -1;
@@ -98,9 +108,6 @@ class ConversionHandler {
 
         //initialize path variable
         $cachedXliffPath = false;
-
-        //get storage object
-        $fs = new FilesStorage\FsFilesStorage();
 
         //don't load from cache when a specified filter version is forced
         if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false ) {
@@ -126,7 +133,7 @@ class ConversionHandler {
             if ( $ocrCheck->thereIsError( $file_path ) ) {
                 $this->result[ 'code' ]     = -21; // No Good, Default
                 $this->result[ 'errors' ][] = [
-                        "code" => -21,
+                        "code"    => -21,
                         "message" => "File is not valid. OCR for RTL languages is not supported."
                 ];
 
@@ -135,7 +142,7 @@ class ConversionHandler {
             if ( $ocrCheck->thereIsWarning( $file_path ) ) {
                 $this->result[ 'code' ]     = -20; // No Good, Default
                 $this->result[ 'errors' ][] = [
-                        "code" => -20,
+                        "code"    => -20,
                         "message" => "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental."
                 ];
             }
@@ -170,9 +177,9 @@ class ConversionHandler {
                     $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have MateCat running in multiple tabs. Please close all other MateCat tabs in your browser.";
                     $this->result[ 'code' ]          = -103;
                     $this->result[ 'errors' ][]      = [
-                            "code"  => -103,
+                            "code"    => -103,
                             "message" => $convertResult[ 'errorMessage' ],
-                            'debug' => FilesStorage\FsFilesStorage::basename_fix( $this->file_name )
+                            'debug'   => $fs::basename_fix( $this->file_name )
                     ];
 
                     unset( $cachedXliffPath );
@@ -185,9 +192,9 @@ class ConversionHandler {
                 //custom error message passed directly to javascript client and displayed as is
                 $this->result[ 'code' ]     = -100;
                 $this->result[ 'errors' ][] = [
-                        "code" => -100,
+                        "code"    => -100,
                         "message" => $convertResult[ 'errorMessage' ],
-                        "debug" => FilesStorage\FsFilesStorage::basename_fix( $this->file_name )
+                        "debug"   => $fs::basename_fix( $this->file_name )
                 ];
             }
 
@@ -205,7 +212,7 @@ class ConversionHandler {
                     $sha1,
                     $this->source_lang,
                     $this->cookieDir,
-                    FilesStorage\FsFilesStorage::basename_fix( $file_path )
+                    $fs::basename_fix( $file_path )
             );
 
         }
@@ -266,7 +273,7 @@ class ConversionHandler {
                 return null;
             }
 
-            return array_map( function( $fileName ) use( $uploadFile ) {
+            return array_map( function ( $fileName ) use ( $uploadFile ) {
                 return $uploadFile->fixFileName( $fileName, false );
             }, $za->treeList );
 
@@ -448,6 +455,7 @@ class ConversionHandler {
      */
     public function setFeatures( FeatureSet $features ) {
         $this->features = $features;
+
         return $this;
     }
 
@@ -458,6 +466,7 @@ class ConversionHandler {
      */
     public function setUserIsLogged( $_userIsLogged ) {
         $this->_userIsLogged = $_userIsLogged;
+
         return $this;
     }
 

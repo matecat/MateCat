@@ -12,10 +12,10 @@
 namespace Predis\Connection\Aggregate;
 
 use InvalidArgumentException;
-use RuntimeException;
 use Predis\Command\CommandInterface;
 use Predis\Connection\NodeConnectionInterface;
 use Predis\Replication\ReplicationStrategy;
+use RuntimeException;
 
 /**
  * Aggregate connection handling replication of Redis nodes configured in a

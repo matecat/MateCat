@@ -9,7 +9,6 @@
 namespace Features\ReviewExtended;
 
 use LQA\EntryDao;
-
 use LQA\EntryStruct;
 use Translations_TranslationVersionDao;
 use Translations_TranslationVersionStruct;

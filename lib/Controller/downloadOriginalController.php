@@ -2,6 +2,8 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
 
 set_time_limit( 180 );
 
@@ -10,6 +12,11 @@ class downloadOriginalController extends downloadController {
     private $download_type;
     private $id_file;
     private $id_project;
+
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
 
     public function __construct() {
 
@@ -40,12 +47,14 @@ class downloadOriginalController extends downloadController {
         $this->download_type = $__postInput[ 'download_type' ];
         $this->password      = $__postInput[ 'password' ];
 
+        $this->files_storage = FilesStorageFactory::create();
+
     }
 
     public function doAction() {
 
         //get storage object
-        $fs        = new FilesStorage\FsFilesStorage();
+        $fs        = $this->files_storage;
         $files_job = $fs->getOriginalFilesForJob( $this->id_job, $this->id_file, $this->password );
 
         //take the project ID and creation date, array index zero is good, all id are equals
@@ -89,7 +98,7 @@ class downloadOriginalController extends downloadController {
         if ( count( $output_content ) > 1 ) {
 
             $this->setFilename( $this->getDefaultFileName( $this->project ) );
-            $pathInfo        = FilesStorage\FsFilesStorage::pathinfo_fix( $this->_filename );
+            $pathInfo        = $fs::pathinfo_fix( $this->_filename );
 
             if ( $pathInfo[ 'extension' ] != 'zip' ) {
                 $this->setFilename( $pathInfo[ 'basename' ] . ".zip" );

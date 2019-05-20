@@ -7,10 +7,9 @@ use API\V2\Exceptions\AuthenticationError;
 use Features\Dqf\Model\ProjectCreation;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\QueueElement ;
-use TaskRunner\Exceptions\EndQueueException ;
-
 use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EndQueueException;
 
 class CreateProjectWorker extends AbstractWorker  {
 

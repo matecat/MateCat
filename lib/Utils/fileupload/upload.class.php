@@ -1,10 +1,21 @@
 <?php
 
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+
 define( "DIRSEP", "//" );
 
 class UploadHandler {
 
+    /**
+     * @var array
+     */
     protected $options;
+
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
 
     function __construct() {
 
@@ -26,6 +37,8 @@ class UploadHandler {
             // Set the following option to false to enable resumable uploads:
                 'discard_aborted_uploads' => true,
         ];
+
+        $this->files_storage = FilesStorageFactory::create();
 
     }
 
@@ -427,7 +440,8 @@ class UploadHandler {
             return false;
         }
 
-        $file_info = FilesStorage\FsFilesStorage::pathinfo_fix( $file_name );
+        $fs = $this->files_storage;
+        $file_info = $fs::pathinfo_fix( $file_name );
 
         //if it's a zip file, delete it and all its contained files.
         if ( $file_info[ 'extension' ] == 'zip' ) {
@@ -528,7 +542,8 @@ class UploadHandler {
         //remove the last line ( is an empty string )
         array_pop( $file_content_array );
 
-        $fileName = FilesStorage\FsFilesStorage::basename_fix( $file_path );
+        $fs = $this->files_storage;
+        $fileName = $fs::basename_fix( $file_path );
 
         $key = array_search( $fileName, $file_content_array );
         unset( $file_content_array[ $key ] );

@@ -7,9 +7,7 @@
  */
 
 namespace Features\ReviewExtended\Model;
-use Chunks_ChunkStruct ;
-
-use Features\ReviewExtended\Model\ArchivedQualityReportStruct ;
+use Chunks_ChunkStruct;
 
 class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
 

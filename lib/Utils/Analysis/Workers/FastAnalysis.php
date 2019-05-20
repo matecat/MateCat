@@ -1,30 +1,30 @@
 <?php
+
 namespace Analysis\Workers;
 
+use AMQHandler;
+use Analysis\Queue\RedisKeys;
+use Analysis_PayableRates as PayableRates;
 use Constants_ProjectStatus;
+use Constants_ProjectStatus as ProjectStatus;
+use Database;
+use Engine;
+use Exception;
 use FeatureSet;
-use FilesStorage\FsFilesStorage;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+use INIT;
+use Log;
 use PDO;
+use PDOException;
 use Projects_MetadataDao;
-use \TaskRunner\Commons\AbstractDaemon,
-    \TaskRunner\Commons\QueueElement,
-    TaskRunner\Commons\Context,
-    TaskRunner\Commons\ContextList;
-
-use \Analysis\Queue\RedisKeys;
-
-use \AMQHandler,
-    \Constants_ProjectStatus as ProjectStatus,
-    \Exception,
-    \Analysis_PayableRates as PayableRates,
-    \WordCount_Counter,
-    \Engine,
-    \Database,
-    \Utils,
-    \PDOException,
-    \UnexpectedValueException,
-    \Log,
-    \INIT;
+use TaskRunner\Commons\AbstractDaemon;
+use TaskRunner\Commons\Context;
+use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\QueueElement;
+use UnexpectedValueException;
+use Utils;
+use WordCount_Counter;
 
 
 include_once \INIT::$MODEL_ROOT . '/queries.php';
@@ -49,6 +49,11 @@ class FastAnalysis extends AbstractDaemon {
     protected $_tHandlerPID;
     protected $_executor_instance_id;
 
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
+
     const ERR_NO_SEGMENTS    = 127;
     const ERR_TOO_LARGE      = 128;
     const ERR_500            = 129;
@@ -58,7 +63,7 @@ class FastAnalysis extends AbstractDaemon {
     /**
      * @var ContextList
      */
-    protected $_queueContextList = array();
+    protected $_queueContextList = [];
 
     /**
      * Reload Configuration every cycle
@@ -68,7 +73,7 @@ class FastAnalysis extends AbstractDaemon {
 
         $config = @parse_ini_file( $this->_configFile, true );
 
-        if( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ){
+        if ( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ) {
             throw new Exception( 'Wrong configuration file provided.' );
         }
 
@@ -77,7 +82,7 @@ class FastAnalysis extends AbstractDaemon {
 
     }
 
-    protected function _checkDatabaseConnection(){
+    protected function _checkDatabaseConnection() {
 
         $db = Database::obtain();
         try {
@@ -102,7 +107,7 @@ class FastAnalysis extends AbstractDaemon {
 
         try {
             self::$queueHandler = new AMQHandler();
-            self::$queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_SET, self::$tHandlerPID . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
+            self::$queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_SET, self::$tHandlerPID . ":" . gethostname() . ":" . (int)INIT::$INSTANCE_ID );
 
             $this->_updateConfiguration();
 
@@ -112,6 +117,8 @@ class FastAnalysis extends AbstractDaemon {
             self::_TimeStampMsg( str_pad( "EXIT", 60, " ", STR_PAD_BOTH ) );
             die();
         }
+
+        $this->files_storage = FilesStorageFactory::create();
 
     }
 
@@ -128,9 +135,9 @@ class FastAnalysis extends AbstractDaemon {
             try {
                 $this->_checkDatabaseConnection();
                 $projects_list = $this->_getLockProjectForVolumeAnalysis( 5 );
-            } catch ( PDOException $e ){
+            } catch ( PDOException $e ) {
                 self::_TimeStampMsg( $e->getMessage() . " - Error again. Try to reconnect in next cycle." );
-                sleep(3); // wait for reconnection
+                sleep( 3 ); // wait for reconnection
                 continue; // next cycle, reload projects.
             }
 
@@ -154,8 +161,8 @@ class FastAnalysis extends AbstractDaemon {
 
                 // disable TM analysis
 
-                $disable_Tms_Analysis = $this->actual_project_row[ 'id_tms' ] == 0 && $this->actual_project_row[ 'id_mt_engine' ] == 0 ;
-                
+                $disable_Tms_Analysis = $this->actual_project_row[ 'id_tms' ] == 0 && $this->actual_project_row[ 'id_mt_engine' ] == 0;
+
                 if ( $disable_Tms_Analysis ) {
 
                     /**
@@ -171,15 +178,15 @@ class FastAnalysis extends AbstractDaemon {
                     $fastReport = $this->_fetchMyMemoryFast( $pid );
                     self::_TimeStampMsg( "Fast $pid result: " . count( $fastReport->responseData ) . " segments." );
                 } catch ( Exception $e ) {
-                    if( $e->getCode() == self::ERR_TOO_LARGE ){
+                    if ( $e->getCode() == self::ERR_TOO_LARGE ) {
                         self::_updateProject( $pid, ProjectStatus::STATUS_NOT_TO_ANALYZE );
                         //next project
                         continue;
                     } elseif ( $e->getCode() == self::ERR_500 || $e->getCode() == self::ERR_EMPTY_RESPONSE ) {
-                        self::_TimeStampMsg( $e->getMessage() ) ;
+                        self::_TimeStampMsg( $e->getMessage() );
                         self::_updateProject( $pid, ProjectStatus::STATUS_NEW );
                         self::$queueHandler->getRedisClient()->del( [ '_fPid:' . $pid ] );
-                        sleep( 3 ) ;
+                        sleep( 3 );
                         continue;
                     } else {
                         $status = ProjectStatus::STATUS_DONE;
@@ -190,14 +197,14 @@ class FastAnalysis extends AbstractDaemon {
                     $fastResultData = $fastReport->responseData;
                 } else {
                     self::_TimeStampMsg( "Pid $pid failed fast analysis." );
-                    $fastResultData = array();
+                    $fastResultData = [];
                 }
 
                 unset( $fastReport );
 
                 foreach ( $fastResultData as $k => $v ) {
 
-                    if ( in_array( $v[ 'type' ], array( "50%-74%" ) ) ) {
+                    if ( in_array( $v[ 'type' ], [ "50%-74%" ] ) ) {
                         $fastResultData[ $k ][ 'type' ] = "NO_MATCH";
                     }
 
@@ -232,7 +239,8 @@ class FastAnalysis extends AbstractDaemon {
                 // INSERT DATA
 
                 self::_updateProject( $pid, $status );
-                FsFilesStorage::deleteFastAnalysisFile( $pid );
+                $fs = $this->files_storage;
+                $fs::deleteFastAnalysisFile( $pid );
 
             }
 
@@ -255,10 +263,12 @@ class FastAnalysis extends AbstractDaemon {
          */
         $myMemory = Engine::getInstance( 1 /* MyMemory */ );
 
+        $fs = $this->files_storage;
+
         try {
 
             self::_TimeStampMsg( "Fetching data from disk" );
-            $this->segments = FsFilesStorage::getFastAnalysisData( $pid );
+            $this->segments = $fs::getFastAnalysisData( $pid );
 
         } catch ( UnexpectedValueException $e ) {
 
@@ -280,14 +290,14 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         //TODO Remove when MyMemory FastAnalysis will be rewritten
-        if( count( $this->segments ) > 100000 ){
+        if ( count( $this->segments ) > 100000 ) {
             throw new Exception( "Project too large. Skip.", self::ERR_TOO_LARGE );
         }
 
         //compose a lookup array
-        $this->segment_hashes = array();
+        $this->segment_hashes = [];
 
-        $fastSegmentsRequest = array();
+        $fastSegmentsRequest = [];
         foreach ( $this->segments as $pos => $segment ) {
 
             $fastSegmentsRequest[ $pos ][ 'jsid' ]         = $segment[ 'jsid' ];
@@ -314,9 +324,9 @@ class FastAnalysis extends AbstractDaemon {
         if ( isset( $result->error->code ) && $result->error->code == -28 ) { //curl timed out
             throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 500 ) {
-            throw new Exception("MyMemory Internal Server Error. Pid: " . $pid , self::ERR_500 );
-        } elseif( !empty( $fastSegmentsRequest ) && empty( $result->responseData )) {
-            throw new Exception("MyMemory Fast Analysis Failed. Pid: " . $pid , self::ERR_EMPTY_RESPONSE );
+            throw new Exception( "MyMemory Internal Server Error. Pid: " . $pid, self::ERR_500 );
+        } elseif ( !empty( $fastSegmentsRequest ) && empty( $result->responseData ) ) {
+            throw new Exception( "MyMemory Fast Analysis Failed. Pid: " . $pid, self::ERR_EMPTY_RESPONSE );
         }
 
         return $result;
@@ -329,7 +339,7 @@ class FastAnalysis extends AbstractDaemon {
             case SIGTERM :
             case SIGHUP :
             case SIGINT :
-                $run = static::getInstance();
+                $run          = static::getInstance();
                 $run->RUNNING = false;
                 break;
             default :
@@ -345,12 +355,12 @@ class FastAnalysis extends AbstractDaemon {
 
     public static function cleanShutDown() {
 
-        $run = static::getInstance();
-        $run->RUNNING = false;
+        $run               = static::getInstance();
+        $run->RUNNING      = false;
         self::$tHandlerPID = null;
 
         //SHUTDOWN
-        self::$queueHandler->getRedisClient()->srem( RedisKeys::FAST_PID_SET, getmypid() . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
+        self::$queueHandler->getRedisClient()->srem( RedisKeys::FAST_PID_SET, getmypid() . ":" . gethostname() . ":" . (int)INIT::$INSTANCE_ID );
 
         $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
@@ -386,12 +396,12 @@ class FastAnalysis extends AbstractDaemon {
          * Ensure we have fresh data from master node
          */
         Database::obtain()->getConnection()->beginTransaction();
-        $projectStruct = \Projects_ProjectDao::findById( $pid );
+        $projectStruct         = \Projects_ProjectDao::findById( $pid );
         $projectFeaturesString = $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
         Database::obtain()->getConnection()->commit();
 
         $db   = Database::obtain();
-        $data = array();
+        $data = [];
 
         $total_eq_wc       = 0;
         $total_standard_wc = 0;
@@ -404,7 +414,7 @@ class FastAnalysis extends AbstractDaemon {
         $data[ 'standard_word_count' ] = null;
 
         $segment_translations = "INSERT INTO `segment_translations` ( " . implode( ", ", array_keys( $data ) ) . " ) VALUES ";
-        $st_values            = array();
+        $st_values            = [];
 
         foreach ( $this->segments as $k => $v ) {
 
@@ -418,7 +428,7 @@ class FastAnalysis extends AbstractDaemon {
 
             list( $eq_word, $standard_words, $match_type ) = $this->_getWordCountForSegment( $v, $equivalentWordMapping );
 
-            $total_eq_wc += $eq_word;
+            $total_eq_wc       += $eq_word;
             $total_standard_wc += $standard_words;
 
             $list_id_jobs_password = explode( ',', $list_id_jobs_password );
@@ -452,7 +462,7 @@ class FastAnalysis extends AbstractDaemon {
                     $this->segments[ $k ][ 'eq_word_count' ]       = (float)$eq_word;
                     $this->segments[ $k ][ 'standard_word_count' ] = (float)$standard_words;
 
-                } elseif( $perform_Tms_Analysis ) {
+                } elseif ( $perform_Tms_Analysis ) {
 
                     Log::doJsonLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
                     // this segment must not be sent to the TM analysis queue
@@ -468,7 +478,9 @@ class FastAnalysis extends AbstractDaemon {
 
             //anyway this key must be removed because he is no more needed and we want not to send it to the queue
             unset( $this->segments[ $k ][ 'wc' ] );
-            if( !$perform_Tms_Analysis ) unset( $this->segments[ $k ] );
+            if ( !$perform_Tms_Analysis ) {
+                unset( $this->segments[ $k ] );
+            }
 
         }
 
@@ -525,7 +537,7 @@ class FastAnalysis extends AbstractDaemon {
 
         //_TimeStampMsg( "Done." );
 
-        $data2 = array( 'fast_analysis_wc' => $total_eq_wc );
+        $data2 = [ 'fast_analysis_wc' => $total_eq_wc ];
 
         $where = " id = $pid";
         try {
@@ -541,7 +553,7 @@ class FastAnalysis extends AbstractDaemon {
          *  i take the value from the first element of the list ( the last one is the same for the project )
          *  because surely this value are equal for all the record of the project
          */
-        $queueInfo     = $this->_getQueueAddressesByPriority( $totalSegmentsToAnalyze, $this->actual_project_row[ 'id_mt_engine' ] );
+        $queueInfo = $this->_getQueueAddressesByPriority( $totalSegmentsToAnalyze, $this->actual_project_row[ 'id_mt_engine' ] );
 
         if ( $totalSegmentsToAnalyze ) {
 
@@ -549,7 +561,7 @@ class FastAnalysis extends AbstractDaemon {
             self::_TimeStampMsg( "Elements: $totalSegmentsToAnalyze" );
 
             try {
-                $this->_setTotal( array( 'pid' => $pid, 'queueInfo' => $queueInfo ) );
+                $this->_setTotal( [ 'pid' => $pid, 'queueInfo' => $queueInfo ] );
             } catch ( Exception $e ) {
                 Utils::sendErrMailReport( $e->getMessage() . "" . $e->getTraceAsString(), "Fast Analysis set Total values failed." );
                 self::_TimeStampMsg( $e->getMessage() . "" . $e->getTraceAsString() );
@@ -561,7 +573,7 @@ class FastAnalysis extends AbstractDaemon {
             /**
              * Reset the indexes of the list to get the context easily
              */
-            $this->segments  = array_values( $this->segments );
+            $this->segments = array_values( $this->segments );
             foreach ( $this->segments as $k => $queue_element ) {
 
                 $queue_element[ 'id_segment' ]       = $queue_element[ 'id' ];
@@ -572,8 +584,8 @@ class FastAnalysis extends AbstractDaemon {
                 $queue_element[ 'features' ]         = $projectFeaturesString;
                 $queue_element[ 'only_private' ]     = $this->actual_project_row[ 'only_private_tm' ];
 
-                $queue_element[ 'context_before' ]   = @$this->segments[ $k -1 ][ 'segment' ];
-                $queue_element[ 'context_after' ]    = @$this->segments[ $k +1 ][ 'segment' ];
+                $queue_element[ 'context_before' ] = @$this->segments[ $k - 1 ][ 'segment' ];
+                $queue_element[ 'context_after' ]  = @$this->segments[ $k + 1 ][ 'segment' ];
 
                 /**
                  * remove some unuseful fields
@@ -593,15 +605,15 @@ class FastAnalysis extends AbstractDaemon {
 
                         list( $id_job, $language ) = explode( ":", $_language );
 
-                        $queue_element[ 'target' ] = $language;
-                        $queue_element[ 'id_job' ] = $id_job;
+                        $queue_element[ 'target' ]        = $language;
+                        $queue_element[ 'id_job' ]        = $id_job;
                         $queue_element[ 'payable_rates' ] = $jobs_payable_rates[ $id_job ]; // assign the right payable rate for the current job
 
-                        $element = new QueueElement();
-                        $element->params = $queue_element;
+                        $element            = new QueueElement();
+                        $element->params    = $queue_element;
                         $element->classLoad = '\Analysis\Workers\TMAnalysisWorker';
 
-                        self::$queueHandler->send( $queueInfo->queue_name, $element, array( 'persistent' => self::$queueHandler->persistent ) );
+                        self::$queueHandler->send( $queueInfo->queue_name, $element, [ 'persistent' => self::$queueHandler->persistent ] );
                         self::_TimeStampMsg( "AMQ Set Executed " . ( $k + 1 ) . " Language: $language" );
 
                     }
@@ -621,21 +633,21 @@ class FastAnalysis extends AbstractDaemon {
         return $db->affected_rows;
     }
 
-    protected function _getWordCountForSegment( $segmentArray, $equivalentWordMapping ){
+    protected function _getWordCountForSegment( $segmentArray, $equivalentWordMapping ) {
 
-        switch( $segmentArray[ 'match_type' ] ){
+        switch ( $segmentArray[ 'match_type' ] ) {
             case '75%-84%':
             case '85%-94%':
             case '95%-99%':
-                $eq_word = ( $segmentArray[ 'wc' ] * $equivalentWordMapping[ 'INTERNAL' ] / 100 );
+                $eq_word    = ( $segmentArray[ 'wc' ] * $equivalentWordMapping[ 'INTERNAL' ] / 100 );
                 $match_type = 'INTERNAL';
                 break;
             case( array_key_exists( $segmentArray[ 'match_type' ], $equivalentWordMapping ) ):
-                $eq_word = ( $segmentArray[ 'wc' ] * $equivalentWordMapping[ $segmentArray[ 'match_type' ] ] / 100 );
+                $eq_word    = ( $segmentArray[ 'wc' ] * $equivalentWordMapping[ $segmentArray[ 'match_type' ] ] / 100 );
                 $match_type = $segmentArray[ 'match_type' ];
                 break;
             default:
-                $eq_word = $segmentArray[ 'wc' ];
+                $eq_word    = $segmentArray[ 'wc' ];
                 $match_type = "NO_MATCH";
                 break;
         }
@@ -683,7 +695,7 @@ class FastAnalysis extends AbstractDaemon {
             ORDER BY s.id
 HD;
 
-        $db    = Database::obtain();
+        $db = Database::obtain();
         try {
             $results = $db->fetch_array( $query );
         } catch ( PDOException $e ) {
@@ -695,6 +707,7 @@ HD;
             $segment[ 'payable_rates' ] = array_map( function ( $rowPayable ) {
                 return json_encode( $rowPayable );
             }, json_decode( $segment[ 'payable_rates' ], true ) );
+
             return $segment;
         }, $results );
 
@@ -708,38 +721,38 @@ HD;
      *  $config = array(
      *    'total' => null,
      *    'qid' => null,
-     *    'queueInfo' => @var Context
-     *  )
-     * </pre>
-     *
-     * @param array $config
+     *    'queueInfo' => @param array $config
      *
      * @throws Exception
+     * @var Context
+     *  )
+     *  </pre>
+     *
      */
-    protected function _setTotal( $config = array(
-            'total'            => null,
-            'pid'              => null,
-            'queueInfo'        => null
-    ) ) {
+    protected function _setTotal( $config = [
+            'total'     => null,
+            'pid'       => null,
+            'queueInfo' => null
+    ] ) {
 
-        if( empty( $this->queueTotalID ) && empty( $config[ 'pid' ] ) ){
+        if ( empty( $this->queueTotalID ) && empty( $config[ 'pid' ] ) ) {
             throw new Exception( 'Can Not set a Total without a Queue ID.' );
         }
 
-        if( !empty( $config[ 'total' ] ) ){
+        if ( !empty( $config[ 'total' ] ) ) {
             $_total = $config[ 'total' ];
         } else {
 
-            if( empty( $config[ 'queueInfo' ] ) && empty( $this->queueName ) ){
+            if ( empty( $config[ 'queueInfo' ] ) && empty( $this->queueName ) ) {
                 throw new Exception( 'Need a queue name to get it\'s total or you must provide one' );
             }
 
             $queueName = ( !empty( $config[ 'queueInfo' ] ) ? $config[ 'queueInfo' ]->queue_name : $this->queueName );
-            $_total = self::$queueHandler->getQueueLength( $queueName );
+            $_total    = self::$queueHandler->getQueueLength( $queueName );
 
         }
 
-        if( !empty( $config[ 'pid' ] ) ){
+        if ( !empty( $config[ 'pid' ] ) ) {
             $_pid = $config[ 'pid' ];
         } else {
             $_pid = $this->queueTotalID;
@@ -753,17 +766,17 @@ HD;
     /**
      * Select the right Queue ( and the associated redis Key ) by it's length ( simplest implementation simple )
      *
-     * @param $queueLen int
+     * @param $queueLen     int
      * @param $id_mt_engine int
      *
      * @return Context
      */
-    protected function _getQueueAddressesByPriority( $queueLen, $id_mt_engine ){
+    protected function _getQueueAddressesByPriority( $queueLen, $id_mt_engine ) {
 
         $mtEngine = null;
         try {
-            $mtEngine  = Engine::getInstance( $id_mt_engine );
-        } catch ( Exception $e ){
+            $mtEngine = Engine::getInstance( $id_mt_engine );
+        } catch ( Exception $e ) {
             self::_TimeStampMsg( "Caught Exception: " . $e->getMessage() );
         }
 
@@ -772,7 +785,7 @@ HD;
 
         //use this kind of construct to easy add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
-            case ( ! $mtEngine instanceof \Engines_MyMemory && ! $mtEngine instanceof \Engines_NONE ):
+            case ( !$mtEngine instanceof \Engines_MyMemory && !$mtEngine instanceof \Engines_NONE ):
                 $context = $contextList[ 'P3' ];
                 break;
             case ( $queueLen >= 10000 ): // at rate of 100 segments/s ( 100 processes ) ~ 2m 30s
@@ -795,9 +808,9 @@ HD;
         $query_limit = " LIMIT " . (int)$limit;
 
         $and_InstanceId = null;
-        if( !is_null( INIT::$INSTANCE_ID ) ){
-            $and_InstanceId = ' AND instance_id = :instance_id ';
-            $bindParams[ 'instance_id' ] = (int) INIT::$INSTANCE_ID;
+        if ( !is_null( INIT::$INSTANCE_ID ) ) {
+            $and_InstanceId              = ' AND instance_id = :instance_id ';
+            $bindParams[ 'instance_id' ] = (int)INIT::$INSTANCE_ID;
         }
 
         $query = "
@@ -809,7 +822,7 @@ HD;
         ORDER BY id $query_limit ;
 	";
 
-        $db    = Database::obtain();
+        $db = Database::obtain();
         //Needed to address the query to the master database if exists
         \Database::obtain()->begin();
 
@@ -819,10 +832,10 @@ HD;
 
         $db->getConnection()->commit();
 
-        foreach( $results as $position => $project ){
+        foreach ( $results as $position => $project ) {
             //acquire a lock
             $valid = self::$queueHandler->getRedisClient()->setnx( '_fPid:' . $project[ 'id' ], 1 );
-            if( !$valid ){
+            if ( !$valid ) {
                 unset( $results[ $position ] );
             } else {
                 self::$queueHandler->getRedisClient()->expire( '_fPid:' . $project[ 'id' ], 60 * 60 * 24 );

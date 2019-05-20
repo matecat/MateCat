@@ -1,7 +1,5 @@
 <?php
 
-use Database;
-
 /**
  * Created by PhpStorm.
  * User: roberto

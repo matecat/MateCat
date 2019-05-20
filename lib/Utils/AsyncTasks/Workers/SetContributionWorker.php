@@ -9,17 +9,17 @@
 
 namespace AsyncTasks\Workers;
 
-use Contribution\ContributionSetStruct,
-        Engine,
-        TaskRunner\Commons\AbstractWorker,
-        TaskRunner\Commons\QueueElement,
-        TaskRunner\Exceptions\EndQueueException,
-        TaskRunner\Exceptions\ReQueueException,
-        TmKeyManagement_Filter,
-        TmKeyManagement_TmKeyManagement,
-        TaskRunner\Commons\AbstractElement,
-        Jobs_JobStruct;
+use Contribution\ContributionSetStruct;
+use Engine;
 use INIT;
+use Jobs_JobStruct;
+use TaskRunner\Commons\AbstractElement;
+use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
+use TmKeyManagement_Filter;
+use TmKeyManagement_TmKeyManagement;
 
 class SetContributionWorker extends AbstractWorker {
 

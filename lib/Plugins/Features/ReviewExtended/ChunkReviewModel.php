@@ -10,7 +10,6 @@
 namespace Features\ReviewExtended;
 
 use Features\ReviewExtended\Model\ChunkReviewDao;
-
 use LQA\ChunkReviewStruct;
 
 class ChunkReviewModel implements IChunkReviewModel {

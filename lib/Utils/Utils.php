@@ -1,7 +1,6 @@
 <?php
 
-use TaskRunner\Commons\ContextList;
-use TaskRunner\Commons\QueueElement;
+use FilesStorage\FilesStorageFactory;
 
 class Utils {
 
@@ -11,16 +10,17 @@ class Utils {
      *
      * @return bool
      */
-    public static function isSupportedWebBrowser($browser_info) {
-        $browser_name = strtolower( $browser_info[ 'name' ] );
+    public static function isSupportedWebBrowser( $browser_info ) {
+        $browser_name     = strtolower( $browser_info[ 'name' ] );
         $browser_platform = strtolower( $browser_info[ 'platform' ] );
 
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
                 // Safari supported only on Mac
-                if (stripos( "apple safari", $browser_name ) === false ||
-                        (stripos( "apple safari", $browser_name ) !== false && stripos("mac", $browser_platform) !== false) )
+                if ( stripos( "apple safari", $browser_name ) === false ||
+                        ( stripos( "apple safari", $browser_name ) !== false && stripos( "mac", $browser_platform ) !== false ) ) {
                     return 1;
+                }
             }
         }
 
@@ -31,13 +31,15 @@ class Utils {
         }
 
         // unsupported browsers: hack for home page
-        if ($_SERVER[ 'REQUEST_URI' ]=="/") return -2;
+        if ( $_SERVER[ 'REQUEST_URI' ] == "/" ) {
+            return -2;
+        }
 
         return 0;
     }
 
     static public function getBrowser() {
-        $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
+        $u_agent = $_SERVER[ 'HTTP_USER_AGENT' ];
 
         //First get the platform?
         if ( preg_match( '/linux/i', $u_agent ) ) {
@@ -80,7 +82,7 @@ class Utils {
             $ub    = "Unknown";
         }
         // finally get the correct version number
-        $known   = array( 'Version', $ub, 'other' );
+        $known   = [ 'Version', $ub, 'other' ];
         $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
         if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
             // we have no matching number just continue
@@ -105,46 +107,61 @@ class Utils {
             $version = "?";
         }
 
-        return array(
+        return [
                 'userAgent' => $u_agent,
                 'name'      => $bname,
                 'version'   => $version,
                 'platform'  => $platform
-        );
+        ];
     }
 
-    public static function friendly_slug($string) {
+    public static function friendly_slug( $string ) {
         // everything to lower and no spaces begin or end
-        $string = strtolower(trim($string));
+        $string = strtolower( trim( $string ) );
 
         //replace accent characters, depends your language is needed
-        $string = Utils::replace_accents($string);
+        $string = Utils::replace_accents( $string );
 
         // adding - for spaces and union characters
-        $find = array(' ', '&', '\r\n', '\n', '+',',');
-        $string = str_replace ($find, '-', $string);
+        $find   = [ ' ', '&', '\r\n', '\n', '+', ',' ];
+        $string = str_replace( $find, '-', $string );
 
         //delete and replace rest of special chars
-        $find = array('/[^a-z0-9\-<>]/', '/[\-]+/', '/<[^>]*>/');
-        $repl = array('', '-', '');
-        $string = preg_replace ($find, $repl, $string);
+        $find   = [ '/[^a-z0-9\-<>]/', '/[\-]+/', '/<[^>]*>/' ];
+        $repl   = [ '', '-', '' ];
+        $string = preg_replace( $find, $repl, $string );
 
         //return the friendly url
         return $string;
     }
 
-    public static function replace_accents($var){ //replace for accents catalan spanish and more
-        $a = array('À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď', 'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ', 'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś', 'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ', 'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ');
-        $b = array('A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a', 'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C', 'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R', 'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z', 'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o');
-        $var= str_replace($a, $b,$var);
+    public static function replace_accents( $var ) { //replace for accents catalan spanish and more
+        $a   = [
+                'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ',
+                'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď',
+                'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ',
+                'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś',
+                'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ',
+                'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ'
+        ];
+        $b   = [
+                'A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a',
+                'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C',
+                'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i',
+                'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R',
+                'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z',
+                'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o'
+        ];
+        $var = str_replace( $a, $b, $var );
+
         return $var;
     }
 
     public static function getGlobalMessage() {
         $retString = '';
         if ( file_exists( INIT::$ROOT . "/inc/.globalmessage.ini" ) ) {
-            $globalMessage              = parse_ini_file( INIT::$ROOT . "/inc/.globalmessage.ini" );
-            if( ( new DateTime( $globalMessage[ 'expire' ] ) )->getTimestamp() > time() ){
+            $globalMessage = parse_ini_file( INIT::$ROOT . "/inc/.globalmessage.ini" );
+            if ( ( new DateTime( $globalMessage[ 'expire' ] ) )->getTimestamp() > time() ) {
                 $resObject = [
                         'msg'    => $globalMessage[ 'message' ],
                         'token'  => md5( $globalMessage[ 'message' ] ),
@@ -153,6 +170,7 @@ class Utils {
                 $retString = json_encode( [ $resObject ] );
             }
         }
+
         return [ 'messages' => $retString ];
     }
 
@@ -163,7 +181,7 @@ class Utils {
      *  more decoupled implementations.
      */
     public static function userIsLogged() {
-        return isset($_SESSION['uid']) ;
+        return isset( $_SESSION[ 'uid' ] );
     }
 
     public static function encryptPass( $clear_pass, $salt ) {
@@ -191,11 +209,12 @@ class Utils {
         return date( 'Y-m-d H:i:s', $time );
     }
 
-	public static function api_timestamp( $date_string ) {
+    public static function api_timestamp( $date_string ) {
         if ( $date_string == null ) {
-            return null ;
+            return null;
         } else {
             $datetime = new \DateTime( $date_string );
+
             return $datetime->format( 'c' );
         }
     }
@@ -204,93 +223,93 @@ class Utils {
         return str_replace( ' ', '', ucwords( str_replace( '_', ' ', $string ) ) );
     }
 
-	/**
-	 * @param $params
-	 * @param $required_keys
-	 *
-	 * @return mixed
-	 * @throws Exception
-	 */
-    public static function ensure_keys($params, $required_keys) {
-        $missing = array();
+    /**
+     * @param $params
+     * @param $required_keys
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public static function ensure_keys( $params, $required_keys ) {
+        $missing = [];
 
-        foreach( $required_keys as $key ) {
-            if ( !array_key_exists($key, $params) ) {
+        foreach ( $required_keys as $key ) {
+            if ( !array_key_exists( $key, $params ) ) {
                 $missing[] = $key;
             }
         }
 
-        if ( count($missing) > 0 ) {
-            throw new Exception( "Missing keys: " . implode(', ', $missing) );
+        if ( count( $missing ) > 0 ) {
+            throw new Exception( "Missing keys: " . implode( ', ', $missing ) );
         }
 
-        return $params ;
+        return $params;
     }
 
-	public static function is_assoc($array) {
-		return is_array($array) AND (bool) count(array_filter(array_keys($array), 'is_string'));
-	}
+    public static function is_assoc( $array ) {
+        return is_array( $array ) AND (bool)count( array_filter( array_keys( $array ), 'is_string' ) );
+    }
 
-	public static function curlFile($filePath)
-	{
-		$curlFile =  "@$filePath";		
-		// CURLfile is available with PHP 5.5 and higher versions
-		if( version_compare(PHP_VERSION, '5.5.0') >= 0 ){ 
-		    $curlFile = new CURLFile($filePath);
-		}
-		return $curlFile;
-	}
+    public static function curlFile( $filePath ) {
+        $curlFile = "@$filePath";
+        // CURLfile is available with PHP 5.5 and higher versions
+        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
+            $curlFile = new CURLFile( $filePath );
+        }
 
-	public static function curl_post($url, &$d, $opt = array()) {
-		if (!self::is_assoc($d)) {
-			throw new Exception("The input data to " . __FUNCTION__ . "must be an associative array", -1);
-		}
-		$ch = curl_init();
+        return $curlFile;
+    }
 
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, 0);
-		curl_setopt($ch, CURLOPT_USERAGENT, INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $d);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+    public static function curl_post( $url, &$d, $opt = [] ) {
+        if ( !self::is_assoc( $d ) ) {
+            throw new Exception( "The input data to " . __FUNCTION__ . "must be an associative array", -1 );
+        }
+        $ch = curl_init();
 
-		if (self::is_assoc($opt) and !empty($opt)) {
-			foreach ($opt as $k => $v) {
+        curl_setopt( $ch, CURLOPT_URL, $url );
+        curl_setopt( $ch, CURLOPT_HEADER, 0 );
+        curl_setopt( $ch, CURLOPT_USERAGENT, INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt( $ch, CURLOPT_POST, true );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $d );
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true );
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
 
-				if (stripos($k, "curlopt_") === false or stripos($k, "curlopt_") !== 0) {
-					$k = "curlopt_$k";
-				}
-				$const_name = strtoupper($k);
-				if (defined($const_name)) {
-					curl_setopt($ch, constant($const_name), $v);
-				}
-			}
-		}
+        if ( self::is_assoc( $opt ) and !empty( $opt ) ) {
+            foreach ( $opt as $k => $v ) {
 
-		$output = curl_exec($ch);
+                if ( stripos( $k, "curlopt_" ) === false or stripos( $k, "curlopt_" ) !== 0 ) {
+                    $k = "curlopt_$k";
+                }
+                $const_name = strtoupper( $k );
+                if ( defined( $const_name ) ) {
+                    curl_setopt( $ch, constant( $const_name ), $v );
+                }
+            }
+        }
 
-		$info = curl_getinfo($ch);
+        $output = curl_exec( $ch );
 
-		//Log::doJsonLog($d);
-		//Log::doJsonLog($output);
+        $info = curl_getinfo( $ch );
 
-		curl_close($ch);
+        //Log::doJsonLog($d);
+        //Log::doJsonLog($output);
 
-		return $output;
-	}
+        curl_close( $ch );
+
+        return $output;
+    }
 
     public static function getRealIpAddr() {
 
         foreach ( [
-                      'HTTP_CLIENT_IP',
-                      'HTTP_X_FORWARDED_FOR',
-                      'HTTP_X_FORWARDED',
-                      'HTTP_X_CLUSTER_CLIENT_IP',
-                      'HTTP_FORWARDED_FOR',
-                      'HTTP_FORWARDED',
-                      'REMOTE_ADDR'
+                          'HTTP_CLIENT_IP',
+                          'HTTP_X_FORWARDED_FOR',
+                          'HTTP_X_FORWARDED',
+                          'HTTP_X_CLUSTER_CLIENT_IP',
+                          'HTTP_FORWARDED_FOR',
+                          'HTTP_FORWARDED',
+                          'REMOTE_ADDR'
                   ] as $key ) {
             if ( isset( $_SERVER[ $key ] ) ) {
                 foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
@@ -303,60 +322,61 @@ class Utils {
 
     }
 
-    public static function sendErrMailReport( $htmlContent, $subject = null ){
+    public static function sendErrMailReport( $htmlContent, $subject = null ) {
 
         if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
-          return true ;
+            return true;
         }
 
-		$mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
+        $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
 
-        if( empty( $subject ) ){
-			$subject = 'Alert from MateCat: ' . php_uname('n');
+        if ( empty( $subject ) ) {
+            $subject = 'Alert from MateCat: ' . php_uname( 'n' );
         } else {
-            $subject .= ' ' . php_uname('n');
+            $subject .= ' ' . php_uname( 'n' );
         }
 
-		$queue_element = array_merge( array(), $mailConf );
-		$queue_element['subject'] = $subject;
-		$queue_element['body'] = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
+        $queue_element              = array_merge( [], $mailConf );
+        $queue_element[ 'subject' ] = $subject;
+        $queue_element[ 'body' ]    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
-		WorkerClient::init( new AMQHandler() );
-		\WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+        WorkerClient::init( new AMQHandler() );
+        \WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
 
-		Log::doJsonLog( 'Message has been sent' );
-		return true;
+        Log::doJsonLog( 'Message has been sent' );
 
-	}
+        return true;
 
-	protected static function _getBackTrace() {
+    }
 
-		$trace = debug_backtrace();
-		$now   = date( 'Y-m-d H:i:s' );
+    protected static function _getBackTrace() {
 
-		$ip = Utils::getRealIpAddr();
+        $trace = debug_backtrace();
+        $now   = date( 'Y-m-d H:i:s' );
 
-		$stringDataInfo = "[$now (User IP: $ip)]";
+        $ip = Utils::getRealIpAddr();
 
-		if ( isset( $trace[ 2 ][ 'class' ] ) ) {
-			$stringDataInfo .= " " . $trace[ 2 ][ 'class' ] . "-> ";
-		}
-		if ( isset( $trace[ 2 ][ 'function' ] ) ) {
-			$stringDataInfo .= $trace[ 2 ][ 'function' ] . " ";
-		}
-		$stringDataInfo .= "(line:" . $trace[ 1 ][ 'line' ] . ")";
+        $stringDataInfo = "[$now (User IP: $ip)]";
 
-		return $stringDataInfo;
+        if ( isset( $trace[ 2 ][ 'class' ] ) ) {
+            $stringDataInfo .= " " . $trace[ 2 ][ 'class' ] . "-> ";
+        }
+        if ( isset( $trace[ 2 ][ 'function' ] ) ) {
+            $stringDataInfo .= $trace[ 2 ][ 'function' ] . " ";
+        }
+        $stringDataInfo .= "(line:" . $trace[ 1 ][ 'line' ] . ")";
 
-	}
+        return $stringDataInfo;
+
+    }
 
     public static function getPHPVersion() {
         // PHP_VERSION_ID is available as of PHP 5.2.7, if our
         // version is lower than that, then emulate it
-        if (! defined ( 'PHP_VERSION_ID' )) {
-            $version = explode ( '.', PHP_VERSION );
+        if ( !defined( 'PHP_VERSION_ID' ) ) {
+            $version = explode( '.', PHP_VERSION );
 
-            define ( 'PHP_VERSION_ID', ($version [0] * 10000 + $version [1] * 100 + $version [2]) );
+            define( 'PHP_VERSION_ID', ( $version [ 0 ] * 10000 + $version [ 1 ] * 100 + $version [ 2 ] ) );
         }
 
         // PHP_VERSION_ID is defined as a number, where the higher the number
@@ -373,10 +393,10 @@ class Utils {
         // not available in versions prior to 5.2.7
 
 
-        if (PHP_VERSION_ID < 50207) {
-            define ( 'PHP_MAJOR_VERSION', $version [0] );
-            define ( 'PHP_MINOR_VERSION', $version [1] );
-            define ( 'PHP_RELEASE_VERSION', $version [2] );
+        if ( PHP_VERSION_ID < 50207 ) {
+            define( 'PHP_MAJOR_VERSION', $version [ 0 ] );
+            define( 'PHP_MINOR_VERSION', $version [ 1 ] );
+            define( 'PHP_RELEASE_VERSION', $version [ 2 ] );
         }
 
     }
@@ -423,10 +443,11 @@ class Utils {
      *
      * @return bool
      */
-    public static function isTokenValid( $token = null ){
-        if( empty( $token ) || !preg_match( '|^\{[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}\}$|', $token ) ){
+    public static function isTokenValid( $token = null ) {
+        if ( empty( $token ) || !preg_match( '|^\{[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}\}$|', $token ) ) {
             return false;
         }
+
         return true;
     }
 
@@ -451,7 +472,7 @@ class Utils {
     }
 
     public static function filterLangDetectArray( $arr ) {
-        return filter_var( $arr, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
+        return filter_var( $arr, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
     }
 
     public static function deleteDir( $dirPath ) {
@@ -503,20 +524,20 @@ class Utils {
                     $msg = ' - Underflow or the modes mismatch';
                     break;
                 case JSON_ERROR_CTRL_CHAR:
-                    $msg =  ' - Unexpected control character found' ;
+                    $msg = ' - Unexpected control character found';
                     break;
                 case JSON_ERROR_SYNTAX:
-                    $msg = ' - Syntax error, malformed JSON' ;
+                    $msg = ' - Syntax error, malformed JSON';
                     break;
                 case JSON_ERROR_UTF8:
-                    $msg =  ' - Malformed UTF-8 characters, possibly incorrectly encoded';
+                    $msg = ' - Malformed UTF-8 characters, possibly incorrectly encoded';
                     break;
                 default:
-                    $msg =  ' - Unknown error';
+                    $msg = ' - Unknown error';
                     break;
             }
 
-            if( $raise && $error != JSON_ERROR_NONE ){
+            if ( $raise && $error != JSON_ERROR_NONE ) {
                 throw new Exception( $msg, $error );
             }
 
@@ -525,134 +546,135 @@ class Utils {
     }
 
     //Array_column() is not supported on PHP 5.4, so i'll rewrite it
-	public static function array_column( array $input, $column_key, $index_key = null ) {
+    public static function array_column( array $input, $column_key, $index_key = null ) {
 
         if ( function_exists( 'array_column' ) ) {
             return array_column( $input, $column_key, $index_key );
         }
 
-		$result = array();
-		foreach ( $input as $k => $v ) {
-			$result[ $index_key ? $v[ $index_key ] : $k ] = $v[ $column_key ];
-		}
+        $result = [];
+        foreach ( $input as $k => $v ) {
+            $result[ $index_key ? $v[ $index_key ] : $k ] = $v[ $column_key ];
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
-	public static function getServerRootUrl() {
-    $s = $_SERVER['HTTPS'] === 'on' ? 's' : '';
-    $protocol = strtolower(substr($_SERVER['SERVER_PROTOCOL'], 0, strpos($_SERVER['SERVER_PROTOCOL'], '/'))).$s;
-    $port = ($_SERVER['SERVER_PORT'] == '80') ? '' : (':'.$_SERVER['SERVER_PORT']);
-    return $protocol.'://'.$_SERVER['SERVER_NAME'].$port;
-	}
+    public static function getServerRootUrl() {
+        $s        = $_SERVER[ 'HTTPS' ] === 'on' ? 's' : '';
+        $protocol = strtolower( substr( $_SERVER[ 'SERVER_PROTOCOL' ], 0, strpos( $_SERVER[ 'SERVER_PROTOCOL' ], '/' ) ) ) . $s;
+        $port     = ( $_SERVER[ 'SERVER_PORT' ] == '80' ) ? '' : ( ':' . $_SERVER[ 'SERVER_PORT' ] );
 
-	// Previously in FileFormatConverter
-	//remove UTF-8 BOM
-	public static function stripFileBOM( $string, $utf = 8 ) {
-		//depending on encoding, different slices are to be cut
-		switch ( $utf ) {
-			case 16:
-				$string = substr( $string, 2 );
-				break;
-			case 32:
-				$string = substr( $string, 4 );
-				break;
-			case 8:
-			default:
-				$string = substr( $string, 3 );
-				break;
-		}
+        return $protocol . '://' . $_SERVER[ 'SERVER_NAME' ] . $port;
+    }
 
-		return $string;
-	}
+    // Previously in FileFormatConverter
+    //remove UTF-8 BOM
+    public static function stripFileBOM( $string, $utf = 8 ) {
+        //depending on encoding, different slices are to be cut
+        switch ( $utf ) {
+            case 16:
+                $string = substr( $string, 2 );
+                break;
+            case 32:
+                $string = substr( $string, 4 );
+                break;
+            case 8:
+            default:
+                $string = substr( $string, 3 );
+                break;
+        }
 
-	public static function stripBOM( $string ){
+        return $string;
+    }
+
+    public static function stripBOM( $string ) {
         //PATCH TO FIX BOM INSERTIONS
         return str_replace( "\xEF\xBB\xBF", '', $string );
     }
 
-	public static function isJobBasedOnMateCatFilters($jobId) {
+    public static function isJobBasedOnMateCatFilters( $jobId ) {
 
-		try {
+        try {
 
-			$fs    = new FilesStorage\FsFilesStorage();
-			$files = $fs->getFilesForJob( $jobId, null );
-			foreach ( $files as $file ) {
-				$fileType = DetectProprietaryXliff::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
-				if ( $fileType[ 'proprietary_short_name' ] !== 'matecat_converter' ) {
-					// If only one XLIFF is not created with MateCat Filters, we can't say
-					// that the project is entirely based on new Filters
-					return false;
-				}
-			}
+            $fs    = FilesStorageFactory::create();
+            $files = $fs->getFilesForJob( $jobId, null );
+            foreach ( $files as $file ) {
+                $fileType = DetectProprietaryXliff::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
+                if ( $fileType[ 'proprietary_short_name' ] !== 'matecat_converter' ) {
+                    // If only one XLIFF is not created with MateCat Filters, we can't say
+                    // that the project is entirely based on new Filters
+                    return false;
+                }
+            }
 
-			// If the flow arrives here, all the files' XLIFFs are based on new Filters
-			return true;
+            // If the flow arrives here, all the files' XLIFFs are based on new Filters
+            return true;
 
-		} catch (\Exception $e ){
-			$msg = " CRITICAL: " . $jobId . " has no files in storage... " . $e->getMessage();
-			Log::doJsonLog( str_repeat("*", strlen( $msg ) + 10 ) );
-			Log::doJsonLog( "*****$msg*****" );
-			Log::doJsonLog( str_repeat("*", strlen( $msg ) + 10 ) );
-		}
+        } catch ( \Exception $e ) {
+            $msg = " CRITICAL: " . $jobId . " has no files in storage... " . $e->getMessage();
+            Log::doJsonLog( str_repeat( "*", strlen( $msg ) + 10 ) );
+            Log::doJsonLog( "*****$msg*****" );
+            Log::doJsonLog( str_repeat( "*", strlen( $msg ) + 10 ) );
+        }
 
-	}
+    }
 
     /**
-     * uploadDirFromSessionCookie 
+     * uploadDirFromSessionCookie
      *
      * @oaram $guid string
      * @param $file_name string optional file name to append to the upload path
      *
      * @return string
      */
-    public static function uploadDirFromSessionCookie($guid, $file_name = null) {
-        return INIT::$UPLOAD_REPOSITORY . "/" . 
-            $guid . '/' . 
-            $file_name ; 
+    public static function uploadDirFromSessionCookie( $guid, $file_name = null ) {
+        return INIT::$UPLOAD_REPOSITORY . "/" .
+                $guid . '/' .
+                $file_name;
     }
 
-	/**
-	 * @param      $match
-	 * @param      $job_tm_keys
-	 * @param      $job_owner
-	 * @param 	   $uid
-	 *
-	 * @return null|string
-	 * @throws Exception
-	 */
-	public static function changeMemorySuggestionSource( $match, $job_tm_keys, $job_owner, $uid){
-		$sug_source = $match[ 'created_by' ];
-		$key        = $match[ 'memory_key' ];
+    /**
+     * @param       $match
+     * @param       $job_tm_keys
+     * @param       $job_owner
+     * @param       $uid
+     *
+     * @return null|string
+     * @throws Exception
+     */
+    public static function changeMemorySuggestionSource( $match, $job_tm_keys, $job_owner, $uid ) {
+        $sug_source = $match[ 'created_by' ];
+        $key        = $match[ 'memory_key' ];
 
-		if ( strtolower( $sug_source ) == 'matecat' ) {
-		    // Enter this case if created_by is matecat, we show PUBLIC_TM
-			$description = Constants::PUBLIC_TM ;
+        if ( strtolower( $sug_source ) == 'matecat' ) {
+            // Enter this case if created_by is matecat, we show PUBLIC_TM
+            $description = Constants::PUBLIC_TM;
 
-		} elseif( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
-		    // This case if for other sources from MyMemory that are public but we must
+        } elseif ( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
+            // This case if for other sources from MyMemory that are public but we must
             // show the specific name of the source.
-			$description = $sug_source;
+            $description = $sug_source;
 
-		} elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
-			// This condition is for md5 keys
-            $description = self::keyNameFromUserKeyring( $uid, $key ) ;
+        } elseif ( preg_match( "/[a-f0-9]{8,}/", $key ) ) { // md5 Key
+            // This condition is for md5 keys
+            $description = self::keyNameFromUserKeyring( $uid, $key );
 
             if ( empty( $description ) ) {
                 $description = self::getDefaultKeyDescription( $key, $job_tm_keys );
             }
-		}
-
-		if ( empty( $description ) ) {
-		    $description = Constants::PUBLIC_TM ;
         }
 
-		return $description;
-	}
+        if ( empty( $description ) ) {
+            $description = Constants::PUBLIC_TM;
+        }
 
-	public static function keyNameFromUserKeyring( $uid, $key ) {
-	    if ( $uid === null ) {
-	        return null ;
+        return $description;
+    }
+
+    public static function keyNameFromUserKeyring( $uid, $key ) {
+        if ( $uid === null ) {
+            return null;
         }
 
         //check if the user can see the key.
@@ -663,18 +685,18 @@ class Utils {
 
         $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
         $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
-        if ( count( $currentUserMemoryKey ) >  0 ) {
+        if ( count( $currentUserMemoryKey ) > 0 ) {
             $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
-            $name = trim($currentUserMemoryKey->tm_key->name);
+            $name                 = trim( $currentUserMemoryKey->tm_key->name );
 
-            if ( empty($name) ) {
-                $name = Constants::NO_DESCRIPTION_TM ;
+            if ( empty( $name ) ) {
+                $name = Constants::NO_DESCRIPTION_TM;
             }
 
-            return $name ;
+            return $name;
         }
 
-        return null ;
+        return null;
     }
 
     /**
@@ -685,27 +707,27 @@ class Utils {
      *
      * @return null|string
      */
-	public static function getDefaultKeyDescription( $key, $job_tm_keys ){
-		$ownerKeys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $job_tm_keys ) );
-		$description = Constants::NO_DESCRIPTION_TM ;
+    public static function getDefaultKeyDescription( $key, $job_tm_keys ) {
+        $ownerKeys   = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $job_tm_keys ] );
+        $description = Constants::NO_DESCRIPTION_TM;
 
-		//search the current key
-		$currentKey = null;
-		for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
-		    $name = trim( $ownerKeys[ $i ]->name );
+        //search the current key
+        $currentKey = null;
+        for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
+            $name = trim( $ownerKeys[ $i ]->name );
 
-			if ( $ownerKeys[ $i ]->key == $key && !empty($name) )  {
-				$description = $ownerKeys[ $i ]->name;
-			}
+            if ( $ownerKeys[ $i ]->key == $key && !empty( $name ) ) {
+                $description = $ownerKeys[ $i ]->name;
+            }
 
-		}
-
-        if ( empty( $description ) ) {
-            $description = Constants::NO_DESCRIPTION_TM ;
         }
 
-		return $description ;
-	}
+        if ( empty( $description ) ) {
+            $description = Constants::NO_DESCRIPTION_TM;
+        }
+
+        return $description;
+    }
 
 }
 

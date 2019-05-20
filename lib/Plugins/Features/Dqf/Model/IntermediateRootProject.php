@@ -9,13 +9,10 @@
 namespace Features\Dqf\Model;
 
 use Features\Dqf;
-use Features\Dqf\Service\ISession;
 use Features\Dqf\Service\MasterProject;
-use Features\Dqf\Service\AbstractProjectFiles;
 use Features\Dqf\Service\MasterProjectFiles;
 use Features\Dqf\Service\ProjectMapping;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
-use Features\Dqf\Service\Struct\Response\MaserFileCreationResponseStruct;
 use Projects_ProjectStruct;
 
 class IntermediateRootProject {

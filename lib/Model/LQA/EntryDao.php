@@ -1,7 +1,6 @@
 <?php
 
 namespace LQA;
-use \Log as Log ;
 
 class EntryDao extends \DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {

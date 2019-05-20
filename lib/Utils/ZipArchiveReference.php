@@ -1,4 +1,7 @@
 <?php
+
+use FilesStorage\FilesStorageFactory;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -6,7 +9,6 @@
  * Time: 16.29
  *
  */
-
 class ZipArchiveReference {
 
     /**
@@ -14,21 +16,32 @@ class ZipArchiveReference {
      */
     protected $tempZipFile;
 
+    protected $files_storage;
+
+    public function __construct() {
+        $this->files_storage = FilesStorageFactory::create();
+    }
+
+
     public function __destruct() {
         @unlink( $this->tempZipFile );
     }
 
-    public function getFileStreamPointerInfo( Projects_ProjectStruct $project, $fileName ){
+    public function getFileStreamPointerInfo( Projects_ProjectStruct $project, $fileName ) {
 
         $zip = $this->getZipFilePointer( $project );
 
-        $internalFileIndex = $zip->locateName( $fileName, ZipArchive::FL_NOCASE|ZipArchive::FL_NODIR );
-        $internalFileName = $zip->getNameIndex( $internalFileIndex, ZipArchive::FL_UNCHANGED );
-        $filePointer = $zip->getStream( $internalFileName );
+        $internalFileIndex = $zip->locateName( $fileName, ZipArchive::FL_NOCASE | ZipArchive::FL_NODIR );
+        $internalFileName  = $zip->getNameIndex( $internalFileIndex, ZipArchive::FL_UNCHANGED );
+        $filePointer       = $zip->getStream( $internalFileName );
 
-        $extension = FilesStorage\FsFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
-        $mimeType = array_keys( array_filter( INIT::$MIME_TYPES, function( $extensionList ) use ( $extension ) {
-            if( array_search( $extension, $extensionList ) !== false ) return true;
+        $fs = $this->files_storage;
+        $extension = $fs::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+        $mimeType  = array_keys( array_filter( INIT::$MIME_TYPES, function ( $extensionList ) use ( $extension ) {
+            if ( array_search( $extension, $extensionList ) !== false ) {
+                return true;
+            }
+
             return false;
         } ) )[ 0 ];
 
@@ -36,7 +49,7 @@ class ZipArchiveReference {
 
     }
 
-    public function getDirectoryStreamFilePointer( Projects_ProjectStruct $project, $dirName ){
+    public function getDirectoryStreamFilePointer( Projects_ProjectStruct $project, $dirName ) {
 
         $zip = $this->getZipFilePointer( $project );
 
@@ -45,7 +58,7 @@ class ZipArchiveReference {
         $zipReference = new ZipArchive();
         $zipReference->open( $this->tempZipFile, ZipArchive::CREATE );
 
-        for( $i = 0; $i < $zip->numFiles; $i++ ){
+        for ( $i = 0; $i < $zip->numFiles; $i++ ) {
 
             $name = $zip->getNameIndex( $i );
 
@@ -54,7 +67,7 @@ class ZipArchiveReference {
                 continue;
             }
 
-            $zipReference->addFromString( $project->name .  $name, $zip->getFromIndex( $i ) );
+            $zipReference->addFromString( $project->name . $name, $zip->getFromIndex( $i ) );
 
         }
 
@@ -62,12 +75,15 @@ class ZipArchiveReference {
 
         $filePointer = fopen( $this->tempZipFile, 'r' );
 
-        $mimeType = array_keys( array_filter( INIT::$MIME_TYPES, function( $extensionList ) {
-            if( array_search( 'zip', $extensionList ) !== false ) return true;
+        $mimeType = array_keys( array_filter( INIT::$MIME_TYPES, function ( $extensionList ) {
+            if ( array_search( 'zip', $extensionList ) !== false ) {
+                return true;
+            }
+
             return false;
         } ) )[ 0 ];
 
-        return [ 'fileName' => $project->name . '__reference.zip' , 'stream' => $filePointer, 'mime_type' => $mimeType ];
+        return [ 'fileName' => $project->name . '__reference.zip', 'stream' => $filePointer, 'mime_type' => $mimeType ];
 
     }
 
@@ -76,10 +92,10 @@ class ZipArchiveReference {
      *
      * @return ZipArchive
      */
-    public function getZipFilePointer( Projects_ProjectStruct $project ){
+    public function getZipFilePointer( Projects_ProjectStruct $project ) {
 
-        $fs     = new FilesStorage\FsFilesStorage();
-        $files  = Files_FileDao::getByProjectId( $project->id, 60 * 60 );
+        $fs    = $this->files_storage;
+        $files = Files_FileDao::getByProjectId( $project->id, 60 * 60 );
 
         $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[ 0 ]->filename );
         $zipName = $zipName[ 0 ];
@@ -93,7 +109,7 @@ class ZipArchiveReference {
 
     }
 
-    public function getListTree( Projects_ProjectStruct $project, $dirName ){
+    public function getListTree( Projects_ProjectStruct $project, $dirName ) {
 
         $cache_query = '__files_ref_tree:' . $project->id . ':' . $project->password;
 
@@ -115,7 +131,7 @@ class ZipArchiveReference {
         ];
 
         $zip = $this->getZipFilePointer( $project );
-        for( $i = 0; $i < $zip->numFiles; $i++ ){
+        for ( $i = 0; $i < $zip->numFiles; $i++ ) {
 
             $name = $zip->getNameIndex( $i );
 
@@ -124,7 +140,7 @@ class ZipArchiveReference {
                 continue;
             }
 
-            $tree[ 'files' ][] = $name;
+            $tree[ 'files' ][]   = $name;
             $tree[ 'indexes' ][] = $i;
 
         }

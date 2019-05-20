@@ -8,12 +8,12 @@
 
 namespace Features\ReviewExtended\Controller\API;
 
-use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
+use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
-use Projects_ProjectStruct;
 use Features\ReviewExtended\Model\ArchivedQualityReportDao;
-use Features\ReviewExtended\Model\QualityReportModel ;
+use Features\ReviewExtended\Model\QualityReportModel;
+use Projects_ProjectStruct;
 use QualityReport\QualityReportSegmentModel;
 
 class QualityReportController extends KleinController

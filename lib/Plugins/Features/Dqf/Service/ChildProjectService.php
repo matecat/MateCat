@@ -10,12 +10,10 @@ namespace Features\Dqf\Service;
 
 use Chunks_ChunkStruct;
 use Exception;
-use Features\Dqf\Model\DqfProjectMapDao;
 use Features\Dqf\Model\DqfProjectMapStruct;
 use Features\Dqf\Model\UserModel;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
-use Features\Dqf\Service\Struct\Request\ChildProjectTranslationRequestStruct;
 use Features\Dqf\Service\Struct\Request\ProjectTargetLanguageRequestStruct;
 use Features\Dqf\Service\Struct\Response\MaserFileCreationResponseStruct;
 use Features\Dqf\Service\Struct\Response\ProjectResponseStruct;

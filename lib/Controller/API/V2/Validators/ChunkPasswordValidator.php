@@ -14,9 +14,7 @@
 namespace API\V2\Validators;
 
 use API\V2\KleinController;
-use Chunks_ChunkDao ;
-use Klein\Request ;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Chunks_ChunkDao;
 
 class ChunkPasswordValidator extends Base {
     /**

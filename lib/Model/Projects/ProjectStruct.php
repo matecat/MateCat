@@ -1,5 +1,6 @@
 <?php
 
+use FilesStorage\FilesStorageFactory;
 use Teams\TeamDao;
 
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
@@ -218,7 +219,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      *
      */
     public function getFirstOriginalZipPath() {
-        $fs = new FilesStorage\FsFilesStorage();
+        $fs = FilesStorageFactory::create();
         $jobs = $this->getJobs();
         $files = Files_FileDao::getByJobId($jobs[0]->id);
 

@@ -1,5 +1,7 @@
 <?php
 
+use FilesStorage\FilesStorageFactory;
+
 /**
  * User: domenico
  * Date: 23/10/13
@@ -44,13 +46,14 @@ class DetectProprietaryXliff {
         self::_reset();
 
         $info = array();
+        $fs = FilesStorageFactory::create();
 
         if ( !empty ( $stringData ) && empty( $fullPathToFile ) ) {
             $stringData = substr( $stringData, 0, 1024 );
 
         } elseif ( empty( $stringData ) && !empty( $fullPathToFile ) ) {
 
-            $info = FilesStorage\FsFilesStorage::pathinfo_fix( $fullPathToFile );
+            $info = $fs::pathinfo_fix( $fullPathToFile );
 
             if ( is_file( $fullPathToFile ) ) {
                 $file_pointer = fopen( "$fullPathToFile", 'r' );
@@ -61,7 +64,7 @@ class DetectProprietaryXliff {
 
         } elseif ( !empty( $stringData ) && !empty( $fullPathToFile ) ) {
             //we want to check extension and content
-            $info = FilesStorage\FsFilesStorage::pathinfo_fix( $fullPathToFile );
+            $info = $fs::pathinfo_fix( $fullPathToFile );
 
         }
 

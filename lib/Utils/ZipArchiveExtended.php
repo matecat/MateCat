@@ -1,5 +1,7 @@
 <?php
 
+use FilesStorage\FilesStorageFactory;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -23,6 +25,12 @@ class ZipArchiveExtended extends ZipArchive {
     public $treeList;
 
     protected static $MAX_FILES;
+
+    protected $files_storage;
+
+    public function __construct() {
+        $this->files_storage = FilesStorageFactory::create();
+    }
 
     public function message( $code ) {
         switch ( $code ) {
@@ -224,12 +232,13 @@ class ZipArchiveExtended extends ZipArchive {
 
         $filesArray = [];
         $fileErrors = [];
+        $fs         = $this->files_storage;
 
         //pre: createTree() must have been called so that $this->treeList is not empty.
         foreach ( $this->treeList as $filePath ) {
 
             $realPath = str_replace(
-                    [ self::INTERNAL_SEPARATOR, FsFilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ],
+                    [ self::INTERNAL_SEPARATOR, $fs::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ],
                     [ DIRECTORY_SEPARATOR, "" ],
                     $filePath
             );
@@ -285,7 +294,9 @@ class ZipArchiveExtended extends ZipArchive {
     }
 
     private function prependZipFileName( $fName ) {
-        return FilesStorage\FsFilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
+        $fs = $this->files_storage;
+
+        return $fs::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
     }
 
     /**

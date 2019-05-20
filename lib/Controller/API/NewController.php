@@ -1,7 +1,7 @@
 <?php
 
-use API\V2\Exceptions\AuthenticationError;
-use Exceptions\ValidationError;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
 use ProjectQueue\Queue;
 use Teams\MembershipDao;
 
@@ -66,6 +66,11 @@ class NewController extends ajaxController {
 
     public $postInput;
 
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
+
     public function __construct() {
 
         parent::__construct();
@@ -76,8 +81,8 @@ class NewController extends ajaxController {
         if ( !$this->__validateAuthHeader() ) {
             header( 'HTTP/1.0 401 Unauthorized' );
             $this->api_output[ 'message' ] = 'Project Creation Failure';
-            $this->api_output[ 'debug' ] = 'Authentication failed';
-            $this->finalize ();
+            $this->api_output[ 'debug' ]   = 'Authentication failed';
+            $this->finalize();
             die();
         }
 
@@ -132,6 +137,7 @@ class NewController extends ajaxController {
 
         if ( empty( $_FILES ) ) {
             $this->result[ 'errors' ][] = [ "code" => -1, "message" => "Missing file. Not Sent." ];
+
             return -1;
         }
 
@@ -145,19 +151,22 @@ class NewController extends ajaxController {
             $this->__validateTeam();
             $this->__appendFeaturesToProject();
             $this->__generateTargetEngineAssociation();
-        } catch( Exception $ex ){
+        } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
-            $this->api_output[ 'debug' ] = $ex->getMessage();
+            $this->api_output[ 'debug' ]   = $ex->getMessage();
             Log::doJsonLog( $ex->getMessage() );
+
             return $ex->getCode();
         }
+
+        $this->files_storage = FilesStorageFactory::create();
 
     }
 
     /**
      * @throws Exception
      */
-    private function __validateOwnerEmail(){
+    private function __validateOwnerEmail() {
 
         if ( $this->postInput[ 'owner_email' ] === false ) {
             throw new Exception( "Email is not valid", -5 );
@@ -176,7 +185,7 @@ class NewController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validateSegmentationRules(){
+    private function __validateSegmentationRules() {
 
         $this->postInput[ 'segmentation_rule' ] = ( !empty( $this->postInput[ 'segmentation_rule' ] ) ) ? $this->postInput[ 'segmentation_rule' ] : '';
 
@@ -194,7 +203,7 @@ class NewController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function __validateSubjects(){
+    private function __validateSubjects() {
 
         $langDomains = Langs_LanguageDomains::getInstance();
         $subjectList = $langDomains::getEnabledDomains();
@@ -236,9 +245,9 @@ class NewController extends ajaxController {
      * @see filterCreateProjectFeatures callback
      * @see NewController::__appendFeaturesToProject()
      */
-    private function __generateTargetEngineAssociation(){
-        if( !isset( $this->postInput[ 'target_language_mt_engine_id' ] ) ){ // this could be already set by MMT engine if enabled ( so check and do not override )
-            foreach( explode( ",", $this->postInput[ 'target_lang' ] ) as $_matecatTarget ){
+    private function __generateTargetEngineAssociation() {
+        if ( !isset( $this->postInput[ 'target_language_mt_engine_id' ] ) ) { // this could be already set by MMT engine if enabled ( so check and do not override )
+            foreach ( explode( ",", $this->postInput[ 'target_lang' ] ) as $_matecatTarget ) {
                 $this->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $this->postInput[ 'mt_engine' ];
             }
         }
@@ -249,11 +258,11 @@ class NewController extends ajaxController {
      */
     private function __validateEngines() {
 
-        if ( !isset(  $this->postInput[ 'tms_engine' ] ) ) {
+        if ( !isset( $this->postInput[ 'tms_engine' ] ) ) {
             $this->postInput[ 'tms_engine' ] = 1;
         }
 
-        if ( !isset(  $this->postInput[ 'mt_engine' ] ) ) {
+        if ( !isset( $this->postInput[ 'mt_engine' ] ) ) {
             $this->postInput[ 'mt_engine' ] = 1;
         }
 
@@ -261,12 +270,12 @@ class NewController extends ajaxController {
             Engine::getInstance( $this->postInput[ 'tms_engine' ] );
         }
 
-        if ( $this->postInput[ 'mt_engine'] != 0 && $this->postInput[ 'mt_engine'] != 1 ) {
-            if( !$this->userIsLogged ){
+        if ( $this->postInput[ 'mt_engine' ] != 0 && $this->postInput[ 'mt_engine' ] != 1 ) {
+            if ( !$this->userIsLogged ) {
                 throw new Exception( "Invalid MT Engine.", -2 );
             } else {
-                $testEngine = Engine::getInstance( $this->postInput[ 'mt_engine'] );
-                if( $testEngine->getEngineRow()->uid != $this->getUser()->uid ){
+                $testEngine = Engine::getInstance( $this->postInput[ 'mt_engine' ] );
+                if ( $testEngine->getEngineRow()->uid != $this->getUser()->uid ) {
                     throw new Exception( "Invalid MT Engine.", -21 );
                 }
             }
@@ -333,7 +342,8 @@ class NewController extends ajaxController {
         $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
 
         foreach ( $arFiles as $file_name ) {
-            $ext = FilesStorage\FsFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
+            $fs = $this->files_storage;
+            $ext = $fs::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
 
             $conversionHandler = new ConversionHandler();
             $conversionHandler->setFileName( $file_name );
@@ -499,9 +509,8 @@ class NewController extends ajaxController {
         $linkFiles  = scandir( $intDir );
 
         foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == FilesStorage\FsFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+            if ( 'zip' == $fs::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
-                $fs = new FilesStorage\FsFilesStorage();
                 $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
 
                 $linkFiles = scandir( $intDir );
@@ -573,13 +582,14 @@ class NewController extends ajaxController {
 
         try {
             $this->projectManager->sanitizeProjectStructure();
-        } catch ( Exception $e ){
+        } catch ( Exception $e ) {
             $this->api_output[ 'message' ] = $e->getMessage();
-            $this->api_output[ 'debug' ] = $e->getCode();
+            $this->api_output[ 'debug' ]   = $e->getCode();
+
             return -1;
         }
 
-        FilesStorage\FsFilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
+        $fs::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
@@ -731,10 +741,10 @@ class NewController extends ajaxController {
             if ( strlen( $this->postInput[ 'metadata' ] ) > 2048 ) {
                 throw new Exception( 'metadata string is too long' );
             }
-            $depth                     = 2; // only converts key value structures
-            $assoc                     = true;
+            $depth                         = 2; // only converts key value structures
+            $assoc                         = true;
             $this->postInput[ 'metadata' ] = html_entity_decode( $this->postInput[ 'metadata' ] );
-            $this->metadata            = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
+            $this->metadata                = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
             Log::doJsonLog( "Passed parameter metadata as json string." );
         }
 
@@ -743,7 +753,7 @@ class NewController extends ajaxController {
             $this->metadata[ 'lexiqa' ] = $this->postInput[ 'lexiqa' ];
         }
 
-        if ( !empty( $this->postInput[ 'speech2text' ]) ) {
+        if ( !empty( $this->postInput[ 'speech2text' ] ) ) {
             $this->metadata[ 'speech2text' ] = $this->postInput[ 'speech2text' ];
         }
 
@@ -818,10 +828,12 @@ class NewController extends ajaxController {
 
         $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
 
+        $fs = $this->files_storage;
+
         //If a TMX file has been uploaded and no key was provided, create a new key.
         if ( empty( $this->private_tm_key ) ) {
             foreach ( $_FILES as $_fileinfo ) {
-                $pathinfo = FilesStorage\FsFilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                $pathinfo = $fs::pathinfo_fix( $_fileinfo[ 'name' ] );
                 if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $this->private_tm_key[] = [ 'key' => 'new' ];
                     break;
@@ -884,7 +896,7 @@ class NewController extends ajaxController {
                                     'uid'    => $uid,
                                     'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
                             ] )
-                        )
+                            )
                     );
 
                     if ( count( $keyRing ) > 0 ) {

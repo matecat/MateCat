@@ -8,7 +8,6 @@
 
 namespace Features\Dqf\Model;
 
-use Features\Dqf\Service\Struct\Response\UserResponseStruct;
 use Jobs\MetadataDao;
 use Jobs_JobStruct;
 use Users_UserDao;

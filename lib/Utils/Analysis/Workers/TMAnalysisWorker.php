@@ -9,9 +9,13 @@
 
 namespace Analysis\Workers;
 
+use Analysis\Queue\RedisKeys;
 use Constants\Ices;
+use Database;
 use Engine;
+use Exception;
 use Jobs_JobDao;
+use PDOException;
 use Projects_ProjectDao;
 use SubFiltering\Filter;
 use TaskRunner\Commons\AbstractElement;
@@ -21,10 +25,6 @@ use TaskRunner\Exceptions\EmptyElementException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\NotSupportedMTException;
 use TaskRunner\Exceptions\ReQueueException;
-
-use Analysis\Queue\RedisKeys;
-use \Exception;
-use \Database, \PDOException;
 use Translations_SegmentTranslationDao;
 
 include \INIT::$MODEL_ROOT . "/queries.php";

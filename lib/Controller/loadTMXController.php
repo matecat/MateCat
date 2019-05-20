@@ -1,4 +1,8 @@
 <?php
+
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -33,6 +37,11 @@ class loadTMXController extends ajaxController {
     private static $acceptedActions = array( "newTM", "uploadStatus" );
 
     protected $TMService;
+
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
 
     public function __construct() {
 
@@ -76,6 +85,8 @@ class loadTMXController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -7, "message" => "Action not valid." );
         }
 
+        $this->files_storage = FilesStorageFactory::create();
+
     }
 
     /**
@@ -96,6 +107,8 @@ class loadTMXController extends ajaxController {
         $this->TMService = new TMSService();
         $this->TMService->setTmKey( $this->tm_key );
 
+        $fs = $this->files_storage;
+
         try {
 
             if ( $this->exec == "newTM" ) {
@@ -103,7 +116,7 @@ class loadTMXController extends ajaxController {
                 $this->file = $this->TMService->uploadFile();
 
                 foreach( $this->file as $fileInfo ){
-                    if ( FilesStorage\FsFilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
+                    if ( $fs::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
                         throw new Exception( "Please upload a TMX.", -8 );
                     }
 

@@ -5,13 +5,12 @@ use BasicFeatureStruct;
 use Exception;
 use INIT;
 use Klein\Klein;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
-
-use ReflectionClass ;
 use LogicException;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use ReflectionClass;
+
 
 abstract class BaseFeature implements IBaseFeature {
 

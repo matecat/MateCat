@@ -11,7 +11,8 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
-use FilesStorage\FsFilesStorage;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
 use Jobs\SplitQueue;
 use Segments\ContextGroupDao;
 use SubFiltering\Filter;
@@ -38,11 +39,6 @@ class ProjectManager {
     protected $projectStructure;
 
     protected $tmxServiceWrapper;
-
-    /**
-     * @var FsFilesStorage
-     */
-    protected $fileStorage;
 
     protected $uploadDir;
 
@@ -85,6 +81,11 @@ class ProjectManager {
      */
     protected $dbHandler;
     protected $filter;
+
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
 
     /**
      * ProjectManager constructor.
@@ -191,9 +192,11 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+        $this->files_storage = FilesStorageFactory::create();
+
     }
 
-    protected function _log( $_msg ){
+    protected function _log( $_msg ) {
         Log::doJsonLog( $_msg );
     }
 
@@ -469,8 +472,7 @@ class ProjectManager {
         $uploadDir = $this->uploadDir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
         //we are going to access the storage, get model object to manipulate it
-        $this->fileStorage = new FilesStorage\FsFilesStorage();
-        $linkFiles         = $this->fileStorage->getHashesFromDir( $this->uploadDir );
+        $linkFiles         = $this->files_storage->getHashesFromDir( $this->uploadDir );
 
         /*
             loop through all input files to
@@ -523,10 +525,10 @@ class ProjectManager {
                 $sha1 = sha1_file( $filePathName );
 
                 //make a cache package (with work/ only, emtpy orig/)
-                $this->fileStorage->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                $this->files_storage->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
 
                 //put reference to cache in upload dir to link cache to session
-                $this->fileStorage->linkSessionToCacheForAlreadyConvertedFiles(
+                $this->files_storage->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
                         $this->projectStructure[ 'source_language' ],
                         $this->projectStructure[ 'uploadToken' ],
@@ -555,17 +557,19 @@ class ProjectManager {
             ];
         }
 
+        $fs = $this->files_storage;
+
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         $totalFilesStructure = [];
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
-            $hashFile = FilesStorage\FsFilesStorage::basename_fix( $linkFile );
+            $hashFile = $fs::basename_fix( $linkFile );
             $hashFile = explode( '|', $hashFile );
 
             //use hash and lang to fetch file from package
-            $cachedXliffFilePathName = $this->fileStorage->getXliffFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
+            $cachedXliffFilePathName = $fs->getXliffFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
 
             //get sha
             $sha1_original = $hashFile[ 0 ];
@@ -584,7 +588,7 @@ class ProjectManager {
                     throw new Exception( "File not found on server after upload.", -6 );
                 }
 
-                $info = FsFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
+                $info = $fs::pathinfo_fix( $cachedXliffFilePathName );
 
                 if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
                     throw new Exception( "Failed to find converted Xliff", -3 );
@@ -690,7 +694,7 @@ class ProjectManager {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
-                $this->fileStorage->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
+                $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
             } elseif ( $e->getCode() == -4 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -7,
@@ -828,7 +832,8 @@ class ProjectManager {
 
         }
 
-        FsFilesStorage::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
+        $fs = $this->files_storage;
+        $fs::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
 
         //free memory
         unset( $this->projectStructure[ 'segments_metadata' ] );
@@ -876,7 +881,8 @@ class ProjectManager {
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $ext = FsFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+            $fs = $this->files_storage;
+            $ext = $fs::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
 
             $file = new stdClass();
             if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
@@ -922,6 +928,8 @@ class ProjectManager {
      */
     protected function _loopForTMXLoadStatus() {
 
+        $fs = $this->files_storage;
+
         //TMX Management
 
         /****************/
@@ -929,7 +937,7 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $kname => $fileName ) {
 
             //if TMX,
-            if ( 'tmx' == FsFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+            if ( 'tmx' == $fs::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
 
                 $this->tmxServiceWrapper->setName( $fileName );
 
@@ -1058,7 +1066,7 @@ class ProjectManager {
         //begin of zip hashes manipulation
         foreach ( $linkFiles[ 'zipHashes' ] as $zipHash ) {
 
-            $result = $this->fileStorage->linkZipToProject(
+            $result = $this->files_storage->linkZipToProject(
                     $this->projectStructure[ 'create_date' ],
                     $zipHash,
                     $this->projectStructure[ 'id_project' ]
@@ -1071,7 +1079,7 @@ class ProjectManager {
                 //Exit
             }
 
-            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $this->fileStorage->getZipDir() );
+            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $this->files_storage->getZipDir() );
 
         } //end zip hashes manipulation
 
@@ -1838,6 +1846,7 @@ class ProjectManager {
 
         $yearMonthPath    = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
+        $fs = $this->files_storage;
 
         //return structure
         $filesStructure = [];
@@ -1847,7 +1856,7 @@ class ProjectManager {
         //
         foreach ( $_originalFileNames as $originalFileName ) {
 
-            $mimeType = FsFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+            $mimeType = $fs::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
             $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
 
             if ( $this->gdriveSession ) {
@@ -1857,7 +1866,7 @@ class ProjectManager {
                 }
             }
 
-            $this->fileStorage->moveFromCacheToFileDir(
+            $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
                     $this->projectStructure[ 'source_language' ],
                     $fid,

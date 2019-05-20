@@ -10,7 +10,7 @@ namespace API\V2;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\ProjectPasswordValidator;
 use Jobs_JobStruct;
-use ProjectManager ;
+use ProjectManager;
 
 
 class JobMergeController extends KleinController {

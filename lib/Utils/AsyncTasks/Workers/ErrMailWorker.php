@@ -10,6 +10,7 @@
 
 namespace AsyncTasks\Workers;
 
+use PHPMailer;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Params;
@@ -17,8 +18,6 @@ use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EmptyElementException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-
-use \PHPMailer;
 
 /**
  * Class TMAnalysisWorker
