@@ -20,7 +20,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
         $output_content = [];
 
         //set the file Name
-        $pathinfo = FilesStorage::pathinfo_fix( $this->controller->getDefaultFileName( $this->controller->getProject() ) );
+        $pathinfo = FilesStorage\FsFilesStorage::pathinfo_fix( $this->controller->getDefaultFileName( $this->controller->getProject() ) );
         $this->controller->setFilename( $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "." . $pathinfo[ 'extension' ] );
 
 
@@ -107,7 +107,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
             $fName = str_replace( '._', ".", $fName );
             $fName = str_replace( ".out.sdlxliff", ".sdlxliff", $fName );
 
-            $nFinfo = FilesStorage::pathinfo_fix( $fName );
+            $nFinfo = FilesStorage\FsFilesStorage::pathinfo_fix( $fName );
             $_name  = $nFinfo[ 'filename' ];
             if ( strlen( $_name ) < 3 ) {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;

@@ -55,7 +55,7 @@ abstract class downloadController extends controller {
 
     protected function setMimeType() {
 
-        $extension = FilesStorage::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
+        $extension = FilesStorage\FsFilesStorage::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
 
         switch ( strtolower( $extension ) ) {
             case "xlf":
@@ -203,7 +203,7 @@ abstract class downloadController extends controller {
                 $fName = self::forceOcrExtension( $fName );
             }
 
-            $nFinfo = FilesStorage::pathinfo_fix( $fName );
+            $nFinfo = FilesStorage\FsFilesStorage::pathinfo_fix( $fName );
             $_name  = $nFinfo[ 'filename' ];
             if ( strlen( $_name ) < 3 ) {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
@@ -231,7 +231,7 @@ abstract class downloadController extends controller {
 
     public static function forceOcrExtension( $filename ) {
 
-        $pathinfo = FilesStorage::pathinfo_fix( $filename );
+        $pathinfo = FilesStorage\FsFilesStorage::pathinfo_fix( $filename );
 
         switch ( strtolower( $pathinfo[ 'extension' ] ) ) {
             case 'pdf':

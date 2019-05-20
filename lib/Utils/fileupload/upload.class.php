@@ -427,7 +427,7 @@ class UploadHandler {
             return false;
         }
 
-        $file_info = FilesStorage::pathinfo_fix( $file_name );
+        $file_info = FilesStorage\FsFilesStorage::pathinfo_fix( $file_name );
 
         //if it's a zip file, delete it and all its contained files.
         if ( $file_info[ 'extension' ] == 'zip' ) {
@@ -528,7 +528,7 @@ class UploadHandler {
         //remove the last line ( is an empty string )
         array_pop( $file_content_array );
 
-        $fileName = FilesStorage::basename_fix( $file_path );
+        $fileName = FilesStorage\FsFilesStorage::basename_fix( $file_path );
 
         $key = array_search( $fileName, $file_content_array );
         unset( $file_content_array[ $key ] );

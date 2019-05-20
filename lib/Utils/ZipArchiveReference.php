@@ -26,7 +26,7 @@ class ZipArchiveReference {
         $internalFileName = $zip->getNameIndex( $internalFileIndex, ZipArchive::FL_UNCHANGED );
         $filePointer = $zip->getStream( $internalFileName );
 
-        $extension = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+        $extension = FilesStorage\FsFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
         $mimeType = array_keys( array_filter( INIT::$MIME_TYPES, function( $extensionList ) use ( $extension ) {
             if( array_search( $extension, $extensionList ) !== false ) return true;
             return false;
@@ -78,7 +78,7 @@ class ZipArchiveReference {
      */
     public function getZipFilePointer( Projects_ProjectStruct $project ){
 
-        $fs     = new \FilesStorage();
+        $fs     = new FilesStorage\FsFilesStorage();
         $files  = Files_FileDao::getByProjectId( $project->id, 60 * 60 );
 
         $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[ 0 ]->filename );

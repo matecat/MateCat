@@ -333,7 +333,7 @@ class NewController extends ajaxController {
         $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
 
         foreach ( $arFiles as $file_name ) {
-            $ext = FilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
+            $ext = FilesStorage\FsFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
 
             $conversionHandler = new ConversionHandler();
             $conversionHandler->setFileName( $file_name );
@@ -499,9 +499,9 @@ class NewController extends ajaxController {
         $linkFiles  = scandir( $intDir );
 
         foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == FilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+            if ( 'zip' == FilesStorage\FsFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
-                $fs = new FilesStorage();
+                $fs = new FilesStorage\FsFilesStorage();
                 $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
 
                 $linkFiles = scandir( $intDir );
@@ -579,7 +579,7 @@ class NewController extends ajaxController {
             return -1;
         }
 
-        FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
+        FilesStorage\FsFilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
@@ -821,7 +821,7 @@ class NewController extends ajaxController {
         //If a TMX file has been uploaded and no key was provided, create a new key.
         if ( empty( $this->private_tm_key ) ) {
             foreach ( $_FILES as $_fileinfo ) {
-                $pathinfo = FilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                $pathinfo = FilesStorage\FsFilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
                 if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $this->private_tm_key[] = [ 'key' => 'new' ];
                     break;

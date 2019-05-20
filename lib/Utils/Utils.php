@@ -575,7 +575,7 @@ class Utils {
 
 		try {
 
-			$fs    = new FilesStorage();
+			$fs    = new FilesStorage\FsFilesStorage();
 			$files = $fs->getFilesForJob( $jobId, null );
 			foreach ( $files as $file ) {
 				$fileType = DetectProprietaryXliff::getInfo( $files[ 0 ][ 'xliffFilePath' ] );

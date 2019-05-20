@@ -117,8 +117,8 @@ class Filters {
     }
 
     public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation ) {
-        $basename  = FilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
-        $extension = FilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
+        $basename  = FilesStorage\FsFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
+        $extension = FilesStorage\FsFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename = "$basename.$extension";
 
         $data = array(
@@ -214,8 +214,8 @@ class Filters {
                 'job_pwd'          => $jobData[ 'password' ],
                 'job_owner'        => $jobData[ 'owner' ],
                 'source_file_id'   => ( $toXliff ? null : $sourceFileData[ 'id_file' ] ),
-                'source_file_name' => ( $toXliff ? FilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
-                'source_file_ext'  => ( $toXliff ? FilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
+                'source_file_name' => ( $toXliff ? FilesStorage\FsFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
+                'source_file_ext'  => ( $toXliff ? FilesStorage\FsFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
                 'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
         );
 

@@ -25,7 +25,7 @@ use RecursiveIteratorIterator;
  * Class Session
  * @package ConnectedServices\GDrive
  *
- * TODO: This class has duplicated code from FilesStorage
+ * TODO: This class has duplicated code from FsFilesStorage
  */
 class Session {
 
@@ -348,7 +348,7 @@ class Session {
 
         $fileHash = $file[ self::FILE_HASH ];
 
-        $cacheTreeAr = \FilesStorage::composeCachePath( $fileHash );
+        $cacheTreeAr = FilesStorage\FsFilesStorage::composeCachePath( $fileHash );
 
         $cacheTree = implode(DIRECTORY_SEPARATOR, $cacheTreeAr);
 

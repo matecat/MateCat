@@ -229,7 +229,7 @@ class ZipArchiveExtended extends ZipArchive {
         foreach ( $this->treeList as $filePath ) {
 
             $realPath = str_replace(
-                    [ self::INTERNAL_SEPARATOR, FilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ],
+                    [ self::INTERNAL_SEPARATOR, FsFilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ],
                     [ DIRECTORY_SEPARATOR, "" ],
                     $filePath
             );
@@ -285,7 +285,7 @@ class ZipArchiveExtended extends ZipArchive {
     }
 
     private function prependZipFileName( $fName ) {
-        return FilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
+        return FilesStorage\FsFilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
     }
 
     /**

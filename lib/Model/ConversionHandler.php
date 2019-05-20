@@ -51,7 +51,7 @@ class ConversionHandler {
             $this->result[ 'errors' ][] = [
                     "code"    => -6,
                     "message" => "Error during upload. Please retry.",
-                    'debug'   => FilesStorage::basename_fix( $this->file_name )
+                    'debug'   => FilesStorage\FsFilesStorage::basename_fix( $this->file_name )
             ];
 
             return -1;
@@ -85,7 +85,7 @@ class ConversionHandler {
                 $this->result[ 'errors' ][] = [
                         "code"    => -7,
                         "message" => 'Matecat Open-Source does not support ' . ucwords( DetectProprietaryXliff::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-                        'debug'   => FilesStorage::basename_fix( $this->file_name )
+                        'debug'   => FilesStorage\FsFilesStorage::basename_fix( $this->file_name )
                 ];
 
                 return -1;
@@ -100,7 +100,7 @@ class ConversionHandler {
         $cachedXliffPath = false;
 
         //get storage object
-        $fs = new FilesStorage();
+        $fs = new FilesStorage\FsFilesStorage();
 
         //don't load from cache when a specified filter version is forced
         if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false ) {
@@ -172,7 +172,7 @@ class ConversionHandler {
                     $this->result[ 'errors' ][]      = [
                             "code"  => -103,
                             "message" => $convertResult[ 'errorMessage' ],
-                            'debug' => FilesStorage::basename_fix( $this->file_name )
+                            'debug' => FilesStorage\FsFilesStorage::basename_fix( $this->file_name )
                     ];
 
                     unset( $cachedXliffPath );
@@ -187,7 +187,7 @@ class ConversionHandler {
                 $this->result[ 'errors' ][] = [
                         "code" => -100,
                         "message" => $convertResult[ 'errorMessage' ],
-                        "debug" => FilesStorage::basename_fix( $this->file_name )
+                        "debug" => FilesStorage\FsFilesStorage::basename_fix( $this->file_name )
                 ];
             }
 
@@ -205,7 +205,7 @@ class ConversionHandler {
                     $sha1,
                     $this->source_lang,
                     $this->cookieDir,
-                    FilesStorage::basename_fix( $file_path )
+                    FilesStorage\FsFilesStorage::basename_fix( $file_path )
             );
 
         }

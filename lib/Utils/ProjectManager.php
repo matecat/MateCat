@@ -11,6 +11,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
+use FilesStorage\FsFilesStorage;
 use Jobs\SplitQueue;
 use Segments\ContextGroupDao;
 use SubFiltering\Filter;
@@ -39,7 +40,7 @@ class ProjectManager {
     protected $tmxServiceWrapper;
 
     /**
-     * @var FilesStorage
+     * @var FsFilesStorage
      */
     protected $fileStorage;
 
@@ -468,7 +469,7 @@ class ProjectManager {
         $uploadDir = $this->uploadDir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
         //we are going to access the storage, get model object to manipulate it
-        $this->fileStorage = new FilesStorage();
+        $this->fileStorage = new FilesStorage\FsFilesStorage();
         $linkFiles         = $this->fileStorage->getHashesFromDir( $this->uploadDir );
 
         /*
@@ -560,7 +561,7 @@ class ProjectManager {
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
-            $hashFile = FilesStorage::basename_fix( $linkFile );
+            $hashFile = FilesStorage\FsFilesStorage::basename_fix( $linkFile );
             $hashFile = explode( '|', $hashFile );
 
             //use hash and lang to fetch file from package
@@ -583,7 +584,7 @@ class ProjectManager {
                     throw new Exception( "File not found on server after upload.", -6 );
                 }
 
-                $info = FilesStorage::pathinfo_fix( $cachedXliffFilePathName );
+                $info = FsFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
 
                 if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
                     throw new Exception( "Failed to find converted Xliff", -3 );
@@ -827,7 +828,7 @@ class ProjectManager {
 
         }
 
-        FilesStorage::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
+        FsFilesStorage::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
 
         //free memory
         unset( $this->projectStructure[ 'segments_metadata' ] );
@@ -875,7 +876,7 @@ class ProjectManager {
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $ext = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+            $ext = FsFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
 
             $file = new stdClass();
             if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
@@ -928,7 +929,7 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $kname => $fileName ) {
 
             //if TMX,
-            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+            if ( 'tmx' == FsFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
 
                 $this->tmxServiceWrapper->setName( $fileName );
 
@@ -1846,7 +1847,7 @@ class ProjectManager {
         //
         foreach ( $_originalFileNames as $originalFileName ) {
 
-            $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+            $mimeType = FsFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
             $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
 
             if ( $this->gdriveSession ) {

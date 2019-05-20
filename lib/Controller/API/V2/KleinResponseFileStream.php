@@ -9,7 +9,7 @@
 namespace API\V2;
 
 
-use FilesStorage;
+use FilesStorage\FsFilesStorage;
 use Klein\DataCollection\HeaderDataCollection;
 use Klein\Klein;
 use Klein\Response;
@@ -52,7 +52,7 @@ class KleinResponseFileStream  {
         $this->response->noCache();
 
         if ( null !== $filename ) {
-            $filename = FilesStorage::basename_fix( $filename );
+            $filename = FsFilesStorage::basename_fix( $filename );
         }
 
         $this->response->header('Content-type', $mimeType );

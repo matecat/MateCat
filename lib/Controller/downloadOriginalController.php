@@ -45,7 +45,7 @@ class downloadOriginalController extends downloadController {
     public function doAction() {
 
         //get storage object
-        $fs        = new FilesStorage();
+        $fs        = new FilesStorage\FsFilesStorage();
         $files_job = $fs->getOriginalFilesForJob( $this->id_job, $this->id_file, $this->password );
 
         //take the project ID and creation date, array index zero is good, all id are equals
@@ -89,7 +89,7 @@ class downloadOriginalController extends downloadController {
         if ( count( $output_content ) > 1 ) {
 
             $this->setFilename( $this->getDefaultFileName( $this->project ) );
-            $pathInfo        = FilesStorage::pathinfo_fix( $this->_filename );
+            $pathInfo        = FilesStorage\FsFilesStorage::pathinfo_fix( $this->_filename );
 
             if ( $pathInfo[ 'extension' ] != 'zip' ) {
                 $this->setFilename( $pathInfo[ 'basename' ] . ".zip" );

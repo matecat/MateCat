@@ -440,7 +440,7 @@ class Mmt extends BaseFeature {
                      * @var Engines_MMT $MMTEngine
                      */
                     $MMTEngine = Engine::getInstance( $ownerMmtEngineMetaData->value );
-                    $fileName = \FilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
+                    $fileName = \FsFilesStorage::pathinfo_fix( $file->file_path, PATHINFO_FILENAME );
                     $result = $MMTEngine->import( $file->file_path, $tm_key, $fileName );
 
                     if( $result->responseStatus >= 400 ){

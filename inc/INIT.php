@@ -275,15 +275,18 @@ class INIT {
     public static $SKIP_SQL_CACHE = false ;
 
     /**
-     * FileStorage Configuration
+     * FileStorage Configuration: [s3|fs]
      */
-    public static $FILE_STORAGE_METHOD = 's3';
+    public static $FILE_STORAGE_METHOD;
 
     /**
      * S3 Configuration
      */
-    public static $S3_AUTH_USER = 'mamma';
-    public static $S3_AUTH_PASS = 'papa';
+    public static $AWS_ACCESS_KEY_ID;
+    public static $AWS_SECRET_KEY;
+    public static $AWS_VERSION;
+    public static $AWS_REGION;
+    public static $AWS_STORAGE_BASE_BUCKET;
 
     public function __construct(){
 
@@ -299,11 +302,9 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile',
                 'profile'
         );
+
         self::$MIME_TYPES = include( 'Mime2Extension.php' );
-
     }
-
-
 
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;

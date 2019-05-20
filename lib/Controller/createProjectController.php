@@ -277,9 +277,9 @@ class createProjectController extends ajaxController {
         $newArFiles = [];
 
         foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == FilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+            if ( 'zip' == FilesStorage\FsFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
-                $fs = new FilesStorage();
+                $fs = new FilesStorage\FsFilesStorage();
                 $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
 
                 $linkFiles = scandir( $uploadDir );
@@ -361,7 +361,7 @@ class createProjectController extends ajaxController {
             return -1;
         }
 
-        FilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+        FilesStorage\FsFilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
 
         Queue::sendProject( $projectStructure );
 

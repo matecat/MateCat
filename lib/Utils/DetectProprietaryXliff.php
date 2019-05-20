@@ -50,7 +50,7 @@ class DetectProprietaryXliff {
 
         } elseif ( empty( $stringData ) && !empty( $fullPathToFile ) ) {
 
-            $info = FilesStorage::pathinfo_fix( $fullPathToFile );
+            $info = FilesStorage\FsFilesStorage::pathinfo_fix( $fullPathToFile );
 
             if ( is_file( $fullPathToFile ) ) {
                 $file_pointer = fopen( "$fullPathToFile", 'r' );
@@ -61,7 +61,7 @@ class DetectProprietaryXliff {
 
         } elseif ( !empty( $stringData ) && !empty( $fullPathToFile ) ) {
             //we want to check extension and content
-            $info = FilesStorage::pathinfo_fix( $fullPathToFile );
+            $info = FilesStorage\FsFilesStorage::pathinfo_fix( $fullPathToFile );
 
         }
 

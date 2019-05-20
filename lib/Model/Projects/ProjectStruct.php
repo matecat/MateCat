@@ -218,7 +218,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      *
      */
     public function getFirstOriginalZipPath() {
-        $fs = new FilesStorage();
+        $fs = new FilesStorage\FsFilesStorage();
         $jobs = $this->getJobs();
         $files = Files_FileDao::getByJobId($jobs[0]->id);
 

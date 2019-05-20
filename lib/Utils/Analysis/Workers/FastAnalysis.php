@@ -3,7 +3,7 @@ namespace Analysis\Workers;
 
 use Constants_ProjectStatus;
 use FeatureSet;
-use FilesStorage;
+use FilesStorage\FsFilesStorage;
 use PDO;
 use Projects_MetadataDao;
 use \TaskRunner\Commons\AbstractDaemon,
@@ -232,7 +232,7 @@ class FastAnalysis extends AbstractDaemon {
                 // INSERT DATA
 
                 self::_updateProject( $pid, $status );
-                FilesStorage::deleteFastAnalysisFile( $pid );
+                FsFilesStorage::deleteFastAnalysisFile( $pid );
 
             }
 
@@ -258,7 +258,7 @@ class FastAnalysis extends AbstractDaemon {
         try {
 
             self::_TimeStampMsg( "Fetching data from disk" );
-            $this->segments = FilesStorage::getFastAnalysisData( $pid );
+            $this->segments = FsFilesStorage::getFastAnalysisData( $pid );
 
         } catch ( UnexpectedValueException $e ) {
 
