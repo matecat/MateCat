@@ -1291,6 +1291,29 @@ UI = {
 		var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
+
+		// If second pass enabled
+		if ( config.secondRevisionsCount && s.reviews ) {
+		    var reviewedWords = s.reviews.find(function ( value ) {
+                return value.revision_number === 1;
+            });
+		    if ( reviewedWords ) {
+                var approvePerc = parseFloat(reviewedWords.reviewed_words)*100/s.TOTAL;
+                a_perc_formatted = _.round(approvePerc, 1);
+                a_perc = approvePerc;
+            }
+
+            var reviewWordsSecondPass = s.reviews.find(function ( value ) {
+                return value.revision_number === 2;
+            });
+
+            if ( reviewWordsSecondPass ) {
+                var approvePerc2ndPass = parseFloat(reviewWordsSecondPass.reviewed_words)*100/s.TOTAL;
+                a_perc_2nd_formatted = _.round(approvePerc2ndPass, 1);
+                a_perc_2nd = approvePerc2ndPass;
+            }
+        }
+
 		var t_formatted = s.TODO_FORMATTED;
 		var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
 
@@ -1315,6 +1338,9 @@ UI = {
 		$('.translated-bar', m).css('width', t_perc + '%').attr('title', 'Translated ' + t_perc_formatted + '%');
 		$('.draft-bar', m).css('width', d_perc + '%').attr('title', 'Draft ' + d_perc_formatted + '%');
 		$('.rejected-bar', m).css('width', r_perc + '%').attr('title', 'Rejected ' + r_perc_formatted + '%');
+		if ( reviewWordsSecondPass ) {
+            $('.approved-bar-2nd-pass', m).css('width', a_perc_2nd + '%').attr('title', 'Approved ' + a_perc_2nd_formatted + '%');
+        }
 
 		$('#stat-progress').html(this.progress_perc);
         if ( config.isReview ) {

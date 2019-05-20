@@ -10,13 +10,16 @@ class JobSummary extends React.Component {
             {this.props.jobInfo? (
                 <ProductionSummary jobInfo={this.props.jobInfo}
                                    qualitySummary={this.props.qualitySummary}
+                                   secondPassReviewEnabled={this.props.secondPassReviewEnabled}
                 />
             ) : null}
 
             {this.props.jobInfo? (
             (config.project_type === 'new') ? (
                 <QualitySummaryTable jobInfo={this.props.jobInfo}
-                                     qualitySummary={this.props.qualitySummary}/>
+                                     qualitySummary={this.props.qualitySummary}
+                                     secondPassReviewEnabled={this.props.secondPassReviewEnabled}
+                />
                 ) : (
                 <QualitySummaryTableOld jobInfo={this.props.jobInfo} qualitySummary={this.props.qualitySummary}/>
             )

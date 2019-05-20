@@ -48,6 +48,14 @@ class ProductionSummary extends React.Component {
         let jobPassedClass = (jobPassed === null || reviewedWordsCount === 0) ? "qr-norevision" : ((jobPassed)? "qr-pass" : "qr-fail");
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
         let stats = this.props.jobInfo.get('stats');
+        let approvedWords = stats.get('approved');
+        let approvedWords2ndPass;
+        if ( this.props.secondPassReviewEnabled && stats.has('reviews') ) {
+            let approved = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 1});
+            approvedWords = (approved) ? approved.get('reviewed_words') : approvedWords;
+            let approved2ndPass = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 2});
+            approvedWords2ndPass = (approved2ndPass) ? approved2ndPass.get('reviewed_words') : null;
+        }
         return <div className="qr-production shadow-1">
             <div className="qr-effort job-id">ID: {this.props.jobInfo.get('id')}</div>
             <div className="qr-effort source-to-target">
@@ -64,11 +72,15 @@ class ProductionSummary extends React.Component {
                             <a className="warning-bar translate-tooltip" data-variation="tiny"
                                data-html={"Rejected " + Math.round(stats.get('rejected')/stats.get('total')*100) +"%"}
                                style={{width: Math.round(stats.get('rejected')/stats.get('total')*100)+"%"}}/>
-
                             <a className="approved-bar translate-tooltip" data-variation="tiny"
-                               data-html={"Approved " + Math.round(stats.get('approved')/stats.get('total')*100) +"%"}
-                               style={{width:Math.round(stats.get('approved')/stats.get('total')*100)+"%"}}/>
-
+                               data-html={"Approved " + Math.round(approvedWords/stats.get('total')*100) +"%"}
+                               style={{width:Math.round(approvedWords/stats.get('total')*100)+"%"}}/>
+                            { approvedWords2ndPass ? (
+                                    <a className="approved-bar-2nd-pass translate-tooltip" data-variation="tiny"
+                                       data-html={"Approved " + Math.round(approvedWords2ndPass/stats.get('total')*100) +"%"}
+                                       style={{width:Math.round(approvedWords2ndPass/stats.get('total')*100)+"%"}}/>
+                                ) : null
+                            }
                             <a className="translated-bar translate-tooltip" data-variation="tiny"
                                data-html={"Translated " + Math.round(stats.get('translated')/stats.get('total')*100) +"%"}
                                style={{width:Math.round(stats.get('translated')/stats.get('total')*100)+"%"}}/>
