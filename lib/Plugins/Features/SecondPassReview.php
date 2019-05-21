@@ -76,7 +76,7 @@ class SecondPassReview extends BaseFeature {
             $chunks[] = array( $job['id'], $job['password'] );
         }
 
-        $chunk_reviews = \Features\SecondPassReview\Model\ChunkReviewDao::findSecondRevisionsChunkReviewsByChunkIds( $chunks );
+        $chunk_reviews = ( new \Features\SecondPassReview\Model\ChunkReviewDao() )->findAllChunkReviewsByChunkIds( $chunks );
 
         foreach( $project['jobs'] as $kk => $job ) {
             /**
@@ -85,7 +85,13 @@ class SecondPassReview extends BaseFeature {
              */
             foreach( $chunk_reviews as $chunk_review ) {
                 if ( $chunk_review->id_job == $job['id'] && $chunk_review->password == $job['password'] ) {
-                    $project['jobs'][$kk][ 'second_pass_review' ][] = $chunk_review->review_password ;
+                    // TODO: change this revision number to an array of review passwords
+                    if ( $chunk_review->source_page == 3 ) {
+                        $project['jobs'][$kk][ 'second_pass_review' ][] = $chunk_review->review_password ;
+                    }
+                    if ( !isset( $project['jobs'][ $kk ] [ 'stats' ] ['reviews'] ) ) {
+                        $project['jobs'][ $kk ] [ 'stats' ] = Utils::formatStats( $project['jobs'][ $kk ] [ 'stats' ], $chunk_reviews ) ;
+                    }
                 }
             }
         }
