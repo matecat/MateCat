@@ -59,7 +59,7 @@ class QualityReportController extends KleinController
         $ref_segment = $this->request->param( 'ref_segment' );
         $where       = $this->request->param( 'where' );
         $step        = $this->request->param( 'step' );
-        $filter        = $this->request->param( 'filter' );
+        $filter      = $this->request->param( 'filter' );
 
         if ( empty( $ref_segment ) ) {
             $ref_segment = 0;

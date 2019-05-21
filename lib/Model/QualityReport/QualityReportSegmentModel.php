@@ -32,6 +32,8 @@ class QualityReportSegmentModel {
     protected $_legacySegmentRevisions;
     protected $chunk ;
 
+    protected $_chunkReviews ;
+
     public function __construct( Chunks_ChunkStruct $chunk ) {
         $this->chunk = $chunk ;
     }
@@ -45,7 +47,6 @@ class QualityReportSegmentModel {
      * @return array
      */
     public function getSegmentsIdForQR( $step = 10, $ref_segment, $where = "after", $options = [] ) {
-
         if ( isset( $options[ 'filter' ][ 'issue_category' ] ) ) {
             $subCategories = ( new CategoryDao() )->findByIdModelAndIdParent(
                     $this->chunk->getProject()->id_qa_model,
@@ -59,10 +60,25 @@ class QualityReportSegmentModel {
             }
         }
 
+        /**
+         * Validate revision_number param
+         */
+        if (  in_array( $options['filter'] ['status'], Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+            if ( isset( $options['filter']['revision_number'] ) ) {
+
+                $validRevisionNumbers = array_map( function( $chunkReview ) {
+                    return SecondPassReview\Utils::sourcePageToRevisionNumber( $chunkReview->source_page );
+                }, $this->_getChunkReviews() ) ;
+
+                if ( !in_array( (int) $options['filter']['revision_number'], $validRevisionNumbers )  ) {
+                    $options['filter']['revision_number'] = 1 ;
+                }
+            }
+        }
+
         $segmentsDao = new Segments_SegmentDao();
         $segments_id = $segmentsDao->getSegmentsIdForQR(
-                $this->chunk->id, $this->chunk->password,
-                $step, $ref_segment, $where, $options
+                $this->chunk, $step, $ref_segment, $where, $options
         );
 
         return $segments_id;
@@ -120,7 +136,6 @@ class QualityReportSegmentModel {
         $commentsDao  = new \Comments_CommentDao;
         $comments     = $commentsDao->getThreadsBySegments( $segments_id, $this->chunk->id );
         $codes        = $featureSet->getCodes();
-        $chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([ [ $this->chunk->id, $this->chunk->password ] ] ) ;
 
         $last_revisions = [] ;
 
@@ -131,7 +146,7 @@ class QualityReportSegmentModel {
                     $segments_id, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
             );
 
-            foreach( $chunkReviews as $chunkReview ) {
+            foreach( $this->_getChunkReviews() as $chunkReview ) {
                 $last_revisions [ $chunkReview->source_page ] = $translationVersionDao->getLastRevieionsBySegmentsAndSourcePage(
                         $segments_id, $this->chunk->id, $chunkReview->source_page
                 );
@@ -164,6 +179,17 @@ class QualityReportSegmentModel {
         }
 
         return $files;
+    }
+
+    /**
+     * @return \LQA\ChunkReviewStruct[]
+     */
+    protected function _getChunkReviews() {
+        if ( is_null( $this->_chunkReviews ) ) {
+            $this->_chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([ [ $this->chunk->id, $this->chunk->password ] ] );
+        }
+
+        return $this->_chunkReviews ;
     }
 
     protected function _getLegacySegmentRevisions($segments_id) {
