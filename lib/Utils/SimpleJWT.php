@@ -69,11 +69,11 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
         //check if valid hash and expiration still in time
 
         if( $data_hash != self::base64url_encode( $expected_hash ) ){
-            throw new DomainException( "Invalid Token Signature" );
+            throw new DomainException( "Invalid Token Signature", 1 );
         }
 
         if( time() > $_storage[ 'payload' ][ 'exp' ] ){
-            throw new DomainException( "Token Expired" );
+            throw new DomainException( "Token Expired", 2 );
         }
 
         return true;
