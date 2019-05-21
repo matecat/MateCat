@@ -60,6 +60,10 @@
             &.approved-all-bulked {
                 border: 1px solid #7cc576;
                 color: #7cc576;
+                &.approved-2nd-pass {
+                    border: 1px solid #BC6AC9;
+                    color: #BC6AC9;
+                }
             }
             i {
                 top: 3px;

@@ -145,7 +145,7 @@ if (SegmentFilter.enabled())
                     segmentToOpen = lastSegmentId ;
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     UI.scrollSegment(segment$, segmentToOpen);
-                    if (segment$) {
+                    if (segment$.length) {
                         UI.openSegment(segment$)
                     }
                 }
