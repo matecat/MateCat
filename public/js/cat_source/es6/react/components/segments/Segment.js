@@ -26,7 +26,7 @@ class Segment extends React.Component {
         this.addClass = this.addClass.bind(this);
         this.removeClass = this.removeClass.bind(this);
         this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
-        this.setSegmentStatus = this.setSegmentStatus.bind(this);
+        // this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
         this.handleChangeBulk = this.handleChangeBulk.bind(this);
 
@@ -169,22 +169,33 @@ class Segment extends React.Component {
             });
         }
     }
-    setSegmentStatus(sid, status) {
-        if (this.props.segment.sid == sid) {
-            let classes = this.state.segment_classes.slice(0);
-            let index = classes.findIndex(function ( item ) {
-                return item.indexOf("status-") > -1;
-            });
+    // setSegmentStatus(sid, status) {
+    //     if (this.props.segment.sid == sid) {
+    //         let classes = this.state.segment_classes.slice(0);
+    //         let index = classes.findIndex(function ( item ) {
+    //             return item.indexOf("status-") > -1;
+    //         });
+    //
+    //         if (index >= 0) {
+    //             classes.splice(index, 1);
+    //         }
+    //
+    //         this.setState({
+    //             segment_classes: classes,
+    //             status: status
+    //         });
+    //     }
+    // }
+    checkSegmentStatus() {
+        let classes = this.state.segment_classes.slice(0);
+        let index = classes.findIndex(function ( item ) {
+            return item.indexOf("status-") > -1;
+        });
 
-            if (index >= 0) {
-                classes.splice(index, 1);
-            }
-
-            this.setState({
-                segment_classes: classes,
-                status: status
-            });
+        if (index >= 0) {
+            classes.splice(index, 1);
         }
+        return classes;
     }
     isSplitted() {
         return (!_.isUndefined(this.props.segment.split_group));
@@ -224,7 +235,8 @@ class Segment extends React.Component {
     }
 
     checkSegmentClasses() {
-        let classes =  this.state.segment_classes.concat(this.createSegmentClasses());
+        let classes =  this.checkSegmentStatus();
+        classes =  classes.concat(this.createSegmentClasses());
         if (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1){
             let indexEditor = classes.indexOf("editor");
             classes.splice(indexEditor, 1);
@@ -289,7 +301,7 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
-        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
+        // SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         //Review
         SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel.bind(this));
@@ -307,7 +319,7 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
-        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
+        // SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         //Review
         SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
