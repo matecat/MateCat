@@ -18,7 +18,7 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
      * ( easy to put in another file or change localization )
      * @var array
      */
-    protected static $actionsStrings = array(
+    protected static $actionsStrings = [
 
         /* DOWNLOADS */
             self::DOWNLOAD_EDIT_LOG           => "Editing Log downloaded",
@@ -45,7 +45,9 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
             self::PROJECT_CREATED             => "Project created.",
             self::JOB_UNARCHIVED              => "Job unarchived.",
 
-    );
+            self::TRANSLATION_DELIVERED => 'Translation Delivered'
+
+    ];
 
     /**
      * MAP for Database values
@@ -72,10 +74,12 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
     const ACCESS_REVISE_SUMMARY_PAGE = 17;
 
     /* OTHERS */
-    const PROJECT_CREATED            = 18;
-    const JOB_UNARCHIVED             = 19;
+    const PROJECT_CREATED = 18;
+    const JOB_UNARCHIVED  = 19;
 
-    protected $cached_results = array();
+    const TRANSLATION_DELIVERED = 101;
+
+    protected $cached_results = [];
 
     /**
      * @var int
@@ -137,7 +141,7 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
      *
      * @return string
      */
-    public static function getAction( $actionID ){
+    public static function getAction( $actionID ) {
         return self::$actionsStrings[ $actionID ];
     }
 
