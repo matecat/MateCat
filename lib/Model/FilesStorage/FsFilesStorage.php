@@ -2,62 +2,9 @@
 
 namespace FilesStorage;
 
-/*
-
-files
-	|_file id
-		|_package
-		|	|_manifest
-		|	|_orig
-		|	|	|_original file
-		|	|_work
-		|		|_xliff file
-		|_orig
-		|	|_original file
-		|_xliff
-			|_xliff file
-
-cache
-	|_sha1+lang
-		|_package
-			|_manifest
-			|_orig
-			|	|_original file
-			|_work
-				|_xliff file
-
-*/
-
 class FsFilesStorage extends AbstractFilesStorage
 {
-
-    private $filesDir;
-    private $cacheDir;
-    private $zipDir;
-
     const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
-
-    public function __construct( $files = null, $cache = null, $zip = null ) {
-
-        //override default config
-        if ( $files ) {
-            $this->filesDir = $files;
-        } else {
-            $this->filesDir = \INIT::$FILES_REPOSITORY;
-        }
-
-        if ( $cache ) {
-            $this->cacheDir = $cache;
-        } else {
-            $this->cacheDir = \INIT::$CACHE_REPOSITORY;
-        }
-
-        if ( $zip ) {
-            $this->zipDir = $zip;
-        } else {
-            $this->zipDir = \INIT::$ZIP_REPOSITORY;
-        }
-    }
 
     public static function moveFileFromUploadSessionToQueuePath( $upload_session ) {
 
@@ -134,18 +81,6 @@ class FsFilesStorage extends AbstractFilesStorage
      * Cache Handling Methods --- START
      */
 
-    public static function composeCachePath( $hash ) {
-
-        $cacheTree = [
-                'firstLevel'  => $hash{0} . $hash{1},
-                'secondLevel' => $hash{2} . $hash{3},
-                'thirdLevel'  => substr( $hash, 4 )
-        ];
-
-        return $cacheTree;
-
-    }
-
     public function getXliffFromCache( $hash, $lang ) {
 
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
@@ -197,7 +132,7 @@ class FsFilesStorage extends AbstractFilesStorage
             }
 
             //use original xliff
-            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . FsFilesStorage::basename_fix( $xliffPath ) . @$force_extension;
+            $xliffDestination = $cacheDir . DIRECTORY_SEPARATOR . "work" . DIRECTORY_SEPARATOR . static::basename_fix( $xliffPath ) . @$force_extension;
         } else {
             //move original
             $raw_file_path = explode( DIRECTORY_SEPARATOR, $originalPath );

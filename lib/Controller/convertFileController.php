@@ -29,7 +29,6 @@ class convertFileController extends ajaxController {
     protected $files_storage;
 
     public function __construct() {
-
         parent::__construct();
 
         $filterArgs = array(
