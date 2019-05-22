@@ -27,13 +27,18 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
     public static function findSegmentIdsBySimpleFilter( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
 
         if ( $filter->revisionNumber() ) {
-            $join_events = "JOIN segment_translation_events ste
-            ON ste.id_job = jobs.id
-            AND ste.id_segment = st.id_segment
-            AND ste.version_number = st.version_number
-            AND ste.final_revision = 1
-            AND ste.source_page = :source_page
-            " ;
+
+            $join_events = " JOIN (
+                SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
+
+                    SELECT max(id) FROM segment_translation_events
+                        WHERE id_job = :id_job
+                        AND id_segment BETWEEN :job_first_segment AND :job_last_segment
+                        GROUP BY id_segment
+                        ) ORDER BY id_segment
+
+                ) ste ON ste.ste_id_segment = st.id_segment AND ste.source_page = :source_page " ;
+
             $join_data ['source_page' ] = SecondPassReview\Utils::revisionNumberToSourcePage( $filter->revisionNumber() );
         }
         else {
