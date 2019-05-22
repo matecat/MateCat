@@ -27,7 +27,9 @@ class Utils {
     }
 
     public static function revisionNumberToSourcePage($number) {
-        return $number + 1 ;
+        if ( !is_null( $number ) ) {
+            return $number + 1 ;
+        }
     }
 
     public static function sourcePageToRevisionNumber( $number ) {
