@@ -195,6 +195,17 @@ class Segment extends React.Component {
             });
         }
     }
+    checkSegmentStatus() {
+        let classes = this.state.segment_classes.slice(0);
+        let index = classes.findIndex(function ( item ) {
+            return item.indexOf("status-") > -1;
+        });
+
+        if (index >= 0) {
+            classes.splice(index, 1);
+        }
+        return classes;
+    }
     isSplitted() {
         return (!_.isUndefined(this.props.segment.split_group));
     }
@@ -243,6 +254,8 @@ class Segment extends React.Component {
     }
 
     checkSegmentClasses() {
+        // let classes =  this.checkSegmentStatus();
+        // classes =  classes.concat(this.createSegmentClasses());
         let classes =  this.state.segment_classes.concat(this.createSegmentClasses());
         if (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1){
             let indexEditor = classes.indexOf("editor");

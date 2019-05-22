@@ -99,7 +99,7 @@ abstract class BaseFeature implements IBaseFeature {
         if ( $this->log == null ) {
             $this->log = new Logger( $this->logger_name );
             $streamHandler = new StreamHandler( $this->logFilePath(),  Logger::INFO );
-            $streamHandler->setFormatter( new LineFormatter( null, null, true, true ) );
+            $streamHandler->setFormatter( new LineFormatter( "%message%\n", "", true, true ) );
             $this->log->pushHandler( $streamHandler );
         }
         return $this->log;

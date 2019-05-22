@@ -184,7 +184,7 @@ if (true)
             UI.checkIntervalsUnions( intervals );
             UI.startGlossaryMark = '<mark class="inGlossary">';
             UI.endGlossaryMark = '</mark>';
-            markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
+            var markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
             var sourceString = container.html();
             if ( sourceString ) {
                 $.each( UI.intervalsUnion, function ( index ) {
@@ -221,11 +221,11 @@ if (true)
 
         checkIntervalsUnions: function ( intervals ) {
             UI.endedIntervalAnalysis = false;
-            smallest = UI.smallestInterval( intervals );
+            var smallest = UI.smallestInterval( intervals );
             $.each( intervals, function ( indice ) {
                 if ( this === smallest ) smallestIndex = indice;
             } );
-            mod = 0;
+            var mod = 0;
             $.each( intervals, function ( i ) {
                 if ( i != smallestIndex ) {
                     if ( (smallest.startPos <= this.startPos) && (smallest.endPos >= this.startPos) ) { // this item is to be merged to the smallest

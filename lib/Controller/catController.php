@@ -435,7 +435,13 @@ class catController extends viewController {
         $this->template->mt_enabled  = var_export( (bool) $this->chunk->id_mt_engine , true );
 
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
-        $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
+
+        if ( array_key_exists( explode( '-', $this->target_code )[0] , CatUtils::$cjk ) ) {
+            $this->template->segmentQACheckInterval = 3000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
+        } else {
+            $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
+        }
+
 
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;

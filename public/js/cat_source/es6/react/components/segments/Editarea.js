@@ -114,7 +114,7 @@ class Editarea extends React.Component {
     }
 
     onInputEvent(e) {
-        if (!this.keyPressed) {
+        if (!this.keyPressed && !this.compositionsStart) {
             UI.inputEditAreaEventHandler.call(this.editAreaRef, e);
             this.checkEmptyText();
             this.emitTrackChanges();
@@ -137,6 +137,14 @@ class Editarea extends React.Component {
     onKeyUpEvent(e) {
         this.keyPressed = false;
         this.checkEditToolbar();
+    }
+    onCompositionStartEvent() {
+        this.compositionsStart = true;
+        console.log('CompositionEvent START');
+    }
+    onCompositionEndEvent() {
+        this.compositionsStart = false;
+        console.log('CompositionEvent END');
     }
     onCopyText(e) {
         UI.handleCopyEvent(e);
@@ -240,6 +248,8 @@ class Editarea extends React.Component {
                     onKeyUp={this.onKeyUpEvent.bind(this)}
                     onCopy={this.onCopyText.bind(this)}
                     onInput={_.debounce(this.onInputEvent, 500)}
+                    onCompositionStart={this.onCompositionStartEvent.bind(this)}
+                    onCompositionEnd={this.onCompositionEndEvent.bind(this)}
                     onPaste={this.onPasteEvent}
                     ref={(ref) => this.editAreaRef = ref}
                     tabIndex="-1"

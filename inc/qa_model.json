@@ -38,11 +38,11 @@
       },{
         "label": "Minor",
         "dqf_id" : 2,
-        "penalty": 0.03
+        "penalty": 0.5
       },
       {
         "label": "Major",
-        "dqf_id" : 3,
+        "dqf_id" : 2,
         "penalty": 1
       }
     ],
