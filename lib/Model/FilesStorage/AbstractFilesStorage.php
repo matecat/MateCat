@@ -31,7 +31,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
 
     /**
      **********************************************************************************************
-     * FILE HANDLING
+     * FILE HANDLING ON FILE SYSTEM
      **********************************************************************************************
      */
 

@@ -6,13 +6,13 @@ class FsFilesStorage extends AbstractFilesStorage
 {
     const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
 
-    public static function moveFileFromUploadSessionToQueuePath( $upload_session ) {
+    public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
 
-        $destination = \INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $upload_session;
+        $destination = \INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         mkdir( $destination, 0755 );
         foreach (
                 $iterator = new \RecursiveIteratorIterator(
-                        new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $upload_session, \RecursiveDirectoryIterator::SKIP_DOTS ),
+                        new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, \RecursiveDirectoryIterator::SKIP_DOTS ),
                         \RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
             if ( $item->isDir() ) {
@@ -22,7 +22,7 @@ class FsFilesStorage extends AbstractFilesStorage
             }
         }
 
-        \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $upload_session );
+        \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
 
     }
 

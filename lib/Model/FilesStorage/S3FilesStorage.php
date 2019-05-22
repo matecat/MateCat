@@ -25,13 +25,24 @@ class S3FilesStorage extends AbstractFilesStorage {
      * S3FilesStorage constructor.
      */
     public function __construct() {
+        $this->s3Client = self::getStaticS3Client();
+    }
+
+    /**
+     * This static method gives
+     * an access to Client instance
+     * to all static methods like moveFileFromUploadSessionToQueuePath()
+     *
+     * @return Client
+     */
+    public static function getStaticS3Client() {
         // init the S3Client
         $awsAccessKeyId = \INIT::$AWS_ACCESS_KEY_ID;
         $awsSecretKey   = \INIT::$AWS_SECRET_KEY;
         $awsVersion     = \INIT::$AWS_VERSION;
         $awsRegion      = \INIT::$AWS_REGION;
 
-        $this->s3Client = new Client(
+        return new Client(
                 $awsAccessKeyId,
                 $awsSecretKey,
                 [
@@ -57,6 +68,21 @@ class S3FilesStorage extends AbstractFilesStorage {
     }
 
     /**
+     * Get a project bucket name
+     *
+     * Example:
+     * matecat-project-20191212.{id}
+     *
+     * @param $datestring
+     * @param $id
+     *
+     * @return string
+     */
+    public function getProjectBucketName( $datestring, $id ) {
+        return 'matecat-project-' . $datestring . '.' . $id;
+    }
+
+    /**
      * Create the cache bucket on S3 and store the files
      *
      * @param      $hash
@@ -68,15 +94,15 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
-        $bucketName = $this->getCachePackageBucketName( $hash, $lang );
+        $cachePackageBucketName = $this->getCachePackageBucketName( $hash, $lang );
 
-        if ( \INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $this->s3Client->hasBucket( $bucketName ) ) {
+        if ( \INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $this->s3Client->hasBucket( $cachePackageBucketName ) ) {
             return true;
         }
 
-        $xliffDestination = $this->getXliffDestination( $xliffPath, $bucketName, $originalPath );
+        $xliffDestination = $this->getXliffDestination( $xliffPath, $cachePackageBucketName, $originalPath );
 
-        $this->tryToUploadAFile( $bucketName, $xliffDestination, $xliffPath );
+        $this->tryToUploadAFile( $cachePackageBucketName, $xliffDestination, $xliffPath );
 
         unlink( $xliffPath );
 
@@ -120,7 +146,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
     private function tryToUploadAFile( $bucketName, $destination, $origPath ) {
         try {
-            $this->s3Client->uploadFile( $bucketName, $destination, $origPath );
+            $this->s3Client->uploadItem( $bucketName, $destination, $origPath );
             \Log::doJsonLog( 'Successfully uploaded file ' . $destination . ' into ' . $bucketName . ' bucket.' );
         } catch ( \Exception $e ) {
             \Log::doJsonLog( 'Error in uploading a file ' . $destination . ' into ' . $bucketName . ' bucket. ERROR: ' . $e->getMessage() );
@@ -130,32 +156,63 @@ class S3FilesStorage extends AbstractFilesStorage {
     }
 
     /**
-     * Get a project bucket name
+     * @param $uploadSession
      *
-     * Example:
-     * matecat-project-20191212.{id}
-     *
-     * @param $datestring
-     * @param $id
-     *
-     * @return string
+     * @return mixed|void
+     * @throws \Exception
      */
-    public function getProjectBucketName( $datestring, $id ) {
-        return 'matecat-project-' . $datestring . '.' . $id;
+    public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
+
+        $s3Client = self::getStaticS3Client();
+
+        // 1. get the queue bucket name
+        $queueBucketName = self::getQueueBucketName($uploadSession);
+
+        // 2. create queue bucket
+        $s3Client->createBucketIfItDoesNotExist( $queueBucketName );
+
+        foreach (
+                $iterator = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, \RecursiveDirectoryIterator::SKIP_DOTS ),
+                        \RecursiveIteratorIterator::SELF_FIRST ) as $item
+        ) {
+            if ( $item->isDir() ) {
+                // create folder
+                $s3Client->createFolder($queueBucketName, $iterator->getSubPathName());
+            } else {
+                // upload file
+                $s3Client->uploadItem($queueBucketName, $iterator->getSubPathName(), $item);
+            }
+        }
+
+        \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
     }
 
     /**
+     * @param $uploadSession
+     *
+     * @return string
+     */
+    public static function getQueueBucketName($uploadSession){
+        return 'matecat-queue-'.str_replace(['{','}'], '', strtolower(urldecode($uploadSession)));
+    }
+
+    /**
+     * Copies the files from cache bucket package to project bucket identified by $idFile
+     *
      * @param      $dateHashPath
      * @param      $lang
      * @param      $idFile
      * @param null $newFileName
      *
-     * @return mixed|void
+     * @return bool|mixed
      * @throws \Exception
      */
     public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
 
-        // 1. get the bucket cache package
+        $errors = [];
+
+        // 1. get the cache package bucket  name
         $hashes                 = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $datePath               = $hashes[ 0 ];
         $hash                   = $hashes[ 1 ];
@@ -165,23 +222,43 @@ class S3FilesStorage extends AbstractFilesStorage {
         $bucketProjectName = $this->getProjectBucketName( $datePath, $idFile );
         $this->s3Client->createBucketIfItDoesNotExist( $bucketProjectName );
 
-        $bucketCachePackageFiles = $this->s3Client->getFilesInABucket( $bucketCachePackageName );
+        $bucketCachePackageFiles = $this->s3Client->getItemsInABucket( $bucketCachePackageName );
         foreach ( $bucketCachePackageFiles as $key => $file ) {
 
-            // 3. create package/orig and package/work blank folders
-            $this->s3Client->copyFile($bucketCachePackageName, $key, $bucketProjectName, 'package/orig');
-            $this->s3Client->copyFile($bucketCachePackageName, $key, $bucketProjectName, 'package/work');
+            // 3. create package/orig and package/work empty folders
+            $folder1 = $this->s3Client->createFolder($bucketProjectName, 'package/orig');
+            $folder2 = $this->s3Client->createFolder($bucketProjectName, 'package/work');
 
-            // 4. copy orig file from cache package to project
-            if(false !== strpos($key, 'orig/') ){
-                $this->s3Client->copyFile($bucketCachePackageName, $key, $bucketProjectName, $key);
+            if(false === $folder1){
+                $errors[] = 'package/orig was not created';
             }
 
-            // 5. copy work file from cache package to project
-            if(false !== strpos($key, 'work/')){
-                $newKey = substr_replace($key,"xliff/",0, 5);
-                $this->s3Client->copyFile($bucketCachePackageName, $key, $bucketProjectName, $newKey);
+            if(false === $folder2){
+                $errors[] = 'package/work was not created';
+            }
+
+            // 4. copy orig file from cache package to project bucket
+            if ( false !== strpos( $key, 'orig/' ) ) {
+                $copied = $this->s3Client->copyItem( $bucketCachePackageName, $key, $bucketProjectName, $key );
+
+                if(false === $copied){
+                    \Log::doJsonLog( 'project id ' . $idFile . ': ' . $key . ' was copied from ' . $bucketCachePackageName . ' to ' . $bucketProjectName );
+                    $errors[] = $key . ' was not copied';
+                }
+            }
+
+            // 5. copy work file from cache package to project bucket
+            if ( false !== strpos( $key, 'work/' ) ) {
+                $newKey = substr_replace( $key, "xliff/", 0, 5 );
+                $copied = $this->s3Client->copyItem( $bucketCachePackageName, $key, $bucketProjectName, $newKey );
+
+                if(false === $copied){
+                    \Log::doJsonLog( 'project id ' . $idFile . ': ' . $key . ' was copied from ' . $bucketCachePackageName . ' to ' . $bucketProjectName );
+                    $errors[] = $key . ' was not copied';
+                }
             }
         }
+
+        return (count($errors) === 0);
     }
 }

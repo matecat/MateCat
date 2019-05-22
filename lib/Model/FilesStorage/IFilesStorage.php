@@ -26,6 +26,14 @@ interface IFilesStorage {
      */
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath );
 
+    /**
+     * Moves the files from upload session folder to queue path
+     *
+     * @param $uploadSession
+     *
+     * @return mixed
+     */
+    public static function moveFileFromUploadSessionToQueuePath( $uploadSession );
 
     /**
      * Creates the files folder.
