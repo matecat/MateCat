@@ -8,6 +8,10 @@
 
 namespace Features\SegmentFilter\Model;
 
+use Constants_TranslationStatus;
+use DataAccess\ShapelessConcreteStruct;
+use Database;
+use Features\SecondPassReview;
 use Features\SegmentFilter\Model\FilterDefinition;
 use Chunks_ChunkStruct;
 
@@ -22,29 +26,48 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
      */
     public static function findSegmentIdsBySimpleFilter( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
 
+        if ( $filter->revisionNumber() ) {
+            $join_events = "JOIN segment_translation_events ste
+            ON ste.id_job = jobs.id
+            AND ste.id_segment = st.id_segment
+            AND ste.version_number = st.version_number
+            AND ste.final_revision = 1
+            AND ste.source_page = :source_page
+            " ;
+            $join_data ['source_page' ] = SecondPassReview\Utils::revisionNumberToSourcePage( $filter->revisionNumber() );
+        }
+        else {
+            $join_events = "" ;
+            $join_data = [] ;
+        }
+
         $sql = "
         SELECT st.id_segment AS id
           FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.id = :id_job
-           AND jobs.password = :password
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           AND st.status = :status
+           segment_translations st
+           JOIN jobs ON jobs.id = st.id_job
+
+               AND jobs.id = :id_job
+               AND jobs.password = :password
+               AND st.id_segment
+               BETWEEN :job_first_segment AND :job_last_segment
+               AND st.status = :status
+
+          $join_events
+
            ORDER BY st.id_segment
            ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        $data = [
+        $data = array_merge( [
                 'id_job'            => $chunk->id,
                 'job_first_segment' => $chunk->job_first_segment,
                 'job_last_segment'  => $chunk->job_last_segment,
                 'password'          => $chunk->password,
                 'status'            => $filter->getSegmentStatus()
-        ];
+        ], $join_data );
 
         $stmt->execute( $data );
 
@@ -63,6 +86,13 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         if ( $filter->isFiltered() ) {
             $where      = " AND st.status = :status ";
             $where_data = [ 'status' => $filter->getSegmentStatus() ];
+
+            if ( in_array( $filter->getSegmentStatus(), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+                $where .= " AND ste.source_page = :source_page " ;
+                $where_data[ 'source_page' ] = SecondPassReview\Utils::revisionNumberToSourcePage(
+                        $filter->revisionNumber()
+                );
+            }
         }
 
         if ( $filter->hasCustomCondition() ) {
@@ -70,7 +100,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             array_merge( $where_data, $filter->getCustomConditionData() ) ;
         }
 
-        return (object)[ 'sql' => $where, 'data' => $where_data ];
+        return (object) [ 'sql' => $where, 'data' => $where_data ];
     }
 
 
@@ -131,12 +161,12 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                 case 'todo':
 
                     $data = array_merge( $data, [
-                            'status_new'   => \Constants_TranslationStatus::STATUS_NEW,
-                            'status_draft' => \Constants_TranslationStatus::STATUS_DRAFT
+                            'status_new'   => Constants_TranslationStatus::STATUS_NEW,
+                            'status_draft' => Constants_TranslationStatus::STATUS_DRAFT
                     ] );
                     if ( $chunk->getIsReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated'   => \Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
                         ] );
                     }
                     break;
@@ -167,7 +197,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            BETWEEN :job_first_segment AND :job_last_segment
            $where->sql ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $countSql );
 
         $data = self::__getData( $chunk, $filter );
@@ -245,16 +275,10 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                 break;
         }
 
-        /*$conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql);
-        $stmt->execute($data);
-        return $stmt->fetchAll();*/
-
-
         $thisDao = new self();
         $stmt    = $thisDao->_getStatementForCache( $sql );
 
-        return $thisDao->_fetchObject( $stmt, new \DataAccess\ShapelessConcreteStruct, $data );
+        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct, $data );
     }
 
     /**

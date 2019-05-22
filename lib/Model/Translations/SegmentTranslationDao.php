@@ -272,19 +272,27 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $sql = "UPDATE segment_translations SET status = :status WHERE id_job = :id_job AND id_segment = :id_segment " ;
         $conn         = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql ) ;
-        $stmt->execute( ['id_job' => $id_job, 'id_segment' => $id_segment, 'status' => $status ] ) ;
+        $stmt->execute( [ 'id_job' => $id_job, 'id_segment' => $id_segment, 'status' => $status ] ) ;
 
         return $stmt->rowCount() ;
     }
 
-    public static function getUnchangebleStatus( $segments_ids, $status ) {
+    public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
 
-        if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
-            $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
 
-        } elseif ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+        if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
+            /**
+             * if source_page is null, we keep the default behaviour and only allow TRANSLATED segments.
+             */
+            $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+        }
+
+        elseif ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+            /**
+             * When status is TRANSLATED we can change APPROVED DRAFT and NEW statuses
+             */
             $where_values[] = Constants_TranslationStatus::STATUS_APPROVED ;
             $where_values[] = Constants_TranslationStatus::STATUS_DRAFT ;
             $where_values[] = Constants_TranslationStatus::STATUS_NEW ;
@@ -296,16 +304,44 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $status_placeholders       = str_repeat( '?,', count( $where_values ) -1 ) . '?' ;
         $segments_ids_placeholders = str_repeat( '?,', count( $segments_ids ) - 1 ) . '?';
 
-        $sql = "SELECT id_segment FROM segment_translations
+        if ( !is_null( $source_page ) ) {
+            /**
+             * If source page is being provided, we must return as un-changeable, segments which
+             * are currently in the same revision stage as the input source page. To do so, we JOIN
+             * segment_translation_events table.
+             */
+            $join_ste = " JOIN segment_translation_events ste
+                      ON ste.id_segment = st.id_segment
+                          AND ste.id_job = ?
+                          AND st.status = ?
+                          AND ste.source_page = ?
+                          AND ste.final_revision = 1 " ;
+
+            $where_values = array_merge( [
+                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED, $source_page
+            ], $where_values );
+        }
+        else {
+            $join_ste   = '' ;
+        }
+
+        $sql = "SELECT st.id_segment
+                    FROM segment_translations st
+
+                    $join_ste
+
                     WHERE
                     (
-                      status NOT IN( $status_placeholders )  OR
+
+                      st.status NOT IN ( $status_placeholders ) OR
+
                       translation IS NULL OR
                       translation = ''
-                    ) AND id_segment IN ( $segments_ids_placeholders )
+                    ) AND st.id_segment IN ( $segments_ids_placeholders )
+
                     ";
 
-        $where_values = array_merge( $where_values, $segments_ids );
+        $where_values = array_merge($where_values, $segments_ids );
         $stmt         = $conn->prepare( $sql );
         $stmt->execute( $where_values );
 

@@ -9,6 +9,8 @@
 
 namespace Features\SecondPassReview;
 
+use Chunks_ChunkStruct;
+use LQA\ChunkReviewDao;
 use LQA\ModelStruct;
 
 class Utils {
@@ -49,4 +51,18 @@ class Utils {
             return $limit ;
         }
     }
+
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return array
+     */
+    public static function validRevisionNumbers( Chunks_ChunkStruct $chunk ) {
+        $chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([ [ $chunk->id, $chunk->password ] ] );
+        $validRevisionNumbers = array_map( function( $chunkReview ) {
+            return self::sourcePageToRevisionNumber( $chunkReview->source_page );
+        },  $chunkReviews );
+        return $validRevisionNumbers ;
+    }
+
 }

@@ -8,7 +8,7 @@
 
 namespace Features\SecondPassReview\Decorator ;
 use AbstractCatDecorator;
-use Features\SecondPassReview\Model\ChunkReviewDao;
+use LQA\ChunkReviewDao;
 
 class CatDecorator extends AbstractCatDecorator {
 

@@ -10,8 +10,12 @@ namespace API\V2;
 
 use AMQHandler;
 use API\V2\Exceptions\NotFoundException;
+use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\Validators\JobPasswordValidator;
+use Constants;
 use Constants_TranslationStatus;
+use Features\ReviewExtended\Model\ChunkReviewDao;
+use Features\SecondPassReview;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
@@ -21,9 +25,9 @@ use WorkerClient;
 class JobStatusController extends KleinController {
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Chunks_ChunkStruct
      */
-    private $job;
+    private $chunk;
 
     /**
      * @var Projects_ProjectStruct
@@ -32,25 +36,36 @@ class JobStatusController extends KleinController {
 
     protected function afterConstruct() {
 
-        $jobValidator = new JobPasswordValidator( $this );
-        $jobValidator->onSuccess( function () use ( $jobValidator ) {
-            $this->job     = $jobValidator->getJob();
-            $this->project = $this->job->getProject();
+        $chunkValidator = new ChunkPasswordValidator( $this );
+        $chunkValidator->onSuccess( function () use ( $chunkValidator ) {
+            $this->chunk   = $chunkValidator->getChunk();
+            $this->project = $this->chunk->getProject();
         } );
 
-        $this->appendValidator( $jobValidator );
+        $this->appendValidator( $chunkValidator );
     }
 
     public function changeSegmentsStatus() {
-
         $segments_id = $this->sanitizeSegmentIDs( $this->request->segments_id );
+        $status      = strtoupper( $this->request->status );
+        $source_page = null ;
 
-        $status = strtoupper( $this->request->status );
+        if ( $this->request->revision_number ) {
+            $validRevisions = SecondPassReview\Utils::validRevisionNumbers( $this->chunk ) ;
+            if ( !in_array( $this->request->revision_number, $validRevisions ) ) {
+                $this->response->code( 400 ) ;
+                $this->response->json( [ 'error' => 'Invalid revision number' ] );
+                return;
+            }
+            $source_page = SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number ) ;
+        }
 
         if ( in_array( $status, [
                 Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED
         ] ) ) {
-            $unchangeble_segments = Translations_SegmentTranslationDao::getUnchangebleStatus( $segments_id, $status );
+            $unchangeble_segments = Translations_SegmentTranslationDao::getUnchangebleStatus(
+                    $this->chunk, $segments_id, $status, $source_page
+            );
             $segments_id          = array_diff( $segments_id, $unchangeble_segments );
 
             if ( !empty( $segments_id ) ) {
@@ -61,7 +76,7 @@ class JobStatusController extends KleinController {
                             [
                                     'segment_ids'        => $segments_id,
                                     'client_id'          => $this->request->client_id,
-                                    'job'                => $this->job,
+                                    'chunk'              => $this->chunk,
                                     'destination_status' => $status,
                                     'id_user'            => ( $this->userIsLogged() ? $this->getUser()->uid : null ),
                                     'is_review'          => ( $status == Constants_TranslationStatus::STATUS_APPROVED ),

@@ -120,9 +120,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         return $options ;
     }
 
-
     /**
-     *
      * @param $project
      */
     public function filter_manage_single_project( $project ) {

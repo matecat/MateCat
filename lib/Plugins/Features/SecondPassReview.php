@@ -76,7 +76,7 @@ class SecondPassReview extends BaseFeature {
             $chunks[] = array( $job['id'], $job['password'] );
         }
 
-        $chunk_reviews = ( new \Features\SecondPassReview\Model\ChunkReviewDao() )->findAllChunkReviewsByChunkIds( $chunks );
+        $chunk_reviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( $chunks );
 
         foreach( $project['jobs'] as $kk => $job ) {
             /**

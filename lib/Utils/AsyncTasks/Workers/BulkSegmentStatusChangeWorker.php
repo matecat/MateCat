@@ -9,12 +9,12 @@
 namespace AsyncTasks\Workers;
 
 
+use Chunks_ChunkStruct;
 use Database;
 use Features;
 use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 use INIT;
-use Jobs_JobStruct;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -44,8 +44,8 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $this->_doLog( 'data: ' . var_export( $queueElement->params->toArray(), true ) );
 
         $params = $queueElement->params->toArray();
-        /** @var Jobs_JobStruct $job */
-        $job         = new Jobs_JobStruct( $params['job']->toArray() ) ;
+        /** @var Chunks_ChunkStruct $chunk */
+        $chunk         = new Chunks_ChunkStruct( $params['chunk']->toArray() ) ;
         $status      = $params['destination_status'] ;
         $client_id   = $params['client_id'];
         $user        = ( new Users_UserDao())->getByUid( $params['id_user'] );
@@ -58,7 +58,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         foreach ( $params[ 'segment_ids' ] as $segment ) {
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment, $job->id );
+            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment, $chunk->id );
 
             if ( empty( $old_translation ) ) {
                 //no segment found
@@ -68,9 +68,9 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
             $new_translation         = clone $old_translation;
             $new_translation->status = $status;
 
-            Translations_SegmentTranslationDao::updateSegmentStatusBySegmentId( $job->id, $segment, $status );
+            Translations_SegmentTranslationDao::updateSegmentStatusBySegmentId( $chunk->id, $segment, $status );
 
-            if ( $job->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
+            if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
                 $segmentTransaltionEvent = new SegmentTranslationEventModel( $old_translation, $new_translation, $user, $source_page ) ;
                 $segmentTransaltionEvent->save();
             }
@@ -78,7 +78,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         if ( !empty( $params[ 'segment_ids' ] ) ) {
             $counter = new WordCount_Counter();
-            $counter->initializeJobWordCount( $job->id, $job->password );
+            $counter->initializeJobWordCount( $chunk->id, $chunk->password );
         }
 
         $this->_doLog( 'completed' );
@@ -95,8 +95,8 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
             $message = json_encode( [
                     '_type' => 'bulk_segment_status_change',
                     'data'  => [
-                            'id_job'    => $job->id,
-                            'passwords' => $job->password,
+                            'id_job'    => $chunk->id,
+                            'passwords' => $chunk->password,
                             'id_client' => $client_id,
                             'payload'   => $payload,
                     ]
