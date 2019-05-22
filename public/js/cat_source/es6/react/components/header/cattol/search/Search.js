@@ -157,6 +157,12 @@ class Search extends React.Component {
     handleStatusChange(value) {
         let search =  _.cloneDeep(this.state.search);
         search['selectStatus'] = value;
+        if ( value === 'APPROVED-2') {
+            search.revisionNumber = 2;
+            search['selectStatus'] = 'APPROVED';
+        } else {
+            search.revisionNumber = null;
+        }
         this.setState({
             search: search,
             funcFindButton: true
@@ -320,7 +326,7 @@ class Search extends React.Component {
                     {item.label}
                 </div>
                 { config.secondRevisionsCount && item.value === 'APPROVED' ? (
-                <div className="item" key={index+'-2'} data-value={'APPROVED'}>
+                <div className="item" key={index+'-2'} data-value={'APPROVED-2'}>
                     <div  className={"ui "+ item.label.toLowerCase() +"-2ndpass-color empty circular label"} />
                     {item.label}
                 </div>

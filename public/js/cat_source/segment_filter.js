@@ -98,14 +98,14 @@ if (SegmentFilter.enabled())
             return localStorage.removeItem( keyForLocalStorage() ) ;
         },
 
-        filterSubmit : function( data ,extendendLocalStorageValues) {
+        filterSubmit : function( params ,extendendLocalStorageValues) {
             if(!extendendLocalStorageValues){
                 extendendLocalStorageValues = {};
             }
             this.filteringSegments = true;
-            data = { filter: data } ;
+            var data = { filter: params } ;
+            data.revision_number = params.revision_number;
             data.filter.revision = config.isReview;
-            data.filter.revision_number = config.revisionNumber;
             var password = (config.isReview) ? config.review_password : config.password;
             var path = sprintf('/api/v2/jobs/%s/%s/segments-filter?%s',
                               config.id_job, password, $.param( data ) );
