@@ -30,6 +30,12 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
+     **********************************************************************************************
+     * FILE HANDLING
+     **********************************************************************************************
+     */
+
+    /**
      * @param $path
      *
      * @return mixed
@@ -92,6 +98,45 @@ abstract class AbstractFilesStorage implements IFilesStorage {
 
         return $return_array;
     }
+
+    /**
+     * @param $path
+     *
+     * @return bool|string
+     */
+    public function getSingleFileInPath( $path ) {
+
+        //check if it actually exist
+        $filePath = false;
+        $files    = [];
+        try {
+            $files = new \DirectoryIterator( $path );
+        } catch ( \Exception $e ) {
+            //directory does not exists
+            \Log::doJsonLog( "Directory $path does not exists. If you are creating a project check the source language." );
+        }
+
+        foreach ( $files as $key => $file ) {
+
+            if ( $file->isDot() ) {
+                continue;
+            }
+
+            //get the remaining file (it's the only file in dir)
+            $filePath = $path . DIRECTORY_SEPARATOR . $file->getFilename();
+            //no need to loop anymore
+            break;
+
+        }
+
+        return $filePath;
+    }
+
+    /**
+     **********************************************************************************************
+     * CACHE PACKAGE HELPERS
+     **********************************************************************************************
+     */
 
     /**
      * Return an array to build thr cache path from an hash

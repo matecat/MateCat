@@ -13,7 +13,7 @@ interface IFilesStorage {
      *      |_package
      *          |_manifest
      *          |_orig
-     *          |	|_original file
+     *          |    |_original file
      *          |_work
      *          |_xliff file
      *
@@ -24,7 +24,7 @@ interface IFilesStorage {
      *
      * @return mixed
      */
-    public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) ;
+    public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath );
 
 
     /**

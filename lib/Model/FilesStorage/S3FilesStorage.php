@@ -41,15 +41,11 @@ class S3FilesStorage extends AbstractFilesStorage {
         );
     }
 
-    /*
-     * Cache Handling Methods --- START
-     */
-
     /**
      * Get a cache bucket name
      *
      * Example:
-     * matecat-cache-d9-e7-590837d3861ad723879f2d63154e7eb690b1|it-IT
+     * matecat-cache-d9-e7-590837d3861ad723879f2d63154e7eb690b1-it-it
      *
      * @param $hash
      * @param $lang
@@ -57,16 +53,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return string
      */
     public function getCachePackageBucketName( $hash, $lang ) {
-        return 'matecat-cache-' . implode( '-', self::composeCachePath( $hash ) ) . '-' . strtolower($lang);
-    }
-
-    /**
-     * Get all files from a cache bucket
-     *
-     * @param $hash
-     */
-    public function getCachePackage( $hash ) {
-
+        return 'matecat-cache-' . implode( '-', self::composeCachePath( $hash ) ) . '.' . strtolower( $lang );
     }
 
     /**
@@ -87,9 +74,9 @@ class S3FilesStorage extends AbstractFilesStorage {
             return true;
         }
 
-        $xliffDestination = $this->getXliffDestination( $xliffPath, $bucketName, $hash, $lang, $originalPath );
+        $xliffDestination = $this->getXliffDestination( $xliffPath, $bucketName, $originalPath );
 
-        $this->tryToUploadAFile( $bucketName, $xliffDestination, $xliffPath, $hash, $lang );
+        $this->tryToUploadAFile( $bucketName, $xliffDestination, $xliffPath );
 
         unlink( $xliffPath );
 
@@ -99,13 +86,11 @@ class S3FilesStorage extends AbstractFilesStorage {
     /**
      * @param      $xliffPath
      * @param      $bucketName
-     * @param      $hash
-     * @param      $lang
      * @param bool $originalPath
      *
      * @return string
      */
-    private function getXliffDestination( $xliffPath, $bucketName, $hash, $lang, $originalPath = false ) {
+    private function getXliffDestination( $xliffPath, $bucketName, $originalPath = false ) {
         if ( !$originalPath ) {
             $fileType = \DetectProprietaryXliff::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
@@ -119,7 +104,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $file_name       = array_pop( $raw_file_path );
         $origDestination = 'orig' . DIRECTORY_SEPARATOR . $file_name;
 
-        $this->tryToUploadAFile( $bucketName, $origDestination, $originalPath, $hash, $lang );
+        $this->tryToUploadAFile( $bucketName, $origDestination, $originalPath );
 
         $file_extension = '.sdlxliff';
 
@@ -130,37 +115,73 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @param $bucketName
      * @param $destination
      * @param $origPath
-     * @param $hash
-     * @param $lang
      *
      * @return bool
      */
-    private function tryToUploadAFile( $bucketName, $destination, $origPath, $hash, $lang ) {
+    private function tryToUploadAFile( $bucketName, $destination, $origPath ) {
         try {
             $this->s3Client->uploadFile( $bucketName, $destination, $origPath );
+            \Log::doJsonLog( 'Successfully uploaded file ' . $destination . ' into ' . $bucketName . ' bucket.' );
         } catch ( \Exception $e ) {
-
-            var_dump($e->getMessage());
+            \Log::doJsonLog( 'Error in uploading a file ' . $destination . ' into ' . $bucketName . ' bucket. ERROR: ' . $e->getMessage() );
 
             return false;
         }
     }
 
-    /*
-     * Cache Handling Methods --- END
+    /**
+     * Get a project bucket name
+     *
+     * Example:
+     * matecat-project-20191212.{id}
+     *
+     * @param $datestring
+     * @param $id
+     *
+     * @return string
      */
-
-
-    /*
-     * Cache Handling Methods --- START
-     */
-
-    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
-        // TODO: Implement moveFromCacheToFileDir() method.
+    public function getProjectBucketName( $datestring, $id ) {
+        return 'matecat-project-' . $datestring . '.' . $id;
     }
 
-    /*
-     * Cache Handling Methods --- START
+    /**
+     * @param      $dateHashPath
+     * @param      $lang
+     * @param      $idFile
+     * @param null $newFileName
+     *
+     * @return mixed|void
+     * @throws \Exception
      */
+    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
 
+        // 1. get the bucket cache package
+        $hashes                 = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+        $datePath               = $hashes[ 0 ];
+        $hash                   = $hashes[ 1 ];
+        $bucketCachePackageName = $this->getCachePackageBucketName( $hash, $lang );
+
+        // 2. create project bucket
+        $bucketProjectName = $this->getProjectBucketName( $datePath, $idFile );
+        $this->s3Client->createBucketIfItDoesNotExist( $bucketProjectName );
+
+        $bucketCachePackageFiles = $this->s3Client->getFilesInABucket( $bucketCachePackageName );
+        foreach ( $bucketCachePackageFiles as $key => $file ) {
+
+            // 3. create package/orig and package/work blank folders
+            $this->s3Client->copyFile($bucketCachePackageName, $key, $bucketProjectName, 'package/orig');
+            $this->s3Client->copyFile($bucketCachePackageName, $key, $bucketProjectName, 'package/work');
+
+            // 4. copy orig file from cache package to project
+            if(false !== strpos($key, 'orig/') ){
+                $this->s3Client->copyFile($bucketCachePackageName, $key, $bucketProjectName, $key);
+            }
+
+            // 5. copy work file from cache package to project
+            if(false !== strpos($key, 'work/')){
+                $newKey = substr_replace($key,"xliff/",0, 5);
+                $this->s3Client->copyFile($bucketCachePackageName, $key, $bucketProjectName, $newKey);
+            }
+        }
+    }
 }

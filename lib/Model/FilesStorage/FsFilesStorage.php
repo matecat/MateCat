@@ -198,7 +198,7 @@ class FsFilesStorage extends AbstractFilesStorage
         }
 
         //move original
-        $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . FsFilesStorage::basename_fix( $zipPath ) );
+        $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . static::basename_fix( $zipPath ) );
 
         if ( !$outcome1 ) {
             //Original directory deleted!!!
@@ -221,7 +221,7 @@ class FsFilesStorage extends AbstractFilesStorage
 
         $datePath = date_create( $create_date )->format( 'Ymd' );
 
-        $fileName = FsFilesStorage::basename_fix( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
+        $fileName = static::basename_fix( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
 
         //destination dir
         $newZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
@@ -362,7 +362,7 @@ class FsFilesStorage extends AbstractFilesStorage
                 continue;
             }
 
-            //remove only the wrong languages, the same code|language must be
+            // remove only the wrong languages, the same code|language must be
             // retained because of the file name append
             if ( $fileInfo->getFilename() != $linkFile &&
                     stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
@@ -415,7 +415,7 @@ class FsFilesStorage extends AbstractFilesStorage
             if ( !empty( $newFileName ) ) {
                 $tmpOrigFileName = $newFileName;
             }
-            $res &= $this->link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . FsFilesStorage::basename_fix( $tmpOrigFileName ) );
+            $res &= $this->link( $origFilePath, $fileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . static::basename_fix( $tmpOrigFileName ) );
 
         }
 
@@ -431,15 +431,15 @@ class FsFilesStorage extends AbstractFilesStorage
 
         $tmpConvertedFilePath = $convertedFilePath;
         if ( !empty( $newFileName ) ) {
-            if ( !\DetectProprietaryXliff::isXliffExtension( FsFilesStorage::pathinfo_fix( $newFileName ) ) ) {
-                $convertedExtension   = FsFilesStorage::pathinfo_fix( $convertedFilePath, PATHINFO_EXTENSION );
+            if ( !\DetectProprietaryXliff::isXliffExtension( static::pathinfo_fix( $newFileName ) ) ) {
+                $convertedExtension   = static::pathinfo_fix( $convertedFilePath, PATHINFO_EXTENSION );
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }
         }
 
         \Log::doJsonLog( $convertedFilePath );  // <--------- TODO: this is empty!
 
-        $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . FsFilesStorage::basename_fix( $tmpConvertedFilePath );
+        $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . static::basename_fix( $tmpConvertedFilePath );
 
         \Log::doJsonLog( $dest );
 
@@ -451,33 +451,7 @@ class FsFilesStorage extends AbstractFilesStorage
 
     }
 
-    public function getSingleFileInPath( $path ) {
 
-        //check if it actually exist
-        $filePath = false;
-        $files    = [];
-        try {
-            $files = new \DirectoryIterator( $path );
-        } catch ( \Exception $e ) {
-            //directory does not exists
-            \Log::doJsonLog( "Directory $path does not exists. If you are creating a project check the source language." );
-        }
-
-        foreach ( $files as $key => $file ) {
-
-            if ( $file->isDot() ) {
-                continue;
-            }
-
-            //get the remaining file (it's the only file in dir)
-            $filePath = $path . DIRECTORY_SEPARATOR . $file->getFilename();
-            //no need to loop anymore
-            break;
-
-        }
-
-        return $filePath;
-    }
 
 
     /**
