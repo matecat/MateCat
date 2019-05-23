@@ -436,7 +436,7 @@
             }
         },
         isReadonlySegment : function( segment ) {
-            return ( (segment.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
+            return ( segment.readonly == 'true' ||UI.body.hasClass('archived')) ;
         },
 
         isUnlockedSegment: function ( segment ) {
