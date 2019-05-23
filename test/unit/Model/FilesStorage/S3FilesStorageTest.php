@@ -1,6 +1,7 @@
 <?php
 
 use FilesStorage\S3FilesStorage;
+use SimpleS3\Client;
 
 class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
@@ -9,33 +10,21 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
      */
     private $fs;
 
+    /**
+     * @var Client
+     */
+    private $s3Client;
+
     public function setUp() {
         parent::setUp();
 
-        $this->fs = new S3FilesStorage();
-    }
-
-//    public function tearDown() {
-//        parent::tearDown();
-//
-//        $this->fs->getS3Client()->deleteBucket();
-//    }
-
-    /**
-     * @test
-     */
-    public function test_get_cache_package_bucket_name() {
-        $filePath = __DIR__ . '/../../../support/files/docx/WhiteHouse.docx';
-        $sha1     = sha1_file( $filePath );
-        $lang     = 'it-IT';
-
-        $cacheBucketName = $this->fs->getCachePackageBucketName( $sha1, $lang );
-
-        $this->assertTrue( strlen( $cacheBucketName ) === 62 );
+        $this->fs       = new S3FilesStorage();
+        $this->s3Client = S3FilesStorage::getStaticS3Client();
     }
 
     /**
      * @test
+     * @throws Exception
      */
     public function test_creation_of_cache_package_into_a_bucket() {
         $filePath        = __DIR__ . '/../../../support/files/txt/hello.txt';
@@ -48,19 +37,13 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         $lang = 'it-IT';
 
         $this->assertTrue( $this->fs->makeCachePackage( $sha1, $lang, $filePath, $xliffPathTarget ) );
+        $this->assertEquals( 'orig/hello.txt', $this->fs->getOriginalFromCache( $sha1, $lang ) );
+        $this->assertEquals( 'work/hello.txt.sdlxliff', $this->fs->getXliffFromCache( $sha1, $lang ) );
     }
 
     /**
      * @test
-     */
-    public function test_get_project_bucket_name() {
-        $projectBucketName = $this->fs->getProjectBucketName( '20191212', 13 );
-
-        $this->assertEquals( 'matecat-project-20191212.13', $projectBucketName );
-    }
-
-    /**
-     * @test
+     * @throws Exception
      */
     public function test_copying_a_file_from_cache_package_bucket_to_file_bucket() {
         $filePath     = __DIR__ . '/../../../support/files/txt/hello.txt';
@@ -70,19 +53,13 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         $idFile       = 13;
 
         $this->assertTrue( $this->fs->moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $filePath ) );
+        $this->assertEquals( 'orig/hello.txt', $this->fs->getOriginalFromFileDir( $idFile, $dateHashPath ) );
+        $this->assertEquals( 'xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir( $idFile, $dateHashPath ) );
     }
 
     /**
      * @test
-     */
-    public function test_get_queue_bucket_name() {
-        $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
-
-        $this->assertEquals( 'matecat-queue-cad1b6e1-b312-8713-e8c3-97145410fd37', S3FilesStorage::getQueueBucketName( $uploadSession ) );
-    }
-
-    /**
-     * @test
+     * @throws Exception
      */
     public function test_uploading_files_from_queue_folder_to_queue_bucket() {
 
@@ -98,5 +75,47 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         copy( $source, $destination );
 
         S3FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadSession );
+
+        $queueBucketName = 'matecat-queue-' . str_replace( [ '{', '}' ], '', strtolower( urldecode( $uploadSession ) ) );
+        $items = $this->s3Client->getItemsInABucket($queueBucketName);
+
+        $this->assertCount(1, $items);
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function test_handling_files_in_fast_analysys_bucket() {
+
+        $id_project        = 13;
+        $segments_metadata = [
+                'meta' => [
+                        'node-1' => [
+                                'value-1,',
+                                'value-2,',
+                                'value-3,',
+                                'value-4,',
+                        ],
+                        'node-2' => [
+                                'value-1,',
+                                'value-2,',
+                                'value-3,',
+                                'value-4,',
+                        ],
+                        'node-3' => [
+                                'value-1,',
+                                'value-2,',
+                                'value-3,',
+                                'value-4,',
+                        ],
+                ]
+        ];
+
+        S3FilesStorage::storeFastAnalysisFile( $id_project, $segments_metadata );
+
+        $this->assertEquals( S3FilesStorage::getFastAnalysisData( $id_project ), $segments_metadata );
+
+        S3FilesStorage::deleteFastAnalysisFile( $id_project );
     }
 }

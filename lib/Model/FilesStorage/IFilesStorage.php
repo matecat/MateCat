@@ -2,7 +2,25 @@
 
 namespace FilesStorage;
 
+/**
+ * Interface IFilesStorage
+ *
+ * INDEX
+ * -------------------------------------------------------------------------
+ * 1. CACHE PACKAGE
+ * 2. PROJECT
+ * 3. QUEUE
+ * 4. FAST ANALYSIS
+ *
+ * @package FilesStorage
+ */
 interface IFilesStorage {
+
+    /**
+     **********************************************************************************************
+     * 1. CACHE PACKAGE
+     **********************************************************************************************
+     */
 
     /**
      * Creates the Cache Package.
@@ -27,13 +45,28 @@ interface IFilesStorage {
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath );
 
     /**
-     * Moves the files from upload session folder to queue path
+     * Rebuild the filename that will be taken from disk in the cache directory
      *
-     * @param $uploadSession
+     * @param $hash
+     * @param $lang
      *
      * @return mixed
      */
-    public static function moveFileFromUploadSessionToQueuePath( $uploadSession );
+    public function getOriginalFromCache( $hash, $lang );
+
+    /**
+     * @param $hash
+     * @param $lang
+     *
+     * @return mixed
+     */
+    public function getXliffFromCache( $hash, $lang );
+
+    /**
+     **********************************************************************************************
+     * 2. PROJECT
+     **********************************************************************************************
+     */
 
     /**
      * Creates the files folder.
@@ -54,4 +87,70 @@ interface IFilesStorage {
      * @return mixed
      */
     public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null );
+
+    /**
+     * Rebuild the filename that will be taken from disk in files directory
+     *
+     * @param $id
+     *
+     * @return bool|string
+     */
+    public function getOriginalFromFileDir( $id, $dateHashPath );
+
+    /**
+     * @param $id
+     * @param $dateHashPath
+     *
+     * @return mixed
+     */
+    public function getXliffFromFileDir( $id, $dateHashPath );
+
+    /**
+     **********************************************************************************************
+     * 3. QUEUE
+     **********************************************************************************************
+     */
+
+    /**
+     * Moves the files from upload session folder to queue path
+     *
+     * @param $uploadSession
+     *
+     * @return mixed
+     */
+    public static function moveFileFromUploadSessionToQueuePath( $uploadSession );
+
+    /**
+     **********************************************************************************************
+     * 4. FAST ANALYSIS
+     **********************************************************************************************
+     */
+
+    /**
+     * Stores a serialized file to fast analysis storage
+     *
+     * @param       $id_project
+     * @param array $segments_metadata
+     *
+     * @return mixed
+     */
+    public static function storeFastAnalysisFile( $id_project, Array $segments_metadata = [] );
+
+    /**
+     * Gets a serialized file from fast analysis storage
+     *
+     * @param $id_project
+     *
+     * @return mixed
+     */
+    public static function getFastAnalysisData( $id_project );
+
+    /**
+     * Deletes a serialized file from fast analysis storage
+     *
+     * @param $id_project
+     *
+     * @return mixed
+     */
+    public static function deleteFastAnalysisFile( $id_project );
 }

@@ -2,10 +2,50 @@
 
 namespace FilesStorage;
 
+/**
+ * Class FsFilesStorage
+ *
+ * INDEX
+ * -------------------------------------------------------------------------
+ * 1. CACHE PACKAGE
+ * 2. PROJECT
+ * 3. QUEUE
+ * 4. FAST ANALYSIS
+ * 5. GENERAL METHODS
+ *
+ * @package FilesStorage
+ */
 class FsFilesStorage extends AbstractFilesStorage
 {
     const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
 
+    /**
+     **********************************************************************************************
+     * 1. CACHE PACKAGE
+     **********************************************************************************************
+     */
+
+
+
+    /**
+     **********************************************************************************************
+     * 2. PROJECT
+     **********************************************************************************************
+     */
+
+
+
+    /**
+     **********************************************************************************************
+     * 3. QUEUE
+     **********************************************************************************************
+     */
+
+    /**
+     * @param $uploadSession
+     *
+     * @return mixed|void
+     */
     public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
 
         $destination = \INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
@@ -103,6 +143,14 @@ class FsFilesStorage extends AbstractFilesStorage
         return $this->getSingleFileInPath( $path );
     }
 
+    /**
+     * @param      $hash
+     * @param      $lang
+     * @param bool $originalPath
+     * @param      $xliffPath
+     *
+     * @return bool|mixed
+     */
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
 
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
@@ -352,29 +400,14 @@ class FsFilesStorage extends AbstractFilesStorage
      * Cache Handling Methods --- END
      */
 
-    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ) {
-        @list( $shasum, $srcLang ) = explode( "|", $linkFile );
-
-        $iterator = new \DirectoryIterator( $uploadDirPath );
-
-        foreach ( $iterator as $fileInfo ) {
-            if ( $fileInfo->isDot() || $fileInfo->isDir() ) {
-                continue;
-            }
-
-            // remove only the wrong languages, the same code|language must be
-            // retained because of the file name append
-            if ( $fileInfo->getFilename() != $linkFile &&
-                    stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
-
-                unlink( $fileInfo->getPathname() );
-                \Log::doJsonLog( "Deleted Hash " . $fileInfo->getPathname() );
-
-            }
-        }
-
-    }
-
+    /**
+     * @param      $dateHashPath
+     * @param      $lang
+     * @param      $idFile
+     * @param null $newFileName
+     *
+     * @return mixed|void
+     */
     public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
 
         list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
@@ -451,81 +484,6 @@ class FsFilesStorage extends AbstractFilesStorage
 
     }
 
-
-
-
-    /**
-     *
-     * Used when we get info to download the original file
-     *
-     * @param $id_job
-     * @param $id_file
-     * @param $password
-     *
-     * @return array
-     */
-    public function getOriginalFilesForJob( $id_job, $id_file, $password ) {
-
-        $where_id_file = "";
-        if ( !empty( $id_file ) ) {
-            $where_id_file = " and fj.id_file=$id_file";
-        }
-        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file, create_date from files_job fj
-			inner join files f on f.id=fj.id_file
-			inner join jobs j on j.id=fj.id_job
-			where fj.id_job=$id_job $where_id_file and j.password='$password'";
-
-        $db      = Database::obtain();
-        $results = $db->fetch_array( $query );
-
-        foreach ( $results as $k => $result ) {
-            //try fetching from files dir
-            $filePath                            = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
-            $results[ $k ][ 'originalFilePath' ] = $filePath;
-        }
-
-        return $results;
-    }
-
-    /**
-     * Used when we take the files after the translation ( Download )
-     *
-     * @param $id_job
-     * @param $id_file
-     *
-     * @return array
-     */
-    public function getFilesForJob( $id_job, $id_file ) {
-
-        $where_id_file = "";
-
-        if ( !empty( $id_file ) ) {
-            $where_id_file = " and id_file=$id_file";
-        }
-
-        $query = "SELECT fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file 
-            FROM files_job fj
-            INNER JOIN files f ON f.id=fj.id_file
-            JOIN jobs AS j ON j.id=fj.id_job
-            WHERE fj.id_job = $id_job $where_id_file 
-            GROUP BY id_file";
-
-        $db      = Database::obtain();
-        $results = $db->fetch_array( $query );
-
-        foreach ( $results as $k => $result ) {
-            //try fetching from files dir
-            $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
-
-            $results[ $k ][ 'originalFilePath' ] = $originalPath;
-
-            //note that we trust this to succeed on first try since, at this stage, we already built the file package
-            $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
-        }
-
-        return $results;
-    }
-
     /**
      * Gets the file path of the temporary uploaded zip, when the project is not
      * yet created. Useful to perform prelimiray validation on the project.
@@ -569,6 +527,12 @@ class FsFilesStorage extends AbstractFilesStorage
     private function link( $source, $destination ) {
         return link( $source, $destination );
     }
+
+    /**
+     **********************************************************************************************
+     * 4. FAST ANALYSIS
+     **********************************************************************************************
+     */
 
     /**
      * @param array $segments_metadata

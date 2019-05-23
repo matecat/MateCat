@@ -2,6 +2,17 @@
 
 namespace FilesStorage;
 
+/**
+ * Class FsFilesStorage
+ *
+ * INDEX
+ * -------------------------------------------------------------------------
+ * 1. FILE HANDLING ON FILE SYSTEM
+ * 2. CACHE PACKAGE HELPERS
+ * 3. PROJECT
+ *
+ * @package FilesStorage
+ */
 abstract class AbstractFilesStorage implements IFilesStorage {
     protected $filesDir;
     protected $cacheDir;
@@ -31,7 +42,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
 
     /**
      **********************************************************************************************
-     * FILE HANDLING ON FILE SYSTEM
+     * 1. FILE HANDLING ON FILE SYSTEM
      **********************************************************************************************
      */
 
@@ -133,8 +144,36 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
+     * Delete a hash from upload directory
+     *
+     * @param $uploadDirPath
+     * @param $linkFile
+     */
+    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ) {
+        @list( $shasum, $srcLang ) = explode( "|", $linkFile );
+
+        $iterator = new \DirectoryIterator( $uploadDirPath );
+
+        foreach ( $iterator as $fileInfo ) {
+            if ( $fileInfo->isDot() || $fileInfo->isDir() ) {
+                continue;
+            }
+
+            // remove only the wrong languages, the same code|language must be
+            // retained because of the file name append
+            if ( $fileInfo->getFilename() != $linkFile &&
+                    stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
+
+                unlink( $fileInfo->getPathname() );
+                \Log::doJsonLog( "Deleted Hash " . $fileInfo->getPathname() );
+
+            }
+        }
+    }
+
+    /**
      **********************************************************************************************
-     * CACHE PACKAGE HELPERS
+     * 2. CACHE PACKAGE HELPERS
      **********************************************************************************************
      */
 
@@ -155,5 +194,83 @@ abstract class AbstractFilesStorage implements IFilesStorage {
 
         return $cacheTree;
 
+    }
+
+    /**
+     **********************************************************************************************
+     * 3. PROJECT
+     **********************************************************************************************
+     */
+
+    /**
+     *
+     * Used when we get info to download the original file
+     *
+     * @param $id_job
+     * @param $id_file
+     * @param $password
+     *
+     * @return array
+     */
+    public function getOriginalFilesForJob( $id_job, $id_file, $password ) {
+
+        $where_id_file = "";
+        if ( !empty( $id_file ) ) {
+            $where_id_file = " and fj.id_file=$id_file";
+        }
+        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file, create_date from files_job fj
+			inner join files f on f.id=fj.id_file
+			inner join jobs j on j.id=fj.id_job
+			where fj.id_job=$id_job $where_id_file and j.password='$password'";
+
+        $db      = \Database::obtain();
+        $results = $db->fetch_array( $query );
+
+        foreach ( $results as $k => $result ) {
+            //try fetching from files dir
+            $filePath                            = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
+            $results[ $k ][ 'originalFilePath' ] = $filePath;
+        }
+
+        return $results;
+    }
+
+    /**
+     * Used when we take the files after the translation ( Download )
+     *
+     * @param $id_job
+     * @param $id_file
+     *
+     * @return array
+     */
+    public function getFilesForJob( $id_job, $id_file ) {
+
+        $where_id_file = "";
+
+        if ( !empty( $id_file ) ) {
+            $where_id_file = " and id_file=$id_file";
+        }
+
+        $query = "SELECT fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file 
+            FROM files_job fj
+            INNER JOIN files f ON f.id=fj.id_file
+            JOIN jobs AS j ON j.id=fj.id_job
+            WHERE fj.id_job = $id_job $where_id_file 
+            GROUP BY id_file";
+
+        $db      = \Database::obtain();
+        $results = $db->fetch_array( $query );
+
+        foreach ( $results as $k => $result ) {
+            //try fetching from files dir
+            $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
+
+            $results[ $k ][ 'originalFilePath' ] = $originalPath;
+
+            //note that we trust this to succeed on first try since, at this stage, we already built the file package
+            $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
+        }
+
+        return $results;
     }
 }
