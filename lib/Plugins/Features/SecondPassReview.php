@@ -64,6 +64,13 @@ class SecondPassReview extends BaseFeature {
         return $sourcePage ;
     }
 
+    public function filterStatsResponse( $inputStats, $options ) {
+        /** @var Chunks_ChunkStruct $chunk */
+        $chunk = $options['chunk'] ;
+        $chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([ [ $chunk->id, $chunk->password ] ] );
+
+        return SecondPassReview\Utils::formatStats( $inputStats, $chunkReviews ) ;
+    }
 
     /**
      *
