@@ -135,11 +135,9 @@ class SegmentTranslationEventModel  {
         return $this->translation;
     }
 
-    protected function _getPriorSourcePageCode() {
-        $this->getPriorEvent();
-        return $this->prior_event == null ? null : $this->prior_event->source_page ;
-    }
-
+    /**
+     * @return SegmentTranslationEventStruct|int|null
+     */
     public function getPriorEvent() {
         if ( $this->prior_event === -1 ) {
             $this->prior_event = ( new SegmentTranslationEventDao() )->getLatestEventForSegment(

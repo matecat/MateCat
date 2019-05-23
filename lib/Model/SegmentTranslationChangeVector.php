@@ -85,20 +85,41 @@ class SegmentTranslationChangeVector {
     }
 
     /**
-     * This method returns the list of source pages to invalidate in regards of reviewed words count.
+     * Returns 1 if source page is moving up  0 if it's not changing, -1 if it's moving down.
      *
-     * If a segment moves from R2 to R1 this returns [3]   ( = source page of R2 ).
-     * If a segment moves from R1 to TR this returns [3,2] ( = source pages of R2 and R1 ).
+     * @return int
+     */
+    public function getSourcePageDirection() {
+        $originEvent      = $this->eventModel->getPriorEvent();
+        $destinationEvent = $this->eventModel->getCurrentEvent();
+
+        return $originEvent->source_page < $destinationEvent->source_page ? 1  : (
+            $originEvent->source_page == $destinationEvent->source_page ? null : -1
+        );
+    }
+
+    /**
+     * This method returns the source pages span including the translation source page.
      *
      * @return array
      */
-    function getRollbackRevisionsSpan() {
-        $source = $this->eventModel->getPriorEvent()->source_page ;
-        $dest   = $this->eventModel->getCurrentEvent()->source_page ;
+    public function sourcePagesSpan() {
+        if ( $this->getSourcePageDirection() === 1 ) {
+            $min = $this->eventModel->getPriorEvent()->source_page ;
+            $max = $this->eventModel->getCurrentEvent()->source_page ;
+        }
+        elseif ($this->getSourcePageDirection() === -1 ) {
+            $min = $this->eventModel->getCurrentEvent()->source_page ;
+            $max = $this->eventModel->getPriorEvent()->source_page ;
+        }
+        else {
+            return [];
+        }
+
         $list   = [] ;
 
-        while( $source > $dest && $source > Constants::SOURCE_PAGE_TRANSLATE ) {
-            $list[] = $source-- ;
+        while( $max >= $min ) {
+            $list[] = $max-- ;
         }
         return $list ;
     }
