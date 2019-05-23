@@ -260,6 +260,8 @@ class SearchModel {
     }
 
     protected function _loadSearchInTargetQuery(){
+        $ste_join  = $this->_SteJoinInSegments('st.id_segment');
+        $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT  st.id_segment as id, sum(
@@ -272,6 +274,7 @@ class SearchModel {
 					) ) / LENGTH('{$this->queryParams->target}') )
 			) AS count
 			FROM segment_translations st
+			$ste_join
 			WHERE st.id_job = {$this->queryParams->job}
 		    AND st.translation REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
@@ -285,6 +288,7 @@ class SearchModel {
                             ) ) 
                         ) / LENGTH('{$this->queryParams->target}') 
 			) > 0
+			$ste_where
 			GROUP BY st.id_segment WITH ROLLUP
 		";
 
@@ -293,6 +297,8 @@ class SearchModel {
     }
 
     protected function _loadSearchInSourceQuery(){
+        $ste_join  = $this->_SteJoinInSegments();
+        $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT s.id, sum(
@@ -307,7 +313,9 @@ class SearchModel {
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
+            $ste_join
 			WHERE fj.id_job = {$this->queryParams->job}
+			$ste_where
 		    AND s.segment 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
@@ -321,10 +329,14 @@ class SearchModel {
 
     protected function _loadSearchCoupledQuery(){
 
+        $ste_join  = $this->_SteJoinInSegments();
+        $ste_where = $this->_SteWhere();
+
         $query = "
         SELECT st.id_segment as id
 			FROM segment_translations as st
 			JOIN segments as s on id = id_segment
+			$ste_join
 			WHERE st.id_job = {$this->queryParams->job}
 		    AND st.translation 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
@@ -348,6 +360,7 @@ class SearchModel {
 			) != LENGTH( st.translation )
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
+			$ste_where
 		";
 
         return $query;
@@ -355,11 +368,15 @@ class SearchModel {
     }
 
     protected function _loadSearchStatusOnlyQuery(){
+        $ste_join  = $this->_SteJoinInSegments('st.id_segment');
+        $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT st.id_segment as id
 			FROM segment_translations as st
+			$ste_join
 			WHERE st.id_job = {$this->queryParams->job}
+			$ste_where
 		    {$this->queryParams->where_status}
 		";
 
@@ -368,12 +385,17 @@ class SearchModel {
     }
 
     protected function _loadReplaceAllQuery(){
+        $ste_join  = $this->_SteJoinInSegments();
+        $ste_where = $this->_SteWhere();
 
         $sql = "
         SELECT id_segment, id_job, translation
             FROM segment_translations st
             JOIN jobs ON st.id_job = jobs.id AND password = '{$this->queryParams->password}' AND jobs.id = {$this->queryParams->job}
             JOIN segments as s ON st.id_segment = s.id 
+
+            $ste_join
+
             WHERE id_job = {$this->queryParams->job}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
             AND st.status != 'NEW'
@@ -381,15 +403,56 @@ class SearchModel {
             	REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
             {$this->queryParams->where_status}
+
+            $ste_where
+
         ";
 
         if ( !empty( $this->queryParams->regexpEscapedSrc ) ) {
             $sql .= " AND s.segment REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}' ";
         }
-
         return $sql;
+    }
 
+    /**
+     * Sometimes queries make use of s alias or segments, sometimes they make use of st for segment_translations.
+     *
+     * @param string $joined_field
+     *
+     * @return string
+     */
+    protected function _SteJoinInSegments( $joined_field = 's.id') {
+        if ( !$this->queryParams->sourcePage ) {
+            return '' ;
+        }
+        return "
+            LEFT JOIN (
+                SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
+                SELECT max(id) FROM segment_translation_events
+                    WHERE id_job = {$this->queryParams->job}
+                    GROUP BY id_segment ) ORDER BY id_segment
+            ) ste ON ste.ste_id_segment = $joined_field "  ;
+    }
+
+    /**
+     * @return string
+     */
+    protected function _SteWhere() {
+        if ( !$this->queryParams->sourcePage ) {
+            return '' ;
+        }
+
+        /**
+         * This variable $first_revision_source_code is necessary because in case of first revision
+         * segment_translations_events may not have records
+         * for APPROVED segments ( in case of ICE match ). While in second pass reviews or later this should not happen.
+         */
+        $first_revision_source_code = \Constants::SOURCE_PAGE_REVISION ;
+
+        return " AND ( ste.source_page = {$this->queryParams->sourcePage}
+                    OR ( {$this->queryParams->sourcePage} = $first_revision_source_code AND ste.source_page = null )
+               ) " ;
     }
 
 }
