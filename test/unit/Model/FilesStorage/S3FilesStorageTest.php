@@ -36,9 +36,12 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         $sha1 = sha1_file( $filePath );
         $lang = 'it-IT';
 
+        $hashTree = S3FilesStorage::composeCachePath( $sha1 );
+        $prefix   = $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . '.' . $lang;
+
         $this->assertTrue( $this->fs->makeCachePackage( $sha1, $lang, $filePath, $xliffPathTarget ) );
-        $this->assertEquals( 'orig/hello.txt', $this->fs->getOriginalFromCache( $sha1, $lang ) );
-        $this->assertEquals( 'work/hello.txt.sdlxliff', $this->fs->getXliffFromCache( $sha1, $lang ) );
+        $this->assertEquals( $prefix . '/orig/hello.txt', $this->fs->getOriginalFromCache( $sha1, $lang ) );
+        $this->assertEquals( $prefix . '/work/hello.txt.sdlxliff', $this->fs->getXliffFromCache( $sha1, $lang ) );
     }
 
     /**
@@ -53,8 +56,8 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         $idFile       = 13;
 
         $this->assertTrue( $this->fs->moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $filePath ) );
-        $this->assertEquals( 'orig/hello.txt', $this->fs->getOriginalFromFileDir( $idFile, $dateHashPath ) );
-        $this->assertEquals( 'xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir( $idFile, $dateHashPath ) );
+        $this->assertEquals( '20191212/13/orig/hello.txt', $this->fs->getOriginalFromFileDir( $idFile, $dateHashPath ) );
+        $this->assertEquals( '20191212/13/xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir( $idFile, $dateHashPath ) );
     }
 
     /**
@@ -76,10 +79,9 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
         S3FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadSession );
 
-        $queueBucketName = 'matecat-queue-' . str_replace( [ '{', '}' ], '', strtolower( urldecode( $uploadSession ) ) );
-        $items = $this->s3Client->getItemsInABucket($queueBucketName);
+        $items = $this->s3Client->getItemsInABucket( S3FilesStorage::QUEUE_BUCKET );
 
-        $this->assertCount(1, $items);
+        $this->assertCount( 1, $items );
     }
 
     /**

@@ -25,124 +25,6 @@ class FsFilesStorage extends AbstractFilesStorage
      **********************************************************************************************
      */
 
-
-
-    /**
-     **********************************************************************************************
-     * 2. PROJECT
-     **********************************************************************************************
-     */
-
-
-
-    /**
-     **********************************************************************************************
-     * 3. QUEUE
-     **********************************************************************************************
-     */
-
-    /**
-     * @param $uploadSession
-     *
-     * @return mixed|void
-     */
-    public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
-
-        $destination = \INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
-        mkdir( $destination, 0755 );
-        foreach (
-                $iterator = new \RecursiveIteratorIterator(
-                        new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, \RecursiveDirectoryIterator::SKIP_DOTS ),
-                        \RecursiveIteratorIterator::SELF_FIRST ) as $item
-        ) {
-            if ( $item->isDir() ) {
-                mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
-            } else {
-                copy( $item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
-            }
-        }
-
-        \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
-
-    }
-
-    /**
-     * Rebuild the filename that will be taken from disk in the cache directory
-     *
-     * @param $hash
-     * @param $lang
-     *
-     * @return bool|string
-     */
-    public function getOriginalFromCache( $hash, $lang ) {
-
-        //compose path
-        $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
-
-        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
-
-        //return file
-        $filePath = $this->getSingleFileInPath( $path );
-
-        //an unconverted xliff is never stored in orig dir; look for it in xliff dir
-        if ( !$filePath ) {
-            $filePath = $this->getXliffFromCache( $hash, $lang );
-        }
-
-        return $filePath;
-    }
-
-    /**
-     * Rebuild the filename that will be taken from disk in files directory
-     *
-     * @param $id
-     *
-     * @return bool|string
-     */
-    public function getOriginalFromFileDir( $id, $dateHashPath ) {
-
-        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
-
-        //compose path
-        $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
-
-        //return file
-        $filePath = $this->getSingleFileInPath( $path );
-
-        //an unconverted xliff is never stored in orig dir; look for it in xliff dir
-        if ( !$filePath ) {
-            $filePath = $this->getXliffFromFileDir( $id, $dateHashPath );
-        }
-
-        return $filePath;
-    }
-
-    /*
-     * Cache Handling Methods --- START
-     */
-
-    public function getXliffFromCache( $hash, $lang ) {
-
-        $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
-
-        //compose path
-        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
-
-        //return file
-        return $this->getSingleFileInPath( $path );
-    }
-
-    public function getXliffFromFileDir( $id, $dateHashPath ) {
-
-        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
-
-        //compose path
-        $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "xliff";
-
-        //return file
-        return $this->getSingleFileInPath( $path );
-    }
-
     /**
      * @param      $hash
      * @param      $lang
@@ -219,6 +101,49 @@ class FsFilesStorage extends AbstractFilesStorage
 
         return true;
 
+    }
+
+    /**
+     * Rebuild the filename that will be taken from disk in the cache directory
+     *
+     * @param $hash
+     * @param $lang
+     *
+     * @return bool|string
+     */
+    public function getOriginalFromCache( $hash, $lang ) {
+
+        //compose path
+        $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
+
+        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
+
+        //return file
+        $filePath = $this->getSingleFileInPath( $path );
+
+        //an unconverted xliff is never stored in orig dir; look for it in xliff dir
+        if ( !$filePath ) {
+            $filePath = $this->getXliffFromCache( $hash, $lang );
+        }
+
+        return $filePath;
+    }
+
+    /**
+     * @param $hash
+     * @param $lang
+     *
+     * @return bool|mixed|string
+     */
+    public function getXliffFromCache( $hash, $lang ) {
+
+        $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
+
+        //compose path
+        $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
+
+        //return file
+        return $this->getSingleFileInPath( $path );
     }
 
     /**
@@ -396,8 +321,10 @@ class FsFilesStorage extends AbstractFilesStorage
         return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, $realFileName . "\n", FILE_APPEND | LOCK_EX );
     }
 
-    /*
-     * Cache Handling Methods --- END
+    /**
+     **********************************************************************************************
+     * 2. PROJECT
+     **********************************************************************************************
      */
 
     /**
@@ -485,6 +412,79 @@ class FsFilesStorage extends AbstractFilesStorage
     }
 
     /**
+     * Rebuild the filename that will be taken from disk in files directory
+     *
+     * @param $id
+     *
+     * @return bool|string
+     */
+    public function getOriginalFromFileDir( $id, $dateHashPath ) {
+
+        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+
+        //compose path
+        $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "orig";
+
+        //return file
+        $filePath = $this->getSingleFileInPath( $path );
+
+        //an unconverted xliff is never stored in orig dir; look for it in xliff dir
+        if ( !$filePath ) {
+            $filePath = $this->getXliffFromFileDir( $id, $dateHashPath );
+        }
+
+        return $filePath;
+    }
+
+    /**
+     * @param $id
+     * @param $dateHashPath
+     *
+     * @return bool|mixed|string
+     */
+    public function getXliffFromFileDir( $id, $dateHashPath ) {
+
+        list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
+
+        //compose path
+        $path = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . "xliff";
+
+        //return file
+        return $this->getSingleFileInPath( $path );
+    }
+
+    /**
+     **********************************************************************************************
+     * 3. QUEUE
+     **********************************************************************************************
+     */
+
+    /**
+     * @param $uploadSession
+     *
+     * @return mixed|void
+     */
+    public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
+
+        $destination = \INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
+        mkdir( $destination, 0755 );
+        foreach (
+                $iterator = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, \RecursiveDirectoryIterator::SKIP_DOTS ),
+                        \RecursiveIteratorIterator::SELF_FIRST ) as $item
+        ) {
+            if ( $item->isDir() ) {
+                mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+            } else {
+                copy( $item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+            }
+        }
+
+        \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
+
+    }
+
+    /**
      * Gets the file path of the temporary uploaded zip, when the project is not
      * yet created. Useful to perform prelimiray validation on the project.
      * This function was created to perform validations on the TKIT zip file
@@ -504,7 +504,7 @@ class FsFilesStorage extends AbstractFilesStorage
 
         foreach ( $files as $file ) {
             \Log::doJsonLog( $file );
-            if ( strpos( $file, FsFilesStorage::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
+            if ( strpos( $file, static::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
                 $zip_name = $file;
             }
         }
@@ -522,10 +522,6 @@ class FsFilesStorage extends AbstractFilesStorage
         } else {
             return \INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file;
         }
-    }
-
-    private function link( $source, $destination ) {
-        return link( $source, $destination );
     }
 
     /**
@@ -575,9 +571,18 @@ class FsFilesStorage extends AbstractFilesStorage
         return unlink( \INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser" );
     }
 
+    /**
+     **********************************************************************************************
+     * 5. GENERAL METHODS
+     **********************************************************************************************
+     */
+
     public function getZipDir() {
         return $this->zipDir;
     }
 
+    private function link( $source, $destination ) {
+        return link( $source, $destination );
+    }
 }
 
