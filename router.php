@@ -60,13 +60,11 @@ $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception 
         $klein->response()->code( 503 );
 //        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
         \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-        \Log::doJsonLog( "Error: {$exception->getMessage()} " );
-        \Log::doJsonLog( $exception->getTrace() );
+        \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
     } catch ( Exception $e ){
         $klein->response()->code( 500 );
         \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-        \Log::doJsonLog( "Error: {$exception->getMessage()} " );
-        \Log::doJsonLog( $exception->getTrace() );
+        \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
     }
 
 } );

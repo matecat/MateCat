@@ -115,15 +115,17 @@ abstract class viewController extends controller {
      * @see controller::finalize
      *
      * @return mixed|void
+     * @throws Exception
      */
     public function finalize() {
-        $this->setInitialTemplateVars();
 
-        $this->setTemplateVars();
+        try {
+            $this->setInitialTemplateVars();
+            $this->setTemplateVars();
+            $this->featureSet->run( 'appendDecorators', $this, $this->template );
+            $this->setTemplateFinalVars();
+        } catch ( Exception $ignore ){}
 
-        $this->featureSet->run( 'appendDecorators', $this, $this->template );
-
-        $this->setTemplateFinalVars();
 
         ob_get_contents();
         ob_get_clean();
@@ -138,6 +140,8 @@ abstract class viewController extends controller {
         echo $this->template->execute();
 
         $this->logPageCall();
+
+        if( isset( $ignore ) ) throw $ignore;
 
     }
 

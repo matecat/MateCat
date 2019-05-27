@@ -15,8 +15,9 @@ use SubFiltering\Commons\AbstractHandler;
 class SprintfToPH extends AbstractHandler {
 
     public function transform( $segment ) {
-        //
-        preg_match_all( '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?(?:[b-fiosuxX]))/', $segment, $vars, PREG_SET_ORDER );
+        // Octal parsing is disabled due to Hungarian percentages 20%-os
+        // preg_match_all( '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:0|\'[^$])?(?:-)?(?:\d+)?(?:\.(?:\d+))?(?:[b-fiosuxX]))/', $segment, $vars, PREG_SET_ORDER );
+        preg_match_all( '/(?:\x25\x25)|(\x25(?:(?:[1-9]\d*)\$|\((?:[^\)]+)\))?(?:\+)?(?:-)?(?:0|\'[^$])?(?:\d+)?(?:\.(?:\d+))?(?:[b-fisuxX]))/', $segment, $vars, PREG_SET_ORDER );
         foreach ( $vars as $pos => $variable ) {
             //replace subsequent elements excluding already encoded
             $segment = preg_replace(
