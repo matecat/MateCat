@@ -13,11 +13,6 @@ class downloadOriginalController extends downloadController {
     private $id_file;
     private $id_project;
 
-    /**
-     * @var AbstractFilesStorage
-     */
-    protected $files_storage;
-
     public function __construct() {
 
         $filterArgs = array(
@@ -46,15 +41,12 @@ class downloadOriginalController extends downloadController {
         $this->id_job        = $__postInput[ 'id_job' ];
         $this->download_type = $__postInput[ 'download_type' ];
         $this->password      = $__postInput[ 'password' ];
-
-        $this->files_storage = FilesStorageFactory::create();
-
     }
 
     public function doAction() {
 
         //get storage object
-        $fs        = $this->files_storage;
+        $fs        = FilesStorageFactory::create();
         $files_job = $fs->getOriginalFilesForJob( $this->id_job, $this->id_file, $this->password );
 
         //take the project ID and creation date, array index zero is good, all id are equals
@@ -98,7 +90,7 @@ class downloadOriginalController extends downloadController {
         if ( count( $output_content ) > 1 ) {
 
             $this->setFilename( $this->getDefaultFileName( $this->project ) );
-            $pathInfo        = $fs::pathinfo_fix( $this->_filename );
+            $pathInfo        = AbstractFilesStorage::pathinfo_fix( $this->_filename );
 
             if ( $pathInfo[ 'extension' ] != 'zip' ) {
                 $this->setFilename( $pathInfo[ 'basename' ] . ".zip" );

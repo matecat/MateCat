@@ -83,11 +83,6 @@ class ProjectManager {
     protected $filter;
 
     /**
-     * @var AbstractFilesStorage
-     */
-    protected $files_storage;
-
-    /**
      * ProjectManager constructor.
      *
      * @param ArrayObject|null $projectStructure
@@ -191,9 +186,6 @@ class ProjectManager {
                 $this->projectStructure[ 'array_files' ],
                 $this->projectStructure
         );
-
-        $this->files_storage = FilesStorageFactory::create();
-
     }
 
     protected function _log( $_msg ) {
@@ -557,7 +549,7 @@ class ProjectManager {
             ];
         }
 
-        $fs = $this->files_storage;
+        $fs = FilesStorageFactory::create();
 
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
@@ -565,7 +557,7 @@ class ProjectManager {
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
-            $hashFile = $fs::basename_fix( $linkFile );
+            $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
             $hashFile = explode( '|', $hashFile );
 
             //use hash and lang to fetch file from package
@@ -588,7 +580,7 @@ class ProjectManager {
                     throw new Exception( "File not found on server after upload.", -6 );
                 }
 
-                $info = $fs::pathinfo_fix( $cachedXliffFilePathName );
+                $info = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
 
                 if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
                     throw new Exception( "Failed to find converted Xliff", -3 );
@@ -832,7 +824,7 @@ class ProjectManager {
 
         }
 
-        $fs = $this->files_storage;
+        $fs = FilesStorageFactory::create();
         $fs::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
 
         //free memory
@@ -881,8 +873,7 @@ class ProjectManager {
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $fs = $this->files_storage;
-            $ext = $fs::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+            $ext = AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
 
             $file = new stdClass();
             if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
@@ -928,8 +919,6 @@ class ProjectManager {
      */
     protected function _loopForTMXLoadStatus() {
 
-        $fs = $this->files_storage;
-
         //TMX Management
 
         /****************/
@@ -937,7 +926,7 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $kname => $fileName ) {
 
             //if TMX,
-            if ( 'tmx' == $fs::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+            if ( 'tmx' == AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
 
                 $this->tmxServiceWrapper->setName( $fileName );
 
@@ -1846,7 +1835,6 @@ class ProjectManager {
 
         $yearMonthPath    = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
-        $fs = $this->files_storage;
 
         //return structure
         $filesStructure = [];
@@ -1856,7 +1844,7 @@ class ProjectManager {
         //
         foreach ( $_originalFileNames as $originalFileName ) {
 
-            $mimeType = $fs::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+            $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
             $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
 
             if ( $this->gdriveSession ) {
@@ -1866,6 +1854,7 @@ class ProjectManager {
                 }
             }
 
+            $fs = FilesStorageFactory::create();
             $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
                     $this->projectStructure[ 'source_language' ],

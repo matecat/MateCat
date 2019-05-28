@@ -1,5 +1,6 @@
 <?php
 
+use FilesStorage\AbstractFilesStorage;
 use FilesStorage\S3FilesStorage;
 use SimpleS3\Client;
 

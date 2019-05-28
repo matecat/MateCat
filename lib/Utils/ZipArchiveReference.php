@@ -1,5 +1,6 @@
 <?php
 
+use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 
 /**
@@ -16,13 +17,6 @@ class ZipArchiveReference {
      */
     protected $tempZipFile;
 
-    protected $files_storage;
-
-    public function __construct() {
-        $this->files_storage = FilesStorageFactory::create();
-    }
-
-
     public function __destruct() {
         @unlink( $this->tempZipFile );
     }
@@ -35,8 +29,7 @@ class ZipArchiveReference {
         $internalFileName  = $zip->getNameIndex( $internalFileIndex, ZipArchive::FL_UNCHANGED );
         $filePointer       = $zip->getStream( $internalFileName );
 
-        $fs = $this->files_storage;
-        $extension = $fs::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+        $extension = AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
         $mimeType  = array_keys( array_filter( INIT::$MIME_TYPES, function ( $extensionList ) use ( $extension ) {
             if ( array_search( $extension, $extensionList ) !== false ) {
                 return true;
@@ -94,7 +87,7 @@ class ZipArchiveReference {
      */
     public function getZipFilePointer( Projects_ProjectStruct $project ) {
 
-        $fs    = $this->files_storage;
+        $fs    = FilesStorageFactory::create();
         $files = Files_FileDao::getByProjectId( $project->id, 60 * 60 );
 
         $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[ 0 ]->filename );

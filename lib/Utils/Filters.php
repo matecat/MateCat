@@ -1,6 +1,7 @@
 <?php
 
 // TODO: files should remain on disk, and not copied and transformed in memory several times
+use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 
 class Filters {
@@ -125,9 +126,8 @@ class Filters {
     }
 
     public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation ) {
-        $fs        = FilesStorageFactory::create();
-        $basename  = $fs::pathinfo_fix( $filePath, PATHINFO_FILENAME );
-        $extension = $fs::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
+        $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
+        $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
 
         $data = [
@@ -209,8 +209,6 @@ class Filters {
             return;
         }
 
-        $fs = FilesStorageFactory::create();
-
         $info = [
                 'filters_address'  => @$response[ 'instanceAddress' ],
                 'filters_version'  => @$response[ 'instanceVersion' ],
@@ -226,8 +224,8 @@ class Filters {
                 'job_pwd'          => $jobData[ 'password' ],
                 'job_owner'        => $jobData[ 'owner' ],
                 'source_file_id'   => ( $toXliff ? null : $sourceFileData[ 'id_file' ] ),
-                'source_file_name' => ( $toXliff ? $fs::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
-                'source_file_ext'  => ( $toXliff ? $fs::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
+                'source_file_name' => ( $toXliff ? AbstractFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
+                'source_file_ext'  => ( $toXliff ? AbstractFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
                 'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
         ];
 

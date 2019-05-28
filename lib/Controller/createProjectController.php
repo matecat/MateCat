@@ -37,11 +37,6 @@ class createProjectController extends ajaxController {
 
     public $postInput;
 
-    /**
-     * @var AbstractFilesStorage
-     */
-    protected $files_storage;
-
     public function __construct() {
 
         //SESSION ENABLED
@@ -166,9 +161,6 @@ class createProjectController extends ajaxController {
         if ( $this->userIsLogged ) {
             $this->__setTeam( $this->postInput[ 'id_team' ] );
         }
-
-        $this->files_storage = FilesStorageFactory::create();
-
     }
 
     /**
@@ -284,10 +276,10 @@ class createProjectController extends ajaxController {
 
         $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
         $newArFiles = [];
-        $fs = $this->files_storage;
+        $fs = FilesStorageFactory::create();
 
         foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == $fs::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
                 $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
 

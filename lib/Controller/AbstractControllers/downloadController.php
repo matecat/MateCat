@@ -32,15 +32,6 @@ abstract class downloadController extends controller {
     protected $job;
 
     /**
-     * @var AbstractFilesStorage
-     */
-    protected $files_storage;
-
-    public function __construct() {
-        $this->files_storage = FilesStorageFactory::create();
-    }
-
-    /**
      * @param int $ttl
      *
      * @return Jobs_JobStruct
@@ -67,8 +58,7 @@ abstract class downloadController extends controller {
 
     protected function setMimeType() {
 
-        $fs        = $this->files_storage;
-        $extension = $fs::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
+        $extension = AbstractFilesStorage::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
 
         switch ( strtolower( $extension ) ) {
             case "xlf":
@@ -216,8 +206,7 @@ abstract class downloadController extends controller {
                 $fName = self::forceOcrExtension( $fName );
             }
 
-            $fs     = FilesStorageFactory::create();
-            $nFinfo = $fs::pathinfo_fix( $fName );
+            $nFinfo = AbstractFilesStorage::pathinfo_fix( $fName );
             $_name  = $nFinfo[ 'filename' ];
             if ( strlen( $_name ) < 3 ) {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
@@ -245,8 +234,7 @@ abstract class downloadController extends controller {
 
     public static function forceOcrExtension( $filename ) {
 
-        $fs       = FilesStorageFactory::create();
-        $pathinfo = $fs::pathinfo_fix( $filename );
+        $pathinfo = AbstractFilesStorage::pathinfo_fix( $filename );
 
         switch ( strtolower( $pathinfo[ 'extension' ] ) ) {
             case 'pdf':

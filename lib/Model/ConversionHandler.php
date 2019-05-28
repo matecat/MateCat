@@ -38,21 +38,17 @@ class ConversionHandler {
     public $features;
 
     /**
-     * @var AbstractFilesStorage
+     * ConversionHandler constructor.
      */
-    protected $files_storage;
-
     public function __construct() {
         $this->result = [
                 'code' => 1 //set OK default
         ];
-
-        $this->files_storage = FilesStorageFactory::create();
     }
 
     public function doAction() {
 
-        $fs              = $this->files_storage;
+        $fs              = FilesStorageFactory::create();
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
         $file_path       = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
 
@@ -61,7 +57,7 @@ class ConversionHandler {
             $this->result[ 'errors' ][] = [
                     "code"    => -6,
                     "message" => "Error during upload. Please retry.",
-                    'debug'   => $fs::basename_fix( $this->file_name )
+                    'debug'   => AbstractFilesStorage::basename_fix( $this->file_name )
             ];
 
             return -1;
@@ -95,7 +91,7 @@ class ConversionHandler {
                 $this->result[ 'errors' ][] = [
                         "code"    => -7,
                         "message" => 'Matecat Open-Source does not support ' . ucwords( DetectProprietaryXliff::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
-                        'debug'   => $fs::basename_fix( $this->file_name )
+                        'debug'   => AbstractFilesStorage::basename_fix( $this->file_name )
                 ];
 
                 return -1;
@@ -179,7 +175,7 @@ class ConversionHandler {
                     $this->result[ 'errors' ][]      = [
                             "code"    => -103,
                             "message" => $convertResult[ 'errorMessage' ],
-                            'debug'   => $fs::basename_fix( $this->file_name )
+                            'debug'   => AbstractFilesStorage::basename_fix( $this->file_name )
                     ];
 
                     unset( $cachedXliffPath );
@@ -194,7 +190,7 @@ class ConversionHandler {
                 $this->result[ 'errors' ][] = [
                         "code"    => -100,
                         "message" => $convertResult[ 'errorMessage' ],
-                        "debug"   => $fs::basename_fix( $this->file_name )
+                        "debug"   => AbstractFilesStorage::basename_fix( $this->file_name )
                 ];
             }
 
@@ -212,7 +208,7 @@ class ConversionHandler {
                     $sha1,
                     $this->source_lang,
                     $this->cookieDir,
-                    $fs::basename_fix( $file_path )
+                    AbstractFilesStorage::basename_fix( $file_path )
             );
 
         }

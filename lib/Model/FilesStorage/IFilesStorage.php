@@ -170,6 +170,13 @@ interface IFilesStorage {
      */
     public function cacheZipArchive( $hash, $zipPath );
 
+    /**
+     * @param $create_date
+     * @param $zipHash
+     * @param $projectID
+     *
+     * @return mixed
+     */
     public function linkZipToProject( $create_date, $zipHash, $projectID );
 
     /**

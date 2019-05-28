@@ -5,7 +5,7 @@ namespace FilesStorage;
 class FilesStorageFactory
 {
     /**
-     * @return IFilesStorage
+     * @return AbstractFilesStorage
      */
     public static function create()
     {

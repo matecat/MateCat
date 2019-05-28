@@ -290,6 +290,8 @@ class NewController extends ajaxController {
 
     public function doAction() {
 
+        $fs = FilesStorageFactory::create();
+
         if ( @count( $this->api_output[ 'debug' ] ) > 0 ) {
             return -1;
         }
@@ -342,8 +344,7 @@ class NewController extends ajaxController {
         $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
 
         foreach ( $arFiles as $file_name ) {
-            $fs = $this->files_storage;
-            $ext = $fs::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
+            $ext = AbstractFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
 
             $conversionHandler = new ConversionHandler();
             $conversionHandler->setFileName( $file_name );
@@ -509,7 +510,8 @@ class NewController extends ajaxController {
         $linkFiles  = scandir( $intDir );
 
         foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == $fs::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+
 
                 $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
 
@@ -828,12 +830,10 @@ class NewController extends ajaxController {
 
         $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
 
-        $fs = $this->files_storage;
-
         //If a TMX file has been uploaded and no key was provided, create a new key.
         if ( empty( $this->private_tm_key ) ) {
             foreach ( $_FILES as $_fileinfo ) {
-                $pathinfo = $fs::pathinfo_fix( $_fileinfo[ 'name' ] );
+                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
                 if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $this->private_tm_key[] = [ 'key' => 'new' ];
                     break;

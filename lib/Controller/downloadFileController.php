@@ -32,11 +32,6 @@ class downloadFileController extends downloadController {
 
     const FILES_CHUNK_SIZE = 3;
 
-    /**
-     * @var AbstractFilesStorage
-     */
-    protected $files_storage;
-
     public function __construct() {
 
         $filterArgs = [
@@ -77,8 +72,6 @@ class downloadFileController extends downloadController {
         }
 
         $this->featureSet = new FeatureSet();
-
-        $this->files_storage = FilesStorageFactory::create();
     }
 
     public function doAction() {
@@ -101,7 +94,7 @@ class downloadFileController extends downloadController {
         $this->featureSet->loadForProject( $this->project );
 
         //get storage object
-        $fs        = $this->files_storage;
+        $fs        = FilesStorageFactory::create();
         $files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
 
         $nonew          = 0;
@@ -285,7 +278,7 @@ class downloadFileController extends downloadController {
 
                 //in case of .strings, they are required to be in UTF-16
                 //get extension to perform file detection
-                $extension = $fs::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ], PATHINFO_EXTENSION );
+                $extension = AbstractFilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ], PATHINFO_EXTENSION );
                 if ( strtoupper( $extension ) == 'STRINGS' ) {
                     //use this function to convert stuff
                     $encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'document_content' ] );
@@ -330,7 +323,7 @@ class downloadFileController extends downloadController {
 
             try {
 
-                $pathinfo = $fs::pathinfo_fix( $this->getDefaultFileName( $this->project ) );
+                $pathinfo = AbstractFilesStorage::pathinfo_fix( $this->getDefaultFileName( $this->project ) );
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
 
@@ -545,8 +538,7 @@ class downloadFileController extends downloadController {
      */
     public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
-        $fs        = $this->files_storage;
-        $extension = $fs::pathinfo_fix( $path );
+        $extension = AbstractFilesStorage::pathinfo_fix( $path );
         if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
             return $documentContent;
         }
@@ -691,7 +683,7 @@ class downloadFileController extends downloadController {
 
         $project = Projects_ProjectDao::findById( $this->jobInfo[ 'id_project' ] );
 
-        $fs      = $this->files_storage;
+        $fs      = FilesStorageFactory::create();
         $zipFile = $fs->getOriginalZipPath( $project->create_date, $this->jobInfo[ 'id_project' ], $zipFileName );
 
         $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
@@ -709,14 +701,14 @@ class downloadFileController extends downloadController {
                 $realZipFilePath = str_replace(
                         [
                                 ZipArchiveExtended::INTERNAL_SEPARATOR,
-                                $fs::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
+                                AbstractFilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
                         ],
                         [ DIRECTORY_SEPARATOR, "" ],
                         $filePath );
                 $realZipFilePath = ltrim( $realZipFilePath, "/" );
 
                 //remove the tmx from the original zip ( we want not to be exported as preview )
-                if ( $fs::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
+                if ( AbstractFilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
                     $zip->deleteName( $realZipFilePath );
                     continue;
                 }
@@ -737,7 +729,7 @@ class downloadFileController extends downloadController {
                     if ( $isTheSameFile ) {
 
                         $zip->deleteName( $realZipFilePath );
-                        if ( $fs::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
+                        if ( AbstractFilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
                             $realZipFilePath .= '.docx';
                         } elseif ( $this->forceXliff ) {
                             $realZipFilePath = $newInternalZipFile->output_filename;

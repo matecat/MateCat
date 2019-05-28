@@ -187,6 +187,20 @@ class S3FilesStorage extends AbstractFilesStorage {
     }
 
     /**
+     * @param $hash
+     * @param $lang
+     * @param $uid
+     * @param $realFileName
+     *
+     * @return int
+     */
+    public function linkSessionToCacheForOriginalFiles( $hash, $lang, $uid, $realFileName ) {
+
+
+
+    }
+
+    /**
      **********************************************************************************************
      * 2. PROJECT
      **********************************************************************************************
@@ -337,6 +351,10 @@ class S3FilesStorage extends AbstractFilesStorage {
         }
 
         \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
+    }
+
+    public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $lang, $uid, $realFileName ) {
+        // TODO: Implement linkSessionToCacheForAlreadyConvertedFiles() method.
     }
 
     /**

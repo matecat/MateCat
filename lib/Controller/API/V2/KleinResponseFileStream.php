@@ -21,14 +21,13 @@ class KleinResponseFileStream  {
     protected $response ;
 
     /**
-     * @var AbstractFilesStorage
+     * KleinResponseFileStream constructor.
+     *
+     * @param Response $response
      */
-    protected $files_storage;
-
     public function __construct(Response $response )
     {
         $this->response = $response ;
-        $this->files_storage = FilesStorageFactory::create();
     }
 
     /**
@@ -56,8 +55,7 @@ class KleinResponseFileStream  {
         $this->response->noCache();
 
         if ( null !== $filename ) {
-            $fs = $this->files_storage;
-            $filename = $fs::basename_fix( $filename );
+            $filename = AbstractFilesStorage::basename_fix( $filename );
         }
 
         $this->response->header('Content-type', $mimeType );
