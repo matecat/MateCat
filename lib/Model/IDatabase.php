@@ -48,6 +48,14 @@ interface IDatabase {
      */
     public function rollback();
 
+    /**
+     * Executes prepared SQL query to an open connection
+     * @param       $sql
+     * @param array $params
+     *
+     * @return mixed
+     */
+    public function prepared_query($sql, $params = []);
 
     /**
      * Executes SQL query to an open connection
@@ -70,7 +78,7 @@ interface IDatabase {
      * @param $query string Query to run
      * @return array All the fetched results
      */
-    public function fetch_array($query);
+    public function fetch_array($query, $input_parameters = []);
 
 
     /**

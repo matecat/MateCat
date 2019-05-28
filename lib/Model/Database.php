@@ -20,8 +20,8 @@ class Database implements IDatabase {
     private $connection;
 
     // Connection variables
-    private $server = ""; //database server
-    private $user = ""; //database login name
+    private $server   = ""; //database server
+    private $user     = ""; //database login name
     private $password = ""; //database login password
     private $database = ""; //database name
 
@@ -29,9 +29,9 @@ class Database implements IDatabase {
     public $affected_rows;
 
 
-    const SEQ_ID_SEGMENT = 'id_segment';
-    const SEQ_ID_PROJECT = 'id_project';
-    const SEQ_ID_DQF_PROJECT = 'id_dqf_project' ;
+    const SEQ_ID_SEGMENT     = 'id_segment';
+    const SEQ_ID_PROJECT     = 'id_project';
+    const SEQ_ID_DQF_PROJECT = 'id_dqf_project';
 
     protected static $SEQUENCES = [
             Database::SEQ_ID_SEGMENT,
@@ -41,21 +41,22 @@ class Database implements IDatabase {
 
     /**
      * Instantiate the database (singleton design pattern)
+     *
      * @param string $server
      * @param string $user
      * @param string $password
      * @param string $database
      */
-    private function __construct($server=null, $user=null, $password=null, $database=null) {
+    private function __construct( $server = null, $user = null, $password = null, $database = null ) {
 
         // Check that the variables are not empty
-        if ($server == null || $user == null || $database == null) {
-            throw new InvalidArgumentException("Database information must be passed in when the object is first created.");
+        if ( $server == null || $user == null || $database == null ) {
+            throw new InvalidArgumentException( "Database information must be passed in when the object is first created." );
         }
 
         // Set fields
-        $this->server = $server;
-        $this->user = $user;
+        $this->server   = $server;
+        $this->user     = $user;
         $this->password = $password;
         $this->database = $database;
     }
@@ -65,17 +66,18 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public static function obtain($server=null, $user=null, $password=null, $database=null) {
-        if (!self::$instance  ||  $server != null  &&  $user != null  &&  $password != null  &&  $database != null) {
-            self::$instance = new Database($server, $user, $password, $database);
+    public static function obtain( $server = null, $user = null, $password = null, $database = null ) {
+        if ( !self::$instance || $server != null && $user != null && $password != null && $database != null ) {
+            self::$instance = new Database( $server, $user, $password, $database );
         }
+
         return self::$instance;
     }
 
     /**
      * Class destructor
      */
-    public function __destruct(){
+    public function __destruct() {
         $this->close();
     }
 
@@ -88,12 +90,13 @@ class Database implements IDatabase {
                     "mysql:host={$this->server};dbname={$this->database}",
                     $this->user,
                     $this->password,
-                    array(
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
+                    [
+                            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
                             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                    ) );
+                    ] );
             $this->connection->exec( "SET names utf8" );
         }
+
         return $this->connection;
     }
 
@@ -105,8 +108,9 @@ class Database implements IDatabase {
      * @return bool
      * @throws PDOException
      */
-    public function ping(){
+    public function ping() {
         $this->getConnection()->query( "SELECT 1 FROM DUAL" );
+
         return true;
     }
 
@@ -119,8 +123,8 @@ class Database implements IDatabase {
     }
 
     public function reconnect() {
-      $this->close();
-      $this->getConnection();
+        $this->close();
+        $this->getConnection();
     }
 
 
@@ -128,8 +132,8 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function useDb($name){
-        $this->getConnection()->query("USE ".$name);
+    public function useDb( $name ) {
+        $this->getConnection()->query( "USE " . $name );
         $this->database = $name;
     }
 
@@ -139,9 +143,10 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function begin() {
-        if ( ! $this->getConnection()->inTransaction() ) {
+        if ( !$this->getConnection()->inTransaction() ) {
             $this->getConnection()->beginTransaction();
         }
+
         return $this->getConnection();
     }
 
@@ -163,14 +168,32 @@ class Database implements IDatabase {
         $this->getConnection()->rollBack();
     }
 
+    /**
+     * @param       $sql
+     * @param array $params
+     *
+     * @return bool|mixed|PDOStatement
+     */
+    public function prepared_query( $sql, $input_parameters = [] ) {
+        $sth = $this->getConnection()->prepare( $sql, [ PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY ] );
+
+        if ( $sth->execute( $input_parameters ) ) {
+            $this->affected_rows = $sth->rowCount();
+
+            return $sth;
+        }
+
+        return null;
+    }
 
     /**
      * @Override
      * {@inheritdoc}
      */
-    public function query($sql) {
-        $result = $this->getConnection()->query($sql);
+    public function query( $sql ) {
+        $result              = $this->getConnection()->query( $sql );
         $this->affected_rows = $result->rowCount();
+
         return $result;
     }
 
@@ -178,28 +201,42 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function query_first($query) {
-        $result = $this->query($query);
-        $out = $result->fetch(PDO::FETCH_ASSOC);
+    public function query_first( $query, $input_parameters = [] ) {
+        $result = $this->getQueryResult( $query, $input_parameters = [] );
+        $out    = $result->fetch( PDO::FETCH_ASSOC );
         $result->closeCursor();
+
         return $out;
     }
 
 
     /**
-     * @deprecated
-     * @Override
-     * {@inheritdoc}
-     * @deprecated
-     * TODO: Re-implement with prepared statement
+     * @param string $query
+     * @param array  $input_parameters
+     *
+     * @return array
      */
-    public function fetch_array($query) {
-        $result = $this->query($query);
-        $out = $result->fetchAll(PDO::FETCH_ASSOC);
+    public function fetch_array( $query, $input_parameters = [] ) {
+        $result = $this->getQueryResult( $query, $input_parameters = [] );
+        $out    = $result->fetchAll( PDO::FETCH_ASSOC );
         $result->closeCursor();
+
         return $out;
     }
 
+    /**
+     * @param       $query
+     * @param array $input_parameters
+     *
+     * @return bool|false|mixed|PDOStatement
+     */
+    private function getQueryResult( $query, $input_parameters = [] ) {
+        if ( !empty( $input_parameters ) ) {
+            return $this->prepared_query( $query, $input_parameters );
+        }
+
+        return $this->query( $query );
+    }
 
     /**
      * @Override
@@ -235,27 +272,28 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function insert($table, $data) {
+    public function insert( $table, $data ) {
 
         // Prepare the statement
-        $valuesToBind = array();
-        $keys = "";
-        $values = "";
+        $valuesToBind = [];
+        $keys         = "";
+        $values       = "";
         $currentIndex = 0;
-        foreach($data as $key => $value) {
-            $keys .= "$key, ";
-            $values .= ":value{$currentIndex}, ";
-            $valuesToBind[":value{$currentIndex}"] = $value;
+        foreach ( $data as $key => $value ) {
+            $keys                                    .= "$key, ";
+            $values                                  .= ":value{$currentIndex}, ";
+            $valuesToBind[ ":value{$currentIndex}" ] = $value;
             ++$currentIndex;
         }
-        $keys = rtrim($keys,', ');
-        $values = rtrim($values,', ');
-        $query = "INSERT INTO $table ($keys) VALUES ($values);";
-        $preparedStatement = $this->getConnection()->prepare($query);
+        $keys              = rtrim( $keys, ', ' );
+        $values            = rtrim( $values, ', ' );
+        $query             = "INSERT INTO $table ($keys) VALUES ($values);";
+        $preparedStatement = $this->getConnection()->prepare( $query );
 
         // Execute it
-        $preparedStatement->execute($valuesToBind);
+        $preparedStatement->execute( $valuesToBind );
         $this->affected_rows = $preparedStatement->rowCount();
+
         return $this->last_insert();
     }
 
@@ -284,9 +322,9 @@ class Database implements IDatabase {
      *
      * @return array
      */
-    public function nextSequence( $sequence_name, $seqIncrement = 1 ){
+    public function nextSequence( $sequence_name, $seqIncrement = 1 ) {
 
-        if( array_search( $sequence_name, static::$SEQUENCES ) === false ){
+        if ( array_search( $sequence_name, static::$SEQUENCES ) === false ) {
             throw new \PDOException( "Undefined sequence " . $sequence_name );
         }
 
@@ -302,7 +340,7 @@ class Database implements IDatabase {
 
         $this->getConnection()->commit();
 
-        return range( $first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement -1 );
+        return range( $first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement - 1 );
 
     }
 

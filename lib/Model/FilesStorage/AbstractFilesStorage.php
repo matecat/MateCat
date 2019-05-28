@@ -307,18 +307,25 @@ abstract class AbstractFilesStorage implements IFilesStorage {
         $where_id_file = "";
 
         if ( !empty( $id_file ) ) {
-            $where_id_file = " and id_file=$id_file";
+            $where_id_file = " and id_file=:id_file";
         }
 
-        $query = "SELECT fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file 
+        $query       = "SELECT fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file 
             FROM files_job fj
             INNER JOIN files f ON f.id=fj.id_file
             JOIN jobs AS j ON j.id=fj.id_job
-            WHERE fj.id_job = $id_job $where_id_file 
+            WHERE fj.id_job = :id_job $where_id_file 
             GROUP BY id_file";
+        $inputParams = [
+                ':id_job' => $id_job
+        ];
+
+        if ( !empty( $id_file ) ) {
+            $inputParams[ ':id_file' ] = $id_file;
+        }
 
         $db      = \Database::obtain();
-        $results = $db->fetch_array( $query );
+        $results = $db->fetch_array( $query, $inputParams );
 
         foreach ( $results as $k => $result ) {
             //try fetching from files dir
