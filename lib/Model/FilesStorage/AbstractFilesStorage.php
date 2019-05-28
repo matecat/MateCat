@@ -14,6 +14,9 @@ namespace FilesStorage;
  * @package FilesStorage
  */
 abstract class AbstractFilesStorage implements IFilesStorage {
+
+    const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
+
     protected $filesDir;
     protected $cacheDir;
     protected $zipDir;
@@ -172,6 +175,15 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
+     * @param $create_date
+     *
+     * @return string
+     */
+    public function getDatePath( $create_date ) {
+        return date_create( $create_date )->format( 'Ymd' );
+    }
+
+    /**
      **********************************************************************************************
      * 2. CACHE PACKAGE HELPERS
      **********************************************************************************************
@@ -272,5 +284,51 @@ abstract class AbstractFilesStorage implements IFilesStorage {
         }
 
         return $results;
+    }
+
+    /**
+     **********************************************************************************************
+     * 4. ZIP ARCHIVES HANDLING
+     **********************************************************************************************
+     */
+
+    /**
+     * Gets the file path of the temporary uploaded zip, when the project is not
+     * yet created. Useful to perform preliminary validation on the project.
+     * This function was created to perform validations on the TKIT zip file
+     * format loaded via API.
+     *
+     * XXX: This function only handles the case in which the zip file is *one* for the
+     * project.
+     *
+     * @param $uploadToken
+     *
+     * @return bool|string
+     */
+    public function getTemporaryUploadedZipFile( $uploadToken ) {
+        $files    = scandir( \INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
+        $zip_name = null;
+        $zip_file = null;
+
+        foreach ( $files as $file ) {
+            \Log::doJsonLog( $file );
+            if ( strpos( $file, static::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
+                $zip_name = $file;
+            }
+        }
+
+        $files = scandir( \INIT::$ZIP_REPOSITORY . '/' . $zip_name );
+        foreach ( $files as $file ) {
+            if ( strpos( $file, '.zip' ) !== false ) {
+                $zip_file = $file;
+                break;
+            }
+        }
+
+        if ( $zip_name == null && $zip_file == null ) {
+            return false;
+        } else {
+            return \INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file;
+        }
     }
 }

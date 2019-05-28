@@ -153,4 +153,39 @@ interface IFilesStorage {
      * @return mixed
      */
     public static function deleteFastAnalysisFile( $id_project );
+
+    /**
+     **********************************************************************************************
+     * 5. ZIP ARCHIVES HANDLING
+     **********************************************************************************************
+     */
+
+    /**
+     * Make a temporary cache copy for the original zip file
+     *
+     * @param $hash
+     * @param $zipPath
+     *
+     * @return bool
+     */
+    public function cacheZipArchive( $hash, $zipPath );
+
+    public function linkZipToProject( $create_date, $zipHash, $projectID );
+
+    /**
+     * @param $projectDate
+     * @param $projectID
+     * @param $zipName
+     *
+     * @return string
+     */
+    public function getOriginalZipPath( $projectDate, $projectID, $zipName );
+
+    /**
+     * @param $projectDate
+     * @param $projectID
+     *
+     * @return string
+     */
+    public function getOriginalZipDir( $projectDate, $projectID );
 }

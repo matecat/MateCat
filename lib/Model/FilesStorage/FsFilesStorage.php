@@ -11,14 +11,13 @@ namespace FilesStorage;
  * 2. PROJECT
  * 3. QUEUE
  * 4. FAST ANALYSIS
- * 5. GENERAL METHODS
+ * 5. ZIP ARCHIVES HANDLING
+ * 6. GENERAL METHODS
  *
  * @package FilesStorage
  */
 class FsFilesStorage extends AbstractFilesStorage
 {
-    const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
-
     /**
      **********************************************************************************************
      * 1. CACHE PACKAGE
@@ -147,105 +146,10 @@ class FsFilesStorage extends AbstractFilesStorage
     }
 
     /**
-     * Make a temporary cache copy for the original zip file
+     * @param $dirToScan
      *
-     * @param $hash
-     * @param $zipPath
-     *
-     * @return bool
+     * @return array
      */
-    public function cacheZipArchive( $hash, $zipPath ) {
-
-        $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER;
-
-        //ensure old stuff is overwritten
-        if ( is_dir( $thisZipDir ) ) {
-            \Utils::deleteDir( $thisZipDir );
-        }
-
-        //create cache dir structure
-        $created = mkdir( $thisZipDir, 0755, true );
-
-        if ( !$created ) {
-            return $created;
-        }
-
-        //move original
-        $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . static::basename_fix( $zipPath ) );
-
-        if ( !$outcome1 ) {
-            //Original directory deleted!!!
-            //CLEAR ALL CACHE
-            \Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
-
-            return $outcome1;
-        }
-
-        unlink( $zipPath );
-
-        //link this zip to the upload directory by creating a file name as the ash of the zip file
-        touch( dirname( $zipPath ) . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
-
-        return true;
-
-    }
-
-    public function linkZipToProject( $create_date, $zipHash, $projectID ) {
-
-        $datePath = date_create( $create_date )->format( 'Ymd' );
-
-        $fileName = static::basename_fix( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
-
-        //destination dir
-        $newZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
-
-        //check if doesn't exist
-        if ( !is_dir( $newZipDir ) ) {
-            //make files' directory structure
-            if ( !mkdir( $newZipDir, 0755, true ) ) {
-                return false;
-            }
-        }
-
-        //link original
-        $outcome1 = $this->link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ), $newZipDir . DIRECTORY_SEPARATOR . $fileName );
-
-        if ( !$outcome1 ) {
-            //Failed to copy the original file zip
-            return $outcome1;
-        }
-
-        \Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash );
-
-        return true;
-
-    }
-
-    /**
-     * @param $projectDate
-     * @param $projectID
-     * @param $zipName
-     *
-     * @return string
-     */
-    public function getOriginalZipPath( $projectDate, $projectID, $zipName ) {
-
-        $datePath = date_create( $projectDate )->format( 'Ymd' );
-        $zipDir   = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
-
-        return $zipDir;
-
-    }
-
-    public function getOriginalZipDir( $projectDate, $projectID ) {
-
-        $datePath = date_create( $projectDate )->format( 'Ymd' );
-        $zipDir   = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
-
-        return $zipDir;
-
-    }
-
     public function getHashesFromDir( $dirToScan ) {
 
         //fetch cache links, created by converter, from a directory
@@ -485,46 +389,6 @@ class FsFilesStorage extends AbstractFilesStorage
     }
 
     /**
-     * Gets the file path of the temporary uploaded zip, when the project is not
-     * yet created. Useful to perform prelimiray validation on the project.
-     * This function was created to perform validations on the TKIT zip file
-     * format loaded via API.
-     *
-     * XXX: This function only handles the case in which the zip file is *one* for the
-     * project.
-     *
-     * @param projectStructure the projectStructure of new project.
-     *
-     * @return bool|string
-     */
-    public function getTemporaryUploadedZipFile( $uploadToken ) {
-        $files    = scandir( \INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
-        $zip_name = null;
-        $zip_file = null;
-
-        foreach ( $files as $file ) {
-            \Log::doJsonLog( $file );
-            if ( strpos( $file, static::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
-                $zip_name = $file;
-            }
-        }
-
-        $files = scandir( \INIT::$ZIP_REPOSITORY . '/' . $zip_name );
-        foreach ( $files as $file ) {
-            if ( strpos( $file, '.zip' ) !== false ) {
-                $zip_file = $file;
-                break;
-            }
-        }
-
-        if ( $zip_name == null && $zip_file == null ) {
-            return false;
-        } else {
-            return \INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file;
-        }
-    }
-
-    /**
      **********************************************************************************************
      * 4. FAST ANALYSIS
      **********************************************************************************************
@@ -573,7 +437,126 @@ class FsFilesStorage extends AbstractFilesStorage
 
     /**
      **********************************************************************************************
-     * 5. GENERAL METHODS
+     * 5. ZIP ARCHIVES HANDLING
+     **********************************************************************************************
+     */
+
+    /**
+     * Make a temporary cache copy for the original zip file
+     *
+     * @param $hash
+     * @param $zipPath
+     *
+     * @return bool
+     */
+    public function cacheZipArchive( $hash, $zipPath ) {
+
+        $thisZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER;
+
+        //ensure old stuff is overwritten
+        if ( is_dir( $thisZipDir ) ) {
+            \Utils::deleteDir( $thisZipDir );
+        }
+
+        //create cache dir structure
+        $created = mkdir( $thisZipDir, 0755, true );
+
+        if ( !$created ) {
+            return $created;
+        }
+
+        //move original
+        $outcome1 = copy( $zipPath, $thisZipDir . DIRECTORY_SEPARATOR . static::basename_fix( $zipPath ) );
+
+        if ( !$outcome1 ) {
+            //Original directory deleted!!!
+            //CLEAR ALL CACHE
+            \Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
+
+            return $outcome1;
+        }
+
+        unlink( $zipPath );
+
+        //link this zip to the upload directory by creating a file name as the ash of the zip file
+        touch( dirname( $zipPath ) . DIRECTORY_SEPARATOR . $hash . self::ORIGINAL_ZIP_PLACEHOLDER );
+
+        return true;
+
+    }
+
+    /**
+     * @param $create_date
+     * @param $zipHash
+     * @param $projectID
+     *
+     * @return bool
+     */
+    public function linkZipToProject( $create_date, $zipHash, $projectID ) {
+
+        $datePath = $this->getDatePath($create_date);
+
+        $fileName = static::basename_fix( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ) );
+
+        //destination dir
+        $newZipDir = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
+
+        //check if doesn't exist
+        if ( !is_dir( $newZipDir ) ) {
+            //make files' directory structure
+            if ( !mkdir( $newZipDir, 0755, true ) ) {
+                return false;
+            }
+        }
+
+        //link original
+        $outcome1 = $this->link( $this->getSingleFileInPath( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash ), $newZipDir . DIRECTORY_SEPARATOR . $fileName );
+
+        if ( !$outcome1 ) {
+            //Failed to copy the original file zip
+            return $outcome1;
+        }
+
+        \Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $zipHash );
+
+        return true;
+
+    }
+
+    /**
+     * @param $projectDate
+     * @param $projectID
+     * @param $zipName
+     *
+     * @return string
+     */
+    public function getOriginalZipPath( $projectDate, $projectID, $zipName ) {
+
+        $datePath = date_create( $projectDate )->format( 'Ymd' );
+        $zipDir   = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
+
+        return $zipDir;
+
+    }
+
+    /**
+     * @param $projectDate
+     * @param $projectID
+     *
+     * @return string
+     */
+    public function getOriginalZipDir( $projectDate, $projectID ) {
+
+        $datePath = date_create( $projectDate )->format( 'Ymd' );
+        $zipDir   = $this->zipDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $projectID;
+
+        return $zipDir;
+
+    }
+
+    /**
+     **********************************************************************************************
+     * 6. GENERAL METHODS
      **********************************************************************************************
      */
 

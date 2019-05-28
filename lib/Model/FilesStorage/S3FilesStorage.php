@@ -2,6 +2,7 @@
 
 namespace FilesStorage;
 
+use DoctrineTest\InstantiatorTestAsset\XMLReaderAsset;
 use SimpleS3\Client;
 
 /**
@@ -13,7 +14,8 @@ use SimpleS3\Client;
  * 2. PROJECT
  * 3. QUEUE
  * 4. FAST ANALYSIS
- * 5. GENERAL METHODS
+ * 5. ZIP ARCHIVES HANDLING
+ * 6. GENERAL METHODS
  *
  * @package FilesStorage
  */
@@ -324,7 +326,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                         new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, \RecursiveDirectoryIterator::SKIP_DOTS ),
                         \RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
-            $prefix = str_replace( [ '{', '}' ], '', strtolower($uploadSession) ); // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
+            $prefix = str_replace( [ '{', '}' ], '', strtolower( $uploadSession ) ); // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
             if ( $item->isDir() ) {
                 // create folder
                 $s3Client->createFolder( self::QUEUE_BUCKET, $prefix . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
@@ -387,7 +389,94 @@ class S3FilesStorage extends AbstractFilesStorage {
 
     /**
      **********************************************************************************************
-     * GENERAL METHODS
+     * 5. ZIP ARCHIVES HANDLING
+     **********************************************************************************************
+     */
+
+    /**
+     * Make a temporary cache copy for the original zip file
+     *
+     * @param $hash
+     * @param $zipPath
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function cacheZipArchive( $hash, $zipPath ) {
+        // create bucket if does not exist
+        $this->s3Client->createBucketIfItDoesNotExist( self::ZIP_BUCKET );
+
+        // upload item
+        $prefix  = 'cache' . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder();
+        $outcome = $this->s3Client->uploadItem( self::ZIP_BUCKET, $prefix . DIRECTORY_SEPARATOR . static::basename_fix( $zipPath ), $zipPath );
+
+        if ( !$outcome ) {
+            //Original directory deleted!!!
+            //CLEAR ALL CACHE
+            \Utils::deleteDir( $this->zipDir . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder() );
+
+            return $outcome;
+        }
+
+        unlink( $zipPath );
+
+        return true;
+    }
+
+    /**
+     * @param $create_date
+     * @param $zipHash
+     * @param $projectID
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function linkZipToProject( $create_date, $zipHash, $projectID ) {
+        $cacheZipPackage = 'cache' . DIRECTORY_SEPARATOR . $zipHash . $this->getOriginalZipPlaceholder() . DIRECTORY_SEPARATOR;
+
+        foreach ( array_keys( $this->s3Client->getItemsInABucket( self::ZIP_BUCKET, $cacheZipPackage ) ) as $key ) {
+            $destination = $this->getOriginalZipPath( $create_date, $projectID, $this->getTheFileName( $key ) );
+
+            $copied = $this->s3Client->copyItem( self::ZIP_BUCKET, $key, self::ZIP_BUCKET, $destination );
+
+            if ( !$copied ) {
+                return $copied;
+            }
+
+            $delete = $this->s3Client->deleteFile( self::ZIP_BUCKET, $key );
+
+            if ( !$delete ) {
+                return $delete;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $projectDate
+     * @param $projectID
+     * @param $zipName
+     *
+     * @return string
+     */
+    public function getOriginalZipPath( $projectDate, $projectID, $zipName ) {
+        return $this->getOriginalZipDir( $projectDate, $projectID ) . DIRECTORY_SEPARATOR . $zipName;
+    }
+
+    /**
+     * @param $projectDate
+     * @param $projectID
+     *
+     * @return string
+     */
+    public function getOriginalZipDir( $projectDate, $projectID ) {
+        return 'work/' . $this->getDatePath( $projectDate ) . DIRECTORY_SEPARATOR . $projectID;
+    }
+
+    /**
+     **********************************************************************************************
+     * 6. GENERAL METHODS
      **********************************************************************************************
      */
 
@@ -407,5 +496,14 @@ class S3FilesStorage extends AbstractFilesStorage {
 
             return false;
         }
+    }
+
+    /**
+     * Return safe S3 object safe name
+     *
+     * @return mixed
+     */
+    private function getOriginalZipPlaceholder() {
+        return str_replace( '#', '', self::ORIGINAL_ZIP_PLACEHOLDER );
     }
 }

@@ -98,8 +98,7 @@ class convertFileController extends ajaxController {
             $this->featureSet->loadFromUserEmail( $this->user->email ) ;
         }
 
-        $fs = $this->files_storage;
-        $ext = $fs::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
+        $ext = AbstractFilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
 
         $conversionHandler = new ConversionHandler();
         $conversionHandler->setFileName( $this->file_name );

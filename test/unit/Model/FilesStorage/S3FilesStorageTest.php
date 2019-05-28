@@ -120,4 +120,40 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
         S3FilesStorage::deleteFastAnalysisFile( $id_project );
     }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function test_cache_zip_archive() {
+
+        // create a backup file from fixtures folder because the folder in upload folder is deleted every time
+        $source            = __DIR__ . '/../../../support/files/zip-with-model-json.zip';
+        $destinationFolder = __DIR__ . '/../../../../local_storage/files_storage/originalZip';
+        $destination       = $destinationFolder . '/zip-with-model-json.zip';
+
+        if ( !file_exists( $destinationFolder ) ) {
+            mkdir( $destinationFolder, 0755 );
+        }
+        copy( $source, $destination );
+
+        $archived = $this->fs->cacheZipArchive( sha1_file( $destination ), $destination );
+
+        $this->assertTrue( $archived );
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function test_link_zip_to_project() {
+        $filePath  = __DIR__ . '/../../../support/files/zip-with-model-json.zip';
+        $sha1      = sha1_file( $filePath );
+        $date      = '2019-12-12 10:00:00';
+        $idProject = 13;
+
+        $copied = $this->fs->linkZipToProject( $date, $sha1, $idProject );
+
+        $this->assertTrue( $copied );
+    }
 }
