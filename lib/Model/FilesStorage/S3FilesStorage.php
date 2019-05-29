@@ -21,12 +21,12 @@ use SimpleS3\Client;
 class S3FilesStorage extends AbstractFilesStorage {
 
     const CACHE_PACKAGE_BUCKET = 'matecat-cache-bucket';
-    const PROJECT_BUCKET       = 'matecat-project-bucket';
+    const FILES_BUCKET         = 'matecat-files-bucket';
     const QUEUE_BUCKET         = 'matecat-queue-bucket';
-    const ZIP_BUCKET           = 'matecat-zip-archive-bucket';
+    const ZIP_BUCKET           = 'matecat-original-zip-bucket';
     const FAST_ANALYSIS_BUCKET = 'matecat-fast-analysis-bucket';
 
-    const OBJECTS_SAFE_SEPARATOR = '!!';
+    const OBJECTS_SAFE_DELIMITER = '!!';
 
     /**
      * @var Client
@@ -94,6 +94,10 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
 
+        // create the cache package bucket if does not exists
+        $this->s3Client->createBucketIfItDoesNotExist( self::CACHE_PACKAGE_BUCKET );
+
+        // get the prefix
         $prefix = $this->getCachePackageHashFolder( $hash, $lang );
 
         if ( \INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $this->s3Client->hasItem( self::CACHE_PACKAGE_BUCKET, $prefix ) ) {
@@ -118,7 +122,7 @@ class S3FilesStorage extends AbstractFilesStorage {
     private function getCachePackageHashFolder( $hash, $lang ) {
         $hashTree = self::composeCachePath( $hash );
 
-        return $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . self::OBJECTS_SAFE_SEPARATOR . $lang;
+        return $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . self::OBJECTS_SAFE_DELIMITER . strtolower( $lang );
     }
 
     /**
@@ -214,7 +218,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $hash     = $hashes[ 1 ];
 
         // 2. create project bucket
-        $this->s3Client->createBucketIfItDoesNotExist( self::PROJECT_BUCKET );
+        $this->s3Client->createBucketIfItDoesNotExist( self::FILES_BUCKET );
 
         // 3. copy orig file from cache package to project bucket
         $origPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig/';
@@ -223,7 +227,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         foreach ( array_keys( $origItems ) as $key ) {
 
             $newKey = $datePath . DIRECTORY_SEPARATOR . $idFile . '/orig/' . $this->getTheLastPartOfKey( $key );
-            $copied = $this->s3Client->copyItem( self::CACHE_PACKAGE_BUCKET, $key, self::PROJECT_BUCKET, $newKey );
+            $copied = $this->s3Client->copyItem( self::CACHE_PACKAGE_BUCKET, $key, self::FILES_BUCKET, $newKey );
 
             if ( false === $copied ) {
                 \Log::doJsonLog( 'project id ' . $idFile . ': ' . $key . ' was copied from ' . self::CACHE_PACKAGE_BUCKET . ' to ' . self::CACHE_PACKAGE_BUCKET );
@@ -238,7 +242,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         foreach ( array_keys( $workItems ) as $key ) {
 
             $newKey = $datePath . DIRECTORY_SEPARATOR . $idFile . '/xliff/' . $this->getTheLastPartOfKey( $key );
-            $copied = $this->s3Client->copyItem( self::CACHE_PACKAGE_BUCKET, $key, self::PROJECT_BUCKET, $newKey );
+            $copied = $this->s3Client->copyItem( self::CACHE_PACKAGE_BUCKET, $key, self::FILES_BUCKET, $newKey );
 
             if ( false === $copied ) {
                 \Log::doJsonLog( 'project id ' . $idFile . ': ' . $key . ' was copied from ' . self::CACHE_PACKAGE_BUCKET . ' to ' . self::CACHE_PACKAGE_BUCKET );
@@ -284,7 +288,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $datePath = $hashes[ 0 ];
 
         $prefix = $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . $keyToSearch . DIRECTORY_SEPARATOR; // example: 20181212/13/work/
-        $items  = $this->s3Client->getItemsInABucket( self::PROJECT_BUCKET, $prefix );
+        $items  = $this->s3Client->getItemsInABucket( self::FILES_BUCKET, $prefix );
 
         return ( isset( array_keys( $items )[ 0 ] ) ) ? array_keys( $items )[ 0 ] : null;
     }
@@ -312,7 +316,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                         \RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
             $prefix      = self::getUploadSessionSafeName( $uploadSession ); // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
-            $subPathName = str_replace( '|', self::OBJECTS_SAFE_SEPARATOR, strtolower( $iterator->getSubPathName() ) );
+            $subPathName = str_replace( '|', self::OBJECTS_SAFE_DELIMITER, strtolower( $iterator->getSubPathName() ) );
             // Example: aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT --> aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it
 
             if ( $item->isDir() ) {
@@ -343,11 +347,23 @@ class S3FilesStorage extends AbstractFilesStorage {
         foreach ( $linkFiles as $k => $linkFile ) {
             if ( strpos( $k, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
                 $zipFilesHash[] = $k;
-            } elseif ( strpos( $k, '.' ) !== false or strpos( $k, self::OBJECTS_SAFE_SEPARATOR ) === false ) {
+            } elseif ( strpos( $k, '.' ) !== false or strpos( $k, self::OBJECTS_SAFE_DELIMITER ) === false ) {
                 unset( $linkFiles[ $k ] );
             } else {
                 $filesHashInfo[ 'sha' ][]          = $k;
-                $filesHashInfo[ 'fileName' ][ $k ] = file_get_contents($this->s3Client->getPublicItemLink(self::QUEUE_BUCKET, $k));
+
+                // this method get the content from the hashes map file and convert it into an array of original file names
+                // Example:
+                //
+                // 'file.txt'
+                // 'file2.txt'
+                // ==>
+                // [
+                //     0 => 'file.txt',
+                //     1 => 'file2.txt'
+                // ]
+                $filesHashInfo[ 'fileName' ][ $k ] =
+                $result = array_filter(array_map('trim',explode("\n", file_get_contents( $this->s3Client->getPublicItemLink( self::QUEUE_BUCKET, $k ) ))));
             }
         }
 

@@ -1,6 +1,5 @@
 <?php
 
-use FilesStorage\AbstractFilesStorage;
 use FilesStorage\S3FilesStorage;
 use SimpleS3\Client;
 
@@ -35,10 +34,10 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         copy( $xliffPath, $xliffPathTarget ); // I copy the original xliff file because then
 
         $sha1 = sha1_file( $filePath );
-        $lang = 'it-IT';
+        $lang = 'it-it';
 
         $hashTree = S3FilesStorage::composeCachePath( $sha1 );
-        $prefix   = $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . S3FilesStorage::OBJECTS_SAFE_SEPARATOR . $lang;
+        $prefix   = $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . S3FilesStorage::OBJECTS_SAFE_DELIMITER . $lang;
 
         $this->assertTrue( $this->fs->makeCachePackage( $sha1, $lang, $filePath, $xliffPathTarget ) );
         $this->assertEquals( $prefix . '/orig/hello.txt', $this->fs->getOriginalFromCache( $sha1, $lang ) );
@@ -98,10 +97,16 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
         $hashes = $this->fs->getHashesFromDir( $dirToScan );
 
+        $hashes['conversionHashes']['fileName']['cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it'];
+
         $this->assertArrayHasKey( 'conversionHashes', $hashes );
         $this->assertArrayHasKey( 'zipHashes', $hashes );
-        $this->assertEquals($hashes['conversionHashes']['sha'][0], 'cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it');
-        $this->assertContains('test.txt', $hashes['conversionHashes']['fileName']['cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it']);
+
+        $sha = $hashes['conversionHashes']['sha'][0];
+        $originalFileNames = $hashes['conversionHashes']['fileName']['cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it'];
+
+        $this->assertEquals($sha, 'cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it');
+        $this->assertEquals('test.txt', $originalFileNames[0]);
     }
 
     /**
