@@ -174,10 +174,10 @@ class Database implements IDatabase {
      *
      * @return bool|mixed|PDOStatement
      */
-    public function prepared_query( $sql, $input_parameters = [] ) {
+    public function prepared_query( $sql, $bindParams = [] ) {
         $sth = $this->getConnection()->prepare( $sql, [ PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY ] );
 
-        if ( $sth->execute( $input_parameters ) ) {
+        if ( $sth->execute( $bindParams ) ) {
             $this->affected_rows = $sth->rowCount();
 
             return $sth;
@@ -201,8 +201,8 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function query_first( $query, $input_parameters = [] ) {
-        $result = $this->getQueryResult( $query, $input_parameters = [] );
+    public function query_first( $query, $bindParams = [] ) {
+        $result = $this->getQueryResult( $query, $bindParams = [] );
         $out    = $result->fetch( PDO::FETCH_ASSOC );
         $result->closeCursor();
 
@@ -212,12 +212,12 @@ class Database implements IDatabase {
 
     /**
      * @param string $query
-     * @param array  $input_parameters
+     * @param array  $bindParams
      *
      * @return array
      */
-    public function fetch_array( $query, $input_parameters = [] ) {
-        $result = $this->getQueryResult( $query, $input_parameters = [] );
+    public function fetch_array( $query, $bindParams = [] ) {
+        $result = $this->getQueryResult( $query, $bindParams = [] );
         $out    = $result->fetchAll( PDO::FETCH_ASSOC );
         $result->closeCursor();
 
@@ -226,13 +226,13 @@ class Database implements IDatabase {
 
     /**
      * @param       $query
-     * @param array $input_parameters
+     * @param array $bindParams
      *
      * @return bool|false|mixed|PDOStatement
      */
-    private function getQueryResult( $query, $input_parameters = [] ) {
-        if ( !empty( $input_parameters ) ) {
-            return $this->prepared_query( $query, $input_parameters );
+    private function getQueryResult( $query, $bindParams = [] ) {
+        if ( !empty( $bindParams ) ) {
+            return $this->prepared_query( $query, $bindParams );
         }
 
         return $this->query( $query );

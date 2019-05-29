@@ -146,42 +146,6 @@ class FsFilesStorage extends AbstractFilesStorage
     }
 
     /**
-     * @param $dirToScan
-     *
-     * @return array
-     */
-    public function getHashesFromDir( $dirToScan ) {
-
-        //fetch cache links, created by converter, from a directory
-        $linkFiles     = scandir( $dirToScan );
-        $zipFilesHash  = [];
-        $filesHashInfo = [];
-        //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
-        foreach ( $linkFiles as $k => $linkFile ) {
-
-            if ( strpos( $linkFile, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
-                $zipFilesHash[] = $linkFile;
-                unset( $linkFiles[ $k ] );
-            } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
-                unset( $linkFiles[ $k ] );
-            } else {
-                $filesHashInfo[ 'sha' ][]                        = $linkFiles[ $k ];
-                $filesHashInfo[ 'fileName' ][ $linkFiles[ $k ] ] = file(
-                        $dirToScan . DIRECTORY_SEPARATOR . $linkFiles[ $k ],
-                        FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
-                );
-            }
-
-        }
-
-        return [
-                'conversionHashes' => $filesHashInfo,
-                'zipHashes'        => $zipFilesHash
-        ];
-
-    }
-
-    /**
      **********************************************************************************************
      * 2. PROJECT
      **********************************************************************************************
@@ -311,6 +275,42 @@ class FsFilesStorage extends AbstractFilesStorage
 
         //return file
         return $this->getSingleFileInPath( $path );
+    }
+
+    /**
+     * @param $dirToScan
+     *
+     * @return array
+     */
+    public function getHashesFromDir( $dirToScan ) {
+
+        //fetch cache links, created by converter, from a directory
+        $linkFiles     = scandir( $dirToScan );
+        $zipFilesHash  = [];
+        $filesHashInfo = [];
+        //remove dir hardlinks, as uninteresting, as well as regular files; only hash-links
+        foreach ( $linkFiles as $k => $linkFile ) {
+
+            if ( strpos( $linkFile, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
+                $zipFilesHash[] = $linkFile;
+                unset( $linkFiles[ $k ] );
+            } elseif ( strpos( $linkFile, '.' ) !== false or strpos( $linkFile, '|' ) === false ) {
+                unset( $linkFiles[ $k ] );
+            } else {
+                $filesHashInfo[ 'sha' ][]                        = $linkFiles[ $k ];
+                $filesHashInfo[ 'fileName' ][ $linkFiles[ $k ] ] = file(
+                        $dirToScan . DIRECTORY_SEPARATOR . $linkFiles[ $k ],
+                        FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES
+                );
+            }
+
+        }
+
+        return [
+                'conversionHashes' => $filesHashInfo,
+                'zipHashes'        => $zipFilesHash
+        ];
+
     }
 
     /**

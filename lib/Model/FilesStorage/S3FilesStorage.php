@@ -26,6 +26,8 @@ class S3FilesStorage extends AbstractFilesStorage {
     const ZIP_BUCKET           = 'matecat-zip-archive-bucket';
     const FAST_ANALYSIS_BUCKET = 'matecat-fast-analysis-bucket';
 
+    const OBJECTS_SAFE_SEPARATOR = '!!';
+
     /**
      * @var Client
      */
@@ -116,7 +118,7 @@ class S3FilesStorage extends AbstractFilesStorage {
     private function getCachePackageHashFolder( $hash, $lang ) {
         $hashTree = self::composeCachePath( $hash );
 
-        return $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . '.' . $lang;
+        return $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . self::OBJECTS_SAFE_SEPARATOR . $lang;
     }
 
     /**
@@ -179,7 +181,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     private function findAKeyInCachePackageBucket( $hash, $lang, $keyToSearch ) {
-        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/' . $keyToSearch . '/'; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9.it-IT/work/
+        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/' . $keyToSearch . '/'; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9!!it-IT/work/
         $items  = $this->s3Client->getItemsInABucket( self::CACHE_PACKAGE_BUCKET, $prefix );
 
         return ( isset( array_keys( $items )[ 0 ] ) ) ? array_keys( $items )[ 0 ] : null;
@@ -220,7 +222,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         foreach ( array_keys( $origItems ) as $key ) {
 
-            $newKey = $datePath . DIRECTORY_SEPARATOR . $idFile . '/orig/' . $this->getTheFileName( $key );
+            $newKey = $datePath . DIRECTORY_SEPARATOR . $idFile . '/orig/' . $this->getTheLastPartOfKey( $key );
             $copied = $this->s3Client->copyItem( self::CACHE_PACKAGE_BUCKET, $key, self::PROJECT_BUCKET, $newKey );
 
             if ( false === $copied ) {
@@ -235,7 +237,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         foreach ( array_keys( $workItems ) as $key ) {
 
-            $newKey = $datePath . DIRECTORY_SEPARATOR . $idFile . '/xliff/' . $this->getTheFileName( $key );
+            $newKey = $datePath . DIRECTORY_SEPARATOR . $idFile . '/xliff/' . $this->getTheLastPartOfKey( $key );
             $copied = $this->s3Client->copyItem( self::CACHE_PACKAGE_BUCKET, $key, self::PROJECT_BUCKET, $newKey );
 
             if ( false === $copied ) {
@@ -245,22 +247,6 @@ class S3FilesStorage extends AbstractFilesStorage {
         }
 
         return ( count( $errors ) === 0 );
-    }
-
-    /**
-     * Get the item name from an S3 complete key.
-     *
-     * Example:
-     * c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9.it-IT/orig/hello.txt --> hello.txt
-     *
-     * @param $key
-     *
-     * @return mixed
-     */
-    private function getTheFileName( $key ) {
-        $explode = explode( DIRECTORY_SEPARATOR, $key );
-
-        return end( $explode );
     }
 
     /**
@@ -325,17 +311,59 @@ class S3FilesStorage extends AbstractFilesStorage {
                         new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, \RecursiveDirectoryIterator::SKIP_DOTS ),
                         \RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
-            $prefix = str_replace( [ '{', '}' ], '', strtolower( $uploadSession ) ); // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
+            $prefix      = self::getUploadSessionSafeName( $uploadSession ); // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
+            $subPathName = str_replace( '|', self::OBJECTS_SAFE_SEPARATOR, strtolower( $iterator->getSubPathName() ) );
+            // Example: aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT --> aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it
+
             if ( $item->isDir() ) {
                 // create folder
-                $s3Client->createFolder( self::QUEUE_BUCKET, $prefix . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+                $s3Client->createFolder( self::QUEUE_BUCKET, $prefix . DIRECTORY_SEPARATOR . $subPathName );
             } else {
                 // upload file
-                $s3Client->uploadItem( self::QUEUE_BUCKET, $prefix . DIRECTORY_SEPARATOR . $iterator->getSubPathName(), $item->getPathName() );
+                $s3Client->uploadItem( self::QUEUE_BUCKET, $prefix . DIRECTORY_SEPARATOR . $subPathName, $item->getPathName() );
             }
         }
 
         \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
+    }
+
+    /**
+     * @param $dirToScan
+     *
+     * @return mixed|void
+     * @throws \Exception
+     */
+    public function getHashesFromDir( $dirToScan ) {
+        $folder        = self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $dirToScan ) ) . DIRECTORY_SEPARATOR;
+        $zipFilesHash  = [];
+        $filesHashInfo = [];
+
+        $linkFiles = $this->s3Client->getItemsInABucket( self::QUEUE_BUCKET, $folder );
+
+        foreach ( $linkFiles as $k => $linkFile ) {
+            if ( strpos( $k, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
+                $zipFilesHash[] = $k;
+            } elseif ( strpos( $k, '.' ) !== false or strpos( $k, self::OBJECTS_SAFE_SEPARATOR ) === false ) {
+                unset( $linkFiles[ $k ] );
+            } else {
+                $filesHashInfo[ 'sha' ][]          = $k;
+                $filesHashInfo[ 'fileName' ][ $k ] = file_get_contents($this->s3Client->getPublicItemLink(self::QUEUE_BUCKET, $k));
+            }
+        }
+
+        return [
+                'conversionHashes' => $filesHashInfo,
+                'zipHashes'        => $zipFilesHash
+        ];
+    }
+
+    /**
+     * @param $uploadSession
+     *
+     * @return mixed
+     */
+    private static function getUploadSessionSafeName( $uploadSession ) {
+        return str_replace( [ '{', '}' ], '', strtolower( $uploadSession ) );
     }
 
     /**
@@ -434,7 +462,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $cacheZipPackage = 'cache' . DIRECTORY_SEPARATOR . $zipHash . $this->getOriginalZipPlaceholder() . DIRECTORY_SEPARATOR;
 
         foreach ( array_keys( $this->s3Client->getItemsInABucket( self::ZIP_BUCKET, $cacheZipPackage ) ) as $key ) {
-            $destination = $this->getOriginalZipPath( $create_date, $projectID, $this->getTheFileName( $key ) );
+            $destination = $this->getOriginalZipPath( $create_date, $projectID, $this->getTheLastPartOfKey( $key ) );
 
             $copied = $this->s3Client->copyItem( self::ZIP_BUCKET, $key, self::ZIP_BUCKET, $destination );
 
@@ -478,6 +506,22 @@ class S3FilesStorage extends AbstractFilesStorage {
      * 6. GENERAL METHODS
      **********************************************************************************************
      */
+
+    /**
+     * Get the last part of key (exploded by /) from an S3 complete key.
+     *
+     * Example:
+     * c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9.it-IT/orig/hello.txt --> hello.txt
+     *
+     * @param $key
+     *
+     * @return mixed
+     */
+    private function getTheLastPartOfKey( $key ) {
+        $explode = explode( DIRECTORY_SEPARATOR, $key );
+
+        return end( $explode );
+    }
 
     /**
      * @param $bucketName

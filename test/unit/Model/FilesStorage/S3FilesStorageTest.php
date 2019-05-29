@@ -38,7 +38,7 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         $lang = 'it-IT';
 
         $hashTree = S3FilesStorage::composeCachePath( $sha1 );
-        $prefix   = $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . '.' . $lang;
+        $prefix   = $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . S3FilesStorage::OBJECTS_SAFE_SEPARATOR . $lang;
 
         $this->assertTrue( $this->fs->makeCachePackage( $sha1, $lang, $filePath, $xliffPathTarget ) );
         $this->assertEquals( $prefix . '/orig/hello.txt', $this->fs->getOriginalFromCache( $sha1, $lang ) );
@@ -70,19 +70,38 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         // create a backup file from fixtures folder because the folder in upload folder is deleted every time
         $uploadSession     = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
         $source            = __DIR__ . '/../../../support/files/queue/' . $uploadSession . '/test.txt';
+        $source2            = __DIR__ . '/../../../support/files/queue/' . $uploadSession . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
         $destinationFolder = __DIR__ . '/../../../../local_storage/upload/' . $uploadSession;
         $destination       = $destinationFolder . '/test.txt';
+        $destination2       = $destinationFolder . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
 
         if ( !file_exists( $destinationFolder ) ) {
             mkdir( $destinationFolder, 0755 );
         }
         copy( $source, $destination );
+        copy( $source2, $destination2 );
 
         S3FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadSession );
 
         $items = $this->s3Client->getItemsInABucket( S3FilesStorage::QUEUE_BUCKET );
 
-        $this->assertCount( 1, $items );
+        $this->assertGreaterThanOrEqual( 1, $items );
+    }
+
+    /**
+     * @test
+     * @throws Exception
+     */
+    public function test_get_hashes_from_dir() {
+        $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
+        $dirToScan     = \INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
+
+        $hashes = $this->fs->getHashesFromDir( $dirToScan );
+
+        $this->assertArrayHasKey( 'conversionHashes', $hashes );
+        $this->assertArrayHasKey( 'zipHashes', $hashes );
+        $this->assertEquals($hashes['conversionHashes']['sha'][0], 'cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it');
+        $this->assertContains('test.txt', $hashes['conversionHashes']['fileName']['cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it']);
     }
 
     /**

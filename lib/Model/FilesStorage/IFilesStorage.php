@@ -63,6 +63,13 @@ interface IFilesStorage {
     public function getXliffFromCache( $hash, $lang );
 
     /**
+     * @param $dirToScan
+     *
+     * @return mixed
+     */
+    public function getHashesFromDir( $dirToScan );
+
+    /**
      **********************************************************************************************
      * 2. PROJECT
      **********************************************************************************************

@@ -463,8 +463,13 @@ class ProjectManager {
 
         $uploadDir = $this->uploadDir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
+        \Log::doJsonLog($uploadDir);
+
         //we are going to access the storage, get model object to manipulate it
-        $linkFiles         = $this->files_storage->getHashesFromDir( $this->uploadDir );
+        $fs        = FilesStorageFactory::create();
+        $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
+
+        \Log::doJsonLog($linkFiles);
 
         /*
             loop through all input files to
@@ -517,10 +522,10 @@ class ProjectManager {
                 $sha1 = sha1_file( $filePathName );
 
                 //make a cache package (with work/ only, emtpy orig/)
-                $this->files_storage->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
 
                 //put reference to cache in upload dir to link cache to session
-                $this->files_storage->linkSessionToCacheForAlreadyConvertedFiles(
+                $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
                         $this->projectStructure[ 'source_language' ],
                         $this->projectStructure[ 'uploadToken' ],
@@ -548,8 +553,6 @@ class ProjectManager {
                     "code" => $e->getCode(), "message" => $e->getMessage()
             ];
         }
-
-        $fs = FilesStorageFactory::create();
 
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
@@ -736,18 +739,18 @@ class ProjectManager {
 
         $update_project_count = "
             UPDATE projects
-              SET status_analysis = '%s', standard_analysis_wc = %u
-            WHERE id = %u
+            SET status_analysis = :status_analysis, 
+                standard_analysis_wc = :standard_analysis_wc
+            WHERE id = :id
         ";
 
-        $update_project_count = sprintf(
-                $update_project_count,
-                $this->projectStructure[ 'status' ],
-                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] ),  //estimation of total segments in the project
-                $this->projectStructure[ 'id_project' ]
-        );
+        $bindParams = [
+            ':status_analysis' => $this->projectStructure[ 'status' ],
+            ':standard_analysis_wc' => $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] ),
+            ':id' => $this->projectStructure[ 'id_project' ],
+        ];
 
-        $this->dbHandler->query( $update_project_count );
+        $this->dbHandler->prepared_query( $update_project_count, $bindParams );
 
         $this->pushActivityLog();
 

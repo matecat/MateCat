@@ -316,16 +316,16 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             JOIN jobs AS j ON j.id=fj.id_job
             WHERE fj.id_job = :id_job $where_id_file 
             GROUP BY id_file";
-        $inputParams = [
+        $bindParams = [
                 ':id_job' => $id_job
         ];
 
         if ( !empty( $id_file ) ) {
-            $inputParams[ ':id_file' ] = $id_file;
+            $bindParams[ ':id_file' ] = $id_file;
         }
 
         $db      = \Database::obtain();
-        $results = $db->fetch_array( $query, $inputParams );
+        $results = $db->fetch_array( $query, $bindParams );
 
         foreach ( $results as $k => $result ) {
             //try fetching from files dir
