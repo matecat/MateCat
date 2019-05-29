@@ -583,8 +583,8 @@ class ProjectManager {
 
             try {
 
-                if(count($_originalFileNames) === 0){
-                    throw new Exception('No hash files found' , -6);
+                if ( count( $_originalFileNames ) === 0 ) {
+                    throw new Exception( 'No hash files found', -6 );
                 }
 
                 if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
@@ -605,8 +605,8 @@ class ProjectManager {
 
                 $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
 
-                if(count($filesStructure) === 0){
-                    throw new Exception('Files could not be saved in database.' , -6);
+                if ( count( $filesStructure ) === 0 ) {
+                    throw new Exception( 'Files could not be saved in database.', -6 );
                 }
 
                 //check if the files language equals the source language. If not, set an error message.
@@ -1628,7 +1628,7 @@ class ProjectManager {
      */
     protected function _extractSegments( $fid, $file_info ) {
 
-        $xliff_file_content = file_get_contents( $file_info[ 'path_cached_xliff' ] );
+        $xliff_file_content = $this->getXliffFileContent( $file_info[ 'path_cached_xliff' ] );
         $mimeType           = $file_info[ 'mime_type' ];
 
         //create Structure fro multiple files
@@ -1641,7 +1641,6 @@ class ProjectManager {
         } catch ( Exception $e ) {
             throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
         }
-
 
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
@@ -1864,8 +1863,24 @@ class ProjectManager {
     }
 
     /**
+     * @param $xliff_file_content
+     *
+     * @return false|string
+     * @throws Exception
+     */
+    private function getXliffFileContent( $xliff_file_content ) {
+        if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+            $fs = S3FilesStorage::getStaticS3Client();
+
+            return file_get_contents( $fs->getPublicItemLink( S3FilesStorage::CACHE_PACKAGE_BUCKET, $xliff_file_content ) );
+        }
+
+        return file_get_contents( $xliff_file_content );
+    }
+
+    /**
      * @param $_originalFileNames
-     * @param $sha1_original (example: 917f7b03c8f54350fb65387bda25fbada43ff7d8)
+     * @param $sha1_original           (example: 917f7b03c8f54350fb65387bda25fbada43ff7d8)
      * @param $cachedXliffFilePathName (example: 91/7f/7b03c8f54350fb65387bda25fbada43ff7d8!!it-it/work/test_2.txt.sdlxliff)
      *
      * @return array
