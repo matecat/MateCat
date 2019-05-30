@@ -160,6 +160,7 @@ class Job {
                 'target'                => $jStruct->target,
                 'sourceTxt'             => $lang_handler->getLocalizedName( $jStruct->source ),
                 'targetTxt'             => $lang_handler->getLocalizedName( $jStruct->target ),
+                'job_first_segment'     => $jStruct->job_first_segment,
                 'status'                => $jStruct->status_owner,
                 'subject'               => $jStruct->subject,
                 'subject_printable'     => $subjects[$subject_key]['display'],
