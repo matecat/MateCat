@@ -24,7 +24,7 @@ trait TimeLogger {
         $this->startExecutionTime = microtime( true );
     }
 
-    protected function getTimer() {
+    public function getTimer() {
         return round( microtime( true ) - $this->startExecutionTime, 4 ); //get milliseconds
     }
 
