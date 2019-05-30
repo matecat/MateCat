@@ -17,8 +17,8 @@ abstract class Base {
      */
     protected $_validationCallbacks = [];
 
-    public function __construct( Request $controller ) {
-        $this->request = $controller ;
+    public function __construct( Request $kleinRequest ) {
+        $this->request = $kleinRequest ;
     }
 
     /**
