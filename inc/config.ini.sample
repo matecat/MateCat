@@ -47,7 +47,7 @@ AWS_ACCESS_KEY_ID = 'xxxxxxx'
 AWS_SECRET_KEY = 'xxxxxxxxxxxx'
 AWS_VERSION = 'latest'
 AWS_REGION = 'us-west-2'
-AWS_STORAGE_BUCKET = "mauretto78-bucket-test"
+AWS_SSL_VERIFY = true
 
 DQF_ENABLED = yes
 DQF_BASE_URL = 'https://dqf-api.stag.taus.net/'

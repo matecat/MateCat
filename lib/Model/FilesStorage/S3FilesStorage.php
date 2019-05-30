@@ -2,6 +2,7 @@
 
 namespace FilesStorage;
 
+use INIT;
 use SimpleS3\Client;
 
 /**
@@ -48,6 +49,12 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
     public function __construct() {
         $this->s3Client = self::getStaticS3Client();
+
+        // disable SSL verify from configuration
+        if(false === INIT::$AWS_SSL_VERIFY){
+            $this->s3Client->disableSslVerify();
+        }
+
         $this->s3Client->createBucketIfItDoesNotExist( self::FILES_STORAGE_BUCKET );
     }
 
