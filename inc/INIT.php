@@ -280,13 +280,13 @@ class INIT {
     public static $FILE_STORAGE_METHOD;
 
     /**
-     * S3 Configuration
+     * S3FilesStorage Configuration
      */
     public static $AWS_ACCESS_KEY_ID;
     public static $AWS_SECRET_KEY;
     public static $AWS_VERSION;
     public static $AWS_REGION;
-    public static $AWS_STORAGE_BASE_BUCKET;
+    public static $AWS_SSL_VERIFY;
 
     public function __construct(){
 
