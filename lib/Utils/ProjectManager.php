@@ -1872,7 +1872,7 @@ class ProjectManager {
         if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
             $fs = S3FilesStorage::getStaticS3Client();
 
-            return file_get_contents( $fs->getPublicItemLink( S3FilesStorage::CACHE_PACKAGE_BUCKET, $xliff_file_content ) );
+            return  $fs->openItem( S3FilesStorage::FILES_STORAGE_BUCKET, $xliff_file_content );
         }
 
         return file_get_contents( $xliff_file_content );

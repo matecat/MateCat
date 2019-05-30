@@ -305,27 +305,49 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     public function getFilesForJob( $id_job, $id_file ) {
 
         $where_id_file = "";
-
         if ( !empty( $id_file ) ) {
-            $where_id_file = " and id_file=:id_file";
+            $where_id_file = " and `id_file`=$id_file";
         }
-
-        $query       = "SELECT fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file 
-            FROM files_job fj
-            INNER JOIN files f ON f.id=fj.id_file
-            JOIN jobs AS j ON j.id=fj.id_job
-            WHERE fj.id_job = :id_job $where_id_file 
-            GROUP BY id_file";
-        $bindParams = [
-                ':id_job' => $id_job
-        ];
-
-        if ( !empty( $id_file ) ) {
-            $bindParams[ ':id_file' ] = $id_file;
-        }
-
+        $query = "SELECT `fj`.`id_file`, `f`.`filename`, `f`.`id_project`, `j`.`source`, `mime_type`, `sha1_original_file`
+            FROM `files_job` `fj`
+            INNER JOIN `files` `f` ON `f`.`id`=`fj`.`id_file`
+            JOIN `jobs` AS `j` ON `j`.`id`=`fj`.`id_job`
+            WHERE `fj`.`id_job` = $id_job $where_id_file
+            GROUP BY `id_file`";
         $db      = \Database::obtain();
-        $results = $db->fetch_array( $query, $bindParams );
+        $results = $db->fetch_array( $query );
+
+//        $query       = 'SELECT `fj`.`id_file`, `f`.`filename`, `f`.`id_project`, `j`.`source`, `mime_type`, `sha1_original_file`
+//            FROM `files_job` `fj`
+//            INNER JOIN `files` `f` ON `f`.`id`=`fj`.`id_file`
+//            JOIN `jobs` AS `j` ON `j`.`id`=`fj`.`id_job`
+//            WHERE `fj`.`id_job` = :id_job';
+//
+//
+//        if ( !empty( $id_file ) ) {
+//            $query .= " AND `id_file` = :id_file ";
+//        }
+//
+//        $query       .= " GROUP BY `id_file`";
+//
+//        $bindParams = [
+//                ':id_job' => $id_job
+//        ];
+//
+//        if ( !empty( $id_file ) ) {
+//            $bindParams[ ':id_file' ] = $id_file;
+//        }
+//
+//        $db      = \Database::obtain();
+//
+//        try {
+//            $results = $db->fetch_array( $query );
+//        } catch (\Exception $e){
+//            var_dump($query);
+//            var_dump($bindParams);
+//            var_dump($e->getMessage());
+//            die();
+//        }
 
         foreach ( $results as $k => $result ) {
             //try fetching from files dir

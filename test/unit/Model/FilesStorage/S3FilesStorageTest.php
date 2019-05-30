@@ -82,7 +82,7 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
         S3FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadSession );
 
-        $items = $this->s3Client->getItemsInABucket( S3FilesStorage::QUEUE_BUCKET );
+        $items = $this->s3Client->getItemsInABucket( S3FilesStorage::QUEUE_FOLDER );
 
         $this->assertGreaterThanOrEqual( 1, $items );
     }

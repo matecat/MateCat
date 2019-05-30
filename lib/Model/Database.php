@@ -175,9 +175,9 @@ class Database implements IDatabase {
      * @return bool|mixed|PDOStatement
      */
     public function prepared_query( $sql, $bindParams = [] ) {
-        $sth = $this->getConnection()->prepare( $sql, [ PDO::ATTR_CURSOR => PDO::CURSOR_FWDONLY ] );
+        $sth = $this->getConnection()->prepare( $sql );
 
-        if ( $sth->execute( $bindParams ) ) {
+        if ( $sth->execute($bindParams) ) {
             $this->affected_rows = $sth->rowCount();
 
             return $sth;
@@ -231,7 +231,7 @@ class Database implements IDatabase {
      * @return bool|false|mixed|PDOStatement
      */
     private function getQueryResult( $query, $bindParams = [] ) {
-        if ( !empty( $bindParams ) ) {
+        if ( count( $bindParams ) > 0 ) {
             return $this->prepared_query( $query, $bindParams );
         }
 
