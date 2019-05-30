@@ -1,5 +1,7 @@
 <?php
 
+use FilesStorage\S3FilesStorage;
+
 class XliffSAXTranslationReplacer {
 
     protected $originalFP;
@@ -55,8 +57,16 @@ class XliffSAXTranslationReplacer {
             $this->outputFP = fopen( $outputFile, 'w+' );
         }
 
-        if ( !( $this->originalFP = fopen( $originalXliffFilename, "r" ) ) ) {
-            die( "could not open XML input" );
+        // setting $this->originalFP
+        if(INIT::$FILE_STORAGE_METHOD === 's3'){
+            $s3Client = S3FilesStorage::getStaticS3Client();
+
+            $xmlLink = $s3Client->getPublicItemLink(S3FilesStorage::FILES_STORAGE_BUCKET, $originalXliffFilename);
+            $this->originalFP = fopen($xmlLink, 'r');
+        } else {
+            if ( !( $this->originalFP = fopen( $originalXliffFilename, "r" ) ) ) {
+                die( "could not open XML input" );
+            }
         }
 
         $this->segments       = $segments;

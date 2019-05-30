@@ -1870,9 +1870,9 @@ class ProjectManager {
      */
     private function getXliffFileContent( $xliff_file_content ) {
         if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
-            $fs = S3FilesStorage::getStaticS3Client();
+            $s3Client = S3FilesStorage::getStaticS3Client();
 
-            return  $fs->openItem( S3FilesStorage::FILES_STORAGE_BUCKET, $xliff_file_content );
+            return  $s3Client->openItem( S3FilesStorage::FILES_STORAGE_BUCKET, $xliff_file_content );
         }
 
         return file_get_contents( $xliff_file_content );

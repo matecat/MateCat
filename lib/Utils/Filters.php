@@ -156,11 +156,14 @@ class Filters {
         $tmpFiles   = [];
 
         foreach ( $xliffsData as $id => $xliffData ) {
+
             // Filters are expecting an upload of a xliff file, so put the xliff
             // data in a temp file and configure POST param to upload it
             $tmpXliffFile    = tempnam( sys_get_temp_dir(), "matecat-xliff-to-target-" );
+
+
             $tmpFiles[ $id ] = $tmpXliffFile;
-            file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
+            $x = file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
 
             $dataGroups[ $id ] = [ 'xliffContent' => Utils::curlFile( $tmpXliffFile ) ];
         }

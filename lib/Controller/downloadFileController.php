@@ -5,6 +5,7 @@ use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use FilesStorage\S3FilesStorage;
 
 set_time_limit( 180 );
 
@@ -118,13 +119,24 @@ class downloadFileController extends downloadController {
 
             foreach ( $chunk as $file ) {
 
+                //:{
+                //"id_file":"31",
+                //"filename":"test.txt",
+                //"id_project":"93",
+                //"source":"it-IT",
+                //"mime_type":"txt",
+                //"sha1_original_file":"20190530\/aad03b600bc4792b3dc4bf3a2d7191327a482d4a",
+                //"originalFilePath":"files\/20190530\/31\/orig\/test.txt",
+                //"xliffFilePath":"files\/20190530\/31\/xliff\/test.txt.sdlxliff"
+                //}
+
                 $mime_type        = $file[ 'mime_type' ];
                 $fileID           = $file[ 'id_file' ];
                 $current_filename = $file[ 'filename' ];
 
                 //get path for the output file converted to know it's right extension
                 $_fileName  = explode( DIRECTORY_SEPARATOR, $file[ 'xliffFilePath' ] );
-                $outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
+                $outputPath = INIT::$TMP_DOWNLOAD . DIRECTORY_SEPARATOR . $this->id_job . DIRECTORY_SEPARATOR . $fileID . DIRECTORY_SEPARATOR . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
 
                 //make dir if doesn't exist
                 if ( !file_exists( dirname( $outputPath ) ) ) {
@@ -179,7 +191,6 @@ class downloadFileController extends downloadController {
                         , $file[ 'xliffFilePath' ]
                 );
 
-
                 //instatiate parser
                 $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, $transUnits, $_target_lang, $outputPath );
 
@@ -199,6 +210,7 @@ class downloadFileController extends downloadController {
                 $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
 
                 $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
+
 
                 if ( $this->forceXliff ) {
                     //clean the output filename by removing
@@ -225,7 +237,14 @@ class downloadFileController extends downloadController {
                 $convertBackToOriginal = true;
 
                 //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
-                $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
+                if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+                    $s3Client = S3FilesStorage::getStaticS3Client();
+
+                    $file[ 'original_file' ] = $s3Client->openItem( S3FilesStorage::FILES_STORAGE_BUCKET, $file[ 'originalFilePath' ] );
+                } else {
+                    $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
+                }
+
 
                 // When the 'proprietary' flag is set to false, the xliff
                 // is not passed to any converter, because is handled
