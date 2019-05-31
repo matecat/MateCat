@@ -240,7 +240,7 @@ class downloadFileController extends downloadController {
                 if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
                     $s3Client = S3FilesStorage::getStaticS3Client();
 
-                    $file[ 'original_file' ] = $s3Client->openItem( S3FilesStorage::FILES_STORAGE_BUCKET, $file[ 'originalFilePath' ] );
+                    $file[ 'original_file' ] = $s3Client->openItem( [ 'bucket' => S3FilesStorage::FILES_STORAGE_BUCKET, 'key' => $file[ 'originalFilePath' ] ] );
                 } else {
                     $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
                 }
