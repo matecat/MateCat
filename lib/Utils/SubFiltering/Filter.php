@@ -75,14 +75,15 @@ class Filter {
      */
     protected $_featureSet;
 
-    protected function __construct() {}
+    protected function __construct() {
+    }
 
     /**
      * Update/Add featureSet
      *
      * @param FeatureSet|null $featureSet
      */
-    protected function _featureSet( FeatureSet $featureSet = null ){
+    protected function _featureSet( FeatureSet $featureSet = null ) {
         $this->_featureSet = $featureSet;
     }
 
@@ -94,15 +95,16 @@ class Filter {
      */
     public static function getInstance( FeatureSet $featureSet = null ) {
 
-        if( $featureSet === null ){
+        if ( $featureSet === null ) {
             $featureSet = new FeatureSet();
         }
 
-        if( static::$_INSTANCE === null ){
+        if ( static::$_INSTANCE === null ) {
             static::$_INSTANCE = new Filter();
         }
 
         static::$_INSTANCE->_featureSet( $featureSet );
+
         return static::$_INSTANCE;
 
     }
@@ -135,6 +137,7 @@ class Filter {
         $channel->addLast( new LtGtEncode() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer0ToLayer2', $channel );
+
         return $channel->transform( $segment );
 
     }
@@ -161,6 +164,7 @@ class Filter {
         $channel->addLast( new LtGtEncode() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer1ToLayer2', $channel );
+
         return $channel->transform( $segment );
 
     }
@@ -188,6 +192,7 @@ class Filter {
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer2ToLayer1', $channel );
+
         return $channel->transform( $segment );
 
     }
@@ -231,6 +236,7 @@ class Filter {
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer2ToLayer0', $channel );
+
         return $channel->transform( $segment );
 
     }
@@ -261,6 +267,7 @@ class Filter {
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer0ToLayer1', $channel );
+
         return $channel->transform( $segment );
 
     }
@@ -290,6 +297,7 @@ class Filter {
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer1ToLayer0', $channel );
+
         return $channel->transform( $segment );
     }
 
@@ -314,6 +322,7 @@ class Filter {
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromRawXliffToLayer0', $channel );
+
         return $channel->transform( $segment );
 
     }
@@ -339,6 +348,7 @@ class Filter {
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer0ToRawXliff', $channel );
+
         return $channel->transform( $segment );
 
     }
@@ -356,24 +366,24 @@ class Filter {
      *
      * @return string
      */
-    public function realignIDInLayer1( $source, $target ){
+    public function realignIDInLayer1( $source, $target ) {
 
         $pattern = '|<ph id ?= ?["\'](mtc_[0-9]+)["\'] ?(equiv-text=["\'].+?["\'] ?)/>|ui';
         preg_match_all( $pattern, $source, $src_tags, PREG_PATTERN_ORDER );
         preg_match_all( $pattern, $target, $trg_tags, PREG_PATTERN_ORDER );
 
-        if( count( $src_tags[ 0 ] ) != count( $trg_tags[ 0 ] ) ){
+        if ( count( $src_tags[ 0 ] ) != count( $trg_tags[ 0 ] ) ) {
             return $target; //WRONG NUMBER OF TAGS, in the translation there is a tag mismatch, let the user fix it
         }
 
         $notFoundTargetTags = [];
 
         $start_offset = 0;
-        foreach ( $trg_tags[ 2 ] as $trg_tag_position => $b64 ){
+        foreach ( $trg_tags[ 2 ] as $trg_tag_position => $b64 ) {
 
             $src_tag_position = array_search( $b64, $src_tags[ 2 ], true );
 
-            if( $src_tag_position === false ){
+            if ( $src_tag_position === false ) {
                 //this means that the content of a tag is changed in the translation
                 $notFoundTargetTags[ $trg_tag_position ] = $b64;
                 continue;
@@ -384,12 +394,12 @@ class Filter {
 
             //replace ONLY ONE element AND the EXACT ONE
             $tag_position_in_string = strpos( $target, $trg_tags[ 0 ][ $trg_tag_position ], $start_offset );
-            $target = substr_replace( $target, $src_tags[ 0 ][ $src_tag_position ], $tag_position_in_string, strlen( $trg_tags[ 0 ][ $trg_tag_position ] ) );
-            $start_offset = $tag_position_in_string + strlen( $src_tags[ 0 ][ $src_tag_position ] ); // set the next starting point
+            $target                 = substr_replace( $target, $src_tags[ 0 ][ $src_tag_position ], $tag_position_in_string, strlen( $trg_tags[ 0 ][ $trg_tag_position ] ) );
+            $start_offset           = $tag_position_in_string + strlen( $src_tags[ 0 ][ $src_tag_position ] ); // set the next starting point
 
         }
 
-        if( !empty( $notFoundTargetTags ) ){
+        if ( !empty( $notFoundTargetTags ) ) {
             //do something ?!? how to re-align if they are changed in value and changed in position?
         }
 
