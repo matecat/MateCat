@@ -48,7 +48,7 @@ class JobContainer extends React.Component {
     getTranslateUrl() {
         let use_prefix = ( this.props.jobsLenght > 1 );
         let chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
-        return '/translate/'+this.props.project.get('project_slug')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
+        return '/translate/'+this.props.project.get('project_slug')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password') + (use_prefix?'#'+this.props.job.get('job_first_segment'):'')  ;
     }
 
     getReviseUrl() {
@@ -59,7 +59,7 @@ class JobContainer extends React.Component {
             this.props.job.get('password')
         );
 
-        return '/revise/'+this.props.project.get('project_slug')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+  possibly_different_review_password ;
+        return '/revise/'+this.props.project.get('project_slug')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+  possibly_different_review_password + (use_prefix?'#'+this.props.job.get('job_first_segment'):'');
     }
 
     getEditingLogUrl() {
