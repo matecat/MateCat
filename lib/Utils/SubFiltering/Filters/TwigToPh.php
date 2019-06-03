@@ -15,12 +15,16 @@ use SubFiltering\Commons\Constants;
 class TwigToPh extends AbstractHandler {
 
     /**
-     * @param $segment
+     * TestSet:
+     * <code>
+     *   Dear {{customer.first_name}}, This is {{agent.alias}} with Airbnb.
+     * </code>
      *
+     * @param $segment
      * @return string
      */
     public function transform( $segment ) {
-        preg_match_all( '/{[{%#][^<>]+[}%#]}/', $segment, $html, PREG_SET_ORDER );
+        preg_match_all( '/{[{%#][^<>]+?[}%#]}/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $pos => $twig_variable ) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
             if( !strstr($twig_variable[0], Constants::GTPLACEHOLDER) ){
