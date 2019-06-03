@@ -55,7 +55,7 @@ class S3FilesStorage extends AbstractFilesStorage {
             $this->s3Client->disableSslVerify();
         }
 
-        $this->createAndSetupBucket();
+        //$this->createAndSetupBucket();
     }
 
     /**
@@ -64,34 +64,37 @@ class S3FilesStorage extends AbstractFilesStorage {
      * Cache-package items > 2 days of lifecycle
      */
     private function createAndSetupBucket() {
-        $this->s3Client->createBucketIfItDoesNotExist( [ 'bucket' => self::FILES_STORAGE_BUCKET, ] );
 
-        $rules = [
-                [
-                        "ID"          => "Move cache package to Glacier",
-                        "Prefix"      => self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR,
-                        "Status"      => "Enabled",
-                        "Transitions" => [
-                                [
-                                        "Days"         => 2,
-                                        "StorageClass" => "GLACIER"
-                                ]
-                        ]
-                ],
-                [
-                        "ID"                           => "Move old versions to Glacier",
-                        "Status"                       => "Enabled",
-                        "Prefix"                       => "",
-                        "NoncurrentVersionTransitions" => [
-                                [
-                                        "NoncurrentDays" => 2,
-                                        "StorageClass"   => "GLACIER"
-                                ]
-                        ],
-                ]
-        ];
+        if ( false === $this->s3Client->hasBucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, ] ) ) {
+            $this->s3Client->createBucketIfItDoesNotExist( [ 'bucket' => self::FILES_STORAGE_BUCKET, ] );
 
-        $this->s3Client->setBucketLifecycleConfiguration( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'rules' => $rules ] );
+            $rules = [
+                    [
+                            "ID"          => "Move cache package to Glacier",
+                            "Prefix"      => self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR,
+                            "Status"      => "Enabled",
+                            "Transitions" => [
+                                    [
+                                            "Days"         => 2,
+                                            "StorageClass" => "GLACIER"
+                                    ]
+                            ]
+                    ],
+                    [
+                            "ID"                           => "Move old versions to Glacier",
+                            "Status"                       => "Enabled",
+                            "Prefix"                       => "",
+                            "NoncurrentVersionTransitions" => [
+                                    [
+                                            "NoncurrentDays" => 2,
+                                            "StorageClass"   => "GLACIER"
+                                    ]
+                            ],
+                    ]
+            ];
+
+            $this->s3Client->setBucketLifecycleConfiguration( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'rules' => $rules ] );
+        }
     }
 
     /**
@@ -234,7 +237,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/' . $keyToSearch . '/'; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9!!it-IT/work/
         $items  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
 
-        return ( isset( array_keys( $items )[ 0 ] ) ) ? array_keys( $items )[ 0 ] : null;
+        return ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
     }
 
     /**
@@ -267,7 +270,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $origPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig/';
         $origItems  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $origPrefix ] );
 
-        foreach ( array_keys( $origItems ) as $key ) {
+        foreach ( $origItems as $key ) {
 
             $newKey = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . '/orig/' . $this->getTheLastPartOfKey( $key );
             $copied = $this->s3Client->copyItem( [
@@ -287,7 +290,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $workPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/work/';
         $workItems  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $workPrefix ] );
 
-        foreach ( array_keys( $workItems ) as $key ) {
+        foreach ( $workItems as $key ) {
 
             $newKey = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . '/xliff/' . $this->getTheLastPartOfKey( $key );
             $copied = $this->s3Client->copyItem( [
@@ -343,7 +346,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $prefix = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . $keyToSearch . DIRECTORY_SEPARATOR; // example: 20181212/13/work/
         $items  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
 
-        return ( isset( array_keys( $items )[ 0 ] ) ) ? array_keys( $items )[ 0 ] : null;
+        return ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
     }
 
     /**
@@ -400,15 +403,16 @@ class S3FilesStorage extends AbstractFilesStorage {
         $zipFilesHash  = [];
         $filesHashInfo = [];
 
+        $i         = 0;
         $linkFiles = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $folder ] );
 
-        foreach ( $linkFiles as $k => $linkFile ) {
-            if ( strpos( $k, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
-                $zipFilesHash[] = $k;
-            } elseif ( strpos( $k, '.' ) !== false or strpos( $k, self::OBJECTS_SAFE_DELIMITER ) === false ) {
-                unset( $linkFiles[ $k ] );
+        foreach ( $linkFiles as $key ) {
+            if ( strpos( $key, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
+                $zipFilesHash[] = $key;
+            } elseif ( strpos( $key, '.' ) !== false or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === false ) {
+                unset( $linkFiles[ $i ] );
             } else {
-                $filesHashInfo[ 'sha' ][] = $k;
+                $filesHashInfo[ 'sha' ][] = $key;
 
                 // this method get the content from the hashes map file and convert it into an array of original file names
                 // Example:
@@ -420,9 +424,11 @@ class S3FilesStorage extends AbstractFilesStorage {
                 //     0 => 'file.txt',
                 //     1 => 'file2.txt'
                 // ]
-                $filesHashInfo[ 'fileName' ][ $k ] =
-                $result = array_filter( array_map( 'trim', explode( "\n", $this->s3Client->openItem( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $k ] ) ) ) );
+                $filesHashInfo[ 'fileName' ][ $key ] =
+                $result = array_filter( array_map( 'trim', explode( "\n", $this->s3Client->openItem( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $key ] ) ) ) );
             }
+
+            $i++;
         }
 
         return [
@@ -549,7 +555,7 @@ class S3FilesStorage extends AbstractFilesStorage {
     public function linkZipToProject( $create_date, $zipHash, $projectID ) {
         $cacheZipPackage = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $zipHash . $this->getOriginalZipPlaceholder() . DIRECTORY_SEPARATOR;
 
-        foreach ( array_keys( $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $cacheZipPackage ] ) ) as $key ) {
+        foreach ( $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $cacheZipPackage ] ) as $key ) {
             $destination = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getOriginalZipPath( $create_date, $projectID, $this->getTheLastPartOfKey( $key ) );
 
             $copied = $this->s3Client->copyItem( [
