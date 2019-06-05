@@ -515,7 +515,7 @@ class S3FilesStorage extends AbstractFilesStorage {
     public function linkZipToProject( $create_date, $zipHash, $projectID ) {
         $cacheZipPackage = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $zipHash . $this->getOriginalZipPlaceholder() . DIRECTORY_SEPARATOR;
 
-        foreach ( $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $cacheZipPackage ] ) as $key ) {
+        foreach ( $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $cacheZipPackage ] ) as $key ) {
             $destination = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getOriginalZipPath( $create_date, $projectID, $this->getTheLastPartOfKey( $key ) );
 
             $copied = $this->s3Client->copyItem( [
