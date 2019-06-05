@@ -365,7 +365,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $filesHashInfo = [];
 
         $i         = 0;
-        $linkFiles = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $folder ] );
+        $linkFiles = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $folder ] );
 
         foreach ( $linkFiles as $key ) {
             if ( strpos( $key, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
