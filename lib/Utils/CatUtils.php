@@ -391,6 +391,14 @@ class CatUtils {
         $string = html_entity_decode( $string, ENT_XML1, 'UTF-8' );
 
         /**
+         * Count links as 1 word
+         *
+         * heuristic, of course this regexp is not perfect, hoping it is not too greedy
+         *
+         */
+        $string = preg_replace( '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d-_]+)?(?:[\p{Latin}\d-_]+\.[\p{Latin}\d-_]+\.[\p{Latin}\d#\?=\.-_]+)/', 'TRANSLATED_LINK', $string );
+
+        /**
          * Count numbers as One Word
          */
         if ( array_key_exists( $source_lang, self::$cjk ) ) {
@@ -405,7 +413,7 @@ class CatUtils {
 
             // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', ' TRANSLATED_NUMBER ', $string );
+            $string = preg_replace( '/\s[\.,0-9]+\s/', ' TRANSLATED_NUMBER ', $string );
 
         }
 
