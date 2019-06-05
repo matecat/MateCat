@@ -12,6 +12,8 @@ class FilesStorageFactoryTest extends PHPUnit_Framework_TestCase {
     public function test_it_initialize_S3FilesStorage() {
         $fileStorage = FilesStorageFactory::create();
 
+
+
         $this->assertInstanceOf( S3FilesStorage::class, $fileStorage );
     }
 

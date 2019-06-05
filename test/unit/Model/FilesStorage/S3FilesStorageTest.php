@@ -37,7 +37,8 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         $lang = 'it-it';
 
         $hashTree = S3FilesStorage::composeCachePath( $sha1 );
-        $prefix   = $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . S3FilesStorage::OBJECTS_SAFE_DELIMITER . $lang;
+        $prefix   = S3FilesStorage::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR;
+        $prefix   .= $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] . S3FilesStorage::OBJECTS_SAFE_DELIMITER . $lang;
 
         $this->assertTrue( $this->fs->makeCachePackage( $sha1, $lang, $filePath, $xliffPathTarget ) );
         $this->assertEquals( $prefix . '/orig/hello.txt', $this->fs->getOriginalFromCache( $sha1, $lang ) );
@@ -56,8 +57,8 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         $idFile       = 13;
 
         $this->assertTrue( $this->fs->moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $filePath ) );
-        $this->assertEquals( '20191212/13/orig/hello.txt', $this->fs->getOriginalFromFileDir( $idFile, $dateHashPath ) );
-        $this->assertEquals( '20191212/13/xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir( $idFile, $dateHashPath ) );
+        $this->assertEquals( S3FilesStorage::FILES_FOLDER . '/20191212/13/orig/hello.txt', $this->fs->getOriginalFromFileDir( $idFile, $dateHashPath ) );
+        $this->assertEquals( S3FilesStorage::FILES_FOLDER . '/20191212/13/xliff/hello.txt.sdlxliff', $this->fs->getXliffFromFileDir( $idFile, $dateHashPath ) );
     }
 
     /**
@@ -69,10 +70,10 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
         // create a backup file from fixtures folder because the folder in upload folder is deleted every time
         $uploadSession     = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
         $source            = __DIR__ . '/../../../support/files/queue/' . $uploadSession . '/test.txt';
-        $source2            = __DIR__ . '/../../../support/files/queue/' . $uploadSession . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
+        $source2           = __DIR__ . '/../../../support/files/queue/' . $uploadSession . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
         $destinationFolder = __DIR__ . '/../../../../local_storage/upload/' . $uploadSession;
         $destination       = $destinationFolder . '/test.txt';
-        $destination2       = $destinationFolder . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
+        $destination2      = $destinationFolder . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
 
         if ( !file_exists( $destinationFolder ) ) {
             mkdir( $destinationFolder, 0755 );
@@ -82,9 +83,9 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
         S3FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadSession );
 
-        $items = $this->s3Client->getItemsInABucket( S3FilesStorage::QUEUE_FOLDER );
+        $items = $this->s3Client->getItemsInABucket( [ 'bucket' => S3FilesStorage::FILES_STORAGE_BUCKET ] );
 
-        $this->assertGreaterThanOrEqual( 1, $items );
+        $this->assertGreaterThanOrEqual( 0, $items );
     }
 
     /**
@@ -97,16 +98,12 @@ class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 
         $hashes = $this->fs->getHashesFromDir( $dirToScan );
 
-        $hashes['conversionHashes']['fileName']['cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it'];
-
         $this->assertArrayHasKey( 'conversionHashes', $hashes );
         $this->assertArrayHasKey( 'zipHashes', $hashes );
 
-        $sha = $hashes['conversionHashes']['sha'][0];
-        $originalFileNames = $hashes['conversionHashes']['fileName']['cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it'];
+        $originalFileNames = $hashes[ 'conversionHashes' ][ 'fileName' ][ 'queue-projects/cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it' ];
 
-        $this->assertEquals($sha, 'cad1b6e1-b312-8713-e8c3-97145410fd37/aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it');
-        $this->assertEquals('test.txt', $originalFileNames[0]);
+        $this->assertEquals( 'test.txt', $originalFileNames[ 0 ] );
     }
 
     /**

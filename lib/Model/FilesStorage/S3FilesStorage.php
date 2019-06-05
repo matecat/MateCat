@@ -2,8 +2,12 @@
 
 namespace FilesStorage;
 
+use Aws\PsrCacheAdapter;
+use DirectoryIterator;
 use INIT;
+use RedisHandler;
 use SimpleS3\Client;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 /**
  * Class S3FilesStorage
@@ -55,46 +59,12 @@ class S3FilesStorage extends AbstractFilesStorage {
             $this->s3Client->disableSslVerify();
         }
 
-        //$this->createAndSetupBucket();
-    }
-
-    /**
-     * Create the bucket storage if does not exists and setup the folders
-     *
-     * Cache-package items > 2 days of lifecycle
-     */
-    private function createAndSetupBucket() {
-
-        if ( false === $this->s3Client->hasBucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, ] ) ) {
-            $this->s3Client->createBucketIfItDoesNotExist( [ 'bucket' => self::FILES_STORAGE_BUCKET, ] );
-
-            $rules = [
-                    [
-                            "ID"          => "Move cache package to Glacier",
-                            "Prefix"      => self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR,
-                            "Status"      => "Enabled",
-                            "Transitions" => [
-                                    [
-                                            "Days"         => 2,
-                                            "StorageClass" => "GLACIER"
-                                    ]
-                            ]
-                    ],
-                    [
-                            "ID"                           => "Move old versions to Glacier",
-                            "Status"                       => "Enabled",
-                            "Prefix"                       => "",
-                            "NoncurrentVersionTransitions" => [
-                                    [
-                                            "NoncurrentDays" => 2,
-                                            "StorageClass"   => "GLACIER"
-                                    ]
-                            ],
-                    ]
-            ];
-
-            $this->s3Client->setBucketLifecycleConfiguration( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'rules' => $rules ] );
-        }
+//        // add caching
+//        if ( INIT::$AWS_CACHING == true ) {
+//            $redis        = new RedisHandler();
+//            $cacheAdapter = new RedisAdapter( $redis->getConnection() ); // in this example Symfony Cache component is used
+//            $this->s3Client->addCache( new PsrCacheAdapter( $cacheAdapter ) );
+//        }
     }
 
     /**
@@ -103,6 +73,8 @@ class S3FilesStorage extends AbstractFilesStorage {
      * to all static methods like moveFileFromUploadSessionToQueuePath()
      *
      * @return Client
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
      */
     public static function getStaticS3Client() {
 
@@ -147,15 +119,15 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         // get the prefix
         $prefix = $this->getCachePackageHashFolder( $hash, $lang );
+        $file   = $prefix . '/work/' . $this->getTheLastPartOfKey( $xliffPath );
+        $valid  = $this->s3Client->hasItem( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $file ] );
 
-        if ( \INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $this->s3Client->hasItem( [ 'bucket' => self::CACHE_PACKAGE_FOLDER, 'prefix' => $prefix ] ) ) {
+        if ( \INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $valid ) {
             return true;
         }
 
         $xliffDestination = $this->getXliffDestination( $prefix, $xliffPath, self::FILES_STORAGE_BUCKET, $originalPath );
-
         $this->tryToUploadAFile( self::FILES_STORAGE_BUCKET, $xliffDestination, $xliffPath );
-
         unlink( $xliffPath );
 
         return true;
@@ -258,55 +230,36 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
-
-        $errors = [];
-
-        // 1. get the cache package item in bucket
         $hashes   = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $datePath = $hashes[ 0 ];
         $hash     = $hashes[ 1 ];
 
-        // 2. copy orig file from cache package to project bucket
-        $origPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig/';
-        $origItems  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $origPrefix ] );
+        $origPrefix  = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig/';
+        $workPrefix  = $this->getCachePackageHashFolder( $hash, $lang ) . '/work/';
+        $origItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $origPrefix ] );
+        $workItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $workPrefix ] );
+        $sourceItems = array_merge( $origItems, $workItems );
 
-        foreach ( $origItems as $key ) {
-
-            $newKey = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . '/orig/' . $this->getTheLastPartOfKey( $key );
-            $copied = $this->s3Client->copyItem( [
-                    'source_bucket' => self::FILES_STORAGE_BUCKET,
-                    'source'        => $key,
-                    'target_bucket' => self::FILES_STORAGE_BUCKET,
-                    'target'        => $newKey
-            ] );
-
-            if ( false === $copied ) {
-                \Log::doJsonLog( 'project id ' . $idFile . ': ' . $key . ' was copied from ' . self::FILES_STORAGE_BUCKET . ' to ' . self::FILES_STORAGE_BUCKET );
-                $errors[] = $key . ' was not copied';
+        $destItems = [];
+        foreach ( $sourceItems as $key ) {
+            if ( strpos( $key, '/orig/' ) !== false ) {
+                $folder = '/orig/';
+            } else {
+                $folder = '/xliff/';
             }
+
+            $destItems[] = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . $folder . $this->getTheLastPartOfKey( $key );
         }
 
-        // 3. copy work file from cache package to project bucket
-        $workPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/work/';
-        $workItems  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $workPrefix ] );
+        \Log::doJsonLog( 'project id ' . $idFile . ': copying files from cache package to project folder' );
 
-        foreach ( $workItems as $key ) {
-
-            $newKey = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . '/xliff/' . $this->getTheLastPartOfKey( $key );
-            $copied = $this->s3Client->copyItem( [
-                    'source_bucket' => self::FILES_STORAGE_BUCKET,
-                    'source'        => $key,
-                    'target_bucket' => self::FILES_STORAGE_BUCKET,
-                    'target'        => $newKey
-            ] );
-
-            if ( false === $copied ) {
-                \Log::doJsonLog( 'project id ' . $idFile . ': ' . $key . ' was copied from ' . self::FILES_STORAGE_BUCKET . ' to ' . self::FILES_STORAGE_BUCKET );
-                $errors[] = $key . ' was not copied';
-            }
-        }
-
-        return ( count( $errors ) === 0 );
+        return $this->s3Client->copyInBatch( [
+                'source_bucket' => self::FILES_STORAGE_BUCKET,
+                'files'         => [
+                        'source' => $sourceItems,
+                        'target' => $destItems,
+                ],
+        ] );
     }
 
     /**
@@ -365,6 +318,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         $s3Client = self::getStaticS3Client();
 
+        /** @var DirectoryIterator $item */
         foreach (
                 $iterator = new \RecursiveIteratorIterator(
                         new \RecursiveDirectoryIterator( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, \RecursiveDirectoryIterator::SKIP_DOTS ),
@@ -376,16 +330,23 @@ class S3FilesStorage extends AbstractFilesStorage {
             // Example: aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT --> aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it
             $subPathName = str_replace( '|', self::OBJECTS_SAFE_DELIMITER, strtolower( $iterator->getSubPathName() ) );
 
+            $key = $prefix . DIRECTORY_SEPARATOR . $subPathName;
+
             if ( $item->isDir() ) {
                 // create folder
-                $s3Client->createFolder( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $prefix . DIRECTORY_SEPARATOR . $subPathName ] );
+                $s3Client->createFolder( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $key ] );
             } else {
                 // upload file
                 $s3Client->uploadItem( [
                         'bucket' => self::FILES_STORAGE_BUCKET,
-                        'key'    => $prefix . DIRECTORY_SEPARATOR . $subPathName,
+                        'key'    => $key,
                         'source' => $item->getPathName()
                 ] );
+
+                // save on redis the hash map files
+                if ( strpos( $key, '.' ) !== true or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === true ) {
+                    ( new RedisHandler() )->getConnection()->set( $key, file_get_contents( $item->getPathName() ) );
+                }
             }
         }
 
@@ -424,8 +385,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                 //     0 => 'file.txt',
                 //     1 => 'file2.txt'
                 // ]
-                $filesHashInfo[ 'fileName' ][ $key ] =
-                $result = array_filter( array_map( 'trim', explode( "\n", $this->s3Client->openItem( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'key' => $key ] ) ) ) );
+                $filesHashInfo[ 'fileName' ][ $key ] = array_filter( array_map( 'trim', explode( "\n", ( new RedisHandler() )->getConnection()->get( $key ) ) ) );
             }
 
             $i++;
@@ -597,7 +557,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return string
      */
     public function getOriginalZipDir( $projectDate, $projectID ) {
-        return 'work/' . $this->getDatePath( $projectDate ) . DIRECTORY_SEPARATOR . $projectID;
+        return 'work' . DIRECTORY_SEPARATOR . $this->getDatePath( $projectDate ) . DIRECTORY_SEPARATOR . $projectID;
     }
 
     /**
@@ -636,6 +596,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                     'key'    => $destination,
                     'source' => $origPath
             ] );
+
             \Log::doJsonLog( 'Successfully uploaded file ' . $destination . ' into ' . $bucketName . ' bucket.' );
         } catch ( \Exception $e ) {
             \Log::doJsonLog( 'Error in uploading a file ' . $destination . ' into ' . $bucketName . ' bucket. ERROR: ' . $e->getMessage() );

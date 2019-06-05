@@ -47,6 +47,8 @@ AWS_ACCESS_KEY_ID = 'xxxxxxx'
 AWS_SECRET_KEY = 'xxxxxxxxxxxx'
 AWS_VERSION = 'latest'
 AWS_REGION = 'us-west-2'
+AWS_STORAGE_BASE_BUCKET = "xxxxxxxxxxxxxx"
+AWS_CACHING = true
 AWS_SSL_VERIFY = true
 
 DQF_ENABLED = yes
@@ -103,6 +105,7 @@ AWS_VERSION = 'latest'
 AWS_REGION = 'us-west-2'
 AWS_PROFILE = 'default'
 AWS_STORAGE_BASE_BUCKET = "storage-bucket"
+AWS_CACHING = true
 
 ;----------------------------------------
 [production]

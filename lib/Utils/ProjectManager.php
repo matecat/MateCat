@@ -396,6 +396,8 @@ class ProjectManager {
             //Found Errors
         }
 
+        $fs = FilesStorageFactory::create();
+
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] );
         }
@@ -467,7 +469,6 @@ class ProjectManager {
         \Log::doJsonLog( $uploadDir );
 
         //we are going to access the storage, get model object to manipulate it
-        $fs        = FilesStorageFactory::create();
         $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
 
         \Log::doJsonLog( $linkFiles );
@@ -1084,10 +1085,12 @@ class ProjectManager {
 
     protected function _zipFileHandling( $linkFiles ) {
 
+        $fs = FilesStorageFactory::create();
+
         //begin of zip hashes manipulation
         foreach ( $linkFiles[ 'zipHashes' ] as $zipHash ) {
 
-            $result = $this->files_storage->linkZipToProject(
+            $result = $fs->linkZipToProject(
                     $this->projectStructure[ 'create_date' ],
                     $zipHash,
                     $this->projectStructure[ 'id_project' ]
@@ -1100,7 +1103,7 @@ class ProjectManager {
                 //Exit
             }
 
-            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $this->files_storage->getZipDir() );
+            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $fs->getZipDir() );
 
         } //end zip hashes manipulation
 
@@ -1887,6 +1890,7 @@ class ProjectManager {
      * @throws Exception
      */
     protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName ) {
+        $fs = FilesStorageFactory::create();
 
         $yearMonthPath    = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
@@ -1894,9 +1898,6 @@ class ProjectManager {
         //return structure
         $filesStructure = [];
 
-        //PLEASE NOTE, this can be an array when the same file added more
-        // than once and with different names
-        //
         foreach ( $_originalFileNames as $originalFileName ) {
 
             $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
@@ -1909,7 +1910,6 @@ class ProjectManager {
                 }
             }
 
-            $fs = FilesStorageFactory::create();
             $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
                     $this->projectStructure[ 'source_language' ],
@@ -1920,11 +1920,9 @@ class ProjectManager {
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
             $filesStructure[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
-
         }
 
         return $filesStructure;
-
     }
 
     protected function _storeSegments( $fid ) {
