@@ -144,12 +144,12 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     /**
      * @param $chunk_ids
-     * @param $ids
+     * @param $source_pages
      *
      * @return ChunkReviewStruct[]
      */
-    public function findChunkReviewsInSourcePages( $chunk_ids, $ids ) {
-        $sql_condition = " WHERE source_page IN ( " . implode(',', $ids ) . ") ";
+    public function findChunkReviewsInSourcePages( $chunk_ids, $source_pages ) {
+        $sql_condition = " WHERE source_page IN ( " . implode(',', $source_pages ) . ") ";
         return $this->findChunkReviewsByChunkIdsAndCondition( $chunk_ids, $sql_condition ) ;
     }
 

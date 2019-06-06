@@ -26,6 +26,12 @@ class Utils {
         return $statsArray ;
     }
 
+    /**
+     *
+     * @param $number
+     *
+     * @return int
+     */
     public static function revisionNumberToSourcePage($number) {
         if ( !is_null( $number ) ) {
             return $number + 1 ;

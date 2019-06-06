@@ -8,6 +8,8 @@
 
 namespace Features\TranslationVersions\Model;
 
+use Constants;
+use Constants_TranslationStatus;
 use Exception;
 use TransactionableTrait;
 use Translations_SegmentTranslationStruct;
@@ -63,14 +65,14 @@ class SegmentTranslationEventModel  {
      * @return bool
      */
     public function isUpperRevision() {
-        return $this->getPriorEvent()->source_page < $this->getCurrentEvent()->source_page ;
+        return $this->getOriginSourcePage() < $this->getDestinationSourcePage() ;
     }
 
     /**
      * @return bool
      */
     public function isLowerRevision() {
-        return $this->getPriorEvent()->source_page > $this->getCurrentEvent()->source_page ;
+        return $this->getOriginSourcePage() > $this->getDestinationSourcePage() ;
     }
 
     public function save() {
@@ -117,7 +119,7 @@ class SegmentTranslationEventModel  {
         return (
                 $this->old_translation->translation != $this->translation->translation ||
                 $this->old_translation->status      != $this->translation->status ||
-                $this->source_page_code             != $this->getPriorEvent()->source_page
+                $this->source_page_code             != $this->getOriginSourcePage()
         );
     }
 
@@ -136,6 +138,8 @@ class SegmentTranslationEventModel  {
     }
 
     /**
+     * This may return null in some cases because prior event can be missing.
+     *
      * @return SegmentTranslationEventStruct|int|null
      */
     public function getPriorEvent() {
@@ -159,6 +163,39 @@ class SegmentTranslationEventModel  {
         return $this->current_event ;
     }
 
+    /**
+     * @return mixed
+     * @throws Exception
+     */
+    public function getOriginSourcePage() {
+        if ( ! $this->getPriorEvent() ) {
+            if (
+                    in_array( $this->getOldTranslation()->status,
+                            array_merge(
+                                    Constants_TranslationStatus::$TRANSLATION_STATUSES,
+                                    Constants_TranslationStatus::$INITIAL_STATUSES
+                            ) )
+            )  {
+                $source_page = Constants::SOURCE_PAGE_TRANSLATE ;
+            }
+            elseif ( Constants_TranslationStatus::isReviewedStatus( $this->getOldTranslation()->status ) ) {
+                $source_page = Constants::SOURCE_PAGE_REVISION ;
+            }
+            else {
+                throw new \Exception('Unable to guess source_page for missing prior event') ;
+            }
+            return $source_page ;
+        }
+        else {
+            return $this->getPriorEvent()->source_page ;
+        }
+    }
 
+    /**
+     * @return int
+     */
+    public function getDestinationSourcePage() {
+        return $this->getCurrentEvent()->source_page ;
+    }
 
 }

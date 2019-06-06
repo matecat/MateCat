@@ -64,14 +64,15 @@ class SegmentTranslationChangeVector {
         return $this->old_translation ;
     }
 
-    public function getDestinationSourcePage() {
-        return $this->eventModel->getCurrentEvent()->source_page ;
-    }
-
-    public function getOriginSourcePage() {
-        return $this->eventModel->getPriorEvent()->source_page ;
-    }
-
+    /**
+     * Origin source page can be missing. This can happen in case of ICE matches, or pre-transalted
+     * segments or just because we are evaluating a transition from NEW to TRANSLATED status.
+     *
+     * In such case we need to make assumptions on the `source_page` variable because that's what we use
+     * to decide where to move revised words and advancement words around.
+     * @return mixed
+     * @throws \Exception
+     */
     public function isBeingUpperReviewed() {
         return $this->old_translation->isReviewedStatus() &&
         $this->translation->isReviewedStatus() &&
@@ -90,30 +91,33 @@ class SegmentTranslationChangeVector {
      * @return int
      */
     public function getSourcePageDirection() {
-        $originEvent      = $this->eventModel->getPriorEvent();
-        $destinationEvent = $this->eventModel->getCurrentEvent();
+        $originSourcePage      = $this->eventModel->getOriginSourcePage() ;
+        $destinationSourcePage = $this->eventModel->getDestinationSourcePage() ;
 
-        return $originEvent->source_page < $destinationEvent->source_page ? 1  : (
-            $originEvent->source_page == $destinationEvent->source_page ? null : -1
+        return $originSourcePage < $destinationSourcePage ? 1  : (
+            $originSourcePage == $destinationSourcePage ? null : -1
         );
     }
 
     /**
-     * This method returns the source pages span including the translation source page.
+     *
+     * This method returns the list of revision source pages codes that which are involved in the current
+     * transition. Source page for Translate page is skipped.
+     * Example:
+     *
+     * - if moving from R1 to R2 => returns [2,3]
+     * - if moving frmo R4 to R1 => returns [5,4,3,2]
+     * - the change remains on R3 => returns [4]
      *
      * @return array
      */
     public function sourcePagesSpan() {
-        if ( $this->getSourcePageDirection() === 1 ) {
-            $min = $this->eventModel->getPriorEvent()->source_page ;
-            $max = $this->eventModel->getCurrentEvent()->source_page ;
-        }
-        elseif ($this->getSourcePageDirection() === -1 ) {
-            $min = $this->eventModel->getCurrentEvent()->source_page ;
-            $max = $this->eventModel->getPriorEvent()->source_page ;
-        }
-        else {
-            return [];
+        $min = $this->eventModel->getOriginSourcePage() ;
+        $max = $this->eventModel->getDestinationSourcePage() ;
+
+        if ( $this->getSourcePageDirection() === -1 ) {
+            $min = $this->eventModel->getDestinationSourcePage() ;
+            $max = $this->eventModel->getOriginSourcePage() ;
         }
 
         $list   = [] ;
@@ -121,7 +125,10 @@ class SegmentTranslationChangeVector {
         while( $max >= $min ) {
             $list[] = $max-- ;
         }
-        return $list ;
+
+        return array_filter( $list, function($i) {
+            return $i != Constants::SOURCE_PAGE_TRANSLATE ;
+        });
     }
 
     /**

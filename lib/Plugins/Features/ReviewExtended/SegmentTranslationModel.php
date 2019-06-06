@@ -42,14 +42,17 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
     public function evaluateReviewedWordsTransition() {
         $this->openTransaction() ;
 
+        $sourcePageSpan = $this->model->sourcePagesSpan() ;
+        if ( empty( $sourcePageSpan ) ) {
+            return ;
+        }
         // load all relevant source page ChunkReviewRecords
         // find all chunk reviews between source and destination and sort them by direction
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviewsInSourcePages( [ [
                 $this->chunk->id, $this->chunk->password ] ],
-                $this->model->sourcePagesSpan() );
+                $sourcePageSpan  );
 
         if ( $this->model->getSourcePageDirection() === -1 )  {
-            // moving down
             $chunkReviews = array_reverse( $chunkReviews ) ;
         }
 
@@ -84,17 +87,12 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
         $modifiedChunkReviewsToSave = [] ;
         $unsetFinalRevision         = [] ;
         $setFinalRevision           = [] ;
+        $originSourcePage           = $this->model->getEventModel()->getOriginSourcePage();
+        $destinationSourcePage      = $this->model->getEventModel()->getDestinationSourcePage() ;
 
-        if (
-                !$this->model->isEnteringReviewedState() &&
-                $chunkReviews[0]->source_page != $this->model->getEventModel()->getPriorEvent()->source_page
-        ) {
-            throw new Exception('The oridering of chunk review is not as expected');
-        }
 
         foreach( $chunkReviews as $chunkReview ) {
-
-            if ( $this->model->isEnteringReviewedState() && $this->model->getDestinationSourcePage() == $chunkReview->source_page ) {
+            if ( $this->model->isEnteringReviewedState() && $destinationSourcePage == $chunkReview->source_page ) {
                 // expect the first chunk review record to be the final
                 // add revised words and advancement
                 $chunkReview->reviewed_words_count += $this->rawWordsCountWithPropagation();
@@ -104,7 +102,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 break;
             }
 
-            if ( $this->model->isExitingReviewedState() ) {
+            elseif ( $this->model->isExitingReviewedState() ) {
                 // expect the direction to be downwards from R3 -> R2 -> R1 etc.
                 if ( in_array( $chunkReview->source_page, $sourcePagesWithFinalRevisions ) ) {
                     $chunkReview->reviewed_words_count -= $this->rawWordsCountWithPropagation();
@@ -112,7 +110,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 }
 
                 // expect advancement to be removed only from the current source page
-                if ( $chunkReview->source_page == $this->model->getEventModel()->getPriorEvent()->source_page ) {
+                if ( $chunkReview->source_page == $originSourcePage ) {
                     $chunkReview->advancement_wc -= $this->equivalentWordsCountWithPropagation();
                 }
 
@@ -120,21 +118,24 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
             }
 
             // TODO: in the following two cases we shuold considere if the segment is changed or not.
-
-            if ( $this->model->isBeingLowerReviewed() ) {
+            elseif ( $this->model->isBeingLowerReviewed() ) {
                 // whenever a revision is lower reviewed we expect the upper revisions to be invalidated.
                 // the reviewed words count is removed from the upper one and moved to the lower one.
-                if ( $this->model->getOriginSourcePage() == $chunkReview->source_page ) {
+                if ( $originSourcePage == $chunkReview->source_page ) {
                     $chunkReview->reviewed_words_count -= $this->rawWordsCountWithPropagation();
                     $unsetFinalRevision[]               = $chunkReview->source_page ;
                     // expect advancement to be assigned to the origin source_page
                     $chunkReview->advancement_wc       -= $this->equivalentWordsCountWithPropagation();
                     $modifiedChunkReviewsToSave[]       = $chunkReview ;
 
-                } elseif ( $this->model->getDestinationSourcePage() == $chunkReview->source_page ) {
+                } elseif ( $destinationSourcePage == $chunkReview->source_page ) {
                     // we reached the last record, destination record of the lower revision, add the count
-                    $chunkReview->reviewed_words_count += $this->rawWordsCountWithPropagation();
-                    $setFinalRevision[]                 = $chunkReview->source_page ;
+                    // TODO: evaluate the case in which the destination revision never received a revision before
+                    // evaluate $sourcePagesWithFinalRevisions
+                    if ( !in_array( $chunkReview->source_page, $sourcePagesWithFinalRevisions ) ) {
+                        $chunkReview->reviewed_words_count += $this->rawWordsCountWithPropagation();
+                        $setFinalRevision[]                 = $chunkReview->source_page ;
+                    }
                     $chunkReview->advancement_wc       += $this->equivalentWordsCountWithPropagation();
                     $modifiedChunkReviewsToSave[]       = $chunkReview ;
 
@@ -146,15 +147,15 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 }
             }
 
-            if ( $this->model->isBeingUpperReviewed() ) {
-                if ( $this->model->getOriginSourcePage() == $chunkReview->source_page ) {
+            elseif ( $this->model->isBeingUpperReviewed() ) {
+                if ( $originSourcePage == $chunkReview->source_page ) {
                     // TODO: decide wether or not to remove the revised words
                     // $chunkReview->reviewed_words_count -= $this->rawWordsCountWithPropagation();
                     // expect advancement to be assigned to the origin source_page
                     $chunkReview->advancement_wc -= $this->equivalentWordsCountWithPropagation();
                     $modifiedChunkReviewsToSave[] = $chunkReview ;
 
-                } elseif ( $this->model->getDestinationSourcePage() == $chunkReview->source_page ) {
+                } elseif ( $destinationSourcePage == $chunkReview->source_page ) {
                     // we reached the last record, destination record of the lower revision, add the count
                     $chunkReview->reviewed_words_count += $this->rawWordsCountWithPropagation();
                     $setFinalRevision[]                 = $chunkReview->source_page ;
@@ -166,51 +167,10 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                     // in case of upper revisions this case should never happen because latest state is always
                     // the current revision state so it's not possible to move from R1 to R3 if an R2 is current
                     // state.
-                    // $chunkReview->reviewed_words_count -= $this->rawWordsCountWithPropagation() ;
-                    // $modifiedChunkReviewsToSave[] = $chunkReview ;
                     false ;
                 }
             }
         }
-
-
-        // TODO: update the $modifiedChunkReviewsToSave
-
-        // /**
-        //  * we need to check the transition in regards of second pass
-        //  *
-        //  * possible cases are:
-        //  *
-        //  * 1. This event is reviweing a segment for the first time
-        //  * 2. This event is updating an existing review
-        //  * 3. This event is making a change to a reviewed segment
-        //  *
-        //  * If the segment is being reviewed, we need to find the relevant chunk_review record to
-        //  * update with words count.
-        //  *
-        //  e If the segment is being changed and one or more upper reviews were already done, we need
-        //  * to find the relevant chunk_review records and subtract the reviewed words count from there.
-        //  *
-        //  * In order to do this we need to find the initial an destination source pages.
-        //  *
-        //  */
-        // if ( $this->model->isEnteringReviewedState() || $this->model->isBeingUpperReviewed() ) {
-        //     $this->addRevisedWordsCount();
-        // }
-        // elseif ( $this->model->isExitingReviewedState() ) {
-        //     /**
-        //      * In this case we just need to rollback all reviewed words count from the chunk reviews
-        //      * that received any revision ( use the final_revision flag to get this information ).
-        //      */
-        //     $this->subtractRevisedWordsCount();
-        // }
-        // elseif ( $this->model->isBeingLowerReviewed() ) {
-        //     /**
-        //      * In this case we need to increase the reviewed words count only if the revision didn't get
-        //      * the final_revision flag before.
-        //      */
-        //     $this->subtractRevisedWordsCount();
-        // }
 
         foreach( $modifiedChunkReviewsToSave as $chunkReview ) {
             $chunkReviewModel = new ChunkReviewModel( $chunkReview ) ;
