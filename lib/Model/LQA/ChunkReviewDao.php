@@ -120,6 +120,36 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_job
+     * @param $password
+     * @param $source_page
+     *
+     * @return mixed
+     */
+    public function getReviewedWordsCountForSecondPass( $chunk, $source_page ) {
+        $sql = " SELECT SUM(raw_word_count) FROM segments s 
+ 
+        JOIN segment_translations st on st.id_segment = s.id 
+        JOIN jobs j on j.id = st.id_job 
+                AND s.id <= j.job_last_segment 
+                AND s.id >= j.job_first_segment 
+        JOIN 
+                segment_translation_events ste on ste.id_segment = s.id 
+                AND ste.final_revision = 1      
+                AND ste.source_page = :source_page
+        WHERE 
+                j.id = :id_job AND j.password = :password " ;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute(['id_job' => $chunk->id, 'password' => $chunk->password, 'source_page' => $source_page ]);
+
+        $result = $stmt->fetch();
+        return $result[0] == null ? 0 : $result[0];
+    }
+
+
+    /**
      * @param array    $chunk_ids Example: array( array($id_job, $password), ... )
      *
      * @param int|null $source_page
@@ -368,7 +398,9 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
                             LEFT JOIN segment_translation_events ste ON ste.id_segment = st.id_segment
                             WHERE st.id_job = :id_job
                                 AND j.password = :password
-                                AND ( final_revision = 1 or ( st.status = 'APPROVED' AND ste.id = null ) )
+                                AND ( final_revision = 1 OR (
+                                    st.status = 'APPROVED' AND ste.id = null
+                                ) )
                 ) sums GROUP BY id_job, source_page ; " ;
 
         $conn = \Database::obtain()->getConnection();
