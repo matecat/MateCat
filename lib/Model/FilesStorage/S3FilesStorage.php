@@ -53,18 +53,6 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
     public function __construct() {
         $this->s3Client = self::getStaticS3Client();
-
-        // disable SSL verify from configuration
-        if ( false === INIT::$AWS_SSL_VERIFY ) {
-            $this->s3Client->disableSslVerify();
-        }
-
-//        // add caching
-//        if ( INIT::$AWS_CACHING == true ) {
-//            $redis        = new RedisHandler();
-//            $cacheAdapter = new RedisAdapter( $redis->getConnection() ); // in this example Symfony Cache component is used
-//            $this->s3Client->addCache( new PsrCacheAdapter( $cacheAdapter ) );
-//        }
     }
 
     /**
@@ -93,6 +81,18 @@ class S3FilesStorage extends AbstractFilesStorage {
                             'region'  => $awsRegion,
                     ]
             );
+
+            // add caching
+//            if ( INIT::$AWS_CACHING == true ) {
+//                $redis        = new RedisHandler();
+//                $cacheAdapter = new RedisAdapter( $redis->getConnection() ); // in this example Symfony Cache component is used
+//                self::$CLIENT->addCache( new PsrCacheAdapter( $cacheAdapter ) );
+//            }
+
+            // disable SSL verify from configuration
+            if ( false === INIT::$AWS_SSL_VERIFY ) {
+                self::$CLIENT->disableSslVerify();
+            }
         }
 
         return self::$CLIENT;
@@ -206,7 +206,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     private function findAKeyInCachePackageBucket( $hash, $lang, $keyToSearch ) {
-        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/' . $keyToSearch . '/'; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9!!it-IT/work/
+        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/' . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9!!it-IT/work
         $items  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
 
         return ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
@@ -234,8 +234,8 @@ class S3FilesStorage extends AbstractFilesStorage {
         $datePath = $hashes[ 0 ];
         $hash     = $hashes[ 1 ];
 
-        $origPrefix  = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig/';
-        $workPrefix  = $this->getCachePackageHashFolder( $hash, $lang ) . '/work/';
+        $origPrefix  = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig';
+        $workPrefix  = $this->getCachePackageHashFolder( $hash, $lang ) . '/work';
         $origItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $origPrefix ] );
         $workItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $workPrefix ] );
         $sourceItems = array_merge( $origItems, $workItems );
@@ -296,7 +296,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $hashes   = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $datePath = $hashes[ 0 ];
 
-        $prefix = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . $keyToSearch . DIRECTORY_SEPARATOR; // example: 20181212/13/work/
+        $prefix = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . $keyToSearch; // example: 20181212/13/work
         $items  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
 
         return ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
@@ -360,7 +360,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     public function getHashesFromDir( $dirToScan ) {
-        $folder        = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $dirToScan ) ) . DIRECTORY_SEPARATOR;
+        $folder        = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $dirToScan ) );
         $zipFilesHash  = [];
         $filesHashInfo = [];
 
@@ -513,7 +513,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     public function linkZipToProject( $create_date, $zipHash, $projectID ) {
-        $cacheZipPackage = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $zipHash . $this->getOriginalZipPlaceholder() . DIRECTORY_SEPARATOR;
+        $cacheZipPackage = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $zipHash . $this->getOriginalZipPlaceholder();
 
         foreach ( $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $cacheZipPackage ] ) as $key ) {
             $destination = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getOriginalZipPath( $create_date, $projectID, $this->getTheLastPartOfKey( $key ) );

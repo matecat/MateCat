@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9cef0e6528ae76e9546cd0550cbcf32a",
+    "content-hash": "a5d8e962dd7e3bb3abe206b32c0647e8",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.99.1",
+            "version": "3.99.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "455e93cc4feb99847f88f4229659da2c79aa6371"
+                "reference": "c3c2877ac7d17125631106c1ee3532e9bf33df53"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/455e93cc4feb99847f88f4229659da2c79aa6371",
-                "reference": "455e93cc4feb99847f88f4229659da2c79aa6371",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/c3c2877ac7d17125631106c1ee3532e9bf33df53",
+                "reference": "c3c2877ac7d17125631106c1ee3532e9bf33df53",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-06-04T18:08:27+00:00"
+            "time": "2019-06-05T18:07:37+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -432,16 +432,16 @@
         },
         {
             "name": "mauretto78/simple-s3",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mauretto78/simple-s3.git",
-                "reference": "e4acb81e9a580bbad1db875b1f525950dfd92501"
+                "reference": "5e0a85ecf07a51a127f730eb3defd2ee82e77e2b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mauretto78/simple-s3/zipball/e4acb81e9a580bbad1db875b1f525950dfd92501",
-                "reference": "e4acb81e9a580bbad1db875b1f525950dfd92501",
+                "url": "https://api.github.com/repos/mauretto78/simple-s3/zipball/5e0a85ecf07a51a127f730eb3defd2ee82e77e2b",
+                "reference": "5e0a85ecf07a51a127f730eb3defd2ee82e77e2b",
                 "shasum": ""
             },
             "require": {
@@ -485,7 +485,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-06-05T13:55:05+00:00"
+            "time": "2019-06-06T09:14:12+00:00"
         },
         {
             "name": "monolog/monolog",
