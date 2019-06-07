@@ -371,7 +371,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         $i         = 0;
         $linkFiles = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $folder ] );
-        asort($linkFiles);
+        asort( $linkFiles );
 
         foreach ( $linkFiles as $key ) {
             if ( strpos( $key, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
@@ -389,7 +389,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                 //     0 => 'file.txt',
                 //     1 => 'file2.txt'
                 // ]
-                $filesHashInfo[ 'sha' ][] = $key;
+                $filesHashInfo[ 'sha' ][]            = $key;
                 $filesHashInfo[ 'fileName' ][ $key ] = array_filter( array_map( 'trim', explode( "\n", ( new RedisHandler() )->getConnection()->get( $key ) ) ) );
             }
 
@@ -409,6 +409,27 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
     private static function getUploadSessionSafeName( $uploadSession ) {
         return str_replace( [ '{', '}' ], '', strtolower( $uploadSession ) );
+    }
+
+    /**
+     * Delete the entire queue folder
+     *
+     * @param $uploadDir
+     */
+    public function deleteQueue( $uploadDir ) {
+        $folder = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $uploadDir ) );
+
+        $items = $this->s3Client->getItemsInABucket( [
+                'bucket' => self::FILES_STORAGE_BUCKET,
+                'prefix' => $folder
+        ] );
+
+        foreach ( $items as $item ) {
+            $this->s3Client->deleteItem( [
+                    'bucket' => self::FILES_STORAGE_BUCKET,
+                    'key'    => $item
+            ] );
+        }
     }
 
     /**

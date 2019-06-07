@@ -809,6 +809,12 @@ class ProjectManager {
                 Utils::sendErrMailReport( $output, $e->getMessage() );
 
             }
+        } elseif (INIT::$FILE_STORAGE_METHOD === 's3') {
+
+            \Log::doJsonLog('CIAOOOO ' . $this->uploadDir);
+
+            /** @var $fs S3FilesStorage */
+            $fs->deleteQueue( $this->uploadDir );
         }
     }
 
