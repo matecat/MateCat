@@ -388,7 +388,11 @@ class CatUtils {
         }
 
         //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
-        $string = html_entity_decode( $string, ENT_XML1, 'UTF-8' );
+        //take a look at this string:
+        // This is a string &amp;nbsp;
+        $string = html_entity_decode(
+                html_entity_decode( $string, ENT_HTML401 | ENT_QUOTES , 'UTF-8' )
+        );
 
         /**
          * Count links as 1 word
@@ -419,6 +423,8 @@ class CatUtils {
             $string = preg_replace( '/\b[0-9]+(?:[\.,][0-9]+)*\b/', ' NUMBER ', $string );
 
         }
+
+
 
         return $string;
 
