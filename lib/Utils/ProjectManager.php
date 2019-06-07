@@ -590,7 +590,7 @@ class ProjectManager {
 
                 if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
                     if ( null === $cachedXliffFilePathName ) {
-                        throw new Exception( sprintf( 'Key %s not found on S3 cache bucket.', $cachedXliffFilePathName ), -6 );
+                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', $_originalFileNames[0] ), -6 );
                     }
                 } else {
                     if ( !file_exists( $cachedXliffFilePathName ) ) {
@@ -784,30 +784,32 @@ class ProjectManager {
         Database::obtain()->commit();
 
         $this->features->run( 'postProjectCommit', $this->projectStructure );
-        try {
 
-            Utils::deleteDir( $this->uploadDir );
-            if ( is_dir( $this->uploadDir . '_converted' ) ) {
-                Utils::deleteDir( $this->uploadDir . '_converted' );
+        if ( INIT::$FILE_STORAGE_METHOD === 'fs' ) {
+            try {
+
+                Utils::deleteDir( $this->uploadDir );
+                if ( is_dir( $this->uploadDir . '_converted' ) ) {
+                    Utils::deleteDir( $this->uploadDir . '_converted' );
+                }
+
+            } catch ( Exception $e ) {
+
+                $output = "<pre>\n";
+                $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
+                $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+                $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+                $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
+                $output .= "\n\t";
+                $output .= "Aborting...\n";
+                $output .= "</pre>";
+
+                $this->_log( $output );
+
+                Utils::sendErrMailReport( $output, $e->getMessage() );
+
             }
-
-        } catch ( Exception $e ) {
-
-            $output = "<pre>\n";
-            $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
-            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-            $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
-            $output .= "\n\t";
-            $output .= "Aborting...\n";
-            $output .= "</pre>";
-
-            $this->_log( $output );
-
-            Utils::sendErrMailReport( $output, $e->getMessage() );
-
         }
-
     }
 
     /**

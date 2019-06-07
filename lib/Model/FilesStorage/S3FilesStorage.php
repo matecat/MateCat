@@ -83,11 +83,11 @@ class S3FilesStorage extends AbstractFilesStorage {
             );
 
             // add caching
-//            if ( INIT::$AWS_CACHING == true ) {
-//                $redis        = new RedisHandler();
-//                $cacheAdapter = new RedisAdapter( $redis->getConnection() ); // in this example Symfony Cache component is used
-//                self::$CLIENT->addCache( new PsrCacheAdapter( $cacheAdapter ) );
-//            }
+            if ( INIT::$AWS_CACHING == true ) {
+                $redis        = new RedisHandler();
+                $cacheAdapter = new RedisAdapter( $redis->getConnection() );
+                self::$CLIENT->addCache( new PsrCacheAdapter( $cacheAdapter ) );
+            }
 
             // disable SSL verify from configuration
             if ( false === INIT::$AWS_SSL_VERIFY ) {
@@ -193,6 +193,11 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return mixed
      * @throws \Exception
      */
+
+    // $sha1_original = $hashFile[ 0 ]; 6981e08bc467f8af85fd686c54287ac755408e89
+    // $lang          = $hashFile[ 1 ]; it-it
+    // $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang ); cache-package/69/81/e08bc467f8af85fd686c54287ac755408e89!!it-it/work/os.odt.sdlxliff
+
     public function getXliffFromCache( $hash, $lang ) {
         return $this->findAKeyInCachePackageBucket( $hash, $lang, 'work' );
     }
@@ -206,7 +211,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     private function findAKeyInCachePackageBucket( $hash, $lang, $keyToSearch ) {
-        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/' . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9!!it-IT/work
+        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . DIRECTORY_SEPARATOR . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9!!it-IT/work
         $items  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
 
         return ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
@@ -366,6 +371,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         $i         = 0;
         $linkFiles = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $folder ] );
+        asort($linkFiles);
 
         foreach ( $linkFiles as $key ) {
             if ( strpos( $key, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
@@ -373,8 +379,6 @@ class S3FilesStorage extends AbstractFilesStorage {
             } elseif ( strpos( $key, '.' ) !== false or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === false ) {
                 unset( $linkFiles[ $i ] );
             } else {
-                $filesHashInfo[ 'sha' ][] = $key;
-
                 // this method get the content from the hashes map file and convert it into an array of original file names
                 // Example:
                 //
@@ -385,6 +389,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                 //     0 => 'file.txt',
                 //     1 => 'file2.txt'
                 // ]
+                $filesHashInfo[ 'sha' ][] = $key;
                 $filesHashInfo[ 'fileName' ][ $key ] = array_filter( array_map( 'trim', explode( "\n", ( new RedisHandler() )->getConnection()->get( $key ) ) ) );
             }
 

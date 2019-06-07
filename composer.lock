@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.99.2",
+            "version": "3.99.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "c3c2877ac7d17125631106c1ee3532e9bf33df53"
+                "reference": "6857f5a612f2f32363d33b770d36501ed8d57116"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/c3c2877ac7d17125631106c1ee3532e9bf33df53",
-                "reference": "c3c2877ac7d17125631106c1ee3532e9bf33df53",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6857f5a612f2f32363d33b770d36501ed8d57116",
+                "reference": "6857f5a612f2f32363d33b770d36501ed8d57116",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-06-05T18:07:37+00:00"
+            "time": "2019-06-06T18:46:45+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -432,16 +432,16 @@
         },
         {
             "name": "mauretto78/simple-s3",
-            "version": "v1.2.1",
+            "version": "v1.2.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mauretto78/simple-s3.git",
-                "reference": "5e0a85ecf07a51a127f730eb3defd2ee82e77e2b"
+                "reference": "7ba942e9ebc8d71ab62e0b89f2e9f7cdd6743864"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mauretto78/simple-s3/zipball/5e0a85ecf07a51a127f730eb3defd2ee82e77e2b",
-                "reference": "5e0a85ecf07a51a127f730eb3defd2ee82e77e2b",
+                "url": "https://api.github.com/repos/mauretto78/simple-s3/zipball/7ba942e9ebc8d71ab62e0b89f2e9f7cdd6743864",
+                "reference": "7ba942e9ebc8d71ab62e0b89f2e9f7cdd6743864",
                 "shasum": ""
             },
             "require": {
@@ -485,7 +485,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-06-06T09:14:12+00:00"
+            "time": "2019-06-07T08:25:01+00:00"
         },
         {
             "name": "monolog/monolog",
