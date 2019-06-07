@@ -356,23 +356,53 @@ class FeatureSet {
      */
     public function sortFeatures() {
 
-        foreach( $this->features as $feature ){
 
-            /**
-             * @var $feature BasicFeatureStruct
-             */
-            $baseFeature = $feature->toNewObject();
-            uasort( $this->features, function ( BasicFeatureStruct $left, BasicFeatureStruct $right ) use ( $baseFeature ) {
-                if ( in_array( $left->feature_code, $baseFeature::getDependencies() ) ) {
-                    return 0;
-                } else {
-                    return 1;
-                }
-            } );
+        $toBeSorted = array_values( $this->features );
+        $sortedFeatures = $this->_quickSort( $toBeSorted );
 
+        $this->clear();
+        foreach( $sortedFeatures as $value ){
+            $this->features[ $value->feature_code ] = $value;
         }
 
         return $this;
+
+    }
+
+    /**
+     * Warning Recursion, memory overflow if there are a lot of features
+     *
+     * @param BasicFeatureStruct[]
+     *
+     * @return BasicFeatureStruct[]
+     */
+    private function _quickSort( $featureStructsList ) {
+
+        $length = count( $featureStructsList );
+        if ( $length < 2 ) {
+            return $featureStructsList;
+        }
+
+        /**
+         * @var $firstInList BasicFeatureStruct
+         */
+        $firstInList = $featureStructsList[ 0 ];
+        $ObjectFeatureFirst = $firstInList->toNewObject();
+
+        $leftBucket = $rightBucket = [];
+
+        for ( $i = 1; $i < $length; $i++ ) {
+
+            if ( in_array( $featureStructsList[ $i ]->feature_code, $ObjectFeatureFirst::getDependencies() ) ) {
+                $leftBucket[] = $featureStructsList[ $i ];
+            } else {
+                $rightBucket[] = $featureStructsList[ $i ];
+            }
+
+        }
+
+        return array_merge( $this->_quickSort( $leftBucket ), [ $firstInList ], $this->_quickSort( $rightBucket ) );
+
     }
 
     /**
@@ -437,6 +467,9 @@ class FeatureSet {
         /** @var BasicFeatureStruct $feature */
         foreach ( $all_features as $feature ) {
             foreach ( $conflictingDeps as $key => $value ) {
+                if( empty( $conflictingDeps[ $key ] ) ){
+                    continue;
+                }
                 if ( in_array( $feature->feature_code, $value ) ) {
                     throw new Exception( "{$feature->feature_code} is conflicting with $key." );
                 }
