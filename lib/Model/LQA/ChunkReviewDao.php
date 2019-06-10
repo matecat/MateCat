@@ -213,15 +213,17 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $password
+     * @param     $id_job
+     * @param     $password
+     *
+     * @param int $source_page
      *
      * @return ChunkReviewStruct
      */
-    public static function findOneChunkReviewByIdJobAndPassword($id_job, $password) {
+    public static function findOneChunkReviewByIdJobAndPassword($id_job, $password, $source_page = Constants::SOURCE_PAGE_REVISION ) {
         $records = self::findChunkReviewsByChunkIds(array(
             array( $id_job, $password)
-        ));
+        ), $source_page ) ;
         return @$records[0];
     }
 
@@ -240,13 +242,18 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param     $review_password
+     * @param     $id_job
+     * @param int $source_page
+     *
      * @return ChunkReviewStruct
      */
 
-    public static function findByReviewPasswordAndJobId( $review_password, $id_job ) {
+    public static function findByReviewPasswordAndJobId( $review_password, $id_job, $source_page = Constants::SOURCE_PAGE_REVISION ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
             " WHERE review_password = :review_password " .
-            " AND id_job = :id_job " ;
+            " AND id_job = :id_job " .
+            " AND source_page = :source_page "  ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -254,7 +261,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $stmt->execute(
             array(
                 'review_password' => $review_password,
-                'id_job'          => $id_job
+                'id_job'          => $id_job,
+                'source_page'     => $source_page
             )
         );
         return $stmt->fetch() ;

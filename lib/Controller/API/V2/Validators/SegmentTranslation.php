@@ -61,4 +61,12 @@ class SegmentTranslation extends Base {
         if (!$this->segment) throw new NotFoundException('segment not found');
     }
 
+    public function getTranslation() {
+        return $this->translation;
+    }
+
+    public function getSegment() {
+        return $this->segment ;
+    }
+
 }
