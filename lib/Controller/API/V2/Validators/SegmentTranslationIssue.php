@@ -9,9 +9,13 @@ use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use LQA\EntryStruct;
 
 class SegmentTranslationIssue extends Base {
 
+    /**
+     * @var EntryStruct
+     */
     public $issue ;
     /**
      * @var \Translations_SegmentTranslationStruct
@@ -71,10 +75,20 @@ class SegmentTranslationIssue extends Base {
             $this->__ensureSegmentIsInRevisionNumber();
         }
 
+        if ( $this->request->method('delete') ) {
+            $this->__ensureRevisionPasswordAllowsDeleteForIssue();
+        }
+
     }
 
     public function getChunkReview() {
         return $this->chunk_review ;
+    }
+
+    private function __ensureRevisionPasswordAllowsDeleteForIssue() {
+        if ( $this->issue->source_page != $this->chunk_review->source_page ) {
+            throw new ValidationError('Not enough privileges to delete this issue') ;
+        }
     }
 
     private function __ensureSegmentIsInRevisionNumber() {
