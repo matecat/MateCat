@@ -811,7 +811,7 @@ class ProjectManager {
             }
         } elseif (INIT::$FILE_STORAGE_METHOD === 's3') {
 
-            \Log::doJsonLog('CIAOOOO ' . $this->uploadDir);
+            \Log::doJsonLog('Deleting folder' . $this->uploadDir . ' from S3');
 
             /** @var $fs S3FilesStorage */
             $fs->deleteQueue( $this->uploadDir );
