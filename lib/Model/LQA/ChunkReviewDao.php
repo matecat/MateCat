@@ -249,11 +249,10 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @return ChunkReviewStruct
      */
 
-    public static function findByReviewPasswordAndJobId( $review_password, $id_job, $source_page = Constants::SOURCE_PAGE_REVISION ) {
+    public static function findByReviewPasswordAndJobId( $review_password, $id_job ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
             " WHERE review_password = :review_password " .
-            " AND id_job = :id_job " .
-            " AND source_page = :source_page "  ;
+            " AND id_job = :id_job " ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -261,8 +260,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $stmt->execute(
             array(
                 'review_password' => $review_password,
-                'id_job'          => $id_job,
-                'source_page'     => $source_page
+                'id_job'          => $id_job
             )
         );
         return $stmt->fetch() ;
