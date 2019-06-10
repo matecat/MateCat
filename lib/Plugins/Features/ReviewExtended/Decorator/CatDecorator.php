@@ -41,13 +41,20 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->project_type = null;
         $this->template->segmentFilterEnabled = true;
 
-        $this->template->footer_show_revise_link = false;
+        if ( !$this->controller->isRevision() ) {
+            $this->template->footer_show_revise_link = true;
+        } else {
+            $this->template->footer_show_revise_link = false;
+        }
 
         $this->template->quality_report_href = \INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
 
         $this->template->showReplaceOptionsInSearch = true ;
 
         $this->template->overall_quality_class = $this->getOverallQualityClass();
+
+        $chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword($this->controller->getChunk()->id, $this->controller->getChunk()->password);
+        $this->template->review_password = $chunk_review->review_password;
     }
 
     private function getCategoriesAsJson(ModelStruct $model) {
