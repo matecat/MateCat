@@ -432,16 +432,16 @@
         },
         {
             "name": "mauretto78/simple-s3",
-            "version": "v1.2.6",
+            "version": "v1.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mauretto78/simple-s3.git",
-                "reference": "ec387391adb05285db0a42110f5c2512234accea"
+                "reference": "430dfa7c3dad1a5e9be633cfdf1caedef7e6f910"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mauretto78/simple-s3/zipball/ec387391adb05285db0a42110f5c2512234accea",
-                "reference": "ec387391adb05285db0a42110f5c2512234accea",
+                "url": "https://api.github.com/repos/mauretto78/simple-s3/zipball/430dfa7c3dad1a5e9be633cfdf1caedef7e6f910",
+                "reference": "430dfa7c3dad1a5e9be633cfdf1caedef7e6f910",
                 "shasum": ""
             },
             "require": {
@@ -485,7 +485,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-06-10T10:08:39+00:00"
+            "time": "2019-06-10T13:14:00+00:00"
         },
         {
             "name": "monolog/monolog",

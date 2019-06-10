@@ -32,7 +32,7 @@ class S3FilesStorage extends AbstractFilesStorage {
     const QUEUE_FOLDER           = 'queue-projects';
     const ZIP_FOLDER             = 'original-zip';
     const FAST_ANALYSIS_FOLDER   = 'fast-analysis';
-    const OBJECTS_SAFE_DELIMITER = '!!';
+    const OBJECTS_SAFE_DELIMITER = '__';
 
     /**
      * @var Client
@@ -196,7 +196,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
     // $sha1_original = $hashFile[ 0 ]; 6981e08bc467f8af85fd686c54287ac755408e89
     // $lang          = $hashFile[ 1 ]; it-it
-    // $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang ); cache-package/69/81/e08bc467f8af85fd686c54287ac755408e89!!it-it/work/os.odt.sdlxliff
+    // $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang ); cache-package/69/81/e08bc467f8af85fd686c54287ac755408e89__it-it/work/os.odt.sdlxliff
 
     public function getXliffFromCache( $hash, $lang ) {
         return $this->findAKeyInCachePackageBucket( $hash, $lang, 'work' );
@@ -211,7 +211,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     private function findAKeyInCachePackageBucket( $hash, $lang, $keyToSearch ) {
-        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . DIRECTORY_SEPARATOR . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9!!it-IT/work
+        $prefix = $this->getCachePackageHashFolder( $hash, $lang ) . DIRECTORY_SEPARATOR . $keyToSearch; // example: c1/68/9bd71f45e76fd5e428f35c00d1f289a7e9e9__it-IT/work
         $items  = $this->s3Client->getItemsInABucket( [ 'bucket' => self::FILES_STORAGE_BUCKET, 'prefix' => $prefix ] );
 
         return ( isset( $items[ 0 ] ) ) ? $items[ 0 ] : null;
@@ -332,7 +332,7 @@ class S3FilesStorage extends AbstractFilesStorage {
             // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
             $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $uploadSession );
 
-            // Example: aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT --> aad03b600bc4792b3dc4bf3a2d7191327a482d4a!!it-it
+            // Example: aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT --> aad03b600bc4792b3dc4bf3a2d7191327a482d4a__it-it
             $subPathName = str_replace( '|', self::OBJECTS_SAFE_DELIMITER, strtolower( $iterator->getSubPathName() ) );
 
             $key = $prefix . DIRECTORY_SEPARATOR . $subPathName;
