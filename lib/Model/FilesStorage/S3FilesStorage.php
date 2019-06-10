@@ -417,19 +417,10 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @param $uploadDir
      */
     public function deleteQueue( $uploadDir ) {
-        $folder = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $uploadDir ) );
-
-        $items = $this->s3Client->getItemsInABucket( [
+        $this->s3Client->deleteFolder( [
                 'bucket' => self::FILES_STORAGE_BUCKET,
-                'prefix' => $folder
+                'prefix' => self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $uploadDir ) )
         ] );
-
-        foreach ( $items as $item ) {
-            $this->s3Client->deleteItem( [
-                    'bucket' => self::FILES_STORAGE_BUCKET,
-                    'key'    => $item
-            ] );
-        }
     }
 
     /**
