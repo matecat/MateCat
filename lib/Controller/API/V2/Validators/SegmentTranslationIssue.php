@@ -4,6 +4,7 @@ namespace API\V2\Validators;
 
 
 use API\V2\Exceptions\ValidationError;
+use Exception;
 use Features\SecondPassReview;
 use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
@@ -27,6 +28,9 @@ class SegmentTranslationIssue extends Base {
      */
     public $segment ;
 
+    /**
+     * @var SegmentTranslation
+     */
     private $parent_validator ;
 
     /**
@@ -37,7 +41,7 @@ class SegmentTranslationIssue extends Base {
     /**
      * @return mixed|void
      * @throws ValidationError
-     * @throws \Exception
+     * @throws Exception
      */
     public function _validate() {
         // if method is delete we expect the password to be revise password.
@@ -95,11 +99,22 @@ class SegmentTranslationIssue extends Base {
         $latestSegmentEvent = ( new SegmentTranslationEventDao() )
                 ->getLatestEventForSegment( $this->chunk_review->id_job, $this->segment->id );
 
+        $originalSourcePage = null;
+
+        if ( $latestSegmentEvent ) {
+            $originalSourcePage = $latestSegmentEvent->source_page ;
+        }
+        elseif (!$latestSegmentEvent && $this->parent_validator->getTranslation()->isICE() ) {
+            $originalSourcePage = \Constants::SOURCE_PAGE_REVISION ;
+        }
+        else {
+            throw new Exception('Unable to detect prior state for current segment' ) ;
+        }
+
         // can latest event be missing here? Actually yes, for example in case we are setting an issue on a locked ice match, which never received
         // a submit from the UI. How do we handle that case? No reviewed words yet an issue. That's not possible, we need to ensure the reviewed words
         // are set, and reviewed words are set during setTranslation triggered callbacks.
-        if ( !$latestSegmentEvent || $latestSegmentEvent->source_page !=
-                Utils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
+        if ( $originalSourcePage != Utils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
             throw new ValidationError("Trying access segment issue for revision number " .
                     $this->request->revision_number . " but segment is not in same revision state.");
         }
