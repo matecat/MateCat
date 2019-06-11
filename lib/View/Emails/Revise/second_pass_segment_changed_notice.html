@@ -1,0 +1,13 @@
+<p>Hi <?= $recipientUser['first_name'] ?>, </p>
+<p>
+    <?php if ( $changeAuthor ) { ?>
+        <?= $changeAuthor['first_name'] . " " . $changeAuthor['last_name'] ?>
+    <?php } else { ?>
+        someone
+    <?php } ?>
+    changed a segment which was earlier approved by you.
+</p>
+
+<p>
+    Here's the link to the segment for you to review the change: <a href="<?= $segmentUrl ?>"><?= $segmentUrl ?></a>.
+</p>

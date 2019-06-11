@@ -54,6 +54,15 @@ class SegmentTranslationChangeVector {
     }
 
     /**
+     * @return Users_UserStruct
+     */
+    public function getEventUser() {
+        if ( $this->eventModel->getCurrentEvent()->uid ) {
+            return ( new Users_UserDao())->getByUid( $this->eventModel->getCurrentEvent()->uid ) ;
+        }
+    }
+
+    /**
      * @return Translations_SegmentTranslationStruct
      * @throws Exception
      */

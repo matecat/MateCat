@@ -135,7 +135,13 @@ class Routes {
             $revise .= $options['revision_number'] ;
         }
 
-        return "$host/$revise/$project_name/$source-$target/$id_job-$password";
+        $url = "$host/$revise/$project_name/$source-$target/$id_job-$password" ;
+
+        if ( isset( $options['id_segment']) ) {
+            $url .= '#' . $options['id_segment'] ;
+        }
+
+        return $url ;
     }
 
     public static function translate( $project_name, $id_job, $password, $source, $target, $options = array() ) {
