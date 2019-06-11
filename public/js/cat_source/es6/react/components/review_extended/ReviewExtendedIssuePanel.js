@@ -34,24 +34,22 @@ class ReviewExtendedIssuePanel extends React.Component{
             issue.end_offset = 0;
         }
 
-        if(this.props.isDiffChanged){
-        	let segment = this.props.segment;
-        	segment.translation = this.props.newtranslation;
-        	segment.status = 'approved';
-			API.SEGMENT.setTranslation(segment)
-				.done(function(response){
-					issue.version = response.translation.version;
-					deferred.resolve();
-				})
-				.fail( self.handleFail.bind(self) ) ;
-		}else{
-        	deferred.resolve();
-		}
-
+        let segment = this.props.segment;
+        if ( segment.status.toLowerCase() !== 'approved' || segment.revision_number !== ReviewExtended.number ) {
+            segment.status = 'approved';
+            API.SEGMENT.setTranslation( segment )
+                .done( function ( response ) {
+                    issue.version = response.translation.version_number;
+                    deferred.resolve();
+                } )
+                .fail( self.handleFail.bind( self ) );
+        } else {
+            deferred.resolve();
+        }
 		data.push(issue);
 
 		deferred.then(function () {
-		    SegmentActions.removeClassToSegment(self.props.sid, "modified");
+            SegmentActions.setStatus(segment.sid, segment.fid, segment.status);
             UI.currentSegment.data('modified', false);
 			SegmentActions.submitIssue(self.props.sid, data)
 				.done(function ( data ) {

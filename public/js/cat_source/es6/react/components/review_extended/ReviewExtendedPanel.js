@@ -11,7 +11,6 @@ class ReviewExtendedPanel extends React.Component {
 		this.state = {
 			versionNumber: this.props.segment.versions[0].version_number,
 			diffPatch: null,
-			isDiffChanged: false,
 			newtranslation: this.props.segment.translation,
 			issueInCreation: false,
             showAddIssueMessage: false,
