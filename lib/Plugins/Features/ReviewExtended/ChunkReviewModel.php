@@ -10,9 +10,7 @@
 namespace Features\ReviewExtended;
 
 use Features\ReviewExtended\Model\ChunkReviewDao;
-
 use Features\SecondPassReview;
-use Features\SecondPassReview\Utils;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
 
@@ -27,33 +25,32 @@ class ChunkReviewModel implements IChunkReviewModel {
 
     public function __construct( ChunkReviewStruct $chunk_review ) {
         $this->chunk_review = $chunk_review ;
-        $this->penalty_points = $this->chunk_review->penalty_points ;
+
     }
 
     /**
      * Adds reviewed words count and recomputes result
      *
      * @param $count
-     * @param $eq_count
      */
 
-    public function addWordsCount( $count, $eq_count ) {
+    public function addWordsCount( $count ) {
         $this->chunk_review->reviewed_words_count += $count ;
-        $this->chunk_review->eq_reviewed_words_count += $eq_count ;
-        $this->updatePassFailResult() ;
     }
 
     /**
      * Subtracts reviewed_words_count and recomputes result
      *
      * @param $count
-     * @param $eq_count
      */
-    public function subtractWordsCount( $count, $eq_count ) {
+    public function subtractWordsCount( $count ) {
         $this->chunk_review->reviewed_words_count -= $count ;
-        $this->chunk_review->eq_reviewed_words_count -= $eq_count ;
-        $this->updatePassFailResult() ;
     }
+
+    // public function subtractWordsCountWithAdvancement( $count, $advancement_wc ) {
+    //     $this->chunk_review->advancement_wc -= $advancement_wc ;
+    //     $this->subtractWordsCount( $count ) ;
+    // }
 
     /**
      * adds penalty_points and updates pass fail result
@@ -103,13 +100,15 @@ class ChunkReviewModel implements IChunkReviewModel {
         $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit() ) ;
 
         $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, [
-             'fields' => array('eq_reviewed_words_count', 'reviewed_words_count', 'is_pass', 'penalty_points')
+             'fields' => array('advancement_wc', 'reviewed_words_count', 'is_pass', 'penalty_points')
             ]
         );
 
         $this->chunk_review->getChunk()->getProject()->getFeatures()->run(
                 'chunkReviewUpdated', $this->chunk_review, $update_result, $this
         );
+
+        return $update_result ;
     }
 
     /**

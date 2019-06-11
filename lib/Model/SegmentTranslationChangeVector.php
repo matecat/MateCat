@@ -64,14 +64,15 @@ class SegmentTranslationChangeVector {
         return $this->old_translation ;
     }
 
-    public function getDestinationSourcePage() {
-        return $this->eventModel->getCurrentEvent()->source_page ;
-    }
-
-    public function getOriginSourcePage() {
-        return $this->eventModel->getPriorEvent()->source_page ;
-    }
-
+    /**
+     * Origin source page can be missing. This can happen in case of ICE matches, or pre-transalted
+     * segments or just because we are evaluating a transition from NEW to TRANSLATED status.
+     *
+     * In such case we need to make assumptions on the `source_page` variable because that's what we use
+     * to decide where to move revised words and advancement words around.
+     * @return mixed
+     * @throws \Exception
+     */
     public function isBeingUpperReviewed() {
         return $this->old_translation->isReviewedStatus() &&
         $this->translation->isReviewedStatus() &&
@@ -85,22 +86,49 @@ class SegmentTranslationChangeVector {
     }
 
     /**
-     * This method returns the list of source pages to invalidate in regards of reviewed words count.
+     * Returns 1 if source page is moving up  0 if it's not changing, -1 if it's moving down.
      *
-     * If a segment moves from R2 to R1 this returns [3]   ( = source page of R2 ).
-     * If a segment moves from R1 to TR this returns [3,2] ( = source pages of R2 and R1 ).
+     * @return int
+     */
+    public function getSourcePageDirection() {
+        $originSourcePage      = $this->eventModel->getOriginSourcePage() ;
+        $destinationSourcePage = $this->eventModel->getDestinationSourcePage() ;
+
+        return $originSourcePage < $destinationSourcePage ? 1  : (
+            $originSourcePage == $destinationSourcePage ? null : -1
+        );
+    }
+
+    /**
+     *
+     * This method returns the list of revision source pages codes that which are involved in the current
+     * transition. Source page for Translate page is skipped.
+     * Example:
+     *
+     * - if moving from R1 to R2 => returns [2,3]
+     * - if moving frmo R4 to R1 => returns [5,4,3,2]
+     * - the change remains on R3 => returns [4]
      *
      * @return array
      */
-    function getRollbackRevisionsSpan() {
-        $source = $this->eventModel->getPriorEvent()->source_page ;
-        $dest   = $this->eventModel->getCurrentEvent()->source_page ;
+    public function sourcePagesSpan() {
+        $min = $this->eventModel->getOriginSourcePage() ;
+        $max = $this->eventModel->getDestinationSourcePage() ;
+
+        if ( $this->getSourcePageDirection() === -1 ) {
+            $min = $this->eventModel->getDestinationSourcePage() ;
+            $max = $this->eventModel->getOriginSourcePage() ;
+        }
+
         $list   = [] ;
 
-        while( $source > $dest && $source > Constants::SOURCE_PAGE_TRANSLATE ) {
-            $list[] = $source-- ;
+        while( $max >= $min ) {
+            $list[] = $max-- ;
         }
-        return $list ;
+
+        return array_filter( $list, function($i) {
+            return $i != Constants::SOURCE_PAGE_TRANSLATE ;
+        });
     }
 
     /**

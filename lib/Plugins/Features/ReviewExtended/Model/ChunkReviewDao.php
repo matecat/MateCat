@@ -11,6 +11,7 @@ namespace Features\ReviewExtended\Model;
 use Chunks_ChunkStruct;
 use Constants;
 use Database;
+use PDO;
 
 class ChunkReviewDao extends \LQA\ChunkReviewDao {
 
@@ -38,8 +39,8 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                'id_job' => $chunk->id,
-                'password' => $chunk->password,
+                'id_job'      => $chunk->id,
+                'password'    => $chunk->password,
                 'source_page' => $source_page
         ] );
 
@@ -47,6 +48,29 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
 
         $penalty_points = $count[0] == null ? 0 : $count[0];
         return $penalty_points ;
+    }
+
+    public static function getPenaltyPointsForChunkAndSourcePageAndSegment( $chunk, $segment_ids ) {
+        $segment_ids = implode(',', $segment_ids ) ;
+
+        $sql = "SELECT source_page, SUM(penalty_points) FROM qa_entries e
+                JOIN jobs j on j.id = e.id_job
+                    AND e.id_segment >= j.job_first_segment
+                    AND e.id_segment <= j.job_last_segment
+                WHERE j.id = :id_job
+                    AND j.password = :password
+                    AND e.id_segment IN ( $segment_ids ) 
+                GROUP BY source_page 
+        ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+                'id_job'     => $chunk->id,
+                'password'   => $chunk->password
+        ] );
+
+        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
 }

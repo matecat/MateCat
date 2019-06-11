@@ -20,12 +20,18 @@ class Utils {
         foreach( $chunkReviews as $chunkReview ) {
             $statsArray['reviews'][] = [
                     'revision_number' => Utils::sourcePageToRevisionNumber( $chunkReview->source_page ),
-                    'reviewed_words' => $chunkReview->eq_reviewed_words_count
+                    'reviewed_words' => $chunkReview->advancement_wc
             ] ;
         }
         return $statsArray ;
     }
 
+    /**
+     *
+     * @param $number
+     *
+     * @return int
+     */
     public static function revisionNumberToSourcePage($number) {
         if ( !is_null( $number ) ) {
             return $number + 1 ;

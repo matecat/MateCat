@@ -14,14 +14,14 @@ interface IChunkReviewModel {
      *
      * @param $count
      */
-    public function addWordsCount( $count, $eq_count );
+    public function addWordsCount( $count );
 
     /**
      * Subtracts reviewed_words_count and recomputes result
      *
      * @param $count
      */
-    public function subtractWordsCount( $count, $eq_count );
+    public function subtractWordsCount( $count );
 
     /**
      * adds penalty_points and updates pass fail result
