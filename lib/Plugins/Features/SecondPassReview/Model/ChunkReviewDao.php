@@ -15,25 +15,25 @@ class ChunkReviewDao extends \Features\ReviewExtended\Model\ChunkReviewDao {
 
     public function recountAdvancementWords( Chunks_ChunkStruct $chunk, $source_page ) {
         $sql = "
-            SELECT sum(eq_word_count) FROM segments s
-        JOIN segment_translations st on st.id_segment = s.id
-        JOIN jobs j on j.id = st.id_job
-        AND s.id <= j.job_last_segment
-        AND s.id >= j.job_first_segment
-        JOIN (
-        SELECT id_segment as id_segment, source_page FROM segment_translation_events
-        WHERE id IN (
-        SELECT max(id) FROM segment_translation_events
-            WHERE id_job = :id_job
-            AND id_segment BETWEEN :job_first_segment AND :job_last_segment 
-            GROUP BY id_segment
-        )
-        HAVING source_page = :source_page
-        ORDER BY id_segment
-        ) ste ON ste.id_segment = s.id
+            SELECt SUM( IF( match_type != 'ICE', eq_word_count, s.raw_word_count ) )  FROM segments s
+                JOIN segment_translations st on st.id_segment = s.id
+                JOIN jobs j on j.id = st.id_job
+                AND s.id <= j.job_last_segment
+                AND s.id >= j.job_first_segment
+            JOIN (
+                SELECT id_segment as id_segment, source_page FROM segment_translation_events
+                WHERE id IN (
+                    SELECT max(id) FROM segment_translation_events
+                        WHERE id_job = :id_job
+                        AND id_segment BETWEEN :job_first_segment AND :job_last_segment
+                        GROUP BY id_segment
+                )
+                HAVING source_page = :source_page
+                ORDER BY id_segment
+            ) ste ON ste.id_segment = s.id
 
-        WHERE
-        j.id = :id_job AND j.password = :password  "  ;
+            WHERE
+            j.id = :id_job AND j.password = :password  "  ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

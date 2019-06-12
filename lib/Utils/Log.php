@@ -120,7 +120,7 @@ class Log {
             $context[ 'function' ] = $trace[ 3 ][ 'function' ];
         }
 
-        $context[ 'line' ] = $trace[ 2 ][ 'line' ];
+        $context[ 'line' ] = @$trace[ 2 ][ 'line' ];
 
         return $context;
 
