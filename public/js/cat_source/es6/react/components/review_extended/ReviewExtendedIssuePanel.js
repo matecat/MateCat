@@ -58,13 +58,17 @@ class ReviewExtendedIssuePanel extends React.Component{
                         SegmentActions.issueAdded(self.props.sid, data.issue.id);
                     });
                 } )
-				.fail( self.handleFail.bind(self) ) ;
+				.fail( (response) => self.handleFail(response.responseJSON) ) ;
 		})
 
     }
 
-    handleFail() {
-        genericErrorAlertMessage() ;
+    handleFail(response) {
+        if ( response.errors && response.errors[0].code === -2000 ) {
+            UI.processErrors(response.errors, 'createIssue');
+        } else {
+            genericErrorAlertMessage() ;
+        }
         this.props.setCreationIssueLoader(false);
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });
