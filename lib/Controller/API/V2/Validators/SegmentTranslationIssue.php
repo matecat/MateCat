@@ -4,8 +4,8 @@ namespace API\V2\Validators;
 
 
 use API\V2\Exceptions\ValidationError;
+use Constants;
 use Exception;
-use Features\SecondPassReview;
 use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use LQA\ChunkReviewDao;
@@ -75,11 +75,10 @@ class SegmentTranslationIssue extends Base {
             $this->__ensureIssueIsInScope();
         }
 
-        if ( $this->request->revision_number ) {
-            $this->__ensureSegmentIsInRevisionNumber();
+        if ( $this->request->method('post') && $this->request->revision_number ) {
+            $this->__ensureSegmentRevisionIsCompatibileWithIssueRevisionNumber();
         }
-
-        if ( $this->request->method('delete') ) {
+        elseif ( $this->request->method('delete') ) {
             $this->__ensureRevisionPasswordAllowsDeleteForIssue();
         }
 
@@ -95,28 +94,28 @@ class SegmentTranslationIssue extends Base {
         }
     }
 
-    private function __ensureSegmentIsInRevisionNumber() {
+    /**
+     *
+     * @throws Exception
+     * @throws ValidationError
+     */
+    private function __ensureSegmentRevisionIsCompatibileWithIssueRevisionNumber() {
         $latestSegmentEvent = ( new SegmentTranslationEventDao() )
                 ->getLatestEventForSegment( $this->chunk_review->id_job, $this->segment->id );
 
-        $originalSourcePage = null;
-
-        if ( $latestSegmentEvent ) {
-            $originalSourcePage = $latestSegmentEvent->source_page ;
+        if ( !$latestSegmentEvent && $this->translation->isICE() ) {
+            throw new ValidationError('Cannot set issues on unmodified ICE.') ;
         }
-        elseif (!$latestSegmentEvent && $this->parent_validator->getTranslation()->isICE() ) {
-            $originalSourcePage = \Constants::SOURCE_PAGE_REVISION ;
-        }
-        else {
-            throw new Exception('Unable to detect prior state for current segment' ) ;
-        }
-
-        // can latest event be missing here? Actually yes, for example in case we are setting an issue on a locked ice match, which never received
-        // a submit from the UI. How do we handle that case? No reviewed words yet an issue. That's not possible, we need to ensure the reviewed words
-        // are set, and reviewed words are set during setTranslation triggered callbacks.
-        if ( $originalSourcePage != Utils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
+        elseif ( $latestSegmentEvent->source_page != Utils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
+            // Can latest event be missing here? Actually yes, for example in case we are setting an issue on
+            // a locked ice match, which never received a submit from the UI. How do we handle that case?
+            // No reviewed words yet an issue. That's not possible, we need to ensure the reviewed words
+            // are set, and reviewed words are set during setTranslation triggered callbacks.
             throw new ValidationError("Trying access segment issue for revision number " .
                     $this->request->revision_number . " but segment is not in same revision state.");
+        }
+        elseif ( !$latestSegmentEvent ) {
+            throw new Exception('Unable to find the current state of this segment. Please report this issue to support.') ;
         }
     }
 
