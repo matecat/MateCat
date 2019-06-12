@@ -256,6 +256,10 @@ class SegmentQR extends React.Component {
             revise = this.decodeTextAndTransformTags(this.state.htmlDiff);
         }
 
+        if (this.state.revise2DiffOn) {
+            revise2 = this.decodeTextAndTransformTags(this.state.htmlDiff);
+        }
+
         let sourceClass = classnames({
             "segment-container": true,
             "qr-source": true,
