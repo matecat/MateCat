@@ -8,6 +8,7 @@
 
 namespace Features\ReviewExtended\Controller\API;
 
+use API\V2\Json\TranslationIssueComment;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
@@ -113,11 +114,19 @@ class QualityReportController extends KleinController
                                 $segment->issues[ $k2 ]['source_page']
                         );
                         unset( $segment->issues[ $k2 ]['source_page'] );
+
+                        if ( !empty( $issue->comments ) ) {
+                            $renderedIssueComments = [] ;
+                            foreach( $issue->comments as $k3 => $comment )  {
+                                $renderedIssueComments [] = ( new TranslationIssueComment() )->renderItem((object)$comment) ;
+                            }
+                            $issue->comments = null ;
+                            $issue->comments = $renderedIssueComments ;
+                        }
                     }
                 }
 
                 $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] = $file['segments'] [ $k1 ]->toArray();
-
                 $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'revision_number' ] = SecondPassReview\Utils::sourcePageToRevisionNumber(
                         $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'source_page' ]
                 );

@@ -20,6 +20,7 @@ use FeatureSet;
 use LQA\CategoryDao;
 use LQA\CategoryStruct;
 use LQA\ChunkReviewDao;
+use LQA\EntryCommentDao;
 use QualityReport_QualityReportSegmentStruct;
 use Revise_ReviseDAO;
 use Segments_SegmentDao;
@@ -95,8 +96,12 @@ class QualityReportSegmentModel {
         $seg->suggestion          = $Filter->fromLayer0ToLayer2( $seg->suggestion );
     }
 
-    protected function _assignIssues( $seg, $issues ) {
+    protected function _assignIssues( $seg, $issues, $issue_comments) {
         foreach ( $issues as $issue ) {
+            if ( isset( $issue_comments[ $issue->issue_id] ) ) {
+                $issue->comments = $issue_comments[ $issue->issue_id ] ;
+            }
+
             if ( $issue->segment_id == $seg->sid ) {
                 $seg->issues[] = $issue;
             }
@@ -120,16 +125,18 @@ class QualityReportSegmentModel {
 
         $featureSet->loadForProject( $this->chunk->getProject() );
 
-
         if ( $featureSet->hasRevisionFeature() ) {
-
             $issues = QualityReportDao::getIssuesBySegments( $segments_id, $this->chunk->id );
+            $issue_ids = array_map( function( $issue ) {
+                return $issue->issue_id ;
+            }, $issues );
+            $issue_comments = ( new EntryCommentDao() )->fetchCommentsGroupedByIssueIds( $issue_ids ) ;
 
         } else {
-
             $reviseDao          = new Revise_ReviseDAO();
             $segments_revisions = $reviseDao->readBySegments( $segments_id, $this->chunk->id );
             $issues             = $this->makeIssuesDataUniform( $segments_revisions );
+            $issue_comments     = [];
 
         }
 
@@ -168,7 +175,7 @@ class QualityReportSegmentModel {
             }
 
             $this->_commonSegmentAssignments( $seg, $Filter ) ;
-            $this->_assignIssues( $seg, $issues ) ;
+            $this->_assignIssues( $seg, $issues, $issue_comments ) ;
             $this->_assignComments( $seg, $comments ) ;
             $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
 

@@ -95,7 +95,7 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
      * @return float|int
      */
     public function getPEE() {
-        if(empty($this->translation) || empty($this->suggestion)){
+        if(empty($this->translation) || empty($this->suggestion) ){
             return 0;
         }
         return self::calculatePEE($this->suggestion, $this->translation, $this->target);

@@ -216,7 +216,7 @@ FROM  qa_entries issues
 
 JOIN (
 		SELECT ? as id_segment
-		".$prepare_str_segments_id."
+		" . $prepare_str_segments_id . "
 ) AS SLIST USING( id_segment )
 
   LEFT JOIN qa_categories
