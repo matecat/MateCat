@@ -13,10 +13,12 @@ use Chunks_ChunkStruct;
 use Exceptions\NotFoundException;
 use Features;
 use Features\SecondPassReview\Controller\API\Json\ProjectUrls;
+use Features\SecondPassReview\Model\ChunkReviewModel;
 use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use Klein\Klein;
 use LQA\ChunkReviewDao;
+use Projects_ProjectDao;
 
 class SecondPassReview extends BaseFeature {
     const FEATURE_CODE = 'second_pass_review' ;
@@ -24,7 +26,6 @@ class SecondPassReview extends BaseFeature {
     protected static $dependencies = [
             Features::REVIEW_EXTENDED
     ];
-
 
     public static function projectUrls( $formatted ) {
         $projectUrlsDecorator = new ProjectUrls( $formatted->getData() );
@@ -34,6 +35,24 @@ class SecondPassReview extends BaseFeature {
     public static function loadRoutes( Klein $klein ) {
         route( '/project/[:id_project]/[:password]/reviews', 'POST',
                 'Features\SecondPassReview\Controller\ReviewsController', 'createReview' );
+    }
+
+    public function chunkReviewRecordCreated($chunkReview) {
+        // This is needed to properly populate advancement wc for ICE matches
+        ( new ChunkReviewModel( $chunkReview ))->recountAndUpdatePassFailResult();
+    }
+
+    public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
+        $project = Projects_ProjectDao::findById( $project_id );
+        $chunk_ids = array_map( function( $chunk ) {
+            return [ $chunk->id, $chunk->password ];
+        }, $project->getChunks() );
+
+        $chunkReviews = (new ChunkReviewDao())->findAllChunkReviewsByChunkIds( $chunk_ids );
+        foreach ($chunkReviews as $chunkReview ) {
+            $model = new ChunkReviewModel( $chunkReview ) ;
+            $model->recountAndUpdatePassFailResult() ;
+        }
     }
 
     public function catControllerChunkFound( catController $controller ) {

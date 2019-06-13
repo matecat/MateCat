@@ -1298,7 +1298,7 @@ UI = {
                 return value.revision_number === 1;
             });
 		    if ( reviewedWords ) {
-                var approvePerc = parseFloat(reviewedWords.reviewed_words)*100/s.TOTAL;
+                var approvePerc = parseFloat(reviewedWords.advancement_wc)*100/s.TOTAL;
                 a_perc_formatted = _.round(approvePerc, 1);
                 a_perc = approvePerc;
             }
@@ -1308,7 +1308,7 @@ UI = {
             });
 
             if ( reviewWordsSecondPass ) {
-                var approvePerc2ndPass = parseFloat(reviewWordsSecondPass.reviewed_words)*100/s.TOTAL;
+                var approvePerc2ndPass = parseFloat(reviewWordsSecondPass.advancement_wc)*100/s.TOTAL;
                 a_perc_2nd_formatted = _.round(approvePerc2ndPass, 1);
                 a_perc_2nd = approvePerc2ndPass;
             }

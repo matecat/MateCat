@@ -20,7 +20,7 @@ class Utils {
         foreach( $chunkReviews as $chunkReview ) {
             $statsArray['reviews'][] = [
                     'revision_number' => Utils::sourcePageToRevisionNumber( $chunkReview->source_page ),
-                    'reviewed_words' => $chunkReview->advancement_wc
+                    'advancement_wc' => $chunkReview->advancement_wc
             ] ;
         }
         return $statsArray ;

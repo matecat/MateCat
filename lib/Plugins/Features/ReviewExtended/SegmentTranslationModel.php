@@ -188,6 +188,9 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                     false ;
                 }
             }
+            else {
+                // TODO
+            }
         }
 
         foreach( $modifiedChunkReviewsToSave as $chunkReview ) {

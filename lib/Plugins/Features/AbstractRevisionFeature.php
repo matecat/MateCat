@@ -168,11 +168,14 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @return ChunkReviewStruct
      * @throws \Exceptions\ValidationError
+     *
      */
     public function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
-
+        $project = Projects_ProjectDao::findById( $id_project );
         $chunks = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
+        $createdRecords = [] ;
 
+        // expect one chunk
         if ( ! isset( $options['source_page'] ) ) {
             $options['source_page'] = Constants::SOURCE_PAGE_REVISION ;
         }
@@ -189,8 +192,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                 $data[ 'review_password' ] = $options[ 'first_record_password' ];
             }
 
-            return ChunkReviewDao::createRecord( $data );
+            $chunkReview = ChunkReviewDao::createRecord( $data );
+            $project->getFeatures()->run('chunkReviewRecordCreated', $chunkReview );
+            $createdRecords[] = $chunkReview ;
         }
+
+        return $createdRecords[0];
     }
 
     /**

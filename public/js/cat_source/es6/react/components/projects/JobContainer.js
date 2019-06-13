@@ -646,10 +646,10 @@ class JobContainer extends React.Component {
         let approvedPerc2ndPass, approvedPercFormatted2ndPass;
         if (this.props.project.has('features') && this.props.project.get('features').indexOf('second_pass_review') > -1 && this.props.job.get('stats').has('reviews')){
             let approved = this.props.job.get('stats').get('reviews').find(( item ) => {return item.get('revision_number') === 1});
-            approvedPerc = (approved) ? parseFloat(approved.get('reviewed_words'))*100/this.props.job.get('stats').get('TOTAL') : approvedPerc;
+            approvedPerc = (approved) ? parseFloat(approved.get('advancement_wc'))*100/this.props.job.get('stats').get('TOTAL') : approvedPerc;
             approvedPercFormatted = _.round(approvedPerc, 1);
             let approved2ndPass = this.props.job.get('stats').get('reviews').find(( item ) => {return item.get('revision_number') === 2});
-            approvedPerc2ndPass = (approved2ndPass) ? parseFloat(approved2ndPass.get('reviewed_words'))*100/this.props.job.get('stats').get('TOTAL') : approved2ndPass;
+            approvedPerc2ndPass = (approved2ndPass) ? parseFloat(approved2ndPass.get('advancement_wc'))*100/this.props.job.get('stats').get('TOTAL') : approved2ndPass;
             approvedPercFormatted2ndPass = _.round(approvedPerc2ndPass, 1);
         }
 
