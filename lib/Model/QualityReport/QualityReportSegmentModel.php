@@ -124,19 +124,22 @@ class QualityReportSegmentModel {
         $featureSet = new FeatureSet();
 
         $featureSet->loadForProject( $this->chunk->getProject() );
+        $issue_comments     = [];
 
         if ( $featureSet->hasRevisionFeature() ) {
             $issues = QualityReportDao::getIssuesBySegments( $segments_id, $this->chunk->id );
-            $issue_ids = array_map( function( $issue ) {
-                return $issue->issue_id ;
-            }, $issues );
-            $issue_comments = ( new EntryCommentDao() )->fetchCommentsGroupedByIssueIds( $issue_ids ) ;
+            if ( !empty( $issues )) {
+                $issue_comments = ( new EntryCommentDao() )->fetchCommentsGroupedByIssueIds(
+                        array_map( function( $issue ) {
+                            return $issue->issue_id ;
+                        }, $issues )
+                ) ;
+            }
 
         } else {
             $reviseDao          = new Revise_ReviseDAO();
             $segments_revisions = $reviseDao->readBySegments( $segments_id, $this->chunk->id );
             $issues             = $this->makeIssuesDataUniform( $segments_revisions );
-            $issue_comments     = [];
 
         }
 
