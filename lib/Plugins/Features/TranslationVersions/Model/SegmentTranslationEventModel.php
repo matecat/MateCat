@@ -75,6 +75,13 @@ class SegmentTranslationEventModel  {
         return $this->getOriginSourcePage() > $this->getDestinationSourcePage() ;
     }
 
+    /**
+     * @return bool
+     */
+    public function isChangingSourcePage() {
+        return $this->getOriginSourcePage() != $this->getDestinationSourcePage() ;
+    }
+
     public function save() {
 
         if ( $this->current_event !== -1 ) {

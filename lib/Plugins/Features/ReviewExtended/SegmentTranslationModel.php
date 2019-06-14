@@ -188,8 +188,14 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                     false ;
                 }
             }
-            else {
-                // TODO
+            elseif ( $this->model->isModifyingICE() && $this->model->getEventModel()->isLowerRevision() ) {
+                /**
+                 * Enter this condition when we are just changing source page. This change only affects advancement wc.
+                 * This is the case of ICE matches moving from R1 to TR.
+                 */
+
+                $chunkReview->advancement_wc       -= $this->advancementWordCountWithPropagation();
+                $modifiedChunkReviewsToSave[]       = $chunkReview ;
             }
         }
 

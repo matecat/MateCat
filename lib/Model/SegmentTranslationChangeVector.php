@@ -157,7 +157,7 @@ class SegmentTranslationChangeVector {
                 );
     }
 
-    protected function isModifyingICE() {
+    public function isModifyingICE() {
         return $this->old_translation->isICE() &&
                 $this->old_translation->translation != $this->translation->translation &&
                 $this->old_translation->version_number == 0 ;
