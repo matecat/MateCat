@@ -166,7 +166,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param       $id_project
      * @param array $options
      *
-     * @return ChunkReviewStruct
+     * @return ChunkReviewStruct[]
      * @throws \Exceptions\ValidationError
      *
      */
@@ -197,7 +197,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             $createdRecords[] = $chunkReview ;
         }
 
-        return $createdRecords[0];
+        return $createdRecords;
     }
 
     /**

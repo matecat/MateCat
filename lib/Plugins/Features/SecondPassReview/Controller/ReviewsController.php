@@ -38,7 +38,7 @@ class ReviewsController extends KleinController {
 
     public function createReview() {
         // create a new chunk revision password
-        $record = RevisionFactory::initFromProject($this->project)->getFeature()->createQaChunkReviewRecord(
+        $records = RevisionFactory::initFromProject($this->project)->getFeature()->createQaChunkReviewRecord(
                 $this->chunk->id,
                 $this->project->id,
                 [
@@ -47,10 +47,11 @@ class ReviewsController extends KleinController {
         );
 
         $this->response->json( [ 'chunk_review' => [
-                'id'              => $record->id ,
-                'id_job'          => $record->id_job ,
-                'review_password' => $record->review_password
-        ] ] ) ;
+                'id'              => $records[ 0 ]->id ,
+                'id_job'          => $records[ 0 ]->id_job ,
+                'review_password' => $records[ 0 ]->review_password ]
+                ]
+        ) ;
     }
 
     protected function afterConstruct() {
