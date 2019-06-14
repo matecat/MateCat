@@ -46,7 +46,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         }
 
         if ( $obj->type !== null ) {
-            $where_conditions[ ] = "type = '" . $this->con->escape( $obj->type ) . "'";
+            $where_conditions[ ] = "type = '" . $this->database->escape( $obj->type ) . "'";
         }
 
         if ( count( $where_conditions ) ) {
@@ -106,11 +106,11 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                 ( $obj->uid == null ) ? "NULL" : $obj->uid
         );
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
         //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
-            $obj->id = $this->con->last_insert();
+        if ( $this->database->affected_rows > 0 ) {
+            $obj->id = $this->database->last_insert();
             return $obj;
         }
 
@@ -199,9 +199,9 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $set_string, $where_string );
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $this->database->affected_rows > 0 ) {
             return $obj;
         }
 
@@ -222,9 +222,9 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         );
 
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $this->database->affected_rows > 0 ) {
             return $obj;
         }
 
@@ -244,9 +244,9 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                 $obj->uid
         );
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $this->database->affected_rows > 0 ) {
             $tmpEng = $this->setCacheTTL( 60 * 60 * 5 )->read( $obj )[0];
             $tmpEng->active = 0; // avoid slave replication delay
             return $tmpEng;
@@ -268,9 +268,9 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                 $obj->uid
         );
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $this->database->affected_rows > 0 ) {
             return $obj;
         }
 

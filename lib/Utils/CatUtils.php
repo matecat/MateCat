@@ -164,7 +164,7 @@ class CatUtils {
 
         try {
             //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
-            addTranslation( $translation );
+            Translations_SegmentTranslationDao::addTranslation( $translation );
         } catch ( Exception $e ) {
             $errors[] = [ "code" => -101, "message" => $e->getMessage() ];
         }
@@ -325,23 +325,6 @@ class CatUtils {
         }
 
         return self::_performanceEstimationTime( $job_stats );
-    }
-
-    /**
-     * @param $fid
-     *
-     * @return array
-     */
-    public static function getStatsForFile( $fid ) {
-        $file_stats = getStatsForFile( $fid );
-
-        $file_stats                         = $file_stats[ 0 ];
-        $file_stats[ 'ID_FILE' ]            = $fid;
-        $file_stats[ 'TOTAL_FORMATTED' ]    = number_format( $file_stats[ 'TOTAL' ], 0, ".", "," );
-        $file_stats[ 'REJECTED_FORMATTED' ] = number_format( $file_stats[ 'REJECTED' ], 0, ".", "," );
-        $file_stats[ 'DRAFT_FORMATTED' ]    = number_format( $file_stats[ 'DRAFT' ], 0, ".", "," );
-
-        return $file_stats;
     }
 
     /**
@@ -615,21 +598,19 @@ class CatUtils {
     }
 
     /**
-     * @param $job
+     * @param Jobs_JobStruct         $job
+     *
+     * @param Projects_ProjectStruct $projectStruct
      *
      * @return WordCount_Struct
      * @throws Exception
      */
-    public static function getWStructFromJobArray( $job ) {
-        $job = Utils::ensure_keys( $job, [
-                'new_words', 'draft_words', 'translated_words', 'approved_words', 'rejected_words',
-                'status_analysis', 'jid', 'jpassword'
-        ] );
+    public static function getWStructFromJobArray( Jobs_JobStruct $job, Projects_ProjectStruct $projectStruct ) {
 
         $wStruct = new WordCount_Struct();
 
-        $wStruct->setIdJob( $job[ 'jid' ] );
-        $wStruct->setJobPassword( $job[ 'jpassword' ] );
+        $wStruct->setIdJob( $job[ 'id' ] );
+        $wStruct->setJobPassword( $job[ 'password' ] );
         $wStruct->setNewWords( $job[ 'new_words' ] );
         $wStruct->setDraftWords( $job[ 'draft_words' ] );
         $wStruct->setTranslatedWords( $job[ 'translated_words' ] );
@@ -637,9 +618,9 @@ class CatUtils {
         $wStruct->setRejectedWords( $job[ 'rejected_words' ] );
 
         // For projects created with No tm analysis enabled
-        if ( $wStruct->getTotal() == 0 && ( $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
-            $wCounter = new WordCount_Counter();
-            $wStruct  = $wCounter->initializeJobWordCount( $job[ 'jid' ], $job[ 'jpassword' ] );
+        if ( $wStruct->getTotal() == 0 && ( $projectStruct[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $projectStruct[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
+            $wCounter = new WordCount_CounterModel();
+            $wStruct  = $wCounter->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
             Log::doJsonLog( "BackWard compatibility set Counter." );
 
             return $wStruct;
@@ -739,7 +720,7 @@ class CatUtils {
 
         // For projects created with No tm analysis enabled
         if ( $wStruct->getTotal() == 0 && ( $analysis_status == Constants_ProjectStatus::STATUS_DONE || $analysis_status == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
-            $wCounter = new WordCount_Counter();
+            $wCounter = new WordCount_CounterModel();
             $wStruct  = $wCounter->initializeJobWordCount( $job->id, $job->password );
             Log::doJsonLog( "BackWard compatibility set Counter." );
 
@@ -792,6 +773,58 @@ class CatUtils {
         $job_stats[ 'TOTAL' ] = ( $total == 0 ? 1 : $total );
 
         return $job_stats;
+    }
+
+    /**
+     * @param        $sid
+     * @param        $results array The resultset from previous getNextSegment()
+     * @param string $status
+     *
+     * @return null
+     */
+
+    public static function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STATUS_NEW ) {
+
+        $statusWeight = [
+                Constants_TranslationStatus::STATUS_NEW        => 10,
+                Constants_TranslationStatus::STATUS_DRAFT      => 10,
+                Constants_TranslationStatus::STATUS_REJECTED   => 10,
+                Constants_TranslationStatus::STATUS_TRANSLATED => 40,
+                Constants_TranslationStatus::STATUS_APPROVED   => 50
+        ];
+
+        $nSegment = null;
+        if ( isset( $results[ 0 ][ 'id' ] ) ) {
+            //if there are results check for next id,
+            //otherwise get the first one in the list
+//        $nSegment = $results[ 0 ][ 'id' ];
+            //Check if there is translated segment with $seg[ 'id' ] > $sid
+            foreach ( $results as $seg ) {
+                if ( $seg[ 'status' ] == null ) {
+                    $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
+                }
+                if ( $seg[ 'id' ] > $sid && $statusWeight[ $seg[ 'status' ] ] == $statusWeight[ $status ] ) {
+                    $nSegment = $seg[ 'id' ];
+                    break;
+                }
+            }
+            // If there aren't transleted segments in the next elements -> check starting from the first
+            if ( !$nSegment ) {
+                foreach ( $results as $seg ) {
+                    if ( $seg[ 'status' ] == null ) {
+                        $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
+                    }
+                    if ( $statusWeight[ $seg[ 'status' ] ] == $statusWeight[ $status ] ) {
+                        $nSegment = $seg[ 'id' ];
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        return $nSegment;
+
     }
 
 }

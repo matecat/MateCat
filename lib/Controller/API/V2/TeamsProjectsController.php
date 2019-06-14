@@ -82,7 +82,7 @@ class TeamsProjectsController extends KleinController {
         $assignee              = null;
         $no_assignee           = null;
 
-        $projects = ManageUtils::queryProjects( $this->user, $start, $step,
+        $projects = ManageUtils::getProjects( $this->user, $start, $step,
                 $search_in_pname,
                 $search_source, $search_target, $search_status,
                 $search_only_completed, $project_id,

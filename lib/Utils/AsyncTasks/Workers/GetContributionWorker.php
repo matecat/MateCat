@@ -148,7 +148,7 @@ class GetContributionWorker extends AbstractWorker {
                 [ 'persistent' => 'false' ]
         );
 
-        $this->_doLog( $_object );
+        $this->_doLog( $message );
 
     }
 
@@ -553,21 +553,14 @@ class GetContributionWorker extends AbstractWorker {
             $data[ 'translation' ]       = $match[ 'raw_translation' ];
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
-            $statuses = [ Constants_TranslationStatus::STATUS_NEW ];
+            $where = [
+                    'id_segment' => $contributionStruct->segmentId,
+                    'id_job'     => $contributionStruct->getJobStruct()->id,
+                    'status'     => Constants_TranslationStatus::STATUS_NEW
+            ];
 
-            $statuses_condition = implode(' OR ', array_map( function($status) {
-                return " status = '$status' " ;
-            }, $statuses ) ) ;
+            \Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
 
-            $where = " id_segment= " . (int) $contributionStruct->segmentId . " and id_job = " . (int) $contributionStruct->getJobStruct()->id . " AND ( $statuses_condition ) ";
-
-            $db = Database::obtain();
-
-            try {
-                $db->update( 'segment_translations', $data, $where );
-            } catch ( PDOException $e ) {
-                $this->_doLog( $e->getMessage() );
-            }
 
         }
 

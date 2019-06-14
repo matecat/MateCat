@@ -142,7 +142,7 @@ class getProjectsController extends ajaxController {
             $assignee = $this->filterAssignee( $team );
         }
 
-        $projects = ManageUtils::queryProjects( $this->user, $this->start, $this->step,
+        $projects = ManageUtils::getProjects( $this->user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
@@ -150,7 +150,7 @@ class getProjectsController extends ajaxController {
             $this->no_assignee
         );
 
-        $projnum = getProjectsNumber( $this->user,
+        $projnum = ManageUtils::getProjectsNumber( $this->user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
             $this->search_only_completed,

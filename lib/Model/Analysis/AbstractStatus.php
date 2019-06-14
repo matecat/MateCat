@@ -235,7 +235,7 @@ abstract class Analysis_AbstractStatus {
             //fast analysis not done, return the number of raw word count
             //needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
             //( no segment_translations )
-            $project_data_fallback = getProjectJobData( $this->id_project );
+            $project_data_fallback = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
 
             foreach ( $project_data_fallback as $i => $_job_fallback ) {
                 $this->result[ 'data' ][ 'jobs' ][ $_job_fallback[ 'jid' ] ][ 'totals' ][ $_job_fallback[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ] = $_job_fallback[ 'standard_analysis_wc' ];

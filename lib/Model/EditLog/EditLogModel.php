@@ -67,8 +67,8 @@ class EditLog_EditLogModel {
     }
 
     public function controllerDoAction() {
-        //pay a little query to avoid to fetch 5000 rows
-        $this->jobData   = getJobData( $this->jid, $this->password );
+
+        $this->jobData   = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
         $this->job_stats = $this->getFastStatsForJob();
 
         if ( $this->jobData[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED || $this->jobData == Constants_JobStatus::STATUS_CANCELLED ) {
@@ -81,8 +81,7 @@ class EditLog_EditLogModel {
             self::$start_id = $this->jobData[ 'job_first_segment' ];
         }
 
-        //TODO: portare dentro il codice
-        $proj = getProject( $this->jobData[ 'id_project' ] );
+        $projectStruct = $this->jobData->getProject();
 
         try {
 
@@ -100,7 +99,7 @@ class EditLog_EditLogModel {
 
             $this->stats = $tmp[ 1 ];
 
-            $this->project_info = $proj[ 0 ];
+            $this->project_info = $projectStruct[ 0 ];
 
             $this->loadLanguageStats();
 
@@ -109,7 +108,7 @@ class EditLog_EditLogModel {
                 $this->jobEmpty = true;
                 //set JobData anyway to fill the template for the goBack button
                 $this->data[] = array(
-                        'proj_name'  => $proj[ 0 ][ 'name' ],
+                        'proj_name'  => $projectStruct[ 0 ][ 'name' ],
                         'job_source' => $this->jobData[ 'source' ],
                         'job_target' => $this->jobData[ 'target' ]
                 );
@@ -463,7 +462,7 @@ class EditLog_EditLogModel {
      */
     private function loadLanguageStats() {
         if ( empty( $this->jobData ) ) {
-            $this->jobData = getJobData( $this->jid, $this->password );
+            $this->jobData = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
         }
 
         if ( empty( $this->languageStatsData ) ) {

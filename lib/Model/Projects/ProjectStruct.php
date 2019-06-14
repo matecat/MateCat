@@ -1,8 +1,12 @@
 <?php
 
+use DataAccess\ArrayAccessTrait;
 use Teams\TeamDao;
 
-class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+
+    use ArrayAccessTrait;
+
     public $id ;
     public $password ;
     public $name ;

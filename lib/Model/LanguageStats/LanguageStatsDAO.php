@@ -16,7 +16,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
     public function getLastDate(){
 
-        $con = $this->con->getConnection();
+        $con = $this->database->getConnection();
         $stmt = $con->prepare( "select max( date ) as date from " . self::TABLE );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute();
@@ -41,7 +41,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 ;
           ";
 
-        $con = $this->con->getConnection();
+        $con = $this->database->getConnection();
         $stmt = $con->prepare( $query );
 
         return $this->_fetchObject( $stmt, new LanguageStats_LanguageStatsStruct(), [
@@ -56,7 +56,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 SELECT distinct DATE_FORMAT( date,'%Y-%m-%d' ) AS date_format , date
                 FROM " . self::TABLE;
 
-        $con = $this->con->getConnection();
+        $con = $this->database->getConnection();
         $stmt = $con->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute();
@@ -137,10 +137,10 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 (int)$obj->job_count
         );
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
         //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $this->database->affected_rows > 0 ) {
             return $obj;
         }
 
@@ -171,22 +171,22 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
         if ( $obj->date !== null ) {
             $condition          = "date = '%s'";
-            $where_conditions[] = sprintf( $condition, $this->con->escape( $obj->date ) );
+            $where_conditions[] = sprintf( $condition, $this->database->escape( $obj->date ) );
         }
 
         if ( $obj->source !== null ) {
             $condition          = "source = '%s'";
-            $where_conditions[] = sprintf( $condition, $this->con->escape( $obj->source ) );
+            $where_conditions[] = sprintf( $condition, $this->database->escape( $obj->source ) );
         }
 
         if ( $obj->target !== null ) {
             $condition          = "target = '%s'";
-            $where_conditions[] = sprintf( $condition, $this->con->escape( $obj->target ) );
+            $where_conditions[] = sprintf( $condition, $this->database->escape( $obj->target ) );
         }
 
         if ( $obj->fuzzy_band !== null ) {
             $condition          = "fuzzy_band = '%s'";
-            $where_conditions[] = sprintf( $condition, $this->con->escape( $obj->target ) );
+            $where_conditions[] = sprintf( $condition, $this->database->escape( $obj->target ) );
         }
 
         if ( count( $where_conditions ) ) {
@@ -198,7 +198,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
         $query = sprintf( $query, $where_string );
 
         
-        $stmt = $this->con->getConnection()->prepare( $query );
+        $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute();
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         return $stmt->fetchAll();
@@ -254,7 +254,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
             );
 
 
-            $stmt = $this->con->getConnection()->prepare( $insert_query );
+            $stmt = $this->database->getConnection()->prepare( $insert_query );
             $stmt->execute();
 
             if($stmt->errorCode() > 0 ){

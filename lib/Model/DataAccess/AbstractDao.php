@@ -14,7 +14,7 @@ abstract class DataAccess_AbstractDao {
      * The connection object
      * @var Database
      */
-    protected $con;
+    protected $database;
 
     /**
      * The cache connection object
@@ -62,11 +62,14 @@ abstract class DataAccess_AbstractDao {
             $con = Database::obtain();
         }
 
-        $this->con = $con;
+        $this->database = $con;
     }
 
-    public function getConnection() {
-        return $this->con;
+    /**
+     * @return \Database|IDatabase
+     */
+    public function getDatabaseHandler() {
+        return $this->database;
     }
 
     /**
@@ -299,7 +302,7 @@ abstract class DataAccess_AbstractDao {
             return $_cacheResult;
         }
 
-        $result = $this->con->fetch_array( $query );
+        $result = $this->database->fetch_array( $query );
 
         $this->_setInCache( $query, $result );
 
@@ -391,49 +394,19 @@ abstract class DataAccess_AbstractDao {
      * Returns a string suitable for insert of the fields
      * provided by the attributes array.
      *
-     * @param      $attrs    array of full attributes to update
-     * @param      $mask     array of attributes to include in the update
-     * @param bool $ignore   Use INSERT IGNORE query type
-     * @param bool $no_nulls Exclude NULL fields when build the sql
+     * @param       $attrs    array of full attributes to update
+     * @param       $mask     array of attributes to include in the update
+     * @param bool  $ignore   Use INSERT IGNORE query type
+     * @param bool  $no_nulls Exclude NULL fields when build the sql
+     *
+     * @param array $on_duplicate_fields
      *
      * @return string
-     * @internal param array $options of options for the SQL statement
-     *
      * @throws Exception
+     * @internal param array $options of options for the SQL statement
      */
-    public static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false, $on_duplicate_fields = null ) {
-
-        if ( is_null( static::TABLE ) ) {
-            throw new Exception( 'TABLE constant is not defined' );
-        }
-
-        $first  = [];
-        $second = [];
-
-        $sql_ignore = $ignore ? " IGNORE " : "";
-
-        $sql_on_duplicate_update = !empty( $on_duplicate_fields ) ? " ON DUPLICATE KEY UPDATE " . implode( ", ", $on_duplicate_fields ) : null;
-
-        if ( empty( $mask ) ) {
-            $mask = array_keys( $attrs );
-        }
-
-        foreach ( $attrs as $key => $value ) {
-            if ( in_array( $key, $mask ) ) {
-                if ( $no_nulls && is_null( $value ) ) {
-                    unset( $mask[ array_search( $key, $mask ) ] );
-                    continue;
-                }
-                $first[]  = "`$key`";
-                $second[] = ":$key";
-            }
-        }
-
-        $sql = "INSERT $sql_ignore INTO " . static::TABLE . " (" .
-                implode( ', ', $first ) . ") VALUES (" .
-                implode( ', ', $second ) . ") $sql_on_duplicate_update ;";
-
-        return $sql;
+    public static function buildInsertStatement( array $attrs, array &$mask = [], $ignore = false, $no_nulls = false, array $on_duplicate_fields = [] ) {
+        return Database::buildInsertStatement( static::TABLE, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_fields );
     }
 
 
@@ -593,7 +566,7 @@ abstract class DataAccess_AbstractDao {
             if ( count( static::$auto_increment_field ) ) {
                 return $conn->lastInsertId();
             } else {
-                return true;
+                return $stmt->rowCount();
             }
         } else {
 

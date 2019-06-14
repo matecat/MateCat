@@ -34,7 +34,7 @@ class SegmentTranslationEventModel {
         }
 
         $conn = new SegmentTranslationEventDao();
-        $conn->getConnection()->begin() ;
+        $conn->getDatabaseHandler()->begin() ;
 
         $struct                 = new SegmentTranslationEventStruct() ;
         $struct->id_job         = $this->translation['id_job'] ;
@@ -51,7 +51,7 @@ class SegmentTranslationEventModel {
             $dao->insertForPropagation($this->propagated_ids, $struct);
         }
 
-        $conn->getConnection()->commit();
+        $conn->getDatabaseHandler()->commit();
     }
 
     protected function _savePropagatedIds() {

@@ -8,9 +8,11 @@
  *
  */
 
+use WordCount\WordCounterDao;
+
 require_once 'queries.php';
 
-class WordCount_Counter {
+class WordCount_CounterModel {
 
     /**
      * @var WordCount_Struct
@@ -36,6 +38,8 @@ class WordCount_Counter {
 
     /**
      * @param WordCount_Struct $oldWCount
+     *
+     * @throws ReflectionException
      */
     public function __construct( WordCount_Struct $oldWCount = null ) {
 
@@ -124,7 +128,7 @@ class WordCount_Counter {
 
         $differentialCountStruct = $this->sumDifferentials( $_wordCount_Struct_Array );
 
-        $res = updateWordCount( $differentialCountStruct );
+        $res = WordCounterDao::updateWordCount( $differentialCountStruct );
 
         if ( $res < 0 ) {
             throw new Exception( "Failed to update counter", $res );
@@ -275,7 +279,7 @@ class WordCount_Counter {
         $wStruct->setTranslatedWords( $job_details[ Constants_TranslationStatus::STATUS_TRANSLATED ] );
         $wStruct->setApprovedWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED ] );
         $wStruct->setRejectedWords( $job_details[ Constants_TranslationStatus::STATUS_REJECTED ] );
-        initializeWordCount( $wStruct );
+        WordCounterDao::initializeWordCount( $wStruct );
 
         //Log::doJsonLog( $wStruct );
 

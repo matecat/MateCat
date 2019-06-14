@@ -37,7 +37,7 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
         }
 
         if ( $obj->getJobPassword() !== null ) {
-            $where_conditions[ ] = "password = '" . $this->con->escape($obj->getJobPassword())."'";
+            $where_conditions[ ] = "password = '" . $this->database->escape($obj->getJobPassword())."'";
         }
 
         if ( count( $where_conditions ) ) {
@@ -84,7 +84,7 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
         $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
         $where_conditions[ ] = "id = " . (int)$obj->getIdJob();
-        $where_conditions[ ] = "password = '" . $this->con->escape( $obj->getJobPassword() ) . "'";
+        $where_conditions[ ] = "password = '" . $this->database->escape( $obj->getJobPassword() ) . "'";
 
         //WARNING: cannot check if object's values are correctly set, because they have a default value
         //the update will be done for all the values
@@ -157,9 +157,9 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $set_string, $where_string );
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
-        if ($this->con->affected_rows > 0 ) {
+        if ($this->database->affected_rows > 0 ) {
             return $obj;
         }
 

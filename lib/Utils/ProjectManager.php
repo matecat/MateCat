@@ -12,7 +12,7 @@ use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
 use Jobs\SplitQueue;
-use Segments\ContextGroupDao;
+use ProjectManager\ProjectManagerModel;
 use SubFiltering\Filter;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
@@ -366,7 +366,7 @@ class ProjectManager {
      *
      */
     private function __createProjectRecord() {
-        $this->project = insertProject( $this->projectStructure );
+        $this-> project = ProjectManagerModel::createProjectRecord( $this->projectStructure );
     }
 
     private function __checkForProjectAssignment() {
@@ -737,20 +737,11 @@ class ProjectManager {
             $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL();
         }
 
-        $update_project_count = "
-            UPDATE projects
-              SET status_analysis = '%s', standard_analysis_wc = %u
-            WHERE id = %u
-        ";
-
-        $update_project_count = sprintf(
-                $update_project_count,
+        Projects_ProjectDao::updateAnalysisStatus(
+                $this->projectStructure[ 'id_project' ],
                 $this->projectStructure[ 'status' ],
-                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] ),  //estimation of total segments in the project
-                $this->projectStructure[ 'id_project' ]
+                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] )
         );
-
-        $this->dbHandler->query( $update_project_count );
 
         $this->pushActivityLog();
 
@@ -1449,7 +1440,7 @@ class ProjectManager {
             $stmt = ( new Jobs_JobDao() )->getSplitJobPreparedStatement( $jobInfo );
             $stmt->execute();
 
-            $wCountManager = new WordCount_Counter();
+            $wCountManager = new WordCount_CounterModel();
             $wCountManager->initializeJobWordCount( $jobInfo->id, $jobInfo->password );
 
             if ( $this->dbHandler->affected_rows == 0 ) {
@@ -1493,6 +1484,8 @@ class ProjectManager {
      * Apply new structure of job
      *
      * @param ArrayObject $projectStructure
+     *
+     * @throws Exception
      */
     public function applySplit( ArrayObject $projectStructure ) {
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
@@ -1569,7 +1562,7 @@ class ProjectManager {
 
         Jobs_JobDao::deleteOnMerge( $first_job );
 
-        $wCountManager = new WordCount_Counter();
+        $wCountManager = new WordCount_CounterModel();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
 
         $chunk = new Chunks_ChunkStruct( $first_job->toArray() );
@@ -1847,7 +1840,7 @@ class ProjectManager {
         foreach ( $_originalFileNames as $originalFileName ) {
 
             $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
+            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
 
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
@@ -1871,6 +1864,20 @@ class ProjectManager {
 
         return $filesStructure;
 
+    }
+
+    /**
+     * @param ArrayObject $projectStructure
+     * @param             $file_name
+     * @param             $mime_type
+     * @param             $fileDateSha1Path
+     *
+     * @return mixed|string
+     * @throws Exception
+     */
+    protected function _insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
+        $idFile = ProjectManagerModel::insertFile( $projectStructure, $file_name, $mime_type, $fileDateSha1Path );
+        return $idFile;
     }
 
     protected function _storeSegments( $fid ) {
@@ -2162,49 +2169,7 @@ class ProjectManager {
 
         // Executing the Query
         if ( !empty( $query_translations_values ) ) {
-
-            $baseQuery = "
-                INSERT INTO segment_translations (
-                        id_segment, 
-                        id_job, 
-                        segment_hash, 
-                        status, 
-                        translation, 
-                        translation_date, /* NOW() */
-                        tm_analysis_status, /* DONE */
-                        locked, 
-                        match_type, 
-                        eq_word_count,
-                        suggestion_match,
-                        standard_word_count
-                )
-                VALUES ";
-
-            $tuple_marks = "( ?, ?, ?, ?, ?, NOW(), 'DONE', ?, ?, ?, ?, ? )";
-
-            $this->_log( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
-
-            //split the query in to chunks if there are too much segments
-            $query_translations_values = array_chunk( $query_translations_values, 100 );
-
-            $this->_log( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
-
-            foreach ( $query_translations_values as $i => $chunk ) {
-
-                try {
-
-                    $query = $baseQuery . rtrim( str_repeat( $tuple_marks . ", ", count( $chunk ) ), ", " );
-                    $stmt  = $this->dbHandler->getConnection()->prepare( $query );
-                    $stmt->execute( iterator_to_array( new RecursiveIteratorIterator( new RecursiveArrayIterator( $chunk ) ), false ) );
-
-                    $this->_log( "Pre-Translations: Executed Query " . ( $i + 1 ) );
-                } catch ( PDOException $e ) {
-                    $this->_log( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
-                    throw new PDOException( "Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
-                }
-
-            }
-
+            ProjectManagerModel::insertPreTranslations( $query_translations_values );
         }
 
         //clean translations and queries
@@ -2419,90 +2384,91 @@ class ProjectManager {
 
 
     /**
+     * NOT USED
+     *
      * Extract internal reference base64 files
      * and store their index in $this->projectStructure
      *
      * @param $project_file_id
      * @param $xliff_file_array
      *
-     * @return null|int $file_reference_id
+     * @return void|int $file_reference_id
      *
      * @throws Exception
-     *
      * @deprecated
-     * @removed
      */
     protected function _extractFileReferences( $project_file_id, $xliff_file_array ) {
+//
+//        $fName = self::_sanitizeName( $xliff_file_array[ 'attr' ][ 'original' ] );
+//
+//        if ( $fName != false ) {
+//            $fName = $this->dbHandler->escape( $fName );
+//        } else {
+//            $fName = '';
+//        }
+//
+//        $serialized_reference_meta     = [];
+//        $serialized_reference_binaries = [];
+//
+//        /* Fix: PHP Warning:  Invalid argument supplied for foreach() */
+//        if ( !isset( $xliff_file_array[ 'reference' ] ) ) {
+//            return null;
+//        }
+//
+//        foreach ( $xliff_file_array[ 'reference' ] as $pos => $ref ) {
+//
+//            $found_ref = true;
+//
+//            $_ext = self::getExtensionFromMimeType( $ref[ 'form-type' ] );
+//            if ( $_ext !== null ) {
+//
+//                //insert in database if exists extension
+//                //and add the id_file_part to the segments insert statement
+//
+//                $refName = $this->projectStructure[ 'id_project' ] . "-" . $pos . "-" . $fName . "." . $_ext;
+//
+//                $serialized_reference_meta[ $pos ][ 'filename' ]   = $refName;
+//                $serialized_reference_meta[ $pos ][ 'mime_type' ]  = $this->dbHandler->escape( $ref[ 'form-type' ] );
+//                $serialized_reference_binaries[ $pos ][ 'base64' ] = $ref[ 'base64' ];
+//
+//                if ( !is_dir( INIT::$REFERENCE_REPOSITORY ) ) {
+//                    mkdir( INIT::$REFERENCE_REPOSITORY, 0755 );
+//                }
+//
+//                $wBytes = file_put_contents( INIT::$REFERENCE_REPOSITORY . "/$refName", base64_decode( $ref[ 'base64' ] ) );
+//
+//                if ( !$wBytes ) {
+//                    throw new Exception ( "Failed to import references. $wBytes Bytes written.", -11 );
+//                }
+//
+//            }
+//
+//        }
+//
+//        if ( isset( $found_ref ) && !empty( $serialized_reference_meta ) ) {
+//
+//            $serialized_reference_meta     = serialize( $serialized_reference_meta );
+//            $serialized_reference_binaries = serialize( $serialized_reference_binaries );
+//            $queries                       = "INSERT INTO file_references ( id_project, id_file, part_filename, serialized_reference_meta, serialized_reference_binaries ) VALUES ( " . $this->projectStructure[ 'id_project' ] . ", $project_file_id, '$fName', '$serialized_reference_meta', '$serialized_reference_binaries' )";
+//
+//            $this->dbHandler->query( $queries );
+//
+//            $affected = $this->dbHandler->affected_rows;
+//            $last_id  = "SELECT LAST_INSERT_ID() as fpID";
+//            $result   = $this->dbHandler->query_first( $last_id );
+//            $result   = $result[ 0 ];
+//
+//            //last Insert id
+//            $file_reference_id = $result[ 'fpID' ];
+//            $this->projectStructure[ 'file_references' ]->offsetSet( $project_file_id, $file_reference_id );
+//
+//            if ( !$affected || !$file_reference_id ) {
+//                throw new Exception ( "Failed to import references.", -12 );
+//            }
+//
+//            return $file_reference_id;
+//        }
 
-        $fName = self::_sanitizeName( $xliff_file_array[ 'attr' ][ 'original' ] );
-
-        if ( $fName != false ) {
-            $fName = $this->dbHandler->escape( $fName );
-        } else {
-            $fName = '';
-        }
-
-        $serialized_reference_meta     = [];
-        $serialized_reference_binaries = [];
-
-        /* Fix: PHP Warning:  Invalid argument supplied for foreach() */
-        if ( !isset( $xliff_file_array[ 'reference' ] ) ) {
-            return null;
-        }
-
-        foreach ( $xliff_file_array[ 'reference' ] as $pos => $ref ) {
-
-            $found_ref = true;
-
-            $_ext = self::getExtensionFromMimeType( $ref[ 'form-type' ] );
-            if ( $_ext !== null ) {
-
-                //insert in database if exists extension
-                //and add the id_file_part to the segments insert statement
-
-                $refName = $this->projectStructure[ 'id_project' ] . "-" . $pos . "-" . $fName . "." . $_ext;
-
-                $serialized_reference_meta[ $pos ][ 'filename' ]   = $refName;
-                $serialized_reference_meta[ $pos ][ 'mime_type' ]  = $this->dbHandler->escape( $ref[ 'form-type' ] );
-                $serialized_reference_binaries[ $pos ][ 'base64' ] = $ref[ 'base64' ];
-
-                if ( !is_dir( INIT::$REFERENCE_REPOSITORY ) ) {
-                    mkdir( INIT::$REFERENCE_REPOSITORY, 0755 );
-                }
-
-                $wBytes = file_put_contents( INIT::$REFERENCE_REPOSITORY . "/$refName", base64_decode( $ref[ 'base64' ] ) );
-
-                if ( !$wBytes ) {
-                    throw new Exception ( "Failed to import references. $wBytes Bytes written.", -11 );
-                }
-
-            }
-
-        }
-
-        if ( isset( $found_ref ) && !empty( $serialized_reference_meta ) ) {
-
-            $serialized_reference_meta     = serialize( $serialized_reference_meta );
-            $serialized_reference_binaries = serialize( $serialized_reference_binaries );
-            $queries                       = "INSERT INTO file_references ( id_project, id_file, part_filename, serialized_reference_meta, serialized_reference_binaries ) VALUES ( " . $this->projectStructure[ 'id_project' ] . ", $project_file_id, '$fName', '$serialized_reference_meta', '$serialized_reference_binaries' )";
-
-            $this->dbHandler->query( $queries );
-
-            $affected = $this->dbHandler->affected_rows;
-            $last_id  = "SELECT LAST_INSERT_ID() as fpID";
-            $result   = $this->dbHandler->query_first( $last_id );
-            $result   = $result[ 0 ];
-
-            //last Insert id
-            $file_reference_id = $result[ 'fpID' ];
-            $this->projectStructure[ 'file_references' ]->offsetSet( $project_file_id, $file_reference_id );
-
-            if ( !$affected || !$file_reference_id ) {
-                throw new Exception ( "Failed to import references.", -12 );
-            }
-
-            return $file_reference_id;
-        }
     }
 
     protected static function _sanitizeName( $nameString ) {
@@ -2592,11 +2558,11 @@ class ProjectManager {
     }
 
     /**
-     *
+     * @throws \Exception
      */
     private function insertSegmentNotesForFile() {
         $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
-        Segments_SegmentNoteDao::bulkInsertFromProjectStructure( $this->projectStructure[ 'notes' ] );
+        ProjectManagerModel::bulkInsertSegmentNotes( $this->projectStructure[ 'notes' ] );
     }
 
     /**
@@ -2645,7 +2611,7 @@ class ProjectManager {
      */
     private function insertContextsForFile() {
         $this->features->filter( 'handleTUContextGroups', $this->projectStructure );
-        ContextGroupDao::bulkInsertTUFromProjectStructure( $this->projectStructure );
+        ProjectManagerModel::bulkInsertContextsGroups( $this->projectStructure );
     }
 
     private function initArrayObject( $key, $id ) {
@@ -2695,9 +2661,11 @@ class ProjectManager {
      * @param $firstTMXFileName
      *
      * @return bool
-     * @throws \Exceptions\NotFoundException
      * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function setPrivateTMKeys( $firstTMXFileName ) {
 

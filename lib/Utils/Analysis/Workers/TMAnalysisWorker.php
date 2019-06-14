@@ -812,8 +812,14 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_doLog( "--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE" );
 
-            changeProjectStatus( $_project_id, \Constants_ProjectStatus::STATUS_DONE );
-            changeTmWc( $_project_id, $project_totals[ 'eq_wc' ], $project_totals[ 'st_wc' ] );
+            Projects_ProjectDao::updateFields(
+                    [
+                            'status_analysis'      => \Constants_ProjectStatus::STATUS_DONE,
+                            'tm_analysis_wc'       => $project_totals[ 'eq_wc' ],
+                            'standard_analysis_wc' => $project_totals[ 'st_wc' ]
+                    ],
+                    [ 'id' => $_project_id ]
+            );
 
             /*
              * Remove this job from the project list
@@ -825,7 +831,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $database = Database::obtain();
             foreach ( $_analyzed_report as $job_info ) {
-                $counter = new \WordCount_Counter();
+                $counter = new \WordCount_CounterModel();
                 $database->begin();
                 $wordCountStructs[] = $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
                 $database->commit();
@@ -857,7 +863,10 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ) {
 
         $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an inconsistent state
-        $where                        = " id_segment = {$elementQueue->params->id_segment} and id_job = {$elementQueue->params->id_job} ";
+        $where                        = [
+                "id_segment" => $elementQueue->params->id_segment,
+                "id_job"     => $elementQueue->params->id_job
+        ];
 
         $db = Database::obtain();
         try {

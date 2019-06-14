@@ -57,7 +57,7 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
-        $job_data = getJobData( $this->id_job, $this->pass );
+        $job_data = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->pass );
 
         if ( empty( $job_data ) ) {
             $errorCode = -3;
