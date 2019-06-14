@@ -58,7 +58,7 @@ class SegmentTranslationEventModel  {
     }
 
     public function getPropagatedIds() {
-        return $this->propagated_ids ;
+        return is_null( $this->propagated_ids ) ? [] : $this->propagated_ids ;
     }
 
     /**
