@@ -1,11 +1,11 @@
 import TagsUtils from "../../utils/textUtils"
 import classnames from "classnames";
 import SegmentQRLine from "./SegmentQRLine";
+import SegmentQRIssue from "./SegmentQRIssue";
 
 class SegmentQR extends React.Component {
     constructor(props) {
         super(props);
-
         this.source = this.props.segment.get("segment");
         this.suggestion = this.props.segment.get("suggestion");
         this.target = !_.isNull(this.props.segment.get('last_translation')) && this.props.segment.get("last_translation");
@@ -126,15 +126,13 @@ class SegmentQR extends React.Component {
     getHumanQaHtml(issues) {
         let html = [];
         issues.map((issue, index)=>{
-            let item = <div className="qr-issue human critical" key={'qr-issue' + index}>
-                            <div className="qr-error" key={'error-qr' + index}>{issue.get('issue_category')}: </div>
-                            <div className="qr-severity" key={'severity-qr' + index}><b key={'sev' + index}>[{issue.get('issue_severity')}]</b></div>
-                        </div>;
+            let item = <SegmentQRIssue key={index} index={index} issue={issue}/>;
             html.push(item);
         });
 
         return html;
     }
+
     showTranslateDiff() {
         if (this.state.translateDiffOn) {
             this.setState({
@@ -404,7 +402,7 @@ class SegmentQR extends React.Component {
 
                         </div>
                     </div>
-                    <div className="segment-content qr-text">
+                    <div className="segment-content qr-text" ref={(issueContainer)=>this.issuesContainer=issueContainer}>
 
                         {this.state.automatedQaOpen ?
 

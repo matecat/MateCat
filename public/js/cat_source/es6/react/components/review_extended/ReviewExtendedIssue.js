@@ -127,7 +127,7 @@ class ReviewExtendedIssue extends React.Component {
         var data = {
             rebutted : true,
             message : this.state.comment_text,
-            source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
+            source_page : (config.isReview ? config.revisionNumber + 1 : 1)  // TODO: move this to UI property
         };
 
         this.setState({sendDisabled : true});
@@ -156,8 +156,10 @@ class ReviewExtendedIssue extends React.Component {
 
             if(comment.source_page == 1){
 				array.push(<p key={comment.id} className="re-comment"><span className="re-translator">Translator </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
-            }else if(comment.source_page == 2){
+            } else if(comment.source_page == 2){
                 array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Reviewer </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
+            } else if(comment.source_page == 3){
+                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor2">Reviewer </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
             }
         }
         if(array.length > 0 ){
