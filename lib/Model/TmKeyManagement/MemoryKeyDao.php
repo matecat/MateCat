@@ -152,6 +152,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj = $this->  sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
+        $this->_validateNotNullFields( $obj );
 
         $set_array        = [];
         $where_conditions = [];
@@ -200,6 +201,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
+        $this->_validateNotNullFields( $obj );
 
         $query = "DELETE FROM " . self::TABLE . " WHERE uid = %d and key_value = '%s'";
 
@@ -222,6 +224,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
+        $this->_validateNotNullFields( $obj );
 
         $query = "UPDATE " . self::TABLE . " set deleted = 1 WHERE uid = :uid and key_value = :key_value";
 
@@ -242,6 +245,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
+        $this->_validateNotNullFields( $obj );
 
         $query = "UPDATE " . self::TABLE . " set deleted = 0 WHERE uid = :uid and key_value = :key_value";
 
