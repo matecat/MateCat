@@ -527,7 +527,13 @@ abstract class DataAccess_AbstractDao {
         \Log::doJsonLog( $sql );
         \Log::doJsonLog( $data );
 
-        return $stmt->execute( $data );
+        $stmt->execute( $data );
+
+        //WARNING
+        //When updating a Mysql table with identical values, nothing's really affected so rowCount will return 0.
+        //If you need this value use this:
+        //https://www.php.net/manual/en/pdostatement.rowcount.php#example-1096
+        return $stmt->rowCount();
     }
 
     /**
@@ -548,7 +554,7 @@ abstract class DataAccess_AbstractDao {
 
         $ignore              = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
         $no_nulls            = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
-        $on_duplicate_fields = ( isset( $options[ 'on_duplicate_update' ] ) && !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : null );
+        $on_duplicate_fields = ( isset( $options[ 'on_duplicate_update' ] ) && !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : [] );
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
