@@ -694,19 +694,20 @@ header {
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .ui.cancel.label {
-                position: absolute;
-                padding: 4px;
-                background-color: #d6d6d6;
-                border-radius: 15px;
-                top: 8px;
-                line-height: 0px;
-                right: 0px;
-                visibility: hidden;
-                &:hover {
-                    background-color: #cccccc !important;
-                }
-            }
+
+        }
+        .ui.cancel.label {
+          position: absolute;
+          padding: 4px;
+          background-color: #d6d6d6;
+          border-radius: 15px;
+          top: 8px;
+          line-height: 0px;
+          right: 0px;
+          visibility: hidden;
+          &:hover {
+            background-color: #cccccc !important;
+          }
         }
         .filter-category {
             margin-left: 5px;

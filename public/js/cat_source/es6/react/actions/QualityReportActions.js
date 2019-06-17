@@ -3,8 +3,8 @@ import QRApi from "../ajax_utils/quality_report/qrUtils";
 import QRConstants from "./../constants/QualityReportConstants"
 let QualityReportActions =  {
 
-    loadInitialAjaxData() {
-        QRApi.getSegmentsFiles().done(function ( response ) {
+    loadInitialAjaxData(data) {
+        QRApi.getSegmentsFiles(data).done(function ( response ) {
             if ( response.files ) {
                 AppDispatcher.dispatch({
                     actionType: QRConstants.RENDER_SEGMENTS,

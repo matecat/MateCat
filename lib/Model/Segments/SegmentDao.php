@@ -238,7 +238,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             }
         }
 
-        if ( isset( $options['filter']['id_segment'] ) ) {
+        if ( isset( $options['filter']['id_segment'] ) && !empty( $options['filter']['id_segment'] ) ) {
             $options_conditions_query .= " AND s.id = :id_segment " ;
             $options_conditions_values[ 'id_segment' ] = $options['filter']['id_segment'] ;
 
