@@ -238,6 +238,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             }
         }
 
+        if ( isset( $options['filter']['id_segment'] ) ) {
+            $options_conditions_query .= " AND s.id = :id_segment " ;
+            $options_conditions_values[ 'id_segment' ] = $options['filter']['id_segment'] ;
+
+        }
+
         if ( isset( $options['filter']['revision_number'] ) && !empty( $options['filter']['revision_number'] ) ) {
             $join_revision_number = " JOIN segment_translation_events ste on s.id = ste.id_segment " .
                     " AND ste.id_job = j.id  "  .
