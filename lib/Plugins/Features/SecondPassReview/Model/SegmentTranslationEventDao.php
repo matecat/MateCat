@@ -17,7 +17,7 @@ class SegmentTranslationEventDao extends \Features\TranslationVersions\Model\Seg
                 " WHERE id_job = :id_job AND id_segment = :id_segment " .
                 " AND source_page IN ( " . implode(',', $source_pages ) . " ) " ;
 
-        $conn = $this->getConnection()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute( [

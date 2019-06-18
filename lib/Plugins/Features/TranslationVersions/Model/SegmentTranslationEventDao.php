@@ -48,7 +48,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
                 " AND id_segment >= :min_segment AND id_segment <= :max_segment " .
                 " GROUP BY id_segment ) ORDER BY id_segment " ;
 
-        $conn = $this->getConnection()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [
@@ -67,7 +67,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
                     AND final_revision = 1
                 " ;
 
-        $conn = $this->getConnection()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [

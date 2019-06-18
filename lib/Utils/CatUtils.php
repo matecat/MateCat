@@ -160,11 +160,11 @@ class CatUtils {
      *
      * @return array
      */
-    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, array &$errors ) {
+    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, $is_revision, array &$errors ) {
 
         try {
             //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
-            Translations_SegmentTranslationDao::addTranslation( $translation );
+            Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
         } catch ( Exception $e ) {
             $errors[] = [ "code" => -101, "message" => $e->getMessage() ];
         }

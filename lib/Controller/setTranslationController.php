@@ -401,7 +401,7 @@ class setTranslationController extends ajaxController {
         /**
          * Translation is inserted here.
          */
-        CatUtils::addSegmentTranslation( $new_translation, $this->result[ 'errors' ] );
+        CatUtils::addSegmentTranslation( $new_translation, self::isRevision(), $this->result[ 'errors' ] );
 
         if ( !empty( $this->result[ 'errors' ] ) ) {
             $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " .
@@ -514,7 +514,9 @@ class setTranslationController extends ajaxController {
 
         //update total time to edit
         try {
-            Jobs_JobDao::updateTotalTimeToEdit( $this->chunk, $this->time_to_edit );
+            if ( !self::isRevision() ) {
+                Jobs_JobDao::updateTotalTimeToEdit( $this->chunk, $this->time_to_edit );
+            }
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -101, "message" => "database errors" ];
             Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );

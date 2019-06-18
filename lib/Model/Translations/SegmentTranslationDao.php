@@ -370,23 +370,28 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct ) {
+    public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
 
         $keys_to_insert = [
                 'id_segment',
                 'id_job',
                 'status',
-                'time_to_edit',
                 'translation',
                 'serialized_errors_list',
                 'suggestion_position',
                 'warning',
                 'translation_date',
                 'version_number',
-                'autopropagated_from'
+                'autopropagated_from',
+                'time_to_edit'
         ] ;
 
         $translation = $translation_struct->toArray( $keys_to_insert );
+
+        if ( $is_revision ) {
+            $translation['time_to_edit'] = 0 ;
+        }
+
         $fields = array_keys( $translation );
         $bind_keys = [];
         $bind_values = [];
