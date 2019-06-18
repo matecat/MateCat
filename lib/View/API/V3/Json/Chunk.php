@@ -121,7 +121,9 @@ class Chunk extends \API\V2\Json\Chunk {
 
                 $result = $this->populateQualitySummarySection($result, $chunkReview->source_page,
                         $chunk, $quality_overall, $reviseIssues, $score, $categories,
-                        $total_issues_weight, $total_reviewed_words_count, $passfail );
+                        $total_issues_weight, $total_reviewed_words_count, $passfail,
+                        $chunkReview->total_tte
+                );
             }
 
         } else {
@@ -132,7 +134,8 @@ class Chunk extends \API\V2\Json\Chunk {
 
             $result = $this->populateQualitySummarySection($result, Constants::SOURCE_PAGE_REVISION,
                     $chunk, $quality_overall, $reviseIssues, $score, $categories,
-                    $total_issues_weight, $total_reviewed_words_count, $passfail );
+                    $total_issues_weight, $total_reviewed_words_count, $passfail,
+                    0 );
         }
 
         /**
@@ -179,7 +182,7 @@ class Chunk extends \API\V2\Json\Chunk {
      * @return mixed
      */
     protected function populateQualitySummarySection( $result, $source_page, $jStruct, $quality_overall, $reviseIssues, $score, $categories,
-                                                         $total_issues_weight, $total_reviewed_words_count, $passfail ) {
+                                                         $total_issues_weight, $total_reviewed_words_count, $passfail, $total_tte ) {
 
         if ( !isset( $result['quality_summary'] ) ) {
             $result['quality_summary'] = [];
@@ -196,6 +199,7 @@ class Chunk extends \API\V2\Json\Chunk {
                 'total_issues_weight' => (int)$total_issues_weight,
                 'total_reviewed_words_count' => (int)$total_reviewed_words_count,
                 'passfail'            => $passfail,
+                'total_time_to_edit'  => (int) $total_tte
         ];
 
         return $result ;

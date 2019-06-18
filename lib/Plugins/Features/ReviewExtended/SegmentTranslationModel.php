@@ -107,6 +107,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 // add revised words and advancement
                 $chunkReview->reviewed_words_count += $this->rawWordsCountWithPropagation();
                 $chunkReview->penalty_points       += $segmentPointsBySourcePage[ $chunkReview->source_page ]  ;
+                $chunkReview->total_tte            += $this->model->getEventModel()->getCurrentEvent()->time_to_edit;
                 $chunkReview->advancement_wc       += $this->advancementWordCountWithPropagation();
                 $setFinalRevision []                = $chunkReview->source_page ;
                 $modifiedChunkReviewsToSave[]       = $chunkReview ;
@@ -151,6 +152,8 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                         $chunkReview->penalty_points       += $segmentPointsBySourcePage[ $chunkReview->source_page ]  ;
                         $setFinalRevision[]                 = $chunkReview->source_page ;
                     }
+
+                    $chunkReview->total_tte            += $this->model->getEventModel()->getCurrentEvent()->time_to_edit ;
                     $chunkReview->advancement_wc       += $this->advancementWordCountWithPropagation();
                     $modifiedChunkReviewsToSave[]       = $chunkReview ;
 
@@ -177,6 +180,8 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                     $chunkReview->penalty_points       += $segmentPointsBySourcePage[ $chunkReview->source_page ]  ;
 
                     $setFinalRevision[]                 = $chunkReview->source_page ;
+
+                    $chunkReview->total_tte            += $this->model->getEventModel()->getCurrentEvent()->time_to_edit ;
                     $chunkReview->advancement_wc       += $this->advancementWordCountWithPropagation();
                     $modifiedChunkReviewsToSave[]       = $chunkReview ;
 
