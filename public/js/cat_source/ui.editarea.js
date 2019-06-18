@@ -12,14 +12,11 @@ $.extend( UI, {
         }).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if (!UI.hiddenTextEnabled) return;
             e.preventDefault();
-            UI.editarea.find('.lastInserted').removeClass('lastInserted');
-
-            var node = document.createElement("span");
-            node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
-            node.setAttribute('contenteditable', 'false');
-            node.textContent = htmlDecode("&nbsp;");
-            insertNodeAtCursor(node);
-            UI.unnestMarkers();
+            UI.insertNbspAtCursor();
+        }).on('keydown', '.editor .editarea', 'alt+space', function(e) {
+            if (!UI.hiddenTextEnabled) return;
+            e.preventDefault();
+            UI.insertNbspAtCursor();
         });
         /**
          * Finish editArea Events
@@ -329,6 +326,16 @@ $.extend( UI, {
             }
             return false;
         }
+    },
+    insertNbspAtCursor: function (  ) {
+        UI.editarea.find('.lastInserted').removeClass('lastInserted');
+
+        var node = document.createElement("span");
+        node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.textContent = htmlDecode("&nbsp;");
+        insertNodeAtCursor(node);
+        UI.unnestMarkers();
     }
 
 
