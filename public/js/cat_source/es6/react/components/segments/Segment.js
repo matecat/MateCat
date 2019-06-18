@@ -283,7 +283,7 @@ class Segment extends React.Component {
     }
 
     openRevisionPanel(data) {
-        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) ) {
+        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) && !(this.props.segment.ice_locked &&  !this.props.segment.unlocked) ) {
             this.setState( {
                 showRevisionPanel: true,
                 showTranslationIssues: false,
