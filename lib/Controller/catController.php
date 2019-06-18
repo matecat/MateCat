@@ -14,23 +14,23 @@ use Engines_Intento as Intento;
  */
 class catController extends viewController {
 
-    private $cid = "";
-    private $jid = "";
-    private $password = "";
-    private $create_date = "";
+    private   $cid         = "";
+    private   $jid         = "";
+    protected $password    = "";
+    private   $create_date = "";
 
     private $start_time = 0.00;
 
-    private $job_stats = array();
+    private $job_stats = [];
     private $job_owner = "";
 
     private $job_not_found = false;
-    private $job_archived = false;
+    private $job_archived  = false;
     private $job_cancelled = false;
 
-    private $first_job_segment = 0;
+    private $first_job_segment   = 0;
     private $firstSegmentOfFiles = '[]';
-    private $fileCounter = '[]';
+    private $fileCounter         = '[]';
 
     private $qa_data = '[]';
 
@@ -318,7 +318,6 @@ class catController extends viewController {
         if( $this->job_archived ) parent::makeTemplate( 'job_archived.html' );
 
         $this->template->jid         = $this->jid;
-        $this->template->password    = $this->password;
 
         $this->template->id_team = null;
 
@@ -514,6 +513,10 @@ class catController extends viewController {
 
     public function getReviewPassword() {
         return $this->review_password ;
+    }
+
+    public function getPassword(){
+        return $this->password;
     }
 
 
