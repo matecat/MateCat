@@ -421,7 +421,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 				status = :status,
                 suggestion_position = :suggestion_position,
                 serialized_errors_list = :serialized_errors_list,
-                time_to_edit = :time_to_edit + VALUES( time_to_edit ),
+                time_to_edit = time_to_edit + VALUES( time_to_edit ),
                 translation = :translation,
                 translation_date = :translation_date,
                 warning = :warning
