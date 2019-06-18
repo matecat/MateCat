@@ -16,6 +16,8 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $reviewed_words_count ;
     public $undo_data ;
     public $advancement_wc ;
+    public $total_tte ;
+    public $avg_pee ;
 
     /**
      * Sets default values for an empty struct

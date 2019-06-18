@@ -9,8 +9,36 @@
 namespace Features\SecondPassReview\Model;
 
 use Chunks_ChunkStruct;
+use Database;
 
 class ChunkReviewDao extends \Features\ReviewExtended\Model\ChunkReviewDao {
+
+    public function countTimeToEdit( Chunks_ChunkStruct $chunk, $source_page ) {
+        $sql = "
+            SELECT SUM( time_to_edit ) FROM jobs
+                JOIN segment_translation_events ste
+                  ON jobs.id = ste.id_job
+                  AND ste.id_segment >= jobs.job_first_segment AND ste.id_segment <= jobs.job_last_segment
+
+                WHERE jobs.id = :id_job AND jobs.password = :password
+                  AND ste.source_page = :source_page
+
+                  GROUP BY ste.source_page
+
+        " ;
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute([
+                'id_job'      => $chunk->id,
+                'password'    => $chunk->password,
+                'source_page' => $source_page,
+        ]);
+
+        $result = $stmt->fetch();
+
+        return $result[0] == null ? 0 : $result[0];
+    }
 
     public function recountAdvancementWords( Chunks_ChunkStruct $chunk, $source_page ) {
         $sql = "
@@ -36,7 +64,7 @@ class ChunkReviewDao extends \Features\ReviewExtended\Model\ChunkReviewDao {
                 AND ( ste.id_segment IS NOT NULL OR match_type = 'ICE' )
             "  ;
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute([
                 'id_job'            => $chunk->id,
