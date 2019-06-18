@@ -1,6 +1,7 @@
 <?php
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
 use TmKeyManagement\UserKeysModel;
 use Engines_Intento as Intento;
@@ -309,13 +310,17 @@ class catController extends viewController {
 
     }
 
+    /**
+     * @return mixed|void
+     * @throws NotFoundException
+     * @throws AuthorizationError
+     */
     public function setTemplateVars() {
 
         if ( $this->job_not_found ) {
             parent::makeTemplate( 'job_not_found.html' );
             $this->template->support_mail = INIT::$SUPPORT_MAIL;
-            header( "HTTP/1.0 404 Not Found" );
-            return;
+            throw new NotFoundException( "Job Not Found." );
         }
 
         if( $this->job_cancelled ) parent::makeTemplate( 'job_cancelled.html' );
@@ -381,7 +386,7 @@ class catController extends viewController {
             $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
             $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
 
-            return;
+            throw new AuthorizationError( "Forbidden, Job archived/cancelled." );
 
         } else {
             $this->template->pid                 = $this->pid;

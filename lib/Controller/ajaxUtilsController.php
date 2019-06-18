@@ -10,7 +10,6 @@
 class ajaxUtilsController extends ajaxController {
 
     private $__postInput = null;
-    private $__getInput = null;
 
     public function __construct() {
 
@@ -18,15 +17,9 @@ class ajaxUtilsController extends ajaxController {
         parent::sessionStart();
         parent::__construct();
 
-//        $gets = $_GET;
-//        foreach ( $gets as $key => &$value ) {
-//            $value = filter_var( $value, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
-//        }
-//        $this->__getInput = $gets;
-
         $posts = $_POST;
         foreach ( $posts as $key => &$value ) {
-            $value = filter_var( $value, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
+            $value = filter_var( $value, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         }
 
         $this->__postInput = $posts;
@@ -35,33 +28,33 @@ class ajaxUtilsController extends ajaxController {
 
     public function doAction() {
 
-        switch ( $this->__postInput['exec'] ) {
+        switch ( $this->__postInput[ 'exec' ] ) {
 
-			case 'ping':
+            case 'ping':
                 $db = Database::obtain();
-                $db->query("SELECT 1");
-				$this->result['data'] = array( "OK", time() ); 
-				break;
+                $db->query( "SELECT 1" );
+                $this->result[ 'data' ] = [ "OK", time() ];
+                break;
             case 'checkTMKey':
                 //get MyMemory apiKey service
 
                 $tmxHandler = new TMSService();
-                $tmxHandler->setTmKey( $this->__postInput['tm_key'] );
+                $tmxHandler->setTmKey( $this->__postInput[ 'tm_key' ] );
 
                 //validate the key
                 try {
                     $keyExists = $tmxHandler->checkCorrectKey();
-                } catch ( Exception $e ){
+                } catch ( Exception $e ) {
                     /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */
                     Log::doJsonLog( $e->getMessage() );
                 }
 
-                if ( !isset($keyExists) || $keyExists === false ) {
-                    $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
+                if ( !isset( $keyExists ) || $keyExists === false ) {
+                    $this->result[ 'errors' ][] = [ "code" => -9, "message" => "TM key is not valid." ];
                     Log::doJsonLog( __METHOD__ . " -> TM key is not valid." );
                     $this->result[ 'success' ] = false;
                 } else {
-                    $this->result[ 'errors' ] = array();
+                    $this->result[ 'errors' ]  = [];
                     $this->result[ 'success' ] = true;
                 }
 
@@ -69,7 +62,7 @@ class ajaxUtilsController extends ajaxController {
             case 'clearNotCompletedUploads':
                 try {
                     ConnectedServices\GDrive\Session::cleanupSessionFiles();
-                    if( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ){
+                    if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
                         Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
                     }
                 } catch ( Exception $e ) {

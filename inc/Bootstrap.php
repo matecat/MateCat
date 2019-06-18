@@ -28,7 +28,8 @@ class Bootstrap {
         self::$CONFIG       = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
         $OAUTH_CONFIG       = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
 
-        register_shutdown_function( [ 'Bootstrap', 'fatalErrorHandler' ] );
+        register_shutdown_function( [ 'Bootstrap', 'shutdownFunctionHandler' ] );
+        set_exception_handler( [ 'Bootstrap', 'exceptionHandler' ] );
 
         $mv = parse_ini_file( 'version.ini' );
         self::$_INI_VERSION = $mv['version'];
@@ -155,7 +156,66 @@ class Bootstrap {
         $this->autoLoadedFeatureSet->run('bootstrapCompleted');
     }
 
-    public static function fatalErrorHandler() {
+    public static function exceptionHandler( $exception ) {
+
+        Log::$fileName = 'fatal_errors.txt';
+
+        try {
+            /**
+             * @var $exception Exception
+             */
+            throw $exception;
+        } catch ( InvalidArgumentException $e ) {
+            $code = 400;
+            $message = "Bad Request";
+        } catch ( Exceptions\NotFoundException $e ) {
+            $code = 404;
+            $message = "Not Found";
+            \Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+        }  catch ( Exceptions\AuthorizationError $e ) {
+            $code = 403;
+            $message = "Forbidden";
+            \Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+        } catch ( \PDOException $e ) {
+            $code = 503;
+            $message = "Service Unavailable";
+            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
+            \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+        } catch ( Exception $e ) {
+            $code = 500;
+            $message = "Internal Server Error";
+            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
+            \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+        }
+
+        header( "HTTP/1.1 " . $code . " " . $message );
+
+        if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
+
+            //json_rersponse
+            if ( INIT::$PRINT_ERRORS ) {
+                echo json_encode( [
+                        "errors" => [ [ "code" => -1000, "message" => $exception->getMessage() ] ], "data" => []
+                ] );
+            } else {
+                echo json_encode( [
+                        "errors"  => [
+                                [
+                                        "code"    => -1000,
+                                        "message" => "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>"
+                                ]
+                        ], "data" => []
+                ] );
+            }
+
+        } elseif ( INIT::$PRINT_ERRORS ) {
+            echo $exception->getMessage() . "\n";
+            echo $exception->getTraceAsString() . "\n";
+        }
+
+    }
+
+    public static function shutdownFunctionHandler() {
 
         $errorType = array(
                 E_CORE_ERROR        => 'E_CORE_ERROR',
