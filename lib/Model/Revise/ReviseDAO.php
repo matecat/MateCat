@@ -37,13 +37,13 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
                 $obj->err_terminology,
                 $obj->err_language,
                 $obj->err_style,
-                $this->con->escape( $obj->original_translation )
+                $this->database->escape( $obj->original_translation )
         );
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
         //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $this->database->affected_rows > 0 ) {
             return $obj;
         }
 
@@ -82,7 +82,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $where_string );
 
-        $arr_result = $this->con->fetch_array( $query );
+        $arr_result = $this->database->fetch_array( $query );
 
         return $this->_buildResult( $arr_result );
     }
@@ -167,9 +167,9 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $set_string, $where_string );
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $this->database->affected_rows > 0 ) {
             return $obj;
         }
 

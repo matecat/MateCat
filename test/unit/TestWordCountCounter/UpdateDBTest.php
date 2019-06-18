@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_Counter::updateDB
+ * @covers WordCount_CounterModel::updateDB
  * User: dinies
  * Date: 14/06/16
  * Time: 18.31
@@ -30,7 +30,7 @@ class UpdateDBTest extends AbstractTest
      */
     protected $word_count_struct;
     /**
-     * @var WordCount_Counter
+     * @var WordCount_CounterModel
      */
     protected $word_counter;
     /**
@@ -137,7 +137,7 @@ class UpdateDBTest extends AbstractTest
 
 
 
-        $this->word_counter= new WordCount_Counter( $this->word_count_struct );
+        $this->word_counter= new WordCount_CounterModel( $this->word_count_struct );
 
         $this->flusher = new Predis\Client(INIT::$REDIS_SERVERS);
         $this->flusher->flushdb();
@@ -153,7 +153,7 @@ class UpdateDBTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_Counter::updateDB
+     * @covers WordCount_CounterModel::updateDB
      */
     public function test_updateDB_from_NEW_to_TRANSLATED(){
 

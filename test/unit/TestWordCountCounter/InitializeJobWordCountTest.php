@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @covers WordCount_Counter::initializeJobWordCount
+ * @covers WordCount_CounterModel::initializeJobWordCount
  * @group regression
  * User: dinies
  * Date: 30/06/16
@@ -13,14 +13,14 @@ class InitializeJobWordCountTest extends AbstractTest
     
     /**
      * @group regression
-     * @covers WordCount_Counter::initializeJobWordCount
+     * @covers WordCount_CounterModel::initializeJobWordCount
      */
     function test_initializeJobWordCount()
     {
         $test_initializer= new UnitTestInitializer( Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $job= $test_initializer->getJob();
         
-        $wordCount= new WordCount_Counter();
+        $wordCount= new WordCount_CounterModel();
 
         $result=$wordCount->initializeJobWordCount($job['id'],$job['password']);
 

@@ -17,7 +17,7 @@ use \AMQHandler,
     \Constants_ProjectStatus as ProjectStatus,
     \Exception,
     \Analysis_PayableRates as PayableRates,
-    \WordCount_Counter,
+    \WordCount_CounterModel,
     \Engine,
     \Database,
     \Utils,
@@ -155,7 +155,7 @@ class FastAnalysis extends AbstractDaemon {
                 // disable TM analysis
 
                 $disable_Tms_Analysis = $this->actual_project_row[ 'id_tms' ] == 0 && $this->actual_project_row[ 'id_mt_engine' ] == 0 ;
-                
+
                 if ( $disable_Tms_Analysis ) {
 
                     /**
@@ -364,7 +364,7 @@ class FastAnalysis extends AbstractDaemon {
 
         self::_TimeStampMsg( "*** Project $pid: Changing status..." );
 
-        changeProjectStatus( $pid, $status );
+        \Projects_ProjectDao::changeProjectStatus( $pid, $status );
 
         self::_TimeStampMsg( "*** Project $pid: $status" );
 
@@ -514,7 +514,7 @@ class FastAnalysis extends AbstractDaemon {
             $project_details = array_pop( $_details ); //Don't remove, needed to remove rollup row
 
             foreach ( $_details as $job_info ) {
-                $counter = new WordCount_Counter();
+                $counter = new WordCount_CounterModel();
                 $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
             }
 
@@ -523,9 +523,9 @@ class FastAnalysis extends AbstractDaemon {
 
         //_TimeStampMsg( "Done." );
 
-        $data2 = array( 'fast_analysis_wc' => $total_eq_wc );
+        $data2 = [ 'fast_analysis_wc' => $total_eq_wc ];
+        $where = [ "id" => $pid ];
 
-        $where = " id = $pid";
         try {
             $db->update( 'projects', $data2, $where );
         } catch ( PDOException $e ) {

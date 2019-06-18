@@ -247,11 +247,11 @@ class setTranslationController extends ajaxController {
     }
 
     /**
-     * @throws Exceptions_RecordNotFound
      * @throws \API\V2\Exceptions\AuthenticationError
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\NotFoundException
      */
     protected function _getContexts() {
 
@@ -274,9 +274,10 @@ class setTranslationController extends ajaxController {
 
     /**
      * @return int|mixed
-     * @throws Exceptions_RecordNotFound
+     * @throws ControllerReturnException
      * @throws ReflectionException
      * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \Predis\Connection\ConnectionException
      * @throws \TaskRunner\Exceptions\EndQueueException
@@ -483,7 +484,7 @@ class setTranslationController extends ajaxController {
             // if there is not a row in segment_translations because volume analysis is disabled
             // search for a just created row
 
-            $counter = new WordCount_Counter( $old_wStruct );
+            $counter = new WordCount_CounterModel( $old_wStruct );
             $counter->setOldStatus( $old_status );
             $counter->setNewStatus( $this->status );
 
@@ -513,7 +514,7 @@ class setTranslationController extends ajaxController {
 
         //update total time to edit
         try {
-            updateTotalTimeToEdit( $this->id_job, $this->password, $this->time_to_edit );
+            Jobs_JobDao::updateTotalTimeToEdit( $this->chunk, $this->time_to_edit );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -101, "message" => "database errors" ];
             Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
@@ -523,8 +524,7 @@ class setTranslationController extends ajaxController {
         }
 
         $job_stats = CatUtils::getFastStatsForJob( $newTotals );
-        $project   = getProject( $this->jobData[ 'id_project' ] );
-        $project   = array_pop( $project );
+        $project   = $this->project;
 
         $job_stats[ 'ANALYSIS_COMPLETE' ] = (
         $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
@@ -562,7 +562,8 @@ class setTranslationController extends ajaxController {
             $translationStruct->id_job     = $this->id_job;
 
             $translationStruct->target_chunk_lengths = [
-                    'len' => $this->split_chunk_lengths, 'statuses' => $this->split_statuses
+                    'len'      => $this->split_chunk_lengths,
+                    'statuses' => $this->split_statuses
             ];
             $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
             $result         = $translationDao->update( $translationStruct );
@@ -625,13 +626,18 @@ class setTranslationController extends ajaxController {
         $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->id_job );
         if ( $job_stats[ 'TRANSLATED_PERC' ] == '100' && empty( $job_status ) ) {
             $redisHandler->getConnection()->setex( 'job_completeness:' . $this->id_job, 60 * 60 * 24 * 15, true ); //15 days
-            $update_completed = setJobCompleteness( $this->id_job, 1 );
-            if ( $update_completed < 0 ) {
+
+            try {
+                $update_completed = Jobs_JobDao::setJobComplete( $this->chunk );
+            } catch ( Exception $ignore ) {}
+
+            if ( empty( $update_completed ) ) {
                 $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
                 $redisHandler->getConnection()->del( 'job_completeness:' . $this->id_job );
                 Log::doJsonLog( $msg );
                 Utils::sendErrMailReport( $msg );
             }
+
         }
 
         $this->result['stats'] = $this->featureSet->filter('filterStatsResponse', $this->result['stats'], [ 'chunk' => $this->chunk ] );
@@ -724,7 +730,7 @@ class setTranslationController extends ajaxController {
 
         $old_wStruct->setIdSegment( $this->id_segment );
 
-        //redundant, this is made into WordCount_Counter::updateDB
+        //redundant, this is made into WordCount_CounterModel::updateDB
         $old_wStruct->setOldStatus( $old_status );
         $old_wStruct->setNewStatus( $this->status );
 
@@ -763,39 +769,26 @@ class setTranslationController extends ajaxController {
             } //otherwise, evaluate it normally
             else {
                 $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
-
             }
-            $queryUpdateJob = "update jobs
-                                set avg_post_editing_effort = %f
-                                where id = %d and password = '%s'";
 
-            $db = Database::obtain();
-            $db->query(
-                    sprintf(
-                            $queryUpdateJob,
-                            $newTotalJobPee,
-                            $this->id_job,
-                            $this->password
-                    )
-            );
+            Jobs_JobDao::updateFields(
+                    [ 'avg_post_editing_effort' => $newTotalJobPee, ],
+                    [
+                            'id'       => $this->id_job,
+                            'password' => $this->password
+                    ] );
+
         } //segment was valid but now it is no more
         else {
             if ( $oldSegment->isValidForEditLog() ) {
                 $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
-                $queryUpdateJob = "update jobs
-                                set avg_post_editing_effort = %f
-                                where id = %d and password = '%s'";
-
-                $db = Database::obtain();
-                $db->query(
-                        sprintf(
-                                $queryUpdateJob,
-                                $newTotalJobPee,
-                                $this->id_job,
-                                $this->password
-                        )
-                );
+                Jobs_JobDao::updateFields(
+                        [ 'avg_post_editing_effort' => $newTotalJobPee, ],
+                        [
+                                'id'       => $this->id_job,
+                                'password' => $this->password
+                        ] );
             }
         }
     }

@@ -3,17 +3,17 @@
 use Jobs\JobStatsStruct;
 use LexiQA\LexiQADecorator;
 
-class CatDecorator {
+class CatDecorator extends \AbstractDecorator {
 
     /**
      * @var catController
      */
-    private $controller;
+    protected $controller;
 
     /**
      * @var PHPTALWithAppend
      */
-    private $template;
+    protected $template;
 
     /**
      * @var Chunks_ChunkStruct
@@ -49,7 +49,6 @@ class CatDecorator {
         $this->template->isReview                         = $this->controller->getRevisionNumber() > 0  ;
 
         $this->template->header_quality_report_item_class = '';
-        $this->template->review_password                  = $this->controller->getReviewPassword();
 
         $this->template->header_main_button_enabled = true;
         $this->template->header_main_button_label   = $this->getHeaderMainButtonLabel();
@@ -69,11 +68,7 @@ class CatDecorator {
 
         $this->template->status_labels = json_encode( $this->getStatusLabels() );
 
-        if ( $this->controller->isRevision() ) {
-            $this->decorateForRevision();
-        } else {
-            $this->decorateForTranslate();
-        }
+        $this->assignCatDecorator();
 
         $this->setQualityReportHref();
 
@@ -154,27 +149,7 @@ class CatDecorator {
       return $label;
   }
 
-    private function decorateForRevision() {
-        $this->template->footer_show_revise_link    = false;
-        $this->template->footer_show_translate_link = true;
-        $this->template->review_class               = 'review';
-        $this->template->review_type                = 'simple';
 
-        // TODO: move this logic in javascript QualityReportButton component
-        if ( $this->controller->getQaOverall() == 'fail' ||
-                $this->controller->getQaOverall() == 'poor'
-        ) {
-            $this->template->header_quality_report_item_class = 'hide';
-        }
-
-    }
-
-    private function decorateForTranslate() {
-        $this->template->footer_show_revise_link    = true;
-        $this->template->footer_show_translate_link = false;
-        $this->template->review_class               = '';
-        $this->template->review_type                = 'simple';
-    }
 
     private function setQualityReportHref() {
         $this->template->quality_report_href =

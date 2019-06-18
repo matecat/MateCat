@@ -166,17 +166,18 @@ class updateJobKeysController extends ajaxController {
         try {
             $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData['tm_keys'], $this->userRole, $this->user->uid );
 
-            Log::doJsonLog('Before:');
-            Log::doJsonLog($this->jobData['tm_keys']);
-            Log::doJsonLog('After:');
-            Log::doJsonLog(json_encode($totalTmKeys));
-            TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $totalTmKeys );
+            Log::doJsonLog('Before: ' . $this->jobData['tm_keys'] );
+            Log::doJsonLog('After: ' . json_encode($totalTmKeys) );
 
-            if ($this->jobOwnerIsMe() ) {
+            if ( $this->jobOwnerIsMe() ) {
                 $this->jobData[ 'only_private_tm' ] = $this->only_private;
             }
 
-            Jobs_JobDao::updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm' ] ] );
+            $this->jobData->tm_keys = json_encode( $totalTmKeys );
+
+            $jobDao  = new \Jobs_JobDao( Database::obtain() );
+            $jobDao->updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm', 'tm_keys' ] ] );
+            $jobDao->destroyCache( $this->jobData );
 
             $this->result['data'] = 'OK';
 

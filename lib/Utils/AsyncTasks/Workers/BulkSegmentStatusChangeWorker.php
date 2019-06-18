@@ -15,13 +15,14 @@ use Features;
 use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 use INIT;
+use SegmentTranslationChangeVector;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use Translations_SegmentTranslationDao;
 use Users_UserDao;
-use WordCount_Counter;
+use WordCount_CounterModel;
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
@@ -77,7 +78,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         }
 
         if ( !empty( $params[ 'segment_ids' ] ) ) {
-            $counter = new WordCount_Counter();
+            $counter = new WordCount_CounterModel();
             $counter->initializeJobWordCount( $chunk->id, $chunk->password );
         }
 

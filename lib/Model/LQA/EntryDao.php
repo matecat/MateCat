@@ -222,7 +222,7 @@ class EntryDao extends \DataAccess_AbstractDao {
             'id' => $id
         );
 
-        $stmt = $this->con->prepare( $sql );
+        $stmt = $this->database->prepare( $sql );
 
         $stmt->execute( $opts );
 

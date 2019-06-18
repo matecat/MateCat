@@ -183,7 +183,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      *
      */
     public function getSplitData( $id, $password, $ttl = 0 ) {
-        $conn = $this->getConnection()->getConnection();
+        $conn = $this->getDatabaseHandler()->getConnection();
 
         /**
          * Select all rows raw_word_count and eq_word_count
@@ -318,7 +318,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     public function updateOwner( Projects_ProjectStruct $project, Users_UserStruct $user ) {
         $sql = " UPDATE jobs SET owner = :email WHERE id_project = :id_project ";
 
-        $stmt = $this->con->getConnection()->prepare( $sql ) ;
+        $stmt = $this->database->getConnection()->prepare( $sql ) ;
         $stmt->execute(array('email' => $user->email, 'id_project' => $project->id ) ) ;
 
         return $stmt->rowCount();
@@ -380,7 +380,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
         ";
 
-        $stmt = $this->con->getConnection()->prepare( $query );
+        $stmt = $this->database->getConnection()->prepare( $query );
 
         return $this->_fetchObject( $stmt, new EditLog_EditLogSegmentStruct(), [
                 'id_job'             => $jStruct->id,
@@ -437,7 +437,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
         ";
 
-        $stmt = $this->con->getConnection()->prepare( $query );
+        $stmt = $this->database->getConnection()->prepare( $query );
 
         return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job'             => $id_job,
@@ -471,7 +471,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
             AND st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
             ";
 
-        $stmt = $this->con->getConnection()->prepare( $queryAllSegments );
+        $stmt = $this->database->getConnection()->prepare( $queryAllSegments );
 
         return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job'             => $id_job,
@@ -484,6 +484,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @param Jobs_JobStruct $jobStruct
      *
      * @return PDOStatement
+     * @throws ReflectionException
      */
     public function getSplitJobPreparedStatement( Jobs_JobStruct $jobStruct ){
 
@@ -517,6 +518,14 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param Jobs_JobStruct $first_job
+     * @param                $newPass
+     *
+     * @return Jobs_JobStruct
+     * @throws ReflectionException
+     * @throws \Exceptions\ValidationError
+     */
     public static function updateForMerge( Jobs_JobStruct $first_job, $newPass ){
 
         static::updateStruct( $first_job );
@@ -536,6 +545,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param Jobs_JobStruct $first_job
+     *
+     * @return bool
+     */
     public static function deleteOnMerge( Jobs_JobStruct $first_job ){
 
         $conn = Database::obtain()->getConnection();
@@ -547,6 +561,123 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
                 'first_job_password' => $first_job->password
         ] );
 
+    }
+
+    /**
+     * @param $jid
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public static function getFirstSegmentOfFilesInJob( $jid ) {
+
+        $thisDao = new self();
+        $thisDao->getDatabaseHandler();
+
+        $query = "SELECT DISTINCT id_file, MIN( segments.id ) AS first_segment, filename AS file_name,
+                    FORMAT(
+                        SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count) )
+                        , 0
+                    ) AS TOTAL_FORMATTED
+                FROM files_job
+                JOIN segments USING( id_file )
+                JOIN files ON files.id = id_file
+                JOIN jobs ON jobs.id = files_job.id_job
+                LEFT JOIN segment_translations AS st ON segments.id = st.id_segment AND st.id_job = jobs.id
+                WHERE files_job.id_job = :id_job
+                AND segments.show_in_cattool = 1
+                GROUP BY id_file, jobs.id, jobs.password";
+
+        $stmt = $thisDao->getDatabaseHandler()->getConnection()->prepare( $query );
+
+        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_job'             => $jid
+        ] );
+
+    }
+
+    /**
+     * @param                $id_project
+     * @param                $new_status
+     */
+    public static function updateAllJobsStatusesByProjectId( $id_project, $new_status ){
+
+        $conn = Database::obtain()->getConnection();
+
+        $query = "UPDATE jobs SET status_owner = :status WHERE id_project = :id_project";
+        $stmt = $conn->prepare( $query );
+        $stmt->execute( ['status' => $new_status, 'id_project' => $id_project ] );
+
+        ( new Jobs_JobDao )->destroyCacheByProjectId( $id_project );
+
+    }
+
+    /**
+     * @param Jobs_JobStruct $jStruct
+     *
+     * @return int
+     */
+    public static function setJobComplete( Jobs_JobStruct $jStruct ){
+
+        $db    = Database::obtain();
+        $query = "update jobs set completed = 1 where id = :jid";
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->execute( [ 'jid' => $jStruct->id ] );
+        return $stmt->rowCount();
+
+    }
+
+    /**
+     * @param Jobs_JobStruct $jStruct
+     * @param                $new_status
+     */
+    public static function updateJobStatus( Jobs_JobStruct $jStruct, $new_status ){
+
+        $conn = Database::obtain()->getConnection();
+
+        $query = "update jobs set status_owner = :status where id = :id_job";
+        $stmt  = $conn->prepare( $query );
+        $stmt->execute( [ 'status' => $new_status, 'id_job' => $jStruct->id ] );
+
+        ( new Jobs_JobDao )->destroyCacheByProjectId( $jStruct->id_project );
+
+    }
+
+    /**
+     * @param Jobs_JobStruct $jStruct
+     * @param                $segmentTimeToEdit
+     *
+     * @return float|int
+     */
+    public static function updateTotalTimeToEdit( Jobs_JobStruct $jStruct, $segmentTimeToEdit ) {
+
+        $db = Database::obtain();
+
+        //Update in Transaction
+        $query = "UPDATE jobs AS j SET
+                  total_time_to_edit = coalesce( total_time_to_edit, 0 ) + :tte
+               WHERE j.id = :jid
+               AND j.password = :password";
+
+        $stmt = $db->getConnection()->prepare( $query );
+
+        try {
+
+            $stmt->execute( [
+                    'tte'      => $segmentTimeToEdit,
+                    'jid'      => $jStruct->id,
+                    'password' => $jStruct->password
+            ] );
+
+        } catch ( PDOException $e ) {
+            Log::doJsonLog( $e->getMessage() );
+            return $e->getCode();
+        }
+
+        return $stmt->rowCount();
+    }
+
+    public static function updateFields( array $data = [], array $where = [] ){
+        return Database::obtain()->update( 'jobs', $data, $where );
     }
 
 }

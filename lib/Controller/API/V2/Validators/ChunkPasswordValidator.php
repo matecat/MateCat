@@ -14,9 +14,9 @@
 namespace API\V2\Validators;
 
 use API\V2\KleinController;
-use Chunks_ChunkDao ;
-use Klein\Request ;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Chunks_ChunkDao;
+use Exceptions\NotFoundException;
+use LQA\ChunkReviewDao;
 
 class ChunkPasswordValidator extends Base {
     /**
@@ -52,7 +52,7 @@ class ChunkPasswordValidator extends Base {
 
     /**
      * @return mixed|void
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      */
     protected function _validate() {
         try {
@@ -60,8 +60,8 @@ class ChunkPasswordValidator extends Base {
                     $this->id_job,
                     $this->password
             );
-        } catch ( \Exceptions\NotFoundException $e ) {
-            $review_chunk = \LQA\ChunkReviewDao::findByReviewPasswordAndJobId(
+        } catch ( NotFoundException $e ) {
+            $review_chunk = ChunkReviewDao::findByReviewPasswordAndJobId(
                     $this->password,
                     $this->id_job
             );
@@ -69,7 +69,7 @@ class ChunkPasswordValidator extends Base {
                 $this->chunk = $review_chunk->getChunk();
                 $this->chunk->setIsReview( true );
             } else {
-                throw new \Exceptions\NotFoundException( 'Record not found' );
+                throw new NotFoundException( 'Record not found' );
             }
         }
     }

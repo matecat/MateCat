@@ -169,7 +169,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                         AND show_in_cattool = 1
                         AND st.status not in( '%s', '%s' )";
 
-        $result = $this->con->query_first(
+        $result = $this->database->query_first(
                 sprintf(
                         $query,
                         $job_id,

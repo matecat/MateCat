@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_Counter::__construct
+ * @covers WordCount_CounterModel::__construct
  * User: dinies
  * Date: 13/06/16
  * Time: 10.34
@@ -47,12 +47,12 @@ public function setUp(){
 
     /**
      * @group regression
-     * @covers WordCount_Counter::__construct
+     * @covers WordCount_CounterModel::__construct
      */
     public function test__constructor_with_ice_segments(){
 
 
-        $word_counter= new WordCount_Counter( $this->word_count_struct );
+        $word_counter= new WordCount_CounterModel( $this->word_count_struct );
         $mirror_word_counter= new ReflectionClass($word_counter);
         $constCache= $mirror_word_counter->getProperty('constCache');
         $constCache->setAccessible(true);
@@ -100,12 +100,12 @@ public function setUp(){
 
     /**
      * @group regression
-     * @covers WordCount_Counter::__construct
+     * @covers WordCount_CounterModel::__construct
      */
     public function test__constructor_with_no_args(){
 
 
-        $word_counter= new WordCount_Counter();
+        $word_counter= new WordCount_CounterModel();
         $mirror_word_counter= new ReflectionClass($word_counter);
         $constCache= $mirror_word_counter->getProperty('constCache');
         $constCache->setAccessible(true);

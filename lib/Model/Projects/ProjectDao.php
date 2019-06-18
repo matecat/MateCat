@@ -62,19 +62,15 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return Projects_ProjectStruct
      */
-    public function updateField( $project, $field, $value ) {
+    public function updateField( Projects_ProjectStruct $project, $field, $value ) {
 
-        $sql = "UPDATE projects SET {$field} = :value WHERE id = :id ";
+        $data           = [];
+        $data[ $field ] = $value;
+        $where          = [ "id" => $project->id ];
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $success = self::updateFields( $data, $where );
 
-        $success = $stmt->execute( array(
-            'value' => $value,
-            'id' => $project->id
-        ));
-
-        if( $success ){
+        if ( $success ) {
             $project->$field = $value;
         }
 
@@ -112,7 +108,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * This update can easily become massive in case of long lived teams.
      * TODO: make this update chunked.
      *
+     * @param TeamStruct       $team
      * @param Users_UserStruct $user
+     *
      * @return int
      */
     public function unassignProjects( TeamStruct $team, Users_UserStruct $user) {
@@ -256,6 +254,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return Chunks_ChunkStruct[]
      *
+     * @throws Exception
      */
     static function uncompletedChunksByProjectId( $id_project, $params=array() ) {
         $params = Utils::ensure_keys($params, array('is_review'));
@@ -397,6 +396,75 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         $stmt = $this->_getStatementForCache( $query );
         return $this->_destroyObjectCache( $stmt, $values );
+
+    }
+
+    public static function updateAnalysisStatus( $project_id, $status, $stWordCount ) {
+
+        $update_project_count = "
+            UPDATE projects
+              SET status_analysis = :status_analysis, 
+                  standard_analysis_wc = :standard_analysis_wc
+            WHERE id = :id
+        ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $update_project_count );
+
+        return $stmt->execute( [
+                'status_analysis'      => $status,
+                'standard_analysis_wc' => $stWordCount,
+                'id'                   => $project_id
+        ] );
+
+    }
+
+    public static function changeProjectStatus( $pid, $status ) {
+        $data                      = [];
+        $data[ 'status_analysis' ] = $status;
+        $where                     = [ "id" => $pid ];
+
+        return self::updateFields( $data, $where );
+    }
+
+    /**
+     * @param int $pid Project Id
+     *
+     * @return array
+     */
+    public static function getProjectAndJobData( $pid ) {
+
+
+        $db = Database::obtain();
+
+        $query = "SELECT projects.id AS pid,
+            projects.name AS pname,
+            projects.password AS ppassword,
+            projects.status_analysis,
+            projects.standard_analysis_wc,
+            projects.fast_analysis_wc,
+            projects.tm_analysis_wc,
+            projects.create_date,
+            jobs.id AS jid,
+            jobs.password AS jpassword,
+            job_first_segment,
+            job_last_segment,
+            CONCAT( jobs.id , '-', jobs.password ) AS jid_jpassword,
+            CONCAT( jobs.source, '|', jobs.target ) AS lang_pair,
+            CONCAT( projects.name, '/', jobs.source, '-', jobs.target, '/', jobs.id , '-', jobs.password ) AS job_url,
+            status_owner
+                FROM jobs
+                JOIN projects ON jobs.id_project = projects.id
+                WHERE projects.id = :pid
+                ORDER BY jid, job_last_segment
+                ";
+
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [ 'pid' => $pid ] );
+
+        return $stmt->fetchAll();
+
 
     }
 

@@ -50,7 +50,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         GROUP BY id_project, id_job, jobs.password
  ";
 
-        $con = $this->con->getConnection() ;
+        $con = $this->database->getConnection() ;
         $stmt = $con->prepare( $sql ) ;
 
         return $this->_fetchObject( $stmt, new OpenThreadsStruct(), [] );
@@ -88,7 +88,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                 ) ) . " ) ";
 
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
         return $input;
     }
@@ -97,7 +97,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         $input->message_type = self::TYPE_RESOLVE;
         $input->resolve_date = date( 'Y-m-d H:i:s' );
 
-        $this->con->begin();
+        $this->database->begin();
 
         try {
             $comment = $this->saveComment( $input );
@@ -109,13 +109,13 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                     " AND id_job = $obj->id_job " .
                     " AND resolve_date IS NULL ";
 
-            $this->con->query( $update );
+            $this->database->query( $update );
 
-            $this->con->commit();
+            $this->database->commit();
         } catch ( Exception $e ) {
-            $err = $this->con->get_error();
+            $err = $this->database->get_error();
             Log::doJsonLog( "Error: " . var_export( $err, true ) );
-            $this->con->rollback();
+            $this->database->rollback();
         }
 
         $input->thread_id   = $input->getThreadId();
@@ -137,7 +137,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
             $query .= " AND uid <> $obj->uid ";
         }
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
         $arr_result = $this->_fetch_array( $query );
 
@@ -220,7 +220,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                 " WHERE id_job = $obj->id_job " .
                 " ORDER BY id_segment ASC, create_date ASC ";
 
-        $this->con->query( $query );
+        $this->database->query( $query );
 
         $arr_result = $this->_fetch_array( $query );
 

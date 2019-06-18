@@ -8,14 +8,15 @@ use Segments\ContextGroupDao;
 
 class getSegmentsController extends ajaxController {
 
-    private $data = array();
-    private $cid = "";
-    private $jid = "";
-    private $tid = "";
-    private $password = "";
-    private $source = "";
-    private $pname = "";
-    private $err = '';
+    private $where       = 'after';
+    private $step        = 100;
+    private $data        = [];
+    private $cid         = "";
+    private $jid         = "";
+    private $tid         = "";
+    private $password    = "";
+    private $source      = "";
+    private $pname       = "";
     private $create_date = "";
 
     /**
@@ -26,21 +27,21 @@ class getSegmentsController extends ajaxController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project ;
+    private $project;
 
-    private $segment_notes ;
+    private $segment_notes;
 
     public function __construct() {
 
         parent::__construct();
 
-        $filterArgs = array(
-            'jid'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'step'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'segment' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'where'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-        );
+        $filterArgs = [
+                'jid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'step'     => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'segment'  => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'where'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+        ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -48,214 +49,134 @@ class getSegmentsController extends ajaxController {
         //NOTE: Global $_POST Overriding from CLI Test scripts
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->jid         = (int)$__postInput[ 'jid' ];
-        $this->step        = $__postInput[ 'step' ];
-        $this->ref_segment = $__postInput[ 'segment' ];
-        $this->password    = $__postInput[ 'password' ];
-        $this->where       = $__postInput[ 'where' ];
+        $this->jid        = $__postInput[ 'jid' ];
+        $this->step       = $__postInput[ 'step' ];
+        $this->id_segment = $__postInput[ 'segment' ];
+        $this->password   = $__postInput[ 'password' ];
+        $this->where      = $__postInput[ 'where' ];
 
     }
 
     public function doAction() {
 
-        //get Job Infos
-        $job_data = getJobData( $this->jid );
+        $this->job     = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->project = $this->job->getProject();
 
-        $pCheck = new AjaxPasswordCheck();
-        //check for Password correctness
-        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
-            $this->result['errors'][] = array("code" => -10, "message" => "wrong password");
-            return;
+        $this->featureSet->loadForProject( $this->project );
+
+        $lang_handler = Langs_Languages::getInstance();
+
+        $this->parseIDSegment();
+
+        if ( $this->id_segment == '' ) {
+            $this->id_segment = 0;
         }
 
-        $this->job        = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
-        $this->project    = $this->job->getProject();
-
-        $this->featureSet->loadForProject( $this->project ) ;
-
-		$lang_handler = Langs_Languages::getInstance();
-
-		if ($this->ref_segment == '') {
-			$this->ref_segment = 0;
-		}
-
-
-        $data = getMoreSegments(
-                $this->jid, $this->password, $this->step,
-                $this->ref_segment, $this->where,
+        $sDao = new Segments_SegmentDao();
+        $data = $sDao->getPaginationSegments(
+                $this->job,
+                $this->step,
+                $this->id_segment,
+                $this->where,
                 $this->getOptionalQueryFields()
         );
 
         $this->prepareNotes( $data );
         $contexts = $this->getContextGroups( $data );
 
-		foreach ($data as $i => $seg) {
+        $this->pname       = $this->project->name;
+        $this->cid         = $this->project->id_customer;
+        $this->tid         = $this->job->id_translator;
+        $this->create_date = $this->project->create_date;
 
-            if ($this->where == 'before') {
-                if (((float) $seg['sid']) >= ((float) $this->ref_segment)) {
-                    break;
-                }
+        foreach ( $data as $i => $seg ) {
+
+            $id_file = $seg[ 'id_file' ];
+
+            if ( !isset( $this->data[ $id_file ] ) ) {
+                $this->data[ $id_file ][ 'jid' ]         = $seg[ 'jid' ];
+                $this->data[ $id_file ][ "filename" ]    = ZipArchiveExtended::getFileName( $seg[ 'filename' ] );
+                $this->data[ $id_file ][ 'source' ]      = $lang_handler->getLocalizedName( $this->job->source );
+                $this->data[ $id_file ][ 'target' ]      = $lang_handler->getLocalizedName( $this->job->target );
+                $this->data[ $id_file ][ 'source_code' ] = $this->job->source;
+                $this->data[ $id_file ][ 'target_code' ] = $this->job->target;
+                $this->data[ $id_file ][ 'segments' ]    = [];
             }
 
-			if (empty($this->pname)) {
-				$this->pname = $seg['pname'];
-			}
+            $seg = $this->featureSet->filter( 'filter_get_segments_segment_data', $seg );
 
-			if (empty($this->last_opened_segment)) {
-				$this->last_opened_segment = $seg['last_opened_segment'];
-			}
+            $seg[ 'parsed_time_to_edit' ] = CatUtils::parse_time_to_edit( $seg[ 'time_to_edit' ] );
 
-			if (empty($this->cid)) {
-				$this->cid = $seg['cid'];
-			}
+            ( $seg[ 'source_chunk_lengths' ] === null ? $seg[ 'source_chunk_lengths' ] = '[]' : null );
+            ( $seg[ 'target_chunk_lengths' ] === null ? $seg[ 'target_chunk_lengths' ] = '{"len":[0],"statuses":["DRAFT"]}' : null );
+            $seg[ 'source_chunk_lengths' ] = json_decode( $seg[ 'source_chunk_lengths' ], true );
+            $seg[ 'target_chunk_lengths' ] = json_decode( $seg[ 'target_chunk_lengths' ], true );
 
-			if (empty($this->pid)) {
-				$this->pid = $seg['pid'];
-			}
-
-			if (empty($this->tid)) {
-				$this->tid = $seg['tid'];
-			}
-
-			if (empty($this->create_date)) {
-				$this->create_date = $seg['create_date'];
-			}
-
-			if (empty($this->source_code)) {
-				$this->source_code = $seg['source'];
-			}
-
-			if (empty($this->target_code)) {
-				$this->target_code = $seg['target'];
-			}
-
-            if (empty($this->source)) {
-                $s = explode("-", $seg['source']);
-                $source = strtoupper($s[0]);
-                $this->source = $source;
-            }
-
-            if (empty($this->target)) {
-                $t = explode("-", $seg['target']);
-                $target = strtoupper($t[0]);
-                $this->target = $target;
-            }
-
-            if (empty($this->err)) {
-                $this->err = $seg['serialized_errors_list'];
-            }
-
-			$id_file = $seg['id_file'];
-
-			if ( !isset($this->data["$id_file"]) ) {
-                $this->data["$id_file"]['jid'] = $seg['jid'];
-                $this->data["$id_file"]["filename"] = ZipArchiveExtended::getFileName($seg['filename']);
-                $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
-                $this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source']);
-                $this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target']);
-                $this->data["$id_file"]['source_code'] = $seg['source'];
-                $this->data["$id_file"]['target_code'] = $seg['target'];
-                $this->data["$id_file"]['segments'] = array();
-            }
-
-            $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
-
-            unset($seg['id_file']);
-            unset($seg['source']);
-            unset($seg['target']);
-            unset($seg['source_code']);
-            unset($seg['target_code']);
-            unset($seg['mime_type']);
-            unset($seg['filename']);
-            unset($seg['jid']);
-            unset($seg['pid']);
-            unset($seg['cid']);
-            unset($seg['tid']);
-            unset($seg['pname']);
-            unset($seg['create_date']);
-            unset($seg['id_segment_end']);
-            unset($seg['id_segment_start']);
-            unset($seg['serialized_errors_list']);
-
-            $seg['parsed_time_to_edit'] = CatUtils::parse_time_to_edit($seg['time_to_edit']);
-
-            ( $seg['source_chunk_lengths'] === null ? $seg['source_chunk_lengths'] = '[]' : null );
-            ( $seg['target_chunk_lengths'] === null ? $seg['target_chunk_lengths'] = '{"len":[0],"statuses":["DRAFT"]}' : null );
-            $seg['source_chunk_lengths'] = json_decode( $seg['source_chunk_lengths'], true );
-            $seg['target_chunk_lengths'] = json_decode( $seg['target_chunk_lengths'], true );
-
-            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
-            $seg['segment'] = $Filter->fromLayer0ToLayer1(
-                    CatUtils::reApplySegmentSplit( $seg['segment'] , $seg['source_chunk_lengths'] )
+            $Filter           = \SubFiltering\Filter::getInstance( $this->featureSet );
+            $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
+                    CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
             );
 
-            $seg['translation'] = $Filter->fromLayer0ToLayer1(
-                    CatUtils::reApplySegmentSplit( $seg['translation'] , $seg['target_chunk_lengths'][ 'len' ] )
+            $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
+                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] )
             );
 
-            $seg['translation'] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg['segment'], $seg['translation'] ) );
-            $seg['segment']     = $Filter->fromLayer1ToLayer2( $seg['segment'] );
+            $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
+            $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
 
             $this->attachNotes( $seg );
             $this->attachContexts( $seg, $contexts );
 
-            $this->data["$id_file"]['segments'][] = $seg;
+            $this->data[ $id_file ][ 'segments' ][] = $seg;
         }
 
-        $this->result['data']['files'] = $this->data;
+        $this->result[ 'data' ][ 'files' ] = $this->data;
 
-        $this->result['data']['where'] = $this->where;
+        $this->result[ 'data' ][ 'where' ] = $this->where;
+    }
 
         $this->result['data'] = $this->featureSet->filter('filterGetSegmentsResult', $this->result['data'], $this->job );
     }
 
     private function getOptionalQueryFields() {
-        $feature = $this->job->getProject()->isFeatureEnabled('translation_versions');
-        $options = array();
-
-        if ( $feature ) {
-            $options['optional_fields'] = array('st.version_number');
-        }
-
-        $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
-
-        return $options;
+        return $this->featureSet->filter( 'filter_get_segments_optional_fields', [ 'optional_fields' => [] ] );
     }
 
     private function attachNotes( &$segment ) {
-        $segment['notes'] = @$this->segment_notes[ (int) $segment['sid'] ] ;
+        $segment[ 'notes' ] = @$this->segment_notes[ (int)$segment[ 'sid' ] ];
     }
 
     private function prepareNotes( $segments ) {
-        if ( ! empty( $segments[0] ) ) {
-            $start = $segments[0]['sid'];
-            $last = end($segments);
-            $stop = $last['sid'];
-            if( $this->featureSet->filter( 'prepareAllNotes', false ) ){
-                $this->segment_notes = Segments_SegmentNoteDao::getAllAggregatedBySegmentIdInInterval($start, $stop);
-                foreach ( $this->segment_notes as $k => $noteObj ){
+        if ( !empty( $segments[ 0 ] ) ) {
+            $start = $segments[ 0 ][ 'sid' ];
+            $last  = end( $segments );
+            $stop  = $last[ 'sid' ];
+            if ( $this->featureSet->filter( 'prepareAllNotes', false ) ) {
+                $this->segment_notes = Segments_SegmentNoteDao::getAllAggregatedBySegmentIdInInterval( $start, $stop );
+                foreach ( $this->segment_notes as $k => $noteObj ) {
                     $this->segment_notes[ $k ][ 0 ][ 'json' ] = json_decode( $noteObj[ 0 ][ 'json' ], true );
                 }
                 $this->segment_notes = $this->featureSet->filter( 'processExtractedJsonNotes', $this->segment_notes );
             } else {
-                $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval($start, $stop);
+                $this->segment_notes = Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval( $start, $stop );
             }
 
         }
 
     }
 
-    private function getContextGroups( $segments ){
-        if ( ! empty( $segments[0] ) ) {
-            $start = $segments[0]['sid'];
-            $last = end($segments);
-            $stop = $last['sid'];
+    private function getContextGroups( $segments ) {
+        if ( !empty( $segments[ 0 ] ) ) {
+            $start = $segments[ 0 ][ 'sid' ];
+            $last  = end( $segments );
+            $stop  = $last[ 'sid' ];
+
             return ( new ContextGroupDao() )->getBySIDRange( $start, $stop );
         }
     }
 
-    private function attachContexts( &$segment, $contexts ){
-        $segment['context_groups'] = @$contexts[ (int) $segment['sid'] ] ;
+    private function attachContexts( &$segment, $contexts ) {
+        $segment[ 'context_groups' ] = @$contexts[ (int)$segment[ 'sid' ] ];
     }
 
 

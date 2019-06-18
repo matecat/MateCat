@@ -18,15 +18,15 @@ class copyAllSource2TargetController extends ajaxController {
 
         $this->setErrorMap();
 
-        $filterArgs = array(
-                'id_job' => array(
+        $filterArgs = [
+                'id_job' => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
-                ),
-                'pass'   => array(
+                ],
+                'pass'   => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                ],
+        ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -57,7 +57,7 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
-        $job_data = getJobData( $this->id_job, $this->pass );
+        $job_data = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->pass );
 
         if ( empty( $job_data ) ) {
             $errorCode = -3;
@@ -66,129 +66,43 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
-        $first_seg = $job_data[ 'job_first_segment' ];
-        $last_seg  = $job_data[ 'job_last_segment' ];
-
         try {
-            $segments = $this->getNewSegments( $first_seg, $last_seg );
-            Log::doJsonLog( "SEGS: " . implode( ",", $segments ) );
-
-            $affected_rows = $this->copySegmentInTranslation( $first_seg, $last_seg );
+            $affected_rows = Translations_SegmentTranslationDao::copyAllSourceToTargetForJob( $job_data );
         } catch ( Exception $e ) {
-            $errorCode = -4;
-
+            $errorCode                                         = -4;
             self::$errorMap[ $errorCode ][ 'internalMessage' ] .= $e->getMessage();
-
             $this->addError( $errorCode );
 
             return;
         }
-        $this->result[ 'data' ] = array(
+        $this->result[ 'data' ] = [
                 'code'              => 1,
                 'segments_modified' => $affected_rows
-        );
+        ];
         Log::doJsonLog( $this->result[ 'data' ] );
-    }
-
-
-    /**
-     * Copies the segments.segment field into segment_translations.translation
-     * and sets the segment status to <b>DRAFT</b>.
-     * This operation is made only for the segments in <b>NEW</b> status
-     *
-     * @param $first_seg int
-     * @param $last_seg  int
-     */
-    private function copySegmentInTranslation( $first_seg, $last_seg ) {
-
-        $query = "update segment_translations st
-                    join segments s on st.id_segment = s.id
-                    join jobs j on st.id_job = j.id
-                    set st.translation = s.segment,
-                    st.status = 'DRAFT',
-                    st.translation_date = now()
-                    where st.status = 'NEW'
-                    and j.id = %d
-                    and j.password = '%s'
-                    and st.id_segment between %d and %d";
-
-        $db = Database::obtain();
-
-        $result = $db->query(
-                sprintf(
-                        $query,
-                        $this->id_job,
-                        $this->pass,
-                        $first_seg,
-                        $last_seg
-                )
-        );
-
-        return $db->affected_rows;
-    }
-
-    /**
-     * Copies the segments.segment field into segment_translations.translation
-     * and sets the segment status to <b>DRAFT</b>.
-     * This operation is made only for the segments in <b>NEW</b> status
-     *
-     * @param $first_seg int
-     * @param $last_seg  int
-     */
-    private function getNewSegments( $first_seg, $last_seg ) {
-
-        $query = "select s.id from segment_translations st
-                    join segments s on st.id_segment = s.id
-                    join jobs j on st.id_job = j.id
-                    where st.status = 'NEW'
-                    and j.id = %d
-                    and j.password = '%s'
-                    and st.id_segment between %d and %d";
-
-        $db = Database::obtain();
-
-        $result = $db->fetch_array(
-                sprintf(
-                        $query,
-                        $this->id_job,
-                        $this->pass,
-                        $first_seg,
-                        $last_seg
-                )
-        );
-
-
-        //Array_column() is not supported on PHP 5.4, so i'll rewrite it
-        if ( !function_exists( 'array_column' ) ) {
-            $result = Utils::array_column( $result, 'id' );
-        } else {
-            $result = Utils::array_column( $result, 'id' );
-        }
-
-        return $result;
     }
 
     private function setErrorMap() {
         $generalOutputError = "Error while copying sources to targets. Please contact support@matecat.com";
 
-        self::$errorMap = array(
-                "-1" => array(
+        self::$errorMap = [
+                "-1" => [
                         'internalMessage' => "Empty id job",
                         'outputMessage'   => $generalOutputError
-                ),
-                "-2" => array(
+                ],
+                "-2" => [
                         'internalMessage' => "Empty job password",
                         'outputMessage'   => $generalOutputError
-                ),
-                "-3" => array(
+                ],
+                "-3" => [
                         'internalMessage' => "Wrong id_job-password couple. Job not found",
                         'outputMessage'   => $generalOutputError
-                ),
-                "-4" => array(
+                ],
+                "-4" => [
                         'internalMessage' => "Error in copySegmentInTranslation: ",
                         'outputMessage'   => $generalOutputError
-                )
-        );
+                ]
+        ];
     }
 
     /**
@@ -196,10 +110,10 @@ class copyAllSource2TargetController extends ajaxController {
      */
     private function addError( $errorCode ) {
         Log::doJsonLog( $this->getErrorMessage( $errorCode ) );
-        $this->result[ 'errors' ][] = array(
+        $this->result[ 'errors' ][] = [
                 'code'    => $errorCode,
                 'message' => $this->getOutputErrorMessage( $errorCode )
-        );
+        ];
     }
 
     /**

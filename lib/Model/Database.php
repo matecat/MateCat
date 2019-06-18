@@ -165,6 +165,7 @@ class Database implements IDatabase {
 
 
     /**
+     * @deprecated Prepared statements should be used
      * @Override
      * {@inheritdoc}
      */
@@ -175,6 +176,7 @@ class Database implements IDatabase {
     }
 
     /**
+     * @deprecated Prepared statements should be used
      * @Override
      * {@inheritdoc}
      */
@@ -187,7 +189,7 @@ class Database implements IDatabase {
 
 
     /**
-     * @deprecated
+     * @deprecated Prepared statements should be used
      * @Override
      * {@inheritdoc}
      * @deprecated
@@ -202,10 +204,11 @@ class Database implements IDatabase {
 
 
     /**
+     * @Warning This method do not support all the SQL syntax features. Only AND key/value pair is supported, OR in WHERE condition is not supported, NESTING is not supported
      * @Override
      * {@inheritdoc}
      */
-    public function update( $table, $data, $where = '1' ) {
+    public function update( $table, $data, array $where = [ '1' => '0' ] ) {
 
         // Prepare the statement
         $valuesToBind = [];
@@ -218,47 +221,128 @@ class Database implements IDatabase {
             ++$currentIndex;
         }
 
-        $query             = rtrim( $query, ', ' );
-        $query             .= " WHERE $where;";
-        $preparedStatement = $this->getConnection()->prepare( $query );
+        $query = rtrim( $query, ', ' );
+        $query .= " WHERE ";
+
+        foreach ( $where as $k => $v ) {
+            $query              .= $k . " = :" . $k . " AND ";
+            $valuesToBind[ $k ] = $v;
+        }
+
+        $query = rtrim( $query, " AND " );
+
+        $stmt = $this->getConnection()->prepare( $query );
 
         // Execute it
-        $preparedStatement->execute( $valuesToBind );
-        $affected            = $preparedStatement->rowCount();
+        $stmt->execute( $valuesToBind );
+
+        $affected            = $stmt->rowCount();
         $this->affected_rows = $affected;
-
         return $affected;
-    }
 
+    }
 
     /**
      * @Override
      * {@inheritdoc}
+     * @throws Exception
      */
-    public function insert($table, $data) {
+    public function insert( $table, array $data, &$mask = [], $ignore = false, $no_nulls = false, Array $onDuplicateKey = [] ) {
 
-        // Prepare the statement
-        $valuesToBind = array();
-        $keys = "";
-        $values = "";
-        $currentIndex = 0;
-        foreach($data as $key => $value) {
-            $keys .= "$key, ";
-            $values .= ":value{$currentIndex}, ";
-            $valuesToBind[":value{$currentIndex}"] = $value;
-            ++$currentIndex;
-        }
-        $keys = rtrim($keys,', ');
-        $values = rtrim($values,', ');
-        $query = "INSERT INTO $table ($keys) VALUES ($values);";
-        $preparedStatement = $this->getConnection()->prepare($query);
+        $query = static::buildInsertStatement( $table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey );
+
+        $preparedStatement = $this->getConnection()->prepare( $query );
+
+        $valuesToBind = array_filter( $data, function( $key ) use( $mask ) {
+            return isset( $mask[ $key ] );
+        }, ARRAY_FILTER_USE_KEY );
 
         // Execute it
-        $preparedStatement->execute($valuesToBind);
+        $preparedStatement->execute( $valuesToBind );
         $this->affected_rows = $preparedStatement->rowCount();
+
         return $this->last_insert();
+
     }
 
+    /**
+     * Returns a string suitable for insert of the fields
+     * provided by the attributes array.
+     *
+     * @param string $table    the table on which perform the insert
+     * @param array  $attrs    array of full attributes to update
+     * @param array  $mask     array of attributes to include in the update
+     * @param bool   $ignore   Use INSERT IGNORE query type
+     * @param bool   $no_nulls Exclude NULL fields when build the sql
+     *
+     * @param array  $on_duplicate_fields
+     *
+     * @return string
+     * @throws Exception
+     * @internal param array $options of options for the SQL statement
+     */
+    public static function buildInsertStatement( $table, array $attrs, array &$mask = [], $ignore = false, $no_nulls = false, array $on_duplicate_fields = [] ) {
+
+        if ( empty( $table ) ) {
+            throw new Exception( 'TABLE constant is not defined' );
+        }
+
+        if( $ignore && $no_nulls ){
+            throw new Exception( 'INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together.' );
+        }
+
+        $first  = [];
+        $second = [];
+
+        $sql_ignore = $ignore ? " IGNORE " : "";
+
+        $duplicate_statement = "";
+        if ( !empty( $on_duplicate_fields ) ) {
+            $duplicate_statement = " ON DUPLICATE KEY UPDATE ";
+            foreach ( $on_duplicate_fields as $key => $value ) {
+                //set the update keys
+                $duplicate_statement .= " $key = ";
+                if ( stripos( $value, "value" ) !== false ) {
+                    //if string contains VALUES( .. ) , it is not needed to bind to PDO
+                    $duplicate_statement .= "VALUES( $key )";
+                } else {
+                    //bind to PDO
+                    $duplicate_statement                  .= ":dupUpdate_" . $key;
+                    $valuesToBind[ ":dupUpdate_" . $key ] = $value;
+                }
+                $duplicate_statement .= ", ";
+            }
+        }
+
+        $duplicate_statement = rtrim( $duplicate_statement, ", " );
+
+        if ( empty( $mask ) ) {
+            $mask = array_keys( $attrs );
+        }
+        $mask = array_combine( $mask, $mask );
+
+        foreach ( $attrs as $key => $value ) {
+            if ( @$mask[ $key ] ) {
+                if ( $no_nulls && is_null( $value ) ) {
+                    unset( $mask[ $key ] );
+                    continue;
+                }
+                $first[]  = "`$key`";
+                $second[] = ":$key";
+            }
+        }
+
+        $sql = "INSERT $sql_ignore INTO " . $table .
+                " (" .
+                    implode( ', ', $first ) .
+                ") VALUES (" .
+                    implode( ', ', $second ) .
+                ")
+                $duplicate_statement ;
+        ";
+
+        return $sql;
+    }
 
     /**
      * @Override

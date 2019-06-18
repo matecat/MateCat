@@ -3,66 +3,6 @@
 class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
     /**
-     * @param $notes
-     *
-     * @throws Exception
-     */
-    public static function bulkInsertFromProjectStructure( $notes ) {
-        $template = " INSERT INTO segment_notes ( id_segment, internal_id, note, json ) VALUES " ;
-
-        $insert_values = array();
-        $chunk_size = 30;
-
-        foreach ( $notes as $internal_id => $v ) {
-
-            $entries  = $v[ 'entries' ];
-            $segments = $v[ 'segment_ids' ];
-
-            $json_entries  = $v[ 'json' ];
-            $json_segment_ids = $v[ 'json_segment_ids' ];
-
-            foreach ( $segments as $id_segment ) {
-                foreach ( $entries as $note ) {
-                    $insert_values[] = array( $id_segment, $internal_id, $note, null );
-                }
-            }
-
-            foreach ( $json_segment_ids as $id_segment ) {
-                foreach ( $json_entries as $json ) {
-                    $insert_values[] = array( $id_segment, $internal_id, null, $json );
-                }
-            }
-
-        }
-
-        $chunked = array_chunk( $insert_values, $chunk_size ) ;
-        Log::doJsonLog(  "Notes: Total Rows to insert: " . count( $chunked )  );
-
-        $conn = Database::obtain()->getConnection();
-
-        try {
-
-            foreach( $chunked as $i => $chunk ) {
-                $values_sql_array = array_fill( 0, count($chunk), " ( ?, ?, ?, ? ) " ) ;
-                $stmt = $conn->prepare( $template . implode( ', ', $values_sql_array )) ;
-                $flattened_values = array_reduce( $chunk, 'array_merge', array() );
-                $stmt->execute( $flattened_values ) ;
-                Log::doJsonLog(  "Notes: Executed Query " . ( $i + 1 )  );
-            }
-
-        } catch ( Exception $e ){
-            Log::doJsonLog(  "Notes import - DB Error: " . $e->getMessage() );
-            /** @noinspection PhpUndefinedVariableInspection */
-            Log::doJsonLog(  "Notes import - Statement: " . $stmt->queryString );
-            Log::doJsonLog(  "Notes Chunk Dump: " . var_export( $chunk , true ) );
-            /** @noinspection PhpUndefinedVariableInspection */
-            Log::doJsonLog(  "Notes Flattened Values Dump: " . var_export( $flattened_values , true ) );
-            throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0 , $e );
-        }
-
-    }
-
-    /**
      * @param     $id_segment
      * @param int $ttl
      *
@@ -71,7 +11,7 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
     public static function getBySegmentId( $id_segment, $ttl = 86400 ) {
 
         $thisDao = new self();
-        $conn = $thisDao->getConnection();
+        $conn = $thisDao->getDatabaseHandler();
         $stmt = $conn->getConnection()->prepare( "SELECT * FROM segment_notes WHERE id_segment = ? " );
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
                 new Segments_SegmentNoteStruct(),
