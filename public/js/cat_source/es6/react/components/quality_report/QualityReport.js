@@ -16,20 +16,38 @@ class QualityReport extends React.Component {
             segmentFiles: null,
             jobInfo: null,
             moreSegments: true,
-            revisionToShow: this.getUrlParameter()
+            revisionToShow: this.getReviseUrlParameter(),
+            idSegment: this.getidSegmentUrlParameter()
         };
         this.renderSegmentsFiles = this.renderSegmentsFiles.bind(this);
         this.renderJobInfo = this.renderJobInfo.bind(this);
         this.noMoreSegments = this.noMoreSegments.bind(this);
     }
-    getUrlParameter() {
+    getReviseUrlParameter() {
         let url = new URL(window.location.href);
         let revType = url.searchParams.get('revision_type');
         return (revType) ? revType : '1'
     }
 
+    getidSegmentUrlParameter() {
+        let url = new URL(window.location.href);
+        return url.searchParams.get('id_segment');
+    }
+
+    updateUrlIdSegment(idSegment) {
+        let url = new URL(window.location.href);
+        if ( idSegment ) {
+            url.searchParams.set('id_segment', idSegment);
+        } else {
+            url.searchParams.delete('id_segment');
+        }
+        history.pushState(null, '', url.search);
+    }
+
     updateUrlParameter( revisionType ) {
-        history.pushState(null, '', '?revision_type=' + revisionType);
+        let url = new URL(window.location.href);
+        url.searchParams.set('revision_type', revisionType);
+        history.pushState(null, '', url.search);
     }
 
     renderSegmentsFiles(files) {
@@ -67,7 +85,7 @@ class QualityReport extends React.Component {
     }
 
     componentWillMount() {
-        QRActions.loadInitialAjaxData();
+        QRActions.loadInitialAjaxData({id_segment: this.state.idSegment});
     }
 
     componentDidMount() {
@@ -148,6 +166,8 @@ class QualityReport extends React.Component {
                                             secondPassReviewEnabled={this.state.jobInfo.get('quality_summary').size > 1}
                                 />
                                 <SegmentsDetails files={this.state.segmentFiles}
+                                                 segmentToFilter={this.state.idSegment}
+                                                 updateSegmentToFilter={this.updateUrlIdSegment}
                                                  urls={this.state.jobInfo.get('urls')}
                                                  categories={quality_summary.get('categories')}
                                                  moreSegments={this.state.moreSegments}

@@ -1,3 +1,4 @@
+import InputField from "../../common/InputField";
 
 class FilterSegments extends React.Component {
 
@@ -14,7 +15,8 @@ class FilterSegments extends React.Component {
             filter: {
                 status: "",
                 issue_category: null,
-                severity: null
+                severity: null,
+                id_segment: this.props.segmentToFilter
             }
         }
     }
@@ -96,6 +98,22 @@ class FilterSegments extends React.Component {
         });
     }
 
+    filterIdSegmentChange(value) {
+        if (value && value !== "") {
+            this.filterSelectChanged('id_segment', value);
+        } else {
+            let filter = jQuery.extend({}, this.state.filter);
+            filter.id_segment = null;
+            this.setState({
+                filter: filter
+            });
+            setTimeout(()=> {
+                this.props.applyFilter(this.state.filter)
+            });
+        }
+        this.props.updateSegmentToFilter(value);
+    }
+
     initDropDown() {
         let self = this;
         $(this.statusDropdown).dropdown({
@@ -163,6 +181,9 @@ class FilterSegments extends React.Component {
         let severityFilterClass = (this.state.filter.severity && this.state.filter.severity !== "") ? "filtered" : "not-filtered";
         return <div className="qr-filter-list">Filters by
             <div className="filter-dropdown left-10">
+                <div className={"filter-idSegment "}>
+                    <InputField placeholder="Id Segment" name="id_segment" onFieldChanged={this.filterIdSegmentChange.bind(this)} tabindex={0} showCancel={true} value={this.state.filter.id_segment}/>
+                </div>
                 <div className={"filter-status " + statusFilterClass}>
                     <div className="ui top left pointing dropdown basic tiny button right-0" ref={(dropdown)=>this.statusDropdown=dropdown}>
                         <div className="text">

@@ -65,6 +65,8 @@ class SegmentsDetails extends React.Component {
                     <Filters applyFilter={this.filterSegments.bind(this)}
                              categories={this.props.categories}
                              secondPassReviewEnabled={this.props.secondPassReviewEnabled}
+                             segmentToFilter={this.props.segmentToFilter}
+                             updateSegmentToFilter={this.props.updateSegmentToFilter}
 
                     />
                 </div>

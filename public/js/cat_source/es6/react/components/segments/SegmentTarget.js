@@ -210,6 +210,9 @@ class SegmentTarget extends React.Component {
                     {config.isReview && ReviewExtended.enabled() ? (
                         <a href="#" className="revise-lock-editArea" onClick={this.lockEditArea.bind(this)} title="Highlight text and assign an issue to the selected text."/>
                     ): null}
+                    {ReviewExtended.enabled() ? (
+                        <a  className="revise-qr-link" title="Segment Quality Report." target="_blank" href={"/revise-summary/" +  config.id_job + "-" + config.password +"?revision_type="+ config.revisionNumber +"&id_segment="+ this.props.segment.sid }>QR</a>
+                    ): null}
                     {tagLockCustomizable}
                     {tagModeButton}
                     {tagCopyButton}
