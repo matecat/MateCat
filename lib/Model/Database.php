@@ -165,6 +165,7 @@ class Database implements IDatabase {
 
 
     /**
+     * @deprecated Prepared statements should be used
      * @Override
      * {@inheritdoc}
      */
@@ -175,6 +176,7 @@ class Database implements IDatabase {
     }
 
     /**
+     * @deprecated Prepared statements should be used
      * @Override
      * {@inheritdoc}
      */
@@ -187,7 +189,7 @@ class Database implements IDatabase {
 
 
     /**
-     * @deprecated
+     * @deprecated Prepared statements should be used
      * @Override
      * {@inheritdoc}
      * @deprecated
@@ -202,10 +204,7 @@ class Database implements IDatabase {
 
 
     /**
-     * Only AND key/value pair is supported
-     *
-     * OR in WHERE condition is not supported
-     * NESTING is not supported
+     * @Warning This method do not support all the SQL syntax features. Only AND key/value pair is supported, OR in WHERE condition is not supported, NESTING is not supported
      * @Override
      * {@inheritdoc}
      */
@@ -232,14 +231,15 @@ class Database implements IDatabase {
 
         $query = rtrim( $query, " AND " );
 
-        $preparedStatement = $this->getConnection()->prepare( $query );
+        $stmt = $this->getConnection()->prepare( $query );
 
         // Execute it
-        $preparedStatement->execute( $valuesToBind );
-        $affected            = $preparedStatement->rowCount();
-        $this->affected_rows = $affected;
+        $stmt->execute( $valuesToBind );
 
+        $affected            = $stmt->rowCount();
+        $this->affected_rows = $affected;
         return $affected;
+
     }
 
     /**

@@ -533,4 +533,36 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * Copies the segments.segment field into segment_translations.translation
+     * and sets the segment status to <b>DRAFT</b>.
+     * This operation is made only for the segments in <b>NEW</b> status
+     *
+     * @param Jobs_JobStruct $jStruct
+     *
+     * @return
+     */
+    public static function copyAllSourceToTargetForJob( Jobs_JobStruct $jStruct ) {
+
+        $query = "UPDATE segment_translations st
+                    JOIN segments s ON st.id_segment = s.id
+                    JOIN jobs j ON st.id_job = j.id
+                      SET st.translation = s.segment, st.status = 'DRAFT', st.translation_date = now()
+                    WHERE st.status = 'NEW'
+                    AND j.id = :job_id
+                    AND j.password = :password
+                    AND st.id_segment between :job_first_segment and :job_last_segment";
+
+        $db = Database::obtain();
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->execute( [
+                'job_id'            => $jStruct->id,
+                'password'          => $jStruct->password,
+                'job_first_segment' => $jStruct->job_first_segment,
+                'job_last_segment'  => $jStruct->job_last_segment
+        ] );
+
+        return $stmt->rowCount();
+    }
+
 }

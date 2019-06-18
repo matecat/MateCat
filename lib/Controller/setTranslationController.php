@@ -759,39 +759,26 @@ class setTranslationController extends ajaxController {
             } //otherwise, evaluate it normally
             else {
                 $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
-
             }
-            $queryUpdateJob = "update jobs
-                                set avg_post_editing_effort = %f
-                                where id = %d and password = '%s'";
 
-            $db = Database::obtain();
-            $db->query(
-                    sprintf(
-                            $queryUpdateJob,
-                            $newTotalJobPee,
-                            $this->id_job,
-                            $this->password
-                    )
-            );
+            Jobs_JobDao::updateFields(
+                    [ 'avg_post_editing_effort' => $newTotalJobPee, ],
+                    [
+                            'id'       => $this->id_job,
+                            'password' => $this->password
+                    ] );
+
         } //segment was valid but now it is no more
         else {
             if ( $oldSegment->isValidForEditLog() ) {
                 $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
-                $queryUpdateJob = "update jobs
-                                set avg_post_editing_effort = %f
-                                where id = %d and password = '%s'";
-
-                $db = Database::obtain();
-                $db->query(
-                        sprintf(
-                                $queryUpdateJob,
-                                $newTotalJobPee,
-                                $this->id_job,
-                                $this->password
-                        )
-                );
+                Jobs_JobDao::updateFields(
+                        [ 'avg_post_editing_effort' => $newTotalJobPee, ],
+                        [
+                                'id'       => $this->id_job,
+                                'password' => $this->password
+                        ] );
             }
         }
     }

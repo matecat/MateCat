@@ -32,7 +32,8 @@ class ajaxUtilsController extends ajaxController {
 
             case 'ping':
                 $db = Database::obtain();
-                $db->query( "SELECT 1" );
+                $stmt = $db->getConnection()->prepare( "SELECT 1" );
+                $stmt->execute();
                 $this->result[ 'data' ] = [ "OK", time() ];
                 break;
             case 'checkTMKey':

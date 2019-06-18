@@ -419,10 +419,6 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function updateFields( array $data = [], array $where = [] ){
-        return Database::obtain()->update( 'projects', $data, $where );
-    }
-
     public static function changeProjectStatus( $pid, $status ) {
         $data                      = [];
         $data[ 'status_analysis' ] = $status;

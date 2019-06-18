@@ -441,6 +441,8 @@ abstract class DataAccess_AbstractDao {
      * Returns a string suitable to identify the struct to perform
      * update or delete operations via PDO data binding.
      *
+     * WARNING: only AND conditions are supported
+     *
      * @return string
      *
      * @param $attrs array of attributes of the struct
@@ -485,6 +487,10 @@ abstract class DataAccess_AbstractDao {
         $keys = static::$primary_keys;
 
         return $struct->attributes( $keys );
+    }
+
+    public static function updateFields( array $data = [], array $where = [] ){
+        return Database::obtain()->update( static::TABLE, $data, $where );
     }
 
     /**

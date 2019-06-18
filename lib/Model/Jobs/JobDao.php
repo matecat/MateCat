@@ -670,10 +670,14 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
-            return $e->getCode() * -1;
+            return $e->getCode();
         }
 
         return $stmt->rowCount();
+    }
+
+    public static function updateFields( array $data = [], array $where = [] ){
+        return Database::obtain()->update( 'jobs', $data, $where );
     }
 
 }
