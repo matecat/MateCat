@@ -30,7 +30,7 @@ class SegmentQR extends React.Component {
             automatedQaOpen: this.props.segment.get('issues').size === 0 && this.props.segment.get('warnings').get('total') > 0 ,
             humanQaOpen: !this.props.secondPassReviewEnabled && this.props.segment.get('issues').size > 0,
             r1QaOpen: this.props.secondPassReviewEnabled && this.issuesR1 && this.issuesR1.size > 0,
-            r2QaOpen: this.props.secondPassReviewEnabled && this.issuesR2 && this.issuesR2.size > 0 && _.isUndefined(this.issuesR1)
+            r2QaOpen: this.props.secondPassReviewEnabled && this.issuesR2 && this.issuesR2.size > 0 && (_.isUndefined(this.issuesR1) || this.issuesR1.size === 0 )
 
         };
         this.state.htmlDiff = this.initializeDiff();
