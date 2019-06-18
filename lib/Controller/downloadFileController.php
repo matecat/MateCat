@@ -119,6 +119,8 @@ class downloadFileController extends downloadController {
 
             foreach ( $chunk as $file ) {
 
+                $s3Client = S3FilesStorage::getStaticS3Client();
+
                 //:{
                 //"id_file":"31",
                 //"filename":"test.txt",
@@ -135,7 +137,12 @@ class downloadFileController extends downloadController {
                 $current_filename = $file[ 'filename' ];
 
                 //get path for the output file converted to know it's right extension
-                $_fileName  = explode( DIRECTORY_SEPARATOR, $file[ 'xliffFilePath' ] );
+                $xliffFilePath = $file[ 'xliffFilePath' ];
+                if($s3Client->hasEncoder()){
+                    $xliffFilePath = $s3Client->getEncoder()->decode($file[ 'xliffFilePath' ]);
+                }
+
+                $_fileName  = explode( DIRECTORY_SEPARATOR, $xliffFilePath );
                 $outputPath = INIT::$TMP_DOWNLOAD . DIRECTORY_SEPARATOR . $this->id_job . DIRECTORY_SEPARATOR . $fileID . DIRECTORY_SEPARATOR . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
 
                 //make dir if doesn't exist
@@ -188,11 +195,11 @@ class downloadFileController extends downloadController {
                 $_target_lang = $this->featureSet->filter(
                         'changeXliffTargetLangCode',
                         $jobData[ 'target' ]
-                        , $file[ 'xliffFilePath' ]
+                        , $xliffFilePath
                 );
 
                 //instatiate parser
-                $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, $transUnits, $_target_lang, $outputPath );
+                $xsp = new SdlXliffSAXTranslationReplacer( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath );
 
                 if ( $this->download_type == 'omegat' ) {
                     $xsp->setSourceInTarget( true );
@@ -209,7 +216,7 @@ class downloadFileController extends downloadController {
                 $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
                 $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
 
-                $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
+                $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
 
 
                 if ( $this->forceXliff ) {
@@ -238,9 +245,15 @@ class downloadFileController extends downloadController {
 
                 //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
                 if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
-                    $s3Client = S3FilesStorage::getStaticS3Client();
+                    $originalFilePath = $file[ 'originalFilePath' ];
+                    if($s3Client->hasEncoder()){
+                        $originalFilePath = $s3Client->getEncoder()->decode($file[ 'originalFilePath' ]);
+                    }
 
-                    $file[ 'original_file' ] = $s3Client->openItem( [ 'bucket' => S3FilesStorage::FILES_STORAGE_BUCKET, 'key' => $file[ 'originalFilePath' ] ] );
+                    $file[ 'original_file' ] = $s3Client->openItem( [
+                            'bucket' => S3FilesStorage::FILES_STORAGE_BUCKET,
+                            'key' => $originalFilePath
+                    ] );
                 } else {
                     $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
                 }

@@ -1883,6 +1883,10 @@ class ProjectManager {
         if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
             $s3Client = S3FilesStorage::getStaticS3Client();
 
+            if($s3Client->hasEncoder()){
+                $xliff_file_content = $s3Client->getEncoder()->decode($xliff_file_content);
+            }
+
             return $s3Client->openItem( [ 'bucket' => S3FilesStorage::FILES_STORAGE_BUCKET, 'key' => $xliff_file_content ] );
         }
 

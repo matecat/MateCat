@@ -5,8 +5,11 @@ namespace FilesStorage;
 use Aws\PsrCacheAdapter;
 use DirectoryIterator;
 use INIT;
+use Log;
 use RedisHandler;
 use SimpleS3\Client;
+use SimpleS3\Components\Cache\RedisCache;
+use SimpleS3\Components\Encoders\UrlEncoder;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 /**
@@ -85,9 +88,12 @@ class S3FilesStorage extends AbstractFilesStorage {
             // add caching
             if ( INIT::$AWS_CACHING == true ) {
                 $redis        = new RedisHandler();
-                $cacheAdapter = new RedisAdapter( $redis->getConnection() );
-                self::$CLIENT->addCache( new PsrCacheAdapter( $cacheAdapter ) );
+                self::$CLIENT->addCache( new RedisCache( $redis->getConnection() ) );
             }
+
+            // add encoding
+            $encoder = new UrlEncoder();
+            self::$CLIENT->addEncoder($encoder);
 
             // disable SSL verify from configuration
             if ( false === INIT::$AWS_SSL_VERIFY ) {
@@ -350,7 +356,11 @@ class S3FilesStorage extends AbstractFilesStorage {
 
                 // save on redis the hash map files
                 if ( strpos( $key, '.' ) !== true or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === true ) {
-                    ( new RedisHandler() )->getConnection()->set( $key, file_get_contents( $item->getPathName() ) );
+                    if($s3Client->hasEncoder()){
+                        $redisKey = $s3Client->getEncoder()->encode($key);
+                    }
+
+                    ( new RedisHandler() )->getConnection()->set( $redisKey, file_get_contents( $item->getPathName() ) );
                 }
             }
         }
@@ -379,6 +389,10 @@ class S3FilesStorage extends AbstractFilesStorage {
             } elseif ( strpos( $key, '.' ) !== false or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === false ) {
                 unset( $linkFiles[ $i ] );
             } else {
+                if($this->s3Client->hasEncoder()){
+                    $redisKey = $this->s3Client->getEncoder()->encode($key);
+                }
+
                 // this method get the content from the hashes map file and convert it into an array of original file names
                 // Example:
                 //
@@ -390,7 +404,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                 //     1 => 'file2.txt'
                 // ]
                 $filesHashInfo[ 'sha' ][]            = $key;
-                $filesHashInfo[ 'fileName' ][ $key ] = array_filter( array_map( 'trim', explode( "\n", ( new RedisHandler() )->getConnection()->get( $key ) ) ) );
+                $filesHashInfo[ 'fileName' ][ $key ] = array_filter( array_map( 'trim', explode( "\n", ( new RedisHandler() )->getConnection()->get( $redisKey ) ) ) );
             }
 
             $i++;

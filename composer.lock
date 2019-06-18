@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a5d8e962dd7e3bb3abe206b32c0647e8",
+    "content-hash": "17f42aedeccb806aac2f95258557fc9e",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.99.4",
+            "version": "3.100.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "6fff31b8402b3309fcfe51f802c5faca7c738e33"
+                "reference": "28066515aadd23f535a55b9125ead61cee9ae259"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6fff31b8402b3309fcfe51f802c5faca7c738e33",
-                "reference": "6fff31b8402b3309fcfe51f802c5faca7c738e33",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/28066515aadd23f535a55b9125ead61cee9ae259",
+                "reference": "28066515aadd23f535a55b9125ead61cee9ae259",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-06-07T18:09:17+00:00"
+            "time": "2019-06-17T18:10:37+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -432,16 +432,16 @@
         },
         {
             "name": "mauretto78/simple-s3",
-            "version": "v1.2.7",
+            "version": "v1.3.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mauretto78/simple-s3.git",
-                "reference": "430dfa7c3dad1a5e9be633cfdf1caedef7e6f910"
+                "reference": "26bb9bfc917c467c9ea641728c134942a91b4d3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mauretto78/simple-s3/zipball/430dfa7c3dad1a5e9be633cfdf1caedef7e6f910",
-                "reference": "430dfa7c3dad1a5e9be633cfdf1caedef7e6f910",
+                "url": "https://api.github.com/repos/mauretto78/simple-s3/zipball/26bb9bfc917c467c9ea641728c134942a91b4d3a",
+                "reference": "26bb9bfc917c467c9ea641728c134942a91b4d3a",
                 "shasum": ""
             },
             "require": {
@@ -449,16 +449,15 @@
                 "php": ">=5.5"
             },
             "require-dev": {
+                "ext-curl": "^7.3",
+                "ext-fileinfo": "^7.3",
+                "ext-redis": "^4.3",
                 "friendsofphp/php-cs-fixer": "^2.3",
                 "monolog/monolog": "^1.24",
                 "phpstan/phpstan": "^0.11.8",
                 "phpunit/phpunit": "~5.7",
                 "predis/predis": "^1.1",
-                "symfony/cache": "^4.3"
-            },
-            "suggest": {
-                "ext-curl": "Needed to get file content from remote url",
-                "ext-fileinfo": "Allows to get info on files"
+                "symfony/console": "^3.4.17 || ^4.1.6"
             },
             "type": "library",
             "autoload": {
@@ -485,7 +484,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-06-10T13:14:00+00:00"
+            "time": "2019-06-18T10:46:22+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -1707,16 +1706,16 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "1.8.0",
+            "version": "1.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "4ba436b55987b4bf311cb7c6ba82aa528aac0a06"
+                "reference": "1927e75f4ed19131ec9bcc3b002e07fb1173ee76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/4ba436b55987b4bf311cb7c6ba82aa528aac0a06",
-                "reference": "4ba436b55987b4bf311cb7c6ba82aa528aac0a06",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/1927e75f4ed19131ec9bcc3b002e07fb1173ee76",
+                "reference": "1927e75f4ed19131ec9bcc3b002e07fb1173ee76",
                 "shasum": ""
             },
             "require": {
@@ -1737,8 +1736,8 @@
                 }
             },
             "autoload": {
-                "psr-0": {
-                    "Prophecy\\": "src/"
+                "psr-4": {
+                    "Prophecy\\": "src/Prophecy"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1766,7 +1765,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2018-08-05T17:53:17+00:00"
+            "time": "2019-06-13T12:50:23+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
