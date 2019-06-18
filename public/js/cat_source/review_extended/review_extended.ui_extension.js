@@ -273,6 +273,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
             $( '.sub-editor.review .error-type' ).removeClass( 'error' );
 
+            UI.setTimeToEdit(UI.currentSegment);
             UI.changeStatus( button, 'approved', 0 );  // this does < setTranslation
 
             var original = UI.currentSegment.find( '.original-translation' ).text();

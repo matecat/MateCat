@@ -1414,19 +1414,8 @@ UI = {
 
 	setStatusButtons: function(button) {
 		var isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
-		this.editStop = new Date();
 		var segment = this.currentSegment;
-		var tte = $('.timetoedit', segment);
-		this.editTime = this.editStop - this.editStart;
-		this.totalTime = this.editTime + tte.data('raw-time-to-edit');
-		var editedTime = millisecondsToTime(this.totalTime);
-		if (config.time_to_edit_enabled) {
-			var editSec = $('.timetoedit .edit-sec', segment);
-			var editMin = $('.timetoedit .edit-min', segment);
-			editMin.text(APP.zerofill(editedTime[0], 2));
-			editSec.text(APP.zerofill(editedTime[1], 2));
-		}
-		tte.data('raw-time-to-edit', this.totalTime);
+
 		var statusSwitcher = $(".status", segment);
 		statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
 
@@ -1440,6 +1429,20 @@ UI = {
 		this.copyToNextIfSame(nextUntranslatedSegment);
 		this.byButton = true;
 	},
+    setTimeToEdit: function($segment) {
+        this.editStop = new Date();
+        var tte = $('.timetoedit', $segment);
+        this.editTime = this.editStop - this.editStart;
+        this.totalTime = this.editTime + tte.data('raw-time-to-edit');
+        var editedTime = millisecondsToTime(this.totalTime);
+        if (config.time_to_edit_enabled) {
+            var editSec = $('.timetoedit .edit-sec', $segment);
+            var editMin = $('.timetoedit .edit-min', $segment);
+            editMin.text(APP.zerofill(editedTime[0], 2));
+            editSec.text(APP.zerofill(editedTime[1], 2));
+        }
+        tte.data('raw-time-to-edit', this.totalTime);
+    },
 	collectSegmentErrors: function(segment) {
 		var errors = '';
 		// tag mismatch
@@ -2428,6 +2431,8 @@ UI = {
         if(!UI.offline) UI.blockButtons = true;
 
         UI.setStatusButtons(button);
+
+        UI.setTimeToEdit(UI.currentSegment);
 
         if (!skipChange) {
             UI.changeStatus(button, 'translated', 0);
