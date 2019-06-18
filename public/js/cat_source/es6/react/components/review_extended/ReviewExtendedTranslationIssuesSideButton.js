@@ -85,7 +85,7 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
                     <span className="revise-button-counter">{this.state.issues_count}</span>
                 </a>
             </div>);
-        } else  if (config.isReview && !(this.props.segment.ice_locked &&  !this.props.segment.unlocked) ){
+        } else  if (config.isReview && !(this.props.segment.ice_locked == 1 &&  !this.props.segment.unlocked) ){
             return (<div title="Show Issues" onClick={this.handleClick.bind(this)}>
                 <a ref={(button)=> this.button=button} className={"revise-button " + openClass} href="javascript:void(0);">
                     <span className="icon-error_outline" />
