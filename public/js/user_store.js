@@ -17,6 +17,7 @@ APP.USER.STORE = {} ;
             xhrFields: { withCredentials: true }
         }).done(function( data ) {
             APP.USER.STORE = data ;
+            $(document).trigger('userDataLoaded') ;
         });
     };
 

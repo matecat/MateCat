@@ -388,7 +388,19 @@ class CatUtils {
         }
 
         //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
-        $string = html_entity_decode( $string, ENT_XML1, 'UTF-8' );
+        //take a look at this string:
+        // This is a string &amp;nbsp;
+        $string = html_entity_decode(
+                html_entity_decode( $string, ENT_HTML401 | ENT_QUOTES , 'UTF-8' )
+        );
+
+        /**
+         * Count links as 1 word
+         *
+         * heuristic, of course this regexp is not perfect, hoping it is not too greedy
+         *
+         */
+        $string = preg_replace( '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d-_]+)?(?:[\p{Latin}\d-_]+\.[\p{Latin}\d-_]+\.[\p{Latin}\d#\?=\.-_]+)/', ' LINK ', $string );
 
         /**
          * Count numbers as One Word
@@ -399,15 +411,20 @@ class CatUtils {
             // sostituiamo i numeri con N nel CJK in modo da non alterare i rapporti carattere/parola
             // in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', 'N', $string );
+            $string = preg_replace( '/\b[0-9]+(?:[\.,][0-9]+)*\b/', 'N', $string );
 
         } else {
 
+            //Refine links like "php://filter/read=string.strip_tags/resource=php://input" not available in CJK because we can't use \s identifier
+            $string = preg_replace( '/(?:(?:[a-z]+:\/\/)[^\s]+)/', ' LINK ', $string );
+
             // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', ' TRANSLATED_NUMBER ', $string );
+            $string = preg_replace( '/\b[0-9]+(?:[\.,][0-9]+)*\b/', ' NUMBER ', $string );
 
         }
+
+
 
         return $string;
 

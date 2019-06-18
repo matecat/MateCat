@@ -136,7 +136,7 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
         $validator_name = "\\$validator_name" ;
 
         try {
-            $load = class_exists($validator_name, true) ;
+            $load = @class_exists($validator_name, true) ;
             if ( $load  ) {
                 $this->validator = new $validator_name($this);
             }

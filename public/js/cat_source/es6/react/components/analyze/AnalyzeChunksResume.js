@@ -58,7 +58,7 @@ class AnalyzeChunksResume extends React.Component {
 
     getTranslateUrl(job, index) {
         let chunk_id = (index)? job.get('id') + '-' + index : job.get('id');
-        return '/translate/'+ this.props.project.get('project_slug')+'/'+ job.get('source') +'-'+ job.get('target')+'/'+ chunk_id +'-'+ job.get('password')  ;
+        return '/translate/'+ this.props.project.get('project_slug')+'/'+ job.get('source') +'-'+ job.get('target')+'/'+ chunk_id +'-'+ job.get('password') + (index?'#'+job.get('job_first_segment'):'')  ;
     }
 
     openOutsourceModal(idJob, e) {

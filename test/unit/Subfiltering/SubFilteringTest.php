@@ -7,6 +7,7 @@
  *
  */
 
+use SubFiltering\Commons\Pipeline;
 use SubFiltering\Filter;
 use SubFiltering\Filters\LtGtDecode;
 use SubFiltering\Filters\LtGtDoubleDecode;
@@ -262,6 +263,28 @@ is &lt; 70 dB(A).';
 
         $this->assertEquals( $segment_from_UI, $this->filter->fromLayer0ToLayer1( $db_segment ) );
 
+    }
+
+    public function testSprintf(){
+
+        $channel = new Pipeline();
+        $channel->addLast( new \SubFiltering\Filters\SprintfToPH() );
+
+        $segment = 'Legalább 10%-os befejezett foglalás 20%-dir VAGY';
+        $seg_transformed = $channel->transform( $segment );
+
+        $this->assertEquals( $segment, $seg_transformed );
+
+    }
+
+    public function testTwigUngreedy(){
+        $segment = 'Dear {{customer.first_name}}, This is {{agent.alias}} with Airbnb.';
+        $expected = 'Dear <ph id="mtc_1" equiv-text="base64:e3tjdXN0b21lci5maXJzdF9uYW1lfX0="/>, This is <ph id="mtc_2" equiv-text="base64:e3thZ2VudC5hbGlhc319"/> with Airbnb.';
+
+        $channel = new Pipeline();
+        $channel->addLast( new \SubFiltering\Filters\TwigToPh() );
+        $seg_transformed = $channel->transform( $segment );
+        $this->assertEquals( $expected, $seg_transformed );
     }
 
 }

@@ -12,7 +12,7 @@ namespace API\V2\Validators;
 
 use AbstractControllers\IController;
 use API\V2\KleinController;
-use Exceptions\NotFoundException;
+use DomainException;
 use Utils;
 
 class WhitelistAccessValidator extends Base {
@@ -43,16 +43,15 @@ class WhitelistAccessValidator extends Base {
                 "/^10\.3\.14\..*/",
                 "/^10\.3\.15\..*/",
                 "/^10\.6\..*/",
-                "/^172\.18\..*/",
+                "/^10\.128\..*/",
+                "/^172\.(?:1[6-9]|2[0-9]|3[0-1])\..*/",
                 "/^149\.7\.212\..*/",
-                "/^2\.229\.60\.78/",
                 "/^127\.0\.0\..*/",
-                "/^93\.43\.95\.132/",
-
+                "/^93\.43\.95\.1(?:29|3[0-4])/",
         ];
 
         if( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
-            throw new NotFoundException( "Not Found.", 404 );
+            throw new DomainException( "Invalid Request: not authorized domain: " . Utils::getRealIpAddr(), 403 );
         }
 
     }
