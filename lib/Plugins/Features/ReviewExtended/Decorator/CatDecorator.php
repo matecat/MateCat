@@ -41,13 +41,27 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->project_type = null;
         $this->template->segmentFilterEnabled = true;
 
-        $this->template->footer_show_revise_link = false;
-
         $this->template->quality_report_href = \INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
 
         $this->template->showReplaceOptionsInSearch = true ;
 
         $this->template->overall_quality_class = $this->getOverallQualityClass();
+
+        $this->assignCatDecorator();
+    }
+
+    /**
+     * Empty method because it's not necessery to do again what is written into the parent
+     */
+    protected function decorateForRevision() {
+    }
+
+    protected function decorateForTranslate() {
+        /**
+         * override review_password
+         */
+        $chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword($this->controller->getChunk()->id, $this->controller->getChunk()->password);
+        $this->template->review_password = $chunk_review->review_password;
     }
 
     private function getCategoriesAsJson(ModelStruct $model) {
