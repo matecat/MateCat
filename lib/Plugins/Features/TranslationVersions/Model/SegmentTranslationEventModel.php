@@ -32,6 +32,8 @@ class SegmentTranslationEventModel  {
     protected $propagated_ids ;
     protected $source_page_code ;
 
+    protected $propagated_events = [] ;
+
     /**
      * @var int|SegmentTranslationEventStruct
      */
@@ -119,8 +121,14 @@ class SegmentTranslationEventModel  {
         $this->current_event->id = SegmentTranslationEventDao::insertStruct( $this->current_event ) ;
 
         if ( ! empty( $this->propagated_ids ) ) {
-            $dao = new SegmentTranslationEventDao();
-            $dao->insertForPropagation($this->propagated_ids, $this->current_event);
+            foreach( $this->propagated_ids as $id_segment ) {
+                $structForPropagatedEvent = clone $this->current_event ;
+                $structForPropagatedEvent->id = null ;
+                $structForPropagatedEvent->id_segment = $id_segment ;
+
+                $structForPropagatedEvent->id = SegmentTranslationEventDao::insertStruct( $structForPropagatedEvent ) ;
+                $this->propagated_events[] = $structForPropagatedEvent ;
+            }
         }
 
         $this->translation->getChunk()
@@ -158,6 +166,10 @@ class SegmentTranslationEventModel  {
 
     public function isEdit() {
         return $this->translation->translation != $this->old_translation->translation ;
+    }
+
+    public function getPropagatedEvents() {
+        return $this->propagated_events ;
     }
 
     /**

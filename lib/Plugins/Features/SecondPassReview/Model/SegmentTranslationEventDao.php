@@ -9,12 +9,15 @@
 namespace Features\SecondPassReview\Model;
 
 
+use Features\TranslationVersions\Model\SegmentTranslationEventStruct;
+
 class SegmentTranslationEventDao extends \Features\TranslationVersions\Model\SegmentTranslationEventDao {
 
-    public function unsetFinalRevisionFlag($id_job, $id_segment, $source_pages) {
+    public function unsetFinalRevisionFlag($id_job, $id_segments, $source_pages) {
 
         $sql = " UPDATE segment_translation_events SET final_revision = 0 " .
-                " WHERE id_job = :id_job AND id_segment = :id_segment " .
+                " WHERE id_job = :id_job " .
+                " AND id_segment IN ( " . implode(',', $id_segments ) . " ) " .
                 " AND source_page IN ( " . implode(',', $source_pages ) . " ) " ;
 
         $conn = $this->getDatabaseHandler()->getConnection() ;
@@ -22,7 +25,6 @@ class SegmentTranslationEventDao extends \Features\TranslationVersions\Model\Seg
 
         $stmt->execute( [
                 'id_job'     => $id_job,
-                'id_segment' => $id_segment
         ] ) ;
 
         return $stmt->rowCount() ;

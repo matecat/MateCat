@@ -38,6 +38,10 @@ class SegmentTranslationChangeVector {
         return $this->eventModel->getPropagatedIds() ;
     }
 
+    public function getPropagatedEvents() {
+        return $this->eventModel->getPropagatedEvents();
+    }
+
     public function didPropagate() {
         return count( $this->eventModel->getPropagatedIds() ) > 0 ;
     }

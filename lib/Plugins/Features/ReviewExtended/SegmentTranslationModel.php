@@ -298,16 +298,19 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
         }
 
         if ( !empty( $unsetFinalRevision ) ) {
+            $all_ids = array_filter(
+                    array_merge( [ $this->model->getSegmentStruct()->id ], $this->model->getPropagatedIds() )
+            ) ;
             ( new SegmentTranslationEventDao() )->unsetFinalRevisionFlag(
-                    $this->chunk->id,
-                    $this->model->getSegmentStruct()->id,
-                   $unsetFinalRevision
+                    $this->chunk->id, $all_ids , $unsetFinalRevision
             ) ;
         }
 
-        $eventStruct->final_revision = $is_revision ;
-        SegmentTranslationEventDao::updateStruct( $eventStruct, ['fields' => ['final_revision'] ] ) ;
-
+        $eventsToUpdate = array_filter( array_merge( [ $eventStruct ], $this->model->getPropagatedEvents() ) ) ;
+        foreach( $eventsToUpdate as $event ) {
+            $event->final_revision = $is_revision ;
+            SegmentTranslationEventDao::updateStruct( $event, ['fields' => ['final_revision'] ] ) ;
+        }
     }
 
     protected function getWordCountWithPropagation( $count ) {
