@@ -56,7 +56,9 @@ class ProductionSummary extends React.Component {
             approvedWords = (approved) ? approved.get('advancement_wc') : approvedWords;
             let approved2ndPass = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 2});
             approvedWords2ndPass = (approved2ndPass) ? approved2ndPass.get('advancement_wc') : null;
+            totalApprovedWord += parseFloat(approvedWords2ndPass);
         }
+        totalApprovedWord += parseFloat(approvedWords);
         return <div className="qr-production shadow-1">
             <div className="qr-effort job-id">ID: {this.props.jobInfo.get('id')}</div>
             <div className="qr-effort source-to-target">
@@ -93,7 +95,7 @@ class ProductionSummary extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div className="percent">{Math.round((totalApprovedWord+stats.get('translated'))/stats.get('total')*100)}%</div>
+                <div className="percent">{Math.round((stats.get('approved')+stats.get('translated'))/stats.get('total')*100)}%</div>
             </div>
             <div className="qr-effort">
                 <div className="qr-label">Reviewed Words</div>
