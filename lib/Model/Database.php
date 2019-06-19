@@ -259,9 +259,13 @@ class Database implements IDatabase {
 
         $preparedStatement = $this->getConnection()->prepare( $query );
 
-        $valuesToBind = array_filter( $data, function( $key ) use( $mask ) {
-            return isset( $mask[ $key ] );
-        }, ARRAY_FILTER_USE_KEY );
+        $valuesToBind = [] ;
+        foreach ( $data as $key => $value ) {
+            if ( isset( $mask[ $key ] ) ) {
+                $valuesToBind [ $key ] = $value;
+            }
+        }
+
 
         // Execute it
         $preparedStatement->execute( $valuesToBind );
