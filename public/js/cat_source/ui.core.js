@@ -254,7 +254,7 @@ UI = {
                     saveBehaviour = false;
             }
 
-            if ((segment.data('modified')) && (saveBehaviour) && (!config.isReview)) {
+            if ((segment.data('modified')) && (saveBehaviour) && (!config.isReview) && UI.getStatus(segment) !== 'approved') {
                 this.saveSegment(segment);
             }
             this.deActivateSegment(byButton, segment);

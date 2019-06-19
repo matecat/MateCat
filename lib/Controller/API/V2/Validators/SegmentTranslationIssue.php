@@ -89,7 +89,7 @@ class SegmentTranslationIssue extends Base {
     }
 
     private function __ensureRevisionPasswordAllowsDeleteForIssue() {
-        if ( $this->issue->source_page != $this->chunk_review->source_page ) {
+        if ( $this->issue->source_page > $this->chunk_review->source_page ) {
             throw new ValidationError('Not enough privileges to delete this issue') ;
         }
     }

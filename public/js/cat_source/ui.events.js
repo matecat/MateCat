@@ -408,7 +408,7 @@ $.extend(UI, {
 
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
-			if (UI.currentSegment) {
+			if (UI.currentSegment  && (!config.isReview) && UI.getStatus(UI.currentSegment) !== 'approved') {
                 UI.saveSegment(UI.currentSegment);
             }
 			CatToolActions.toggleQaIssues();

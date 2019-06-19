@@ -196,7 +196,7 @@ class Chunk extends \API\V2\Json\Chunk {
                 'revise_issues'       => $reviseIssues,
                 'score'               => floatval($score),
                 'categories'          => $categories,
-                'total_issues_weight' => (int)$total_issues_weight,
+                'total_issues_weight' => $total_issues_weight,
                 'total_reviewed_words_count' => (int)$total_reviewed_words_count,
                 'passfail'            => $passfail,
                 'total_time_to_edit'  => (int) $total_tte

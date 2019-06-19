@@ -737,6 +737,7 @@
             } else {
                 return API.SEGMENT.approveSegments(segmentsArray).then(function ( response ) {
                     self.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
+                    UI.retrieveStatistics();
                 });
             }
         },
@@ -751,6 +752,7 @@
             } else {
                 return API.SEGMENT.translateSegments(segmentsArray).then(function ( response ) {
                     self.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
+                    UI.retrieveStatistics();
                 });
             }
         },

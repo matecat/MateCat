@@ -75,7 +75,7 @@ class QualitySummaryTable extends React.Component {
             </div>;
             html.push(item);
         });
-        let totalScore = Math.round(this.props.qualitySummary.get('total_issues_weight'));
+        let totalScore = this.props.qualitySummary.get('total_issues_weight');
         return <div className="qr-head">
             <div className="qr-title qr-issue">Issues</div>
             {html}
