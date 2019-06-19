@@ -2,6 +2,8 @@
 
 namespace Features ;
 
+use Exceptions\ControllerReturnException;
+use Exceptions\ValidationError;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 
 class TranslationVersions extends BaseFeature {
@@ -26,9 +28,21 @@ class TranslationVersions extends BaseFeature {
                 $translation, $user, $source_page_code );
 
         $event->setPropagatedIds( $propagated_ids ) ;
-        $event->save() ;
 
-
+        /**
+         * Here we check if saving the event generates an exception.
+         * This callback is in the scope of setTranslationController which is ajax controller, so we need
+         * to modify the result array to allow the browser to be notified of the error message.
+         */
+        try {
+            $event->save() ;
+        } catch ( ValidationError $e ) {
+            $params['controller_result']['errors'] [] = [
+                    'code' => -2000,
+                    'message' => $e->getMessage()
+            ];
+            throw new ControllerReturnException( $e->getMessage(), -2000 ) ;
+        }
     }
 
     public function filter_get_segments_optional_fields(){

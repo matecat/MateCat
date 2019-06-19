@@ -11,6 +11,7 @@ namespace Features\TranslationVersions\Model;
 use Constants;
 use Constants_TranslationStatus;
 use Exception;
+use Exceptions\ValidationError;
 use TransactionableTrait;
 use Translations_SegmentTranslationStruct;
 
@@ -86,6 +87,13 @@ class SegmentTranslationEventModel  {
 
         if ( $this->current_event !== -1 ) {
             throw new Exception('The current event was persisted already. Use getCurrentEvent to retrieve it.') ;
+        }
+
+        if (
+                in_array( $this->translation['status'], Constants_TranslationStatus::$REVISION_STATUSES ) &&
+                $this->source_page_code < Constants::SOURCE_PAGE_REVISION
+        ) {
+            throw new ValidationError('Setting revised state from translation is not allowed.', -2000 );
         }
 
         if ( !$this->_saveRequired() ) {
