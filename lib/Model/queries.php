@@ -259,7 +259,7 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
 
     }
 
-    return [ 'totals' => $totals, 'propagated_ids' => $propagated_ids ];
+    return [ 'totals' => $totals, 'propagated_ids' => $propagated_ids, 'propagated_segments' => $segmentsForPropagation ];
 }
 
 /**

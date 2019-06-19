@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: fregini
- * Date: 07/02/2018
- * Time: 17:34
- */
 
 namespace Features\TranslationVersions\Model;
 
@@ -30,6 +24,12 @@ class SegmentTranslationEventModel  {
 
     protected $user ;
     protected $propagated_ids ;
+
+    /**
+     * @var Translations_SegmentTranslationStruct[]
+     */
+    protected $propagated_segments = [] ;
+
     protected $source_page_code ;
 
     protected $propagated_events = [] ;
@@ -56,12 +56,16 @@ class SegmentTranslationEventModel  {
         $this->getPriorEvent() ;
     }
 
-    public function setPropagatedIds( $propagated_ids ) {
-        $this->propagated_ids = $propagated_ids ;
+    public function setPropagatedSegments( $propagated_segments ) {
+        $this->propagated_segments = $propagated_segments ;
     }
 
     public function getPropagatedIds() {
-        return is_null( $this->propagated_ids ) ? [] : $this->propagated_ids ;
+        $ids = array_filter(array_map(function($propagated_segment) {
+            return $propagated_segment->id_segment ;
+        }, $this->propagated_segments ) );
+
+        return is_null( $ids ) ? [] : $ids ;
     }
 
     /**
@@ -120,14 +124,15 @@ class SegmentTranslationEventModel  {
 
         $this->current_event->id = SegmentTranslationEventDao::insertStruct( $this->current_event ) ;
 
-        if ( ! empty( $this->propagated_ids ) ) {
-            foreach( $this->propagated_ids as $id_segment ) {
-                $structForPropagatedEvent = clone $this->current_event ;
-                $structForPropagatedEvent->id = null ;
-                $structForPropagatedEvent->id_segment = $id_segment ;
+        if ( ! empty( $this->propagated_segments ) ) {
+            foreach( $this->propagated_segments as $segment ) {
+                $structForPropagatedEvent                 = clone $this->current_event ;
+                $structForPropagatedEvent->id             = null ;
+                $structForPropagatedEvent->id_segment     = $segment->id_segment ;
+                $structForPropagatedEvent->version_number = $segment->version_number ;
 
-                $structForPropagatedEvent->id = SegmentTranslationEventDao::insertStruct( $structForPropagatedEvent ) ;
-                $this->propagated_events[] = $structForPropagatedEvent ;
+                $structForPropagatedEvent->id             = SegmentTranslationEventDao::insertStruct( $structForPropagatedEvent ) ;
+                $this->propagated_events[]                = $structForPropagatedEvent ;
             }
         }
 
@@ -192,8 +197,8 @@ class SegmentTranslationEventModel  {
      * @throws Exception
      */
     public function getCurrentEvent() {
-        if ( $this->current_event == -1 ) {
-            throw new Exception('The current segment was not persisted yet. Run save() first.');
+        if ( ! $this->current_event ) {
+            throw new Exception('The current segment was not persisted yet. Run getPropagatedIdsve() first.');
         }
         return $this->current_event ;
     }

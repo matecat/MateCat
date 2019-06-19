@@ -575,7 +575,7 @@ class setTranslationController extends ajaxController {
         $this->featureSet->run('preSetTranslationCommitted', [
                 'translation'      => $new_translation,
                 'old_translation'  => $old_translation,
-                'propagated_ids'   => $propagationTotal['propagated_ids'],
+                'propagation'      => $propagationTotal,
                 'chunk'            => $this->chunk,
                 'segment'          => $this->segment,
                 'user'             => $this->user,

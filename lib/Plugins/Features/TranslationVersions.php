@@ -21,13 +21,12 @@ class TranslationVersions extends BaseFeature {
         /** @var \Translations_SegmentTranslationStruct $old_translation */
         $old_translation  = $params['old_translation'];
 
-        $propagated_ids   = $params['propagated_ids'];
         $source_page_code = $params['source_page_code'];
 
         $event = new SegmentTranslationEventModel($old_translation,
                 $translation, $user, $source_page_code );
 
-        $event->setPropagatedIds( $propagated_ids ) ;
+        $event->setPropagatedSegments( $params['propagation']['propagated_segments'] ) ;
 
         /**
          * Here we check if saving the event generates an exception.
