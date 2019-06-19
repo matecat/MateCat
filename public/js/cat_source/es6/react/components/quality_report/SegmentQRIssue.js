@@ -37,6 +37,9 @@ class SegmentQRIssue extends React.Component {
     componentDidMount() {
         this.attachPopupEvent();
     }
+    componentDidUpdate() {
+        this.attachPopupEvent();
+    }
     render () {
         let index = this.props.index;
         let issue = this.props.issue;

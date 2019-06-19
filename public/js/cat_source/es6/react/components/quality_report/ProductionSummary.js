@@ -50,7 +50,8 @@ class ProductionSummary extends React.Component {
         let stats = this.props.jobInfo.get('stats');
         let approvedWords = stats.get('approved');
         let approvedWords2ndPass;
-        if ( this.props.secondPassReviewEnabled && stats.has('reviews') ) {
+        let totalApprovedWord = 0;
+        if ( this.props.secondPassReviewEnabled && stats.has('reviews') && stats.get('reviews').get(1).get('advancement_wc') !== '0.00' ) {
             let approved = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 1});
             approvedWords = (approved) ? approved.get('advancement_wc') : approvedWords;
             let approved2ndPass = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 2});
@@ -92,7 +93,7 @@ class ProductionSummary extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div className="percent">{Math.round((stats.get('approved')+Math.round(stats.get('translated')))/stats.get('total')*100)}%</div>
+                <div className="percent">{Math.round((totalApprovedWord+stats.get('translated'))/stats.get('total')*100)}%</div>
             </div>
             <div className="qr-effort">
                 <div className="qr-label">Reviewed Words</div>
