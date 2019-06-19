@@ -508,29 +508,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     public static function updateFirstTimeOpenedContribution( $data, $where ){
-
-        $db = Database::obtain();
-
-        $sql = "UPDATE segment_translations 
-                    SET ";
-
-        foreach ( $data as $k => $v ) {
-            $sql .= $k . " = :$k, ";
-        }
-
-        $sql = rtrim( $sql, ", " );
-
-        $sql .= " WHERE id_segment = :id_segment AND id_job = :id_job AND status = :status ;";
-
-        $bind_values = array_merge( $data, $where );
-
-        try {
-            $stmt = $db->getConnection()->prepare( $sql );
-            $stmt->execute( $bind_values );
-        } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
-        }
-
+        self::updateFields( $data, $where );
     }
 
     /**

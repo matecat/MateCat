@@ -27,8 +27,6 @@ use \Exception;
 use \Database, \PDOException;
 use Translations_SegmentTranslationDao;
 
-include \INIT::$MODEL_ROOT . "/queries.php";
-
 /**
  * Class TMAnalysisWorker
  * @package Analysis\Workers
@@ -37,6 +35,8 @@ include \INIT::$MODEL_ROOT . "/queries.php";
  * This worker handle a queue element ( a segment ) and perform the analysis on it
  */
 class TMAnalysisWorker extends AbstractWorker {
+
+    use ProjectWordCount;
 
     /**
      * Matches vector
@@ -692,7 +692,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
-            $total_segs = getProjectSegmentsTranslationSummary( $pid );
+            $total_segs = $this->getProjectSegmentsTranslationSummary( $pid );
 
             $total_segs = array_pop( $total_segs ); // get the Rollup Value
             $this->_doLog( $total_segs );
@@ -774,7 +774,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      * @throws \Predis\Connection\ConnectionException
-     * @throws EndQueueException
+     * @throws \ReflectionException
      */
     protected function _tryToCloseProject( $_project_id ) {
 
@@ -806,7 +806,7 @@ class TMAnalysisWorker extends AbstractWorker {
             }
 
             //TODO use a simplest query to get job id and password
-            $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
+            $_analyzed_report = $this->getProjectSegmentsTranslationSummary( $_project_id );
 
             $total_segs = array_pop( $_analyzed_report ); //remove Rollup
 

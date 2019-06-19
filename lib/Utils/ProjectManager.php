@@ -1146,7 +1146,8 @@ class ProjectManager {
             }
 
             foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
-                insertFilesJob( $newJob->id, $fid );
+
+                Files_FileDao::insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id );

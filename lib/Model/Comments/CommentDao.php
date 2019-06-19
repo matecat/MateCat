@@ -7,6 +7,9 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     const TABLE       = "comments";
     const STRUCT_TYPE = "Comments_CommentStruct";
 
+    protected static $auto_increment_field = [ 'id' ];
+    protected static $primary_keys         = [ 'id' ];
+
     const TYPE_COMMENT = 1;
     const TYPE_RESOLVE = 2;
     const TYPE_MENTION = 3;
@@ -57,91 +60,89 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
     }
 
-    public function saveComment( $input ) {
-        if ( $input->message_type == null ) {
-            $input->message_type = self::TYPE_COMMENT;
+    public function saveComment( Comments_CommentStruct $obj ) {
+
+        if ( $obj->message_type == null ) {
+            $obj->message_type = self::TYPE_COMMENT;
         }
 
-        $input->timestamp   = time();
-        $input->create_date = date( 'Y-m-d H:i:s', $input->timestamp );
-
-        $obj = $this->sanitize( $input );
+        $obj->timestamp   = time();
+        $obj->create_date = date( 'Y-m-d H:i:s', $obj->timestamp );
 
         $this->validateComment( $obj );
 
-        $query = " INSERT INTO comments " .
-                " ( " .
-                " id_job, id_segment, create_date, email, full_name, uid, " .
-                " source_page, message_type, message ) " .
-                " VALUES " .
-                " ( " .
-                implode( ", ", array(
-                        $obj->id_job,
-                        $obj->id_segment,
-                        $obj->create_date,
-                        $obj->email,
-                        $obj->full_name,
-                        $obj->uid,
-                        $obj->source_page,
-                        $obj->message_type,
-                        $obj->message
-                ) ) . " ) ";
+        $this->database->insert( "comments", [
+                'id_job'       => $obj->id_job,
+                'id_segment'   => $obj->id_segment,
+                'create_date'  => $obj->create_date,
+                'email'        => $obj->email,
+                'full_name'    => $obj->full_name,
+                'uid'          => $obj->uid,
+                'source_page'  => $obj->source_page,
+                'message_type' => $obj->message_type,
+                'message'      => $obj->message
+        ] );
 
-
-        $this->database->query( $query );
-
-        return $input;
+        return $obj;
     }
 
-    public function resolveThread( $input ) {
-        $input->message_type = self::TYPE_RESOLVE;
-        $input->resolve_date = date( 'Y-m-d H:i:s' );
+    public function resolveThread( Comments_CommentStruct $obj ) {
+
+        $obj->message_type = self::TYPE_RESOLVE;
+        $obj->resolve_date = date( 'Y-m-d H:i:s' );
 
         $this->database->begin();
 
         try {
-            $comment = $this->saveComment( $input );
 
-            $obj = $this->sanitize( $input );
+            $comment = $this->saveComment( $obj );
 
-            $update = "UPDATE comments SET resolve_date = $obj->resolve_date " .
-                    " WHERE id_segment = $obj->id_segment " .
-                    " AND id_job = $obj->id_job " .
-                    " AND resolve_date IS NULL ";
-
-            $this->database->query( $update );
+            self::updateFields(
+                    [ 'resolve_date' => $obj->resolve_date ],
+                    [
+                            'id_segment'   => $obj->id_segment,
+                            'id_job'       => $obj->id_job,
+                            'resolve_date' => null
+                    ]
+            );
 
             $this->database->commit();
+
         } catch ( Exception $e ) {
-            $err = $this->database->get_error();
+            $err = $e->getMessage();
             Log::doJsonLog( "Error: " . var_export( $err, true ) );
             $this->database->rollback();
         }
 
-        $input->thread_id   = $input->getThreadId();
-        $input->create_date = $comment->create_date;
-        $input->timestamp   = $comment->timestamp;
+        $obj->thread_id   = $obj->getThreadId();
+        $obj->create_date = $comment->create_date;
+        $obj->timestamp   = $comment->timestamp;
 
-        return $input;
+        return $obj;
     }
 
-    public function getThreadContributorUids( $input ) {
-        $obj = $this->sanitize( $input );
+    public function getThreadContributorUids( Comments_CommentStruct $obj ) {
+
+        $bind_values = [
+                'id_job' => $obj->id_job,
+                'id_segment' => $obj->id_segment
+        ];
 
         $query = "SELECT DISTINCT(uid) FROM " . self::TABLE .
-                " WHERE id_job = $obj->id_job " .
-                " AND id_segment = $obj->id_segment " .
-                " AND uid IS NOT NULL ";
+                " WHERE id_job = :id_job 
+                  AND id_segment = :id_segment 
+                  AND uid IS NOT NULL ";
 
-        if ( $input->uid ) {
-            $query .= " AND uid <> $obj->uid ";
+        if ( $obj->uid ) {
+            $bind_values[ 'uid' ] = $obj->uid;
+            $query .= " AND uid <> :uid ";
         }
 
-        $this->database->query( $query );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( $bind_values );
+        return $stmt->fetchAll();
 
-        $arr_result = $this->_fetch_array( $query );
-
-        return $arr_result;
     }
 
     public function getThreadsBySegments( $segments_id, $job_id ) {
@@ -172,18 +173,23 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
     public static function getCommentsForChunk( Chunks_ChunkStruct $chunk, $options = array() ) {
 
-        $sql = "SELECT " .
-                " id, uid, resolve_date, id_job, id_segment, create_date, full_name, " .
-                " source_page, message_type, message, email, " .
-                " IF ( resolve_date IS NULL, NULL,  " .
-                " MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) " .
-                " ) AS thread_id FROM comments "  .
-                " WHERE id_job = :id_job " .
-                "  ";
+        $sql = "SELECT 
+                  id, 
+                  uid, 
+                  resolve_date, 
+                  id_job, 
+                  id_segment, 
+                  create_date, 
+                  full_name, 
+                  source_page, 
+                  message_type, 
+                  message, 
+                  email, 
+                  IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) 
+                ) AS thread_id FROM comments
+                WHERE id_job = :id_job ";
 
-        $params = array(
-            'id_job' => $chunk->id
-        ) ;
+        $params = [ 'id_job' => $chunk->id ];
 
         if ( array_key_exists( 'from_id', $options ) && $options['from_id'] != null ) {
             $sql = $sql . " AND id >= :from_id " ;
@@ -209,35 +215,36 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
      *             use getCommentsForChunk.
      *
      * TODO: refactor this, shoudl return an array of structs
-     * @param $input
+     *
+     * @param Comments_CommentStruct $obj
      *
      * @return array
      */
-    public function getCommentsInJob( $input ) {
-        $obj = $this->sanitize( $input );
+    public function getCommentsInJob( Comments_CommentStruct $obj ) {
 
-        $query = $this->finderQuery() .
-                " WHERE id_job = $obj->id_job " .
-                " ORDER BY id_segment ASC, create_date ASC ";
+        $query = "SELECT
+                      id_job, 
+                      id_segment, 
+                      create_date, 
+                      full_name, 
+                      resolve_date, 
+                      source_page, 
+                      message_type, 
+                      message, 
+                      email, 
+                      UNIX_TIMESTAMP( create_date ) AS timestamp, 
+                      IF ( resolve_date IS NULL, NULL,  MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) 
+                 ) AS thread_id 
+                 FROM " . self::TABLE . "
+                 WHERE id_job = :id_job 
+                 ORDER BY id_segment ASC, create_date ASC ";
 
-        $this->database->query( $query );
-
-        $arr_result = $this->_fetch_array( $query );
-
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [ 'id_job' => $obj->id_job ] );
+        $arr_result = $stmt->fetchAll();
         return $this->_buildResult( $arr_result );
     }
-
-    private function finderQuery() {
-        return "SELECT " .
-        " id_job, id_segment, create_date, full_name, resolve_date, " .
-        " source_page, message_type, message, email, " .
-        " UNIX_TIMESTAMP( create_date ) AS timestamp, " .
-        " IF ( resolve_date IS NULL, NULL,  " .
-        " MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) " .
-        " ) AS thread_id " .
-        " FROM " . self::TABLE;
-    }
-
 
     private function validateComment( $obj ) {
         if ( empty( $obj->message ) && $obj->message_type == self::TYPE_COMMENT ) {
@@ -249,10 +256,11 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     }
 
     protected function _buildResult( $array_result ) {
-        $result = array();
+        $result = [];
 
         foreach ( $array_result as $item ) {
-            $build_arr = array(
+
+            $build_arr = [
                     'id_job'         => $item[ 'id_job' ],
                     'id_segment'     => $item[ 'id_segment' ],
                     'create_date'    => $item[ 'create_date' ],
@@ -263,7 +271,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                     'message'        => $item[ 'message' ],
                     'formatted_date' => self::formattedDate( $item[ 'create_date' ] ),
                     'timestamp'      => (int)$item[ 'timestamp' ]
-            );
+            ];
 
             $result[] = $build_arr;
         }
@@ -273,28 +281,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
     static function formattedDate( $time ) {
         return strftime( '%l:%M %p %e %b %Y UTC', strtotime( $time ) );
-    }
-
-    public function sanitize( $input ) {
-        $cloned = clone $input;
-        parent::_sanitizeInput( $input, self::STRUCT_TYPE );
-
-        $cloned->id_job       = self::intWithNull( $input->id_job );
-        $cloned->id_segment   = self::intWithNull( $input->id_segment );
-        $cloned->uid          = self::intWithNull( $input->uid );
-        $cloned->source_page  = self::intWithNull( $input->source_page );
-        $cloned->message_type = self::intWithNull( $input->message_type );
-
-        $cloned->first_segment = self::intWithNull( $input->first_segment );
-        $cloned->last_segment  = self::intWithNull( $input->last_segment );
-
-        $cloned->message      = self::escapeWithNull( trim( $input->message ) );
-        $cloned->email        = self::escapeWithNull( $input->email );
-        $cloned->full_name    = self::escapeWithNull( $input->full_name );
-        $cloned->create_date  = self::escapeWithNull( $input->create_date );
-        $cloned->resolve_date = self::escapeWithNull( $input->resolve_date );
-
-        return $cloned;
     }
 
     public static function placeholdContent($content){
@@ -320,23 +306,6 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
 
         return $users;
 
-    }
-
-    private static function escapeWithNull( $value ) {
-        $conn = \Database::obtain();
-        if ( $value !== null ) {
-            return " '{$conn->escape( $value )}' ";
-        } else {
-            return "NULL";
-        }
-    }
-
-    private static function intWithNull( $value ) {
-        if ( $value === null ) {
-            return "NULL";
-        } else {
-            return (int)$value;
-        }
     }
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+use Analysis\AnalysisDao;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -63,7 +65,7 @@ abstract class Analysis_AbstractStatus {
      */
     protected function _fetchProjectData() {
 
-        $this->_resultSet = getProjectStatsVolumeAnalysis( $this->id_project );
+        $this->_resultSet = AnalysisDao::getProjectStatsVolumeAnalysis( $this->id_project );
 
         try {
             $amqHandler         = new \AMQHandler();

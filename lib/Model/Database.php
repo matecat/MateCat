@@ -204,7 +204,7 @@ class Database implements IDatabase {
 
 
     /**
-     * @Warning This method do not support all the SQL syntax features. Only AND key/value pair is supported, OR in WHERE condition is not supported, NESTING is not supported
+     * @Warning This method do not support all the SQL syntax features. Only AND key/value pair is supported, OR in WHERE condition is not supported, nesting "AND ( .. OR .. ) AND ( .. )" is not supported
      * @Override
      * {@inheritdoc}
      */
@@ -225,7 +225,13 @@ class Database implements IDatabase {
         $query .= " WHERE ";
 
         foreach ( $where as $k => $v ) {
-            $query              .= $k . " = :" . $k . " AND ";
+
+            if( $v !== null ){
+                $query .= $k . " = :" . $k . " AND ";
+            } else {
+                $query .= $k . " IS :" . $k . " AND ";
+            }
+
             $valuesToBind[ $k ] = $v;
         }
 
