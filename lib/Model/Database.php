@@ -20,8 +20,8 @@ class Database implements IDatabase {
     private $connection;
 
     // Connection variables
-    private $server = ""; //database server
-    private $user = ""; //database login name
+    private $server   = ""; //database server
+    private $user     = ""; //database login name
     private $password = ""; //database login password
     private $database = ""; //database name
 
@@ -29,9 +29,9 @@ class Database implements IDatabase {
     public $affected_rows;
 
 
-    const SEQ_ID_SEGMENT = 'id_segment';
-    const SEQ_ID_PROJECT = 'id_project';
-    const SEQ_ID_DQF_PROJECT = 'id_dqf_project' ;
+    const SEQ_ID_SEGMENT     = 'id_segment';
+    const SEQ_ID_PROJECT     = 'id_project';
+    const SEQ_ID_DQF_PROJECT = 'id_dqf_project';
 
     protected static $SEQUENCES = [
             Database::SEQ_ID_SEGMENT,
@@ -41,21 +41,22 @@ class Database implements IDatabase {
 
     /**
      * Instantiate the database (singleton design pattern)
+     *
      * @param string $server
      * @param string $user
      * @param string $password
      * @param string $database
      */
-    private function __construct($server=null, $user=null, $password=null, $database=null) {
+    private function __construct( $server = null, $user = null, $password = null, $database = null ) {
 
         // Check that the variables are not empty
-        if ($server == null || $user == null || $database == null) {
-            throw new InvalidArgumentException("Database information must be passed in when the object is first created.");
+        if ( $server == null || $user == null || $database == null ) {
+            throw new InvalidArgumentException( "Database information must be passed in when the object is first created." );
         }
 
         // Set fields
-        $this->server = $server;
-        $this->user = $user;
+        $this->server   = $server;
+        $this->user     = $user;
         $this->password = $password;
         $this->database = $database;
     }
@@ -65,17 +66,18 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public static function obtain($server=null, $user=null, $password=null, $database=null) {
-        if (!self::$instance  ||  $server != null  &&  $user != null  &&  $password != null  &&  $database != null) {
-            self::$instance = new Database($server, $user, $password, $database);
+    public static function obtain( $server = null, $user = null, $password = null, $database = null ) {
+        if ( !self::$instance || $server != null && $user != null && $password != null && $database != null ) {
+            self::$instance = new Database( $server, $user, $password, $database );
         }
+
         return self::$instance;
     }
 
     /**
      * Class destructor
      */
-    public function __destruct(){
+    public function __destruct() {
         $this->close();
     }
 
@@ -88,12 +90,13 @@ class Database implements IDatabase {
                     "mysql:host={$this->server};dbname={$this->database}",
                     $this->user,
                     $this->password,
-                    array(
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
+                    [
+                            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
                             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                    ) );
+                    ] );
             $this->connection->exec( "SET names utf8" );
         }
+
         return $this->connection;
     }
 
@@ -105,8 +108,9 @@ class Database implements IDatabase {
      * @return bool
      * @throws PDOException
      */
-    public function ping(){
+    public function ping() {
         $this->getConnection()->query( "SELECT 1 FROM DUAL" );
+
         return true;
     }
 
@@ -119,8 +123,8 @@ class Database implements IDatabase {
     }
 
     public function reconnect() {
-      $this->close();
-      $this->getConnection();
+        $this->close();
+        $this->getConnection();
     }
 
 
@@ -128,8 +132,11 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function useDb($name){
-        $this->getConnection()->query("USE ".$name);
+    public function useDb( $name ) {
+        $stmt = $this->getConnection()->prepare( "USE ?" );
+        $stmt->execute( [ $name ] );
+        $stmt->closeCursor();
+        unset( $stmt );
         $this->database = $name;
     }
 
@@ -139,9 +146,10 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function begin() {
-        if ( ! $this->getConnection()->inTransaction() ) {
+        if ( !$this->getConnection()->inTransaction() ) {
             $this->getConnection()->beginTransaction();
         }
+
         return $this->getConnection();
     }
 
@@ -162,46 +170,6 @@ class Database implements IDatabase {
     public function rollback() {
         $this->getConnection()->rollBack();
     }
-
-
-    /**
-     * @deprecated Prepared statements should be used
-     * @Override
-     * {@inheritdoc}
-     */
-    public function query($sql) {
-        $result = $this->getConnection()->query($sql);
-        $this->affected_rows = $result->rowCount();
-        return $result;
-    }
-
-    /**
-     * @deprecated Prepared statements should be used
-     * @Override
-     * {@inheritdoc}
-     */
-    public function query_first($query) {
-        $result = $this->query($query);
-        $out = $result->fetch(PDO::FETCH_ASSOC);
-        $result->closeCursor();
-        return $out;
-    }
-
-
-    /**
-     * @deprecated Prepared statements should be used
-     * @Override
-     * {@inheritdoc}
-     * @deprecated
-     * TODO: Re-implement with prepared statement
-     */
-    public function fetch_array($query) {
-        $result = $this->query($query);
-        $out = $result->fetchAll(PDO::FETCH_ASSOC);
-        $result->closeCursor();
-        return $out;
-    }
-
 
     /**
      * @Warning This method do not support all the SQL syntax features. Only AND key/value pair is supported, OR in WHERE condition is not supported, nesting "AND ( .. OR .. ) AND ( .. )" is not supported
@@ -226,7 +194,7 @@ class Database implements IDatabase {
 
         foreach ( $where as $k => $v ) {
 
-            if( $v !== null ){
+            if ( $v !== null ) {
                 $query .= $k . " = :" . $k . " AND ";
             } else {
                 $query .= $k . " IS :" . $k . " AND ";
@@ -244,6 +212,7 @@ class Database implements IDatabase {
 
         $affected            = $stmt->rowCount();
         $this->affected_rows = $affected;
+
         return $affected;
 
     }
@@ -259,7 +228,7 @@ class Database implements IDatabase {
 
         $preparedStatement = $this->getConnection()->prepare( $query );
 
-        $valuesToBind = [] ;
+        $valuesToBind = [];
         foreach ( $data as $key => $value ) {
             if ( isset( $mask[ $key ] ) ) {
                 $valuesToBind [ $key ] = $value;
@@ -297,7 +266,7 @@ class Database implements IDatabase {
             throw new Exception( 'TABLE constant is not defined' );
         }
 
-        if( $ignore && $no_nulls ){
+        if ( $ignore && $no_nulls ) {
             throw new Exception( 'INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together.' );
         }
 
@@ -344,9 +313,9 @@ class Database implements IDatabase {
 
         $sql = "INSERT $sql_ignore INTO " . $table .
                 " (" .
-                    implode( ', ', $first ) .
+                implode( ', ', $first ) .
                 ") VALUES (" .
-                    implode( ', ', $second ) .
+                implode( ', ', $second ) .
                 ")
                 $duplicate_statement ;
         ";
@@ -378,9 +347,9 @@ class Database implements IDatabase {
      *
      * @return array
      */
-    public function nextSequence( $sequence_name, $seqIncrement = 1 ){
+    public function nextSequence( $sequence_name, $seqIncrement = 1 ) {
 
-        if( array_search( $sequence_name, static::$SEQUENCES ) === false ){
+        if ( array_search( $sequence_name, static::$SEQUENCES ) === false ) {
             throw new \PDOException( "Undefined sequence " . $sequence_name );
         }
 
@@ -396,7 +365,7 @@ class Database implements IDatabase {
 
         $this->getConnection()->commit();
 
-        return range( $first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement -1 );
+        return range( $first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement - 1 );
 
     }
 

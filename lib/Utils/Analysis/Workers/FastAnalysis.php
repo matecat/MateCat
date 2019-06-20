@@ -687,7 +687,7 @@ class FastAnalysis extends AbstractDaemon {
             INNER JOIN files_job AS fj ON fj.id_file = s.id_file
             INNER JOIN jobs as j ON fj.id_job = j.id
             LEFT JOIN segment_translations AS st ON st.id_segment = s.id
-                WHERE j.id_project = '$pid'
+                WHERE j.id_project = ?
                 AND IFNULL( st.locked, 0 ) = 0
                 AND IFNULL( st.match_type, 'NO_MATCH' ) != 'ICE'
                 AND show_in_cattool != 0
@@ -697,7 +697,10 @@ HD;
 
         $db    = Database::obtain();
         try {
-            $results = $db->fetch_array( $query );
+            $stmt = $db->getConnection()->prepare( $query );
+            $stmt->setFetchMode( PDO::FETCH_ASSOC );
+            $stmt->execute( [ $pid ] );
+            $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
             throw $e;
@@ -804,8 +807,6 @@ HD;
 
         $bindParams = [ 'project_status' => Constants_ProjectStatus::STATUS_NEW ];
 
-        $query_limit = " LIMIT " . (int)$limit;
-
         $and_InstanceId = null;
         if( !is_null( INIT::$INSTANCE_ID ) ){
             $and_InstanceId = ' AND instance_id = :instance_id ';
@@ -818,8 +819,7 @@ HD;
             INNER JOIN jobs j ON j.id_project=p.id
             WHERE status_analysis = :project_status $and_InstanceId
             GROUP BY 1
-        ORDER BY id $query_limit ;
-	";
+        ORDER BY id LIMIT " . (int)$limit;
 
         $db    = Database::obtain();
         //Needed to address the query to the master database if exists

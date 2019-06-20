@@ -64,12 +64,11 @@ class EditLog_EditLogModel {
             $featureSet = new FeatureSet();
         }
         $this->featureSet = $featureSet;
+        $this->jobData   = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->job_stats = $this->getFastStatsForJob();
     }
 
     public function controllerDoAction() {
-
-        $this->jobData   = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
-        $this->job_stats = $this->getFastStatsForJob();
 
         if ( $this->jobData[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED || $this->jobData == Constants_JobStatus::STATUS_CANCELLED ) {
             //this job has been archived
@@ -517,7 +516,7 @@ class EditLog_EditLogModel {
      * @param int $segments_per_page
      */
     public static function setSegmentsPerPage( $segments_per_page ) {
-        self::$segments_per_page = $segments_per_page;
+        self::$segments_per_page = (int)$segments_per_page;
     }
 
     /**

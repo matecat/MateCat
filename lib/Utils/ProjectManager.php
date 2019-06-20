@@ -1624,9 +1624,6 @@ class ProjectManager {
                 continue;
             }
 
-            //extract internal reference base64 files and store their index in $this->projectStructure
-//            $this->_extractFileReferences( $fid, $xliff_file );
-
             foreach ( $xliff_file[ 'trans-units' ] as $xliff_trans_unit ) {
 
                 //initialize flag
@@ -2380,95 +2377,6 @@ class ProjectManager {
         }
 
         return null;
-
-    }
-
-
-    /**
-     * NOT USED
-     *
-     * Extract internal reference base64 files
-     * and store their index in $this->projectStructure
-     *
-     * @param $project_file_id
-     * @param $xliff_file_array
-     *
-     * @return void|int $file_reference_id
-     *
-     * @throws Exception
-     * @deprecated
-     */
-    protected function _extractFileReferences( $project_file_id, $xliff_file_array ) {
-//
-//        $fName = self::_sanitizeName( $xliff_file_array[ 'attr' ][ 'original' ] );
-//
-//        if ( $fName != false ) {
-//            $fName = $this->dbHandler->escape( $fName );
-//        } else {
-//            $fName = '';
-//        }
-//
-//        $serialized_reference_meta     = [];
-//        $serialized_reference_binaries = [];
-//
-//        /* Fix: PHP Warning:  Invalid argument supplied for foreach() */
-//        if ( !isset( $xliff_file_array[ 'reference' ] ) ) {
-//            return null;
-//        }
-//
-//        foreach ( $xliff_file_array[ 'reference' ] as $pos => $ref ) {
-//
-//            $found_ref = true;
-//
-//            $_ext = self::getExtensionFromMimeType( $ref[ 'form-type' ] );
-//            if ( $_ext !== null ) {
-//
-//                //insert in database if exists extension
-//                //and add the id_file_part to the segments insert statement
-//
-//                $refName = $this->projectStructure[ 'id_project' ] . "-" . $pos . "-" . $fName . "." . $_ext;
-//
-//                $serialized_reference_meta[ $pos ][ 'filename' ]   = $refName;
-//                $serialized_reference_meta[ $pos ][ 'mime_type' ]  = $this->dbHandler->escape( $ref[ 'form-type' ] );
-//                $serialized_reference_binaries[ $pos ][ 'base64' ] = $ref[ 'base64' ];
-//
-//                if ( !is_dir( INIT::$REFERENCE_REPOSITORY ) ) {
-//                    mkdir( INIT::$REFERENCE_REPOSITORY, 0755 );
-//                }
-//
-//                $wBytes = file_put_contents( INIT::$REFERENCE_REPOSITORY . "/$refName", base64_decode( $ref[ 'base64' ] ) );
-//
-//                if ( !$wBytes ) {
-//                    throw new Exception ( "Failed to import references. $wBytes Bytes written.", -11 );
-//                }
-//
-//            }
-//
-//        }
-//
-//        if ( isset( $found_ref ) && !empty( $serialized_reference_meta ) ) {
-//
-//            $serialized_reference_meta     = serialize( $serialized_reference_meta );
-//            $serialized_reference_binaries = serialize( $serialized_reference_binaries );
-//            $queries                       = "INSERT INTO file_references ( id_project, id_file, part_filename, serialized_reference_meta, serialized_reference_binaries ) VALUES ( " . $this->projectStructure[ 'id_project' ] . ", $project_file_id, '$fName', '$serialized_reference_meta', '$serialized_reference_binaries' )";
-//
-//            $this->dbHandler->query( $queries );
-//
-//            $affected = $this->dbHandler->affected_rows;
-//            $last_id  = "SELECT LAST_INSERT_ID() as fpID";
-//            $result   = $this->dbHandler->query_first( $last_id );
-//            $result   = $result[ 0 ];
-//
-//            //last Insert id
-//            $file_reference_id = $result[ 'fpID' ];
-//            $this->projectStructure[ 'file_references' ]->offsetSet( $project_file_id, $file_reference_id );
-//
-//            if ( !$affected || !$file_reference_id ) {
-//                throw new Exception ( "Failed to import references.", -12 );
-//            }
-//
-//            return $file_reference_id;
-//        }
 
     }
 

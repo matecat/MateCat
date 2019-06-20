@@ -30,7 +30,10 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
 
         if ( !$filterDate ) {
-            $filterDate = $this->setCacheTTL( 24 * 60 * 60 )->_fetch_array( "SELECT MAX( date ) as date FROM " . self::TABLE )[ 0 ][ 'date' ];
+            $con  = $this->database->getConnection();
+            $stmt = $con->prepare( "SELECT MAX( date ) as date FROM " . self::TABLE );
+            $this->setCacheTTL( 24 * 60 * 60 );
+            $filterDate = $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [] )[ 0 ][ 'date' ];
         } else {
             $filterDate = $filterDate->format( 'Y-m-d H:i:s' );
         }
