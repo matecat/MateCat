@@ -125,6 +125,7 @@ class SegmentTranslationEventModel  {
         $this->current_event->id = SegmentTranslationEventDao::insertStruct( $this->current_event ) ;
 
         if ( ! empty( $this->propagated_segments ) ) {
+
             foreach( $this->propagated_segments as $segment ) {
                 $structForPropagatedEvent                 = clone $this->current_event ;
                 $structForPropagatedEvent->id             = null ;

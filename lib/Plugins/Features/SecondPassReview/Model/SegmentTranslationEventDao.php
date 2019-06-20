@@ -9,8 +9,6 @@
 namespace Features\SecondPassReview\Model;
 
 
-use Features\TranslationVersions\Model\SegmentTranslationEventStruct;
-
 class SegmentTranslationEventDao extends \Features\TranslationVersions\Model\SegmentTranslationEventDao {
 
     public function unsetFinalRevisionFlag($id_job, $id_segments, $source_pages) {

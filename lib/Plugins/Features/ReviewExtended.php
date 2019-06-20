@@ -51,7 +51,7 @@ class ReviewExtended extends AbstractRevisionFeature {
 
     public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
         $model = new SegmentTranslationModel( $translation );
-        $model->evaluateReviewedWordsTransition();
+        $model->evaluateChunkReviewTransition();
     }
 
     /**

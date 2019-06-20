@@ -8,6 +8,8 @@
 
 namespace Features\TranslationVersions\Model ;
 
+use PDO;
+
 class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
 
     const TABLE       = "segment_translation_events";
@@ -50,7 +52,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
 
         $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [
             'id_job'      => $id_job,
             'min_segment' => $min_segment,
@@ -70,7 +72,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
 
         $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [
                 'id_job'      => $id_job,
                 'id_segment'  => $id_segment,
@@ -80,7 +82,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
         return $stmt->fetch(); // expect one result only
     }
 
-    public function getFinalRevisionsForSegment( $id_job, $id_segment, $source_page = null ) {
+    public function getFinalRevisionsForSegment( $id_job, $id_segment ) {
         $sql = "SELECT * FROM segment_translation_events
                 WHERE id_job = :id_job
                     AND id_segment = :id_segment
@@ -89,13 +91,30 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
 
         $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [
                 'id_job'      => $id_job,
                 'id_segment' => $id_segment
         ] );
 
         return $stmt->fetchAll();
+    }
+
+    public function getFinalRevisionForSegments( $id_job, $segment_ids ) {
+        $sql = "SELECT source_page, segment_translation_events.* FROM segment_translation_events
+                WHERE id_job = :id_job
+                    AND id_segment IN (" . implode(',', $segment_ids ) . " )
+                    AND final_revision = 1
+                " ;
+
+        $conn = $this->getDatabaseHandler()->getConnection() ;
+        $stmt = $conn->prepare( $sql );
+        // $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->execute( [
+                'id_job' => $id_job,
+        ] );
+
+        return $stmt->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_CLASS, self::STRUCT_TYPE );
     }
 
     /**
