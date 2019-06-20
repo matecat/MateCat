@@ -29,6 +29,7 @@ class TranslationIssueModel {
      * @var \LQA\ChunkReviewStruct
      */
     protected $chunk_review ;
+    private   $removePointsOnDelete;
 
 
     /**

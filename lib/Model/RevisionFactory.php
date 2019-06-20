@@ -9,8 +9,13 @@
 class RevisionFactory {
 
     /** @var  \Features\AbstractRevisionFeature */
-    protected $revision ;
+    protected        $revision ;
     protected static $INSTANCE ;
+
+    /**
+     * @var FeatureSet
+     */
+    protected        $_featureSet;
 
     /**
      * @param \Features\BaseFeature|null $revisionFeature
@@ -40,6 +45,16 @@ class RevisionFactory {
     }
 
     /**
+     * @param FeatureSet $featureSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featureSet ) {
+        $this->_featureSet = $featureSet ;
+        return $this ;
+    }
+
+    /**
      * @param $id_job
      * @param $password
      * @param $issue
@@ -47,7 +62,11 @@ class RevisionFactory {
      * @return mixed
      */
     public function getTranslationIssueModel( $id_job, $password, $issue) {
-        return $this->revision->getTranslationIssueModel( $id_job, $password, $issue ) ;
+        if ( in_array(Features::SECOND_PASS_REVIEW, $this->_featureSet->getCodes() ) ) {
+            return new \Features\SecondPassReview\TranslationIssueModel($id_job, $password, $issue ) ;
+        } else {
+            return $this->revision->getTranslationIssueModel( $id_job, $password, $issue ) ;
+        }
     }
 
     public static function initFromProject( Projects_ProjectStruct $project ) {

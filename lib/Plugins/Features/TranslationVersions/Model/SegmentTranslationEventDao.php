@@ -60,7 +60,27 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public function getFinalRevisionsForSegment( $id_job, $id_segment ) {
+    public function getFinalRevisionForSegmentAndSourcePage( $id_job, $id_segment, $source_page ) {
+        $sql = "SELECT * FROM segment_translation_events
+                WHERE id_job = :id_job
+                    AND id_segment = :id_segment
+                    AND final_revision = 1
+                    AND source_page = :source_page
+                " ;
+
+        $conn = $this->getDatabaseHandler()->getConnection() ;
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->execute( [
+                'id_job'      => $id_job,
+                'id_segment'  => $id_segment,
+                'source_page' => $source_page
+        ] );
+
+        return $stmt->fetch(); // expect one result only
+    }
+
+    public function getFinalRevisionsForSegment( $id_job, $id_segment, $source_page = null ) {
         $sql = "SELECT * FROM segment_translation_events
                 WHERE id_job = :id_job
                     AND id_segment = :id_segment

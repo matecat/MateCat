@@ -116,7 +116,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $project = \Projects_ProjectDao::findByJobId($this->request->id_job);
         $this->featureSet->loadForProject($project);
 
-        return RevisionFactory::getInstance()->getTranslationIssueModel( $id_job, $password, $issue ) ;
+        return RevisionFactory::getInstance()
+                ->setFeatureSet($this->featureSet)
+                ->getTranslationIssueModel( $id_job, $password, $issue ) ;
     }
 
     protected function afterConstruct() {
