@@ -180,7 +180,7 @@ class CatUtils {
      */
     protected static function _performanceEstimationTime( array $job_stats ) {
 
-        $last_10_worked_ids = Translations_SegmentTranslationDao::getLastSegmentIDs( $job_stats[ 'id' ] );
+        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $job_stats[ 'id' ] );
         if ( !empty( $last_10_worked_ids ) ) {
             //perform check on performance if single segment are set to check or globally Forced
             // Calculating words per hour and estimated completion

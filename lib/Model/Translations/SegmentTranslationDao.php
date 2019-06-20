@@ -681,7 +681,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return [ 'totals' => $totals, 'propagated_ids' => $propagated_ids ];
     }
 
-    public static function getLastSegmentIDs( $id_job ) {
+    public static function getLast10TranslatedSegmentIDs( $id_job ) {
 
         // Force Index guarantee that the optimizer will not choose translation_date and scan the full table for new jobs.
         $query = "
