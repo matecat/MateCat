@@ -5,7 +5,6 @@
  * Date: 02/09/14
  * Time: 15.01
  */
-include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class TmKeyManagement_TmKeyManagement {
 

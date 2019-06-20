@@ -10,8 +10,6 @@
 
 use WordCount\WordCounterDao;
 
-require_once 'queries.php';
-
 class WordCount_CounterModel {
 
     /**
