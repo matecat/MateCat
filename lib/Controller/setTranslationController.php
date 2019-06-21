@@ -580,7 +580,8 @@ class setTranslationController extends ajaxController {
                 'segment'          => $this->segment,
                 'user'             => $this->user,
                 'source_page_code' => self::getRefererSourcePageCode( $this->featureSet ),
-                'controller_result' => & $this->result
+                'controller_result' => & $this->result,
+                'features'         => $this->featureSet
         ] );
 
         //COMMIT THE TRANSACTION

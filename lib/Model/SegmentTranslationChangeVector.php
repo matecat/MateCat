@@ -171,4 +171,11 @@ class SegmentTranslationChangeVector {
         );
     }
 
+    /**
+     * @return Chunks_ChunkStruct
+     */
+    public function getChunk() {
+        return $this->chunk;
+    }
+
 }

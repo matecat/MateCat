@@ -286,16 +286,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param SegmentTranslationEventModel $event
+     * @param TranslationVersions\Model\BatchEventCreator $eventCreator
+     *
+     * @internal param SegmentTranslationEventModel $event
      */
-    public function translationEventSaved( SegmentTranslationEventModel $event ) {
-        $translation_model = new SegmentTranslationChangeVector( $event );
-        $this->updateRevisionScore( $translation_model ) ;
-    }
-
-    public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
-        $model = $this->getSegmentTranslationModel( $translation );
-        $model->evaluateChunkReviewTransition();
+    public function batchEventCreationSaved( Features\TranslationVersions\Model\BatchEventCreator $eventCreator ) {
+        $batchReviewProcessor = new Features\ReviewExtended\Model\BatchReviewProcessor( $eventCreator ) ;
+        $batchReviewProcessor->process();
     }
 
     /**
@@ -483,11 +480,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     /**
      * @param SegmentTranslationChangeVector $translation
      *
+     * @param array                          $chunkReviews
+     *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews = [] ) {
         $class_name = get_class( $this ) . '\SegmentTranslationModel' ;
-        return new $class_name( $translation );
+        return new $class_name( $translation, $chunkReviews );
     }
 
     /**

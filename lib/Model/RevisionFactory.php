@@ -40,8 +40,8 @@ class RevisionFactory {
         return $this->revision->getChunkReviewModel( $chunkReviewStruct );
     }
 
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
-        return $this->revision->getSegmentTranslationModel( $translation ) ;
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews ) {
+        return $this->revision->getSegmentTranslationModel( $translation, $chunkReviews ) ;
     }
 
     /**

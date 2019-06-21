@@ -4,7 +4,7 @@ namespace Features ;
 
 use Exceptions\ControllerReturnException;
 use Exceptions\ValidationError;
-use Features\ReviewExtended\Model\ChunkReviewDao;
+use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 
 class TranslationVersions extends BaseFeature {
@@ -20,15 +20,16 @@ class TranslationVersions extends BaseFeature {
         /** @var \Translations_SegmentTranslationStruct $old_translation */
         $old_translation  = $params['old_translation'];
         $source_page_code = $params['source_page_code'];
+        /** @var \Chunks_ChunkStruct $chunk */
         $chunk            = $params['chunk'];
+        /** @var \FeatureSet $features */
+        $features         = $params['features'];
 
-        $chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( [ [ $chunk->id, $chunk->password ] ] );
-
-        $events = [] ;
         $sourceEvent = new SegmentTranslationEventModel($old_translation, $translation, $user, $source_page_code );
 
-        /** @var SegmentTranslationEventModel[] $events */
-        $events[] = $sourceEvent ;
+        $batchEventCreator = new BatchEventCreator( $chunk ) ;
+        $batchEventCreator->setFeatureSet( $features ) ;
+        $batchEventCreator->addEventModel( $sourceEvent ) ;
 
         // Start cycle for propagated segments
         foreach( $params['propagation']['propagated_segments'] as $segmentTranslationBeforeChange ) {
@@ -47,21 +48,22 @@ class TranslationVersions extends BaseFeature {
             ) ;
 
             $propagatedEvent->setPropagationSource( false ) ;
-            $events[] = $propagatedEvent ;
+            $batchEventCreator->addEventModel( $propagatedEvent );
         }
 
-        foreach( $events as $event ) {
-            try {
-                $event->setChunkReviewsList( $chunkReviews ) ;
-                $event->save() ;
-            } catch ( ValidationError $e ) {
-                $params['controller_result']['errors'] [] = [
-                        'code' => -2000,
-                        'message' => $e->getMessage()
-                ];
-                throw new ControllerReturnException( $e->getMessage(), -2000 ) ;
-            }
+
+        try {
+            $batchEventCreator->save();
+            // $event->setChunkReviewsList( $chunkReviews ) ;
+        } catch ( ValidationError $e ) {
+            $params['controller_result']['errors'] [] = [
+                    'code' => -2000,
+                    'message' => $e->getMessage()
+            ];
+            throw new ControllerReturnException( $e->getMessage(), -2000 ) ;
         }
+
+
     }
 
     public function filter_get_segments_optional_fields(){

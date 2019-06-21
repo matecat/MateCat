@@ -13,6 +13,7 @@ use Chunks_ChunkStruct;
 use Database;
 use Features;
 use Features\SecondPassReview\Utils;
+use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 use INIT;
 use SegmentTranslationChangeVector;
@@ -57,6 +58,8 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $database = Database::obtain() ;
         $database->begin() ;
 
+        $batchEventCreator = new BatchEventCreator( $chunk ) ;
+
         foreach ( $params[ 'segment_ids' ] as $segment ) {
 
             $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment, $chunk->id );
@@ -73,9 +76,11 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
                 $segmentTransaltionEvent = new SegmentTranslationEventModel( $old_translation, $new_translation, $user, $source_page ) ;
-                $segmentTransaltionEvent->save();
+                $batchEventCreator->addEventModel( $segmentTransaltionEvent ) ;
             }
         }
+
+        $batchEventCreator->save() ;
 
         if ( !empty( $params[ 'segment_ids' ] ) ) {
             $counter = new WordCount_CounterModel();

@@ -11,7 +11,6 @@ use TransactionableTrait;
 use Translations_SegmentTranslationStruct;
 
 class SegmentTranslationEventModel  {
-    use TransactionableTrait ;
 
     /**
      * @var Translations_SegmentTranslationStruct
@@ -36,9 +35,6 @@ class SegmentTranslationEventModel  {
      * @var int|SegmentTranslationEventStruct
      */
     protected $current_event = -1 ;
-
-    /** @var ChunkReviewStruct[] */
-    protected $_chunkReviewsList = [] ;
 
     protected $_isPropagationSource = true ;
 
@@ -92,7 +88,6 @@ class SegmentTranslationEventModel  {
             return ;
         }
 
-        $this->openTransaction() ;
 
         $this->current_event                 = new SegmentTranslationEventStruct() ;
         $this->current_event->id_job         = $this->translation['id_job'] ;
@@ -106,20 +101,6 @@ class SegmentTranslationEventModel  {
 
         $this->current_event->id = SegmentTranslationEventDao::insertStruct( $this->current_event ) ;
 
-        $this->translation->getChunk()
-                ->getProject()
-                ->getFeatures()
-                ->run('translationEventSaved', $this, $this->_chunkReviewsList );
-
-        $this->commitTransaction() ;
-    }
-
-    public function setChunkReviewsList(array $list) {
-        $this->_chunkReviewsList = $list ;
-    }
-
-    public function getChunkReviewsList() {
-        return $this->_chunkReviewsList;
     }
 
     /**

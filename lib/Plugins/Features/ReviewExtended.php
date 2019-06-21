@@ -46,12 +46,6 @@ class ReviewExtended extends AbstractRevisionFeature {
             $model = new ChunkReviewModel($review);
             $model->recountAndUpdatePassFailResult();
         }
-
-    }
-
-    public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
-        $model = new SegmentTranslationModel( $translation );
-        $model->evaluateChunkReviewTransition();
     }
 
     /**

@@ -8,6 +8,8 @@
 
 namespace Features\SecondPassReview\Model;
 
+use Features\ReviewExtended\Model\ChunkReviewDao ;
+
 class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
 
     public function recountAndUpdatePassFailResult() {
@@ -24,6 +26,7 @@ class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
                 ->recountAdvancementWords( $chunk, $this->chunk_review->source_page ) ;
 
         $this->chunk_review->total_tte = ( new ChunkReviewDao() )->countTimeToEdit( $chunk, $this->chunk_review->source_page ) ;
+
 
         $this->updatePassFailResult();
     }
