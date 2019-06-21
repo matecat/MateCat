@@ -27,14 +27,21 @@ class FixChunkReviewRecordCounts extends Command
     }
 
     public function execute( InputInterface $input, OutputInterface $output ) {
-        $allChunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([
-                [ $input->getArgument('id_job'), $input->getArgument('password') ]
-        ]) ;
 
-        foreach ( $allChunkReviews as $chunkReview ) {
-            $model = new ChunkReviewModel($chunkReview);
-            $model->recountAndUpdatePassFailResult() ;
+        foreach( [1,2,3,4] as $k ) {
+
+            $allChunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([
+                    [ $input->getArgument('id_job'), $input->getArgument('password') ]
+            ]) ;
+
+            foreach ( $allChunkReviews as $chunkReview ) {
+                $model = new ChunkReviewModel($chunkReview);
+                $start = microtime(true) ;
+                $model->recountAndUpdatePassFailResult() ;
+                echo microtime(true ) - $start . "\n" ;
+            }
         }
+
     }
 
 }

@@ -6,6 +6,7 @@ use Constants;
 use Constants_TranslationStatus;
 use Exception;
 use Exceptions\ValidationError;
+use LQA\ChunkReviewStruct;
 use TransactionableTrait;
 use Translations_SegmentTranslationStruct;
 
@@ -23,16 +24,8 @@ class SegmentTranslationEventModel  {
     protected $translation ;
 
     protected $user ;
-    protected $propagated_ids ;
-
-    /**
-     * @var Translations_SegmentTranslationStruct[]
-     */
-    protected $propagated_segments = [] ;
 
     protected $source_page_code ;
-
-    protected $propagated_events = [] ;
 
     /**
      * @var int|SegmentTranslationEventStruct
@@ -44,6 +37,11 @@ class SegmentTranslationEventModel  {
      */
     protected $current_event = -1 ;
 
+    /** @var ChunkReviewStruct[] */
+    protected $_chunkReviewsList = [] ;
+
+    protected $_isPropagationSource = true ;
+
     public function __construct( Translations_SegmentTranslationStruct $old_translation,
                                  Translations_SegmentTranslationStruct $translation,
                                  $user, $source_page_code) {
@@ -54,18 +52,6 @@ class SegmentTranslationEventModel  {
         $this->source_page_code = $source_page_code ;
 
         $this->getPriorEvent() ;
-    }
-
-    public function setPropagatedSegments( $propagated_segments ) {
-        $this->propagated_segments = $propagated_segments ;
-    }
-
-    public function getPropagatedIds() {
-        $ids = array_filter(array_map(function($propagated_segment) {
-            return $propagated_segment->id_segment ;
-        }, $this->propagated_segments ) );
-
-        return is_null( $ids ) ? [] : $ids ;
     }
 
     /**
@@ -116,33 +102,24 @@ class SegmentTranslationEventModel  {
         $this->current_event->version_number = $this->translation['version_number'] ;
         $this->current_event->source_page    = $this->source_page_code ;
 
-        if ( $this->isEdit() ) {
-            $this->current_event->time_to_edit   = $this->translation['time_to_edit'];
-        }
-
         $this->current_event->setTimestamp('create_date', time() );
 
         $this->current_event->id = SegmentTranslationEventDao::insertStruct( $this->current_event ) ;
 
-        if ( ! empty( $this->propagated_segments ) ) {
-
-            foreach( $this->propagated_segments as $segment ) {
-                $structForPropagatedEvent                 = clone $this->current_event ;
-                $structForPropagatedEvent->id             = null ;
-                $structForPropagatedEvent->id_segment     = $segment->id_segment ;
-                $structForPropagatedEvent->version_number = $segment->version_number ;
-
-                $structForPropagatedEvent->id             = SegmentTranslationEventDao::insertStruct( $structForPropagatedEvent ) ;
-                $this->propagated_events[]                = $structForPropagatedEvent ;
-            }
-        }
-
         $this->translation->getChunk()
                 ->getProject()
                 ->getFeatures()
-                ->run('translationEventSaved', $this );
+                ->run('translationEventSaved', $this, $this->_chunkReviewsList );
 
         $this->commitTransaction() ;
+    }
+
+    public function setChunkReviewsList(array $list) {
+        $this->_chunkReviewsList = $list ;
+    }
+
+    public function getChunkReviewsList() {
+        return $this->_chunkReviewsList;
     }
 
     /**
@@ -168,14 +145,6 @@ class SegmentTranslationEventModel  {
      */
     public function getTranslation() {
         return $this->translation;
-    }
-
-    public function isEdit() {
-        return $this->translation->translation != $this->old_translation->translation ;
-    }
-
-    public function getPropagatedEvents() {
-        return $this->propagated_events ;
     }
 
     /**
@@ -237,6 +206,14 @@ class SegmentTranslationEventModel  {
      */
     public function getDestinationSourcePage() {
         return $this->getCurrentEvent()->source_page ;
+    }
+
+    public function isPropagationSource() {
+        return $this->_isPropagationSource;
+    }
+
+    public function setPropagationSource( $value ) {
+        $this->_isPropagationSource = $value ;
     }
 
 }

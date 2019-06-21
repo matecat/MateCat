@@ -1,8 +1,6 @@
 <?php
 
-use Exception;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
-use Segments_SegmentDao;
 
 class SegmentTranslationChangeVector {
 
@@ -34,18 +32,6 @@ class SegmentTranslationChangeVector {
         $this->chunk           = $eventModel->getTranslation()->getChunk() ;
     }
 
-    public function getPropagatedIds() {
-        return $this->eventModel->getPropagatedIds() ;
-    }
-
-    public function getPropagatedEvents() {
-        return $this->eventModel->getPropagatedEvents();
-    }
-
-    public function didPropagate() {
-        return count( $this->eventModel->getPropagatedIds() ) > 0 ;
-    }
-
     /**
      * @return Translations_SegmentTranslationStruct
      */
@@ -58,7 +44,7 @@ class SegmentTranslationChangeVector {
     }
 
     /**
-     * @return Users_UserStruct
+     * @return Users_UserStruct|null
      */
     public function getEventUser() {
         if ( $this->eventModel->getCurrentEvent()->uid ) {
@@ -110,38 +96,6 @@ class SegmentTranslationChangeVector {
         return $originSourcePage < $destinationSourcePage ? 1  : (
             $originSourcePage == $destinationSourcePage ? null : -1
         );
-    }
-
-    /**
-     *
-     * This method returns the list of revision source pages codes that which are involved in the current
-     * transition. Source page for Translate page is skipped.
-     * Example:
-     *
-     * - if moving from R1 to R2 => returns [2,3]
-     * - if moving frmo R4 to R1 => returns [5,4,3,2]
-     * - the change remains on R3 => returns [4]
-     *
-     * @return array
-     */
-    public function sourcePagesSpan() {
-        $min = $this->eventModel->getOriginSourcePage() ;
-        $max = $this->eventModel->getDestinationSourcePage() ;
-
-        if ( $this->getSourcePageDirection() === -1 ) {
-            $min = $this->eventModel->getDestinationSourcePage() ;
-            $max = $this->eventModel->getOriginSourcePage() ;
-        }
-
-        $list   = [] ;
-
-        while( $max >= $min ) {
-            $list[] = $max-- ;
-        }
-
-        return array_filter( $list, function($i) {
-            return $i != Constants::SOURCE_PAGE_TRANSLATE ;
-        });
     }
 
     /**
@@ -203,22 +157,6 @@ class SegmentTranslationChangeVector {
                 $this->translation->isTranslationStatus() &&
                 $this->old_translation->isReviewedStatus() &&
                 $this->old_translation->version_number == $this->translation->version_number ;
-    }
-
-    /**
-     * Equivalent word count is the same on both segment translation structs (new and old).
-     * The new translation struct lacks of this information because it's not populated by a database query.
-     * So we look for this count on the old translation.
-     *
-     * In case of ICE match, this method returns raw_words_count in order to be compatible with job stats.
-     */
-    public function getRawOrEquivalentWordsCount() {
-        if ( $this->old_translation->isICE() ) {
-            return $this->getSegmentStruct()->raw_word_count ;
-        }
-        else {
-            return $this->old_translation->eq_word_count ;
-        }
     }
 
     /**

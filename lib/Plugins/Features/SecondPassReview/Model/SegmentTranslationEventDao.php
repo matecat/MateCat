@@ -22,7 +22,7 @@ class SegmentTranslationEventDao extends \Features\TranslationVersions\Model\Seg
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute( [
-                'id_job'     => $id_job,
+                'id_job' => $id_job,
         ] ) ;
 
         return $stmt->rowCount() ;

@@ -18,24 +18,6 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
     protected static $auto_increment_field = [ 'id' ];
     protected static $primary_keys         = [ 'id' ];
 
-    public function insertForPropagation($propagatedIds, SegmentTranslationEventStruct $struct) {
-
-        $sql = "INSERT INTO " . self::TABLE . " ( id_job, id_segment, uid ,
-                status, version_number, source_page, create_date  )
-                SELECT :id_job, st.id_segment, :uid, st.status, st.version_number, :source_page, :create_date
-                FROM segment_translations st WHERE st.id_segment IN ( " .
-                implode(',', $propagatedIds ) . " ) " ;
-
-        $conn = $this->getDatabaseHandler()->getConnection() ;
-        $stmt = $conn->prepare( $sql );
-
-        $struct->setTimestamp('create_date', time() );
-
-        $stmt->execute( $struct->toArray(['id_job', 'uid', 'source_page', 'create_date']) ) ;
-
-        return $stmt->rowCount() ;
-    }
-
     /**
      * @param $id_job
      * @param $min_segment
