@@ -965,65 +965,50 @@ UI = {
         if (where === "center" && !starting) {
             this.unmountSegments();
         }
+        var segments = [];
         $.each(files, function(k) {
 			var newFile = '';
 			var fid = k;
-			var articleToAdd = ((where == 'center') || (!$('#file-' + fid).length)) ? true : false;
+			var articleToAdd = ((where == 'center') || (!$('#file').length)) ? true : false;
             var filenametoshow ;
 
 			if (articleToAdd) {
 				filenametoshow = truncate_filename(this.filename, 40);
-				newFile += '<article id="file-' + fid + '" class="loading mbc-commenting-closed">' +
-						'	<ul class="projectbar" data-job="job-' + this.jid + '">' +
-						'		<li class="filename">' +
-						'			<form class="download" action="/" method="post">' +
-						'				<input type=hidden name="action" value="downloadFile">' +
-						'				<input type=hidden name="id_job" value="' + this.jid + '">' +
-						'				<input type=hidden name="id_file" value="' + fid + '">' +
-						'				<input type=hidden name="filename" value="' + this.filename + '">' +
-						'				<input type=hidden name="password" value="' + config.password + '">' +
-						'				<!--input title="Download file" type="submit" value="" class="downloadfile" id="file-' + fid + '-download" -->' +
-						'			</form>' +
-						'			<h2 title="' + this.filename + '">' + filenametoshow + '</div>' +
-						'		</li>' +
-						'		<li style="text-align:center;text-indent:-20px">' +
-						'			<strong>' + this.source + '</strong> [<span class="source-lang">' + this.source_code + '</span>]&nbsp;>&nbsp;<strong>' + this.target + '</strong> [<span class="target-lang">' + this.target_code + '</span>]' +
-						'		</li>' +
-						'		<li class="wordcounter">' +
-                        '			Payable Words: <strong>' + config.fileCounter[fid].TOTAL_FORMATTED + '</strong>' +
-						'		</li>' +
-						'	</ul>' +
-                        '   <div class="article-segments-container-' + fid + ' article-segments-container"></div>' +
+				newFile += '<article id="file" class="loading mbc-commenting-closed">' +
+						// '	<ul class="projectbar" data-job="job-' + this.jid + '">' +
+						// '		<li class="filename">' +
+						// '			<form class="download" action="/" method="post">' +
+						// '				<input type=hidden name="action" value="downloadFile">' +
+						// '				<input type=hidden name="id_job" value="' + this.jid + '">' +
+						// '				<input type=hidden name="id_file" value="' + fid + '">' +
+						// '				<input type=hidden name="filename" value="' + this.filename + '">' +
+						// '				<input type=hidden name="password" value="' + config.password + '">' +
+						// '				<!--input title="Download file" type="submit" value="" class="downloadfile" id="file-' + fid + '-download" -->' +
+						// '			</form>' +
+						// '			<h2 title="' + this.filename + '">' + filenametoshow + '</div>' +
+						// '		</li>' +
+						// '		<li style="text-align:center;text-indent:-20px">' +
+						// '			<strong>' + this.source + '</strong> [<span class="source-lang">' + this.source_code + '</span>]&nbsp;>&nbsp;<strong>' + this.target + '</strong> [<span class="target-lang">' + this.target_code + '</span>]' +
+						// '		</li>' +
+						// '		<li class="wordcounter">' +
+                        // '			Payable Words: <strong>' + config.fileCounter[fid].TOTAL_FORMATTED + '</strong>' +
+						// '		</li>' +
+						// '	</ul>' +
+                        '   <div class="article-segments-container article-segments-container"></div>' +
                         '</article>';
 			}
 
 			if (articleToAdd) {
-				if (where == 'before') {
-					if (typeof lastArticleAdded != 'undefined') {
-						$('#file-' + fid).after(newFile);
-					} else {
-						$('article').first().before(newFile);
-					}
-					lastArticleAdded = fid;
-				} else if (where == 'after') {
-					$('article').last().after(newFile);
-				} else if (where == 'center') {
-					$('#outer').append(newFile);
-				}
-			} else {
-				if (where == 'before') {
-					$('#file-' + fid).prepend(newFile);
-				} else if (where == 'after') {
-					$('#file-' + fid).append(newFile);
-				}
+                $('#outer').append(newFile);
 			}
+			segments = segments.concat(this.segments);
             // console.time("Time: RenderSegments"+fid);
-            UI.renderSegments(this.segments, false, fid, where);
+
             // console.timeEnd("Time: RenderSegments"+fid);
             // console.timeEnd("Time: from start()");
 
 		});
-
+        UI.renderSegments(segments, false, where);
         $(document).trigger('files:appended');
 
 		if (starting) {
@@ -1033,16 +1018,16 @@ UI = {
 
 	},
 
-    renderSegments: function (segments, justCreated, fid, where) {
+    renderSegments: function (segments, justCreated, where) {
 
         if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-            if ( !this.SegmentsContainers || !this.SegmentsContainers[fid] ) {
+            if ( !this.SegmentsContainers  ) {
                 if (!this.SegmentsContainers) {
                     this.SegmentsContainers = [];
                 }
-                var mountPoint = $(".article-segments-container-" + fid)[0];
-                this.SegmentsContainers[fid] = ReactDOM.render(React.createElement(SegmentsContainer, {
-                    fid: fid,
+                var mountPoint = $(".article-segments-container")[0];
+                this.SegmentsContainers[0] = ReactDOM.render(React.createElement(SegmentsContainer, {
+                    // fid: fid,
                     isReviewExtended: ReviewExtended.enabled(),
                     reviewType: Review.type,
                     enableTagProjection: UI.enableTagProjection,
@@ -1050,9 +1035,9 @@ UI = {
                     tagModesEnabled: UI.tagModesEnabled,
                     speech2textEnabledFn: Speech2Text.enabled,
                 }), mountPoint);
-                SegmentActions.renderSegments(segments, fid);
+                SegmentActions.renderSegments(segments);
             } else {
-                SegmentActions.addSegments(segments, fid, where);
+                SegmentActions.addSegments(segments, where);
             }
             UI.registerFooterTabs();
         }

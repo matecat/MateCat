@@ -41,7 +41,7 @@ EventEmitter.prototype.setMaxListeners(0);
 
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
-    _segments: {},
+    _segments: Immutable.fromJS([]),
     _segmentsFiles: Immutable.fromJS({}),
     _globalWarnings: {
         lexiqa: [],
@@ -61,17 +61,17 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     /**
      * Update all
      */
-    updateAll: function (segments, fid, where) {
+    updateAll: function (segments, where) {
         // console.time("Time: updateAll segments" + fid);
-        if (this._segments[fid] && where === "before") {
-            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
-        } else if (this._segments[fid] && where === "after") {
-            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
+        if (this._segments.size > 0 && where === "before") {
+            this._segments = this._segments.unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
+        } else if (this._segments.size > 0 && where === "after") {
+            this._segments = this._segments.push(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else {
-            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments, fid));
+            this._segments = Immutable.fromJS(this.normalizeSplittedSegments(segments));
         }
 
-        this.buildSegmentsFiles(fid, segments);
+        this.buildSegmentsFiles(segments);
         // console.log(this._segmentsFiles);
 
         if (this.segmentsInBulk.length > 0) {
@@ -80,7 +80,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         // console.timeEnd("Time: updateAll segments"+fid);
     },
 
-    normalizeSplittedSegments: function (segments, fid) {
+    normalizeSplittedSegments: function (segments) {
         let newSegments = [];
         let self = this;
         $.each(segments, function (index) {
@@ -106,7 +106,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         segment_hash: segment.segment_hash,
                         original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
-                        fid: fid,
                         split_group: splitGroup,
                         split_points_source: [],
                         status: status,
@@ -129,9 +128,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.decoded_source = UI.decodeText(segment, segment.segment);
                 segment.unlocked = UI.isUnlockedSegment(segment);
                 segment.warnings = {};
-                segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
-                segment.fid = fid;
-                segment.edit_area_locked = false;
+                segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);segment.edit_area_locked = false;
                 segment.original_sid = segment.sid;
                 newSegments.push(this);
             }
@@ -147,27 +144,27 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
         return false;
     },
-    buildSegmentsFiles: function (fid, segments) {
+    buildSegmentsFiles: function (segments) {
         segments.map(segment => {
             var splittedSourceAr = segment.segment.split(UI.splittedTranslationPlaceholder);
             if (splittedSourceAr.length > 1) {
                 let self = this;
                 $.each(splittedSourceAr, function (i) {
-                    self._segmentsFiles = self._segmentsFiles.set(segment.sid + '-' + (i + 1), fid);
+                    self._segmentsFiles = self._segmentsFiles.set(segment.sid + '-' + (i + 1), segment.fid);
                 });
             } else {
-                this._segmentsFiles = this._segmentsFiles.set(segment.sid, fid);
+                this._segmentsFiles = this._segmentsFiles.set(segment.sid, segment.fid);
             }
         });
     },
 
-    getSegmentById(sid, fid) {
-        return this._segments[fid].find(function (seg) {
+    getSegmentById(sid) {
+        return this._segments.find(function (seg) {
             return seg.get('sid') == sid;
         });
     },
-    getSegmentIndex(sid, fid) {
-        return this._segments[fid].findIndex(function (segment, index) {
+    getSegmentIndex(sid) {
+        return this._segments.findIndex(function (segment, index) {
             if (sid.toString().indexOf("-") === -1) {
                 return parseInt(segment.get('sid')) === parseInt(sid);
             } else {
@@ -178,7 +175,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     splitSegment(oldSid, newSegments, fid, splitGroup) {
-        var index = this._segments[fid].findIndex(function (segment, index) {
+        var index = this._segments.findIndex(function (segment, index) {
             return (segment.get('sid') == oldSid);
         });
         if (index > -1) {
@@ -190,7 +187,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             });
 
             newSegments = Immutable.fromJS(newSegments);
-            this._segments[fid] = this._segments[fid].splice(index, 1, ...newSegments);
+            this._segments = this._segments.splice(index, 1, ...newSegments);
         } else {
             this.removeSplit(oldSid, newSegments, fid, splitGroup);
         }
@@ -208,7 +205,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
         newSegments = Immutable.fromJS(newSegments);
         var indexes = [];
-        this._segments[fid].map(function (segment, index) {
+        this._segments.map(function (segment, index) {
             if (segment.get('sid').split('-').length && segment.get('sid').split('-')[0] == oldSid) {
                 elementsToRemove.push(segment);
                 indexes.push(index);
@@ -217,9 +214,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         if (elementsToRemove.length) {
             elementsToRemove.forEach(function (seg) {
-                self._segments[fid] = self._segments[fid].splice(self._segments[fid].indexOf(seg), 1)
+                self._segments = self._segments.splice(self._segments.indexOf(seg), 1)
             });
-            this._segments[fid] = this._segments[fid].splice(indexes[0], 0, ...newSegments);
+            this._segments = this._segments.splice(indexes[0], 0, ...newSegments);
 
             // Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
         }
@@ -227,32 +224,32 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     setStatus(sid, fid, status) {
         var index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'status'], status);
+        this._segments = this._segments.setIn([index, 'status'], status);
     },
 
     setSuggestionMatch(sid, fid, perc) {
         var index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'suggestion_match'], perc.replace('%', ''));
+        this._segments = this._segments.setIn([index, 'suggestion_match'], perc.replace('%', ''));
     },
 
     setPropagation(sid, fid, propagation, from) {
         var index = this.getSegmentIndex(sid, fid);
         if (propagation) {
-            this._segments[fid] = this._segments[fid].setIn([index, 'autopropagated_from'], from);
+            this._segments = this._segments.setIn([index, 'autopropagated_from'], from);
         } else {
-            this._segments[fid] = this._segments[fid].setIn([index, 'autopropagated_from'], "0");
+            this._segments = this._segments.setIn([index, 'autopropagated_from'], "0");
         }
     },
     replaceTranslation(sid, fid, translation) {
         var index = this.getSegmentIndex(sid, fid);
         var trans = htmlEncode(this.removeLockTagsFromString(translation));
-        this._segments[fid] = this._segments[fid].setIn([index, 'translation'], trans);
+        this._segments = this._segments.setIn([index, 'translation'], trans);
         return translation;
     },
     replaceSource(sid, fid, source) {
         var index = this.getSegmentIndex(sid, fid);
         var trans = htmlEncode(this.removeLockTagsFromString(source));
-        this._segments[fid] = this._segments[fid].setIn([index, 'segment'], trans);
+        this._segments = this._segments.setIn([index, 'segment'], trans);
         return source;
     },
     decodeSegmentsText: function () {
@@ -264,12 +261,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setSegmentAsTagged(sid, fid) {
         var index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'tagged'], true);
+        this._segments = this._segments.setIn([index, 'tagged'], true);
     },
 
     setSegmentOriginalTranslation(sid, fid, translation) {
         var index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'original_translation'], translation);
+        this._segments = this._segments.setIn([index, 'original_translation'], translation);
     },
 
     removeLockTagsFromString(str) {
@@ -279,23 +276,23 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     addSegmentVersions(fid, sid, versions) {
         //If is a splitted segment the versions are added to the first of the split
         let index = this.getSegmentIndex(sid, fid);
-        let segment = this._segments[fid].get(index);
+        let segment = this._segments.get(index);
         if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
-            this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS([]));
-            return this._segments[fid].get(index);
+            this._segments = this._segments.setIn([index, 'versions'], Immutable.fromJS([]));
+            return this._segments.get(index);
         }
-        this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS(versions));
-        return this._segments[fid].get(index);
+        this._segments = this._segments.setIn([index, 'versions'], Immutable.fromJS(versions));
+        return this._segments.get(index);
     },
     lockUnlockEditArea(sid, fid) {
         let index = this.getSegmentIndex(sid, fid);
-        let segment = this._segments[fid].get(index);
+        let segment = this._segments.get(index);
         let lockedEditArea = segment.get('edit_area_locked');
-        this._segments[fid] = this._segments[fid].setIn([index, 'edit_area_locked'], !lockedEditArea);
+        this._segments = this._segments.setIn([index, 'edit_area_locked'], !lockedEditArea);
     },
     getSegmentByIdToJS(sid, fid) {
-        return this._segments[fid].find(function (seg) {
+        return this._segments.find(function (seg) {
             return seg.get('sid') == sid;
         }).toJS();
 
@@ -310,13 +307,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setToggleBulkOption: function (sid, fid) {
         let index = this.getSegmentIndex(sid, fid);
-        if (this._segments[fid].getIn([index, 'inBulk'])) {
+        if (this._segments.getIn([index, 'inBulk'])) {
             let indexArray = this.segmentsInBulk.indexOf(sid);
             this.segmentsInBulk.splice(indexArray, 1);
-            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], false);
+            this._segments = this._segments.setIn([index, 'inBulk'], false);
         } else {
             this.segmentsInBulk.push(sid);
-            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], true);
+            this._segments = this._segments.setIn([index, 'inBulk'], true);
         }
     },
     removeBulkOption: function () {
@@ -329,12 +326,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     setBulkSelectionInterval: function (from, to, fid) {
         let index = this.getSegmentIndex(from, fid);
         if (index > -1 &&
-            this._segments[fid].get(index).get("readonly") == "false" &&  //not readonly
-            (this._segments[fid].get(index).get("ice_locked") === "0" ||  //not ice_locked
-                (this._segments[fid].get(index).get("ice_locked") === "1" && this._segments[fid].get(index).get("unlocked"))  //unlocked
+            this._segments.get(index).get("readonly") == "false" &&  //not readonly
+            (this._segments.get(index).get("ice_locked") === "0" ||  //not ice_locked
+                (this._segments.get(index).get("ice_locked") === "1" && this._segments.get(index).get("unlocked"))  //unlocked
             )
         ) {
-            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], true);
+            this._segments = this._segments.setIn([index, 'inBulk'], true);
             if (this.segmentsInBulk.indexOf(from.toString()) === -1) {
                 this.segmentsInBulk.push(from.toString());
             }
@@ -379,12 +376,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setUnlockedSegment: function (sid, fid, unlocked) {
         let index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
+        this._segments = this._segments.setIn([index, 'unlocked'], unlocked);
     },
 
     setContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], {
+        this._segments = this._segments.setIn([index, 'contributions'], {
             matches: contributions,
             errors: errors
         });
@@ -392,7 +389,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     setCrossLanguageContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'cl_contributions'], {
+        this._segments = this._segments.setIn([index, 'cl_contributions'], {
             matches: contributions,
             errors: errors
         });
@@ -409,7 +406,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 return true
             }
             let index = this.getSegmentIndex(sid, fid);
-            let segment = this._segments[fid].get(index);
+            let segment = this._segments.get(index);
             return segment.get('tagged');
         }
 
@@ -419,7 +416,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     setSegmentWarnings(sid, warning) {
         const fid = this._segmentsFiles.get(sid);
         let index = this.getSegmentIndex(sid, fid);
-        this._segments[fid] = this._segments[fid].setIn([index, 'warnings'], Immutable.fromJS(warning));
+        this._segments = this._segments.setIn([index, 'warnings'], Immutable.fromJS(warning));
     },
     updateGlobalWarnings: function (warnings) {
         Object.keys(warnings).map(key => {
@@ -443,25 +440,22 @@ AppDispatcher.register(function (action) {
 
     switch (action.actionType) {
         case SegmentConstants.RENDER_SEGMENTS:
-            SegmentStore.updateAll(action.segments, action.fid);
-            SegmentStore.emitChange(action.actionType, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.updateAll(action.segments);
+            SegmentStore.emitChange(action.actionType, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_SEGMENTS:
-            SegmentStore.updateAll(action.segments, action.fid, action.where);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.updateAll(action.segments, action.where);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
             SegmentStore.splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);
-            SegmentStore.emitChange(action.actionType, SegmentStore._segments[action.fid], action.splitGroup, action.fid);
+            SegmentStore.emitChange(action.actionType, SegmentStore._segments, action.splitGroup, action.fid);
             break;
         case SegmentConstants.HIGHLIGHT_EDITAREA:
             SegmentStore.emitChange(action.actionType, action.id);
             break;
         case SegmentConstants.ADD_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.newClass);
-            break;
-        case SegmentConstants.ADD_SEGMENTS_CLASS:
-            SegmentStore.emitChange(action.actionType, action.sidList, action.newClass);
             break;
         case SegmentConstants.REMOVE_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
@@ -503,7 +497,6 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.LOCK_EDIT_AREA:
             SegmentStore.lockUnlockEditArea(action.id, action.fid);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
@@ -520,7 +513,7 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_CL_CONTRIBUTIONS:
             SegmentStore.setCrossLanguageContributionsToCache(action.sid, action.fid, action.matches, action.errors);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
@@ -534,7 +527,7 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_SEGMENT_TAGGED:
             SegmentStore.setSegmentAsTagged(action.id, action.fid);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION:
             SegmentStore.setSegmentOriginalTranslation(action.id, action.fid, action.originalTranslation);
@@ -543,7 +536,7 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
             let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
             SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:
             SegmentStore.emitChange(action.actionType, action.sid, action.tab, action.data);
@@ -551,55 +544,46 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.TOGGLE_SEGMENT_ON_BULK:
             SegmentStore.setToggleBulkOption(action.sid, action.fid);
             SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.REMOVE_SEGMENTS_ON_BULK:
             SegmentStore.removeBulkOption();
             SegmentStore.emitChange(SegmentConstants.REMOVE_SEGMENTS_ON_BULK, []);
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+
             break;
         case SegmentConstants.SET_BULK_SELECTION_INTERVAL:
             SegmentStore.setBulkSelectionInterval(action.from, action.to, action.fid);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
             break;
         case SegmentConstants.SET_BULK_SELECTION_SEGMENTS:
             SegmentStore.setBulkSelectionSegments(action.segmentsArray);
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
             break;
         case SegmentConstants.SET_UNLOCKED_SEGMENT:
             SegmentStore.setUnlockedSegment(action.sid, action.fid, action.unlocked);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.SET_MUTED_SEGMENTS:
             SegmentStore.setMutedSegments(action.segmentsArray);
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.REMOVE_MUTED_SEGMENTS:
             SegmentStore.removeAllMutedSegments();
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.DISABLE_TAG_LOCK:
         case SegmentConstants.ENABLE_TAG_LOCK:
             SegmentStore.decodeSegmentsText();
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             // Todo remove this
             SegmentStore.emitChange(action.actionType);
             break;
         case SegmentConstants.SET_SEGMENT_WARNINGS:  // LOCAL
             SegmentStore.setSegmentWarnings(action.sid, action.warnings);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[SegmentStore._segmentsFiles.get(action.sid)], SegmentStore._segmentsFiles.get(action.sid));
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.UPDATE_GLOBAL_WARNINGS:
             SegmentStore.updateGlobalWarnings(action.warnings);

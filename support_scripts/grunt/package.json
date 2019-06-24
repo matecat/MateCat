@@ -15,6 +15,7 @@
     "browserify": "^16.2.0",
     "classnames": "^2.2.3",
     "envify": "^3.4.0",
+    "escape-string-regexp": "^1.0.5",
     "flux": "^2.1.1",
     "grunt": "~1.0.3",
     "grunt-browserify": "^5.2.0",
@@ -39,10 +40,11 @@
     "react-addons-css-transition-group": "^15.6.2",
     "react-addons-update": "^15.6.2",
     "react-dom": "^16.0.0",
+    "react-tiny-virtual-list": "^2.2.0",
+    "react-window": "^1.8.3",
     "semantic-ui": "^2.4.1",
     "showdown": "^1.8.0",
-    "sprintf-js": "^1.1.1",
-    "escape-string-regexp": "^1.0.5"
+    "sprintf-js": "^1.1.1"
   },
   "devDependencies": {
     "grunt-notify": "^0.4.5"

@@ -629,7 +629,7 @@ article.mbc-commenting-closed .mbc-comment-balloon-outer {
  Commenting opened. Article width reduced and room made for comment ballon
  ******
  */
-article.mbc-commenting-opened {
+article.mbc-commenting-opened section{
   /*-webkit-transform: translate3d(0, 0, 0);*/
   -webkit-backface-visibility: hidden;
   /*-webkit-perspective: 1000;*/

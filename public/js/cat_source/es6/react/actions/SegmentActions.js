@@ -17,13 +17,11 @@ var SegmentActions = {
     /********* SEGMENTS *********/
     /**
      * @param segments
-     * @param fid
      */
-    renderSegments: function (segments, fid) {
+    renderSegments: function (segments) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_SEGMENTS,
-            segments: segments,
-            fid: fid
+            segments: segments
         });
     },
     splitSegments: function (oldSid, newSegments, splitGroup, fid) {
@@ -35,11 +33,10 @@ var SegmentActions = {
             fid: fid
         });
     },
-    addSegments: function (segments, fid, where) {
+    addSegments: function (segments, where) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENTS,
             segments: segments,
-            fid: fid,
             where: where
         });
     },
@@ -70,16 +67,6 @@ var SegmentActions = {
                 newClass: newClass
             });
         }, 0);
-    },
-
-    addClassToSegments: function (sidList, newClass) {
-        setTimeout( function () {
-            AppDispatcher.dispatch({
-                actionType: SegmentConstants.ADD_SEGMENTS_CLASS,
-                sidList: sidList,
-                newClass: newClass
-            });
-        }, 0)
     },
 
     removeClassToSegment: function (sid, className) {

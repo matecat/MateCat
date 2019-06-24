@@ -160,7 +160,7 @@ class getSegmentsController extends ajaxController {
 
             $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
 
-            unset($seg['id_file']);
+//            unset($seg['id_file']);
             unset($seg['source']);
             unset($seg['target']);
             unset($seg['source_code']);
