@@ -111,11 +111,15 @@ class SegmentTranslationChangeVector {
                 (
                     $this->old_translation->isReviewedStatus() &&
                     $this->translation->isReviewedStatus() &&
-                    $this->isModifyingICE()
+                    $this->isModifyingICEFromTranslation()
                 );
     }
 
-    public function isModifyingICE() {
+    /**
+     *
+     * @return bool
+     */
+    public function isModifyingICEFromTranslation() {
         return $this->old_translation->isICE() &&
                 $this->old_translation->translation != $this->translation->translation &&
                 $this->old_translation->version_number == 0 ;
@@ -141,11 +145,14 @@ class SegmentTranslationChangeVector {
     public function isExitingReviewedState() {
         return $this->old_translation->isReviewedStatus() &&
                 $this->translation->isTranslationStatus() &&
-                ! $this->_isEditingICEforTheFirstTime() &&
+                ! $this->isEditingICEforTheFirstTime() &&
                 ! $this->_isChangingICEtoTranslatedWithNoChange() ;
     }
 
-    protected function _isEditingICEforTheFirstTime() {
+    /**
+     * @return bool
+     */
+    public function isEditingICEforTheFirstTime() {
         return ( $this->old_translation->isICE() &&
                 $this->old_translation->version_number == 0 &&
                 $this->translation->version_number == 1

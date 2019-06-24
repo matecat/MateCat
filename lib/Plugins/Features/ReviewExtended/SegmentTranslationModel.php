@@ -169,7 +169,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 }
             }
             elseif (
-                    $this->_model->isModifyingICE() &&
+                    $this->_model->isModifyingICEFromTranslation() &&
                     $this->_model->getEventModel()->getDestinationSourcePage() == Constants::SOURCE_PAGE_TRANSLATE ) {
                 /**
                  * Enter this condition when we are just changing source page. This change only affects advancement wc.
