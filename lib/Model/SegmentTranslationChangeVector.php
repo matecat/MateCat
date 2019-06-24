@@ -178,4 +178,12 @@ class SegmentTranslationChangeVector {
         return $this->chunk;
     }
 
+    /**
+     * @return bool
+     */
+    public function isEditingCurrentRevision() {
+        return $this->eventModel->getDestinationSourcePage() == $this->eventModel->getOriginSourcePage() &&
+                $this->translation->translation != $this->old_translation->translation ;
+    }
+
 }

@@ -97,6 +97,10 @@ class SegmentTranslationEventModel  {
         $this->current_event->version_number = $this->translation['version_number'] ;
         $this->current_event->source_page    = $this->source_page_code ;
 
+        if ( $this->isPropagationSource() ) {
+            $this->current_event->time_to_edit = $this->translation['time_to_edit'];
+        }
+
         $this->current_event->setTimestamp('create_date', time() );
 
         $this->current_event->id = SegmentTranslationEventDao::insertStruct( $this->current_event ) ;

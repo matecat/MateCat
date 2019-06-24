@@ -170,12 +170,15 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
             }
             elseif (
                     $this->_model->isModifyingICE() &&
-                    $this->_model->getEventModel()->getDestinationSourcePage() == 1 ) { // TODO change to constant
+                    $this->_model->getEventModel()->getDestinationSourcePage() == Constants::SOURCE_PAGE_TRANSLATE ) {
                 /**
                  * Enter this condition when we are just changing source page. This change only affects advancement wc.
                  * This is the case of ICE matches moving from R1 to TR.
                  */
                 $chunkReview->advancement_wc -= $this->advancementWordCount() ;
+            }
+            elseif ( $this->_model->isEditingCurrentRevision() && $destinationSourcePage == $chunkReview->source_page ) {
+                $chunkReview->total_tte += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit ;
             }
         }
 

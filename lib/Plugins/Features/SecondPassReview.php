@@ -42,6 +42,12 @@ class SecondPassReview extends BaseFeature {
         ( new ChunkReviewModel( $chunkReview ))->recountAndUpdatePassFailResult();
     }
 
+    /**
+     * This callback is necessary so that ICE matches are included in advancement_wc.
+     *
+     * @param $project_id
+     * @param $_analyzed_report
+     */
     public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
         $project = Projects_ProjectDao::findById( $project_id );
         $chunk_ids = array_map( function( $chunk ) {
