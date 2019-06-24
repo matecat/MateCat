@@ -71,6 +71,10 @@ class SegmentTranslationEventModel  {
         return $this->getOriginSourcePage() != $this->getDestinationSourcePage() ;
     }
 
+    public function isPersisted() {
+        return $this->current_event !== -1 && !is_null($this->current_event->id);
+    }
+
     public function save() {
 
         if ( $this->current_event !== -1 ) {
@@ -152,8 +156,8 @@ class SegmentTranslationEventModel  {
      * @throws Exception
      */
     public function getCurrentEvent() {
-        if ( ! $this->current_event ) {
-            throw new Exception('The current segment was not persisted yet. Run getPropagatedIdsve() first.');
+        if ( $this->current_event == -1 ) {
+            throw new Exception('The current segment was not persisted yet. Run save() first.');
         }
         return $this->current_event ;
     }

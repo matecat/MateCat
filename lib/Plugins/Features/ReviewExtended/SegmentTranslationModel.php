@@ -94,7 +94,11 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count ;
                 $chunkReview->penalty_points       += $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
                 $chunkReview->total_tte            += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit;
-                $chunkReview->advancement_wc       += $this->advancementWordCount();
+
+                if ( $destinationSourcePage != $originSourcePage ) {
+                    $chunkReview->advancement_wc += $this->advancementWordCount();
+                }
+
                 break;
             }
 
@@ -107,7 +111,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                     $unsetFinalRevision []              = $chunkReview->source_page ;
                 }
 
-                if ( $chunkReview->source_page == $originSourcePage ) {
+                if ( $destinationSourcePage == $originSourcePage ) {
                     $chunkReview->advancement_wc -= $this->advancementWordCount() ;
                 }
 

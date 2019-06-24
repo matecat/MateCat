@@ -10,6 +10,7 @@ namespace Features\TranslationVersions\Model;
 
 
 use Chunks_ChunkStruct;
+use Features\ProjectCompletion\Model\EventModel;
 use FeatureSet;
 use TransactionableTrait;
 
@@ -19,7 +20,7 @@ class BatchEventCreator {
     /**
      * @var SegmentTranslationEventModel[]
      */
-    protected $_events ;
+    protected $_events = [];
 
     /**
      * @var FeatureSet
@@ -37,6 +38,12 @@ class BatchEventCreator {
 
     public function getEvents() {
         return $this->_events ;
+    }
+
+    public function getPersistedEvents() {
+        return array_filter( $this->_events, function( SegmentTranslationEventModel $event ) {
+            return $event->isPersisted() ;
+        }) ;
     }
 
     public function setFeatureSet( FeatureSet $featureSet ) {

@@ -30,7 +30,7 @@ class BatchReviewProcessor {
 
         $revisionFactory = RevisionFactory::getInstance() ;
 
-        foreach ( $this->_batchEventCreator->getEvents() as $event ) {
+        foreach ( $this->_batchEventCreator->getPersistedEvents() as $event ) {
 
             $translationVector = new SegmentTranslationChangeVector( $event );
 
