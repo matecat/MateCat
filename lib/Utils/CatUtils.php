@@ -2,8 +2,6 @@
 
 use SubFiltering\Filter;
 
-include_once INIT::$MODEL_ROOT . "/queries.php";
-
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
 define( "GTPLACEHOLDER", "##GREATERTHAN##" );
 define( "AMPPLACEHOLDER", "##AMPPLACEHOLDER##" );
@@ -182,18 +180,11 @@ class CatUtils {
      */
     protected static function _performanceEstimationTime( array $job_stats ) {
 
-        $estimation_temp = getLastSegmentIDs( $job_stats[ 'id' ] );
-
-        $estimation_concat = [];
-        foreach ( $estimation_temp as $sid ) {
-            $estimation_concat[] = $sid[ 'id_segment' ];
-        }
-        $estimation_seg_ids = implode( ",", $estimation_concat );
-
-        if ( $estimation_seg_ids ) {
+        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $job_stats[ 'id' ] );
+        if ( !empty( $last_10_worked_ids ) ) {
             //perform check on performance if single segment are set to check or globally Forced
             // Calculating words per hour and estimated completion
-            $estimation_temp = getEQWLastHour( $job_stats[ 'id' ], $estimation_seg_ids );
+            $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $job_stats[ 'id' ], $last_10_worked_ids );
             if ( $estimation_temp[ 0 ][ 'data_validity' ] == 1 ) {
                 $job_stats[ 'WORDS_PER_HOUR' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
                 // 7.2 hours
@@ -766,8 +757,8 @@ class CatUtils {
      * @return array
      */
     public static function getPlainStatsForJobs( WordCount_Struct $wCount ) {
-        $job_stats         = [];
-        $job_stats[ 'id' ] = $wCount->getIdJob();
+        $job_stats                 = [];
+        $job_stats[ 'id' ]         = $wCount->getIdJob();
         $job_stats[ 'DRAFT' ]      = $wCount->getNewWords() + $wCount->getDraftWords();
         $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
         $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();

@@ -291,25 +291,6 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @param $query string A query
-     *
-     * @return array|mixed
-     */
-    protected function _fetch_array( $query ) {
-        $_cacheResult = $this->_getFromCache( $query );
-
-        if ( $_cacheResult !== false && $_cacheResult !== null ) {
-            return $_cacheResult;
-        }
-
-        $result = $this->database->fetch_array( $query );
-
-        $this->_setInCache( $query, $result );
-
-        return $result;
-    }
-
-    /**
      * @param $query
      *
      * @return bool

@@ -10,8 +10,6 @@
 
 use WordCount\WordCounterDao;
 
-require_once 'queries.php';
-
 class WordCount_CounterModel {
 
     /**
@@ -266,7 +264,7 @@ class WordCount_CounterModel {
 
     public function initializeJobWordCount( $id_job, $jPassword ) {
 
-        $_details = getStatsForJob( $id_job, null, $jPassword );
+        $_details = WordCounterDao::getStatsForJob( $id_job, null, $jPassword );
         //Log::doJsonLog( "--- trying to Iitialize/reset job total word count." );
 
         $job_details = array_pop( $_details ); //get the row

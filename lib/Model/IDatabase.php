@@ -51,37 +51,6 @@ interface IDatabase {
      */
     public function rollback();
 
-
-    /**
-     * Executes SQL query to an open connection
-     *
-     * @param string $sql Query to execute
-     *
-     * @return PDOStatement Query result
-     */
-    public function query( $sql );
-
-
-    /**
-     * Perform a query, fetching only the first row and freeing the result
-     *
-     * @param $query string Query to execute
-     *
-     * @return mixed First fetched row
-     */
-    public function query_first( $query );
-
-
-    /**
-     * Perform a query and return all the results
-     *
-     * @param $query string Query to run
-     *
-     * @return array All the fetched results
-     */
-    public function fetch_array( $query );
-
-
     /**
      * Execute a update query with an array as argument
      *

@@ -449,7 +449,7 @@ class setTranslationController extends ajaxController {
                     ] );
                 }
 
-                $propagationTotal = propagateTranslation(
+                $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                         $TPropagation,
                         $this->jobData,
                         $this->id_segment,

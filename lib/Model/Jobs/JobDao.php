@@ -531,13 +531,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         static::updateStruct( $first_job );
 
         if( $newPass ){
-            $sql = " UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
-            $stmt = Database::obtain()->getConnection()->prepare( $sql ) ;
-            $stmt->execute( [
-                    'new_password' => $newPass,
-                    'id'           => $first_job->id,
-                    'old_password' => $first_job->password
-            ] );
+            self::updateFields( [ 'password' => $newPass ], [ 'id' => $first_job->id, 'password' => $first_job->password ] );
             $first_job->password = $newPass;
         }
 
@@ -600,13 +594,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @param                $new_status
      */
     public static function updateAllJobsStatusesByProjectId( $id_project, $new_status ){
-
-        $conn = Database::obtain()->getConnection();
-
-        $query = "UPDATE jobs SET status_owner = :status WHERE id_project = :id_project";
-        $stmt = $conn->prepare( $query );
-        $stmt->execute( ['status' => $new_status, 'id_project' => $id_project ] );
-
+        self::updateFields( [ 'status_owner' => $new_status ], [ 'id_project' => $id_project ] );
         ( new Jobs_JobDao )->destroyCacheByProjectId( $id_project );
 
     }
@@ -617,29 +605,16 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @return int
      */
     public static function setJobComplete( Jobs_JobStruct $jStruct ){
-
-        $db    = Database::obtain();
-        $query = "update jobs set completed = 1 where id = :jid";
-        $stmt = $db->getConnection()->prepare( $query );
-        $stmt->execute( [ 'jid' => $jStruct->id ] );
-        return $stmt->rowCount();
-
+        return self::updateFields( [ 'completed' => 1 ], [ 'id' => $jStruct->id ] );
     }
 
     /**
      * @param Jobs_JobStruct $jStruct
      * @param                $new_status
      */
-    public static function updateJobStatus( Jobs_JobStruct $jStruct, $new_status ){
-
-        $conn = Database::obtain()->getConnection();
-
-        $query = "update jobs set status_owner = :status where id = :id_job";
-        $stmt  = $conn->prepare( $query );
-        $stmt->execute( [ 'status' => $new_status, 'id_job' => $jStruct->id ] );
-
+    public static function updateJobStatus( Jobs_JobStruct $jStruct, $new_status ) {
+        self::updateFields( [ 'status_owner' => $new_status ], [ 'id' => $jStruct->id ] );
         ( new Jobs_JobDao )->destroyCacheByProjectId( $jStruct->id_project );
-
     }
 
     /**
@@ -674,10 +649,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         }
 
         return $stmt->rowCount();
-    }
-
-    public static function updateFields( array $data = [], array $where = [] ){
-        return Database::obtain()->update( 'jobs', $data, $where );
     }
 
 }

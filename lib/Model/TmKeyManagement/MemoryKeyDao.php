@@ -63,9 +63,9 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj = $this->sanitize( $obj );
 
         $where_params = [];
-        $condition        = [];
+        $condition    = [];
 
-        $query            = "SELECT  m1.uid, 
+        $query = "SELECT  m1.uid, 
                                      m1.key_value, 
                                      m1.key_name, 
                                      m1.key_tm AS tm, 
@@ -79,7 +79,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 			                 ORDER BY m1.creation_date desc";
 
         if ( $obj->uid !== null ) {
-            $condition[]                 = "m1.uid = :uid";
+            $condition[]           = "m1.uid = :uid";
             $where_params[ 'uid' ] = $obj->uid;
         }
 
@@ -87,22 +87,22 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         if ( $obj->tm_key !== null ) {
 
             if ( $obj->tm_key->key !== null ) {
-                $condition[]                      = "m1.key_value = :key_value";
+                $condition[]                 = "m1.key_value = :key_value";
                 $where_params[ 'key_value' ] = $obj->tm_key->key;
             }
 
             if ( $obj->tm_key->name !== null ) {
-                $condition[]                     = "m1.key_name = :key_name";
+                $condition[]                = "m1.key_name = :key_name";
                 $where_params[ 'key_name' ] = $obj->tm_key->name;
             }
 
             if ( $obj->tm_key->tm !== null ) {
-                $condition[]                   = "m1.key_tm = :key_tm";
+                $condition[]              = "m1.key_tm = :key_tm";
                 $where_params[ 'key_tm' ] = $obj->tm_key->tm;
             }
 
             if ( $obj->tm_key->glos !== null ) {
-                $condition[]                      = "m1.key_glos = :key_glos";
+                $condition[]                = "m1.key_glos = :key_glos";
                 $where_params[ 'key_glos' ] = $obj->tm_key->glos;
             }
         }
@@ -149,7 +149,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public function update( TmKeyManagement_MemoryKeyStruct $obj ) {
-        $obj = $this->  sanitize( $obj );
+        $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
         $this->_validateNotNullFields( $obj );
@@ -178,7 +178,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $where_string = implode( " AND ", $where_conditions );
 
-        $set_string   = null;
+        $set_string = null;
         if ( count( $set_array ) ) {
             $set_string = implode( ", ", $set_array );
         } else {
@@ -203,17 +203,15 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $this->_validatePrimaryKey( $obj );
         $this->_validateNotNullFields( $obj );
 
-        $query = "DELETE FROM " . self::TABLE . " WHERE uid = %d and key_value = '%s'";
+        $query = "DELETE FROM " . self::TABLE . " WHERE uid = :uid and key_value = :key_value";
 
-        $query = sprintf(
-                $query,
-                $obj->uid,
-                $obj->tm_key->key
-        );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( [
+                'uid'       => $obj->uid,
+                'key_value' => $obj->tm_key->key
+        ] );
 
-        $this->database->query( $query );
-
-        if ( $this->database->affected_rows > 0 ) {
+        if ( $stmt->rowCount() > 0 ) {
             return $obj;
         }
 

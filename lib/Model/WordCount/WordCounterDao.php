@@ -60,6 +60,7 @@ class WordCounterDao extends DataAccess_AbstractDao {
             $stmt->execute( $bind_keys );
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
+
             return $e->getCode() * -1;
         }
 
@@ -79,7 +80,7 @@ class WordCounterDao extends DataAccess_AbstractDao {
         $data[ 'rejected_words' ]   = $wStruct->getRejectedWords();
 
         $where = [
-                'id' => $wStruct->getIdJob(),
+                'id'       => $wStruct->getIdJob(),
                 'password' => $wStruct->getJobPassword()
         ];
 
@@ -87,10 +88,86 @@ class WordCounterDao extends DataAccess_AbstractDao {
             $db->update( 'jobs', $data, $where );
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
+
             return $e->getCode() * -1;
         }
+
         return $db->affected_rows;
 
     }
+
+    /**
+     * Inefficient function for high traffic requests like setTranslation
+     *
+     * Leave untouched for getSegmentsController, split job recalculation
+     * because of file level granularity in payable words
+     *
+     * @param      $id_job
+     * @param null $id_file
+     * @param null $jPassword
+     *
+     * @return array
+     *
+     */
+    public static function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
+
+        $query = "
+            SELECT
+                j.id,
+                SUM(
+                        IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count )
+                   ) as TOTAL,
+                SUM(
+                        IF(
+                            st.status IS NULL OR
+                            st.status = 'NEW',
+                            IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
+                   ) as NEW,
+                SUM(
+                        IF( 
+                            st.status IS NULL OR st.status = 'DRAFT' OR st.status = 'NEW',
+                            IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
+                   ) as DRAFT,
+                SUM(
+                        IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
+                   ) as TRANSLATED,
+                   
+                SUM(
+                        IF(st.status='APPROVED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
+                   ) as APPROVED,
+                SUM(
+                        IF(st.status='REJECTED', IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count ),0 )
+                   ) as REJECTED
+			FROM jobs AS j
+			INNER JOIN files_job as fj on j.id = fj.id_job
+			INNER join segments as s on fj.id_file = s.id_file
+			LEFT join segment_translations as st on s.id = st.id_segment and st.id_job = j.id
+			WHERE j.id = :id_job
+			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+			";
+
+        $db = Database::obtain();
+
+        $bind_values = [ 'id_job' => $id_job ];
+
+        if ( !empty( $jPassword ) ) {
+            $bind_values[ 'password' ] = $jPassword;
+            $query                     .= " and j.password = :password";
+        }
+
+        if ( !empty( $id_file ) ) {
+            $bind_values[ 'id_file' ] = $id_file;
+            $query                    .= " and fj.id_file = :id_file";
+        }
+
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->setFetchMode( \PDO::FETCH_ASSOC );
+        $stmt->execute( $bind_values );
+        $results = $stmt->fetchAll();
+        $stmt->closeCursor();
+
+        return $results;
+    }
+
 
 }

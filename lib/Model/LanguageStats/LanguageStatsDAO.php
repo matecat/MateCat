@@ -1,4 +1,5 @@
 <?php
+
 use DataAccess\ShapelessConcreteStruct;
 
 /**
@@ -14,12 +15,13 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
     const STRUCT_TYPE = "LanguageStats_LanguageStatsStruct";
 
 
-    public function getLastDate(){
+    public function getLastDate() {
 
-        $con = $this->database->getConnection();
+        $con  = $this->database->getConnection();
         $stmt = $con->prepare( "select max( date ) as date from " . self::TABLE );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute();
+
         return @$stmt->fetch()[ 'date' ];
 
     }
@@ -27,13 +29,16 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
     public function getLanguageStats( DateTime $filterDate = null ) {
 
 
-        if( !$filterDate ){
-            $filterDate = $this->setCacheTTL( 24 * 60 * 60 )->_fetch_array( "SELECT MAX( date ) as date FROM " . self::TABLE )[ 0 ][ 'date' ];
+        if ( !$filterDate ) {
+            $con  = $this->database->getConnection();
+            $stmt = $con->prepare( "SELECT MAX( date ) as date FROM " . self::TABLE );
+            $this->setCacheTTL( 24 * 60 * 60 );
+            $filterDate = $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [] )[ 0 ][ 'date' ];
         } else {
             $filterDate = $filterDate->format( 'Y-m-d H:i:s' );
         }
 
-         $query = "
+        $query = "
           SELECT source, target, date, total_post_editing_effort, job_count, total_word_count, fuzzy_band
                 FROM " . self::TABLE . "
                 WHERE date = :filterDate
@@ -41,7 +46,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 ;
           ";
 
-        $con = $this->database->getConnection();
+        $con  = $this->database->getConnection();
         $stmt = $con->prepare( $query );
 
         return $this->_fetchObject( $stmt, new LanguageStats_LanguageStatsStruct(), [
@@ -50,33 +55,39 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
     }
 
-    public function getSnapshotDates(){
+    public function getSnapshotDates() {
 
         $query = "
                 SELECT distinct DATE_FORMAT( date,'%Y-%m-%d' ) AS date_format , date
                 FROM " . self::TABLE;
 
-        $con = $this->database->getConnection();
+        $con  = $this->database->getConnection();
         $stmt = $con->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute();
+
         return $stmt->fetchAll();
 
     }
 
-    public function getGraphData( ShapelessConcreteStruct $filters ){
+    public function getGraphData( ShapelessConcreteStruct $filters ) {
 
         $query = "
-                  SELECT source, target, fuzzy_band, total_post_editing_effort, DATE_FORMAT( date, '%Y-%m' ) as date
+                  SELECT 
+                    source, 
+                    target, 
+                    fuzzy_band, 
+                    total_post_editing_effort, 
+                    DATE_FORMAT( date, '%Y-%m' ) as date
                   FROM " . self::TABLE . "
                   WHERE 
                     date BETWEEN ? AND ?
                   AND
-                    source IN( " . str_repeat( '?,', count( $filters->sources ) - 1) . '?' . " )
+                    source IN( " . str_repeat( '?,', count( $filters->sources ) - 1 ) . '?' . " )
                   AND 
-                    target IN( " . str_repeat( '?,', count( $filters->targets ) - 1) . '?' . " )
+                    target IN( " . str_repeat( '?,', count( $filters->targets ) - 1 ) . '?' . " )
                   AND 
-                    fuzzy_band IN( " . str_repeat( '?,', count( $filters->fuzzy_band ) - 1) . '?' . " )
+                    fuzzy_band IN( " . str_repeat( '?,', count( $filters->fuzzy_band ) - 1 ) . '?' . " )
                   ORDER BY 5 ASC
                   ;";
 
@@ -85,8 +96,8 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
         $values = array_merge(
                 [
-                    $filters->date_start,
-                    $filters->date_end
+                        $filters->date_start,
+                        $filters->date_end
                 ],
                 $filters->sources,
                 $filters->targets,
@@ -119,14 +130,13 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
         $query = "INSERT INTO " . self::TABLE .
                 " (date, source, target, fuzzy_band, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
-                VALUES ( '%s', '%s', '%s', '%s', %f, %f, %f, %u )
+                VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )
                 ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
                           job_count = values( job_count )";
 
-        $query = sprintf(
-                $query,
+        $bind_values = [
                 $obj->date,
                 $obj->source,
                 $obj->target,
@@ -135,12 +145,13 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 $obj->total_post_editing_effort,
                 $obj->total_time_to_edit,
                 (int)$obj->job_count
-        );
+        ];
 
-        $this->database->query( $query );
+        $stmt = $this->getDatabaseHandler()->getConnection()->prepare( $query );
+        $stmt->execute( $bind_values );
 
         //return the inserted object on success, null otherwise
-        if ( $this->database->affected_rows > 0 ) {
+        if ( $stmt->rowCount() > 0 ) {
             return $obj;
         }
 
@@ -149,6 +160,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
     /**
      * @param DataAccess_IDaoStruct $obj
+     *
      * @return array
      * @throws Exception
      */
@@ -159,8 +171,9 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
          */
         $obj = $this->sanitize( $obj );
 
-        $where_conditions = array();
-        $query            = "SELECT date,
+        $bind_values = [];
+        $condition   = [];
+        $query       = "SELECT date,
                                     source,
                                     target,
                                     total_word_count,
@@ -170,37 +183,37 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                              FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->date !== null ) {
-            $condition          = "date = '%s'";
-            $where_conditions[] = sprintf( $condition, $this->database->escape( $obj->date ) );
+            $condition[]   = "date = ?";
+            $bind_values[] = $obj->date;
         }
 
         if ( $obj->source !== null ) {
-            $condition          = "source = '%s'";
-            $where_conditions[] = sprintf( $condition, $this->database->escape( $obj->source ) );
+            $condition    [] = "source = ?";
+            $bind_values[]   = $obj->source;
         }
 
         if ( $obj->target !== null ) {
-            $condition          = "target = '%s'";
-            $where_conditions[] = sprintf( $condition, $this->database->escape( $obj->target ) );
+            $condition         [] = "target = ?";
+            $bind_values[]        = $obj->target;
         }
 
         if ( $obj->fuzzy_band !== null ) {
-            $condition          = "fuzzy_band = '%s'";
-            $where_conditions[] = sprintf( $condition, $this->database->escape( $obj->target ) );
+            $condition    [] = "fuzzy_band = ?";
+            $bind_values[]   = $obj->target;
         }
 
-        if ( count( $where_conditions ) ) {
-            $where_string = implode( " AND ", $where_conditions );
+        if ( count( $condition ) ) {
+            $where_string = implode( " AND ", $condition );
         } else {
             throw new Exception( "Where condition needed." );
         }
 
         $query = sprintf( $query, $where_string );
 
-        
         $stmt = $this->database->getConnection()->prepare( $query );
-        $stmt->execute();
+        $stmt->execute( $bind_values );
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+
         return $stmt->fetchAll();
     }
 
@@ -222,21 +235,20 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                           total_time_to_edit = values( total_time_to_edit ),
                           job_count = values( job_count )";
 
-        $tuple_template = "( '%s', '%s', '%s', '%s', %f, %f, %f, %u )";
-
-        $values = array();
-
         //chunk array using MAX_INSERT_NUMBER
-        $objects = array_chunk( $obj_arr, 20 );
+        $objects    = array_chunk( $obj_arr, 20 );
+        $values     = [];
+        $tuple_list = [];
 
         $allInsertPerformed = true;
         //create an insert query for each chunk
         foreach ( $objects as $i => $chunk ) {
             foreach ( $chunk as $obj ) {
 
+                $tuple_list[] = "( ?, ?, ?, ?, ?, ?, ?, ? )";
+
                 //fill values array
-                $values[] = sprintf(
-                        $tuple_template,
+                $values = array_merge( $values, [
                         $obj->date,
                         $obj->source,
                         $obj->target,
@@ -245,24 +257,22 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                         $obj->total_post_editing_effort,
                         $obj->total_time_to_edit,
                         (int)$obj->job_count
-                );
+                ] );
+
             }
 
-            $insert_query = sprintf(
-                    $query,
-                    implode( ", ", $values )
-            );
-
+            $insert_query = sprintf( $query, implode( ", ", $tuple_list ) );
 
             $stmt = $this->database->getConnection()->prepare( $insert_query );
-            $stmt->execute();
+            $stmt->execute( $values );
 
-            if($stmt->errorCode() > 0 ){
+            if ( $stmt->errorCode() > 0 ) {
                 $allInsertPerformed = false;
                 break;
             }
 
-            $values = array();
+            $values = [];
+            $tuple_list = [];
         }
 
         if ( $allInsertPerformed ) {
@@ -292,6 +302,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      * @param array $input
      *
      * @return array
+     * @throws Exception
      */
     public static function sanitizeArray( $input ) {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
