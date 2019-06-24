@@ -5,7 +5,7 @@ class FileDetails extends React.Component {
     getSegments() {
         let segments = [];
         this.props.file.get("segments").forEach((item) =>{
-            let segment = <SegmentQR key={item.get("sid")} segment={item} urls={this.props.urls}/>;
+            let segment = <SegmentQR key={item.get("sid")} segment={item} urls={this.props.urls} secondPassReviewEnabled={this.props.secondPassReviewEnabled}/>;
             segments.push(segment);
         });
         return segments;

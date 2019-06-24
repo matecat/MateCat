@@ -1,12 +1,11 @@
 <?php
 
+use Constants;
 use DataAccess\ShapelessConcreteStruct;
 
 class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     const TABLE = 'segment_translation_versions';
-
-    public $source_page ;
 
     protected static $primary_keys = ['id_job', 'id_segment', 'version_number'];
 
@@ -155,7 +154,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     qa.translation_version as qa_translation_version,
     qa.target_text as qa_target_text,
     qa.penalty_points as qa_penalty_points,
-    qa.rebutted_at as qa_rebutted_at
+    qa.rebutted_at as qa_rebutted_at,
+    qa.source_page as qa_source_page
 
     FROM segment_translations st LEFT JOIN qa_entries qa
         ON st.id_segment = qa.id_segment AND st.id_job = qa.id_job AND
@@ -197,7 +197,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      qa.translation_version as qa_translation_version,
      qa.target_text as qa_target_text,
      qa.penalty_points as qa_penalty_points,
-     qa.rebutted_at as qa_rebutted_at
+     qa.rebutted_at as qa_rebutted_at,
+     qa.source_page as qa_source_page
 
     FROM segment_translation_versions stv 
     
@@ -225,105 +226,61 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     }
 
-    public function getLastTranslationsBySegments($segments_id, $job_id){
-
-        $db = Database::obtain()->getConnection();
-
-        $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1)." ?";;
-
-        $query = "SELECT 
-    stv.id_segment,
-    stv.translation,
-    TX.version_number
-FROM
-    (
-        SELECT id_segment, translation, version_number, id_job 
-        FROM segment_translation_versions 
-        WHERE id_segment IN(
-            ".$prepare_str_segments_id."
-        )
-        AND id_job = ?
-        UNION 
-        SELECT id_segment, translation, version_number, id_job 
-        FROM segment_translations 
-        WHERE id_segment IN(
-            ".$prepare_str_segments_id."
-        )
-        AND id_job = ?
-    ) stv
-JOIN
-(
-        SELECT 
-            MAX(version_number) AS version_number, ste.id_segment
-        FROM
-            segment_translation_events ste
-        WHERE id_segment IN(
-            ".$prepare_str_segments_id."
-        )
-        AND ste.id_job = ?
-        AND ste.source_page = ".\Constants::SOURCE_PAGE_TRANSLATE."
-        GROUP BY id_segment
-
-) AS TX ON stv.version_number = TX.version_number AND stv.id_segment = TX.id_segment";
-
-
-        $stmt = $db->prepare($query);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id] ));
-
-        $results = $stmt->fetchAll();
-
-        return $results;
-
-
-    }
-
-    public function getLastRevisionsBySegments($segments_id, $job_id){
+    /**
+     * @param      $segments_id
+     * @param      $job_id
+     * @param null $source_page
+     *
+     * @return array
+     */
+    public function getLastRevieionsBySegmentsAndSourcePage( $segments_id, $job_id, $source_page ) {
 
         $db = Database::obtain()->getConnection();
 
         $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1)." ?";
 
-
-
         $query = "SELECT 
+
     stv.id_segment,
     stv.translation,
-    TX.version_number
-FROM
-    (
-        SELECT id_segment, translation, version_number, id_job 
-        FROM segment_translation_versions 
-        WHERE id_segment IN(
-            ".$prepare_str_segments_id."
-        )
-        AND id_job = ?
-        UNION 
-        SELECT id_segment, translation, version_number, id_job 
-        FROM segment_translations 
-        WHERE id_segment IN(
-            ".$prepare_str_segments_id."
-        )
-        AND id_job = ?
-    ) stv
-JOIN
-(
-        SELECT 
-            MAX(version_number) AS version_number, ste.id_segment
-        FROM
-            segment_translation_events ste
-        WHERE id_segment IN(
-            ".$prepare_str_segments_id."
-        )
-        AND ste.id_job = ?
-        AND ste.source_page = ".\Constants::SOURCE_PAGE_REVISION."
-        GROUP BY id_segment
+    ste.version_number
 
-) AS TX ON stv.version_number = TX.version_number AND stv.id_segment = TX.id_segment";
+    FROM
+        (
+            SELECT id_segment, translation, version_number, id_job
+            FROM segment_translation_versions
+            WHERE id_segment IN (
+                $prepare_str_segments_id
+            )
+            AND id_job = ?
+            UNION
+            SELECT id_segment, translation, version_number, id_job
+            FROM segment_translations
+            WHERE id_segment IN (
+                $prepare_str_segments_id
+            )
+            AND id_job = ?
+        ) stv
+    JOIN
+        (
+                SELECT
+                    MAX(version_number) AS version_number, ste.id_segment
+                FROM
+                    segment_translation_events ste
+
+                WHERE id_segment IN (
+                    $prepare_str_segments_id
+                )
+                AND ste.id_job = ?
+                AND ste.source_page = ?
+
+                GROUP BY id_segment
+
+        ) AS ste ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment";
 
         $stmt = $db->prepare($query);
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id] ));
+        $stmt->execute( array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id], [ $source_page ] ));
 
         $results = $stmt->fetchAll();
 
@@ -370,25 +327,23 @@ JOIN
         ));
     }
 
-    public function saveVersion( Translations_TranslationVersionStruct $old_translation ) {
+    public function saveVersion( Translations_TranslationVersionStruct $new_version ) {
         $sql = "INSERT INTO segment_translation_versions " .
-                " ( id_job, id_segment, translation, version_number, time_to_edit, is_review, old_status, new_status ) " .
+                " ( id_job, id_segment, translation, version_number, time_to_edit, old_status, new_status ) " .
                 " VALUES " .
-                " (:id_job, :id_segment, :translation, 
-:version_number, :time_to_edit, :is_review, :old_status, :new_status )";
+                " (:id_job, :id_segment, :translation, :version_number, :time_to_edit, :old_status, :new_status ) ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         return $stmt->execute( [
-                'id_job'         => $old_translation->id_job,
-                'id_segment'     => $old_translation->id_segment,
-                'translation'    => $old_translation->translation,
-                'version_number' => $old_translation->version_number,
-                'time_to_edit'   => $old_translation->time_to_edit,
-                'is_review'      => $old_translation->is_review,
-                'old_status'     => $old_translation->old_status,
-                'new_status'     => $old_translation->new_status,
+                'id_job'         => $new_version->id_job,
+                'id_segment'     => $new_version->id_segment,
+                'translation'    => $new_version->translation,
+                'version_number' => $new_version->version_number,
+                'time_to_edit'   => $new_version->time_to_edit,
+                'old_status'     => $new_version->old_status,
+                'new_status'     => $new_version->new_status,
         ] );
     }
 

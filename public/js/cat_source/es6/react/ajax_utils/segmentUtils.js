@@ -62,6 +62,7 @@ API.SEGMENT = {
 
         var path = sprintf(APP.getRandomUrl() + 'api/v2/jobs/%s/%s/segments/%s/translation-issues',
             config.id_job, config.password, idSegment);
+        data.revision_number = config.revisionNumber;
         return $.ajax({
             data: data,
             type: "POST",
@@ -78,7 +79,6 @@ API.SEGMENT = {
             idSegment,
             idIssue
         );
-
         return $.ajax({
             url: replies_path,
             type: 'POST',
@@ -180,7 +180,8 @@ API.SEGMENT = {
         var data = {
             segments_id: segments,
             status: 'approved',
-            client_id: config.id_client
+            client_id: config.id_client,
+            revision_number: config.revisionNumber
         };
         return $.ajax({
             async: true,
@@ -194,7 +195,8 @@ API.SEGMENT = {
         var data = {
             segments_id: segments,
             status: 'translated',
-            client_id: config.id_client
+            client_id: config.id_client,
+            revision_number: config.revisionNumber
         };
         return $.ajax({
             async: true,

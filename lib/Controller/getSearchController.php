@@ -16,6 +16,7 @@ class getSearchController extends ajaxController {
     private $function; //can be search, replace
     private $matchCase;
     private $exactMatch;
+    private $revisionNumber;
 
     private $queryParams = array();
 
@@ -26,30 +27,32 @@ class getSearchController extends ajaxController {
         parent::__construct();
 
         $filterArgs = array(
-            'function'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'job'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'token'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'source'      => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'target'      => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'status'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'replace'     => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'password'    => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'matchcase'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'exactmatch'  => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'function'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'job'             => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'token'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'source'          => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'target'          => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'status'          => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'replace'         => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'password'        => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'matchcase'       => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'exactmatch'      => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'revision_number' => array( 'filter' => FILTER_VALIDATE_INT )
         );
 
         $__postInput     = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->function   = $__postInput[ 'function' ]; //can be: search / replace
-        $this->job        = $__postInput[ 'job' ];
-        $this->token      = $__postInput[ 'token' ];
-        $this->source     = $__postInput[ 'source' ];
-        $this->target     = $__postInput[ 'target' ];
-        $this->status     = strtolower( $__postInput[ 'status' ] );
-        $this->replace    = $__postInput[ 'replace' ];
-        $this->password   = $__postInput[ 'password' ];
-        $this->matchCase  = $__postInput[ 'matchcase' ];
-        $this->exactMatch = $__postInput[ 'exactmatch' ];
+        $this->function       = $__postInput[ 'function' ]; //can be: search / replace
+        $this->job            = $__postInput[ 'job' ];
+        $this->token          = $__postInput[ 'token' ];
+        $this->source         = $__postInput[ 'source' ];
+        $this->target         = $__postInput[ 'target' ];
+        $this->status         = strtolower( $__postInput[ 'status' ] );
+        $this->replace        = $__postInput[ 'replace' ];
+        $this->password       = $__postInput[ 'password' ];
+        $this->matchCase      = $__postInput[ 'matchcase' ];
+        $this->exactMatch     = $__postInput[ 'exactmatch' ];
+        $this->revisionNumber = $__postInput[ 'revision_number' ];
 
         if (empty($this->status)) {
             $this->status = "all";
@@ -68,17 +71,25 @@ class getSearchController extends ajaxController {
         }
 
         $this->queryParams = new SearchQueryParamsStruct( [
-            'job'         => $this->job,
-            'password'    => $this->password,
-            'key'         => null,
-            'src'         => null,
-            'trg'         => null,
-            'status'      => $this->status,
-            'replacement' => $this->replace,
-            'matchCase'   => $this->matchCase,
-            'exactMatch'  => $this->exactMatch,
+            'job'            => $this->job,
+            'password'       => $this->password,
+            'key'            => null,
+            'src'            => null,
+            'trg'            => null,
+            'status'         => $this->status,
+            'replacement'    => $this->replace,
+            'matchCase'      => $this->matchCase,
+            'exactMatch'     => $this->exactMatch,
         ] );
 
+        if ( in_array( strtoupper($this->queryParams->status), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+            if ( !empty( $this->revisionNumber ) ) {
+                $this->queryParams->sourcePage = \Features\SecondPassReview\Utils::revisionNumberToSourcePage( $this->revisionNumber );
+            }
+            else {
+                $this->queryParams->sourcePage = Constants::SOURCE_PAGE_REVISION ;
+            }
+        }
     }
 
     /**

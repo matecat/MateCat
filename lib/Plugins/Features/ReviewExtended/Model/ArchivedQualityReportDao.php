@@ -35,7 +35,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
                 job_first_segment = :job_first_segment AND job_last_segment = :job_last_segment AND
                 version = :version " ;
 
-        $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
+        $stmt = $this->getDatabaseHandler()->getConnection()->prepare( $sql ) ;
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'Features\ReviewExtended\Model\ArchivedQualityReportStruct' );
         $stmt->execute( array(
                 'id_job'              => $chunk->id,
@@ -60,7 +60,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
                 id_job = :id_job AND password = :password AND
                 job_first_segment = :job_first_segment AND job_last_segment = :job_last_segment ";
 
-        $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
+        $stmt = $this->getDatabaseHandler()->getConnection()->prepare( $sql ) ;
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'Features\ReviewExtended\Model\ArchivedQualityReportStruct' );
         $stmt->execute( array(
                 'id_job'              => $chunk->id,
@@ -73,7 +73,7 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
     }
 
     public function getLastVersionNumber( Chunks_ChunkStruct $chunk ) {
-        $conn = $this->getConnection()->getConnection();
+        $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare("
             SELECT MAX(version) FROM qa_archived_reports
               WHERE id_job = :id_job

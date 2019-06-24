@@ -2,28 +2,73 @@
 
 namespace Features ;
 
+use Exceptions\ControllerReturnException;
+use Exceptions\ValidationError;
+use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 
 class TranslationVersions extends BaseFeature {
 
     const FEATURE_CODE = 'translation_versions';
 
-    public function setTranslationCommitted( $params ) {
+    public function preSetTranslationCommitted( $params ) {
         // evaluate if the record is to be created, either the
         // status changed or the translation changed
-
-        $user             = $params['user'] ;
-        $translation      = $params['translation'] ;
+        $user = $params['user'] ;
+        /** @var \Translations_SegmentTranslationStruct $translation */
+        $translation = $params['translation'] ;
+        /** @var \Translations_SegmentTranslationStruct $old_translation */
         $old_translation  = $params['old_translation'];
-        $propagated_ids   = $params['propagated_ids'];
         $source_page_code = $params['source_page_code'];
+        /** @var \Chunks_ChunkStruct $chunk */
+        $chunk            = $params['chunk'];
+        /** @var \FeatureSet $features */
+        $features         = $params['features'];
 
-        $event = new SegmentTranslationEventModel($old_translation,
-                $translation, $user, $source_page_code );
+        $sourceEvent = new SegmentTranslationEventModel($old_translation, $translation, $user, $source_page_code );
 
-        $event->setPropagatedIds( $propagated_ids ) ;
-        $event->save() ;
+        $batchEventCreator = new BatchEventCreator( $chunk ) ;
+        $batchEventCreator->setFeatureSet( $features ) ;
+        $batchEventCreator->addEventModel( $sourceEvent ) ;
 
+        // Start cycle for propagated segments
+        foreach( $params['propagation']['propagated_segments'] as $segmentTranslationBeforeChange ) {
+            /** @var \Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
+            $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange ;
+            $propagatedSegmentAfterChange->translation         = $translation->translation ;
+            $propagatedSegmentAfterChange->status              = $translation->status ;
+            $propagatedSegmentAfterChange->autopropagated_from = $translation->id_segment ;
+            $propagatedSegmentAfterChange->time_to_edit        = 0 ;
+
+            $propagatedEvent = new SegmentTranslationEventModel(
+                    $segmentTranslationBeforeChange,
+                    $propagatedSegmentAfterChange,
+                    $user,
+                    $source_page_code
+            ) ;
+
+            $propagatedEvent->setPropagationSource( false ) ;
+            $batchEventCreator->addEventModel( $propagatedEvent );
+        }
+
+
+        try {
+            $batchEventCreator->save();
+            // $event->setChunkReviewsList( $chunkReviews ) ;
+        } catch ( ValidationError $e ) {
+            $params['controller_result']['errors'] [] = [
+                    'code' => -2000,
+                    'message' => $e->getMessage()
+            ];
+            throw new ControllerReturnException( $e->getMessage(), -2000 ) ;
+        }
+
+
+    }
+
+    public function filter_get_segments_optional_fields(){
+        $options[ 'optional_fields' ] = [ 'st.version_number' ];
+        return $options;
     }
 
 }

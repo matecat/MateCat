@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_Counter::setOldStatus
+ * @covers WordCount_CounterModel::setOldStatus
  * User: dinies
  * Date: 13/06/16
  * Time: 12.34
@@ -10,7 +10,7 @@
 class SetOldStatusTest extends AbstractTest
 {
     /**
-     * @var WordCount_Counter
+     * @var WordCount_CounterModel
      */
     protected $word_counter;
     protected $mirror_word_counter;
@@ -20,7 +20,7 @@ class SetOldStatusTest extends AbstractTest
 
     public function setUp()
     {
-        $this->word_counter = new WordCount_Counter();
+        $this->word_counter = new WordCount_CounterModel();
         $this->mirror_word_counter = new ReflectionClass($this->word_counter);
         $this->old_status = $this->mirror_word_counter->getProperty('oldStatus');
         $this->old_status->setAccessible(true);
@@ -32,7 +32,8 @@ class SetOldStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_Counter::setOldStatus
+     * @covers WordCount_CounterModel::setOldStatus
+     *
      * @param "NEW"
      */
     public function test_setOldStatus_NEW()
@@ -44,7 +45,8 @@ class SetOldStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_Counter::setOldStatus
+     * @covers WordCount_CounterModel::setOldStatus
+     *
      * @param "DRAFT"
      */
     public function test_setOldStatus_DRAFT()
@@ -56,7 +58,8 @@ class SetOldStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_Counter::setOldStatus
+     * @covers WordCount_CounterModel::setOldStatus
+     *
      * @param "TRANSLATED"
      */
     public function test_setOldStatus_TRANSLATED()
@@ -68,7 +71,8 @@ class SetOldStatusTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_Counter::setOldStatus
+     * @covers WordCount_CounterModel::setOldStatus
+     *
      * @param "APPROVED"
      */
     public function test_setOldStatus_APPROVED()
@@ -78,8 +82,9 @@ class SetOldStatusTest extends AbstractTest
         $this->assertEquals("APPROVED", $this->old_status->getValue($this->word_counter));
     }
     /**
-     * @group regression
-     * @covers WordCount_Counter::setOldStatus
+     * @group  regression
+     * @covers WordCount_CounterModel::setOldStatus
+     *
      * @param "REJECTED"
      */
     public function test_setOldStatus_REJECTED()
@@ -90,8 +95,9 @@ class SetOldStatusTest extends AbstractTest
     }
 
     /**
-     * @group regression
-     * @covers WordCount_Counter::setOldStatus
+     * @group  regression
+     * @covers WordCount_CounterModel::setOldStatus
+     *
      * @param "FIXED"
      */
     public function test_setOldStatus_FIXED()
@@ -102,8 +108,9 @@ class SetOldStatusTest extends AbstractTest
     }
 
     /**
-     * @group regression
-     * @covers WordCount_Counter::setOldStatus
+     * @group  regression
+     * @covers WordCount_CounterModel::setOldStatus
+     *
      * @param "REBUTTED"
      */
     public function test_setOldStatus_REBUTTED()
@@ -114,8 +121,9 @@ class SetOldStatusTest extends AbstractTest
     }
 
     /**
-     * @group regression
-     * @covers WordCount_Counter::setOldStatus
+     * @group  regression
+     * @covers WordCount_CounterModel::setOldStatus
+     *
      * @param "BARANDFOO"
      */
     public function test_setOldStatus_BARANDFOO()

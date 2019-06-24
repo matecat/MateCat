@@ -72,7 +72,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct
      */
     public function getByConfirmationToken( $token ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE confirmation_token = ?");
         $stmt->execute( array($token )) ;
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users_UserStruct');
@@ -80,7 +80,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     public function createUser( Users_UserStruct $obj ){
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
         \Database::obtain()->begin();
 
         $obj->create_date = date('Y-m-d H:i:s');
@@ -256,7 +256,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct[]
      */
     public function getByEmails( $email_list ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE email IN ( " . str_repeat( '?,', count( $email_list ) - 1) . '?' . " ) ");
         $stmt->execute( $email_list ) ;
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\Users_UserStruct' );

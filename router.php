@@ -9,7 +9,6 @@ use API\V2\Exceptions\ExternalServiceException;
 use Exceptions\ValidationError as Model_ValidationError;
 
 require_once './inc/Bootstrap.php';
-require_once './lib/Model/queries.php';
 
 Bootstrap::start();
 

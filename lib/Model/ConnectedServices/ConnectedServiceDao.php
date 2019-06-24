@@ -24,7 +24,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @return ConnectedServiceStruct
      */
     public function findById( $id ) {
-        $conn = $this->con->getConnection() ;
+        $conn = $this->database->getConnection() ;
         $stmt = $conn->prepare(
             "SELECT * FROM connected_services WHERE id = :id"
         );
@@ -60,7 +60,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
             throw  new ValidationError('Service is not valid for update') ;
         }
 
-        $conn = $this->con->getConnection() ;
+        $conn = $this->database->getConnection() ;
 
         $stmt = $conn->prepare(
             "UPDATE connected_services SET is_default = 0 WHERE uid = :uid AND service = :service"
@@ -74,7 +74,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
     }
 
     public function findServiceByUserAndId( \Users_UserStruct $user, $id_service ) {
-        $conn = $this->con->getConnection() ;
+        $conn = $this->database->getConnection() ;
 
         $stmt = $conn->prepare(
             "SELECT * FROM connected_services WHERE " .
@@ -95,7 +95,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @return ConnectedServiceStruct[]
      */
     public function findServicesByUser(\Users_UserStruct $user ) {
-        $conn = $this->con->getConnection() ;
+        $conn = $this->database->getConnection() ;
 
         $stmt = $conn->prepare(
             "SELECT * FROM connected_services WHERE " .
@@ -118,7 +118,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      *
      */
     public function findServicesByUserAndName( \Users_UserStruct $user, $name ) {
-        $conn = $this->con->getConnection() ;
+        $conn = $this->database->getConnection() ;
 
         $stmt = $conn->prepare(
             "SELECT * FROM connected_services WHERE " .
@@ -140,7 +140,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      */
 
     public function findDefaultServiceByUserAndName( \Users_UserStruct $user, $name ) {
-        $conn = $this->con->getConnection() ;
+        $conn = $this->database->getConnection() ;
 
         $stmt = $conn->prepare(
             "SELECT * FROM connected_services WHERE " .
@@ -163,7 +163,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @return mixed
      */
     public function findUserServicesByNameAndEmail( \Users_UserStruct $user, $service, $email ) {
-        $stmt = $this->con->getConnection()->prepare(
+        $stmt = $this->database->getConnection()->prepare(
             " SELECT * FROM connected_services WHERE " .
             " uid = :uid AND service = :service AND email = :email "
         );
@@ -179,7 +179,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
     }
 
     public function findByRemoteIdAndCode( $remote_id, $service ) {
-        $stmt = $this->con->getConnection()->prepare(
+        $stmt = $this->database->getConnection()->prepare(
                 " SELECT * FROM connected_services WHERE " .
                 " uid = :remote_id AND service = :service "
         );

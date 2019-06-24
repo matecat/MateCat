@@ -278,6 +278,8 @@ class Executor implements SplObserver {
             } catch ( PDOException $e ) {
 
                 $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage() );
+                $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") " . $e->getTraceAsString() );
+
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher      = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );

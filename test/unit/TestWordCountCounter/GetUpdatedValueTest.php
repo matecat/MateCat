@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @covers WordCount_Counter::getUpdatedValues
+ * @covers WordCount_CounterModel::getUpdatedValues
  * @group regression
  * User: dinies
  * Date: 13/06/16
@@ -34,7 +34,7 @@ class GetUpdatedValueTest extends AbstractTest
     }
 
     /**
-     * @covers WordCount_Counter::getUpdatedValues
+     * @covers WordCount_CounterModel::getUpdatedValues
      * @group regression
      */
     public function test_getUpdateValue_with_ice_match_no_changes()
@@ -48,7 +48,7 @@ class GetUpdatedValueTest extends AbstractTest
         $this->word_count_struct->setOldStatus("TRANSLATED");
         $this->word_count_struct->setNewStatus("TRANSLATED");
 
-        $this->word_counter = new WordCount_Counter($this->word_count_struct);
+        $this->word_counter = new WordCount_CounterModel($this->word_count_struct);
         $this->word_counter->setOldStatus("TRANSLATED");
         $this->word_counter->setNewStatus("TRANSLATED");
         
@@ -67,7 +67,7 @@ class GetUpdatedValueTest extends AbstractTest
     }
 
     /**
-     * @covers WordCount_Counter::getUpdatedValues
+     * @covers WordCount_CounterModel::getUpdatedValues
      * @group regression
      */
     public function test_getUpdateValue_with_rejection()
@@ -81,7 +81,7 @@ class GetUpdatedValueTest extends AbstractTest
         $this->word_count_struct->setOldStatus("TRANSLATED");
         $this->word_count_struct->setNewStatus("REJECTED");
 
-        $this->word_counter = new WordCount_Counter($this->word_count_struct);
+        $this->word_counter = new WordCount_CounterModel($this->word_count_struct);
         $this->word_counter->setOldStatus("TRANSLATED");
         $this->word_counter->setNewStatus("REJECTED");
 
@@ -102,7 +102,7 @@ class GetUpdatedValueTest extends AbstractTest
 
 
     /**
-     * @covers WordCount_Counter::getUpdatedValues
+     * @covers WordCount_CounterModel::getUpdatedValues
      * @group regression
      */
     public function test_getUpdateValue_from_draft_to_approved()
@@ -116,7 +116,7 @@ class GetUpdatedValueTest extends AbstractTest
         $this->word_count_struct->setOldStatus("DRAFT");
         $this->word_count_struct->setNewStatus("APPROVED");
 
-        $this->word_counter = new WordCount_Counter($this->word_count_struct);
+        $this->word_counter = new WordCount_CounterModel($this->word_count_struct);
         $this->word_counter->setOldStatus("DRAFT");
         $this->word_counter->setNewStatus("APPROVED");
 
@@ -136,13 +136,13 @@ class GetUpdatedValueTest extends AbstractTest
     }
 
     /**
-     * @covers WordCount_Counter::getUpdatedValues
+     * @covers WordCount_CounterModel::getUpdatedValues
      * @group regression
      */
     public function test_getUpdateValue_with_null_argument()
     {
 
-        $this->word_counter = new WordCount_Counter();
+        $this->word_counter = new WordCount_CounterModel();
         $this->setExpectedException('LogicException');
         $this->word_counter->getUpdatedValues("15.00");
 

@@ -106,7 +106,10 @@ class ServerCheck {
 
             $db = Database::obtain();
             $queryMysqlVariables = "show variables";
-            $variables = $db->fetch_array($queryMysqlVariables);
+            $stmt = $db->getConnection()->query( $queryMysqlVariables );
+            $stmt->setFetchMode( PDO::FETCH_ASSOC );
+            $stmt->execute();
+            $variables = $stmt->fetchAll();
             foreach ( $variables as $key => $value ){
                 $_VAR_NAME = $value['Variable_name'];
                 self::$MysqlParams->$_VAR_NAME = $value['Value'];

@@ -34,7 +34,7 @@ class JobAnonymous extends Job {
     }
 
     /**
-     * @param                         $jStruct Chunks_ChunkStruct
+     * @param                         $chunk Chunks_ChunkStruct
      *
      * @param \Projects_ProjectStruct $project
      * @param \FeatureSet             $featureSet
@@ -42,9 +42,9 @@ class JobAnonymous extends Job {
      * @return array
      * @throws \Exception
      */
-    public function renderItem( Chunks_ChunkStruct $jStruct, \Projects_ProjectStruct $project, \FeatureSet $featureSet ) {
+    public function renderItem( Chunks_ChunkStruct $chunk, \Projects_ProjectStruct $project, \FeatureSet $featureSet ) {
 
-        $jobJson = parent::renderItem( $jStruct, $project, $featureSet );
+        $jobJson = parent::renderItem( $chunk, $project, $featureSet );
 
         unset( $jobJson[ 'translator' ] );
         unset( $jobJson[ 'owner' ] );

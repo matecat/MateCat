@@ -2,7 +2,8 @@
 
 class setCurrentSegmentController extends ajaxController {
 
-    private $id_job;
+    protected $password;
+    private   $id_job;
 
     public function __construct() {
 
@@ -32,21 +33,15 @@ class setCurrentSegmentController extends ajaxController {
 
         $this->parseIDSegment();
 
-        //get Job Infos
-        $job_data = getJobData( (int)$this->id_job );
+        //get Job Info, we need only a row of jobs ( split )
+        $job_data = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->password );
 
-        $pCheck = new AjaxPasswordCheck();
-
-        if ( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
+        if ( empty( $job_data ) ) {
+            $this->result[ 'errors' ][] = [ "code" => -10, "message" => "wrong password" ];
         }
 
         if ( empty( $this->id_segment ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "missing segment id" );
-        }
-
-        if ( empty( $this->id_job ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "missing Job id" );
         }
 
         if ( !empty( $this->result[ 'errors' ] ) ) {
@@ -54,8 +49,8 @@ class setCurrentSegmentController extends ajaxController {
             return;
         }
 
-        $segmentStruct             = TranslationsSplit_SplitStruct::getStruct();
-        $segmentStruct->id_segment = $this->id_segment;
+        $segmentStruct             = new TranslationsSplit_SplitStruct();
+        $segmentStruct->id_segment = (int)$this->id_segment;
         $segmentStruct->id_job     = $this->id_job;
 
         $translationDao  = new TranslationsSplit_SplitDAO( Database::obtain() );
@@ -84,15 +79,15 @@ class setCurrentSegmentController extends ajaxController {
          */
         if ( !$isASplittedSegment || $isLastSegmentChunk ) {
 
-            $segmentList = getNextSegment( $this->id_segment, $this->id_job, $this->password, ( !self::isRevision() ? false : true ) );
+            $segmentList = Segments_SegmentDao::getNextSegment( $this->id_segment, $this->id_job, $this->password, ( !self::isRevision() ? false : true ) );
 
             if ( !self::isRevision() ) {
-                $nextSegmentId = fetchStatus( $this->id_segment, $segmentList );
+                $nextSegmentId = CatUtils::fetchStatus( $this->id_segment, $segmentList );
             }
             else {
-                $nextSegmentId = fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
+                $nextSegmentId = CatUtils::fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
                 if ( !$nextSegmentId ) {
-                    $nextSegmentId = fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+                    $nextSegmentId = CatUtils::fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
                 }
             }
         }

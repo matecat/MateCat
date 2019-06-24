@@ -49,11 +49,10 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
     }
 
     public function getQualityInfo(){
-
         $project = $this->getProject();
         $featureSet = $project->getFeatures();
 
-        $qClass = CatUtils::getQualityInfoFromJobStruct( $this, $project, $featureSet );
+        $qClass = CatUtils::getQualityInfoOrChunkReviewStructFromJobStruct( $this, $featureSet );
 
         if ( 'LQA\ChunkReviewStruct' === get_class( $qClass ) ) {
             return null ;

@@ -1,51 +1,35 @@
 <?php
 
+use Features\TranslationVersions\Model\SegmentTranslationEventModel;
+
 class SegmentTranslationChangeVector {
 
     /**
      * @var Translations_SegmentTranslationStruct
      */
     private $translation;
+
     /**
      * @var Translations_SegmentTranslationStruct
      */
     private $old_translation;
 
     /**
-     * @var Jobs_JobStruct
+     * @var Chunks_ChunkStruct
      */
-    private $job;
-
-    private $propagated_ids;
-
-    public function __construct(Translations_SegmentTranslationStruct $translation) {
-        $this->translation = $translation;
-        $this->job = $translation->getJob();
-    }
+    private $chunk;
 
     /**
-     * @return bool
+     * @var SegmentTranslationEventModel
      */
-    public function translationTextChanged() {
-        return $this->translation->translation != $this->old_translation->translation ;
-    }
-    /**
-     * @param Translations_SegmentTranslationStruct $translation
-     */
-    public function setOldTranslation( Translations_SegmentTranslationStruct $translation ) {
-        $this->old_translation = $translation ;
-    }
+    protected $eventModel ;
 
-    public function setPropagatedIds( $propagated_ids ) {
-        $this->propagated_ids = $propagated_ids ;
-    }
+    public function __construct( SegmentTranslationEventModel $eventModel ) {
+        $this->eventModel = $eventModel ;
 
-    public function getPropagatedIds() {
-        return $this->propagated_ids ;
-    }
-
-    public function didPropagate() {
-        return !empty( $this->propagated_ids ) ;
+        $this->translation     = $eventModel->getTranslation() ;
+        $this->old_translation = $eventModel->getOldTranslation() ;
+        $this->chunk           = $eventModel->getTranslation()->getChunk() ;
     }
 
     /**
@@ -55,11 +39,63 @@ class SegmentTranslationChangeVector {
         return $this->translation;
     }
 
+    public function getEventModel() {
+        return $this->eventModel;
+    }
+
+    /**
+     * @return Users_UserStruct|null
+     */
+    public function getEventUser() {
+        if ( $this->eventModel->getCurrentEvent()->uid ) {
+            return ( new Users_UserDao())->getByUid( $this->eventModel->getCurrentEvent()->uid ) ;
+        }
+    }
+
+    /**
+     * @return Translations_SegmentTranslationStruct
+     * @throws Exception
+     */
     public function getOldTranslation() {
         if ( is_null( $this->old_translation ) ) {
-            throw new \Exception('Old translation is not set');
+            throw new Exception('Old translation is not set');
         }
         return $this->old_translation ;
+    }
+
+    /**
+     * Origin source page can be missing. This can happen in case of ICE matches, or pre-transalted
+     * segments or just because we are evaluating a transition from NEW to TRANSLATED status.
+     *
+     * In such case we need to make assumptions on the `source_page` variable because that's what we use
+     * to decide where to move revised words and advancement words around.
+     * @return mixed
+     * @throws \Exception
+     */
+    public function isBeingUpperReviewed() {
+        return $this->old_translation->isReviewedStatus() &&
+        $this->translation->isReviewedStatus() &&
+        $this->eventModel->isUpperRevision() ;
+    }
+
+    public function isBeingLowerReviewed() {
+        return $this->old_translation->isReviewedStatus() &&
+                $this->translation->isReviewedStatus() &&
+                $this->eventModel->isLowerRevision() ;
+    }
+
+    /**
+     * Returns 1 if source page is moving up  0 if it's not changing, -1 if it's moving down.
+     *
+     * @return int
+     */
+    public function getSourcePageDirection() {
+        $originSourcePage      = $this->eventModel->getOriginSourcePage() ;
+        $destinationSourcePage = $this->eventModel->getDestinationSourcePage() ;
+
+        return $originSourcePage < $destinationSourcePage ? 1  : (
+            $originSourcePage == $destinationSourcePage ? null : -1
+        );
     }
 
     /**
@@ -79,7 +115,7 @@ class SegmentTranslationChangeVector {
                 );
     }
 
-    protected function isModifyingICE() {
+    public function isModifyingICE() {
         return $this->old_translation->isICE() &&
                 $this->old_translation->translation != $this->translation->translation &&
                 $this->old_translation->version_number == 0 ;
@@ -107,7 +143,6 @@ class SegmentTranslationChangeVector {
                 $this->translation->isTranslationStatus() &&
                 ! $this->_isEditingICEforTheFirstTime() &&
                 ! $this->_isChangingICEtoTranslatedWithNoChange() ;
-    ;
     }
 
     protected function _isEditingICEforTheFirstTime() {
@@ -124,17 +159,23 @@ class SegmentTranslationChangeVector {
                 $this->old_translation->version_number == $this->translation->version_number ;
     }
 
-
     /**
      * @return Segments_SegmentStruct
      */
     public function getSegmentStruct() {
-        $dao = new \Segments_SegmentDao( Database::obtain() );
+        $dao = new Segments_SegmentDao( Database::obtain() );
         return $dao->getByChunkIdAndSegmentId(
-            $this->job->id,
-            $this->job->password,
+            $this->chunk->id,
+            $this->chunk->password,
             $this->translation->id_segment
         );
+    }
+
+    /**
+     * @return Chunks_ChunkStruct
+     */
+    public function getChunk() {
+        return $this->chunk;
     }
 
 }

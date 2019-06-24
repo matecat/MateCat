@@ -121,13 +121,13 @@ class EntryDao extends \DataAccess_AbstractDao {
             " translation_version, start_node, start_offset, " .
             " end_node, end_offset, " .
             " is_full_segment, penalty_points, comment, " .
-            " target_text, uid " .
+            " target_text, uid, source_page " .
             " ) VALUES ( " .
             " :id_segment, :id_job, :id_category, :severity, " .
             " :translation_version, :start_node, :start_offset, " .
             " :end_node, :end_offset, " .
             " :is_full_segment, :penalty_points, :comment, " .
-            " :target_text, :uid " .
+            " :target_text, :uid, :source_page " .
             " ) ; " ;
 
         $conn = \Database::obtain()->getConnection();
@@ -138,7 +138,7 @@ class EntryDao extends \DataAccess_AbstractDao {
                 'id_segment', 'id_job', 'id_category', 'severity',
                 'translation_version', 'start_node', 'start_offset',
                 'end_node', 'end_offset', 'is_full_segment',
-                'penalty_points', 'comment', 'target_text', 'uid')
+                'penalty_points', 'comment', 'target_text', 'uid', 'source_page' )
         );
 
         \Database::obtain()->begin();
@@ -222,7 +222,7 @@ class EntryDao extends \DataAccess_AbstractDao {
             'id' => $id
         );
 
-        $stmt = $this->con->prepare( $sql );
+        $stmt = $this->database->prepare( $sql );
 
         $stmt->execute( $opts );
 

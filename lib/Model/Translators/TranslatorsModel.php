@@ -137,6 +137,10 @@ class TranslatorsModel {
 
     }
 
+    /**
+     * @return JobsTranslatorsStruct
+     * @throws \Exception
+     */
     public function update() {
 
         $confDao            = new ConfirmationDao();
@@ -204,7 +208,9 @@ class TranslatorsModel {
         $jTranslatorsDao->insertStruct( $translatorStruct, [
                 'no_nulls'            => true,
                 'on_duplicate_update' => [
-                        'delivery_date = VALUES( delivery_date ), job_password = VALUES( job_password ), job_owner_timezone = VALUES( job_owner_timezone )'
+                        'delivery_date'      => 'value',
+                        'job_password'       => 'value',
+                        'job_owner_timezone' => 'value'
                 ]
         ] );
 

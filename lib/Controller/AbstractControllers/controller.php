@@ -97,7 +97,6 @@ abstract class controller implements IController {
         $className  = $action . "Controller";
 
         //Put here all actions we want to be performed by ALL controllers
-        require_once INIT::$MODEL_ROOT . '/queries.php';
 
         return new $className();
 

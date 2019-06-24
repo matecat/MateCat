@@ -436,12 +436,13 @@
             }
         },
         isReadonlySegment : function( segment ) {
-            return ( (segment.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
+            return ( segment.readonly == 'true' ||UI.body.hasClass('archived')) ;
         },
 
         isUnlockedSegment: function ( segment ) {
-            var readonly = UI.isReadonlySegment(segment);
-            return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid))
+            // var readonly = UI.isReadonlySegment(segment) ;
+            // return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid));
+            return !_.isNull(UI.getFromStorage('unlocked-' + segment.sid));
         },
         getStatusForAutoSave : function( segment ) {
             var status ;
@@ -736,6 +737,7 @@
             } else {
                 return API.SEGMENT.approveSegments(segmentsArray).then(function ( response ) {
                     self.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
+                    UI.retrieveStatistics();
                 });
             }
         },
@@ -750,6 +752,7 @@
             } else {
                 return API.SEGMENT.translateSegments(segmentsArray).then(function ( response ) {
                     self.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
+                    UI.retrieveStatistics();
                 });
             }
         },

@@ -8,8 +8,9 @@
 
 namespace Features\ReviewExtended\Model;
 
+use Constants;
 use DataAccess_AbstractDao;
-use Database ;
+use Database;
 
 class QualityReportDao extends DataAccess_AbstractDao {
 
@@ -192,6 +193,7 @@ SQL;
   issues.id as issue_id,
   issues.create_date as issue_create_date,
   issues.replies_count as issue_replies_count,
+  issues.source_page as source_page,
 
   -- start_offset and end_offset were introduced for DQF. We are taking for granted a string with
   -- both start_node and end_node equal to 0 ( no tags in target string ).
@@ -214,7 +216,7 @@ FROM  qa_entries issues
 
 JOIN (
 		SELECT ? as id_segment
-		".$prepare_str_segments_id."
+		" . $prepare_str_segments_id . "
 ) AS SLIST USING( id_segment )
 
   LEFT JOIN qa_categories
@@ -236,14 +238,17 @@ JOIN (
         return $stmt->fetchAll();
     }
 
-    public function getReviseIssuesByChunk($job_id, $password){
+    public function getReviseIssuesByChunk($job_id, $password, $source_page = null ) {
+
+        if ( is_null( $source_page ) ) {
+            $source_page = Constants::SOURCE_PAGE_REVISION  ;
+        }
 
         $sql = "SELECT
-
-  issues.id as issue_id,
-  qa_categories.label   as issue_category_label,
-  issues.id_category as id_category,
-  issues.severity     as issue_severity
+  issues.id             AS issue_id,
+  qa_categories.label   AS issue_category_label,
+  issues.id_category    AS id_category,
+  issues.severity       AS issue_severity
 
 FROM  qa_entries issues
 
@@ -254,16 +259,15 @@ JOIN jobs j ON issues.id_job = j.id
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
 
-
     WHERE j.id = ? AND j.password = ?
-
+      AND issues.source_page = ?
   ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
-        $stmt->execute( array($job_id, $password) );
+        $stmt->execute( array( $job_id, $password, $source_page ) );
 
         return $stmt->fetchAll();
 

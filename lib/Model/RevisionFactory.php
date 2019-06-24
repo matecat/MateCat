@@ -9,13 +9,18 @@
 class RevisionFactory {
 
     /** @var  \Features\AbstractRevisionFeature */
-    protected $revision ;
+    protected        $revision ;
     protected static $INSTANCE ;
+
+    /**
+     * @var FeatureSet
+     */
+    protected        $_featureSet;
 
     /**
      * @param \Features\BaseFeature|null $revisionFeature
      *
-     * @return \Features\AbstractRevisionFeature
+     * @return RevisionFactory
      * @throws Exception
      */
     public static function getInstance( $revisionFeature = null ) {
@@ -35,17 +40,45 @@ class RevisionFactory {
         return $this->revision->getChunkReviewModel( $chunkReviewStruct );
     }
 
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
-        return $this->revision->getSegmentTranslationModel( $translation ) ;
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews ) {
+        return $this->revision->getSegmentTranslationModel( $translation, $chunkReviews ) ;
     }
 
+    /**
+     * @param FeatureSet $featureSet
+     *
+     * @return $this
+     */
+    public function setFeatureSet( FeatureSet $featureSet ) {
+        $this->_featureSet = $featureSet ;
+        return $this ;
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @param $issue
+     *
+     * @return mixed
+     */
     public function getTranslationIssueModel( $id_job, $password, $issue) {
-        return $this->revision->getTranslationIssueModel( $id_job, $password, $issue ) ;
+        if ( in_array(Features::SECOND_PASS_REVIEW, $this->_featureSet->getCodes() ) ) {
+            return new \Features\SecondPassReview\TranslationIssueModel($id_job, $password, $issue ) ;
+        } else {
+            return $this->revision->getTranslationIssueModel( $id_job, $password, $issue ) ;
+        }
     }
 
     public static function initFromProject( Projects_ProjectStruct $project ) {
         $project->getFeatures();
         return static::getInstance() ;
+    }
+
+    /**
+     * @return \Features\AbstractRevisionFeature|\Features\BaseFeature
+     */
+    public function getFeature() {
+        return $this->revision ;
     }
 
 }

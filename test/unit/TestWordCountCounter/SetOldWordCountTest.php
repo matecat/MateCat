@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_Counter::setOldWordCount
+ * @covers WordCount_CounterModel::setOldWordCount
  * User: dinies
  * Date: 15/06/16
  * Time: 17.27
@@ -12,11 +12,11 @@ class SetOldWordCountTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers WordCount_Counter::setOldWordCount
+     * @covers WordCount_CounterModel::setOldWordCount
     */
     public function test_setOldWordCount(){
 
-        $word_count= new WordCount_Counter();
+        $word_count= new WordCount_CounterModel();
 
 
         $word_count_struct= new WordCount_Struct();

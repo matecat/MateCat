@@ -33,9 +33,12 @@ h1, h2, h3, h4, h5, a, input {
                 overflow-y: auto;
                 max-height: 250px;
                 padding-bottom: 5px;
+                &.no-scroll {
+                    overflow-y: hidden;
+                }
                 .re-item-head {
                     border-bottom: 1px solid #f2f4f7;
-                    margin-top: 10px;
+                    padding-top: 10px;
                     margin-right: 1px;
                     font-size: 16px;
                     font-weight: bold;
@@ -105,6 +108,9 @@ h1, h2, h3, h4, h5, a, input {
                                 margin-bottom: 0;
                                 .re-revisor {
                                     color: #00b76c;
+                                }
+                                .re-revisor2 {
+                                    color: #BC6AC9;
                                 }
                                 .re-translator {
                                     color: #0997bc;
@@ -334,6 +340,29 @@ section {
             //background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
             margin-top: 18px;
         }
+        .revise-qr-link {
+            float: left;
+            min-width: 20px;
+            cursor: pointer;
+            border-radius: 3px;
+            //padding: 2px;
+            border: 1px solid #C6C6C6;
+            margin-right: 10px;
+            color: #333 !important;
+            font-size: 16px;
+            line-height: 20px;
+            font-weight: bold;
+            background: #ffffff;
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+        .revise-qr-link.hover {
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+            color: #222;
+            //background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
+            margin-top: 18px;
+        }
         //.revise-lock-editArea:before {
         //    font-size: 19px;
         //    display: block;
@@ -394,7 +423,12 @@ section {
     &:not(.opened) .revise-button-counter {
         top: 50px;
     }
-
+    .revise-button-2 {
+        background: #BC6AC9;
+    }
+    &.approved-step-2 .status {
+        background-color: #BC6AC9 !important;
+    }
 }
 
 

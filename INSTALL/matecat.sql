@@ -882,7 +882,7 @@ CREATE TABLE `segment_translation_events` (
 --
 
 DROP TABLE IF EXISTS `segment_translation_versions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET @saved_cs_client    = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segment_translation_versions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1198,7 +1198,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-20 11:23:32
+-- Dump completed on 2019-06-20 19:47:08
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1377,4 +1377,4 @@ INSERT INTO `phinxlog` VALUES (20181026145655,'2018-10-31 12:59:37','2018-10-31 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-20 11:23:32
+-- Dump completed on 2019-06-20 19:47:09

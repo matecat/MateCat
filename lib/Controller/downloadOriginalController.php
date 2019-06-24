@@ -46,7 +46,7 @@ class downloadOriginalController extends downloadController {
 
         //get storage object
         $fs        = new FilesStorage();
-        $files_job = $fs->getOriginalFilesForJob( $this->id_job, $this->id_file, $this->password );
+        $files_job = $fs->getOriginalFilesForJob( $this->id_job, $this->password );
 
         //take the project ID and creation date, array index zero is good, all id are equals
         $this->id_project   = $files_job[0]['id_project'];

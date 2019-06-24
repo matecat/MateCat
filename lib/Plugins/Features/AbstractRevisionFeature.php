@@ -7,6 +7,7 @@ use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
+use Constants;
 use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
@@ -15,6 +16,7 @@ use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\Model\QualityReportModel;
+use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 use FilesStorage;
 use INIT;
 use Jobs_JobStruct;
@@ -118,9 +120,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         return $options ;
     }
 
-
     /**
-     *
      * @param $project
      */
     public function filter_manage_single_project( $project ) {
@@ -166,26 +166,38 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param       $id_project
      * @param array $options
      *
+     * @return ChunkReviewStruct[]
      * @throws \Exceptions\ValidationError
+     *
      */
-    protected function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
+    public function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
+        $project = Projects_ProjectDao::findById( $id_project );
+        $chunks = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
+        $createdRecords = [] ;
 
-        $chunks     = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
+        // expect one chunk
+        if ( ! isset( $options['source_page'] ) ) {
+            $options['source_page'] = Constants::SOURCE_PAGE_REVISION ;
+        }
 
         foreach ( $chunks as $k => $chunk ) {
             $data = [
-                    'id_project' => $id_project,
-                    'id_job'     => $chunk->id,
-                    'password'   => $chunk->password
+                    'id_project'  => $id_project,
+                    'id_job'      => $chunk->id,
+                    'password'    => $chunk->password,
+                    'source_page' => $options['source_page']
             ];
 
             if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
                 $data[ 'review_password' ] = $options[ 'first_record_password' ];
             }
 
-            ChunkReviewDao::createRecord( $data );
+            $chunkReview = ChunkReviewDao::createRecord( $data );
+            $project->getFeatures()->run('chunkReviewRecordCreated', $chunkReview );
+            $createdRecords[] = $chunkReview ;
         }
 
+        return $createdRecords;
     }
 
     /**
@@ -266,34 +278,21 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     /**
      * Entry point for project data validation for this feature.
+     *
+     * @param $projectStructure
      */
     public function validateProjectCreation($projectStructure)  {
         self::loadAndValidateModelFromJsonFile($projectStructure);
     }
 
     /**
-     * @param $params['translation'] Translations_SegmentTranslationStruct
-     * @param $params['old_translation'] Translations_SegmentTranslationStruct
-     * @param $params['propagated_ids'] array
+     * @param TranslationVersions\Model\BatchEventCreator $eventCreator
      *
+     * @internal param SegmentTranslationEventModel $event
      */
-    public function setTranslationCommitted( $params) {
-        $new_translation = $params['translation'];
-        $old_translation = $params['old_translation'];
-        $propagated_ids  = $params['propagated_ids'] ;
-
-        $translation_model = new SegmentTranslationChangeVector( $new_translation );
-
-        $translation_model->setPropagatedIds( $propagated_ids );
-        $translation_model->setOldTranslation( $old_translation );
-
-        $this->updateRevisionScore( $translation_model );
-    }
-
-    public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
-        $model = $this->getSegmentTranslationModel( $translation );
-        $model->addOrSubtractCachedReviewedWordsCount();
-        $model->recountPenaltyPoints();
+    public function batchEventCreationSaved( Features\TranslationVersions\Model\BatchEventCreator $eventCreator ) {
+        $batchReviewProcessor = new Features\ReviewExtended\Model\BatchReviewProcessor( $eventCreator ) ;
+        $batchReviewProcessor->process();
     }
 
     /**
@@ -481,11 +480,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     /**
      * @param SegmentTranslationChangeVector $translation
      *
+     * @param array                          $chunkReviews
+     *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews = [] ) {
         $class_name = get_class( $this ) . '\SegmentTranslationModel' ;
-        return new $class_name( $translation );
+        return new $class_name( $translation, $chunkReviews );
     }
 
     /**

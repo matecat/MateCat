@@ -408,7 +408,7 @@ $.extend(UI, {
 
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
-			if (UI.currentSegment) {
+			if (UI.currentSegment  && (!config.isReview) && UI.getStatus(UI.currentSegment) !== 'approved') {
                 UI.saveSegment(UI.currentSegment);
             }
 			CatToolActions.toggleQaIssues();
@@ -470,11 +470,15 @@ $.extend(UI, {
 });
 
 $(document).ready(function() {
+    var revision_number = (config.revisionNumber) ? config.revisionNumber : '1';
+    var qrParam = (config.secondRevisionsCount) ? '?revision_type=' + revision_number : '' ;
 	window.quality_report_btn_component = ReactDOM.render(
 		React.createElement( Review_QualityReportButton, {
 			vote                : config.overall_quality_class,
-			quality_report_href : config.quality_report_href
+			quality_report_href : config.quality_report_href + qrParam
 		}), $('#quality-report-button')[0] );
-
+	if ( config.secondRevisionsCount ) {
+        UI.reloadQualityReport();
+    }
 });
 
