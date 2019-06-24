@@ -116,12 +116,16 @@ class SegmentTranslationChangeVector {
     }
 
     /**
+     * This method returns true when we are changing and ICE 'APPROVED' to TRANSLATE
      *
      * @return bool
      */
     public function isModifyingICEFromTranslation() {
         return $this->old_translation->isICE() &&
-                $this->old_translation->translation != $this->translation->translation &&
+                $this->old_translation->isReviewedStatus() &&
+                $this->translation->isTranslationStatus() &&
+                $this->eventModel->getOriginSourcePage() == Constants::SOURCE_PAGE_REVISION &&
+                $this->old_translation->translation !== $this->translation->translation &&
                 $this->old_translation->version_number == 0 ;
     }
 
