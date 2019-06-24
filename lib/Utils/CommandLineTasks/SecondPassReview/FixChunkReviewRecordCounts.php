@@ -8,8 +8,8 @@
 
 namespace CommandLineTasks\SecondPassReview;
 
-use Features\SecondPassReview\Model\ChunkReviewModel;
 use LQA\ChunkReviewDao;
+use RevisionFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,7 +19,7 @@ class FixChunkReviewRecordCounts extends Command
 {
     protected function configure() {
         $this
-                ->setName('2ndpass:recount')
+                ->setName('revision:recount')
                 ->setDescription('Fixes counts for second pass review chunk records')
                 ->setHelp('')
                 ->addArgument( 'id_job', InputArgument::REQUIRED, 'Job id')
@@ -28,20 +28,19 @@ class FixChunkReviewRecordCounts extends Command
 
     public function execute( InputInterface $input, OutputInterface $output ) {
 
-        foreach( [1,2,3,4] as $k ) {
+        $allChunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([
+                [ $input->getArgument('id_job'), $input->getArgument('password') ]
+        ]) ;
 
-            $allChunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([
-                    [ $input->getArgument('id_job'), $input->getArgument('password') ]
-            ]) ;
+        $project = $allChunkReviews[0]->getChunk()->getProject() ;
+        $revisionFactory = RevisionFactory::initFromProject( $project )->setFeatureSet( $project->getFeatures() ) ;
 
-            foreach ( $allChunkReviews as $chunkReview ) {
-                $model = new ChunkReviewModel($chunkReview);
-                $start = microtime(true) ;
-                $model->recountAndUpdatePassFailResult() ;
-                echo microtime(true ) - $start . "\n" ;
-            }
+        foreach ( $allChunkReviews as $chunkReview ) {
+            $model = $revisionFactory->getChunkReviewModel( $chunkReview ) ;
+            $start = microtime(true) ;
+            $model->recountAndUpdatePassFailResult() ;
+            echo microtime(true ) - $start . "\n" ;
         }
-
     }
 
 }

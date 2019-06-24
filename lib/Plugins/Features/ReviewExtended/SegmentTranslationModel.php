@@ -8,7 +8,6 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants;
 use Features\ISegmentTranslationModel;

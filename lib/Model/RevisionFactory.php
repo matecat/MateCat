@@ -37,7 +37,11 @@ class RevisionFactory {
     }
 
     public function getChunkReviewModel( \LQA\ChunkReviewStruct $chunkReviewStruct ) {
-        return $this->revision->getChunkReviewModel( $chunkReviewStruct );
+        if ( $this->_isSecondPass() ) {
+            return new \Features\SecondPassReview\Model\ChunkReviewModel( $chunkReviewStruct ) ;
+        } else {
+            return $this->revision->getChunkReviewModel( $chunkReviewStruct );
+        }
     }
 
     public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews ) {
@@ -62,7 +66,7 @@ class RevisionFactory {
      * @return mixed
      */
     public function getTranslationIssueModel( $id_job, $password, $issue) {
-        if ( in_array(Features::SECOND_PASS_REVIEW, $this->_featureSet->getCodes() ) ) {
+        if ( $this->_isSecondPass() ) {
             return new \Features\SecondPassReview\TranslationIssueModel($id_job, $password, $issue ) ;
         } else {
             return $this->revision->getTranslationIssueModel( $id_job, $password, $issue ) ;
@@ -81,4 +85,7 @@ class RevisionFactory {
         return $this->revision ;
     }
 
+    protected function _isSecondPass() {
+        return in_array(Features::SECOND_PASS_REVIEW, $this->_featureSet->getCodes()) ;
+    }
 }
