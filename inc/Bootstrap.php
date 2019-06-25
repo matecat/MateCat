@@ -188,7 +188,9 @@ class Bootstrap {
             \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         }
 
-        header( "HTTP/1.1 " . $code . " " . $message );
+        if ( stripos( PHP_SAPI, 'cli' ) === false ) {
+            header( "HTTP/1.1 " . $code . " " . $message );
+        }
 
         if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
@@ -264,7 +266,9 @@ class Bootstrap {
                 Log::doJsonLog( $output );
                 Utils::sendErrMailReport( $output );
 
-                header( "HTTP/1.1 200 OK" );
+                if ( stripos( PHP_SAPI, 'cli' ) === false ) {
+                    header( "HTTP/1.1 200 OK" );
+                }
 
                 if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 

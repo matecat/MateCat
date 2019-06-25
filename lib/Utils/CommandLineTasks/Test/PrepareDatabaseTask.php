@@ -64,6 +64,9 @@ class PrepareDatabaseTask extends Command
         foreach($tables as $k => $statement) {
             $testDatabase->execSql($statement);
         }
+
+        $testDatabase->resetAllTables();
+
     }
 
 }
