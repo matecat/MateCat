@@ -58,7 +58,7 @@ class XliffParserTest extends AbstractTest {
         $xliff     = $xliff_obj->Xliff2Array( $content );
 
         $this->assertEquals(
-           "&lt;script&gt;alert(&#039;This is malicious code&#039;);&lt;/script&gt;",
+           "&lt;script&gt;alert('This is malicious code');&lt;/script&gt;",
             $xliff['files'][3]['trans-units'][1]['notes'][0]['raw-content']
         );
 
@@ -84,7 +84,7 @@ class XliffParserTest extends AbstractTest {
                 '<ept id="1">Hey</ept>' => '<ept id="1">Hey</ept>',
                 '<ph id="1">Hey</ph>' => '<ph id="1">Hey</ph>',
                 '<it id="1">Hey</it>' => '<it id="1">Hey</it>',
-                '<mrk mid="3" mtype="seg"><g id="2">Hey man! <x id="1"/><b id="dunno">Hey man & hey girl!</b></mrk>' => '<mrk mid="3" mtype="seg"><g id="2">Hey man! <x id="1"/>&lt;b id=&quot;dunno&quot;&gt;Hey man &amp; hey girl!&lt;/b&gt;</mrk>',
+                '<mrk mid="3" mtype="seg"><g id="2">Hey man! <x id="1"/><b id="dunno">Hey man & hey girl!</b></mrk>' => '<mrk mid="3" mtype="seg"><g id="2">Hey man! <x id="1"/>&lt;b id="dunno"&gt;Hey man &amp; hey girl!&lt;/b&gt;</mrk>',
         );
 
         foreach ($tests as $in => $expected) {
@@ -96,7 +96,7 @@ class XliffParserTest extends AbstractTest {
 
     public function testEmptySelfClosedTargetTagWithAltTrans(){
 
-        $x = "id=\"0000000121\" datatype=\"x-text/x-4cb\" restype=\"string\">
+        $x = "<trans-unit id=\"0000000121\" datatype=\"x-text/x-4cb\" restype=\"string\">
     <source>We’ve decreased the amount of money from sales immediately available to you each month</source>
     <target/>
     <alt-trans match-quality=\"100.00\" origin=\"Sparta CAT\">
@@ -111,15 +111,14 @@ class XliffParserTest extends AbstractTest {
 
         $xliff = [];
         $refMethod->invokeArgs( new Xliff_Parser(), [ &$xliff, 0, 0, $x ] );
-
-        $this->assertEmpty( $xliff );
+        $this->assertEmpty( $xliff[ 'files' ][ 0 ][ 'trans-units' ][ 0 ][ 'target' ][ 'raw-content' ] );
 
 
     }
 
     public function testEmptyNotSelfClosedTargetTagWithAltTrans(){
 
-        $x = "id=\"0000000121\" datatype=\"x-text/x-4cb\" restype=\"string\">
+        $x = "<trans-unit id=\"0000000121\" datatype=\"x-text/x-4cb\" restype=\"string\">
     <source>We’ve decreased the amount of money from sales immediately available to you each month</source>
     <target></target>
     <alt-trans match-quality=\"100.00\" origin=\"Sparta CAT\">
@@ -135,14 +134,14 @@ class XliffParserTest extends AbstractTest {
         $xliff = [];
         $refMethod->invokeArgs( new Xliff_Parser(), [ &$xliff, 0, 0, $x ] );
 
-        $this->assertEmpty( $xliff );
+        $this->assertEmpty( $xliff[ 'files' ][ 0 ][ 'trans-units' ][ 0 ][ 'target' ][ 'raw-content' ] );
 
 
     }
 
     public function testNotEmptyTargetTagWithNotOrderedAltTrans(){
 
-        $x = "id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
+        $x = "<trans-unit id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
     <alt-trans match-quality=\"100.00\" origin=\"Sparta CAT\">
         <source>We’ve decreased the amount of money from sales immediately available to you each month</source>
         <target>Hemos disminuido el importe mensual procedente de las ventas del que puede disponer inmediatamente</target>
@@ -165,7 +164,7 @@ class XliffParserTest extends AbstractTest {
 
     public function testNotEmptyTargetTagWithoutAltTrans(){
 
-        $x = "id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
+        $x = "<trans-unit id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
     <source>PPC000460</source>
     <target>PPC000460</target>
 </trans-unit>";
@@ -185,7 +184,7 @@ class XliffParserTest extends AbstractTest {
 
     public function testNotEmptyTargetTagWithMrkWithAltTrans(){
 
-        $x = "id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
+        $x = "<trans-unit id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
     <source><mrk id=\"1\">PPC000460</mrk></source>
     <target><mrk id=\"1\">PPC000460</mrk></target>
     <alt-trans match-quality=\"100.00\" origin=\"Sparta CAT\">
@@ -208,7 +207,7 @@ class XliffParserTest extends AbstractTest {
 
     public function testNotEmptyTargetTagWithSomeMrkWithAltTrans(){
 
-        $x = "id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
+        $x = "<trans-unit id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
     <alt-trans match-quality=\"100.00\" origin=\"Sparta CAT\">
         <source>We’ve decreased the amount of money from sales immediately available to you each month</source>
         <target>Hemos disminuido el importe mensual procedente de las ventas del que puede disponer inmediatamente</target>
@@ -234,7 +233,7 @@ class XliffParserTest extends AbstractTest {
 
     public function testNotEmptyTargetTagWithSomeMrkAndHtmlWithAltTrans(){
 
-        $x = "id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
+        $x = "<trans-unit id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
     <alt-trans match-quality=\"100.00\" origin=\"Sparta CAT\">
         <source>We’ve decreased the amount of money from sales immediately available to you each month</source>
         <target>Hemos disminuido el importe mensual procedente de las ventas del que puede disponer inmediatamente</target>
@@ -255,7 +254,7 @@ class XliffParserTest extends AbstractTest {
 
         $this->assertNotEmpty( $xliff );
         $this->assertEquals(
-                "<mrk id=\"1\">Test1</mrk><mrk id=\"2\">Test2<ex id=\"1\">Another Test Inside</ex></mrk><mrk id=\"3\">Test3&lt;a href=&quot;https://example.org&quot;&gt;ClickMe!&lt;/a&gt;</mrk>",
+                "<mrk id=\"1\">Test1</mrk><mrk id=\"2\">Test2<ex id=\"1\">Another Test Inside</ex></mrk><mrk id=\"3\">Test3&lt;a href=\"https://example.org\"&gt;ClickMe!&lt;/a&gt;</mrk>",
                 $xliff[ 'files' ][ 0 ][ 'trans-units' ][ 0 ][ 'target' ][ 'raw-content' ]
         );
 
@@ -263,7 +262,7 @@ class XliffParserTest extends AbstractTest {
 
     public function testComplexStructure(){
 
-        $x = "id=\"0000000035\" datatype=\"x-text/x-4cb\" restype=\"string\">
+        $x = "<trans-unit id=\"0000000035\" datatype=\"x-text/x-4cb\" restype=\"string\">
     <source>
         <ph id=\"59\" x=\"&lt;endcmp/>\">{59}</ph>
         <ph id=\"60\" x=\"&lt;/span>\">{60}</ph>
@@ -355,7 +354,8 @@ class XliffParserTest extends AbstractTest {
         <iws:attribute name=\"_tm_modified_by\">Marta Chico</iws:attribute>
         <iws:attribute name=\"_tm_modified_date\">1503056686433</iws:attribute>
         <iws:attribute name=\"_tm_sid\">msgrenderingapp/Transactions/Holds/PPC000460/perm13/en_AD/messageSubject/d41d8cd98f00b204e9800998ecf8427e</iws:attribute>
-    </alt-trans>";
+    </alt-trans>
+    </trans-unit>";
 
 
         $refMethod = new ReflectionMethod( 'Xliff_Parser', 'getTarget' );

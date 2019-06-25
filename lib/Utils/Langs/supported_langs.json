@@ -1949,6 +1949,16 @@
     ,
         {
             "localized":[{
+                "en":"Spanish United States"
+            }],
+            "isocode":"es",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"es-US"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Spanish Argentina"
             }],
             "isocode":"es",

@@ -101,9 +101,8 @@ LXQ.init  = function () {
         if (data.segment.raw) {
           segment = data.segment.raw;
         }
-        var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
         var id_segment = UI.getSegmentId(segment);
-        LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
+        LXQ.doLexiQA(segment, id_segment,false, function () {}) ;
     });
     /* Invoked when page loads */
     $(document).on('getWarning:global:success', function(e, data) {
@@ -118,8 +117,7 @@ LXQ.init  = function () {
     /* invoked when segment is completed (translated clicked)*/
     $(document).on('setTranslation:success', function(e, data) {
         var segment = data.segment;
-        var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
-        LXQ.doLexiQA(segment,translation,UI.getSegmentId(segment),true,null);
+        LXQ.doLexiQA(segment,UI.getSegmentId(segment),true,null);
     });
     /* invoked when more segments are loaded...*/
     $( window ).on( 'segmentsAdded', function ( e , data) {
@@ -476,6 +474,7 @@ LXQ.init  = function () {
                         skip = false;
                 }
             }
+            text = text.replace(/<br>/g,'<br>\uFFFF')
             var spcsBeforeRegex = /(( |\&nbsp;)+)<span id="selectionBoundary_/g;
             var spacesBefore = '';
             var match;
@@ -687,6 +686,7 @@ LXQ.init  = function () {
             }
             spcsBeforeRegex.lastIndex = 0;
             text = text.replace(spcsBeforeRegex,spacesBefore+'<span id="selectionBoundary_');
+            text = text.replace(/\uFFFF/g,'')
             return text;
         };
         var toggleHighlighting = function () {
@@ -1152,7 +1152,7 @@ LXQ.init  = function () {
             var seg =  UI.getSegmentById(segment);
             if (UI.getSegmentTarget(seg).length > 0) {
                 // console.log('Requesting QA for: '+segment);
-                LXQ.doLexiQA(seg, UI.getSegmentTarget(seg),segment, true, checkNextUncheckedSegment);
+                LXQ.doLexiQA(seg,segment, true, checkNextUncheckedSegment);
             }
             else {
                 checkNextUncheckedSegment();
@@ -1308,7 +1308,7 @@ LXQ.init  = function () {
     },
 
 
-        doLexiQA: function ( segment, translation, id_segment, isSegmentCompleted, callback ) {
+        doLexiQA: function ( segment, id_segment, isSegmentCompleted, callback ) {
             if ( !LXQ.enabled() ) {
                 if ( callback !== undefined && typeof callback === 'function' ) {
                     callback();
@@ -1322,8 +1322,10 @@ LXQ.init  = function () {
             //     .replace( /\&gt;/g, '>' )
             //     .replace( /\&lt;/g, '<' );
 
-            var sourcetext = $( segment ).find( '.source' ).text();
-
+            //var sourcetext = $( segment ).find( '.source' ).text();
+            var sourcetext = UI.getSegmentSource(segment)
+            var translation = UI.postProcessEditarea(segment, '.targetarea');
+            translation = UI.clenaupTextFromPleaceholders( translation ).replace(/\uFEFF/g,'');
             var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;
             $.lexiqaAuthenticator.doLexiQA(
                 {

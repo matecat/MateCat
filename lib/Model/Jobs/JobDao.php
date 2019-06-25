@@ -132,7 +132,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
             $fetchObject = new Jobs_JobStruct();
         }
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [
+        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, $fetchObject, [
                 'id_job' => $id_job,
                 'password' => $password
         ] )[ 0 ];

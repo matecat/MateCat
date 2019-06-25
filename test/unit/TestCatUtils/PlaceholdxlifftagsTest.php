@@ -1,9 +1,11 @@
 <?php
 
+use SubFiltering\Filters\PlaceHoldXliffTags;
+
 /**
  * @group regression
- * @covers CatUtils::placehold_xliff_tags
- * this battery of tests sends one string in input as $source_segment to CatUtils::placehold_xliff_tags method and
+ * @covers PlaceHoldXliffTags::transform
+ * this battery of tests sends one string in input as $source_segment to ( new PlaceHoldXliffTags() )->transform method and
  * verifies that the output is equal to the $expected_segment.
  * User: dinies
  * Date: 31/03/16
@@ -15,7 +17,7 @@ class PlaceholdxlifftagsTest extends AbstractTest
     protected $expected_segment;
     /**
      * @group regression
-     * @covers CatUtils::placehold_xliff_tags
+     * @covers PlaceHoldXliffTags::transform
      */
     public function testplaceholdxlifftags_japanese_short()
     {
@@ -25,12 +27,12 @@ LAB;
         $this->expected_segment = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##6) ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##阪  眞##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##: ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##YnggaWQ9IjQiLw==##GREATERTHAN##胃術後の栄養障害と栄養補給法．
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::placehold_xliff_tags($this->source_segment));
+        $this->assertEquals($this->expected_segment, ( new PlaceHoldXliffTags() )->transform($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::placehold_xliff_tags
+     * @covers PlaceHoldXliffTags::transform
      */
     public function testplaceholdxlifftags_japanese_long()
     {
@@ -44,12 +46,12 @@ LAB;
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##ΤΕΥΧΟΣ ΔΕΥΤΕΡΟ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##  ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##Αο, Φύλλου 2326##LESSTHAN##L2c=##GREATERTHAN##
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##2 ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##.##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::placehold_xliff_tags($this->source_segment));
+        $this->assertEquals($this->expected_segment, ( new PlaceHoldXliffTags() )->transform($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::placehold_xliff_tags
+     * @covers PlaceHoldXliffTags::transform
      */
     public function testplaceholdxlifftags_english_short()
     {
@@ -59,12 +61,12 @@ LAB;
         $this->expected_segment = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##12.3.##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN## Upon termination of this Agreement for whatever reasons, the Franchisee shall at the request of the Franchisor promptly return all documentation in the possession or control of the Franchisee relating to the Pr##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##YnggaWQ9IjMiLw==##GREATERTHAN##oducts, Services or business activities and affairs of the Franchisor.
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::placehold_xliff_tags($this->source_segment));
+        $this->assertEquals($this->expected_segment, ( new PlaceHoldXliffTags() )->transform($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::placehold_xliff_tags
+     * @covers PlaceHoldXliffTags::transform
      */
     public function testplaceholdxlifftags_deustsch()
     {
@@ -74,12 +76,12 @@ LAB;
         $this->expected_segment = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##derselbe soll dir den Kopf zertreten“##LESSTHAN##L2c=##GREATERTHAN##,  (Hinweis auf Satan) und du wirst ihn in die Ferse stechen (Hinweis auf den Tode des Messias, Ferse hat eine wichtige Bedeutung in der semitischen Kultur).
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::placehold_xliff_tags($this->source_segment));
+        $this->assertEquals($this->expected_segment, ( new PlaceHoldXliffTags() )->transform($this->source_segment));
     }
 
     /**
      * @group regression
-     * @covers CatUtils::placehold_xliff_tags
+     * @covers PlaceHoldXliffTags::transform
      */
     public function testplaceholdxlifftags_very_long()
     {
@@ -97,6 +99,6 @@ LAB;
 ##LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##k##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##0##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNCI=##GREATERTHAN##k##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNSI=##GREATERTHAN##'    ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNiI=##GREATERTHAN##ap##LESSTHAN##L2c=##GREATERTHAN##
 ##LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##[0079] ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##V##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNCI=##GREATERTHAN##f ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNSI=##GREATERTHAN##= - ##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $this->assertEquals($this->expected_segment, CatUtils::placehold_xliff_tags($this->source_segment));
+        $this->assertEquals($this->expected_segment, ( new PlaceHoldXliffTags() )->transform($this->source_segment));
     }
 }
