@@ -2257,8 +2257,7 @@ UI = {
 
                 SegmentActions.setSegmentPropagation(UI.getSegmentId(this), UI.getSegmentFileId(this), true ,UI.getSegmentId(segment));
 
-                var trans = UI.postProcessEditarea(segment, '.targetarea').replace(/\uFEFF/g,'');
-                LXQ.doLexiQA(this,trans,UI.getSegmentId(this),true,null);
+                LXQ.doLexiQA(this,UI.getSegmentId(this),true,null);
             });
 
             //unset actual segment as autoPropagated because now it is translated
