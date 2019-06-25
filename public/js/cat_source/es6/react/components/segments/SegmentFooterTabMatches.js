@@ -30,10 +30,10 @@ class SegmentFooterTabMatches extends React.Component {
                 (
                     this.sentence_confidence !== "" &&
                     this.sentence_confidence !== 0 &&
-                    this.sentence_confidence != "0" &&
+                    this.sentence_confidence !== "0" &&
                     this.sentence_confidence !== null &&
                     this.sentence_confidence !== false &&
-                    typeof this.sentence_confidence != 'undefined'
+                    typeof this.sentence_confidence !== 'undefined'
                 )
             ) {
                 item.suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";

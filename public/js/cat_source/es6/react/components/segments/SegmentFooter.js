@@ -91,7 +91,7 @@ class SegmentFooter extends React.Component {
         };
 
         this.state = {
-            tabs: this.registerTabInit(tabs, SegmentStore._footerTabsConfig),
+            tabs: this.registerTabInit(tabs, SegmentStore._footerTabsConfig.toJS()),
             hideMatches: hideMatches
         };
         this.registerTab = this.registerTab.bind(this);
@@ -100,7 +100,7 @@ class SegmentFooter extends React.Component {
         this.changeTab = this.changeTab.bind(this);
         this.openTab = this.openTab.bind(this);
         this.addTabIndex = this.addTabIndex.bind(this);
-        this.setDefaultTabOpen = this.setDefaultTabOpen.bind(this);
+        // this.setDefaultTabOpen = this.setDefaultTabOpen.bind(this);
     }
 
     registerTabInit(tabs,configs) {
@@ -156,7 +156,9 @@ class SegmentFooter extends React.Component {
                     code = {tab.code}
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
-                    id_segment = {this.props.sid}/>;
+                    id_segment = {this.props.sid}
+                    segment = {this.props.segment}
+                />;
                 break;
             case 'gl':
                 return <SegmentTabGlossary
@@ -164,7 +166,8 @@ class SegmentFooter extends React.Component {
                     code = {tab.code}
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
-                    id_segment = {this.props.sid}/>;
+                    id_segment = {this.props.sid}
+                    segment = {this.props.segment}/>;
                 break;
             case 'al':
                 return <SegmentTabConflicts
@@ -172,7 +175,9 @@ class SegmentFooter extends React.Component {
                     code = {tab.code}
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
-                    id_segment = {this.props.sid}/>;
+                    segment = {this.props.segment}
+                    id_segment = {this.props.sid}
+                />;
                 break;
             case 'notes':
                 return <SegmentTabMessages
@@ -183,7 +188,9 @@ class SegmentFooter extends React.Component {
                     id_segment = {this.props.sid}
                     notes={this.props.segment.notes}
                     context_groups={this.props.segment.context_groups}
-                    segmentSource = {this.props.segment.segment}/>;
+                    segmentSource = {this.props.segment.segment}
+                    segment = {this.props.segment}
+                />;
                 break;
             case 'cl':
                 return <SegmentFooterMultiMatches
@@ -218,16 +225,16 @@ class SegmentFooter extends React.Component {
             tabs: tabs
         });
     }
-    setDefaultTabOpen( sid, tabName) {
-        let tabs = jQuery.extend(true, {}, this.state.tabs);
-        if (tabs[tabName]) {
-            //Close all tabs
-            for ( let item in tabs ) {
-                tabs[item].open = false
-            }
-            tabs[tabName].open = true;
-        }
-    }
+    // setDefaultTabOpen( sid, tabName) {
+    //     let tabs = jQuery.extend(true, {}, this.state.tabs);
+    //     if (tabs[tabName]) {
+    //         //Close all tabs
+    //         for ( let item in tabs ) {
+    //             tabs[item].open = false
+    //         }
+    //         tabs[tabName].open = true;
+    //     }
+    // }
     openTab(sid, tabCode) {
         // Todo: refactoring, no jquery
         if (this.props.sid === sid ) {
@@ -291,7 +298,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.addListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
-        SegmentStore.addListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
+        // SegmentStore.addListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
     }
 
     componentWillUnmount() {
@@ -300,7 +307,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.removeListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
-        SegmentStore.removeListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
+        // SegmentStore.removeListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
     }
 
     componentWillMount() {

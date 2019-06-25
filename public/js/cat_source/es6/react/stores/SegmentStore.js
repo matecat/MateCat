@@ -58,7 +58,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
     segmentsInBulk: [],
-    _footerTabsConfig: {},
+    _footerTabsConfig: Immutable.fromJS({}),
     /**
      * Update all
      */
@@ -436,6 +436,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'unlocked'], unlocked);
     },
 
+    setConcordanceMatches: function (sid, matches ,errors) {
+        const index = this.getSegmentIndex(sid);
+        this._segments = this._segments.setIn([index, 'concordance'], Immutable.fromJS(matches));
+    },
     setContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'contributions'], Immutable.fromJS({
@@ -459,11 +463,17 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
     },
     setConfigTabs: function (tabName, visible, open) {
-        this._footerTabsConfig[tabName] = {
-            visible: visible,
-            open: open,
-            enabled: true
+        if ( open ) {
+            this._footerTabsConfig = this._footerTabsConfig.map((tab)=>tab.set('open', false));
         }
+        this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'visible'], visible);
+        this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'open'], open);
+        this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'enabled'], true);
+        // this._footerTabsConfig[tabName] = {
+        //     visible: visible,
+        //     open: open,
+        //     enabled: true
+        // }
     },
     getCurrentSegment: function(){
         let current = null,
@@ -593,7 +603,11 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.setConfigTabs(action.tab, action.visible, action.open);
-            SegmentStore.emitChange(action.actionType, action.tab, SegmentStore._footerTabsConfig);
+            SegmentStore.emitChange(action.actionType, action.tab, SegmentStore._footerTabsConfig.toJS());
+            break;
+        case SegmentConstants.SET_DEFAULT_TAB:
+            SegmentStore.setConfigTabs(action.tabName, true, true);
+            // SegmentStore.emitChange(action.actionType, action.tab, SegmentStore._footerTabsConfig);
             break;
         case SegmentConstants.MODIFY_TAB_VISIBILITY:
             SegmentStore.emitChange(action.actionType, action.tabName, action.visible);
@@ -613,6 +627,10 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.DELETE_CONTRIBUTION:
             SegmentStore.deleteContribution(action.sid, action.matchId);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.CONCORDANCE_RESULT:
+            SegmentStore.setConcordanceMatches(action.sid, action.matches);
+            SegmentStore.emitChange(action.actionType, action.sid, action.matches);
             break;
         case SegmentConstants.RENDER_GLOSSARY:
             SegmentStore.emitChange(action.actionType, action.sid, action.segment);

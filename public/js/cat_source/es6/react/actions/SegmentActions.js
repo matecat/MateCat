@@ -323,8 +323,7 @@ var SegmentActions = {
     setTabOpen: function (sid, tabName ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_DEFAULT_TAB,
-            sid: sid,
-            data: tabName
+            tabName: tabName
         });
     },
     renderPreview: function ( sid, data ) {
@@ -398,7 +397,7 @@ var SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CONCORDANCE_RESULT,
             sid: sid,
-            data: data
+            matches: data.matches
         });
     },
 
