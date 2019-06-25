@@ -28,7 +28,9 @@ class BatchReviewProcessor {
                 [ [ $this->_batchEventCreator->getChunk()->id, $this->_batchEventCreator->getChunk()->password ] ]
         ) ;
 
-        $revisionFactory = RevisionFactory::getInstance() ;
+        $project = $chunkReviews[0]->getChunk()->getProject() ;
+        $revisionFactory = RevisionFactory::initFromProject( $project )
+            ->setFeatureSet( $project->getFeatures() );
 
         foreach ( $this->_batchEventCreator->getPersistedEvents() as $event ) {
 
