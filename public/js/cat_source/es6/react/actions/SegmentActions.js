@@ -54,11 +54,29 @@ var SegmentActions = {
     },
 
     /********** Segment **********/
+    setOpenSegment: function (sid, fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_OPEN_SEGMENT,
+            sid: sid,
+            fid: fid
+        });
+    },
 
+    openSegment: function (sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_SEGMENT,
+            sid: sid
+        });
+    },
     closeSegment: function ( sid, fid ) {
         this.closeIssuesPanel();
     },
-
+    scrollToSegment: function (sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+            sid: sid,
+        });
+    },
     addClassToSegment: function (sid, newClass) {
         setTimeout( function () {
             AppDispatcher.dispatch({
@@ -243,12 +261,6 @@ var SegmentActions = {
             open: open
         });
     },
-    createFooter: function (sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.CREATE_FOOTER,
-            sid: sid
-        });
-    },
     setSegmentContributions: function (sid, fid, contributions, errors) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_CONTRIBUTIONS,
@@ -272,6 +284,17 @@ var SegmentActions = {
             actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
             sid: sid,
             index: index
+        });
+    },
+    deleteContribution: function(source, target, matchId, sid) {
+        UI.setDeleteSuggestion(source, target, matchId, sid).done((data) => {
+            if (data.errors.length === 0) {
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.DELETE_CONTRIBUTION,
+                    sid: sid,
+                    matchId: matchId
+                });
+            }
         });
     },
     renderSegmentGlossary: function(sid, segment) {
@@ -362,6 +385,13 @@ var SegmentActions = {
             sid: sid,
             data: data
         });
+    },
+
+    getContributions: function (sid, fid, target) {
+        let $segment = UI.getSegmentById(sid);
+        UI.getContribution($segment, 0);
+        UI.getContribution($segment, 1);
+        UI.getContribution($segment, 2);
     },
 
     setConcordanceResult: function (sid, data) {
@@ -496,8 +526,7 @@ var SegmentActions = {
             }
         } else {
             UI.addInStorage('unlocked-'+ segment.sid, true);
-            UI.editAreaClick(UI.getEditAreaBySegmentId(segment.sid));
-            setTimeout(()=> UI.cacheObjects(UI.getEditAreaBySegmentId(segment.sid)));
+            SegmentActions.openSegment(segment.sid);
 
         }
         AppDispatcher.dispatch({

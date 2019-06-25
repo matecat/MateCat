@@ -8,6 +8,7 @@ var EditArea = require('./Editarea').default;
 var TagsMenu = require('./TagsMenu').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
+const SegmentButtons = require('./SegmentButtons').default;
 
 
 class SegmentTarget extends React.Component {
@@ -80,6 +81,8 @@ class SegmentTarget extends React.Component {
     onClickEvent(event) {
         if (this.props.readonly) {
             UI.handleClickOnReadOnly($(event.currentTarget).closest('section'));
+        } else {
+            this.props.openSegment();
         }
     }
 
@@ -255,7 +258,7 @@ class SegmentTarget extends React.Component {
 
     componentWillUpdate() {
         this.beforeRenderActions();
-    }
+    }F
 
     componentDidUpdate() {
         this.afterRenderActions();
@@ -273,6 +276,10 @@ class SegmentTarget extends React.Component {
 
                 <ul className="buttons toggle" data-mount="main-buttons"
                     id={"segment-" + this.props.segment.sid + "-buttons"}/>
+
+                <SegmentButtons
+                    {...this.props}
+                />
 
                 {this.props.segment.warnings ?
                     <SegmentWarnings

@@ -137,7 +137,7 @@ if (SegmentFilter.enabled())
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     UI.scrollSegment( segment$, segmentToOpen );
                     if (segment$.length) {
-                        UI.openSegment( segment$ );
+                        SegmentActions.openSegment(segmentToOpen);
                     }
                 } else if ( lastSegmentId && !segmentIsInSample( lastSegmentId, data[ 'segment_ids' ] ) ) {
                     callbackForSegmentNotInSample( lastSegmentId )  ;
@@ -146,7 +146,7 @@ if (SegmentFilter.enabled())
                     var segment$ = UI.getSegmentById(segmentToOpen);
                     UI.scrollSegment(segment$, segmentToOpen);
                     if (segment$.length) {
-                        UI.openSegment(segment$)
+                        SegmentActions.openSegment(segmentToOpen);
                     }
                 }
 
@@ -168,7 +168,6 @@ if (SegmentFilter.enabled())
                 CatToolActions.setSegmentFilter(localStorageData.serverData, localStorageData.reactState);
                 this.filteringSegments = true;
                 setTimeout( function() {
-                    UI.createButtons();
                     tryToFocusLastSegment();
                 }, 200 );
             }
@@ -185,7 +184,6 @@ if (SegmentFilter.enabled())
             CatToolActions.closeSubHeader();
             this.open = false;
             SegmentActions.removeAllMutedSegments();
-            UI.createButtons();
             setTimeout( function() {
                 UI.scrollSegment( UI.currentSegment ) ;
             }, 600 );

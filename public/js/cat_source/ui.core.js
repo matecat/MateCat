@@ -58,8 +58,8 @@ UI = {
 	},
 
     activateSegment: function(segment) {
-        SegmentActions.createFooter(UI.getSegmentId(segment));
-		this.createButtons(segment);
+        // SegmentActions.createFooter(UI.getSegmentId(segment));
+		// this.createButtons(segment);
 
         $(document).trigger('segment:activate', { segment: segment } );
 	},
@@ -807,11 +807,11 @@ UI = {
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
 			    var segToScrollElem = ( UI.getSegmentById(options.segmentToScroll).length > 0 ) ? UI.getSegmentById(options.segmentToScroll) : UI.getSegmentsSplit(options.segmentToScroll)[0];
 				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
-				UI.openSegment(segToScrollElem);
+                SegmentActions.openSegment(options.segmentToScroll);
 			} else if (options.segmentToOpen) {
                 var segToScrollElem = UI.getSegmentById(options.segmentToOpen);
                 this.scrollSegment(segToScrollElem, options.segmentToOpen, options.highlight );
-                UI.openSegment(segToScrollElem);
+                SegmentActions.openSegment(options.segmentToOpen);
             }
 
 			if (options.applySearch) {
@@ -1028,6 +1028,7 @@ UI = {
                 var mountPoint = $(".article-segments-container")[0];
                 this.SegmentsContainers[0] = ReactDOM.render(React.createElement(SegmentsContainer, {
                     // fid: fid,
+                    isReview: Review.enabled(),
                     isReviewExtended: ReviewExtended.enabled(),
                     reviewType: Review.type,
                     enableTagProjection: UI.enableTagProjection,
@@ -2509,11 +2510,10 @@ UI = {
         }
 
         if (buttonValue == 'translated') {
-            UI.gotoNextSegment();
+            // UI.gotoNextSegment();
+            SegmentActions.openSegment(UI.nextSegmentId);
         } else {
-            // TODO: investigate why this trigger click is necessary.
-            // See function closeSegment (line 271) ??
-            $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
+            SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
         }
     },
 

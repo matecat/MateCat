@@ -245,7 +245,7 @@ $.extend( UI, {
         UI.removeHighlightCorrespondingTags($(target).closest('section'));
 
         var segmentNotYetOpened = ($(target).is(UI.editarea) && !$(target).closest('section').hasClass("opened"));
-
+        var segment = $(target).closest('section');
         if ( !$(target).is(UI.editarea) || !UI.body.hasClass('editing') || segmentNotYetOpened) {
             if (operation == 'moving') {
                 UI.recentMoving = true;
@@ -256,10 +256,11 @@ $.extend( UI, {
             }
 
             UI.lastOperation = operation;
-            UI.openSegment(target, operation);
+            SegmentActions.openSegment(UI.getSegmentId(segment));
+            //UI.openSegment(target, operation);
 
             if (operation != 'moving') {
-                var segment = $(target).closest('section');
+
                 if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
                     setTimeout(function () {
                         UI.scrollSegment(segment);

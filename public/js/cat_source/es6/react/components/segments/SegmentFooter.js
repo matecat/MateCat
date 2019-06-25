@@ -23,7 +23,8 @@ class SegmentFooter extends React.Component {
         else {
             tMLabel = 'Translation Matches' + " (No MT) ";
         }
-        this.tabs = {
+        let hideMatches = this.getHideMatchesCookie();
+        let tabs = {
             matches: {
                 label: tMLabel,
                 code : 'tm',
@@ -90,11 +91,11 @@ class SegmentFooter extends React.Component {
         };
 
         this.state = {
-            tabs: {}
+            tabs: this.registerTabInit(tabs, SegmentStore._footerTabsConfig),
+            hideMatches: hideMatches
         };
         this.registerTab = this.registerTab.bind(this);
         this.modifyTabVisibility = this.modifyTabVisibility.bind(this);
-        this.createFooter = this.createFooter.bind(this);
         this.getTabContainer = this.getTabContainer.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.openTab = this.openTab.bind(this);
@@ -102,25 +103,30 @@ class SegmentFooter extends React.Component {
         this.setDefaultTabOpen = this.setDefaultTabOpen.bind(this);
     }
 
-    registerTab(tabName, visible, open) {
-        this.tabs[tabName].visible = visible;
-        // Ensure there is only one tab open.
-        if (open === true) {
-            for (let key in this.tabs) {
-                this.tabs[key].open = false;
-            }
+    registerTabInit(tabs,configs) {
+        let allTabs = tabs;
+        for(let key in configs){
+            allTabs[key].open = configs[key].open;
+            allTabs[key].visible = configs[key].visible;
+            allTabs[key].enabled = true;
         }
-        this.tabs[tabName].open = this.state.hideMatches ? false : open;
-        this.tabs[tabName].enabled = true;
+        return allTabs
+    }
+
+    registerTab(tabs,configs) {
+        let allTabs = _.cloneDeep(this.state.tabs);
+        for(let key in configs){
+            allTabs[key].open = configs[key].open;
+            allTabs[key].visible = configs[key].visible;
+            allTabs[key].enabled = true;
+        }
+        this.setState({
+            tabs: allTabs
+        });
     }
 
     modifyTabVisibility(tabName, visible) {
-        let tabs;
-        if ( this.state.tabs.tabName ) {
-            tabs = _.cloneDeep(this.state.tabs);
-        } else {
-            tabs = this.tabs;
-        }
+        let tabs = _.cloneDeep(this.state.tabs);
         tabs[tabName].visible = visible;
         tabs[tabName].enabled = visible;
         if ( _.size(this.state.tabs) ) {
@@ -129,14 +135,6 @@ class SegmentFooter extends React.Component {
             });
         }
 
-    }
-
-    createFooter(sid) {
-        if (this.props.sid == sid) {
-            this.setState({
-                tabs: this.tabs
-            });
-        }
     }
 
     getTabContainer(tab, active_class) {
@@ -221,12 +219,13 @@ class SegmentFooter extends React.Component {
         });
     }
     setDefaultTabOpen( sid, tabName) {
-        if (this.tabs[tabName]) {
+        let tabs = jQuery.extend(true, {}, this.state.tabs);
+        if (tabs[tabName]) {
             //Close all tabs
-            for ( let item in this.tabs ) {
-                this.tabs[item].open = false
+            for ( let item in tabs ) {
+                tabs[item].open = false
             }
-            this.tabs[tabName].open = true;
+            tabs[tabName].open = true;
         }
     }
     openTab(sid, tabCode) {
@@ -287,7 +286,6 @@ class SegmentFooter extends React.Component {
         });
     }
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.MODIFY_TAB_VISIBILITY, this.modifyTabVisibility);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
@@ -297,7 +295,6 @@ class SegmentFooter extends React.Component {
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.MODIFY_TAB_VISIBILITY, this.modifyTabVisibility);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);

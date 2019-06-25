@@ -31,6 +31,7 @@ module.exports = keyMirror({
     SET_CONTRIBUTIONS: null,
     SET_CL_CONTRIBUTIONS: null,
     CHOOSE_CONTRIBUTION: null,
+    DELETE_CONTRIBUTION: null,
     RENDER_GLOSSARY: null,
     SET_SEGMENT_ORIGINAL_TRANSLATION: null,
     MOUNT_TRANSLATIONS_ISSUES: null,
@@ -63,5 +64,9 @@ module.exports = keyMirror({
     QA_LEXIQA_ISSUES: null,
     LOCK_EDIT_AREA: null,
     OPEN_TAGS_MENU: null,
-    CLOSE_TAGS_MENU: null
+    CLOSE_TAGS_MENU: null,
+    SET_OPEN_SEGMENT: null,
+    OPEN_SEGMENT: null,
+    SCROLL_TO_SEGMENT: null,
+
 });

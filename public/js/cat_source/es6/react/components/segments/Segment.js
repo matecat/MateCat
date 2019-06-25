@@ -35,6 +35,9 @@ class Segment extends React.Component {
         this.setSegmentStatus = this.setSegmentStatus.bind(this);
         this.addTranslationsIssues = this.addTranslationsIssues.bind(this);
         this.handleChangeBulk = this.handleChangeBulk.bind(this);
+        this.openSegment = this.openSegment.bind(this);
+        this.openSegmentFromAction = this.openSegmentFromAction.bind(this);
+        this.checkIfCanOpenSegment = this.checkIfCanOpenSegment.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
         this.secondPassLocked = ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number === 2 && config.revisionNumber !== 2);
@@ -51,6 +54,70 @@ class Segment extends React.Component {
             && !UI.checkXliffTagsInText(this.props.segment.translation) && UI.removeAllTags(this.props.segment.segment) !== '',
             showRevisionPanel: false,
             selectedTextObj: null
+        }
+    }
+
+    openSegment() {
+        if (!this.checkIfCanOpenSegment()) {
+            if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
+                alertNoTranslatedSegments();
+            } else {
+                alertNotTranslatedYet(this.props.segment.sid);
+            }
+        } else {
+            UI.segmentQA($(this.section));
+
+            // TODO Remove this block
+            /**************************/
+            //From EditAreaClick
+            UI.closeTagAutocompletePanel();
+            UI.removeHighlightCorrespondingTags($(this.section));
+            if (UI.warningStopped) {
+                UI.warningStopped = false;
+                UI.checkWarnings(false);
+            }
+            // start old cache
+            UI.cacheObjects($(this.section));
+            //end old cache
+
+            UI.evalNextSegment($(this.section), 'untranslated');
+            UI.clearUndoStack();
+            $(document).trigger('segment:activate', {segment: new UI.Segment($(this.section))});  //Used by Segment Filter
+            UI.getNextSegment(UI.currentSegment, 'untranslated');
+
+            UI.setEditingSegment($(this.section));  //TODO Remove: set Class editing to the body and trigger event used by review improved
+
+            $('html').trigger('open'); // used by ui.review to open tab Revise in the footer next-unapproved
+
+            $(window).trigger({
+                type: "segmentOpened",
+                segment: new UI.Segment($(this.section))
+            });
+
+            Speech2Text.enabled() && Speech2Text.enableMicrophone($(this.section));
+            /************/
+            UI.editStart = new Date();
+            SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
+            SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
+
+            //From EditAreaClick
+            UI.saveInUndoStack();
+            UI.checkTagProximity();
+
+            setTimeout(() => {
+                window.location.hash = this.props.segment.sid
+            }, 300);
+
+        }
+    }
+
+    openSegmentFromAction(sid) {
+        let self = this;
+        sid = sid + "";
+        if (sid === this.props.segment.sid) {
+            setTimeout(function () {
+                self.openSegment();
+            });
         }
     }
 
@@ -105,6 +172,13 @@ class Segment extends React.Component {
         if ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number ) {
             classes.push( 'approved-step-'+ this.props.segment.revision_number);
         }
+        if (this.props.segment.opened) {
+            classes.push('editor');
+            classes.push('opened');
+        }
+        if (this.props.segment.modified) {
+            classes.push('modified');
+        }
         return classes;
     }
 
@@ -113,7 +187,7 @@ class Segment extends React.Component {
             /*  TODO REMOVE THIS CODE
              *  The segment must know about his classes
              */
-            let classes = $('#segment-' + this.props.segment.sid).attr("class").split(" ");
+            let classes = this.state.segment_classes.slice();
             if (!!classes.indexOf("modified")) {
                 classes.push("modified");
                 this.setState({
@@ -264,7 +338,7 @@ class Segment extends React.Component {
         let classes =  this.state.segment_classes.concat(this.createSegmentClasses());
         classes =  classes.concat(this.createSegmentClasses());
         classes =  this.checkSegmentStatus(classes);
-        if (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1){
+        if ( (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1) ){
             let indexEditor = classes.indexOf("editor");
             classes.splice(indexEditor, 1);
             let indexOpened = classes.indexOf("opened");
@@ -319,6 +393,21 @@ class Segment extends React.Component {
         }
     }
 
+    checkIfCanOpenSegment() {
+        return (this.props.isReview && !(this.props.segment.status == 'NEW') && !(this.props.segment.status == 'DRAFT'))
+            || !this.props.isReview;
+    }
+    onClickEvent(event) {
+        if (this.state.readonly || (!this.props.segment.unlocked && this.props.segment.ice_locked === '1')) {
+            UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
+        } else if (this.props.segment.muted) {
+            return;
+        } else if ( !this.props.segment.opened ){
+            this.openSegment();
+            UI.removeSelectedClassToTags()
+        }
+    }
+
     allowHTML(string) {
         return { __html: string };
     }
@@ -330,6 +419,7 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
+        SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
         //Review
         SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel.bind(this));
         SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel.bind(this));
@@ -348,6 +438,7 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
+        SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
         //Review
         SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
         SegmentStore.removeListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel);
@@ -369,6 +460,25 @@ class Segment extends React.Component {
             nextState.showRevisionPanel !== this.state.showRevisionPanel ||
             (nextState.selectedTextObj !== this.state.selectedTextObj)
         );
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (!this.props.segment.opened && nextProps.segment.opened) {
+            //UI.scrollSegment($(this.section), this.props.segment.sid);
+            setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},0)
+        }
+
+        //check if this segment is in closing
+        if (this.props.segment.opened && !nextProps.segment.opened) {
+            //check if this segment require setTranslation
+            if (!this.props.isReview && this.props.segment.modified) {
+                UI.setTranslation({
+                    id_segment: UI.getSegmentId($(this.section)),
+                    status: this.props.segment.status ,
+                    caller: 'autosave'
+                });
+            }
+        }
     }
 
     render() {
@@ -415,6 +525,7 @@ class Segment extends React.Component {
                 data-split-original-id={originalId}
                 data-tagmode="crunched"
                 data-tagprojection={this.dataAttrTagged}
+                onClick={this.onClickEvent.bind(this)}
                 data-fid={this.props.fid}>
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
@@ -469,6 +580,11 @@ class Segment extends React.Component {
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
                         locked={!this.props.segment.unlocked && (this.props.segment.ice_locked === '1' || this.secondPassLocked) }
                         removeSelection={this.removeSelection.bind(this)}
+                        openSegment={this.openSegment}
+                        isReview={this.props.isReview}
+                        isReviewExtended={this.props.isReviewExtended}
+                        reviewType={this.props.reviewType}
+                        isReviewImproved={this.props.isReviewImproved}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
@@ -485,11 +601,12 @@ class Segment extends React.Component {
                         />
                     ) : (null)}
 
-                    <SegmentFooter
+                    {this.props.segment.opened ? (<SegmentFooter
                         segment={this.props.segment}
                         sid={this.props.segment.sid}
+                        fid={this.props.fid}
                         decodeTextFn={this.props.decodeTextFn}
-                    />
+                    />) : (null)}
                 </div>
 
                 {/*//!-- TODO: place this element here only if it's not a split --*/}

@@ -183,6 +183,10 @@ class SegmentBody extends React.Component {
                         <SegmentTarget
                             segment={this.props.segment}
                             enableTagProjection={this.props.enableTagProjection}
+                            isReview={this.props.isReview}
+                            isReviewExtended={this.props.isReviewExtended}
+                            isReviewImproved={this.props.isReviewImproved}
+                            reviewType={this.props.reviewType}
                             decodeTextFn={this.props.decodeTextFn}
                             tagModesEnabled={this.props.tagModesEnabled}
                             speech2textEnabledFn={this.props.speech2textEnabledFn}
@@ -190,6 +194,7 @@ class SegmentBody extends React.Component {
                             beforeRenderOrUpdate={this.beforeRenderOrUpdate}
                             locked={this.props.locked}
                             readonly={this.props.readonly}
+                            openSegment={this.props.openSegment}
                             removeSelection={this.props.removeSelection}
                         />
 

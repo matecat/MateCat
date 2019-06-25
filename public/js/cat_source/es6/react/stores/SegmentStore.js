@@ -58,6 +58,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
     segmentsInBulk: [],
+    _footerTabsConfig: {},
     /**
      * Update all
      */
@@ -193,6 +194,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
 
+    openSegment(sid) {
+        var index = this.getSegmentIndex(sid);
+        this._segments = this._segments.map(segment => segment.set('opened', false));
+        this._segments = this._segments.setIn([index, 'opened'], true);
+    },
+
     removeSplit(oldSid, newSegments, fid, splitGroup) {
         var self = this;
         var elementsToRemove = [];
@@ -221,20 +228,69 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             // Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
         }
     },
+    /**
+     *
+     * @param current_sid
+     * @param current_fid
+     * @param status
+     * status values:
+     * null|undefined|false NEXT WITHOUT CHECK STATUS
+     * 1 APPROVED
+     * 2 DRAFT
+     * 3 FIXED
+     * 4 NEW
+     * 5 REBUTTED
+     * 6 REJECTED
+     * 7 TRANSLATED
+     * 8 UNTRANSLATED | is draft or new
+     */
+    getNextSegment(current_sid, current_fid, status) {
 
+        let allStatus = {
+            1: "APPROVED",
+            2: "DRAFT",
+            3: "FIXED",
+            4: "NEW",
+            5: "REBUTTED",
+            6: "REJECTED",
+            7: "TRANSLATED",
+            8: "UNTRANSLATED"
+        };
+        let result,
+            currentFind = false;
+        this._segments.forEach((segment, key) => {
+            if (_.isUndefined(result)) {
+                if ( currentFind ) {
+                    if ( status === 8 && (segment.get( 'status' ) == allStatus[2] || segment.get( 'status' ) == allStatus[4]) ) {
+                        result = segment.toJS();
+                        return false;
+                    } else if ( (status && segment.get( 'status' ) == allStatus[status]) || !status ) {
+                        result = segment.toJS();
+                        return false;
+                    }
+                }
+                if ( segment.get( 'sid' ) == current_sid ) {
+                    currentFind = true;
+                }
+            } else {
+                return;
+            }
+        });
+        return result;
+    },
     setStatus(sid, fid, status) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'status'], status);
         this._segments = this._segments.setIn([index, 'revision_number'], config.revisionNumber);
     },
 
     setSuggestionMatch(sid, fid, perc) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'suggestion_match'], perc.replace('%', ''));
     },
 
     setPropagation(sid, fid, propagation, from) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         if (propagation) {
             this._segments = this._segments.setIn([index, 'autopropagated_from'], from);
         } else {
@@ -242,13 +298,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
     replaceTranslation(sid, fid, translation) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         var trans = htmlEncode(this.removeLockTagsFromString(translation));
         this._segments = this._segments.setIn([index, 'translation'], trans);
         return translation;
     },
     replaceSource(sid, fid, source) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         var trans = htmlEncode(this.removeLockTagsFromString(source));
         this._segments = this._segments.setIn([index, 'segment'], trans);
         return source;
@@ -261,12 +317,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
     },
     setSegmentAsTagged(sid, fid) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'tagged'], true);
     },
 
     setSegmentOriginalTranslation(sid, fid, translation) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'original_translation'], translation);
     },
 
@@ -276,7 +332,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     addSegmentVersions(fid, sid, versions) {
         //If is a splitted segment the versions are added to the first of the split
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         let segment = this._segments.get(index);
         if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
@@ -287,7 +343,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return this._segments.get(index);
     },
     lockUnlockEditArea(sid, fid) {
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         let segment = this._segments.get(index);
         let lockedEditArea = segment.get('edit_area_locked');
         this._segments = this._segments.setIn([index, 'edit_area_locked'], !lockedEditArea);
@@ -307,7 +363,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return result;
     },
     setToggleBulkOption: function (sid, fid) {
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         if (this._segments.getIn([index, 'inBulk'])) {
             let indexArray = this.segmentsInBulk.indexOf(sid);
             this.segmentsInBulk.splice(indexArray, 1);
@@ -325,7 +381,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this.segmentsInBulk = [];
     },
     setBulkSelectionInterval: function (from, to, fid) {
-        let index = this.getSegmentIndex(from, fid);
+        let index = this.getSegmentIndex(from);
         if (index > -1 &&
             this._segments.get(index).get("readonly") == "false" &&  //not readonly
             (this._segments.get(index).get("ice_locked") === "0" ||  //not ice_locked
@@ -376,26 +432,54 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
     },
     setUnlockedSegment: function (sid, fid, unlocked) {
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'unlocked'], unlocked);
     },
 
     setContributionsToCache: function (sid, fid, contributions,errors) {
-        const index = this.getSegmentIndex(sid, fid);
-        this._segments = this._segments.setIn([index, 'contributions'], {
+        const index = this.getSegmentIndex(sid);
+        this._segments = this._segments.setIn([index, 'contributions'], Immutable.fromJS({
             matches: contributions,
             errors: errors
-        });
+        }));
     },
+    deleteContribution: function(sid, matchId) {
+        const index = this.getSegmentIndex(sid);
+        let contributions = this._segments.get(index).get('contributions');
+        const indexCont = contributions.get('matches').findIndex((contr, index) => contr.id === matchId);
+        let matches = contributions.get('matches').splice(indexCont, 1);
+        this._segments = this._segments.setIn([index, 'contributions', 'matches'], matches);
 
+    },
     setCrossLanguageContributionsToCache: function (sid, fid, contributions,errors) {
-        const index = this.getSegmentIndex(sid, fid);
+        const index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'cl_contributions'], {
             matches: contributions,
             errors: errors
         });
     },
+    setConfigTabs: function (tabName, visible, open) {
+        this._footerTabsConfig[tabName] = {
+            visible: visible,
+            open: open,
+            enabled: true
+        }
+    },
+    getCurrentSegment: function(){
+        let current = null,
+            tmpCurrent = null;
 
+        _.forEach(this._segments, (item, index) => {
+            tmpCurrent = this._segments[index].find((segment) => {
+                return segment.get('opened') === true
+            });
+            if(tmpCurrent){
+                current = Object.assign({},tmpCurrent.toJS());
+            }
+        });
+
+        return current;
+    },
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
 
@@ -406,7 +490,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             if(!fid){
                 return true
             }
-            let index = this.getSegmentIndex(sid, fid);
+            let index = this.getSegmentIndex(sid);
             let segment = this._segments.get(index);
             return segment.get('tagged');
         }
@@ -416,7 +500,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     // Local warnings
     setSegmentWarnings(sid, warning) {
         const fid = this._segmentsFiles.get(sid);
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'warnings'], Immutable.fromJS(warning));
     },
     updateGlobalWarnings: function (warnings) {
@@ -444,9 +528,16 @@ AppDispatcher.register(function (action) {
             SegmentStore.updateAll(action.segments);
             SegmentStore.emitChange(action.actionType, SegmentStore._segments);
             break;
+        case SegmentConstants.SET_OPEN_SEGMENT:
+            SegmentStore.openSegment(action.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.where);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.SCROLL_TO_SEGMENT:
+            SegmentStore.emitChange(action.actionType, action.sid);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
             SegmentStore.splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);
@@ -501,17 +592,15 @@ AppDispatcher.register(function (action) {
             SegmentStore.lockUnlockEditArea(action.id, action.fid);
             break;
         case SegmentConstants.REGISTER_TAB:
-            SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
+            SegmentStore.setConfigTabs(action.tab, action.visible, action.open);
+            SegmentStore.emitChange(action.actionType, action.tab, SegmentStore._footerTabsConfig);
             break;
         case SegmentConstants.MODIFY_TAB_VISIBILITY:
             SegmentStore.emitChange(action.actionType, action.tabName, action.visible);
             break;
-        case SegmentConstants.CREATE_FOOTER:
-            SegmentStore.emitChange(action.actionType, action.sid);
-            break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);
-            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.SET_CL_CONTRIBUTIONS:
             SegmentStore.setCrossLanguageContributionsToCache(action.sid, action.fid, action.matches, action.errors);
@@ -520,6 +609,10 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
             SegmentStore.emitChange(action.actionType, action.sid, action.index);
+            break;
+        case SegmentConstants.DELETE_CONTRIBUTION:
+            SegmentStore.deleteContribution(action.sid, action.matchId);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.RENDER_GLOSSARY:
             SegmentStore.emitChange(action.actionType, action.sid, action.segment);

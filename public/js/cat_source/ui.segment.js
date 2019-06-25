@@ -69,7 +69,7 @@
                 UI.setSegmentAsTagged();
                 UI.editarea.focus();
                 SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-                UI.createButtons();
+                // UI.createButtons();
                 UI.registerQACheck();
             });
         },
@@ -156,7 +156,6 @@
                 SegmentActions.setSegmentAsTagged(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
                 currentSegment.data('tagprojection', 'tagged');
                 this.copySourcefromDataAttribute(segment);
-                UI.createButtons();
             }
         },
         /**
@@ -333,7 +332,7 @@
          */
         evalNextSegment: function( section, status ) {
             var selector = UI.selectorForNextUntranslatedSegment( status, section );
-            var n = $(section).nextAll(selector).first();
+            var n = $(section).parent('div').nextAll('div').find(selector).first();
 
             if (!n.length) {
                 n = $(section).parents('article').next().find(selector).first();
@@ -344,7 +343,7 @@
             } else {
                 this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
             }
-            var i = $(section).next();
+            var i = $(section).parent('div').next().find('section');
 
             if (!i.length) {
                 i = $(section).parents('article').next().find( UI.selectorForNextSegment() ).first();
@@ -356,22 +355,23 @@
             }
         },
         gotoNextSegment: function() {
-            var selector = UI.selectorForNextSegment() ;
-            var next = $('.editor').nextAll( selector  ).first();
+            SegmentActions.openSegment(UI.nextSegmentId);
 
-            if (next.is('section')) {
-                UI.editAreaClick($(UI.targetContainerSelector(), next));
-            } else {
-                next = UI.currentFile.next().find( selector ).first();
-                if (next.length) {
-                    UI.editAreaClick($(UI.targetContainerSelector(), next));
-                } else {
-                    UI.closeSegment(UI.currentSegment, 1, 'save');
-                }
-            }
+            // var selector = UI.selectorForNextSegment() ;
+            // var next = $('.editor').nextAll( selector  ).first();
+            //
+            // if (next.is('section')) {
+            //     UI.editAreaClick($(UI.targetContainerSelector(), next));
+            // } else {
+            //     next = UI.currentFile.next().find( selector ).first();
+            //     if (next.length) {
+            //         UI.editAreaClick($(UI.targetContainerSelector(), next));
+            //     } else {
+            //         UI.closeSegment(UI.currentSegment, 1, 'save');
+            //     }
+            // }
         },
         gotoNextUntranslatedSegment: function() {
-            console.log('gotoNextUntranslatedSegment');
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
                 if (!UI.nextUntranslatedSegmentId) {
                     UI.closeSegment(UI.currentSegment);
@@ -379,8 +379,7 @@
                     UI.reloadWarning();
                 }
             } else {
-                $("#segment-" + UI.nextUntranslatedSegmentId +
-                    " " + UI.targetContainerSelector() ).trigger("click");
+                SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
             }
         },
 
@@ -431,8 +430,7 @@
             if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
                 MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
             } else {
-                var el = $("section:not(.opened)#segment-" + id);
-                UI.editAreaClick($(UI.targetContainerSelector(), el));
+                SegmentActions.openSegment(id);
             }
         },
         isReadonlySegment : function( segment ) {
@@ -562,8 +560,8 @@
 
         focusSegment: function(segment) {
             var clickableEditArea = segment.find('.editarea:not(.opened)');
-            if ( clickableEditArea.length == 0 || ( Review.enabled() && !isTranslated( segment ) ) ) {
-                UI.openSegment( segment );
+            if ( clickableEditArea.length === 0 || ( Review.enabled() && !isTranslated( segment ) ) ) {
+                SegmentActions.openSegment(UI.getSegmentId(segment));
             }
             else {
                 clickableEditArea.trigger('click');

@@ -19,6 +19,7 @@ class SegmentsContainer extends React.Component {
             segments : Immutable.fromJS([]),
             splitGroup: [],
             timeToEdit: config.time_to_edit_enabled,
+            scrollTo: null,
             window: {
                 width: 0,
                 height: 0,
@@ -28,6 +29,7 @@ class SegmentsContainer extends React.Component {
         this.updateAllSegments = this.updateAllSegments.bind(this);
         this.splitSegments = this.splitSegments.bind(this);
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+        this.scrollToSegment = this.scrollToSegment.bind(this);
     }
 
     splitSegments(segments, splitGroup) {
@@ -71,6 +73,21 @@ class SegmentsContainer extends React.Component {
         SegmentActions.setBulkSelectionInterval(from, to, fid);
     }
 
+    scrollToSegment(sid) {
+        this.setState({scrollTo: sid});
+    }
+
+    getIndexToScroll() {
+        if ( !this.state.scrollTo ) return 0;
+        return this.state.segments.findIndex( (segment, index) => {
+            if (this.state.scrollTo.toString().indexOf("-") === -1) {
+                return parseInt(segment.get('sid')) === parseInt(this.state.scrollTo);
+            } else {
+                return segment.get('sid') === this.state.scrollTo;
+            }
+        });
+    }
+
     getSegments() {
         let items = [];
         let self = this;
@@ -82,13 +99,14 @@ class SegmentsContainer extends React.Component {
                 segment={segment}
                 timeToEdit={self.state.timeToEdit}
                 fid={self.props.fid}
+                isReview={self.props.isReview}
                 isReviewExtended={isReviewExtended}
+                reviewType={self.props.reviewType}
                 enableTagProjection={self.props.enableTagProjection}
                 decodeTextFn={self.props.decodeTextFn}
                 tagLockEnabled={self.state.tagLockEnabled}
                 tagModesEnabled={self.props.tagModesEnabled}
                 speech2textEnabledFn={self.props.speech2textEnabledFn}
-                reviewType={self.props.reviewType}
                 setLastSelectedSegment={self.setLastSelectedSegment.bind(self)}
                 setBulkSelection={self.setBulkSelection.bind(self)}
             />;
@@ -103,6 +121,7 @@ class SegmentsContainer extends React.Component {
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
+        SegmentStore.addListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
     }
 
     componentWillUnmount() {
@@ -110,13 +129,15 @@ class SegmentsContainer extends React.Component {
         SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
+        SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         return (!nextState.segments.equals(this.state.segments) ||
         nextState.splitGroup !== this.state.splitGroup ||
         nextState.tagLockEnabled !== this.state.tagLockEnabled ||
-        nextState.window !== this.state.window)
+        nextState.window !== this.state.window ||
+        nextState.scrollTo !== this.state.scrollTo)
     }
 
     updateWindowDimensions()  {
@@ -137,6 +158,7 @@ class SegmentsContainer extends React.Component {
     }
 
     render() {
+        let scrollTo = this.getIndexToScroll();
         let items = this.getSegments();
         return <VirtualList
             width={this.state.window.width}
@@ -147,6 +169,7 @@ class SegmentsContainer extends React.Component {
             itemCount={items.length}
             itemSize={87}
             scrollToAlignment="center"
+            scrollToIndex={scrollTo}
             onScroll={(number, event) => {
                 let scrollTop = $(event.target).scrollTop();
                 let scrollBottom = $(event.target).prop('scrollHeight') - (scrollTop + $(event.target).height());

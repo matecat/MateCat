@@ -217,9 +217,9 @@ $.extend(UI, {
            for which the contribution has been requested
          */
 
-        if (!$('.sub-editor.matches', segment).length) {
-            SegmentActions.createFooter(UI.getSegmentId(segment));
-        }
+        // if (!$('.sub-editor.matches', segment).length) {
+        //     SegmentActions.createFooter(UI.getSegmentId(segment));
+        // }
 
         SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.errors);
 
@@ -269,13 +269,6 @@ $.extend(UI, {
         SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
     },
     showContributionError: function(segment) {
-        $('.tab-switcher-tm .number', segment).text('');
-        if((config.mt_enabled)&&(!config.id_translator)) {
-            $('.sub-editor.matches .engine-errors', segment).html('<ul class="engine-error-item graysmall"><li class="engine-error">' +
-                '<div class="warning-img"></div><span class="engine-error-message warning">' +
-                'Oops we got an Error. Please, contact <a' +
-                ' href="mailto:support@matecat.com">support@matecat.com</a>.</span></li></ul>');
-        }
         SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), [], [{}]);
 
     },
@@ -283,55 +276,9 @@ $.extend(UI, {
         return true;
     },
     renderContributionErrors: function(errors, segment) {
-        $('.tab.sub-editor.matches .engine-errors', segment).empty();
-        $('.tab.sub-editor.matches .engine-errors', segment).hide();
-        var percentClass = "";
-        var messageClass = "";
-        var imgClass = "";
-        var  messageTypeText = '';
-        $.each(errors, function(){
-            if(this.code === -2001) {
-                console.log('ERROR -2001');
-                percentClass = "per-red";
-                messageClass = 'error';
-                imgClass = 'error-img';
-                messageTypeText = 'Error: ';
-            }
-            else if (this.code === -2002) {
-                console.log('WARNING -2002');
-                percentClass = "per-orange";
-                messageClass = 'warning';
-                imgClass = 'warning-img';
-                messageTypeText = 'Warning: ';
-            } else if (this.code === -1000) {
-                console.log('WARNING -2002');
-                percentClass = "per-orange";
-                messageClass = 'warning';
-                imgClass = 'warning-img';
-                messageTypeText = 'Warning: ';
-            } else if (this.code === -4) {
-                console.log('WARNING -4');
-                percentClass = "per-orange";
-                messageClass = 'warning';
-                imgClass = 'warning-img';
-                messageTypeText = 'Warning: ';
-                this.message = 'Oops we got an Error. Please, contact <a' +
-                ' href="mailto:support@matecat.com">support@matecat.com</a>.'
-            }
-            else {
-                return;
-            }
-            $('.tab.sub-editor.matches .engine-errors', segment).show();
-            var percentText = this.created_by_type;
-            var suggestion_info = '';
-            var cb = this.created_by;
-        $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
-                '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
-                '</span></li></ul>');
-        });
         SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), [], errors);
     },
-	setDeleteSuggestion: function(source, target, id) {
+	setDeleteSuggestion: function(source, target, id, sid) {
 
         return APP.doRequest({
             data: {
@@ -353,7 +300,7 @@ $.extend(UI, {
             }
         });
 	},
-	setDeleteSuggestion_success: function(d) {
+	setDeleteSuggestion_success: function(d, idMatch, sid) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setDeleteSuggestion');
 	},
@@ -407,4 +354,3 @@ $.extend(UI, {
 
     });
 }
-;

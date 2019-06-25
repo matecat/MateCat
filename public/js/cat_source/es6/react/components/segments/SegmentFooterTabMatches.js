@@ -9,24 +9,10 @@ class SegmentFooterTabMatches extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            matches: undefined
-        };
         this.suggestionShortcutLabel = 'CTRL+';
-        this.setContributions = this.setContributions.bind(this);
         this.processContributions = this.processContributions.bind(this);
         this.chooseSuggestion = this.chooseSuggestion.bind(this);
-    }
-
-    setContributions(sid, fid, matches){
-        if ( this.props.id_segment == sid ) {
-            var matchesProcessed = this.processContributions(matches);
-            if (this._isMounted) {
-                this.setState({
-                    matches: matchesProcessed
-                });
-            }
-        }
+        SegmentActions.getContributions(this.props.segment.sid, this.props.fid, this.props.segment.segment);
     }
 
     processContributions(matches) {
@@ -96,7 +82,7 @@ class SegmentFooterTabMatches extends React.Component {
 
     chooseSuggestion(sid, index) {
         if (this.props.id_segment === sid) {
-            this.suggestionDblClick(this.state.matches, index);
+            this.suggestionDblClick(this.props.segment.contributions, index);
         }
     }
 
@@ -115,7 +101,6 @@ class SegmentFooterTabMatches extends React.Component {
 
     deleteSuggestion(match, index) {
         var source, target;
-        var matches = this.state.matches;
         source = htmlDecode( match.segment );
         var ul = $('.suggestion-item[data-id="'+ match.id +'"]');
         if( config.brPlaceholdEnabled ){
@@ -125,11 +110,7 @@ class SegmentFooterTabMatches extends React.Component {
         }
         target = view2rawxliff(target);
         source = view2rawxliff(source);
-        matches.splice(index, 1);
-        UI.setDeleteSuggestion(source, target, match.id);
-        this.setState({
-            matches: matches
-        });
+        SegmentActions.deleteContribution(source, target, match.id, this.props.segment.original_sid);
     }
 
     getMatchInfo(match) {
@@ -149,13 +130,11 @@ class SegmentFooterTabMatches extends React.Component {
 
     componentDidMount() {
         this._isMounted = true;
-        SegmentStore.addListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
         SegmentStore.addListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 
     componentWillUnmount() {
         this._isMounted = false;
-        SegmentStore.removeListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
         SegmentStore.removeListener(SegmentConstants.CHOOSE_CONTRIBUTION, this.chooseSuggestion);
     }
 
@@ -169,10 +148,11 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     render() {
-        var matches = [];
-        var self = this;
-        if ( this.state.matches && this.state.matches.length > 0 ) {
-            this.state.matches.forEach( function ( match, index ) {
+        let matchesHtml = [];
+        let self = this;
+        if (this.props.segment.contributions && this.props.segment.contributions.matches && this.props.segment.contributions.matches.length > 0) {
+            let tpmMatches = this.processContributions(this.props.segment.contributions.matches);
+            tpmMatches.forEach( function ( match, index ) {
                 var trashIcon = (match.disabled) ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'}
                                                               className="trash"
                                                               title="delete this row"
@@ -203,34 +183,77 @@ class SegmentFooterTabMatches extends React.Component {
                         </li>
                         {self.getMatchInfo( match )}
                     </ul>;
-                matches.push( item );
+                matchesHtml.push( item );
             } );
 
-        } else if (this.state.matches && this.state.matches.length === 0 ){
+        } else if (this.props.segment.contributions && this.props.segment.contributions.matches && this.props.segment.contributions.matches.length === 0 ){
             if((config.mt_enabled)&&(!config.id_translator)) {
-                matches.push( <ul key={0} className="graysmall message">
+                matchesHtml.push( <ul key={0} className="graysmall message">
                     <li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li>
                 </ul>);
             } else {
-                matches.push( <ul key={0} className="graysmall message">
+                matchesHtml.push( <ul key={0} className="graysmall message">
                     <li>No match found for this segment</li>
                 </ul>);
             }
         }
+
+        let errors = [];
+        if (this.props.segment.contributions && this.props.segment.contributions.error && this.props.segment.contributions.errors.length > 0) {
+            this.props.segment.contributions.errors.forEach((error, index) => {
+                let toAdd = false,
+                    percentClass = '',
+                    messageClass,
+                    imgClass,
+                    messageTypeText;
+
+                switch (error.code) {
+                    case '-2001':
+                        toAdd = true;
+                        percentClass = "per-red";
+                        messageClass = 'error';
+                        imgClass = 'error-img';
+                        messageTypeText = 'Error: ';
+                        break;
+                    case '-2002':
+                        toAdd = true;
+                        messageClass = 'warning';
+                        imgClass = 'warning-img';
+                        messageTypeText = 'Warning: ';
+                        break;
+                }
+                if (toAdd) {
+
+                    let item = <ul className="engine-error-item graysmall">
+                        <li className="engine-error">
+                            <div className={imgClass}/>
+                            <span
+                                className={"engine-error-message " + messageClass}>{messageTypeText + ' ' + error.message}</span>
+                        </li>
+                    </ul>;
+
+                    errors.push(item);
+
+                }
+            });
+
+        }
+
+
         return (
         <div
             key={"container_" + this.props.code}
             className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
             id={"segment-" + this.props.id_segment + "-" + this.props.tab_class}>
             <div className="overflow">
-                { !_.isUndefined(matches) && matches.length > 0 ? (
-                    matches
+                { !_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
+                    matchesHtml
                 ): (
                     <span className="loader loader_on"/>
                 )}
 
             </div>
-            <div className="engine-errors"></div>
+            <div className="engine-errors">{errors}</div>
         </div>
         )
     }
