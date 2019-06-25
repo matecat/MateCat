@@ -108,9 +108,12 @@ class SecondPassReview extends BaseFeature {
             $chunks[] = array( $job['id'], $job['password'] );
         }
 
-        $chunk_reviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( $chunks );
-
         foreach( $project['jobs'] as $kk => $job ) {
+            // TODO: get this query out of this loop for economy
+            $chunk_reviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( [[
+                    $job['id'], $job['password']
+            ]]  );
+
             /**
              * Inner cycle to match chunk_reviews records and modify
              * the data structure.
