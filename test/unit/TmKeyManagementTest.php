@@ -1708,7 +1708,7 @@ class TmKeyManagementTest extends AbstractTest {
     public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF() {
 
         $db = Database::obtain();
-        $db->query( "TRUNCATE TABLE memory_keys" );
+        $db->getConnection()->query( "TRUNCATE TABLE memory_keys" );
 
         //this should not to be, because a client can not send not hashed keys
         //already present in job as an anonymous user
