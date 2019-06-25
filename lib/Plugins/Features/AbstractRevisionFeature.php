@@ -218,6 +218,9 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @param \ArrayObject $projectStructure
      *
+     * @todo this method is overridden two child classes, let's see if we can remove that duplication and use just
+     *       this method, perhaps moving the code from ReviewExtended (which is more recent) here.
+     *
      * @throws \Exceptions\ValidationError
      */
     public function postJobSplitted( \ArrayObject $projectStructure ) {
@@ -233,10 +236,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         ] );
 
         $project = Projects_ProjectDao::findById( $projectStructure['id_project'] ) ;
+        $revisionFactory = RevisionFactory::initFromProject( $project )->setFeatureSet( $project->getFeatures() ) ;
 
         $reviews = ChunkReviewDao::findByIdJob( $id_job );
         foreach( $reviews as $review ) {
-            $model = RevisionFactory::getInstance()->getChunkReviewModel( $review ) ;
+            $model = $revisionFactory->getChunkReviewModel( $review ) ;
             $model->recountAndUpdatePassFailResult();
         }
     }

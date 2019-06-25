@@ -22,6 +22,7 @@ class QualityReportModel extends \Features\ReviewExtended\Model\QualityReportMod
         $this->quality_report_structure['chunk']['reviews'] = [] ;
         foreach( $chunk_reviews as $chunk_review ) {
             $chunkReviewModel = RevisionFactory::initFromProject($this->getProject())
+                    ->setFeatureSet( $this->getProject()->getFeatures() )
                     ->getChunkReviewModel( $chunk_review ) ;
 
             $this->quality_report_structure['chunk']['reviews'][] = [
