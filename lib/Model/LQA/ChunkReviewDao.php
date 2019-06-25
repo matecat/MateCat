@@ -347,8 +347,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     public static function deleteByJobId($id_job) {
-        $sql = "DELETE FROM qa_chunk_reviews " .
-            " WHERE id_job = :id_job " ;
+        $sql = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job " ;
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         return $stmt->execute( array('id_job' => $id_job ) ) ;

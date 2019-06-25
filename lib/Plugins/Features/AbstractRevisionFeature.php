@@ -253,27 +253,39 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     public function postJobMerged( $projectStructure ) {
         $id_job               = $projectStructure[ 'job_to_merge' ];
         $old_reviews          = ChunkReviewDao::findByIdJob( $id_job );
-        $first_password       = $old_reviews[ 0 ]->review_password;
-        $penalty_points       = 0;
-        $reviewed_words_count = 0;
+
+        $project              = $old_reviews[0]->getChunk()->getProject() ;
+        $revisionFactory      = RevisionFactory::initFromProject( $project )
+                ->setFeatureSet( $project->getFeatures() ) ;
+
+        $reviewGroupedData = [] ;
+
+        foreach( $old_reviews as $review ) {
+            if ( !isset( $reviewGroupedData[ $review->source_page ] ) )  {
+                $reviewGroupedData[ $review->source_page ] = [
+                        'first_record_password' => $review->review_password
+                ] ;
+            }
+        }
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        foreach($old_reviews as $row ) {
-            $penalty_points = $penalty_points + $row->penalty_points;
-            $reviewed_words_count = $reviewed_words_count + $row->reviewed_words_count ;
+        foreach ($reviewGroupedData as $source_page => $data ) {
+            $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ], [
+                    'first_record_password' => $data['first_record_password'],
+                    'source_page'           => $source_page
+            ] );
         }
 
-        $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ], [
-                'first_record_password' => $first_password
-        ] );
-
+        /**
+         * we expect to have on record for each revision
+         */
         $new_reviews = ChunkReviewDao::findByIdJob( $id_job );
-        $new_reviews[0]->penalty_points = $penalty_points;
-        $new_reviews[0]->reviewed_words_count = $reviewed_words_count ;
 
-        $model = RevisionFactory::getInstance()->getChunkReviewModel( $new_reviews[0] );
-        $model->recountAndUpdatePassFailResult();
+        foreach( $new_reviews as $review ) {
+            $model = $revisionFactory->getChunkReviewModel( $review );
+            $model->recountAndUpdatePassFailResult();
+        }
     }
 
     /**
