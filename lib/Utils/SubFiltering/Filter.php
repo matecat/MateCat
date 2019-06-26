@@ -295,6 +295,7 @@ class Filter {
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestoreEquivTextPhToXliffOriginal() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        $channel->addLast( new SplitPlaceholder() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer1ToLayer0', $channel );
 
