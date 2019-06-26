@@ -109,7 +109,7 @@ class CreateFromStructJobTest extends AbstractTest {
     public function test_createFromStructsJob() {
 
         $result   = $this->job_Dao->createFromStruct( $this->job_struct );
-        $this->id = $this->getTheLastInsertId();
+        $this->id = $this->getTheLastInsertIdByQuery($this->database_instance);
 
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
 
@@ -163,14 +163,5 @@ class CreateFromStructJobTest extends AbstractTest {
 
     }
 
-    /**
-     * @return mixed
-     */
-    private function getTheLastInsertId()
-    {
-        $stmt = $this->database_instance->getConnection()->query("SELECT LAST_INSERT_ID()");
-        $stmt->execute();
 
-        return $stmt->fetchColumn();
-    }
 }

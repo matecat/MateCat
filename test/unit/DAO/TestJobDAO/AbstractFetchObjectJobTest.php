@@ -101,7 +101,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
         );
         $this->job_struct = $this->job_Dao->createFromStruct( $this->job_array );
 
-        $this->job_id = $this->database_instance->getConnection()->lastInsertId();
+        $this->job_id = $this->getTheLastInsertIdByQuery($this->database_instance);
 
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->job_id . "';";
 

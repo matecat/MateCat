@@ -50,7 +50,7 @@ class GetProjectOwnerTest extends AbstractTest {
         $this->email_owner     = "bar@foo.net";
         $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . $this->email_owner . "', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
-        $this->uid_user = $this->database_instance->getConnection()->lastInsertId();
+        $this->uid_user = $this->getTheLastInsertIdByQuery($this->database_instance);
 
         $this->sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid_user . "';";
 
@@ -110,10 +110,8 @@ class GetProjectOwnerTest extends AbstractTest {
 
 
         $this->job_Dao = new Jobs_JobDao( $this->database_instance );
-
         $this->job_Dao->createFromStruct( $this->job_struct );
-
-        $this->id_job = $this->database_instance->last_insert();
+        $this->id_job = $this->getTheLastInsertIdByQuery($this->database_instance);
 
         $this->sql_delete_job = "DELETE FROM jobs WHERE id='" . $this->id_job . "';";
 
@@ -130,16 +128,16 @@ class GetProjectOwnerTest extends AbstractTest {
     }
 
     public function test_getProjectOwner() {
-        $array_wrapper_user = $this->user_Dao->getProjectOwner( $this->id_job );
-        $user               = $array_wrapper_user[ '0' ];
+        /** @var Users_UserStruct $user */
+        $user = $this->user_Dao->getProjectOwner( $this->id_job );
         $this->assertTrue( $user instanceof Users_UserStruct );
         $this->assertEquals( $this->uid_user, $user->uid );
         $this->assertEquals( $this->email_owner, $user->email );
         $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
         $this->assertEquals( "Bar", $user->first_name );
         $this->assertEquals( "Foo", $user->last_name );
-        $this->assertNull( $user->salt );
-        $this->assertNull( $user->pass );
+        $this->assertEquals( '12345trewq', $user->salt );
+        $this->assertEquals( '987654321qwerty', $user->pass );
         $this->assertNull( $user->oauth_access_token );
     }
 
@@ -148,19 +146,29 @@ class GetProjectOwnerTest extends AbstractTest {
         /**
          * @var Users_UserDao
          */
-        $mock_user_Dao = $this->getMockBuilder( '\Users_UserDao' )
+        $mock_user_Dao = $this->getMockBuilder( Users_UserDao::class )
                 ->setConstructorArgs( [ $this->database_instance ] )
                 ->setMethods( [ '_buildResult', '_fetch_array' ] )
                 ->getMock();
 
-        $mock_user_Dao->expects( $this->exactly( 1 ) )
-                ->method( '_fetch_array' );
+//        $mock_user_Dao->expects( $this->exactly( 1 ) )
+//                ->method( '_fetch_array' );
 
-        $mock_user_Dao->expects( $this->exactly( 1 ) )
-                ->method( '_buildResult' );
+//        $mock_user_Dao->expects( $this->exactly( 1 ) )
+//                ->method( '_buildResult' );
 
+        /** @var Users_UserStruct $user */
+        $user = $mock_user_Dao->getProjectOwner( $this->id_job );
 
-        $mock_user_Dao->getProjectOwner( $this->id_job );
+        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertEquals( $this->uid_user, $user->uid );
+        $this->assertEquals( $this->email_owner, $user->email );
+        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
+        $this->assertEquals( "Bar", $user->first_name );
+        $this->assertEquals( "Foo", $user->last_name );
+        $this->assertEquals( '12345trewq', $user->salt );
+        $this->assertEquals( '987654321qwerty', $user->pass );
+        $this->assertNull( $user->oauth_access_token );
 
     }
 

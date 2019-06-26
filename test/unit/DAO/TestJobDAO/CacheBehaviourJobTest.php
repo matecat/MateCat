@@ -89,7 +89,7 @@ class CacheBehaviourJobTest extends AbstractTest {
         $this->cache             = new Predis\Client( INIT::$REDIS_SERVERS );
         $this->job_Dao->createFromStruct( $this->job_struct );
 
-        $this->id = $this->database_instance->getConnection()->lastInsertId();
+        $this->id = $this->getTheLastInsertIdByQuery($this->database_instance);
 
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
 
@@ -142,8 +142,10 @@ class CacheBehaviourJobTest extends AbstractTest {
                         ) ) )
         ) );
         $this->cache->flushdb();
+
         $struct_of_second_read = $this->job_Dao->read( $param_job_struct )[ '0' ];
         $result_from_cache     = $cache_result[ '0' ];
+
         $this->assertEquals( $result_from_cache, $struct_of_second_read );
     }
 }
