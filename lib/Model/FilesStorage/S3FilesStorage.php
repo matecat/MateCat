@@ -2,10 +2,8 @@
 
 namespace FilesStorage;
 
-use Aws\PsrCacheAdapter;
 use DirectoryIterator;
 use INIT;
-use Log;
 use RedisHandler;
 use SimpleS3\Client;
 use SimpleS3\Components\Cache\RedisCache;
