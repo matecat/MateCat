@@ -10,6 +10,7 @@ namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
 use Constants;
+use DataAccess\ShapelessConcreteStruct;
 use Features\ISegmentTranslationModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\SecondPassReview\Email\RevisionChangedNotificationEmail;
@@ -195,7 +196,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
         $this->commitTransaction();
 
         // Send email
-        if ( $this->_model->getEventModel()->isPropagationSource() && $this->_model->isBeingLowerReviewed() ) {
+        if ( $this->_model->getEventModel()->isPropagationSource() && $this->_model->isBeingLowerReviewedOrTranslated() ) {
             $chunkReviewsWithFinalRevisions = [] ;
             foreach ( $this->_chunkReviews as $chunkReview ) {
                 if ( in_array( $chunkReview->source_page, $sourcePagesWithFinalRevisions ) ) {
@@ -205,40 +206,58 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
 
             $this->_sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions );
         }
-
     }
 
     protected function _sendNotificationEmail($finalRevisions, $chunkReviewsWithFinalRevisions) {
-        $emails = [];
+        $emails                   = [];
         $userWhoChangedTheSegment = $this->_model->getEventUser() ;
+        $revision                 = $chunkReviewsWithFinalRevisions[ $this->_model->getEventModel()->getOriginSourcePage() ] ;
 
         foreach( $finalRevisions as $finalRevision ) {
-            if ( $finalRevision->source_page != $this->_model->getEventModel()->getDestinationSourcePage() ) {
-                $user = ( new Users_UserDao() )->getByUid( $finalRevision->uid );
-                if ( $user ) {
-                    $emails[] = [
-                            'recipient' => $user,
-                            'revision'  => $chunkReviewsWithFinalRevisions[ $finalRevision->source_page ]
-                    ] ;
-                }
+            if ( $finalRevision->source_page != $this->_model->getEventModel()->getOriginSourcePage() ) {
+                continue;
+            }
+
+            $user = ( new Users_UserDao() )->getByUid( $finalRevision->uid );
+            if ( $user ) {
+                $emails[] = [
+                        'isPreviousChangeAuthor' => true,
+                        'recipient'            => $user,
+                ] ;
             }
         }
 
+        $projectOwner = ( new Users_UserDao() )->getByEmail( $this->_chunk->getProject()->id_customer ) ;
+        if ( $projectOwner ) {
+            $emails[] = [
+                    'isPreviousChangeAuthor' => false,
+                    'recipient'            => $projectOwner,
+            ] ;
+        }
+
+        $projectAssignee = ( new Users_UserDao() )->getByUid( $this->_chunk->getProject()->id_assignee ) ;
+        if ( $projectAssignee ) {
+            $emails[] = [
+                    'isPreviousChangeAuthor' => false,
+                    'recipient'            => $projectAssignee,
+            ] ;
+        }
+
+        $emails = $this->_chunk->getProject()->getFeatures()->filter('filterRevisionChangeNotificationList', $emails );
+        $url = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
+                $this->_chunk->source, $this->_chunk->target, [
+                        'revision_number' => Utils::sourcePageToRevisionNumber( $revision->source_page ),
+                        'id_segment'      => $this->_model->getSegmentStruct()->id
+                ] ) ;
+
+
+        $notifiedEmails = [];
         foreach( $emails as $email ) {
-            if ( !is_null($userWhoChangedTheSegment) && $userWhoChangedTheSegment->email == $email['recipient']->email ) {
-                continue ;
+            if ( !in_array( $email['recipient']->email, $notifiedEmails ) ) {
+                $delivery = new RevisionChangedNotificationEmail( $email, $url, $userWhoChangedTheSegment ) ;
+                $delivery->send();
+                $notifiedEmails[] = $email['recipient']->email ;
             }
-
-            /** @var ChunkReviewStruct $revision */
-            $revision = $email['revision'] ;
-            $url = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
-                    $this->_chunk->source, $this->_chunk->target, [
-                            'revision_number' => Utils::sourcePageToRevisionNumber( $revision->source_page ),
-                            'id_segment'      => $this->_model->getSegmentStruct()->id
-                    ] ) ;
-
-            $delivery = new RevisionChangedNotificationEmail( $email['recipient'], $url, $userWhoChangedTheSegment ) ;
-            $delivery->send();
         }
     }
 

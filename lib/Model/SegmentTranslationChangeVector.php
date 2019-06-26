@@ -84,6 +84,10 @@ class SegmentTranslationChangeVector {
                 $this->eventModel->isLowerRevision() ;
     }
 
+    public function isBeingLowerReviewedOrTranslated() {
+        return $this->eventModel->isLowerRevision();
+    }
+
     /**
      * Returns 1 if source page is moving up  0 if it's not changing, -1 if it's moving down.
      *

@@ -21,6 +21,7 @@ use Klein\Klein;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
+use Users_UserStruct;
 
 class SecondPassReview extends BaseFeature {
     const FEATURE_CODE = 'second_pass_review' ;

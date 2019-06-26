@@ -23,9 +23,11 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
     protected $recipientUser ;
 
     protected $title = 'Revised segment changed' ;
+    protected $data;
 
-    public function __construct( $recipientUser, $segmentUrl, $changeAuthor = null ) {
-        $this->recipientUser = $recipientUser ;
+    public function __construct( $data, $segmentUrl, $changeAuthor = null ) {
+        $this->data          = $data ;
+        $this->recipientUser = $data['recipient'];
         $this->segmentUrl    = $segmentUrl ;
         $this->changeAuthor  = $changeAuthor ;
 
@@ -35,9 +37,10 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
 
     protected function _getTemplateVariables() {
         return [
-                'changeAuthor' => ( $this->changeAuthor ? $this->changeAuthor->toArray() : null ),
-                'recipientUser' => $this->recipientUser->toArray(),
-                'segmentUrl' => $this->segmentUrl
+                'changeAuthor'  => ( $this->changeAuthor ? $this->changeAuthor->toArray() : null ),
+                'recipientUser' => $this->data['recipient']->toArray(),
+                'segmentUrl'    => $this->segmentUrl,
+                'data'          => $this->data
         ] ;
     }
 
