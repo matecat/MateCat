@@ -10,11 +10,8 @@ namespace ConnectedServices\GDrive;
 
 use ConnectedServices\AbstractRemoteFileService;
 use ConnectedServices\GDrive;
-use \Exception ;
-use Files_FileDao ;
-use RemoteFiles_RemoteFileDao ;
-use Jobs_JobDao ;
-use Log  ;
+use Exception;
+use Log;
 
 class RemoteFileService extends AbstractRemoteFileService
 {

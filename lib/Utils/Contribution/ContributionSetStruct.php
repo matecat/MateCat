@@ -9,14 +9,12 @@
 
 namespace Contribution;
 
-use \DataAccess_AbstractDaoObjectStruct;
-
-use \DataAccess_IDaoStruct;
-use \Jobs_JobStruct,
-        \Database,
-        \Exceptions\ValidationError,
-        \Constants_TranslationStatus
-    ;
+use Constants_TranslationStatus;
+use DataAccess_AbstractDaoObjectStruct;
+use DataAccess_IDaoStruct;
+use Database;
+use Exceptions\ValidationError;
+use Jobs_JobStruct;
 use Projects_MetadataDao;
 use Projects_MetadataStruct;
 use TaskRunner\Commons\Params;

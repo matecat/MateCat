@@ -2,10 +2,10 @@
 
 namespace ActivityLog;
 
-use WorkerClient,
-    Log,
-    Exception,
-    Utils;
+use Exception;
+use Log;
+use Utils;
+use WorkerClient;
 
 /**
  * Created by PhpStorm.

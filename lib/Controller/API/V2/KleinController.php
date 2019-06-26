@@ -3,11 +3,11 @@
 namespace API\V2;
 
 use AbstractControllers\IController;
+use AbstractControllers\TimeLogger;
 use API\V2\Exceptions\AuthenticationError;
 use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
-use AbstractControllers\TimeLogger;
 use FeatureSet;
 use Users_UserDao;
 

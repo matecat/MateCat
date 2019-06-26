@@ -3,14 +3,11 @@
 namespace Features\QaCheckGlossary\Worker ;
 
 use Features\QaCheckGlossary;
-use TaskRunner\Commons\AbstractElement ;
-use TaskRunner\Commons\AbstractWorker ;
-use TaskRunner\Commons\QueueElement ;
-
-use TaskRunner\Exceptions\EndQueueException ;
-
-use Translations\WarningModel ;
-use Translations\WarningStruct ;
+use TaskRunner\Commons\AbstractElement;
+use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
+use Translations\WarningModel;
+use Translations\WarningStruct;
 
 class GlossaryWorker extends AbstractWorker {
 

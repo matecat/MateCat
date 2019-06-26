@@ -8,11 +8,12 @@
  */
 
 namespace TaskRunner\Commons;
-use \SplObserver;
-use \SplSubject;
-use \AMQHandler;
-use \Database, \PDOException ;
-use TaskRunner\Exceptions\EndQueueException ;
+use AMQHandler;
+use Database;
+use PDOException;
+use SplObserver;
+use SplSubject;
+use TaskRunner\Exceptions\EndQueueException;
 
 /**
  * Class AbstractWorker

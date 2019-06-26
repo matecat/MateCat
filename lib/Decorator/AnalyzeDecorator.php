@@ -6,7 +6,7 @@
  * Time: 12:39
  */
 
-use \Analysis\Status;
+use Analysis\Status;
 
 class AnalyzeDecorator {
 

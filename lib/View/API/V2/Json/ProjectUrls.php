@@ -9,8 +9,7 @@
 namespace API\V2\Json;
 
 use DataAccess\ShapelessConcreteStruct;
-use LQA\ChunkReviewDao;
-use Routes ;
+use Routes;
 
 
 class ProjectUrls {

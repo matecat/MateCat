@@ -9,15 +9,17 @@
 namespace API\V2;
 
 use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Validators\LoginValidator;
 use DateTime;
 use DirectoryIterator;
-use TMSService, Exception, Log;
+use Exception;
+use Log;
 use PHPExcel_IOFactory;
 use PHPExcel_Writer_CSV;
+use TMSService;
 use Utils;
-use ActivityLog\ActivityLogStruct;
 use ZipArchive;
 
 class GlossariesController extends AbstractStatefulKleinController {

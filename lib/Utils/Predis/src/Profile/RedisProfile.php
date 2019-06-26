@@ -12,9 +12,9 @@
 namespace Predis\Profile;
 
 use InvalidArgumentException;
-use ReflectionClass;
 use Predis\ClientException;
 use Predis\Command\Processor\ProcessorInterface;
+use ReflectionClass;
 
 /**
  * Base class implementing common functionalities for Redis server profiles.

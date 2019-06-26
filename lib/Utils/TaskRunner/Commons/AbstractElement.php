@@ -8,9 +8,9 @@
  */
 
 namespace TaskRunner\Commons;
-use \ArrayAccess;
-use \DomainException;
-use \stdClass;
+use ArrayAccess;
+use DomainException;
+use stdClass;
 
 /**
  * Class AbstractElement

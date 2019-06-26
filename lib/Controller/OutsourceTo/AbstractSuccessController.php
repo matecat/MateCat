@@ -2,6 +2,7 @@
 /**
  * Created by PhpStorm.
  */
+
 use Outsource\ConfirmationStruct;
 
 /**

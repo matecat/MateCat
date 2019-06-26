@@ -10,7 +10,6 @@
 namespace API\V2\Json;
 
 
-use CatUtils;
 use QA;
 use SubFiltering\Filter;
 

@@ -11,6 +11,9 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use ProjectManager\ProjectManagerModel;
 use SubFiltering\Filter;
@@ -37,11 +40,6 @@ class ProjectManager {
     protected $projectStructure;
 
     protected $tmxServiceWrapper;
-
-    /**
-     * @var FilesStorage
-     */
-    protected $fileStorage;
 
     protected $uploadDir;
 
@@ -189,10 +187,9 @@ class ProjectManager {
                 $this->projectStructure[ 'array_files' ],
                 $this->projectStructure
         );
-
     }
 
-    protected function _log( $_msg ){
+    protected function _log( $_msg ) {
         Log::doJsonLog( $_msg );
     }
 
@@ -399,6 +396,8 @@ class ProjectManager {
             //Found Errors
         }
 
+        $fs = FilesStorageFactory::create();
+
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] );
         }
@@ -467,9 +466,12 @@ class ProjectManager {
 
         $uploadDir = $this->uploadDir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
+        \Log::doJsonLog( $uploadDir );
+
         //we are going to access the storage, get model object to manipulate it
-        $this->fileStorage = new FilesStorage();
-        $linkFiles         = $this->fileStorage->getHashesFromDir( $this->uploadDir );
+        $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
+
+        \Log::doJsonLog( $linkFiles );
 
         /*
             loop through all input files to
@@ -522,10 +524,10 @@ class ProjectManager {
                 $sha1 = sha1_file( $filePathName );
 
                 //make a cache package (with work/ only, emtpy orig/)
-                $this->fileStorage->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
 
                 //put reference to cache in upload dir to link cache to session
-                $this->fileStorage->linkSessionToCacheForAlreadyConvertedFiles(
+                $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
                         $this->projectStructure[ 'source_language' ],
                         $this->projectStructure[ 'uploadToken' ],
@@ -533,9 +535,9 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . $this->__getStorageFilesDelimiter() . $this->projectStructure[ 'source_language' ];
 
-                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
+                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . $this->__getStorageFilesDelimiter() . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
                 $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
@@ -560,14 +562,17 @@ class ProjectManager {
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
-            $hashFile = FilesStorage::basename_fix( $linkFile );
-            $hashFile = explode( '|', $hashFile );
+            $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
+            $hashFile = explode( $this->__getStorageFilesDelimiter(), $hashFile );
+
+            // Example:
+            // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
+            // $hashFile[ 1 ] = it-it
+            $sha1_original = $hashFile[ 0 ];
+            $lang          = $hashFile[ 1 ];
 
             //use hash and lang to fetch file from package
-            $cachedXliffFilePathName = $this->fileStorage->getXliffFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
-
-            //get sha
-            $sha1_original = $hashFile[ 0 ];
+            $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang );
 
             //associate the hash to the right file in upload directory
             //get original file name, to insert into DB and cp in storage
@@ -579,17 +584,31 @@ class ProjectManager {
 
             try {
 
-                if ( !file_exists( $cachedXliffFilePathName ) ) {
-                    throw new Exception( "File not found on server after upload.", -6 );
+                if ( count( $_originalFileNames ) === 0 ) {
+                    throw new Exception( 'No hash files found', -6 );
                 }
 
-                $info = FilesStorage::pathinfo_fix( $cachedXliffFilePathName );
+                if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+                    if ( null === $cachedXliffFilePathName ) {
+                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', $_originalFileNames[0] ), -6 );
+                    }
+                } else {
+                    if ( !file_exists( $cachedXliffFilePathName ) ) {
+                        throw new Exception( sprintf( 'File %s not found on server after upload.', $cachedXliffFilePathName ), -6 );
+                    }
+                }
+
+                $info = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
 
                 if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
                     throw new Exception( "Failed to find converted Xliff", -3 );
                 }
 
                 $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
+
+                if ( count( $filesStructure ) === 0 ) {
+                    throw new Exception( 'Files could not be saved in database.', -6 );
+                }
 
                 //check if the files language equals the source language. If not, set an error message.
                 if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
@@ -689,7 +708,7 @@ class ProjectManager {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
-                $this->fileStorage->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
+                $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
             } elseif ( $e->getCode() == -4 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -7,
@@ -756,30 +775,49 @@ class ProjectManager {
         Database::obtain()->commit();
 
         $this->features->run( 'postProjectCommit', $this->projectStructure );
-        try {
 
-            Utils::deleteDir( $this->uploadDir );
-            if ( is_dir( $this->uploadDir . '_converted' ) ) {
-                Utils::deleteDir( $this->uploadDir . '_converted' );
+        if ( INIT::$FILE_STORAGE_METHOD === 'fs' ) {
+            try {
+
+                Utils::deleteDir( $this->uploadDir );
+                if ( is_dir( $this->uploadDir . '_converted' ) ) {
+                    Utils::deleteDir( $this->uploadDir . '_converted' );
+                }
+
+            } catch ( Exception $e ) {
+
+                $output = "<pre>\n";
+                $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
+                $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+                $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+                $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
+                $output .= "\n\t";
+                $output .= "Aborting...\n";
+                $output .= "</pre>";
+
+                $this->_log( $output );
+
+                Utils::sendErrMailReport( $output, $e->getMessage() );
+
             }
+        } elseif (INIT::$FILE_STORAGE_METHOD === 's3') {
 
-        } catch ( Exception $e ) {
+            \Log::doJsonLog('Deleting folder' . $this->uploadDir . ' from S3');
 
-            $output = "<pre>\n";
-            $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
-            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-            $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
-            $output .= "\n\t";
-            $output .= "Aborting...\n";
-            $output .= "</pre>";
+            /** @var $fs S3FilesStorage */
+            $fs->deleteQueue( $this->uploadDir );
+        }
+    }
 
-            $this->_log( $output );
-
-            Utils::sendErrMailReport( $output, $e->getMessage() );
-
+    /**
+     * @return string
+     */
+    private function __getStorageFilesDelimiter() {
+        if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+            return S3FilesStorage::OBJECTS_SAFE_DELIMITER;
         }
 
+        return '|';
     }
 
     private function __clearFailedProject( Exception $e ) {
@@ -818,7 +856,8 @@ class ProjectManager {
 
         }
 
-        FilesStorage::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
+        $fs = FilesStorageFactory::create();
+        $fs::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
 
         //free memory
         unset( $this->projectStructure[ 'segments_metadata' ] );
@@ -866,7 +905,7 @@ class ProjectManager {
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $ext = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+            $ext = AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
 
             $file = new stdClass();
             if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
@@ -919,7 +958,7 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $kname => $fileName ) {
 
             //if TMX,
-            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+            if ( 'tmx' == AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
 
                 $this->tmxServiceWrapper->setName( $fileName );
 
@@ -1045,10 +1084,12 @@ class ProjectManager {
 
     protected function _zipFileHandling( $linkFiles ) {
 
+        $fs = FilesStorageFactory::create();
+
         //begin of zip hashes manipulation
         foreach ( $linkFiles[ 'zipHashes' ] as $zipHash ) {
 
-            $result = $this->fileStorage->linkZipToProject(
+            $result = $fs->linkZipToProject(
                     $this->projectStructure[ 'create_date' ],
                     $zipHash,
                     $this->projectStructure[ 'id_project' ]
@@ -1061,7 +1102,7 @@ class ProjectManager {
                 //Exit
             }
 
-            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $this->fileStorage->getZipDir() );
+            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $fs->getZipDir() );
 
         } //end zip hashes manipulation
 
@@ -1592,7 +1633,7 @@ class ProjectManager {
      */
     protected function _extractSegments( $fid, $file_info ) {
 
-        $xliff_file_content = file_get_contents( $file_info[ 'path_cached_xliff' ] );
+        $xliff_file_content = $this->getXliffFileContent( $file_info[ 'path_cached_xliff' ] );
         $mimeType           = $file_info[ 'mime_type' ];
 
         //create Structure fro multiple files
@@ -1605,7 +1646,6 @@ class ProjectManager {
         } catch ( Exception $e ) {
             throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
         }
-
 
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
@@ -1824,7 +1864,36 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param $xliff_file_content
+     *
+     * @return false|string
+     * @throws Exception
+     */
+    private function getXliffFileContent( $xliff_file_content ) {
+        if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+
+            if($s3Client->hasEncoder()){
+                $xliff_file_content = $s3Client->getEncoder()->decode($xliff_file_content);
+            }
+
+            return $s3Client->openItem( [ 'bucket' => S3FilesStorage::FILES_STORAGE_BUCKET, 'key' => $xliff_file_content ] );
+        }
+
+        return file_get_contents( $xliff_file_content );
+    }
+
+    /**
+     * @param $_originalFileNames
+     * @param $sha1_original           (example: 917f7b03c8f54350fb65387bda25fbada43ff7d8)
+     * @param $cachedXliffFilePathName (example: 91/7f/7b03c8f54350fb65387bda25fbada43ff7d8!!it-it/work/test_2.txt.sdlxliff)
+     *
+     * @return array
+     * @throws Exception
+     */
     protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName ) {
+        $fs = FilesStorageFactory::create();
 
         $yearMonthPath    = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
@@ -1832,12 +1901,9 @@ class ProjectManager {
         //return structure
         $filesStructure = [];
 
-        //PLEASE NOTE, this can be an array when the same file added more
-        // than once and with different names
-        //
         foreach ( $_originalFileNames as $originalFileName ) {
 
-            $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+            $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
             $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
 
             if ( $this->gdriveSession ) {
@@ -1847,7 +1913,7 @@ class ProjectManager {
                 }
             }
 
-            $this->fileStorage->moveFromCacheToFileDir(
+            $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
                     $this->projectStructure[ 'source_language' ],
                     $fid,
@@ -1857,11 +1923,9 @@ class ProjectManager {
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
             $filesStructure[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
-
         }
 
         return $filesStructure;
-
     }
 
     /**

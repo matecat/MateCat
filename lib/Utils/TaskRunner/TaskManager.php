@@ -9,13 +9,14 @@
 
 namespace TaskRunner;
 
+use AMQHandler;
+use Exception;
 use INIT;
-use TaskRunner\Commons\AbstractDaemon,
-    TaskRunner\Commons\Context,
-    TaskRunner\Commons\ContextList,
-    TaskRunner\Commons\RedisKeys;
-
-use \Log, \Exception, \AMQHandler;
+use Log;
+use TaskRunner\Commons\AbstractDaemon;
+use TaskRunner\Commons\Context;
+use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\RedisKeys;
 
 /**
  * Class Analysis_Manager

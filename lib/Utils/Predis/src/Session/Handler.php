@@ -11,8 +11,8 @@
 
 namespace Predis\Session;
 
-use SessionHandlerInterface;
 use Predis\ClientInterface;
+use SessionHandlerInterface;
 
 /**
  * Session handler class that relies on Predis\Client to store PHP's sessions

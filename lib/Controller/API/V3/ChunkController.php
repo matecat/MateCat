@@ -8,9 +8,9 @@
 
 namespace API\V3;
 
-use API\V3\Json\Chunk;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
+use API\V3\Json\Chunk;
 use Chunks_ChunkStruct;
 
 class ChunkController extends KleinController {

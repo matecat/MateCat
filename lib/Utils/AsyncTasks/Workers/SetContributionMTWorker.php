@@ -9,11 +9,11 @@
 
 namespace AsyncTasks\Workers;
 
-use Contribution\ContributionSetStruct,
-        Engine,
-        TaskRunner\Exceptions\EndQueueException,
-        Jobs_JobStruct;
+use Contribution\ContributionSetStruct;
+use Engine;
 use Exception;
+use Jobs_JobStruct;
+use TaskRunner\Exceptions\EndQueueException;
 use TmKeyManagement_TmKeyManagement;
 
 class SetContributionMTWorker extends SetContributionWorker {

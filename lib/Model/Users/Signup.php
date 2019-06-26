@@ -2,16 +2,16 @@
 
 namespace Users ;
 
+use AuthCookie;
 use Database;
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
 use Exceptions\ValidationError;
 use Teams\TeamDao;
-use Users_UserStruct ;
-use Utils ;
 use Users_UserDao;
-use AuthCookie ;
+use Users_UserStruct;
+use Utils;
 
 class Signup {
 

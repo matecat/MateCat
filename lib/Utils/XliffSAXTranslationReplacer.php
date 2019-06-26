@@ -1,5 +1,7 @@
 <?php
 
+use FilesStorage\S3FilesStorage;
+
 class XliffSAXTranslationReplacer {
 
     protected $originalFP;
@@ -55,7 +57,26 @@ class XliffSAXTranslationReplacer {
             $this->outputFP = fopen( $outputFile, 'w+' );
         }
 
-        if ( !( $this->originalFP = fopen( $originalXliffFilename, "r" ) ) ) {
+        // setting $this->originalFP
+        $xmlLink    = $originalXliffFilename;
+        $streamArgs = null;
+
+        if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+            $xmlLink  = $s3Client->getPublicItemLink( ['bucket' => S3FilesStorage::FILES_STORAGE_BUCKET, 'key' => $originalXliffFilename] );
+
+            if ( false === INIT::$AWS_SSL_VERIFY ) {
+                $streamArgs =
+                        [
+                                'ssl' => [
+                                        'verify_peer'      => INIT::$AWS_SSL_VERIFY,
+                                        'verify_peer_name' => INIT::$AWS_SSL_VERIFY
+                                ]
+                        ];
+            }
+        }
+
+        if ( !( $this->originalFP = fopen( $xmlLink, "r", false, stream_context_create( $streamArgs ) ) ) ) {
             die( "could not open XML input" );
         }
 
@@ -82,12 +103,12 @@ class XliffSAXTranslationReplacer {
 
     public function replaceTranslation( FeatureSet $featureSet = null ) {
 
-        if( $featureSet == null ){
+        if ( $featureSet == null ) {
             $featureSet = new FeatureSet();
         }
 
         $this->featureSet = $featureSet;
-        $this->filter = \SubFiltering\Filter::getInstance( $featureSet );
+        $this->filter     = \SubFiltering\Filter::getInstance( $featureSet );
 
         //write xml header
         fwrite( $this->outputFP, '<?xml version="1.0" encoding="UTF-8"?>' );
@@ -387,45 +408,46 @@ class XliffSAXTranslationReplacer {
                             case \Constants_TranslationStatus::STATUS_FIXED:
                             case \Constants_TranslationStatus::STATUS_APPROVED:
                                 if ( $lastMrkState == null || $lastMrkState == \Constants_TranslationStatus::STATUS_APPROVED ) {
-                                    $state_prop = "state=\"signed-off\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_APPROVED;
+                                    $state_prop   = "state=\"signed-off\"";
+                                    $lastMrkState = \Constants_TranslationStatus::STATUS_APPROVED;
                                 }
                                 break;
 
                             case \Constants_TranslationStatus::STATUS_TRANSLATED:
                                 if ( $lastMrkState == null || $lastMrkState == \Constants_TranslationStatus::STATUS_TRANSLATED || $lastMrkState == \Constants_TranslationStatus::STATUS_APPROVED ) {
-                                    $state_prop = "state=\"translated\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                                    $state_prop   = "state=\"translated\"";
+                                    $lastMrkState = \Constants_TranslationStatus::STATUS_TRANSLATED;
                                 }
                                 break;
 
                             case \Constants_TranslationStatus::STATUS_REJECTED:  // if there is a mark REJECTED and there is not a DRAFT, all the trans-unit is REJECTED
                             case \Constants_TranslationStatus::STATUS_REBUTTED:
                                 if ( ( $lastMrkState == null ) || ( $lastMrkState != \Constants_TranslationStatus::STATUS_NEW || $lastMrkState != \Constants_TranslationStatus::STATUS_DRAFT ) ) {
-                                    $state_prop = "state=\"needs-review-translation\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_REJECTED;
+                                    $state_prop   = "state=\"needs-review-translation\"";
+                                    $lastMrkState = \Constants_TranslationStatus::STATUS_REJECTED;
                                 }
                                 break;
 
                             case \Constants_TranslationStatus::STATUS_NEW:
                                 if ( ( $lastMrkState == null ) || $lastMrkState != \Constants_TranslationStatus::STATUS_DRAFT ) {
-                                    $state_prop = "state=\"new\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_NEW;
+                                    $state_prop   = "state=\"new\"";
+                                    $lastMrkState = \Constants_TranslationStatus::STATUS_NEW;
                                 }
                                 break;
 
                             case \Constants_TranslationStatus::STATUS_DRAFT:
-                                $state_prop = "state=\"needs-translation\"";
-                                $lastMrkState      = \Constants_TranslationStatus::STATUS_DRAFT;
+                                $state_prop   = "state=\"needs-translation\"";
+                                $lastMrkState = \Constants_TranslationStatus::STATUS_DRAFT;
                                 break;
                             default:
                                 // this is the case when a segment is not showed in cattool, so the row in
                                 // segment_translations does not exists and
                                 // ---> $seg[ 'status' ] is NULL
-                                if( $lastMrkState == null ){ //this is the first MRK ID
-                                    $state_prop = "state=\"translated\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_TRANSLATED;
-                                } else { /* Do nothing and preserve the last state */ }
+                                if ( $lastMrkState == null ) { //this is the first MRK ID
+                                    $state_prop   = "state=\"translated\"";
+                                    $lastMrkState = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                                } else { /* Do nothing and preserve the last state */
+                                }
                                 break;
                         }
 
