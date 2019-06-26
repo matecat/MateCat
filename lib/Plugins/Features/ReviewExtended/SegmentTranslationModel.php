@@ -110,10 +110,9 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                     $unsetFinalRevision []              = $chunkReview->source_page ;
                 }
 
-                if ( $destinationSourcePage == $originSourcePage ) {
+                if ( $chunkReview->source_page == $originSourcePage ) {
                     $chunkReview->advancement_wc -= $this->advancementWordCount() ;
                 }
-
             }
 
             // TODO: in the following two cases we shuold considere if the segment is changed or not.

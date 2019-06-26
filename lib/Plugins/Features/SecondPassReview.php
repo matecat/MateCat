@@ -10,6 +10,7 @@ namespace Features;
 
 use catController;
 use Chunks_ChunkStruct;
+use Constants;
 use Exceptions\NotFoundException;
 use Features;
 use Features\SecondPassReview\Controller\API\Json\ProjectUrls;
@@ -18,6 +19,7 @@ use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use Klein\Klein;
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
 
 class SecondPassReview extends BaseFeature {
@@ -102,31 +104,34 @@ class SecondPassReview extends BaseFeature {
      * @param $project
      */
     public function filter_manage_single_project( $project ) {
-        $chunks = array();
+        $chunks = [];
 
         foreach( $project['jobs'] as $job ) {
-            $chunks[] = array( $job['id'], $job['password'] );
+            $chunks[] = [ $job['id'], $job['password'] ];
+        }
+
+        $chunk_reviews = [] ;
+
+        foreach( ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( $chunks ) as $chunk_review ) {
+            $key = $chunk_review->id_job . $chunk_review->password  ;
+            if ( !isset( $chunk_reviews[ $key ] )) {
+                $chunk_reviews[ $key ] = [] ;
+            }
+            $chunk_reviews[ $key ] [] = $chunk_review ;
         }
 
         foreach( $project['jobs'] as $kk => $job ) {
-            // TODO: get this query out of this loop for economy
-            $chunk_reviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( [[
-                    $job['id'], $job['password']
-            ]]  );
+            $key = $job['id'] . $job['password'] ;
 
-            /**
-             * Inner cycle to match chunk_reviews records and modify
-             * the data structure.
-             */
-            foreach( $chunk_reviews as $chunk_review ) {
-                if ( $chunk_review->id_job == $job['id'] && $chunk_review->password == $job['password'] ) {
-                    // TODO: change this revision number to an array of review passwords
-                    if ( $chunk_review->source_page == 3 ) {
-                        $project['jobs'][$kk][ 'second_pass_review' ][] = $chunk_review->review_password ;
+            if ( isset( $chunk_reviews[ $key ] ) ) {
+                $project['jobs'][$kk][ 'second_pass_review' ] = array_values( array_filter( array_map( function(ChunkReviewStruct $chunk_review ) {
+                    if ( $chunk_review->source_page > Constants::SOURCE_PAGE_REVISION ) {
+                        return $chunk_review->password ;
                     }
-                    if ( !isset( $project['jobs'][ $kk ] [ 'stats' ] ['reviews'] ) ) {
-                        $project['jobs'][ $kk ] [ 'stats' ] = Utils::formatStats( $project['jobs'][ $kk ] [ 'stats' ], $chunk_reviews ) ;
-                    }
+                }, $chunk_reviews[$key] ))) ;
+
+                if ( !isset( $project['jobs'][ $kk ] [ 'stats' ] ['reviews'] ) ) {
+                    $project['jobs'][ $kk ] [ 'stats' ] = Utils::formatStats( $project['jobs'][ $kk ] [ 'stats' ], $chunk_reviews[ $key ] ) ;
                 }
             }
         }
