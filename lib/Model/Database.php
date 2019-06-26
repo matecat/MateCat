@@ -279,6 +279,27 @@ class Database implements IDatabase {
         if ( !empty( $on_duplicate_fields ) ) {
             $duplicate_statement = " ON DUPLICATE KEY UPDATE ";
             foreach ( $on_duplicate_fields as $key => $value ) {
+
+                if ( $no_nulls && is_null( $attrs[ $key ] ) ) {
+                    /*
+                     *
+                     * if NO NULLS flag is set and there is an ON DUPLICATE entry "value"
+                     * for such field we do not want override the database value with null
+                     * ( because it will not be inserted in the value fields and it will be null by definition )
+                     *
+                     * Ex:
+                     *
+                     * INSERT  INTO table (`field_A`, `field_C`)
+                     * VALUES (:field_A, :field_C)
+                     * ON DUPLICATE KEY UPDATE
+                     *     field_A = VALUES( field_A ),
+                     *     field_B = VALUES( field_B ),  -- <<<<<<< THIS WILL ERASE THE EXISTING DATABASE VALUE
+                     *     field_C = VALUES( field_C );
+                     *
+                     */
+                    continue;
+                }
+
                 //set the update keys
                 $duplicate_statement .= " $key = ";
                 if ( stripos( $value, "value" ) !== false ) {

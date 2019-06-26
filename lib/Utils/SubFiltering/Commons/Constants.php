@@ -22,4 +22,6 @@ class Constants {
     const tabPlaceholder  = '##$_09$##';
     const nbspPlaceholder = '##$_A0$##';
 
+    const splitPlaceHolder = '##$_SPLIT$##';
+
 }
