@@ -455,6 +455,30 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'contributions', 'matches'], matches);
 
     },
+    setGlossaryToCache: function (sid, fid, glossary) {
+        let index = this.getSegmentIndex(sid, fid);
+        this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
+    },
+    deleteFromGlossary: function(sid, matchId, name) {
+        let index = this.getSegmentIndex(sid);
+        let glossary = this._segments.get(index).get('glossary').toJS();
+        delete glossary[name];
+        this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
+    },
+    changeGlossaryItem: function(sid, matchId, name, comment, target_note, translation) {
+        let index = this.getSegmentIndex(sid);
+        let glossary = this._segments.get(index).get('glossary').toJS();
+        glossary[name].comment = comment;
+        glossary[name].target_note = comment;
+        glossary[name].translation = translation;
+        this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
+    },
+    addGlossaryItem: function(sid, match, name) {
+        let index = this.getSegmentIndex(sid);
+        let glossary = this._segments.get(index).get('glossary').toJS();
+        glossary[name] = match;
+        this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
+    },
     setCrossLanguageContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'cl_contributions'], {
@@ -626,6 +650,23 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.DELETE_CONTRIBUTION:
             SegmentStore.deleteContribution(action.sid, action.matchId);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.SET_GLOSSARY_TO_CACHE:
+            SegmentStore.setGlossaryToCache(action.sid, action.fid, action.glossary);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            SegmentStore.emitChange(action.actionType, action.sid);
+            break;
+        case SegmentConstants.DELETE_FROM_GLOSSARY:
+            SegmentStore.deleteFromGlossary(action.sid, action.matchId, action.name);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.CHANGE_GLOSSARY:
+            SegmentStore.changeGlossaryItem(action.sid, action.matchId, action.name, action.comment, action.target_note, action.translation);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.ADD_GLOSSARY_ITEM:
+            SegmentStore.addGlossaryItem(action.sid, action.match, action.name);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.CONCORDANCE_RESULT:

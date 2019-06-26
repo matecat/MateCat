@@ -54,7 +54,6 @@ $.extend(UI, {
 		this.editarea = '';
 		this.byButton = false;
 		this.blockGetMoreSegments = true;
-		this.noGlossary = false;
 		this.displayedMessages = [];
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;

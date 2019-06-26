@@ -341,32 +341,125 @@ var SegmentActions = {
         });
     },
 
-    getGlossaryForSegment: function ( text ) {
-        return API.SEGMENT.getGlossaryForSegment(text)
-            .fail(function (  ) {
-                UI.failedConnection( 0, 'glossary' );
+    // getGlossaryForSegment: function ( text ) {
+    //     return API.SEGMENT.getGlossaryForSegment(text)
+    //         .fail(function (  ) {
+    //             UI.failedConnection( 0, 'glossary' );
+    //         });
+    // },
+    getGlossaryForSegment: function (sid, fid, text) {
+        let requestes = [{
+            sid: sid,
+            fid: fid,
+            text: text
+        }];
+        let nextSegment = SegmentStore.getNextSegment(sid, fid);
+        if (nextSegment) {
+            requestes.push({
+                sid: nextSegment.sid,
+                fid: nextSegment.fid,
+                text: nextSegment.segment
+            });
+            let nextSegmentUntranslated = SegmentStore.getNextSegment(sid, fid, 8);
+            if (nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid) {
+                requestes.push({
+                    sid: nextSegmentUntranslated.sid,
+                    fid: nextSegmentUntranslated.fid,
+                    text: nextSegmentUntranslated.segment
+                });
+            }
+        }
+
+        for (let index = 0; index < requestes.length; index++) {
+            let request = requestes[index];
+            let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
+            if (typeof segment.glossary === 'undefined') {
+                API.SEGMENT.getGlossaryForSegment(request.text)
+                    .done(function (response) {
+                        UI.storeGlossaryData(request.sid, response.data.matches);
+                        AppDispatcher.dispatch({
+                            actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
+                            sid: request.sid,
+                            fid: request.fid,
+                            glossary: response.data.matches.length !== 0 ? response.data.matches : {}
+                        });
+                    })
+                    .fail(function (error) {
+                        UI.failedConnection(sid, 'getContributions');
+                    });
+            }
+        }
+
+    },
+
+    searchGlossary: function (sid, fid, text) {
+        text = UI.removeAllTags(htmlEncode(text));
+        text = text.replace(/\"/g, "");
+        API.SEGMENT.getGlossaryMatch(text)
+            .done(response => {
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
+                    sid: sid,
+                    fid: fid,
+                    glossary: response.data.matches.length !== 0 ? response.data.matches : {}
+                });
+            })
+            .fail(function () {
+                UI.failedConnection(0, 'glossary');
             });
     },
 
-    deleteGlossaryItem: function ( source, target, id ) {
+    deleteGlossaryItem: function ( source, target, id, name, sid ) {
         return API.SEGMENT.deleteGlossaryItem(source, target, id)
             .fail(function (  ) {
                 UI.failedConnection( 0, 'deleteGlossaryItem' );
+            }).done(function ( data ) {
+                UI.footerMessage( 'A glossary item has been deleted', UI.getSegmentById(id) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
+                    sid: sid,
+                    matchId: id,
+                    name: name
+                });
             });
     },
 
-    addGlossaryItem: function ( source, target, comment ) {
+    addGlossaryItem: function ( source, target, comment, sid ) {
         return API.SEGMENT.addGlossaryItem(source, target, comment)
             .fail(function (  ) {
                 UI.failedConnection( 0, 'addGlossaryItem' );
+            }).done(function ( response ) {
+                if ( response.data.created_tm_key ) {
+                    UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( self.props.id_segment ) );
+                } else {
+                    let msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
+                    UI.footerMessage( msg, UI.getSegmentById( sid ) );
+                }
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
+                    sid: sid,
+                    match: response.data.matches.length !== 0 ? response.data.matches[source] : {},
+                    name: source
+                });
             });
     },
 
-    updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, newComment ) {
-        return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment, newComment)
+    updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, name, sid ) {
+        return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment)
             .fail(function (  ) {
                 UI.failedConnection( 0, 'updateGlossaryItem' );
-            });
+            }).done( function ( response ) {
+                UI.footerMessage( 'A glossary item has been updated', UI.getSegmentById( sid ) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.CHANGE_GLOSSARY,
+                    sid: sid,
+                    matchId: idItem,
+                    name: name,
+                    comment: comment,
+                    target_note: comment,
+                    translation: newTranslation
+                });
+            } );
     },
 
     setTabIndex: function ( sid, tab, index ) {

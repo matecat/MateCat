@@ -340,6 +340,8 @@ class SegmentFooter extends React.Component {
                 return _.isUndefined(this.props.segment.cl_contributions) ||
                     (_.isUndefined(this.props.segment.cl_contributions.matches) &&
                     this.props.segment.cl_contributions.errors.length === 0);
+            case 'gl':
+                return _.isUndefined(this.props.segment.glossary);
             default:
                 return false;
         }
@@ -351,6 +353,8 @@ class SegmentFooter extends React.Component {
                 return this.props.segment.contributions.matches.length;
             case 'cl':
                 return this.props.segment.cl_contributions.matches.length;
+            case 'gl':
+                return Object.size(this.props.segment.glossary);
             default:
                 return tab.index;
         }
