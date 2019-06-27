@@ -31,7 +31,7 @@ class S3FilesStorage extends AbstractFilesStorage {
     const CACHE_PACKAGE_FOLDER   = 'cache-package';
     const FILES_FOLDER           = 'files';
     const QUEUE_FOLDER           = 'queue-projects';
-    const ZIP_FOLDER             = 'original-zip';
+    const ZIP_FOLDER             = 'originalZip';
     const FAST_ANALYSIS_FOLDER   = 'fast-analysis';
     const OBJECTS_SAFE_DELIMITER = '__';
 
