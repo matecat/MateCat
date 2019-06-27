@@ -82,15 +82,51 @@ class EntryDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function findAllBySegmentId( $id_segment ) {
-        $sql = "SELECT * FROM qa_entries
-           WHERE qa_entries.deleted_at IS NULL AND id_segment = :id_segment ";
+    /**
+     * @param      $id_segment
+     * @param null $source_page
+     *
+     * @return array
+     */
+    public static function findAllBySegmentId( $id_segment, $source_page = null ) {
+        $data = [ 'id_segment' => $id_segment ];
+        $source_page_condition = '' ;
+
+        if ( !is_null( $source_page ) ) {
+            $data['source_page']   = $source_page ;
+            $source_page_condition = " AND source_page = :source_page " ;
+        }
+
+        $sql = "SELECT * FROM qa_entries WHERE qa_entries.deleted_at IS NULL AND id_segment = :id_segment ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( [ 'id_segment' => $id_segment ] );
+        $stmt->execute( $data );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
+        return $stmt->fetchAll();
+    }
+
+    public static function findByIdSegmentAndSourcePage($id_segment, $id_job, $source_page) {
+        $sql = "SELECT qa_entries.*, qa_categories.label as category " .
+            " FROM qa_entries " .
+            " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
+            " WHERE id_job = :id_job AND id_segment = :id_segment " .
+            " AND qa_entries.deleted_at IS NULL " .
+            " AND qa_entries.source_page = :source_page " .
+            " ORDER BY create_date DESC ";
+
+        $opts = array(
+            'id_segment'  => $id_segment,
+            'id_job'      => $id_job,
+            'source_page' => $source_page
+        );
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( $opts );
+
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryWithCategoryStruct' );
         return $stmt->fetchAll();
     }
 

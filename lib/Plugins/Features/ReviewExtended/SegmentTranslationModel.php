@@ -18,6 +18,10 @@ use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventStruct;
 use LQA\ChunkReviewStruct;
+use LQA\EntryCommentDao;
+use LQA\EntryCommentStruct;
+use LQA\EntryDao;
+use LQA\EntryWithCategoryStruct;
 use Routes;
 use SegmentTranslationChangeVector;
 use TransactionableTrait;
@@ -42,7 +46,8 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
     /**
      * @var ChunkReviewStruct[]
      */
-    protected   $_chunkReviews;
+    protected $_chunkReviews;
+    protected $_issuesDeletionList = [] ;
 
     public function __construct( SegmentTranslationChangeVector $model, array $chunkReviews ) {
         $this->_model        = $model;
@@ -106,8 +111,8 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 // expect the direction to be downwards from R3 -> R2 -> R1 etc.
                 if ( in_array( $chunkReview->source_page, $sourcePagesWithFinalRevisions ) ) {
                     $chunkReview->reviewed_words_count -= $this->_model->getSegmentStruct()->raw_word_count ;
+                    $this->_deleteIssues( $chunkReview->source_page );
                     $chunkReview->penalty_points       -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page ) ;
-                    // $chunkReview->advancement_wc       -= $this->advancementWordCount() ;
                     $unsetFinalRevision []              = $chunkReview->source_page ;
                 }
 
@@ -122,6 +127,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 // the reviewed words count is removed from the upper one and moved to the lower one.
                 if ( $originSourcePage == $chunkReview->source_page ) {
                     $chunkReview->reviewed_words_count -= $this->_model->getSegmentStruct()->raw_word_count ;
+                    $this->_deleteIssues( $chunkReview->source_page );
                     $chunkReview->penalty_points       -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page ) ;
                     $chunkReview->advancement_wc       -= $this->advancementWordCount() ;
                     $unsetFinalRevision[]               = $chunkReview->source_page ;
@@ -142,6 +148,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 } elseif ( in_array( $chunkReview->source_page, $sourcePagesWithFinalRevisions ) ) {
                     // this case fits any other intermediate chunkReview record
                     $chunkReview->reviewed_words_count -= $this->_model->getSegmentStruct()->raw_word_count ;
+                    $this->_deleteIssues( $chunkReview->source_page );
                     $chunkReview->penalty_points       -= $this->getPenaltyPointsForSourcePage($chunkReview->source_page) ;
                     $unsetFinalRevision[]               = $chunkReview->source_page ;
                 }
@@ -207,10 +214,46 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
         }
     }
 
-    protected function _sendNotificationEmail($finalRevisions, $chunkReviewsWithFinalRevisions) {
+    protected function _deleteIssues( $source_page ) {
+        $this->_issuesDeletionList[ $source_page ] = EntryDao::findByIdSegmentAndSourcePage(
+                $this->_model->getSegmentStruct()->id, $this->_chunk->id, $source_page );
+
+        /** @var EntryWithCategoryStruct $issue */
+        foreach( $this->_issuesDeletionList[ $source_page ] as $issue ) {
+            $issue->addComments( ( new EntryCommentDao() )->findByIssueId( $issue->id ) );
+            EntryDao::deleteEntry( $issue ) ;
+        }
+    }
+
+    /**
+     * @param $finalRevisions
+     * @param $chunkReviewsWithFinalRevisions
+     */
+    protected function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions) {
         $emails                   = [];
         $userWhoChangedTheSegment = $this->_model->getEventUser() ;
         $revision                 = $chunkReviewsWithFinalRevisions[ $this->_model->getEventModel()->getOriginSourcePage() ] ;
+
+        $serialized_issues = [] ;
+        /** @var EntryWithCategoryStruct $issue */
+        foreach( $this->_issuesDeletionList[ $this->_model->getEventModel()->getOriginSourcePage() ] as $k => $issue ) {
+            $serialized = $issue->toArray() ;
+            $serialized['comments'] = [] ;
+
+            /** @var EntryCommentStruct $comment */
+            foreach( $issue->getComments() as $comment ) {
+                $serialized['comments'][] = $comment->toArray();
+            }
+
+            $serialized_issues [] = $serialized ;
+        }
+
+        $segmentInfo = [
+                'segment_source'  => htmlentities( $this->_model->getSegmentStruct()->segment, ENT_HTML5|ENT_NOQUOTES),
+                'old_translation' => htmlentities( $this->_model->getEventModel()->getOldTranslation()->translation, ENT_HTML5 | ENT_NOQUOTES ),
+                'new_translation' => htmlentities( $this->_model->getEventModel()->getTranslation()->translation, ENT_HTML5 | ENT_NOQUOTES ),
+                'issues'          => $serialized_issues
+        ];
 
         foreach( $finalRevisions as $finalRevision ) {
             if ( $finalRevision->source_page != $this->_model->getEventModel()->getOriginSourcePage() ) {
@@ -253,7 +296,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
         $notifiedEmails = [];
         foreach( $emails as $email ) {
             if ( !in_array( $email['recipient']->email, $notifiedEmails ) ) {
-                $delivery = new RevisionChangedNotificationEmail( $email, $url, $userWhoChangedTheSegment ) ;
+                $delivery = new RevisionChangedNotificationEmail( $segmentInfo, $email, $url, $userWhoChangedTheSegment ) ;
                 $delivery->send();
                 $notifiedEmails[] = $email['recipient']->email ;
             }
