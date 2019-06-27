@@ -69,29 +69,32 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         if ( empty( self::$CLIENT ) ) {
             // init the S3Client
-            $awsAccessKeyId = \INIT::$AWS_ACCESS_KEY_ID;
-            $awsSecretKey   = \INIT::$AWS_SECRET_KEY;
-            $awsVersion     = \INIT::$AWS_VERSION;
-            $awsRegion      = \INIT::$AWS_REGION;
+            $awsVersion = \INIT::$AWS_VERSION;
+            $awsRegion  = \INIT::$AWS_REGION;
 
-            self::$CLIENT = new Client(
-                    $awsAccessKeyId,
-                    $awsSecretKey,
-                    [
-                            'version' => $awsVersion,
-                            'region'  => $awsRegion,
-                    ]
-            );
+            $config = [
+                    'version' => $awsVersion,
+                    'region'  => $awsRegion,
+            ];
+
+            if ( null !== \INIT::$AWS_ACCESS_KEY_ID and null !== \INIT::$AWS_SECRET_KEY ) {
+                $config[ 'credentials' ] = [
+                        'key'    => \INIT::$AWS_ACCESS_KEY_ID,
+                        'secret' => \INIT::$AWS_SECRET_KEY,
+                ];
+            }
+
+            self::$CLIENT = new Client( $config );
 
             // add caching
             if ( INIT::$AWS_CACHING == true ) {
-                $redis        = new RedisHandler();
+                $redis = new RedisHandler();
                 self::$CLIENT->addCache( new RedisCache( $redis->getConnection() ) );
             }
 
             // add encoding
             $encoder = new UrlEncoder();
-            self::$CLIENT->addEncoder($encoder);
+            self::$CLIENT->addEncoder( $encoder );
 
             // disable SSL verify from configuration
             if ( false === INIT::$AWS_SSL_VERIFY ) {
@@ -354,8 +357,8 @@ class S3FilesStorage extends AbstractFilesStorage {
 
                 // save on redis the hash map files
                 if ( strpos( $key, '.' ) !== true or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === true ) {
-                    if($s3Client->hasEncoder()){
-                        $redisKey = $s3Client->getEncoder()->encode($key);
+                    if ( $s3Client->hasEncoder() ) {
+                        $redisKey = $s3Client->getEncoder()->encode( $key );
                     }
 
                     ( new RedisHandler() )->getConnection()->set( $redisKey, file_get_contents( $item->getPathName() ) );
@@ -387,8 +390,8 @@ class S3FilesStorage extends AbstractFilesStorage {
             } elseif ( strpos( $key, '.' ) !== false or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === false ) {
                 unset( $linkFiles[ $i ] );
             } else {
-                if($this->s3Client->hasEncoder()){
-                    $redisKey = $this->s3Client->getEncoder()->encode($key);
+                if ( $this->s3Client->hasEncoder() ) {
+                    $redisKey = $this->s3Client->getEncoder()->encode( $key );
                 }
 
                 // this method get the content from the hashes map file and convert it into an array of original file names
