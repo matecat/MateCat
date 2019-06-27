@@ -3,6 +3,7 @@
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
 use Exceptions\ControllerReturnException;
+use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
 
 class setTranslationController extends ajaxController {
@@ -20,12 +21,6 @@ class setTranslationController extends ajaxController {
 
     protected $id_translator;
     protected $time_to_edit;
-    protected $translation;
-
-    /**
-     * @var string
-     */
-    protected $_segment; // this comes from UI but is not used at moment
 
     /**
      * @var Segments_SegmentStruct
@@ -190,11 +185,10 @@ class setTranslationController extends ajaxController {
         }
 
 
-        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
-        list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ), '' );
-        list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'segment' ] ), '' );
+        $Filter = Filter::getInstance( $this->featureSet );
+        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ) );
 
-        if ( is_null( $this->translation ) || $this->translation === '' ) {
+        if ( is_null( $__translation ) || $__translation === '' ) {
             Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
 
             // won't save empty translation but there is no need to return an errors
@@ -266,7 +260,7 @@ class setTranslationController extends ajaxController {
 
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $Filter               = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $Filter               = Filter::getInstance( $this->featureSet );
         $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
         $this->context_after  = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
 
@@ -308,27 +302,28 @@ class setTranslationController extends ajaxController {
         $dao           = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getById( $this->id_segment );
 
+        $Filter = Filter::getInstance( $this->featureSet );
+
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
         $spaceHandler = new FromViewNBSPToSpaces();
-        $check        = new QA( $spaceHandler->transform( $this->__postInput[ 'segment' ] ), $spaceHandler->transform( $this->__postInput[ 'translation' ] ) );
+        $__seg = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
+        $__tra = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
+
+        $check        = new QA( $__seg, $__tra );
         $check->setFeatureSet( $this->featureSet );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
             $err_json    = $check->getWarningsJSON();
-            $translation = $this->translation;
+            $translation = $Filter->fromLayer1ToLayer0( $__tra );
         } else {
             $err_json    = '';
-            $Filter      = \SubFiltering\Filter::getInstance( $this->featureSet );
             $translation = $Filter->fromLayer1ToLayer0( $check->getTrgNormalized() );
         }
 
         //PATCH TO FIX BOM INSERTIONS
         $translation = Utils::stripBOM( $translation );
-
-        $splitHandler = new \SubFiltering\Filters\SplitPlaceholder();
-        $translation  = $splitHandler->transform( $translation );
 
         /*
          * begin stats counter
