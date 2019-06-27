@@ -717,15 +717,18 @@ $.extend(UI, {
 
     handleCopyEvent: function ( e ) {
         var elem = $(e.target);
+        var cloneTag, text;
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
             var tag = (elem.hasClass('inside-attribute')) ? elem.parent('span.locked') : elem.parent().parent('span.locked');
-            var cloneTag = tag.clone();
+            cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
-            var text = cloneTag.text();
+            text = cloneTag.text();
             e.clipboardData.setData('text/plain', text.trim());
             e.preventDefault();
         } else if (elem.hasClass('locked')) {
-            var text = htmlEncode(elem.text());
+            cloneTag = elem.clone();
+            cloneTag.find('.inside-attribute').remove();
+            text = htmlEncode(cloneTag.text());
             e.clipboardData.setData('text/plain', text.trim());
             e.clipboardData.setData('text/html', text.trim());
             e.preventDefault();

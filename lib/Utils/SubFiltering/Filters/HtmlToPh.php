@@ -215,8 +215,8 @@ class HtmlToPh extends AbstractHandler {
          * - ending with a letter a-zA-Z or a quote "' or /
          *
          */
-        if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-zA-Z0-9\-\._]+?(?:\s[:A-Z_a-z]+=.+?)?\s*[\/]{0,1}>#', $buffer ) ){
-            if( is_numeric( substr( $buffer, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[hH][1-6][^>]*>#', $buffer ) ){ //H tag are an exception
+        if ( preg_match( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._]+?(?:\s[:_a-z]+=.+?)?\s*[\/]{0,1}>#is', $buffer ) ){
+            if( is_numeric( substr( $buffer, -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#is', $buffer ) ){ //H tag are an exception
                 //tag can not end with a number
                 return false;
             }

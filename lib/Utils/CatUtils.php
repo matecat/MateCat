@@ -349,17 +349,8 @@ class CatUtils {
             unset( $tmp_lang );
         }
 
-        if ( preg_match_all( '#<[/]{0,1}[a-zA-Z].*?(?:[a-zA-Z]|["\']{0,1}|[/]{0,1})>#is', $string, $matches, PREG_SET_ORDER ) ) {
-
-            foreach ( $matches as $tag ) {
-                if ( is_numeric( substr( $tag[ 0 ], -2, 1 ) ) && !preg_match( '#<[/]{0,1}[hH][1-6][^>]*>#', $tag[ 0 ] ) ) { //H tag are an exception
-                    //tag can not end with a number
-                    continue;
-                }
-                $string = str_replace( $tag[ 0 ], " ", $string );
-            }
-
-        }
+        //Subfiltering should have transformed the html in ph tags, so remove them, we do not want to count them
+        $string = preg_replace( '#<ph [^>]+>#', " ", $string );
 
         //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
         //take a look at this string:
@@ -374,27 +365,28 @@ class CatUtils {
          * heuristic, of course this regexp is not perfect, hoping it is not too greedy
          *
          */
-        $string = preg_replace( '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d-_]+)?(?:[\p{Latin}\d-_]+\.[\p{Latin}\d-_]+\.[\p{Latin}\d#\?=\.-_]+)/', ' LINK ', $string );
+        $linkRegexp = '/(?:(?:[a-z]+:\/\/)|(?:\/\/))?(?:[\p{Latin}\d-_]+)?(?:[\p{Latin}\d-_]+\.[\p{Latin}\d-_]+\.[\p{Latin}\d#\?=\.-_]+)/u';
+
 
         /**
          * Count numbers as One Word
          */
         if ( array_key_exists( $source_lang, self::$cjk ) ) {
 
-            // 17/01/2014
-            // sostituiamo i numeri con N nel CJK in modo da non alterare i rapporti carattere/parola
-            // in modo che il conteggio
-            // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
+            $string = preg_replace( $linkRegexp, 'L', $string );
+
+            // replace all numbers with a placeholder without spaces to no alter the ratio characters/words, so they will be counted as 1 word
             $string = preg_replace( '/\b[0-9]+(?:[\.,][0-9]+)*\b/', 'N', $string );
 
         } else {
 
-            //Refine links like "php://filter/read=string.strip_tags/resource=php://input" not available in CJK because we can't use \s identifier
-            $string = preg_replace( '/(?:(?:[a-z]+:\/\/)[^\s]+)/', ' LINK ', $string );
+            $string = preg_replace( $linkRegexp, ' L ', $string );
 
-            // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
-            // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( '/\b[0-9]+(?:[\.,][0-9]+)*\b/', ' NUMBER ', $string );
+            //Refine links like "php://filter/read=string.strip_tags/resource=php://input" not available in CJK because we can't use \s identifier
+            $string = preg_replace( '/(?:(?:[a-z]+:\/\/)[^\s]+)/u', ' L ', $string );
+
+            // replace all numbers with a placeholder so they will be counted as 1 word
+            $string = preg_replace( '/\b[0-9]+(?:[\.,][0-9]+)*\b/', ' N ', $string );
 
         }
 
