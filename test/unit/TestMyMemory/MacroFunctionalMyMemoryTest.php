@@ -18,7 +18,7 @@
 error_reporting(~E_DEPRECATED);
 
 
-class MacroFunzionalMyMemoryTest extends AbstractTest
+class MacroFunctionalMyMemoryTest extends AbstractTest
 {
 
     protected $resource;
