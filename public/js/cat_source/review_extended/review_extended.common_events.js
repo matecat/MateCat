@@ -21,9 +21,7 @@ if (ReviewExtended.enabled()) {
     } );
 
     $(document).on('translation:change', function(e, data) {
-        if (data.sid === UI.getSegmentId(UI.currentSegment)) {
-            UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
-        }
+        UI.getSegmentVersionsIssues(data.sid, UI.getSegmentFileId(data.segment));
         UI.reloadQualityReport();
     });
 
