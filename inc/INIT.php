@@ -287,7 +287,7 @@ class INIT {
     public static $AWS_VERSION;
     public static $AWS_REGION;
     public static $AWS_SSL_VERIFY;
-    public static $AWS_CACHING;
+    public static $AWS_CACHING = false;
 
     public function __construct(){
 
