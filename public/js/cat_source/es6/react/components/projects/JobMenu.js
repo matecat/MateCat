@@ -19,7 +19,7 @@ class JobMenu extends React.Component {
     }
 
     openSecondPassUrl() {
-        if ( this.props.job.has('second_pass_review') ) {
+        if ( this.props.job.has('second_pass_review') && this.props.job.has('second_pass_review').size > 0) {
             let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('second_pass_review').get(0);
             console.log('Open url');
             window.open(url);
@@ -33,7 +33,7 @@ class JobMenu extends React.Component {
 
     getSecondPassReviewMenuLink() {
         if (this.props.project.has('features') && this.props.project.get('features').indexOf('second_pass_review') > -1 ){
-            if ( this.props.job.has('second_pass_review') ) {
+            if ( this.props.job.has('second_pass_review') && this.props.job.has('second_pass_review').size > 0 ) {
                 let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('second_pass_review').get(0);
                 return <a className="item" target="_blank" href={url}><i className="icon-edit icon"/>Revise 2</a>
             } else {
