@@ -21,6 +21,7 @@ use Klein\Klein;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
+use Users_UserStruct;
 
 class SecondPassReview extends BaseFeature {
     const FEATURE_CODE = 'second_pass_review' ;
@@ -126,7 +127,7 @@ class SecondPassReview extends BaseFeature {
             if ( isset( $chunk_reviews[ $key ] ) ) {
                 $project['jobs'][$kk][ 'second_pass_review' ] = array_values( array_filter( array_map( function(ChunkReviewStruct $chunk_review ) {
                     if ( $chunk_review->source_page > Constants::SOURCE_PAGE_REVISION ) {
-                        return $chunk_review->password ;
+                        return $chunk_review->review_password ;
                     }
                 }, $chunk_reviews[$key] ))) ;
 

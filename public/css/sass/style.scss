@@ -3212,6 +3212,9 @@ section.readonly:hover .ice-locked-label {
     top: 0;
     border-bottom: 0;
     z-index: 0;
+    &.no-hover {
+        cursor: default;
+    }
 }
 
 

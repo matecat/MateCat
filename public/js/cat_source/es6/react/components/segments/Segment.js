@@ -469,6 +469,7 @@ class Segment extends React.Component {
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
                         locked={!this.props.segment.unlocked && (this.props.segment.ice_locked === '1' || this.secondPassLocked) }
                         removeSelection={this.removeSelection.bind(this)}
+                        reviewType={this.props.reviewType}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
