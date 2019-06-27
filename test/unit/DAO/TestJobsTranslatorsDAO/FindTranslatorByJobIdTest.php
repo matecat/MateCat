@@ -34,6 +34,8 @@ class FindTranslatorByJobIdTest extends AbstractTest {
      */
     public function testCreationComplete() {
 
+        $this->markTestSkipped( "Can not be executed without conflicting with main database schema and storage" );
+
         $this->project = new ArrayObject( json_decode( $this->projectJson, true ) );
 
         //reserve a project id from the sequence

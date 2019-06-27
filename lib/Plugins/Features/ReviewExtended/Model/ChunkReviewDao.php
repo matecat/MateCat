@@ -11,6 +11,7 @@ namespace Features\ReviewExtended\Model;
 use Chunks_ChunkStruct;
 use Constants;
 use Database;
+use Exceptions\ControllerReturnException;
 use PDO;
 
 class ChunkReviewDao extends \LQA\ChunkReviewDao {
@@ -105,6 +106,7 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
     }
 
     public function recountAdvancementWords( Chunks_ChunkStruct $chunk, $source_page ) {
+
         $sql = "
             SELECT SUM( IF( match_type != 'ICE', eq_word_count, s.raw_word_count ) ) FROM segments s
                 JOIN segment_translations st on st.id_segment = s.id
@@ -119,13 +121,16 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                         AND id_segment BETWEEN :job_first_segment AND :job_last_segment
                         GROUP BY id_segment
                 )
-                HAVING source_page = :source_page
+
                 ORDER BY id_segment
             ) ste ON ste.id_segment = s.id
 
             WHERE
                 j.id = :id_job AND j.password = :password
-                AND ( ste.id_segment IS NOT NULL OR match_type = 'ICE' )
+                AND
+                ( source_page = :source_page OR
+                  ( :source_page = 2 AND ste.id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
+                  ) ;
             "  ;
 
         $conn = Database::obtain()->getConnection();

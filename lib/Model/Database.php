@@ -203,7 +203,7 @@ class Database implements IDatabase {
             $valuesToBind[ $k ] = $v;
         }
 
-        $query = rtrim( $query, " AND " );
+        $query = substr( $query, 0, -5 );
 
         $stmt = $this->getConnection()->prepare( $query );
 

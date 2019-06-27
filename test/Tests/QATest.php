@@ -163,9 +163,9 @@ TRG;
 
         $source_seg = CatUtils::layer2ToLayer0( $source_seg );
         $target_seg = CatUtils::layer2ToLayer0( $target_seg );
-//Log::doLog("---------------");
-//        Log::doLog($source_seg);
-//        Log::doLog($target_seg);
+//Log::doJsonLog("---------------");
+//        Log::doJsonLog($source_seg);
+//        Log::doJsonLog($target_seg);
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
 //die();

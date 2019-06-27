@@ -1,14 +1,13 @@
 <?php
 
 /**
- * @group regression
+ * @group   regression
  * @covers  Engines_AbstractEngine::_call
  * User: dinies
  * Date: 22/04/16
  * Time: 14.40
  */
-class CallprotectedfunctionTest extends AbstractTest
-{
+class CallprotectedfunctionTest extends AbstractTest {
     /**
      * @var EnginesModel_EngineStruct
      */
@@ -35,62 +34,59 @@ class CallprotectedfunctionTest extends AbstractTest
      */
     protected $mock_engine;
 
-    public function setUp()
-    {
+    public function setUp() {
         parent::setUp();
-        $this->database_instance = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         /**
          * user insertion
          */
-        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES ('100044', 'bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo', '');";
-        $this->database_instance->query($this->sql_insert_user);
+        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ('100044', 'bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo');";
+        $this->database_instance->getConnection()->query( $this->sql_insert_user );
         $this->id_user = $this->database_instance->getConnection()->lastInsertId();
 
         /**
          * engine insertion
          */
         $this->sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
-        $this->database_instance->query($this->sql_insert_engine);
+        $this->database_instance->getConnection()->query( $this->sql_insert_engine );
         $this->id_database = $this->database_instance->getConnection()->lastInsertId();
 
 
-        $this->sql_delete_user = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
+        $this->sql_delete_user   = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
         $this->sql_delete_engine = "DELETE FROM engines WHERE id=" . $this->id_database . ";";
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
-        $engine_struct = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = $this->id_database;
-        $eng = $engineDAO->read($engine_struct);
+        $eng               = $engineDAO->read( $engine_struct );
 
         /**
          * @var $engineRecord EnginesModel_EngineStruct
          */
-        $this->engine_struct_param = @$eng[0];
-        $this->mock_engine = $this->getMockBuilder('\Engines_DeepLingo')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $this->engine_struct_param = @$eng[ 0 ];
+        $this->mock_engine         = $this->getMockBuilder( '\Engines_DeepLingo' )->setMethods( [ '_call' ] )->getMock();
 
     }
 
-    public function tearDown()
-    {
+    public function tearDown() {
 
-        $this->database_instance->query($this->sql_delete_user);
-        $this->database_instance->query($this->sql_delete_engine);
-        $flusher = new Predis\Client(INIT::$REDIS_SERVERS);
+        $this->database_instance->getConnection()->query( $this->sql_delete_user );
+        $this->database_instance->getConnection()->query( $this->sql_delete_engine );
+        $flusher = new Predis\Client( INIT::$REDIS_SERVERS );
         $flusher->flushdb();
         parent::tearDown();
 
     }
 
     /**
-     * @group regression
+     * @group   regression
      * @covers  Engines_AbstractEngine::_call
      */
-    public function test__call_using_mock_object_and_simple_segment()
-    {
+    public function test__call_using_mock_object_and_simple_segment() {
 
-        $reflector = new ReflectionClass($this->mock_engine);
-        $this->method = $reflector->getMethod("_call");
-        $this->method->setAccessible(true);
+        $reflector    = new ReflectionClass( $this->mock_engine );
+        $this->method = $reflector->getMethod( "_call" );
+        $this->method->setAccessible( true );
 
 
         $url = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red&source=en&target=fr&key=gala15";
@@ -143,10 +139,10 @@ class CallprotectedfunctionTest extends AbstractTest
 }
 LAB;
 
-        $curl_opt = array(
-            CURLOPT_HTTPGET => true,
-            CURLOPT_TIMEOUT => 10
-        );
+        $curl_opt = [
+                CURLOPT_HTTPGET => true,
+                CURLOPT_TIMEOUT => 10
+        ];
 
         $json_output_mock = <<<LAB
 {
@@ -195,24 +191,23 @@ LAB;
   }
 }
 LAB;
-        $url_param_mock = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red&source=en&target=fr&key=gala15";
+        $url_param_mock   = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red&source=en&target=fr&key=gala15";
 
-        $this->mock_engine->expects($this->once())->method('_call')->with($url_param_mock, $curl_opt)->willReturn($json_output_mock);
+        $this->mock_engine->expects( $this->once() )->method( '_call' )->with( $url_param_mock, $curl_opt )->willReturn( $json_output_mock );
 
 
-        $this->assertEquals($json_output, $this->method->invoke($this->mock_engine, $url, $curl_opt));
+        $this->assertEquals( $json_output, $this->method->invoke( $this->mock_engine, $url, $curl_opt ) );
     }
 
     /**
-     * @group regression
+     * @group   regression
      * @covers  Engines_AbstractEngine::_call
      */
-    public function test__call_using_mock_object_and_long_segment()
-    {
+    public function test__call_using_mock_object_and_long_segment() {
 
-        $reflector = new ReflectionClass($this->mock_engine);
-        $this->method = $reflector->getMethod("_call");
-        $this->method->setAccessible(true);
+        $reflector    = new ReflectionClass( $this->mock_engine );
+        $this->method = $reflector->getMethod( "_call" );
+        $this->method->setAccessible( true );
 
 
         $json_output = <<<'LAB'
@@ -309,10 +304,10 @@ LAB;
 
         $url = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red+and+apple+is+green+soup&source=en&target=fr&key=gala15";
 
-        $curl_opt = array(
-            CURLOPT_HTTPGET => true,
-            CURLOPT_TIMEOUT => 10
-        );
+        $curl_opt = [
+                CURLOPT_HTTPGET => true,
+                CURLOPT_TIMEOUT => 10
+        ];
 
 
         $json_output_mock = <<<'LAB'
@@ -410,10 +405,10 @@ LAB;
         $url_param_mock = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red+and+apple+is+green+soup&source=en&target=fr&key=gala15";
 
 
-        $this->mock_engine->expects($this->once())->method('_call')->with($url_param_mock, $curl_opt)->willReturn($json_output_mock);
+        $this->mock_engine->expects( $this->once() )->method( '_call' )->with( $url_param_mock, $curl_opt )->willReturn( $json_output_mock );
 
 
-        $this->assertEquals($json_output, $this->method->invoke($this->mock_engine, $url, $curl_opt));
+        $this->assertEquals( $json_output, $this->method->invoke( $this->mock_engine, $url, $curl_opt ) );
     }
 
 }

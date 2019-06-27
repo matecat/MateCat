@@ -51,7 +51,6 @@ class TranslationVersions extends BaseFeature {
             $batchEventCreator->addEventModel( $propagatedEvent );
         }
 
-
         try {
             $batchEventCreator->save();
             // $event->setChunkReviewsList( $chunkReviews ) ;
@@ -62,8 +61,6 @@ class TranslationVersions extends BaseFeature {
             ];
             throw new ControllerReturnException( $e->getMessage(), -2000 ) ;
         }
-
-
     }
 
     public function filter_get_segments_optional_fields(){

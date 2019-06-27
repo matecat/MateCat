@@ -34,6 +34,7 @@ function startConnection() {
 
 startConnection();
 
-TestHelper::init() ;
+TestHelper::init();
+TestHelper::resetDb();
 
 INIT::$DQF_ID_PREFIX = INIT::$DQF_ID_PREFIX . '-test-' . rand(1,10000);

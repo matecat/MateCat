@@ -84,6 +84,10 @@ class SegmentTranslationChangeVector {
                 $this->eventModel->isLowerRevision() ;
     }
 
+    public function isBeingLowerReviewedOrTranslated() {
+        return $this->eventModel->isLowerRevision();
+    }
+
     /**
      * Returns 1 if source page is moving up  0 if it's not changing, -1 if it's moving down.
      *
@@ -111,13 +115,21 @@ class SegmentTranslationChangeVector {
                 (
                     $this->old_translation->isReviewedStatus() &&
                     $this->translation->isReviewedStatus() &&
-                    $this->isModifyingICE()
+                    $this->isModifyingICEFromTranslation()
                 );
     }
 
-    public function isModifyingICE() {
+    /**
+     * This method returns true when we are changing and ICE 'APPROVED' to TRANSLATE
+     *
+     * @return bool
+     */
+    public function isModifyingICEFromTranslation() {
         return $this->old_translation->isICE() &&
-                $this->old_translation->translation != $this->translation->translation &&
+                $this->old_translation->isReviewedStatus() &&
+                $this->translation->isTranslationStatus() &&
+                $this->eventModel->getOriginSourcePage() == Constants::SOURCE_PAGE_REVISION &&
+                $this->old_translation->translation !== $this->translation->translation &&
                 $this->old_translation->version_number == 0 ;
     }
 
@@ -141,11 +153,14 @@ class SegmentTranslationChangeVector {
     public function isExitingReviewedState() {
         return $this->old_translation->isReviewedStatus() &&
                 $this->translation->isTranslationStatus() &&
-                ! $this->_isEditingICEforTheFirstTime() &&
+                ! $this->isEditingICEforTheFirstTime() &&
                 ! $this->_isChangingICEtoTranslatedWithNoChange() ;
     }
 
-    protected function _isEditingICEforTheFirstTime() {
+    /**
+     * @return bool
+     */
+    public function isEditingICEforTheFirstTime() {
         return ( $this->old_translation->isICE() &&
                 $this->old_translation->version_number == 0 &&
                 $this->translation->version_number == 1
@@ -176,6 +191,14 @@ class SegmentTranslationChangeVector {
      */
     public function getChunk() {
         return $this->chunk;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEditingCurrentRevision() {
+        return $this->eventModel->getDestinationSourcePage() == $this->eventModel->getOriginSourcePage() &&
+                $this->translation->translation != $this->old_translation->translation ;
     }
 
 }

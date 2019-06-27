@@ -177,6 +177,17 @@ class Users_UserDao extends DataAccess_AbstractDao {
      */
     public function read( DataAccess_IDaoStruct $UserQuery ) {
 
+        list( $query, $where_parameters ) = $this->_buildReadQuery( $UserQuery );
+        $stmt = $this->_getStatementForCache( $query );
+
+        return $this->_fetchObject( $stmt,
+                $UserQuery,
+                $where_parameters
+        );
+
+    }
+
+    protected function _buildReadQuery( DataAccess_IDaoStruct $UserQuery ){
         $UserQuery = $this->sanitize( $UserQuery );
 
         $where_conditions = array();
@@ -205,24 +216,9 @@ class Users_UserDao extends DataAccess_AbstractDao {
             throw new Exception( "Where condition needed." );
         }
 
-        $query = sprintf( $query, $where_string );
-        $stmt = $this->_getStatementForCache( $query );
-
-        return $this->_fetchObject( $stmt,
-                $UserQuery,
-                $where_parameters
-        );
+        return [ sprintf( $query, $where_string ), $where_parameters ];
 
     }
-
-    protected function _getStatementForCache( $query ) {
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $query );
-
-        return $stmt;
-    }
-
 
     /***
      * @param $job_id

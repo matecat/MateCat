@@ -24,7 +24,7 @@ class SegmentTranslationEventModel  {
 
     protected $user ;
 
-    protected $source_page_code ;
+    protected $source_page ;
 
     /**
      * @var int|SegmentTranslationEventStruct
@@ -42,10 +42,10 @@ class SegmentTranslationEventModel  {
                                  Translations_SegmentTranslationStruct $translation,
                                  $user, $source_page_code) {
 
-        $this->old_translation  = $old_translation ;
-        $this->translation      = $translation ;
-        $this->user             = $user ;
-        $this->source_page_code = $source_page_code ;
+        $this->old_translation = $old_translation ;
+        $this->translation     = $translation ;
+        $this->user            = $user ;
+        $this->source_page     = $source_page_code ;
 
         $this->getPriorEvent() ;
     }
@@ -71,6 +71,10 @@ class SegmentTranslationEventModel  {
         return $this->getOriginSourcePage() != $this->getDestinationSourcePage() ;
     }
 
+    public function isPersisted() {
+        return $this->current_event !== -1 && !is_null($this->current_event->id);
+    }
+
     public function save() {
 
         if ( $this->current_event !== -1 ) {
@@ -79,10 +83,18 @@ class SegmentTranslationEventModel  {
 
         if (
                 in_array( $this->translation['status'], Constants_TranslationStatus::$REVISION_STATUSES ) &&
-                $this->source_page_code < Constants::SOURCE_PAGE_REVISION
+                $this->source_page < Constants::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError('Setting revised state from translation is not allowed.', -2000 );
         }
+
+        if (
+                in_array( $this->translation['status'], Constants_TranslationStatus::$TRANSLATION_STATUSES ) &&
+                $this->source_page >= Constants::SOURCE_PAGE_REVISION
+        ) {
+            throw new ValidationError('Setting translated state from revision is not allowed.', -2000 );
+        }
+
 
         if ( !$this->_saveRequired() ) {
             return ;
@@ -95,7 +107,11 @@ class SegmentTranslationEventModel  {
         $this->current_event->uid            = ( $this->user->uid != null ? $this->user->uid : 0 );
         $this->current_event->status         = $this->translation['status'] ;
         $this->current_event->version_number = $this->translation['version_number'] ;
-        $this->current_event->source_page    = $this->source_page_code ;
+        $this->current_event->source_page    = $this->source_page ;
+
+        if ( $this->isPropagationSource() ) {
+            $this->current_event->time_to_edit = $this->translation['time_to_edit'];
+        }
 
         $this->current_event->setTimestamp('create_date', time() );
 
@@ -110,7 +126,7 @@ class SegmentTranslationEventModel  {
         return (
                 $this->old_translation->translation != $this->translation->translation ||
                 $this->old_translation->status      != $this->translation->status ||
-                $this->source_page_code             != $this->getOriginSourcePage()
+                $this->source_page             != $this->getOriginSourcePage()
         );
     }
 
@@ -148,8 +164,8 @@ class SegmentTranslationEventModel  {
      * @throws Exception
      */
     public function getCurrentEvent() {
-        if ( ! $this->current_event ) {
-            throw new Exception('The current segment was not persisted yet. Run getPropagatedIdsve() first.');
+        if ( $this->current_event == -1 ) {
+            throw new Exception('The current segment was not persisted yet. Run save() first.');
         }
         return $this->current_event ;
     }

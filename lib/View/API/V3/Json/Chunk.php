@@ -309,7 +309,9 @@ class Chunk extends \API\V2\Json\Chunk {
             $quality_overall = 'fail';
         }
 
-        $chunkReviewModel = RevisionFactory::getInstance()->getChunkReviewModel( $chunkReview );
+        $chunkReviewModel = RevisionFactory::initFromProject( $project )
+                ->setFeatureSet( $project->getFeatures() )
+                ->getChunkReviewModel( $chunkReview );
 
         $score = number_format( $chunkReviewModel->getScore(), 2, ".", "" );
 

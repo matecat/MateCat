@@ -75,7 +75,7 @@ class CurlTest {
     }
 
     if ( $this->referer != null ) {
-        \Log::doLog('referer: ' .  $this->referer );
+        \Log::doJsonLog('referer: ' .  $this->referer );
         curl_setopt($ch, CURLOPT_REFERER, $this->referer )  ;
     }
 

@@ -141,6 +141,11 @@ class ChunkReviewModel implements IChunkReviewModel {
         $this->chunk_review->reviewed_words_count =
                 ChunkReviewDao::getReviewedWordsCountForChunk( $chunk );
 
+        $this->chunk_review->advancement_wc = ( new ChunkReviewDao() )
+                ->recountAdvancementWords( $chunk, $this->chunk_review->source_page ) ;
+
+        $this->chunk_review->total_tte = ( new ChunkReviewDao() )->countTimeToEdit( $chunk, $this->chunk_review->source_page ) ;
+
         $this->updatePassFailResult();
     }
 

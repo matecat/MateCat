@@ -13,7 +13,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     const STRUCT_TYPE = "EnginesModel_EngineStruct";
 
     protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys = [ 'id' ];
+    protected static $primary_keys         = [ 'id' ];
 
     /**
      * Build the query,
@@ -40,7 +40,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
             if ( $obj->uid == 'NULL' ) {
                 $where_conditions[] = "uid IS NULL";
-            } elseif( empty( $obj->uid ) || $obj->uid <= 0 ){
+            } elseif ( empty( $obj->uid ) || $obj->uid <= 0 ) {
                 throw new DomainException( "Anonymous User." ); //do not perform any query on anonymous user requests
             } elseif ( is_numeric( $obj->uid ) ) {
                 $bind_values[ 'uid' ] = (int)$obj->uid;
@@ -51,12 +51,12 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         if ( $obj->active !== null ) {
             $bind_values[ 'active' ] = (int)$obj->active;
-            $where_conditions[] = "active = :active";
+            $where_conditions[]      = "active = :active";
         }
 
         if ( $obj->type !== null ) {
             $bind_values[ 'type' ] = $obj->type;
-            $where_conditions[] = "type = :type";
+            $where_conditions[]    = "type = :type";
         }
 
         if ( count( $where_conditions ) ) {
@@ -85,11 +85,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         $query = "INSERT INTO " . self::TABLE .
                 " ( name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url,
                 delete_relative_url, others, extra_parameters, class_load, google_api_compliant_version, penalty, active, uid)
-                    VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ) ON DUPLICATE KEY UPDATE
-                        active = VALUES(active),
-                        others = VALUES(others),
-                        extra_parameters = VALUES(extra_parameters),
-                        name = VALUES(name)
+                    VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
             ";
 
         $bind_values   = [];
@@ -115,14 +111,11 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( $bind_values );
 
-        //return the inserted object on success, null otherwise
-        if ( $stmt->rowCount() > 0 ) {
-            $obj->id = $this->database->last_insert();
+        //return the inserted object on success
+        $obj->id = $this->database->last_insert();
 
-            return $obj;
-        }
+        return $obj;
 
-        return null;
     }
 
     /**
@@ -140,7 +133,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
          */
         try {
             $query_and_bindValues = $this->_buildQueryForEngine( $obj );
-        } catch( DomainException $e ){
+        } catch ( DomainException $e ) {
             return []; //anonymous use request, he can not have any associated engine, do not perform queries
         }
 
@@ -170,7 +163,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         */
         try {
             $query_and_bindValues = $this->_buildQueryForEngine( $obj );
-        } catch( DomainException $e ){
+        } catch ( DomainException $e ) {
             return true; //anonymous use request, he can not have any associated engine, do not perform queries
         }
 
@@ -182,7 +175,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     }
 
     public function update( EnginesModel_EngineStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+        $obj = $this->sanitize( clone $obj );
 
         $this->_validatePrimaryKey( $obj );
 
@@ -226,8 +219,8 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( [
-                $obj->id,
-                $obj->uid
+                'id'  => $obj->id,
+                'uid' => $obj->uid
         ] );
 
 
@@ -248,8 +241,8 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( [
-                $obj->id,
-                $obj->uid
+                'id'  => $obj->id,
+                'uid' => $obj->uid
         ] );
 
         if ( $stmt->rowCount() > 0 ) {
@@ -360,7 +353,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      * @return bool|void
      * @throws Exception
      */
-    protected function _validateNotNullFields(  $obj ) {
+    protected function _validateNotNullFields( $obj ) {
         /**
          * @var $obj EnginesModel_EngineStruct
          */

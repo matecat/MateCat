@@ -8,9 +8,9 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants;
+use DataAccess\ShapelessConcreteStruct;
 use Features\ISegmentTranslationModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\SecondPassReview\Email\RevisionChangedNotificationEmail;
@@ -94,7 +94,11 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count ;
                 $chunkReview->penalty_points       += $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
                 $chunkReview->total_tte            += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit;
-                $chunkReview->advancement_wc       += $this->advancementWordCount();
+
+                if ( $destinationSourcePage != $originSourcePage ) {
+                    $chunkReview->advancement_wc += $this->advancementWordCount();
+                }
+
                 break;
             }
 
@@ -110,7 +114,6 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 if ( $chunkReview->source_page == $originSourcePage ) {
                     $chunkReview->advancement_wc -= $this->advancementWordCount() ;
                 }
-
             }
 
             // TODO: in the following two cases we shuold considere if the segment is changed or not.
@@ -169,13 +172,16 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 }
             }
             elseif (
-                    $this->_model->isModifyingICE() &&
-                    $this->_model->getEventModel()->getDestinationSourcePage() == 1 ) { // TODO change to constant
+                    $this->_model->isModifyingICEFromTranslation() &&
+                    $this->_model->getEventModel()->getDestinationSourcePage() == Constants::SOURCE_PAGE_TRANSLATE ) {
                 /**
                  * Enter this condition when we are just changing source page. This change only affects advancement wc.
                  * This is the case of ICE matches moving from R1 to TR.
                  */
                 $chunkReview->advancement_wc -= $this->advancementWordCount() ;
+            }
+            elseif ( $this->_model->isEditingCurrentRevision() && $destinationSourcePage == $chunkReview->source_page ) {
+                $chunkReview->total_tte += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit ;
             }
         }
 
@@ -190,7 +196,7 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
         $this->commitTransaction();
 
         // Send email
-        if ( $this->_model->getEventModel()->isPropagationSource() && $this->_model->isBeingLowerReviewed() ) {
+        if ( $this->_model->getEventModel()->isPropagationSource() && $this->_model->isBeingLowerReviewedOrTranslated() ) {
             $chunkReviewsWithFinalRevisions = [] ;
             foreach ( $this->_chunkReviews as $chunkReview ) {
                 if ( in_array( $chunkReview->source_page, $sourcePagesWithFinalRevisions ) ) {
@@ -200,40 +206,58 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
 
             $this->_sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions );
         }
-
     }
 
     protected function _sendNotificationEmail($finalRevisions, $chunkReviewsWithFinalRevisions) {
-        $emails = [];
+        $emails                   = [];
         $userWhoChangedTheSegment = $this->_model->getEventUser() ;
+        $revision                 = $chunkReviewsWithFinalRevisions[ $this->_model->getEventModel()->getOriginSourcePage() ] ;
 
         foreach( $finalRevisions as $finalRevision ) {
-            if ( $finalRevision->source_page != $this->_model->getEventModel()->getDestinationSourcePage() ) {
-                $user = ( new Users_UserDao() )->getByUid( $finalRevision->uid );
-                if ( $user ) {
-                    $emails[] = [
-                            'recipient' => $user,
-                            'revision'  => $chunkReviewsWithFinalRevisions[ $finalRevision->source_page ]
-                    ] ;
-                }
+            if ( $finalRevision->source_page != $this->_model->getEventModel()->getOriginSourcePage() ) {
+                continue;
+            }
+
+            $user = ( new Users_UserDao() )->getByUid( $finalRevision->uid );
+            if ( $user ) {
+                $emails[] = [
+                        'isPreviousChangeAuthor' => true,
+                        'recipient'            => $user,
+                ] ;
             }
         }
 
+        $projectOwner = ( new Users_UserDao() )->getByEmail( $this->_chunk->getProject()->id_customer ) ;
+        if ( $projectOwner ) {
+            $emails[] = [
+                    'isPreviousChangeAuthor' => false,
+                    'recipient'            => $projectOwner,
+            ] ;
+        }
+
+        $projectAssignee = ( new Users_UserDao() )->getByUid( $this->_chunk->getProject()->id_assignee ) ;
+        if ( $projectAssignee ) {
+            $emails[] = [
+                    'isPreviousChangeAuthor' => false,
+                    'recipient'            => $projectAssignee,
+            ] ;
+        }
+
+        $emails = $this->_chunk->getProject()->getFeatures()->filter('filterRevisionChangeNotificationList', $emails );
+        $url = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
+                $this->_chunk->source, $this->_chunk->target, [
+                        'revision_number' => Utils::sourcePageToRevisionNumber( $revision->source_page ),
+                        'id_segment'      => $this->_model->getSegmentStruct()->id
+                ] ) ;
+
+
+        $notifiedEmails = [];
         foreach( $emails as $email ) {
-            if ( !is_null($userWhoChangedTheSegment) && $userWhoChangedTheSegment->email == $email['recipient']->email ) {
-                continue ;
+            if ( !in_array( $email['recipient']->email, $notifiedEmails ) ) {
+                $delivery = new RevisionChangedNotificationEmail( $email, $url, $userWhoChangedTheSegment ) ;
+                $delivery->send();
+                $notifiedEmails[] = $email['recipient']->email ;
             }
-
-            /** @var ChunkReviewStruct $revision */
-            $revision = $email['revision'] ;
-            $url = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
-                    $this->_chunk->source, $this->_chunk->target, [
-                            'revision_number' => Utils::sourcePageToRevisionNumber( $revision->source_page ),
-                            'id_segment'      => $this->_model->getSegmentStruct()->id
-                    ] ) ;
-
-            $delivery = new RevisionChangedNotificationEmail( $email['recipient'], $url, $userWhoChangedTheSegment ) ;
-            $delivery->send();
         }
     }
 

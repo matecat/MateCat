@@ -43,16 +43,16 @@ class UpdateInsertTest extends AbstractTest {
         $this->sql_read = "SELECT * FROM Persons";
 
 
-        $this->alfa_instance->query( $this->sql_create );
-        $this->alfa_instance->query( $this->sql_insert_first_value );
-        $this->alfa_instance->query( $this->sql_insert_second_value );
+        $this->alfa_instance->getConnection()->query( $this->sql_create );
+        $this->alfa_instance->getConnection()->query( $this->sql_insert_first_value );
+        $this->alfa_instance->getConnection()->query( $this->sql_insert_second_value );
 
 
     }
 
     public function tearDown() {
 
-        $this->alfa_instance->query( $this->sql_drop );
+        $this->alfa_instance->getConnection()->query( $this->sql_drop );
         $this->reflectedClass = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->reflectedClass->close();
         startConnection();
@@ -78,7 +78,7 @@ class UpdateInsertTest extends AbstractTest {
         $this->affected_rows = $this->property->getValue( $this->alfa_instance );
 
         $expected = [ 0 => [ "PersonID" => 678432 ], 1 => [ "PersonID" => 890788 ] ];
-        $actual   = $this->alfa_instance->query( $this->sql_read )->fetchAll( PDO::FETCH_ASSOC );
+        $actual   = $this->alfa_instance->getConnection()->query( $this->sql_read )->fetchAll( PDO::FETCH_ASSOC );
 
         $this->assertEquals( $expected, $actual );
         $this->assertEquals( 1, $this->affected_rows );
@@ -100,7 +100,7 @@ class UpdateInsertTest extends AbstractTest {
         $this->affected_rows = $this->property->getValue( $this->alfa_instance );
 
         $expected = [ 0 => [ "PersonID" => 475144 ], 1 => [ "PersonID" => 890788 ], 2 => [ "PersonID" => 678432 ] ];
-        $actual   = $this->alfa_instance->query( $this->sql_read )->fetchAll( PDO::FETCH_ASSOC );
+        $actual   = $this->alfa_instance->getConnection()->query( $this->sql_read )->fetchAll( PDO::FETCH_ASSOC );
 
 
         $this->assertEquals( $expected, $actual );

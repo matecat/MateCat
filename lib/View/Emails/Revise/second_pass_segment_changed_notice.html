@@ -5,7 +5,12 @@
     <?php } else { ?>
         someone
     <?php } ?>
+
+    <?php if ( $data['isPreviousChangeAuthor'] ) { ?>
     changed a segment which was earlier approved by you.
+    <?php } else { ?>
+    changed a previously approved segment.
+    <?php } ?>
 </p>
 
 <p>
