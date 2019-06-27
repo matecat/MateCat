@@ -2,6 +2,7 @@
 
 namespace LQA;
 use \Log as Log ;
+use Utils;
 
 class EntryDao extends \DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
@@ -20,12 +21,23 @@ class EntryDao extends \DataAccess_AbstractDao {
         return $stmt->execute( array( 'id' => $id ) );
     }
 
-    public static function deleteEntry( EntryStruct $record ) {
+    public static function hardDeleteEntry( EntryStruct $record ) {
         $sql = "DELETE FROM qa_entries WHERE id = :id ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare($sql);
         return $stmt->execute( array( 'id' => $record->id ));
+    }
+
+    public static function deleteEntry( EntryStruct $record ) {
+        $sql = "UPDATE qa_entries SET deleted_at = :deleted_at WHERE id = :id ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare($sql);
+        return $stmt->execute(  [
+                'id'         => $record->id ,
+                'deleted_at' => Utils::mysqlTimestamp( time() )
+        ]);
     }
 
     /**
@@ -37,7 +49,7 @@ class EntryDao extends \DataAccess_AbstractDao {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
             " FROM qa_entries " .
             " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
-            " WHERE qa_entries.id = :id LIMIT 1" ;
+            " WHERE qa_entries.id = :id AND qa_entries.deleted_at IS NULL LIMIT 1" ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -59,7 +71,9 @@ class EntryDao extends \DataAccess_AbstractDao {
           JOIN jobs
             ON jobs.id = qa_entries.id_job
           JOIN qa_categories ON qa_categories.id = qa_entries.id_category
-           WHERE qa_entries.id_job = :id AND jobs.password = :password ";
+           WHERE
+            qa_entries.deleted_at IS NULL AND
+            qa_entries.id_job = :id AND jobs.password = :password ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -70,7 +84,7 @@ class EntryDao extends \DataAccess_AbstractDao {
 
     public static function findAllBySegmentId( $id_segment ) {
         $sql = "SELECT * FROM qa_entries
-           WHERE id_segment = :id_segment ";
+           WHERE qa_entries.deleted_at IS NULL AND id_segment = :id_segment ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -85,6 +99,7 @@ class EntryDao extends \DataAccess_AbstractDao {
             " FROM qa_entries " .
             " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
             " WHERE id_job = :id_job AND id_segment = :id_segment " .
+            " AND qa_entries.deleted_at IS NULL " .
             " AND translation_version = :translation_version " .
             " ORDER BY create_date DESC ";
 

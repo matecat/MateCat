@@ -151,7 +151,6 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
             elseif ( $this->_model->isBeingUpperReviewed() ) {
                 if ( $originSourcePage == $chunkReview->source_page ) {
                     // TODO: decide wether or not to remove the revised words
-                    // $chunkReview->reviewed_words_count -= $this->rawWordsCountWithPropagation();
                     // expect advancement to be assigned to the origin source_page
                     $chunkReview->advancement_wc  -= $this->advancementWordCount() ;
 

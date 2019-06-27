@@ -136,6 +136,7 @@ FROM segment_translations st
     ON issues.id_job = jobs.id
     AND issues.id_segment = s.id
     AND issues.translation_version = st.version_number
+    AND issues.deleted_at IS NULL
 
   LEFT JOIN qa_entry_comments comments
     ON comments.id_qa_entry = issues.id
@@ -225,7 +226,7 @@ JOIN (
   LEFT JOIN translation_warnings
     ON translation_warnings.id_segment = issues.id_segment
 
-    WHERE issues.id_job = ?
+    WHERE issues.deleted_at IS NULL AND issues.id_job = ?
 
   ";
 
@@ -261,6 +262,7 @@ JOIN jobs j ON issues.id_job = j.id
 
     WHERE j.id = ? AND j.password = ?
       AND issues.source_page = ?
+      AND issues.deleted_at IS NULL
   ";
 
         $conn = Database::obtain()->getConnection();
