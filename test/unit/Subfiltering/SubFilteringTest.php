@@ -198,7 +198,7 @@ is &lt; 70 dB(A).';
 
         //Original JSON value from Airbnb
         //"&lt;br>&lt;br>This will "
-        $expected_segment = '&amp;lt;b&gt;de %1$s, &lt;/b&gt;que';
+        $expected_segment = '&lt;b&gt;de %1$s, &lt;/b&gt;que';
 
         //Start test
         $string_from_UI = '&lt;b&gt;de <ph id="mtc_1" equiv-text="base64:JTEkcw=="/>, &lt;/b&gt;que';

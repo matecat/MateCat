@@ -69,6 +69,12 @@ LABEL;
      * @covers  Engines_AbstractEngine::_resetSpecialStrings
      */
     public function test__resetSpecialStrings_with_strings(){
+
+        // NOTE 27th June 2019
+        // ----------------------------------
+        // Mark as skipped
+        $this->markTestSkipped('The method _patterns_found does not exists anymore and the method _resetSpecialStrings does not operate any change in string');
+
         $array_of_patterns= array('%d'=> "6509f252c35a", '%@' => "465cb57f10ce");
         $patterns_found= $this->reflector->getProperty("_patterns_found");
         $patterns_found->setAccessible(true);
@@ -95,6 +101,5 @@ LABEL;
 LABEL;
 
         $this->assertEquals($expected_string, $this->method->invoke($this->reflectedClass,$input_string));
-
     }
 }
