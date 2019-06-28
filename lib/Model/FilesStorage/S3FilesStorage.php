@@ -59,7 +59,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
     public function __construct() {
         $this->s3Client = self::getStaticS3Client();
-        self::setStorageBaseBucket();
+        self::setFilesStorageBucket();
     }
 
     /**
@@ -108,13 +108,15 @@ class S3FilesStorage extends AbstractFilesStorage {
             }
         }
 
-        self::setStorageBaseBucket();
-
+        self::setFilesStorageBucket();
 
         return self::$CLIENT;
     }
 
-    private static function setStorageBaseBucket()
+    /**
+     * set $FILES_STORAGE_BUCKET
+     */
+    private static function setFilesStorageBucket()
     {
         if(null === \INIT::$AWS_STORAGE_BASE_BUCKET){
             throw new DomainException('$AWS_STORAGE_BASE_BUCKET param is missing in INIT.php.');
@@ -124,9 +126,11 @@ class S3FilesStorage extends AbstractFilesStorage {
     }
 
     /**
+     * get $FILES_STORAGE_BUCKET
+     *
      * @return string
      */
-    public static function getStorageBaseBucket()
+    public static function getFilesStorageBucket()
     {
         return static::$FILES_STORAGE_BUCKET;
     }

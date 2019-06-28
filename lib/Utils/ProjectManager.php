@@ -1878,7 +1878,7 @@ class ProjectManager {
                 $xliff_file_content = $s3Client->getEncoder()->decode($xliff_file_content);
             }
 
-            return $s3Client->openItem( [ 'bucket' => S3FilesStorage::getStorageBaseBucket(), 'key' => $xliff_file_content ] );
+            return $s3Client->openItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliff_file_content ] );
         }
 
         return file_get_contents( $xliff_file_content );
