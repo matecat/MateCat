@@ -9,7 +9,6 @@ use RedisHandler;
 use SimpleS3\Client;
 use SimpleS3\Components\Cache\RedisCache;
 use SimpleS3\Components\Encoders\UrlEncoder;
-use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 /**
  * Class S3FilesStorage
@@ -100,7 +99,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
             // add encoding
             $encoder = new UrlEncoder();
-            self::$CLIENT->addEncoder( $encoder );
+//            self::$CLIENT->addEncoder( $encoder );
 
             // disable SSL verify from configuration
             if ( false === INIT::$AWS_SSL_VERIFY ) {
@@ -116,10 +115,9 @@ class S3FilesStorage extends AbstractFilesStorage {
     /**
      * set $FILES_STORAGE_BUCKET
      */
-    private static function setFilesStorageBucket()
-    {
-        if(null === \INIT::$AWS_STORAGE_BASE_BUCKET){
-            throw new DomainException('$AWS_STORAGE_BASE_BUCKET param is missing in INIT.php.');
+    private static function setFilesStorageBucket() {
+        if ( null === \INIT::$AWS_STORAGE_BASE_BUCKET ) {
+            throw new DomainException( '$AWS_STORAGE_BASE_BUCKET param is missing in INIT.php.' );
         }
 
         static::$FILES_STORAGE_BUCKET = \INIT::$AWS_STORAGE_BASE_BUCKET;
@@ -130,8 +128,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return string
      */
-    public static function getFilesStorageBucket()
-    {
+    public static function getFilesStorageBucket() {
         return static::$FILES_STORAGE_BUCKET;
     }
 
@@ -360,6 +357,8 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         $s3Client = self::getStaticS3Client();
 
+        $hasSet = [];
+
         /** @var DirectoryIterator $item */
         foreach (
                 $iterator = new \RecursiveIteratorIterator(
@@ -378,6 +377,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                 // create folder
                 $s3Client->createFolder( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $key ] );
             } else {
+
                 // upload file
                 $s3Client->uploadItem( [
                         'bucket' => static::$FILES_STORAGE_BUCKET,
@@ -386,17 +386,17 @@ class S3FilesStorage extends AbstractFilesStorage {
                 ] );
 
                 // save on redis the hash map files
-                if ( strpos( $key, '.' ) !== true or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === true ) {
-                    if ( $s3Client->hasEncoder() ) {
-                        $redisKey = $s3Client->getEncoder()->encode( $key );
-                    }
-
-                    ( new RedisHandler() )->getConnection()->set( $redisKey, file_get_contents( $item->getPathName() ) );
+                if ( strpos( $key, '.' ) === false ) {
+                    $hasSet[ $key ] = file( $item->getPathname() );
                 }
+
             }
+
         }
 
+        ( new RedisHandler() )->getConnection()->hset( self::getUploadSessionSafeName( $uploadSession ), 'file_map', serialize( $hasSet ) );
         \Utils::deleteDir( \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
+
     }
 
     /**
@@ -410,36 +410,52 @@ class S3FilesStorage extends AbstractFilesStorage {
         $zipFilesHash  = [];
         $filesHashInfo = [];
 
-        $i         = 0;
-        $linkFiles = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $folder ] );
-        asort( $linkFiles );
+//        $i         = 0;
+//        $linkFiles = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $folder ] );
+//        asort( $linkFiles );
 
-        foreach ( $linkFiles as $key ) {
-            if ( strpos( $key, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
-                $zipFilesHash[] = $key;
-            } elseif ( strpos( $key, '.' ) !== false or strpos( $key, self::OBJECTS_SAFE_DELIMITER ) === false ) {
-                unset( $linkFiles[ $i ] );
-            } else {
-                if ( $this->s3Client->hasEncoder() ) {
-                    $redisKey = $this->s3Client->getEncoder()->encode( $key );
-                }
+        $redisPosition = self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $dirToScan ) );
+        $fileMap       = unserialize( ( new RedisHandler() )->getConnection()->hget( $redisPosition, 'file_map' ) );
 
-                // this method get the content from the hashes map file and convert it into an array of original file names
-                // Example:
-                //
-                // 'file.txt'
-                // 'file2.txt'
-                // ==>
-                // [
-                //     0 => 'file.txt',
-                //     1 => 'file2.txt'
-                // ]
-                $filesHashInfo[ 'sha' ][]            = $key;
-                $filesHashInfo[ 'fileName' ][ $key ] = array_filter( array_map( 'trim', explode( "\n", ( new RedisHandler() )->getConnection()->get( $redisKey ) ) ) );
-            }
-
-            $i++;
+        foreach ( $fileMap as $hashName => $fileNameList ) {
+            // this method get the content from the hashes map file and convert it into an array of original file names
+            // Example:
+            //
+            // 'file.txt'
+            // 'file2.txt'
+            // ==>
+            // [
+            //     0 => 'file.txt',
+            //     1 => 'file2.txt'
+            // ]
+            $filesHashInfo[ 'sha' ][]                 = $hashName;
+            $filesHashInfo[ 'fileName' ][ $hashName ] = $fileMap[ $hashName ];
         }
+
+
+//        foreach ( $linkFiles as $key ) {
+//            if ( strpos( $key, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
+//                $zipFilesHash[] = $key;
+//            } elseif ( strpos( $key, '.' ) !== false ) {
+//                unset( $linkFiles[ $i ] );
+//            } else {
+//
+//                // this method get the content from the hashes map file and convert it into an array of original file names
+//                // Example:
+//                //
+//                // 'file.txt'
+//                // 'file2.txt'
+//                // ==>
+//                // [
+//                //     0 => 'file.txt',
+//                //     1 => 'file2.txt'
+//                // ]
+//                $filesHashInfo[ 'sha' ][]            = $key;
+//                $filesHashInfo[ 'fileName' ][ $key ] = $fileMap[ $key ];
+//            }
+//
+//            $i++;
+//        }
 
         return [
                 'conversionHashes' => $filesHashInfo,

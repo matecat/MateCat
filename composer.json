@@ -14,6 +14,7 @@
         "phpoffice/phpexcel": "~1.8.1",
         "psr/log": "~1.0",
         "symfony/console": "^2.8",
-        "symfony/filesystem": "^2.8.9"
+        "symfony/filesystem": "^2.8.9",
+        "defuse/php-encryption": "2.0.*"
     }
 }
