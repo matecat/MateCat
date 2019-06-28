@@ -63,7 +63,7 @@ class XliffSAXTranslationReplacer {
 
         if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
             $s3Client = S3FilesStorage::getStaticS3Client();
-            $xmlLink  = $s3Client->getPublicItemLink( ['bucket' => S3FilesStorage::FILES_STORAGE_BUCKET, 'key' => $originalXliffFilename] );
+            $xmlLink  = $s3Client->getPublicItemLink( ['bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $originalXliffFilename] );
 
             if ( false === INIT::$AWS_SSL_VERIFY ) {
                 $streamArgs =
