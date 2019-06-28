@@ -6,6 +6,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments';
     protected static $auto_increment_field = [ 'id' ];
 
+
+
+    const ISSUE_CATEGORY_ALL = 'all' ;
+
     public function countByFile( Files_FileStruct $file ) {
         $conn = $this->database->getConnection();
         $sql  = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file ";
@@ -203,13 +207,18 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job AND e.deleted_at IS NULL ";
             $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment AND sr.id_job = st.id_job ";
 
-            if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) {
+            if (
+                    isset( $options[ 'filter' ][ 'issue_category' ] ) &&
+                    $options[ 'filter' ][ 'issue_category' ] != '' &&
+                    $options[ 'filter' ][ 'issue_category' ] != self::ISSUE_CATEGORY_ALL
+            ) {
 
                 if ( in_array( $options[ 'filter' ][ 'issue_category' ], Constants_Revise::$categoriesDbNames ) ) {
+                    // Case for legacy review  ^^
                     $options_conditions_query .= " AND (sr." . $options[ 'filter' ][ 'issue_category' ] .
                             " != '' AND sr." . $options[ 'filter' ][ 'issue_category' ] . " != 'none')";
                 } else {
-
+                    // Case for AbstractRevisionFeature
                     if ( is_array( $options[ 'filter' ][ 'issue_category' ] ) ) {
                         $placeholders = implode( ', ', array_map( function ( $id ) {
                             return ':issue_category_' . $id;
@@ -226,6 +235,21 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     }
                 }
             }
+            elseif (
+                    isset( $options[ 'filter' ][ 'issue_category' ] ) &&
+                    $options[ 'filter' ][ 'issue_category' ] == self::ISSUE_CATEGORY_ALL
+            ) {
+                if ( $chunk->getProject()->getFeatures()->hasRevisionFeature() ) {
+                    $options_conditions_query .= " AND e.id_category IS NOT NULL " ;
+                }
+                else {
+                    $options_conditions_query .= " AND ( " .
+                            implode(' OR ', array_map( function( $name ) {
+                                return " ( sr.$name != 'none' AND sr.$name != '') ";
+                            }, Constants_Revise::$categoriesDbNames ) ) . " ) " ;
+                }
+            }
+
 
             if ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) {
                 $options_conditions_query .= " AND (
