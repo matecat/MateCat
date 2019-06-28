@@ -232,7 +232,7 @@ class downloadFileController extends downloadController {
                     }
 
                     $file[ 'original_file' ] = $s3Client->openItem( [
-                            'bucket' => S3FilesStorage::FILES_STORAGE_BUCKET,
+                            'bucket' => S3FilesStorage::getFilesStorageBucket(),
                             'key' => $originalFilePath
                     ] );
                 } else {
