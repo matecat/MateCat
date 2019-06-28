@@ -26,15 +26,14 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
  */
 class S3FilesStorage extends AbstractFilesStorage {
 
-    // S3 BUCKET AND FOLDERS NAMES
-    const FILES_STORAGE_BUCKET   = 'matecat-files-storage';
     const CACHE_PACKAGE_FOLDER   = 'cache-package';
+
+
     const FILES_FOLDER           = 'files';
     const QUEUE_FOLDER           = 'queue-projects';
     const ZIP_FOLDER             = 'originalZip';
     const FAST_ANALYSIS_FOLDER   = 'fast-analysis';
     const OBJECTS_SAFE_DELIMITER = '__';
-
     /**
      * @var Client
      */
@@ -46,6 +45,11 @@ class S3FilesStorage extends AbstractFilesStorage {
     private static $CLIENT;
 
     /**
+     * @var string
+     */
+    private static $FILES_STORAGE_BUCKET;
+
+    /**
      * S3FilesStorage constructor.
      *
      * Create the bucket if not exists
@@ -54,6 +58,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
     public function __construct() {
         $this->s3Client = self::getStaticS3Client();
+        $this->setFilesStorageBucket();
     }
 
     /**
@@ -103,6 +108,18 @@ class S3FilesStorage extends AbstractFilesStorage {
         }
 
         return self::$CLIENT;
+    }
+
+    /**
+     * Set $FILES_STORAGE_BUCKET
+     */
+    private function setFilesStorageBucket()
+    {
+        if(null === \INIT::$AWS_STORAGE_BASE_BUCKET){
+            throw new \DomainException('You must declare AWS_STORAGE_BASE_BUCKET variable in your INIT.php file!');
+        }
+
+        static::$FILES_STORAGE_BUCKET = \INIT::$AWS_STORAGE_BASE_BUCKET;
     }
 
     /**
