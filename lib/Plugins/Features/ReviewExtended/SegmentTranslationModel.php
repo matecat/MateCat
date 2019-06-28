@@ -21,6 +21,7 @@ use LQA\ChunkReviewStruct;
 use LQA\EntryCommentDao;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;
+use LQA\EntryStruct;
 use LQA\EntryWithCategoryStruct;
 use Routes;
 use SegmentTranslationChangeVector;
@@ -97,7 +98,6 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 // expect the first chunk review record to be the final
                 // add revised words and advancement
                 $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count ;
-                $chunkReview->penalty_points       += $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
                 $chunkReview->total_tte            += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit;
 
                 if ( $destinationSourcePage != $originSourcePage ) {
@@ -139,7 +139,6 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                     // evaluate $sourcePagesWithFinalRevisions
                     if ( !in_array( $chunkReview->source_page, $sourcePagesWithFinalRevisions ) ) {
                         $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count;
-                        $chunkReview->penalty_points       += $this->getPenaltyPointsForSourcePage( $chunkReview->source_page ) ;
                     }
 
                     $chunkReview->advancement_wc       += $this->advancementWordCount() ;
@@ -165,7 +164,6 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
                 } elseif ( $destinationSourcePage == $chunkReview->source_page ) {
                     // we reached the last record, destination record of the lower revision, add the count
                     $chunkReview->reviewed_words_count += $this->_model->getSegmentStruct()->raw_word_count;
-                    $chunkReview->penalty_points       += $this->getPenaltyPointsForSourcePage($chunkReview->source_page ) ;
                     $chunkReview->advancement_wc       += $this->advancementWordCount() ;
                     $chunkReview->total_tte            += $this->_model->getEventModel()->getCurrentEvent()->time_to_edit ;
 
@@ -314,9 +312,17 @@ class SegmentTranslationModel  implements  ISegmentTranslationModel {
         return $wc ;
     }
 
-    protected function getPenaltyPointsForSourcePage( $source_page) {
-        return ( new ChunkReviewDao() )
-                ->getPenaltyPointsForChunkAndSourcePageAndSegment( $this->_chunk, [ $this->_model->getSegmentStruct()->id ], $source_page ) ;
+    /**
+     * Returns the sum of penalty points to subtract, reading from the previously populated _issuesDeletionList.
+     *
+     * @param $source_page
+     *
+     * @return mixed
+     */
+    protected function getPenaltyPointsForSourcePage( $source_page ) {
+        return array_reduce($this->_issuesDeletionList[ $source_page ], function($carry, EntryStruct $issue) {
+            return $carry + $issue->penalty_points ;
+        }, 0 );
     }
 
     /**
