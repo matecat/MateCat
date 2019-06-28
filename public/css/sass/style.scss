@@ -720,7 +720,7 @@ section {
     float: left;
     width: 88%;
     margin-left: 5%;
-    height: 100%;
+    //height: 100%;
     /*-webkit-transition: all 100ms ease-in;*/
     /*transition: all 100ms ease-in;*/
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -774,14 +774,12 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 }
 
 .projectbar {
-    margin: 0 0 0 5px;
+    margin: 0 0 0 5%;
     padding: 0;
     height: 43px;
     color: #777;
-    width: 100%;
+    width: 88%;
     font-size: 14px;
-    position: absolute;
-    margin-top: -43px
 }
 
 .projectbar li {
@@ -1279,13 +1277,17 @@ article .approved:active {
 }
 
 article {
-    margin: 40px auto 100px auto;
+    margin: 0px auto 100px auto;
     -moz-border-radius: 2px;
     -moz-box-shadow: 0 1px 3px #ccc;
     position: relative;
     width: 91.5%;
     float: left;
     box-sizing: content-box;
+    .hiddenHtml {
+        position: absolute;
+        top: 0;
+    }
 }
 body #outer {
     overflow: hidden;
@@ -1301,18 +1303,10 @@ body .main-container {
 }
 #outer.loadingBefore {
     display: block;
-    background: url(../../img/loading.gif) 48% bottom no-repeat;
-    float: left;
-    background-size: 20px 20px;
-    position: relative;
-}
-
-#outer.loadingBefore {
     background: url(../../img/loading.gif) 48% top no-repeat !important;
-    padding-top: 40px;
+    position: relative;
     background-size: 30px 30px !important;
 }
-
 #outer.loading {
     display: block;
     background: url(../../img/loading.gif) 48% center no-repeat;
@@ -1360,7 +1354,6 @@ body .main-container {
 section .body > .text {
     width: 100%;
     position: relative;
-    background: #ffffff;
     float: left;
     min-height: 87px;
 }
@@ -1386,7 +1379,7 @@ body.cattool.editing {
     background: #f2f4f7;
 }
 
-body.editing section:not(.editor) .text {
+body section:not(.editor) {
     background: #dcdfe4;
 }
 
@@ -1395,7 +1388,7 @@ section:not(.editor) .text:first-child {
     border-top-right-radius: 4px;
 }
 
-body.cattool.editing section:not(.editor) .text:hover {
+body.cattool.editing section:not(.editor):hover {
     background: #d4d7dc !important;
     color: #000;
 }
@@ -2446,7 +2439,7 @@ section.status-new.opened .editarea {
 section.editor {
     z-index: 2;
     position: relative;
-    height: 100%;
+    //height: 100%;
     width: 89%;
 }
 
@@ -2513,7 +2506,7 @@ section.ice-locked .text {
     background-color: #f2f4f7 !important;
 }
 
-body.editing section:not(.editor).ice-locked .text {
+body section:not(.editor).ice-locked {
     background: #dde0e4 !important;
 }
 

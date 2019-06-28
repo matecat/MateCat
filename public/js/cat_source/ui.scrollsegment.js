@@ -96,25 +96,26 @@
     }
 
     var scrollSegment = function(inputSegment, idSegment, highlight, quick) {
-        var segment = (inputSegment instanceof jQuery) ? inputSegment : $(inputSegment);
+        SegmentActions.scrollToSegment(idSegment);
+        // var segment = (inputSegment instanceof jQuery) ? inputSegment : $(inputSegment);
+        //
+        // quick = quick || false;
+        // highlight = highlight || false;
+        //
+        // if ( segment.length ) {
+        //     return doDirectScroll( segment, highlight, quick ) ;
+        // } else if( $(segment.selector + '-1').length ) {
+        //     return doDirectScroll( $(segment.selector + '-1'), highlight, quick ) ;
+        // }
+        // else if ( idSegment ){
+        //     return tryToRenderAgain( idSegment, highlight, true ) ;
+        // } else {
+        //     console.error("Segment not found in the UI");
+        // }
 
-        quick = quick || false;
-        highlight = highlight || false;
-        
-        if ( segment.length ) {
-            return doDirectScroll( segment, highlight, quick ) ; 
-        } else if( $(segment.selector + '-1').length ) {
-            return doDirectScroll( $(segment.selector + '-1'), highlight, quick ) ;
-        }
-        else if ( idSegment ){
-            return tryToRenderAgain( idSegment, highlight, true ) ;
-        } else {
-            console.error("Segment not found in the UI");
-        }
 
 
-
-    }
+    };
 
     /**
      * This function takes a segment as argument and the speed to apply to scroll.
@@ -132,32 +133,32 @@
      * @returns Deferred
      */
     var animateScroll = function( element, speed ) {
-        var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
-        var segment = element.closest('section');
-        var pos = 0;
-        var prev = segment.prev('section') ;
-        var segmentOpen = $('section.editor');
-        var article = segment.closest('article');
-
-        if ( prev.length ) {
-            pos = prev.offset().top ; // to show also the segment before
-        } else {
-            pos = segment.offset().top ;
-        }
-        pos = pos - segment.offsetParent('#outer').offset().top;
-
-        if (article.prevAll('article').length > 0) {
-            _.forEach(article.prevAll('article'), function ( item ) {
-                pos = pos + $(item).outerHeight() + 140;
-            });
-        }
-
-        scrollAnimation.animate({
-            scrollTop: pos
-        }, speed);
-
-
-        return scrollAnimation.promise() ;
+        // var scrollAnimation = $( UI.scrollSelector ).stop().delay( 300 );
+        // var segment = element.closest('section');
+        // var pos = 0;
+        // var prev = segment.prev('section') ;
+        // var segmentOpen = $('section.editor');
+        // var article = segment.closest('article');
+        //
+        // if ( prev.length ) {
+        //     pos = prev.offset().top ; // to show also the segment before
+        // } else {
+        //     pos = segment.offset().top ;
+        // }
+        // pos = pos - segment.offsetParent('#outer').offset().top;
+        //
+        // if (article.prevAll('article').length > 0) {
+        //     _.forEach(article.prevAll('article'), function ( item ) {
+        //         pos = pos + $(item).outerHeight() + 140;
+        //     });
+        // }
+        //
+        // scrollAnimation.animate({
+        //     scrollTop: pos
+        // }, speed);
+        //
+        //
+        // return scrollAnimation.promise() ;
     };
 
     $.extend(UI, {

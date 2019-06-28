@@ -371,24 +371,25 @@ if ( MBC.enabled() )
 
         var scrollSegment = function ( section ) {
             if ($('article.mbc-commenting-opened').length > 0 && section.length > 0) {
+                SegmentActions.scrollToSegment(idSegment);
 
-                var scrollAnimation = $( UI.scrollSelector );
-                var segment = section;
-                var pos = 0;
-                var article = segment.closest('article');
-
-                pos = segment.offset().top - segment.offsetParent('#outer').offset().top;
-
-                if (article.prevAll('article').length > 0) {
-                    _.forEach(article.prevAll('article'), function ( item ) {
-                        pos = pos + $(item).outerHeight() + 140;
-                    });
-                }
-                pos = pos - 220;
-                scrollAnimation.animate({
-                    scrollTop: pos
-                }, 200);
-                return scrollAnimation.promise() ;
+                // var scrollAnimation = $( UI.scrollSelector );
+                // var segment = section;
+                // var pos = 0;
+                // var article = segment.closest('article');
+                //
+                // pos = segment.offset().top - segment.offsetParent('#outer').offset().top;
+                //
+                // if (article.prevAll('article').length > 0) {
+                //     _.forEach(article.prevAll('article'), function ( item ) {
+                //         pos = pos + $(item).outerHeight() + 140;
+                //     });
+                // }
+                // pos = pos - 220;
+                // scrollAnimation.animate({
+                //     scrollTop: pos
+                // }, 200);
+                // return scrollAnimation.promise() ;
             } else {
                 return originalScrollSegment.apply(this, arguments);
             }
@@ -697,7 +698,7 @@ if ( MBC.enabled() )
 
         var initCommentLinks = function () {
             $( 'section' ).each( function ( i, el ) {
-                initCommentLink( el );
+                // initCommentLink( el );
             } );
         };
 

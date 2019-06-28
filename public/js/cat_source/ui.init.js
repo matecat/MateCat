@@ -53,15 +53,11 @@ $.extend(UI, {
 		this.numMatchesResults = 10;
 		this.editarea = '';
 		this.byButton = false;
-		this.blockGetMoreSegments = true;
 		this.displayedMessages = [];
-		setTimeout(function() {
-			UI.blockGetMoreSegments = false;
-		}, 200);
+
 		this.loadCustomization();
         $('html').trigger('init');
         this.setTagMode();
-		this.detectFirstLast();
 		rangy.init();
 		this.savedSel = null;
 		this.savedSelActiveElement = null;

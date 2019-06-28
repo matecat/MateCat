@@ -514,6 +514,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
         return current;
     },
+    getLastSegmentId() {
+        return this._segments.last().get('sid');
+    },
+    getFirstSegmentId() {
+        return this._segments.first().get('sid');
+    },
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
 
@@ -566,6 +572,11 @@ AppDispatcher.register(function (action) {
             SegmentStore.openSegment(action.sid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
+        case SegmentConstants.OPEN_SEGMENT:
+            SegmentStore.openSegment(action.sid);
+            SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
+            SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
+            break;
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.where);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
@@ -589,7 +600,7 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.SET_SEGMENT_STATUS:
             SegmentStore.setStatus(action.id, action.fid, action.status);
             // SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.UPDATE_ALL_SEGMENTS:
             SegmentStore.emitChange(SegmentConstants.UPDATE_ALL_SEGMENTS);

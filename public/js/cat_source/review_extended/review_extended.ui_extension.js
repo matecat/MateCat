@@ -33,14 +33,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         render: function ( options ) {
             var promise = (new $.Deferred() ).resolve();
             originalRender.call(this, options);
-            this.downOpts = {
-                offset: '100%',
-                context: $('#outer')
-            };
-            this.upOpts = {
-                offset: '-100%',
-                context: $('#outer')
-            };
             return promise;
         },
         overrideButtonsForRevision: function () {

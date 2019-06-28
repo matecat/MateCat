@@ -335,8 +335,8 @@ class Segment extends React.Component {
     }
 
     checkSegmentClasses() {
-        let classes =  this.state.segment_classes.concat(this.createSegmentClasses());
-        classes =  classes.concat(this.createSegmentClasses());
+        let classes =  this.state.segment_classes.slice();
+        classes =  _.union(classes, this.createSegmentClasses());
         classes =  this.checkSegmentStatus(classes);
         if ( (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1) ){
             let indexEditor = classes.indexOf("editor");
@@ -526,7 +526,7 @@ class Segment extends React.Component {
                 data-tagmode="crunched"
                 data-tagprojection={this.dataAttrTagged}
                 onClick={this.onClickEvent.bind(this)}
-                data-fid={this.props.fid}>
+                data-fid={this.props.segment.id_file}>
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
 

@@ -226,7 +226,6 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery.powertip.min.js',
                     basePath + 'lib/jquery-dateFormat.min.js',
                     // basePath + 'lib/handlebars.runtime-v4.0.5.js',
-                    basePath + 'lib/jquery.waypoints.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',

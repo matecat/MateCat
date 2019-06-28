@@ -12,6 +12,7 @@
         /**
          * Return che Suggestion, if exist, used by the current segment
          * return json
+         * TODO retrieve contributions from the store
          */
         getCurrentSegmentContribution: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
@@ -529,7 +530,7 @@
          * @param status
          */
         setStatus: function(segment, status) {
-            var fid = segment.data("fid");
+            var fid = UI.getSegmentFileId(segment);
             SegmentActions.setStatus(UI.getSegmentId(segment), fid, status);
         },
         /**

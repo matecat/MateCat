@@ -78,7 +78,7 @@ class SegmentsContainer extends React.Component {
     }
 
     getIndexToScroll() {
-        if ( !this.state.scrollTo ) return 0;
+        if ( !this.state.scrollTo ) return null;
         return this.state.segments.findIndex( (segment, index) => {
             if (this.state.scrollTo.toString().indexOf("-") === -1) {
                 return parseInt(segment.get('sid')) === parseInt(this.state.scrollTo);
@@ -88,10 +88,15 @@ class SegmentsContainer extends React.Component {
         });
     }
 
+    getSegmentByIndex(index) {
+        return this.state.segments.get(index);
+    }
+
     getSegments() {
         let items = [];
         let self = this;
         let isReviewExtended = !!(this.props.isReviewExtended);
+        let currentFileId = 0;
         this.state.segments.forEach(function (segImmutable) {
             let segment = segImmutable.toJS();
             let item = <Segment
@@ -110,9 +115,58 @@ class SegmentsContainer extends React.Component {
                 setLastSelectedSegment={self.setLastSelectedSegment.bind(self)}
                 setBulkSelection={self.setBulkSelection.bind(self)}
             />;
-            items.push(item);
+            if ( segment.id_file !== currentFileId ) {
+                item = <React.Fragment>
+                    <ul className="projectbar" data-job={"job-"+ segment.id_file}>
+                        <li className="filename">
+                            <h2 title={segment.filename}>{segment.filename}</h2>
+                        </li>
+                        <li style={{textAlign:'center', textIndent:'-20px'}}>
+                            <strong/> [<span className="source-lang">{config.source_rfc}</span>]] >
+                            <strong/> [<span className="target-lang">{config.target_rfc}</span>]
+                        </li>
+                        <li className="wordcounter">Payable Words: <strong>{config.fileCounter[segment.id_file].TOTAL_FORMATTED}</strong>
+                        </li>
+                    </ul>
+                    {item}
+                    </React.Fragment>
+            }
+            currentFileId = segment.id_file;
+        items.push(item);
         });
         return items;
+    }
+
+    getSegmentHeight(index) {
+        let segment = this.getSegmentByIndex(index);
+        let itemHeigth = 0;
+        if (segment.get('opened')) {
+            let $segment= $('#segment-' + segment.get('sid'));
+            if ( $segment.length && $segment.hasClass('opened') ) {
+                itemHeigth = $segment.outerHeight() + 20;
+            } else {
+                itemHeigth = 300;
+            }
+        } else {
+            let source = $('#hiddenHtml .source');
+            source.html(segment.get('decoded_source'));
+            const sourceHeight = source.outerHeight();
+
+
+            let target = $('#hiddenHtml .targetarea');
+            target.html(segment.get('decoded_translation'));
+            const targetHeight = target.closest('.target').outerHeight();
+
+            source.html('');
+            target.html('');
+            itemHeigth = Math.max(sourceHeight + 10, targetHeight + 10, 87) ;
+        }
+        let preiousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
+        //If is the first segment of a file add the file header
+        if ( preiousFileId !== segment.get('id_file')) {
+            itemHeigth = itemHeigth + 47;
+        }
+        return itemHeigth;
     }
 
     componentDidMount() {
@@ -155,6 +209,11 @@ class SegmentsContainer extends React.Component {
     }
     componentDidUpdate() {
         restoreSelection();
+        if (this.state.scrollTo !== null) {
+            this.setState({
+                scrollTo: null
+            })
+        }
     }
 
     render() {
@@ -162,12 +221,12 @@ class SegmentsContainer extends React.Component {
         let items = this.getSegments();
         return <VirtualList
             width={this.state.window.width}
-            height={this.state.window.height-120}
+            height={this.state.window.height-79}
             style={{overflowX: 'hidden'}}
             estimatedItemSize={80}
             overscanCount={2}
             itemCount={items.length}
-            itemSize={87}
+            itemSize={(index)=>this.getSegmentHeight(index)}
             scrollToAlignment="center"
             scrollToIndex={scrollTo}
             onScroll={(number, event) => {

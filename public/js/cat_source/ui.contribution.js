@@ -212,14 +212,6 @@ $.extend(UI, {
         if(!data) return true;
 
         var editarea = $('.editarea', segment);
-        /**
-         * Creation of the footer for the segments following the current one
-           for which the contribution has been requested
-         */
-
-        // if (!$('.sub-editor.matches', segment).length) {
-        //     SegmentActions.createFooter(UI.getSegmentId(segment));
-        // }
 
         SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.errors);
 
@@ -307,50 +299,7 @@ $.extend(UI, {
 	setChosenSuggestion: function(w, segment) {
         var currentSegment = (segment)? segment : UI.currentSegment;
         currentSegment.find('.editarea').data('lastChosenSuggestion', w);
-	},
-    setContributionSourceDiff: function (segment) {
-        var sourceText = '';
-        var suggestionSourceText = '';
-        var html = $(segment).find('.source').html();
-        var parsed = $.parseHTML( html ) ;
-
-        if ( parsed == null ) return;
-
-        $.each( parsed, function (index) {
-            if(this.nodeName == '#text') {
-                sourceText += this.data;
-            } else {
-                sourceText += this.innerText;
-            }
-        });
-
-        $(segment).find('.sub-editor.matches ul.suggestion-item').each(function () {
-            var percent = parseInt($(this).find('.graysmall-details .percent').text().split('%')[0]);
-            if(percent > 74) {
-                var ss = $(this).find('.suggestion_source');
-
-                suggestionSourceText = '';
-
-                $.each($.parseHTML($(ss).html()), function (index) {
-
-                        if (this.nodeName == '#text') {
-                            suggestionSourceText += this.data;
-                        } else {
-                            suggestionSourceText += this.innerText;
-                        }
-                    });
-
-                $(this).find('.suggestion_source').html(
-                    UI.dmp.diff_prettyHtml(
-                        UI.execDiff(sourceText, suggestionSourceText)
-                    )
-                );
-            }
-
-
-        });
-    },
-
+	}
 
     });
 }

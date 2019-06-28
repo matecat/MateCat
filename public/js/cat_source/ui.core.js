@@ -602,11 +602,7 @@ UI = {
 		this.lastSegment = s.last();
 	},
 	detectRefSegId: function(where) {
-//		var step = this.moreSegNum;
-		var section = $('section');
-        var seg = (where == 'after') ? section.last() : (where == 'before') ? section.first() : '';
-		var segId = (seg.length) ? this.getSegmentId(seg) : 0;
-		return segId;
+        return (where == 'after') ? SegmentStore.getLastSegmentId() : (where == 'before') ? SegmentStore.getFirstSegmentId() : '';
 	},
 	detectStartSegment: function() {
 		if (this.segmentToScrollAtRender) {
@@ -746,7 +742,6 @@ UI = {
 		}
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
-		setTimeout(UI.setWaypoints.bind(this), 2000);
         $(window).trigger('segmentsAdded',{ resp : d.data.files });
 	},
 
@@ -762,7 +757,8 @@ UI = {
 				action: 'getSegments',
 				jid: config.id_job,
 				password: config.password,
-				step: step,
+				step: 40,
+				// step: step,
 				segment: seg,
 				where: where
 			},
@@ -827,8 +823,6 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 
 		this.loadingMore = false;
-		this.setWaypoints();
-		this.checkPendingOperations();
         this.retrieveStatistics();
         $(document).trigger('getSegments_success');
 
@@ -892,7 +886,6 @@ UI = {
             ReactDOM.unmountComponentAtNode(value);
             delete UI.SegmentsContainers;
         });
-        this.removeWaypoints();
         $('#outer').empty();
     },
 
@@ -966,10 +959,11 @@ UI = {
             this.unmountSegments();
         }
         var segments = [];
+        var self = this;
         $.each(files, function(k) {
 			var newFile = '';
 			var fid = k;
-			var articleToAdd = ((where == 'center') || (!$('#file').length)) ? true : false;
+			var articleToAdd = !$( '#file' ).length;
             var filenametoshow ;
 
 			if (articleToAdd) {
@@ -995,6 +989,7 @@ UI = {
 						// '		</li>' +
 						// '	</ul>' +
                         '   <div class="article-segments-container article-segments-container"></div>' +
+                        '   <div id="hiddenHtml" style="visibility: hidden">' + self.getSegmentStructure()  + '</div>' +
                         '</article>';
 			}
 
@@ -1017,6 +1012,11 @@ UI = {
 		}
 
 	},
+
+    getSegmentStructure: function() {
+        return '<section  class="status-draft hasTagsToggle hasTagsAutofill" style="width: 99%"> <div class="sid"> <div class="txt">0000000</div> <div class="txt' +
+            ' segment-add-inBulk"> <input type="checkbox"> </div> <div class="actions"> <button class="split" href="#" title="Click to split segment"> <i class="icon-split"></i> </button> <p class="split-shortcut">CTRL + S</p> </div> </div> <div class="body"> <div class="header toggle"></div> <div class="text segment-body-content"> <div class="wrap"> <div class="outersource"> <div class="source item" tabindex="0"> </div> <div class="copy" title="Copy source to target"><a href="#"></a><p>CTRL+I</p></div> <div class="target item"> <div class="textarea-container"> <div class="targetarea editarea" contenteditable="true" spellcheck="true"> </div> <div class="toolbar"> <a class="revise-qr-link" title="Segment Quality Report." target="_blank" href="/revise-summary/1143-d1bd30bcde1c?revision_type=1&amp;id_segment=898088">QR</a> <a href="#" class="tagModeToggle " alt="Display full/short tags" title="Display full/short tags"><span class="icon-chevron-left"></span><span class="icon-tag-expand"></span><span class="icon-chevron-right"></span></a> <a href="#" class="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"></a> <ul class="editToolbar"> <li class="uppercase" title="Uppercase"></li> <li class="lowercase" title="Lowercase"></li> <li class="capitalize" title="Capitalized"></li> </ul> </div> </div> <p class="warnings"></p> <ul class="buttons toggle"> <li><a href="#" class="translated"> Translated </a><p>CTRL ENTER</p></li> </ul> </div> </div> </div> <div class="status-container"> <a href="#" class="status no-hover"></a> </div> </div> <div class="timetoedit" data-raw-time-to-edit="0"></div> <div class="edit-distance">Edit Distance: </div> </div> <div class="segment-side-buttons"> <div data-mount="translation-issues-button" class="translation-issues-button"></div> </div> <div class="segment-side-container"></div> </section>'
+    },
 
     renderSegments: function (segments, justCreated, where) {
 
@@ -2019,15 +2019,6 @@ UI = {
         });
         return totalTranslation;
     },
-
-    /**
-     * @deprecated
-     */
-    checkPendingOperations: function() {
-        if(this.checkInStorage('pending')) {
-            UI.execAbortedOperations();
-        }
-    },
     addInStorage: function (key, val, operation) {
         if(this.isPrivateSafari) {
             item = {
@@ -2292,42 +2283,6 @@ UI = {
             Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled , { expires: 30 });
         }
 
-    },
-
-    setWaypoints: function() {
-        if (this.settedWaypoints) {
-            Waypoint.destroyAll();
-        }
-		this.detectFirstLast();
-		this.lastSegmentWaypoint = this.lastSegment.waypoint(function(direction) {
-			if (direction === 'down' && !UI.noMoreSegmentsAfter) {
-				this.destroy();
-				if (UI.infiniteScroll) {
-					if (!UI.blockGetMoreSegments) {
-						UI.blockGetMoreSegments = true;
-						UI.getMoreSegments('after');
-						setTimeout(function() {
-							UI.blockGetMoreSegments = false;
-						}, 1000);
-					}
-				}
-			}
-		}, UI.downOpts);
-
-        this.firstSegmentWaypoint = this.firstSegment.waypoint(function(direction) {
-			if (direction === 'up' && !UI.noMoreSegmentsBefore) {
-                this.destroy();
-				UI.getMoreSegments('before');
-			}
-		}, UI.upOpts);
-        this.settedWaypoints = true;
-	},
-
-    removeWaypoints: function (  ) {
-        if (this.settedWaypoints) {
-            Waypoint.destroyAll();
-            this.settedWaypoints = false;
-        }
     },
 
     storeClientInfo: function () {
