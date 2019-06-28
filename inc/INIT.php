@@ -288,6 +288,7 @@ class INIT {
     public static $AWS_REGION;
     public static $AWS_SSL_VERIFY;
     public static $AWS_CACHING = false;
+    public static $AWS_STORAGE_BASE_BUCKET;
 
     public function __construct(){
 
