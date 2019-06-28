@@ -266,7 +266,7 @@ class Database implements IDatabase {
             throw new Exception( 'TABLE constant is not defined' );
         }
 
-        if ( $ignore && $no_nulls ) {
+        if ( $ignore && !empty( $on_duplicate_fields ) ) {
             throw new Exception( 'INSERT IGNORE and ON DUPLICATE KEYS UPDATE are not allowed together.' );
         }
 
