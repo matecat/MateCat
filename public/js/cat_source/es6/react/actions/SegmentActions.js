@@ -518,7 +518,7 @@ var SegmentActions = {
             actionType: SegmentConstants.OPEN_ISSUES_PANEL,
             data: data,
         });
-
+        this.openSideSegments();
         UI.openIssuesPanel(data, openSegment);
     },
 
@@ -526,6 +526,7 @@ var SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
         });
+        this.closeSideSegments();
     },
 
     closeSegmentIssuePanel: function ( sid ) {
@@ -561,6 +562,7 @@ var SegmentActions = {
             sid: sid,
             data: issueId
         });
+        this.openSideSegments();
     },
 
     addPreloadedIssuesToSegment: function ( sid, issues ) {
@@ -654,9 +656,18 @@ var SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REMOVE_MUTED_SEGMENTS
         });
+    },
+
+    openSideSegments() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_SIDE
+        });
+    },
+    closeSideSegments() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_SIDE
+        });
     }
-
-
 
 };
 

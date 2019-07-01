@@ -709,7 +709,7 @@ UI = {
 			this.processErrors(d.errors, 'getMoreSegments');
 		var where = d.data.where;
         var section = $('section');
-		if (typeof d.data.files != 'undefined') {
+		if ( d.data.files && Object.size(d.data.files) ) {
 			var firstSeg = section.first();
 			var lastSeg = section.last();
 			var numsegToAdd = 0;
@@ -734,7 +734,7 @@ UI = {
 
 		}
 
-		if (d.data.files.length === 0) {
+		if ( d.data.files.length === 0 ) {
 			if (where == 'after')
 				this.noMoreSegmentsAfter = true;
 			if (where == 'before')
@@ -962,32 +962,9 @@ UI = {
         var self = this;
         $.each(files, function(k) {
 			var newFile = '';
-			var fid = k;
 			var articleToAdd = !$( '#file' ).length;
-            var filenametoshow ;
-
 			if (articleToAdd) {
-				filenametoshow = truncate_filename(this.filename, 40);
 				newFile += '<article id="file" class="loading mbc-commenting-closed">' +
-						// '	<ul class="projectbar" data-job="job-' + this.jid + '">' +
-						// '		<li class="filename">' +
-						// '			<form class="download" action="/" method="post">' +
-						// '				<input type=hidden name="action" value="downloadFile">' +
-						// '				<input type=hidden name="id_job" value="' + this.jid + '">' +
-						// '				<input type=hidden name="id_file" value="' + fid + '">' +
-						// '				<input type=hidden name="filename" value="' + this.filename + '">' +
-						// '				<input type=hidden name="password" value="' + config.password + '">' +
-						// '				<!--input title="Download file" type="submit" value="" class="downloadfile" id="file-' + fid + '-download" -->' +
-						// '			</form>' +
-						// '			<h2 title="' + this.filename + '">' + filenametoshow + '</div>' +
-						// '		</li>' +
-						// '		<li style="text-align:center;text-indent:-20px">' +
-						// '			<strong>' + this.source + '</strong> [<span class="source-lang">' + this.source_code + '</span>]&nbsp;>&nbsp;<strong>' + this.target + '</strong> [<span class="target-lang">' + this.target_code + '</span>]' +
-						// '		</li>' +
-						// '		<li class="wordcounter">' +
-                        // '			Payable Words: <strong>' + config.fileCounter[fid].TOTAL_FORMATTED + '</strong>' +
-						// '		</li>' +
-						// '	</ul>' +
                         '   <div class="article-segments-container article-segments-container"></div>' +
                         '   <div id="hiddenHtml" style="visibility: hidden">' + self.getSegmentStructure()  + '</div>' +
                         '</article>';
@@ -997,10 +974,6 @@ UI = {
                 $('#outer').append(newFile);
 			}
 			segments = segments.concat(this.segments);
-            // console.time("Time: RenderSegments"+fid);
-
-            // console.timeEnd("Time: RenderSegments"+fid);
-            // console.timeEnd("Time: from start()");
 
 		});
         UI.renderSegments(segments, false, where);

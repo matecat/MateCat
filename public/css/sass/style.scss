@@ -1381,6 +1381,7 @@ body.cattool.editing {
 
 body section:not(.editor) {
     background: #dcdfe4;
+    cursor: pointer;
 }
 
 section:not(.editor) .text:first-child {

@@ -23,13 +23,16 @@ class SegmentsContainer extends React.Component {
             window: {
                 width: 0,
                 height: 0,
-            }
+            },
+            sideOpen: false
         };
         this.renderSegments = this.renderSegments.bind(this);
         this.updateAllSegments = this.updateAllSegments.bind(this);
         this.splitSegments = this.splitSegments.bind(this);
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.scrollToSegment = this.scrollToSegment.bind(this);
+        this.openSide = this.openSide.bind(this);
+        this.closeSide = this.closeSide.bind(this);
     }
 
     splitSegments(segments, splitGroup) {
@@ -37,6 +40,14 @@ class SegmentsContainer extends React.Component {
             segments: segments,
             splitGroup: splitGroup
         });
+    }
+
+    openSide() {
+        this.setState({sideOpen: true});
+    }
+
+    closeSide() {
+        this.setState({sideOpen: false});
     }
 
     updateAllSegments() {
@@ -114,6 +125,7 @@ class SegmentsContainer extends React.Component {
                 speech2textEnabledFn={self.props.speech2textEnabledFn}
                 setLastSelectedSegment={self.setLastSelectedSegment.bind(self)}
                 setBulkSelection={self.setBulkSelection.bind(self)}
+                sideOpen={self.state.sideOpen}
             />;
             if ( segment.id_file !== currentFileId ) {
                 item = <React.Fragment>
@@ -176,6 +188,8 @@ class SegmentsContainer extends React.Component {
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
         SegmentStore.addListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
+        SegmentStore.addListener(SegmentConstants.OPEN_SIDE, this.openSide);
+        SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
     }
 
     componentWillUnmount() {
@@ -191,7 +205,8 @@ class SegmentsContainer extends React.Component {
         nextState.splitGroup !== this.state.splitGroup ||
         nextState.tagLockEnabled !== this.state.tagLockEnabled ||
         nextState.window !== this.state.window ||
-        nextState.scrollTo !== this.state.scrollTo)
+        nextState.scrollTo !== this.state.scrollTo ||
+        nextState.sideOpen !== this.state.sideOpen )
     }
 
     updateWindowDimensions()  {
@@ -219,8 +234,9 @@ class SegmentsContainer extends React.Component {
     render() {
         let scrollTo = this.getIndexToScroll();
         let items = this.getSegments();
+        let width = this.state.window.width;
         return <VirtualList
-            width={this.state.window.width}
+            width={width}
             height={this.state.window.height-79}
             style={{overflowX: 'hidden'}}
             estimatedItemSize={80}

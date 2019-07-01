@@ -179,6 +179,9 @@ class Segment extends React.Component {
         if (this.props.segment.modified) {
             classes.push('modified');
         }
+        if ( this.props.sideOpen ) {
+            classes.push('slide-right');
+        }
         return classes;
     }
 
@@ -458,7 +461,8 @@ class Segment extends React.Component {
             nextState.showTranslationIssues !== this.state.showTranslationIssues ||
             nextState.readonly !== this.state.readonly ||
             nextState.showRevisionPanel !== this.state.showRevisionPanel ||
-            (nextState.selectedTextObj !== this.state.selectedTextObj)
+            nextState.selectedTextObj !== this.state.selectedTextObj ||
+            nextProps.sideOpen !== this.props.sideOpen
         );
     }
 
