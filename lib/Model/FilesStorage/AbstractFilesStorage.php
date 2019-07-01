@@ -343,6 +343,12 @@ abstract class AbstractFilesStorage implements IFilesStorage {
 
             //note that we trust this to succeed on first try since, at this stage, we already built the file package
             $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
+
+            // fix 1 July 2019
+            // remove "\n" from 'filename' and 'mime_type'
+            // @TODO Why do this happen?
+            $results[ $k ][ 'filename' ] = str_replace(PHP_EOL, '', $results[ $k ][ 'filename' ]);
+            $results[ $k ][ 'mime_type' ] = str_replace(PHP_EOL, '', $results[ $k ][ 'mime_type' ]);
         }
 
         return $results;

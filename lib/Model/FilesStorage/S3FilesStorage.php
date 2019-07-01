@@ -406,13 +406,8 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @throws \Exception
      */
     public function getHashesFromDir( $dirToScan ) {
-        $folder        = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $dirToScan ) );
         $zipFilesHash  = [];
         $filesHashInfo = [];
-
-//        $i         = 0;
-//        $linkFiles = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $folder ] );
-//        asort( $linkFiles );
 
         $redisPosition = self::getUploadSessionSafeName( $this->getTheLastPartOfKey( $dirToScan ) );
         $fileMap       = unserialize( ( new RedisHandler() )->getConnection()->hget( $redisPosition, 'file_map' ) );
@@ -431,31 +426,6 @@ class S3FilesStorage extends AbstractFilesStorage {
             $filesHashInfo[ 'sha' ][]                 = $hashName;
             $filesHashInfo[ 'fileName' ][ $hashName ] = $fileMap[ $hashName ];
         }
-
-
-//        foreach ( $linkFiles as $key ) {
-//            if ( strpos( $key, self::ORIGINAL_ZIP_PLACEHOLDER ) !== false ) {
-//                $zipFilesHash[] = $key;
-//            } elseif ( strpos( $key, '.' ) !== false ) {
-//                unset( $linkFiles[ $i ] );
-//            } else {
-//
-//                // this method get the content from the hashes map file and convert it into an array of original file names
-//                // Example:
-//                //
-//                // 'file.txt'
-//                // 'file2.txt'
-//                // ==>
-//                // [
-//                //     0 => 'file.txt',
-//                //     1 => 'file2.txt'
-//                // ]
-//                $filesHashInfo[ 'sha' ][]            = $key;
-//                $filesHashInfo[ 'fileName' ][ $key ] = $fileMap[ $key ];
-//            }
-//
-//            $i++;
-//        }
 
         return [
                 'conversionHashes' => $filesHashInfo,
