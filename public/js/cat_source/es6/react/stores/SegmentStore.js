@@ -486,6 +486,18 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             errors: errors
         });
     },
+    showTranslationsIssues: function() {
+        this._segments = this._segments.map((segment)=>segment.set('showIssues', true));
+    },
+    openSegmentIssuePanel: function(sid) {
+        const index = this.getSegmentIndex(sid);
+        if ( !( this._segments.get(index).get('ice_locked') === 1 && !this._segments.get(index).get('unlocked') ) ) {
+            this._segments = this._segments.setIn([index, 'openIssues'], true);
+        }
+    },
+    closeSegmentIssuePanel: function() {
+        this._segments = this._segments.map((segment)=>segment.set('openIssues', false));
+    },
     setConfigTabs: function (tabName, visible, open) {
         if ( open ) {
             this._footerTabsConfig = this._footerTabsConfig.map((tab)=>tab.set('open', false));
@@ -493,11 +505,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'visible'], visible);
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'open'], open);
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'enabled'], true);
-        // this._footerTabsConfig[tabName] = {
-        //     visible: visible,
-        //     open: open,
-        //     enabled: true
-        // }
     },
     getCurrentSegment: function(){
         let current = null,
@@ -688,6 +695,7 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.sid, action.segment);
             break;
         case SegmentConstants.MOUNT_TRANSLATIONS_ISSUES:
+            SegmentStore.showTranslationsIssues();
             SegmentStore.emitChange(action.actionType);
             break;
         case SegmentConstants.SET_SEGMENT_TAGGED:
@@ -760,7 +768,14 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.UPDATE_GLOBAL_WARNINGS, SegmentStore._globalWarnings);
             break;
         case SegmentConstants.OPEN_ISSUES_PANEL:
+            SegmentStore.openSegmentIssuePanel(action.data.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(action.actionType, action.data);
+            break;
+        case SegmentConstants.CLOSE_ISSUES_PANEL:
+            SegmentStore.closeSegmentIssuePanel();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(action.actionType);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

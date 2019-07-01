@@ -46,13 +46,13 @@ class Segment extends React.Component {
             modified: false,
             autopropagated: this.props.segment.autopropagated_from != 0,
             status: this.props.segment.status,
-            showTranslationIssues: false,
+            showTranslationIssues: this.props.segment.showIssues,
             unlocked: UI.isUnlockedSegment(this.props.segment),
             readonly: readonly,
             inBulk: false,
             tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
             && !UI.checkXliffTagsInText(this.props.segment.translation) && UI.removeAllTags(this.props.segment.segment) !== '',
-            showRevisionPanel: false,
+            showRevisionPanel: this.props.segment.openIssues,
             selectedTextObj: null
         }
     }
