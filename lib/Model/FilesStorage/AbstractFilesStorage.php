@@ -301,6 +301,12 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             //try fetching from files dir
             $filePath                            = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
             $results[ $k ][ 'originalFilePath' ] = $filePath;
+
+            // fix 1 July 2019
+            // remove "\n" from 'filename' and 'mime_type'
+            // @TODO Why do this happen?
+            $results[ $k ][ 'filename' ] = str_replace(PHP_EOL, '', $results[ $k ][ 'filename' ]);
+            $results[ $k ][ 'mime_type' ] = str_replace(PHP_EOL, '', $results[ $k ][ 'mime_type' ]);
         }
 
         return $results;

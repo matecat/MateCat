@@ -1,5 +1,7 @@
 <?php
 
+use FilesStorage\S3FilesStorage;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -20,28 +22,56 @@ class ZipContentObject extends stdClass {
         if ( !empty( $this->document_content ) ) {
             return $this->document_content;
 
-        } elseif ( !empty( $this->input_filename ) ) {
-            if ( is_file( $this->input_filename ) ) {
-                $this->document_content = file_get_contents( $this->input_filename );
+        }
 
+        if ( !empty( $this->input_filename ) ) {
+            if ( \INIT::$FILE_STORAGE_METHOD === 's3' ) {
+                $this->setDocumentContentFromS3();
             } else {
-                throw new Exception( "Error while retrieving input_filename content: " . $this->input_filename  );
-
+                $this->setDocumentContentFromFileSystem();
             }
-
         }
 
         return $this->document_content;
     }
 
     /**
+     * @throws ReflectionException
+     * @throws \Predis\Connection\ConnectionException
+     */
+    private function setDocumentContentFromS3() {
+        $s3Client = S3FilesStorage::getStaticS3Client();
+        $config   = [
+                'bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                'key'    => $this->input_filename,
+        ];
+
+        if ( $s3Client->hasItem( $config ) ) {
+            $this->document_content = $s3Client->openItem( $config );
+        } else {
+            throw new Exception( "File: " . $this->input_filename . " is not present in S3 storage bucket. " );
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function setDocumentContentFromFileSystem() {
+        if ( is_file( $this->input_filename ) ) {
+            $this->document_content = file_get_contents( $this->input_filename );
+        } else {
+            throw new Exception( "Error while retrieving input_filename content: " . $this->input_filename );
+        }
+    }
+
+    /**
      * @param array|ZipContentObject $_array_params
      */
-    public function __construct( $_array_params = array() ) {
+    public function __construct( $_array_params = [] ) {
 
         //This is a multidimensional array
-        if( array_key_exists( 0, $_array_params ) ){
-            foreach( $_array_params as $pos => $array_params ){
+        if ( array_key_exists( 0, $_array_params ) ) {
+            foreach ( $_array_params as $pos => $array_params ) {
                 $this->build( $array_params );
             }
         } else {
@@ -51,15 +81,14 @@ class ZipContentObject extends stdClass {
 
     }
 
-    public function build( $_array_params ){
+    public function build( $_array_params ) {
 
         //This is a multidimensional array
-        if( array_key_exists( 0, $_array_params ) ){
-            foreach( $_array_params as $pos => $array_params ){
+        if ( array_key_exists( 0, $_array_params ) ) {
+            foreach ( $_array_params as $pos => $array_params ) {
                 $this->build( $array_params );
             }
-        }
-        else {
+        } else {
             //this accept instance of SELF also
             if ( !empty( $_array_params ) ) {
                 foreach ( $_array_params as $property => $value ) {
@@ -75,7 +104,7 @@ class ZipContentObject extends stdClass {
         }
     }
 
-    public function toArray(){
+    public function toArray() {
         return (array)$this;
     }
 
