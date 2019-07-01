@@ -242,10 +242,12 @@ var SegmentActions = {
         });
     },
     showTagsMenu: function(sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.OPEN_TAGS_MENU,
-            sid: sid,
-        });
+        if ( !UI.checkCurrentSegmentTPEnabled() ) {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.OPEN_TAGS_MENU,
+                sid: sid,
+            });
+        }
     },
     closeTagsMenu: function() {
         AppDispatcher.dispatch({
