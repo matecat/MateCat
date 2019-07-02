@@ -427,7 +427,6 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
             //check for glossary files and tmx and put them in front of the list
-            $infoFile = DetectProprietaryXliff::getInfo( $fileName ); ///FIXME get copy from S3
             if ( DetectProprietaryXliff::getMemoryFileType() ) {
 
                 //found TMX, enable language checking routines
