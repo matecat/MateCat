@@ -438,7 +438,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return mixed
      */
-    private static function getUploadSessionSafeName( $uploadSession ) {
+    public static function getUploadSessionSafeName( $uploadSession ) {
         return str_replace( [ '{', '}' ], '', strtolower( $uploadSession ) );
     }
 

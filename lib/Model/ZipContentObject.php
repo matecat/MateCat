@@ -42,7 +42,7 @@ class ZipContentObject extends stdClass {
     private function setDocumentContentFromS3() {
         $s3Client = S3FilesStorage::getStaticS3Client();
         $config   = [
-                'bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                'bucket' => S3FilesStorage::getFilesStorageBucket(),
                 'key'    => $this->input_filename,
         ];
 

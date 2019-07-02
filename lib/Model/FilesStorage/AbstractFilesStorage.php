@@ -3,6 +3,7 @@
 namespace FilesStorage;
 
 use Database;
+use Log;
 use PDO;
 
 /**
@@ -305,8 +306,8 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             // fix 1 July 2019
             // remove "\n" from 'filename' and 'mime_type'
             // @TODO Why do this happen?
-            $results[ $k ][ 'filename' ] = str_replace(PHP_EOL, '', $results[ $k ][ 'filename' ]);
-            $results[ $k ][ 'mime_type' ] = str_replace(PHP_EOL, '', $results[ $k ][ 'mime_type' ]);
+            $results[ $k ][ 'filename' ]  = str_replace( PHP_EOL, '', $results[ $k ][ 'filename' ] );
+            $results[ $k ][ 'mime_type' ] = str_replace( PHP_EOL, '', $results[ $k ][ 'mime_type' ] );
         }
 
         return $results;
@@ -335,7 +336,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             WHERE fj.id_job = :id_job 
             GROUP BY id_file";
 
-        $db      = Database::obtain();
+        $db   = Database::obtain();
         $stmt = $db->getConnection()->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute( [ 'id_job' => $id_job ] );
@@ -353,8 +354,8 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             // fix 1 July 2019
             // remove "\n" from 'filename' and 'mime_type'
             // @TODO Why do this happen?
-            $results[ $k ][ 'filename' ] = str_replace(PHP_EOL, '', $results[ $k ][ 'filename' ]);
-            $results[ $k ][ 'mime_type' ] = str_replace(PHP_EOL, '', $results[ $k ][ 'mime_type' ]);
+            $results[ $k ][ 'filename' ]  = str_replace( PHP_EOL, '', $results[ $k ][ 'filename' ] );
+            $results[ $k ][ 'mime_type' ] = str_replace( PHP_EOL, '', $results[ $k ][ 'mime_type' ] );
         }
 
         return $results;
@@ -378,9 +379,20 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      * @param $uploadToken
      *
      * @return bool|string
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
      */
     public function getTemporaryUploadedZipFile( $uploadToken ) {
-        $files    = scandir( \INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
+        if ( \INIT::$FILE_STORAGE_METHOD === 's3' ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+            $files    = $s3Client->getItemsInABucket( [
+                    'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                    'prefix' => S3FilesStorage::QUEUE_FOLDER . DIRECTORY_SEPARATOR . S3FilesStorage::getUploadSessionSafeName( $uploadToken )
+            ] );
+        } else {
+            $files = scandir( \INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
+        }
+
         $zip_name = null;
         $zip_file = null;
 
@@ -391,7 +403,15 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             }
         }
 
-        $files = scandir( \INIT::$ZIP_REPOSITORY . '/' . $zip_name );
+        if ( \INIT::$FILE_STORAGE_METHOD === 's3' ) {
+            $files = $s3Client->getItemsInABucket( [
+                    'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                    'prefix' => S3FilesStorage::ZIP_FOLDER . DIRECTORY_SEPARATOR . $zip_name
+            ] );
+        } else {
+            $files = scandir( \INIT::$ZIP_REPOSITORY . '/' . $zip_name );
+        }
+
         foreach ( $files as $file ) {
             if ( strpos( $file, '.zip' ) !== false ) {
                 $zip_file = $file;
