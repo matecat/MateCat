@@ -198,6 +198,13 @@ is &lt; 70 dB(A).';
 
         //Original JSON value from Airbnb
         //"&lt;br>&lt;br>This will "
+
+        //Xliff Value
+        //"&amp;lt;br&gt;&amp;lt;br&gt;This will "
+
+        //Fixed by airbnb plugin in Database
+        //"&lt;br&gt;&lt;br&gt;This will"
+
         $expected_segment = '&lt;b&gt;de %1$s, &lt;/b&gt;que';
 
         //Start test
@@ -212,7 +219,7 @@ is &lt; 70 dB(A).';
     /**
      * @throws \Exception
      */
-    public function testFix(){
+    public function testFixQA(){
 
         $seg [ 'segment' ] = 'Due to security concerns, we were not able to process your transaction.&amp;lt;br&gt;&amp;lt;br&gt;This will likely happen if you try again.&amp;lt;br&gt;&amp;lt;br&gt;If you feel you should be able to complete your transaction, contact us.';
         $translation = 'Devido a questões de segurança, não foi possível processar sua transação. &lt;br&gt;&lt;br&gt; Isso provavelmente acontecerá se você tentar novamente. &lt;br&gt;&lt;br&gt;Se você acha que deve conseguir concluir sua transação , Contate-Nos.';
