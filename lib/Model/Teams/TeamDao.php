@@ -94,12 +94,14 @@ class TeamDao extends \DataAccess_AbstractDao {
         //add the creator to the list of members
         $params[ 'members' ][] = $orgCreatorUser->email;
 
+        // wrap createList() in a transaction
+        Database::obtain()->getConnection()->beginTransaction();
         $membersList = ( new MembershipDao )->createList( [
                 'team'    => $teamStruct,
                 'members' => $params[ 'members' ]
         ] );
-
         $teamStruct->setMembers( $membersList );
+        Database::obtain()->getConnection()->commit();
 
         return $teamStruct;
 
