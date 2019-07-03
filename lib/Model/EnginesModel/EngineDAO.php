@@ -333,20 +333,16 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     public function sanitize( $input ) {
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        // NOTE 27th Jun 2019
-        // --------------------------------------
-        // introduced addslashes in order to make green all tests
-
-        $input->name                    = ( $input->name !== null ) ? addslashes( $input->name ) : null;
-        $input->description             = ( $input->description !== null ) ? addslashes( $input->description ) : null;
-        $input->base_url                = ( $input->base_url !== null ) ? addslashes( $input->base_url ) : null;
-        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ? addslashes( $input->translate_relative_url ) : null;
-        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ? addslashes( $input->contribute_relative_url ) : null;
-        $input->update_relative_url     = ( $input->update_relative_url !== null ) ? addslashes( $input->update_relative_url ) : null;
-        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? addslashes( $input->delete_relative_url ) : null;
-        $input->others                  = ( $input->others !== null and $input->others !== '{}' ) ? addslashes( json_encode( $input->others ) ) : '{}';
-        $input->class_load              = ( $input->class_load !== null ) ? addslashes( $input->class_load ) : null;
-        $input->extra_parameters        = ( $input->extra_parameters !== null and $input->extra_parameters !== '{}' ) ? addslashes( json_encode( $input->extra_parameters ) ) : '{}';
+        $input->name                    = ( $input->name !== null ) ?  $input->name  : null;
+        $input->description             = ( $input->description !== null ) ?  $input->description  : null;
+        $input->base_url                = ( $input->base_url !== null ) ?  $input->base_url  : null;
+        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ?  $input->translate_relative_url  : null;
+        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ?  $input->contribute_relative_url  : null;
+        $input->update_relative_url     = ( $input->update_relative_url !== null ) ?  $input->update_relative_url  : null;
+        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ?  $input->delete_relative_url  : null;
+        $input->others                  = ( $input->others !== null and $input->others !== '{}' ) ?  json_encode( $input->others )  : '{}';
+        $input->class_load              = ( $input->class_load !== null ) ?  $input->class_load  : null;
+        $input->extra_parameters        = ( $input->extra_parameters !== null and $input->extra_parameters !== '{}' ) ?  json_encode( $input->extra_parameters ) : '{}';
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
         $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;

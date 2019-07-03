@@ -33,7 +33,7 @@ class SanitizeEngineTest extends AbstractTest {
 ba""r/foo'
 LABEL;
         $this->engine_struct_expected->name = <<<LABEL
-ba\"\"r/foo\'
+ba""r/foo'
 LABEL;
 
         $this->engine_struct_expected->others           = "{}";
@@ -52,7 +52,7 @@ LABEL;
 ba""r/foo'
 LABEL;
         $this->engine_struct_expected->description      = <<<LABEL
-ba\"\"r/foo\'
+ba""r/foo'
 LABEL;
         $this->engine_struct_expected->others           = "{}";
         $this->engine_struct_expected->extra_parameters = "{}";
@@ -71,7 +71,7 @@ LABEL;
 www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->base_url         = <<<LABEL
-www.ba\"\"r/foo\'.com
+www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->others           = "{}";
         $this->engine_struct_expected->extra_parameters = "{}";
@@ -90,7 +90,7 @@ LABEL;
 www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->translate_relative_url = <<<LABEL
-www.ba\"\"r/foo\'.com
+www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->others                 = "{}";
         $this->engine_struct_expected->extra_parameters       = "{}";
@@ -109,7 +109,7 @@ LABEL;
 www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->contribute_relative_url = <<<LABEL
-www.ba\"\"r/foo\'.com
+www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->others                  = "{}";
         $this->engine_struct_expected->extra_parameters        = "{}";
@@ -128,7 +128,7 @@ LABEL;
 www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->delete_relative_url = <<<LABEL
-www.ba\"\"r/foo\'.com
+www.ba""r/foo'.com
 LABEL;
         $this->engine_struct_expected->others              = "{}";
         $this->engine_struct_expected->extra_parameters    = "{}";
@@ -146,8 +146,8 @@ LABEL;
         $this->engine_struct_input->others              = <<<LABEL
 ba""r/foo'
 LABEL;
-        $this->engine_struct_expected->others           = <<<'LABEL'
-\"ba\\\"\\\"r\\/foo\'\"
+        $this->engine_struct_expected->others           = <<<LABEL
+"ba\"\"r\/foo'"
 LABEL;
         $this->engine_struct_expected->extra_parameters = "{}";
         $this->engine_Dao->sanitize( $this->engine_struct_input );
@@ -165,7 +165,7 @@ LABEL;
 ba""r/foo'
 LABEL;
         $this->engine_struct_expected->class_load       = <<<LABEL
-ba\"\"r/foo\'
+ba""r/foo'
 LABEL;
         $this->engine_struct_expected->others           = "{}";
         $this->engine_struct_expected->extra_parameters = "{}";
@@ -183,8 +183,8 @@ LABEL;
         $this->engine_struct_input->extra_parameters    = <<<LABEL
 ba""r/foo'
 LABEL;
-        $this->engine_struct_expected->extra_parameters = <<<'LABEL'
-\"ba\\\"\\\"r\\/foo\'\"
+        $this->engine_struct_expected->extra_parameters = <<<LABEL
+"ba\"\"r\/foo'"
 LABEL;
         $this->engine_struct_expected->others           = "{}";
         $this->engine_Dao->sanitize( $this->engine_struct_input );
@@ -257,9 +257,9 @@ LABEL;
         $this->engine_struct_input->others              = <<<'LAB'
 {"gloss_get_relative_url":"glossary/get","gloss_set_relative_url":"glossary/set","gloss_update_relative_url":"glossary/update","gloss_delete_relative_url":"glossary/delete","tmx_import_relative_url":"tmx/import","tmx_status_relative_url":"tmx/status","tmx_export_create_url":"tmx/export/create","tmx_export_check_url":"tmx/export/check","tmx_export_download_url":"tmx/export/download","tmx_export_list_url":"tmx/export/list","api_key_create_user_url":"createranduser","api_key_check_auth_url":"authkey","analyze_url":"analyze","detect_language_url":"langdetect.php"}
 LAB;
-        $this->engine_struct_expected->others           = <<<'LABEL'
-\"{\\\"gloss_get_relative_url\\\":\\\"glossary\\/get\\\",\\\"gloss_set_relative_url\\\":\\\"glossary\\/set\\\",\\\"gloss_update_relative_url\\\":\\\"glossary\\/update\\\",\\\"gloss_delete_relative_url\\\":\\\"glossary\\/delete\\\",\\\"tmx_import_relative_url\\\":\\\"tmx\\/import\\\",\\\"tmx_status_relative_url\\\":\\\"tmx\\/status\\\",\\\"tmx_export_create_url\\\":\\\"tmx\\/export\\/create\\\",\\\"tmx_export_check_url\\\":\\\"tmx\\/export\\/check\\\",\\\"tmx_export_download_url\\\":\\\"tmx\\/export\\/download\\\",\\\"tmx_export_list_url\\\":\\\"tmx\\/export\\/list\\\",\\\"api_key_create_user_url\\\":\\\"createranduser\\\",\\\"api_key_check_auth_url\\\":\\\"authkey\\\",\\\"analyze_url\\\":\\\"analyze\\\",\\\"detect_language_url\\\":\\\"langdetect.php\\\"}\"
-LABEL;
+        $this->engine_struct_expected->others           = <<<'LAB'
+"{\"gloss_get_relative_url\":\"glossary\/get\",\"gloss_set_relative_url\":\"glossary\/set\",\"gloss_update_relative_url\":\"glossary\/update\",\"gloss_delete_relative_url\":\"glossary\/delete\",\"tmx_import_relative_url\":\"tmx\/import\",\"tmx_status_relative_url\":\"tmx\/status\",\"tmx_export_create_url\":\"tmx\/export\/create\",\"tmx_export_check_url\":\"tmx\/export\/check\",\"tmx_export_download_url\":\"tmx\/export\/download\",\"tmx_export_list_url\":\"tmx\/export\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}"
+LAB;
         $this->engine_struct_expected->extra_parameters = "{}";
         $this->engine_Dao->sanitize( $this->engine_struct_input );
         $this->assertEquals( $this->engine_struct_expected, $this->engine_struct_input );
