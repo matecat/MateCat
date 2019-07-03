@@ -290,6 +290,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
          *
          * but the result is the one expected: the segment is not present in the current TM.
          **/
+
         if ( $this->result->responseStatus != "200" &&
                 ( $this->result->responseStatus != "404" ||
                         $this->result->responseDetails != "NO ID FOUND" )
