@@ -52,47 +52,6 @@ if ( MBC.enabled() )
             lastCommentHash = null;
             return l;
         };
-
-        var Scrollable = function ( el ) {
-            this.el = el;
-            var that = this;
-            var root = $( el ).closest( '.mbc-comment-balloon-outer' );
-            var notificationArea = $( root ).find( '.mbc-new-message-notification' );
-            var dataRoot = root.closest( 'section' );
-
-            $( this.el ).on( 'scroll', function () {
-                if ( that.bottomVisible() ) hideNotificationAndResetCount();
-            } );
-
-
-            this.bottomVisible = function () {
-                return el.scrollTop + 30 >= el.scrollHeight - el.clientHeight;
-            };
-
-            var verbalize = function ( count ) {
-                if ( count > 1 )  return '' + count + ' new messages';
-                else            return '1 new message';
-            };
-
-            this.notifyNewComments = function () {
-                var count = dataRoot.data( 'mbc-new-comments-count' ) || 0;
-                dataRoot.data( 'mbc-new-comments-count', ++count );
-
-                notificationArea.find( 'a' ).text( verbalize( count ) );
-                notificationArea.show();
-            };
-
-            this.scrollToBottom = function () {
-                $( this.el ).scrollTop( this.el.scrollHeight );
-                hideNotificationAndResetCount();
-            };
-
-            var hideNotificationAndResetCount = function () {
-                notificationArea.hide();
-                dataRoot.data( 'mbc-new-comments-count', 0 );
-            }
-        };
-
         var openSegmentCommentNoScroll = function ( idSegment ) {
             SegmentActions.openSegmentComment(idSegment);
 
