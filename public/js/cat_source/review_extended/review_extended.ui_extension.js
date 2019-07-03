@@ -64,7 +64,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             var segmentFid = UI.getSegmentFileId($(editarea));
             var currentSegment =  UI.getSegmentById(segmentId)
             var originalTranslation = currentSegment.find('.original-translation').html();
-            SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
+            // SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
         },
 
         submitIssues: function (sid, data, diff) {

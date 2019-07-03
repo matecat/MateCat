@@ -478,7 +478,7 @@ class Segment extends React.Component {
         //check if this segment is in closing
         if (this.props.segment.opened && !nextProps.segment.opened) {
             //check if this segment require setTranslation
-            if (!this.props.isReview && this.props.segment.modified) {
+            if (!this.props.isReview && this.props.segment.modified && this.props.segment.status !== "APPROVED") {
                 UI.setTranslation({
                     id_segment: UI.getSegmentId($(this.section)),
                     status: this.props.segment.status ,

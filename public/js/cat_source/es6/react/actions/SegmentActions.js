@@ -208,7 +208,15 @@ var SegmentActions = {
             id: sid
         });
     },
+    modifiedTranslation: function (sid, fid, status) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.MODIFIED_TRANSLATION,
+            sid: sid,
+            fid: fid,
+            status: status
+        });
 
+    },
     replaceEditAreaTextContent: function(sid, fid, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_TRANSLATION,
@@ -224,14 +232,6 @@ var SegmentActions = {
             id: sid,
             fid: fid,
             className: className
-        });
-    },
-    updateTranslation: function (fid, sid, editAreaText) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.TRANSLATION_EDITED,
-            fid: fid,
-            id: sid,
-            translation: editAreaText
         });
     },
     lockEditArea : function ( sid, fid ) {

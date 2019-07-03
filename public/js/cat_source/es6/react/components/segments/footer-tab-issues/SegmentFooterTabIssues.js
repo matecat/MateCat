@@ -23,7 +23,7 @@ class SegmentFooterTabIssues extends React.Component {
         $( this.selectIssueSeverity ).dropdown();
 
         SegmentStore.addListener( SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened.bind( this ) );
-        SegmentStore.addListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind( this ) );
+        // SegmentStore.addListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind( this ) );
     }
 
     componentDidUpdate() {
@@ -37,7 +37,7 @@ class SegmentFooterTabIssues extends React.Component {
 
     componentWillUnmount() {
         SegmentStore.removeListener( SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened );
-        SegmentStore.removeListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges );
+        // SegmentStore.removeListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges );
     }
 
     componentWillMount() {

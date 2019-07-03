@@ -119,7 +119,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         tagged: !self.hasSegmentTagProjectionEnabled(segment),
                         unlocked: false,
                         edit_area_locked: false,
-                        notes: segment.notes
+                        notes: segment.notes,
+                        modified: false
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -131,6 +132,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.warnings = {};
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);segment.edit_area_locked = false;
                 segment.original_sid = segment.sid;
+                segment.modified = false;
                 newSegments.push(this);
             }
 
@@ -297,11 +299,17 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             this._segments = this._segments.setIn([index, 'autopropagated_from'], "0");
         }
     },
-    replaceTranslation(sid, fid, translation) {
+    replaceTranslation(sid, translation) {
         var index = this.getSegmentIndex(sid);
+        let segment = this._segments.get(index);
         var trans = htmlEncode(this.removeLockTagsFromString(translation));
         this._segments = this._segments.setIn([index, 'translation'], trans);
+        this._segments = this._segments.setIn([index, 'decoded_translation'], UI.decodeText(segment.toJS(), trans));
         return translation;
+    },
+    modifiedTranslation(sid, fid, status) {
+        const index = this.getSegmentIndex(sid, fid);
+        this._segments = this._segments.setIn([index, 'modified'], status);
     },
     replaceSource(sid, fid, source) {
         var index = this.getSegmentIndex(sid);
@@ -311,10 +319,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     decodeSegmentsText: function () {
         let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(segment => segment.set('decoded_translation', UI.decodeText(segment.toJS(), segment.get('translation'))));
-            self._segments[index] = self._segments[index].map(segment => segment.set('decoded_source', UI.decodeText(segment.toJS(), segment.get('segment'))));
-        });
+        this._segments = this._segments.map(segment => segment.set('decoded_translation', UI.decodeText(segment.toJS(), segment.get('translation'))));
+        this._segments = this._segments.map(segment => segment.set('decoded_source', UI.decodeText(segment.toJS(), segment.get('segment'))));
+
     },
     setSegmentAsTagged(sid, fid) {
         var index = this.getSegmentIndex(sid);
@@ -375,9 +382,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     removeBulkOption: function () {
         let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(segment => segment.set('inBulk', false));
-        });
+        this._segments = self._segments.map(segment => segment.set('inBulk', false));
         this.segmentsInBulk = [];
     },
     setBulkSelectionInterval: function (from, to, fid) {
@@ -398,38 +403,31 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
     setBulkSelectionSegments: function (segmentsArray) {
-        let self = this;
         this.segmentsInBulk = segmentsArray;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(function (segment) {
-                if (segmentsArray.indexOf(segment.get('sid')) > -1) {
-                    if (segment.get('ice_locked') == "1" && !segment.get('unlocked')) {
-                        let index = segmentsArray.indexOf(segment.get('sid'));
-                        self.segmentsInBulk.splice(index, 1);  // if is a locked segment remove it from bulk
-                    } else {
-                        return segment.set('inBulk', true);
-                    }
+        this._segments = this._segments.map( (segment) => {
+            if (segmentsArray.indexOf(segment.get('sid')) > -1) {
+                if (segment.get('ice_locked') == "1" && !segment.get('unlocked')) {
+                    let index = segmentsArray.indexOf(segment.get('sid'));
+                    this.segmentsInBulk.splice(index, 1);  // if is a locked segment remove it from bulk
+                } else {
+                    return segment.set('inBulk', true);
                 }
-                return segment.set('inBulk', false);
-            });
+            }
+            return segment.set('inBulk', false);
         });
+
     },
     setMutedSegments: function (segmentsArray) {
-        let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(function (segment) {
-                if (segmentsArray.indexOf(segment.get('sid')) === -1) {
-                    return segment.set('muted', true);
-                }
-                return segment;
-            });
+        this._segments = self._segments.map( (segment) => {
+            if (segmentsArray.indexOf(segment.get('sid')) === -1) {
+                return segment.set('muted', true);
+            }
+            return segment;
         });
     },
     removeAllMutedSegments: function () {
         let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(segment => segment.set('muted', false));
-        });
+        this._segments = this._segments.map(segment => segment.set('muted', false));
     },
     setUnlockedSegment: function (sid, fid, unlocked) {
         let index = this.getSegmentIndex(sid);
@@ -522,16 +520,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     getCurrentSegment: function(){
         let current = null,
             tmpCurrent = null;
-
-        _.forEach(this._segments, (item, index) => {
-            tmpCurrent = this._segments[index].find((segment) => {
-                return segment.get('opened') === true
-            });
-            if(tmpCurrent){
-                current = Object.assign({},tmpCurrent.toJS());
-            }
+        tmpCurrent = this._segments.find((segment) => {
+            return segment.get('opened') === true
         });
-
+        if(tmpCurrent){
+            current = Object.assign({},tmpCurrent.toJS());
+        }
         return current;
     },
     getLastSegmentId() {
@@ -639,8 +633,9 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            let trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            let trans = SegmentStore.replaceTranslation(action.id, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, trans);
+            // SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.REPLACE_SOURCE:
             let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
@@ -649,9 +644,9 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
-        case SegmentConstants.TRANSLATION_EDITED:
-            let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
-            SegmentStore.emitChange(action.actionType, action.id, action.translation);
+        case SegmentConstants.MODIFIED_TRANSLATION:
+            SegmentStore.modifiedTranslation(action.sid, action.fid, action.status);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.LOCK_EDIT_AREA:
             SegmentStore.lockUnlockEditArea(action.id, action.fid);
@@ -662,7 +657,7 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_DEFAULT_TAB:
             SegmentStore.setConfigTabs(action.tabName, true, true);
-            // SegmentStore.emitChange(action.actionType, action.tab, SegmentStore._footerTabsConfig);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.MODIFY_TAB_VISIBILITY:
             SegmentStore.emitChange(action.actionType, action.tabName, action.visible);

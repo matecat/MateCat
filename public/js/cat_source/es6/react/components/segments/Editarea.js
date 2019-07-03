@@ -102,6 +102,12 @@ class Editarea extends React.Component {
 		if ( Review.enabled() && ( ReviewSimple.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled() ) ){
 			UI.trackChanges(this.editAreaRef);
 		}
+        //check if the translation is changed
+        const   value = htmlEncode(UI.prepareTextToSend($(this.editAreaRef).html())),
+            status = (value !== htmlEncode(UI.prepareTextToSend(this.props.translation)));
+        if( this.props.segment.modified !== status ){
+            SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.fid,status);
+        }
 	}
 
 	checkEmptyText() {

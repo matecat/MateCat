@@ -544,11 +544,11 @@
             }
 
             if ( isModified ) {
-                SegmentActions.addClassToSegment(UI.getSegmentId( el ), 'modified');
+                SegmentActions.modifiedTranslation(UI.getSegmentId( el ), UI.getSegmentFileId(el), true);
                 el.data('modified', true);
                 el.trigger('modified');
             } else {
-                SegmentActions.removeClassToSegment(UI.getSegmentId( el ), 'modified');
+                SegmentActions.modifiedTranslation(UI.getSegmentId( el ), UI.getSegmentFileId(el), false);
                 el.data('modified', false);
                 el.trigger('modified');
             }

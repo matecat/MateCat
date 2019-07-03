@@ -63,7 +63,7 @@ $.extend(UI, {
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
 
             if (which) {
-                SegmentActions.addClassToSegment(UI.getSegmentId( segment ), 'modified');
+                SegmentActions.modifiedTranslation(UI.getSegmentId( segment ),UI.getSegmentFileId(segment),true);
                 segment.data('modified', true);
                 segment.trigger('modified');
             }

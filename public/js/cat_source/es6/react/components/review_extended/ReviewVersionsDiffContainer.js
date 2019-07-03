@@ -61,12 +61,12 @@ class ReviewVersionsDiffContainer extends React.Component {
 	}
 
     componentDidMount() {
-		SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind(this));
+		// SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind(this));
 		SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation.bind(this));
     }
 
     componentWillUnmount() {
-		SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges);
+		// SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.trackChanges);
 		SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
     }
 

@@ -149,9 +149,36 @@ class SegmentsContainer extends React.Component {
         return items;
     }
 
+    getCommentsPadding(index, segment) {
+        if ( index === 0 ) {
+            let segment1 = this.getSegmentByIndex(1);
+            let segment2 = this.getSegmentByIndex(2);
+
+            if ( segment.get('openComments') ) {
+                let comments = CommentsStore.getCommentsBySegment(segment.get('original_sid'));
+                if (index === 0 && comments.length === 0)
+                    return 110;
+                else  if (index === 0 && comments.length > 0)
+                    return 270;
+            } else if ( segment1.get('openComments') ) {
+                let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
+                if (comments.length === 0)
+                    return 100;
+                else  if (comments.length > 0)
+                    return 150;
+            } else if ( segment2.get('openComments') ) {
+                let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
+                if (comments.length > 0)
+                    return 100;
+            }
+        }
+        return 0;
+    }
+
     getSegmentHeight(index) {
         let segment = this.getSegmentByIndex(index);
         let itemHeigth = 0;
+        let commentsPadding = this.getCommentsPadding(index, segment);
         if (segment.get('opened')) {
             let $segment= $('#segment-' + segment.get('sid'));
             if ( $segment.length && $segment.hasClass('opened') ) {
@@ -178,7 +205,7 @@ class SegmentsContainer extends React.Component {
         if ( preiousFileId !== segment.get('id_file')) {
             itemHeigth = itemHeigth + 47;
         }
-        return itemHeigth;
+        return itemHeigth + commentsPadding;
     }
 
     componentDidMount() {
@@ -254,11 +281,37 @@ class SegmentsContainer extends React.Component {
                     UI.getMoreSegments('before');
                 }
             } }
-            renderItem={({index, style}) =>
-                <div key={index} style={style}>
+            renderItem={({index, style}) => {
+                let styleCopy = Object.assign({}, style);
+                if ( index === 0 ) {
+                    let segment = this.getSegmentByIndex(index);
+                    let segment1 = this.getSegmentByIndex(1);
+                    let segment2 = this.getSegmentByIndex(2);
+
+                    if ( segment.get('openComments') ) {
+                        let comments = CommentsStore.getCommentsBySegment(segment.get('original_sid'));
+                        if (index === 0 && comments.length === 0)
+                            styleCopy.marginTop = '110px';
+                        else  if (index === 0 && comments.length > 0)
+                            styleCopy.marginTop = '270px';
+                    } else if ( segment1.get('openComments') ) {
+                        let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
+                        if (comments.length === 0)
+                            styleCopy.marginTop = '40px';
+                        else  if (comments.length > 0)
+                            styleCopy.marginTop = '100px';
+                    } else if ( segment2.get('openComments') ) {
+                        let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
+                        if (comments.length === 0)
+                            styleCopy.marginTop = '20px';
+                        else  if (comments.length > 0)
+                            styleCopy.marginTop = '50px';
+                    }
+                }
+                return <div key={index} style={styleCopy}>
                     {items[index]}
-                </div>
-            }
+                </div>;
+            }}
         >
         </VirtualList>
 
