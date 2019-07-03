@@ -286,15 +286,16 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
         $result = [];
 
-        $availableEngines = func_get_arg( 1 );
-
         foreach ( $array_result as $item ) {
 
-            if ( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
-                $result[] = new EnginesModel_NONEStruct();
-                continue;
-            }
+            if ( func_num_args() > 1 ) { // check if $availableEngines is provided as second argument
+                $availableEngines = func_get_arg( 1 );
 
+                if ( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
+                    $result[] = new EnginesModel_NONEStruct();
+                    continue;
+                }
+            }
 
             $build_arr = [
                     'id'                           => (int)$item[ 'id' ],
