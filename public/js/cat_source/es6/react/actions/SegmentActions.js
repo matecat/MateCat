@@ -526,7 +526,6 @@ var SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
         });
-        this.closeSideSegments();
     },
 
     closeSegmentIssuePanel: function ( sid ) {
@@ -666,6 +665,19 @@ var SegmentActions = {
     closeSideSegments() {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_SIDE
+        });
+    },
+    openSegmentComment(sid) {
+        this.openSideSegments();
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_COMMENTS,
+            sid: sid
+        });
+    },
+    closeSegmentComment(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_COMMENTS,
+            sid: sid
         });
     }
 

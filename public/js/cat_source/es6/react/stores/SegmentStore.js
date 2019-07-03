@@ -498,6 +498,19 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     closeSegmentIssuePanel: function() {
         this._segments = this._segments.map((segment)=>segment.set('openIssues', false));
     },
+    openSegmentComments: function(sid) {
+        const index = this.getSegmentIndex(sid);
+        this._segments = this._segments.map((segment)=>segment.set('openComments', false));
+        this._segments = this._segments.setIn([index, 'openComments'], true);
+    },
+    closeSegmentComments: function() {
+        this._segments = this._segments.map((segment)=>segment.set('openComments', false));
+    },
+    isSidePanelOpen: function() {
+        const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);
+        const issueOpen = this._segments.findIndex((segment)=>segment.get('openIssues') === true);
+        return ( commentOpen !== -1 ||  issueOpen !== -1);
+    },
     setConfigTabs: function (tabName, visible, open) {
         if ( open ) {
             this._footerTabsConfig = this._footerTabsConfig.map((tab)=>tab.set('open', false));
@@ -776,6 +789,20 @@ AppDispatcher.register(function (action) {
             SegmentStore.closeSegmentIssuePanel();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(action.actionType);
+            if ( !SegmentStore.isSidePanelOpen() ) {
+                SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
+            }
+            break;
+        case SegmentConstants.OPEN_COMMENTS:
+            SegmentStore.openSegmentComments(action.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.CLOSE_COMMENTS:
+            SegmentStore.closeSegmentComments(action.sid);
+            if ( !SegmentStore.isSidePanelOpen() ) {
+                SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
+            }
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

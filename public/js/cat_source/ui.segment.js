@@ -405,13 +405,15 @@
             var prev = $('.editor').prevAll( selector ).first();
             if (prev.is('section')) {
                 UI.scrollSegment(prev);
-                UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
+                SegmentActions.openSegment(UI.getSegmentId(prev));
+                // UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
                 // $(UI.targetContainerSelector(), prev).click();
             } else {
                 prev = $('.editor').parents('article').prevAll( selector ).first();
                 if (prev.length) {
                     // $(UI.targetContainerSelector() , prev).click();
-                    UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
+                    SegmentActions.openSegment(UI.getSegmentId(prev));
+                    // UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
                     UI.scrollSegment(prev);
                 }
             }
@@ -422,17 +424,10 @@
             if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
                 id = UI.parsedHash.splittedSegmentId ;
             }
-
-            if ( typeof id === 'undefined' ) {
-                console.debug( 'id is undefined', id);
-                return ;
-            }
-
-            if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
-                MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
-            } else {
+            if ( id ) {
                 SegmentActions.openSegment(id);
             }
+
         },
         isReadonlySegment : function( segment ) {
             return ( segment.readonly == 'true' ||UI.body.hasClass('archived')) ;

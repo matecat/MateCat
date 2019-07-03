@@ -731,6 +731,7 @@ UI = {
 					seg: segLimit
 				});
 			}
+            $(window).trigger('segmentsAdded',{ resp : d.data.files });
 
 		}
 
@@ -742,7 +743,6 @@ UI = {
 		}
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
-        $(window).trigger('segmentsAdded',{ resp : d.data.files });
 	},
 
 	getSegments: function(options) {

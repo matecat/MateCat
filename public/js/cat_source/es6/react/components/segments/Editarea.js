@@ -93,7 +93,7 @@ class Editarea extends React.Component {
         if (this.props.readonly || this.props.locked) {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
         } else {
-            UI.editAreaClick(event.currentTarget);
+            // UI.editAreaClick(event.currentTarget);
             UI.removeSelectedClassToTags()
         }
     }

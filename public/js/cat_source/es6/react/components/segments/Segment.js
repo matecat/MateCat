@@ -2,6 +2,9 @@
  * React Component for the editarea.
 
  */
+import SegmentCommentsContainer from "./SegmentCommentsContainer";
+import SegmentsCommentsIcon from "./SegmentsCommentsIcon";
+
 let React = require('react');
 let SegmentStore = require('../../stores/SegmentStore');
 let SegmentActions = require('../../actions/SegmentActions');
@@ -114,7 +117,7 @@ class Segment extends React.Component {
     openSegmentFromAction(sid) {
         let self = this;
         sid = sid + "";
-        if (sid === this.props.segment.sid) {
+        if (sid === this.props.segment.sid && !this.props.segment.opened ) {
             setTimeout(function () {
                 self.openSegment();
             });
@@ -615,11 +618,19 @@ class Segment extends React.Component {
 
                 {/*//!-- TODO: place this element here only if it's not a split --*/}
                 <div className="segment-side-buttons">
+
+                    {config.comments_enabled && !this.props.segment.openComments ? (
+                        <SegmentsCommentsIcon {...this.props} />
+                    ) : (null)}
+
                     <div data-mount="translation-issues-button" className="translation-issues-button" data-sid={this.props.segment.sid}>
                         {translationIssues}
                     </div>
                 </div>
                 <div className="segment-side-container">
+                    {config.comments_enabled && this.props.segment.openComments ? (
+                        <SegmentCommentsContainer {...this.props} />
+                    ) : (null)}
                     {this.props.isReviewExtended && this.state.showRevisionPanel ? (
                         <div className="review-balloon-container">
                             {!this.props.segment.versions ? (

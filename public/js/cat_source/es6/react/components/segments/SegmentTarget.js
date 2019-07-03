@@ -99,7 +99,7 @@ class SegmentTarget extends React.Component {
             });
         } else {
             this.props.removeSelection();
-            UI.editAreaClick(event.currentTarget);
+            // UI.editAreaClick(event.currentTarget);
         }
     }
 

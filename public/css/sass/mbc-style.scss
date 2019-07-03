@@ -16,9 +16,9 @@
 }*/
 
 /* Give breathing space to the last comment ballon in page */
-.mbc-comment-balloon-outer:last-of-type {
-  margin-bottom: 100px;
-}
+//.mbc-comment-balloon-outer:last-of-type {
+//  margin-bottom: 100px;
+//}
 
 /*
  ******
@@ -273,10 +273,10 @@ a.mbc-new-message-link:hover {
   padding: 2px 5px 2px 0;
 }
 
-.mbc-comment-anonymous-label:hover {
-  box-shadow: 0px 0px 0px 1px #ccc;
-  cursor: text;
-}
+//.mbc-comment-anonymous-label:hover {
+//  box-shadow: 0px 0px 0px 1px #ccc;
+//  cursor: text;
+//}
 
 /*
  ******
@@ -606,36 +606,16 @@ section:not(.opened) .segment-side-buttons .txt {
  */
 
 
-/*
- ******
- Commenting closed. Article width back to default
- ******
- */
-article.mbc-commenting-closed {
-  width: 88.5%; /* add selector to article tag line 874 style.css */
-}
-
-/*
- ******
- Commenting closed. Hide comment ballon
- ******
- */
-article.mbc-commenting-closed .mbc-comment-balloon-outer {
-  display: none;
-}
 
 /*
  ******
  Commenting opened. Article width reduced and room made for comment ballon
  ******
  */
-article.mbc-commenting-opened section{
-  /*-webkit-transform: translate3d(0, 0, 0);*/
-  -webkit-backface-visibility: hidden;
-  /*-webkit-perspective: 1000;*/
-  -webkit-transition: width .2s ease;
-  transition: width .2s ease;
-  width: 69%;
+article section{
+  //-webkit-backface-visibility: hidden;
+  //-webkit-transition: width .2s ease;
+  //transition: width .2s ease;
 }
 
 /*
@@ -643,7 +623,7 @@ article.mbc-commenting-opened section{
  Commenting opened. Draw comment ballon
  ******
  */
-article.mbc-commenting-opened .mbc-comment-balloon-outer {
+article .mbc-comment-balloon-outer {
   display: block;
   padding-right: 15px;
   margin-bottom: 30px;

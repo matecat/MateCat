@@ -93,28 +93,10 @@
             }); 
         }
         return scrollPromise ; 
-    }
+    };
 
     var scrollSegment = function(inputSegment, idSegment, highlight, quick) {
         SegmentActions.scrollToSegment(idSegment);
-        // var segment = (inputSegment instanceof jQuery) ? inputSegment : $(inputSegment);
-        //
-        // quick = quick || false;
-        // highlight = highlight || false;
-        //
-        // if ( segment.length ) {
-        //     return doDirectScroll( segment, highlight, quick ) ;
-        // } else if( $(segment.selector + '-1').length ) {
-        //     return doDirectScroll( $(segment.selector + '-1'), highlight, quick ) ;
-        // }
-        // else if ( idSegment ){
-        //     return tryToRenderAgain( idSegment, highlight, true ) ;
-        // } else {
-        //     console.error("Segment not found in the UI");
-        // }
-
-
-
     };
 
     /**

@@ -3,7 +3,6 @@ if ( SegmentFilter.enabled() )
 (function($, UI, SF, undefined) {
 
     var original_renderFiles = UI.renderFiles ;
-    var original_editAreaClick     = UI.editAreaClick ;
 
     var original_selectorForNextUntranslatedSegment = UI.selectorForNextUntranslatedSegment ; 
     var original_selectorForNextSegment = UI.selectorForNextSegment ; 
@@ -114,13 +113,6 @@ if ( SegmentFilter.enabled() )
 
         isMuted : function(el) {
             return  $(el).closest('section').hasClass('muted');
-        },
-
-        editAreaClick : function(target, operation) {
-            var e = arguments[0];
-            if ( ! UI.isMuted(target) ) {
-                original_editAreaClick.apply( this,[target, operation]);
-            }
         },
 
         renderFiles : function() {

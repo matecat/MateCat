@@ -67,6 +67,10 @@ window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatche
 window.SegmentTabMessages = require('./components/segments/SegmentFooterTabMessages').default;
 window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
 
+window.CommentsActions = require('./actions/CommentsActions');
+window.CommentsStore = require('./stores/CommentsStore');
+
+
 window.TranslationIssuesSideButton = require('./components/review/TranslationIssuesSideButton').default;
 
 window.SearchUtils = require('./components/header/cattol/search/searchUtils');

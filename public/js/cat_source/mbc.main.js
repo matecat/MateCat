@@ -11,7 +11,6 @@ MBC = {
 if ( MBC.enabled() )
     (function ( $, config, window, MBC, undefined ) {
 
-        var originalScrollSegment = UI.scrollSegment;
         MBC.const = {
             get commentAction() {
                 return 'comment';
@@ -32,95 +31,6 @@ if ( MBC.enabled() )
             tpls = MBC.const.tpls;
         };
 
-        var db = {
-            segments: {},
-            history: {},
-            refreshHistory: function () {
-
-                function includeInHistory( comment ) {
-                    return Number( comment.message_type ) == types.comment &&
-                            sids.indexOf( comment.id_segment ) === -1
-                }
-
-                this.history = [];
-                this.history_count = 0;
-                var comment;
-                var sids = [];
-
-                for ( var i in this.segments ) {
-                    if ( isNaN( i ) ) {
-                        continue;
-                    }
-
-                    var new_array = this.segments[i].slice(); // quick clone
-                    new_array.reverse();
-
-                    for ( var ii in new_array ) {
-                        comment = new_array[ii];
-
-                        if ( includeInHistory( comment ) ) {
-                            this.history_count++;
-                            this.history.push( comment );
-                            sids.push( comment.id_segment );
-                        }
-                    }
-                }
-
-                this.history.sort( function ( x, y ) {
-                    return x.timestamp - y.timestamp;
-                } );
-            },
-
-            resetSegments: function () {
-                this.segments = {};
-            },
-
-            storeSegments: function ( array ) {
-                for ( var i = 0; i < array.length; i++ ) {
-                    this.pushSegment( array[i] );
-                }
-            },
-
-            pushSegment: function ( data ) {
-                var s = Number( data.id_segment );
-
-                if ( typeof db.segments[s] === 'undefined' ) {
-                    db.segments[s] = [data];
-                }
-                else {
-                    db.segments[s].push( data );
-                }
-                if ( Number( data.message_type ) == types.resolve ) {
-                    $( db.segments[s] ).each( function ( i, x ) {
-                        if ( x.thread_id == null ) {
-                            x.thread_id = data.thread_id
-                        }
-                    } );
-                }
-            },
-
-            getCommentsBySegment: function ( s ) {
-                var s = Number( s );
-
-                if ( typeof this.segments[s] === 'undefined' ) {
-                    return [];
-                } else {
-                    return this.segments[s];
-                }
-            },
-
-            getCommentsCountBySegment: function ( s ) {
-                var active = 0, total = 0;
-
-                $( this.getCommentsBySegment( s ) ).each( function ( i, x ) {
-                    if ( Number( x.message_type ) == types.comment ) {
-                        if ( null == x.thread_id ) active++;
-                        total++;
-                    }
-                } );
-                return {active: active, total: total};
-            }
-        };
 
         var getUsername = function () {
             if ( customUserName ) return customUserName;
@@ -137,123 +47,10 @@ if ( MBC.enabled() )
             }
         };
 
-        var limitNum = function ( num ) {
-            if ( Number( num ) > 99 ) return '+99';
-            else return num;
-        };
-
-        var buildFirstCommentHeader = function () {
-            return $( tpls.firstCommentWrap );
-        };
-
         var popLastCommentHash = function () {
             var l = lastCommentHash;
             lastCommentHash = null;
             return l;
-        };
-
-        var resolveCommentLinkIcon = function ( el, comments_obj ) {
-            var root = $( el ).find( '.txt' );
-            root.hide();
-
-            if ( comments_obj.total == 0 ) {
-                root.append( $( tpls.commentIconHighlightInvite ) );
-                return;
-            }
-
-            root.find( '.mbc-comment-highlight-invite' ).remove();
-            root.find( '.mbc-comment-highlight' ).remove();
-
-            var highlight = $( tpls.commentIconHighlightNumber );
-
-            if ( comments_obj.active > 0 ) {
-                root.append( highlight );
-                root.addClass('has-object');
-                highlight.text( limitNum( comments_obj.active ) );
-            }
-
-            root.show();
-        };
-
-        var renderInputForm = function () {
-            var inputForm = $( tpls.inputForm );
-            inputForm.find( '.mbc-new-message-notification' ).hide();
-            inputForm.find( '.mbc-comment-username' )
-                    .toggleClass( 'mbc-comment-anonymous-label', !loggedUserName )
-                    .text( getUsername() );
-
-            if ( loggedUserName ) {
-                inputForm.find( '.mbc-login-link' ).addClass( 'mbc-hide' );
-            } else {
-                inputForm.find( '.mbc-login-link' ).addClass( 'mbc-visible' );
-                inputForm.find( '.mbc-comment-username' )
-                        .attr( 'title', 'Click to edit' );
-            }
-            inputForm.find( '.mbc-comment-send-btn' ).hide();
-            return inputForm;
-        };
-
-        var renderSegmentCommentsFirstInput = function ( el ) {
-            $( '.mbc-comment-balloon-outer' ).remove();
-
-            var root = $( tpls.segmentThread );
-            var inputForm = renderInputForm();
-
-            inputForm.addClass( 'mbc-first-input' );
-
-            root.find( '.mbc-comment-balloon-inner' ).append( inputForm );
-
-            el.find('.segment-side-container').prepend( root.show() );
-            addTagging();
-            inputForm.find( 'textarea' ).focus();
-        };
-
-        var populateCommentsWrap = function ( root, comments ) {
-            var comments_root = root.find( '.mbc-comments-wrap' );
-
-            if ( comments.length == 0 ) {
-                return root;
-            }
-            var thread_wrap = null, thread_id = 0, count = 0;
-
-            for ( var i = 0; i < comments.length; i++ ) {
-                if ( comments[i].thread_id != thread_id ) {
-                    // start a new thread
-                    if ( thread_wrap != null ) {
-                        comments_root.append( thread_wrap );
-                        count = 0;
-                    }
-                    thread_wrap = $( tpls.threadWrap );
-                }
-                if ( Number( comments[i].message_type ) == types.comment ) {
-                    count++;
-                }
-                if ( comments[i].thread_id == null ) {
-                    thread_wrap.addClass( 'mbc-thread-wrap-active' );
-                }
-                else {
-                    thread_wrap.addClass( 'mbc-thread-wrap-resolved' );
-                }
-                thread_wrap.append( populateCommentTemplate( comments[i] ) );
-                thread_wrap.data( 'count', count );
-
-                thread_id = comments[i].thread_id;
-            }
-
-            comments_root.append( thread_wrap );
-        };
-
-        var populateWithComments = function ( root, comments ) {
-            populateCommentsWrap( root, comments );
-
-            function threadIsResolved() {
-                return comments[comments.length - 1].thread_id;
-            }
-
-            if ( !threadIsResolved() ) {
-                root.find( '.mbc-thread-wrap-active' ).append( $( tpls.resolveButton ) );
-            }
-            return root;
         };
 
         var Scrollable = function ( el ) {
@@ -296,160 +93,23 @@ if ( MBC.enabled() )
             }
         };
 
-        var renderSegmentComments = function ( el ) {
-            $( '.mbc-comment-balloon-outer' ).remove();
+        var openSegmentCommentNoScroll = function ( idSegment ) {
+            SegmentActions.openSegmentComment(idSegment);
 
-            var segment = new UI.Segment( el );
-            var comments = db.getCommentsBySegment( segment.absoluteId );
-            var root = $( tpls.segmentThread );
-
-            populateWithComments( root, comments );
-
-            var inputForm = renderInputForm();
-            inputForm.addClass( 'mbc-reply-input' );
-            root.find( '.mbc-comment-balloon-inner' ).append( inputForm );
-            el.find('.segment-side-container').prepend( root.show() );
-            inputForm.find( 'textarea' ).focus();
-            addTagging();
-        };
-
-        var renderOnlySegmentsWrap = function ( el ) {
-            var segment = new UI.Segment( el );
-            var comments = db.getCommentsBySegment( segment.absoluteId );
-            var root = $( '.mbc-comment-balloon-outer' );
-            $( root ).find( '.mbc-comments-wrap' ).empty();
-            populateWithComments( root, comments );
-            //populateCommentsWrap(root, comments);
-        };
-
-        var appendReceivedMessage = function ( el ) {
-            var areaBefore = new Scrollable( $( el ).find( '.mbc-comments-wrap' )[0] );
-            var scrollTop = areaBefore.el.scrollTop;
-            var scrollableArea;
-
-            if ( !areaBefore.bottomVisible() ) {
-
-                renderOnlySegmentsWrap( el );
-
-                scrollableArea = new Scrollable( $( el ).find( '.mbc-comments-wrap' )[0] );
-                el; /// XXX seems to be required to get actual scrollTop number
-                $( scrollableArea.el ).scrollTop( scrollTop );
-                scrollableArea.notifyNewComments();
-            } else {
-                renderOnlySegmentsWrap( el );
-                scrollableArea = new Scrollable( $( el ).find( '.mbc-comments-wrap' )[0] );
-                scrollableArea.scrollToBottom();
-            }
-
-            el.find( '.mbc-thread-wrap-active .mbc-show-comment:last' ).effect( 'highlight', {}, 1000 );
-        };
-
-        var appendSubmittedMessage = function ( el ) {
-            renderSegmentComments( el );
-            var scrollableArea = new Scrollable( el.find( '.mbc-comments-wrap' )[0] );
-            scrollableArea.scrollToBottom();
-        };
-
-        var renderSegmentBalloon = function ( el ) {
-            var segment = new UI.Segment( el );
-            var comments = db.getCommentsBySegment( segment.absoluteId );
-            var index = $('section').index(el);
-            if ( comments.length > 0 ) {
-                if ( index < 3 ) {
-                    $('article').first().addClass('comment-opened-'+ index);
-                }
-                renderSegmentComments( el );
-                var scrollableArea = new Scrollable( el.find( '.mbc-comments-wrap' )[0] );
-                scrollableArea.scrollToBottom();
-            } else {
-                renderSegmentCommentsFirstInput( el );
-                if ( index === 0 ) {
-                    $('article').first().addClass('comment-opened-empty-'+ index);
-                }
-            }
-        };
-
-        var scrollSegment = function ( section ) {
-            if ($('article.mbc-commenting-opened').length > 0 && section.length > 0) {
-                SegmentActions.scrollToSegment(idSegment);
-
-                // var scrollAnimation = $( UI.scrollSelector );
-                // var segment = section;
-                // var pos = 0;
-                // var article = segment.closest('article');
-                //
-                // pos = segment.offset().top - segment.offsetParent('#outer').offset().top;
-                //
-                // if (article.prevAll('article').length > 0) {
-                //     _.forEach(article.prevAll('article'), function ( item ) {
-                //         pos = pos + $(item).outerHeight() + 140;
-                //     });
-                // }
-                // pos = pos - 220;
-                // scrollAnimation.animate({
-                //     scrollTop: pos
-                // }, 200);
-                // return scrollAnimation.promise() ;
-            } else {
-                return originalScrollSegment.apply(this, arguments);
-            }
-        };
-
-        var openSegmentComment = function ( el ) {
-            if (_.isUndefined(MBC.teamUsers) ) {
-                return;
-            }
-            $( 'article' ).addClass( 'mbc-commenting-opened' );
-            $( 'body' ).addClass( 'side-tools-opened' );
-            el.find('.mbc-comment-icon-button').css("visibility", "hidden");
-            popLastCommentHash();
-            $( 'article' ).removeClass('comment-opened-0').removeClass('comment-opened-1').removeClass('comment-opened-2').removeClass('comment-opened-empty-0');
-            setTimeout(function(){
-                if ( el.hasClass("opened") ) {
-                    renderSegmentBalloon( el );
-                } else {
-                    scrollSegment( el ).done( function() {
-                        renderSegmentBalloon( el );
-                    });
-                }
-            });
+            // $( 'article' ).removeClass('comment-opened-0').removeClass('comment-opened-1').removeClass('comment-opened-2').removeClass('comment-opened-empty-0');
             localStorage.setItem(MBC.localStorageCommentsClosed, false);
         };
 
-        var openSegmentCommentNoScroll = function ( el ) {
-            $( 'article' ).addClass( 'mbc-commenting-opened' );
-            $( 'body' ).addClass( 'side-tools-opened' );
-            $('.mbc-comment-icon-button').css("visibility", "");
-            el.find('.mbc-comment-icon-button').css("visibility", "hidden");
-            $( 'article' ).removeClass('comment-opened-0').removeClass('comment-opened-1').removeClass('comment-opened-2').removeClass('comment-opened-empty-0');
-            renderSegmentBalloon( el );
+        var openSegmentComment = function ( idSegment ) {
+            SegmentActions.openSegment(idSegment);
+            SegmentActions.openSegmentComment(idSegment);
+
+            // $( 'article' ).removeClass('comment-opened-0').removeClass('comment-opened-1').removeClass('comment-opened-2').removeClass('comment-opened-empty-0');
             localStorage.setItem(MBC.localStorageCommentsClosed, false);
         };
 
         var closeBalloon = function (segmentClose) {
-            $('article').first().removeClass('comment-opened-0').removeClass('comment-opened-1').removeClass('comment-opened-2').removeClass('comment-opened-empty-0');
-            $( '.mbc-comment-balloon-outer' ).remove();
-            $( 'article' ).removeClass( 'mbc-commenting-opened' );
-            $( 'body' ).removeClass( 'side-tools-opened' );
-            $('.mbc-comment-icon-button').css("visibility", "");
-            if (!segmentClose) {
-                localStorage.setItem(MBC.localStorageCommentsClosed, true);
-            }
-        };
-
-        var renderCommentIconLink = function ( el ) {
-            var segment = new UI.Segment( el );
-
-            if ( (!segment.isSplit()) || segment.isFirstOfSplit() ) {
-                $( document ).trigger( 'mbc:segment:update:links', segment.absoluteId );
-            }
-        };
-
-        var renderCommentIconLinks = function () {
-            $( 'section' ).each( function ( i, el ) {
-                if ( $(el).find('.mbc-comment-notification').length === 0 && $(el).find('.mbc-comment-balloon-outer').length === 0)
-                    renderCommentIconLink( el );
-            } );
+            SegmentActions.closeSegmentComment(segmentClose);
         };
 
         var populateCommentTemplate = function ( data ) {
@@ -475,15 +135,6 @@ if ( MBC.enabled() )
             return (str + '').replace( /([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2' );
         };
 
-        var nothingToSubmit = function () {
-            return $.trim( $( '.mbc-comment-textarea' ).text() ) == '';
-        };
-
-        var ajaxResolveSuccess = function ( resp ) {
-            db.pushSegment( resp.data.entries[0] );
-            $( document ).trigger( 'mbc:comment:new', resp.data.entries[0] );
-        };
-
         var refreshUserInfo = function ( user ) {
             if ( typeof user === 'undefined' ) {
                 loggedUserName = null;
@@ -503,8 +154,8 @@ if ( MBC.enabled() )
             var count = 1;
             var comment;
 
-            for ( var i in db.history ) {
-                comment = db.history[i];
+            for ( var i in CommentsStore.db.history ) {
+                comment = CommentsStore.db.history[i];
 
                 var viewButton = $( tpls.historyViewButton );
                 viewButton.find( 'a' ).text( 'View thread' );
@@ -537,8 +188,7 @@ if ( MBC.enabled() )
         };
 
         var updateHistoryWithLoadedSegments = function () {
-            db.refreshHistory();
-            if ( db.history_count == 0 ) {
+            if ( CommentsStore.db.history_count === 0 ) {
                 $( '#mbc-history' )
                         .addClass( 'mbc-history-balloon-icon-has-no-comments' )
                         .removeClass( 'mbc-history-balloon-icon-has-comment' );
@@ -551,24 +201,9 @@ if ( MBC.enabled() )
             }
         };
 
-        var addTagging = function (  ) {
+        var parseCommentHtmlBeforeSend = function ( text ) {
 
-            if ( MBC.teamUsers && MBC.teamUsers.length > 0 ) {
-                $(".mbc-comment-textarea")
-                    .atwho({
-                        at: "@",
-                        displayTpl: '<li>${first_name} ${last_name}</li>',
-                        insertTpl: '<span contenteditable="false" class="tagging-item" data-id="${uid}">${first_name} ${last_name}</span>',
-                        data: MBC.teamUsers,
-                        searchKey: "first_name",
-                        limit: MBC.teamUsers.length
-                    });
-            }
-        };
-
-        var parseCommentHtmlBeforeSend = function (  ) {
-
-            var elem = $( '.mbc-comment-textarea' ).clone();
+            var elem = $( '<div></div>' ).html(text);
             elem.find(".atwho-inserted").each(function (  ) {
                 var id = $(this).find('.tagging-item').data('id');
                 $(this).html("{@"+id+"@}");
@@ -601,63 +236,33 @@ if ( MBC.enabled() )
             });
         };
 
-        var submitComment = function ( el ) {
-            if ( nothingToSubmit() ) return;
+        var submitComment = function ( text, sid ) {
 
-            var segment = new UI.Segment( el );
-
-            var text = parseCommentHtmlBeforeSend();
+            text = parseCommentHtmlBeforeSend(text);
 
             var data = {
                 action: 'comment',
                 _sub: 'create',
                 id_client: config.id_client,
                 id_job: config.id_job,
-                id_segment: segment.absoluteId,
+                id_segment: sid,
                 username: getUsername(),
                 password: config.password,
                 source_page: getSourcePage(),
                 message: text,
             };
 
-            $( '.mbc-comment-textarea' ).attr( 'disabled', 'disabled' );
-
-            clearGenericWarning();
-
-            APP.doRequest( {
+            return APP.doRequest( {
                 data: data,
                 success: function ( resp ) {
                     if ( resp.errors.length ) {
-                        showGenericWarning();
+                        // showGenericWarning();
                     } else {
                         $( document ).trigger( 'mbc:comment:saved', resp.data.entries[0] );
                     }
-                },
-                error: function () {
-                    showGenericWarning();
-                },
-                always: function () {
-                    $( '.mbc-comment-textarea' ).removeAttr( 'disabled' );
                 }
             } );
         };
-
-        var showGenericWarning = function () {
-            $( '.mbc-ajax-message-wrap' ).show();
-        };
-
-        var clearGenericWarning = function () {
-            $( '.mbc-ajax-message-wrap' ).hide();
-        };
-
-        function enableInputForm( outer ) {
-            outer.find( '.mbc-post-comment .mbc-comment-username' )
-                    .toggleClass( 'mbc-comment-anonymous-label', !loggedUserName )
-                    .text( getUsername() );
-
-            if ( loggedUserName ) outer.find( '.mbc-post-comment .mbc-login-link' ).addClass( 'mbc-hide' );
-            else outer.find( '.mbc-post-comment .mbc-login-link' ).addClass( 'mbc-visible' );
-        }
 
         var loadCommentData = function ( success ) {
             var data = {
@@ -678,33 +283,34 @@ if ( MBC.enabled() )
             } );
         };
 
-        var resetDatabase = function ( resp ) {
-            db.resetSegments();
-            db.storeSegments( resp.data.entries.comments );
-            // db.storeSegments( resp.data.entries.open_comments );
-            refreshUserInfo( resp.data.user );
-        };
+        var resolveThread = function ( sid ) {
 
-        var initCommentLink = function ( el ) {
-            var section = new UI.Segment( el );
-            var side_buttons;
 
-            if ( (!section.isSplit()) || section.isFirstOfSplit() ) {
-                side_buttons = section.el.find('.segment-side-buttons' );
-                side_buttons.find('.mbc-comment-icon').parent('.txt').remove();
-                side_buttons.prepend( $(tpls.commentLink ));
-            }
-        };
+            var data = {
+                action: 'comment',
+                _sub: 'resolve',
+                id_job: config.id_job,
+                id_client: config.id_client,
+                id_segment: sid,
+                password: config.password,
+                source_page: getSourcePage(),
+                username: getUsername(),
+            };
 
-        var initCommentLinks = function () {
-            $( 'section' ).each( function ( i, el ) {
-                // initCommentLink( el );
+            return APP.doRequest( {
+                data: data,
+                success: function ( resp ) {
+                    $( document ).trigger( 'mbc:comment:new', resp.data.entries[0] );
+                }
             } );
         };
 
+        var resetDatabase = function ( resp ) {
+            CommentsActions.storeComments(resp.data.entries.comments, resp.data.user );
+            refreshUserInfo( resp.data.user );
+        };
+
         var refreshElements = function () {
-            initCommentLinks();
-            renderCommentIconLinks();
             updateHistoryWithLoadedSegments();
         };
 
@@ -725,6 +331,7 @@ if ( MBC.enabled() )
                     MBC.teamUsers = data;
                     MBC.teamUsers.unshift(team);
 
+                    CommentsActions.updateTeamUsers(MBC.teamUsers);
 
                 }).fail(function ( response ) {
                     MBC.teamUsers = [];
@@ -736,42 +343,17 @@ if ( MBC.enabled() )
         };
 
         var checkOpenSegmentComment = function ( id_segment ) {
-            if ( db.getCommentsCountBySegment && UI.currentSegmentId === id_segment) {
-                var comments_obj = db.getCommentsCountBySegment( id_segment );
-                var el = UI.Segment.findEl( id_segment );
-                var panelClosed = localStorage.getItem(MBC.localStorageCommentsClosed) == 'true';
+            if ( CommentsStore.db.getCommentsCountBySegment && UI.currentSegmentId === id_segment) {
+                var comments_obj = CommentsStore.db.getCommentsCountBySegment( id_segment );
+                var panelClosed = localStorage.getItem(MBC.localStorageCommentsClosed) === 'true';
                 if ( comments_obj.active > 0  && !panelClosed) {
-                    openSegmentCommentNoScroll(el);
-                    setTimeout(function(){
-                        scrollSegment( el )
-                    }, 200);
+                    openSegmentCommentNoScroll(id_segment);
                 } else {
-                    closeBalloon(true);
+                    closeBalloon(id_segment);
                 }
             }
         };
 
-        // var resetTextArea = function () {
-        //     var maxHeight = 100;
-        //     var minHeight = 34;
-        //     var borderTopWidth = parseFloat( $( this ).css( "borderTopWidth" ) );
-        //     var borderBottomWidth = parseFloat( $( this ).css( "borderBottomWidth" ) );
-        //     var borders = borderTopWidth + borderBottomWidth;
-        //     var scrollHeightWithBorders = this.scrollHeight + borders;
-        //
-        //     while ( scrollHeightWithBorders > $( this ).outerHeight() && $( this ).height() < maxHeight ) {
-        //         $( this ).height( $( this ).height() + 10 );
-        //     }
-        //     while ( scrollHeightWithBorders <= $( this ).outerHeight() && $( this ).height() > minHeight ) {
-        //         $( this ).height( $( this ).height() - 10 );
-        //     }
-        //
-        //     if ( $( this ).height() >= maxHeight ) {
-        //         $( this ).css( "overflow-y", "auto" );
-        //     } else {
-        //         $( this ).css( "overflow-y", "hidden" );
-        //     }
-        // };
 
         /**
          * Close balloon if the user click on some dead area
@@ -795,129 +377,43 @@ if ( MBC.enabled() )
             //
             var delegate = '#outer';
 
-            // Click on the link to open the balloon, in any segment on the page.
-            // $( delegate ).on( 'click', '.segment-side-buttons .mbc-comment-icon-button', function ( e ) {
-            //     e.stopPropagation();
-            //     $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
-            //     var $section = $( e.target ).closest( 'section' );
-            //     UI.scrollSegment($section, UI.getSegmentId($section));
-            // } );
-
-            // TODO: investigate and explain why this is needed
-            $( delegate ).on( 'click', '.mbc-comment-balloon-outer', function ( e ) {
-                if ( $(".mbc-history-balloon-outer.mbc-visible").length ) {
-                    e.stopPropagation();
-                }
-                $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
-            } );
 
             // Click reached #outer , close the history balloon
             $( delegate ).on( 'click', function () {
                 $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
             } );
 
-            $( delegate ).on( 'click', '.segment-side-buttons .mbc-comment-icon-button', function ( e ) {
-                var section = $( e.target ).closest( 'section' );
-                $('.mbc-comment-icon-button').css("visibility", "");
-                $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
-                if ( section.find('.mbc-comment-balloon-outer').length ) {
-                    closeBalloon();
-                } else {
-                    openSegmentComment(section);
-                }
-                setTimeout(function (  ) {
-                    $( '.mbc-comment-balloon-inner' ).find('.mbc-comment-textarea').click();
-                    $( '.mbc-comment-balloon-inner' ).find('.mbc-comment-textarea').focus();
-                }, 700);
-            } );
-
-            $( delegate ).on( 'click', '.mbc-comment-balloon-inner .re-close-balloon', function ( e ) {
-                closeBalloon();
-            } );
-
-            $( delegate ).on( 'click', '.mbc-comment-send-btn', function ( e ) {
-                e.preventDefault();
-                submitComment( $( e.target ).closest( 'section' ) );
-            } );
-
-            $( delegate ).on( 'click', '.mbc-comment-resolve-btn', function ( e ) {
-                e.preventDefault();
-                clearGenericWarning();
-
-                var segment = new UI.Segment( $( e.target ).closest( 'section' ) );
-
-                var data = {
-                    action: 'comment',
-                    _sub: 'resolve',
-                    id_job: config.id_job,
-                    id_client: config.id_client,
-                    id_segment: segment.absoluteId,
-                    password: config.password,
-                    source_page: getSourcePage(),
-                    username: getUsername(),
-                };
-
-                APP.doRequest( {
-                    data: data,
-                    success: ajaxResolveSuccess,
-                    error: function () {
-                        showGenericWarning();
-                    }
+            $( window ).on( 'segmentsAdded', function ( e ) {
+                loadCommentData( function ( resp ) {
+                    resetDatabase( resp );
+                    refreshElements();
                 } );
             } );
 
-            $( delegate ).on( 'click', '.show-thread-btn', function ( e ) {
-                e.preventDefault();
-                var el = $( e.target ).closest( 'a' );
-                var panel = el.siblings( '.thread-collapsed' );
-                var showlabel = $( el ).find( '.show-thread-label' );
-                var showIconlabel = $( el ).find( '.show-toggle-icon' );
-
-                if ( panel.is( ':visible' ) ) {
-                    $( showlabel ).text( 'Show more' );
-                    $( showIconlabel ).text( '+' );
-                } else {
-                    $( showlabel ).text( 'Show less' );
-                    $( showIconlabel ).text( '-' );
-                }
-
-                panel.stop().slideToggle();
+            $( document ).on( 'getSegments_success', function ( e ) {
+                loadCommentData( function ( resp ) {
+                    resetDatabase( resp );
+                    $( document ).trigger( 'mbc:ready' );
+                } );
             } );
 
-            $( delegate ).on( 'click', '.mbc-login-link', function ( e ) {
-                $('#modal').trigger('openlogin');
-            } );
+            $( document ).on( 'mbc:ready', function ( ev ) {
 
-            $( delegate ).on( 'click', '.mbc-comment-anonymous-label', function () {
-                var elem = $( this );
-                var replaceWith = $( '<input name="customName" type="text" class="mbc-comment-input mbc-comment-textinput" />' )
-                        .val( getUsername() );
-                var action = function () {
-                    var tmpval = $.trim( htmlDecode( $( this ).val() ) );
-                    if ( tmpval == "" ) {
-                        customUserName = null;
-                    } else {
-                        customUserName = tmpval;
-                        elem.text( customUserName );
+                $( '#mbc-history' ).remove();
+                $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
+                $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
+
+
+                getTeamUsers().then( function() {
+                    refreshElements();
+                    // open a comment if was asked by hash
+                    var lastAsked = popLastCommentHash();
+                    if ( lastAsked ) {
+                        openSegmentComment(lastAsked.segmentId );
                     }
-                    $( this ).remove();
-                    elem.text( getUsername() ).show();
-                };
-
-                elem.hide().after( replaceWith );
-
-                replaceWith.blur( action ).keypress( function ( ev ) {
-                    if ( ev.which == 13 ) {
-                        action.call( ev.target );
-                    }
-                } ).focus();
-            } );
-
-            $( delegate ).on( 'click', '.mbc-new-message-link', function ( e ) {
-                e.preventDefault();
-                var root = $( e.target ).closest( '.mbc-comment-balloon-outer' );
-                var scrollableArea = new Scrollable( root.find( '.mbc-comments-wrap' )[0] );
-                scrollableArea.scrollToBottom();
+                });
+                //New icon inserted in the header -> resize file name
+                APP.fitText($('.breadcrumbs'), $('#pname'), 30);
             } );
         } );
 
@@ -925,63 +421,25 @@ if ( MBC.enabled() )
         $( document ).on( 'keydown', function ( e ) {
             if ( e.which == '27' ) {
                 e.preventDefault();
-                $( '.mbc-history-balloon-outer.mbc-visible' ).toggleClass( 'mbc-visible' );
-                closeBalloon();
+                SegmentActions.closeSegmentComment();
             }
         } );
 
         $( document ).on( 'click', '.mbc-show-comment-btn', function ( e ) {
             e.preventDefault();
+            e.stopPropagation();
             $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
 
             var sid = $( e.target ).closest( 'div' ).data( 'id' );
-
-            var new_hash = new ParsedHash( {
-                segmentId: sid,
-                action: MBC.const.commentAction
-            } ).toString();
-
-            window.location.hash = new_hash;
-            UI.scrollSegment(UI.getSegmentById(segmentId), segmentId);
+            SegmentActions.scrollToSegment(sid);
+            SegmentActions.openSegmentComment(sid);
 
         } );
 
-        $( window ).on( 'segmentsAdded', function ( e ) {
-            loadCommentData( function ( resp ) {
-                resetDatabase( resp );
-                refreshElements();
-            } );
-        } );
 
-        $( document ).on( 'getSegments_success', function ( e ) {
-            loadCommentData( function ( resp ) {
-                resetDatabase( resp );
-                $( document ).trigger( 'mbc:ready' );
-            } );
-        } );
-
-        $( document ).on( 'mbc:ready', function ( ev ) {
-
-            $( '#mbc-history' ).remove();
-            $( '.mbc-history-balloon-outer' ).remove();
-            $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
-            $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
-
-
-            getTeamUsers().then( function() {
-                refreshElements()
-                // open a comment if was asked by hash
-                var lastAsked = popLastCommentHash();
-                if ( lastAsked ) {
-                    openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) );
-                }
-            });
-            //New icon inserted in the header -> resize file name
-            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
-        } );
 
         $( document ).on( 'sse:comment', function ( ev, message ) {
-            db.pushSegment( message.data );
+            CommentsActions.updateCommentsFromSse(message.data);
             $( document ).trigger( 'mbc:comment:new', message.data );
         } );
 
@@ -1000,29 +458,12 @@ if ( MBC.enabled() )
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
             updateHistoryWithLoadedSegments();
-            $( document ).trigger( 'mbc:segment:update:links', data.id_segment );
-
-            var section = UI.Segment.findEl( data.id_segment );
-
-            if ( section.find( '.mbc-thread-wrap' ).is( ':visible' ) ) {
-                appendReceivedMessage( section );
-            }
         } );
 
         $( document ).on( 'mbc:comment:saved', function ( ev, data ) {
-            $( document ).find( 'section .mbc-thread-wrap' ).remove();
-
-            db.pushSegment( data ); // TODO: move this in ajax success?
+            //Update Header icon
             updateHistoryWithLoadedSegments();
-
-            $( document ).trigger( 'mbc:segment:update:links', data.id_segment );
-            appendSubmittedMessage( UI.Segment.findEl( data.id_segment ) );
         } );
-
-        // $( window ).on( 'segmentClosed', function ( e ) {
-        //
-        //     // closeBalloon(true);
-        // } );
 
         $( window ).on( 'segmentOpened', function ( e ) {
             var segment = e.segment ;
@@ -1032,30 +473,15 @@ if ( MBC.enabled() )
             checkOpenSegmentComment(segment.absoluteId);
         } );
 
-        $( document ).on( 'mbc:segment:update:links', function ( ev, id_segment ) {
-            var comments_obj = db.getCommentsCountBySegment( id_segment );
-            var el = UI.Segment.findEl( id_segment );
-            resolveCommentLinkIcon( el.find( '.segment-side-buttons' ), comments_obj );
-            checkOpenSegmentComment(id_segment);
-        } );
+        // $( document ).on( 'split:segment:complete', function ( e, sid ) {
+        //     var segment = UI.Segment.find( sid );
+        //     initCommentLink( segment.el );
+        //     renderCommentIconLink( segment.el );
+        // } );
 
-        $( document ).on( 'split:segment:complete', function ( e, sid ) {
-            var segment = UI.Segment.find( sid );
-            initCommentLink( segment.el );
-            renderCommentIconLink( segment.el );
-        } );
-
-        $( document ).on( 'click', '.mbc-comment-input', function ( e ) {
-            $( e.target ).parent( 'div' ).find( '.mbc-comment-btn' ).addClass( 'mbc-visible' );
-        } );
-
-        $( document ).on( 'click', function ( e ) {
-            $( '.mbc-comment-balloon-outer' ).find( '.mbc-comment-send-btn' ).addClass( 'mbc-hide' );
-        } );
-
-        $( document ).on( 'click', '.mbc-tag-link', function ( e ) {
-            $( '.mbc-comment-textarea-tagging' ).toggleClass('hide');
-        } );
+        // $( document ).on( 'click', '.mbc-tag-link', function ( e ) {
+        //     $( '.mbc-comment-textarea-tagging' ).toggleClass('hide');
+        // } );
 
         $( document ).on( 'ui:segment:focus', function ( e, sid ) {
             if ( lastCommentHash && lastCommentHash.segmentId == sid ) {
@@ -1066,7 +492,6 @@ if ( MBC.enabled() )
 
         // Interfaces
         $.extend( MBC, {
-            openSegmentComment: openSegmentComment,
             popLastCommentHash: popLastCommentHash,
 
             wasAskedByCommentHash: function ( sid ) {
@@ -1074,20 +499,11 @@ if ( MBC.enabled() )
             },
             setLastCommentHash: function ( value ) {
                 lastCommentHash = value;
-            }
-        } );
-
-        // Interfaces
-        $.extend( UI, {
-            scrollSegment: scrollSegment,
-            popLastCommentHash: popLastCommentHash,
-
-            wasAskedByCommentHash: function ( sid ) {
-                return lastCommentHash && lastCommentHash.segmentId == sid;
             },
-            setLastCommentHash: function ( value ) {
-                lastCommentHash = value;
-            }
+
+
+            submitComment: submitComment,
+            resolveThread: resolveThread
         } );
 
     })( jQuery, config, window, MBC );

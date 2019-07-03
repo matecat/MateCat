@@ -2,13 +2,13 @@ if ( MBC.enabled() )
 (function($,MBC) {
 
     var tpls = { // TODO: make this local
-        threadCollapsedControl : '' +
-            ' <a href="javascript:" class="show-thread-btn">' +
-            ' <span class="show-thread-label">Show more</span> ' +
-            ' <span class="show-thread-number">(1)</span> ' +
-            ' <span class="show-toggle-icon">+</span>' +
-            ' </a>' +
-            ' <div class="divider"></div>',
+        // threadCollapsedControl : '' +
+        //     ' <a href="javascript:" class="show-thread-btn">' +
+        //     ' <span class="show-thread-label">Show more</span> ' +
+        //     ' <span class="show-thread-number">(1)</span> ' +
+        //     ' <span class="show-toggle-icon">+</span>' +
+        //     ' </a>' +
+        //     ' <div class="divider"></div>',
 
         threadCollapsedWrapper : '' +
             '<div class="thread-collapsed hide"></div>',
@@ -60,13 +60,13 @@ if ( MBC.enabled() )
         divider : '' +
             '<div class="divider"></div>',
 
-        showResolve : '' +
-            '<div class="mbc-resolved-comment">' +
-            ' <span class="mbc-comment-resolved-label">' +
-            '   <span class="mbc-comment-username mbc-comment-resolvedby"></span>' +
-            '   <span class="">marked as resolved</span>' +
-            ' </span>' +
-            '</div>' ,
+        // showResolve : '' +
+        //     '<div class="mbc-resolved-comment">' +
+        //     ' <span class="mbc-comment-resolved-label">' +
+        //     '   <span class="mbc-comment-username mbc-comment-resolvedby"></span>' +
+        //     '   <span class="">marked as resolved</span>' +
+        //     ' </span>' +
+        //     '</div>' ,
 
         threadWrap : '' +
             ' <div class="mbc-thread-wrap mbc-clearfix">'  +
@@ -83,60 +83,60 @@ if ( MBC.enabled() )
             ' <p class="mbc-comment-body"></p>' +
             ' </div>' ,
 
-        inputForm : '' +
-            ' <div class="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix">' +
-            /*'<div class="mbc-triangle mbc-open-view mbc-re-messages"></div>' +*/
-            ' <div class="mbc-new-message-notification">' +
-            '    <span class="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>' +
-            '    <a href="javascript:" class="mbc-new-message-link"></a> ' +
-            ' </div>' +
-            ' <div class="mbc-post-comment">' +
-            ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label"></span>' +
-            ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive comments</a>' +
-            ' <div class="mbc-comment-input mbc-comment-textarea" contenteditable="true" data-placeholder="Write a comment..."></div>' +
-            // ' <div>' +
-            // ' <a href="javascript:;" class="mbc-tag-link">Tag someone</a>' +
-            // ' </div>' +
-            // ' <div>' +
-            // ' <textarea class="mbc-comment-input mbc-comment-textarea-tagging hide" id="tagging-area" placeholder="Tag someone"></textarea>' +
-            // ' </div>' +
-            ' <div>' +
-            ' <a href="javascript:;" class="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide">Comment</a>' +
-            ' </div>' +
-            ' <div class="mbc-ajax-message-wrap hide">' +
-            ' <span class="mbc-warnings">Oops, something went wrong. Please try again later.</span>' +
-            ' </div>' +
-            ' <div>' +
-            ' </div>' +
-            ' </div>' +
-            ' </div>',
+        // inputForm : '' +
+        //     ' <div class="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix">' +
+        //     /*'<div class="mbc-triangle mbc-open-view mbc-re-messages"></div>' +*/
+        //     ' <div class="mbc-new-message-notification">' +
+        //     '    <span class="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>' +
+        //     '    <a href="javascript:" class="mbc-new-message-link"></a> ' +
+        //     ' </div>' +
+        //     ' <div class="mbc-post-comment">' +
+        //     ' <span class="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label"></span>' +
+        //     ' <a href="javascript:" class="mbc-comment-link-btn mbc-login-link">Login to receive comments</a>' +
+        //     ' <div class="mbc-comment-input mbc-comment-textarea" contenteditable="true" data-placeholder="Write a comment..."></div>' +
+        //     // ' <div>' +
+        //     // ' <a href="javascript:;" class="mbc-tag-link">Tag someone</a>' +
+        //     // ' </div>' +
+        //     // ' <div>' +
+        //     // ' <textarea class="mbc-comment-input mbc-comment-textarea-tagging hide" id="tagging-area" placeholder="Tag someone"></textarea>' +
+        //     // ' </div>' +
+        //     ' <div>' +
+        //     ' <a href="javascript:;" class="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide">Comment</a>' +
+        //     ' </div>' +
+        //     ' <div class="mbc-ajax-message-wrap hide">' +
+        //     ' <span class="mbc-warnings">Oops, something went wrong. Please try again later.</span>' +
+        //     ' </div>' +
+        //     ' <div>' +
+        //     ' </div>' +
+        //     ' </div>' +
+        //     ' </div>',
 
         firstCommentWrap : '' +
             ' <div class="mbc-thread-wrap mbc-thread-wrap-active mbc-clearfix">' +
             '' + // insertCommentHeader
             '</div>',
 
-        segmentThread : '' +
-            ' <div class="mbc-comment-balloon-outer">' +
-            ' <div class="mbc-comment-balloon-inner">' +
-            ' <div class="mbc-triangle mbc-open-view mbc-re-messages"></div>' +
-            ' <a class="re-close-balloon shadow-1"><i class="icon-cancel3 icon" /></a>' +
-            ' <div class="mbc-comments-wrap">' +
-            ' ' +
-            ' </div>' +
-            ' </div>' +
-            ' </div>',
+        // segmentThread : '' +
+        //     ' <div class="mbc-comment-balloon-outer">' +
+        //     ' <div class="mbc-comment-balloon-inner">' +
+        //     ' <div class="mbc-triangle mbc-open-view mbc-re-messages"></div>' +
+        //     ' <a class="re-close-balloon shadow-1"><i class="icon-cancel3 icon" /></a>' +
+        //     ' <div class="mbc-comments-wrap">' +
+        //     ' ' +
+        //     ' </div>' +
+        //     ' </div>' +
+        //     ' </div>',
 
-        commentLink : '' +
-            '<div class="mbc-comment-icon-button txt" title="Add comment">' +
-            '   <span class="mbc-comment-icon icon-bubble2"></span>' +
-            '</div>',
+        // commentLink : '' +
+        //     '<div class="mbc-comment-icon-button txt" title="Add comment">' +
+        //     '   <span class="mbc-comment-icon icon-bubble2"></span>' +
+        //     '</div>',
 
-        commentIconHighlightNumber : '' +
-            '<span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment"></span>',
+        // commentIconHighlightNumber : '' +
+        //     '<span class="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment"></span>',
 
-        commentIconHighlightInvite : '' +
-            '<span class="mbc-comment-notification mbc-comment-highlight-segment mbc-comment-highlight-invite">+</span>'
+        // commentIconHighlightInvite : '' +
+        //     '<span class="mbc-comment-notification mbc-comment-highlight-segment mbc-comment-highlight-invite">+</span>'
 
     };
 

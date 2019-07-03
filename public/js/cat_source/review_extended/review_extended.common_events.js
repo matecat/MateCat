@@ -13,7 +13,7 @@ if (ReviewExtended.enabled()) {
     } );
 
     $( window ).on( 'segmentOpened', function ( e ) {
-        var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) == 'true';
+        var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) === 'true';
         if (config.isReview && !panelClosed) {
             SegmentActions.openIssuesPanel({sid:e.segment.absoluteId}, false)
         }
