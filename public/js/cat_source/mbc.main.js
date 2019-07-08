@@ -72,7 +72,7 @@ if ( MBC.enabled() )
         };
 
         var populateCommentTemplate = function ( data ) {
-            if ( Number( data.message_type ) == types.resolve ) {
+            if ( Number( data.message_type ) === types.resolve ) {
                 var root = $( tpls.showResolve );
                 root.find( '.mbc-comment-username' ).text( htmlDecode( data.full_name ) );
             } else {

@@ -19,7 +19,8 @@ class SegmentTarget extends React.Component {
             translation: this.props.segment.decoded_translation,
             originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
                 : this.props.segment.translation),
-            showTagsMenu: false
+            showTagsMenu: false,
+            buttonsDisabled: false
         };
         this.replaceTranslation = this.replaceTranslation.bind(this);
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
@@ -122,6 +123,10 @@ class SegmentTarget extends React.Component {
         return {__html: string};
     }
 
+    changeButtonsVisibility(visibility) {
+        this.setState({buttonsDisabled: visibility})
+    }
+
     getTargetArea(translation) {
         var textAreaContainer = "";
 
@@ -197,6 +202,7 @@ class SegmentTarget extends React.Component {
                     translation={translation}
                     locked={this.props.locked}
                     readonly={this.props.readonly}
+                    disableButtons={this.changeButtonsVisibility.bind(this)}
                 />
                 { this.state.showTagsMenu ? (
 
@@ -276,6 +282,7 @@ class SegmentTarget extends React.Component {
                     id={"segment-" + this.props.segment.sid + "-buttons"}/>
 
                 <SegmentButtons
+                    disabled={this.state.buttonsDisabled}
                     {...this.props}
                 />
 

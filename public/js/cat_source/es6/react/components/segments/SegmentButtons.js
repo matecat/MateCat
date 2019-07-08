@@ -35,7 +35,7 @@ class SegmentButton extends React.Component {
         let currentScore = ReviewImproved.getLatestScoreForSegment( this.props.segment.sid ) ;
         if ( currentScore == 0 ) {
             button = <li className="right">
-                <a id={"segment-" + this.props.segment.sid + "-button-translated"}
+                <a id={"segment-" + this.props.segment.sid + "-button-translated "}
                    data-segmentid={"segment-"+ this.props.segment.sid}
                    href="javascript:;" className="approved"
                 >APPROVED</a>
@@ -67,14 +67,16 @@ class SegmentButton extends React.Component {
     }
 
     getReviewButtons(){
+        const classDisable = (this.props.disabled) ? 'disabled' : '';
         let nextButton, currentButton;
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
         let enableGoToNext = !_.isUndefined(nextSegment) && nextSegment.status === "APPROVED";
+        const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
 
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
-                       href="#" className="btn next-unapproved" data-segmentid={'segment-' + this.props.segment.sid}
+                       href="#" className={"btn next-unapproved "+ classDisable } data-segmentid={'segment-' + this.props.segment.sid}
                        title="Revise and go to next translated"> A+>>
                     </a>
                     <p>
@@ -85,9 +87,31 @@ class SegmentButton extends React.Component {
             (null);
         currentButton = <li><a id={'segment-' + this.props.segment.sid + '-button-translated'}
                                data-segmentid={'segment-' + this.props.segment.sid} href="#"
-                               className='approved' > {config.status_labels.APPROVED} </a><p>
+                               className={'approved ' + classDisable} > {config.status_labels.APPROVED} </a><p>
             {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
         </p></li>;
+
+        if (filtering) {
+            nextButton = null;
+            var data = SegmentFilter.getStoredState();
+            var filterinRepetitions = data.reactState.samplingType === "repetitions";
+            if (filterinRepetitions) {
+                nextButton =<React.Fragment>
+                    <li><a id={"segment-" + this.currentSegmentId+"-nextrepetition"} href="#"
+                           className="next-review-repetition ui green button"
+                           data-segmentid={"segment-"+this.currentSegmentId}
+                           title="Revise and go to next repetition">REP ></a>
+                    </li>
+                    <li>
+                        <a id={"segment-" + this.currentSegmentId +"-nextgrouprepetition"}
+                           href="#" className="next-review-repetition-group ui green button"
+                           data-segmentid={"segment-" + this.currentSegmentId}
+                           title="Revise and go to next repetition group">REP >></a>
+                    </li>
+                </React.Fragment>;
+
+            }
+        }
         return <ul className="buttons toggle" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
             {nextButton}
             {currentButton}
@@ -96,7 +120,10 @@ class SegmentButton extends React.Component {
 
 
     getTranslateButtons(){
+        const classDisable = (this.props.disabled) ? 'disabled' : '';
+
         let nextButton, currentButton;
+        const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
         let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" );
         //TODO Store TP Information in the SegmentsStore
@@ -106,7 +133,7 @@ class SegmentButton extends React.Component {
             currentButton = <li>
                                 <a id={'segment-' + this.props.segment.sid + '-button-guesstags'}
                                    data-segmentid={'segment-' + this.props.segment.sid}
-                                   href="#" className="guesstags" > GUESS TAGS
+                                   href="#" className={"guesstags " + classDisable} > GUESS TAGS
                                 </a>
                             <p>
                                 {UI.isMac ? ('CMD') : ('CTRL') }
@@ -117,7 +144,7 @@ class SegmentButton extends React.Component {
             nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nextuntranslated'}
-                       href="#" className="btn next-untranslated" data-segmentid={'segment-' + this.props.segment.sid}
+                       href="#" className={"btn next-untranslated " + classDisable} data-segmentid={'segment-' + this.props.segment.sid}
                        title="Translate and go to next untranslated"> T+>>
                     </a>
                     <p>
@@ -128,10 +155,32 @@ class SegmentButton extends React.Component {
                 (null);
             currentButton = <li><a id={'segment-' + this.props.segment.sid + '-button-translated'}
                                    data-segmentid={'segment-' + this.props.segment.sid} href="#"
-                                   className='translated' > {config.status_labels.TRANSLATED} </a><p>
+                                   className={'translated ' +classDisable } > {config.status_labels.TRANSLATED} </a><p>
                 {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
             </p></li>;
         }
+        if (filtering) {
+            nextButton = null;
+            var data = SegmentFilter.getStoredState();
+            var filterinRepetitions = data.reactState.samplingType === "repetitions";
+            if (filterinRepetitions) {
+                nextButton =<React.Fragment>
+                            <li><a id={"segment-" + this.currentSegmentId+"-nextrepetition"} href="#"
+                                   className="next-repetition ui primary button"
+                                   data-segmentid={"segment-"+this.currentSegmentId}
+                                   title="Translate and go to next repetition">REP ></a>
+                            </li>
+                            <li>
+                                <a id={"segment-" + this.currentSegmentId +"-nextgrouprepetition"}
+                                href="#" className="next-repetition-group ui primary button"
+                                data-segmentid={"segment-" + this.currentSegmentId}
+                                title="Translate and go to next repetition group">REP >></a>
+                            </li>
+                    </React.Fragment>;
+
+            }
+        }
+
         return <ul className="buttons toggle" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
             {nextButton}
             {currentButton}

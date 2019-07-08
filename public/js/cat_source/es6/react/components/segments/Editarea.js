@@ -113,9 +113,9 @@ class Editarea extends React.Component {
 	checkEmptyText() {
         let text = UI.prepareTextToSend( $(this.editAreaRef).html() );
         if (text === "") {
-            UI.disableSegmentButtons(this.props.segment.sid);
+            this.props.disableButtons(true);
         } else {
-            UI.enableSegmentsButtons(this.props.segment.sid);
+            this.props.disableButtons(false);
         }
     }
 
@@ -199,6 +199,11 @@ class Editarea extends React.Component {
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
+        if ( this.props.segment.modified ) {
+            let textToSend = UI.prepareTextToSend( $(this.editAreaRef).html() );
+            let sid = this.props.segment.sid;
+            setTimeout(()=>SegmentActions.replaceEditAreaTextContent(sid, null, textToSend), 200);
+        }
     }
     componentWillMount() {
         Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;

@@ -768,15 +768,6 @@
                 });
                 setTimeout(CatToolActions.reloadSegmentFilter, 500);
             }
-        },
-        disableSegmentButtons: function ( sid ) {
-            var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved, .next-untranslated, .translated, .guesstags");
-            div.addClass('disabled').attr("disabled", 'disabled');
-
-        },
-        enableSegmentsButtons: function ( sid ) {
-            var div =$("#segment-"+sid+"-buttons").find(".approved, .next-unapproved, .next-untranslated, .translated, .guesstags");
-            div.removeClass('disabled').attr("disabled", false);
         }
     });
 })(jQuery); 

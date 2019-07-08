@@ -418,7 +418,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     },
     setMutedSegments: function (segmentsArray) {
-        this._segments = self._segments.map( (segment) => {
+        this._segments = this._segments.map( (segment) => {
             if (segmentsArray.indexOf(segment.get('sid')) === -1) {
                 return segment.set('muted', true);
             }
@@ -635,7 +635,7 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.REPLACE_TRANSLATION:
             let trans = SegmentStore.replaceTranslation(action.id, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, trans);
-            // SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.REPLACE_SOURCE:
             let source = SegmentStore.replaceSource(action.id, action.fid, action.source);

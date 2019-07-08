@@ -240,7 +240,7 @@ UI = {
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
             segment.find('.editarea').attr('contenteditable', 'false');
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result opened editor split-action');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'opened editor split-action');
 
             $(window).trigger({
                 type: "segmentClosed",
@@ -390,64 +390,64 @@ UI = {
 			}
 		}
 	},
-	createButtons: function() {
-
-        var button_label = config.status_labels.TRANSLATED ;
-        var label_first_letter = button_label[0];
-        var nextUntranslated, currentButton;
-
-        //Tag Projection: Identify if is enabled in the current segment
-        this.currentSegmentTPEnabled = this.checkCurrentSegmentTPEnabled();
-
-		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-        var nextSegment = this.currentSegment.next();
-        var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
-        var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-        if (this.currentSegmentTPEnabled) {
-            nextUntranslated = "";
-            currentButton = '<li ><a draggable="false" id="segment-' + this.currentSegmentId +
-                '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
-                '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
-                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-        } else {
-            nextUntranslated = (sameButton || filtering)? '' : '<li><a draggable="false" id="segment-' + this.currentSegmentId +
-                '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
-                this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
-                ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-            currentButton = '<li><a draggable="false" id="segment-' + this.currentSegmentId +
-                '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
-                '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
-                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-        }
-
-        if (filtering) {
-            var data = SegmentFilter.getStoredState();
-            var filterinRepetitions = data.reactState.samplingType === "repetitions";
-            if (filterinRepetitions) {
-                nextUntranslated ='<li><a id="segment-' + this.currentSegmentId +
-                    '-nextrepetition" href="#" class="next-repetition ui primary button" data-segmentid="segment-' +
-                    this.currentSegmentId + '" title="Translate and go to next repetition">REP ></a>' +
-                    '</li>' +
-                    '<li><a id="segment-' + this.currentSegmentId +
-                    '-nextgrouprepetition" href="#" class="next-repetition-group ui primary button" data-segmentid="segment-' +
-                    this.currentSegmentId + '" title="Translate and go to next repetition group">REP >></a>' +
-                    '</li>';
-
-            }
-        }
-
-        UI.segmentButtons = nextUntranslated + currentButton;
-
-		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
-
-        UI.currentSegment.trigger('buttonsCreation');
-
-        buttonsOb.empty().append(UI.segmentButtons);
-        buttonsOb.before('<p class="warnings"></p>');
-
-        UI.segmentButtons = null;
-
-	},
+	// createButtons: function() {
+    //
+    //     var button_label = config.status_labels.TRANSLATED ;
+    //     var label_first_letter = button_label[0];
+    //     var nextUntranslated, currentButton;
+    //
+    //     //Tag Projection: Identify if is enabled in the current segment
+    //     this.currentSegmentTPEnabled = this.checkCurrentSegmentTPEnabled();
+    //
+	// 	var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
+    //     var nextSegment = this.currentSegment.next();
+    //     var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
+    //     var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
+    //     if (this.currentSegmentTPEnabled) {
+    //         nextUntranslated = "";
+    //         currentButton = '<li ><a draggable="false" id="segment-' + this.currentSegmentId +
+    //             '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
+    //             '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
+    //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+    //     } else {
+    //         nextUntranslated = (sameButton || filtering)? '' : '<li><a draggable="false" id="segment-' + this.currentSegmentId +
+    //             '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
+    //             this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
+    //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+    //         currentButton = '<li><a draggable="false" id="segment-' + this.currentSegmentId +
+    //             '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
+    //             '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
+    //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+    //     }
+    //
+    //     if (filtering) {
+    //         var data = SegmentFilter.getStoredState();
+    //         var filterinRepetitions = data.reactState.samplingType === "repetitions";
+    //         if (filterinRepetitions) {
+    //             nextUntranslated ='<li><a id="segment-' + this.currentSegmentId +
+    //                 '-nextrepetition" href="#" class="next-repetition ui primary button" data-segmentid="segment-' +
+    //                 this.currentSegmentId + '" title="Translate and go to next repetition">REP ></a>' +
+    //                 '</li>' +
+    //                 '<li><a id="segment-' + this.currentSegmentId +
+    //                 '-nextgrouprepetition" href="#" class="next-repetition-group ui primary button" data-segmentid="segment-' +
+    //                 this.currentSegmentId + '" title="Translate and go to next repetition group">REP >></a>' +
+    //                 '</li>';
+    //
+    //         }
+    //     }
+    //
+    //     UI.segmentButtons = nextUntranslated + currentButton;
+    //
+	// 	var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
+    //
+    //     UI.currentSegment.trigger('buttonsCreation');
+    //
+    //     buttonsOb.empty().append(UI.segmentButtons);
+    //     buttonsOb.before('<p class="warnings"></p>');
+    //
+    //     UI.segmentButtons = null;
+    //
+	// },
 
 
 	/*createJobMenu: function() {
@@ -1728,7 +1728,7 @@ UI = {
             segment = new UI.Segment( segment );
         }
 
-        SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
+        // SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
 
 		var dd = new Date();
 		ts = dd.getTime();
@@ -2313,7 +2313,7 @@ UI = {
 		if (this.undoStackPosition > 0) {
             this.undoStackPosition--;
         }
-        SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
+        // SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	saveInUndoStack: function(action) {
