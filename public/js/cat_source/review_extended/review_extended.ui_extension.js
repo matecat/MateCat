@@ -147,7 +147,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             return ReviewExtended.submitComment(id_segment, id_issue, data)
         },
         openIssuesPanel : function(data, openSegment) {
-            var segment = (data)? UI.Segment.findEl( data.sid ): data;
+            var segment = SegmentStore.getSegmentByIdToJS( data.sid );
 
             if (segment && !UI.evalOpenableSegment( segment )) {
                 return false;
@@ -158,15 +158,9 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));
             if (data && openSegment) {
-                segment.find( UI.targetContainerSelector() ).click();
+                SegmentActions.openSegment(data.sid);
                 window.setTimeout( function ( data ) {
-                    var el = UI.Segment.find( data.sid ).el;
-
-                    if ( UI.currentSegmentId != data.sid ) {
-                        UI.focusSegment( el );
-                    }
-
-                    UI.scrollSegment( el );
+                    UI.scrollSegment( data.sid );
                 }, 500, data );
             }
         },
@@ -178,7 +172,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
             if ( UI.currentSegment ) {
                 setTimeout( function() {
-                    UI.scrollSegment( UI.currentSegment );
+                    UI.scrollSegment( UI.currentSegmentId );
                 }, 100 );
             }
             window.dispatchEvent(new Event('resize'));

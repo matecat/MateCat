@@ -708,17 +708,18 @@ UI = {
 		if ( d.data.files && Object.size(d.data.files) ) {
 			var firstSeg = section.first();
 			var lastSeg = section.last();
-			var numsegToAdd = 0;
-			$.each(d.data.files, function() {
-				numsegToAdd = numsegToAdd + this.segments.length;
-			});
+
+			// var numsegToAdd = 0;
+			// $.each(d.data.files, function() {
+			// 	numsegToAdd = numsegToAdd + this.segments.length;
+			// });
 
 			this.renderFiles(d.data.files, where, false);
 
-			// if getting segments before, UI points to the segment triggering the event
-			if ((where == 'before') && (numsegToAdd)) {
-				this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
-			}
+			// // if getting segments before, UI points to the segment triggering the event
+			// if ((where == 'before') && (numsegToAdd)) {
+			// 	this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
+			// }
 
 			if (this.body.hasClass('searchActive')) {
 				segLimit = (where == 'before') ? firstSeg : lastSeg;
@@ -797,12 +798,10 @@ UI = {
 			}
 
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
-			    var segToScrollElem = ( UI.getSegmentById(options.segmentToScroll).length > 0 ) ? UI.getSegmentById(options.segmentToScroll) : UI.getSegmentsSplit(options.segmentToScroll)[0];
-				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
+				this.scrollSegment(options.segmentToScroll );
                 SegmentActions.openSegment(options.segmentToScroll);
 			} else if (options.segmentToOpen) {
-                var segToScrollElem = UI.getSegmentById(options.segmentToOpen);
-                this.scrollSegment(segToScrollElem, options.segmentToOpen, options.highlight );
+                this.scrollSegment(options.segmentToOpen);
                 SegmentActions.openSegment(options.segmentToOpen);
             }
 
@@ -909,11 +908,6 @@ UI = {
 			UI.segmentQA(UI.currentSegment);
 		}, config.segmentQACheckInterval);
 	},
-	reloadToSegment: function(segmentId) {
-		config.last_opened_segment = segmentId;
-        UI.unmountSegments();
-		this.render({ segmentToOpen : segmentId });
-	},
 	renderUntranslatedOutOfView: function() {
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
 		var segmentToScroll = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
@@ -1010,12 +1004,17 @@ UI = {
     },
 
 	renderAndScrollToSegment: function(sid) {
-        UI.unmountSegments();
-		this.render({
-			caller: 'link2file',
-			segmentToScroll: sid,
-			scrollToFile: true
-		});
+        var segment = SegmentStore.getSegmentByIdToJS(sid);
+        if ( segment ) {
+            SegmentActions.openSegment(sid);
+        } else {
+            UI.unmountSegments();
+            this.render({
+                caller: 'link2file',
+                segmentToScroll: sid,
+                scrollToFile: true
+            });
+        }
 	},
 	addWord: function(word) {
 		APP.doRequest({
@@ -2258,17 +2257,6 @@ UI = {
         Cookies.set('client_info', JSON.stringify(clientInfo), { expires: 3650 });
     },
 
-	browserScrollPositionRestoreCorrection: function() {
-		// detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment
-		if (this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI
-			if (!$('.editor').isOnScreen()) { // if the current segment is out of the current viewport
-				if (this.autoscrollCorrectionEnabled) { // if this is the first correction and we are in the initial 2 seconds since page init
-					this.scrollSegment(this.currentSegment);
-					this.autoscrollCorrectionEnabled = false;
-				}
-			}
-		}
-	},
 	undoInSegment: function() {
 		console.log('undoInSegment');
         if (this.undoStack.length === 0) {

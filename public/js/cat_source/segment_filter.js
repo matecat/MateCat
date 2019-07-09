@@ -134,20 +134,12 @@ if (SegmentFilter.enabled())
                 var lastSegmentId = SegmentFilter.getStoredState().lastSegmentId;
                 if ( !lastSegmentId ) {
                     segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
-                    var segment$ = UI.getSegmentById(segmentToOpen);
-                    UI.scrollSegment( segment$, segmentToOpen );
-                    if (segment$.length) {
-                        SegmentActions.openSegment(segmentToOpen);
-                    }
+                    SegmentActions.openSegment(segmentToOpen);
                 } else if ( lastSegmentId && !segmentIsInSample( lastSegmentId, data[ 'segment_ids' ] ) ) {
                     callbackForSegmentNotInSample( lastSegmentId )  ;
                 } else {
                     segmentToOpen = lastSegmentId ;
-                    var segment$ = UI.getSegmentById(segmentToOpen);
-                    UI.scrollSegment(segment$, segmentToOpen);
-                    if (segment$.length) {
-                        SegmentActions.openSegment(segmentToOpen);
-                    }
+                    SegmentActions.openSegment(segmentToOpen);
                 }
 
             })
@@ -185,7 +177,7 @@ if (SegmentFilter.enabled())
             this.open = false;
             SegmentActions.removeAllMutedSegments();
             setTimeout( function() {
-                UI.scrollSegment( UI.currentSegment ) ;
+                UI.scrollSegment( UI.currentSegmentId ) ;
             }, 600 );
         },
         goToNextRepetition: function ( button, status ) {
@@ -243,21 +235,15 @@ if (SegmentFilter.enabled())
     });
 
     function tryToFocusLastSegment() {
-        var segment = UI.Segment.find( SegmentFilter.getStoredState().lastSegmentId ) ;
+        var segment = SegmentStore.getSegmentByIdToJS( SegmentFilter.getStoredState().lastSegmentId ) ;
 
         if ( ! (SegmentFilter.getStoredState().lastSegmentId && segment ) ) {
             return ; // the stored lastSegmentId is not in the DOM, this should never happen
         }
 
-        if ( segment.el.is( UI.currentSegment ) ) {
-            if ( UI.body.hasClass( 'editing' ) ) {
-                UI.scrollSegment( segment.el ) ;
-            }
-            else {
-                segment.el.find( UI.targetContainerSelector() ).click();
-            }
-        }
-        else {
+        if ( segment.opened ) {
+            UI.scrollSegment( segment.original_sid ) ;
+        } else {
             segment.el.find( UI.targetContainerSelector() ).click();
         }
     }

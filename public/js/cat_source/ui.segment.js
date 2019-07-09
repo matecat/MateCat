@@ -363,8 +363,8 @@
         gotoOpenSegment: function(quick) {
             quick = quick || false;
 
-            if ($('#segment-' + this.currentSegmentId).length) {
-                UI.scrollSegment(this.currentSegment, this.currentSegmentId, false, quick);
+            if (this.currentSegmentId) {
+                UI.scrollSegment(this.currentSegmentId);
             } else {
                 this.render({
                     firstLoad: false,
@@ -581,7 +581,7 @@
         },
 
         getSegmentsSplit: function(id) {
-            return $('section[id^="segment-'+ id +'"][data-split-original-id="'+id+'"]');
+            return SegmentStore.getSegmentsSplitGroup(id);
         },
 
         getEditAreaBySegmentId: function(id) {
@@ -589,7 +589,7 @@
         },
 
         segmentIsLoaded: function(segmentId) {
-            return UI.getSegmentById(segmentId).length > 0 || UI.getSegmentsSplit(segmentId).length > 0 ;
+            return UI.getSegmentById(segmentId) || UI.getSegmentsSplit(segmentId).length > 0 ;
         },
         getContextBefore: function(segmentId) {
             var segment = $('#segment-' + segmentId);

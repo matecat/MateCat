@@ -19,7 +19,6 @@ $.extend(UI, {
 		this.numOpenedSegments = 0;
 		this.maxMinutesBeforeRerendering = 60;
 		this.loadingMore = false;
-		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;
 		this.noMoreSegmentsBefore = false;
 		this.blockButtons = false;

@@ -61,14 +61,9 @@ $.extend(UI, {
 		rangy.init();
 		this.savedSel = null;
 		this.savedSelActiveElement = null;
-		this.autoscrollCorrectionEnabled = true;
         this.offline = false;
-
 		if (SearchUtils.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
-		setTimeout(function() {
-			UI.autoscrollCorrectionEnabled = false;
-		}, 2000);
 		this.checkSegmentsArray = {};
 		this.warningStopped = false;
 		this.abortedOperations = [];

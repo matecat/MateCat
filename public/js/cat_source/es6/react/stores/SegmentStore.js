@@ -120,7 +120,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         unlocked: false,
                         edit_area_locked: false,
                         notes: segment.notes,
-                        modified: false
+                        modified: false,
+                        opened: false
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -133,6 +134,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);segment.edit_area_locked = false;
                 segment.original_sid = segment.sid;
                 segment.modified = false;
+                segment.opened = false;
                 newSegments.push(this);
             }
 
@@ -364,7 +366,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             return seg.get('sid') == sid;
         });
         return (segment) ? segment.toJS() : null;
+    },
 
+    getSegmentsSplitGroup(sid) {
+        let segments = this._segments.filter(function (seg) {
+            return seg.get('original_sid') == sid;
+        });
+        return (segments) ? segments.toJS() : null;
     },
 
     getAllSegments: function () {

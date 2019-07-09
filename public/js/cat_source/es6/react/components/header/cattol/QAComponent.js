@@ -31,18 +31,13 @@ class QAComponent extends React.Component {
 
         let segmentId = this.state.navigationList[newIndex];
 
-        let $segment = $('#segment-' + segmentId);
+        let $segment = SegmentStore.getSegmentByIdToJS(segmentId);
 
         if (segmentId) {
-            if ($segment.length) {
-                window.location.hash = segmentId;
-            } else if ($('#segment-' + segmentId + '-1').length) {
-                window.location.hash = segmentId + '-1';
+            if ($segment) {
+                window.location.hash = segment.sid;
             }
-            UI.scrollSegment($segment, segmentId);
-            if ($segment.hasClass('ice-locked')) {
-                UI.editAreaClick($(UI.targetContainerSelector(), $segment), 'moving');
-            }
+            SegmentActions.openSegment(segmentId);
         }
         this.setState({
             navigationIndex: newIndex
@@ -53,20 +48,16 @@ class QAComponent extends React.Component {
 
         let segmentId = list[0];
 
-        let $segment = $('#segment-' + segmentId);
+        let $segment = SegmentStore.getSegmentByIdToJS(segmentId);
 
         if (segmentId) {
-            if ($segment.length) {
-                window.location.hash = segmentId;
-            } else if ($('#segment-' + segmentId + '-1').length) {
-                window.location.hash = segmentId + '-1';
+            if ($segment) {
+                window.location.hash = $segment.sid;
             }
             setTimeout(function (  ) {
-                UI.scrollSegment($segment, segmentId);
+                UI.scrollSegment(segmentId);
             });
-            if ($segment.hasClass('ice-locked')) {
-                UI.editAreaClick($(UI.targetContainerSelector(), $segment), 'moving');
-            }
+            SegmentActions.openSegment(segmentId);
         }
 
         this.setState({

@@ -402,8 +402,8 @@ $.extend(UI, {
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), $(this).attr('data-goto'), true);
-			SegmentActions.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+			UI.scrollSegment($(this).attr('data-goto'));
+			SegmentActions.highlightEditarea($(this).attr('data-goto'));
 		});
 
 		$("#point2seg").bind('mousedown', function(e) {
