@@ -438,14 +438,14 @@ $.extend(UI, {
 
 		$("#jobNav .currseg").on('click', function(e) {
 			e.preventDefault();
-
-			if (!($('#segment-' + UI.currentSegmentId).length)) {
+            var current = SegmentStore.getCurrentSegment();
+			if ( !current ) {
 				UI.unmountSegments();
                 UI.render({
                     firstLoad: false
                 });
 			} else {
-				UI.scrollSegment(UI.currentSegment);
+				UI.scrollSegment(current.original_sid);
 			}
 		});
 		

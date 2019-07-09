@@ -233,10 +233,6 @@ UI = {
         }
 
     },
-
-    maxNumSegmentsReached : function() {
-        return $('section').length > config.maxNumSegments  ;
-    },
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
             segment.find('.editarea').attr('contenteditable', 'false');
@@ -914,13 +910,11 @@ UI = {
 		}, config.segmentQACheckInterval);
 	},
 	reloadToSegment: function(segmentId) {
-		this.infiniteScroll = false;
 		config.last_opened_segment = segmentId;
         UI.unmountSegments();
 		this.render({ segmentToOpen : segmentId });
 	},
 	renderUntranslatedOutOfView: function() {
-		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
 		var segmentToScroll = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
         window.location.hash = segmentToScroll;
@@ -933,8 +927,6 @@ UI = {
 		this.renderUntranslatedOutOfView();
 	},
 	pointBackToSegment: function(segmentId) {
-		if (!this.infiniteScroll)
-			return;
 		if (segmentId === '') {
 			this.startSegmentId = config.last_opened_segment;
             UI.unmountSegments();
@@ -2408,12 +2400,6 @@ UI = {
                 skipChange = true;
             }
 
-        }
-
-        if ( UI.maxNumSegmentsReached() && !UI.offline ) {
-            // TODO: argument should be next segment to open
-            UI.reloadToSegment( UI.currentSegmentId );
-            return ;
         }
 
         if ( UI.blockButtons ) {

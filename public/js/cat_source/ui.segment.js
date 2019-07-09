@@ -332,45 +332,21 @@
          *
          */
         evalNextSegment: function( section, status ) {
-            var selector = UI.selectorForNextUntranslatedSegment( status, section );
-            var n = $(section).parent('div').nextAll('div').find(selector).first();
+            var currentSegment = SegmentStore.getCurrentSegment();
+            var nextUntranslated = SegmentStore.getNextSegment(currentSegment.original_sid, null, 8);
 
-            if (!n.length) {
-                n = $(section).parents('article').next().find(selector).first();
-            }
-
-            if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
-                this.nextUntranslatedSegmentId = this.getSegmentId($(n));
+            if (nextUntranslated) { // se ci sono sotto segmenti caricati con lo status indicato
+                this.nextUntranslatedSegmentId = nextUntranslated.original_sid;
             } else {
                 this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
             }
-            var i = $(section).parent('div').next().find('section');
-
-            if (!i.length) {
-                i = $(section).parents('article').next().find( UI.selectorForNextSegment() ).first();
-            }
-            if (i.length) {
-                this.nextSegmentId = this.getSegmentId($(i));
-            } else {
-                this.nextSegmentId = 0;
-            }
+            var next = SegmentStore.getNextSegment(currentSegment.original_sid, null, null);
+            this.nextSegmentId = (next) ? next.original_sid : null;
+            var prev = SegmentStore.getPrevSegment(currentSegment.original_sid)
+            this.previousSegmentId = ( prev ) ? prev.original_sid : null;
         },
         gotoNextSegment: function() {
             SegmentActions.openSegment(UI.nextSegmentId);
-
-            // var selector = UI.selectorForNextSegment() ;
-            // var next = $('.editor').nextAll( selector  ).first();
-            //
-            // if (next.is('section')) {
-            //     UI.editAreaClick($(UI.targetContainerSelector(), next));
-            // } else {
-            //     next = UI.currentFile.next().find( selector ).first();
-            //     if (next.length) {
-            //         UI.editAreaClick($(UI.targetContainerSelector(), next));
-            //     } else {
-            //         UI.closeSegment(UI.currentSegment, 1, 'save');
-            //     }
-            // }
         },
         gotoNextUntranslatedSegment: function() {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
@@ -401,24 +377,26 @@
             });
         },
         gotoPreviousSegment: function() {
-            var selector = UI.selectorForNextSegment() ;
-            var prev = $('.editor').prevAll( selector ).first();
-            if (prev.is('section')) {
-                UI.scrollSegment(prev);
-                SegmentActions.openSegment(UI.getSegmentId(prev));
-                // UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
-                // $(UI.targetContainerSelector(), prev).click();
-            } else {
-                prev = $('.editor').parents('article').prevAll( selector ).first();
-                if (prev.length) {
-                    // $(UI.targetContainerSelector() , prev).click();
-                    SegmentActions.openSegment(UI.getSegmentId(prev));
-                    // UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
-                    UI.scrollSegment(prev);
-                }
-            }
-            if (prev.length)
-                UI.scrollSegment(prev);
+            SegmentActions.openSegment(UI.previousSegmentId);
+
+            // var selector = UI.selectorForNextSegment() ;
+            // var prev = $('.editor').prevAll( selector ).first();
+            // if (prev.is('section')) {
+            //     UI.scrollSegment(prev);
+            //     SegmentActions.openSegment(UI.getSegmentId(prev));
+            //     // UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
+            //     // $(UI.targetContainerSelector(), prev).click();
+            // } else {
+            //     prev = $('.editor').parents('article').prevAll( selector ).first();
+            //     if (prev.length) {
+            //         // $(UI.targetContainerSelector() , prev).click();
+            //         SegmentActions.openSegment(UI.getSegmentId(prev));
+            //         // UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
+            //         UI.scrollSegment(prev);
+            //     }
+            // }
+            // if (prev.length)
+            //     UI.scrollSegment(prev);
         },
         gotoSegment: function(id) {
             if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
@@ -428,6 +406,49 @@
                 SegmentActions.openSegment(id);
             }
 
+        },
+        /**
+         * Search for the next translated segment to propose for revision.
+         * This function searches in the current UI first, then falls back
+         * to invoke the server and eventually reload the page to the new
+         * URL.
+         */
+        openNextTranslated: function (sid) {
+            sid = sid || UI.currentSegmentId;
+            var nextTranslatedSegment = SegmentStore.getNextSegment(sid, null, 7);
+            var nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(-1, null, 7);
+            // find in next segments
+            if(nextTranslatedSegment) {
+                SegmentActions.openSegment(nextTranslatedSegment.sid);
+                // else find from the beginning of the currently loaded segments in all files
+            } else if ( this.noMoreSegmentsBefore && nextTranslatedSegmentInPrevious) {
+                SegmentActions.openSegment(nextTranslatedSegmentInPrevious.sid);
+            } else if ( !this.noMoreSegmentsBefore || !this.noMoreSegmentsAfter) { // find in not loaded segments or go to the next approved
+                // Go to the next segment saved before
+                var callback = function() {
+                    $(window).off('modalClosed');
+                    //Check if the next is inside the view, if not render the file
+                    var next = SegmentStore.getSegmentByIdToJS(UI.nextUntranslatedSegmentIdByServer);
+                    if (next) {
+                        SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
+                    } else {
+                        UI.renderAfterConfirm(UI.nextUntranslatedSegmentIdByServer);
+                    }
+                };
+                // If the modal is open wait the close event
+                if( $(".modal[data-type='confirm']").length ) {
+                    $(window).on('modalClosed', function(e) {
+                        callback();
+                    });
+                } else {
+                    callback();
+                }
+            }
+        },
+        renderAfterConfirm: function (nextId) {
+            this.render({
+                segmentToOpen: nextId
+            });
         },
         isReadonlySegment : function( segment ) {
             return ( segment.readonly == 'true' ||UI.body.hasClass('archived')) ;
@@ -471,19 +492,9 @@
                 caller: 'autosave'
             });
         },
-        setCurrentSegment: function(closed) {
+        setCurrentSegment: function() {
             var reqArguments = arguments;
             var id_segment = this.currentSegmentId;
-            if (closed) {
-                id_segment = 0;
-                UI.currentSegment = undefined;
-            } else {
-                setTimeout(function() {
-                    window.location.hash = UI.currentSegmentId;
-                }, 300);
-            }
-
-            if (this.readonly) return;
             this.setLastSegmentFromLocalStorage(id_segment.toString());
             APP.doRequest({
                 data: {

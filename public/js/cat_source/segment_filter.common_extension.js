@@ -15,27 +15,19 @@ if ( SegmentFilter.enabled() )
      * This function handles the movement to the next segment when filter is open. This is a natural operation
      * that is commonly used and likely to cause the number of segments loaded to be come huge.
      *
-     * To handle this case, it checks for the maxNumSegmentsReached function. If the number of segments is too high
-     * it removes the DOM elements UI.unmountSegments().
      */
 
     var gotoNextSegment = function() {
         var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf( '' + UI.currentSegmentId );
         var nextFiltered = ( index !== list.length - 1 ) ? list[ index + 1 ] : list[0];
-        var maxReached = UI.maxNumSegmentsReached() ;
-
+        var segment = SegmentStore.getSegmentByIdToJS(nextFiltered);
         if ( !nextFiltered ) {
             return ;
         }
-
-        if ( maxReached ) {
-            UI.unmountSegments() ;
-        }
-
-        if ( UI.Segment.findEl( nextFiltered ).length && index !== list.length - 1) {
+        if ( segment ) {
             original_gotoNextSegment.apply(undefined, arguments);
-        } else if (UI.Segment.findEl( nextFiltered ).length && index === 0) {
+        } else if (segment && index === 0) {
             original_gotoPreviousSegment.apply(undefined, arguments);
         } else if ( nextFiltered ) {
             UI.render({ segmentToOpen: nextFiltered });
@@ -46,19 +38,15 @@ if ( SegmentFilter.enabled() )
         var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf( '' + UI.currentSegmentId );
         var nextFiltered = (index !== 0 ) ? list[ index - 1 ] : list[list.length - 1 ];
-        var maxReached = UI.maxNumSegmentsReached() ;
+        var segment = SegmentStore.getSegmentByIdToJS(nextFiltered);
 
         if ( !nextFiltered ) {
             return ;
         }
 
-        if ( maxReached ) {
-            UI.unmountSegments() ;
-        }
-
-        if ( UI.Segment.findEl( nextFiltered ).length && index !== 0 ) {
+        if ( segment && index !== 0 ) {
             original_gotoPreviousSegment.apply(undefined, arguments);
-        } else if (UI.Segment.findEl( nextFiltered ).length && index === 0) {
+        } else if (segment && index === 0) {
             original_gotoNextSegment.apply(undefined, arguments);
         } else if ( nextFiltered ) {
             UI.render({ segmentToOpen: nextFiltered });

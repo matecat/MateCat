@@ -124,60 +124,6 @@ if ( config.enableReview && config.isReview ) {
                 diffHTML = UI.transformTextForLockTags(diffHTML);
                 $('.sub-editor.review .track-changes p', $segment).html( diffHTML );
             },
-            openNextTranslated: function (sid) {
-                sid = sid || UI.currentSegmentId;
-                var el = $('#segment-' + sid);
-
-                var translatedList = [];
-                var nextSegmentSelector = this.getSelectorForNextSegment();
-                // find in next segments in the current file
-                if(el.nextAll(nextSegmentSelector).length) {
-                    translatedList = el.nextAll(nextSegmentSelector);
-                    if( translatedList.length ) {
-                        translatedList.first().find(UI.targetContainerSelector()).click();
-                    }
-                    // find in next segments in the next files
-                } else if(el.parents('article').nextAll(nextSegmentSelector).length) {
-
-                    file = el.parents('article');
-                    file.nextAll(nextSegmentSelector).each(function () {
-                        if (!$(this).is(UI.currentSegment)) {
-                            translatedList = $(this);
-                            translatedList.first().find(UI.targetContainerSelector()).click();
-                            return false;
-                        }
-                    });
-                    // else find from the beginning of the currently loaded segments in all files
-                } else if ($(nextSegmentSelector).length) {
-                    $(nextSegmentSelector).each(function () {
-                        if (!$(this).is(UI.currentSegment)) {
-                            translatedList = $(this);
-                            translatedList.first().find(UI.targetContainerSelector()).click();
-                            return false;
-                        }
-                    });
-                } else { // find in not loaded segments or go to the next approved
-                    // Go to the next segment saved before
-                    var callback = function() {
-                        $(window).off('modalClosed');
-                        //Check if the next is inside the view, if not render the file
-                        var next = UI.Segment.findEl(UI.nextUntranslatedSegmentIdByServer);
-                        if (next.length > 0) {
-                            UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
-                        } else {
-                            UI.renderAfterConfirm(UI.nextUntranslatedSegmentIdByServer);
-                        }
-                    };
-                    // If the modal is open wait the close event
-                    if( $(".modal[data-type='confirm']").length ) {
-                        $(window).on('modalClosed', function(e) {
-                            callback();
-                        });
-                    } else {
-                        callback();
-                    }
-                }
-            },
             getSelectorForNextSegment: function() {
                 return 'section.status-translated'
             },
@@ -192,11 +138,6 @@ if ( config.enableReview && config.isReview ) {
                             vote: d.data.overall_quality_class
                         });
                     }
-                });
-            },
-            renderAfterConfirm: function (nextId) {
-                this.render({
-                    segmentToOpen: nextId
                 });
             },
             /**

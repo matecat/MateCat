@@ -275,10 +275,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                     currentFind = true;
                 }
             } else {
-                return;
+                return null;
             }
         });
         return result;
+    },
+    getPrevSegment(sid) {
+        var index = this.getSegmentIndex(sid);
+        return (index > 0) ? this._segments.get(index-1).toJS() : null;
     },
     setStatus(sid, fid, status) {
         var index = this.getSegmentIndex(sid);
@@ -356,9 +360,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'edit_area_locked'], !lockedEditArea);
     },
     getSegmentByIdToJS(sid, fid) {
-        return this._segments.find(function (seg) {
+        let segment = this._segments.find(function (seg) {
             return seg.get('sid') == sid;
-        }).toJS();
+        });
+        return (segment) ? segment.toJS() : null;
 
     },
 

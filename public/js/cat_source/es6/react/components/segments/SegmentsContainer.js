@@ -246,6 +246,10 @@ class SegmentsContainer extends React.Component {
         })
     };
 
+    componentDidCatch(e){
+        console.log("React component Error", e);
+    }
+
     componentWillUpdate() {
         saveSelection();
     }

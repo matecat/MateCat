@@ -202,11 +202,6 @@ if (SegmentFilter.enabled())
             UI.changeStatus(button, status, 0);
             skipChange = true;
 
-            if ( UI.maxNumSegmentsReached() && !UI.offline ) {
-                UI.reloadToSegment( nextItem );
-                return ;
-            }
-
             UI.setStatusButtons(UI.currentSegment.find('a.translated'));
 
             if ( UI.segmentIsLoaded(nextItem) ) {
@@ -229,11 +224,6 @@ if (SegmentFilter.enabled())
             var nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0];
             UI.changeStatus(button, status, 0);
             skipChange = true;
-
-            if ( UI.maxNumSegmentsReached() && !UI.offline ) {
-                UI.reloadToSegment( nextItem );
-                return ;
-            }
 
             UI.setStatusButtons(UI.currentSegment.find('a.translated'));
 
