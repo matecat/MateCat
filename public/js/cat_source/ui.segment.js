@@ -351,7 +351,7 @@
         gotoNextUntranslatedSegment: function() {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
                 if (!UI.nextUntranslatedSegmentId) {
-                    UI.closeSegment(UI.currentSegment);
+                    SegmentActions.closeSegment(UI.currentSegmentId);
                 } else {
                     UI.reloadWarning();
                 }
@@ -377,26 +377,7 @@
             });
         },
         gotoPreviousSegment: function() {
-            SegmentActions.openSegment(UI.previousSegmentId);
-
-            // var selector = UI.selectorForNextSegment() ;
-            // var prev = $('.editor').prevAll( selector ).first();
-            // if (prev.is('section')) {
-            //     UI.scrollSegment(prev);
-            //     SegmentActions.openSegment(UI.getSegmentId(prev));
-            //     // UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
-            //     // $(UI.targetContainerSelector(), prev).click();
-            // } else {
-            //     prev = $('.editor').parents('article').prevAll( selector ).first();
-            //     if (prev.length) {
-            //         // $(UI.targetContainerSelector() , prev).click();
-            //         SegmentActions.openSegment(UI.getSegmentId(prev));
-            //         // UI.editAreaClick($(UI.targetContainerSelector(), prev), 'moving');
-            //         UI.scrollSegment(prev);
-            //     }
-            // }
-            // if (prev.length)
-            //     UI.scrollSegment(prev);
+            SegmentActions.openSegment( UI.previousSegmentId );
         },
         gotoSegment: function(id) {
             if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
@@ -566,13 +547,7 @@
         },
 
         focusSegment: function(segment) {
-            var clickableEditArea = segment.find('.editarea:not(.opened)');
-            if ( clickableEditArea.length === 0 || ( Review.enabled() && !isTranslated( segment ) ) ) {
-                SegmentActions.openSegment(UI.getSegmentId(segment));
-            }
-            else {
-                clickableEditArea.trigger('click');
-            }
+            SegmentActions.openSegment(UI.getSegmentId(segment));
             $(document).trigger('ui:segment:focus', UI.getSegmentId( segment ) );
         },
 
@@ -589,7 +564,8 @@
         },
 
         segmentIsLoaded: function(segmentId) {
-            return UI.getSegmentById(segmentId) || UI.getSegmentsSplit(segmentId).length > 0 ;
+            var segment = SegmentStore.getSegmentByIdToJS(segmentId);
+            return segment || UI.getSegmentsSplit(segmentId).length > 0 ;
         },
         getContextBefore: function(segmentId) {
             var segment = $('#segment-' + segmentId);
@@ -691,26 +667,6 @@
             var segmentAfterId = UI.getSegmentId(segmentAfter);
             return segmentAfterId;
         },
-        /**
-         * findNextSegment
-         *
-         * Finds next segment or returns null if next segment does not exist.
-         */
-        findNextSegment : function(segmentId) {
-            var selector = UI.selectorForNextSegment() ;
-            var currentElem = (_.isUndefined(segmentId)) ? $('.editor') : $('#segment-' + segmentId);
-            var next = currentElem.nextAll( selector ).first();
-
-            if ( next.is('section') ) {
-                return next ;
-            } else if ( UI.currentFile ) {
-                next = UI.currentFile.next().find( selector ).first();
-                if ( next.length ) {
-                    return next ;
-                }
-            }
-            return false ;
-        },
         showApproveAllModalWarnirng: function (  ) {
             var props = {
                 text: "It was not possible to approve all segments. There are some segments that have not been translated.",
@@ -779,6 +735,9 @@
                 });
                 setTimeout(CatToolActions.reloadSegmentFilter, 500);
             }
+        },
+        scrollSegment: function(idSegment) {
+            SegmentActions.scrollToSegment( idSegment );
         }
     });
 })(jQuery); 

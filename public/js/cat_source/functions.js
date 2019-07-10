@@ -941,10 +941,10 @@ if (typeof String.prototype.endsWith !== 'function') {
     };
 }
 
-function isTranslated(section) {
+function isTranslated(segment) {
     return ! (
-        section.hasClass('status-new') ||
-        section.hasClass('status-draft')
+        section.status === 'NEW' ||
+        section.status === 'DRAFT'
     );
 }
 

@@ -227,9 +227,7 @@ LXQ.init  = function () {
         var hidePopUp = function () {
             if ($('#lexiqa-popup').hasClass('lxq-visible')) {
                 $('#lexiqa-popup').removeClass('lxq-visible').focus();
-                //$('.cattool.editing').css('margin-top', 0);
                 $('#outer').css('margin-top', 20);
-                //LXQ.reloadPowertip();
             }
         };
         $(document).ready(function () {
@@ -1236,38 +1234,6 @@ LXQ.init  = function () {
             $('#lexiqa-quide-link').attr('href', config.lexiqaServer + '/documentation.html');
             $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate'));
 
-            // $('#lexiqa-prev-seg').on('click', function (e) {
-            //     e.preventDefault();
-            //     var segid = getPreviousSegmentWithWarning();
-            //     if (UI.segmentIsLoaded(segid) === true)
-            //         UI.gotoSegment(segid);
-            //     else {
-            //         config.last_opened_segment = segid;
-            //         //config.last_opened_segment = this.nextUntranslatedSegmentId;
-            //         window.location.hash = segid;
-            //         $('#outer').empty();
-            //         UI.render({
-            //             firstLoad: false
-            //         });
-            //     }
-            // });
-            // $('#lexiqa-next-seg').on('click', function (e) {
-            //     e.preventDefault();
-            //     //UI.gotoSegment(getNextSegmentWithWarning());
-            //     var segid = getNextSegmentWithWarning();
-            //     if (UI.segmentIsLoaded(segid) === true)
-            //         UI.gotoSegment(segid);
-            //     else {
-            //         //UI.reloadWarning();
-            //         config.last_opened_segment = segid;
-            //         //config.last_opened_segment = this.nextUntranslatedSegmentId;
-            //         window.location.hash = segid;
-            //         $('#outer').empty();
-            //         UI.render({
-            //             firstLoad: false
-            //         });
-            //     }
-            // });
         };
         // Interfaces
         $.extend(LXQ, {

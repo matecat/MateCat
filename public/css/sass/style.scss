@@ -562,7 +562,7 @@ body.editing .grayed, body.virtualEditing .grayed {
     background: #f2f4f7;
 }
 
-.editing .sid .txt {
+.sid .txt {
     background: #f2f4f7;
 }
 
@@ -2425,7 +2425,7 @@ section .text .warning {
     display: none;
 }
 
-section.status-new .editarea {
+section.status-new:not(.modified) .editarea {
     text-indent: -20000px;
 }
 

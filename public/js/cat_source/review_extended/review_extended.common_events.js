@@ -8,10 +8,6 @@ if (ReviewExtended.enabled()) {
         ReviewExtended.getSegmentsIssues();
     });
 
-    $( window ).on( 'segmentClosed', function ( e ) {
-        SegmentActions.closeSegmentIssuePanel(UI.getSegmentId(e.segment));
-    } );
-
     $( window ).on( 'segmentOpened', function ( e ) {
         var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) === 'true';
         if (config.isReview && !panelClosed) {

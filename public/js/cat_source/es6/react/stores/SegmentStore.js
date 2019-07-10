@@ -248,7 +248,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
      * 7 TRANSLATED
      * 8 UNTRANSLATED | is draft or new
      */
-    getNextSegment(current_sid, current_fid, status) {
+    getNextSegment(current_sid, current_fid, status, notIce) {
 
         let allStatus = {
             1: "APPROVED",

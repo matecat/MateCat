@@ -236,44 +236,44 @@ $.extend( UI, {
      * and should be decoupled in future refactorings.
      *
      */
-    editAreaClick : function(target, operation) {
-        if (typeof operation == 'undefined') {
-            operation = 'clicking';
-        }
-
-        UI.closeTagAutocompletePanel();
-        UI.removeHighlightCorrespondingTags($(target).closest('section'));
-
-        var segmentNotYetOpened = ($(target).is(UI.editarea) && !$(target).closest('section').hasClass("opened"));
-        var segment = $(target).closest('section');
-        if ( !$(target).is(UI.editarea) || !UI.body.hasClass('editing') || segmentNotYetOpened) {
-            if (operation == 'moving') {
-                UI.recentMoving = true;
-                clearTimeout(UI.recentMovingTimeout);
-                UI.recentMovingTimeout = setTimeout(function() {
-                    UI.recentMoving = false;
-                }, 1000);
-            }
-
-            UI.lastOperation = operation;
-            SegmentActions.openSegment(UI.getSegmentId(segment));
-            //UI.openSegment(target, operation);
-
-            if (operation != 'moving') {
-
-                if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
-                    setTimeout(function () {
-                        UI.scrollSegment(segment);
-                    }, 50);
-                }
-            }
-        }
-
-        setTimeout(function() {
-            UI.saveInUndoStack();
-            UI.checkTagProximity();
-        }, 100);
-    },
+    // editAreaClick : function(target, operation) {
+    //     if (typeof operation == 'undefined') {
+    //         operation = 'clicking';
+    //     }
+    //
+    //     UI.closeTagAutocompletePanel();
+    //     UI.removeHighlightCorrespondingTags($(target).closest('section'));
+    //
+    //     var segmentNotYetOpened = ($(target).is(UI.editarea) && !$(target).closest('section').hasClass("opened"));
+    //     var segment = $(target).closest('section');
+    //     if ( !$(target).is(UI.editarea) || !UI.body.hasClass('editing') || segmentNotYetOpened) {
+    //         if (operation == 'moving') {
+    //             UI.recentMoving = true;
+    //             clearTimeout(UI.recentMovingTimeout);
+    //             UI.recentMovingTimeout = setTimeout(function() {
+    //                 UI.recentMoving = false;
+    //             }, 1000);
+    //         }
+    //
+    //         UI.lastOperation = operation;
+    //         SegmentActions.openSegment(UI.getSegmentId(segment));
+    //         //UI.openSegment(target, operation);
+    //
+    //         if (operation != 'moving') {
+    //
+    //             if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
+    //                 setTimeout(function () {
+    //                     UI.scrollSegment(segment);
+    //                 }, 50);
+    //             }
+    //         }
+    //     }
+    //
+    //     setTimeout(function() {
+    //         UI.saveInUndoStack();
+    //         UI.checkTagProximity();
+    //     }, 100);
+    // },
     keyPressEditAreaEventHandler: function (e, sid) {
         if( (e.which == 60) && (UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment) && !UI.tagMenuOpen) { // opening tag sign
             SegmentActions.showTagsMenu(sid);

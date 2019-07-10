@@ -17,15 +17,14 @@ $.extend( UI, {
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
         return text;
     },
-    evalOpenableSegment: function ( section ) {
-        if ( isTranslated( section ) ) return true;
-        var sid = UI.getSegmentId( section );
+    evalOpenableSegment: function ( segment ) {
+        if ( isTranslated( segment ) ) return true;
+
         if ( UI.projectStats && UI.projectStats.TRANSLATED_PERC === 0 ) {
             alertNoTranslatedSegments()
         } else {
-            alertNotTranslatedYet( sid );
+            alertNotTranslatedYet( segment.sid );
         }
-        $( document ).trigger( 'review:unopenableSegment', section );
         return false;
     },
     reloadQualityReport : function() {

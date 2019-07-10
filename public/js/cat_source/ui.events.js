@@ -266,29 +266,6 @@ $.extend(UI, {
 		});
 
 
-        // This is where we decide if a segment is to close or not.
-        // Beware that closeSegment is also called on openSegment
-        // ( other segments are closed when a new one is opened ).
-        //
-        $('#outer').click(function(e) {
-
-             var close = function() {
-                UI.setEditingSegment( null );
-                UI.closeSegment(UI.currentSegment, 1);
-            };
-            if( !UI.tagMenuOpen && UI.currentSegment ) {
-                UI.removeSelectedClassToTags();
-                UI.removeHighlightCorrespondingTags(UI.currentSegment);
-            }
-            if ( $(e.target).parents('body') ) return ; // detatched from DOM
-            if ( eventFromReact(e) ) return;
-
-            if ( $(e.target).closest('section .sid').length ) close()  ;
-            if ( $(e.target).closest('section .segment-side-buttons').length ) close();
-
-            if ( !$(e.target).closest('section').length ) close();
-        });
-
 		$('html').on('click', 'section .actions', function(e){
             e.stopPropagation();
         }).on('keydown', function(e) {
@@ -298,16 +275,15 @@ $.extend(UI, {
             // resized to let space to the tools on the sidebar.
 
             var handleEscPressed = function() {
-                if ( UI.body.hasClass('editing') &&
+                var segment = SegmentStore.getCurrentSegment();
+                if ( segment &&
                     !UI.body.hasClass('side-tools-opened') &&
 					!UI.body.hasClass("side-popup" ) &&
                     !UI.body.hasClass('search-open') &&
                     !UI.tagMenuOpen ) {
-                        UI.setEditingSegment( null );
-                        UI.closeSegment(UI.currentSegment, 1);
-                        UI.closeTagAutocompletePanel();
+                        SegmentActions.closeSegment(UI.currentSegmentId);
                     }
-            }
+            };
 
             if ( e.which == esc ) handleEscPressed() ;
 

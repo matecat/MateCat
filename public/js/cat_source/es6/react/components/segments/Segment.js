@@ -88,8 +88,6 @@ class Segment extends React.Component {
             $(document).trigger('segment:activate', {segment: new UI.Segment($(this.section))});  //Used by Segment Filter
             UI.getNextSegment(UI.currentSegment, 'untranslated');
 
-            UI.setEditingSegment($(this.section));  //TODO Remove: set Class editing to the body and trigger event used by review improved
-
             $('html').trigger('open'); // used by ui.review to open tab Revise in the footer next-unapproved
 
             $(window).trigger({
@@ -431,7 +429,7 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel.bind(this));
         if (this.state.showRevisionPanel) {
             setTimeout(()=>{
-                UI.openIssuesPanel(null, false)
+                UI.openIssuesPanel({sid: this.props.segment.get('sid')}, false)
             });
         }
     }
@@ -473,7 +471,7 @@ class Segment extends React.Component {
         if (!this.props.segment.opened && nextProps.segment.opened) {
             //UI.scrollSegment($(this.section), this.props.segment.sid);
             setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},0)
-            setTimeout(()=>{UI.setCurrentSegment()},0)
+            setTimeout(()=>{UI.setCurrentSegment()},0);
         }
 
         //check if this segment is in closing
@@ -482,7 +480,7 @@ class Segment extends React.Component {
             if (!this.props.isReview && this.props.segment.modified && this.props.segment.status !== "APPROVED") {
                 UI.setTranslation({
                     id_segment: UI.getSegmentId($(this.section)),
-                    status: this.props.segment.status ,
+                    status: 'DRAFT' ,
                     caller: 'autosave'
                 });
             }

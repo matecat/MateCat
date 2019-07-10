@@ -11,22 +11,14 @@ UI = {
         3: "edit_3"
     },
 
-    setEditingSegment : function(segment) {
-        if ( segment != null ) {
-            UI.body.addClass('editing');
-        } else {
-            UI.body.removeClass('editing');
-        }
-        $(document).trigger('editingSegment:change', {segment: segment});
-    },
-
 	toggleFileMenu: function() {
         var jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
 			return false;
 		} else {
+            var segment = SegmentStore.getCurrentSegment();
             currSegment = jobMenu.find('.currSegment');
-            if (this.body.hasClass('editing')) {
+            if (segment) {
                 currSegment.removeClass('disabled');
             } else {
                 currSegment.addClass('disabled');
@@ -232,44 +224,6 @@ UI = {
             return false;
         }
 
-    },
-    closeSegment: function(segment, byButton, operation) {
-        if ( typeof segment !== 'undefined' ) {
-            segment.find('.editarea').attr('contenteditable', 'false');
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'opened editor split-action');
-
-            $(window).trigger({
-                type: "segmentClosed",
-                segment: segment
-            });
-
-
-            var saveBehaviour = true;
-            if (operation != 'noSave') {
-                if ((operation == 'translated') || (operation == 'save'))
-                    saveBehaviour = false;
-            }
-
-            if ((segment.data('modified')) && (saveBehaviour) && (!config.isReview) && UI.getStatus(segment) !== 'approved') {
-                this.saveSegment(segment);
-            }
-            this.deActivateSegment(byButton, segment);
-            this.removeGlossaryMarksFormSource(segment);
-
-            $('span.locked.mismatch', segment).removeClass('mismatch');
-
-            // close split segment
-            $('.sid .actions .split').removeClass('cancel');
-            source = $(segment).find('.source');
-            $(source).removeAttr('style');
-
-            $('.split-shortcut').html('CTRL + S');
-            $('.splitBar, .splitArea').remove();
-            $('.sid .actions').hide();
-            // end split segment
-
-        }
-        return true;
     },
 
     copySource: function() {
@@ -554,44 +508,7 @@ UI = {
                                                                                 'extxif';
         return c;
     },
-	deActivateSegment: function(byButton, segment) {
-		UI.removeButtons(byButton, segment);
 
-        $(document).trigger('segment:deactivate', {
-            deactivated_segment : UI.lastOpenedSegment,
-            current_segment : UI.currentSegment
-        });
-
-        if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
-            Speech2Text.enabled() && Speech2Text.disableContinuousRecognizing();
-        }
-
-        Speech2Text.enabled() && Speech2Text.disableMicrophone( segment );
-	},
-	detectAdjacentSegment: function(segment, direction, times) { // currently unused
-		if (!times)
-			times = 1;
-		if (direction == 'down') {
-			adjacent = segment.next();
-			if (!adjacent.is('section'))
-				adjacent = this.currentFile.next().find('section:first');
-		} else {
-			adjacent = segment.prev();
-			if (!adjacent.is('section'))
-				adjacent = $('.editor').parents('article').prev().find('section:last');
-		}
-
-		if (adjacent.length) {
-			if (times == 1) {
-				return adjacent;
-			} else {
-				this.detectAdjacentSegment(adjacent, direction, times - 1);
-                return true;
-			}
-		} else {
-            return true;
-		}
-	},
 	detectFirstLast: function() {
 		var s = $('section');
 		this.firstSegment = s.first();
