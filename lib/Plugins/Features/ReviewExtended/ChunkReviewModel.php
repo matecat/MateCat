@@ -29,30 +29,6 @@ class ChunkReviewModel implements IChunkReviewModel {
     }
 
     /**
-     * Adds reviewed words count and recomputes result
-     *
-     * @param $count
-     */
-
-    public function addWordsCount( $count ) {
-        $this->chunk_review->reviewed_words_count += $count ;
-    }
-
-    /**
-     * Subtracts reviewed_words_count and recomputes result
-     *
-     * @param $count
-     */
-    public function subtractWordsCount( $count ) {
-        $this->chunk_review->reviewed_words_count -= $count ;
-    }
-
-    // public function subtractWordsCountWithAdvancement( $count, $advancement_wc ) {
-    //     $this->chunk_review->advancement_wc -= $advancement_wc ;
-    //     $this->subtractWordsCount( $count ) ;
-    // }
-
-    /**
      * adds penalty_points and updates pass fail result
      *
      * @param $penalty_points

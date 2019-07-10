@@ -14,6 +14,7 @@ class Editarea extends React.Component {
         this.state = {
             editAreaClasses : ['targetarea']
         };
+        this.editAreaIsEditing = false;
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
         this.addClass = this.addClass.bind(this);
         this.onMouseUpEvent = this.onMouseUpEvent.bind(this);
@@ -127,7 +128,7 @@ class Editarea extends React.Component {
     }
     onKeyDownEvent(e) {
         this.keyPressed = true;
-    	//on textarea the event of ctrz+z have a preventDefault.
+        //on textarea the event of ctrz+z have a preventDefault.
 		//We added this lines for fix the bug
 		//TODO:delete preventDefault on ui.events.js
 		if (e.keyCode === 90 && (e.ctrlKey || e.metaKey) ) {
@@ -145,10 +146,12 @@ class Editarea extends React.Component {
     }
     onCompositionStartEvent() {
         this.compositionsStart = true;
+        this.setEditAreaEditing(true);
         console.log('CompositionEvent START');
     }
     onCompositionEndEvent() {
         this.compositionsStart = false;
+        this.setEditAreaEditing(false);
         console.log('CompositionEvent END');
     }
     onCopyText(e) {
@@ -170,9 +173,12 @@ class Editarea extends React.Component {
     onDragEvent(e) {
         UI.handleDragEvent(e);
         this.draggingFromEditArea = true;
+        this.setEditAreaEditing(true);
     }
     onDragEnd() {
         this.draggingFromEditArea = false;
+        this.setEditAreaEditing(false);
+
     }
     onDropEvent(e) {
         if ( this.draggingFromEditArea ) {
@@ -190,6 +196,10 @@ class Editarea extends React.Component {
                 $(self.editAreaRef).find('span[style][class~=locked]').removeAttr('style');
             }
         });
+    }
+    setEditAreaEditing(editAreaIsEditing){
+        this.editAreaIsEditing = editAreaIsEditing;
+        UI.setEditAreaEditing(editAreaIsEditing);
     }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
@@ -210,7 +220,8 @@ class Editarea extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
             nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation ||
-            !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment)) )
+            !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment))
+        ) && !this.editAreaIsEditing
     }
     componentDidUpdate() {
         let self = this;
@@ -223,6 +234,7 @@ class Editarea extends React.Component {
         focusOnPlaceholder();
     }
     render() {
+        console.log("EditArea Render isEditing: " , this.editAreaIsEditing);
         let lang = '';
         let readonly = false;
         if (this.props.segment){

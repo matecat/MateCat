@@ -171,6 +171,9 @@ class FilterSegments extends React.Component {
                 {item.get('label')}
             </div>;
         });
+        optionsCategory = optionsCategory.insert(0, <div className="item" key={'all'} data-value={'all'}>
+           All
+        </div>);
         let optionsSeverities = this.severities.map((item, index) => {
             return <div className="item" key={index} data-value={item.get('label')}>
                 {item.get('label')}

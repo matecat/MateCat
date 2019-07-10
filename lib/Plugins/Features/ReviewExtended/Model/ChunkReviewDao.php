@@ -35,6 +35,7 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                 WHERE j.id = :id_job
                     AND j.password = :password
                     AND source_page = :source_page
+                    AND e.deleted_at IS NULL
         ";
 
         $conn = Database::obtain()->getConnection();
@@ -62,6 +63,7 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                     AND j.password = :password
                     AND e.id_segment IN ( $segment_ids ) 
                     AND source_page = :source_page 
+                    AND e.deleted_at IS NULL
         ";
 
         $conn = Database::obtain()->getConnection();

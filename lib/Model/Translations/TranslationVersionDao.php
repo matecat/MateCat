@@ -160,6 +160,8 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     FROM segment_translations st LEFT JOIN qa_entries qa
         ON st.id_segment = qa.id_segment AND st.id_job = qa.id_job AND
           st.version_number = qa.translation_version
+          AND qa.deleted_at IS NULL
+
         LEFT JOIN segment_translation_versions AS stv
           ON stv.id_job = st.id_job AND stv.id_segment = st.id_segment
           AND st.version_number = stv.version_number
@@ -210,6 +212,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     LEFT JOIN qa_entries qa
         ON stv.id_job = qa.id_job AND stv.id_segment = qa.id_segment
           AND stv.version_number = qa.translation_version
+          AND qa.deleted_at IS NULL
         WHERE stv.id_job = :id_job AND stv.id_segment = :id_segment AND st.id_segment IS NULL 
     ) t2
 

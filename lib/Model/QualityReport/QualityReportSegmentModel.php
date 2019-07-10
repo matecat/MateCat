@@ -48,7 +48,7 @@ class QualityReportSegmentModel {
      * @return array
      */
     public function getSegmentsIdForQR( $step = 10, $ref_segment, $where = "after", $options = [] ) {
-        if ( isset( $options[ 'filter' ][ 'issue_category' ] ) ) {
+        if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != 'all' ) {
             $subCategories = ( new CategoryDao() )->findByIdModelAndIdParent(
                     $this->chunk->getProject()->id_qa_model,
                     $options['filter']['issue_category']

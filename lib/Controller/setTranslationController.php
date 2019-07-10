@@ -56,6 +56,9 @@ class setTranslationController extends ajaxController {
     protected $context_before;
     protected $context_after;
 
+    /** @var Filter */
+    protected $filter;
+
     /**
      * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
      */
@@ -175,6 +178,7 @@ class setTranslationController extends ajaxController {
             $this->project = $this->chunk->getProject();
 
             $this->featureSet->loadForProject( $this->project );
+            $this->filter = Filter::getInstance( $this->featureSet );
 
         }
 
@@ -185,8 +189,7 @@ class setTranslationController extends ajaxController {
         }
 
 
-        $Filter = Filter::getInstance( $this->featureSet );
-        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ) );
+        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ) );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
             Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
@@ -260,11 +263,8 @@ class setTranslationController extends ajaxController {
 
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
-        $Filter               = Filter::getInstance( $this->featureSet );
-        $this->context_before = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
-        $this->context_after  = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
-
-    }
+        $this->context_before = $this->filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
+        $this->context_after  = $this->filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );}
 
     /**
      * @return int|mixed
@@ -303,8 +303,6 @@ class setTranslationController extends ajaxController {
         $dao           = new \Segments_SegmentDao( \Database::obtain() );
         $this->segment = $dao->getById( $this->id_segment );
 
-        $Filter = Filter::getInstance( $this->featureSet );
-
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
         $spaceHandler = new FromViewNBSPToSpaces();
@@ -317,10 +315,10 @@ class setTranslationController extends ajaxController {
 
         if ( $check->thereAreWarnings() ) {
             $err_json    = $check->getWarningsJSON();
-            $translation = $Filter->fromLayer1ToLayer0( $__tra );
+            $translation = $this->filter->fromLayer1ToLayer0( $__tra );
         } else {
             $err_json    = '';
-            $translation = $Filter->fromLayer1ToLayer0( $check->getTrgNormalized() );
+            $translation = $this->filter->fromLayer1ToLayer0( $check->getTrgNormalized() );
         }
 
         //PATCH TO FIX BOM INSERTIONS
@@ -692,18 +690,17 @@ class setTranslationController extends ajaxController {
      * @param $saved_translation
      *
      * @return array
-     * @throws Exceptions_RecordNotFound
      * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
      * @throws \TaskRunner\Exceptions\EndQueueException
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function getTranslationObject( $saved_translation ) {
-        $filter      = \SubFiltering\Filter::getInstance( $this->featureSet );
         $translation = [
                 'version_number' => @$saved_translation[ 'version_number' ],
                 'sid'            => $saved_translation[ 'id_segment' ],
-                'translation'    => $filter->fromLayer0ToLayer2( $saved_translation[ 'translation' ] ),
+                'translation'    => $this->filter->fromLayer0ToLayer2( $saved_translation[ 'translation' ] ),
                 'status'         => $saved_translation[ 'status' ]
         ];
 
@@ -920,20 +917,18 @@ class setTranslationController extends ajaxController {
         /**
          * Set the new contribution in queue
          */
-        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
-
         $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = self::isRevision();
         $contributionStruct->id_job               = $this->id_job;
         $contributionStruct->job_password         = $this->password;
         $contributionStruct->id_segment           = $this->id_segment;
-        $contributionStruct->segment              = $Filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
-        $contributionStruct->translation          = $Filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
+        $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
+        $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = $this->user->uid;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
-        $contributionStruct->oldSegment           = $Filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
-        $contributionStruct->oldTranslation       = $Filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
+        $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
+        $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
         $contributionStruct->propagationRequest   = $this->propagate;
         $contributionStruct->id_mt                = $this->jobData->id_mt_engine;
 

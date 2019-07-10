@@ -72,6 +72,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             AND st.id_segment = e.id_segment
             JOIN jobs on jobs.id = st.id_job
             WHERE jobs.id = :id_job AND jobs.password = :password
+              AND e.deleted_at IS NULL
             AND st.id_segment
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
              ";

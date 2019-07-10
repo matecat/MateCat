@@ -1636,8 +1636,6 @@ UI = {
             segment = new UI.Segment( segment );
         }
 
-        // SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
-
 		var dd = new Date();
 		ts = dd.getTime();
 		var token = segment.id + '-' + ts.toString();
@@ -1671,6 +1669,7 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
+			    if (UI.editAreaEditing) return;
 			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
                     UI.markTagMismatch(d.details);
@@ -2210,7 +2209,6 @@ UI = {
 		if (this.undoStackPosition > 0) {
             this.undoStackPosition--;
         }
-        // SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	saveInUndoStack: function(action) {
