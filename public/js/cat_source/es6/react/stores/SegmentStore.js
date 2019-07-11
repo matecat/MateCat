@@ -141,14 +141,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         return newSegments;
     },
-    hasSegmentTagProjectionEnabled: function ( segment ) {
-        if (UI.enableTagProjection) {
-            if ( (segment.status === "NEW" || segment.status === "DRAFT") && (UI.checkXliffTagsInText(segment.segment) && (!UI.checkXliffTagsInText(segment.translation))) ) {
-                return true;
-            }
-        }
-        return false;
-    },
+
     buildSegmentsFiles: function (segments) {
         segments.map(segment => {
             var splittedSourceAr = segment.segment.split(UI.splittedTranslationPlaceholder);
@@ -161,22 +154,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 this._segmentsFiles = this._segmentsFiles.set(segment.sid, segment.fid);
             }
         });
-    },
-
-    getSegmentById(sid) {
-        return this._segments.find(function (seg) {
-            return seg.get('sid') == sid;
-        });
-    },
-    getSegmentIndex(sid) {
-        return this._segments.findIndex(function (segment, index) {
-            if (sid.toString().indexOf("-") === -1) {
-                return parseInt(segment.get('sid')) === parseInt(sid);
-            } else {
-                return segment.get('sid') === sid;
-            }
-        });
-
     },
 
     splitSegment(oldSid, newSegments, fid, splitGroup) {
@@ -232,60 +209,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             // Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
         }
     },
-    /**
-     *
-     * @param current_sid
-     * @param current_fid
-     * @param status
-     * status values:
-     * null|undefined|false NEXT WITHOUT CHECK STATUS
-     * 1 APPROVED
-     * 2 DRAFT
-     * 3 FIXED
-     * 4 NEW
-     * 5 REBUTTED
-     * 6 REJECTED
-     * 7 TRANSLATED
-     * 8 UNTRANSLATED | is draft or new
-     */
-    getNextSegment(current_sid, current_fid, status, notIce) {
 
-        let allStatus = {
-            1: "APPROVED",
-            2: "DRAFT",
-            3: "FIXED",
-            4: "NEW",
-            5: "REBUTTED",
-            6: "REJECTED",
-            7: "TRANSLATED",
-            8: "UNTRANSLATED"
-        };
-        let result,
-            currentFind = false;
-        this._segments.forEach((segment, key) => {
-            if (_.isUndefined(result)) {
-                if ( currentFind ) {
-                    if ( status === 8 && (segment.get( 'status' ) == allStatus[2] || segment.get( 'status' ) == allStatus[4]) ) {
-                        result = segment.toJS();
-                        return false;
-                    } else if ( (status && segment.get( 'status' ) == allStatus[status]) || !status ) {
-                        result = segment.toJS();
-                        return false;
-                    }
-                }
-                if ( segment.get( 'sid' ) == current_sid ) {
-                    currentFind = true;
-                }
-            } else {
-                return null;
-            }
-        });
-        return result;
-    },
-    getPrevSegment(sid) {
-        var index = this.getSegmentIndex(sid);
-        return (index > 0) ? this._segments.get(index-1).toJS() : null;
-    },
     setStatus(sid, fid, status) {
         var index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'status'], status);
@@ -360,27 +284,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         let segment = this._segments.get(index);
         let lockedEditArea = segment.get('edit_area_locked');
         this._segments = this._segments.setIn([index, 'edit_area_locked'], !lockedEditArea);
-    },
-    getSegmentByIdToJS(sid, fid) {
-        let segment = this._segments.find(function (seg) {
-            return seg.get('sid') == sid;
-        });
-        return (segment) ? segment.toJS() : null;
-    },
-
-    getSegmentsSplitGroup(sid) {
-        let segments = this._segments.filter(function (seg) {
-            return seg.get('original_sid') == sid;
-        });
-        return (segments) ? segments.toJS() : null;
-    },
-
-    getAllSegments: function () {
-        var result = [];
-        $.each(this._segments, function (key, value) {
-            result = result.concat(value.toJS());
-        });
-        return result;
     },
     setToggleBulkOption: function (sid, fid) {
         let index = this.getSegmentIndex(sid);
@@ -517,11 +420,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     closeSegmentComments: function() {
         this._segments = this._segments.map((segment)=>segment.set('openComments', false));
     },
-    isSidePanelOpen: function() {
-        const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);
-        const issueOpen = this._segments.findIndex((segment)=>segment.get('openIssues') === true);
-        return ( commentOpen !== -1 ||  issueOpen !== -1);
-    },
+
     setConfigTabs: function (tabName, visible, open) {
         if ( open ) {
             this._footerTabsConfig = this._footerTabsConfig.map((tab)=>tab.set('open', false));
@@ -530,23 +429,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'open'], open);
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'enabled'], true);
     },
-    getCurrentSegment: function(){
-        let current = null,
-            tmpCurrent = null;
-        tmpCurrent = this._segments.find((segment) => {
-            return segment.get('opened') === true
-        });
-        if(tmpCurrent){
-            current = Object.assign({},tmpCurrent.toJS());
-        }
-        return current;
-    },
-    getLastSegmentId() {
-        return this._segments.last().get('sid');
-    },
-    getFirstSegmentId() {
-        return this._segments.first().get('sid');
-    },
+
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
 
@@ -578,8 +461,135 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         this._globalWarnings.matecat = warnings;
     },
+    openSegmentSplit: function(sid) {
+        let index = this.getSegmentIndex(sid);
+        this._segments = this._segments.setIn([index, 'openSplit'], true);
+    },
+    closeSegmentsSplit: function(sid) {
+        this._segments = this._segments.map((segment)=>segment.set('openSplit', false));
+    },
     updateLexiqaWarnings: function(warnings){
         this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning.bind(this, "LXQ"));
+    },
+    hasSegmentTagProjectionEnabled: function ( segment ) {
+        if (UI.enableTagProjection) {
+            if ( (segment.status === "NEW" || segment.status === "DRAFT") && (UI.checkXliffTagsInText(segment.segment) && (!UI.checkXliffTagsInText(segment.translation))) ) {
+                return true;
+            }
+        }
+        return false;
+    },
+    /**
+     *
+     * @param current_sid
+     * @param current_fid
+     * @param status
+     * status values:
+     * null|undefined|false NEXT WITHOUT CHECK STATUS
+     * 1 APPROVED
+     * 2 DRAFT
+     * 3 FIXED
+     * 4 NEW
+     * 5 REBUTTED
+     * 6 REJECTED
+     * 7 TRANSLATED
+     * 8 UNTRANSLATED | is draft or new
+     */
+    getNextSegment(current_sid, current_fid, status, notIce) {
+
+        let allStatus = {
+            1: "APPROVED",
+            2: "DRAFT",
+            3: "FIXED",
+            4: "NEW",
+            5: "REBUTTED",
+            6: "REJECTED",
+            7: "TRANSLATED",
+            8: "UNTRANSLATED"
+        };
+        let result,
+            currentFind = false;
+        this._segments.forEach((segment, key) => {
+            if (_.isUndefined(result)) {
+                if ( currentFind ) {
+                    if ( status === 8 && (segment.get( 'status' ) == allStatus[2] || segment.get( 'status' ) == allStatus[4]) ) {
+                        result = segment.toJS();
+                        return false;
+                    } else if ( (status && segment.get( 'status' ) == allStatus[status]) || !status ) {
+                        result = segment.toJS();
+                        return false;
+                    }
+                }
+                if ( segment.get( 'sid' ) == current_sid ) {
+                    currentFind = true;
+                }
+            } else {
+                return null;
+            }
+        });
+        return result;
+    },
+    getPrevSegment(sid) {
+        var index = this.getSegmentIndex(sid);
+        return (index > 0) ? this._segments.get(index-1).toJS() : null;
+    },
+    getSegmentByIdToJS(sid, fid) {
+        let segment = this._segments.find(function (seg) {
+            return seg.get('sid') == sid;
+        });
+        return (segment) ? segment.toJS() : null;
+    },
+
+    getSegmentsSplitGroup(sid) {
+        let segments = this._segments.filter(function (seg) {
+            return seg.get('original_sid') == sid;
+        });
+        return (segments) ? segments.toJS() : null;
+    },
+
+    getAllSegments: function () {
+        var result = [];
+        $.each(this._segments, function (key, value) {
+            result = result.concat(value.toJS());
+        });
+        return result;
+    },
+    getSegmentById(sid) {
+        return this._segments.find(function (seg) {
+            return seg.get('sid') == sid;
+        });
+    },
+    getSegmentIndex(sid) {
+        return this._segments.findIndex(function (segment, index) {
+            if (sid.toString().indexOf("-") === -1) {
+                return parseInt(segment.get('sid')) === parseInt(sid);
+            } else {
+                return segment.get('sid') === sid;
+            }
+        });
+
+    },
+    getLastSegmentId() {
+        return this._segments.last().get('sid');
+    },
+    getFirstSegmentId() {
+        return this._segments.first().get('sid');
+    },
+    getCurrentSegment: function(){
+        let current = null,
+            tmpCurrent = null;
+        tmpCurrent = this._segments.find((segment) => {
+            return segment.get('opened') === true
+        });
+        if(tmpCurrent){
+            current = Object.assign({},tmpCurrent.toJS());
+        }
+        return current;
+    },
+    isSidePanelOpen: function() {
+        const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);
+        const issueOpen = this._segments.findIndex((segment)=>segment.get('openIssues') === true);
+        return ( commentOpen !== -1 ||  issueOpen !== -1);
     },
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
@@ -597,6 +607,7 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_OPEN_SEGMENT:
             SegmentStore.openSegment(action.sid);
+            SegmentStore.closeSegmentsSplit();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.OPEN_SEGMENT:
@@ -810,6 +821,14 @@ AppDispatcher.register(function (action) {
             if ( !SegmentStore.isSidePanelOpen() ) {
                 SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
             }
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.OPEN_SPLIT_SEGMENT:
+            SegmentStore.openSegmentSplit(action.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.CLOSE_SPLIT_SEGMENT:
+            SegmentStore.closeSegmentsSplit();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         default:

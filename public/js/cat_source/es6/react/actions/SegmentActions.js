@@ -254,6 +254,18 @@ var SegmentActions = {
             actionType: SegmentConstants.CLOSE_TAGS_MENU
         });
     },
+    /************ SPLIT ****************/
+    openSplitSegment: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_SPLIT_SEGMENT,
+            sid: sid
+        });
+    },
+    closeSplitSegment: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_SPLIT_SEGMENT
+        });
+    },
     /************ FOOTER ***************/
     registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({

@@ -566,14 +566,6 @@ body.editing .grayed, body.virtualEditing .grayed {
     background: #f2f4f7;
 }
 
-section .sid .txt input {
-    display: none;
-}
-
-section:hover .sid .txt input {
-    display: unset;
-}
-
 section.readonly .txt input {
     display: none !important;
 }
@@ -666,15 +658,11 @@ section.currSearchSegment .sid .txt {
 }
 
 .editor .sid {
-    height: inherit;
+    height: 100%;
 }
 
 div.sid .implicit {
     /*    display: none; */
-}
-
-.sid .actions {
-    display: none;
 }
 
 .sid .actions.disabled {

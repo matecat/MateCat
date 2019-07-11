@@ -56,7 +56,8 @@ class Segment extends React.Component {
             tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
             && !UI.checkXliffTagsInText(this.props.segment.translation) && UI.removeAllTags(this.props.segment.segment) !== '',
             showRevisionPanel: this.props.segment.openIssues,
-            selectedTextObj: null
+            selectedTextObj: null,
+            showActions: false
         }
     }
 
@@ -182,6 +183,9 @@ class Segment extends React.Component {
         }
         if ( this.props.sideOpen ) {
             classes.push('slide-right');
+        }
+        if ( this.props.segment.openSplit ) {
+            classes.push('split-action');
         }
         return classes;
     }
@@ -463,7 +467,8 @@ class Segment extends React.Component {
             nextState.readonly !== this.state.readonly ||
             nextState.showRevisionPanel !== this.state.showRevisionPanel ||
             nextState.selectedTextObj !== this.state.selectedTextObj ||
-            nextProps.sideOpen !== this.props.sideOpen
+            nextProps.sideOpen !== this.props.sideOpen ||
+            nextState.showActions !== this.state.showActions
         );
     }
 
@@ -532,7 +537,8 @@ class Segment extends React.Component {
                 data-tagmode="crunched"
                 data-tagprojection={this.dataAttrTagged}
                 onClick={this.onClickEvent.bind(this)}
-                data-fid={this.props.segment.id_file}>
+                data-fid={this.props.segment.id_file}
+            >
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
 
@@ -552,23 +558,32 @@ class Segment extends React.Component {
                         ) : (null)
                     ): (null)}
 
-                    {!config.isLQA ? (
-                        <div className="txt segment-add-inBulk">
-                            <input type="checkbox"
-                                   ref={(node)=>this.bulk=node}
-                                   checked={this.props.segment.inBulk}
-                                   onClick={this.handleChangeBulk}
-                            />
-                        </div>
-                    ) : (null)}
+
+                    <div className="txt segment-add-inBulk">
+                        <input type="checkbox"
+                               ref={(node)=>this.bulk=node}
+                               checked={this.props.segment.inBulk}
+                               onClick={this.handleChangeBulk}
+                        />
+                    </div>
 
 
-                    {(this.props.segment.ice_locked !== '1' && config.splitSegmentEnabled) ? (
+
+                    {(this.props.segment.ice_locked !== '1' && config.splitSegmentEnabled) && this.props.segment.opened ? (
+                        (!this.props.segment.openSplit) ?
+
                         <div className="actions">
-                            <button className="split" href="#" title="Click to split segment">
+                            <button className="split" title="Click to split segment" onClick={()=> SegmentActions.openSplitSegment(this.props.segment.sid)}>
                                 <i className="icon-split"/>
                             </button>
                             <p className="split-shortcut">CTRL + S</p>
+                        </div>
+                            :
+                        <div className="actions">
+                            <button className="split cancel" title="Click to close split segment" onClick={()=> SegmentActions.closeSplitSegment()}>
+                                <i className="icon-split"/>
+                            </button>
+                            <p className="split-shortcut">CTRL + W</p>
                         </div>
                     ) : (null)}
 

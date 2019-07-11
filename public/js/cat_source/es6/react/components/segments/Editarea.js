@@ -234,7 +234,6 @@ class Editarea extends React.Component {
         focusOnPlaceholder();
     }
     render() {
-        console.log("EditArea Render isEditing: " , this.editAreaIsEditing);
         let lang = '';
         let readonly = false;
         if (this.props.segment){

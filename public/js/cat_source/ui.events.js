@@ -266,9 +266,11 @@ $.extend(UI, {
 		});
 
 
-		$('html').on('click', 'section .actions', function(e){
-            e.stopPropagation();
-        }).on('keydown', function(e) {
+		$('html')
+        //     .on('click', 'section .actions', function(e){
+        //     e.stopPropagation();
+        // })
+            .on('keydown', function(e) {
             var esc = 27 ;
 
             // ESC should close the current segment only if `article` is not

@@ -3,37 +3,36 @@
  */
 if(config.splitSegmentEnabled) {
     UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
-    $('html').on('mouseover', '.editor .source, .editor .sid', function() {
-        var actions = $('.editor .sid').parent().find('.actions');
-        actions.show();
-    }).on('mouseout', '.sid, .editor:not(.split-action) .source, .editor:not(.split-action) .outersource .actions', function() {
-        var actions = $('.editor .sid').parent().find('.actions');
-        actions.hide();
-    }).on('click', 'body:not([data-offline-mode]) .outersource .actions .split:not(.cancel)', function(e) {
-        e.preventDefault();
-        var segment = $(this).parents('section');
-        $('.editor .split-shortcut').html('CTRL + W');
-        SegmentActions.addClassToSegment(UI.getSegmentId( UI.currentSegment ), 'split-action');
-        var actions = $(this).parent().find('.actions');
-        actions.show();
-        UI.createSplitArea(segment);
-    })
+    $('html')
+    //     .on('click', 'body:not([data-offline-mode]) .outersource .actions .split:not(.cancel)', function(e) {
+    //     e.preventDefault();
+    //     var segment = $(this).parents('section');
+    //     $('.editor .split-shortcut').html('CTRL + W');
+    //     SegmentActions.addClassToSegment(UI.getSegmentId( UI.currentSegment ), 'split-action');
+    //     var actions = $(this).parent().find('.actions');
+    //     actions.show();
+    //     UI.createSplitArea(segment);
+    // })
 
-    .on('click', 'body:not([data-offline-mode]) .sid .actions .split', function(e) {
-        e.preventDefault();
-        UI.openSegmentSplit(this);
-    }).on('click', 'body[data-offline-mode] .sid .actions .split', function(e) {
-        e.preventDefault();
-    }).on('click', '.sid .actions .split.cancel', function(e) {
-        e.preventDefault();
-        UI.closeSegmentSplit(this);
-    }).on('keydown', '.splitArea', function(e) {
-        e.preventDefault();
-    }).on('keypress', '.splitArea', function(e) {
-        e.preventDefault();
-    }).on('keyup', '.splitArea', function(e) {
-        e.preventDefault();
-    }).on('click', '.splitArea', function(e) {
+    // .on('click', 'body:not([data-offline-mode]) .sid .actions .split', function(e) {
+    //     e.preventDefault();
+    //     UI.openSegmentSplit(this);
+    // })
+    //     .on('click', 'body[data-offline-mode] .sid .actions .split', function(e) {
+    //     e.preventDefault();
+    // })
+    //     .on('click', '.sid .actions .split.cancel', function(e) {
+    //     e.preventDefault();
+    //     UI.closeSegmentSplit(this);
+    // })
+    //     .on('keydown', '.splitArea', function(e) {
+    //     e.preventDefault();
+    // }).on('keypress', '.splitArea', function(e) {
+    //     e.preventDefault();
+    // }).on('keyup', '.splitArea', function(e) {
+    //     e.preventDefault();
+    // })
+        .on('click', '.splitArea', function(e) {
         e.preventDefault();
         if(window.getSelection().type == 'Range') return false;
 

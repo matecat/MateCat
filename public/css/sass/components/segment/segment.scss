@@ -45,6 +45,15 @@ section{
             }
         }
     }
+    .actions {
+        visibility: hidden;
+    }
+    &.split-action .actions {
+        visibility: visible;
+    }
+    &:hover .actions {
+        visibility: visible;
+    }
     .segment-body-content{
         .warnings-block{
             display: none;

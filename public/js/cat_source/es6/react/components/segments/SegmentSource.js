@@ -102,15 +102,29 @@ class SegmentSource extends React.Component {
     }
 
     render() {
+        let html = <div className={"source item"}
+                        tabIndex={0}
+                        id={"segment-" + this.props.segment.sid +"-source"}
+                        data-original={this.originalSource}
+                        dangerouslySetInnerHTML={ this.allowHTML(this.state.source) }
+                        onCopy={this.onCopyEvent.bind(this)}
+                        onDragStart={this.onDragEvent.bind(this)}
+        />;
+        if ( !this.props.segment.openSplit ) {
+            html =  <div className="splitContainer">
+                    <div className="splitArea" contentEditable = "true" dangerouslySetInnerHTML={this.allowHTML(this.originalSource)}/>
+                    <div className="splitBar">
+                        <div className="buttons">
+                            <a className="cancel hide" href="#">Cancel</a >
+                            <a href = "#" className = "done btn-ok pull-right" > Confirm </a>
+                        </div>
+                        <div className="splitNum pull-right"> Split in <span className="num">1</span>segment < span className="plural"/>
+                        </div>
+                    </div>
+                </div >;
+        }
         return (
-            <div className={"source item"}
-                 tabIndex={0}
-                 id={"segment-" + this.props.segment.sid +"-source"}
-                 data-original={this.originalSource}
-                 dangerouslySetInnerHTML={ this.allowHTML(this.state.source) }
-                 onCopy={this.onCopyEvent.bind(this)}
-                 onDragStart={this.onDragEvent.bind(this)}
-            />
+            {html}
         )
     }
 }
