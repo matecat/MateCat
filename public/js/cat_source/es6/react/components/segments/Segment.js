@@ -116,7 +116,8 @@ class Segment extends React.Component {
     openSegmentFromAction(sid) {
         let self = this;
         sid = sid + "";
-        if (sid === this.props.segment.sid && !this.props.segment.opened ) {
+        if ( (sid === this.props.segment.sid || (this.props.segment.original_sid === sid && this.props.segment.firstOfSplit))
+            && !this.props.segment.opened ) {
             setTimeout(function () {
                 self.openSegment();
             });
@@ -583,7 +584,7 @@ class Segment extends React.Component {
                             <button className="split cancel" title="Click to close split segment" onClick={()=> SegmentActions.closeSplitSegment()}>
                                 <i className="icon-split"/>
                             </button>
-                            <p className="split-shortcut">CTRL + W</p>
+                            {/*<p className="split-shortcut">CTRL + W</p>*/}
                         </div>
                     ) : (null)}
 

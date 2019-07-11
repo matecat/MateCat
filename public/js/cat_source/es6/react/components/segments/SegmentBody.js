@@ -84,20 +84,24 @@ class SegmentBody extends React.Component {
             if (LXQ.enabled()) {
                 LXQ.reloadPowertip(segment);
             }
+            try {
+                if (UI.hasSourceOrTargetTags(segment)) {
+                    segment.addClass('hasTagsToggle');
+                    UI.detectTagType(area);
 
-            if (UI.hasSourceOrTargetTags(segment)) {
-                segment.addClass('hasTagsToggle');
-                UI.detectTagType(area);
+                } else {
+                    segment.removeClass('hasTagsToggle');
+                }
 
-            } else {
-                segment.removeClass('hasTagsToggle');
+                if (UI.hasMissingTargetTags(segment)) {
+                    segment.addClass('hasTagsAutofill');
+                } else {
+                    segment.removeClass('hasTagsAutofill');
+                }
+            } catch ( e ) {
+                console.log("Fail afterRenderOrUpdate in SegmentBody component")
             }
 
-            if (UI.hasMissingTargetTags(segment)) {
-                segment.addClass('hasTagsAutofill');
-            } else {
-                segment.removeClass('hasTagsAutofill');
-            }
         }
     }
 

@@ -2,9 +2,10 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentStore = require('../../stores/SegmentStore');
-var SegmentConstants = require('../../constants/SegmentConstants');
+const React = require('react');
+const SegmentStore = require('../../stores/SegmentStore');
+const SegmentConstants = require('../../constants/SegmentConstants');
+const SegmentActions = require('../../actions/SegmentActions');
 
 
 class SegmentSource extends React.Component {
@@ -62,8 +63,34 @@ class SegmentSource extends React.Component {
     }
 
     afterRenderActions() {
-        var area = $("#segment-" + this.props.segment.sid + " .source");
+        let area = $("#segment-" + this.props.segment.sid + " .source");
         this.props.afterRenderOrUpdate(area);
+        let self = this;
+        if ( this.splitContainer ) {
+            $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).remove();
+                self.updateSplitNumber();
+            })
+        }
+    }
+
+    updateSplitNumber() {
+        if (this.props.segment.splitted) return;
+        let numSplits = $(this.splitContainer).find('.splitpoint').length + 1;
+        let splitnum = $(this.splitContainer).find('.splitNum');
+        $(splitnum).find('.num').text(numSplits);
+        this.splitNum = numSplits;
+        if (numSplits > 1) {
+            $(splitnum).find('.plural').text('s');
+            $(this.splitContainer).find('.btn-ok').removeClass('disabled');
+        } else {
+            $(splitnum).find('.plural').text('');
+            splitnum.hide();
+            $(this.splitContainer).find('.btn-ok').addClass('disabled');
+        }
+        $(this.splitContainer).find('.splitArea').blur();
     }
 
     onCopyEvent(e) {
@@ -72,6 +99,22 @@ class SegmentSource extends React.Component {
 
     onDragEvent(e) {
         UI.handleDragEvent(e);
+    }
+
+    addSplitPoint(event) {
+        if(window.getSelection().type === 'Range') return false;
+        pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"/></span>');
+
+        this.updateSplitNumber();
+    }
+
+    splitSegment(split) {
+        let text = $(this.splitContainer).find('.splitArea').html();
+        text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/, '##$_SPLIT$##');
+        text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
+        text = UI.prepareTextToSend(text);
+        // let splitArray = text.split('##_SPLIT_##');
+        SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
 
     componentDidMount() {
@@ -110,22 +153,51 @@ class SegmentSource extends React.Component {
                         onCopy={this.onCopyEvent.bind(this)}
                         onDragStart={this.onDragEvent.bind(this)}
         />;
-        if ( !this.props.segment.openSplit ) {
-            html =  <div className="splitContainer">
-                    <div className="splitArea" contentEditable = "true" dangerouslySetInnerHTML={this.allowHTML(this.originalSource)}/>
+        if ( this.props.segment.openSplit ) {
+            if ( this.props.segment.splitted ) {
+                let segmentsSplit = this.props.segment.split_group;
+                let sourceHtml = '';
+                segmentsSplit.forEach((sid, index)=>{
+                    let segment = SegmentStore.getSegmentByIdToJS(sid);
+                    if ( sid === this.props.segment.sid) {
+                        sourceHtml += '<span class="currentSplittedSegment">'+segment.decoded_source+'</span>';
+                    } else {
+                        sourceHtml+= segment.decoded_source;
+                    }
+                    if(index !== segmentsSplit.length - 1)
+                        sourceHtml += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
+                });
+                html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
+                    <div className="splitArea" contentEditable = "false"
+                         onClick={(e)=>this.addSplitPoint(e)}
+                         dangerouslySetInnerHTML={this.allowHTML(sourceHtml)}/>
                     <div className="splitBar">
                         <div className="buttons">
-                            <a className="cancel hide" href="#">Cancel</a >
-                            <a href = "#" className = "done btn-ok pull-right" > Confirm </a>
+                            <a className="cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
+                            <a className = {"done btn-ok pull-right" } onClick={()=>this.splitSegment()}> Confirm </a>
                         </div>
-                        <div className="splitNum pull-right"> Split in <span className="num">1</span>segment < span className="plural"/>
+                        <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
                         </div>
                     </div>
                 </div >;
+            } else {
+                html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
+                    <div className="splitArea" contentEditable = "false"
+                         onClick={(e)=>this.addSplitPoint(e)}
+                         dangerouslySetInnerHTML={this.allowHTML(this.state.source)}/>
+                    <div className="splitBar">
+                        <div className="buttons">
+                            <a className="cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
+                            <a className = {"done btn-ok pull-right disabled" } onClick={()=>this.splitSegment()}> Confirm </a>
+                        </div>
+                        <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
+                        </div>
+                    </div>
+                </div >;
+            }
         }
-        return (
-            {html}
-        )
+        return html;
+
     }
 }
 

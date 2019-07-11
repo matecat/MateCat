@@ -33,6 +33,32 @@ var SegmentActions = {
             fid: fid
         });
     },
+    splitSegment: function(sid, text)  {
+        API.SEGMENT.splitSegment(sid , text)
+            .done(function (response) {
+                if(response.errors.length) {
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error'
+                    };
+                    APP.addNotification(notification);
+                } else {
+                    UI.unmountSegments();
+                    UI.render({
+                        segmentToOpen: UI.currentSegmentId.split('-')[0]
+                    });
+                }
+            })
+            .fail(function (d) {
+                var notification = {
+                    title: 'Error',
+                    text: d.errors[0].message,
+                    type: 'error'
+                };
+                APP.addNotification(notification);
+            });
+    },
     addSegments: function (segments, where) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENTS,

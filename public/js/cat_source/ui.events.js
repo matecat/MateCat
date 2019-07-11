@@ -83,6 +83,10 @@ $.extend(UI, {
             if ((UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment)) {
                 SegmentActions.showTagsMenu(UI.getSegmentId(UI.currentSegment));
             }
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.splitSegment.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            SegmentActions.openSplitSegment(UI.currentSegmentId);
         }).on('keydown.shortcuts', null, "ctrl+u", function(e) {
             // to prevent the underline shortcut
             e.preventDefault();

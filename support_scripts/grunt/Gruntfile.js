@@ -186,7 +186,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.customization.js',
                     // basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/ui.offline.js',
-                    basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/ui.opensegment.js',
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/db.js',

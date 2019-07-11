@@ -551,7 +551,7 @@ body.editing .grayed, body.virtualEditing .grayed {
     color: #b6b8bb;
     text-decoration: none;
     cursor: default;
-    height: inherit;
+    height: 100%;
     padding-bottom: 1px;
     width: 4.5%;
 }
@@ -914,7 +914,8 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 .buttons .next-unapproved.disabled ,
 .buttons .next-untranslated.disabled ,
 .buttons .translated.disabled,
-.buttons .guesstags.disabled{
+.buttons .guesstags.disabled,
+.buttons .disabled {
     pointer-events: none;
     color: #666 !important;
     border-color: #666;
@@ -4818,30 +4819,40 @@ body.cattool .mgmt-table-mt .activemt {
     opacity: 1 !important;
 }
 
-.splitArea {
-    width: 45.5%;
-    position: absolute;
-    padding: 3px 0px 5px 3px;
-    margin: 0 0.7%;
-    background: #efefef;
-    font-size: 18px;
-    min-height: 70px;
-    outline: 0;
-    text-align: left;
-    border-radius: 2px;
-    line-height: 27px;
-    color: #000;
-    border: 1px solid #727272;
-    box-shadow: 0 1px 2px #ccc;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    word-break: normal !important;
-    cursor: col-resize;
-}
-
-.splitBar {
-    width: 46.6%;
-    position: absolute;
-    z-index: 10000;
+.splitContainer {
+    position: relative;
+    float: left;
+    width: 45.2%;
+    .splitArea {
+        width: 100%;
+        padding: 3px 0px 5px 3px;
+        margin: 7px 1.7%;
+        background: #efefef;
+        font-size: 18px;
+        min-height: 70px;
+        outline: 0;
+        text-align: left;
+        border-radius: 2px;
+        line-height: 27px;
+        color: #000;
+        border: 1px solid #727272;
+        word-break: normal !important;
+        cursor: col-resize;
+        float: left;
+    }
+    .splitBar {
+        position: relative;
+        clear: both;
+        margin-top: 100px;
+        width: 100%;
+        margin-left: 19px;
+    }
+    .cancel {
+        margin-right: 4px;
+        width: 108px;
+        float: left;
+        color: #333;
+    }
 }
 
 .splitBar p,
@@ -4863,8 +4874,6 @@ body.cattool .mgmt-table-mt .activemt {
 .splitBar .buttons a {
     margin-left: 20px;
     margin-top: 2px;
-    color: #fff;
-
 }
 
 .splitBar .btn-ok:hover {

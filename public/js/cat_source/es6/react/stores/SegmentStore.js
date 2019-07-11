@@ -121,7 +121,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         edit_area_locked: false,
                         notes: segment.notes,
                         modified: false,
-                        opened: false
+                        opened: false,
+                        id_file: segment.id_file,
+                        originalSource: segment.segment,
+                        firstOfSplit: (i===0)
                     };
                     newSegments.push(segData);
                     segData = null;
