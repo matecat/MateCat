@@ -180,10 +180,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     openSegment(sid) {
         var index = this.getSegmentIndex(sid);
-        this._segments = this._segments.map(segment => segment.set('opened', false));
+        this.closeSegments()
         this._segments = this._segments.setIn([index, 'opened'], true);
     },
-
+    closeSegments() {
+        this._segments = this._segments.map(segment => segment.set('opened', false));
+    },
     removeSplit(oldSid, newSegments, fid, splitGroup) {
         var self = this;
         var elementsToRemove = [];
@@ -606,7 +608,13 @@ AppDispatcher.register(function (action) {
     switch (action.actionType) {
         case SegmentConstants.RENDER_SEGMENTS:
             SegmentStore.updateAll(action.segments);
+            if ( action.idToOpen ) {
+                SegmentStore.openSegment(action.idToOpen);
+            }
             SegmentStore.emitChange(action.actionType, SegmentStore._segments);
+            if ( action.idToOpen ) {
+                SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
+            }
             break;
         case SegmentConstants.SET_OPEN_SEGMENT:
             SegmentStore.openSegment(action.sid);
@@ -617,6 +625,10 @@ AppDispatcher.register(function (action) {
             SegmentStore.openSegment(action.sid);
             SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
             SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
+            break;
+        case SegmentConstants.CLOSE_SEGMENT:
+            SegmentStore.closeSegments(action.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.where);

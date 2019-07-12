@@ -163,6 +163,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                     UI.scrollSegment( data.sid );
                 }, 500, data );
             }
+            return true;
         },
 
         closeIssuesPanel : function() {
@@ -170,12 +171,12 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             SegmentActions.closeIssuesPanel();
             $('body').removeClass('side-tools-opened review-side-panel-opened review-extended-opened');
             localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
-            if ( UI.currentSegment ) {
-                setTimeout( function() {
-                    UI.scrollSegment( UI.currentSegmentId );
-                }, 100 );
-            }
-            window.dispatchEvent(new Event('resize'));
+            // if ( UI.currentSegment ) {
+            //     setTimeout( function() {
+            //         UI.scrollSegment( UI.currentSegmentId );
+            //     }, 100 );
+            // }
+            // window.dispatchEvent(new Event('resize'));
         },
 
         deleteIssue : function( issue, sid, dontShowMessage) {

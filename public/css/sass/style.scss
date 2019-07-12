@@ -350,10 +350,6 @@ section.opened .warnings {
     z-index: 1;
 }
 
-body.editing .grayed, body.virtualEditing .grayed {
-    display: block;
-}
-
 .toggle {
     display: none;
 }
@@ -1374,7 +1370,7 @@ section:not(.editor) .text:first-child {
     border-top-right-radius: 4px;
 }
 
-body.cattool.editing section:not(.editor):hover {
+body.cattool section:not(.editor):hover {
     background: #d4d7dc !important;
     color: #000;
 }
@@ -3673,7 +3669,7 @@ section.modified.editor .status {
         display: block;
     }
 
-    p.split-shortcut, .editing .sid .txt {
+    p.split-shortcut, .sid .txt {
         font-size: 10px;
     }
     .sid {

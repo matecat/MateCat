@@ -19,7 +19,7 @@ class SegmentsContainer extends React.Component {
             segments : Immutable.fromJS([]),
             splitGroup: [],
             timeToEdit: config.time_to_edit_enabled,
-            scrollTo: null,
+            scrollTo: this.props.startSegmentId,
             window: {
                 width: 0,
                 height: 0,
@@ -33,6 +33,8 @@ class SegmentsContainer extends React.Component {
         this.scrollToSegment = this.scrollToSegment.bind(this);
         this.openSide = this.openSide.bind(this);
         this.closeSide = this.closeSide.bind(this);
+
+        this.lastScrollTop = 0;
     }
 
     splitSegments(segments, splitGroup) {
@@ -89,14 +91,20 @@ class SegmentsContainer extends React.Component {
     }
 
     getIndexToScroll() {
-        if ( !this.state.scrollTo ) return null;
-        return this.state.segments.findIndex( (segment, index) => {
-            if (this.state.scrollTo.toString().indexOf("-") === -1) {
-                return parseInt(segment.get('sid')) === parseInt(this.state.scrollTo);
-            } else {
-                return segment.get('sid') === this.state.scrollTo;
-            }
-        });
+        if ( this.state.scrollTo && this.state.segments.size > 0 ) {
+            const index = this.state.segments.findIndex( (segment, index) => {
+                if (this.state.scrollTo.toString().indexOf("-") === -1) {
+                    return parseInt(segment.get('sid')) === parseInt(this.state.scrollTo);
+                } else {
+                    return segment.get('sid') === this.state.scrollTo;
+                }
+            });
+            return {scrollTo:index, position: 'center'}
+        } else if ( this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
+            const diff = this.state.segments.size - this.lastListSize;
+            return {scrollTo:this.lastUpdateObj.startIndex + diff, position: 'start'}
+        }
+        return {scrollTo:null, position: null}
     }
 
     getSegmentByIndex(index) {
@@ -177,16 +185,16 @@ class SegmentsContainer extends React.Component {
 
     getSegmentHeight(index) {
         let segment = this.getSegmentByIndex(index);
-        let itemHeigth = 0;
+        let itemHeight = 0;
         let commentsPadding = this.getCommentsPadding(index, segment);
         if (segment.get('opened')) {
             let $segment= $('#segment-' + segment.get('sid'));
-            if ( $segment.length && $segment.hasClass('opened') ) {
-                itemHeigth = $segment.outerHeight() + 20;
-            } else {
-                itemHeigth = 300;
+            if ( ($segment.length && $segment.hasClass('opened')) || this.lastOpenedHeight ) {
+                itemHeight = ($segment.length) ? $segment.outerHeight() + 20 :  this.lastOpenedHeight;
+                this.lastOpenedHeight = itemHeight
             }
-        } else {
+        }
+        if (itemHeight === 0) {
             let source = $('#hiddenHtml .source');
             source.html(segment.get('decoded_source'));
             const sourceHeight = source.outerHeight();
@@ -198,14 +206,14 @@ class SegmentsContainer extends React.Component {
 
             source.html('');
             target.html('');
-            itemHeigth = Math.max(sourceHeight + 10, targetHeight + 10, 87) ;
+            itemHeight = Math.max(sourceHeight + 10, targetHeight + 10, 87) ;
         }
         let preiousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
         //If is the first segment of a file add the file header
         if ( preiousFileId !== segment.get('id_file')) {
-            itemHeigth = itemHeigth + 47;
+            itemHeight = itemHeight + 47;
         }
-        return itemHeigth + commentsPadding;
+        return itemHeight + commentsPadding;
     }
 
     componentDidMount() {
@@ -250,12 +258,9 @@ class SegmentsContainer extends React.Component {
         console.log("React component Error", e);
     }
 
-    componentWillUpdate() {
-        saveSelection();
-    }
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         restoreSelection();
-        if (this.state.scrollTo !== null) {
+        if ( this.state.scrollTo !== null && this.state.segments.size > 0 ) {
             this.setState({
                 scrollTo: null
             })
@@ -263,27 +268,32 @@ class SegmentsContainer extends React.Component {
     }
 
     render() {
-        let scrollTo = this.getIndexToScroll();
+        let scrollToObject = this.getIndexToScroll();
         let items = this.getSegments();
         let width = this.state.window.width;
         return <VirtualList
+            ref={this.listRef}
             width={width}
             height={this.state.window.height-79}
             style={{overflowX: 'hidden'}}
             estimatedItemSize={80}
-            overscanCount={2}
+            overscanCount={5}
             itemCount={items.length}
             itemSize={(index)=>this.getSegmentHeight(index)}
-            scrollToAlignment="center"
-            scrollToIndex={scrollTo}
+            scrollToAlignment={scrollToObject.position}
+            scrollToIndex={scrollToObject.scrollTo}
+            // scrollOffset={1000}
             onScroll={(number, event) => {
                 let scrollTop = $(event.target).scrollTop();
                 let scrollBottom = $(event.target).prop('scrollHeight') - (scrollTop + $(event.target).height());
-                if ( scrollBottom < 900 ) {
+                this.scrollDirectionTop = (scrollTop < this.lastScrollTop);
+                if ( scrollBottom < 500 && !this.scrollDirectionTop) {
                     UI.getMoreSegments('after');
-                } else if( scrollTop < 900 ) {
+                } else if( scrollTop < 500 && this.scrollDirectionTop) {
                     UI.getMoreSegments('before');
                 }
+                this.lastListSize = items.length;
+                this.lastScrollTop = scrollTop;
             } }
             renderItem={({index, style}) => {
                 let styleCopy = Object.assign({}, style);
@@ -316,6 +326,7 @@ class SegmentsContainer extends React.Component {
                     {items[index]}
                 </div>;
             }}
+            onItemsRendered={(obj)=> this.lastUpdateObj = obj}
         >
         </VirtualList>
 

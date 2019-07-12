@@ -18,10 +18,11 @@ var SegmentActions = {
     /**
      * @param segments
      */
-    renderSegments: function (segments) {
+    renderSegments: function (segments, idToOpen) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_SEGMENTS,
-            segments: segments
+            segments: segments,
+            idToOpen: idToOpen
         });
     },
     splitSegments: function (oldSid, newSegments, splitGroup, fid) {
@@ -95,6 +96,9 @@ var SegmentActions = {
         });
     },
     closeSegment: function ( sid, fid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_SEGMENT,
+        });
         this.closeIssuesPanel();
     },
     scrollToSegment: function (sid) {
@@ -552,12 +556,15 @@ var SegmentActions = {
     },
 
     openIssuesPanel: function (data, openSegment) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.OPEN_ISSUES_PANEL,
-            data: data,
-        });
-        this.openSideSegments();
-        UI.openIssuesPanel(data, openSegment);
+        if ( UI.openIssuesPanel(data, openSegment) ) {
+
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+                data: data,
+            });
+            this.openSideSegments();
+        }
+
     },
 
     closeIssuesPanel: function () {

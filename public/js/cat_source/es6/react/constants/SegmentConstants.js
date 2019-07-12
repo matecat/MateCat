@@ -72,6 +72,7 @@ module.exports = keyMirror({
     CLOSE_TAGS_MENU: null,
     SET_OPEN_SEGMENT: null,
     OPEN_SEGMENT: null,
+    CLOSE_SEGMENT: null,
     SCROLL_TO_SEGMENT: null,
     OPEN_SIDE: null,
     CLOSE_SIDE: null,

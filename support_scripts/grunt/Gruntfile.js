@@ -354,6 +354,8 @@ module.exports = function(grunt) {
             js: {
                 files: [
                     basePath + 'cat_source/*.js',
+                    basePath + 'cat_source/review/*.js',
+                    basePath + 'cat_source/review_extended/*.js',
                     basePath + 'tm.js',
                     basePath + 'login.js',
                     basePath + 'advancedOptionsTab.js'

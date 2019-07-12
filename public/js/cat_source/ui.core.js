@@ -703,7 +703,6 @@ UI = {
             var firstFile = d.data.files[Object.keys(d.data.files)[0]];
             this.startSegmentId = firstFile.segments[0].sid;
         }
-
 		this.body.addClass('loaded');
 
 		if (typeof d.data.files !== 'undefined') {
@@ -911,8 +910,9 @@ UI = {
                     decodeTextFn: UI.decodeText,
                     tagModesEnabled: UI.tagModesEnabled,
                     speech2textEnabledFn: Speech2Text.enabled,
+                    startSegmentId: this.startSegmentId
                 }), mountPoint);
-                SegmentActions.renderSegments(segments);
+                SegmentActions.renderSegments(segments, this.startSegmentId);
             } else {
                 SegmentActions.addSegments(segments, where);
             }

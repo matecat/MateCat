@@ -430,12 +430,6 @@ $.extend(UI, {
 				UI.scrollSegment(current.original_sid);
 			}
 		});
-		
-		//search
-
-        if (!this.segmentToScrollAtRender)
-            UI.gotoSegment(this.startSegmentId);
-
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug) { console.log('Init time: ' + this.initTime); }

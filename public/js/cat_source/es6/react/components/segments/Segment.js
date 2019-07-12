@@ -175,7 +175,7 @@ class Segment extends React.Component {
         if ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number ) {
             classes.push( 'approved-step-'+ this.props.segment.revision_number);
         }
-        if (this.props.segment.opened) {
+        if (this.props.segment.opened && this.checkIfCanOpenSegment()) {
             classes.push('editor');
             classes.push('opened');
         }
@@ -434,8 +434,14 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel.bind(this));
         if (this.state.showRevisionPanel) {
             setTimeout(()=>{
-                UI.openIssuesPanel({sid: this.props.segment.get('sid')}, false)
+                UI.openIssuesPanel({sid: this.props.segment.sid}, false)
             });
+        }
+        if ( this.props.segment.opened) {
+            setTimeout(()=>{
+                this.openSegment();
+            });
+
         }
     }
 
@@ -473,17 +479,16 @@ class Segment extends React.Component {
         );
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (!this.props.segment.opened && nextProps.segment.opened) {
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+        if (!prevProps.segment.opened && this.props.segment.opened) {
             //UI.scrollSegment($(this.section), this.props.segment.sid);
-            setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},0)
+            setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},0);
             setTimeout(()=>{UI.setCurrentSegment()},0);
         }
-
         //check if this segment is in closing
-        if (this.props.segment.opened && !nextProps.segment.opened) {
+        if (prevProps.segment.opened && !this.props.segment.opened) {
             //check if this segment require setTranslation
-            if (!this.props.isReview && this.props.segment.modified && this.props.segment.status !== "APPROVED") {
+            if (!prevProps.isReview && prevProps.segment.modified && prevProps.segment.status !== "APPROVED") {
                 UI.setTranslation({
                     id_segment: UI.getSegmentId($(this.section)),
                     status: 'DRAFT' ,
@@ -491,6 +496,7 @@ class Segment extends React.Component {
                 });
             }
         }
+        return null;
     }
 
     render() {

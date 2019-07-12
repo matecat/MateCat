@@ -333,16 +333,16 @@
          */
         evalNextSegment: function( section, status ) {
             var currentSegment = SegmentStore.getCurrentSegment();
-            var nextUntranslated = SegmentStore.getNextSegment(currentSegment.original_sid, null, 8);
+            var nextUntranslated = (currentSegment) ? SegmentStore.getNextSegment(currentSegment.original_sid, null, 8): null;
 
             if (nextUntranslated) { // se ci sono sotto segmenti caricati con lo status indicato
                 this.nextUntranslatedSegmentId = nextUntranslated.original_sid;
             } else {
                 this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
             }
-            var next = SegmentStore.getNextSegment(currentSegment.original_sid, null, null);
+            var next = (currentSegment) ?  SegmentStore.getNextSegment(currentSegment.original_sid, null, null) : null;
             this.nextSegmentId = (next) ? next.original_sid : null;
-            var prev = SegmentStore.getPrevSegment(currentSegment.original_sid)
+            var prev = (currentSegment) ? SegmentStore.getPrevSegment(currentSegment.original_sid) : null;
             this.previousSegmentId = ( prev ) ? prev.original_sid : null;
         },
         gotoNextSegment: function() {

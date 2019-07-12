@@ -943,8 +943,8 @@ if (typeof String.prototype.endsWith !== 'function') {
 
 function isTranslated(segment) {
     return ! (
-        section.status === 'NEW' ||
-        section.status === 'DRAFT'
+        segment.status === 'NEW' ||
+        segment.status === 'DRAFT'
     );
 }
 
