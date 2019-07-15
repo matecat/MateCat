@@ -191,7 +191,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @return bool
      */
     public function set( $_config ) {
-
         $parameters               = [];
         $parameters[ 'seg' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
         $parameters[ 'tra' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
