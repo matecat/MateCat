@@ -80,18 +80,13 @@ $.extend(UI, {
 			translation: translation
 		});
 	},
-	getContribution: function(segment, next) {
+	getContribution: function(segmentSid, next) {
         var txt;
-        var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
-        try {
-            var currentSegment  = new UI.Segment( current );
-        } catch (e) {
-            console.error("Error, get Contribution");
-            return;
-        }
-        var segmentUnlocked = !!(UI.getFromStorage('unlocked-' + currentSegment.absId));
-        if (currentSegment.isReadonly() && !segmentUnlocked) {
-            UI.blockButtons = false ;
+        var currentSegment = (next === 0) ? SegmentStore.getSegmentByIdToJS(segmentSid) : (next == 1) ? SegmentStore.getNextSegment(segmentSid) : SegmentStore.getNextSegment(segmentSid, 8);
+
+        if ( !currentSegment) return;
+
+        if (currentSegment.ice_locked === "1" && !this.props.segment.unlocked) {
             SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
             var deferred = new jQuery.Deferred() ;
             return deferred.resolve();
@@ -102,47 +97,29 @@ $.extend(UI, {
          * current segment force to reload the matches
         **/
         var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
-        var s2 = $('.source', current).text();
+        var s2 = currentSegment.segment;
         var areSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 < 50;
         var isEqual = (s1 == s2) && s1 !== '';
 
         var callNewContributions = areSimilar || isEqual;
 
-        if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length && !callNewContributions) {
-            SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
-            if (!next) {
-                this.blockButtons = false;
-                this.segmentQA(segment);
-            }
-            if (this.currentSegmentId == this.nextUntranslatedSegmentId)
-                this.blockButtons = false;
+        if (currentSegment.contributions && currentSegment.contributions.matches.length > 0 && !callNewContributions) {
             return $.Deferred().resolve();
 		}
-		if ((!current.length) && (next)) {
+		if ((!currentSegment) && (next)) {
 			return $.Deferred().resolve();
 		}
 
-        var id = UI.getSegmentId(current);
+        var id = currentSegment.original_sid;
         var id_segment_original = id.split('-')[0];
 
-        if( config.brPlaceholdEnabled ) {
-            txt = this.postProcessEditarea(current, '.source');
-        } else {
-            txt = $('.source', current).text();
-        }
-
-        //If tag projection enabled in the source there are not tags, so I take the data-original value
-        if (UI.checkCurrentSegmentTPEnabled(current)) {
-            txt = current.find('.source').data('original');
-            txt = htmlDecode(txt).replace(/&quot;/g, '\"');
-            txt = htmlDecode(txt);
-        }
+        txt = UI.prepareTextToSend(currentSegment.segment);
 
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 
         // `next` and `untranslated next` are the same
-        if ((next == 2) && (this.nextSegmentId == this.nextUntranslatedSegmentId)) {
+        if ((next === 2) && (this.nextSegmentId === this.nextUntranslatedSegmentId)) {
             return $.Deferred().resolve();
         }
 
@@ -153,7 +130,7 @@ $.extend(UI, {
 
         if ( _.isUndefined(config.id_client) ) {
             setTimeout(() => {
-                UI.getContribution(segment, next);
+                UI.getContribution(segmentSid, next);
             }, 3000);
             console.log("SSE: ID_CLIENT not found");
             return $.Deferred().resolve();
@@ -205,7 +182,6 @@ $.extend(UI, {
 		if(!data) return true;
 		this.renderContributions(data, segment);
 		this.saveInUndoStack();
-		this.blockButtons = false;  //Used for offline mode
     },
 
     renderContributions: function(data, segment) {

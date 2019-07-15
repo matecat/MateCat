@@ -123,9 +123,6 @@ if ( config.enableReview && config.isReview ) {
                 diffHTML = UI.transformTextForLockTags(diffHTML);
                 $('.sub-editor.review .track-changes p', $segment).html( diffHTML );
             },
-            getSelectorForNextSegment: function() {
-                return 'section.status-translated'
-            },
             setRevision: function( data ){
                 APP.doRequest({
                     data: data,

@@ -566,19 +566,20 @@ UI = {
 	},
 	getMoreSegments: function(where) {
 
-        console.log('get more segments');
-
 		if ((where == 'after') && (this.noMoreSegmentsAfter)) {
-			return;
-        }
 
+            return;
+        }
 		if ((where == 'before') && (this.noMoreSegmentsBefore)) {
-			return;
+
+            return;
+        }
+		if ( this.loadingMore ) {
+
+            return;
         }
 
-		if ( this.loadingMore ) {
-			return;
-		}
+        console.log('Get more segments: ', where);
 
 		this.loadingMore = true;
 
@@ -2013,7 +2014,6 @@ UI = {
      * @param next
      */
     getContribution : function(segment, next) {
-        UI.blockButtons = false ;
         SegmentActions.addClassToSegment( UI.getSegmentId( segment ), 'loaded' ) ;
         this.segmentQA(segment);
         var deferred = new jQuery.Deferred() ;
@@ -2304,18 +2304,6 @@ UI = {
             }
 
         }
-
-        if ( UI.blockButtons ) {
-            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
-            } else {
-
-                if (UI.noMoreSegmentsAfter) {
-                    UI.reloadWarning();
-                }
-            }
-            return;
-        }
-        if(!UI.offline) UI.blockButtons = true;
 
         UI.setStatusButtons(button);
 

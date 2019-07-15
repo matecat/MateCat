@@ -357,6 +357,7 @@ class Segment extends React.Component {
     }
 
     handleChangeBulk(event){
+        event.stopPropagation();
         if (event.shiftKey) {
             this.props.setBulkSelection(this.props.segment.sid, this.props.fid);
         } else {
@@ -441,7 +442,7 @@ class Segment extends React.Component {
             setTimeout(()=>{
                 this.openSegment();
             });
-
+            setTimeout(()=>{UI.setCurrentSegment()},0);
         }
     }
 

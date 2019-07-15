@@ -17,7 +17,7 @@ if (SegmentFilter.enabled())
 
     var segmentIsInSample = function( segmentId, listOfSegments ) {
         return listOfSegments.indexOf( segmentId ) !== -1 ;
-    }
+    };
 
     var notification;
 
@@ -111,7 +111,10 @@ if (SegmentFilter.enabled())
                               config.id_job, password, $.param( data ) );
 
             return $.getJSON(path).pipe(function( data ) {
+                UI.clearStorage('SegmentFilter');
+
                 SegmentActions.removeAllMutedSegments();
+
                 $(document).trigger('segment-filter:filter-data:load', { data: data });
 
                 var reactState = Object.assign({
@@ -119,14 +122,13 @@ if (SegmentFilter.enabled())
                     filtering : true,
                     segmentsArray: data.segment_ids
                 },extendendLocalStorageValues);
-                CatToolActions.setSegmentFilter(data);
-
-                UI.clearStorage('SegmentFilter');
 
                 SegmentFilter.setStoredState({
                     serverData : data ,
                     reactState : reactState
                 }) ;
+
+                CatToolActions.setSegmentFilter(data);
 
                 SegmentActions.setMutedSegments(data[ 'segment_ids' ]);
 

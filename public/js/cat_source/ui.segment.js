@@ -308,24 +308,6 @@
         },
 
         /**
-         * selectorForNextUntranslatedSegment
-         *
-         * Defines the css selectors to be used to determine the next
-         * segment to open.
-         */
-        selectorForNextUntranslatedSegment : function(status, section) {
-            var selector = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
-            return selector ;
-        },
-
-        /**
-         * selectorForNextSegment
-         */
-        selectorForNextSegment : function() {
-            return 'section:not(.ice-locked)';
-        },
-
-        /**
          * evalNextSegment
          *
          * Evaluates the next segment and populates this.nextSegmentId ;
@@ -344,9 +326,6 @@
             this.nextSegmentId = (next) ? next.original_sid : null;
             var prev = (currentSegment) ? SegmentStore.getPrevSegment(currentSegment.original_sid) : null;
             this.previousSegmentId = ( prev ) ? prev.original_sid : null;
-        },
-        gotoNextSegment: function() {
-            SegmentActions.openSegment(UI.nextSegmentId);
         },
         gotoNextUntranslatedSegment: function() {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
@@ -376,8 +355,18 @@
                 segment: this.currentSegment
             });
         },
+        gotoNextSegment: function() {
+            var nextSeg =  SegmentStore.getNextSegment();
+            if ( nextSeg ) {
+                SegmentActions.openSegment(nextSeg.sid);
+            }
+        },
         gotoPreviousSegment: function() {
-            SegmentActions.openSegment( UI.previousSegmentId );
+            var prevSeg = SegmentStore.getPrevSegment();
+            if ( prevSeg ) {
+                SegmentActions.openSegment( prevSeg.sid );
+            }
+
         },
         gotoSegment: function(id) {
             if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
@@ -568,104 +557,46 @@
             return segment || UI.getSegmentsSplit(segmentId).length > 0 ;
         },
         getContextBefore: function(segmentId) {
-            var segment = $('#segment-' + segmentId);
-            var originalId = segment.attr('data-split-original-id');
-            var segmentBefore = (function  findBefore(segment) {
-                var before = segment.prev('section');
-                if (before.length === 0 ) {
-                    return undefined;
-                }
-                else if (before.attr('data-split-original-id') && before.attr('data-split-original-id') !== originalId) {
-                    return before;
-                } else {
-                    return findBefore(before);
-                }
-
-            })(segment);
-            // var segmentBefore = findSegmentBefore();
-            if (_.isUndefined(segmentBefore)) {
+            var segmentBefore = SegmentStore.getPrevSegment(segmentId);
+            if ( !segmentBefore ) {
                 return null;
             }
-            var segmentBeforeId = UI.getSegmentId(segmentBefore);
-            var isSplitted = segmentBeforeId.split('-').length > 1;
+            var segmentBeforeId = segmentBefore.splitted;
+            var isSplitted = segmentBefore.splitted;
             if (isSplitted) {
                 return this.collectSplittedTranslations(segmentBeforeId, ".source");
-            } else if (config.brPlaceholdEnabled)  {
-                return this.postProcessEditarea(segmentBefore, '.source');
             } else {
-                return $('.source', segmentBefore ).text();
+                return UI.prepareTextToSend(segmentBefore.segment);
             }
         },
         getContextAfter: function(segmentId) {
-            var segment = $('#segment-' + segmentId);
-            var originalId = segment.attr('data-split-original-id');
-            var segmentAfter = (function findAfter(segment) {
-                var after = segment.next('section');
-                if (after.length === 0 ) {
-                    return undefined;
-                }
-                else if (after.attr('data-split-original-id') && after.attr('data-split-original-id') !== originalId) {
-                    return after;
-                } else {
-                    return findAfter(after);
-                }
 
-            })(segment);
-            if (_.isUndefined(segmentAfter)) {
+            var segmentAfter = SegmentStore.getNextSegment(segmentId);
+            if ( !segmentAfter ) {
                 return null;
             }
-            var segmentAfterId = UI.getSegmentId(segmentAfter);
-            var isSplitted = segmentAfterId.split('-').length > 1;
+            var segmentAfterId = segmentAfter.sid;
+            var isSplitted = segmentAfter.splitted;
             if (isSplitted) {
                 return this.collectSplittedTranslations(segmentAfterId, ".source");
-            } else if (config.brPlaceholdEnabled)  {
-                return this.postProcessEditarea(segmentAfter, '.source');
-            } else {
-                return $('.source', segmentAfter ).text();
+            } else   {
+                return UI.prepareTextToSend(segmentAfter.segment);
             }
         },
         getIdBefore: function(segmentId) {
-            var segment = $('#segment-' + segmentId);
-            var originalId = segment.attr('data-split-original-id');
-            var segmentBefore = (function  findBefore(segment) {
-                var before = segment.prev('section');
-                if (before.length === 0 ) {
-                    return undefined;
-                }
-                else if (before.attr('data-split-original-id') !== originalId) {
-                    return before;
-                } else {
-                    return findBefore(before);
-                }
-
-            })(segment);
+            var segmentBefore = SegmentStore.getPrevSegment(segmentId);
             // var segmentBefore = findSegmentBefore();
-            if (_.isUndefined(segmentBefore)) {
+            if ( !segmentBefore ) {
                 return null;
             }
-            var segmentBeforeId = UI.getSegmentId(segmentBefore);
-            return segmentBeforeId;
+            return segmentBefore.original_sid;
         },
         getIdAfter: function(segmentId) {
-            var segment = $('#segment-' + segmentId);
-            var originalId = segment.attr('data-split-original-id');
-            var segmentAfter = (function findAfter(segment) {
-                var after = segment.next('section');
-                if (after.length === 0 ) {
-                    return undefined;
-                }
-                else if (after.attr('data-split-original-id') !== originalId) {
-                    return after;
-                } else {
-                    return findAfter(after);
-                }
-
-            })(segment);
-            if (_.isUndefined(segmentAfter)) {
+            var segmentAfter = SegmentStore.getNextSegment(segmentId);
+            if ( !segmentAfter ) {
                 return null;
             }
-            var segmentAfterId = UI.getSegmentId(segmentAfter);
-            return segmentAfterId;
+            return segmentAfter.original_sid;
         },
         showApproveAllModalWarnirng: function (  ) {
             var props = {
@@ -698,7 +629,7 @@
             } else {
                 return API.SEGMENT.approveSegments(segmentsArray).then(function ( response ) {
                     self.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
-                    UI.retrieveStatistics();
+                    setTimeout(UI.retrieveStatistics, 2000);
                 });
             }
         },
@@ -713,7 +644,7 @@
             } else {
                 return API.SEGMENT.translateSegments(segmentsArray).then(function ( response ) {
                     self.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
-                    UI.retrieveStatistics();
+                    setTimeout(UI.retrieveStatistics, 2000);
                 });
             }
         },

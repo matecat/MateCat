@@ -40,8 +40,9 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.SET_SEARCH_RESULTS:
             CatToolStore.emitChange(CatToolConstants.SET_SEARCH_RESULTS, action.total, action.segments);
             break;
-        default:
-            CatToolStore.emitChange(action.actionType, action.data);
+        case CatToolConstants.RELOAD_SEGMENT_FILTER:
+            CatToolStore.emitChange(CatToolConstants.RELOAD_SEGMENT_FILTER);
+            break;
     }
 });
 module.exports = CatToolStore;

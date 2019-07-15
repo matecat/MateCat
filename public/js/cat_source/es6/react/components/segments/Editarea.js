@@ -72,7 +72,7 @@ class Editarea extends React.Component {
         let self = this;
         setTimeout(function () {
             if(!$(self.editAreaRef).find('.locked.selected').length) {
-                if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                if(window.getSelection() && !$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                     //ShowEditToolbar
                     $('.editor .editToolbar').addClass('visible');
                 }

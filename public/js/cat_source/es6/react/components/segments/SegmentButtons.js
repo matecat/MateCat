@@ -94,18 +94,18 @@ class SegmentButton extends React.Component {
         if (filtering) {
             nextButton = null;
             var data = SegmentFilter.getStoredState();
-            var filterinRepetitions = data.reactState.samplingType === "repetitions";
+            var filterinRepetitions = data.reactState && data.reactState.samplingType === "repetitions";
             if (filterinRepetitions) {
                 nextButton =<React.Fragment>
-                    <li><a id={"segment-" + this.currentSegmentId+"-nextrepetition"} href="#"
+                    <li><a id={"segment-" + this.props.segment.sid+"-nextrepetition"} href="#"
                            className="next-review-repetition ui green button"
-                           data-segmentid={"segment-"+this.currentSegmentId}
+                           data-segmentid={"segment-"+ this.props.segment.sid}
                            title="Revise and go to next repetition">REP ></a>
                     </li>
                     <li>
-                        <a id={"segment-" + this.currentSegmentId +"-nextgrouprepetition"}
+                        <a id={"segment-" + this.props.segment.sid +"-nextgrouprepetition"}
                            href="#" className="next-review-repetition-group ui green button"
-                           data-segmentid={"segment-" + this.currentSegmentId}
+                           data-segmentid={"segment-" + this.props.segment.sid}
                            title="Revise and go to next repetition group">REP >></a>
                     </li>
                 </React.Fragment>;
@@ -162,7 +162,7 @@ class SegmentButton extends React.Component {
         if (filtering) {
             nextButton = null;
             var data = SegmentFilter.getStoredState();
-            var filterinRepetitions = data.reactState.samplingType === "repetitions";
+            var filterinRepetitions = data.reactState && data.reactState.samplingType === "repetitions";
             if (filterinRepetitions) {
                 nextButton =<React.Fragment>
                             <li><a id={"segment-" + this.currentSegmentId+"-nextrepetition"} href="#"
@@ -259,6 +259,7 @@ class SegmentButton extends React.Component {
 
 
     render() {
+        if ( this.props.segment.muted ) return '';
         return this.getButtons()
     }
 }

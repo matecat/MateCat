@@ -90,10 +90,19 @@ var SegmentActions = {
     },
 
     openSegment: function (sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.OPEN_SEGMENT,
-            sid: sid
-        });
+        const segment = SegmentStore.getSegmentByIdToJS(sid);
+        if ( segment ) {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.OPEN_SEGMENT,
+                sid: sid
+            });
+        } else {
+            UI.unmountSegments();
+            UI.render({
+                firstLoad: false,
+                segmentToScroll: sid
+            });
+        }
     },
     closeSegment: function ( sid, fid ) {
         AppDispatcher.dispatch({
@@ -429,7 +438,7 @@ var SegmentActions = {
                         });
                     })
                     .fail(function (error) {
-                        UI.failedConnection(sid, 'getContributions');
+                        UI.failedConnection(sid, 'getGlossaryForSegment');
                     });
             }
         }
@@ -524,10 +533,9 @@ var SegmentActions = {
     },
 
     getContributions: function (sid, fid, target) {
-        let $segment = UI.getSegmentById(sid);
-        UI.getContribution($segment, 0);
-        UI.getContribution($segment, 1);
-        UI.getContribution($segment, 2);
+        UI.getContribution(sid, 0);
+        UI.getContribution(sid, 1);
+        UI.getContribution(sid, 2);
     },
 
     setConcordanceResult: function (sid, data) {

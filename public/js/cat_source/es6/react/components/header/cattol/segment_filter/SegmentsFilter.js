@@ -208,7 +208,8 @@ class SegmentsFilter extends React.Component {
         }
     }
 
-    selectAllSegments() {
+    selectAllSegments(event) {
+        event.stopPropagation();
         SegmentActions.setBulkSelectionSegments(this.state.segmentsArray.slice(0));
     }
 
@@ -446,7 +447,7 @@ class SegmentsFilter extends React.Component {
                             </div>
                             {this.state.filteredCount > 0 ? (
                             <div className="select-all-filter">
-                                <button href="#" ref={(button)=>this.selectAllButton=button} onClick={this.selectAllSegments.bind(this)}>Select All</button>
+                                <button href="#" ref={(button)=>this.selectAllButton=button} onClick={(event)=>this.selectAllSegments(event)}>Select All</button>
                             </div>
                             ): (null)}
                         </div>

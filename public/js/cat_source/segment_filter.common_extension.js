@@ -4,8 +4,6 @@ if ( SegmentFilter.enabled() )
 
     var original_renderFiles = UI.renderFiles ;
 
-    var original_selectorForNextUntranslatedSegment = UI.selectorForNextUntranslatedSegment ; 
-    var original_selectorForNextSegment = UI.selectorForNextSegment ; 
     var original_gotoNextSegment = UI.gotoNextSegment ;
     var original_gotoPreviousSegment = UI.gotoPreviousSegment ;
 
@@ -53,13 +51,25 @@ if ( SegmentFilter.enabled() )
         }
     };
 
+    var gotoNextTranslatedSegment = function(sid) {
+        var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
+        var index = list.indexOf( '' + sid );
+        var nextFiltered = ( index !== list.length - 1 ) ? list[ index + 1 ] : list[0];
+        let segment = SegmentStore.getSegmentByIdToJS(nextFiltered);
+        if ( segment.status !== "DRAFT" &&  segment.status !== "NEW" ) {
+            SegmentActions.openSegment(nextFiltered);
+        } else {
+            gotoNextTranslatedSegment(nextFiltered)
+        }
+    };
+
     $.extend(UI, {
         openNextTranslated : function() {
             // this is expected behaviour in review
             // change this if we are filtering, go to the next
             // segment, assuming the sample is what we want to revise.
             if ( SF.filtering() ) {
-                gotoNextSegment.apply(this, arguments);
+                gotoNextTranslatedSegment(this.currentSegmentId);
             }
             else {
                 original_openNextTranslated.apply(this, arguments);
@@ -83,26 +93,6 @@ if ( SegmentFilter.enabled() )
             }
 
         },
-        selectorForNextUntranslatedSegment : function(status, section) {
-            if ( !SF.filtering() ) {
-                return original_selectorForNextUntranslatedSegment(status, section); 
-            } else {
-                return 'section:not(.muted)';
-            }
-        },
-
-        selectorForNextSegment : function() {
-            if ( !SF.filtering() ) {
-                return original_selectorForNextSegment(); 
-            } else  {
-                return 'section:not(.muted)'; 
-            }
-        },
-
-        isMuted : function(el) {
-            return  $(el).closest('section').hasClass('muted');
-        },
-
         renderFiles : function() {
             original_renderFiles.apply( this, arguments );
 

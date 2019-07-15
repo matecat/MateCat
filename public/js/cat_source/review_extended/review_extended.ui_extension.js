@@ -284,14 +284,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 UI.removeFromStorage('unlocked-' + sid);
             }
             UI.setRevision( data );
-        },
-        getSelectorForNextSegment: function() {
-            if ( ReviewExtended.number === 1 ) {
-                return '.status-translated';
-            } else if ( ReviewExtended.number === 2 ){
-                return 'section.status-translated, section.status-approved.approved-step-1';
-            }
-        },
+        }
 
     });
 }

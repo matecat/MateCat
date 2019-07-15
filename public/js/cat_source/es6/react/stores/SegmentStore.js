@@ -339,6 +339,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     },
     setMutedSegments: function (segmentsArray) {
+        this._segments = this._segments.map(segment => segment.set('filtering', true));
         this._segments = this._segments.map( (segment) => {
             if (segmentsArray.indexOf(segment.get('sid')) === -1) {
                 return segment.set('muted', true);
@@ -347,8 +348,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
     },
     removeAllMutedSegments: function () {
-        let self = this;
-        this._segments = this._segments.map(segment => segment.set('muted', false));
+        this._segments = this._segments.map((segment) => {segment.set('muted', false); segment.set('filtering', false); return segment; });
     },
     setUnlockedSegment: function (sid, fid, unlocked) {
         let index = this.getSegmentIndex(sid);
@@ -500,8 +500,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
      * 7 TRANSLATED
      * 8 UNTRANSLATED | is draft or new
      */
-    getNextSegment(current_sid, current_fid, status, notIce) {
-
+    getNextSegment(current_sid, current_fid, status) {
+        current_sid = ( !current_sid) ? this.getCurrentSegment().sid : current_sid;
         let allStatus = {
             1: "APPROVED",
             2: "DRAFT",
@@ -517,10 +517,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments.forEach((segment, key) => {
             if (_.isUndefined(result)) {
                 if ( currentFind ) {
-                    if ( status === 8 && (segment.get( 'status' ) == allStatus[2] || segment.get( 'status' ) == allStatus[4]) ) {
+                    if ( status === 8 && (segment.get( 'status' ) == allStatus[2] || segment.get( 'status' ) == allStatus[4]) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
-                    } else if ( (status && segment.get( 'status' ) == allStatus[status]) || !status ) {
+                    } else if ( ((status && segment.get( 'status' ) == allStatus[status]) || !status) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     }
@@ -535,8 +535,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return result;
     },
     getPrevSegment(sid) {
+        sid = ( !sid) ? this.getCurrentSegment().sid : sid;
         var index = this.getSegmentIndex(sid);
-        return (index > 0) ? this._segments.get(index-1).toJS() : null;
+        let segment = (index > 0) ? this._segments.get(index-1).toJS() : null;
+        if ( segment && !segment.muted || !segment) {
+            return segment;
+        }
+        return this.getPrevSegment(segment.sid);
     },
     getSegmentByIdToJS(sid, fid) {
         let segment = this._segments.find(function (seg) {
