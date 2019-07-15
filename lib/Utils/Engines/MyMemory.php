@@ -261,13 +261,20 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     public function delete( $_config ) {
 
         $parameters               = [];
-        $parameters[ 'seg' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]       = $_config[ 'email' ];
-        $parameters[ 'id' ]       = @$_config[ 'id_match' ];
+
+        if(isset($_config[ 'segment' ]) and isset($_config[ 'translation' ])){
+            $parameters[ 'seg' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
+            $parameters[ 'tra' ]      = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
+        }
+
+        if(isset($_config[ 'id_match' ])){
+            $parameters[ 'id' ]       = $_config[ 'id_match' ];
+        }
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
+
             if ( !is_array( $_config[ 'id_user' ] ) ) {
                 $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
             }
