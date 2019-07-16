@@ -322,13 +322,12 @@ class SegmentsContainer extends React.Component {
                             styleCopy.marginTop = '50px';
                     }
                 }
-                return <div key={index} style={styleCopy}>
+                return <div className={'segment-container'} key={index} style={styleCopy}>
                     {items[index]}
                 </div>;
             }}
             onItemsRendered={(obj)=> this.lastUpdateObj = obj}
-        >
-        </VirtualList>
+        />
 
 
     }

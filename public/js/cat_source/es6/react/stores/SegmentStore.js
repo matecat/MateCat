@@ -238,9 +238,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         var index = this.getSegmentIndex(sid);
         let segment = this._segments.get(index);
         var trans = htmlEncode(this.removeLockTagsFromString(translation));
+        let decoded_translation = UI.decodeText(segment.toJS(), trans);
         this._segments = this._segments.setIn([index, 'translation'], trans);
-        this._segments = this._segments.setIn([index, 'decoded_translation'], UI.decodeText(segment.toJS(), trans));
-        return translation;
+        this._segments = this._segments.setIn([index, 'decoded_translation'], decoded_translation);
+        return decoded_translation;
     },
     modifiedTranslation(sid, fid, status) {
         const index = this.getSegmentIndex(sid, fid);
@@ -499,8 +500,9 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
      * 6 REJECTED
      * 7 TRANSLATED
      * 8 UNTRANSLATED | is draft or new
+     * @param revisionNumber
      */
-    getNextSegment(current_sid, current_fid, status) {
+    getNextSegment(current_sid, current_fid, status, revisionNumber) {
         current_sid = ( !current_sid) ? this.getCurrentSegment().sid : current_sid;
         let allStatus = {
             1: "APPROVED",
@@ -510,22 +512,28 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             5: "REBUTTED",
             6: "REJECTED",
             7: "TRANSLATED",
-            8: "UNTRANSLATED"
+            8: "UNTRANSLATED",
+            9: "UNAPPROVED"
         };
         let result,
             currentFind = false;
         this._segments.forEach((segment, key) => {
             if (_.isUndefined(result)) {
-                if ( currentFind ) {
-                    if ( status === 8 && (segment.get( 'status' ) == allStatus[2] || segment.get( 'status' ) == allStatus[4]) && !segment.get('muted') ) {
+                if ( currentFind || current_sid === -1) {
+                    if ( status === 8 && (segment.get( 'status' ) === allStatus[2] || segment.get( 'status' ) === allStatus[4]) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
-                    } else if ( ((status && segment.get( 'status' ) == allStatus[status]) || !status) && !segment.get('muted') ) {
+                    } else if ( status === 9 && revisionNumber ) { // Second pass
+                        if ( (segment.get('status') === allStatus[1] || segment.get('status') === allStatus[7]) && segment.get('revision_number') === revisionNumber ) {
+                            result = segment.toJS();
+                            return false;
+                        }
+                    } else if ( ((status && segment.get( 'status' ) === allStatus[status]) || !status) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     }
                 }
-                if ( segment.get( 'sid' ) == current_sid ) {
+                if ( segment.get( 'sid' ) === current_sid ) {
                     currentFind = true;
                 }
             } else {
@@ -543,7 +551,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
         return this.getPrevSegment(segment.sid);
     },
-    getSegmentByIdToJS(sid, fid) {
+    getSegmentByIdToJS(sid) {
         let segment = this._segments.find(function (seg) {
             return seg.get('sid') == sid;
         });

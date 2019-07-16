@@ -277,9 +277,6 @@ class SegmentTarget extends React.Component {
                 {this.getTargetArea(translation)}
                 <p className="warnings"/>
 
-                <ul className="buttons toggle" data-mount="main-buttons"
-                    id={"segment-" + this.props.segment.sid + "-buttons"}/>
-
                 <SegmentButtons
                     disabled={this.state.buttonsDisabled}
                     {...this.props}

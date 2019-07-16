@@ -35,7 +35,7 @@ class QAComponent extends React.Component {
 
         if (segmentId) {
             if ($segment) {
-                window.location.hash = segment.sid;
+                window.location.hash = segmentId;
             }
             SegmentActions.openSegment(segmentId);
         }

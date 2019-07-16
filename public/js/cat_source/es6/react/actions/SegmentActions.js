@@ -110,11 +110,23 @@ var SegmentActions = {
         });
         this.closeIssuesPanel();
     },
-    scrollToSegment: function (sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.SCROLL_TO_SEGMENT,
-            sid: sid,
-        });
+    scrollToSegment: function (sid, callback) {
+        const segment = SegmentStore.getSegmentByIdToJS(sid);
+        if ( segment ) {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+                sid: sid,
+            });
+            if (callback) {
+                callback.apply(this, [sid]);
+            }
+        } else {
+            UI.unmountSegments();
+            UI.render({
+                firstLoad: false,
+                segmentToScroll: sid
+            }).done(()=> callback && setTimeout(()=>callback.apply(this, [sid]), 1000));
+        }
     },
     addClassToSegment: function (sid, newClass) {
         setTimeout( function () {

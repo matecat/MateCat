@@ -12,12 +12,11 @@
         /**
          * Return che Suggestion, if exist, used by the current segment
          * return json
-         * TODO retrieve contributions from the store
          */
         getCurrentSegmentContribution: function (segment) {
-            var currentSegment = (segment)? segment : UI.currentSegment;
+            var currentSegment = segment;
             var currentContribution;
-            var chosen_suggestion = $('.editarea', currentSegment).data('lastChosenSuggestion');
+            var chosen_suggestion = ( segment.contributions && segment.contributions.matches.length > 0 ) ? segment.contributions.matches[0] : undefined;
             if (!_.isUndefined(chosen_suggestion)) {
                 var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(currentSegment));
                 if (storedContributions) {
@@ -359,6 +358,8 @@
             var nextSeg =  SegmentStore.getNextSegment();
             if ( nextSeg ) {
                 SegmentActions.openSegment(nextSeg.sid);
+            } else if ( UI.noMoreSegmentsAfter){
+                SegmentActions.openSegment(config.firstSegmentOfFiles[0].first_segment);
             }
         },
         gotoPreviousSegment: function() {
@@ -398,12 +399,7 @@
                 var callback = function() {
                     $(window).off('modalClosed');
                     //Check if the next is inside the view, if not render the file
-                    var next = SegmentStore.getSegmentByIdToJS(UI.nextUntranslatedSegmentIdByServer);
-                    if (next) {
-                        SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
-                    } else {
-                        UI.renderAfterConfirm(UI.nextUntranslatedSegmentIdByServer);
-                    }
+                    SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
                 };
                 // If the modal is open wait the close event
                 if( $(".modal[data-type='confirm']").length ) {

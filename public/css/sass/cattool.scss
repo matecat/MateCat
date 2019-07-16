@@ -53,7 +53,6 @@ Styles from other css files should be ported over time.
     cursor: default;
     display: block;
     font-size: 12px;
-    height: inherit;
     padding-bottom: 1px;
     position: absolute;
     text-align: center;
@@ -61,6 +60,7 @@ Styles from other css files should be ported over time.
     right: -7%;
     width: 7%;
     top: 0;
+    height: 100%;
 }
 
 

@@ -91,6 +91,7 @@ class Editarea extends React.Component {
         $('.editor .editToolbar').removeClass('visible');
     }
     onClickEvent(event) {
+        SegmentActions.closeTagsMenu();
         if (this.props.readonly || this.props.locked) {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
         } else {

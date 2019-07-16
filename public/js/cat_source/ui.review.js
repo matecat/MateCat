@@ -143,26 +143,7 @@ if ( config.enableReview && config.isReview ) {
              */
             clickOnApprovedButton: function (e, button) {
                 return false
-            },
-            // overrideButtonsForRevision: function () {
-            //     var div = $('<ul>' + UI.segmentButtons + '</ul>');
-            //
-            //     div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved');
-            //     var nextSegment = UI.currentSegment.next();
-            //     var goToNextApprovedButton = !nextSegment.hasClass('status-translated');
-            //     var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
-            //     div.find('.next-untranslated').parent().remove();
-            //     div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition').removeClass('primary').addClass('green');
-            //     div.find('.next-repetition-group').removeClass('next-repetition-group').addClass('next-review-repetition-group').removeClass('primary').addClass('green');
-            //     if (goToNextApprovedButton && !filtering) {
-            //         var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
-            //             '-nexttranslated" href="#" class="btn next-unapproved" data-segmentid="segment-' +
-            //             this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
-            //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-            //         div.html(htmlButton + div.html());
-            //     }
-            //     UI.segmentButtons = div.html();
-            // }
+            }
         });
     })(jQuery);
 }

@@ -18,8 +18,8 @@ class TagsMenu extends React.Component {
         let addedTags = _.filter(uniqueSourceTags, function ( item ) {
             return missingTags.indexOf(item.replace(/&quot;/g, '"')) === -1 ;
         });
-        this.menuHeight = window.innerHeight*30/100;
-        this.menuWidth = 300;
+        this.menuHeight = $('.editor .targetarea').outerHeight() *150/100;
+        this.menuWidth = 270;
         this.state = {
             selectedItem: 0,
             missingTags : missingTags,
@@ -41,25 +41,27 @@ class TagsMenu extends React.Component {
     };
 
     getSelectionCoords() {
-        var win = window;
-        var doc = win.document;
-        var sel = doc.selection, range, rects, rect;
-        var x = 0, y = 0;
+        let win = window;
+        let doc = win.document;
+        let sel = doc.selection, range, rects, rect;
+        let x = 0, y = 0, offsetParent;
+        let $container;
         if (win.getSelection) {
             sel = win.getSelection();
             if (sel.rangeCount) {
                 range = sel.getRangeAt(0).cloneRange();
 
-                var span = doc.createElement("span");
+                let span = doc.createElement("span");
                 if (span.getClientRects) {
                     // Ensure span has dimensions and position by
                     // adding a zero-width space character
                     span.appendChild( doc.createTextNode( "\u200b" ) );
                     range.insertNode( span );
-                    rect = span.getClientRects()[0];
-                    x = rect.left;
-                    y = rect.bottom;
-                    var spanParent = span.parentNode;
+                    // rect = span.getClientRects()[0];
+                    x = $(span).position().left;
+                    y = $(span).position().top;
+                    offsetParent = $(span).offsetParent().offset();
+                    let spanParent = span.parentNode;
                     spanParent.removeChild( span );
 
                     // Glue any broken text nodes back together
@@ -68,10 +70,12 @@ class TagsMenu extends React.Component {
                 }
             }
         }
-        if ( (window.innerHeight - y) < (this.menuHeight + 200) ) {
-            y = y - this.menuHeight - 20;
+        if ( (window.innerHeight - offsetParent.top - y) < (this.menuHeight + 200) ) {
+            y = y - this.menuHeight;
+        } else {
+            y = y + 20;
         }
-        if ( (window.innerWidth - x) < (this.menuWidth + 100) ) {
+        if ( (window.innerWidth - offsetParent.left - x) < (this.menuWidth + 100) ) {
             x = x - this.menuWidth + 20;
         }
         return { x: x, y: y };
@@ -407,9 +411,9 @@ class TagsMenu extends React.Component {
     render() {
 
         let style = {
-            position: "fixed",
+            position: "absolute",
             zIndex: 2,
-            maxHeight: "30%",
+            maxHeight: "150%",
             overflowY: "auto",
             top: this.state.coord.y,
             left: this.state.coord.x

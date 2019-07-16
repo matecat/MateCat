@@ -32,16 +32,10 @@ if (config.translation_matches_enabled) {
     } );
 
 $.extend(UI, {
-	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
-		if (typeof (decode) == "undefined") {
-			decode = false;
-		}
+	copySuggestionInEditarea: function(segment, translation, editarea, match, which, createdBy) {
+
 		var percentageClass = this.getPercentuageClass(match);
 		if ($.trim(translation) !== '') {
-
-			if (decode) {
-				translation = htmlDecode(translation);
-			}
 
 			this.saveInUndoStack('copysuggestion');
 
@@ -188,29 +182,29 @@ $.extend(UI, {
         if(!data) return true;
 
         var editarea = $('.editarea', segment);
-
+        var segmentObj = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(segment));
         SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.errors);
 
         if ( data.matches && data.matches.length > 0 && _.isUndefined(data.matches[0].error)) {
-            var editareaLength = editarea.text().trim().length;
+            var editareaLength = segmentObj.translation.length;
             var translation = data.matches[0].translation;
 
             var match = data.matches[0].match;
 
-            var segment_id = segment.attr('id');
-            $('.sub-editor.matches .overflow .graysmall .message, .tab.sub-editor.matches .engine-error-item', segment).remove();
-            // $('.tab-switcher-tm .number', segment).text('');
+            var segment_id = segmentObj.sid;
 
             if (editareaLength === 0) {
 
                 UI.setChosenSuggestion(1, segment);
 
-                translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
+
+                // translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
+
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
                  * the source with the text with tags, the segment is tagged
                  */
                 if (UI.checkCurrentSegmentTPEnabled(segment)) {
-                    var currentContribution = this.getCurrentSegmentContribution(segment);
+                    var currentContribution = this.getCurrentSegmentContribution(segmentObj);
                     if (parseInt(currentContribution.match) !== 100) {
                         translation = currentContribution.translation;
                         translation = UI.removeAllTags(translation);
@@ -220,7 +214,7 @@ $.extend(UI, {
                 }
 
                 var copySuggestion = function() {
-                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
+                    UI.copySuggestionInEditarea(segment, translation, editarea, match, 1);
                 };
                 if ( UI.autoCopySuggestionEnabled() &&
                     ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() )
@@ -234,7 +228,7 @@ $.extend(UI, {
             $('.draft', segment).removeAttr('disabled');
         }
 
-        SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
+        SegmentActions.addClassToSegment(segment_id, 'loaded');
     },
     showContributionError: function(segment) {
         SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), [], [{}]);

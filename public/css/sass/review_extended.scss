@@ -379,12 +379,10 @@ section {
 
     .translation-issues-button {
         cursor: pointer;
-        padding: 10px 0;
-        width: 50px;
-    }
-
-    &:not(.opened) .translation-issues-button {
         padding: 5px 7px 5px;
+        width: 50px;
+        position: absolute;
+        top: 50px;
     }
 
     .translation-issues-button .revise-button {
@@ -403,9 +401,9 @@ section {
     }
 
     .revise-button-counter {
-        left: 30px;
+        left: 35px;
         position: absolute;
-        top: 55px;
+        top: 2px;
         background: #dc2e34;
         color: #fff;
         border: 1px solid #fff;
@@ -420,9 +418,6 @@ section {
         line-height: 1.5;
     }
 
-    &:not(.opened) .revise-button-counter {
-        top: 50px;
-    }
     .revise-button-2 {
         background: #BC6AC9;
     }

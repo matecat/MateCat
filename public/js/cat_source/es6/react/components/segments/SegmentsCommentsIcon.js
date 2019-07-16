@@ -28,7 +28,8 @@ class SegmentsCommentsIcon extends React.Component {
         }
     }
 
-    openComments() {
+    openComments(event) {
+        event.stopPropagation();
         SegmentsActions.openSegmentComment(this.props.segment.sid);
         SegmentsActions.scrollToSegment(this.props.segment.sid);
         localStorage.setItem(MBC.localStorageCommentsClosed, false);
@@ -65,7 +66,7 @@ class SegmentsCommentsIcon extends React.Component {
                 </span>
                 }
 
-                return <div className={rootClasses.join( ' ' )} title="Add comment" onClick={() => this.openComments()}>
+                return <div className={rootClasses.join( ' ' )} title="Add comment" onClick={(e) => this.openComments(e)}>
                     <span className="mbc-comment-icon icon-bubble2"/>
                     {html}
                 </div>

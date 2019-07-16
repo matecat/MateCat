@@ -4,7 +4,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
     $.extend(ReviewExtended, {
 
         submitIssue: function (sid, data_array, diff) {
-            var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
+            var fid = UI.getSegmentFileId(UI.getSegmentById(sid));
 
 
             var deferreds = _.map(data_array, function (data) {
@@ -134,14 +134,8 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
          * @returns {boolean}
          */
         segmentIsModified: function ( sid ) {
-            var segmentFid = UI.getSegmentFileId(UI.currentSegment);
-            var segment = SegmentStore.getSegmentByIdToJS(sid, segmentFid);
-            var versionTranslation = $('<div/>').html(UI.transformTagsWithHtmlAttribute(segment.versions[0].translation)).text();
-
-            if (UI.currentSegment.hasClass('modified') && versionTranslation.trim() !== UI.getSegmentTarget(UI.currentSegment).trim()) {
-                return true;
-            }
-            return false;
+            var segment = SegmentStore.getSegmentByIdToJS(sid);
+            return segment.modified;
         },
         submitComment : function(id_segment, id_issue, data) {
             return ReviewExtended.submitComment(id_segment, id_issue, data)
@@ -244,9 +238,10 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             // because of the event is triggered even on download button
             e.preventDefault();
             var sid = UI.currentSegmentId;
+            var segment = SegmentStore.getSegmentByIdToJS(sid);
 
             //If is a splitted segment the user need to specify a issue before approve
-            var isSplit = sid.indexOf("-") !== -1;
+            var isSplit = segment.splitted;
             if (!isSplit && UI.segmentIsModified(sid) && ReviewExtended.issueRequiredOnSegmentChange) {
                 SegmentActions.showIssuesMessage(sid);
                 return;
@@ -267,7 +262,11 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
 
             if ( goToNextNotApproved ) {
-                UI.openNextTranslated();
+                if ( segment.revision_number > 1 ) {
+                    UI.openNextApproved();
+                } else {
+                    UI.openNextTranslated();
+                }
             } else {
                 UI.gotoNextSegment( sid );
             }
@@ -284,6 +283,20 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 UI.removeFromStorage('unlocked-' + sid);
             }
             UI.setRevision( data );
+        },
+        openNextApproved: function ( sid ) {
+            sid = sid || UI.currentSegmentId;
+            var nextApprovedSegment = SegmentStore.getNextSegment(sid, null, 9, 1);
+            var nextApprovedSegmentInPrevious = SegmentStore.getNextSegment(-1, null, 9, 1);
+            // find in next segments
+            if(nextApprovedSegment) {
+                SegmentActions.openSegment(nextApprovedSegment.sid);
+                // else find from the beginning of the currently loaded segments in all files
+            } else if ( this.noMoreSegmentsBefore && nextApprovedSegmentInPrevious) {
+                SegmentActions.openSegment(nextApprovedSegmentInPrevious.sid);
+            } else if ( !this.noMoreSegmentsBefore || !this.noMoreSegmentsAfter) { // find in not loaded segments or go to the next approved
+                SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
+            }
         }
 
     });

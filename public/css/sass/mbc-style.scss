@@ -504,15 +504,13 @@ a.mbc-close-icon:hover {
 .segment-side-buttons .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
-  padding: 10px 0;
-  position: relative;
+  padding-left: 7px;
+  position: absolute;
   width: 50px;
   display: block !important;
+  top: 0px;
 }
 
-section:not(.opened) .segment-side-buttons .txt {
-  padding-left: 7px;
-}
 
 /*
  ******
@@ -569,7 +567,7 @@ section:not(.opened) .segment-side-buttons .txt {
  Highlight element in segment unique properties
  */
 .mbc-comment-highlight-segment {
-  left: 30px;
+  left: 35px;
   position: absolute;
   top: 5px;
 }
@@ -628,7 +626,7 @@ article .mbc-comment-balloon-outer {
   padding-right: 15px;
   margin-bottom: 30px;
   position: absolute;
-  bottom: -85px;
+  bottom: -70px;
   width: 100%;
   z-index: 1;
 }

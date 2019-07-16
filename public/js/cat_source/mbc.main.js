@@ -389,10 +389,8 @@ if ( MBC.enabled() )
             e.stopPropagation();
             $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
 
-            var sid = $( e.target ).closest( 'div' ).data( 'id' );
-            SegmentActions.scrollToSegment(sid);
-            SegmentActions.openSegmentComment(sid);
-
+            var sid = $( e.target ).closest( 'div' ).data( 'id' ) + "";
+            SegmentActions.scrollToSegment(sid, SegmentActions.openSegmentComment);
         } );
 
 
