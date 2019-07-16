@@ -13,7 +13,7 @@ class SegmentQRIssue extends React.Component {
             } else if(comment.source_page == 2){
                 array.push(<p key={comment.id} className="re-comment"><span className="re-revisor">Reviewer </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.message}</p>)
             } else if(comment.source_page == 3){
-                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor2">Reviewer </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.comment}</p>)
+                array.push(<p key={comment.id} className="re-comment"><span className="re-revisor2">Reviewer </span><span className="re-comment-date"><i>({comment_date}): </i></span>{comment.message}</p>)
             }
         }
         if(array.length > 0 ){
