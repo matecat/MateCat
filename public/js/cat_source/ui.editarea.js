@@ -1,4 +1,8 @@
 $.extend( UI, {
+    editAreaEditing: false,
+    setEditAreaEditing: function(isEditing) {
+        this.editAreaEditing = isEditing;
+    },
     setEditAreaEvents: function () {
         /**
          * Start EditArea Events Shortcuts
@@ -279,9 +283,10 @@ $.extend( UI, {
         }
     },
     inputEditAreaEventHandler: function (e) {
-        SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'waiting_for_check_result');
-        SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
-        UI.currentSegment.data('modified', true);
+        if ( !UI.currentSegment.data('modified') ) {
+            SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
+            UI.currentSegment.data('modified', true);
+        }
         UI.currentSegment.trigger('modified');
         //UI.updateSegmentTranslation();
         UI.registerQACheck();

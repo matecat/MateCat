@@ -349,8 +349,17 @@ class CatUtils {
             unset( $tmp_lang );
         }
 
-        //Subfiltering should have transformed the html in ph tags, so remove them, we do not want to count them
-        $string = preg_replace( '#<ph [^>]+>#', " ", $string );
+        if ( preg_match_all( '#<[/]{0,1}(?![0-9]+)[a-z0-9\-\._]+?(?:\s[:_a-z]+=.+?)?\s*[\/]{0,1}>#i', $string, $matches, PREG_SET_ORDER ) ) {
+
+            foreach ( $matches as $tag ) {
+                if ( is_numeric( substr( $tag[ 0 ], -2, 1 ) ) && !preg_match( '#<[/]{0,1}[h][1-6][^>]*>#i', $tag[ 0 ] ) ) { //H tag are an exception
+                    //tag can not end with a number
+                    continue;
+                }
+                $string = str_replace( $tag[ 0 ], " ", $string );
+            }
+
+        }
 
         //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
         //take a look at this string:

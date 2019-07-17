@@ -242,10 +242,10 @@ class Segment extends React.Component {
     }
 
     checkSegmentClasses() {
-        let classes =  this.state.segment_classes.concat(this.createSegmentClasses());
-        classes =  classes.concat(this.createSegmentClasses());
+        let classes =  this.state.segment_classes.slice();
+        classes =  _.union(classes, this.createSegmentClasses());
         classes =  this.checkSegmentStatus(classes);
-        if (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1){
+        if ( (classes.indexOf("muted") > -1 && classes.indexOf("editor") > -1) ){
             let indexEditor = classes.indexOf("editor");
             classes.splice(indexEditor, 1);
             let indexOpened = classes.indexOf("opened");

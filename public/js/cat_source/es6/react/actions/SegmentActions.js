@@ -237,7 +237,7 @@ var SegmentActions = {
         });
     },
     showTagsMenu: function(sid) {
-        if ( !UI.enableTagProjection ) {
+        if ( !UI.checkCurrentSegmentTPEnabled() ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_TAGS_MENU,
                 sid: sid,
