@@ -211,7 +211,7 @@ if(config.splitSegmentEnabled) {
                 var totalMarkup = '';
                 $.each(segments, function (index) {
                     var newMarkup = $('#segment-' + this + ' .source').attr('data-original');
-                    newMarkup = UI.transformTextForLockTags(newMarkup.replace(/&quot;/g, '\"'));
+                    newMarkup = UI.decodePlaceholdersToText(UI.transformTextForLockTags(newMarkup.replace(/&quot;/g, '\"')));
                     if(this == UI.currentSegmentId) newMarkup = '<span class="currentSplittedSegment">' + newMarkup + '</span>';
                     totalMarkup += newMarkup;
 
@@ -220,7 +220,7 @@ if(config.splitSegmentEnabled) {
                 splitAreaMarkup = totalMarkup;
             } else {
                 splitAreaMarkup = source.attr('data-original');
-                splitAreaMarkup = UI.transformTextForLockTags(htmlDecode(splitAreaMarkup).replace(/&quot;/g, '\"'));
+                splitAreaMarkup = UI.decodePlaceholdersToText(UI.transformTextForLockTags(htmlDecode(splitAreaMarkup).replace(/&quot;/g, '\"')));
             }
             splitArea.html(splitAreaMarkup);
             splitArea.find('.rangySelectionBoundary').remove();
