@@ -13,7 +13,7 @@ class FeatureSetTest extends PHPUnit_Framework_TestCase {
         $featureSet->loadFromString("dqf,review_improved,translation_versions,project_completion") ;
 
         $this->assertEquals(
-                "project_completion,translation_versions,review_improved,dqf",
+                "translated,mmt,translation_versions,project_completion,dqf,review_improved",
                 implode(',', $featureSet->sortFeatures()->getCodes() ) ) ;
     }
 

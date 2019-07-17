@@ -44,7 +44,7 @@ class GetByIdApikeyTest extends AbstractTest {
 
 
         $this->database_instance->getConnection()->query( $this->sql_insert_apikey );
-        $this->apikey_id = $this->database_instance->getConnection()->lastInsertId();
+        $this->apikey_id = $this->getTheLastInsertIdByQuery($this->database_instance);
 
         $this->sql_delete_apikey = "DELETE FROM " . INIT::$DB_DATABASE . ".`api_keys` WHERE uid='" . $this->apikey_id . "';";
 

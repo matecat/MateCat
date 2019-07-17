@@ -170,7 +170,7 @@ class GetMyMemoryTest extends AbstractTest {
                 CURLOPT_TIMEOUT     => 120
         ];
 
-        $url_mock_param   = "https://api.mymemory.translated.net/get";
+        $url_mock_param   = "http://api.mymemory.translated.net/get";
         $mock_json_return = <<<'TAB'
 {"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"responderId":null,"matches":[]}
 TAB;
@@ -219,13 +219,22 @@ TAB;
     public function test_get_segment_with_mock_for__call_and_at_least_one_match_found_in_TM() {
 
         $this->config_param_of_get[ 'segment' ] = "Ciascuna copia è dotata di un numero di serie univoco.";
-
-
-        $curl_mock_param  = [
-                CURLOPT_HTTPGET => true,
-                CURLOPT_TIMEOUT => 10
+        $curl_mock_param = [
+                CURLOPT_POSTFIELDS  =>
+                        [
+                                'q'        => 'Ciascuna copia è dotata di un numero di serie univoco.',
+                                'langpair' => 'it-IT|en-US',
+                                'de'       => 'demo@matecat.com',
+                                'mt'       => true,
+                                'numres'   => 3,
+                                'key'      => 'a6043e606ac9b5d7ff24',
+                        ],
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT     => 120
         ];
-        $url_mock_param   = "http://api.mymemory.translated.net/get?q=Ciascuna+copia+%C3%A8+dotata+di+un+numero+di+serie+univoco.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
+
+//        $url_mock_param   = "http://api.mymemory.translated.net/get?q=Ciascuna+copia+%C3%A8+dotata+di+un+numero+di+serie+univoco.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
+        $url_mock_param   = "http://api.mymemory.translated.net/get";
         $mock_json_return = <<<'TAB'
 {"responseData":{"translatedText":"Each copy has a unique serial number.","match":1},"responseDetails":"","responseStatus":200,"responderId":"238","matches":[{"id":"484523811","segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":"74","reference":"","usage-count":1,"subject":"All","created-by":"MyMemory_65655950851269d899c7","last-updated-by":"MyMemory_65655950851269d899c7","create-date":"2016-05-02 17:15:11","last-update-date":"2016-05-02 17:15:11","tm_properties":"[{\"type\":\"x-project_id\",\"value\":\"9\"},{\"type\":\"x-project_name\",\"value\":\"eryt\"},{\"type\":\"x-job_id\",\"value\":\"9\"}]","match":1,"key":"a6043e606ac9b5d7ff24"},{"id":0,"segment":"Ciascuna copia \u00e8 dotata di un numero di serie univoco.","translation":"Each copy has a unique serial number.","quality":70,"reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":false,"created-by":"MT!","last-updated-by":"MT!","create-date":"2016-05-02 17:20:51","last-update-date":"2016-05-02 17:20:51","tm_properties":"","match":0.85},{"id":"418675820","segment":"- un numero di serie univoco;","translation":"- a unique serial number;","quality":"0","reference":"http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:EN:HTML|@|http:\/\/eur-lex.europa.eu\/LexUriServ\/LexUriServ.do?uri=OJ:L:2007:084:0007:01:IT:HTML","usage-count":1,"subject":"Legal_and_Notarial","created-by":"Europa.eu","last-updated-by":"Europa.eu","create-date":"0000-00-00 00:00:00","last-update-date":"0000-00-00 00:00:00","tm_properties":null,"match":0.58}]}
 TAB;
@@ -347,10 +356,20 @@ TAB;
         $this->config_param_of_get[ 'segment' ] = "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
 
         $curl_mock_param = [
-                CURLOPT_HTTPGET => true,
-                CURLOPT_TIMEOUT => 10
+                CURLOPT_POSTFIELDS  =>
+                        [
+                                'q'        => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
+                                'langpair' => 'it-IT|en-US',
+                                'de'       => 'demo@matecat.com',
+                                'mt'       => true,
+                                'numres'   => 3,
+                                'key'      => 'a6043e606ac9b5d7ff24',
+                        ],
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT     => 120
         ];
-        $url_mock_param  = "http://api.mymemory.translated.net/get?q=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
+//        $url_mock_param  = "http://api.mymemory.translated.net/get?q=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
+        $url_mock_param  = "http://api.mymemory.translated.net/get";
 
         $rawValue_error = [
                 'error'          => [

@@ -112,7 +112,10 @@ class ServerCheck {
             $variables = $stmt->fetchAll();
             foreach ( $variables as $key => $value ){
                 $_VAR_NAME = $value['Variable_name'];
-                self::$MysqlParams->$_VAR_NAME = $value['Value'];
+
+                if(isset(self::$MysqlParams->$_VAR_NAME)){
+                    self::$MysqlParams->$_VAR_NAME = $value['Value'];
+                }
             }
 
             self::$serverParams->mysql_params = new ServerCheck_mysqlParams( self::$MysqlParams );

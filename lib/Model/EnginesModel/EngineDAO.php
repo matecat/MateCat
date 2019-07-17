@@ -139,6 +139,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         list( $query, $bind_values ) = $query_and_bindValues;
 
+
         $stmt      = $this->database->getConnection()->prepare( $query );
         $resultSet = $this->_fetchObject( $stmt, new EnginesModel_EngineStruct(), $bind_values );
 
@@ -285,13 +286,15 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) {
         $result = [];
 
-        $availableEngines = func_get_arg( 1 );
-
         foreach ( $array_result as $item ) {
 
-            if ( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
-                $result[] = new EnginesModel_NONEStruct();
-                continue;
+            if ( func_num_args() > 1 ) { // check if $availableEngines is provided as second argument
+                $availableEngines = func_get_arg( 1 );
+
+                if ( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
+                    $result[] = new EnginesModel_NONEStruct();
+                    continue;
+                }
             }
 
             $build_arr = [
@@ -330,16 +333,16 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     public function sanitize( $input ) {
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        $input->name                    = ( $input->name !== null ) ? $input->name : null;
-        $input->description             = ( $input->description !== null ) ? $input->description : null;
-        $input->base_url                = ( $input->base_url !== null ) ? $input->base_url : null;
-        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ? $input->translate_relative_url : null;
-        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ? $input->contribute_relative_url : null;
-        $input->update_relative_url     = ( $input->update_relative_url !== null ) ? $input->update_relative_url : null;
-        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? $input->delete_relative_url : null;
-        $input->others                  = ( $input->others !== null ) ? json_encode( $input->others ) : "{}";
-        $input->class_load              = ( $input->class_load !== null ) ? $input->class_load : null;
-        $input->extra_parameters        = ( $input->extra_parameters !== null ) ? json_encode( $input->extra_parameters ) : '{}';
+        $input->name                    = ( $input->name !== null ) ?  $input->name  : null;
+        $input->description             = ( $input->description !== null ) ?  $input->description  : null;
+        $input->base_url                = ( $input->base_url !== null ) ?  $input->base_url  : null;
+        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ?  $input->translate_relative_url  : null;
+        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ?  $input->contribute_relative_url  : null;
+        $input->update_relative_url     = ( $input->update_relative_url !== null ) ?  $input->update_relative_url  : null;
+        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ?  $input->delete_relative_url  : null;
+        $input->others                  = ( $input->others !== null and $input->others !== '{}' ) ?  json_encode( $input->others )  : '{}';
+        $input->class_load              = ( $input->class_load !== null ) ?  $input->class_load  : null;
+        $input->extra_parameters        = ( $input->extra_parameters !== null and $input->extra_parameters !== '{}' ) ?  json_encode( $input->extra_parameters ) : '{}';
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
         $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;

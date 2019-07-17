@@ -7,7 +7,8 @@ class ProjectsMetadataDaoTest extends AbstractTest {
         $record = $dao->get(1, 'foo');
         $this->assertEquals($record, false);
 
-        $record = $dao->set(1, 'foo', 'bar');
+        $dao->set(1, 'foo', 'bar');
+        $record = $dao->get(1,'foo');
 
         $this->assertEquals( $record->value, 'bar');
         $this->assertEquals( $record->key, 'foo');
@@ -15,8 +16,9 @@ class ProjectsMetadataDaoTest extends AbstractTest {
 
     function testUpdate() {
         $dao = new Projects_MetadataDao(Database::obtain());
-        $record = $dao->set(1, 'foo', 'bar');
-        $record = $dao->set(1, 'foo', 'bar2');
+        $dao->set(1, 'foo', 'bar');
+        $dao->set(1, 'foo', 'bar2');
+        $record = $dao->get(1,'foo');
 
         $this->assertEquals( $record->value, 'bar2');
         $this->assertEquals( $record->key, 'foo');
@@ -27,8 +29,8 @@ class ProjectsMetadataDaoTest extends AbstractTest {
 
     function testDelete() {
         $dao = new Projects_MetadataDao(Database::obtain());
-        $record = $dao->set(1, 'foo', 'bar2');
-        $record = $dao->delete(1, 'foo');
+        $dao->set(1, 'foo', 'bar2');
+        $dao->delete(1, 'foo');
 
         $count = $dao->allByProjectId(1);
         $this->assertEquals( 0, count($count) );
