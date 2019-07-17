@@ -641,7 +641,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stm = $this->getDatabaseHandler()->getConnection()->prepare( $isPropagationToAlreadyTranslatedAvailable );
         $stm->setFetchMode( PDO::FETCH_ASSOC );
         $stm->execute( $bind_keys );
-        return $stm->fetchAll();
+        return $stm->fetch();
 
     }
 
