@@ -193,18 +193,31 @@ LABEL;
         $this->config_param_of_set['segment'] = $this->str_seg_1;
         $this->config_param_of_set['translation'] = $this->str_tra_1;
 
-        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&tra=The+system+becomes+bar+and+thinks+foo.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
+//        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&tra=The+system+becomes+bar+and+thinks+foo.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
+        $url_mock_param = "http://api.mymemory.translated.net/set";
 
         $mock_json_return = <<<'TAB'
 {"responseData":"OK","responseStatus":200,"responseDetails":[484525156]}
 TAB;
 
+        $curl_params = [
+            CURLOPT_POSTFIELDS => [
+                    'seg' => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
+                    'tra'   => 'The system becomes bar and thinks foo.',
+                    'tnote' => NULL,
+                    'langpair' => 'it-IT|en-US',
+                    'de' => 'demo@matecat.com',
+                    'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
+            ],
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_TIMEOUT => 120,
+        ];
 
         /**
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $this->curl_param)->willReturn($mock_json_return);
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_params)->willReturn($mock_json_return);
 
         $actual_result = $this->engine_MyMemory->set($this->config_param_of_set);
 
@@ -271,18 +284,31 @@ TAB;
         $this->config_param_of_set['translation'] = $this->str_tra_2;
 
 
-        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Ad+esempio%2C+una+copia+del+film+%3Cg+id%3D%2210%22%3EBlade+Runner%3C%2Fg%3E+in+formato+DVD%2C+con+numero+di+serie+6457.&tra=For+example%2C+a+copy+of+the+film+%3Cg+id%3D%2210%22%3EFlade+Bunner%3C%2Fg%3E+in+DVD+format%2C+with+numbers+of+6457+series.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
+//        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Ad+esempio%2C+una+copia+del+film+%3Cg+id%3D%2210%22%3EBlade+Runner%3C%2Fg%3E+in+formato+DVD%2C+con+numero+di+serie+6457.&tra=For+example%2C+a+copy+of+the+film+%3Cg+id%3D%2210%22%3EFlade+Bunner%3C%2Fg%3E+in+DVD+format%2C+with+numbers+of+6457+series.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
+        $url_mock_param = "http://api.mymemory.translated.net/set";
 
         $mock_json_return = <<<'TAB'
 {"responseData":"OK","responseStatus":200,"responseDetails":[484540480]}
 TAB;
 
+        $curl_params = [
+                CURLOPT_POSTFIELDS => [
+                        'seg' => 'Ad esempio, una copia del film <g id="10">Blade Runner</g> in formato DVD, con numero di serie 6457.',
+                        'tra'   => 'For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.',
+                        'tnote' => NULL,
+                        'langpair' => 'it-IT|en-US',
+                        'de' => 'demo@matecat.com',
+                        'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
+                ],
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT => 120,
+        ];
 
         /**
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $this->curl_param)->willReturn($mock_json_return);
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_params)->willReturn($mock_json_return);
 
         $actual_result = $this->engine_MyMemory->set($this->config_param_of_set);
 
@@ -321,7 +347,8 @@ TAB;
         $this->config_param_of_set['segment'] = $this->str_seg_1;
         $this->config_param_of_set['translation'] = $this->str_tra_1;
 
-        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&tra=The+system+becomes+bar+and+thinks+foo.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
+//        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&tra=The+system+becomes+bar+and+thinks+foo.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
+        $url_mock_param = "http://api.mymemory.translated.net/set";
 
         $rawValue_error = array(
             'error' => array(
@@ -332,12 +359,25 @@ TAB;
             'responseStatus'    => 0
         );
 
+        $curl_params = [
+                CURLOPT_POSTFIELDS => [
+                        'seg' => 'Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.',
+                        'tra'   => 'The system becomes bar and thinks foo.',
+                        'tnote' => NULL,
+                        'langpair' => 'it-IT|en-US',
+                        'de' => 'demo@matecat.com',
+                        'prop' => '{"project_id":"987654","project_name":"barfoo","job_id":"321"}',
+                ],
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT => 120,
+        ];
+
 
         /**
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $this->curl_param)->willReturn($rawValue_error);
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_params)->willReturn($rawValue_error);
 
         $actual_result = $this->engine_MyMemory->set($this->config_param_of_set);
 

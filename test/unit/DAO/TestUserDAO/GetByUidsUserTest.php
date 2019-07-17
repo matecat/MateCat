@@ -49,17 +49,17 @@ class GetByUidsUserTest extends AbstractTest {
          * 1st
          */
         $this->database_instance->getConnection()->query( $this->sql_insert_user_1 );
-        $this->uid_1 = $this->database_instance->getConnection()->lastInsertId();
+        $this->uid_1 = $this->getTheLastInsertIdByQuery($this->database_instance);
         /**
          * 2nd
          */
         $this->database_instance->getConnection()->query( $this->sql_insert_user_2 );
-        $this->uid_2 = $this->database_instance->getConnection()->lastInsertId();
+        $this->uid_2 = $this->getTheLastInsertIdByQuery($this->database_instance);
         /**
          * 3rd
          */
         $this->database_instance->getConnection()->query( $this->sql_insert_user_3 );
-        $this->uid_3 = $this->database_instance->getConnection()->lastInsertId();
+        $this->uid_3 = $this->getTheLastInsertIdByQuery($this->database_instance);
 
 
         $this->sql_delete_user_1 = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid_1 . "';";

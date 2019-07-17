@@ -54,7 +54,6 @@ class BuildResultEngineTest extends AbstractTest
            'uid' => "5678"
         ));
 
-
         $actual_array_of_engine_structures = $this->method->invoke($this->reflectedClass, $this->array_param);
         $actual_engine_struct = $actual_array_of_engine_structures['0'];
         $this->assertTrue($actual_engine_struct instanceof EnginesModel_EngineStruct);
