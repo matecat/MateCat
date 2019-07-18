@@ -118,7 +118,11 @@ class SegmentsContainer extends React.Component {
         saveSelection();
     }
     componentDidUpdate() {
-        restoreSelection();
+        try {
+            restoreSelection();
+        } catch ( e ) {
+            console.log("Fail to restore selection", e);
+        }
         // console.timeEnd("Time: SegmentsContainer Mount/Update"+this.props.fid);
     }
 
