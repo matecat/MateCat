@@ -57,7 +57,8 @@ class UserController extends AbstractStatefulKleinController {
         \Users_UserValidator::validatePassword( $new_password );
 
         $this->user->pass = Utils::encryptPass( $new_password, $this->user->salt );
-        \Users_UserDao::updateStruct( $this->user, [ 'fields' => [ 'pass' ] ] );
+        $this->user->email_confirmed_at = date('Y-m-d H:i:s');
+        \Users_UserDao::updateStruct( $this->user, [ 'fields' => [ 'pass', 'email_confirmed_at' ] ] );
         ( new Users_UserDao )->destroyCacheByEmail( $this->user->email );
         ( new Users_UserDao )->destroyCacheByUid( $this->user->uid );
 
