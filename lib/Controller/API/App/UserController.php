@@ -5,10 +5,8 @@ namespace API\App;
 use API\App\Json\ConnectedService;
 use API\V2\Json\Team;
 use API\V2\Json\User;
-
 use API\V2\Validators\LoginValidator;
 use ConnectedServices\ConnectedServiceDao;
-use Exceptions\NotFoundException;
 use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
@@ -57,7 +55,17 @@ class UserController extends AbstractStatefulKleinController {
         \Users_UserValidator::validatePassword( $new_password );
 
         $this->user->pass = Utils::encryptPass( $new_password, $this->user->salt );
-        \Users_UserDao::updateStruct( $this->user, [ 'fields' => [ 'pass' ] ] );
+        $fieldsToUpdate   = [
+                'fields' => [ 'pass' ]
+        ];
+
+        // update email_confirmed_at only if it's null
+        if ( null === $this->user->email_confirmed_at ) {
+            $this->user->email_confirmed_at = date( 'Y-m-d H:i:s' );
+            $fieldsToUpdate[ 'fields' ][]   = 'email_confirmed_at';
+        }
+
+        \Users_UserDao::updateStruct( $this->user, $fieldsToUpdate );
         ( new Users_UserDao )->destroyCacheByEmail( $this->user->email );
         ( new Users_UserDao )->destroyCacheByUid( $this->user->uid );
 

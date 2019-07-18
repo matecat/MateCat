@@ -838,6 +838,7 @@ HD;
                 unset( $results[ $position ] );
             } else {
                 self::$queueHandler->getRedisClient()->expire( '_fPid:' . $project[ 'id' ], 60 * 60 * 24 );
+                $this->_updateProject( $project[ 'id' ], Constants_ProjectStatus::STATUS_BUSY );
             }
         }
 
