@@ -63,7 +63,7 @@ class Header extends React.Component {
 
     getUserIcon() {
         if (this.props.loggedUser ) {
-            if (this.props.user.metadata) {
+            if (this.props.user.metadata && this.props.user.metadata.gplus_picture) {
                 return <img onClick={this.openPreferencesModal.bind(this)}
                             className="ui mini circular image ui-user-top-image"
                             src={this.props.user.metadata.gplus_picture + "?sz=80"} title="Personal settings" alt="Profile picture"/>
