@@ -38,11 +38,12 @@ class UseDbTest extends AbstractTest
      * @covers Database::useDb
      */
     public function test_useDb_check_private_variable(){
-        /**
-         * @var Database
-         */
-        $instance_after_reset = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
-        $instance_after_reset->useDb("information_schema");
+
+        /** @var Database $db */
+        $db =  $this->reflectedClass;
+
+        $instance_after_reset = $db->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
+        $instance_after_reset->useDb('information_schema');
         $this->property = $this->reflector->getProperty('database');
         $this->property->setAccessible(true);
         $current_database_value = $this->property->getValue($instance_after_reset);

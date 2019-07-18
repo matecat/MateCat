@@ -64,7 +64,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest {
 
 
         $this->engine_Dao->create( $this->engine_struct_param );
-        $this->id = $this->database_instance->last_insert();
+        $this->id = $this->getTheLastInsertIdByQuery($this->database_instance);
 
         $this->engine_struct_param->id = $this->id;
 
@@ -83,9 +83,9 @@ class AbstractGetFromCacheEngineTest extends AbstractTest {
                                 "contribute_relative_url"      => "contribute",
                                 "update_relative_url"          => "update",
                                 "delete_relative_url"          => "delete",
-                                "others"                       => '"{}"',
+                                "others"                       => '{}',
                                 "class_load"                   => "foo_bar",
-                                "extra_parameters"             => '"{}"',
+                                "extra_parameters"             => '{}',
                                 'google_api_compliant_version' => '2',
                                 "penalty"                      => "1",
                                 "active"                       => "4",

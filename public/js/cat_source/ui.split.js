@@ -63,11 +63,14 @@ if(config.splitSegmentEnabled) {
 
     $.extend(UI, {
         splitSegment: function (segment) {
-            var ss = this.cleanSplittedSource(segment.find('.splitArea').html());
-            var splittedSource = ss.split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
-            segment.find('.splitBar .buttons .cancel').click();
+            var ss = segment.find('.splitArea').html();
+            ss = ss.replace( /<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/g, "##$_SPLIT$##");
+            ss = UI.prepareTextToSend(ss);
+            // var ss = this.cleanSplittedSource(segment.find('.splitArea').html());
+            var splittedSource = ss.split('##$_SPLIT$##');
+            UI.closeSegmentSplit(segment.find('.splitArea'));
             var oldSid = segment.attr('id').split('-')[1];
-            this.setSegmentSplit(oldSid, splittedSource);
+            this.setSegmentSplit(oldSid, splittedSource, ss);
         },
         cleanSplittedSource: function (str) {
             var str = str.replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
@@ -75,30 +78,7 @@ if(config.splitSegmentEnabled) {
             return str;
         },
 
-        setSegmentSplit: function (sid, splittedSource) {
-            var splitAr = [0];
-            var splitIndex = 0;
-            $.each(splittedSource, function (index) {
-                var cc = UI.cleanSplittedSource(splittedSource[index]);
-
-                //SERVER NEEDS TEXT LENGTH COUNT ( WE MUST PAY ATTENTION TO THE TAGS ), so get html content as text
-                //and perform the count
-                var ll = $('<div>').html(cc).text().length;
-
-                //WARNING for the length count, must be done BEFORE encoding of quotes '"' to &quot;
-                cc = cc.replace(/"/gi, '&quot;');
-
-                splitIndex += ll;
-                splitAr.push( splitIndex );
-            });
-            splitAr.pop();
-
-            // new version
-            var totalSource = '';
-            $.each( splittedSource, function ( index ) {
-                totalSource += $( document.createElement( 'div' ) ).html( splittedSource[index] ).text();
-                if ( index < (splittedSource.length - 1) ) totalSource += UI.splittedTranslationPlaceholder;
-            } );
+        setSegmentSplit: function (sid, splittedSource, totalSource) {
 
             APP.doRequest({
                 data: {
@@ -111,7 +91,6 @@ if(config.splitSegmentEnabled) {
                 context: {
                     splittedSource: splittedSource,
                     sid: sid,
-                    splitAr: splitAr
                 },
                 error: function(d){
                     var notification = {
@@ -140,7 +119,6 @@ if(config.splitSegmentEnabled) {
         setSegmentSplitSuccess: function (data) {
             var oldSid = data.sid;
             var splittedSource = data.splittedSource;
-            var splitAr = data.splitAr;
             var newSegments = [];
             var splitGroup = [];
             var onlyOne = ( splittedSource.length == 1 );
@@ -153,7 +131,7 @@ if(config.splitSegmentEnabled) {
                 $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
                     return this.id.match(/-editarea/);
                 } ).each( function( index, value ){
-                    translation += $( value ).html();
+                    translation += UI.prepareTextToSend($( value ).html());
                 } );
             }
 
@@ -161,7 +139,7 @@ if(config.splitSegmentEnabled) {
 
                 if( !onlyOne ) {
                     //there is a split, there are more than one source
-                    translation = ( index == 0 ) ? UI.editarea.html() : '';
+                    translation = ( index == 0 ) ? UI.prepareTextToSend(UI.editarea.html()) : '';
                 }
 
                 var segData = {
@@ -169,13 +147,13 @@ if(config.splitSegmentEnabled) {
                     has_reference: "false",
                     parsed_time_to_edit: ["00", "00", "00", "00"],
                     readonly: "false",
-                    segment: this.toString(),
+                    segment: htmlEncode(this.toString()),
                     segment_hash: segment.attr('data-hash'),
                     sid: (onlyOne)? oldSid : oldSid + '-' + (index + 1),
                     split_points_source: [],
                     status: "DRAFT",
                     time_to_edit: "0",
-                    translation: translation,
+                    translation: htmlEncode(translation),
                     version: segment.attr('data-version'),
                     warning: "0"
                 };
@@ -233,7 +211,7 @@ if(config.splitSegmentEnabled) {
                 var totalMarkup = '';
                 $.each(segments, function (index) {
                     var newMarkup = $('#segment-' + this + ' .source').attr('data-original');
-                    newMarkup = htmlDecode(newMarkup).replace(/&quot;/g, '\"');
+                    newMarkup = UI.decodePlaceholdersToText(UI.transformTextForLockTags(newMarkup.replace(/&quot;/g, '\"')));
                     if(this == UI.currentSegmentId) newMarkup = '<span class="currentSplittedSegment">' + newMarkup + '</span>';
                     totalMarkup += newMarkup;
 
@@ -242,7 +220,7 @@ if(config.splitSegmentEnabled) {
                 splitAreaMarkup = totalMarkup;
             } else {
                 splitAreaMarkup = source.attr('data-original');
-                splitAreaMarkup = htmlDecode(splitAreaMarkup).replace(/&quot;/g, '\"');
+                splitAreaMarkup = UI.decodePlaceholdersToText(UI.transformTextForLockTags(htmlDecode(splitAreaMarkup).replace(/&quot;/g, '\"')));
             }
             splitArea.html(splitAreaMarkup);
             splitArea.find('.rangySelectionBoundary').remove();

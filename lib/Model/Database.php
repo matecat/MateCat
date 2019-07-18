@@ -133,13 +133,12 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function useDb( $name ) {
-        $stmt = $this->getConnection()->prepare( "USE ?" );
-        $stmt->execute( [ $name ] );
+        $stmt = $this->getConnection()->prepare( "USE " . $name ); // Table and Column names cannot be replaced by parameters in PDO
+        $stmt->execute();
         $stmt->closeCursor();
         unset( $stmt );
         $this->database = $name;
     }
-
 
     /**
      * @Override

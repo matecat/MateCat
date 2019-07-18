@@ -101,7 +101,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
         );
         $this->job_struct = $this->job_Dao->createFromStruct( $this->job_array );
 
-        $this->job_id = $this->database_instance->getConnection()->lastInsertId();
+        $this->job_id = $this->getTheLastInsertIdByQuery($this->database_instance);
 
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->job_id . "';";
 
@@ -208,7 +208,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
         $this->assertNull( $result->job_type );
         $this->assertEquals( "156255", $result->total_time_to_edit );
         $this->assertEquals( "0", $result->avg_post_editing_effort );
-        $this->assertNull( $result->id_job_to_revise );
+//        $this->assertNull( $result->id_job_to_revise ); // id_job_to_revise does not exists anymore
         $this->assertEquals( "182655204", $result->last_opened_segment );
         $this->assertEquals( "1", $result->id_tms );
         $this->assertEquals( "1", $result->id_mt_engine );
@@ -220,7 +220,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
         $this->assertEquals( "active", $result->status );
         $this->assertNull( $result->status_translator );
 
-        $this->assertEquals( "\0", $result->completed );
+        $this->assertEquals( 0, $result->completed );
         $this->assertEquals( "-12.60", $result->new_words );
         $this->assertEquals( "0.00", $result->draft_words );
         $this->assertEquals( "728.15", $result->translated_words );
@@ -287,7 +287,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
         $this->assertNull( $result->job_type );
         $this->assertEquals( "156255", $result->total_time_to_edit );
         $this->assertEquals( "0", $result->avg_post_editing_effort );
-        $this->assertNull( $result->id_job_to_revise );
+//        $this->assertNull( $result->id_job_to_revise ); // id_job_to_revise does not exists anymore
         $this->assertEquals( "182655204", $result->last_opened_segment );
         $this->assertEquals( "1", $result->id_tms );
         $this->assertEquals( "1", $result->id_mt_engine );
@@ -299,7 +299,7 @@ class AbstractFetchObjectJobTest extends AbstractTest {
         $this->assertEquals( "active", $result->status );
         $this->assertNull( $result->status_translator );
 
-        $this->assertEquals( "\0", $result->completed );
+        $this->assertEquals( 0, $result->completed );
         $this->assertEquals( "-12.60", $result->new_words );
         $this->assertEquals( "0.00", $result->draft_words );
         $this->assertEquals( "728.15", $result->translated_words );

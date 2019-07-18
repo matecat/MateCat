@@ -72,6 +72,10 @@ class Log {
 
     protected static function getFileNamePath() {
         if ( !empty( self::$fileName ) ) {
+            if(is_array(self::$fileName)){
+                self::$fileName = implode(self::$fileName);
+            }
+
             $name = LOG_REPOSITORY . "/" . self::$fileName;
         } else {
             $name = LOG_REPOSITORY . "/" . LOG_FILENAME;
