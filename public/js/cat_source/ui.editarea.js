@@ -73,8 +73,10 @@ $.extend( UI, {
                 var selBound = $('.rangySelectionBoundary', UI.editarea);
                 if(undeletableMonad) selBound.prev().remove();
                 if(code == 8) { // backspace
-                    var undeletableTag = ((($(translation[sbIndex-1]).hasClass('locked')) && ($(translation[sbIndex-2]).prop("tagName") === 'BR')) ||
-                        $(translation[sbIndex-2]).hasClass("_A0") && $(translation[sbIndex-1]).hasClass("undoCursorPlaceholder"))? true : false;
+                    var undeletableTag = (
+                        ( $(translation[sbIndex-1]).hasClass('locked') && ($(translation[sbIndex-2]).prop("tagName") === 'BR')) ||
+                        ( ( $(translation[sbIndex-2]).hasClass("monad") || $(translation[sbIndex-2]).hasClass("locked")) && $(translation[sbIndex-1]).hasClass('undoCursorPlaceholder') )
+                    )? true : false;
                     if(undeletableTag) {
                         selBound.prev().remove();
                         // e.preventDefault();
