@@ -56,9 +56,9 @@ if ( SegmentFilter.enabled() )
         var index = list.indexOf( '' + sid );
         var nextFiltered = ( index !== list.length - 1 ) ? list[ index + 1 ] : list[0];
         let segment = SegmentStore.getSegmentByIdToJS(nextFiltered);
-        if ( segment.status !== "DRAFT" &&  segment.status !== "NEW" ) {
+        if ( segment && segment.status !== "DRAFT" &&  segment.status !== "NEW" ) {
             SegmentActions.openSegment(nextFiltered);
-        } else {
+        } else if (segment) {
             gotoNextTranslatedSegment(nextFiltered)
         }
     };

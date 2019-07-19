@@ -83,20 +83,10 @@ if ( config.enableReview && config.isReview ) {
          *
          * Only bind events for specific review type
          */
-        $('html')
-        //     .on('buttonsCreation', 'section', function() {
-        //     UI.overrideButtonsForRevision();
-        // })
-            .on('afterFormatSelection', '.editor .editarea', function() {
+        $('html').on('afterFormatSelection', '.editor .editarea', function() {
             UI.trackChanges(this);
         }).on('click', '.editor .outersource .copy', function(e) {
             UI.trackChanges(UI.editarea);
-        }).on('click', 'a.next-review-repetition', function(e) {
-            e.preventDefault();
-            SegmentFilter.goToNextRepetition(this, 'approved');
-        }).on('click', 'a.next-review-repetition-group', function(e) {
-            e.preventDefault();
-            SegmentFilter.goToNextRepetitionGroup(this, 'approved');
         }).on('setCurrentSegment_success', function(e, d, id_segment) {
             UI.addOriginalTranslation(d, id_segment);
         });

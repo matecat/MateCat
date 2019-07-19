@@ -128,14 +128,14 @@ class SegmentButton extends React.Component {
             if (filterinRepetitions) {
                 nextButton =<React.Fragment>
                     <li><a id={"segment-" + this.props.segment.sid+"-nextrepetition"} href="#"
-                           onClick={(e)=>this.goToNextRepetition(e, 'translated')}
+                           onClick={(e)=>this.goToNextRepetition(e, 'approved')}
                            className="next-review-repetition ui green button"
                            data-segmentid={"segment-"+ this.props.segment.sid}
                            title="Revise and go to next repetition">REP ></a>
                     </li>
                     <li>
                         <a id={"segment-" + this.props.segment.sid +"-nextgrouprepetition"}
-                           onClick={(e)=>this.goToNextRepetition(e, 'translated')}
+                           onClick={(e)=>this.goToNextRepetitionGroup(e, 'approved')}
                            href="#" className="next-review-repetition-group ui green button"
                            data-segmentid={"segment-" + this.props.segment.sid}
                            title="Revise and go to next repetition group">REP >></a>
