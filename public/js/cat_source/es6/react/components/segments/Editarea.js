@@ -210,7 +210,7 @@ class Editarea extends React.Component {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
         if ( this.props.segment.modified ) {
-            let textToSend = UI.prepareTextToSend( $(this.editAreaRef).html() );
+            let textToSend = $(this.editAreaRef).html() ;
             let sid = this.props.segment.sid;
             setTimeout(()=>SegmentActions.replaceEditAreaTextContent(sid, null, textToSend), 200);
         }

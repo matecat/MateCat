@@ -193,16 +193,11 @@ if (SegmentFilter.enabled())
             } else {
                 nextItem = groupArray[0];
             }
-            UI.changeStatus(button, status, 0);
-            skipChange = true;
+            UI.changeStatus(button, status, 0, function(){SegmentActions.openSegment(nextItem);});
 
             UI.setStatusButtons(UI.currentSegment.find('a.translated'));
 
-            if ( UI.segmentIsLoaded(nextItem) ) {
-                UI.gotoSegment(nextItem)
-            } else {
-                UI.render({ segmentToOpen: nextItem });
-            }
+
         },
         goToNextRepetitionGroup: function ( button, status ) {
             var hash = UI.currentSegment.data('hash');
@@ -216,16 +211,10 @@ if (SegmentFilter.enabled())
                 nextGroupHash = groupsArray[0];
             }
             var nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0];
-            UI.changeStatus(button, status, 0);
-            skipChange = true;
+
+            UI.changeStatus(button, status, 0, function(){SegmentActions.openSegment(nextItem);});
 
             UI.setStatusButtons(UI.currentSegment.find('a.translated'));
-
-            if ( UI.segmentIsLoaded(nextItem) ) {
-                UI.gotoSegment(nextItem)
-            } else {
-                UI.render({ segmentToOpen: nextItem });
-            }
         }
 
     });

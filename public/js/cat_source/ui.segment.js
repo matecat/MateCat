@@ -14,17 +14,16 @@
          * return json
          */
         getCurrentSegmentContribution: function (segment) {
-            var currentSegment = segment;
-            var currentContribution;
-            var chosen_suggestion = ( segment.contributions && segment.contributions.matches.length > 0 ) ? segment.contributions.matches[0] : undefined;
-            if (!_.isUndefined(chosen_suggestion)) {
+            var currentSegment = (segment) ? segment: SegmentStore.getCurrentSegment();
+            var chosen_suggestion = ( currentSegment.contributions && currentSegment.contributions.matches.length > 0 ) ? currentSegment.contributions.matches[0] : undefined;
+            if (_.isUndefined(chosen_suggestion)) {
                 var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(currentSegment));
                 if (storedContributions) {
-                    currentContribution = JSON.parse(storedContributions).matches[chosen_suggestion - 1];
+                    chosen_suggestion = JSON.parse(storedContributions).matches[chosen_suggestion - 1];
 
                 }
             }
-            return currentContribution;
+            return chosen_suggestion;
         },
         setGlobalTagProjection: function () {
             UI.enableTagProjection = UI.checkTPEnabled();
@@ -57,19 +56,19 @@
                     UI.processErrors(response.errors, 'getTagProjection');
                     UI.disableTPOnSegment()
                 } else {
+                    UI.setSegmentAsTagged();
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                     UI.autoFillTagsInTarget();
                 }
 
             }).fail(function () {
+                UI.setSegmentAsTagged();
                 UI.copyTagProjectionInCurrentSegment();
                 UI.autoFillTagsInTarget();
                 UI.startOfflineMode();
             }).always(function () {
-                UI.setSegmentAsTagged();
                 UI.editarea.focus();
                 SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-                // UI.createButtons();
                 UI.registerQACheck();
             });
         },
@@ -113,7 +112,7 @@
             this.copySourcefromDataAttribute();
             if (!_.isUndefined(translation) && translation.length > 0) {
 
-                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), UI.transformPlaceholdersAndTags(translation));
+                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), translation);
 
                 // $(this.editarea).html(decoded_translation);
             }
@@ -238,7 +237,7 @@
         },
         decodeText: function(segment, text) {
             var decoded_text;
-            if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
+            if (UI.enableTagProjection && !segment.tagged && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) && UI.removeAllTags(segment.segment) !== '' ) {
                 decoded_text = UI.removeAllTags(text);
             } else {
@@ -314,17 +313,17 @@
          */
         evalNextSegment: function( section, status ) {
             var currentSegment = SegmentStore.getCurrentSegment();
-            var nextUntranslated = (currentSegment) ? SegmentStore.getNextSegment(currentSegment.original_sid, null, 8): null;
+            var nextUntranslated = (currentSegment) ? SegmentStore.getNextSegment(currentSegment.sid, null, 8): null;
 
             if (nextUntranslated) { // se ci sono sotto segmenti caricati con lo status indicato
-                this.nextUntranslatedSegmentId = nextUntranslated.original_sid;
+                this.nextUntranslatedSegmentId = nextUntranslated.sid;
             } else {
                 this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
             }
-            var next = (currentSegment) ?  SegmentStore.getNextSegment(currentSegment.original_sid, null, null) : null;
-            this.nextSegmentId = (next) ? next.original_sid : null;
-            var prev = (currentSegment) ? SegmentStore.getPrevSegment(currentSegment.original_sid) : null;
-            this.previousSegmentId = ( prev ) ? prev.original_sid : null;
+            var next = (currentSegment) ?  SegmentStore.getNextSegment(currentSegment.sid, null, null) : null;
+            this.nextSegmentId = (next) ? next.sid : null;
+            var prev = (currentSegment) ? SegmentStore.getPrevSegment(currentSegment.sid) : null;
+            this.previousSegmentId = ( prev ) ? prev.sid : null;
         },
         gotoNextUntranslatedSegment: function() {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
@@ -399,7 +398,7 @@
                 var callback = function() {
                     $(window).off('modalClosed');
                     //Check if the next is inside the view, if not render the file
-                    SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
+                    UI.nextUntranslatedSegmentId && SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
                 };
                 // If the modal is open wait the close event
                 if( $(".modal[data-type='confirm']").length ) {
@@ -516,8 +515,8 @@
          * @param el
          */
         setSegmentModified : function( el, isModified ) {
-            if ( typeof isModified == 'undefined' ) {
-                throw new Exception('isModified parameter is missing.');
+            if ( typeof isModified == 'undefined' || !el || el.length === 0 ) {
+                return;
             }
 
             if ( isModified ) {
@@ -560,7 +559,11 @@
             var segmentBeforeId = segmentBefore.splitted;
             var isSplitted = segmentBefore.splitted;
             if (isSplitted) {
-                return this.collectSplittedTranslations(segmentBeforeId, ".source");
+                if (segmentBefore.original_sid !== segmentId.split('-')[0]){
+                    return this.collectSplittedTranslations(segmentBefore.original_sid, ".source");
+                } else {
+                    return this.getContextBefore(segmentBeforeId);
+                }
             } else {
                 return UI.prepareTextToSend(segmentBefore.segment);
             }
@@ -573,8 +576,12 @@
             }
             var segmentAfterId = segmentAfter.sid;
             var isSplitted = segmentAfter.splitted;
-            if (isSplitted) {
-                return this.collectSplittedTranslations(segmentAfterId, ".source");
+            if (isSplitted ) {
+                if (segmentAfter.firstOfSplit) {
+                    return this.collectSplittedTranslations(segmentAfter.original_sid, ".source");
+                } else {
+                    return this.getContextAfter(segmentAfterId);
+                }
             } else   {
                 return UI.prepareTextToSend(segmentAfter.segment);
             }

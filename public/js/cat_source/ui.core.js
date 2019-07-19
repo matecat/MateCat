@@ -100,7 +100,7 @@ UI = {
      * @param status
      * @param byStatus
      */
-	changeStatus: function(el, status, byStatus) {
+	changeStatus: function(el, status, byStatus, callback) {
         var segment = $(el).closest("section");
         var segment_id = this.getSegmentId(segment);
 
@@ -108,12 +108,13 @@ UI = {
             segment_id      : segment_id,
             status          : status,
             byStatus        : byStatus,
-            noPropagation   : ! UI.shouldSegmentAutoPropagate( segment, status )
+            noPropagation   : ! UI.shouldSegmentAutoPropagate( segment, status ),
+            callback        : callback
         };
 
         if ( byStatus || opts.noPropagation ) {
             opts.noPropagation = true;
-            this.execChangeStatus(JSON.stringify(opts)); // no propagation
+            this.execChangeStatus(opts);// no propagation
         } else {
 
             // ask if the user wants propagation or this is valid only
@@ -121,21 +122,39 @@ UI = {
 
             if ( this.autopropagateConfirmNeeded() ) {
 
-                var optionsStr = JSON.stringify(opts);
-
-                APP.confirm({
-                    name: 'confirmAutopropagation',
-                    cancelTxt: 'Propagate to All',
-                    onCancel: 'execChangeStatus',
-                    callback: 'preExecChangeStatus',
-                    okTxt: 'Only this segment',
-                    context: optionsStr,
-                    msg: "There are other identical segments. <br><br>Would you " +
-                         "like to propagate the translation to all of them, " +
-                         "or keep this translation only for this segment?"
-                });
+                // var optionsStr = opts;
+                var props = {
+                    text: "There are other identical segments. <br><br>Would you " +
+                        "like to propagate the translation to all of them, " +
+                        "or keep this translation only for this segment?",
+                    successText: 'Only this segment',
+                    successCallback: function(){
+                            UI.preExecChangeStatus(opts);
+                            APP.ModalWindow.onCloseModal();
+                        },
+                    cancelText: 'Propagate to All',
+                    cancelCallback: function(){
+                            UI.execChangeStatus(opts);
+                            APP.ModalWindow.onCloseModal();
+                        },
+                    onClose: function(){
+                        UI.preExecChangeStatus(opts);
+                    }
+                };
+                APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
+                // APP.confirm({
+                //     name: 'confirmAutopropagation',
+                //     cancelTxt: 'Propagate to All',
+                //     onCancel: 'execChangeStatus',
+                //     callback: 'preExecChangeStatus',
+                //     okTxt: 'Only this segment',
+                //     context: optionsStr,
+                //     msg: "There are other identical segments. <br><br>Would you " +
+                //          "like to propagate the translation to all of them, " +
+                //          "or keep this translation only for this segment?"
+                // });
             } else {
-                this.execChangeStatus( JSON.stringify(opts) ); // autopropagate
+                this.execChangeStatus( opts ); // autopropagate
             }
         }
 
@@ -158,14 +177,12 @@ UI = {
 
     },
     preExecChangeStatus: function (optStr) {
-        var opt = $.parseJSON(optStr);
+        var opt = optStr;
         opt.noPropagation = true;
-        this.execChangeStatus(JSON.stringify(opt));
+        this.execChangeStatus(opt);
     },
     execChangeStatus: function (optStr) {
-        var options = $.parseJSON(optStr);
-
-        var segment = UI.Segment.find( options.segment_id );
+        var options = optStr;
 
         var noPropagation = options.noPropagation;
         var status        = options.status;
@@ -174,7 +191,7 @@ UI = {
         noPropagation = noPropagation || false;
 
         // $('.percentuage', segment.el).removeClass('visible');
-        SegmentActions.hideSegmentHeader(options.segment_id, UI.getSegmentFileId(segment));
+        SegmentActions.hideSegmentHeader(options.segment_id);
 
         this.setTranslation({
             id_segment: options.segment_id,
@@ -184,8 +201,10 @@ UI = {
             propagate: !noPropagation
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
-        UI.setSegmentModified( UI.currentSegment, false ) ;
-        $(document).trigger('segment:status:change', [segment, options]);
+        UI.setSegmentModified( UI.getSegmentById(options.segment_id), false ) ;
+        if ( optStr.callback ) {
+            optStr.callback();
+        }
     },
 
     getSegmentId: function (segment) {
@@ -229,9 +248,6 @@ UI = {
     copySource: function() {
         var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
 
-        // Test
-        //source_val = source_val.replace(/&quot;/g,'"');
-
         // Attention I use .text to obtain a entity conversion,
         // by I ignore the quote conversion done before adding to the data-original
         // I hope it still works.
@@ -266,17 +282,6 @@ UI = {
             };
 
             APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
-            // APP.confirmAndCheckbox({
-            //     title: 'Copy source to target',
-            //     name: 'confirmCopyAllSources',
-            //     okTxt: 'Yes',
-            //     cancelTxt: 'No',
-            //     callback: 'continueCopyAllSources',
-            //     onCancel: 'abortCopyAllSources',
-            //     closeOnSuccess: true,
-            //     msg: "Copy source to target for all new segments?<br/><b>This action cannot be undone.</b>",
-            //     'checkbox-label': "Confirm copy source to target"
-            // });
         } else {
             this.consecutiveCopySourceNum = [];
         }
@@ -340,80 +345,6 @@ UI = {
 			}
 		}
 	},
-	// createButtons: function() {
-    //
-    //     var button_label = config.status_labels.TRANSLATED ;
-    //     var label_first_letter = button_label[0];
-    //     var nextUntranslated, currentButton;
-    //
-    //     //Tag Projection: Identify if is enabled in the current segment
-    //     this.currentSegmentTPEnabled = this.checkCurrentSegmentTPEnabled();
-    //
-	// 	var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-    //     var nextSegment = this.currentSegment.next();
-    //     var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
-    //     var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-    //     if (this.currentSegmentTPEnabled) {
-    //         nextUntranslated = "";
-    //         currentButton = '<li ><a draggable="false" id="segment-' + this.currentSegmentId +
-    //             '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
-    //             '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
-    //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-    //     } else {
-    //         nextUntranslated = (sameButton || filtering)? '' : '<li><a draggable="false" id="segment-' + this.currentSegmentId +
-    //             '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
-    //             this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
-    //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-    //         currentButton = '<li><a draggable="false" id="segment-' + this.currentSegmentId +
-    //             '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
-    //             '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
-    //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-    //     }
-    //
-    //     if (filtering) {
-    //         var data = SegmentFilter.getStoredState();
-    //         var filterinRepetitions = data.reactState.samplingType === "repetitions";
-    //         if (filterinRepetitions) {
-    //             nextUntranslated ='<li><a id="segment-' + this.currentSegmentId +
-    //                 '-nextrepetition" href="#" class="next-repetition ui primary button" data-segmentid="segment-' +
-    //                 this.currentSegmentId + '" title="Translate and go to next repetition">REP ></a>' +
-    //                 '</li>' +
-    //                 '<li><a id="segment-' + this.currentSegmentId +
-    //                 '-nextgrouprepetition" href="#" class="next-repetition-group ui primary button" data-segmentid="segment-' +
-    //                 this.currentSegmentId + '" title="Translate and go to next repetition group">REP >></a>' +
-    //                 '</li>';
-    //
-    //         }
-    //     }
-    //
-    //     UI.segmentButtons = nextUntranslated + currentButton;
-    //
-	// 	var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
-    //
-    //     UI.currentSegment.trigger('buttonsCreation');
-    //
-    //     buttonsOb.empty().append(UI.segmentButtons);
-    //     buttonsOb.before('<p class="warnings"></p>');
-    //
-    //     UI.segmentButtons = null;
-    //
-	// },
-
-
-	/*createJobMenu: function() {
-		var menu = '<nav id="jobMenu" class="topMenu">' +
-				'    <ul>';
-		$.each(config.firstSegmentOfFiles, function() {
-			menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("[...]" ).concat((this.file_name).substring(this.file_name.length-20))  + '</a></li>';
-		});
-
-		menu += '    </ul>' +
-				'	<ul>' +
-				'		<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="#">Go to current segment</a></li>' +
-				'    </ul>' +
-				'</nav>';
-		this.body.append(menu);
-	},*/
 
     createJobMenu: function() {
         var menu = '<nav id="jobMenu" class="topMenu">' +
@@ -1408,13 +1339,6 @@ UI = {
         }
         tte.data('raw-time-to-edit', this.totalTime);
     },
-	collectSegmentErrors: function(segment) {
-		var errors = '';
-		// tag mismatch
-		if (segment.hasClass('mismatch'))
-			errors += '01|';
-		return errors.substring(0, errors.length - 1);
-	},
 	goToFirstError: function() {
         $("#point2seg").trigger('mousedown');
         setTimeout(function (  ) {
@@ -1686,8 +1610,8 @@ UI = {
 
     translationIsToSave : function( segment ) {
         // add to setTranslation tail
-        var alreadySet = this.alreadyInSetTranslationTail( segment.id );
-        var emptyTranslation = ( segment && segment.el.find('.targetarea').text().trim().length )? false : true;
+        var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
+        var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
 
         return ((!alreadySet)&&(!emptyTranslation));
     },
@@ -1700,7 +1624,7 @@ UI = {
         var byStatus = options.byStatus || false;
         var propagate = options.propagate || false;
 
-        var segment = UI.Segment.findAbsolute( id_segment );
+        var segment = SegmentStore.getSegmentByIdToJS( id_segment );
 
         if (!segment) {
             return;
@@ -1784,7 +1708,7 @@ UI = {
         var sourceSegment;
         this.executingSetTranslation = true;
         var reqArguments = arguments;
-		var segment = $('#segment-' + id_segment);
+		var segment = SegmentStore.getSegmentByIdToJS(id_segment);
 		var contextBefore = UI.getContextBefore(id_segment);
         var idBefore = UI.getIdBefore(id_segment);
         var contextAfter = UI.getContextAfter(id_segment);
@@ -1794,16 +1718,10 @@ UI = {
 
 
 		caller = (typeof caller == 'undefined') ? false : caller;
-		var file = $(segment).parents('article');
 
 		// Attention, to be modified when we will lock tags
-		if( config.brPlaceholdEnabled ) {
-			translation = this.postProcessEditarea(segment);
-            sourceSegment = this.postProcessEditarea(segment, '.source');
-		} else {
-            translation = $('.editarea', segment ).text();
-            sourceSegment = $('.source', segment ).text();
-		}
+        translation = this.prepareTextToSend(segment.decoded_translation);
+        sourceSegment = this.prepareTextToSend(segment.segment);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
@@ -1812,29 +1730,25 @@ UI = {
         }
 		var time_to_edit = UI.editTime;
 		var id_translator = config.id_translator;
-		var errors = this.collectSegmentErrors(segment);
-		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
 		var autosave = (caller == 'autosave');
 
-        var isSplitted = (id_segment.split('-').length > 1);
+        var isSplitted = (segment.splitted);
         if(isSplitted) {
-            translation = this.collectSplittedTranslations(id_segment);
-            sourceSegment = this.collectSplittedTranslations(id_segment, ".source");
+            translation = this.collectSplittedTranslations(segment.original_sid);
+            sourceSegment = this.collectSplittedTranslations(segment.original_sid, ".source");
         }
         this.tempReqArguments = {
             id_segment: id_segment,
             id_job: config.id_job,
-            id_first_file: file.attr('id').split('-')[1],
             password: config.password,
             status: status,
             translation: translation,
             segment : sourceSegment,
             time_to_edit: time_to_edit,
             id_translator: id_translator,
-            errors: errors,
-            chosen_suggestion_index: chosen_suggestion,
+            chosen_suggestion_index: segment.choosenSuggestionIndex,
             autosave: autosave,
-            version: segment.attr('data-version'),
+            version: segment.version,
             propagate: propagate,
             context_before: contextBefore,
             id_before: idBefore,
@@ -1843,8 +1757,8 @@ UI = {
             by_status: byStatus
         };
         if(isSplitted) {
-            this.setStatus($('#segment-' + id_segment), status);
-            this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
+            this.setStatus(segment.status);
+            this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(segment.original_sid, segment.sid, status).toString();
         }
         if(!propagate) {
             this.tempReqArguments.propagate = false;
@@ -1880,23 +1794,32 @@ UI = {
 		});
 	},
 
-    collectSplittedStatuses: function (sid) {
-        statuses = [];
-        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
-        $.each(segmentsIds, function (index) {
-            segment = $('#segment-' + this);
-            status = UI.getStatus(segment);
-            statuses.push(status);
+    collectSplittedStatuses: function (sid, splittedSid, status) {
+        var statuses = [];
+        var segments = SegmentStore.getSegmentsInSplit(sid);
+        $.each(segments, function (index) {
+            var segment = SegmentStore.getSegmentByIdToJS(this.sid);
+            if ( splittedSid === this.sid) {
+                statuses.push(status);
+            } else {
+                statuses.push(segment.status);
+            }
         });
         return statuses;
     },
+    /**
+     *
+     * @param sid
+     * @param selector
+     * @returns {string}
+     */
     collectSplittedTranslations: function (sid, selector) {
-        totalTranslation = '';
-        segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
-        $.each(segmentsIds, function (index) {
-            segment = $('#segment-' + this);
-            totalTranslation += UI.postProcessEditarea(segment, selector);
-            if(index < (segmentsIds.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
+        var totalTranslation = '';
+        var segments = SegmentStore.getSegmentsInSplit(sid);
+        $.each(segments, function (index) {
+            var segment = this;
+            totalTranslation += (selector === '.source') ? segment.segment : UI.prepareTextToSend(segment.translation);
+            if(index < (segments.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
         });
         return totalTranslation;
     },
@@ -1905,7 +1828,7 @@ UI = {
             item = {
                 key: key,
                 value: val
-            }
+            };
             this.localStorageArray.push(item);
         } else {
             try {
@@ -2081,7 +2004,7 @@ UI = {
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
             if((!byStatus)&&(propagate)) {
-                this.beforePropagateTranslation(segment, status);
+                this.beforePropagateTranslation(options.id_segment, status);
             }
         }
         this.resetRecoverUnsavedSegmentsTimer();
@@ -2107,31 +2030,35 @@ UI = {
     },
 
 
-    beforePropagateTranslation: function(segment, status) {
-        if($(segment).attr('id').split('-').length > 2) return false;
+    beforePropagateTranslation: function(segmentId, status) {
+        let segment = SegmentStore.getSegmentByIdToJS(segmentId);
+        if ( segment.splitted > 2 ) return false;
         UI.propagateTranslation(segment, status);
     },
 
     propagateTranslation: function(segment, status) {
         this.tempReqArguments = null;
         if( (status == 'translated') || (config.isReview && (status == 'approved'))){
+
+            var segmentsInPropagation = SegmentStore.getSegmentsInPropagation(segment.segment_hash, config.isReview);
             plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated' + plusApproved ).not( segment ), function() {
+            $.each(segmentsInPropagation, function() {
                 // $('.editarea', $(this)).html( $('.editarea', segment).html() );
-                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId($(this)), UI.getSegmentFileId($(this)), $('.editarea', segment).html());
+                SegmentActions.replaceEditAreaTextContent(this.sid ,null , segment.translation);
 
 
                 //Tag Projection: disable it if enable
-                UI.disableTPOnSegment($(this));
+                // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
+                SegmentActions.setSegmentAsTagged(this.sid);
 
                 // if status is not set to draft, the segment content is not displayed
-                UI.setStatus($(this), status); // now the status, too, is propagated
+                SegmentActions.setStatus(segment.sid, null, status); // now the status, too, is propagated
 
-                SegmentActions.setSegmentPropagation(UI.getSegmentId(this), UI.getSegmentFileId(this), true ,UI.getSegmentId(segment));
+                SegmentActions.setSegmentPropagation(this.sid, null, true ,segment.sid);
 
-                LXQ.doLexiQA(this,UI.getSegmentId(this),true,null);
+                LXQ.doLexiQA(this,this.sid,true,null);
             });
 
             //unset actual segment as autoPropagated because now it is translated

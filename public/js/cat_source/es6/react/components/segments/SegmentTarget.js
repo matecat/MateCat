@@ -126,6 +126,14 @@ class SegmentTarget extends React.Component {
         this.setState({buttonsDisabled: visibility})
     }
 
+    sendTranslationUpdate() {
+        if (this.editArea && this.props.segment.modified ) {
+            let textToSend = $(this.editArea.editAreaRef).html();
+            let sid = this.props.segment.sid;
+            SegmentActions.replaceEditAreaTextContent(sid, null, textToSend);
+        }
+    }
+
     getTargetArea(translation) {
         var textAreaContainer = "";
 
@@ -197,6 +205,7 @@ class SegmentTarget extends React.Component {
 
 
                 <EditArea
+                    ref={(ref) => this.editArea = ref}
                     segment={this.props.segment}
                     translation={translation}
                     locked={this.props.locked}
@@ -255,16 +264,26 @@ class SegmentTarget extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
     }
 
-    componentWillMount() {
-        this.beforeRenderActions();
-    }
-
-    componentWillUpdate() {
-        this.beforeRenderActions();
-    }
-
     componentDidUpdate() {
         this.afterRenderActions();
+    }
+
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+        this.beforeRenderActions();
+        //check if this segment is in closing
+        if (prevProps.segment.opened && !this.props.segment.opened) {
+            //check if this segment require setTranslation
+            if (!prevProps.isReview && prevProps.segment.modified && (prevProps.segment.status === "DRAFT" || prevProps.segment.status === "NEW")) {
+                this.sendTranslationUpdate();
+                setTimeout(()=>UI.setTranslation({
+                    id_segment: this.props.segment.sid,
+                    status: 'DRAFT' ,
+                    caller: 'autosave'
+                }));
+
+            }
+        }
+        return null;
     }
 
     render() {
@@ -280,6 +299,7 @@ class SegmentTarget extends React.Component {
                 <SegmentButtons
                     disabled={this.state.buttonsDisabled}
                     {...this.props}
+                    updateTranslation={this.sendTranslationUpdate.bind(this)}
                 />
 
                 {this.props.segment.warnings ?

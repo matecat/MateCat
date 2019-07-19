@@ -182,8 +182,8 @@ $.extend(UI, {
         if(!data) return true;
 
         var editarea = $('.editarea', segment);
-        var segmentObj = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(segment));
         SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.errors);
+        var segmentObj = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(segment));
 
         if ( data.matches && data.matches.length > 0 && _.isUndefined(data.matches[0].error)) {
             var editareaLength = segmentObj.translation.length;
@@ -195,7 +195,7 @@ $.extend(UI, {
 
             if (editareaLength === 0) {
 
-                UI.setChosenSuggestion(1, segment);
+                UI.setChosenSuggestion(1, segmentObj);
 
 
                 // translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
@@ -266,9 +266,9 @@ $.extend(UI, {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setDeleteSuggestion');
 	},
-	setChosenSuggestion: function(w, segment) {
-        var currentSegment = (segment)? segment : UI.currentSegment;
-        currentSegment.find('.editarea').data('lastChosenSuggestion', w);
+	setChosenSuggestion: function(index, segmentObj) {
+        var currentSegmentId = (segmentObj)? segmentObj.sid : UI.currentSegmentId;
+        SegmentActions.setChoosenSuggestion(currentSegmentId, index);
 	}
 
     });

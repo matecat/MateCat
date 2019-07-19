@@ -91,10 +91,6 @@ if ( config.enableReview && config.isReview ) {
             UI.trackChanges(this);
         }).on('click', '.editor .outersource .copy', function(e) {
             UI.trackChanges(UI.editarea);
-        }).on('click', 'a.approved, a.next-unapproved', function(e) {
-            // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
-            // because of the event is triggered even on download button
-            UI.clickOnApprovedButton(e, this)
         }).on('click', 'a.next-review-repetition', function(e) {
             e.preventDefault();
             SegmentFilter.goToNextRepetition(this, 'approved');

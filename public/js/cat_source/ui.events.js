@@ -134,16 +134,6 @@ $.extend(UI, {
             }, 100, this );
         } );
 
-        $(document).on('segment:status:change', function(e, segment, options) {
-            var status = options.status ;
-            var next = UI.getNextSegment( segment.el, 'untranslated' );
-
-            if ( ! next ) {
-                $(window).trigger({
-                    type: "allTranslated"
-                });
-            }
-        });
 
 		$("body").on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
@@ -349,26 +339,10 @@ $.extend(UI, {
 			restoreSelection();
         }).on('click', '.editor .source .locked,.editor .editarea .locked, ' +
             '.editor .source .locked a,.editor .editarea .locked a', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.markSelectedTag($(this));
-		}).on('click', 'a.translated, a.next-untranslated', function(e) {
             e.preventDefault();
-            UI.clickOnTranslatedButton(this);
-        }).on('click', 'a.next-repetition', function(e) {
-            e.preventDefault();
-            SegmentFilter.goToNextRepetition(this, 'translated');
-		}).on('click', 'a.next-repetition-group', function(e) {
-            e.preventDefault();
-            SegmentFilter.goToNextRepetitionGroup(this, 'translated');
-		}).on('click', 'a.guesstags', function(e) {
-			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
-			// in the current segment
-			e.preventDefault();
-			$(e.target).addClass('disabled');
-			UI.startSegmentTagProjection();
-			return false;
-		}).on('click', '.editor .outersource .copy', function(e) {
+            e.stopPropagation();
+            UI.markSelectedTag( $( this ) );
+        }).on('click', '.editor .outersource .copy', function(e) {
 			e.preventDefault();
 			UI.copySource();
 		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {

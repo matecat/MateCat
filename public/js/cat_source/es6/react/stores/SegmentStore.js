@@ -111,7 +111,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         split_points_source: [],
                         status: status,
                         time_to_edit: "0",
-                        translation: translation,
+                        translation: (translation) ? translation : '',
                         decoded_translation: UI.decodeText(segment, translation),
                         version: segment.version,
                         warning: "0",
@@ -257,7 +257,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         let self = this;
         this._segments = this._segments.map(segment => segment.set('decoded_translation', UI.decodeText(segment.toJS(), segment.get('translation'))));
         this._segments = this._segments.map(segment => segment.set('decoded_source', UI.decodeText(segment.toJS(), segment.get('segment'))));
-
     },
     setSegmentAsTagged(sid, fid) {
         var index = this.getSegmentIndex(sid);
@@ -349,7 +348,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
     },
     removeAllMutedSegments: function () {
-        this._segments = this._segments.map((segment) => {segment.set('muted', false); segment.set('filtering', false); return segment; });
+        this._segments = this._segments.map(segment => segment.set('filtering', false));
+        this._segments = this._segments.map(segment => segment.set('muted', false));
     },
     setUnlockedSegment: function (sid, fid, unlocked) {
         let index = this.getSegmentIndex(sid);
@@ -435,7 +435,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'open'], open);
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'enabled'], true);
     },
-
+    setChoosenSuggestion: function(sid, sugIndex) {
+        const index = this.getSegmentIndex(sid);
+        this._segments = this._segments.map((segment)=>segment.set('choosenSuggestionIndex', sugIndex));
+    },
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
 
@@ -553,7 +556,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     getSegmentByIdToJS(sid) {
         let segment = this._segments.find(function (seg) {
-            return seg.get('sid') == sid;
+            return seg.get('sid') === sid || seg.get('original_sid') === sid;
         });
         return (segment) ? segment.toJS() : null;
     },
@@ -603,6 +606,37 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             current = Object.assign({},tmpCurrent.toJS());
         }
         return current;
+    },
+    getSegmentsInPropagation(hash, isReview) {
+        let reviewStatus = [
+            "DRAFT",
+            "NEW",
+            "REBUTTED",
+            "REJECTED",
+            "TRANSLATED",
+            "APPROVED"
+        ];
+        let translateStatus = [
+            "DRAFT",
+            "NEW",
+            "REBUTTED",
+            "REJECTED",
+            "TRANSLATED",
+
+        ];
+        return this._segments.filter((segment)=>{
+            if ( isReview && reviewStatus.indexOf(segment.status.toUpperCase() > -1) ){
+                return segment.get('segment_hash') === hash;
+            } else if (!isReview && translateStatus.indexOf(segment.status)){
+                return segment.get('segment_hash') === hash;
+            }
+            return false;
+        }).toJS();
+    },
+    getSegmentsInSplit(sid) {
+        return this._segments.filter((segment)=>{
+              return segment.get('original_sid') === sid;
+        }).toJS();
     },
     isSidePanelOpen: function() {
         const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);
@@ -859,6 +893,10 @@ AppDispatcher.register(function (action) {
             SegmentStore.closeSegmentsSplit();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
+        case SegmentConstants.SET_CHOOSEN_SUGGESTION:
+            SegmentStore.setChoosenSuggestion(action.sid, action.index);
+            break;
+
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
     }

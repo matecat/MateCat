@@ -79,6 +79,6 @@ module.exports = keyMirror({
     OPEN_COMMENTS: null,
     CLOSE_COMMENTS: null,
     OPEN_SPLIT_SEGMENT: null,
-    CLOSE_SPLIT_SEGMENT: null
-
+    CLOSE_SPLIT_SEGMENT: null,
+    SET_CHOOSEN_SUGGESTION:  null
 });

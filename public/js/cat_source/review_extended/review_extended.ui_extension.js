@@ -247,7 +247,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 return;
             }
 
-            var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? false : true;
+            var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? true : false;
             UI.tempDisablingReadonlyAlert = true;
             SegmentActions.removeClassToSegment( sid, 'modified' );
             UI.currentSegment.data( 'modified', false );

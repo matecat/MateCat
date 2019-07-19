@@ -85,7 +85,7 @@ if ( ReviewSimple.enabled() ) {
                 // because of the event is triggered even on download button
                 e.preventDefault();
                 var sid = UI.currentSegmentId;
-                var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? false : true;
+                var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? true : false;
                 UI.tempDisablingReadonlyAlert = true;
                 SegmentActions.removeClassToSegment( sid, 'modified' );
                 UI.currentSegment.data( 'modified', false );

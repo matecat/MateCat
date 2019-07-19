@@ -252,6 +252,13 @@ var SegmentActions = {
             warnings: issues
         });
     },
+    setChoosenSuggestion: function( sid, index) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_CHOOSEN_SUGGESTION,
+            sid: sid,
+            index: index
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

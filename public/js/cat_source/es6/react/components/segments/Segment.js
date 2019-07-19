@@ -486,17 +486,17 @@ class Segment extends React.Component {
             setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},0);
             setTimeout(()=>{UI.setCurrentSegment()},0);
         }
-        //check if this segment is in closing
-        if (prevProps.segment.opened && !this.props.segment.opened) {
-            //check if this segment require setTranslation
-            if (!prevProps.isReview && prevProps.segment.modified && prevProps.segment.status !== "APPROVED") {
-                UI.setTranslation({
-                    id_segment: UI.getSegmentId($(this.section)),
-                    status: 'DRAFT' ,
-                    caller: 'autosave'
-                });
-            }
-        }
+        // //check if this segment is in closing
+        // if (prevProps.segment.opened && !this.props.segment.opened) {
+        //     //check if this segment require setTranslation
+        //     if (!prevProps.isReview && prevProps.segment.modified && prevProps.segment.status === "DRAFT") {
+        //         UI.setTranslation({
+        //             id_segment: UI.getSegmentId($(this.section)),
+        //             status: 'DRAFT' ,
+        //             caller: 'autosave'
+        //         });
+        //     }
+        // }
         return null;
     }
 
