@@ -472,7 +472,6 @@ function ParsedHash( hash ) {
 function setBrowserHistoryBehavior() {
 
     window.onpopstate = function() {
-        segmentId = location.hash.substr(1); // TODO: check this global var is no longer used and remove it
 
         if ( UI.parsedHash.onlyActionRemoved( window.location.hash ) ) {
             return ;

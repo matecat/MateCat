@@ -42,7 +42,7 @@ class SegmentFooterTabConflicts extends React.Component {
                             <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
                         </li>
                         <li className="b sugg-target">
-                            <span className="graysmall-message">{'CTRL' + (index + 1)}</span>
+                            {/*<span className="graysmall-message">{'CTRL' + (index + 1)}</span>*/}
                             <span className="translation" dangerouslySetInnerHTML={self.allowHTML(translation)} />
                             <span className="realData hide" dangerouslySetInnerHTML={self.allowHTML(this.translation)}/>
                         </li>
@@ -61,7 +61,7 @@ class SegmentFooterTabConflicts extends React.Component {
                     <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
                 </li>
                 <li className="b sugg-target">
-                    <span className="graysmall-message">{'CTRL+' + (index1 + alternatives.data.editable.length + 1)}</span>
+                    {/*<span className="graysmall-message">{'CTRL+' + (index1 + alternatives.data.editable.length + 1)}</span>*/}
                     <span className="translation" dangerouslySetInnerHTML={self.allowHTML(translation)}/>
                     <span className="realData hide" dangerouslySetInnerHTML={self.allowHTML(this.translation)}/>
                 </li>
