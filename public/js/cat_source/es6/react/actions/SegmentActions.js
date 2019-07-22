@@ -351,6 +351,13 @@ var SegmentActions = {
             errors: errors
         });
     },
+    setAlternatives: function (sid, alternatives) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_ALTERNATIVES,
+            sid: sid,
+            alternatives: alternatives
+        });
+    },
     chooseContribution: function (sid, index) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CHOOSE_CONTRIBUTION,

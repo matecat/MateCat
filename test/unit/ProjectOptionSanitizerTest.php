@@ -31,7 +31,7 @@ class ProjectOptionSanitizerTest extends AbstractTest {
         $sanitizer = new ProjectOptionsSanitizer(['lexiqa' => TRUE]);
         $sanitizer->setLanguages('en-US', 'es-MX') ;
         $result = $sanitizer->sanitize();
-        $this->assertEquals( array('lexiqa' => 0), $result ) ;
+        $this->assertEquals( array('lexiqa' => 1), $result ) ;
     }
 
     function testTagProjecttionIsTrueForValidLanguages () {

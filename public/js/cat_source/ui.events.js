@@ -355,13 +355,6 @@ $.extend(UI, {
             }
 		});
 
-		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.scrollSegment($(this).attr('data-goto'));
-			SegmentActions.highlightEditarea($(this).attr('data-goto'));
-		});
-
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
 			if (UI.currentSegment  && (!config.isReview) && UI.getStatus(UI.currentSegment) !== 'approved') {

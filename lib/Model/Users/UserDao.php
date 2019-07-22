@@ -145,7 +145,8 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $stmt = $this->_getStatementForCache( self::$_query_user_by_email );
         $UserQuery = new Users_UserStruct();
         $UserQuery->email = $email;
-        return $this->_fetchObject( $stmt,
+
+        return @$this->_fetchObject( $stmt,
                 $UserQuery,
                 [ 'email' => $UserQuery->email ]
         )[ 0 ];

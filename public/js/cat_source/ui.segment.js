@@ -398,7 +398,7 @@
                 var callback = function() {
                     $(window).off('modalClosed');
                     //Check if the next is inside the view, if not render the file
-                    UI.nextUntranslatedSegmentId && SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
+                    UI.nextUntranslatedSegmentIdByServer && SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
                 };
                 // If the modal is open wait the close event
                 if( $(".modal[data-type='confirm']").length ) {
@@ -485,7 +485,8 @@
             this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
             this.getNextSegment(this.currentSegment, 'untranslated');
 
-            if (config.alternativesEnabled) {
+            var segment = SegmentStore.getSegmentByIdToJS(id_segment);
+            if (config.alternativesEnabled && !segment.alternatives) {
                 this.getTranslationMismatches(id_segment);
             }
             $('html').trigger('setCurrentSegment_success', [d, id_segment]);

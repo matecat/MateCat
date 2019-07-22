@@ -168,11 +168,21 @@ class AbstractGetFromCacheJobTest extends AbstractTest {
      */
     public function test__getFromCache_engine_just_created() {
 
+        $this->job_id = $this->getTheLastInsertIdByQuery($this->database_instance); // update job_id with the last insert id
+        $this->bindParams_param = [
+                'id_job'   => $this->job_id,
+                'password' => $this->job_password
+        ];
+
         $job_param_for_read_method           = new Jobs_JobStruct( [] );
         $job_param_for_read_method->id       = $this->job_id;
         $job_param_for_read_method->password = $this->job_password;
-        $this->job_Dao->read( $job_param_for_read_method );
+        $this->job_Dao->read( $job_param_for_read_method);
+
+        $this->cache_key = $this->stmt_param->queryString . serialize( $this->bindParams_param ); // update $this->cache_key
+
         $expected_return = $this->method_getFromCache->invoke( $this->job_Dao, $this->cache_key );
+
         $this->assertEquals( $this->cache_value, $expected_return );
     }
 

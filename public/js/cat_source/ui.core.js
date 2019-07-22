@@ -936,7 +936,8 @@ UI = {
             numSeg += this.involved_id.length;
         });
         if(numAlt) {
-            UI.renderAlternatives(d);
+            // UI.renderAlternatives(d);
+            SegmentActions.setAlternatives(UI.getSegmentId(UI.currentSegment), d.data);
             SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'alternatives');
             SegmentActions.setTabIndex(UI.getSegmentId(UI.currentSegment), 'alternatives', numAlt);
         }
@@ -1028,57 +1029,57 @@ UI = {
     },
 
     // TODO: refactoring React
-    renderAlternatives: function(d) {
-        var segment = UI.currentSegment;
-        var segment_id = UI.currentSegmentId;
-        var escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
-        // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
-        var mainStr = htmlEncode(UI.postProcessEditarea(UI.currentSegment)).replace(/&amp;/g, "&");
-        $('.sub-editor.alternatives .overflow', segment).empty();
-        $.each(d.data.editable, function(index) {
-            // Decode the string from the server
-            var transDecoded = this.translation;
-            // Make the diff between the text with the same codification
-
-            [ mainStr, transDecoded, replacementsMap ] = UI._treatTagsAsBlock( mainStr, transDecoded, [] );
-
-            var diff_obj = UI.execDiff( mainStr, transDecoded );
-
-            //replace the original string in the diff object by the character placeholder
-            Object.keys( diff_obj ).forEach( ( element ) => {
-                if( replacementsMap[ diff_obj[ element ][ 1 ] ] ){
-                    diff_obj[ element ][ 1 ] = replacementsMap[ diff_obj[ element ][ 1 ] ];
-                }
-            } );
-
-            var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
-                '<li class="sugg-source">' +
-                '   <span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
-                escapedSegment + '</span>' +
-                '</li>' +
-                '<li class="b sugg-target">' +
-                '<span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation"></span>' +
-                '<span class="realData hide">' + this.translation +
-                '</span>' +
-                '</li>' +
-                '<li class="goto">' +
-                '<a href="#" data-goto="' + this.involved_id[0]+ '">View</a>' +
-                '</li>' +
-            '</ul>');
-            $('.sub-editor.alternatives .overflow .graysmall[data-item='+ (index + 1) +']', segment).find('.sugg-target .translation').html(translation);
-        });
-
-        $.each(d.data.not_editable, function(index1) {
-            var diff_obj = UI.execDiff(mainStr, this.translation);
-            var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '">' +
-                '<li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li>' +
-                '<li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span>' +
-                '<span class="translation">' + translation + '</span><span class="realData hide">' + this.translation + '</span></li>' +
-                '<li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
-        });
-    },
+    // renderAlternatives: function(d) {
+    //     var segment = UI.currentSegment;
+    //     var segment_id = UI.currentSegmentId;
+    //     var escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
+    //     // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
+    //     var mainStr = htmlEncode(UI.postProcessEditarea(UI.currentSegment)).replace(/&amp;/g, "&");
+    //     $('.sub-editor.alternatives .overflow', segment).empty();
+    //     $.each(d.data.editable, function(index) {
+    //         // Decode the string from the server
+    //         var transDecoded = this.translation;
+    //         // Make the diff between the text with the same codification
+    //
+    //         [ mainStr, transDecoded, replacementsMap ] = UI._treatTagsAsBlock( mainStr, transDecoded, [] );
+    //
+    //         var diff_obj = UI.execDiff( mainStr, transDecoded );
+    //
+    //         //replace the original string in the diff object by the character placeholder
+    //         Object.keys( diff_obj ).forEach( ( element ) => {
+    //             if( replacementsMap[ diff_obj[ element ][ 1 ] ] ){
+    //                 diff_obj[ element ][ 1 ] = replacementsMap[ diff_obj[ element ][ 1 ] ];
+    //             }
+    //         } );
+    //
+    //         var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
+    //         $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
+    //             '<li class="sugg-source">' +
+    //             '   <span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
+    //             escapedSegment + '</span>' +
+    //             '</li>' +
+    //             '<li class="b sugg-target">' +
+    //             '<span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation"></span>' +
+    //             '<span class="realData hide">' + this.translation +
+    //             '</span>' +
+    //             '</li>' +
+    //             '<li class="goto">' +
+    //             '<a href="#" data-goto="' + this.involved_id[0]+ '">View</a>' +
+    //             '</li>' +
+    //         '</ul>');
+    //         $('.sub-editor.alternatives .overflow .graysmall[data-item='+ (index + 1) +']', segment).find('.sugg-target .translation').html(translation);
+    //     });
+    //
+    //     $.each(d.data.not_editable, function(index1) {
+    //         var diff_obj = UI.execDiff(mainStr, this.translation);
+    //         var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
+    //         $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '">' +
+    //             '<li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li>' +
+    //             '<li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span>' +
+    //             '<span class="translation">' + translation + '</span><span class="realData hide">' + this.translation + '</span></li>' +
+    //             '<li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+    //     });
+    // },
     execDiff: function (mainStr, cfrStr) {
         _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
             .replace( config.crPlaceholderRegex, "\r" )
@@ -2206,46 +2207,33 @@ UI = {
      * @param e
      * @param button
      */
-    clickOnTranslatedButton: function (button) {
-        var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
+    clickOnTranslatedButton: function (e, button) {
+        e.preventDefault();
+        var sid = UI.currentSegmentId;
         //??
         $('.temp-highlight-tags').remove();
 
         // UI.setSegmentModified( UI.currentSegment, false ) ;
+        var goToNextUntranslated = ($( button ).hasClass( 'next-untranslated' )) ? true : false;
+        SegmentActions.removeClassToSegment( sid, 'modified' );
+        UI.currentSegment.data( 'modified', false );
 
-        var skipChange = false;
-        if (buttonValue == 'next-untranslated') {
-            if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
-                UI.changeStatus(button, 'translated', 0);
-                skipChange = true;
-                if (!UI.nextUntranslatedSegmentId) {
-                    $('#' + $(button).attr('data-segmentid') + '-close').click();
-                } else {
-                    UI.reloadWarning();
-                }
-            }
-        } else {
-            if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
-                UI.changeStatus(button, 'translated', 0);
-                skipChange = true;
-            }
-
-        }
 
         UI.setStatusButtons(button);
 
         UI.setTimeToEdit(UI.currentSegment);
 
-        if (!skipChange) {
-            UI.changeStatus(button, 'translated', 0);
-        }
+        var afterTranslateFn = function (  ) {
+            if ( !goToNextUntranslated ) {
+                // UI.gotoNextSegment();
+                SegmentActions.openSegment(UI.nextSegmentId);
+            } else {
+                SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
+            }
+        };
 
-        if (buttonValue == 'translated') {
-            // UI.gotoNextSegment();
-            SegmentActions.openSegment(UI.nextSegmentId);
-        } else {
-            SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
-        }
+        UI.changeStatus(button, 'translated', 0, afterTranslateFn);
+
     },
 
     handleClickOnReadOnly : function(section) {

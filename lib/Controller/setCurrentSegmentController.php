@@ -79,7 +79,7 @@ class setCurrentSegmentController extends ajaxController {
          */
         if ( !$isASplittedSegment || $isLastSegmentChunk ) {
 
-            $segmentList = Segments_SegmentDao::getNextSegment( $this->id_segment, $this->id_job, $this->password, ( !self::isRevision() ? false : true ) );
+            $segmentList = Segments_SegmentDao::getNextSegment( $this->id_segment, $this->id_job, $this->password, self::isRevision() );
 
             if ( !self::isRevision() ) {
                 $nextSegmentId = CatUtils::fetchStatus( $this->id_segment, $segmentList );

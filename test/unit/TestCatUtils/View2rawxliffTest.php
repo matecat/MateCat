@@ -43,11 +43,15 @@ class View2rawxliffTest extends AbstractTest {
         $this->source_segment   = <<<'LAB'
 Modulo  ##$_09$##😆LII-P😆  S-2RI##$_0A$##P😆 1415😆
 LAB;
-        $this->expected_segment = <<<'LAB'
-Modulo  	&#128518;LII-P&#128518;  S-2RI
-P&#128518; 1415&#128518;
-LAB;
-        self::assertEquals( $this->expected_segment, $this->filter->fromLayer2ToLayer0( $this->source_segment ) );
+
+        // NOTE 27th June 2019
+        // ----------------------------------
+        // To compare the strings I remove the hidden characters from $filtered_segment
+        $chars            = [ "\r\n", '\\n', '\\r', "\n", "\r", "\t", "\0", "\x0B" ];
+        $filtered_segment = str_replace( $chars, "", $this->filter->fromLayer2ToLayer0( $this->source_segment ) );
+        $this->expected_segment = 'Modulo  &amp;#128518;LII-P&amp;#128518;  S-2RIP&amp;#128518; 1415&amp;#128518;';
+
+        self::assertEquals( $this->expected_segment, $filtered_segment );
     }
 
     /**
@@ -58,11 +62,15 @@ LAB;
         $this->source_segment   = <<<'LAB'
 Modulo  ##$_09$##😆LII-P😆  S-2RI##$_0A$##P😆 1415😆
 LAB;
-        $this->expected_segment = <<<'LAB'
-Modulo  	&#128518;LII-P&#128518;  S-2RI
-P&#128518; 1415&#128518;
-LAB;
-        self::assertEquals( $this->expected_segment, $this->filter->fromLayer2ToLayer0( $this->source_segment ) );
+
+        // NOTE 27th June 2019
+        // ----------------------------------
+        // To compare the strings I remove the hidden characters from $filtered_segment
+        $chars            = [ "\r\n", '\\n', '\\r', "\n", "\r", "\t", "\0", "\x0B" ];
+        $filtered_segment = str_replace( $chars, "", $this->filter->fromLayer2ToLayer0( $this->source_segment ) );
+        $this->expected_segment = 'Modulo  &amp;#128518;LII-P&amp;#128518;  S-2RIP&amp;#128518; 1415&amp;#128518;';
+
+        self::assertEquals( $this->expected_segment, $filtered_segment );
     }
 
     /**
@@ -74,7 +82,7 @@ LAB;
 <g id="1">􀁸</g><g id="2"> </g><g id="3">Salon salle à manger appartement invité n ° 1 [3-1-03]</g>
 LAB;
         $this->expected_segment = <<<'LAB'
-<g id="1">&#1048696;</g><g id="2"> </g><g id="3">Salon salle à manger appartement invité n ° 1 [3-1-03]</g>
+<g id="1">&amp;#1048696;</g><g id="2"> </g><g id="3">Salon salle à manger appartement invité n ° 1 [3-1-03]</g>
 LAB;
         self::assertEquals( $this->expected_segment, $this->filter->fromLayer2ToLayer0( $this->source_segment ) );
     }
@@ -116,7 +124,7 @@ LAB;
 <g id="1">􀂾</g><g id="2"> </g><g id="3">Bâtiment 3</g>
 LAB;
         $this->expected_segment = <<<'LAB'
-<g id="1">&#1048766;</g><g id="2"> </g><g id="3">Bâtiment 3</g>
+<g id="1">&amp;#1048766;</g><g id="2"> </g><g id="3">Bâtiment 3</g>
 LAB;
         self::assertEquals( $this->expected_segment, $this->filter->fromLayer2ToLayer0( $this->source_segment ) );
     }
@@ -130,7 +138,7 @@ LAB;
 <g id="1">􀂾</g><g id="2"> </g><g id="3">D'une ossature à échelle réalisée en bois dur de section appropriate Traité fongicide insecticide with</g>
 LAB;
         $this->expected_segment = <<<'LAB'
-<g id="1">&#1048766;</g><g id="2"> </g><g id="3">D'une ossature à échelle réalisée en bois dur de section appropriate Traité fongicide insecticide with</g>
+<g id="1">&amp;#1048766;</g><g id="2"> </g><g id="3">D&apos;une ossature à échelle réalisée en bois dur de section appropriate Traité fongicide insecticide with</g>
 LAB;
         self::assertEquals( $this->expected_segment, $this->filter->fromLayer2ToLayer0( $this->source_segment ) );
     }

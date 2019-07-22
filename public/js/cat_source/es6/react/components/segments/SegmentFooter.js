@@ -56,9 +56,9 @@ class SegmentFooter extends React.Component {
                 label : 'Translation conflicts',
                 code : 'al',
                 tab_class : 'alternatives',
-                enabled : false,
-                visible : false,
-                open : false,
+                enabled : !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0),
+                visible : !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0),
+                open : !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0),
                 elements : []
             },
             messages: {
@@ -106,9 +106,14 @@ class SegmentFooter extends React.Component {
     registerTabInit(tabs,configs) {
         let allTabs = tabs;
         for(let key in configs){
-            allTabs[key].open = configs[key].open;
+            allTabs[key].open = (this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0) ? false : configs[key].open;
             allTabs[key].visible = configs[key].visible;
             allTabs[key].enabled = true;
+        }
+        if ( this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0 )  {
+            tabs.alternatives.visible = !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0);
+            tabs.alternatives.enabled = !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0);
+            tabs.alternatives.open = !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0);
         }
         return allTabs
     }

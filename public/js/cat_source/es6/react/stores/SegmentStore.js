@@ -367,6 +367,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             errors: errors
         }));
     },
+    setAlternatives: function (sid, alternatives) {
+        const index = this.getSegmentIndex(sid);
+        this._segments = this._segments.setIn([index, 'alternatives'], Immutable.fromJS(alternatives));
+    },
     deleteContribution: function(sid, matchId) {
         const index = this.getSegmentIndex(sid);
         let contributions = this._segments.get(index).get('contributions');
@@ -756,6 +760,10 @@ AppDispatcher.register(function (action) {
             SegmentStore.setCrossLanguageContributionsToCache(action.sid, action.fid, action.matches, action.errors);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
+            break;
+        case SegmentConstants.SET_ALTERNATIVES:
+            SegmentStore.setAlternatives(action.sid, action.alternatives);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
             SegmentStore.emitChange(action.actionType, action.sid, action.index);

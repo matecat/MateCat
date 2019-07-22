@@ -247,29 +247,32 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 return;
             }
 
-            var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? true : false;
-            UI.tempDisablingReadonlyAlert = true;
+            var goToNextUnapproved = ($( button ).hasClass( 'next-unapproved' )) ? true : false;
             SegmentActions.removeClassToSegment( sid, 'modified' );
             UI.currentSegment.data( 'modified', false );
 
 
             $( '.sub-editor.review .error-type' ).removeClass( 'error' );
 
+            var afterApproveFn = function (  ) {
+                if ( goToNextUnapproved ) {
+                    if ( segment.revision_number > 1 ) {
+                        UI.openNextApproved();
+                    } else {
+                        UI.openNextTranslated();
+                    }
+                } else {
+                    UI.gotoNextSegment( sid );
+                }
+            };
+
             UI.setTimeToEdit(UI.currentSegment);
-            UI.changeStatus( button, 'approved', 0 );  // this does < setTranslation
+            UI.changeStatus( button, 'approved', 0,  afterApproveFn);  // this does < setTranslation
 
             var original = UI.currentSegment.find( '.original-translation' ).text();
 
 
-            if ( goToNextNotApproved ) {
-                if ( segment.revision_number > 1 ) {
-                    UI.openNextApproved();
-                } else {
-                    UI.openNextTranslated();
-                }
-            } else {
-                UI.gotoNextSegment( sid );
-            }
+
 
             var data = {
                 action: 'setRevision',

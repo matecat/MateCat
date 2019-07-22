@@ -723,7 +723,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stm = $this->getDatabaseHandler()->getConnection()->prepare( $isPropagationToAlreadyTranslatedAvailable );
         $stm->setFetchMode( PDO::FETCH_ASSOC );
         $stm->execute( $bind_keys );
-        return $stm->fetchAll();
+        return $stm->fetch();
 
     }
 
@@ -831,7 +831,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $bind_values = [
                 'jid'               => $jid,
                 'sid'               => $sid,
-                'translationStatus' => $translationStatus,
                 'password'          => $password
         ];
 
@@ -841,7 +840,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 		JOIN jobs ON jobs.id = st.id_job
 		WHERE jobs.id = :jid 
 		AND jobs.password = :password
-		AND :translationStatus
+		AND $translationStatus
 		AND s.show_in_cattool = 1
 		AND s.id <> :sid
 		AND s.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment

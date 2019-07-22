@@ -14,7 +14,7 @@ class SegmentButton extends React.Component {
 
     clickOnTranslatedButton(event) {
         this.props.updateTranslation();
-        UI.clickOnTranslatedButton(event.currentTarget);
+        UI.clickOnTranslatedButton(event, event.currentTarget);
     }
 
     clickOnApprovedButton(event) {
@@ -115,7 +115,7 @@ class SegmentButton extends React.Component {
                 </li>) :
             (null);
         currentButton = <li><a id={'segment-' + this.props.segment.sid + '-button-translated'}
-                               data-segmentid={'segment-' + this.props.segment.sid} href="#"
+                               data-segmentid={'segment-' + this.props.segment.sid}
                                onClick={(event)=>this.clickOnApprovedButton(event)}
                                className={'approved ' + classDisable} > {config.status_labels.APPROVED} </a><p>
             {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
@@ -127,7 +127,7 @@ class SegmentButton extends React.Component {
             var filterinRepetitions = data.reactState && data.reactState.samplingType === "repetitions";
             if (filterinRepetitions) {
                 nextButton =<React.Fragment>
-                    <li><a id={"segment-" + this.props.segment.sid+"-nextrepetition"} href="#"
+                    <li><a id={"segment-" + this.props.segment.sid+"-nextrepetition"}
                            onClick={(e)=>this.goToNextRepetition(e, 'approved')}
                            className="next-review-repetition ui green button"
                            data-segmentid={"segment-"+ this.props.segment.sid}
@@ -136,7 +136,7 @@ class SegmentButton extends React.Component {
                     <li>
                         <a id={"segment-" + this.props.segment.sid +"-nextgrouprepetition"}
                            onClick={(e)=>this.goToNextRepetitionGroup(e, 'approved')}
-                           href="#" className="next-review-repetition-group ui green button"
+                           className="next-review-repetition-group ui green button"
                            data-segmentid={"segment-" + this.props.segment.sid}
                            title="Revise and go to next repetition group">REP >></a>
                     </li>

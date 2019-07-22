@@ -86,14 +86,21 @@ if ( ReviewSimple.enabled() ) {
                 e.preventDefault();
                 var sid = UI.currentSegmentId;
                 var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? true : false;
-                UI.tempDisablingReadonlyAlert = true;
                 SegmentActions.removeClassToSegment( sid, 'modified' );
                 UI.currentSegment.data( 'modified', false );
 
 
                 $( '.sub-editor.review .error-type' ).removeClass( 'error' );
 
-                UI.changeStatus( button, 'approved', 0 );  // this does < setTranslation
+                var afterApproveFn = function (  ) {
+                    if ( goToNextNotApproved ) {
+                        UI.openNextTranslated();
+                    } else {
+                        UI.gotoNextSegment( sid );
+                    }
+                };
+
+                UI.changeStatus( button, 'approved', 0, afterApproveFn );  // this does < setTranslation
 
                 var original = UI.currentSegment.find( '.original-translation' ).text();
 
@@ -104,11 +111,8 @@ if ( ReviewSimple.enabled() ) {
                 var err_language = $( err ).find( 'input[name=t4]:checked' ).val();
                 var err_style = $( err ).find( 'input[name=t5]:checked' ).val();
 
-                if ( goToNextNotApproved ) {
-                    UI.openNextTranslated();
-                } else {
-                    UI.gotoNextSegment( sid );
-                }
+
+
 
                 var data = {
                     action: 'setRevision',

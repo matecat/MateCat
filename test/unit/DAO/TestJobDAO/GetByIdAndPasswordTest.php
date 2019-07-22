@@ -94,7 +94,7 @@ class GetByIdAndPasswordTest extends AbstractTest {
 
         $this->job_Dao->createFromStruct( $this->job_struct );
 
-        $this->id = $this->database_instance->last_insert();
+        $this->id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE owner='" . $this->str_owner . "';";
 
