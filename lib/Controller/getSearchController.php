@@ -3,6 +3,7 @@
 
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
+use SubFiltering\Filter;
 
 class getSearchController extends ajaxController {
 
@@ -116,6 +117,9 @@ class getSearchController extends ajaxController {
             case 'replaceAll':
                 $this->doReplaceAll();
                 break;
+            case 'undoReplaceAll':
+                $this->undoReplaceAll();
+                break;
             default :
                 $this->result[ 'errors' ][] = [ "code" => -11, "message" => "unknown  function. Use find or replace" ];
                 return;
@@ -157,7 +161,7 @@ class getSearchController extends ajaxController {
      */
     private function doReplaceAll(){
 
-        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $Filter = Filter::getInstance( $this->featureSet );
 
         $this->queryParams[ 'trg' ]         = $Filter->fromLayer2ToLayer0( $this->target );
         $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
@@ -171,4 +175,45 @@ class getSearchController extends ajaxController {
 
     }
 
+    /**
+     * @throws Exception
+     */
+    private function undoReplaceAll(){
+        $Filter = Filter::getInstance( $this->featureSet );
+
+        $this->queryParams[ 'trg' ]         = $Filter->fromLayer2ToLayer0( $this->target );
+        $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
+        $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
+
+        /**
+         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
+         * @throws Exception
+         */
+        ( new SearchModel( $this->queryParams ) )->undoReplaceAll();
+    }
+
 }
+
+//https://dev.matecat.com/?action=getSearch&time=1563801006413-v2.7.9b,jid=5
+
+//action: getSearch
+//function: replaceAll
+//job: 5
+//token: 1563801006412
+//password: ec7091238e82
+//source:
+//target: naaa
+//matchcase: false
+//exactmatch: false
+//replace: na
+
+//action: getSearch
+//function: undoReplaceAll
+//job: 5
+//token: 1563801006412
+//password: ec7091238e82
+//source:
+//target: naaa
+//matchcase: false
+//exactmatch: false
+//replace: na

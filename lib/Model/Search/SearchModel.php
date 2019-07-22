@@ -14,6 +14,7 @@ use Exception;
 use Log;
 use PDO;
 use PDOException;
+use Search_ReplaceEventDAO;
 use Utils;
 
 class SearchModel {
@@ -28,7 +29,7 @@ class SearchModel {
      */
     protected $db;
 
-    public function __construct( SearchQueryParamsStruct $queryParams ){
+    public function __construct( SearchQueryParamsStruct $queryParams ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
         $this->_loadParams();
@@ -37,28 +38,25 @@ class SearchModel {
     /**
      * @throws Exception
      */
-    public function replaceAll(){
+    public function replaceAll() {
 
-        $sql = $this->_loadReplaceAllQuery();
+        $sql       = $this->_loadReplaceAllQuery();
         $resultSet = $this->_getQuery( $sql );
 
-        $sqlBatch = [];
+        $sqlBatch  = [];
         $sqlValues = [];
         foreach ( $resultSet as $key => $tRow ) {
 
             //we get the spaces before needed string and re-apply before substitution because we can't know if there are
             //and how much they are
-            $trMod = preg_replace( "#({$this->queryParams->exactMatch->Space_Left}){$this->queryParams->_regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}#{$this->queryParams->matchCase->REGEXP_MODIFIER}",
-                    '${1}' . $this->queryParams->replacement . '${2}',
-                    $tRow[ 'translation' ]
-            );
+            $trMod = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
 
             /**
              * Escape for database
              */
-            $sqlBatch[] = "(?,?,?)";
-            $sqlValues[] = $tRow['id_segment'];
-            $sqlValues[] = $tRow['id_job'];
+            $sqlBatch[]  = "(?,?,?)";
+            $sqlValues[] = $tRow[ 'id_segment' ];
+            $sqlValues[] = $tRow[ 'id_job' ];
             $sqlValues[] = $trMod;
 
         }
@@ -67,7 +65,7 @@ class SearchModel {
         //but we can assume that max translation length is more or less 2.5KB
         // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
         // 300KB is a very low number compared to 16MB
-        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
+        $sqlBatchChunk  = array_chunk( $sqlBatch, 100 );
         $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
 
         foreach ( $sqlBatchChunk as $k => $batch ) {
@@ -86,7 +84,14 @@ class SearchModel {
 
                 $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
 
-            } catch ( Exception $e ){
+                // save replace event
+                $bulk_version = Search_ReplaceEventDAO::getCurrentBulkVersion( $tRow[ 'id_job' ] );
+
+                foreach ( $resultSet as $key => $tRow ) {
+                    $this->_saveReplacementEvent( $bulk_version + 1, $tRow );
+                }
+
+            } catch ( Exception $e ) {
 
                 $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
 				- job id            : " . $this->queryParams->job . "
@@ -113,13 +118,54 @@ class SearchModel {
     }
 
     /**
+     * @param $translation
+     *
+     * @return string|string[]|null
+     */
+    private function _getReplacedSegmentTranslation( $translation ) {
+        return preg_replace( "#({$this->queryParams->exactMatch->Space_Left}){$this->queryParams->_regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}#{$this->queryParams->matchCase->REGEXP_MODIFIER}",
+                '${1}' . $this->queryParams->replacement . '${2}',
+                $translation
+        );
+    }
+
+    /**
+     * @param $tRow
+     */
+    private function _saveReplacementEvent( $bulk_version, $tRow ) {
+        $event                             = new ReplaceEventStruct();
+        $event->bulk_version               = $bulk_version;
+        $event->id_segment                 = $tRow[ 'id_segment' ];
+        $event->id_job                     = $this->queryParams[ 'job' ];
+        $event->job_password               = $this->queryParams[ 'password' ];
+        $event->source                     = $this->queryParams[ 'source' ];
+        $event->target                     = $this->queryParams[ 'target' ];
+        $event->replacement                = $this->queryParams[ 'replacement' ];
+        $event->segment_before_replacement = $tRow[ 'translation' ];
+        $event->segment_after_replacement  = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
+        $event->type                       = ReplaceEventStruct::TYPE_REPLACE;
+
+        Search_ReplaceEventDAO::save( $event );
+
+        Log::doJsonLog( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
+    }
+
+    public function undoReplaceAll() {
+        $delta = (isset($this->queryParams[ 'delta' ])) ? $this->queryParams[ 'delta' ] : -1;
+
+        Search_ReplaceEventDAO::restore($this->queryParams[ 'job' ], $this->queryParams[ 'password' ], $delta);
+
+        Log::doJsonLog( 'Undo (delta '.$delta.') replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
+    }
+
+    /**
      * @return array
      * @throws Exception
      */
-    public function search(){
+    public function search() {
 
         $sql = null;
-        switch( $this->queryParams->key ){
+        switch ( $this->queryParams->key ) {
             case 'source':
                 $sql = $this->_loadSearchInSourceQuery();
                 break;
@@ -140,7 +186,7 @@ class SearchModel {
 
         if ( $this->queryParams->key != 'coupled' && $this->queryParams->key != 'status_only' ) { //there is the ROLLUP
 
-            $rollup = array_pop( $results );
+            $rollup            = array_pop( $results );
             $vector[ 'count' ] = $rollup[ 'count' ]; //can be null, suppress warning
 
             foreach ( $results as $occurrence ) {
@@ -153,7 +199,7 @@ class SearchModel {
             //ROLLUP counter rules!
             if ( $vector[ 'count' ] == 0 ) {
                 $vector[ 'sid_list' ] = [];
-                $vector[ 'count' ]   = 0;
+                $vector[ 'count' ]    = 0;
             }
 
         } else {
@@ -174,7 +220,7 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    protected function _getQuery( $sql ){
+    protected function _getQuery( $sql ) {
 
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
@@ -195,7 +241,7 @@ class SearchModel {
      * @return mixed
      * @throws Exception
      */
-    protected function _insertQuery( $sql , $data ){
+    protected function _insertQuery( $sql, $data ) {
 
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
@@ -213,7 +259,7 @@ class SearchModel {
      * Pay attention to possible SQL injection
      *
      */
-    protected function _loadParams(){
+    protected function _loadParams() {
 
         $this->queryParams->source = $this->db->escape( $this->queryParams->src );
         $this->queryParams->target = $this->db->escape( $this->queryParams->trg );
@@ -259,8 +305,8 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchInTargetQuery(){
-        $ste_join  = $this->_SteJoinInSegments('st.id_segment');
+    protected function _loadSearchInTargetQuery() {
+        $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
         $query = "
@@ -296,7 +342,7 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchInSourceQuery(){
+    protected function _loadSearchInSourceQuery() {
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -327,7 +373,7 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchCoupledQuery(){
+    protected function _loadSearchCoupledQuery() {
 
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
@@ -367,8 +413,8 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchStatusOnlyQuery(){
-        $ste_join  = $this->_SteJoinInSegments('st.id_segment');
+    protected function _loadSearchStatusOnlyQuery() {
+        $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
         $query = "
@@ -384,7 +430,7 @@ class SearchModel {
 
     }
 
-    protected function _loadReplaceAllQuery(){
+    protected function _loadReplaceAllQuery() {
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -412,6 +458,7 @@ class SearchModel {
             $sql .= " AND s.segment REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}' ";
         }
+
         return $sql;
     }
 
@@ -422,17 +469,18 @@ class SearchModel {
      *
      * @return string
      */
-    protected function _SteJoinInSegments( $joined_field = 's.id') {
+    protected function _SteJoinInSegments( $joined_field = 's.id' ) {
         if ( !$this->queryParams->sourcePage ) {
-            return '' ;
+            return '';
         }
+
         return "
             LEFT JOIN (
                 SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
                 SELECT max(id) FROM segment_translation_events
                     WHERE id_job = {$this->queryParams->job}
                     GROUP BY id_segment ) ORDER BY id_segment
-            ) ste ON ste.ste_id_segment = $joined_field "  ;
+            ) ste ON ste.ste_id_segment = $joined_field ";
     }
 
     /**
@@ -440,7 +488,7 @@ class SearchModel {
      */
     protected function _SteWhere() {
         if ( !$this->queryParams->sourcePage ) {
-            return '' ;
+            return '';
         }
 
         /**
@@ -448,11 +496,11 @@ class SearchModel {
          * segment_translations_events may not have records
          * for APPROVED segments ( in case of ICE match ). While in second pass reviews or later this should not happen.
          */
-        $first_revision_source_code = \Constants::SOURCE_PAGE_REVISION ;
+        $first_revision_source_code = \Constants::SOURCE_PAGE_REVISION;
 
         return " AND ( ste.source_page = {$this->queryParams->sourcePage}
                     OR ( {$this->queryParams->sourcePage} = $first_revision_source_code AND ste.source_page = null )
-               ) " ;
+               ) ";
     }
 
 }
