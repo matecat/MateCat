@@ -9,6 +9,7 @@ var TagsMenu = require('./TagsMenu').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
 const SegmentButtons = require('./SegmentButtons').default;
+const QaBlacklist = require('./utils/qaCheckBlacklistUtils');
 
 
 class SegmentTarget extends React.Component {
@@ -244,6 +245,13 @@ class SegmentTarget extends React.Component {
         return textAreaContainer;
     }
 
+    markTranslation(translation) {
+        if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
+            translation = QaBlacklist.markBlacklistItemsInSegment(translation, this.props.segment.qaBlacklistGlossary);
+        }
+        return translation
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
         SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
@@ -266,6 +274,9 @@ class SegmentTarget extends React.Component {
 
     componentDidUpdate() {
         this.afterRenderActions();
+        if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
+            $(this.target).find('.blacklistItem').each((index, item)=>QaBlacklist.powerTipFn(item, this.props.segment.qaCheckGlossary));
+        }
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
@@ -289,9 +300,11 @@ class SegmentTarget extends React.Component {
     render() {
         let translation = this.state.translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
 
+        translation = this.markTranslation(translation);
+
 
         return (
-            <div className="target item" id={"segment-" + this.props.segment.sid + "-target"}>
+            <div className="target item" id={"segment-" + this.props.segment.sid + "-target"} ref={(target)=>this.target=target}>
 
                 {this.getTargetArea(translation)}
                 <p className="warnings"/>

@@ -268,6 +268,13 @@ var SegmentActions = {
             matches: matches
         });
     },
+    addQaBlacklistMatches: function(sid, matches) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_QA_BLACKLIST_MATCHES,
+            sid: sid,
+            matches: matches
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

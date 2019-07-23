@@ -470,6 +470,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         const index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'qaCheckGlossary'], matches);
     },
+    setQABlacklistMatches(sid, matches) {
+        const index = this.getSegmentIndex(sid);
+        this._segments = this._segments.setIn([index, 'qaBlacklistGlossary'], matches);
+    },
     updateGlobalWarnings: function (warnings) {
         Object.keys(warnings).map(key => {
             Object.keys(warnings[key].Categories).map(key2 => {
@@ -910,6 +914,10 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_QA_CHECK_MATCHES:
             SegmentStore.setQACheckMatches(action.sid, action.matches);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.SET_QA_BLACKLIST_MATCHES:
+            SegmentStore.setQABlacklistMatches(action.sid, action.matches);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
 

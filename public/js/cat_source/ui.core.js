@@ -1511,8 +1511,11 @@ UI = {
 
                 $(document).trigger('getWarning:global:success', { resp : data }) ;
                 //If QaCheckGlossary Enabled
-                if (QaCheckGlossary.enabled() && data.glossary) {
-                    QaCheckGlossary.update(data.glossary);
+                if (QaCheckGlossary.enabled() && data.data.glossary) {
+                    QaCheckGlossary.update(data.data.glossary);
+                }
+                if (QaCheckBlacklist.enabled() && data.data.blacklist) {
+                    QaCheckBlacklist.update(data.data.blacklist);
                 }
 
             }

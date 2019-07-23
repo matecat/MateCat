@@ -2,6 +2,8 @@
  * TodoConstants
  */
 
+import TagsMenu from "../components/segments/TagsMenu";
+
 var keyMirror = require('keymirror');
 
 module.exports = keyMirror({
@@ -82,5 +84,6 @@ module.exports = keyMirror({
     CLOSE_SPLIT_SEGMENT: null,
     SET_CHOOSEN_SUGGESTION:  null,
     SET_ALTERNATIVES: null,
-    SET_QA_CHECK_MATCHES: null
+    SET_QA_CHECK_MATCHES: null,
+    SET_QA_BLACKLIST_MATCHES: null
 });

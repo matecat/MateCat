@@ -131,10 +131,10 @@ LXQ.init  = function () {
                       //clean up and redo powertip on any glossaries/blacklists
                       var _segment = UI.getSegmentById(segment.sid)
                       // QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(_segment);
-                      QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), _segment ));
+                      // QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), _segment ));
                       LXQ.redoHighlighting(segment.sid,true);
                       LXQ.redoHighlighting(segment.sid,false);
-                      QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), _segment ));
+                      // QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), _segment ));
                       // QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(_segment);
                   }
             });
@@ -1364,7 +1364,7 @@ LXQ.init  = function () {
                             //delete LXQ.lexiqaWarnings[id_segment];
                             LXQ.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
                             // QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(segment);
-                            QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), segment ));
+                            // QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), segment ));
 
                             source_val = LXQ.highLightText( source_val, highlights.source, isSegmentCompleted, true, true, segment );
                             if ( source_val.indexOf('lxqwarning') > -1 ) {
@@ -1380,7 +1380,7 @@ LXQ.init  = function () {
                             if ( parseInt(UI.currentSegmentId) === parseInt(id_segment) )
                                 restoreSelection();
                             LXQ.reloadPowertip( segment );
-                            QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), segment ));
+                            // QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), segment ));
                             // QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(segment);
                             //only reload dropdown menu and link, if there was an error...
                             //if ( LXQ.enabled() ) LXQ.refreshElements();
@@ -1514,14 +1514,14 @@ LXQ.init  = function () {
                             var source_val = $( ".source", seg ).html();
                             // QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(seg);
                             source_val = LXQ.highLightText( source_val, highlights.source, true, LXQ.shouldHighlighWarningsForSegment( UI.getSegmentId(seg) ), true, seg );
-                            QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), seg ));
+                            // QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), seg ));
                             var target_val = $(".targetarea", seg).html();
                             target_val = LXQ.highLightText( target_val, highlights.target, true, LXQ.shouldHighlighWarningsForSegment( UI.getSegmentId(seg) ), false, seg );
                             target_val.indexOf('lxqwarning') > -1 && SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(seg), UI.getSegmentFileId(seg), target_val);
                             source_val.indexOf('lxqwarning') > -1 && SegmentActions.replaceSourceText(UI.getSegmentId(seg), UI.getSegmentFileId(seg), source_val);
                             LXQ.buildPowertipDataForSegment( seg );
                             // QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(seg);
-                            QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), seg ));
+                            // QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), seg ));
                         } );
 
                         LXQ.updateWarningsUI();
