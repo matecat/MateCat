@@ -117,6 +117,9 @@ class getSearchController extends ajaxController {
             case 'replaceAll':
                 $this->doReplaceAll();
                 break;
+            case 'redoReplaceAll':
+                $this->redoReplaceAll();
+                break;
             case 'undoReplaceAll':
                 $this->undoReplaceAll();
                 break;
@@ -179,11 +182,6 @@ class getSearchController extends ajaxController {
      * @throws Exception
      */
     private function undoReplaceAll(){
-        $Filter = Filter::getInstance( $this->featureSet );
-
-        $this->queryParams[ 'trg' ]         = $Filter->fromLayer2ToLayer0( $this->target );
-        $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
-        $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
 
         /**
          * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
@@ -192,28 +190,15 @@ class getSearchController extends ajaxController {
         ( new SearchModel( $this->queryParams ) )->undoReplaceAll();
     }
 
+    /**
+     * @throws Exception
+     */
+    private function redoReplaceAll(){
+
+        /**
+         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
+         * @throws Exception
+         */
+        ( new SearchModel( $this->queryParams ) )->redoReplaceAll();
+    }
 }
-
-//https://dev.matecat.com/?action=getSearch&time=1563801006413-v2.7.9b,jid=5
-
-//action: getSearch
-//function: replaceAll
-//job: 5
-//token: 1563801006412
-//password: ec7091238e82
-//source:
-//target: naaa
-//matchcase: false
-//exactmatch: false
-//replace: na
-
-//action: getSearch
-//function: undoReplaceAll
-//job: 5
-//token: 1563801006412
-//password: ec7091238e82
-//source:
-//target: naaa
-//matchcase: false
-//exactmatch: false
-//replace: na

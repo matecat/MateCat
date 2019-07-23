@@ -9,6 +9,7 @@ class ReplaceEventStruct extends ShapelessConcreteStruct {
     // EVENT TYPES
     const TYPE_REPLACE = 1;
     const TYPE_UNDO    = 2;
+    const TYPE_REDO    = 3;
 
     // DATABASE FIELDS
     public $id;
@@ -23,6 +24,7 @@ class ReplaceEventStruct extends ShapelessConcreteStruct {
     public $source;
     public $target;
     public $replacement;
+    public $restored_from_bulk_version;
     public $type;
     public $created_at;
 }

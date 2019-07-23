@@ -14,6 +14,7 @@ use Exception;
 use Log;
 use PDO;
 use PDOException;
+use Search_ReplaceEventCurrentVersionDAO;
 use Search_ReplaceEventDAO;
 use Utils;
 
@@ -146,16 +147,27 @@ class SearchModel {
         $event->type                       = ReplaceEventStruct::TYPE_REPLACE;
 
         Search_ReplaceEventDAO::save( $event );
+        Search_ReplaceEventCurrentVersionDAO::save( $this->queryParams[ 'job' ], $bulk_version );
 
         Log::doJsonLog( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
     }
 
+    /**
+     * Undo a ReplaceAll
+     */
     public function undoReplaceAll() {
-        $delta = (isset($this->queryParams[ 'delta' ])) ? $this->queryParams[ 'delta' ] : -1;
+        Search_ReplaceEventDAO::move( $this->queryParams[ 'job' ], $this->queryParams[ 'password' ], 'undo' );
 
-        Search_ReplaceEventDAO::restore($this->queryParams[ 'job' ], $this->queryParams[ 'password' ], $delta);
+        Log::doJsonLog( 'Undo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
+    }
 
-        Log::doJsonLog( 'Undo (delta '.$delta.') replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
+    /**
+     * Redo a ReplaceAll
+     */
+    public function redoReplaceAll() {
+        Search_ReplaceEventDAO::move( $this->queryParams[ 'job' ], $this->queryParams[ 'password' ], 'redo' );
+
+        Log::doJsonLog( 'Redo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
     }
 
     /**

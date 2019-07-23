@@ -18,7 +18,6 @@ CREATE TABLE `replace_events` (
     `source` text,
     `target` text,
     `replacement` text,
-    `type` tinyint(1) NOT NULL,
     `created_at` datetime NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

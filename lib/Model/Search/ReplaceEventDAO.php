@@ -33,23 +33,32 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param int    $id_job
-     * @param string $password
-     * @param null   $bulk_version
+     * @param array $options
      *
      * @return array
      */
-    public static function getByJob( $id_job, $password, $bulk_version = null ) {
-        $conn   = Database::obtain()->getConnection();
-        $query  = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job AND job_password = :job_password";
-        $params = [
-                ':id_job'       => $id_job,
-                ':job_password' => $password,
-        ];
+    public static function search( $options = [] ) {
+        $conn  = Database::obtain()->getConnection();
+        $query = "SELECT * FROM " . self::TABLE . " WHERE 1 = 1 ";
 
-        if ( null !== $bulk_version ) {
+        if ( isset( $options[ 'id_job' ] ) and '' !== $options[ 'id_job' ] ) {
+            $query               .= " AND id_job = :id_job";
+            $params[ ':id_job' ] = $options[ 'id_job' ];
+        }
+
+        if ( isset( $options[ 'job_password' ] ) and '' !== $options[ 'job_password' ] ) {
+            $query                     .= " AND job_password = :job_password";
+            $params[ ':job_password' ] = $options[ 'job_password' ];
+        }
+
+        if ( isset( $options[ 'bulk_version' ] ) and '' !== $options[ 'bulk_version' ] ) {
             $query                     .= " AND bulk_version = :bulk_version";
-            $params[ ':bulk_version' ] = $bulk_version;
+            $params[ ':bulk_version' ] = $options[ 'bulk_version' ];
+        }
+
+        if ( isset( $options[ 'type' ] ) and '' !== $options[ 'type' ] ) {
+            $query             .= " AND type = :type";
+            $params[ ':type' ] = $options[ 'type' ];
         }
 
         $query .= " ORDER BY created_at DESC";
@@ -127,9 +136,9 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
 
         // insert query
         $query = "INSERT INTO " . self::TABLE . "
-        (id_job, bulk_version, job_password, id_segment, source, target, replacement, segment_version, segment_before_replacement, segment_after_replacement, segment_words_delta, type, created_at)
+        (id_job, bulk_version, job_password, id_segment, source, target, replacement, segment_version, segment_before_replacement, segment_after_replacement, segment_words_delta, type, restored_from_bulk_version, created_at)
         VALUES
-        (:id_job, :bulk_version, :job_password, :id_segment, :source, :target, :replacement, :segment_version, :segment_before_replacement, :segment_after_replacement, :segment_words_delta, :type, :created_at)
+        (:id_job, :bulk_version, :job_password, :id_segment, :source, :target, :replacement, :segment_version, :segment_before_replacement, :segment_after_replacement, :segment_words_delta, :type, :restored_from_bulk_version, :created_at)
         ";
         $stmt  = $conn->prepare( $query );
         $stmt->execute( [
@@ -144,7 +153,6 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
                 ':segment_before_replacement' => $eventStruct->segment_before_replacement,
                 ':segment_after_replacement'  => $eventStruct->segment_after_replacement,
                 ':segment_words_delta'        => $segment_words_delta,
-                ':type'                       => $eventStruct->type,
                 ':created_at'                 => date( 'Y-m-d H:i:s' ),
         ] );
 
@@ -176,18 +184,46 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
      *
      * @param int    $id_job
      * @param string $password
-     * @param int    $version_delta
+     * @param int    $type
      *
      * @return int
      */
-    public static function restore( $id_job, $password, $version_delta = -1 ) {
-        $conn = Database::obtain()->getConnection();
+    public static function move( $id_job, $password, $type ) {
 
-        $current_bulk_version    = self::getCurrentBulkVersion( $id_job );
-        $bulk_version_to_restore = (int)( ( $current_bulk_version + $version_delta ) > 1 ) ? ( $current_bulk_version + $version_delta ) : 1;
+        $allowedTypes = [
+                'undo',
+                'redo',
+        ];
 
-        $events        = self::getByJob( $id_job, $password, $bulk_version_to_restore );
+        if ( false === in_array( $type, $allowedTypes ) ) {
+            throw new \InvalidArgumentException( 'Provided type is not valid' );
+        }
+
+        $actual = Search_ReplaceEventCurrentVersionDAO::getByIdJob( $id_job );
+
+        if ( $type === 'undo' ) {
+            $versionToMove =  $actual - 1;
+
+            if ( $versionToMove === 0 ) {
+                return 0;
+            }
+
+        } elseif ( $type === 'redo' ) {
+            $versionToMove =  $actual + 1;
+
+            if ( $versionToMove > self::getCurrentBulkVersion( $id_job ) ) {
+                return 0;
+            }
+        }
+
+        $conn          = Database::obtain()->getConnection();
         $affected_rows = 0;
+
+        $events = self::search( [
+                'id_job'       => $id_job,
+                'job_password' => $password,
+                'bulk_version' => $versionToMove,
+        ] );
 
         if ( count( $events ) > 0 ) {
 
@@ -198,30 +234,14 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
                 try {
                     $query = "UPDATE segment_translations SET translation = :translation WHERE id_job=:id_job AND id_segment=:id_segment";
                     $stmt  = $conn->prepare( $query );
-                    $stmt->execute( [
+
+                    $params = [
                             ':id_job'      => $result->id_job,
                             ':id_segment'  => $result->id_segment,
-                            ':translation' => $result->segment_before_replacement,
-                    ] );
+                            ':translation' => $result->segment_after_replacement
+                    ];
 
-                    $event                             = new ReplaceEventStruct();
-                    $event->bulk_version               = $current_bulk_version + 1;
-                    $event->id_segment                 = $result->id_segment;
-                    $event->id_job                     = $result->id_job;
-                    $event->job_password               = $result->job_password;
-                    $event->source                     = $result->source;
-                    $event->target                     = $result->target;
-                    $event->replacement                = $result->replacement;
-                    $event->segment_before_replacement = $result->segment_after_replacement;
-                    $event->segment_after_replacement  = $result->segment_before_replacement;
-
-                    if ( $version_delta < 0 ) {
-                        $event->type = ReplaceEventStruct::TYPE_UNDO;
-                    } else {
-                        $event->type = ReplaceEventStruct::TYPE_REDO;
-                    }
-
-                    self::save( $event );
+                    $stmt->execute( $params );
 
                     $affected_rows++;
                 } catch ( \Exception $e ) {
@@ -229,6 +249,8 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
                     $affected_rows = 0;
                 }
             }
+
+            Search_ReplaceEventCurrentVersionDAO::save( $id_job, $versionToMove );
 
             $conn->commit();
         }
