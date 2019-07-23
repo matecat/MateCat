@@ -136,9 +136,9 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
 
         // insert query
         $query = "INSERT INTO " . self::TABLE . "
-        (id_job, bulk_version, job_password, id_segment, source, target, replacement, segment_version, segment_before_replacement, segment_after_replacement, segment_words_delta, type, restored_from_bulk_version, created_at)
+        (id_job, bulk_version, job_password, id_segment, source, target, replacement, segment_version, segment_before_replacement, segment_after_replacement, segment_words_delta, created_at)
         VALUES
-        (:id_job, :bulk_version, :job_password, :id_segment, :source, :target, :replacement, :segment_version, :segment_before_replacement, :segment_after_replacement, :segment_words_delta, :type, :restored_from_bulk_version, :created_at)
+        (:id_job, :bulk_version, :job_password, :id_segment, :source, :target, :replacement, :segment_version, :segment_before_replacement, :segment_after_replacement, :segment_words_delta, :created_at)
         ";
         $stmt  = $conn->prepare( $query );
         $stmt->execute( [
