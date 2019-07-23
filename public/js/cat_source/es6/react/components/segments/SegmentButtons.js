@@ -100,12 +100,13 @@ class SegmentButton extends React.Component {
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
         let enableGoToNext = !_.isUndefined(nextSegment) && nextSegment.status === "APPROVED";
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
-
+        const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
+        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && nextSegment.revision_number === this.props.segment.revision_number : enableGoToNext;
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
                        onClick={(event)=>this.clickOnApprovedButton(event)}
-                       className={"btn next-unapproved "+ classDisable } data-segmentid={'segment-' + this.props.segment.sid}
+                       className={"btn next-unapproved "+ classDisable + className } data-segmentid={'segment-' + this.props.segment.sid}
                        title="Revise and go to next translated"> A+>>
                     </a>
                     <p>
@@ -117,7 +118,7 @@ class SegmentButton extends React.Component {
         currentButton = <li><a id={'segment-' + this.props.segment.sid + '-button-translated'}
                                data-segmentid={'segment-' + this.props.segment.sid}
                                onClick={(event)=>this.clickOnApprovedButton(event)}
-                               className={'approved ' + classDisable} > {config.status_labels.APPROVED} </a><p>
+                               className={'approved ' + classDisable + className} > {config.status_labels.APPROVED} </a><p>
             {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
         </p></li>;
 
@@ -129,14 +130,14 @@ class SegmentButton extends React.Component {
                 nextButton =<React.Fragment>
                     <li><a id={"segment-" + this.props.segment.sid+"-nextrepetition"}
                            onClick={(e)=>this.goToNextRepetition(e, 'approved')}
-                           className="next-review-repetition ui green button"
+                           className={"next-review-repetition ui green button " + className}
                            data-segmentid={"segment-"+ this.props.segment.sid}
                            title="Revise and go to next repetition">REP ></a>
                     </li>
                     <li>
                         <a id={"segment-" + this.props.segment.sid +"-nextgrouprepetition"}
                            onClick={(e)=>this.goToNextRepetitionGroup(e, 'approved')}
-                           className="next-review-repetition-group ui green button"
+                           className={"next-review-repetition-group ui green button " + className}
                            data-segmentid={"segment-" + this.props.segment.sid}
                            title="Revise and go to next repetition group">REP >></a>
                     </li>

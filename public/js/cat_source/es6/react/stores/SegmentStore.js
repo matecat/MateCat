@@ -637,7 +637,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
         ];
         return this._segments.filter((segment)=>{
-            if ( isReview && reviewStatus.indexOf(segment.status.toUpperCase() > -1) ){
+            if ( isReview && reviewStatus.indexOf(segment.get('status').toUpperCase() > -1) ){
                 return segment.get('segment_hash') === hash;
             } else if (!isReview && translateStatus.indexOf(segment.status)){
                 return segment.get('segment_hash') === hash;
