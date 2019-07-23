@@ -474,6 +474,23 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         const index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'qaBlacklistGlossary'], matches);
     },
+    /**
+     *
+     * @param sid
+     * @param matches
+     * @param type 1 -> source, 2->target
+     */
+    addLexiqaHighlight(sid, matches, type) {
+        const index = this.getSegmentIndex(sid);
+        if ( type === 1 ) {
+            this._segments = this._segments.setIn([index, 'lexiqa', 'source'], Immutable.fromJS(matches));
+        } else if ( type === 2 ){
+            this._segments = this._segments.setIn([index, 'lexiqa', 'target'], Immutable.fromJS(matches));
+        } else {
+            this._segments = this._segments.setIn([index, 'lexiqa'], Immutable.fromJS(matches));
+        }
+
+    },
     updateGlobalWarnings: function (warnings) {
         Object.keys(warnings).map(key => {
             Object.keys(warnings[key].Categories).map(key2 => {
@@ -918,6 +935,10 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_QA_BLACKLIST_MATCHES:
             SegmentStore.setQABlacklistMatches(action.sid, action.matches);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.ADD_LXQ_HIGHLIGHT:
+            SegmentStore.addLexiqaHighlight(action.sid, action.matches, action.type);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
 

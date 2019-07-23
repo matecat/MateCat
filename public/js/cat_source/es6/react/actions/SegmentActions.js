@@ -275,6 +275,14 @@ var SegmentActions = {
             matches: matches
         });
     },
+    addLexiqaHighlight: function(sid, matches, type) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_LXQ_HIGHLIGHT,
+            sid: sid,
+            matches: matches,
+            type: type
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({

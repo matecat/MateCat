@@ -132,6 +132,13 @@ class SegmentSource extends React.Component {
         return source;
     }
 
+    markLexiqa(source) {
+        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source) {
+            source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
+        }
+        return source;
+    }
+
     componentDidMount() {
         $(this.source).on('click', 'mark.inGlossary',  ( e ) => {
             e.preventDefault();
@@ -172,6 +179,7 @@ class SegmentSource extends React.Component {
         let source = this.state.source;
         source = this.markGlossary();
         source = this.markQaCheckGlossary(source);
+        source = this.markLexiqa(source);
         let html = <div ref={(source)=>this.source=source}
                         className={"source item"}
                         tabIndex={0}
