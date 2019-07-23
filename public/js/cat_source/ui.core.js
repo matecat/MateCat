@@ -1510,6 +1510,10 @@ UI = {
                 }
 
                 $(document).trigger('getWarning:global:success', { resp : data }) ;
+                //If QaCheckGlossary Enabled
+                if (QaCheckGlossary.enabled() && data.glossary) {
+                    QaCheckGlossary.update(data.glossary);
+                }
 
             }
         });

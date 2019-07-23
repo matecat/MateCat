@@ -74,5 +74,5 @@ window.CommentsStore = require('./stores/CommentsStore');
 window.TranslationIssuesSideButton = require('./components/review/TranslationIssuesSideButton').default;
 
 window.SearchUtils = require('./components/header/cattol/search/searchUtils');
-
+window.QaCheckGlossary = require('./components/segments/utils/qaCheckGlossaryUtils');
 

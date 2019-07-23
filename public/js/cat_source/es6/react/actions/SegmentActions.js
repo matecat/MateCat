@@ -9,9 +9,11 @@
  * TodoActions
  */
 
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var SegmentConstants = require('../constants/SegmentConstants');
-var SegmentStore = require('../stores/SegmentStore');
+const AppDispatcher = require('../dispatcher/AppDispatcher');
+const SegmentConstants = require('../constants/SegmentConstants');
+const SegmentStore = require('../stores/SegmentStore');
+const GlossaryUtils = require('../components/segments/utils/glossaryUtils');
+
 
 var SegmentActions = {
     /********* SEGMENTS *********/
@@ -259,6 +261,13 @@ var SegmentActions = {
             index: index
         });
     },
+    addQaCheckMatches: function(sid, matches) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_QA_CHECK_MATCHES,
+            sid: sid,
+            matches: matches
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({
@@ -455,7 +464,7 @@ var SegmentActions = {
             if (typeof segment.glossary === 'undefined') {
                 API.SEGMENT.getGlossaryForSegment(request.text)
                     .done(function (response) {
-                        UI.storeGlossaryData(request.sid, response.data.matches);
+                        GlossaryUtils.storeGlossaryData(request.sid, response.data.matches);
                         AppDispatcher.dispatch({
                             actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
                             sid: request.sid,

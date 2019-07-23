@@ -6,7 +6,8 @@ const React = require('react');
 const SegmentStore = require('../../stores/SegmentStore');
 const SegmentConstants = require('../../constants/SegmentConstants');
 const SegmentActions = require('../../actions/SegmentActions');
-
+const GlossaryUtils = require('./utils/glossaryUtils');
+const QACheckGlossary = require('./utils/qaCheckGlossaryUtils');
 
 class SegmentSource extends React.Component {
 
@@ -117,7 +118,25 @@ class SegmentSource extends React.Component {
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
 
+    markGlossary() {
+        if ( this.props.segment.glossary && Object.size(this.props.segment.glossary) > 0 ) {
+            return GlossaryUtils.markGlossaryItemsInText(this.state.source, this.props.segment.glossary, this.props.segment.sid);
+        }
+        return this.state.source;
+    }
+
+    markQaCheckGlossary(source) {
+        if (QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary && this.props.segment.qaCheckGlossary.length > 0) {
+            return QACheckGlossary.markGlossaryUnusedMatches(source, this.props.segment.qaCheckGlossary);
+        }
+        return source;
+    }
+
     componentDidMount() {
+        $(this.source).on('click', 'mark.inGlossary',  ( e ) => {
+            e.preventDefault();
+            SegmentActions.activateTab(this.props.segment.sid, 'glossary');
+        });
         SegmentStore.addListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
         SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
         SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
@@ -125,6 +144,8 @@ class SegmentSource extends React.Component {
     }
 
     componentWillUnmount() {
+        $(this.source).off('click', 'mark.inGlossary');
+        $.powerTip.destroy($('.blacklistItem', $(this.source)));
         SegmentStore.removeListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
         SegmentStore.removeListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
         SegmentStore.removeListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
@@ -137,6 +158,9 @@ class SegmentSource extends React.Component {
     }
 
     componentDidUpdate() {
+        if ( QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary &&  this.props.segment.qaCheckGlossary.length ) {
+            $(this.source).find('.unusedGlossaryTerm').each((index, item)=>QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
+        }
         this.afterRenderActions()
     }
 
@@ -145,11 +169,15 @@ class SegmentSource extends React.Component {
     }
 
     render() {
-        let html = <div className={"source item"}
+        let source = this.state.source;
+        source = this.markGlossary();
+        source = this.markQaCheckGlossary(source);
+        let html = <div ref={(source)=>this.source=source}
+                        className={"source item"}
                         tabIndex={0}
                         id={"segment-" + this.props.segment.sid +"-source"}
                         data-original={this.originalSource}
-                        dangerouslySetInnerHTML={ this.allowHTML(this.state.source) }
+                        dangerouslySetInnerHTML={ this.allowHTML(source) }
                         onCopy={this.onCopyEvent.bind(this)}
                         onDragStart={this.onDragEvent.bind(this)}
         />;

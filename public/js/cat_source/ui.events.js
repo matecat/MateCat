@@ -321,10 +321,7 @@ $.extend(UI, {
             } else {
                 UI.gotoNextUntranslatedSegment();
             }
-		}).on('click', 'mark.inGlossary', function ( e ) {
-            var $segment = $( e.currentTarget ).closest("section");
-		    UI.openSegmentGlossaryTab($segment);
-        });
+		})
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();

@@ -2,7 +2,7 @@ QaCheckBlacklist = {} ;
 
 QaCheckBlacklist.enabled = function() {
     return config.qa_check_blacklist_enabled ;
-}
+};
 
 // COMMON EVENTS
 if (QaCheckBlacklist.enabled() )
@@ -69,7 +69,7 @@ if (QaCheckBlacklist.enabled() )
                     re , '<span class="blacklistItem">$1</span>'
                 );
             });
-            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(editarea), UI.getSegmentFileId(editarea), newHTML);
+            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(editarea), UI.getSegmentFileId(editarea), UI.transformTextForLockTags(newHTML));
         }
 
         restoreSelection();

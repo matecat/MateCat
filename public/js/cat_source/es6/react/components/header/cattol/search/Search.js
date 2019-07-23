@@ -89,7 +89,6 @@ class Search extends React.Component {
         this.resetStatusFilter();
         setTimeout(() => {
             CatToolActions.closeSubHeader();
-            UI.markGlossaryItemsInSource(UI.currentSegment, UI.cachedGlossaryData);
             this.setState(_.cloneDeep(this.defaultState));
         });
     }

@@ -23,7 +23,8 @@ let SearchUtils = {
      * @returns {boolean}
      */
     execFind: function(params) {
-		UI.removeGlossaryMarksFormAllSources();
+		// TODO: REMOVED from glossary
+        // UI.removeGlossaryMarksFormAllSources();
 
 		this.searchResultsSegments = false;
 		$('section.currSearchSegment').removeClass('currSearchSegment');

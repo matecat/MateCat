@@ -80,8 +80,8 @@ $.extend(UI, {
 
         if ( !currentSegment) return;
 
-        if (currentSegment.ice_locked === "1" && !this.props.segment.unlocked) {
-            SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
+        if (currentSegment.ice_locked === "1" && !currentSegment.unlocked) {
+            SegmentActions.addClassToSegment(currentSegment.sid, 'loaded');
             var deferred = new jQuery.Deferred() ;
             return deferred.resolve();
             return;

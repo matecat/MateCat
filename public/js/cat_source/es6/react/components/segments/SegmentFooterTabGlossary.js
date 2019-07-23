@@ -2,10 +2,12 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
-var SegmentActions = require('../../actions/SegmentActions');
+const React = require('react');
+const SegmentConstants = require('../../constants/SegmentConstants');
+const SegmentStore = require('../../stores/SegmentStore');
+const SegmentActions = require('../../actions/SegmentActions');
+const GlossaryUtils = require('./utils/glossaryUtils');
+
 class SegmentFooterTabGlossary extends React.Component {
 
     constructor(props) {
@@ -153,7 +155,7 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     copyItemInEditArea(translation) {
-        UI.copyGlossaryItemInEditarea(UI.decodePlaceholdersToText(translation, true))
+        GlossaryUtils.copyGlossaryItemInEditarea(UI.decodePlaceholdersToText(translation, true), this.props.segment)
     }
     onPasteEvent(e) {
         // cancel paste
@@ -212,7 +214,7 @@ class SegmentFooterTabGlossary extends React.Component {
                             <span id={self.props.id_segment + '-tm-' + match.id + '-source'} className="suggestion_source"
                                   dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText( leftTxt, true ))}/>
                         </li>
-                        <li className="b sugg-target" onDoubleClick={self.copyItemInEditArea.bind(this, rightTxt)}>
+                        <li className="b sugg-target" onDoubleClick={()=>self.copyItemInEditArea(rightTxt)}>
                             <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className="translation"
                                   data-original={UI.decodePlaceholdersToText( rightTxt, true )}
                                   dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(rightTxt, true))}

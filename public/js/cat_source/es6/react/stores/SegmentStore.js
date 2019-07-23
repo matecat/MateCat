@@ -251,7 +251,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         var index = this.getSegmentIndex(sid);
         var trans = htmlEncode(this.removeLockTagsFromString(source));
         this._segments = this._segments.setIn([index, 'segment'], trans);
-        return source;
+        return trans;
     },
     decodeSegmentsText: function () {
         let self = this;
@@ -465,6 +465,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         const fid = this._segmentsFiles.get(sid);
         let index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'warnings'], Immutable.fromJS(warning));
+    },
+    setQACheckMatches(sid, matches) {
+        const index = this.getSegmentIndex(sid);
+        this._segments = this._segments.setIn([index, 'qaCheckGlossary'], matches);
     },
     updateGlobalWarnings: function (warnings) {
         Object.keys(warnings).map(key => {
@@ -903,6 +907,10 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_CHOOSEN_SUGGESTION:
             SegmentStore.setChoosenSuggestion(action.sid, action.index);
+            break;
+        case SegmentConstants.SET_QA_CHECK_MATCHES:
+            SegmentStore.setQACheckMatches(action.sid, action.matches);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
 
         default:
