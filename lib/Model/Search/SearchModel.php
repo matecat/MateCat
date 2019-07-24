@@ -134,17 +134,16 @@ class SearchModel {
      * @param $tRow
      */
     private function _saveReplacementEvent( $bulk_version, $tRow ) {
-        $event                             = new ReplaceEventStruct();
-        $event->bulk_version               = $bulk_version;
-        $event->id_segment                 = $tRow[ 'id_segment' ];
-        $event->id_job                     = $this->queryParams[ 'job' ];
-        $event->job_password               = $this->queryParams[ 'password' ];
-        $event->source                     = $this->queryParams[ 'source' ];
-        $event->target                     = $this->queryParams[ 'target' ];
-        $event->replacement                = $this->queryParams[ 'replacement' ];
-        $event->segment_before_replacement = $tRow[ 'translation' ];
-        $event->segment_after_replacement  = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
-        $event->type                       = ReplaceEventStruct::TYPE_REPLACE;
+        $event                                 = new ReplaceEventStruct();
+        $event->bulk_version                   = $bulk_version;
+        $event->id_segment                     = $tRow[ 'id_segment' ];
+        $event->id_job                         = $this->queryParams[ 'job' ];
+        $event->job_password                   = $this->queryParams[ 'password' ];
+        $event->source                         = $this->queryParams[ 'source' ];
+        $event->target                         = $this->queryParams[ 'target' ];
+        $event->replacement                    = $this->queryParams[ 'replacement' ];
+        $event->translation_before_replacement = $tRow[ 'translation' ];
+        $event->translation_after_replacement  = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
 
         Search_ReplaceEventDAO::save( $event );
         Search_ReplaceEventCurrentVersionDAO::save( $this->queryParams[ 'job' ], $bulk_version );
