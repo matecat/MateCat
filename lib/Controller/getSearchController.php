@@ -1,6 +1,7 @@
 <?php
 
 
+use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
 use SubFiltering\Filter;
@@ -19,29 +20,34 @@ class getSearchController extends ajaxController {
     private $exactMatch;
     private $revisionNumber;
 
-    private $queryParams = array();
+    private $queryParams = [];
 
-    protected $job_data = array();
+    protected $job_data = [];
+
+    /**
+     * @var Database|IDatabase
+     */
+    private $db;
 
     public function __construct() {
 
         parent::__construct();
 
-        $filterArgs = array(
-            'function'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'job'             => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'token'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'source'          => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'target'          => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'status'          => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'replace'         => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'password'        => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'matchcase'       => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'exactmatch'      => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'revision_number' => array( 'filter' => FILTER_VALIDATE_INT )
-        );
+        $filterArgs = [
+                'function'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'job'             => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'token'           => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source'          => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'target'          => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'status'          => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'replace'         => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'password'        => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'matchcase'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'exactmatch'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'revision_number' => [ 'filter' => FILTER_VALIDATE_INT ]
+        ];
 
-        $__postInput     = filter_input_array( INPUT_POST, $filterArgs );
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         $this->function       = $__postInput[ 'function' ]; //can be: search / replace
         $this->job            = $__postInput[ 'job' ];
@@ -55,11 +61,11 @@ class getSearchController extends ajaxController {
         $this->exactMatch     = $__postInput[ 'exactmatch' ];
         $this->revisionNumber = $__postInput[ 'revision_number' ];
 
-        if (empty($this->status)) {
+        if ( empty( $this->status ) ) {
             $this->status = "all";
         }
 
-        switch( $this->status ) {
+        switch ( $this->status ) {
             case 'translated':
             case 'approved':
             case 'rejected':
@@ -72,25 +78,26 @@ class getSearchController extends ajaxController {
         }
 
         $this->queryParams = new SearchQueryParamsStruct( [
-            'job'            => $this->job,
-            'password'       => $this->password,
-            'key'            => null,
-            'src'            => null,
-            'trg'            => null,
-            'status'         => $this->status,
-            'replacement'    => $this->replace,
-            'matchCase'      => $this->matchCase,
-            'exactMatch'     => $this->exactMatch,
+                'job'         => $this->job,
+                'password'    => $this->password,
+                'key'         => null,
+                'src'         => null,
+                'trg'         => null,
+                'status'      => $this->status,
+                'replacement' => $this->replace,
+                'matchCase'   => $this->matchCase,
+                'exactMatch'  => $this->exactMatch,
         ] );
 
-        if ( in_array( strtoupper($this->queryParams->status), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+        if ( in_array( strtoupper( $this->queryParams->status ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
             if ( !empty( $this->revisionNumber ) ) {
                 $this->queryParams->sourcePage = \Features\SecondPassReview\Utils::revisionNumberToSourcePage( $this->revisionNumber );
-            }
-            else {
-                $this->queryParams->sourcePage = Constants::SOURCE_PAGE_REVISION ;
+            } else {
+                $this->queryParams->sourcePage = Constants::SOURCE_PAGE_REVISION;
             }
         }
+
+        $this->db = Database::obtain();
     }
 
     /**
@@ -103,6 +110,7 @@ class getSearchController extends ajaxController {
 
         if ( empty( $this->job ) ) {
             $this->result[ 'errors' ][] = [ "code" => -2, "message" => "missing id job" ];
+
             return;
         }
 
@@ -125,6 +133,7 @@ class getSearchController extends ajaxController {
                 break;
             default :
                 $this->result[ 'errors' ][] = [ "code" => -11, "message" => "unknown  function. Use find or replace" ];
+
                 return;
         }
     }
@@ -149,20 +158,21 @@ class getSearchController extends ajaxController {
 
         try {
             $res = $searchModel->search();
-        } catch( Exception $e ){
-            $this->result['errors'][] = array("code" => -1000, "message" => "internal error: see the log");
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][] = [ "code" => -1000, "message" => "internal error: see the log" ];
+
             return;
         }
 
-        $this->result['total']    = $res['count'];
-        $this->result['segments'] = $res['sid_list'];
+        $this->result[ 'total' ]    = $res[ 'count' ];
+        $this->result[ 'segments' ] = $res[ 'sid_list' ];
 
     }
 
     /**
      * @throws Exception
      */
-    private function doReplaceAll(){
+    private function doReplaceAll() {
 
         $Filter = Filter::getInstance( $this->featureSet );
 
@@ -170,10 +180,116 @@ class getSearchController extends ajaxController {
         $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
         $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
 
-        /**
-         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
-         * @throws Exception
-         */
+        $chunk   = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
+        $project = Projects_ProjectDao::findByJobId( (int)$this->job );
+
+        // loop all segments
+        foreach ( $this->_getSearchResults() as $key => $tRow ) {
+
+            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $tRow[ 'id_segment' ], (int)$this->job );
+            $segment         = ( new Segments_SegmentDao() )->getById( $tRow[ 'id_segment' ] );
+
+            if ( $project->isFeatureEnabled( 'translation_versions' ) ) {
+                $versionsHandler = new SegmentTranslationVersionHandler(
+                        (int)$this->job,
+                        $tRow[ 'id_segment' ],
+                        $this->user->uid,
+                        $project->id
+                );
+            }
+
+            // Propagation
+            $propagationTotal = [
+                    'propagated_ids' => []
+            ];
+
+            $propagate = (isset($_POST['propagate']) and true === $_POST['propagate']) ? true : false;
+
+            if ( true === $propagate && in_array( $old_translation->status, [
+                            Constants_TranslationStatus::STATUS_TRANSLATED,
+                            Constants_TranslationStatus::STATUS_APPROVED,
+                            Constants_TranslationStatus::STATUS_REJECTED
+                    ] )
+            ) {
+                $TPropagation[ 'status' ]                 = $this->status;
+                $TPropagation[ 'id_job' ]                 = $this->job;
+                $TPropagation[ 'translation' ]            = $tRow[ 'translation' ];
+                $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
+                $TPropagation[ 'serialized_errors_list' ] = $old_translation->serialized_errors_list;
+                $TPropagation[ 'warning' ]                = $old_translation->warning;
+                $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
+
+                try {
+                    if ( $versionsHandler != null ) {
+                        $versionsHandler->savePropagation( [
+                                'propagation'     => $TPropagation,
+                                'old_translation' => $old_translation,
+                                'job_data'        => $this->job_data
+                        ] );
+                    }
+
+                    $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
+                            $TPropagation,
+                            $this->job_data,
+                            $this->id_segment,
+                            $project
+                    );
+
+                } catch ( Exception $e ) {
+                    $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
+                    Log::doJsonLog( $msg );
+                    Utils::sendErrMailReport( $msg );
+                    $this->db->rollback();
+
+                    return $e->getCode();
+
+                }
+            }
+
+            // setup $new_translation
+            $new_translation                         = new Translations_SegmentTranslationStruct();
+            $new_translation->id_segment             = $tRow[ 'id_segment' ];
+            $new_translation->id_job                 = $this->job;
+            $new_translation->status                 = $old_translation->status;
+            $new_translation->time_to_edit           = $old_translation->time_to_edit;
+            $new_translation->segment_hash           = $segment->segment_hash;
+            $new_translation->translation            = $tRow[ 'translation' ];
+            $new_translation->serialized_errors_list = $old_translation->serialized_errors_list;
+            $new_translation->suggestion_position    = $old_translation->suggestion_position;
+            $new_translation->warning                = $old_translation->warning;
+            $new_translation->version_number         = $old_translation->version_number;
+            $new_translation->translation_date       = date( "Y-m-d H:i:s" );
+
+            // preSetTranslationCommitted
+            $this->featureSet->run( 'preSetTranslationCommitted', [
+                    'translation'       => $new_translation,
+                    'old_translation'   => $old_translation,
+                    'propagation'       => $propagationTotal,
+                    'chunk'             => $chunk,
+                    'segment'           => $segment,
+                    'user'              => $this->user,
+                    'source_page_code'  => self::getRefererSourcePageCode( $this->featureSet ),
+                    'controller_result' => & $this->result,
+                    'features'          => $this->featureSet
+            ] );
+
+            // setTranslationCommitted
+            try {
+                $this->featureSet->run( 'setTranslationCommitted', [
+                        'translation'      => $new_translation,
+                        'old_translation'  => $old_translation,
+                        'propagated_ids'   => $propagationTotal[ 'propagated_ids' ],
+                        'chunk'            => $chunk,
+                        'segment'          => $segment,
+                        'user'             => $this->user,
+                        'source_page_code' => self::getRefererSourcePageCode( $this->featureSet )
+                ] );
+            } catch ( Exception $e ) {
+                Log::doJsonLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+            }
+        }
+
+        // replaceAll
         ( new SearchModel( $this->queryParams ) )->replaceAll();
 
     }
@@ -181,7 +297,7 @@ class getSearchController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function undoReplaceAll(){
+    private function undoReplaceAll() {
 
         /**
          * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
@@ -193,12 +309,31 @@ class getSearchController extends ajaxController {
     /**
      * @throws Exception
      */
-    private function redoReplaceAll(){
+    private function redoReplaceAll() {
 
         /**
          * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
          * @throws Exception
          */
         ( new SearchModel( $this->queryParams ) )->redoReplaceAll();
+    }
+
+    /**
+     * @return array
+     * @throws Exception
+     */
+    private function _getSearchResults() {
+        $searchModel = new SearchModel( $this->queryParams );
+        $query       = $searchModel->loadReplaceAllQuery();
+
+        try {
+            $stmt = $this->db->getConnection()->prepare( $query );
+            $stmt->execute();
+
+            return $stmt->fetchAll( \PDO::FETCH_ASSOC );
+        } catch ( \PDOException $e ) {
+            Log::doJsonLog( $e->getMessage() );
+            throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
+        }
     }
 }

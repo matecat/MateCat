@@ -16,6 +16,7 @@ use PDO;
 use PDOException;
 use Search_ReplaceEventCurrentVersionDAO;
 use Search_ReplaceEventDAO;
+use Translations_SegmentTranslationDao;
 use Utils;
 
 class SearchModel {
@@ -41,7 +42,7 @@ class SearchModel {
      */
     public function replaceAll() {
 
-        $sql       = $this->_loadReplaceAllQuery();
+        $sql       = $this->loadReplaceAllQuery();
         $resultSet = $this->_getQuery( $sql );
 
         $sqlBatch  = [];
@@ -155,7 +156,16 @@ class SearchModel {
      * Undo a ReplaceAll
      */
     public function undoReplaceAll() {
-        Search_ReplaceEventDAO::move( $this->queryParams[ 'job' ], $this->queryParams[ 'password' ], 'undo' );
+        $actual = Search_ReplaceEventCurrentVersionDAO::getByIdJob( $this->queryParams[ 'job' ] );
+        $versionToMove = $actual - 1;
+
+        if ( $versionToMove === 0 ) {
+            Log::doJsonLog( 'Undo replacement for job #' . $this->queryParams[ 'job' ] . ' version to move error.' );
+
+            return 0;
+        }
+
+        Translations_SegmentTranslationDao::rebuildFromReplaceVersion( $this->queryParams[ 'job' ], $this->queryParams[ 'password' ], $versionToMove);
 
         Log::doJsonLog( 'Undo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
     }
@@ -164,7 +174,16 @@ class SearchModel {
      * Redo a ReplaceAll
      */
     public function redoReplaceAll() {
-        Search_ReplaceEventDAO::move( $this->queryParams[ 'job' ], $this->queryParams[ 'password' ], 'redo' );
+        $actual = Search_ReplaceEventCurrentVersionDAO::getByIdJob( $this->queryParams[ 'job' ] );
+        $versionToMove = $actual + 1;
+
+        if ( $versionToMove > Search_ReplaceEventDAO::getCurrentBulkVersion( $this->queryParams[ 'job' ] ) ) {
+            Log::doJsonLog( 'Redo replacement for job #' . $this->queryParams[ 'job' ] . ' version to move error.' );
+
+            return 0;
+        }
+
+        Translations_SegmentTranslationDao::rebuildFromReplaceVersion( $this->queryParams[ 'job' ], $this->queryParams[ 'password' ], $versionToMove);
 
         Log::doJsonLog( 'Redo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
     }
@@ -441,7 +460,7 @@ class SearchModel {
 
     }
 
-    protected function _loadReplaceAllQuery() {
+    public function loadReplaceAllQuery() {
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
