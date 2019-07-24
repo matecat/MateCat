@@ -183,8 +183,11 @@ class getSearchController extends ajaxController {
         $chunk   = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
         $project = Projects_ProjectDao::findByJobId( (int)$this->job );
 
-        // loop all segments
+        // loop all segments to replace
         foreach ( $this->_getSearchResults() as $key => $tRow ) {
+
+            // start the transaction
+            $this->db->begin();
 
             $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $tRow[ 'id_segment' ], (int)$this->job );
             $segment         = ( new Segments_SegmentDao() )->getById( $tRow[ 'id_segment' ] );
@@ -246,7 +249,7 @@ class getSearchController extends ajaxController {
                 }
             }
 
-            // setup $new_translation
+            // Setup $new_translation
             $new_translation                         = new Translations_SegmentTranslationStruct();
             $new_translation->id_segment             = $tRow[ 'id_segment' ];
             $new_translation->id_job                 = $this->job;
@@ -272,6 +275,17 @@ class getSearchController extends ajaxController {
                     'controller_result' => & $this->result,
                     'features'          => $this->featureSet
             ] );
+
+            //COMMIT THE TRANSACTION
+            try {
+                $this->db->commit();
+            } catch ( Exception $e ) {
+                $this->result[ 'errors' ][] = [ "code" => -101, "message" => $e->getMessage() ];
+                Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+                $this->db->rollback();
+
+                return $e->getCode();
+            }
 
             // setTranslationCommitted
             try {
