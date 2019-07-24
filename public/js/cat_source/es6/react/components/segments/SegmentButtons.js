@@ -14,12 +14,12 @@ class SegmentButton extends React.Component {
 
     clickOnTranslatedButton(event) {
         this.props.updateTranslation();
-        UI.clickOnTranslatedButton(event, event.currentTarget);
+        UI.clickOnTranslatedButton(event.currentTarget);
     }
 
     clickOnApprovedButton(event) {
         this.props.updateTranslation();
-        UI.clickOnApprovedButton(event, event.target);
+        UI.clickOnApprovedButton(event.target);
     }
 
     goToNextRepetition(event, status) {

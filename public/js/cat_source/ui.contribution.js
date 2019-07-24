@@ -58,7 +58,6 @@ $.extend(UI, {
 
             if (which) {
                 SegmentActions.modifiedTranslation(UI.getSegmentId( segment ),UI.getSegmentFileId(segment),true);
-                segment.data('modified', true);
                 segment.trigger('modified');
             }
 		}
@@ -168,9 +167,9 @@ $.extend(UI, {
     getContribution_success: function(data, segment) {
         this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(data), 'contribution');
         this.processContributions(data, segment);
-        if (UI.currentSegmentId === UI.getSegmentId(segment))  {
-            this.segmentQA(segment);
-        }
+        // if (UI.currentSegmentId === UI.getSegmentId(segment))  {
+        //     this.segmentQA(segment);
+        // }
     },
   	processContributions: function(data, segment) {
 		if(!data) return true;

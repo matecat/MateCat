@@ -233,10 +233,9 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             }
         },
 
-        clickOnApprovedButton: function ( e, button ) {
+        clickOnApprovedButton: function (button ) {
             // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
             // because of the event is triggered even on download button
-            e.preventDefault();
             var sid = UI.currentSegmentId;
             var segment = SegmentStore.getSegmentByIdToJS(sid);
 

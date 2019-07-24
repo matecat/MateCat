@@ -23,6 +23,7 @@ module.exports = keyMirror({
     REPLACE_TRANSLATION: null,
     REPLACE_SOURCE: null,
     MODIFIED_TRANSLATION: null,
+    UPDATE_TRANSLATION: null,
     ADD_EDITAREA_CLASS: null,
     TRANSLATION_EDITED: null,
     UPDATE_ALL_SEGMENTS:null,

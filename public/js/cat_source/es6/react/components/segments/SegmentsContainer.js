@@ -259,11 +259,6 @@ class SegmentsContainer extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        try {
-            restoreSelection();
-        } catch ( e ) {
-            console.log("Fail to restore selection", e);
-        }
         if ( this.state.scrollTo !== null && this.state.segments.size > 0 ) {
             this.setState({
                 scrollTo: null

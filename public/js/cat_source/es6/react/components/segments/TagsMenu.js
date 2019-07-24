@@ -214,20 +214,27 @@ class TagsMenu extends React.Component {
 
 
     openTagAutocompletePanel() {
-
-        if ($('.selected', UI.editarea).length) {
-            let range =  window.getSelection().getRangeAt(0);
-            setCursorAfterNode(range, $('.selected', UI.editarea)[0]);
+        try {
+            if ( $( '.selected', UI.editarea ).length ) {
+                let range = window.getSelection().getRangeAt( 0 );
+                setCursorAfterNode( range, $( '.selected', UI.editarea )[0] );
+            }
+            var endCursor = document.createElement( "span" );
+            endCursor.setAttribute( 'class', 'tag-autocomplete-endcursor' );
+            insertNodeAtCursor( endCursor );
+        } catch ( e ) {
+            console.log('Fail to insert tag', e);
         }
-        var endCursor = document.createElement("span");
-        endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
-        insertNodeAtCursor(endCursor);
 
     }
 
     chooseTagAutocompleteOption(tag) {
-        setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
-        saveSelection();
+        try {
+            setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
+            saveSelection();
+        } catch ( e ) {
+            console.log(e);
+        }
         // Todo: refactor this part
         let editareaClone = UI.editarea.clone();
         if ($('.selected', $(editareaClone)).length) {
@@ -268,9 +275,6 @@ class TagsMenu extends React.Component {
         $('.tag-autocomplete-endcursor').remove();
 
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
-        setTimeout(function () {
-            restoreSelection();
-        });
         setTimeout(function () {
             UI.segmentQA(UI.currentSegment);
             UI.checkTagProximity();

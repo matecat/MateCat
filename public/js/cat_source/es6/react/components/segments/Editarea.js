@@ -22,6 +22,7 @@ class Editarea extends React.Component {
         this.onKeyDownEvent = this.onKeyDownEvent.bind(this);
         this.onKeyPressEvent = this.onKeyPressEvent.bind(this);
         this.onPasteEvent = this.onPasteEvent.bind(this);
+        this.onInputDebounced = _.debounce(this.onInputEvent, 500);
         this.keyPressed = false;
     }
 
@@ -99,20 +100,20 @@ class Editarea extends React.Component {
         }
     }
 
-    emitTrackChanges(){
-		if ( Review.enabled() && ( ReviewSimple.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled() ) ){
-			UI.trackChanges(this.editAreaRef);
-		}
-        //check if the translation is changed
-        const   value = htmlEncode(UI.prepareTextToSend($(this.editAreaRef).html())),
-            status = (value !== htmlEncode(UI.prepareTextToSend(this.props.translation)));
-        if( this.props.segment.modified !== status ){
-            SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.fid,status);
-        }
-	}
+    // emitTrackChanges(){
+	// 	if ( Review.enabled() && ( ReviewSimple.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled() ) ){
+	// 		UI.trackChanges(this.editAreaRef);
+	// 	}
+    //     //check if the translation is changed
+    //     // const   value = htmlEncode(UI.prepareTextToSend($(this.editAreaRef).html())),
+    //     //     status = (value !== htmlEncode(UI.prepareTextToSend(this.props.translation)));
+    //     // if( this.props.segment.modified !== status ){
+    //     //     SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.fid,status);
+    //     // }
+	// }
 
 	checkEmptyText() {
-        let text = UI.prepareTextToSend( $(this.editAreaRef).html() );
+        let text = this.editAreaRef.innerText;
         if (text === "") {
             this.props.disableButtons(true);
         } else {
@@ -122,24 +123,29 @@ class Editarea extends React.Component {
 
     onInputEvent(e) {
         if (!this.keyPressed && !this.compositionsStart) {
-            UI.inputEditAreaEventHandler.call(this.editAreaRef, e);
             this.checkEmptyText();
-            this.emitTrackChanges();
+            // this.emitTrackChanges();
+            UI.registerQACheck();
+            if ( !this.props.segment.modified ) {
+                SegmentActions.modifiedTranslation(UI.getSegmentId( UI.currentSegment ),UI.getSegmentFileId(UI.currentSegment),true, this.editAreaRef.innerHTML);
+            }
+            UI.inputEditAreaEventHandler();
         }
     }
+
     onKeyDownEvent(e) {
         this.keyPressed = true;
         //on textarea the event of ctrz+z have a preventDefault.
 		//We added this lines for fix the bug
 		//TODO:delete preventDefault on ui.events.js
-		if (e.keyCode === 90 && (e.ctrlKey || e.metaKey) ) {
-			this.emitTrackChanges();
-		}
+		// if (e.keyCode === 90 && (e.ctrlKey || e.metaKey) ) {
+		// 	this.emitTrackChanges();
+		// }
         UI.keydownEditAreaEventHandler.call(this.editAreaRef, e);
     }
     onKeyPressEvent(e) {
         UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e, this.props.segment.sid);
-		this.emitTrackChanges();
+		// this.emitTrackChanges();
     }
     onKeyUpEvent(e) {
         this.keyPressed = false;
@@ -164,12 +170,12 @@ class Editarea extends React.Component {
             UI.handleCopyEvent(e);
             removeSelectedText();
             UI.saveInUndoStack('cut');
-            this.emitTrackChanges();
+            // this.emitTrackChanges();
         }
     }
     onPasteEvent(e) {
         UI.pasteEditAreaEventHandler.call(this.editAreaRef, e.nativeEvent);
-		this.emitTrackChanges();
+		// this.emitTrackChanges();
     }
     onDragEvent(e) {
         UI.handleDragEvent(e);
@@ -186,7 +192,7 @@ class Editarea extends React.Component {
             removeSelectedText();
         }
         UI.saveInUndoStack('paste');
-        this.emitTrackChanges();
+        // this.emitTrackChanges();
         this.draggingFromEditArea = false;
         let self = this;
         setTimeout(function (  ) {
@@ -202,6 +208,85 @@ class Editarea extends React.Component {
         this.editAreaIsEditing = editAreaIsEditing;
         UI.setEditAreaEditing(editAreaIsEditing);
     }
+    saveCursorPosition(containerEl) {
+        var sel = window.getSelection && window.getSelection();
+        if (sel && sel.rangeCount > 0 && document.createRange) {
+            var range = window.getSelection().getRangeAt(0);
+            var preSelectionRange = range.cloneRange();
+            preSelectionRange.selectNodeContents(containerEl);
+            preSelectionRange.setEnd(range.startContainer, range.startOffset);
+            var start = preSelectionRange.toString().length;
+
+            return {
+                start: start,
+                end: start + range.toString().length
+            }
+        } else if (document.selection && document.body.createTextRange) {
+            var selectedTextRange = document.selection.createRange();
+            var preSelectionTextRange = document.body.createTextRange();
+            preSelectionTextRange.moveToElementText(containerEl);
+            preSelectionTextRange.setEndPoint("EndToStart", selectedTextRange);
+            var start = preSelectionTextRange.text.length;
+
+            return {
+                start: start,
+                end: start + selectedTextRange.text.length
+            }
+        }
+    }
+    restoreCursorPosition(containerEl, savedSel) {
+        if (window.getSelection && document.createRange) {
+            var charIndex = 0, range = document.createRange();
+            range.setStart(containerEl, 0);
+            range.collapse(true);
+            var nodeStack = [containerEl], node, foundStart = false, stop = false;
+            while (!stop && (node = nodeStack.pop())) {
+                if (node.nodeType === 3) {
+                    var nextCharIndex = charIndex + node.length;
+                    if (!foundStart && savedSel.start >= charIndex && savedSel.start <= nextCharIndex ) {
+                        range.setStart(node, savedSel.start - charIndex);
+                        foundStart = true;
+                    }
+                    if (foundStart && savedSel.end >= charIndex && savedSel.end <= nextCharIndex ) {
+                        range.setEnd(node, savedSel.end - charIndex);
+                        stop = true;
+                    }
+                    charIndex = nextCharIndex;
+
+                } else {
+                    var i = node.childNodes.length;
+                    while (i--) {
+                        nodeStack.push(node.childNodes[i]);
+                    }
+                }
+            }
+            if ( node.parentElement.className.indexOf('locked') !== -1 ) {
+                node = (node.parentNode.className.indexOf('locked') !== -1 ) ? node.parentNode.parentNode: node.parentNode;
+                range.setStartAfter(node);
+                range.setEndAfter(node);
+            }
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        } else if (document.selection && document.body.createTextRange) {
+            var textRange = document.body.createTextRange();
+            textRange.moveToElementText(containerEl);
+            textRange.collapse(true);
+            textRange.moveEnd("character", savedSel.end);
+            textRange.moveStart("character", savedSel.start);
+            textRange.select();
+        }
+    }
+
+    componentWillUpdate(e){
+        try {
+            if (this.props.segment.opened) {
+                this.cursorPosition = this.saveCursorPosition(this.editAreaRef);
+            }
+        } catch ( e ) {
+            console.log("Error saving cursor position in EditArea component", e)
+        }
+    }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
@@ -210,7 +295,7 @@ class Editarea extends React.Component {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
         if ( this.props.segment.modified ) {
-            let textToSend = $(this.editAreaRef).html() ;
+            let textToSend = this.editAreaRef.innerHTML ;
             let sid = this.props.segment.sid;
             setTimeout(()=>SegmentActions.replaceEditAreaTextContent(sid, null, textToSend), 200);
         }
@@ -225,13 +310,21 @@ class Editarea extends React.Component {
         ) && !this.editAreaIsEditing
     }
     componentDidUpdate() {
-        let self = this;
-        this.checkEmptyText();
-        setTimeout(function (  ) {
-            if ( !_.isNull(self.editAreaRef) ) {
-                self.emitTrackChanges();
+        if (this.cursorPosition) {
+            try {
+                if (this.props.segment.opened) {
+                    this.restoreCursorPosition( this.editAreaRef, this.cursorPosition );
+                }
+            } catch ( e ) {
+                console.log("Error restoring cursor position in EditArea component", e)
             }
-        });
+        }
+        this.checkEmptyText();
+        // setTimeout(function (  ) {
+        //     if ( !_.isNull(self.editAreaRef) ) {
+        //         self.emitTrackChanges();
+        //     }
+        // });
         focusOnPlaceholder();
     }
     render() {
@@ -269,7 +362,10 @@ class Editarea extends React.Component {
                     onKeyPress={this.onKeyPressEvent}
                     onKeyUp={this.onKeyUpEvent.bind(this)}
                     onCopy={this.onCopyText.bind(this)}
-                    onInput={_.debounce(this.onInputEvent, 500)}
+                    onInput={()=>{
+                        this.props.sendTranslationWithoutUpdate();
+                        this.onInputDebounced();
+                    }}
                     onCompositionStart={this.onCompositionStartEvent.bind(this)}
                     onCompositionEnd={this.onCompositionEndEvent.bind(this)}
                     onPaste={this.onPasteEvent}

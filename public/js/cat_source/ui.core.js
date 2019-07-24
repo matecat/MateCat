@@ -2211,11 +2211,9 @@ UI = {
     },
     /**
      * After User click on Translated or T+>> Button
-     * @param e
      * @param button
      */
-    clickOnTranslatedButton: function (e, button) {
-        e.preventDefault();
+    clickOnTranslatedButton: function (button) {
         var sid = UI.currentSegmentId;
         //??
         $('.temp-highlight-tags').remove();

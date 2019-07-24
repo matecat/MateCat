@@ -109,14 +109,10 @@
          * @param translation
          */
         copyTagProjectionInCurrentSegment: function (translation) {
-            this.copySourcefromDataAttribute();
+            // this.copySourcefromDataAttribute();
             if (!_.isUndefined(translation) && translation.length > 0) {
-
-                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), translation);
-
-                // $(this.editarea).html(decoded_translation);
+                SegmentActions.replaceEditAreaTextContent( UI.getSegmentId( this.editarea ), UI.getSegmentFileId( this.editarea ), translation );
             }
-
         },
         /**
          * Tag Projection: set a segment after tag projection is called, remove the class enableTP and set the data-tagprojection
@@ -154,22 +150,7 @@
             if (this.enableTagProjection && tagProjectionEnabled) {
                 SegmentActions.setSegmentAsTagged(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
                 currentSegment.data('tagprojection', 'tagged');
-                this.copySourcefromDataAttribute(segment);
             }
-        },
-        /**
-         * Copy the source from the data-original to the source decoding the tag
-         */
-        copySourcefromDataAttribute: function (segment) {
-            var currentSegment = (segment)? segment : UI.currentSegment;
-            var source = htmlDecode(currentSegment.find('.source').data('original'));
-            source = UI.transformPlaceholdersAndTags(source);
-            // source = source.replace(/\n/g , config.lfPlaceholder)
-            //         .replace(/\r/g, config.crPlaceholder )
-            //         .replace(/\r\n/g, config.crlfPlaceholder )
-            //         .replace(/\t/g, config.tabPlaceholder )
-            //         .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
-            SegmentActions.replaceSourceText(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment), source);
         },
         /**
          * Set the tag projection to true and reload file
@@ -521,11 +502,9 @@
 
             if ( isModified ) {
                 SegmentActions.modifiedTranslation(UI.getSegmentId( el ), UI.getSegmentFileId(el), true);
-                el.data('modified', true);
                 el.trigger('modified');
             } else {
                 SegmentActions.modifiedTranslation(UI.getSegmentId( el ), UI.getSegmentFileId(el), false);
-                el.data('modified', false);
                 el.trigger('modified');
             }
         },

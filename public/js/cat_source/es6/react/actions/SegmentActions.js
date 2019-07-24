@@ -190,15 +190,6 @@ var SegmentActions = {
         });
     },
 
-    replaceSourceText: function(sid, fid, text) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.REPLACE_SOURCE,
-            id: sid,
-            fid: fid,
-            source: text
-        });
-    },
-
     setSegmentAsTagged: function (sid, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_TAGGED,
@@ -290,12 +281,13 @@ var SegmentActions = {
             id: sid
         });
     },
-    modifiedTranslation: function (sid, fid, status) {
+    modifiedTranslation: function (sid, fid, status, translation) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.MODIFIED_TRANSLATION,
             sid: sid,
             fid: fid,
-            status: status
+            status: status,
+            translation: translation
         });
 
     },
@@ -304,6 +296,14 @@ var SegmentActions = {
             actionType: SegmentConstants.REPLACE_TRANSLATION,
             id: sid,
             fid: fid,
+            translation: text
+        });
+    },
+
+    updateTranslation: function(sid, text) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UPDATE_TRANSLATION,
+            id: sid,
             translation: text
         });
     },

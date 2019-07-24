@@ -43,26 +43,26 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                $('.editor .next-unapproved:not(.disabled)').click();
+                UI.clickOnApprovedButton($('.editor .next-unapproved:not(.disabled)'));
             } else {
                 if ( $('.editor .next-untranslated:not(.disabled)').length > 0 ) {
-                    $('.editor .next-untranslated:not(.disabled)').click();
+                    UI.clickOnTranslatedButton($('.editor .next-untranslated:not(.disabled)'));
                 } else if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    $('.editor .translated').click();
+                    UI.clickOnTranslatedButton($('.editor .translated'));
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    $('.editor .guesstags').click();
+                    UI.startSegmentTagProjection();
                 }
             }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                $('body.review .editor .approved:not(.disabled)').click();
+                UI.clickOnApprovedButton($('body.review .editor .approved:not(.disabled)'));
             } else {
                 if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    $('.editor .translated').click();
+                    UI.clickOnTranslatedButton($('.editor .translated'));
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    $('.editor .guesstags').click();
+                    UI.startSegmentTagProjection();
                 }
             }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {

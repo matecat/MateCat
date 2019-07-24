@@ -546,6 +546,7 @@ class Segment extends React.Component {
                 data-tagprojection={this.dataAttrTagged}
                 onClick={this.onClickEvent.bind(this)}
                 data-fid={this.props.segment.id_file}
+                data-modified={this.props.segment.modified}
             >
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
