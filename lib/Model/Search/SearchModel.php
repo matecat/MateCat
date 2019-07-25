@@ -14,8 +14,6 @@ use Exception;
 use Log;
 use PDO;
 use PDOException;
-use Search_MySQLReplaceEventDAO;
-use Search_MySQLReplaceEventIndexDAO;
 use Search_ReplaceHistory;
 use Utils;
 
@@ -40,6 +38,9 @@ class SearchModel {
      * SearchModel constructor.
      *
      * @param SearchQueryParamsStruct $queryParams
+     *
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
      */
     public function __construct( SearchQueryParamsStruct $queryParams ) {
         $this->queryParams = $queryParams;
@@ -47,8 +48,8 @@ class SearchModel {
         $this->_loadParams();
         $this->eventHistory = new Search_ReplaceHistory(
                 $this->queryParams[ 'job' ],
-                new Search_MySQLReplaceEventDAO(),
-                new Search_MySQLReplaceEventIndexDAO()
+                new \Search_RedisReplaceEventDAO(),
+                new \Search_RedisReplaceEventIndexDAO()
         );
     }
 
