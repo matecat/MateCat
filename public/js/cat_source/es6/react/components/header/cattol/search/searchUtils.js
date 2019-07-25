@@ -103,7 +103,7 @@ let SearchUtils = {
                     matchcase: this.searchParams['match-case'],
                     exactmatch: this.searchParams['exact-match'],
                     replace: replace,
-                    revision_number: params.revisionNumber
+                    revision_number: config.revisionNumber
                 },
                 success: function(d) {
                     SearchUtils.execFind_success(d);
