@@ -230,6 +230,9 @@ class TagsMenu extends React.Component {
 
     chooseTagAutocompleteOption(tag) {
         try {
+            if ( $(".tag-autocomplete-endcursor", UI.editarea).length === 0 ) {
+                this.openTagAutocompletePanel();
+            }
             setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
             saveSelection();
         } catch ( e ) {

@@ -260,8 +260,8 @@ class Editarea extends React.Component {
                     }
                 }
             }
-            if ( node.parentElement.className.indexOf('locked') !== -1 ) {
-                node = (node.parentNode.className.indexOf('locked') !== -1 ) ? node.parentNode.parentNode: node.parentNode;
+            if ( node.parentNode.className.indexOf('locked') !== -1 ) {
+                node = (node.parentNode.parentNode.className.indexOf('locked') !== -1 ) ? node.parentNode.parentNode: node.parentNode;
                 range.setStartAfter(node);
                 range.setEndAfter(node);
             }
