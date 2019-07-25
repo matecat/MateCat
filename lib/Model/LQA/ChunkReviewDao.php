@@ -15,20 +15,21 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     protected function _buildResult( $array_result ) { }
 
-    public function updatePassword($id_job, $password, $old_password) {
+    public function updatePassword( $id_job, $old_password, $new_password ) {
         $sql = "UPDATE qa_chunk_reviews SET password = :new_password
-               WHERE id_job = :id_job AND password = :password " ;
+               WHERE id_job = :id_job AND password = :old_password ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute(array(
+        $stmt->execute( [
                 'id_job'       => $id_job,
-                'password'     => $old_password,
-                'new_password' => $password
-        ));
+                'old_password' => $old_password,
+                'new_password' => $new_password
+        ] );
 
         return $stmt->rowCount();
     }
+
     /**
      * @param $id_job
      *
