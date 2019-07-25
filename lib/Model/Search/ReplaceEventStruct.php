@@ -15,11 +15,8 @@ class ReplaceEventStruct extends ShapelessConcreteStruct {
     public $segment_version;
     public $translation_before_replacement;
     public $translation_after_replacement;
-    public $translation_words_delta;
     public $source;
     public $target;
     public $replacement;
-    public $restored_from_bulk_version;
-    public $type;
     public $created_at;
 }

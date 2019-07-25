@@ -793,52 +793,39 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     /**
      * @param $id_job
-     * @param $password
      * @param $versionToMove
      *
      * @return int
      */
-    public static function rebuildFromReplaceVersion( $id_job, $password, $versionToMove ) {
+    public static function rebuildFromReplaceEvents( $events ) {
         $conn          = Database::obtain()->getConnection();
         $affected_rows = 0;
 
-        $events = Search_ReplaceEventDAO::search( [
-                'id_job'       => $id_job,
-                'job_password' => $password,
-                'bulk_version' => $versionToMove,
-        ] );
+        $conn->beginTransaction();
 
-        if ( count( $events ) > 0 ) {
+        /** @var ReplaceEventStruct $result */
+        foreach ( $events as $result ) {
+            try {
+                $query = "UPDATE segment_translations SET translation = :translation WHERE id_job=:id_job AND id_segment=:id_segment";
+                $stmt  = $conn->prepare( $query );
 
-            $conn->beginTransaction();
+                $params = [
+                        ':id_job'      => $result->id_job,
+                        ':id_segment'  => $result->id_segment,
+                        ':translation' => $result->translation_after_replacement
+                ];
 
-            /** @var ReplaceEventStruct $result */
-            foreach ( $events as $result ) {
-                try {
-                    $query = "UPDATE segment_translations SET translation = :translation WHERE id_job=:id_job AND id_segment=:id_segment";
-                    $stmt  = $conn->prepare( $query );
+                $stmt->execute( $params );
 
-                    $params = [
-                            ':id_job'      => $result->id_job,
-                            ':id_segment'  => $result->id_segment,
-                            ':translation' => $result->segment_after_replacement
-                    ];
-
-                    $stmt->execute( $params );
-
-                    $affected_rows++;
-                } catch ( \Exception $e ) {
-                    $conn->rollBack();
-                    $affected_rows = 0;
-                }
+                $affected_rows++;
+            } catch ( \Exception $e ) {
+                $conn->rollBack();
+                $affected_rows = 0;
             }
-
-            Search_ReplaceEventCurrentVersionDAO::save( $id_job, $versionToMove );
-
-            $conn->commit();
         }
+
+        $conn->commit();
 
         return $affected_rows;
     }
-
 }

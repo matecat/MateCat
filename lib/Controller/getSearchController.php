@@ -2,6 +2,7 @@
 
 
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
+use LQA\ChunkReviewDao;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
 use SubFiltering\Filter;
@@ -206,9 +207,7 @@ class getSearchController extends ajaxController {
                     'propagated_ids' => []
             ];
 
-            $propagate = (isset($_POST['propagate']) and true === $_POST['propagate']) ? true : false;
-
-            if ( true === $propagate && in_array( $old_translation->status, [
+            if ( in_array( $old_translation->status, [
                             Constants_TranslationStatus::STATUS_TRANSLATED,
                             Constants_TranslationStatus::STATUS_APPROVED,
                             Constants_TranslationStatus::STATUS_REJECTED

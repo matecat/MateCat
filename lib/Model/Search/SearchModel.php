@@ -14,9 +14,9 @@ use Exception;
 use Log;
 use PDO;
 use PDOException;
-use Search_ReplaceEventCurrentVersionDAO;
-use Search_ReplaceEventDAO;
-use Translations_SegmentTranslationDao;
+use Search_MySQLReplaceEventDAO;
+use Search_MySQLReplaceEventIndexDAO;
+use Search_ReplaceHistory;
 use Utils;
 
 class SearchModel {
@@ -31,10 +31,25 @@ class SearchModel {
      */
     protected $db;
 
+    /**
+     * @var Search_ReplaceHistory
+     */
+    private $eventHistory;
+
+    /**
+     * SearchModel constructor.
+     *
+     * @param SearchQueryParamsStruct $queryParams
+     */
     public function __construct( SearchQueryParamsStruct $queryParams ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
         $this->_loadParams();
+        $this->eventHistory = new Search_ReplaceHistory(
+                $this->queryParams[ 'job' ],
+                new Search_MySQLReplaceEventDAO(),
+                new Search_MySQLReplaceEventIndexDAO()
+        );
     }
 
     /**
@@ -87,10 +102,10 @@ class SearchModel {
                 $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
 
                 // save replace event
-                $bulk_version = Search_ReplaceEventDAO::getCurrentBulkVersion( $tRow[ 'id_job' ] );
+                $versionToMove = ( $this->eventHistory->getCursor() + 1 );
 
                 foreach ( $resultSet as $key => $tRow ) {
-                    $this->_saveReplacementEvent( $bulk_version + 1, $tRow );
+                    $this->_saveReplacementEvent( $versionToMove, $tRow );
                 }
 
             } catch ( Exception $e ) {
@@ -146,8 +161,8 @@ class SearchModel {
         $event->translation_before_replacement = $tRow[ 'translation' ];
         $event->translation_after_replacement  = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
 
-        Search_ReplaceEventDAO::save( $event );
-        Search_ReplaceEventCurrentVersionDAO::save( $this->queryParams[ 'job' ], $bulk_version );
+        $this->eventHistory->save( $event );
+        $this->eventHistory->updateIndex( $bulk_version );
 
         Log::doJsonLog( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
     }
@@ -156,16 +171,7 @@ class SearchModel {
      * Undo a ReplaceAll
      */
     public function undoReplaceAll() {
-        $actual = Search_ReplaceEventCurrentVersionDAO::getByIdJob( $this->queryParams[ 'job' ] );
-        $versionToMove = $actual - 1;
-
-        if ( $versionToMove === 0 ) {
-            Log::doJsonLog( 'Undo replacement for job #' . $this->queryParams[ 'job' ] . ' version to move error.' );
-
-            return 0;
-        }
-
-        Translations_SegmentTranslationDao::rebuildFromReplaceVersion( $this->queryParams[ 'job' ], $this->queryParams[ 'password' ], $versionToMove);
+        $this->eventHistory->undo();
 
         Log::doJsonLog( 'Undo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
     }
@@ -174,16 +180,7 @@ class SearchModel {
      * Redo a ReplaceAll
      */
     public function redoReplaceAll() {
-        $actual = Search_ReplaceEventCurrentVersionDAO::getByIdJob( $this->queryParams[ 'job' ] );
-        $versionToMove = $actual + 1;
-
-        if ( $versionToMove > Search_ReplaceEventDAO::getCurrentBulkVersion( $this->queryParams[ 'job' ] ) ) {
-            Log::doJsonLog( 'Redo replacement for job #' . $this->queryParams[ 'job' ] . ' version to move error.' );
-
-            return 0;
-        }
-
-        Translations_SegmentTranslationDao::rebuildFromReplaceVersion( $this->queryParams[ 'job' ], $this->queryParams[ 'password' ], $versionToMove);
+        $this->eventHistory->redo();
 
         Log::doJsonLog( 'Redo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
     }
