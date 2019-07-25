@@ -505,6 +505,7 @@ class Utils {
      *
      * @param bool $raise
      *
+     * @return null|string
      * @throws Exception
      */
     public static function raiseJsonExceptionError( $raise = true ) {
@@ -539,6 +540,8 @@ class Utils {
 
             if ( $raise && $error != JSON_ERROR_NONE ) {
                 throw new Exception( $msg, $error );
+            } elseif( $error != JSON_ERROR_NONE ){
+                return $msg;
             }
 
         }
