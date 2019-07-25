@@ -324,13 +324,22 @@ class Executor implements SplObserver {
                 $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : processing frame {$this->_frameID}" );
 
                 $queueElement = json_decode( $msgFrame->body, true );
+
+                if( empty( $queueElement ) ){
+
+                    $this->_queueHandler->ack( $msgFrame );
+                    $msg = \Utils::raiseJsonExceptionError( false );
+                    $this->_logMsg( [ 'ERROR' => "*** Failed to decode the json frame payload, reason: " . $msg, 'FRAME' => $msgFrame->body ] );
+                    throw new FrameException( "*** Failed to decode the json, reason: " . $msg, -1);
+
+                }
+
                 $queueElement = new QueueElement( $queueElement );
+
                 //empty message what to do?? it should not be there, acknowledge and process the next one
                 if ( empty( $queueElement->classLoad ) || !class_exists( $queueElement->classLoad, true ) ) {
 
-                    \Utils::raiseJsonExceptionError();
                     $this->_queueHandler->ack( $msgFrame );
-                    sleep( 2 );
                     throw new WorkerClassException( "--- (Executor " . $this->_executor_instance_id . ") : found frame but no valid Worker Class found: wait 2 seconds" );
 
                 }
