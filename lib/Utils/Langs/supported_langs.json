@@ -1437,7 +1437,7 @@
                 "en":"Marshallese"
             }],
             "isocode":"mh",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"mh-MH"
         }
