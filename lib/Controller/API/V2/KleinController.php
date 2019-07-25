@@ -11,6 +11,10 @@ use AbstractControllers\TimeLogger;
 use FeatureSet;
 use Users_UserDao;
 
+/**
+ * @property  string password
+ * @property  int id_job
+ */
 abstract class KleinController implements IController {
 
     use TimeLogger;
