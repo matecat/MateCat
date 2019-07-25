@@ -51,27 +51,29 @@ class changePasswordController extends ajaxController {
 
 	}
 
-	protected function changePassword( $actual_pwd, $new_password ){
+    protected function changePassword( $actual_pwd, $new_password ) {
 
         if ( $this->res_type == "prj" ) {
 
             $pStruct = Projects_ProjectDao::findByIdAndPassword( $this->res_id, $actual_pwd );
-            $pDao = new Projects_ProjectDao();
+            $pDao    = new Projects_ProjectDao();
             $pDao->changePassword( $pStruct, $new_password );
             $pDao->destroyCacheById( $this->res_id );
 
             $pStruct->getFeatures()
-                    ->run('project_password_changed', $pStruct, $actual_pwd );
+                    ->run( 'project_password_changed', $pStruct, $actual_pwd );
 
         } else {
 
+            Database::obtain()->begin();
             $jStruct = Jobs_JobDao::getByIdAndPassword( $this->res_id, $actual_pwd );
-            $jDao = new Jobs_JobDao();
+            $jDao    = new Jobs_JobDao();
             $jDao->changePassword( $jStruct, $new_password );
-
             $jStruct->getProject()
                     ->getFeatures()
-                    ->run('job_password_changed', $jStruct, $actual_pwd );
+                    ->run( 'job_password_changed', $jStruct, $actual_pwd );
+            Database::obtain()->commit();
+
         }
 
     }
