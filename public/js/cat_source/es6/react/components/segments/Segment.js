@@ -188,6 +188,9 @@ class Segment extends React.Component {
         if ( this.props.segment.openSplit ) {
             classes.push('split-action');
         }
+        // if ( this.props.segment.search && this.props.segment.search.current === this.props.segment.sid ) {
+        //     classes.push('currSearchSegment');
+        // }
         return classes;
     }
 

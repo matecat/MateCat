@@ -87,5 +87,7 @@ module.exports = keyMirror({
     SET_ALTERNATIVES: null,
     SET_QA_CHECK_MATCHES: null,
     SET_QA_BLACKLIST_MATCHES: null,
-    ADD_LXQ_HIGHLIGHT: null
+    ADD_LXQ_HIGHLIGHT: null,
+    ADD_SEARCH_RESULTS: null,
+    REMOVE_SEARCH_RESULTS: null
 });

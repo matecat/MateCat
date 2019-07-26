@@ -570,13 +570,13 @@ UI = {
 			// 	this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
 			// }
 
-			if (this.body.hasClass('searchActive')) {
-				segLimit = (where == 'before') ? firstSeg : lastSeg;
-				SearchUtils.markSearchResults({
-					where: where,
-					seg: segLimit
-				});
-			}
+			// if (this.body.hasClass('searchActive')) {
+			// 	segLimit = (where == 'before') ? firstSeg : lastSeg;
+			// 	SearchUtils.markSearchResults({
+			// 		where: where,
+			// 		seg: segLimit
+			// 	});
+			// }
             $(window).trigger('segmentsAdded',{ resp : d.data.files });
 
 		}
@@ -653,15 +653,15 @@ UI = {
                 SegmentActions.openSegment(options.segmentToOpen);
             }
 
-			if (options.applySearch) {
-				$('mark.currSearchItem').removeClass('currSearchItem');
-				SearchUtils.markSearchResults(options);
-				if (SearchUtils.searchMode == 'normal') {
-					$('section[id^="segment-' + options.segmentToScroll + '"] mark.searchMarker').first().addClass('currSearchItem');
-				} else {
-					$('section[id^="segment-' + options.segmentToScroll + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
-				}
-			}
+			// if (options.applySearch) {
+			// 	$('mark.currSearchItem').removeClass('currSearchItem');
+			// 	SearchUtils.markSearchResults(options);
+			// 	if (SearchUtils.searchMode == 'normal') {
+			// 		$('section[id^="segment-' + options.segmentToScroll + '"] mark.searchMarker').first().addClass('currSearchItem');
+			// 	} else {
+			// 		$('section[id^="segment-' + options.segmentToScroll + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
+			// 	}
+			// }
 		}
 		$('#outer').removeClass('loading loadingBefore');
 
@@ -1621,7 +1621,7 @@ UI = {
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
         var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
 
-        return ((!alreadySet)&&(!emptyTranslation));
+        return ( !alreadySet && !emptyTranslation && segment.modified );
     },
 
     setTranslation: function(options) {

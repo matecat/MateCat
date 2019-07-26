@@ -81,7 +81,18 @@ var SegmentActions = {
             actionType: SegmentConstants.MOUNT_TRANSLATIONS_ISSUES
         });
     },
-
+    addSearchResultToSegments: function (segments, params) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEARCH_RESULTS,
+            segments: segments,
+            params: params
+        });
+    },
+    removeSearchResultToSegments: function () {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REMOVE_SEARCH_RESULTS
+        });
+    },
     /********** Segment **********/
     setOpenSegment: function (sid, fid) {
         AppDispatcher.dispatch({

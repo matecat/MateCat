@@ -59,6 +59,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     segmentsInBulk: [],
     _footerTabsConfig: Immutable.fromJS({}),
+    search : {
+        active: false,
+        segments: null,
+        params: null
+    },
     /**
      * Update all
      */
@@ -73,12 +78,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
 
         this.buildSegmentsFiles(segments);
-        // console.log(this._segmentsFiles);
 
         if (this.segmentsInBulk.length > 0) {
             this.setBulkSelectionSegments(this.segmentsInBulk);
         }
-        // console.timeEnd("Time: updateAll segments"+fid);
     },
 
     normalizeSplittedSegments: function (segments) {
@@ -87,6 +90,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         $.each(segments, function (index) {
             let splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
             let segment = this;
+            let inSearch = false;
+            //if search active
+            if ( self.search.active ) {
+                inSearch = (self.search.segments.indexOf(segment.sid) > -1);
+            }
             if (splittedSourceAr.length > 1) {
                 var splitGroup = [];
                 $.each(splittedSourceAr, function (i) {
@@ -124,7 +132,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         opened: false,
                         id_file: segment.id_file,
                         originalSource: segment.segment,
-                        firstOfSplit: (i===0)
+                        firstOfSplit: (i===0),
+                        search: (inSearch) ? self.search.params : null
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -138,6 +147,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.original_sid = segment.sid;
                 segment.modified = false;
                 segment.opened = false;
+                segment.search = (inSearch) ? self.search.params : null;
                 newSegments.push(this);
             }
 
@@ -495,6 +505,26 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             });
         });
         this._globalWarnings.matecat = warnings;
+    },
+    addSearchResults: function(segments, params) {
+        this.removeSearchResults();
+        segments.forEach((sid)=> {
+            let index = this.getSegmentIndex(sid);
+            this._segments = this._segments.setIn([index, 'search'], Immutable.fromJS(params));
+        });
+        this.search = {
+            active: true,
+            segments: segments,
+            params: params
+        }
+    },
+    removeSearchResults: function() {
+        this._segments = this._segments.map((segment)=>segment.set('search', null));
+        this.search = {
+            active: false,
+            segments: null,
+            params: null
+        };
     },
     openSegmentSplit: function(sid) {
         let index = this.getSegmentIndex(sid);
@@ -940,7 +970,14 @@ AppDispatcher.register(function (action) {
             SegmentStore.addLexiqaHighlight(action.sid, action.matches, action.type);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
-
+        case SegmentConstants.ADD_SEARCH_RESULTS:
+            SegmentStore.addSearchResults(action.segments, action.params);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.REMOVE_SEARCH_RESULTS:
+            SegmentStore.removeSearchResults();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
     }

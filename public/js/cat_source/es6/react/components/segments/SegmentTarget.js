@@ -250,6 +250,9 @@ class SegmentTarget extends React.Component {
         if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
             translation = QaBlacklist.markBlacklistItemsInSegment(translation, this.props.segment.qaBlacklistGlossary);
         }
+        if ( this.props.segment.search && Object.size(this.props.segment.search) > 0 && this.props.segment.search.target) {
+            translation = SearchUtils.markText(translation, this.props.segment.search, false, this.props.segment.sid);
+        }
         return translation
     }
 

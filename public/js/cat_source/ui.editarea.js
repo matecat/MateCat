@@ -36,12 +36,12 @@ $.extend( UI, {
         }
         var selection, range, r, rr, referenceNode;
         //check if inside search
-        if (UI.body.hasClass('searchActive')) {
-            var el = this;
-            setTimeout(function(){
-                SearchUtils.rebuildSearchSegmentMarkers(el);
-            },100)
-        }
+        // if (UI.body.hasClass('searchActive')) {
+        //     var el = this;
+        //     setTimeout(function(){
+        //         SearchUtils.rebuildSearchSegmentMarkers(el);
+        //     },100)
+        // }
 
         if ((code == 8) || (code == 46)) { // backspace e canc(mac)
             if ($('.selected', $(this)).length) {

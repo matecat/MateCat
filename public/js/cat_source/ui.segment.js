@@ -173,7 +173,6 @@
                 UI.render({
                     segmentToScroll: UI.getSegmentId(UI.currentSegment),
                     segmentToOpen: UI.getSegmentId(UI.currentSegment),
-                    applySearch: UI.body.hasClass('searchActive')
                 });
                 UI.checkWarnings(false);
             });
@@ -200,7 +199,7 @@
                 UI.render({
                     segmentToScroll: UI.getSegmentId(UI.currentSegment),
                     segmentToOpen: UI.getSegmentId(UI.currentSegment),
-                    applySearch: UI.body.hasClass('searchActive')
+                    // applySearch: UI.body.hasClass('searchActive')
                 });
                 UI.checkWarnings(false);
             });

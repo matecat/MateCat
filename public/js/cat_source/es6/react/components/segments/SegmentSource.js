@@ -8,6 +8,7 @@ const SegmentConstants = require('../../constants/SegmentConstants');
 const SegmentActions = require('../../actions/SegmentActions');
 const GlossaryUtils = require('./utils/glossaryUtils');
 const QACheckGlossary = require('./utils/qaCheckGlossaryUtils');
+const SearchUtils = require('../header/cattol/search/searchUtils');
 
 class SegmentSource extends React.Component {
 
@@ -99,11 +100,27 @@ class SegmentSource extends React.Component {
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
 
-    markGlossary() {
-        if ( this.props.segment.glossary && Object.size(this.props.segment.glossary) > 0 ) {
-            return GlossaryUtils.markGlossaryItemsInText(this.props.segment.decoded_source, this.props.segment.glossary, this.props.segment.sid);
+    markSource() {
+        let source = this.props.segment.decoded_source;
+        source = this.markGlossary(source);
+        source = this.markQaCheckGlossary(source);
+        source = this.markLexiqa(source);
+        source = this.markSearch(source);
+        return source;
+    }
+
+    markSearch(source) {
+        if ( this.props.segment.search && Object.size(this.props.segment.search) > 0 && this.props.segment.search.source) {
+            source = SearchUtils.markText(source, this.props.segment.search, true, this.props.segment.sid);
         }
-        return this.props.segment.decoded_source;
+        return source;
+    }
+
+    markGlossary(source) {
+        if ( this.props.segment.glossary && Object.size(this.props.segment.glossary) > 0 ) {
+            return GlossaryUtils.markGlossaryItemsInText(source, this.props.segment.glossary, this.props.segment.sid);
+        }
+        return source;
     }
 
     markQaCheckGlossary(source) {
@@ -152,10 +169,8 @@ class SegmentSource extends React.Component {
     }
 
     render() {
-        let source = this.props.segment.decoded_source;
-        source = this.markGlossary();
-        source = this.markQaCheckGlossary(source);
-        source = this.markLexiqa(source);
+        let source = this.markSource();
+
         let html = <div ref={(source)=>this.source=source}
                         className={"source item"}
                         tabIndex={0}
