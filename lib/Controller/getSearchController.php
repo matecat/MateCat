@@ -30,6 +30,16 @@ class getSearchController extends ajaxController {
      */
     private $db;
 
+    /**
+     * @var SearchModel
+     */
+    private $searchModel;
+
+    /**
+     * getSearchController constructor.
+     * @throws ReflectionException
+     * @throws \Predis\Connection\ConnectionException
+     */
     public function __construct() {
 
         parent::__construct();
@@ -99,6 +109,7 @@ class getSearchController extends ajaxController {
         }
 
         $this->db = Database::obtain();
+        $this->searchModel = new SearchModel( $this->queryParams );
     }
 
     /**
@@ -155,10 +166,8 @@ class getSearchController extends ajaxController {
             $this->queryParams[ 'key' ] = 'status_only';
         }
 
-        $searchModel = new SearchModel( $this->queryParams );
-
         try {
-            $res = $searchModel->search();
+            $res = $this->searchModel->search();
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -1000, "message" => "internal error: see the log" ];
 
@@ -177,9 +186,9 @@ class getSearchController extends ajaxController {
 
         $Filter = Filter::getInstance( $this->featureSet );
 
-        $this->queryParams[ 'trg' ]         = $Filter->fromLayer2ToLayer0( $this->target );
-        $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
-        $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
+        $this->queryParams['trg']         = $Filter->fromLayer2ToLayer0( $this->target );
+        $this->queryParams['src']         = $Filter->fromLayer2ToLayer0( $this->source );
+        $this->queryParams['replacement'] = $Filter->fromLayer2ToLayer0( $this->replace );
 
         $chunk   = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
         $project = Projects_ProjectDao::findByJobId( (int)$this->job );
@@ -303,7 +312,7 @@ class getSearchController extends ajaxController {
         }
 
         // replaceAll
-        ( new SearchModel( $this->queryParams ) )->replaceAll();
+        $this->searchModel->replaceAll($this->_getSearchResults());
 
     }
 
@@ -316,7 +325,7 @@ class getSearchController extends ajaxController {
          * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
          * @throws Exception
          */
-        ( new SearchModel( $this->queryParams ) )->undoReplaceAll();
+        $this->searchModel->undoReplaceAll();
     }
 
     /**
@@ -328,7 +337,7 @@ class getSearchController extends ajaxController {
          * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
          * @throws Exception
          */
-        ( new SearchModel( $this->queryParams ) )->redoReplaceAll();
+        $this->searchModel->redoReplaceAll();
     }
 
     /**
@@ -336,8 +345,7 @@ class getSearchController extends ajaxController {
      * @throws Exception
      */
     private function _getSearchResults() {
-        $searchModel = new SearchModel( $this->queryParams );
-        $query       = $searchModel->loadReplaceAllQuery();
+        $query       = $this->searchModel->loadReplaceAllQuery();
 
         try {
             $stmt = $this->db->getConnection()->prepare( $query );

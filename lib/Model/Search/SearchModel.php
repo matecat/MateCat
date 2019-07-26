@@ -45,7 +45,7 @@ class SearchModel {
     public function __construct( SearchQueryParamsStruct $queryParams ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
-        $this->_loadParams();
+        //$this->_loadParams();
         $this->eventHistory = new Search_ReplaceHistory(
                 $this->queryParams[ 'job' ],
                 new \Search_RedisReplaceEventDAO(),
@@ -54,12 +54,11 @@ class SearchModel {
     }
 
     /**
+     * @param $resultSet
+     *
      * @throws Exception
      */
-    public function replaceAll() {
-
-        $sql       = $this->loadReplaceAllQuery();
-        $resultSet = $this->_getQuery( $sql );
+    public function replaceAll($resultSet) {
 
         $sqlBatch  = [];
         $sqlValues = [];
@@ -334,6 +333,7 @@ class SearchModel {
     }
 
     protected function _loadSearchInTargetQuery() {
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
@@ -371,6 +371,7 @@ class SearchModel {
     }
 
     protected function _loadSearchInSourceQuery() {
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -402,7 +403,7 @@ class SearchModel {
     }
 
     protected function _loadSearchCoupledQuery() {
-
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -442,6 +443,7 @@ class SearchModel {
     }
 
     protected function _loadSearchStatusOnlyQuery() {
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
@@ -459,6 +461,7 @@ class SearchModel {
     }
 
     public function loadReplaceAllQuery() {
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 

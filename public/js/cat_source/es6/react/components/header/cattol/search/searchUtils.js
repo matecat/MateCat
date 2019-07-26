@@ -251,7 +251,7 @@ let SearchUtils = {
                 matchcase: p['match-case'],
                 exactmatch: p['exact-match'],
                 replace: replace,
-                revision_number: params.revisionNumber
+                revision_number: config.revisionNumber
             },
             success: function(d) {
                 if(d.errors.length) {
