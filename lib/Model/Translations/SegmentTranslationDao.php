@@ -590,13 +590,14 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param                        $params
      * @param                        $job_data
      * @param                        $_idSegment
+     * @param                        $execute_update
      *
      * @param Projects_ProjectStruct $project
      *
      * @return array
      * @throws Exception
      */
-    public static function propagateTranslation( $params, $job_data, $_idSegment, Projects_ProjectStruct $project ) {
+    public static function propagateTranslation( $params, $job_data, $_idSegment, Projects_ProjectStruct $project, $execute_update = true ) {
 
         $db = Database::obtain();
 
@@ -674,7 +675,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         $propagated_ids = [];
 
-        if ( !empty( $segmentsForPropagation ) ) {
+        if ( true === $execute_update and !empty( $segmentsForPropagation ) ) {
 
             $propagated_ids = array_map( function ( Translations_SegmentTranslationStruct $translation ) {
                 return $translation->id_segment;

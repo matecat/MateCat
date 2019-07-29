@@ -2,7 +2,6 @@
 
 
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
-use LQA\ChunkReviewDao;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
 use SubFiltering\Filter;
@@ -108,7 +107,7 @@ class getSearchController extends ajaxController {
             }
         }
 
-        $this->db = Database::obtain();
+        $this->db          = Database::obtain();
         $this->searchModel = new SearchModel( $this->queryParams );
     }
 
@@ -186,9 +185,9 @@ class getSearchController extends ajaxController {
 
         $Filter = Filter::getInstance( $this->featureSet );
 
-        $this->queryParams['trg']         = $Filter->fromLayer2ToLayer0( $this->target );
-        $this->queryParams['src']         = $Filter->fromLayer2ToLayer0( $this->source );
-        $this->queryParams['replacement'] = $Filter->fromLayer2ToLayer0( $this->replace );
+        $this->queryParams[ 'trg' ]         = $Filter->fromLayer2ToLayer0( $this->target );
+        $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
+        $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
 
         $chunk   = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
         $project = Projects_ProjectDao::findByJobId( (int)$this->job );
@@ -217,10 +216,10 @@ class getSearchController extends ajaxController {
             ];
 
             if ( in_array( $old_translation->status, [
-                            Constants_TranslationStatus::STATUS_TRANSLATED,
-                            Constants_TranslationStatus::STATUS_APPROVED,
-                            Constants_TranslationStatus::STATUS_REJECTED
-                    ] )
+                    Constants_TranslationStatus::STATUS_TRANSLATED,
+                    Constants_TranslationStatus::STATUS_APPROVED,
+                    Constants_TranslationStatus::STATUS_REJECTED
+            ] )
             ) {
                 $TPropagation[ 'status' ]                 = $this->status;
                 $TPropagation[ 'id_job' ]                 = $this->job;
@@ -243,7 +242,8 @@ class getSearchController extends ajaxController {
                             $TPropagation,
                             $this->job_data,
                             $this->id_segment,
-                            $project
+                            $project,
+                            false
                     );
 
                 } catch ( Exception $e ) {
@@ -261,7 +261,7 @@ class getSearchController extends ajaxController {
             $new_translation                         = new Translations_SegmentTranslationStruct();
             $new_translation->id_segment             = $tRow[ 'id_segment' ];
             $new_translation->id_job                 = $this->job;
-            $new_translation->status                 = $old_translation->status;
+            $new_translation->status                 = $this->_getNewStatus($old_translation);
             $new_translation->time_to_edit           = $old_translation->time_to_edit;
             $new_translation->segment_hash           = $segment->segment_hash;
             $new_translation->translation            = $tRow[ 'translation' ];
@@ -312,7 +312,7 @@ class getSearchController extends ajaxController {
         }
 
         // replaceAll
-        $this->searchModel->replaceAll($this->_getSearchResults());
+        $this->searchModel->replaceAll( $this->_getSearchResults() );
 
     }
 
@@ -341,11 +341,36 @@ class getSearchController extends ajaxController {
     }
 
     /**
+     * @param Translations_SegmentTranslationStruct $translationStruct
+     *
+     * @return string
+     */
+    private function _getNewStatus(Translations_SegmentTranslationStruct $translationStruct) {
+
+        switch ($this->revisionNumber){
+
+            // false = TRANSLATED
+            case false:
+                return Constants_TranslationStatus::STATUS_TRANSLATED;
+
+            // 1 = REVISION
+            // 2 = 2ND REVISION
+            case 1:
+            case 2:
+                if($translationStruct->status === Constants_TranslationStatus::STATUS_TRANSLATED){
+                    return Constants_TranslationStatus::STATUS_TRANSLATED;
+                }
+
+                return Constants_TranslationStatus::STATUS_APPROVED;
+        }
+    }
+
+    /**
      * @return array
      * @throws Exception
      */
     private function _getSearchResults() {
-        $query       = $this->searchModel->loadReplaceAllQuery();
+        $query = $this->searchModel->loadReplaceAllQuery();
 
         try {
             $stmt = $this->db->getConnection()->prepare( $query );
