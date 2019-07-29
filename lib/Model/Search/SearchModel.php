@@ -46,14 +46,11 @@ class SearchModel {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
 
-        $redisReplaceEventDAO      = new \Search_RedisReplaceEventDAO();
-        $redisReplaceEventDAO->setTtl(300); // 5 minutes
-        $redisReplaceEventIndexDAO = new \Search_RedisReplaceEventIndexDAO();
-
         $this->eventHistory = new Search_ReplaceHistory(
                 $this->queryParams[ 'job' ],
-                $redisReplaceEventDAO,
-                $redisReplaceEventIndexDAO
+                new \Search_RedisReplaceEventDAO(),
+                new \Search_RedisReplaceEventIndexDAO(),
+                300
         );
     }
 
@@ -153,14 +150,14 @@ class SearchModel {
      * @param $tRow
      */
     private function _saveReplacementEvent( $bulk_version, $tRow ) {
-        $event                                 = new ReplaceEventStruct();
-        $event->bulk_version                   = $bulk_version;
-        $event->id_segment                     = $tRow[ 'id_segment' ];
-        $event->id_job                         = $this->queryParams[ 'job' ];
-        $event->job_password                   = $this->queryParams[ 'password' ];
-        $event->source                         = $this->queryParams[ 'source' ];
-        $event->target                         = $this->queryParams[ 'target' ];
-        $event->replacement                    = $this->queryParams[ 'replacement' ];
+        $event                  = new ReplaceEventStruct();
+        $event->replace_version = $bulk_version;
+        $event->id_segment      = $tRow[ 'id_segment' ];
+        $event->id_job          = $this->queryParams[ 'job' ];
+        $event->job_password    = $this->queryParams[ 'password' ];
+        $event->source          = $this->queryParams[ 'source' ];
+        $event->target          = $this->queryParams[ 'target' ];
+        $event->replacement     = $this->queryParams[ 'replacement' ];
         $event->translation_before_replacement = $tRow[ 'translation' ];
         $event->translation_after_replacement  = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
 
@@ -180,12 +177,44 @@ class SearchModel {
     }
 
     /**
+     * @return array
+     */
+    public function getSegmentIdsForUndoReplaceAll() {
+        $ids = [];
+
+        $versionToMove = $this->eventHistory->getCursor() - 1;
+        $events = $this->eventHistory->get( $versionToMove );
+
+        foreach ($events as $event){
+            $ids[] = $event->id_segment;
+        }
+
+        return $ids;
+    }
+
+    /**
      * Redo a ReplaceAll
      */
     public function redoReplaceAll() {
         $this->eventHistory->redo();
 
         Log::doJsonLog( 'Redo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
+    }
+
+    /**
+     * @return array
+     */
+    public function getSegmentIdsForRedoReplaceAll() {
+        $ids = [];
+
+        $versionToMove = $this->eventHistory->getCursor() + 1;
+        $events = $this->eventHistory->get( $versionToMove );
+
+        foreach ($events as $event){
+            $ids[] = $event->id_segment;
+        }
+
+        return $ids;
     }
 
     /**
@@ -535,6 +564,17 @@ class SearchModel {
         return " AND ( ste.source_page = {$this->queryParams->sourcePage}
                     OR ( {$this->queryParams->sourcePage} = $first_revision_source_code AND ste.source_page = null )
                ) ";
+    }
+
+    public function loadReplaceQueryFromIds($ids){
+        $ids = implode(',', $ids);
+        $sql = "
+        SELECT id_segment, id_job, translation
+            FROM segment_translations st
+            WHERE id_segment IN ('{$ids}')
+        ";
+
+        return $sql;
     }
 
 }

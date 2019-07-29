@@ -15,12 +15,12 @@ class Search_MySQLReplaceEventDAO extends DataAccess_AbstractDao implements Sear
      */
     public function getEvents( $idJob, $version ) {
         $conn  = Database::obtain()->getConnection();
-        $query = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job  AND bulk_version = :bulk_version ORDER BY created_at DESC";
+        $query = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job  AND replace_version = :replace_version ORDER BY created_at DESC";
 
         $stmt = $conn->prepare( $query );
         $stmt->execute( [
                 ':id_job' => $idJob,
-                ':bulk_version' => $version,
+                ':replace_version' => $version,
         ] );
 
         return @$stmt->fetchAll( \PDO::FETCH_CLASS, self::STRUCT_TYPE );
@@ -43,14 +43,14 @@ class Search_MySQLReplaceEventDAO extends DataAccess_AbstractDao implements Sear
 
         // insert query
         $query = "INSERT INTO " . self::TABLE . "
-        (id_job, bulk_version, job_password, id_segment, source, target, replacement, segment_version, translation_before_replacement, translation_after_replacement, created_at)
+        (id_job, replace_version, job_password, id_segment, source, target, replacement, segment_version, translation_before_replacement, translation_after_replacement, created_at)
         VALUES
-        (:id_job, :bulk_version, :job_password, :id_segment, :source, :target, :replacement, :segment_version, :translation_before_replacement, :translation_after_replacement, :created_at)
+        (:id_job, :replace_version, :job_password, :id_segment, :source, :target, :replacement, :segment_version, :translation_before_replacement, :translation_after_replacement, :created_at)
         ";
         $stmt  = $conn->prepare( $query );
         $stmt->execute( [
                 ':id_job'                         => $eventStruct->id_job,
-                ':bulk_version'                   => $eventStruct->bulk_version,
+                ':replace_version'                => $eventStruct->replace_version,
                 ':job_password'                   => $eventStruct->job_password,
                 ':id_segment'                     => $eventStruct->id_segment,
                 ':source'                         => $eventStruct->source,

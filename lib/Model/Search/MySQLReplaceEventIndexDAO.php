@@ -46,4 +46,8 @@ class Search_MySQLReplaceEventIndexDAO extends DataAccess_AbstractDao implements
 
         return $stmt->rowCount();
     }
+
+    public function setTtl( $ttl ) {
+        // TODO: Implement setTtl() method.
+    }
 }

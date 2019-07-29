@@ -8,7 +8,7 @@ class ReplaceEventStruct extends ShapelessConcreteStruct {
 
     // DATABASE FIELDS
     public $id;
-    public $bulk_version;
+    public $replace_version;
     public $id_job;
     public $job_password;
     public $id_segment;

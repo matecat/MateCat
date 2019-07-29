@@ -1,6 +1,5 @@
 <?php
 
-
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
@@ -189,11 +188,57 @@ class getSearchController extends ajaxController {
         $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
         $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
 
+        $search_results = $this->_getSearchResults();
+        $this->runRequiredFeatures( $search_results );
+
+        // replaceAll
+        $this->searchModel->replaceAll( $search_results );
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function undoReplaceAll() {
+
+        $ids = $this->searchModel->getSegmentIdsForUndoReplaceAll();
+        $search_results = $this->_getSearchResultsFromIds( $ids );
+        $this->runRequiredFeatures( $search_results );
+
+        /**
+         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
+         * @throws Exception
+         */
+        $this->searchModel->undoReplaceAll();
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function redoReplaceAll() {
+
+        $ids = $this->searchModel->getSegmentIdsForRedoReplaceAll();
+        $search_results = $this->_getSearchResultsFromIds( $ids );
+        $this->runRequiredFeatures( $search_results );
+
+        /**
+         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
+         * @throws Exception
+         */
+        $this->searchModel->redoReplaceAll();
+    }
+
+    /**
+     * @param $search_results
+     *
+     * @return int|mixed
+     * @throws Exception
+     */
+    private function runRequiredFeatures( $search_results ) {
         $chunk   = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
         $project = Projects_ProjectDao::findByJobId( (int)$this->job );
 
         // loop all segments to replace
-        foreach ( $this->_getSearchResults() as $key => $tRow ) {
+        foreach ( $search_results as $key => $tRow ) {
 
             // start the transaction
             $this->db->begin();
@@ -261,7 +306,7 @@ class getSearchController extends ajaxController {
             $new_translation                         = new Translations_SegmentTranslationStruct();
             $new_translation->id_segment             = $tRow[ 'id_segment' ];
             $new_translation->id_job                 = $this->job;
-            $new_translation->status                 = $this->_getNewStatus($old_translation);
+            $new_translation->status                 = $this->_getNewStatus( $old_translation );
             $new_translation->time_to_edit           = $old_translation->time_to_edit;
             $new_translation->segment_hash           = $segment->segment_hash;
             $new_translation->translation            = $tRow[ 'translation' ];
@@ -310,34 +355,6 @@ class getSearchController extends ajaxController {
                 Log::doJsonLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
             }
         }
-
-        // replaceAll
-        $this->searchModel->replaceAll( $this->_getSearchResults() );
-
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function undoReplaceAll() {
-
-        /**
-         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
-         * @throws Exception
-         */
-        $this->searchModel->undoReplaceAll();
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function redoReplaceAll() {
-
-        /**
-         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
-         * @throws Exception
-         */
-        $this->searchModel->redoReplaceAll();
     }
 
     /**
@@ -345,9 +362,9 @@ class getSearchController extends ajaxController {
      *
      * @return string
      */
-    private function _getNewStatus(Translations_SegmentTranslationStruct $translationStruct) {
+    private function _getNewStatus( Translations_SegmentTranslationStruct $translationStruct ) {
 
-        switch ($this->revisionNumber){
+        switch ( $this->revisionNumber ) {
 
             // false = TRANSLATED
             case false:
@@ -357,7 +374,7 @@ class getSearchController extends ajaxController {
             // 2 = 2ND REVISION
             case 1:
             case 2:
-                if($translationStruct->status === Constants_TranslationStatus::STATUS_TRANSLATED){
+                if ( $translationStruct->status === Constants_TranslationStatus::STATUS_TRANSLATED ) {
                     return Constants_TranslationStatus::STATUS_TRANSLATED;
                 }
 
@@ -371,6 +388,29 @@ class getSearchController extends ajaxController {
      */
     private function _getSearchResults() {
         $query = $this->searchModel->loadReplaceAllQuery();
+
+        return $this->executeQuery( $query );
+    }
+
+    /**
+     * @param $ids
+     *
+     * @return array
+     * @throws Exception
+     */
+    private function _getSearchResultsFromIds( $ids ) {
+        $query = $this->searchModel->loadReplaceQueryFromIds( $ids );
+
+        return $this->executeQuery( $query );
+    }
+
+    /**
+     * @param $query
+     *
+     * @return array
+     * @throws Exception
+     */
+    private function executeQuery( $query ) {
         Log::doJsonLog( $query );
 
         try {

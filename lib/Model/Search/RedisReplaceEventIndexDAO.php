@@ -10,6 +10,11 @@ class Search_RedisReplaceEventIndexDAO extends DataAccess_AbstractDao implements
     private $redis;
 
     /**
+     * @var int
+     */
+    private $ttl = 10800; // 3 hours
+
+    /**
      * Search_RedisReplaceEventDAO constructor.
      *
      * @param null $con
@@ -42,7 +47,7 @@ class Search_RedisReplaceEventIndexDAO extends DataAccess_AbstractDao implements
      */
     public function save( $idJob, $version ) {
         $this->redis->set( $this->getRedisKey( $idJob ), $version );
-        $this->redis->expire( $this->getRedisKey( $idJob ), 60 * 60 * 3 );
+        $this->redis->expire( $this->getRedisKey( $idJob ), $this->ttl );
     }
 
     /**
@@ -53,5 +58,14 @@ class Search_RedisReplaceEventIndexDAO extends DataAccess_AbstractDao implements
      */
     private function getRedisKey( $idJob ) {
         return md5( self::TABLE . '::' . $idJob );
+    }
+
+    /**
+     * @param $ttl
+     *
+     * @return mixed|void
+     */
+    public function setTtl( $ttl ) {
+        $this->ttl = $ttl;
     }
 }

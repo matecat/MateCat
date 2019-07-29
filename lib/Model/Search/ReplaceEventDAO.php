@@ -143,7 +143,7 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
         $stmt  = $conn->prepare( $query );
         $stmt->execute( [
                 ':id_job'                     => $eventStruct->id_job,
-                ':bulk_version'               => $eventStruct->bulk_version,
+                ':bulk_version'               => $eventStruct->replace_version,
                 ':job_password'               => $eventStruct->job_password,
                 ':id_segment'                 => $eventStruct->id_segment,
                 ':source'                     => $eventStruct->source,

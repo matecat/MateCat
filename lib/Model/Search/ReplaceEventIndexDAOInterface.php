@@ -16,4 +16,11 @@ interface Search_ReplaceEventIndexDAOInterface {
      * @return mixed
      */
     public function save($idJob, $version);
+
+    /**
+     * @param $ttl
+     *
+     * @return mixed|void
+     */
+    public function setTtl( $ttl );
 }

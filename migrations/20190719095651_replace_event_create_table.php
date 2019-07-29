@@ -7,7 +7,7 @@ class ReplaceEventCreateTable extends AbstractMigration
     public $sql_up = <<<EOF
 CREATE TABLE `replace_events` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
-    `bulk_version` bigint(20) NOT NULL,
+    `replace_version` bigint(20) NOT NULL,
     `id_job` bigint(20) NOT NULL,
     `job_password` varchar(45) NOT NULL,
     `id_segment` int(11) NOT NULL,
