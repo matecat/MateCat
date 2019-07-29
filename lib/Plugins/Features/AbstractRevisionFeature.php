@@ -393,9 +393,9 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     }
 
-    public function job_password_changed(Jobs_JobStruct $job, $new_password ) {
+    public function job_password_changed( Jobs_JobStruct $job, $old_password ) {
         $dao = new ChunkReviewDao();
-        $dao->updatePassword( $job->id, $job->password, $new_password );
+        $dao->updatePassword( $job->id, $old_password, $job->password );
     }
 
     /**

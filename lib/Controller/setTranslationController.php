@@ -418,6 +418,7 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'serialized_errors_list' ] = $err_json;
             $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
             $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
+            $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
 
             try {
                 if ( $this->VersionsHandler != null ) {
