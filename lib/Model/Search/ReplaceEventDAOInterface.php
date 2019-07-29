@@ -18,4 +18,11 @@ interface Search_ReplaceEventDAOInterface {
      * @return int
      */
     public function save(ReplaceEventStruct $eventStruct);
+
+    /**
+     * @param $ttl
+     *
+     * @return mixed
+     */
+    public function setTtl($ttl);
 }

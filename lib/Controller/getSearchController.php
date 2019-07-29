@@ -371,6 +371,7 @@ class getSearchController extends ajaxController {
      */
     private function _getSearchResults() {
         $query = $this->searchModel->loadReplaceAllQuery();
+        Log::doJsonLog( $query );
 
         try {
             $stmt = $this->db->getConnection()->prepare( $query );

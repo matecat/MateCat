@@ -64,4 +64,8 @@ class Search_MySQLReplaceEventDAO extends DataAccess_AbstractDao implements Sear
 
         return $stmt->rowCount();
     }
+
+    public function setTtl( $ttl ) {
+        // TODO: Implement setTtl() method.
+    }
 }

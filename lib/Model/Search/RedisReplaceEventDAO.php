@@ -12,6 +12,11 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
     private $redis;
 
     /**
+     * @var int
+     */
+    private $ttl = 10800; // 3 hours
+
+    /**
      * Search_RedisReplaceEventDAO constructor.
      *
      * @param null $con
@@ -62,7 +67,7 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
         $count    = ( count( $this->getEvents( $eventStruct->id_job, $eventStruct->bulk_version ) ) > 0 ) ? ( count( $this->getEvents( $eventStruct->id_job, $eventStruct->bulk_version ) ) + 1 ) : 0;
 
         $result = $this->redis->hset( $redisKey, $count, serialize( $eventStruct ) );
-        $this->redis->expire( $redisKey, 60 * 60 * 3 ); // 3 hours
+        $this->redis->expire( $redisKey, $this->ttl );
 
         return (true == $result) ? 1 : 0;
     }
@@ -75,5 +80,14 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
      */
     private function getRedisKey( $idJob, $version ) {
         return md5( self::TABLE. '::' . $idJob . '::' . $version );
+    }
+
+    /**
+     * @param $ttl
+     *
+     * @return mixed|void
+     */
+    public function setTtl( $ttl ) {
+        $this->setTtl($ttl);
     }
 }

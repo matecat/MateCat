@@ -45,11 +45,15 @@ class SearchModel {
     public function __construct( SearchQueryParamsStruct $queryParams ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
-        //$this->_loadParams();
+
+        $redisReplaceEventDAO      = new \Search_RedisReplaceEventDAO();
+        $redisReplaceEventDAO->setTtl(300); // 5 minutes
+        $redisReplaceEventIndexDAO = new \Search_RedisReplaceEventIndexDAO();
+
         $this->eventHistory = new Search_ReplaceHistory(
                 $this->queryParams[ 'job' ],
-                new \Search_RedisReplaceEventDAO(),
-                new \Search_RedisReplaceEventIndexDAO()
+                $redisReplaceEventDAO,
+                $redisReplaceEventIndexDAO
         );
     }
 
@@ -58,7 +62,7 @@ class SearchModel {
      *
      * @throws Exception
      */
-    public function replaceAll($resultSet) {
+    public function replaceAll( $resultSet ) {
 
         $sqlBatch  = [];
         $sqlValues = [];
@@ -116,7 +120,6 @@ class SearchModel {
 				";
 
                 Log::$fileName = 'ReplaceAll_Failures.log';
-                Log::doJsonLog( $sql );
                 Log::doJsonLog( $resultSet );
                 Log::doJsonLog( $sqlInsert );
                 Log::doJsonLog( $msg );
