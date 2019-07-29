@@ -1321,7 +1321,7 @@ UI = {
             .removeClass("draft translated approved")
             .addClass(t);
 
-        var downloadable = (t == 'translated' || t == 'approved') ;
+        var downloadable = (t === 'translated' || t.indexOf('approved') > -1 ) ;
 
         var isGDriveFile = false;
 
@@ -1363,6 +1363,7 @@ UI = {
         }).done( function( data ) {
             if (data.stats){
                 UI.setProgress(data.stats);
+                UI.setDownloadStatus(data.stats);
             }
         });
     },
