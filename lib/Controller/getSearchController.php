@@ -37,7 +37,7 @@ class getSearchController extends ajaxController {
     /**
      * @var Search_ReplaceHistory
      */
-    private $eventHistory;
+    private $srh;
 
     /**
      * getSearchController constructor.
@@ -115,12 +115,10 @@ class getSearchController extends ajaxController {
         $this->db          = Database::obtain();
         $this->searchModel = new SearchModel( $this->queryParams );
 
-        $this->eventHistory = new Search_ReplaceHistory(
-                $this->queryParams[ 'job' ],
-                new \Search_RedisReplaceEventDAO(),
-                new \Search_RedisReplaceEventIndexDAO(),
-                300
-        );
+        // Search_ReplaceHistory init
+        $srh_driver = ( isset( \INIT::$REPLACE_HISTORY_DRIVER ) and '' !== \INIT::$REPLACE_HISTORY_DRIVER ) ? \INIT::$REPLACE_HISTORY_DRIVER : 'redis';
+        $srh_ttl    = ( isset( \INIT::$REPLACE_HISTORY_TTL ) and '' !== \INIT::$REPLACE_HISTORY_TTL ) ? \INIT::$REPLACE_HISTORY_TTL : 300;
+        $this->srh = Search_ReplaceHistoryFactory::create( $this->queryParams[ 'job' ], $srh_driver, $srh_ttl );
     }
 
     /**
@@ -205,7 +203,7 @@ class getSearchController extends ajaxController {
         $this->_updateSegments( $search_results );
 
         // replace events
-        $replace_version = ( $this->eventHistory->getCursor() + 1 );
+        $replace_version = ( $this->srh->getCursor() + 1 );
         foreach ( $search_results as $key => $tRow ) {
             $this->_saveReplacementEvent( $replace_version, $tRow );
         }
@@ -228,8 +226,8 @@ class getSearchController extends ajaxController {
         $event->translation_after_replacement  = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
         $event->status                         = $tRow[ 'status' ];
 
-        $this->eventHistory->save( $event );
-        $this->eventHistory->updateIndex( $replace_version );
+        $this->srh->save( $event );
+        $this->srh->updateIndex( $replace_version );
 
         Log::doJsonLog( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
     }
@@ -253,7 +251,7 @@ class getSearchController extends ajaxController {
         $search_results = $this->_getSegmentForUndoReplaceAll();
         $this->_updateSegments( $search_results );
 
-        $this->eventHistory->undo();
+        $this->srh->undo();
     }
 
     /**
@@ -261,7 +259,7 @@ class getSearchController extends ajaxController {
      */
     private function _getSegmentForUndoReplaceAll() {
         $results = [];
-        $cursor  = $this->eventHistory->getCursor();
+        $cursor  = $this->srh->getCursor();
 
         if ( $cursor === 0 ) {
             $versionToMove = 0;
@@ -271,7 +269,7 @@ class getSearchController extends ajaxController {
             $versionToMove = $cursor - 1;
         }
 
-        $events = $this->eventHistory->get( $versionToMove );
+        $events = $this->srh->get( $versionToMove );
 
         foreach ( $events as $event ) {
             $results[] = [
@@ -292,7 +290,7 @@ class getSearchController extends ajaxController {
         $search_results = $this->_getSegmentForRedoReplaceAll();
         $this->_updateSegments( $search_results );
 
-        $this->eventHistory->redo();
+        $this->srh->redo();
     }
 
     /**
@@ -301,8 +299,8 @@ class getSearchController extends ajaxController {
     private function _getSegmentForRedoReplaceAll() {
         $results = [];
 
-        $versionToMove = $this->eventHistory->getCursor() + 1;
-        $events        = $this->eventHistory->get( $versionToMove );
+        $versionToMove = $this->srh->getCursor() + 1;
+        $events        = $this->srh->get( $versionToMove );
 
         foreach ( $events as $event ) {
             $results[] = [
@@ -453,7 +451,7 @@ class getSearchController extends ajaxController {
      */
     private function _getNewStatus( Translations_SegmentTranslationStruct $translationStruct ) {
 
-        if(false === $this->revisionNumber){
+        if ( false === $this->revisionNumber ) {
             return Constants_TranslationStatus::STATUS_TRANSLATED;
         }
 
