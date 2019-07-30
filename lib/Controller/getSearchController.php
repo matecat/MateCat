@@ -1,6 +1,7 @@
 <?php
 
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
+use Search\ReplaceEventStruct;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
 use SubFiltering\Filter;
@@ -32,6 +33,11 @@ class getSearchController extends ajaxController {
      * @var SearchModel
      */
     private $searchModel;
+
+    /**
+     * @var Search_ReplaceHistory
+     */
+    private $eventHistory;
 
     /**
      * getSearchController constructor.
@@ -108,6 +114,13 @@ class getSearchController extends ajaxController {
 
         $this->db          = Database::obtain();
         $this->searchModel = new SearchModel( $this->queryParams );
+
+        $this->eventHistory = new Search_ReplaceHistory(
+                $this->queryParams[ 'job' ],
+                new \Search_RedisReplaceEventDAO(),
+                new \Search_RedisReplaceEventIndexDAO(),
+                300
+        );
     }
 
     /**
@@ -189,42 +202,118 @@ class getSearchController extends ajaxController {
         $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
 
         $search_results = $this->_getSearchResults();
-        $this->runRequiredFeatures( $search_results );
+        $this->_updateSegments( $search_results );
 
-        // replaceAll
-        $this->searchModel->replaceAll( $search_results );
+        // replace events
+        $replace_version = ( $this->eventHistory->getCursor() + 1 );
+        foreach ( $search_results as $key => $tRow ) {
+            $this->_saveReplacementEvent( $replace_version, $tRow );
+        }
+    }
+
+    /**
+     * @param $replace_version
+     * @param $tRow
+     */
+    private function _saveReplacementEvent( $replace_version, $tRow ) {
+        $event                                 = new ReplaceEventStruct();
+        $event->replace_version                = $replace_version;
+        $event->id_segment                     = $tRow[ 'id_segment' ];
+        $event->id_job                         = $this->queryParams[ 'job' ];
+        $event->job_password                   = $this->queryParams[ 'password' ];
+        $event->source                         = $this->queryParams[ 'source' ];
+        $event->target                         = $this->queryParams[ 'target' ];
+        $event->replacement                    = $this->queryParams[ 'replacement' ];
+        $event->translation_before_replacement = $tRow[ 'translation' ];
+        $event->translation_after_replacement  = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
+        $event->status                         = $tRow[ 'status' ];
+
+        $this->eventHistory->save( $event );
+        $this->eventHistory->updateIndex( $replace_version );
+
+        Log::doJsonLog( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
+    }
+
+    /**
+     * @param $translation
+     *
+     * @return string|string[]|null
+     */
+    private function _getReplacedSegmentTranslation( $translation ) {
+        return preg_replace( "#({$this->queryParams->exactMatch->Space_Left}){$this->queryParams->_regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}#{$this->queryParams->matchCase->REGEXP_MODIFIER}",
+                '${1}' . $this->queryParams->replacement . '${2}',
+                $translation
+        );
     }
 
     /**
      * @throws Exception
      */
     private function undoReplaceAll() {
+        $search_results = $this->_getSegmentForUndoReplaceAll();
+        $this->_updateSegments( $search_results );
 
-        $ids = $this->searchModel->getSegmentIdsForUndoReplaceAll();
-        $search_results = $this->_getSearchResultsFromIds( $ids );
-        $this->runRequiredFeatures( $search_results );
+        $this->eventHistory->undo();
+    }
 
-        /**
-         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
-         * @throws Exception
-         */
-        $this->searchModel->undoReplaceAll();
+    /**
+     * @return array
+     */
+    private function _getSegmentForUndoReplaceAll() {
+        $results = [];
+        $cursor  = $this->eventHistory->getCursor();
+
+        if ( $cursor === 0 ) {
+            $versionToMove = 0;
+        } elseif ( $cursor === 1 ) {
+            $versionToMove = 1;
+        } else {
+            $versionToMove = $cursor - 1;
+        }
+
+        $events = $this->eventHistory->get( $versionToMove );
+
+        foreach ( $events as $event ) {
+            $results[] = [
+                    'id_segment'  => $event->id_segment,
+                    'id_job'      => $event->id_job,
+                    'translation' => $event->translation_after_replacement,
+                    'status'      => $event->status,
+            ];
+        }
+
+        return $results;
     }
 
     /**
      * @throws Exception
      */
     private function redoReplaceAll() {
+        $search_results = $this->_getSegmentForRedoReplaceAll();
+        $this->_updateSegments( $search_results );
 
-        $ids = $this->searchModel->getSegmentIdsForRedoReplaceAll();
-        $search_results = $this->_getSearchResultsFromIds( $ids );
-        $this->runRequiredFeatures( $search_results );
+        $this->eventHistory->redo();
+    }
 
-        /**
-         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
-         * @throws Exception
-         */
-        $this->searchModel->redoReplaceAll();
+    /**
+     * @return array
+     */
+    private function _getSegmentForRedoReplaceAll() {
+        $results = [];
+
+        $versionToMove = $this->eventHistory->getCursor() + 1;
+        $events        = $this->eventHistory->get( $versionToMove );
+
+        foreach ( $events as $event ) {
+            $results[] = [
+                    'id_segment'  => $event->id_segment,
+                    'id_job'      => $event->id_job,
+                    'translation' => $event->translation_before_replacement,
+                    'status'      => $event->status,
+            ];
+        }
+
+        return $results;
     }
 
     /**
@@ -233,7 +322,7 @@ class getSearchController extends ajaxController {
      * @return int|mixed
      * @throws Exception
      */
-    private function runRequiredFeatures( $search_results ) {
+    private function _updateSegments( $search_results ) {
         $chunk   = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
         $project = Projects_ProjectDao::findByJobId( (int)$this->job );
 
@@ -243,7 +332,7 @@ class getSearchController extends ajaxController {
             // start the transaction
             $this->db->begin();
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $tRow[ 'id_segment' ], (int)$this->job );
+            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( (int)$tRow[ 'id_segment' ], (int)$tRow[ 'id_job' ] );
             $segment         = ( new Segments_SegmentDao() )->getById( $tRow[ 'id_segment' ] );
 
             if ( $project->isFeatureEnabled( 'translation_versions' ) ) {
@@ -266,7 +355,7 @@ class getSearchController extends ajaxController {
                     Constants_TranslationStatus::STATUS_REJECTED
             ] )
             ) {
-                $TPropagation[ 'status' ]                 = $this->status;
+                $TPropagation[ 'status' ]                 = $tRow[ 'status' ];
                 $TPropagation[ 'id_job' ]                 = $this->job;
                 $TPropagation[ 'translation' ]            = $tRow[ 'translation' ];
                 $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
@@ -298,7 +387,6 @@ class getSearchController extends ajaxController {
                     $this->db->rollback();
 
                     return $e->getCode();
-
                 }
             }
 
@@ -309,7 +397,7 @@ class getSearchController extends ajaxController {
             $new_translation->status                 = $this->_getNewStatus( $old_translation );
             $new_translation->time_to_edit           = $old_translation->time_to_edit;
             $new_translation->segment_hash           = $segment->segment_hash;
-            $new_translation->translation            = $tRow[ 'translation' ];
+            $new_translation->translation            = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
             $new_translation->serialized_errors_list = $old_translation->serialized_errors_list;
             $new_translation->suggestion_position    = $old_translation->suggestion_position;
             $new_translation->warning                = $old_translation->warning;
@@ -329,8 +417,9 @@ class getSearchController extends ajaxController {
                     'features'          => $this->featureSet
             ] );
 
-            //COMMIT THE TRANSACTION
+            // commit the transaction
             try {
+                Translations_SegmentTranslationDao::updateTranslation( $new_translation );
                 $this->db->commit();
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = [ "code" => -101, "message" => $e->getMessage() ];
@@ -364,22 +453,15 @@ class getSearchController extends ajaxController {
      */
     private function _getNewStatus( Translations_SegmentTranslationStruct $translationStruct ) {
 
-        switch ( $this->revisionNumber ) {
-
-            // false = TRANSLATED
-            case false:
-                return Constants_TranslationStatus::STATUS_TRANSLATED;
-
-            // 1 = REVISION
-            // 2 = 2ND REVISION
-            case 1:
-            case 2:
-                if ( $translationStruct->status === Constants_TranslationStatus::STATUS_TRANSLATED ) {
-                    return Constants_TranslationStatus::STATUS_TRANSLATED;
-                }
-
-                return Constants_TranslationStatus::STATUS_APPROVED;
+        if(false === $this->revisionNumber){
+            return Constants_TranslationStatus::STATUS_TRANSLATED;
         }
+
+        if ( $translationStruct->status === Constants_TranslationStatus::STATUS_TRANSLATED ) {
+            return Constants_TranslationStatus::STATUS_TRANSLATED;
+        }
+
+        return Constants_TranslationStatus::STATUS_APPROVED;
     }
 
     /**
