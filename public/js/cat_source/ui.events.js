@@ -43,7 +43,7 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                $('.editor .next-unapproved:not(.disabled)').click();
+                UI.clickOnApprovedButton(e, UI.currentSegment.find('.next-unapproved'));
             } else {
                 if ( $('.editor .next-untranslated:not(.disabled)').length > 0 ) {
                     $('.editor .next-untranslated:not(.disabled)').click();
