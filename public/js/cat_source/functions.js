@@ -338,15 +338,20 @@ function translationStatus(stats) {
     // If second pass enabled
     if ( config.secondRevisionsCount && stats.reviews ) {
 
-        var revWords = stats.reviews.find(function ( value ) {
-            return value.revision_number === config.revisionNumber;
+        var revWords1 = stats.reviews.find(function ( value ) {
+            return value.revision_number === 1;
         });
 
-        if ( revWords ) {
-            app = parseFloat(revWords.advancement_wc);
-        }
+        var revWords2 = stats.reviews.find(function ( value ) {
+            return value.revision_number === 2;
+        });
 
-        t = (config.revisionNumber === 1) ? t : 'approved-2ndpass';
+        if ( revWords1 && _.round(parseFloat(revWords1.advancement_wc)) > 0 ) {
+            app = parseFloat(revWords1.advancement_wc);
+        } else if ( revWords2 && _.round(parseFloat(revWords2.advancement_wc)) > 0 ) {
+            app = parseFloat(revWords2.advancement_wc);
+            t = 'approved-2ndpass';
+        }
     }
 
 
