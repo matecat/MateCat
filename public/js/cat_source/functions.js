@@ -335,6 +335,21 @@ function translationStatus(stats) {
     var dra = parseFloat(stats.DRAFT);
     var rej = parseFloat(stats.REJECTED);
 
+    // If second pass enabled
+    if ( config.secondRevisionsCount && stats.reviews ) {
+
+        var revWords = stats.reviews.find(function ( value ) {
+            return value.revision_number === config.revisionNumber;
+        });
+
+        if ( revWords ) {
+            app = parseFloat(revWords.advancement_wc);
+        }
+
+        t = (config.revisionNumber === 1) ? t : 'approved-2ndpass';
+    }
+
+
     if (tra) t = 'translated';
     if (dra) t = 'draft';
     if (rej) t = 'draft';
@@ -342,6 +357,7 @@ function translationStatus(stats) {
     if( !tra && !dra && !rej && !app ){
         t = 'draft';
     }
+
     return t ;
 }
 
