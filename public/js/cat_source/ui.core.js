@@ -1389,7 +1389,8 @@ UI = {
 		var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
-
+        var t_formatted = s.TODO_FORMATTED;
+        var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
 		// If second pass enabled
 		if ( config.secondRevisionsCount && s.reviews ) {
 		    var reviewedWords = s.reviews.find(function ( value ) {
@@ -1399,6 +1400,7 @@ UI = {
                 var approvePerc = parseFloat(reviewedWords.advancement_wc)*100/s.TOTAL;
                 a_perc_formatted = _.round(approvePerc, 1);
                 a_perc = approvePerc;
+
             }
 
             var reviewWordsSecondPass = s.reviews.find(function ( value ) {
@@ -1409,11 +1411,11 @@ UI = {
                 var approvePerc2ndPass = parseFloat(reviewWordsSecondPass.advancement_wc)*100/s.TOTAL;
                 a_perc_2nd_formatted = _.round(approvePerc2ndPass, 1);
                 a_perc_2nd = approvePerc2ndPass;
+                revise_todo_formatted = (config.revisionNumber === 2) ? revise_todo_formatted + _.round(parseFloat(reviewedWords.advancement_wc)) : revise_todo_formatted;
             }
         }
 
-		var t_formatted = s.TODO_FORMATTED;
-		var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
+
 
 		var wph = s.WORDS_PER_HOUR;
 		var completion = s.ESTIMATED_COMPLETION;
