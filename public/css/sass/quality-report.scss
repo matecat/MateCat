@@ -473,12 +473,26 @@ header {
                                                     }
                                                     a.qr-segment-title {
                                                         b {
-                                                            color: #000;
                                                             text-decoration: underline;
                                                             cursor: pointer;
                                                             &:hover {
                                                                 text-decoration: none;
                                                             }
+                                                        }
+                                                    }
+                                                    &.qr-translated {
+                                                        b {
+                                                            color: #0abeec;
+                                                        }
+                                                    }
+                                                    &.qr-revised {
+                                                        b {
+                                                            color: #7cc576;
+                                                        }
+                                                    }
+                                                    &.qr-revised-2ndpass {
+                                                        b {
+                                                            color: #BC6AC9;
                                                         }
                                                     }
                                                     &.rtl-lang {

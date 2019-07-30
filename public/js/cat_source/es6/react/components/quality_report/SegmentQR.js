@@ -289,6 +289,7 @@ class SegmentQR extends React.Component {
         let revised2Classes = classnames({
             "segment-container": true,
             "qr-revised": true,
+            "qr-revised-2ndpass": true,
             "shadow-1" : (this.state.revise2DiffOn),
             "rtl-lang" : config.target_rtl
         });
