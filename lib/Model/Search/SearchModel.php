@@ -30,11 +30,6 @@ class SearchModel {
     protected $db;
 
     /**
-     * @var Search_ReplaceHistory
-     */
-    private $eventHistory;
-
-    /**
      * SearchModel constructor.
      *
      * @param SearchQueryParamsStruct $queryParams
@@ -45,176 +40,6 @@ class SearchModel {
     public function __construct( SearchQueryParamsStruct $queryParams ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
-
-        $this->eventHistory = new Search_ReplaceHistory(
-                $this->queryParams[ 'job' ],
-                new \Search_RedisReplaceEventDAO(),
-                new \Search_RedisReplaceEventIndexDAO(),
-                300
-        );
-    }
-
-    /**
-     * @param $resultSet
-     *
-     * @throws Exception
-     */
-    public function replaceAll( $resultSet ) {
-
-        $sqlBatch  = [];
-        $sqlValues = [];
-        foreach ( $resultSet as $key => $tRow ) {
-
-            //we get the spaces before needed string and re-apply before substitution because we can't know if there are
-            //and how much they are
-            $trMod = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
-
-            /**
-             * Escape for database
-             */
-            $sqlBatch[]  = "(?,?,?)";
-            $sqlValues[] = $tRow[ 'id_segment' ];
-            $sqlValues[] = $tRow[ 'id_job' ];
-            $sqlValues[] = $trMod;
-
-        }
-
-        //MySQL default max_allowed_packet is 16MB, this system surely need more
-        //but we can assume that max translation length is more or less 2.5KB
-        // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
-        // 300KB is a very low number compared to 16MB
-        $sqlBatchChunk  = array_chunk( $sqlBatch, 100 );
-        $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
-
-        foreach ( $sqlBatchChunk as $k => $batch ) {
-
-            //WE USE INSERT STATEMENT for it's convenience ( update multiple fields in multiple rows in batch )
-            //we try to insert these rows in a table wherein the primary key ( unique by definition )
-            //is a coupled key ( id_segment, id_job ), but these values are already present ( duplicates )
-            //so make an "ON DUPLICATE KEY UPDATE"
-            $sqlInsert = "
-            INSERT INTO segment_translations ( id_segment, id_job, translation )
-			  VALUES " . implode( ",", $batch ) . "
-			ON DUPLICATE KEY UPDATE translation = VALUES( translation )
-			";
-
-            try {
-
-                $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
-
-                // save replace event
-                $versionToMove = ( $this->eventHistory->getCursor() + 1 );
-
-                foreach ( $resultSet as $key => $tRow ) {
-                    $this->_saveReplacementEvent( $versionToMove, $tRow );
-                }
-
-            } catch ( Exception $e ) {
-
-                $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
-				- job id            : " . $this->queryParams->job . "
-				- original data and failed query stored in log ReplaceAll_Failures.log\n\n
-				";
-
-                Log::$fileName = 'ReplaceAll_Failures.log';
-                Log::doJsonLog( $resultSet );
-                Log::doJsonLog( $sqlInsert );
-                Log::doJsonLog( $msg );
-
-                Utils::sendErrMailReport( $msg );
-
-                throw new Exception( 'Update translations failure.' ); //bye bye translations....
-
-            }
-
-            //we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
-            //Log::doJsonLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
-
-        }
-
-    }
-
-    /**
-     * @param $translation
-     *
-     * @return string|string[]|null
-     */
-    private function _getReplacedSegmentTranslation( $translation ) {
-        return preg_replace( "#({$this->queryParams->exactMatch->Space_Left}){$this->queryParams->_regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}#{$this->queryParams->matchCase->REGEXP_MODIFIER}",
-                '${1}' . $this->queryParams->replacement . '${2}',
-                $translation
-        );
-    }
-
-    /**
-     * @param $tRow
-     */
-    private function _saveReplacementEvent( $bulk_version, $tRow ) {
-        $event                  = new ReplaceEventStruct();
-        $event->replace_version = $bulk_version;
-        $event->id_segment      = $tRow[ 'id_segment' ];
-        $event->id_job          = $this->queryParams[ 'job' ];
-        $event->job_password    = $this->queryParams[ 'password' ];
-        $event->source          = $this->queryParams[ 'source' ];
-        $event->target          = $this->queryParams[ 'target' ];
-        $event->replacement     = $this->queryParams[ 'replacement' ];
-        $event->translation_before_replacement = $tRow[ 'translation' ];
-        $event->translation_after_replacement  = $this->_getReplacedSegmentTranslation( $tRow[ 'translation' ] );
-
-        $this->eventHistory->save( $event );
-        $this->eventHistory->updateIndex( $bulk_version );
-
-        Log::doJsonLog( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
-    }
-
-    /**
-     * Undo a ReplaceAll
-     */
-    public function undoReplaceAll() {
-        $this->eventHistory->undo();
-
-        Log::doJsonLog( 'Undo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
-    }
-
-    /**
-     * @return array
-     */
-    public function getSegmentIdsForUndoReplaceAll() {
-        $ids = [];
-
-        $versionToMove = $this->eventHistory->getCursor() - 1;
-        $events = $this->eventHistory->get( $versionToMove );
-
-        foreach ($events as $event){
-            $ids[] = $event->id_segment;
-        }
-
-        return $ids;
-    }
-
-    /**
-     * Redo a ReplaceAll
-     */
-    public function redoReplaceAll() {
-        $this->eventHistory->redo();
-
-        Log::doJsonLog( 'Redo replacement for job #' . $this->queryParams[ 'job' ] . ' correctly done.' );
-    }
-
-    /**
-     * @return array
-     */
-    public function getSegmentIdsForRedoReplaceAll() {
-        $ids = [];
-
-        $versionToMove = $this->eventHistory->getCursor() + 1;
-        $events = $this->eventHistory->get( $versionToMove );
-
-        foreach ($events as $event){
-            $ids[] = $event->id_segment;
-        }
-
-        return $ids;
     }
 
     /**
@@ -270,7 +95,6 @@ class SearchModel {
         }
 
         return $vector;
-
     }
 
     /**
@@ -280,7 +104,6 @@ class SearchModel {
      * @throws Exception
      */
     protected function _getQuery( $sql ) {
-
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
             $stmt->execute();
@@ -294,29 +117,7 @@ class SearchModel {
     }
 
     /**
-     * @param $sql
-     * @param $data
-     *
-     * @return mixed
-     * @throws Exception
-     */
-    protected function _insertQuery( $sql, $data ) {
-
-        try {
-            $stmt = $this->db->getConnection()->prepare( $sql );
-            $stmt->execute( $data );
-        } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
-            throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
-        }
-
-        return $stmt->rowCount();
-
-    }
-
-    /**
      * Pay attention to possible SQL injection
-     *
      */
     protected function _loadParams() {
 
@@ -364,6 +165,9 @@ class SearchModel {
 
     }
 
+    /**
+     * @return string
+     */
     protected function _loadSearchInTargetQuery() {
         $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
@@ -402,6 +206,9 @@ class SearchModel {
 
     }
 
+    /**
+     * @return string
+     */
     protected function _loadSearchInSourceQuery() {
         $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
@@ -434,6 +241,9 @@ class SearchModel {
 
     }
 
+    /**
+     * @return string
+     */
     protected function _loadSearchCoupledQuery() {
         $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
@@ -498,7 +308,7 @@ class SearchModel {
         $ste_where = $this->_SteWhere();
 
         $sql = "
-        SELECT id_segment, id_job, translation
+        SELECT st.id_segment, st.id_job, st.translation, st.status
             FROM segment_translations st
             JOIN jobs ON st.id_job = jobs.id AND password = '{$this->queryParams->password}' AND jobs.id = {$this->queryParams->job}
             JOIN segments as s ON st.id_segment = s.id 
@@ -566,10 +376,10 @@ class SearchModel {
                ) ";
     }
 
-    public function loadReplaceQueryFromIds($ids){
-        $ids = implode(',', $ids);
+    public function loadReplaceQueryFromIds( $ids ) {
+        $ids = implode( ',', $ids );
         $sql = "
-        SELECT id_segment, id_job, translation
+        SELECT st.id_segment, st.id_job, st.translation, st.status
             FROM segment_translations st
             WHERE id_segment IN ('{$ids}')
         ";

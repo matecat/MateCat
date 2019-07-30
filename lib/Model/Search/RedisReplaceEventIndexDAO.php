@@ -34,9 +34,9 @@ class Search_RedisReplaceEventIndexDAO extends DataAccess_AbstractDao implements
      * @return int
      */
     public function getActualIndex( $idJob ) {
-        $index = $this->redis->get( $this->getRedisKey( $idJob ));
+        $index = $this->redis->get( $this->getRedisKey( $idJob ) );
 
-        return ( '' !== $index and $index > 0 ) ? $this->redis->get( $this->getRedisKey( $idJob ) ) : 0;
+        return ( null !== $index and $index > 0 ) ? (int)$index : 0;
     }
 
     /**

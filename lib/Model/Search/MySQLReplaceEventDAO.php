@@ -19,7 +19,7 @@ class Search_MySQLReplaceEventDAO extends DataAccess_AbstractDao implements Sear
 
         $stmt = $conn->prepare( $query );
         $stmt->execute( [
-                ':id_job' => $idJob,
+                ':id_job'          => $idJob,
                 ':replace_version' => $version,
         ] );
 
@@ -37,15 +37,15 @@ class Search_MySQLReplaceEventDAO extends DataAccess_AbstractDao implements Sear
         // if not directly passed
         // try to assign the current version of the segment if it exists
         if ( null === $eventStruct->segment_version ) {
-            $segment = (new Translations_SegmentTranslationDao())->getByJobId($eventStruct->id_job)[0];
+            $segment                      = ( new Translations_SegmentTranslationDao() )->getByJobId( $eventStruct->id_job )[ 0 ];
             $eventStruct->segment_version = $segment->version_number;
         }
 
         // insert query
         $query = "INSERT INTO " . self::TABLE . "
-        (id_job, replace_version, job_password, id_segment, source, target, replacement, segment_version, translation_before_replacement, translation_after_replacement, created_at)
+        (id_job, replace_version, job_password, id_segment, source, target, replacement, segment_version, translation_before_replacement, translation_after_replacement, status, created_at)
         VALUES
-        (:id_job, :replace_version, :job_password, :id_segment, :source, :target, :replacement, :segment_version, :translation_before_replacement, :translation_after_replacement, :created_at)
+        (:id_job, :replace_version, :job_password, :id_segment, :source, :target, :replacement, :segment_version, :translation_before_replacement, :translation_after_replacement, :status, :created_at)
         ";
         $stmt  = $conn->prepare( $query );
         $stmt->execute( [
@@ -59,6 +59,7 @@ class Search_MySQLReplaceEventDAO extends DataAccess_AbstractDao implements Sear
                 ':segment_version'                => $eventStruct->segment_version,
                 ':translation_before_replacement' => $eventStruct->translation_before_replacement,
                 ':translation_after_replacement'  => $eventStruct->translation_after_replacement,
+                ':status'                         => $eventStruct->status,
                 ':created_at'                     => date( 'Y-m-d H:i:s' ),
         ] );
 
@@ -66,6 +67,6 @@ class Search_MySQLReplaceEventDAO extends DataAccess_AbstractDao implements Sear
     }
 
     public function setTtl( $ttl ) {
-        // TODO: Implement setTtl() method.
+        // TODO: Implement setTtl() method. MySQL does not support ttl, so this method is here just to complain with the Interface
     }
 }

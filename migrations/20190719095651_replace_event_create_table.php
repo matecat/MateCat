@@ -4,8 +4,7 @@ use Phinx\Migration\AbstractMigration;
 
 class ReplaceEventCreateTable extends AbstractMigration
 {
-    public $sql_up = <<<EOF
-CREATE TABLE `replace_events` (
+    public $sql_up = "CREATE TABLE `replace_events` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
     `replace_version` bigint(20) NOT NULL,
     `id_job` bigint(20) NOT NULL,
@@ -16,11 +15,11 @@ CREATE TABLE `replace_events` (
     `translation_after_replacement` text,
     `source` text,
     `target` text,
+    `status` varchar(45) NOT NULL,
     `replacement` text,
     `created_at` datetime NOT NULL,
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-EOF;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;";
 
-    public $sql_down = 'DROP TABLE `replace_events`';
+    public $sql_down = "DROP TABLE `replace_events`";
 }
