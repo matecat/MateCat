@@ -59,6 +59,7 @@ module.exports = function(grunt) {
 
     var es2015Preset = require('babel-preset-env');
     var reactPreset = require('babel-preset-react');
+    const babelstage2 = require('babel-preset-stage-2');
 
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
@@ -89,11 +90,12 @@ module.exports = function(grunt) {
             libs: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
-                    }
+                    },
+                    watch: true,
                 },
                 src: [
                     basePath + 'cat_source/es6/react-libs.js'
@@ -103,11 +105,12 @@ module.exports = function(grunt) {
             components: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
-                    }
+                    },
+                    watch: true,
                 },
                 src: [
                     basePath + 'cat_source/es6/react/*.js'
@@ -117,11 +120,12 @@ module.exports = function(grunt) {
             qualityReport: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
-                    }
+                    },
+                    watch: true,
                 },
                 src: [
                     basePath + 'cat_source/es6/react/components/quality_report/*.js',
@@ -334,7 +338,7 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            react_libs: {
+            /*react_libs: {
                 files: [
                     basePath + 'cat_source/es6/react-libs.js'
                 ],
@@ -346,14 +350,14 @@ module.exports = function(grunt) {
             },
             react: {
                 files: [
-                    basePath + 'cat_source/es6/react/**/*.js'
+                    basePath + 'cat_source/es6/react/!**!/!*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {
                     interrupt: true,
                     livereload : true
                 }
-            },
+            },*/
             js: {
                 files: [
                     basePath + 'cat_source/*.js',
@@ -369,7 +373,7 @@ module.exports = function(grunt) {
             },
             cssCattol: {
                 files: cssWatchFiles ,
-                tasks: ['sass:distCattol'],
+                tasks: ['sass'],
                 options: {
                     interrupt: true,
                     livereload : true

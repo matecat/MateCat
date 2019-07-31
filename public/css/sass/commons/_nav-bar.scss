@@ -4,20 +4,21 @@ header {
     width: 100%;
     z-index: 12;
     margin: 0;
-    height: 48px;
-    background-color: #4d4d4d;
+    background: #002b5c;
+    height: 77px;
     @media only screen and (max-width: 992px) {
         min-width: 992px;
         position: relative;
     }
     .nav-mc-bar {
         margin: 0px !important;
-        height: 48px !important;
         //min-width: 992px;
         .navigation {
-            padding: 5px 15px 5px 0px !important;
+            padding: 20px!important;
+            /*padding: 5px 15px 5px 0px !important;
             background-color: #4d4d4d;
-            height: 48px !important;
+            height: 48px !important;*/
+
         }
         .ui.selection.dropdown,
         .ui.select-org.dropdown {
@@ -264,8 +265,10 @@ header {
     float: right !important;
 }
 
-.upload-page-header .dropdown span {
-    margin-right: 0!important;
+.upload-page-header {
+    .dropdown span {
+        margin-right: 0 !important;
+    }
 }
 
 

@@ -110,20 +110,20 @@
 	}
 	.search-state-filters {
 		input.search-projects {
-			font-size: 14px !important;
-			background-color: #616161 !important;
-			box-shadow: none !important;
-            transition: 0.3s ease;
-            color: #ffffff;
-			border-radius: 2px 0 0 2px;
-
-			&:hover {
+			height: 40px;
+			border-radius: 2px;
+			background-color: #ffffff;
+			color: #002b5c;
+			font-size: 14px;
+			&::placeholder{
+				color: #585d62;
+			}
+			/*&:hover {
 				background-color: #676767 !important;
 			}
+			*/
 			&:focus {
-				background-color: #676767 !important;
-				color: #ffffff;
-                border-right: #676767 !important;
+                border: none!important;
 			}
 		}
 		.ui.dropdown {

@@ -742,7 +742,7 @@ color:#333;}
 	    z-index: 12;
 	    opacity: 0.4;
     }
-	
+
 	.mgmt-popup-outer {
 		z-index: 99999999999999;
 	}
@@ -4773,4 +4773,7 @@ a.pull-right.btn-confirm-small.confirmDelete.confirm-tm-key-delete {
 
 a.pull-left.btn-ok.uploadtm {
     margin-right: 5px;
+}
+body svg{
+  padding: 0!important;
 }
