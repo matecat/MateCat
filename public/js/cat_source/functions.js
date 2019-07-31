@@ -338,15 +338,20 @@ function translationStatus(stats) {
     // If second pass enabled
     if ( config.secondRevisionsCount && stats.reviews ) {
 
-        var revWords = stats.reviews.find(function ( value ) {
-            return value.revision_number === config.revisionNumber;
+        var revWords1 = stats.reviews.find(function ( value ) {
+            return value.revision_number === 1;
         });
 
-        if ( revWords ) {
-            app = parseFloat(revWords.advancement_wc);
-        }
+        var revWords2 = stats.reviews.find(function ( value ) {
+            return value.revision_number === 2;
+        });
 
-        t = (config.revisionNumber === 1) ? t : 'approved-2ndpass';
+        if ( revWords1 && _.round(parseFloat(revWords1.advancement_wc)) > 0 ) {
+            app = parseFloat(revWords1.advancement_wc);
+        } else if ( revWords2 && _.round(parseFloat(revWords2.advancement_wc)) > 0 ) {
+            app = parseFloat(revWords2.advancement_wc);
+            t = 'approved-2ndpass';
+        }
     }
 
 
@@ -381,7 +386,7 @@ function getSelectionHtml() {
 }
 
 function insertHtmlAfterSelection(html) {
-    var sel, range, node;
+    var sel, range;
     if (window.getSelection) {
         sel = window.getSelection();
         if (sel.getRangeAt && sel.rangeCount) {
@@ -403,6 +408,7 @@ function insertHtmlAfterSelection(html) {
         range.collapse(false);
         range.pasteHTML(html);
     }
+    return range;
 }
 
 function ParsedHash( hash ) {
@@ -901,16 +907,16 @@ function replaceSelectedText(replacementText) {
         range.text = replacementText;
     }
 }
-function replaceSelectedHtml(replacementHtml) {
-    var sel, range;
-    if (window.getSelection) {
+function replaceSelectedHtml(replacementHtml, range) {
+    var sel;
+    if (range) {
+        range.deleteContents();
+        pasteHtmlAtCaret(replacementHtml);
+    } else if (window.getSelection) {
         sel = window.getSelection();
         if (sel.rangeCount) {
             range = sel.getRangeAt(0);
-            console.log('range: ', range);
-            console.log('UI.editarea.html() 1: ', UI.editarea.html());
             range.deleteContents();
-            console.log('UI.editarea.html() 2: ', UI.editarea.html());
             pasteHtmlAtCaret(replacementHtml);
 //            range.pasteHtml(replacementHtml);
         }

@@ -1460,7 +1460,7 @@ UI = {
 	},
     formatSelection: function(op) {
         var str = getSelectionHtml();
-        insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
+        var rangeInsert = insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
         var newStr = '';
         var selection$ = $("<div/>").html(str);
         selection$.find('.undoCursorPlaceholder').remove();
@@ -1496,11 +1496,11 @@ UI = {
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
-            replaceSelectedHtml(newStr);
+            replaceSelectedHtml(newStr, rangeInsert);
             LXQ.reloadPowertip(this.currentSegment);
         }
         else {
-            replaceSelectedHtml(newStr);
+            replaceSelectedHtml(newStr, rangeInsert);
         }
         this.saveInUndoStack('formatSelection');
 
