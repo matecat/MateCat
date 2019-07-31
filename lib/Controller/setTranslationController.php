@@ -264,7 +264,8 @@ class setTranslationController extends ajaxController {
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
         $this->context_before = $this->filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
-        $this->context_after  = $this->filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );}
+        $this->context_after  = $this->filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+    }
 
     /**
      * @return int|mixed
@@ -278,22 +279,7 @@ class setTranslationController extends ajaxController {
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
     public function doAction() {
-        try {
-
-            $this->_checkData();
-
-        } catch ( Exception $e ) {
-
-            if ( $e->getCode() == -1 ) {
-                Utils::sendErrMailReport( $e->getMessage() );
-            }
-
-            Log::doJsonLog( $e->getMessage() );
-
-            return $e->getCode();
-
-        }
-
+        $this->checkData();
         $this->readLoginInfo();
         $this->initVersionHandler();
         $this->_getContexts();
@@ -306,10 +292,10 @@ class setTranslationController extends ajaxController {
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
         $spaceHandler = new FromViewNBSPToSpaces();
-        $__seg = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
-        $__tra = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
+        $__seg        = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
+        $__tra        = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
 
-        $check        = new QA( $__seg, $__tra );
+        $check = new QA( $__seg, $__tra );
         $check->setFeatureSet( $this->featureSet );
         $check->performConsistencyCheck();
 
@@ -561,21 +547,21 @@ class setTranslationController extends ajaxController {
                     'len'      => $this->split_chunk_lengths,
                     'statuses' => $this->split_statuses
             ];
-            $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
-            $result         = $translationDao->update( $translationStruct );
+            $translationDao                          = new TranslationsSplit_SplitDAO( Database::obtain() );
+            $result                                  = $translationDao->update( $translationStruct );
 
         }
 
-        $this->featureSet->run('preSetTranslationCommitted', [
-                'translation'      => $new_translation,
-                'old_translation'  => $old_translation,
-                'propagation'      => $propagationTotal,
-                'chunk'            => $this->chunk,
-                'segment'          => $this->segment,
-                'user'             => $this->user,
-                'source_page_code' => self::getRefererSourcePageCode( $this->featureSet ),
+        $this->featureSet->run( 'preSetTranslationCommitted', [
+                'translation'       => $new_translation,
+                'old_translation'   => $old_translation,
+                'propagation'       => $propagationTotal,
+                'chunk'             => $this->chunk,
+                'segment'           => $this->segment,
+                'user'              => $this->user,
+                'source_page_code'  => self::getRefererSourcePageCode( $this->featureSet ),
                 'controller_result' => & $this->result,
-                'features'         => $this->featureSet
+                'features'          => $this->featureSet
         ] );
 
         //COMMIT THE TRANSACTION
@@ -627,7 +613,8 @@ class setTranslationController extends ajaxController {
 
             try {
                 $update_completed = Jobs_JobDao::setJobComplete( $this->chunk );
-            } catch ( Exception $ignore ) {}
+            } catch ( Exception $ignore ) {
+            }
 
             if ( empty( $update_completed ) ) {
                 $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
@@ -638,9 +625,28 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $this->result['stats'] = $this->featureSet->filter('filterStatsResponse', $this->result['stats'], [ 'chunk' => $this->chunk ] );
+        $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );
+    }
+
+    /**
+     * @return int|mixed
+     */
+    protected function checkData() {
+        try {
+            $this->_checkData();
+        } catch ( Exception $e ) {
+
+            if ( $e->getCode() == -1 ) {
+                Utils::sendErrMailReport( $e->getMessage() );
+            }
+
+            Log::doJsonLog( $e->getMessage() );
+
+            return $e->getCode();
+
+        }
     }
 
     /**

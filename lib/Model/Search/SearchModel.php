@@ -14,6 +14,7 @@ use Exception;
 use Log;
 use PDO;
 use PDOException;
+use Search_ReplaceHistory;
 use Utils;
 
 class SearchModel {
@@ -28,98 +29,27 @@ class SearchModel {
      */
     protected $db;
 
-    public function __construct( SearchQueryParamsStruct $queryParams ){
+    /**
+     * SearchModel constructor.
+     *
+     * @param SearchQueryParamsStruct $queryParams
+     *
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
+     */
+    public function __construct( SearchQueryParamsStruct $queryParams ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
-        $this->_loadParams();
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function replaceAll(){
-
-        $sql = $this->_loadReplaceAllQuery();
-        $resultSet = $this->_getQuery( $sql );
-
-        $sqlBatch = [];
-        $sqlValues = [];
-        foreach ( $resultSet as $key => $tRow ) {
-
-            //we get the spaces before needed string and re-apply before substitution because we can't know if there are
-            //and how much they are
-            $trMod = preg_replace( "#({$this->queryParams->exactMatch->Space_Left}){$this->queryParams->_regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}#{$this->queryParams->matchCase->REGEXP_MODIFIER}",
-                    '${1}' . $this->queryParams->replacement . '${2}',
-                    $tRow[ 'translation' ]
-            );
-
-            /**
-             * Escape for database
-             */
-            $sqlBatch[] = "(?,?,?)";
-            $sqlValues[] = $tRow['id_segment'];
-            $sqlValues[] = $tRow['id_job'];
-            $sqlValues[] = $trMod;
-
-        }
-
-        //MySQL default max_allowed_packet is 16MB, this system surely need more
-        //but we can assume that max translation length is more or less 2.5KB
-        // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
-        // 300KB is a very low number compared to 16MB
-        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
-        $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
-
-        foreach ( $sqlBatchChunk as $k => $batch ) {
-
-            //WE USE INSERT STATEMENT for it's convenience ( update multiple fields in multiple rows in batch )
-            //we try to insert these rows in a table wherein the primary key ( unique by definition )
-            //is a coupled key ( id_segment, id_job ), but these values are already present ( duplicates )
-            //so make an "ON DUPLICATE KEY UPDATE"
-            $sqlInsert = "
-            INSERT INTO segment_translations ( id_segment, id_job, translation )
-			  VALUES " . implode( ",", $batch ) . "
-			ON DUPLICATE KEY UPDATE translation = VALUES( translation )
-			";
-
-            try {
-
-                $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
-
-            } catch ( Exception $e ){
-
-                $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
-				- job id            : " . $this->queryParams->job . "
-				- original data and failed query stored in log ReplaceAll_Failures.log\n\n
-				";
-
-                Log::$fileName = 'ReplaceAll_Failures.log';
-                Log::doJsonLog( $sql );
-                Log::doJsonLog( $resultSet );
-                Log::doJsonLog( $sqlInsert );
-                Log::doJsonLog( $msg );
-
-                Utils::sendErrMailReport( $msg );
-
-                throw new Exception( 'Update translations failure.' ); //bye bye translations....
-
-            }
-
-            //we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
-            //Log::doJsonLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
-
-        }
-
     }
 
     /**
      * @return array
      * @throws Exception
      */
-    public function search(){
+    public function search() {
 
         $sql = null;
-        switch( $this->queryParams->key ){
+        switch ( $this->queryParams->key ) {
             case 'source':
                 $sql = $this->_loadSearchInSourceQuery();
                 break;
@@ -140,7 +70,7 @@ class SearchModel {
 
         if ( $this->queryParams->key != 'coupled' && $this->queryParams->key != 'status_only' ) { //there is the ROLLUP
 
-            $rollup = array_pop( $results );
+            $rollup            = array_pop( $results );
             $vector[ 'count' ] = $rollup[ 'count' ]; //can be null, suppress warning
 
             foreach ( $results as $occurrence ) {
@@ -153,7 +83,7 @@ class SearchModel {
             //ROLLUP counter rules!
             if ( $vector[ 'count' ] == 0 ) {
                 $vector[ 'sid_list' ] = [];
-                $vector[ 'count' ]   = 0;
+                $vector[ 'count' ]    = 0;
             }
 
         } else {
@@ -165,7 +95,6 @@ class SearchModel {
         }
 
         return $vector;
-
     }
 
     /**
@@ -174,8 +103,7 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    protected function _getQuery( $sql ){
-
+    protected function _getQuery( $sql ) {
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
             $stmt->execute();
@@ -189,31 +117,9 @@ class SearchModel {
     }
 
     /**
-     * @param $sql
-     * @param $data
-     *
-     * @return mixed
-     * @throws Exception
-     */
-    protected function _insertQuery( $sql , $data ){
-
-        try {
-            $stmt = $this->db->getConnection()->prepare( $sql );
-            $stmt->execute( $data );
-        } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
-            throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
-        }
-
-        return $stmt->rowCount();
-
-    }
-
-    /**
      * Pay attention to possible SQL injection
-     *
      */
-    protected function _loadParams(){
+    protected function _loadParams() {
 
         $this->queryParams->source = $this->db->escape( $this->queryParams->src );
         $this->queryParams->target = $this->db->escape( $this->queryParams->trg );
@@ -259,8 +165,12 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchInTargetQuery(){
-        $ste_join  = $this->_SteJoinInSegments('st.id_segment');
+    /**
+     * @return string
+     */
+    protected function _loadSearchInTargetQuery() {
+        $this->_loadParams();
+        $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
         $query = "
@@ -296,7 +206,11 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchInSourceQuery(){
+    /**
+     * @return string
+     */
+    protected function _loadSearchInSourceQuery() {
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -327,8 +241,11 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchCoupledQuery(){
-
+    /**
+     * @return string
+     */
+    protected function _loadSearchCoupledQuery() {
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -367,8 +284,9 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchStatusOnlyQuery(){
-        $ste_join  = $this->_SteJoinInSegments('st.id_segment');
+    protected function _loadSearchStatusOnlyQuery() {
+        $this->_loadParams();
+        $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
         $query = "
@@ -384,12 +302,13 @@ class SearchModel {
 
     }
 
-    protected function _loadReplaceAllQuery(){
+    public function loadReplaceAllQuery() {
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
         $sql = "
-        SELECT id_segment, id_job, translation
+        SELECT st.id_segment, st.id_job, st.translation, st.status
             FROM segment_translations st
             JOIN jobs ON st.id_job = jobs.id AND password = '{$this->queryParams->password}' AND jobs.id = {$this->queryParams->job}
             JOIN segments as s ON st.id_segment = s.id 
@@ -412,6 +331,7 @@ class SearchModel {
             $sql .= " AND s.segment REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}' ";
         }
+
         return $sql;
     }
 
@@ -422,17 +342,18 @@ class SearchModel {
      *
      * @return string
      */
-    protected function _SteJoinInSegments( $joined_field = 's.id') {
+    protected function _SteJoinInSegments( $joined_field = 's.id' ) {
         if ( !$this->queryParams->sourcePage ) {
-            return '' ;
+            return '';
         }
+
         return "
             LEFT JOIN (
                 SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
                 SELECT max(id) FROM segment_translation_events
                     WHERE id_job = {$this->queryParams->job}
                     GROUP BY id_segment ) ORDER BY id_segment
-            ) ste ON ste.ste_id_segment = $joined_field "  ;
+            ) ste ON ste.ste_id_segment = $joined_field ";
     }
 
     /**
@@ -440,7 +361,7 @@ class SearchModel {
      */
     protected function _SteWhere() {
         if ( !$this->queryParams->sourcePage ) {
-            return '' ;
+            return '';
         }
 
         /**
@@ -448,11 +369,22 @@ class SearchModel {
          * segment_translations_events may not have records
          * for APPROVED segments ( in case of ICE match ). While in second pass reviews or later this should not happen.
          */
-        $first_revision_source_code = \Constants::SOURCE_PAGE_REVISION ;
+        $first_revision_source_code = \Constants::SOURCE_PAGE_REVISION;
 
         return " AND ( ste.source_page = {$this->queryParams->sourcePage}
                     OR ( {$this->queryParams->sourcePage} = $first_revision_source_code AND ste.source_page = null )
-               ) " ;
+               ) ";
+    }
+
+    public function loadReplaceQueryFromIds( $ids ) {
+        $ids = implode( ',', $ids );
+        $sql = "
+        SELECT st.id_segment, st.id_job, st.translation, st.status
+            FROM segment_translations st
+            WHERE id_segment IN ('{$ids}')
+        ";
+
+        return $sql;
     }
 
 }
