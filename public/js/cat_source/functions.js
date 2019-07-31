@@ -386,7 +386,7 @@ function getSelectionHtml() {
 }
 
 function insertHtmlAfterSelection(html) {
-    var sel, range, node;
+    var sel, range;
     if (window.getSelection) {
         sel = window.getSelection();
         if (sel.getRangeAt && sel.rangeCount) {
@@ -408,6 +408,7 @@ function insertHtmlAfterSelection(html) {
         range.collapse(false);
         range.pasteHTML(html);
     }
+    return range;
 }
 
 function ParsedHash( hash ) {
@@ -906,16 +907,16 @@ function replaceSelectedText(replacementText) {
         range.text = replacementText;
     }
 }
-function replaceSelectedHtml(replacementHtml) {
-    var sel, range;
-    if (window.getSelection) {
+function replaceSelectedHtml(replacementHtml, range) {
+    var sel;
+    if (range) {
+        range.deleteContents();
+        pasteHtmlAtCaret(replacementHtml);
+    } else if (window.getSelection) {
         sel = window.getSelection();
         if (sel.rangeCount) {
             range = sel.getRangeAt(0);
-            console.log('range: ', range);
-            console.log('UI.editarea.html() 1: ', UI.editarea.html());
             range.deleteContents();
-            console.log('UI.editarea.html() 2: ', UI.editarea.html());
             pasteHtmlAtCaret(replacementHtml);
 //            range.pasteHtml(replacementHtml);
         }
