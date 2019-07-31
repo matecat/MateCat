@@ -187,11 +187,7 @@ class SegmentButton extends React.Component {
                     </p>
                 </li>) :
                 (null);
-            currentButton = <li><a id={'segment-' + this.props.segment.sid + '-button-translated'} onClick={(e)=>this.clickOnTranslatedButton(e)}
-                                   data-segmentid={'segment-' + this.props.segment.sid}
-                                   className={'translated ' +classDisable } > {config.status_labels.TRANSLATED} </a><p>
-                {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
-            </p></li>;
+            currentButton = this.getTranslateButton();
         }
         if (filtering) {
             nextButton = null;
@@ -223,6 +219,14 @@ class SegmentButton extends React.Component {
         </ul>
     }
 
+    getTranslateButton() {
+        const classDisable = (this.props.disabled) ? 'disabled' : '';
+        return <li><a id={'segment-' + this.props.segment.sid + '-button-translated'} onClick={(e)=>this.clickOnTranslatedButton(e)}
+                      data-segmentid={'segment-' + this.props.segment.sid}
+                      className={'translated ' +classDisable } > {config.status_labels.TRANSLATED} </a><p>
+            {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
+        </p></li>;
+    }
 
     // getSegmentButtons() {
     //     let nextButton, currentButton;

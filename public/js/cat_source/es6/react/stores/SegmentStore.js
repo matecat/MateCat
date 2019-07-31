@@ -601,11 +601,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         return result;
     },
-    getPrevSegment(sid) {
+    getPrevSegment(sid, alsoMutedSegments) {
         sid = ( !sid) ? this.getCurrentSegment().sid : sid;
         var index = this.getSegmentIndex(sid);
         let segment = (index > 0) ? this._segments.get(index-1).toJS() : null;
-        if ( segment && !segment.muted || !segment) {
+        if ( segment && !alsoMutedSegments && !segment.muted || !segment || segment && alsoMutedSegments) {
             return segment;
         }
         return this.getPrevSegment(segment.sid);

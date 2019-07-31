@@ -134,7 +134,7 @@ class Search extends React.Component {
         }
 
         // todo: redo marksearchresults on the target
-        let mark = $("mark.currSearchItem")
+        let mark = $("mark.currSearchItem");
         mark.text(this.state.search.replaceTarget);
         let $segment = mark.parents('section');
         mark.replaceWith(mark.text());

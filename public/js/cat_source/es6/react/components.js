@@ -66,6 +66,7 @@ window.SegmentFooter = require('./components/segments/SegmentFooter').default;
 window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatches').default;
 window.SegmentTabMessages = require('./components/segments/SegmentFooterTabMessages').default;
 window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
+window.SegmentButtons = require('./components/segments/SegmentButtons').default;
 
 window.CommentsActions = require('./actions/CommentsActions');
 window.CommentsStore = require('./stores/CommentsStore');

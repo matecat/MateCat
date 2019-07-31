@@ -111,46 +111,78 @@ class SegmentsContainer extends React.Component {
         return this.state.segments.get(index);
     }
 
+    getCollectionType ( segment ) {
+        let collectionType;
+        if (segment.notes) {
+            segment.notes.forEach(function (item, index) {
+                if ( item.note && item.note !== "" ) {
+                    if (item.note.indexOf("Collection Name: ") !== -1) {
+                        let split = item.note.split(": ");
+                        if ( split.length > 1) {
+                            collectionType = split[1];
+                        }
+                    }
+                }
+            });
+        }
+        return collectionType;
+    }
+
+    getSegment(segment, currentFileId, collectionTypeSeparator) {
+        let isReviewExtended = !!(this.props.isReviewExtended);
+
+
+        let item = <Segment
+            key={segment.sid}
+            segment={segment}
+            timeToEdit={this.state.timeToEdit}
+            fid={this.props.fid}
+            isReview={this.props.isReview}
+            isReviewExtended={isReviewExtended}
+            reviewType={this.props.reviewType}
+            enableTagProjection={this.props.enableTagProjection}
+            decodeTextFn={this.props.decodeTextFn}
+            tagLockEnabled={this.state.tagLockEnabled}
+            tagModesEnabled={this.props.tagModesEnabled}
+            speech2textEnabledFn={this.props.speech2textEnabledFn}
+            setLastSelectedSegment={this.setLastSelectedSegment.bind(this)}
+            setBulkSelection={this.setBulkSelection.bind(this)}
+            sideOpen={this.state.sideOpen}
+        />;
+        if ( segment.id_file !== currentFileId ) {
+            item = <React.Fragment>
+                <ul className="projectbar" data-job={"job-"+ segment.id_file}>
+                    <li className="filename">
+                        <h2 title={segment.filename}>{segment.filename}</h2>
+                    </li>
+                    <li style={{textAlign:'center', textIndent:'-20px'}}>
+                        <strong/> [<span className="source-lang">{config.source_rfc}</span>]] >
+                        <strong/> [<span className="target-lang">{config.target_rfc}</span>]
+                    </li>
+                    <li className="wordcounter">Payable Words: <strong>{config.fileCounter[segment.id_file].TOTAL_FORMATTED}</strong>
+                    </li>
+                </ul>
+                {collectionTypeSeparator}
+                {item}
+            </React.Fragment>
+        }
+        return item;
+    }
+
     getSegments() {
         let items = [];
-        let self = this;
-        let isReviewExtended = !!(this.props.isReviewExtended);
         let currentFileId = 0;
-        this.state.segments.forEach(function (segImmutable) {
+        let collectionsTypeArray = [];
+        this.state.segments.forEach( (segImmutable) =>{
             let segment = segImmutable.toJS();
-            let item = <Segment
-                key={segment.sid}
-                segment={segment}
-                timeToEdit={self.state.timeToEdit}
-                fid={self.props.fid}
-                isReview={self.props.isReview}
-                isReviewExtended={isReviewExtended}
-                reviewType={self.props.reviewType}
-                enableTagProjection={self.props.enableTagProjection}
-                decodeTextFn={self.props.decodeTextFn}
-                tagLockEnabled={self.state.tagLockEnabled}
-                tagModesEnabled={self.props.tagModesEnabled}
-                speech2textEnabledFn={self.props.speech2textEnabledFn}
-                setLastSelectedSegment={self.setLastSelectedSegment.bind(self)}
-                setBulkSelection={self.setBulkSelection.bind(self)}
-                sideOpen={self.state.sideOpen}
-            />;
-            if ( segment.id_file !== currentFileId ) {
-                item = <React.Fragment>
-                    <ul className="projectbar" data-job={"job-"+ segment.id_file}>
-                        <li className="filename">
-                            <h2 title={segment.filename}>{segment.filename}</h2>
-                        </li>
-                        <li style={{textAlign:'center', textIndent:'-20px'}}>
-                            <strong/> [<span className="source-lang">{config.source_rfc}</span>]] >
-                            <strong/> [<span className="target-lang">{config.target_rfc}</span>]
-                        </li>
-                        <li className="wordcounter">Payable Words: <strong>{config.fileCounter[segment.id_file].TOTAL_FORMATTED}</strong>
-                        </li>
-                    </ul>
-                    {item}
-                    </React.Fragment>
+            let collectionType = this.getCollectionType(segment);
+            let collectionTypeSeparator;
+            if (collectionsTypeArray.indexOf(collectionType) === -1) {
+                collectionTypeSeparator = <div id="" className="collection-type-separator" key={collectionType+segment.sid}>
+                    Collection Name: <b>{collectionType}</b></div>;
+                collectionsTypeArray.push(collectionType);
             }
+            let item = this.getSegment(segment, currentFileId, collectionTypeSeparator);
             currentFileId = segment.id_file;
         items.push(item);
         });
@@ -212,6 +244,13 @@ class SegmentsContainer extends React.Component {
         //If is the first segment of a file add the file header
         if ( preiousFileId !== segment.get('id_file')) {
             itemHeight = itemHeight + 47;
+        }
+        //Collection type
+        let collectionType = this.getCollectionType(segment.toJS());
+        let prevSeg = SegmentStore.getPrevSegment(segment.get('sid'));
+        let collectionTypeBefore = ( prevSeg ) ? this.getCollectionType(prevSeg, true): null;
+        if (collectionType !== collectionTypeBefore) {
+            itemHeight = itemHeight + 35;
         }
         return itemHeight + commentsPadding;
     }

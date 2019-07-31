@@ -2233,8 +2233,8 @@ UI = {
 
         var afterTranslateFn = function (  ) {
             if ( !goToNextUntranslated ) {
-                // UI.gotoNextSegment();
-                SegmentActions.openSegment(UI.nextSegmentId);
+                UI.gotoNextSegment(); //Others functionality override this function
+                // SegmentActions.openSegment(UI.nextSegmentId);
             } else {
                 SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
             }
