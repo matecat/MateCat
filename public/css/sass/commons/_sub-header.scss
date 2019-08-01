@@ -26,9 +26,47 @@
 		}
 	}
 	.users-filter {
-		display: flex;
-		margin-top: 7px;
-		float: right;
+		background-color: #fff;
+		color: #002b5c;
+		font-weight: 500;
+		padding: 6px 15px;
+		line-height: 1.21;
+		border-radius: 5px;
+		font-size: 14px;
+		min-width: 150px;
+		.text{
+			display: grid;
+			grid-template-columns: auto 1fr auto;
+			align-items: center;
+			img{
+				margin: 0!important;
+			}
+			.label{
+				font-size: 12px;
+				line-height: 12px;
+				padding: 8px;
+				margin-right: 8px;
+			}
+		}
+		.menu{
+			width: 350px;
+			left: -70%!important;
+			&::after{
+				left: 50%!important;
+			}
+			.item{
+				display: grid;
+				grid-template-columns: 45px auto auto;
+				padding: 6px 12px!important;
+				align-items: center;
+				.box-number-project{
+					text-align: right;
+				}
+				img{
+					margin: 0!important;
+				}
+			}
+		}
 		.input-field {
 			margin-left: 10px;
 			margin-top: -2px;
@@ -112,11 +150,14 @@
 		input.search-projects {
 			height: 40px;
 			border-radius: 2px;
-			background-color: #ffffff;
+			background-color: #e4e4e4;
 			color: #002b5c;
-			font-size: 12px;
-			min-width: 314px;
+			transition: 0.2s ease-in;
+			font-size: 14px;
+			max-width: 320px;
+			width: 100%;
 			padding: 12px 16px;
+			box-shadow: none;
 			&::placeholder{
 				color: #002b5c;
 			}
@@ -126,28 +167,35 @@
 			*/
 			&:focus {
                 border: none!important;
+				background-color: #ffffff;
+				& + .dropdown{
+					background-color: #ffffff;
+				}
 			}
 		}
 		.ui.dropdown {
-            background-color: #ffffff;
+            background-color: #e4e4e4;
 			border-left: 1px solid #002b5c;
-			transition: 0.3s ease;
+			transition: 0.2s ease-in;
 			color: #002b5c;
 			font-weight: 500;
-			padding: 12px 15px 11px;
+			padding: 6px 15px;
 			line-height: 1.21;
 			border-radius: 0px 2px 2px 0px;
 			font-size: 1em;
 			min-width: 110px;
+			display: grid;
+			grid-template-columns: 24px auto;
+			align-items: center;
 
             &:hover {
-                background-color: #8c8c8c;
+                background-color: #ffffff;
             }
             &:active {
                 background-color: #ffffff;
             }
             &:focus {
-                background-color: #b1b1b1
+                background-color: #ffffff
             }
 		}
 

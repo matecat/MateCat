@@ -1,13 +1,13 @@
-const IconManage = ({width='42px',height='42px', style}) => {
+const IconManage = ({width='42',height='42', style}) => {
 
 	return (
 		<svg
-			width={width}
-			height={height}
+			width={`${width}px`}
+			height={`${height}px`}
 			style={style}
 			xmlns="http://www.w3.org/2000/svg"
 			xmlnsXlink="http://www.w3.org/1999/xlink"
-			viewBox={`0 0 ${width} ${height}`}
+			viewBox={`0 0 42 42`}
 		>
 			<defs>
 				<path id="a" d="M0 -0.0002L21 -0.0002 21 21 0 21z" />
