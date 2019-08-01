@@ -36,5 +36,6 @@ class SegmentUIStruct extends DataAccess_AbstractDaoSilentStruct implements Data
     public $autopropagated_from;
     public $repetitions_in_chunk;
     public $revision_number;
+    public $version_number;
 
 }

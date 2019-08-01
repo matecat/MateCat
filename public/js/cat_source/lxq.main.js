@@ -1147,7 +1147,7 @@ LXQ.init  = function () {
             if (!(notCheckedSegments.length >0))
                 return;
             var segment = notCheckedSegments.pop();
-            if (segment === undefined)
+            if (!segment)
                 return;
             var seg =  UI.getSegmentById(segment);
             if (UI.getSegmentTarget(seg).length > 0) {

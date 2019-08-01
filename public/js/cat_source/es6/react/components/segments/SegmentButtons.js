@@ -41,13 +41,7 @@ class SegmentButton extends React.Component {
 
     getButtons() {
         let html;
-        if (this.props.isReviewImproved && this.props.isReview) {
-            //Revise of Review Improved
-            html = this.getReviewImprovedButtons()
-        } else if (this.props.reviewType === 'improved'){
-            //Translate of Review Improved
-            html = this.getReviewImprovedTranslateButtons()
-        } else if (this.props.isReview){
+        if (this.props.isReview){
             //Revise Default, Extended
             html = this.getReviewButtons()
         } else {
@@ -55,43 +49,6 @@ class SegmentButton extends React.Component {
             html = this.getTranslateButtons()
         }
         return html;
-    }
-
-    getReviewImprovedButtons(){
-        let button;
-        let currentScore = ReviewImproved.getLatestScoreForSegment( this.props.segment.sid ) ;
-        if ( currentScore == 0 ) {
-            button = <li className="right">
-                <a id={"segment-" + this.props.segment.sid + "-button-translated "}
-                   onClick={(event)=>this.clickOnApprovedButton(event)}
-                   data-segmentid={"segment-"+ this.props.segment.sid}
-                   href="javascript:;" className="approved"
-                >APPROVED</a>
-                <p>{(UI.isMac) ? 'CMD' : 'CTRL'} ENTER</p>
-            </li>;
-        } else if (currentScore > 0 ) {
-            button = <li className="right">
-                <a className="button button-reject" href="javascript:;">REJECTED</a>
-                <p>{(UI.isMac) ? 'CMD' : 'CTRL'}+SHIFT+DOWN</p>
-            </li>;
-        }
-        return <ul className="buttons toggle" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
-            {button}
-        </ul>
-    }
-    getReviewImprovedTranslateButtons(){
-        //TODO Remove lokiJs
-        let data = MateCat.db.segments.by('sid', this.props.segment.sid );
-        if ( UI.showFixedAndRebuttedButtons( data.status ) ) {
-            return <ul className="buttons toggle" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
-                    <MC.SegmentMainButtons
-                    status={data.status}
-                    sid={data.sid}
-                />
-            </ul>
-        } else {
-            return this.getTranslateButtons()
-        }
     }
 
     getReviewButtons(){

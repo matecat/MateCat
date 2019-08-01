@@ -35,6 +35,13 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     public function create() {
+        //TODO Review
+        if($this->project->hasFeature('second_pass_review')){
+            $sourcePage = SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number );
+        } else {
+            $sourcePage = \ajaxController::getRefererSourcePageCode( $this->project->getFeatures() );
+        }
+
         $data = array(
             'id_segment'          => $this->request->id_segment,
             'id_job'              => $this->request->id_job,
@@ -49,7 +56,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             'is_full_segment'     => false,
             'comment'             => $this->request->comment,
             'uid'                 => $this->user->uid,
-            'source_page'         => SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number ),
+            'source_page'         => $sourcePage
+//            'source_page'         => SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number ),
         );
 
         $struct = new \LQA\EntryStruct( $data );

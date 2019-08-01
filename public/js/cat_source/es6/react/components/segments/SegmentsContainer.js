@@ -177,7 +177,7 @@ class SegmentsContainer extends React.Component {
             let segment = segImmutable.toJS();
             let collectionType = this.getCollectionType(segment);
             let collectionTypeSeparator;
-            if (collectionsTypeArray.indexOf(collectionType) === -1) {
+            if (collectionType && collectionsTypeArray.indexOf(collectionType) === -1) {
                 collectionTypeSeparator = <div id="" className="collection-type-separator" key={collectionType+segment.sid}>
                     Collection Name: <b>{collectionType}</b></div>;
                 collectionsTypeArray.push(collectionType);
