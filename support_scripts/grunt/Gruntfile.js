@@ -399,7 +399,7 @@ module.exports = function(grunt) {
         sass: {
             distCommon: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -409,7 +409,7 @@ module.exports = function(grunt) {
             },
             distCattol: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -419,7 +419,7 @@ module.exports = function(grunt) {
             },
             distUpload: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -429,7 +429,7 @@ module.exports = function(grunt) {
             },
             distManage: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -439,7 +439,7 @@ module.exports = function(grunt) {
             },
             distAnalyze: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -449,7 +449,7 @@ module.exports = function(grunt) {
             },
             distQR: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -459,7 +459,7 @@ module.exports = function(grunt) {
             },
             distIcons: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase ]
                 },
                 src: [
@@ -469,7 +469,7 @@ module.exports = function(grunt) {
             },
             distSemantic: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
                 },
                 src: [
@@ -479,7 +479,7 @@ module.exports = function(grunt) {
             },
             distLegacy: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
                 },
                 src: [
@@ -489,7 +489,7 @@ module.exports = function(grunt) {
             },
             distStyleOld: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
                 },
                 src: [
