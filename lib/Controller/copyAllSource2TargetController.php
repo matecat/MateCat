@@ -80,6 +80,19 @@ class copyAllSource2TargetController extends ajaxController {
      * @throws ReflectionException
      */
     private function _saveEventsAndUpdateTranslations( $job_id ) {
+        if ( !empty( $this->result[ 'errors' ] ) ) {
+            return;
+        }
+
+        $job_data = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->pass );
+
+        if ( empty( $job_data ) ) {
+            $errorCode = -3;
+            $this->addError( $errorCode );
+
+            return;
+        }
+
         // BEGIN TRANSACTION
         $database = Database::obtain();
         $database->begin();
