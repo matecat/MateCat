@@ -197,6 +197,40 @@
             &:focus {
                 background-color: #ffffff
             }
+
+			.menu {
+				min-width: 144px;
+				padding: 14px 8px 8px 8px;
+				border-radius: 2px;
+				border: solid 1px #cdd4de;
+				right: 0 !important;
+				left: auto !important;
+				box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.2);
+
+				&::after{
+					left: 50%!important;
+				}
+
+				.item {
+					border-radius: 2px;
+					color: #002b5c;
+					font-size: 15px;
+					padding: 8px !important;
+					font-weight: normal;
+					display:grid;
+					grid-template-columns: auto 16px;
+					align-items: center;
+
+					&:hover {
+						background-color: rgba(0, 0, 0, 0.03);
+					}
+					&.selected {
+						background-color: #002b5c;
+						color: #ffffff;
+					}
+
+				}
+			}
 		}
 
 	}
