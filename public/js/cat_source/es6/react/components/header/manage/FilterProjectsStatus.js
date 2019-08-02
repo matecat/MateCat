@@ -3,6 +3,9 @@ import IconFilter from "../../icons/IconFilter";
 class FilterProjects extends React.Component {
 	constructor(props) {
 		super(props);
+		this.state = {
+			status: ['active', 'archived', 'cancelled']
+		}
 
 		this.onChangeFunction = this.onChangeFunction.bind(this);
 	}
@@ -31,15 +34,18 @@ class FilterProjects extends React.Component {
 		$(this.dropdown).dropdown('set selected', 'active');
 	}
 
-	render() {
+	render = () => {
+		const {status} = this.state;
+
 		return <div className="ui top left pointing dropdown" title="Status Filter"
 					ref={(dropdown) => this.dropdown = dropdown}>
 			<IconFilter width={24} height={24}/>
 			<div className="text">Active</div>
 			<div className="menu">
-				<div className="item" data-value="active">Active</div>
+				{status.map((e,i)=><div key={i} className="item" data-value={e}>{e} {e === this.currentFilter ? null : null}</div>)}
+				{/*<div className="item" data-value="active">Active</div>
 				<div className="item" data-value="archived">Archived</div>
-				<div className="item" data-value="cancelled">Cancelled</div>
+				<div className="item" data-value="cancelled">Cancelled</div>*/}
 			</div>
 		</div>;
 	}
