@@ -1,4 +1,5 @@
 import IconFilter from "../../icons/IconFilter";
+import IconTick from "../../icons/IconTick";
 
 class FilterProjects extends React.Component {
 	constructor(props) {
@@ -42,10 +43,8 @@ class FilterProjects extends React.Component {
 			<IconFilter width={24} height={24}/>
 			<div className="text">Active</div>
 			<div className="menu">
-				{status.map((e,i)=><div key={i} className="item" data-value={e}>{e} {e === this.currentFilter ? null : null}</div>)}
-				{/*<div className="item" data-value="active">Active</div>
-				<div className="item" data-value="archived">Archived</div>
-				<div className="item" data-value="cancelled">Cancelled</div>*/}
+				{status.map((e, i) => <div key={i} className="item" data-value={e}>{e} {e === this.currentFilter ?
+					<IconTick width={12} height={12} color={'#ffffff'}/> : null}</div>)}
 			</div>
 		</div>;
 	}
