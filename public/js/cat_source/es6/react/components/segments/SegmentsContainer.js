@@ -35,6 +35,7 @@ class SegmentsContainer extends React.Component {
         this.closeSide = this.closeSide.bind(this);
 
         this.lastScrollTop = 0;
+        this.segmentsHeightsMap = {};
     }
 
     splitSegments(segments, splitGroup) {
@@ -217,6 +218,11 @@ class SegmentsContainer extends React.Component {
 
     getSegmentHeight(index) {
         let segment = this.getSegmentByIndex(index);
+
+        if ( this.segmentsHeightsMap[segment.get('sid')] &&  this.segmentsHeightsMap[segment.get('sid')].segment.equals(segment)) {
+            return this.segmentsHeightsMap[segment.get('sid')].height;
+        }
+
         let itemHeight = 0;
         let commentsPadding = this.getCommentsPadding(index, segment);
         if (segment.get('opened')) {
@@ -249,10 +255,15 @@ class SegmentsContainer extends React.Component {
         let collectionType = this.getCollectionType(segment.toJS());
         let prevSeg = SegmentStore.getPrevSegment(segment.get('sid'));
         let collectionTypeBefore = ( prevSeg ) ? this.getCollectionType(prevSeg, true): null;
-        if (collectionType !== collectionTypeBefore) {
+        if (collectionType && collectionType !== collectionTypeBefore) {
             itemHeight = itemHeight + 35;
         }
-        return itemHeight + commentsPadding;
+        let height = itemHeight + commentsPadding;
+        this.segmentsHeightsMap[segment.get('sid')] = {
+            segment : segment,
+            height : height
+        };
+        return height;
     }
 
     componentDidMount() {
@@ -279,7 +290,7 @@ class SegmentsContainer extends React.Component {
         nextState.splitGroup !== this.state.splitGroup ||
         nextState.tagLockEnabled !== this.state.tagLockEnabled ||
         nextState.window !== this.state.window ||
-        nextState.scrollTo !== this.state.scrollTo ||
+            (nextState.scrollTo && nextState.scrollTo !== this.state.scrollTo ) ||
         nextState.sideOpen !== this.state.sideOpen )
     }
 

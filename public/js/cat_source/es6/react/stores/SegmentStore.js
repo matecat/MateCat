@@ -381,7 +381,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     deleteContribution: function(sid, matchId) {
         const index = this.getSegmentIndex(sid);
         let contributions = this._segments.get(index).get('contributions');
-        const indexCont = contributions.get('matches').findIndex((contr, index) => contr.id === matchId);
+        const indexCont = contributions.get('matches').findIndex((contr, index) => contr.get("id") === matchId);
         let matches = contributions.get('matches').splice(indexCont, 1);
         this._segments = this._segments.setIn([index, 'contributions', 'matches'], matches);
 
@@ -726,8 +726,8 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.OPEN_SEGMENT:
             SegmentStore.openSegment(action.sid);
-            SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
             SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
+            // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
             break;
         case SegmentConstants.CLOSE_SEGMENT:
             SegmentStore.closeSegments(action.sid);

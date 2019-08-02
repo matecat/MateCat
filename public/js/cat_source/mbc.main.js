@@ -307,8 +307,6 @@ if ( MBC.enabled() )
                 var panelClosed = localStorage.getItem(MBC.localStorageCommentsClosed) === 'true';
                 if ( comments_obj.active > 0  && !panelClosed) {
                     openSegmentCommentNoScroll(id_segment);
-                } else {
-                    closeBalloon(id_segment);
                 }
             }
         };

@@ -106,9 +106,9 @@ class Segment extends React.Component {
             UI.saveInUndoStack();
             UI.checkTagProximity();
 
-            setTimeout(() => {
-                window.location.hash = this.props.segment.sid
-            }, 300);
+            window.location.hash = this.props.segment.sid;
+            // setTimeout(() => {
+            // }, 300);
 
         }
     }

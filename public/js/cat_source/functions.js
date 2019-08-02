@@ -493,7 +493,7 @@ function ParsedHash( hash ) {
 
 function setBrowserHistoryBehavior() {
 
-    window.onpopstate = function() {
+    window.onpopstate = function(ev) {
 
         if ( UI.parsedHash.onlyActionRemoved( window.location.hash ) ) {
             return ;
@@ -507,7 +507,8 @@ function setBrowserHistoryBehavior() {
 
         function updateAppByPopState() {
             var segment = UI.getSegmentById( UI.parsedHash.segmentId );
-            if ( UI.currentSegmentId === UI.parsedHash.segmentId ) return;
+            var currentSegment = SegmentStore.getCurrentSegment();
+            if ( currentSegment.sid === UI.parsedHash.segmentId ) return;
             if ( segment.length ) {
                 UI.gotoSegment( UI.parsedHash.segmentId );
             } else {
