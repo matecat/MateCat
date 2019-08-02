@@ -40,11 +40,11 @@ class FilterProjects extends React.Component {
 
 		return <div className="ui top left pointing dropdown" title="Status Filter"
 					ref={(dropdown) => this.dropdown = dropdown}>
-			<IconFilter width={24} height={24}/>
+			<IconFilter width={24} height={24} color={'#002b5c'}/>
 			<div className="text">Active</div>
 			<div className="menu">
 				{status.map((e, i) => <div key={i} className="item" data-value={e}>{e} {e === this.currentFilter ?
-					<IconTick width={12} height={12} color={'#ffffff'}/> : null}</div>)}
+					<IconTick width={14} height={14} color={'#ffffff'}/> : null}</div>)}
 			</div>
 		</div>;
 	}
