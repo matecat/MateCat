@@ -172,24 +172,37 @@ header {
         }
 
         .dropdown.select-org {
-            color: #ffffff;
-            font-size: 15px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            min-width: 128px;
+            color: #000000;
+            font-size: 14px;
+            padding: 8px 16px;
             float: right;
             margin-left: 10px;
             i.dropdown.icon {
                 top: 12px;
                 margin-left: 5px !important;
             }
+
+
+
             span.text {
-                text-align: right;
-                line-height: 35px;
-                text-decoration: underline;
-                min-width: 0px;
-                max-width: 100px;
+                text-align: left;
+                /*line-height: 32px;*/
+                text-decoration: none;
+                min-width: 0;
+                max-width: 74px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                font-weight: 100;
             }
+
+            span.icon {
+                padding: 8px 0 0 8px;
+            }
+
             &:hover span.text {
                 text-decoration: none;
                 transition: 0.3s ease;

@@ -116,7 +116,7 @@ class Header extends React.Component {
 
 					<div className={containerClass + " wide right floated right aligned column"}>
 						{userIcon}
-						{!!loggedUser && <a href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
+						{!!loggedUser && !showFilterProjects && <a href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
 						{!!showFilterProjects && <TeamSelect
 							isManage={showFilterProjects}
 							showModals={showModals}

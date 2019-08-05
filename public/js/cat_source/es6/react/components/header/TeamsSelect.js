@@ -1,6 +1,8 @@
 import TeamConstants from "./../../constants/TeamConstants";
 import ManageConstants from "./../../constants/ManageConstants";
 import TeamsStore from "./../../stores/TeamsStore";
+import IconTick from "../icons/IconTick";
+import IconDown from "../icons/IconDown";
 
 class TeamsSelect extends React.Component {
 	constructor(props) {
@@ -114,7 +116,7 @@ class TeamsSelect extends React.Component {
 		const {} = this.state;
 
 		let result = '';
-		let dropdownIcon = (teams.size > 1) ? <i className="dropdown icon"/> : '';
+		let dropdownIcon = (teams.size > 1) ? <IconDown width={14} height={14} color={'#000000'}/>  : '';
 		let dontShowCursorClass = (teams.size == 1) ? 'disable-dropdown-team' : '';
 		let personalTeam = '';
 		if (teams.size > 0 && changeTeam) {
@@ -150,14 +152,16 @@ class TeamsSelect extends React.Component {
 				addTeam = <div className="header" onClick={openCreateTeams}>Create New Team
 					<a className="team-filter button show">
 						<i className="icon-plus3 icon"/>
+						{/* Todo: insert icon*/}
 					</a>
 				</div>
 			}
 			result = <div className={"ui top right pointing dropdown select-org " + dontShowCursorClass}
 						  ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
 				<input type="hidden" name="team" className="team-dd"/>
-				{dropdownIcon}
+
 				<span className="text">Choose Team</span>
+				<span className="icon">{dropdownIcon}</span>
 				<div className="menu">
 					{addTeam}
 					{showModals ? (
