@@ -5,7 +5,8 @@ class FilterProjects extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			status: ['active', 'archived', 'cancelled']
+			status: ['active', 'archived', 'cancelled'],
+			currentStatus: 'active'
 		}
 
 		this.onChangeFunction = this.onChangeFunction.bind(this);
@@ -14,25 +15,30 @@ class FilterProjects extends React.Component {
 	componentDidMount() {
 		let self = this;
 
+		const {currentStatus} = this.state;
+
 		$(this.dropdown).dropdown({
 			onChange: function () {
 				self.onChangeFunction();
 			}
 		});
-		this.currentFilter = 'active';
-		$(this.dropdown).dropdown('set selected', 'active');
+		this.currentFilter = currentStatus;
+		$(this.dropdown).dropdown('set selected', currentStatus);
 	}
 
 	onChangeFunction() {
 		if (this.currentFilter !== $(this.dropdown).dropdown('get value')) {
 			this.props.filterFunction($(this.dropdown).dropdown('get value'));
 			this.currentFilter = $(this.dropdown).dropdown('get value');
+
+			this.setState({
+				currentStatus: this.currentFilter
+			});
 		}
 	}
 
 	componentDidUpdate() {
-		this.currentFilter = 'active';
-		$(this.dropdown).dropdown('set selected', 'active');
+
 	}
 
 	render = () => {
@@ -41,9 +47,9 @@ class FilterProjects extends React.Component {
 		return <div className="ui top left pointing dropdown" title="Status Filter"
 					ref={(dropdown) => this.dropdown = dropdown}>
 			<IconFilter width={24} height={24} color={'#002b5c'}/>
-			<div className="text">Active</div>
-			<div className="menu">
-				{status.map((e, i) => <div key={i} className="item" data-value={e}>{e} {e === this.currentFilter ?
+			<div style={{ textTransform: 'capitalize'}} className="text">Active</div>
+			<div className="menu" >
+				{status.map((e, i) => <div style={{ textTransform: 'capitalize'}} key={i} className="item" data-value={e}>{e} {e === this.currentFilter ?
 					<IconTick width={14} height={14} color={'#ffffff'}/> : null}</div>)}
 			</div>
 		</div>;
