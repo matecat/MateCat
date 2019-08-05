@@ -6,6 +6,8 @@ use Exceptions\ControllerReturnException;
 use Exceptions\ValidationError;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
+use Jobs_JobDao;
+use Projects_ProjectDao;
 
 class TranslationVersions extends BaseFeature {
 
@@ -54,6 +56,8 @@ class TranslationVersions extends BaseFeature {
         try {
             $batchEventCreator->save();
             // $event->setChunkReviewsList( $chunkReviews ) ;
+            ( new Jobs_JobDao() )->destroyCacheByProjectId( $chunk->id_project );
+            Projects_ProjectDao::destroyCacheById( $chunk->id_project );
         } catch ( ValidationError $e ) {
             $params['controller_result']['errors'] [] = [
                     'code' => -2000,
