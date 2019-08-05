@@ -11,6 +11,7 @@ namespace Features\SecondPassReview\Controller;
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
+use API\V2\Validators\ProjectAccessValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use API\V2\Validators\TeamAccessFromProjectIdValidator;
 use API\V2\Validators\TeamAccessValidator;
@@ -45,8 +46,8 @@ class ReviewsController extends KleinController {
      */
     public function createReview() {
 
-        // append TeamProjectValidator
-        $this->_appendTeamProjectValidator();
+        // append validators
+        $this->_appendValidators();
 
         // create a new chunk revision password
         $records = RevisionFactory::initFromProject($this->project)->getFeature()->createQaChunkReviewRecord(
@@ -68,9 +69,9 @@ class ReviewsController extends KleinController {
     /**
      * @throws ValidationError
      */
-    private function _appendTeamProjectValidator() {
-        $validator = ( new TeamProjectValidator( $this ) )->setProject( $this->project ) ;
-        $this->appendValidator($validator);
+    private function _appendValidators() {
+        $this->appendValidator(( new TeamProjectValidator( $this ) )->setProject( $this->project ));
+        $this->appendValidator(( new ProjectAccessValidator( $this ) )->setProject( $this->project ));
         $this->validateRequest();
     }
 
