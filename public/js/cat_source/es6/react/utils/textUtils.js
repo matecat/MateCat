@@ -112,14 +112,14 @@ let TAGS_UTILS =  {
          */
         var phTagsObject = {};
         var diff;
-        source = source.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, group1, group2) {
+        source = source.replace( /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, group1, group2) {
             if ( _.isUndefined(phTagsObject[group2]) ) {
                 phTagsObject[group2] = match;
             }
             return '<' + Base64.encode(group2) +'> ';
         });
 
-        target = target.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, gruop1, group2) {
+        target = target.replace( /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, gruop1, group2) {
             if ( _.isUndefined(phTagsObject[group2]) ) {
                 phTagsObject[group2] = match;
             }
