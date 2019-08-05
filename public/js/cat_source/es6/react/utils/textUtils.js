@@ -127,7 +127,9 @@ let TAGS_UTILS =  {
         });
 
         diff   = dmp.diff_main(
+            this.replacePlaceholder(source.replace(/&nbsp; /g, '  ')),
             this.replacePlaceholder(source.replace(/&nbsp;/g, '')),
+            this.replacePlaceholder(target.replace(/&nbsp; /g, '  ')),
             this.replacePlaceholder(target.replace(/&nbsp;/g, '')),
         );
 
@@ -154,6 +156,10 @@ let TAGS_UTILS =  {
             });
             var rootElem;
             var newElem;
+            if ( self.htmlDecode(text[1]) === " " ) {
+                text[1] = "&nbsp;";
+            }
+
             if(text[0] === -1) {
                 rootElem = $( document.createElement( 'div' ) );
                 newElem = $.parseHTML( '<span class="deleted"/>' );
