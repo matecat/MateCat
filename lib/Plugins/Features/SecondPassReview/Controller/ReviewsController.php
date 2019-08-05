@@ -12,6 +12,9 @@ use API\V2\Exceptions\AuthorizationError;
 use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
 use API\V2\Validators\ProjectPasswordValidator;
+use API\V2\Validators\TeamAccessFromProjectIdValidator;
+use API\V2\Validators\TeamAccessValidator;
+use API\V2\Validators\TeamProjectValidator;
 use Chunks_ChunkDao;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
@@ -36,7 +39,15 @@ class ReviewsController extends KleinController {
      */
     protected $latestChunkReview ;
 
+    /**
+     * @throws ValidationError
+     * @throws \Exceptions\ValidationError
+     */
     public function createReview() {
+
+        // append TeamProjectValidator
+        $this->_appendTeamProjectValidator();
+
         // create a new chunk revision password
         $records = RevisionFactory::initFromProject($this->project)->getFeature()->createQaChunkReviewRecord(
                 $this->chunk->id,
@@ -52,6 +63,15 @@ class ReviewsController extends KleinController {
                 'review_password' => $records[ 0 ]->review_password ]
                 ]
         ) ;
+    }
+
+    /**
+     * @throws ValidationError
+     */
+    private function _appendTeamProjectValidator() {
+        $validator = ( new TeamProjectValidator( $this ) )->setProject( $this->project ) ;
+        $this->appendValidator($validator);
+        $this->validateRequest();
     }
 
     protected function afterConstruct() {
