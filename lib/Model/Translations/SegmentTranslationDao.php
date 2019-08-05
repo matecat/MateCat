@@ -301,21 +301,25 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
-
+        $and_ste = '';
 
         if ( $status == Constants_TranslationStatus::STATUS_APPROVED ) {
             /**
              * if source_page is null, we keep the default behaviour and only allow TRANSLATED segments.
              */
             $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+            // If source page is more than 2 (2ndPass) allow also APPROVED segments
+            if ($source_page === 3) {
+                $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
+            }
         } elseif ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
             /**
              * When status is TRANSLATED we can change APPROVED DRAFT and NEW statuses
              */
-            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
             $where_values[] = Constants_TranslationStatus::STATUS_DRAFT;
             $where_values[] = Constants_TranslationStatus::STATUS_NEW;
-        } else {
+        }
+        else {
             throw new Exception( 'not allowed to change status to ' . $status );
         }
 
@@ -328,15 +332,14 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
              * are currently in the same revision stage as the input source page. To do so, we JOIN
              * segment_translation_events table.
              */
-            $join_ste = " JOIN segment_translation_events ste
+            $join_ste = "LEFT JOIN segment_translation_events ste
                       ON ste.id_segment = st.id_segment
                           AND ste.id_job = ?
-                          AND st.status = ?
-                          AND ste.source_page = ?
+                          AND ste.status = ?
                           AND ste.final_revision = 1 ";
 
             $where_values = array_merge( [
-                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED, $source_page
+                    $chunk->id, Constants_TranslationStatus::STATUS_APPROVED
             ], $where_values );
         } else {
             $join_ste = '';
