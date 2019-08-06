@@ -293,7 +293,8 @@ UI = {
             data: {
                 action: 'copyAllSource2Target',
                 id_job: config.id_job,
-                pass: config.password
+                pass: config.password,
+                revision_number: config.revisionNumber
             },
             error: function() {
                 var notification = {
@@ -1765,7 +1766,8 @@ UI = {
             id_before: idBefore,
             context_after: contextAfter,
             id_after: idAfter,
-            by_status: byStatus
+            by_status: byStatus,
+            revision_number: config.revisionNumber
         };
         if(isSplitted) {
             this.setStatus(segment.status);

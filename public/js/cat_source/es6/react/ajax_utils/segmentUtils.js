@@ -27,6 +27,7 @@ API.SEGMENT = {
             context_after: contextAfter,
             id_after: idAfter,
             time_to_edit: time_to_edit,
+            revision_number: config.revisionNumber
             // id_translator: id_translator,
         };
         return $.ajax({
