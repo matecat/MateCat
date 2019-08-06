@@ -1,19 +1,20 @@
 <?php
 
-
+use Features\SecondPassReview\Utils as SecondPassReviewUtils;
 use Features\ReviewExtended\Model\QualityReportDao;
 
 class setRevisionController extends ajaxController {
 
-    private   $_postInput;
-    private   $id_job;
-    private   $password_job;
-    private   $err_typing;
-    private   $err_translation;
-    private   $err_terminology;
-    private   $err_language;
-    private   $err_style;
-    private   $reviseClass;
+    private $_postInput;
+    private $id_job;
+    private $password_job;
+    private $err_typing;
+    private $err_translation;
+    private $err_terminology;
+    private $err_language;
+    private $err_style;
+    private $reviseClass;
+    private $revisionNumber;
 
     private static $accepted_values = [
             Constants_Revise::CLIENT_VALUE_NONE,
@@ -54,7 +55,10 @@ class setRevisionController extends ajaxController {
                 ],
                 'original'        => [
                         'filter' => FILTER_UNSAFE_RAW
-                ]
+                ],
+                'revision_number' => [
+                        'filter' => FILTER_SANITIZE_NUMBER_INT
+                ],
         ];
 
         $this->_postInput      = filter_input_array( INPUT_POST, $filterArgs );
@@ -66,6 +70,7 @@ class setRevisionController extends ajaxController {
         $this->err_terminology = $this->_postInput[ 'err_terminology' ];
         $this->err_language    = $this->_postInput[ 'err_language' ];
         $this->err_style       = $this->_postInput[ 'err_style' ];
+        $this->revisionNumber  = $this->_postInput[ 'revision_number' ];
 
         if ( empty( $this->id_job ) ) {
             $this->result[ 'errors' ][] = [ 'code' => -1, 'message' => 'Job ID missing' ];
@@ -78,7 +83,6 @@ class setRevisionController extends ajaxController {
         if ( empty( $this->password_job ) ) {
             $this->result[ 'errors' ][] = [ 'code' => -3, 'message' => 'Job password missing' ];
         }
-
     }
 
     /**
@@ -93,7 +97,7 @@ class setRevisionController extends ajaxController {
         }
 
         $job_data = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password_job );
-        $project = $job_data->getProject();
+        $project  = $job_data->getProject();
         $this->featureSet->loadForProject( $project );
 
         $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
@@ -142,6 +146,7 @@ class setRevisionController extends ajaxController {
         } catch ( Exception $e ) {
             Log::doJsonLog( __METHOD__ . " -> " . $e->getMessage() );
             $this->result[ 'errors' ] [] = [ 'code' => -4, 'message' => "Insert failed" ];
+
             return;
         }
 
@@ -153,11 +158,11 @@ class setRevisionController extends ajaxController {
 
         if ( $this->featureSet->hasRevisionFeature() ) {
             $reviseIssues     = [];
-            $qualityReportDao = new QualityReportDao() ;
+            $qualityReportDao = new QualityReportDao();
 
-            $qa_data          = $qualityReportDao->getReviseIssuesByChunk(
+            $qa_data = $qualityReportDao->getReviseIssuesByChunk(
                     $job_data->id, $job_data->password,
-                    self::getRefererSourcePageCode( $this->featureSet )
+                    SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             );
 
             foreach ( $qa_data as $issue ) {

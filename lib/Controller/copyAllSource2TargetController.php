@@ -1,6 +1,6 @@
 <?php
 
-use Features\SecondPassReview\Utils;
+use Features\SecondPassReview\Utils as SecondPassReviewUtils;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 
@@ -16,6 +16,7 @@ class copyAllSource2TargetController extends ajaxController {
     private $pass;
 
     private static $errorMap;
+    private        $revisionNumber;
 
     protected function __construct() {
         parent::__construct();
@@ -23,19 +24,23 @@ class copyAllSource2TargetController extends ajaxController {
         $this->setErrorMap();
 
         $filterArgs = [
-                'id_job' => [
+                'id_job'          => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
-                'pass'   => [
+                'pass'            => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'revision_number' => [
+                        'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
         ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job = $postInput[ 'id_job' ];
-        $this->pass   = $postInput[ 'pass' ];
+        $this->id_job         = $postInput[ 'id_job' ];
+        $this->pass           = $postInput[ 'pass' ];
+        $this->revisionNumber = $postInput[ 'revision_number' ];
 
         Log::doJsonLog( "Requested massive copy-source-to-target for job $this->id_job." );
 
@@ -104,7 +109,7 @@ class copyAllSource2TargetController extends ajaxController {
         $batchEventCreator = new BatchEventCreator( $chunk );
         $batchEventCreator->setFeatureSet( $features );
 
-        $source_page = self::getRefererSourcePageCode( $features );
+        $source_page = SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
         $segments    = $chunk->getSegments();
 
         foreach ( $segments as $segment ) {

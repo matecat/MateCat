@@ -70,6 +70,9 @@ class SecondPassReview extends BaseFeature {
         }
 
         if ( $controller->getRevisionNumber() > 1 ) {
+
+            $fff = Utils::revisionNumberToSourcePage( $controller->getRevisionNumber() );
+
             $chunk_review = ( new ChunkReviewDao() )->findByJobIdPasswordAndSourcePage(
                     $controller->getChunk()->id,
                     $controller->getChunk()->password,
@@ -84,7 +87,7 @@ class SecondPassReview extends BaseFeature {
 
     public function filterSourcePage( $sourcePage ) {
         $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-        $matches = null ;
+        $chunk_review    =    $matches = null ;
         preg_match( '/revise([2-9])?\//s' , $_from_url['path'], $matches ) ;
         if  ( count( $matches ) > 1 ) {
             $sourcePage = Utils::revisionNumberToSourcePage( $matches[ 1 ] ) ;
