@@ -100,7 +100,7 @@ class SegmentsContainer extends React.Component {
                     return segment.get('sid') === this.state.scrollTo;
                 }
             });
-            return {scrollTo:index, position: 'center'}
+            return {scrollTo:index-2, position: 'start'}
         } else if ( this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
             const diff = this.state.segments.size - this.lastListSize;
             return {scrollTo:this.lastUpdateObj.startIndex + diff, position: 'start'}

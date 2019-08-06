@@ -2,9 +2,10 @@
  * React Component .
 
  */
-let React = require('react');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
+const React = require('react');
+const SegmentConstants = require('../../constants/SegmentConstants');
+const SegmentStore = require('../../stores/SegmentStore');
+const Immutable = require('immutable');
 
 class SegmentFooterTabConcordance extends React.Component {
 
@@ -178,6 +179,16 @@ class SegmentFooterTabConcordance extends React.Component {
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.FIND_CONCORDANCE, this.findConcordance);
         SegmentStore.removeListener(SegmentConstants.CONCORDANCE_RESULT, this.renderConcordances);
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return (this.state.extended !== nextState.extended) ||
+            !Immutable.fromJS(this.state.results).equals(Immutable.fromJS(nextState.results)) ||
+            this.state.loading !== nextState.loading ||
+            this.state.noResults !== nextState.loading ||
+            this.state.source !== nextState.source ||
+            this.state.target !== nextState.target ||
+            this.props.active_class !== nextProps.active_class
     }
 
     render() {

@@ -2,11 +2,11 @@
  * React Component for the editarea.
  
  */
-let React = require('react');
-let $ = require('jquery');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
-let Immutable = require('immutable');
+const React = require('react');
+const $ = require('jquery');
+const SegmentConstants = require('../../constants/SegmentConstants');
+const SegmentStore = require('../../stores/SegmentStore');
+const Immutable = require('immutable');
 class Editarea extends React.Component {
 
     constructor(props) {
@@ -307,10 +307,12 @@ class Editarea extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
             nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation ||
-            !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment))
+            nextProps.segment.modified !== this.props.segment.modified || nextProps.segment.opened !== this.props.segment.opened
+            || nextProps.segment.muted !== this.props.segment.muted
         ) && !this.editAreaIsEditing
     }
     componentDidUpdate() {
+        console.log("Update Segment EditArea" + this.props.segment.sid);
         if (this.cursorPosition) {
             try {
                 if (this.props.segment.opened) {

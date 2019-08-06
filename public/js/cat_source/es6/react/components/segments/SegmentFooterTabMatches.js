@@ -2,9 +2,11 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
+const React = require('react');
+const SegmentConstants = require('../../constants/SegmentConstants');
+const SegmentStore = require('../../stores/SegmentStore');
+const Immutable = require('immutable');
+
 class SegmentFooterTabMatches extends React.Component {
 
     constructor(props) {
@@ -142,6 +144,13 @@ class SegmentFooterTabMatches extends React.Component {
      * Do not delete, overwritten by plugin
      */
     componentDidUpdate() {}
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return (!_.isUndefined(nextProps.segment.contributions) || !_.isUndefined(this.props.segment.contributions)) &&
+            ((!_.isUndefined(nextProps.segment.contributions) && _.isUndefined(this.props.segment.contributions)) ||
+            !Immutable.fromJS(this.props.segment.contributions).equals(Immutable.fromJS(nextProps.segment.contributions)) ||
+            this.props.active_class !== nextProps.active_class)
+    }
 
     allowHTML(string) {
         return { __html: string };

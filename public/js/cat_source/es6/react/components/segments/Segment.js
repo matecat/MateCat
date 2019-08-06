@@ -46,9 +46,7 @@ class Segment extends React.Component {
         this.secondPassLocked = ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number === 2 && config.revisionNumber !== 2);
         this.state = {
             segment_classes : [],
-            modified: false,
             autopropagated: this.props.segment.autopropagated_from != 0,
-            status: this.props.segment.status,
             showTranslationIssues: this.props.segment.showIssues,
             unlocked: UI.isUnlockedSegment(this.props.segment),
             readonly: readonly,
@@ -471,9 +469,7 @@ class Segment extends React.Component {
         return (
             !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment)) ||
             !Immutable.fromJS(nextState.segment_classes).equals(Immutable.fromJS(this.state.segment_classes)) ||
-            nextState.modified !== this.state.modified ||
             nextState.autopropagated !== this.state.autopropagated ||
-            nextState.status !== this.state.status ||
             nextState.showTranslationIssues !== this.state.showTranslationIssues ||
             nextState.readonly !== this.state.readonly ||
             nextState.showRevisionPanel !== this.state.showRevisionPanel ||

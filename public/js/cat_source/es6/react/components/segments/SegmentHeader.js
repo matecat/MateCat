@@ -8,7 +8,7 @@ var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentActions = require('../../actions/SegmentActions');
 
 
-class SegmentHeader extends React.Component {
+class SegmentHeader extends React.PureComponent {
 
     constructor(props) {
         super(props);

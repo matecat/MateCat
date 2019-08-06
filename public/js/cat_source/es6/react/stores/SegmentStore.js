@@ -813,7 +813,6 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.SET_CL_CONTRIBUTIONS:
             SegmentStore.setCrossLanguageContributionsToCache(action.sid, action.fid, action.matches, action.errors);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
-            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
             break;
         case SegmentConstants.SET_ALTERNATIVES:
             SegmentStore.setAlternatives(action.sid, action.alternatives);

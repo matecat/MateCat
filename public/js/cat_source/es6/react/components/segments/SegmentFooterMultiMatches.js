@@ -2,9 +2,8 @@
  * React Component .
 
  */
-var React = require('react');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
+const React = require('react');
+const Immutable = require('immutable');
 
 class SegmentFooterMultiMatches extends React.Component {
 
@@ -112,16 +111,21 @@ class SegmentFooterMultiMatches extends React.Component {
 
     componentDidMount() {
         this._isMounted = true;
-        SegmentStore.addListener(SegmentConstants.SET_CL_CONTRIBUTIONS, this.parseMatches);
     }
 
     componentWillUnmount() {
         this._isMounted = false;
-        SegmentStore.removeListener(SegmentConstants.SET_CL_CONTRIBUTIONS, this.parseMatches);
     }
 
     allowHTML(string) {
         return { __html: string };
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return (!_.isUndefined(nextProps.segment.cl_contributions) || !_.isUndefined(this.props.segment.cl_contributions)) &&
+            ( (!_.isUndefined(nextProps.segment.cl_contributions) && _.isUndefined(this.props.segment.cl_contributions)) ||
+            !Immutable.fromJS(this.props.segment.cl_contributions).equals(Immutable.fromJS(nextProps.segment.cl_contributions)) ||
+            this.props.active_class !== nextProps.active_class )
     }
 
     render() {
