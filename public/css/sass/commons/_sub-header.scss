@@ -29,23 +29,55 @@
 		background-color: #fff;
 		color: #002b5c;
 		font-weight: 500;
-		padding: 6px 15px;
+		padding: 8px 16px;
 		line-height: 1.21;
 		border-radius: 5px;
 		font-size: 14px;
-		min-width: 150px;
+		min-width: 168px;
+
+		display: grid;
+		width: 168px;
+		grid-template-columns: auto 16px;
+		align-items: center;
+
+		.icon {
+			padding-top: 6px;
+		}
 		.text{
 			display: grid;
-			grid-template-columns: auto 1fr auto;
+			grid-template-columns: 28px 80px;
 			align-items: center;
+			column-gap: 8px;
+			margin-right: 4px;
+
+			/*grid-template-columns: 36px 72px 0;
+			grid-template-rows: 28px;*/
+
 			img{
 				margin: 0!important;
 			}
 			.label{
 				font-size: 12px;
 				line-height: 12px;
-				padding: 8px;
-				margin-right: 8px;
+				margin-right: 0;
+				border: 3px solid #0099cc;
+				color: #0099cc;
+				border-radius: 100%;
+				padding: 4px 4px;
+
+				&.all {
+					font-size: 10px;
+				}
+			}
+
+			.user-name-filter {
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.box-number-project {
+				display: none;
 			}
 		}
 		.menu{
@@ -56,16 +88,69 @@
 			}
 			.item{
 				display: grid;
-				grid-template-columns: 45px auto auto;
-				padding: 6px 12px!important;
+				grid-template-columns: 28px auto;
+				grid-column-gap: 8px;
+				padding: 0 12px!important;
 				align-items: center;
+				grid-template-rows: 40px;
+
+				.label {
+					margin: 0;
+					padding: 0;
+					text-align: center;
+					border: 3px solid #0099cc;
+					color: #0099cc;
+					border-radius: 100%;
+					line-height: 22px;
+
+					&.all {
+						font-size: 10px;
+					}
+				}
 				.box-number-project{
-					text-align: right;
+					background: #0099cc;
+					border-radius: 5px;
+					padding: 4px;
+					text-align: center;
+					color: #fff;
 				}
 				img{
 					margin: 0!important;
 				}
+
+				.user-projects {
+					display: grid;
+					grid-template-columns: auto 0.20fr;
+					align-items: center;
+					padding: 8px;
+				}
+
+				&:hover {
+					color: #0055b8;
+					background: #f2f5f7;
+				}
+
+				&.active {
+					&.selected {
+
+						.user-projects {
+							background: #002b5c;
+							color: #fff;
+							font-weight: normal;
+							border-radius: 3px;
+						}
+						.box-number-project{
+							font-weight: normal;
+						}
+
+						.user-name-filter{
+							font-weight: normal;
+						}
+					}
+				}
+
 			}
+
 		}
 		.input-field {
 			margin-left: 10px;
@@ -73,6 +158,7 @@
 		}
 		.list-team{
 			.ui.dropdown {
+
 				.all {
 					padding: 0px;
 					width: 24px;
@@ -126,6 +212,7 @@
                         .user-name-filter {
                             top: 2px;
                             position: relative;
+
                         }
 						.box-number-project {
                             position: absolute;

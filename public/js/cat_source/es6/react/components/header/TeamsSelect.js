@@ -116,7 +116,7 @@ class TeamsSelect extends React.Component {
 		const {} = this.state;
 
 		let result = '';
-		let dropdownIcon = (teams.size > 1) ? <IconDown width={14} height={14} color={'#000000'}/>  : '';
+		let dropdownIcon = (teams.size > 1) ? <IconDown width={16} height={16} color={'#788190'}/>  : '';
 		let dontShowCursorClass = (teams.size == 1) ? 'disable-dropdown-team' : '';
 		let personalTeam = '';
 		if (teams.size > 0 && changeTeam) {

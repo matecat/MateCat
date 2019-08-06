@@ -180,12 +180,14 @@ header {
             padding: 8px 16px;
             float: right;
             margin-left: 10px;
+            display: grid;
+            grid-template-columns: auto 16px;
+            align-items: center;
+
             i.dropdown.icon {
                 top: 12px;
                 margin-left: 5px !important;
             }
-
-
 
             span.text {
                 text-align: left;
@@ -200,7 +202,7 @@ header {
             }
 
             span.icon {
-                padding: 8px 0 0 8px;
+                padding: 8px 0 0 0;
             }
 
             &:hover span.text {

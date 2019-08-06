@@ -1,4 +1,6 @@
 import IconFilter from "../../icons/IconFilter";
+import IconTick from "../../icons/IconTick";
+import IconDown from "../../icons/IconDown";
 
 let FilterProjectsStatus = require("./FilterProjectsStatus").default;
 let SearchInput = require("./SearchInput").default;
@@ -103,23 +105,30 @@ class FilterProjects extends React.Component {
 				return <div className={"item " + classDisable} data-value={member.get('user').get('uid')}
 							key={'user' + member.get('user').get('uid')}>
 					{userIcon}
-					<span
-						className="user-name-filter">{member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}</span>
-					<div className="box-number-project">{member.get('projects')}</div>
+					<div className="user-projects">
+						<div className="user-name-filter">{member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}</div>
+						<div className="box-number-project">{member.get('projects')}</div>
+					</div>
 				</div>;
 
 			});
 
 			let item = <div className="item" data-value="-1"
 							key={'user' + -1}>
-				<a className="ui all label">All</a>
-				<div>All Members</div>
+				<a className="ui all label">ALL</a>
+				<div className="user-projects">
+					<div className="user-name-filter">All Members</div>
+					<div className="box-number-project"></div>
+				</div>
 			</div>;
 			members = members.unshift(item);
 			item = <div className="item" data-value="0"
 						key={'user' + 0}>
 				<a className="ui all label">NA</a>
-				<div>Not assigned</div>
+				<div className="user-projects">
+					<div className="user-name-filter">Not assigned</div>
+					<div className="box-number-project"></div>
+				</div>
 			</div>;
 			members = members.unshift(item);
 
@@ -129,9 +138,11 @@ class FilterProjects extends React.Component {
 					<div className="ui all label">ALL</div>
 					All Members
 				</div>
+				<div className="icon"><IconDown width={16} height={16} color={'#788190'}/></div>
 				<div className="menu">
 					{members}
 				</div>
+
 			</div>;
 			/*result = <div className="users-filter" title="Filter project by members">
 
