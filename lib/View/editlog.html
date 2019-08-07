@@ -17,8 +17,6 @@
         </script>
         <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
-        <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
-
         <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
         <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
     </head>
@@ -38,7 +36,6 @@
                 <a href="${basepath}" class="logo"></a>
 
                 <div metal:use-macro="common.html/login_includes" />
-                <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
 
 
             </div>
