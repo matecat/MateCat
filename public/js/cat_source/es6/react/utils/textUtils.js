@@ -127,10 +127,8 @@ let TAGS_UTILS =  {
         });
 
         diff   = dmp.diff_main(
-            this.replacePlaceholder(source.replace(/&nbsp; /g, '  ')),
-            this.replacePlaceholder(source.replace(/&nbsp;/g, '')),
-            this.replacePlaceholder(target.replace(/&nbsp; /g, '  ')),
-            this.replacePlaceholder(target.replace(/&nbsp;/g, '')),
+            this.replacePlaceholder(source.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, '')),
+            this.replacePlaceholder(target.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, ''))
         );
 
         dmp.diff_cleanupSemantic( diff ) ;
