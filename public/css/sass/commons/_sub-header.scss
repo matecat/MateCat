@@ -29,16 +29,19 @@
 		background-color: #fff;
 		color: #002b5c;
 		font-weight: 500;
-		padding: 8px 16px;
+		padding: 7px 16px;
 		line-height: 1.21;
 		border-radius: 5px;
 		font-size: 14px;
 		min-width: 168px;
+		float: right;
 
 		display: grid;
 		width: 168px;
 		grid-template-columns: auto 16px;
 		align-items: center;
+
+		float: right;
 
 		.icon {
 			padding-top: 6px;
@@ -60,10 +63,10 @@
 				font-size: 12px;
 				line-height: 12px;
 				margin-right: 0;
-				border: 3px solid #0099cc;
+				border: 2px solid #0099cc;
 				color: #0099cc;
 				border-radius: 100%;
-				padding: 4px 4px;
+				padding: 6px 4px;
 
 				&.all {
 					font-size: 10px;
@@ -96,9 +99,9 @@
 
 				.label {
 					margin: 0;
-					padding: 0;
+					padding: 1px 0;
 					text-align: center;
-					border: 3px solid #0099cc;
+					border: 2px solid #0099cc;
 					color: #0099cc;
 					border-radius: 100%;
 					line-height: 22px;
@@ -109,10 +112,11 @@
 				}
 				.box-number-project{
 					background: #0099cc;
-					border-radius: 5px;
+					border-radius: 50%;
 					padding: 4px;
 					text-align: center;
 					color: #fff;
+					font-size: 10px;
 				}
 				img{
 					margin: 0!important;
@@ -120,7 +124,7 @@
 
 				.user-projects {
 					display: grid;
-					grid-template-columns: auto 0.20fr;
+					grid-template-columns: auto 0.13fr;
 					align-items: center;
 					padding: 8px;
 				}

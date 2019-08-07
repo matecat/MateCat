@@ -177,12 +177,13 @@ header {
             min-width: 128px;
             color: #000000;
             font-size: 14px;
-            padding: 8px 16px;
-            float: right;
+            padding: 7px 16px;
+            float: left;
             margin-left: 10px;
             display: grid;
             grid-template-columns: auto 16px;
             align-items: center;
+            grid-template-rows: 28px;
 
             i.dropdown.icon {
                 top: 12px;
@@ -224,7 +225,7 @@ header {
 }
 
 .user-teams {
-    padding-right: 0px !important;
+    padding-right: 52px !important;
     .ui-user-top-image {
         margin-top: 2px;
         float: right;
@@ -243,6 +244,15 @@ header {
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+    .separator {
+        width: 1px;
+        height: 37px;
+        background: white;
+        float: right;
+        margin-right: 22px;
+        margin-left: 20px;
+    }
 }
 
 
@@ -259,11 +269,24 @@ header {
 }
 
 #menu-site {
-    margin-top: 8px !important;
+    /*margin-top: 8px !important;*/
     float: right !important;
     margin-right: 12px;
+    /*
     border-right: 1px solid #8a8a8a;
-    height: 22px;
+    */
+    /*height: 22px;*/
+    .btn {
+        background: #fff;
+        color: #002b5c;
+        font-size: 16px;
+        width:152px;
+        text-align: center;
+        max-height: 40px;
+        border-radius: 5px;
+        line-height: 1.25;
+        margin-left: 52px;
+    }
     @media only screen and (min-width: 1208px) {
         ul {
             li {
