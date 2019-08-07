@@ -122,10 +122,11 @@ class SegmentFooterMultiMatches extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return (!_.isUndefined(nextProps.segment.cl_contributions) || !_.isUndefined(this.props.segment.cl_contributions)) &&
+        return ( (!_.isUndefined(nextProps.segment.cl_contributions) || !_.isUndefined(this.props.segment.cl_contributions)) &&
             ( (!_.isUndefined(nextProps.segment.cl_contributions) && _.isUndefined(this.props.segment.cl_contributions)) ||
-            !Immutable.fromJS(this.props.segment.cl_contributions).equals(Immutable.fromJS(nextProps.segment.cl_contributions)) ||
-            this.props.active_class !== nextProps.active_class )
+            !Immutable.fromJS(this.props.segment.cl_contributions).equals(Immutable.fromJS(nextProps.segment.cl_contributions)) ) ) ||
+            this.props.active_class !== nextProps.active_class ||
+                this.props.tab_class !== nextProps.tab_class
     }
 
     render() {

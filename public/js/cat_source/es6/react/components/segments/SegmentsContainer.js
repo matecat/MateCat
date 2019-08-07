@@ -36,6 +36,7 @@ class SegmentsContainer extends React.Component {
 
         this.lastScrollTop = 0;
         this.segmentsHeightsMap = {};
+        this.segmentsWithCollectionType = [];
     }
 
     splitSegments(segments, splitGroup) {
@@ -151,7 +152,7 @@ class SegmentsContainer extends React.Component {
             sideOpen={this.state.sideOpen}
         />;
         if ( segment.id_file !== currentFileId ) {
-            item = <React.Fragment>
+            return <React.Fragment>
                 <ul className="projectbar" data-job={"job-"+ segment.id_file}>
                     <li className="filename">
                         <h2 title={segment.filename}>{segment.filename}</h2>
@@ -167,7 +168,10 @@ class SegmentsContainer extends React.Component {
                 {item}
             </React.Fragment>
         }
-        return item;
+        return <React.Fragment>
+                {collectionTypeSeparator}
+                {item}
+                </React.Fragment>;
     }
 
     getSegments() {
@@ -179,9 +183,12 @@ class SegmentsContainer extends React.Component {
             let collectionType = this.getCollectionType(segment);
             let collectionTypeSeparator;
             if (collectionType && collectionsTypeArray.indexOf(collectionType) === -1) {
-                collectionTypeSeparator = <div id="" className="collection-type-separator" key={collectionType+segment.sid}>
+                collectionTypeSeparator = <div className="collection-type-separator" key={collectionType+segment.sid+ (Math.random()*10)}>
                     Collection Name: <b>{collectionType}</b></div>;
                 collectionsTypeArray.push(collectionType);
+                if ( this.segmentsWithCollectionType.indexOf(segment.sid) === -1 ) {
+                    this.segmentsWithCollectionType.push(segment.sid);
+                }
             }
             let item = this.getSegment(segment, currentFileId, collectionTypeSeparator);
             currentFileId = segment.id_file;
@@ -252,10 +259,7 @@ class SegmentsContainer extends React.Component {
             itemHeight = itemHeight + 47;
         }
         //Collection type
-        let collectionType = this.getCollectionType(segment.toJS());
-        let prevSeg = SegmentStore.getPrevSegment(segment.get('sid'));
-        let collectionTypeBefore = ( prevSeg ) ? this.getCollectionType(prevSeg, true): null;
-        if (collectionType && collectionType !== collectionTypeBefore) {
+        if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
             itemHeight = itemHeight + 35;
         }
         let height = itemHeight + commentsPadding;

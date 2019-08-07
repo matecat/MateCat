@@ -43,7 +43,6 @@ $.extend(UI, {
     },
 	init: function() {
 
-		this.registerFooterTabs();
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
 

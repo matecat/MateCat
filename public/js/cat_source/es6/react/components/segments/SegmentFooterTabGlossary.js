@@ -7,6 +7,7 @@ const SegmentConstants = require('../../constants/SegmentConstants');
 const SegmentStore = require('../../stores/SegmentStore');
 const SegmentActions = require('../../actions/SegmentActions');
 const GlossaryUtils = require('./utils/glossaryUtils');
+const Immutable = require('immutable');
 
 class SegmentFooterTabGlossary extends React.Component {
 
@@ -14,7 +15,6 @@ class SegmentFooterTabGlossary extends React.Component {
         super(props);
         this.state = {
             loading: false,
-            matches: [],
             openComment: false,
             enableAddButton: false
         };
@@ -266,6 +266,17 @@ class SegmentFooterTabGlossary extends React.Component {
 
     allowHTML(string) {
         return { __html: string };
+    }
+
+    shouldComponentUpdate(nextProps,  nextState) {
+        return ( (!_.isUndefined(nextProps.segment.glossary) || !_.isUndefined(this.props.segment.glossary)) &&
+            ( (!_.isUndefined(nextProps.segment.glossary) && _.isUndefined(this.props.segment.glossary)) ||
+                !Immutable.fromJS(this.props.segment.glossary).equals(Immutable.fromJS(nextProps.segment.glossary)) ) )||
+                this.props.loading !== nextProps.loading ||
+                this.props.openComment !== nextProps.openComment ||
+                this.props.active_class !== nextProps.active_class ||
+                this.props.enableAddButton !== nextProps.enableButton ||
+                this.props.tab_class !== nextProps.tab_class
     }
 
     render() {

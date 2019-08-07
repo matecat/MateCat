@@ -65,9 +65,9 @@ class SegmentFooter extends React.Component {
                 label : 'Messages',
                 code : 'notes',
                 tab_class : 'segment-notes',
-                enabled : !!(this.props.segment.notes && this.props.segment.notes.length > 0) || !!this.props.segment.context_groups,
-                visible : !!(this.props.segment.notes && this.props.segment.notes.length > 0) || !!this.props.segment.context_groups,
-                open : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
+                enabled : false,
+                visible : false,
+                open : false,
                 elements : []
             },
             multiMatches: {

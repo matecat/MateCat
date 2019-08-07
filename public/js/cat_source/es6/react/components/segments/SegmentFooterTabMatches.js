@@ -146,10 +146,11 @@ class SegmentFooterTabMatches extends React.Component {
     componentDidUpdate() {}
 
     shouldComponentUpdate(nextProps, nextState) {
-        return (!_.isUndefined(nextProps.segment.contributions) || !_.isUndefined(this.props.segment.contributions)) &&
+        return ( (!_.isUndefined(nextProps.segment.contributions) || !_.isUndefined(this.props.segment.contributions)) &&
             ((!_.isUndefined(nextProps.segment.contributions) && _.isUndefined(this.props.segment.contributions)) ||
-            !Immutable.fromJS(this.props.segment.contributions).equals(Immutable.fromJS(nextProps.segment.contributions)) ||
-            this.props.active_class !== nextProps.active_class)
+            !Immutable.fromJS(this.props.segment.contributions).equals(Immutable.fromJS(nextProps.segment.contributions)) )) ||
+            this.props.active_class !== nextProps.active_class ||
+            this.props.tab_class !== nextProps.tab_class
     }
 
     allowHTML(string) {

@@ -185,10 +185,11 @@ class SegmentFooterTabConcordance extends React.Component {
         return (this.state.extended !== nextState.extended) ||
             !Immutable.fromJS(this.state.results).equals(Immutable.fromJS(nextState.results)) ||
             this.state.loading !== nextState.loading ||
-            this.state.noResults !== nextState.loading ||
+            this.state.noResults !== nextState.noResults ||
             this.state.source !== nextState.source ||
             this.state.target !== nextState.target ||
-            this.props.active_class !== nextProps.active_class
+            this.props.active_class !== nextProps.active_class ||
+            this.props.tab_class !== nextProps.tab_class
     }
 
     render() {

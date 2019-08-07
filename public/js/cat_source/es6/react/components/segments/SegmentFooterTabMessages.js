@@ -2,20 +2,13 @@
  * React Component .
 
  */
-let React = require('react');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
-let WrapperLoader =         require("../../common/WrapperLoader").default;
-let showdown = require( "showdown" );
+const React = require('react');
+const Immutable = require('immutable');
+const showdown = require( "showdown" );
 class SegmentFooterTabMessages extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            previews: null,
-            currentIndexPreview: 0,
-            loadingImage: false
-        };
         //Parameter to exclude notes tha match this regexp, used by plugins to exclude some notes
         this.excludeMatchingNotesRegExp;
     }
@@ -83,40 +76,9 @@ class SegmentFooterTabMessages extends React.Component {
         return notesHtml;
     }
 
-    renderPreview(sid, previewsData) {
-        let self = this;
-        if ( this.props.id_segment === sid && previewsData) {
-            let segments = previewsData.segments;
-            let segmentInfo = segments.find(function ( segment ) {
-                return segment.segment === parseInt(self.props.id_segment)
-            });
-            if (segmentInfo && segmentInfo.previews && segmentInfo.previews.length > 0) {
-                this.setState({
-                    previews: segmentInfo.previews
-                });
-            }
-        }
-    }
+    componentDidMount() {}
 
-    navigationBetweenPreviews(offset){
-        let newIndex = this.state.currentIndexPreview + offset - this.state.previews.length * Math.floor((this.state.currentIndexPreview + offset) / this.state.previews.length);
-        this.setState({
-            currentIndexPreview: newIndex,
-            loadingImage: true
-        })
-    }
-
-    openPreview() {
-        UI.openPreview(this.props.id_segment,this.state.previews[this.state.currentIndexPreview].file_index);
-    }
-
-    componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.RENDER_PREVIEW, this.renderPreview.bind(this));
-    }
-
-    componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.RENDER_PREVIEW, this.renderPreview);
-    }
+    componentWillUnmount() {}
 
     componentWillMount() {}
 
@@ -124,39 +86,22 @@ class SegmentFooterTabMessages extends React.Component {
         return { __html: string };
     }
 
+    shouldComponentUpdate(nextProps,  nextState) {
+        return ( (!_.isUndefined(nextProps.notes) || !_.isUndefined(this.props.notes)) &&
+            ( (!_.isUndefined(nextProps.notes) && _.isUndefined(this.props.notes)) ||
+                !Immutable.fromJS(this.props.notes).equals(Immutable.fromJS(nextProps.notes)) )) ||
+                this.props.loading !== nextProps.loading ||
+                this.props.active_class !== nextProps.active_class ||
+                this.props.tab_class !== nextProps.tab_class
+
+
+    }
+
     render() {
-        let backgroundSrc = "",
-            controls = "";
-        if (this.state.previews && this.state.previews.length > 0) {
-            let preview = this.state.previews[this.state.currentIndexPreview];
-            backgroundSrc =  preview.path + preview.file_index ;
-
-            controls =  <div className="tab-preview-screenshot">
-                <button className="preview-button previous" onClick={this.navigationBetweenPreviews.bind(this,-1)}>
-                    <i className="icon icon-chevron-left" /> </button>
-                <div className="n-segments-available">{this.state.currentIndexPreview+1} / {this.state.previews.length}</div>
-                <button className="preview-button next" onClick={this.navigationBetweenPreviews.bind(this,1)}>
-                    <i className="icon icon-chevron-right" /></button>
-                <div className="text-n-segments-available">available screens for this segment</div>
-            </div>;
-        }
-
         return  <div key={"container_" + this.props.code}
                     className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
                     id={"segment-" + this.props.id_segment + "-" + this.props.tab_class}>
                 <div className="overflow">
-                    {this.state.previews ? (
-                        <div className="segments-preview-footer">
-                            <div className="segments-preview-container" onClick={this.openPreview.bind(this)}>
-                                <img src={backgroundSrc}/>
-                                {this.state.loadingImage ? <WrapperLoader /> : null}
-                            </div>
-
-                            {this.state.previews.length > 1 ? controls : null}
-
-                        </div>
-                    ) : (null)}
-
                     <div className="segment-notes-container">
                         <div className="segment-notes-panel-body">
                             <div className="segments-notes-container">
@@ -166,18 +111,6 @@ class SegmentFooterTabMessages extends React.Component {
                     </div>
                 </div>
             </div>
-    }
-
-    componentDidUpdate(){
-        let self = this;
-        if(this.state.loadingImage){
-            $('.segments-preview-container').imagesLoaded( function() {
-                console.log('Image loaded');
-                self.setState({
-                    loadingImage: false
-                })
-            });
-        }
     }
 }
 

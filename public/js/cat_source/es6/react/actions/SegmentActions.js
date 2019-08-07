@@ -440,13 +440,6 @@ var SegmentActions = {
             tabName: tabName
         });
     },
-    renderPreview: function ( sid, data ) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.RENDER_PREVIEW,
-            sid: sid,
-            data: data
-        });
-    },
 
     getGlossaryMatch: function ( text ) {
         return API.SEGMENT.getGlossaryMatch(text)

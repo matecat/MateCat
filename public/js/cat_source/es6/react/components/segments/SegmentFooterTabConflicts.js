@@ -3,8 +3,8 @@
 
  */
 let React = require('react');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
+const Immutable = require('immutable');
+
 class SegmentFooterTabConflicts extends React.Component {
 
     constructor(props) {
@@ -87,6 +87,13 @@ class SegmentFooterTabConflicts extends React.Component {
     }
     allowHTML(string) {
         return { __html: string };
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return this.props.active_class !== nextProps.active_class || this.props.tab_class !== nextProps.tab_class ||
+            ( (!_.isUndefined(nextProps.segment.alternatives) || !_.isUndefined(this.props.segment.alternatives)) &&
+            ( (!_.isUndefined(nextProps.segment.alternatives) && _.isUndefined(this.props.segment.alternatives)) ||
+                !Immutable.fromJS(this.props.segment.alternatives).equals(Immutable.fromJS(nextProps.segment.alternatives)) ) )
     }
 
     render() {
