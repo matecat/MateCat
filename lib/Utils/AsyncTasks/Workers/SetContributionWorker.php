@@ -11,6 +11,7 @@ namespace AsyncTasks\Workers;
 
 use Contribution\ContributionSetStruct;
 use Engine;
+use Exception;
 use INIT;
 use Jobs_JobStruct;
 use TaskRunner\Commons\AbstractElement;
@@ -77,6 +78,11 @@ class SetContributionWorker extends AbstractWorker {
     protected function _execContribution( ContributionSetStruct $contributionStruct ){
 
         $jobStruct = $contributionStruct->getJobStruct();
+
+        if( empty( $jobStruct ) ){
+            throw new Exception( "Job not found. Password changed?" );
+        }
+
 //        $userInfoList = $contributionStruct->getUserInfo();
 //        $userInfo = array_pop( $userInfoList );
 
