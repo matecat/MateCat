@@ -661,4 +661,24 @@ class S3FilesStorage extends AbstractFilesStorage {
     private function getOriginalZipPlaceholder() {
         return str_replace( '#', '', self::ORIGINAL_ZIP_PLACEHOLDER );
     }
+
+    /**
+     **********************************************************************************************
+     * 6. TRANSFER FILES
+     **********************************************************************************************
+     */
+
+    /**
+     * @param string $source
+     * @param string $destination
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function transferFiles( $source, $destination ) {
+        return $this->s3Client->transfer( [
+                'source' => $source,
+                'dest'   => $destination,
+        ] );
+    }
 }
