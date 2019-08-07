@@ -4,8 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title tal:condition="not:isReview">Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
-        <title tal:condition="true:isReview">Revise - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
+        <title tal:content="pageTitle">Page Title</title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
 
         <tal:block  tal:repeat="css_url css_resources">
