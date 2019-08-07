@@ -387,7 +387,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
                 // save on redis the hash map files
                 if ( strpos( $key, '.' ) === false ) {
-                    $hasSet[ $key ] = file( $item->getPathname() );
+                    $hasSet[ $key ] = file( $item->getPathname(), FILE_IGNORE_NEW_LINES );
                 }
 
             }
