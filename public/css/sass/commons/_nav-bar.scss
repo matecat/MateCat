@@ -139,10 +139,10 @@ header {
             -ms-flex-align: center;
             align-items: center;
             background: center/cover transparent;
-            border-radius: 50%;
+            /*border-radius: 50%;*/
             -moz-box-sizing: border-box;
             box-sizing: border-box;
-            color: #fff;
+            /*color: #fff;*/
             display: -webkit-inline-box;
             display: -webkit-inline-flex;
             display: -ms-inline-flexbox;
@@ -154,27 +154,28 @@ header {
             position: relative;
             vertical-align: top;
             float: right;
-            font-size: 14px;
-            height: 36px;
-            width: 36px;
+            /*font-size: 14px;*/
+            /*height: 36px;
+            width: 36px;*/
             margin-left: 10px;
             margin-right: 10px;
             text-decoration: none;
             cursor: pointer;
-            border: 1px dashed;
+            /*border: 1px dashed;*/
             top: 2px;
-            &:hover {
+            padding:0;
+            /*&:hover {
                 border: 1px dashed #09beec !important;
                 i {
                     color: #09beec;
                 }
-            }
+            }*/
         }
 
         .dropdown.select-org {
             background-color: #ffffff;
             border-radius: 5px;
-            min-width: 128px;
+            min-width: 100px;
             color: #000000;
             font-size: 14px;
             padding: 7px 16px;
@@ -225,7 +226,7 @@ header {
 }
 
 .user-teams {
-    padding-right: 52px !important;
+    //padding-right: 52px !important;
     .ui-user-top-image {
         margin-top: 2px;
         float: right;
@@ -250,8 +251,8 @@ header {
         height: 37px;
         background: white;
         float: right;
-        margin-right: 22px;
-        margin-left: 20px;
+        margin-right: 16px;
+        margin-left: 16px;
     }
 }
 
@@ -286,17 +287,15 @@ header {
         border-radius: 5px;
         line-height: 1.25;
         margin-left: 52px;
+        border: none;
     }
-    @media only screen and (min-width: 1208px) {
-        ul {
-            li {
-                a {
-                    font-size: 14px;
-                }
-            }
-        }
 
+    li {
+        a {
+            font-size: 14px !important;
+        }
     }
+
 }
 
 .menu-site-right {

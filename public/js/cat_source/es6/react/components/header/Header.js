@@ -4,6 +4,9 @@ import FilterProjects from "./manage/FilterProjects"
 import TeamConstants from "./../../constants/TeamConstants";
 import TeamsStore from "./../../stores/TeamsStore";
 import IconManage from "../icons/IconManage";
+import IconUserLogout from "../icons/IconUserLogout";
+import IconDown from "../icons/IconDown";
+
 
 class Header extends React.Component {
 	constructor(props) {
@@ -70,7 +73,8 @@ class Header extends React.Component {
 						onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
 		} else {
 			return <div className="ui user-nolog label" onClick={this.openLoginModal.bind(this)} title="Login">
-				<i className="icon-user22"/>
+				{/*<i className="icon-user22"/>*/}
+				<IconUserLogout width={40} height={40} color={'#fff'} />
 			</div>
 
 		}
@@ -116,7 +120,7 @@ class Header extends React.Component {
 
 					<div className={containerClass + " wide right floated right aligned column"}>
 						{userIcon}
-						{!!loggedUser  && <a href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
+						{!!loggedUser && !showFilterProjects && <a href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
 						<div className={"separator"}></div>
 						{!!showFilterProjects && <TeamSelect
 							isManage={showFilterProjects}
