@@ -523,5 +523,15 @@ class FsFilesStorage extends AbstractFilesStorage
     private function link( $source, $destination ) {
         return link( $source, $destination );
     }
+
+    /**
+     **********************************************************************************************
+     * 6. TRANSFER FILES
+     **********************************************************************************************
+     */
+
+    public function transferFiles($source, $destination){
+        // @TODO to implement
+    }
 }
 

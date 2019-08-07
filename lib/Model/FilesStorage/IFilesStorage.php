@@ -202,4 +202,19 @@ interface IFilesStorage {
      * @return string
      */
     public function getOriginalZipDir( $projectDate, $projectID );
+
+    /**
+     **********************************************************************************************
+     * 6. TRANSFER FILES
+     **********************************************************************************************
+     */
+
+    /**
+     * @param string $source
+     * @param string $destination
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function transferFiles($source, $destination);
 }
