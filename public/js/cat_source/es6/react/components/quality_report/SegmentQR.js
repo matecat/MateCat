@@ -23,9 +23,9 @@ class SegmentQR extends React.Component {
 
 
         this.state = {
-            translateDiffOn: false,
-            reviseDiffOn: false,
-            revise2DiffOn: false,
+            translateDiffOn: !_.isNull(this.props.segment.get('last_translation')) && _.isNull(this.props.segment.get('last_revisions')),
+            reviseDiffOn: !_.isNull(this.props.segment.get('last_revisions')) && this.revise && !this.revise2 && !_.isNull(this.props.segment.get('last_translation')),
+            revise2DiffOn: !_.isNull(this.props.segment.get('last_revisions')) && this.revise2 && (this.revise || !_.isNull(this.props.segment.get('last_translation') ) ),
             htmlDiff: "",
             automatedQaOpen: this.props.segment.get('issues').size === 0 && this.props.segment.get('warnings').get('total') > 0 ,
             humanQaOpen: !this.props.secondPassReviewEnabled && this.props.segment.get('issues').size > 0,
@@ -57,6 +57,9 @@ class SegmentQR extends React.Component {
         } else if ( this.state.reviseDiffOn ){
             let revise = this.revise;
             return this.getDiffPatch(this.target, revise);
+        } else if ( this.state.revise2DiffOn ){
+            let source = (this.revise) ? this.revise : this.target;
+            return this.getDiffPatch(source, this.revise2);
         }
     }
     openAutomatedQa() {
@@ -168,7 +171,7 @@ class SegmentQR extends React.Component {
     showRevise2Diff() {
         if (this.state.revise2DiffOn) {
             this.setState({
-                revise2DiffOn: true,
+                revise2DiffOn: false,
             });
         } else {
             let revise2 = this.revise2;
