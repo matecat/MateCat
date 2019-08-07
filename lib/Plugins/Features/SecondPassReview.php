@@ -160,7 +160,7 @@ class SecondPassReview extends BaseFeature {
 
         foreach ( $data['files'] as $file => $content ) {
             foreach( $content['segments'] as $key => $segment ) {
-                $data ['files'] [ $file ] ['segments'] [ $key ] ['revision_number'] = Utils::sourcePageToRevisionNumber(
+                $data ['files'] [ $file ] ['segments'] [ $key ] ['revision_number'] = SecondPassReviewUtils::sourcePageToRevisionNumber(
                         $by_id_segment[ $segment['sid'] ]->source_page
                 );
             }
