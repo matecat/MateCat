@@ -1,5 +1,6 @@
 <?php
 
+use Features\SecondPassReview\Utils as SecondPassReviewUtils;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use Search\ReplaceEventStruct;
 use Search\SearchModel;
@@ -106,7 +107,7 @@ class getSearchController extends ajaxController {
 
         if ( in_array( strtoupper( $this->queryParams->status ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
             if ( !empty( $this->revisionNumber ) ) {
-                $this->queryParams->sourcePage = \Features\SecondPassReview\Utils::revisionNumberToSourcePage( $this->revisionNumber );
+                $this->queryParams->sourcePage = SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
             } else {
                 $this->queryParams->sourcePage = Constants::SOURCE_PAGE_REVISION;
             }
@@ -410,7 +411,7 @@ class getSearchController extends ajaxController {
                     'chunk'             => $chunk,
                     'segment'           => $segment,
                     'user'              => $this->user,
-                    'source_page_code'  => self::getRefererSourcePageCode( $this->featureSet ),
+                    'source_page_code'  => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber),
                     'controller_result' => & $this->result,
                     'features'          => $this->featureSet
             ] );
@@ -436,7 +437,7 @@ class getSearchController extends ajaxController {
                         'chunk'            => $chunk,
                         'segment'          => $segment,
                         'user'             => $this->user,
-                        'source_page_code' => self::getRefererSourcePageCode( $this->featureSet )
+                        'source_page_code' => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
                 ] );
             } catch ( Exception $e ) {
                 Log::doJsonLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );

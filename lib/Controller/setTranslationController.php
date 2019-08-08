@@ -5,6 +5,7 @@ use Contribution\Set;
 use Exceptions\ControllerReturnException;
 use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
+use Features\SecondPassReview\Utils as SecondPassReviewUtils;
 
 class setTranslationController extends ajaxController {
 
@@ -63,6 +64,7 @@ class setTranslationController extends ajaxController {
      * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
      */
     private $VersionsHandler;
+    private $revisionNumber;
 
     public function __construct() {
 
@@ -95,12 +97,14 @@ class setTranslationController extends ajaxController {
                 'context_after'           => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'id_before'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_after'                => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'revision_number'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job   = $this->__postInput[ 'id_job' ];
-        $this->password = $this->__postInput[ 'password' ];
+        $this->id_job         = $this->__postInput[ 'id_job' ];
+        $this->password       = $this->__postInput[ 'password' ];
+        $this->revisionNumber = $this->__postInput[ 'revision_number' ];
 
         /*
          * set by the client, mandatory
@@ -559,7 +563,7 @@ class setTranslationController extends ajaxController {
                 'chunk'             => $this->chunk,
                 'segment'           => $this->segment,
                 'user'              => $this->user,
-                'source_page_code'  => self::getRefererSourcePageCode( $this->featureSet ),
+                'source_page_code'  => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber),
                 'controller_result' => & $this->result,
                 'features'          => $this->featureSet
         ] );
@@ -584,7 +588,7 @@ class setTranslationController extends ajaxController {
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
-                    'source_page_code' => self::getRefererSourcePageCode( $this->featureSet )
+                    'source_page_code' => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             ] );
 
         } catch ( Exception $e ) {
@@ -803,7 +807,7 @@ class setTranslationController extends ajaxController {
                     $this->id_segment,
                     $this->user->uid,
                     $this->jobData[ 'id_project' ],
-                    self::getRefererSourcePageCode( $this->featureSet )
+                    SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             );
         }
     }
@@ -953,7 +957,7 @@ class setTranslationController extends ajaxController {
             $element         = new \TaskRunner\Commons\QueueElement();
             $element->params = $contributionStruct;
             $element->__toString();
-            \Utils::raiseJsonExceptionError( true );
+            Utils::raiseJsonExceptionError( true );
         } catch ( Exception $e ) {
             Log::doJsonLog( $contributionStruct );
         }
