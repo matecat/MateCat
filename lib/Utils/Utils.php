@@ -475,6 +475,9 @@ class Utils {
         return filter_var( $arr, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
     }
 
+    /**
+     * @param $dirPath
+     */
     public static function deleteDir( $dirPath ) {
 
         $iterator = new DirectoryIterator( $dirPath );
@@ -598,10 +601,12 @@ class Utils {
 
     public static function isJobBasedOnMateCatFilters( $jobId ) {
 
+        return true; //TODO refactory on the project creation to store info about which file is converted
+
         try {
 
             $fs    = FilesStorageFactory::create();
-            $files = $fs->getFilesForJob( $jobId, null );
+            $files = $fs->getFilesForJob( $jobId );
             foreach ( $files as $file ) {
                 $fileType = DetectProprietaryXliff::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
                 if ( $fileType[ 'proprietary_short_name' ] !== 'matecat_converter' ) {

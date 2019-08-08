@@ -177,7 +177,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $hashTree = self::composeCachePath( $hash );
 
         return self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] .
-                self::OBJECTS_SAFE_DELIMITER . strtolower( $lang );
+                self::OBJECTS_SAFE_DELIMITER . $lang;
     }
 
     /**
@@ -368,8 +368,8 @@ class S3FilesStorage extends AbstractFilesStorage {
             // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
             $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $uploadSession );
 
-            // Example: aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT --> aad03b600bc4792b3dc4bf3a2d7191327a482d4a__it-it
-            $subPathName = str_replace( '|', self::OBJECTS_SAFE_DELIMITER, strtolower( $iterator->getSubPathName() ) );
+            // Example: aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT --> aad03b600bc4792b3dc4bf3a2d7191327a482d4a__it-IT
+            $subPathName = str_replace( '|', self::OBJECTS_SAFE_DELIMITER, $iterator->getSubPathName() );
 
             $key = $prefix . DIRECTORY_SEPARATOR . $subPathName;
 
@@ -624,7 +624,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return mixed
      */
-    private function getTheLastPartOfKey( $key ) {
+    public function getTheLastPartOfKey( $key ) {
         $explode = explode( DIRECTORY_SEPARATOR, $key );
 
         return end( $explode );

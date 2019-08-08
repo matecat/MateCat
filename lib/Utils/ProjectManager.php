@@ -424,7 +424,7 @@ class ProjectManager {
         //sort files in order to process TMX first
         $sortedFiles      = [];
         $firstTMXFileName = "";
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) { //TODO THIS IS ALWAYS FALSE Refactory file structure
 
             //check for glossary files and tmx and put them in front of the list
             if ( DetectProprietaryXliff::getMemoryFileType() ) {
@@ -494,6 +494,10 @@ class ProjectManager {
             Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
          */
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+
+            if( INIT::$FILE_STORAGE_METHOD == 's3' && DetectProprietaryXliff::isXliffExtension( $fs::pathinfo_fix( $fileName ) ) ){
+                $this->getSingleS3QueueFile( $fileName );
+            }
 
             $forceXliff = $this->features->filter(
                     'forceXLIFFConversion',
@@ -775,37 +779,51 @@ class ProjectManager {
 
         $this->features->run( 'postProjectCommit', $this->projectStructure );
 
-        if ( INIT::$FILE_STORAGE_METHOD === 'fs' ) {
-            try {
+        try {
 
-                Utils::deleteDir( $this->uploadDir );
-                if ( is_dir( $this->uploadDir . '_converted' ) ) {
-                    Utils::deleteDir( $this->uploadDir . '_converted' );
-                }
-
-            } catch ( Exception $e ) {
-
-                $output = "<pre>\n";
-                $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
-                $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-                $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-                $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
-                $output .= "\n\t";
-                $output .= "Aborting...\n";
-                $output .= "</pre>";
-
-                $this->_log( $output );
-
-                Utils::sendErrMailReport( $output, $e->getMessage() );
-
+            if (INIT::$FILE_STORAGE_METHOD === 's3') {
+                \Log::doJsonLog('Deleting folder' . $this->uploadDir . ' from S3');
+                /** @var $fs S3FilesStorage */
+                $fs->deleteQueue( $this->uploadDir );
             }
-        } elseif (INIT::$FILE_STORAGE_METHOD === 's3') {
 
-            \Log::doJsonLog('Deleting folder' . $this->uploadDir . ' from S3');
+            Utils::deleteDir( $this->uploadDir );
+            if ( is_dir( $this->uploadDir . '_converted' ) ) {
+                Utils::deleteDir( $this->uploadDir . '_converted' );
+            }
 
-            /** @var $fs S3FilesStorage */
-            $fs->deleteQueue( $this->uploadDir );
+        } catch ( Exception $e ) {
+
+            $output = "<pre>\n";
+            $output .= " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
+            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+            $output .= " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
+            $output .= "\n\t";
+            $output .= "Aborting...\n";
+            $output .= "</pre>";
+
+            $this->_log( $output );
+
+            Utils::sendErrMailReport( $output, $e->getMessage() );
+
         }
+
+    }
+
+    /**
+     * @param $fileName
+     *
+     * @throws Exception
+     */
+    public function getSingleS3QueueFile( $fileName ) {
+        $fs = FilesStorageFactory::create();
+        /** @var $fs S3FilesStorage */
+        $client = $fs::getStaticS3Client();
+        $params['bucket'] = \INIT::$AWS_STORAGE_BASE_BUCKET;
+        $params['key'] = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName( $fs->getTheLastPartOfKey( $this->uploadDir ) ) . DIRECTORY_SEPARATOR . $fileName;
+        $params[ 'save_as' ] = "$this->uploadDir/$fileName";
+        $client->downloadItem( $params );
     }
 
     /**
@@ -902,15 +920,21 @@ class ProjectManager {
     protected function _pushTMXToMyMemory() {
 
         //TMX Management
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
             $ext = AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
 
             $file = new stdClass();
             if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
+
+                if( INIT::$FILE_STORAGE_METHOD == 's3' ){
+                    $this->getSingleS3QueueFile( $fileName );
+                }
+
                 $file->file_path = "$this->uploadDir/$fileName";
                 $this->tmxServiceWrapper->setName( $fileName );
                 $this->tmxServiceWrapper->setFile( [ $file ] );
+
             }
 
             try {
@@ -924,6 +948,8 @@ class ProjectManager {
                     //don't call the postPushTMX for normal files
                     continue;
                 }
+
+                unset( $this->projectStructure[ 'array_files' ][ $pos ] );
 
             } catch ( Exception $e ) {
 

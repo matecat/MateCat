@@ -266,75 +266,28 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      */
 
     /**
-     *
-     * Used when we get info to download the original file
-     *
-     * @param $id_job
-     * @param $id_file
-     * @param $password
-     *
-     * @return array
-     */
-    public function getOriginalFilesForJob( $id_job, $password ) {
-
-        $query = "SELECT 
-            fj.id_file, 
-            f.filename, 
-            f.id_project, 
-            j.source, 
-            mime_type, 
-            sha1_original_file, 
-            create_date 
-            FROM files_job fj
-            INNER JOIN files f ON f.id = fj.id_file
-            INNER JOIN jobs j ON j.id = fj.id_job
-            WHERE fj.id_job = :id_job 
-            AND j.password = :password
-        ";
-
-        $db   = Database::obtain();
-        $stmt = $db->getConnection()->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute( [ 'id_job' => $id_job, 'password' => $password ] );
-        $results = $stmt->fetchAll();
-
-        foreach ( $results as $k => $result ) {
-            //try fetching from files dir
-            $filePath                            = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
-            $results[ $k ][ 'originalFilePath' ] = $filePath;
-
-            // fix 1 July 2019
-            // remove "\n" from 'filename' and 'mime_type'
-            // @TODO Why do this happen?
-            $results[ $k ][ 'filename' ]  = str_replace( PHP_EOL, '', $results[ $k ][ 'filename' ] );
-            $results[ $k ][ 'mime_type' ] = str_replace( PHP_EOL, '', $results[ $k ][ 'mime_type' ] );
-        }
-
-        return $results;
-    }
-
-    /**
      * Used when we take the files after the translation ( Download )
      *
-     * @param $id_job
-     * @param $id_file
+     * @param int  $id_job
+     * @param bool $getXliffPath
      *
      * @return array
      */
-    public function getFilesForJob( $id_job ) {
+    public function getFilesForJob( $id_job, $getXliffPath = true ) {
 
         $query = "SELECT 
-              fj.id_file, 
-              f.filename, 
-              f.id_project, 
-              j.source, 
+              files_job.id_file, 
+              files.filename, 
+              files.id_project, 
+              jobs.source, 
               mime_type, 
-              sha1_original_file 
-            FROM files_job fj
-            JOIN files f ON f.id = fj.id_file
-            JOIN jobs AS j ON j.id = fj.id_job
-            WHERE fj.id_job = :id_job 
-            GROUP BY id_file";
+              sha1_original_file,
+              jobs.create_date
+            FROM files_job
+            JOIN files ON files.id = files_job.id_file
+            JOIN jobs ON jobs.id = files_job.id_job
+            WHERE files_job.id_job = :id_job 
+            GROUP BY files_job.id_file";
 
         $db   = Database::obtain();
         $stmt = $db->getConnection()->prepare( $query );
@@ -346,13 +299,32 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             //try fetching from files dir
             $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
 
-            //note that we trust this to succeed on first try since, at this stage, we already built the file package
-            $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
-
             if( !empty( $originalPath ) ){
                 $results[ $k ][ 'originalFilePath' ] = $originalPath;
+            }
+
+            //we MUST have originalFilePath
+            if( $getXliffPath ){
+
+                //note that we trust this to succeed on first try since, at this stage, we already built the file package
+                $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
+
+                //when we ask for XliffPath ( $getXliffPath == true ) we are downloading translations
+                // if original file path is empty means that the file was already a supported xliff type ( ex: trados sdlxliff )
+                //use the xliff as original
+                if( empty( $originalPath ) ){
+                    $results[ $k ][ 'originalFilePath' ] = $results[ $k ][ 'xliffFilePath' ];
+                }
+
             } else {
-                $results[ $k ][ 'originalFilePath' ] = $results[ $k ][ 'xliffFilePath' ];
+
+                //when we do NOT ask for XliffPath ( $getXliffPath == false ) we are downloading original
+                // if original file path is empty means that the file was already a supported xliff type ( ex: trados sdlxliff )
+                //// get the original xliff
+                if( empty( $originalPath ) ){
+                    $results[ $k ][ 'originalFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
+                }
+
             }
 
             $results[ $k ][ 'filename' ]  = trim( $results[ $k ][ 'filename' ] );

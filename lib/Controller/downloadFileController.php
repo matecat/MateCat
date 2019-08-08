@@ -95,7 +95,7 @@ class downloadFileController extends downloadController {
 
         //get storage object
         $fs        = FilesStorageFactory::create();
-        $files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
+        $files_job = $fs->getFilesForJob( $this->id_job );
 
         $output_content = [];
 
