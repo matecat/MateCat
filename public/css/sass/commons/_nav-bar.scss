@@ -77,12 +77,13 @@ header {
             }
             .scrolling {
                 .item.item.item {
-                    padding-right: 40px !important;
+                    padding: 4px 8px !important;
                     width: 230px;
                     min-width: 150px;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+
                     &:hover .team-filter,
                     &.active.selected .team-filter{
                         visibility: visible;
@@ -96,7 +97,7 @@ header {
         }
         .ui.selection.visible.dropdown > .text:not(.default),
         .ui.select-org.visible.dropdown > .text:not(.default) {
-            font-weight: 600;
+            /*font-weight: 600;*/
             //color: white;
         }
         .ui.user.label {
@@ -175,7 +176,7 @@ header {
         .dropdown.select-org {
             background-color: #ffffff;
             border-radius: 5px;
-            min-width: 100px;
+            min-width: 108px;
             color: #000000;
             font-size: 14px;
             padding: 7px 16px;
@@ -185,6 +186,48 @@ header {
             grid-template-columns: auto 16px;
             align-items: center;
             grid-template-rows: 28px;
+
+            .item {
+                display: grid;
+                grid-template-columns: auto;
+                align-items: center;
+                grid-template-rows: 28px;
+
+                .item-info {
+                    display: grid;
+                    grid-template-columns: 1fr 24px;
+                    align-items: center;
+                    grid-template-rows: 28px;
+                    padding: 0 0 0 6px;
+                }
+
+                &.selected {
+                    .item-info {
+                        display: grid;
+                        grid-template-columns: 1fr 24px;
+                        align-items: center;
+                        grid-template-rows: 28px;
+                        background: #002b5c;
+                        padding: 0 0 0 6px;
+                        color: #fff;
+                        border-radius: 5px;
+
+                        svg {
+                            path {
+                                fill: #fff;
+                            }
+                        }
+                    }
+                }
+                a{
+                    display: block;
+                    max-height: 20px;
+                    .icon {
+                        margin:0 !important;
+                        padding:0;
+                    }
+                }
+            }
 
             i.dropdown.icon {
                 top: 12px;
@@ -203,8 +246,8 @@ header {
                 font-weight: 100;
             }
 
-            span.icon {
-                padding: 8px 0 0 0;
+            div.icon{
+                padding: 6px 0 0 0;
             }
 
             &:hover span.text {
