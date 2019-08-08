@@ -1532,7 +1532,7 @@ UI = {
             labelDownloading = 'OPENING FILES...';
         }
         button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
-        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        APP.fitText($('.breadcrumbs'), $('#pname'), 42);
 
     },
 
@@ -2583,5 +2583,5 @@ $(document).ready(function() {
 
 $(window).resize(function() {
     // UI.fixHeaderHeightChange();
-    APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+    APP.fitText($('.breadcrumbs'), $('#pname'), 50);
 });

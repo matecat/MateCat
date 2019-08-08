@@ -418,7 +418,7 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
-		$("#pname").on('click', function(e) {
+		$(".file-list").on('click', function(e) {
 			UI.closeAllMenus(e);
 			e.preventDefault();
 			UI.toggleFileMenu();
@@ -448,7 +448,7 @@ $.extend(UI, {
 				UI.scrollSegment(UI.currentSegment);
 			}
 		});
-		
+
 		//search
 
         if (!this.segmentToScrollAtRender)

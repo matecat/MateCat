@@ -15,7 +15,7 @@ $.extend(UI, {
         UI.setShortcuts();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
-            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+            APP.fitText($('.breadcrumbs'), $('#pname'), 50);
         });
         setBrowserHistoryBehavior();
         $("article").each(function() {
@@ -70,7 +70,7 @@ $.extend(UI, {
         this.offline = false;
 
 		if (SearchUtils.searchEnabled)
-            $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
+            $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 50) } );
 		setTimeout(function() {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);
