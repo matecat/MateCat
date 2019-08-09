@@ -33,8 +33,12 @@ header {
             .menu {
                 .header {
                     font-size: 14px;
-                    margin: 0px;
-                    padding: 15px;
+                    display: grid;
+                    grid-template-columns: 1fr 40px;
+                    grid-template-rows: 28px;
+                    align-items: center;
+                    margin: 0;
+                    padding: 8px;
                     cursor: pointer;
                     color: #09beec;
                     &:hover {
@@ -195,36 +199,44 @@ header {
 
                 .item-info {
                     display: grid;
-                    grid-template-columns: 1fr 24px;
+                    grid-template-columns: 1fr 40px;
                     align-items: center;
                     grid-template-rows: 28px;
                     padding: 0 0 0 6px;
-                }
-
-                &.selected {
-                    .item-info {
-                        display: grid;
-                        grid-template-columns: 1fr 24px;
-                        align-items: center;
-                        grid-template-rows: 28px;
-                        background: #002b5c;
-                        padding: 0 0 0 6px;
-                        color: #fff;
-                        border-radius: 5px;
-
-                        svg {
-                            path {
-                                fill: #fff;
+                    .icon {
+                        margin:0 !important;
+                        padding: 0px 8px;
+                        a {
+                            display: grid;
+                            padding: 0 4px;
+                            height: 24px;
+                            justify-content: center;
+                            align-items: center;
+                            &:hover {
+                                background: rgba(0, 0, 0, 0.03);
+                                border-radius: 50px;
+                            }
+                            svg {
+                                path {
+                                  fill: #0099cc;
+                                }
                             }
                         }
                     }
                 }
-                a{
-                    display: block;
-                    max-height: 20px;
-                    .icon {
-                        margin:0 !important;
-                        padding:0;
+
+                &.selected {
+                    .item-info {
+                        color: #fff;
+                        border-radius: 5px;
+                        background: #002b5c;
+                        a {
+                            svg {
+                                path {
+                                    fill: #fff;
+                                }
+                            }
+                        }
                     }
                 }
             }

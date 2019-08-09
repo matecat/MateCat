@@ -159,8 +159,7 @@ class TeamsSelect extends React.Component {
 				dontShowCursorClass = '';
 				addTeam = <div className="header" onClick={openCreateTeams}>Create New Team
 					<a className="team-filter button show">
-						<i className="icon-plus3 icon"/>
-						{/* Todo: insert icon*/}
+						<span className={"icon"}><i className="icon-plus3 icon"/></span>
 					</a>
 				</div>
 			}
