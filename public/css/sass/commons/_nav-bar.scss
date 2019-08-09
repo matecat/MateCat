@@ -33,8 +33,12 @@ header {
             .menu {
                 .header {
                     font-size: 14px;
-                    margin: 0px;
-                    padding: 15px;
+                    display: grid;
+                    grid-template-columns: 1fr 40px;
+                    grid-template-rows: 28px;
+                    align-items: center;
+                    margin: 0;
+                    padding: 8px;
                     cursor: pointer;
                     color: #09beec;
                     &:hover {
@@ -77,12 +81,13 @@ header {
             }
             .scrolling {
                 .item.item.item {
-                    padding-right: 40px !important;
+                    padding: 4px 8px !important;
                     width: 230px;
                     min-width: 150px;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+
                     &:hover .team-filter,
                     &.active.selected .team-filter{
                         visibility: visible;
@@ -96,7 +101,7 @@ header {
         }
         .ui.selection.visible.dropdown > .text:not(.default),
         .ui.select-org.visible.dropdown > .text:not(.default) {
-            font-weight: 600;
+            /*font-weight: 600;*/
             //color: white;
         }
         .ui.user.label {
@@ -139,10 +144,10 @@ header {
             -ms-flex-align: center;
             align-items: center;
             background: center/cover transparent;
-            border-radius: 50%;
+            /*border-radius: 50%;*/
             -moz-box-sizing: border-box;
             box-sizing: border-box;
-            color: #fff;
+            /*color: #fff;*/
             display: -webkit-inline-box;
             display: -webkit-inline-flex;
             display: -ms-inline-flexbox;
@@ -154,35 +159,87 @@ header {
             position: relative;
             vertical-align: top;
             float: right;
-            font-size: 14px;
-            height: 36px;
-            width: 36px;
+            /*font-size: 14px;*/
+            /*height: 36px;
+            width: 36px;*/
             margin-left: 10px;
             margin-right: 10px;
             text-decoration: none;
             cursor: pointer;
-            border: 1px dashed;
+            /*border: 1px dashed;*/
             top: 2px;
-            &:hover {
+            padding:0;
+            /*&:hover {
                 border: 1px dashed #09beec !important;
                 i {
                     color: #09beec;
                 }
-            }
+            }*/
         }
 
         .dropdown.select-org {
             background-color: #ffffff;
             border-radius: 5px;
-            min-width: 128px;
+            min-width: 108px;
             color: #000000;
             font-size: 14px;
-            padding: 8px 16px;
-            float: right;
+            padding: 7px 16px;
+            float: left;
             margin-left: 10px;
             display: grid;
             grid-template-columns: auto 16px;
             align-items: center;
+            grid-template-rows: 28px;
+
+            .item {
+                display: grid;
+                grid-template-columns: auto;
+                align-items: center;
+                grid-template-rows: 28px;
+
+                .item-info {
+                    display: grid;
+                    grid-template-columns: 1fr 40px;
+                    align-items: center;
+                    grid-template-rows: 28px;
+                    padding: 0 0 0 6px;
+                    .icon {
+                        margin:0 !important;
+                        padding: 0px 8px;
+                        a {
+                            display: grid;
+                            padding: 0 4px;
+                            height: 24px;
+                            justify-content: center;
+                            align-items: center;
+                            &:hover {
+                                background: rgba(0, 0, 0, 0.03);
+                                border-radius: 50px;
+                            }
+                            svg {
+                                path {
+                                  fill: #0099cc;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                &.selected {
+                    .item-info {
+                        color: #fff;
+                        border-radius: 5px;
+                        background: #002b5c;
+                        a {
+                            svg {
+                                path {
+                                    fill: #fff;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             i.dropdown.icon {
                 top: 12px;
@@ -201,8 +258,8 @@ header {
                 font-weight: 100;
             }
 
-            span.icon {
-                padding: 8px 0 0 0;
+            div.icon{
+                padding: 6px 0 0 0;
             }
 
             &:hover span.text {
@@ -224,7 +281,7 @@ header {
 }
 
 .user-teams {
-    padding-right: 0px !important;
+    //padding-right: 52px !important;
     .ui-user-top-image {
         margin-top: 2px;
         float: right;
@@ -243,6 +300,15 @@ header {
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+    .separator {
+        width: 1px;
+        height: 37px;
+        background: white;
+        float: right;
+        margin-right: 16px;
+        margin-left: 16px;
+    }
 }
 
 
@@ -259,21 +325,32 @@ header {
 }
 
 #menu-site {
-    margin-top: 8px !important;
+    /*margin-top: 8px !important;*/
     float: right !important;
     margin-right: 12px;
+    /*
     border-right: 1px solid #8a8a8a;
-    height: 22px;
-    @media only screen and (min-width: 1208px) {
-        ul {
-            li {
-                a {
-                    font-size: 14px;
-                }
-            }
-        }
-
+    */
+    /*height: 22px;*/
+    .btn {
+        background: #fff;
+        color: #002b5c;
+        font-size: 16px;
+        width:152px;
+        text-align: center;
+        max-height: 40px;
+        border-radius: 5px;
+        line-height: 1.25;
+        margin-left: 52px;
+        border: none;
     }
+
+    li {
+        a {
+            font-size: 14px !important;
+        }
+    }
+
 }
 
 .menu-site-right {

@@ -3,6 +3,8 @@ import ManageConstants from "./../../constants/ManageConstants";
 import TeamsStore from "./../../stores/TeamsStore";
 import IconTick from "../icons/IconTick";
 import IconDown from "../icons/IconDown";
+import IconUserLogout from "../icons/IconUserLogout";
+import IconSettings from "../icons/IconSettings";
 
 class TeamsSelect extends React.Component {
 	constructor(props) {
@@ -127,23 +129,29 @@ class TeamsSelect extends React.Component {
 										data-text={team.get('name')}
 										key={'team' + team.get('name') + team.get('id')}
 										onClick={(e) => changeTeamHandler(e, team)}>
-						{team.get('name')}
-						{iconModal}
+						<div className={"item-info"}>
+							<span className={"text"}>{team.get('name')}</span>
+							<span className={"icon"}>{iconModal}</span>
+						</div>
 					</div>;
 					return;
 				}
 				if (showModals && team.get('type') !== 'personal') {
 					iconModal = <a className="team-filter button show right"
 								   onClick={(e) => openModifyTeam(e, team)}>
-						<i className="icon-settings icon"/>
+						{/*<i className="icon-settings icon"/>*/}
+						<IconSettings width={16} height={16} color={'#0099CC'} />
 					</a>
 				}
 				return <div className="item" data-value={team.get('id')}
 							data-text={team.get('name')}
 							key={'team' + team.get('name') + team.get('id')}
 							onClick={(e) => changeTeamHandler(e, team)}>
-					{team.get('name')}
-					{iconModal}
+					<div className={"item-info"}>
+						<span className={"text"}>{team.get('name')}</span>
+						<span className={"icon"}>{iconModal}</span>
+					</div>
+
 				</div>
 			});
 			let addTeam = '';
@@ -151,8 +159,7 @@ class TeamsSelect extends React.Component {
 				dontShowCursorClass = '';
 				addTeam = <div className="header" onClick={openCreateTeams}>Create New Team
 					<a className="team-filter button show">
-						<i className="icon-plus3 icon"/>
-						{/* Todo: insert icon*/}
+						<span className={"icon"}><i className="icon-plus3 icon"/></span>
 					</a>
 				</div>
 			}
@@ -161,7 +168,7 @@ class TeamsSelect extends React.Component {
 				<input type="hidden" name="team" className="team-dd"/>
 
 				<span className="text">Choose Team</span>
-				<span className="icon">{dropdownIcon}</span>
+				<div className="icon">{dropdownIcon}</div>
 				<div className="menu">
 					{addTeam}
 					{showModals ? (
