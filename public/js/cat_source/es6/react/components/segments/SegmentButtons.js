@@ -63,7 +63,7 @@ class SegmentButton extends React.Component {
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
                        onClick={(event)=>this.clickOnApprovedButton(event)}
-                       className={"btn next-unapproved "+ classDisable + className } data-segmentid={'segment-' + this.props.segment.sid}
+                       className={"btn next-unapproved "+ classDisable + " "+ className } data-segmentid={'segment-' + this.props.segment.sid}
                        title="Revise and go to next translated"> A+>>
                     </a>
                     <p>
@@ -75,7 +75,7 @@ class SegmentButton extends React.Component {
         currentButton = <li><a id={'segment-' + this.props.segment.sid + '-button-translated'}
                                data-segmentid={'segment-' + this.props.segment.sid}
                                onClick={(event)=>this.clickOnApprovedButton(event)}
-                               className={'approved ' + classDisable + className} > {config.status_labels.APPROVED} </a><p>
+                               className={'approved ' + classDisable + " " + className} > {config.status_labels.APPROVED} </a><p>
             {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
         </p></li>;
 

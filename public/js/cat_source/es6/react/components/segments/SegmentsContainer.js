@@ -130,13 +130,14 @@ class SegmentsContainer extends React.Component {
         return collectionType;
     }
 
-    getSegment(segment, currentFileId, collectionTypeSeparator) {
+    getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
         let isReviewExtended = !!(this.props.isReviewExtended);
 
 
         let item = <Segment
             key={segment.sid}
             segment={segment}
+            segImmutable={segImmutable}
             timeToEdit={this.state.timeToEdit}
             fid={this.props.fid}
             isReview={this.props.isReview}
@@ -190,7 +191,7 @@ class SegmentsContainer extends React.Component {
                     this.segmentsWithCollectionType.push(segment.sid);
                 }
             }
-            let item = this.getSegment(segment, currentFileId, collectionTypeSeparator);
+            let item = this.getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator);
             currentFileId = segment.id_file;
         items.push(item);
         });
@@ -234,7 +235,7 @@ class SegmentsContainer extends React.Component {
         let commentsPadding = this.getCommentsPadding(index, segment);
         if (segment.get('opened')) {
             let $segment= $('#segment-' + segment.get('sid'));
-            if ( ($segment.length && $segment.hasClass('opened')) || this.lastOpenedHeight ) {
+            if ( ($segment.length && $segment.hasClass('opened')) || ($segment.length === 0 && this.lastOpenedHeight) ) {
                 itemHeight = ($segment.length) ? $segment.outerHeight() + 20 :  this.lastOpenedHeight;
                 this.lastOpenedHeight = itemHeight
             }
@@ -263,10 +264,13 @@ class SegmentsContainer extends React.Component {
             itemHeight = itemHeight + 35;
         }
         let height = itemHeight + commentsPadding;
-        this.segmentsHeightsMap[segment.get('sid')] = {
-            segment : segment,
-            height : height
-        };
+
+        if ( !segment.get('opened') ) {
+            this.segmentsHeightsMap[segment.get('sid')] = {
+                segment : segment,
+                height : height
+            };
+        }
         return height;
     }
 
@@ -314,9 +318,12 @@ class SegmentsContainer extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if ( this.state.scrollTo !== null && this.state.segments.size > 0 ) {
-            this.setState({
-                scrollTo: null
-            })
+            setTimeout(()=>{
+                this.setState({
+                    scrollTo: null
+                });
+            });
+
         }
     }
 

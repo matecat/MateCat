@@ -100,31 +100,10 @@ class Editarea extends React.Component {
         }
     }
 
-    // emitTrackChanges(){
-	// 	if ( Review.enabled() && ( ReviewSimple.enabled() || ReviewExtended.enabled() || ReviewExtendedFooter.enabled() ) ){
-	// 		UI.trackChanges(this.editAreaRef);
-	// 	}
-    //     //check if the translation is changed
-    //     // const   value = htmlEncode(UI.prepareTextToSend($(this.editAreaRef).html())),
-    //     //     status = (value !== htmlEncode(UI.prepareTextToSend(this.props.translation)));
-    //     // if( this.props.segment.modified !== status ){
-    //     //     SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.fid,status);
-    //     // }
-	// }
 
-	checkEmptyText() {
-        let text = this.editAreaRef.innerText;
-        if (text === "") {
-            this.props.disableButtons(true);
-        } else {
-            this.props.disableButtons(false);
-        }
-    }
 
     onInputEvent(e) {
         if (!this.keyPressed && !this.compositionsStart) {
-            this.checkEmptyText();
-            // this.emitTrackChanges();
             UI.registerQACheck();
             if ( !this.props.segment.modified ) {
                 SegmentActions.modifiedTranslation(UI.getSegmentId( UI.currentSegment ),UI.getSegmentFileId(UI.currentSegment),true, this.editAreaRef.innerHTML);
@@ -135,17 +114,10 @@ class Editarea extends React.Component {
 
     onKeyDownEvent(e) {
         this.keyPressed = true;
-        //on textarea the event of ctrz+z have a preventDefault.
-		//We added this lines for fix the bug
-		//TODO:delete preventDefault on ui.events.js
-		// if (e.keyCode === 90 && (e.ctrlKey || e.metaKey) ) {
-		// 	this.emitTrackChanges();
-		// }
         UI.keydownEditAreaEventHandler.call(this.editAreaRef, e);
     }
     onKeyPressEvent(e) {
         UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e, this.props.segment.sid);
-		// this.emitTrackChanges();
     }
     onKeyUpEvent(e) {
         this.keyPressed = false;
@@ -279,16 +251,8 @@ class Editarea extends React.Component {
         }
     }
 
-    componentWillUpdate(e){
-        try {
-            if (this.props.segment.opened) {
-                this.cursorPosition = this.saveCursorPosition(this.editAreaRef);
-            }
-        } catch ( e ) {
-            console.log("Error saving cursor position in EditArea component", e)
-        }
-    }
     componentDidMount() {
+        Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
     }
@@ -301,9 +265,6 @@ class Editarea extends React.Component {
             setTimeout(()=>SegmentActions.replaceEditAreaTextContent(sid, null, textToSend), 200);
         }
     }
-    componentWillMount() {
-        Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;
-    }
     shouldComponentUpdate(nextProps, nextState) {
         return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
             nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation ||
@@ -311,8 +272,21 @@ class Editarea extends React.Component {
             || nextProps.segment.muted !== this.props.segment.muted
         ) && !this.editAreaIsEditing
     }
-    componentDidUpdate() {
-        console.log("Update Segment EditArea" + this.props.segment.sid);
+    getSnapshotBeforeUpdate(prevProps) {
+        try {
+            if (this.props.segment.opened) {
+                this.cursorPosition = this.saveCursorPosition(this.editAreaRef);
+            }
+        } catch ( e ) {
+            console.log("Error saving cursor position in EditArea component", e)
+        }
+        return !prevProps.segment.opened && this.props.segment.opened;
+
+    }
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (snapshot) {
+            this.editAreaRef.focus();
+        }
         if (this.cursorPosition) {
             try {
                 if (this.props.segment.opened) {
@@ -322,20 +296,15 @@ class Editarea extends React.Component {
                 console.log("Error restoring cursor position in EditArea component", e)
             }
         }
-        this.checkEmptyText();
-        // setTimeout(function (  ) {
-        //     if ( !_.isNull(self.editAreaRef) ) {
-        //         self.emitTrackChanges();
-        //     }
-        // });
-        focusOnPlaceholder();
+
+        focusOnPlaceholder(); //??
     }
     render() {
         let lang = '';
         let readonly = false;
         if (this.props.segment){
             lang = config.target_rfc.toLowerCase();
-            readonly = ((this.props.readonly) || this.props.locked || this.props.segment.muted);
+            readonly = (this.props.readonly || this.props.locked || this.props.segment.muted || !this.props.segment.opened);
         }
         let classes = this.state.editAreaClasses.slice();
         if (this.props.locked || this.props.readonly) {

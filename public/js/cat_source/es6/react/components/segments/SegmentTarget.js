@@ -20,7 +20,6 @@ class SegmentTarget extends React.Component {
             originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
                 : this.props.segment.translation),
             showTagsMenu: false,
-            buttonsDisabled: false
         };
         this.replaceTranslation = this.replaceTranslation.bind(this);
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
@@ -109,11 +108,6 @@ class SegmentTarget extends React.Component {
 
     allowHTML(string) {
         return {__html: string};
-    }
-
-    changeButtonsVisibility(visibility) {
-        if (this.state.buttonsDisabled !== visibility)
-            this.setState({buttonsDisabled: visibility})
     }
 
     sendTranslationUpdate() {
@@ -208,7 +202,6 @@ class SegmentTarget extends React.Component {
                     translation={translation}
                     locked={this.props.locked}
                     readonly={this.props.readonly}
-                    disableButtons={this.changeButtonsVisibility.bind(this)}
                     sendTranslationWithoutUpdate={this.sendTranslationWithoutUpdate.bind(this)}
                 />
                 { this.state.showTagsMenu ? (
@@ -286,9 +279,12 @@ class SegmentTarget extends React.Component {
 
     render() {
         let translation = this.props.segment.decoded_translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
-
+        let buttonsDisabled = false;
         translation = this.markTranslation(translation);
 
+        if (translation === "") {
+            buttonsDisabled = true;
+        }
 
         return (
             <div className="target item" id={"segment-" + this.props.segment.sid + "-target"} ref={(target)=>this.target=target}>
@@ -297,7 +293,7 @@ class SegmentTarget extends React.Component {
                 <p className="warnings"/>
 
                 <SegmentButtons
-                    disabled={this.state.buttonsDisabled}
+                    disabled={buttonsDisabled}
                     {...this.props}
                     updateTranslation={this.sendTranslationUpdate.bind(this)}
                 />

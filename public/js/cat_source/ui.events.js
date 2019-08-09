@@ -332,9 +332,7 @@ $.extend(UI, {
 			UI.formatSelection('lowercase');
 		}).on('mousedown', '.editToolbar .capitalize', function() {
 			UI.formatSelection('capitalize');
-		}).on('mouseup', '.editToolbar li', function() {
-			restoreSelection();
-        }).on('click', '.editor .source .locked,.editor .editarea .locked, ' +
+		}).on('click', '.editor .source .locked,.editor .editarea .locked, ' +
             '.editor .source .locked a,.editor .editarea .locked a', function(e) {
             e.preventDefault();
             e.stopPropagation();

@@ -56,7 +56,8 @@ class Segment extends React.Component {
             showRevisionPanel: this.props.segment.openIssues,
             selectedTextObj: null,
             showActions: false
-        }
+        };
+        this.timeoutScroll;
     }
 
     openSegment() {
@@ -467,7 +468,7 @@ class Segment extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         return (
-            !Immutable.fromJS(nextProps.segment).equals(Immutable.fromJS(this.props.segment)) ||
+            !nextProps.segImmutable.equals(this.props.segImmutable) ||
             !Immutable.fromJS(nextState.segment_classes).equals(Immutable.fromJS(this.state.segment_classes)) ||
             nextState.autopropagated !== this.state.autopropagated ||
             nextState.showTranslationIssues !== this.state.showTranslationIssues ||
@@ -482,20 +483,11 @@ class Segment extends React.Component {
     getSnapshotBeforeUpdate(prevProps, prevState) {
         if (!prevProps.segment.opened && this.props.segment.opened) {
             //UI.scrollSegment($(this.section), this.props.segment.sid);
-            setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},0);
+            this.timeoutScroll = setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},200);
             setTimeout(()=>{UI.setCurrentSegment()},0);
+        } else if (prevProps.segment.opened && !this.props.segment.opened) {
+            clearTimeout(this.timeoutScroll);
         }
-        // //check if this segment is in closing
-        // if (prevProps.segment.opened && !this.props.segment.opened) {
-        //     //check if this segment require setTranslation
-        //     if (!prevProps.isReview && prevProps.segment.modified && prevProps.segment.status === "DRAFT") {
-        //         UI.setTranslation({
-        //             id_segment: UI.getSegmentId($(this.section)),
-        //             status: 'DRAFT' ,
-        //             caller: 'autosave'
-        //         });
-        //     }
-        // }
         return null;
     }
 
@@ -508,7 +500,7 @@ class Segment extends React.Component {
             this.secondPassLocked;
         let segment_classes = this.checkSegmentClasses();
         let split_group = this.props.segment.split_group || [];
-        let autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
+        let autoPropagable = (this.props.segment.repetitions_in_chunk !== "1");
         let originalId = this.props.segment.sid.split('-')[0];
 
         if ( this.props.timeToEdit ) {
@@ -516,8 +508,8 @@ class Segment extends React.Component {
             this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2];
         }
 
-        let start_job_marker = this.props.segment.sid == config.first_job_segment;
-        let end_job_marker = this.props.segment.sid == config.last_job_segment;
+        let start_job_marker = this.props.segment.sid === config.first_job_segment;
+        let end_job_marker = this.props.segment.sid === config.last_job_segment;
         if (start_job_marker) {
             job_marker = <span className={"start-job-marker"}/>;
         } else if ( end_job_marker) {
