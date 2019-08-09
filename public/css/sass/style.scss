@@ -4999,3 +4999,111 @@ section .segment-side-buttons {
 input#markAsCompleteButton[disabled] {
     background: #d7d7d8;
 }
+
+/* Header Restyling */
+
+
+/*header .wrapper {
+    width: 100%;
+    background: #002b5c;
+    height: 77px;
+    display: grid;
+    grid-template-columns: 170px auto auto 64px;
+    padding: 0 20px;
+    align-content: center;
+    box-sizing: border-box;
+}*/
+
+header .wrapper {
+    grid-template-columns: 200px auto auto 148px;
+    align-items: center;
+}
+
+$icon-scale : 36px;
+
+.logo-menu {
+    display: grid;
+    align-items:center;
+    justify-content: center;
+
+    .logo {
+        margin-top:0;
+    }
+}
+
+.action-menu {
+    display: grid;
+    grid-template-columns: repeat(8, auto);
+    grid-template-rows: $icon-scale;
+    align-items:center;
+    justify-content: right;
+    column-gap: 12px;
+
+
+    a {
+        display: grid;
+        align-items:center;
+        grid-template-columns: $icon-scale;
+        grid-template-rows: $icon-scale;
+        position: relative;
+
+        img {
+            width: $icon-scale;
+        }
+
+        .badge {
+            position: absolute;
+            top: 4%;
+            padding: 4% 16%;
+            right: -4%;
+            background: #e02020;
+            color: #fff;
+            font-size: 10px;
+            text-align: center;
+            border-radius: 25px;
+            vertical-align: middle;
+            line-height: 16px;
+        }
+
+        /* Todo: icon export size 42 to remove rules */
+        img#icon-settings {
+            width:26px;
+            margin-left: 8px;
+        }
+    }
+}
+
+.profile-menu {
+    display: grid;
+    grid-template-columns: auto auto 0.5fr;
+    align-items: center;
+    justify-content: left;
+
+    a {
+        display: grid;
+        align-items:center;
+        grid-template-columns: $icon-scale;
+        grid-template-rows: $icon-scale;
+
+        img {
+            width: $icon-scale;
+        }
+    }
+
+    .column-separator {
+        width: 1px;
+        height:$icon-scale;
+        background: #fff;
+        margin-right: 24px;
+        margin-left: 12px;
+    }
+
+    .user-menu-container {
+        padding-top:0;
+        img {
+            margin-top:0;
+        }
+    }
+}
+
+
