@@ -529,7 +529,7 @@ class ProjectManager {
 
                 // NOTE: 12 Aug 2019
                 // I am not absolute sure that the queue file exists,
-                // so I check it and in negative case I force the download of the file to fs form S3
+                // so I check it and in negative case I force the download of the file to file system from S3
                 if ( INIT::$FILE_STORAGE_METHOD == 's3' and false === file_exists($filePathName)) {
                     $this->getSingleS3QueueFile( $filePathName );
                 }
