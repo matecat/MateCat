@@ -711,7 +711,9 @@ class ProjectManager {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
-                $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
+                if( INIT::$FILE_STORAGE_METHOD != 's3' ){
+                    $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
+                }
             } elseif ( $e->getCode() == -4 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -7,
