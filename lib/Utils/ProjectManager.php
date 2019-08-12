@@ -527,6 +527,13 @@ class ProjectManager {
                 //get file
                 $filePathName = "$this->uploadDir/$fileName";
 
+                // NOTE: 12 Aug 2019
+                // I am not absolute sure that the queue file exists,
+                // so I check it and in negative case I force the download of the file to fs form S3
+                if ( INIT::$FILE_STORAGE_METHOD == 's3' and false === file_exists($filePathName)) {
+                    $this->getSingleS3QueueFile( $filePathName );
+                }
+
                 //calculate hash + add the fileName, if i load 3 equal files with the same content
                 // they will be squashed to the last one
                 $sha1 = sha1_file( $filePathName );
