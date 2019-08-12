@@ -112,6 +112,7 @@ class ProjectManager {
                             'private_tm_pass'              => null,
                             'uploadToken'                  => null,
                             'array_files'                  => [], //list of file names
+                            'array_files_meta'             => [], //list of file names
                             'file_id_list'                 => [],
                             'source_language'              => null,
                             'target_language'              => null,
@@ -493,25 +494,31 @@ class ProjectManager {
 
             Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
          */
+
+        $i = 0;
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            if( INIT::$FILE_STORAGE_METHOD == 's3' && DetectProprietaryXliff::isXliffExtension( $fs::pathinfo_fix( $fileName ) ) ){
-                $this->getSingleS3QueueFile( $fileName );
-            }
+//            if( INIT::$FILE_STORAGE_METHOD == 's3' && DetectProprietaryXliff::isXliffExtension( $fs::pathinfo_fix( $fileName ) ) ){
+//                $this->getSingleS3QueueFile( $fileName );
+//            }
+//
+//            $forceXliff = $this->features->filter(
+//                    'forceXLIFFConversion',
+//                    INIT::$FORCE_XLIFF_CONVERSION,
+//                    ( isset( $this->projectStructure[ 'userIsLogged' ] ) && $this->projectStructure[ 'userIsLogged' ] ),
+//                    "$this->uploadDir/$fileName"
+//            );
+//
+//            /*
+//               Conversion Enforce
+//               Checking Extension is no more sufficient, we want check content
+//               $enforcedConversion = true; //( if conversion is enabled )
+//             */
+//            $mustBeConverted = $this->fileMustBeConverted( "$this->uploadDir/$fileName", $forceXliff );
 
-            $forceXliff = $this->features->filter(
-                    'forceXLIFFConversion',
-                    INIT::$FORCE_XLIFF_CONVERSION,
-                    ( isset( $this->projectStructure[ 'userIsLogged' ] ) && $this->projectStructure[ 'userIsLogged' ] ),
-                    "$this->uploadDir/$fileName"
-            );
-
-            /*
-               Conversion Enforce
-               Checking Extension is no more sufficient, we want check content
-               $enforcedConversion = true; //( if conversion is enabled )
-             */
-            $mustBeConverted = $this->fileMustBeConverted( "$this->uploadDir/$fileName", $forceXliff );
+            // get corresponding meta
+            $meta = $this->projectStructure['array_files_meta'][$i];
+            $mustBeConverted = $meta['mustBeConverted'];
 
             //if it's one of the listed formats or conversion is not enabled in first place
             if ( !$mustBeConverted ) {
@@ -546,6 +553,8 @@ class ProjectManager {
                 $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
                 unset( $sha1 );
             }
+
+            $i++;
         }
 
 
@@ -919,11 +928,17 @@ class ProjectManager {
      */
     protected function _pushTMXToMyMemory() {
 
+        $i = 0;
+
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
-            $ext = AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+            // get corresponding meta
+            $meta = $this->projectStructure['array_files_meta'][$i];
 
+//            $ext = AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+            $ext = $meta['extension'];
+            
             $file = new stdClass();
             if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
 
@@ -962,6 +977,7 @@ class ProjectManager {
 
             }
 
+            $i++;
         }
 
         /**
@@ -1926,10 +1942,15 @@ class ProjectManager {
         //return structure
         $filesStructure = [];
 
+        $i = 0;
+
         foreach ( $_originalFileNames as $originalFileName ) {
 
+            // get metadata
+            $meta = $this->projectStructure['array_files_meta'][$i];
+
             $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
+            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, @$meta );
 
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
@@ -1948,6 +1969,8 @@ class ProjectManager {
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
             $filesStructure[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
+
+            $i++;
         }
 
         return $filesStructure;

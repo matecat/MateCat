@@ -306,6 +306,12 @@ class createProjectController extends ajaxController {
         }
 
         $arFiles = $newArFiles;
+        $arMeta  = [];
+
+        // create array_files_meta
+        foreach ($arFiles as $arFile){
+            $arMeta[] = $this->getFileMetadata($uploadDir .DIRECTORY_SEPARATOR . $arFile);
+        }
 
         $projectManager = new ProjectManager();
 
@@ -317,6 +323,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'private_tm_pass' ]              = $this->private_tm_pass;
         $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
         $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
+        $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata
         $projectStructure[ 'source_language' ]              = $this->source_lang;
         $projectStructure[ 'target_language' ]              = explode( ',', $this->target_lang );
         $projectStructure[ 'job_subject' ]                  = $this->job_subject;
@@ -374,6 +381,50 @@ class createProjectController extends ajaxController {
                 'password'   => $projectStructure[ 'ppassword' ]
         ];
 
+    }
+
+    /**
+     * @param $filename
+     *
+     * @return ArrayObject
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    private function getFileMetadata($filename) {
+        $info          = DetectProprietaryXliff::getInfo( $filename );
+        $isXliff       = DetectProprietaryXliff::isXliffExtension( pathinfo( $filename ) );
+        $isGlossary    = DetectProprietaryXliff::isGlossaryFile( pathinfo( $filename ) );
+        $isTMX         = DetectProprietaryXliff::isTMXFile( pathinfo( $filename ) );
+        $getMemoryType = DetectProprietaryXliff::getMemoryFileType( pathinfo( $filename ) );
+
+        $forceXliff = $this->getFeatureSet()->filter(
+                'forceXLIFFConversion',
+                INIT::$FORCE_XLIFF_CONVERSION,
+                $this->userIsLogged,
+                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
+        );
+        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $filename, $forceXliff );
+
+        $metadata                      = [];
+        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
+        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
+        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
+        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
+        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
+        $metadata[ 'getMemoryType' ]   = $getMemoryType;
+        $metadata[ 'isXliff' ]         = $isXliff;
+        $metadata[ 'isGlossary' ]      = $isGlossary;
+        $metadata[ 'isTMX' ]           = $isTMX;
+        $metadata[ 'proprietary' ]     = [
+                [ 'proprietary' ]            => $info[ 'proprietary' ],
+                [ 'proprietary_name' ]       => $info[ 'proprietary_name' ],
+                [ 'proprietary_short_name' ] => $info[ 'proprietary_short_name' ],
+        ];
+
+        return $metadata;
     }
 
     /**
