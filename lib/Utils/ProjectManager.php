@@ -425,13 +425,18 @@ class ProjectManager {
         //sort files in order to process TMX first
         $sortedFiles      = [];
         $firstTMXFileName = "";
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) { //TODO THIS IS ALWAYS FALSE Refactory file structure
+
+        $i = 0;
+        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+
+            // get metadata
+            $meta = $this->projectStructure['array_files_meta'][$i];
 
             //check for glossary files and tmx and put them in front of the list
-            if ( DetectProprietaryXliff::getMemoryFileType() ) {
+            if ( $meta['getMemoryFileType'] ) {
 
                 //found TMX, enable language checking routines
-                if ( DetectProprietaryXliff::isTMXFile() ) {
+                if ( $meta['isTMX'] ) {
 
                     //export the name of the first TMX Files for latter use
                     $firstTMXFileName = ( empty( $firstTMXFileName ) ? $firstTMXFileName = $fileName : null );
@@ -439,7 +444,7 @@ class ProjectManager {
                 }
 
                 //not used at moment but needed if we want to do a poll for status
-                if ( DetectProprietaryXliff::isGlossaryFile() ) {
+                if ( $meta['isGlossary'] ) {
                     $this->checkGlossary = 1;
                 }
 
@@ -451,6 +456,7 @@ class ProjectManager {
                 array_push( $sortedFiles, $fileName );
             }
 
+            $i++;
         }
         $this->projectStructure[ 'array_files' ] = $sortedFiles;
         unset( $sortedFiles );
@@ -936,7 +942,6 @@ class ProjectManager {
             // get corresponding meta
             $meta = $this->projectStructure['array_files_meta'][$i];
 
-//            $ext = AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
             $ext = $meta['extension'];
             
             $file = new stdClass();
