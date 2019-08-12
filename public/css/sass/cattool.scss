@@ -30,15 +30,45 @@ body.cattool {
         flex: 1;
         overflow: hidden;
     }
-    footer {
-        background: #6d6e71;
-        height: 27px;
-        text-align: right;
-        border-top: 1px solid #333;
-        color: #fff;
+
+    .stats-foo{
+        height: 44px;
+        background-color: #fafafa;
+        padding: 0 146px;
         width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
         z-index: 2;
-        position: relative;
+        display: grid;
+        .footer-body{
+            display: grid;
+            position: relative;
+            grid-column-gap: 32px;
+            grid-template-columns: auto 0.5fr 0.5fr 0.5fr 0.5fr;
+            align-items: center;
+            .item{
+                color: #000;
+                .statistics-core,  #stat-todo{
+                    span{
+                        color: #000;
+                    }
+                }
+            }
+            .progress-bar{
+                display: grid;
+                grid-template-columns: 1fr auto;
+                grid-column-gap: 16px;
+                .meter{
+                    margin: 0;
+                    a{
+                        &:after{
+                            background-image: none;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
