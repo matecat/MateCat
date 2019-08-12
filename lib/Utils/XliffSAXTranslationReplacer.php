@@ -337,6 +337,8 @@ class XliffSAXTranslationReplacer {
 
                     // we must reset the lastMrkId found because this is a new segment.
                     $lastMrkId = -1;
+                    $eq_word_count = 0;
+                    $raw_word_count = 0;
 
                     foreach ( $list_of_ids as $pos => $id ) {
 
@@ -345,6 +347,7 @@ class XliffSAXTranslationReplacer {
                          * In every cycle we check if the mrk of the segment is below or equal the last one.
                          * When this is true, means that the mrk id belongs to the next segment with the same internal_id
                          * so we MUST stop to apply markers and translations
+                         * and stop to add eq_word_count
                          *
                          * Begin:
                          * pre-assign zero to the new mrk if this is the first one ( in this segment )
@@ -366,10 +369,15 @@ class XliffSAXTranslationReplacer {
 
                         $seg = $this->segments[ $id ];
 
+                        $raw_word_count += (int)$seg[ 'raw_word_count' ];
+                        $eq_word_count += floor( $seg[ 'eq_word_count' ] * 100 ) / 100;  //eq word counts are decimals with 2 decimal numbers, round them by truncating integers
+
                         //delete translations so the prepareSegment
                         // will put source content in target tag
                         if ( $this->sourceInTarget ) {
                             $seg[ 'translation' ] = '';
+                            $eq_word_count = 0;
+                            $raw_word_count = 0;
                         }
 
                         $translation = $this->prepareSegment( $seg, $translation );
@@ -433,6 +441,7 @@ class XliffSAXTranslationReplacer {
 
                     //append translation
                     $tag = "<target xml:lang=\"" . $this->target_lang . "\" $state_prop>$translation</target>";
+                    $tag .= "\n<count-group name=\"x-matecat-word-count\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group>";
                 }
 
                 //signal we are leaving a target
@@ -525,15 +534,13 @@ class XliffSAXTranslationReplacer {
             $translation = $segment;
         } else {
 
-            if ( empty( $seg[ 'locked' ] ) ) {
-                //consistency check
-                $check = new QA ( $this->filter->fromLayer0ToLayer1( $segment ), $this->filter->fromLayer0ToLayer1( $translation ) );
-                $check->setFeatureSet( $this->featureSet );
-                $check->performTagCheckOnly();
-                if ( $check->thereAreErrors() ) {
-                    $translation = '|||UNTRANSLATED_CONTENT_START|||' . $segment . '|||UNTRANSLATED_CONTENT_END|||';
-                    Log::doJsonLog( "tag mismatch on\n" . print_r( $seg, true ) . "\n(because of: " . print_r( $check->getErrors(), true ) . ")" );
-                }
+            //consistency check
+            $check = new QA ( $this->filter->fromLayer0ToLayer1( $segment ), $this->filter->fromLayer0ToLayer1( $translation ) );
+            $check->setFeatureSet( $this->featureSet );
+            $check->performTagCheckOnly();
+            if ( $check->thereAreErrors() ) {
+                $translation = '|||UNTRANSLATED_CONTENT_START|||' . $segment . '|||UNTRANSLATED_CONTENT_END|||';
+                Log::doJsonLog( "tag mismatch on\n" . print_r( $seg, true ) . "\n(because of: " . print_r( $check->getErrors(), true ) . ")" );
             }
 
         }

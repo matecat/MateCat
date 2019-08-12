@@ -591,8 +591,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             s.xliff_mrk_ext_prec_tags AS mrk_prev_tags, 
             s.xliff_mrk_ext_succ_tags AS mrk_succ_tags,
             st.translation, 
-            st.status
-
+            st.status,
+            st.eq_word_count,
+            s.raw_word_count
         FROM jobs j 
         JOIN segment_translations st ON st.id_job = j.id 
         JOIN segments s ON s.id = st.id_segment
