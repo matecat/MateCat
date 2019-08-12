@@ -22,7 +22,6 @@ class createProjectController extends ajaxController {
     private $pretranslate_100;
     private $only_private;
     private $due_date;
-
     private $metadata;
 
     /**
@@ -336,10 +335,8 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'only_private' ]                 = $this->only_private;
         $projectStructure[ 'due_date' ]                     = $this->due_date;
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
-
-
-        $projectStructure[ 'user_ip' ]   = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ] = INIT::$HTTPHOST;
+        $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
 
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ] = $this->metadata;
@@ -366,6 +363,7 @@ class createProjectController extends ajaxController {
                     "code" => $e->getCode(),
                     "message" => $e->getMessage()
             ];
+
             return -1;
         }
 
@@ -395,10 +393,10 @@ class createProjectController extends ajaxController {
      */
     private function getFileMetadata($filename) {
         $info          = DetectProprietaryXliff::getInfo( $filename );
-        $isXliff       = DetectProprietaryXliff::isXliffExtension( pathinfo( $filename ) );
-        $isGlossary    = DetectProprietaryXliff::isGlossaryFile( pathinfo( $filename ) );
-        $isTMX         = DetectProprietaryXliff::isTMXFile( pathinfo( $filename ) );
-        $getMemoryType = DetectProprietaryXliff::getMemoryFileType( pathinfo( $filename ) );
+        $isXliff       = DetectProprietaryXliff::isXliffExtension( AbstractFilesStorage::pathinfo_fix($filename) );
+        $isGlossary    = DetectProprietaryXliff::isGlossaryFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $isTMX         = DetectProprietaryXliff::isTMXFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $getMemoryType = DetectProprietaryXliff::getMemoryFileType( AbstractFilesStorage::pathinfo_fix( $filename ) );
 
         $forceXliff = $this->getFeatureSet()->filter(
                 'forceXLIFFConversion',

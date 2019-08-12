@@ -188,6 +188,16 @@ class ProjectManager {
                 $this->projectStructure[ 'array_files' ],
                 $this->projectStructure
         );
+
+        // sync array_files_meta
+        $array_files_meta = [];
+        foreach ( $this->projectStructure[ 'array_files_meta' ] as $fileMeta ) {
+            if ( in_array( $fileMeta[ 'basename' ], (array)$this->projectStructure[ 'array_files' ] ) ) {
+                $array_files_meta[] = $fileMeta;
+            }
+        }
+
+        $this->projectStructure[ 'array_files_meta' ] = $array_files_meta;
     }
 
     protected function _log( $_msg ) {
@@ -364,7 +374,7 @@ class ProjectManager {
      *
      */
     private function __createProjectRecord() {
-        $this-> project = ProjectManagerModel::createProjectRecord( $this->projectStructure );
+        $this->project = ProjectManagerModel::createProjectRecord( $this->projectStructure );
     }
 
     private function __checkForProjectAssignment() {
@@ -430,13 +440,13 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
             // get metadata
-            $meta = $this->projectStructure['array_files_meta'][$i];
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $i ];
 
             //check for glossary files and tmx and put them in front of the list
-            if ( $meta['getMemoryFileType'] ) {
+            if ( $meta[ 'getMemoryFileType' ] ) {
 
                 //found TMX, enable language checking routines
-                if ( $meta['isTMX'] ) {
+                if ( $meta[ 'isTMX' ] ) {
 
                     //export the name of the first TMX Files for latter use
                     $firstTMXFileName = ( empty( $firstTMXFileName ) ? $firstTMXFileName = $fileName : null );
@@ -444,7 +454,7 @@ class ProjectManager {
                 }
 
                 //not used at moment but needed if we want to do a poll for status
-                if ( $meta['isGlossary'] ) {
+                if ( $meta[ 'isGlossary' ] ) {
                     $this->checkGlossary = 1;
                 }
 
@@ -504,27 +514,9 @@ class ProjectManager {
         $i = 0;
         foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-//            if( INIT::$FILE_STORAGE_METHOD == 's3' && DetectProprietaryXliff::isXliffExtension( $fs::pathinfo_fix( $fileName ) ) ){
-//                $this->getSingleS3QueueFile( $fileName );
-//            }
-//
-//            $forceXliff = $this->features->filter(
-//                    'forceXLIFFConversion',
-//                    INIT::$FORCE_XLIFF_CONVERSION,
-//                    ( isset( $this->projectStructure[ 'userIsLogged' ] ) && $this->projectStructure[ 'userIsLogged' ] ),
-//                    "$this->uploadDir/$fileName"
-//            );
-//
-//            /*
-//               Conversion Enforce
-//               Checking Extension is no more sufficient, we want check content
-//               $enforcedConversion = true; //( if conversion is enabled )
-//             */
-//            $mustBeConverted = $this->fileMustBeConverted( "$this->uploadDir/$fileName", $forceXliff );
-
             // get corresponding meta
-            $meta = $this->projectStructure['array_files_meta'][$i];
-            $mustBeConverted = $meta['mustBeConverted'];
+            $meta            = $this->projectStructure[ 'array_files_meta' ][ $i ];
+            $mustBeConverted = $meta[ 'mustBeConverted' ];
 
             //if it's one of the listed formats or conversion is not enabled in first place
             if ( !$mustBeConverted ) {
@@ -608,7 +600,7 @@ class ProjectManager {
 
                 if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
                     if ( null === $cachedXliffFilePathName ) {
-                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', $_originalFileNames[0] ), -6 );
+                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', $_originalFileNames[ 0 ] ), -6 );
                     }
                 } else {
                     if ( !file_exists( $cachedXliffFilePathName ) ) {
@@ -796,8 +788,8 @@ class ProjectManager {
 
         try {
 
-            if (INIT::$FILE_STORAGE_METHOD === 's3') {
-                \Log::doJsonLog('Deleting folder' . $this->uploadDir . ' from S3');
+            if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+                \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue( $this->uploadDir );
             }
@@ -834,9 +826,9 @@ class ProjectManager {
     public function getSingleS3QueueFile( $fileName ) {
         $fs = FilesStorageFactory::create();
         /** @var $fs S3FilesStorage */
-        $client = $fs::getStaticS3Client();
-        $params['bucket'] = \INIT::$AWS_STORAGE_BASE_BUCKET;
-        $params['key'] = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName( $fs->getTheLastPartOfKey( $this->uploadDir ) ) . DIRECTORY_SEPARATOR . $fileName;
+        $client              = $fs::getStaticS3Client();
+        $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
+        $params[ 'key' ]     = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName( $fs->getTheLastPartOfKey( $this->uploadDir ) ) . DIRECTORY_SEPARATOR . $fileName;
         $params[ 'save_as' ] = "$this->uploadDir/$fileName";
         $client->downloadItem( $params );
     }
@@ -940,14 +932,14 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
             // get corresponding meta
-            $meta = $this->projectStructure['array_files_meta'][$i];
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $i ];
 
-            $ext = $meta['extension'];
-            
+            $ext = $meta[ 'extension' ];
+
             $file = new stdClass();
             if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
 
-                if( INIT::$FILE_STORAGE_METHOD == 's3' ){
+                if ( INIT::$FILE_STORAGE_METHOD == 's3' ) {
                     $this->getSingleS3QueueFile( $fileName );
                 }
 
@@ -970,6 +962,7 @@ class ProjectManager {
                 }
 
                 unset( $this->projectStructure[ 'array_files' ][ $pos ] );
+                unset( $this->projectStructure[ 'array_files_meta' ][ $pos ] );
 
             } catch ( Exception $e ) {
 
@@ -1096,6 +1089,7 @@ class ProjectManager {
                 }
 
                 unset( $this->projectStructure[ 'array_files' ][ $kname ] );
+                unset( $this->projectStructure[ 'array_files_meta' ][ $kname ] );
 
             }
 
@@ -1920,8 +1914,8 @@ class ProjectManager {
         if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
             $s3Client = S3FilesStorage::getStaticS3Client();
 
-            if($s3Client->hasEncoder()){
-                $xliff_file_content = $s3Client->getEncoder()->decode($xliff_file_content);
+            if ( $s3Client->hasEncoder() ) {
+                $xliff_file_content = $s3Client->getEncoder()->decode( $xliff_file_content );
             }
 
             return $s3Client->openItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliff_file_content ] );
@@ -1952,7 +1946,7 @@ class ProjectManager {
         foreach ( $_originalFileNames as $originalFileName ) {
 
             // get metadata
-            $meta = $this->projectStructure['array_files_meta'][$i];
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $i ];
 
             $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
             $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, @$meta );
@@ -1992,6 +1986,7 @@ class ProjectManager {
      */
     protected function _insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
         $idFile = ProjectManagerModel::insertFile( $projectStructure, $file_name, $mime_type, $fileDateSha1Path );
+
         return $idFile;
     }
 

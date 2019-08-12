@@ -72,7 +72,6 @@ class ProjectManagerModel {
         $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
         $data[ 'mime_type' ]          = $mime_type;
         $data[ 'sha1_original_file' ] = $fileDateSha1Path;
-        $data[ 'metadata' ]           = isset($meta) ? json_encode($meta) : null;
         $data[ 'is_converted' ]       = isset($meta['mustBeConverted']) ? $meta['mustBeConverted'] : null;
 
         $db = Database::obtain();
