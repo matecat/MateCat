@@ -2250,7 +2250,7 @@ class ProjectManager {
                 // All the bytes in the matched groups are whitespaces and must be
                 // ignored in the next steps
                 $start = $match[ 1 ];
-                $end   = $start + strlen( $match[ 0 ] );
+                $end   = $start + mb_strlen( $match[ 0 ] );
                 for ( $i = $start; $i < $end; $i++ ) {
                     $isSpace[ $i ] = true;
                 }
