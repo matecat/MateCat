@@ -203,13 +203,17 @@ class ConversionHandler {
             $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
             $fs->deleteHashFromUploadDir( $uploadDir, $sha1 . "|" . $this->source_lang );
 
-            //put reference to cache in upload dir to link cache to session
-            $fs->linkSessionToCacheForOriginalFiles(
-                    $sha1,
-                    $this->source_lang,
-                    $this->cookieDir,
-                    AbstractFilesStorage::basename_fix( $file_path )
-            );
+            if( is_file( $file_path ) ){
+                //put reference to cache in upload dir to link cache to session
+                $fs->linkSessionToCacheForOriginalFiles(
+                        $sha1,
+                        $this->source_lang,
+                        $this->cookieDir,
+                        AbstractFilesStorage::basename_fix( $file_path )
+                );
+            } else {
+                Log::doJsonLog( "File not found in path. linkSessionToCacheForOriginalFiles Skipped." );
+            }
 
         }
 
