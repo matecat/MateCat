@@ -37,14 +37,13 @@ class ReviewExtendedIssuePanel extends React.Component{
         let segment = this.props.segment;
         if ( segment.status.toLowerCase() !== 'approved' || segment.revision_number !== ReviewExtended.number ) {
             segment.status = 'approved';
-            UI.setTranslation({
-                id_segment: segment.sid,
-                status: segment.status ,
-                caller: 'autosave'
-            }).done( function ( response ) {
-                issue.version = response.translation.version_number;
-                deferred.resolve();
-            } ).fail( self.handleFail.bind( self ) );
+            API.SEGMENT.setTranslation( segment )
+                .done( function ( response ) {
+                    issue.version = response.translation.version_number;
+                    SegmentActions.addClassToSegment(segment.sid , 'modified');
+                    deferred.resolve();
+                } )
+                .fail( self.handleFail.bind( self ) );
 
         } else {
             deferred.resolve();
