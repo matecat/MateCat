@@ -48,10 +48,35 @@ body.cattool {
             grid-template-columns: auto 0.5fr 0.5fr 0.5fr 0.5fr;
             align-items: center;
             .item{
-                color: #000;
-                .statistics-core,  #stat-todo{
-                    span{
-                        color: #000;
+                font-size: 16px;
+                font-weight: bold;
+                font-style: normal;
+                font-stretch: normal;
+                line-height: 1.5;
+                color: black;
+                .to-arrow{
+                    font-size: 14px;
+                    font-weight: bold;
+                    color: #999999;
+                }
+                #stat-todo{
+				  span {
+                      color: black;
+                  }
+                }
+                #job_id{
+                    font-weight: 200;
+                    font-size: 12px;
+                }
+                .statistics-core{
+                    font-size: 14px;
+                    line-height: 1.29;
+                    color: #0055b8;
+                    font-weight: 200;
+                    a{
+                        span{
+                            color: #0055b8;
+                        }
                     }
                 }
             }
@@ -59,8 +84,12 @@ body.cattool {
                 display: grid;
                 grid-template-columns: 1fr auto;
                 grid-column-gap: 16px;
+                .percent{
+                    font-weight: 600;
+                }
                 .meter{
-                    margin: 0;
+                    margin: 0!important;
+                    height: auto;
                     a{
                         &:after{
                             background-image: none;

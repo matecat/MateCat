@@ -213,13 +213,13 @@
         <footer class="stats-foo">
             <div class="footer-body">
                 <!-- job id -->
-                <div>
-                    <span tal:replace="jid">---</span>
+                <div class="item">
+                    <p id="job_id">id: <span tal:replace="jid">---</span></p>
                 </div>
 
                 <!-- to from -->
-                <div>
-                    <p> Italian -> English </p>
+                <div class="item">
+                    <p> Italian <span class="to-arrow"> &#8594; </span> English </p>
                 </div>
 
                 <!-- progress -->
@@ -233,19 +233,20 @@
                     <div class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</div>
                 </div>
 
-                <!-- wwighted words -->
+                <!-- weighted words -->
                 <div class="item">
                     <div class="statistics-core">
                         <div id="stat-eqwords">
+                            <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                             <a tal:condition="php: allow_link_to_analysis && !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">
-                                <span tal:condition="not: isCJK">Words</span>
+                                <span tal:condition="not: isCJK">Weighted words</span>
                                 <span tal:condition="isCJK">Characters</span>
                             </a>
                             <tal:block tal:condition="php: !allow_link_to_analysis && !empty(analysis_enabled)">
-                                <span tal:condition="not: isCJK">Words</span>
+                                <span tal:condition="not: isCJK">eighted words</span>
                                 <span tal:condition="isCJK">Characters</span>
                             </tal:block>
-                            <tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                            <tal:block tal:condition="php: empty(analysis_enabled)">Weighted words</tal:block>
                         </div>
                     </div>
                 </div>
