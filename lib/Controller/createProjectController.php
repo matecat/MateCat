@@ -22,7 +22,6 @@ class createProjectController extends ajaxController {
     private $pretranslate_100;
     private $only_private;
     private $due_date;
-
     private $metadata;
 
     /**
@@ -306,6 +305,12 @@ class createProjectController extends ajaxController {
         }
 
         $arFiles = $newArFiles;
+        $arMeta  = [];
+
+        // create array_files_meta
+        foreach ($arFiles as $arFile){
+            $arMeta[] = $this->getFileMetadata($uploadDir .DIRECTORY_SEPARATOR . $arFile);
+        }
 
         $projectManager = new ProjectManager();
 
@@ -317,6 +322,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'private_tm_pass' ]              = $this->private_tm_pass;
         $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
         $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
+        $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata
         $projectStructure[ 'source_language' ]              = $this->source_lang;
         $projectStructure[ 'target_language' ]              = explode( ',', $this->target_lang );
         $projectStructure[ 'job_subject' ]                  = $this->job_subject;
@@ -329,10 +335,8 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'only_private' ]                 = $this->only_private;
         $projectStructure[ 'due_date' ]                     = $this->due_date;
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
-
-
-        $projectStructure[ 'user_ip' ]   = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ] = INIT::$HTTPHOST;
+        $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
 
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ] = $this->metadata;
@@ -359,6 +363,7 @@ class createProjectController extends ajaxController {
                     "code" => $e->getCode(),
                     "message" => $e->getMessage()
             ];
+
             return -1;
         }
 
@@ -374,6 +379,50 @@ class createProjectController extends ajaxController {
                 'password'   => $projectStructure[ 'ppassword' ]
         ];
 
+    }
+
+    /**
+     * @param $filename
+     *
+     * @return ArrayObject
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
+    private function getFileMetadata($filename) {
+        $info          = DetectProprietaryXliff::getInfo( $filename );
+        $isXliff       = DetectProprietaryXliff::isXliffExtension( AbstractFilesStorage::pathinfo_fix($filename) );
+        $isGlossary    = DetectProprietaryXliff::isGlossaryFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $isTMX         = DetectProprietaryXliff::isTMXFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $getMemoryType = DetectProprietaryXliff::getMemoryFileType( AbstractFilesStorage::pathinfo_fix( $filename ) );
+
+        $forceXliff = $this->getFeatureSet()->filter(
+                'forceXLIFFConversion',
+                INIT::$FORCE_XLIFF_CONVERSION,
+                $this->userIsLogged,
+                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
+        );
+        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $filename, $forceXliff );
+
+        $metadata                      = [];
+        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
+        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
+        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
+        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
+        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
+        $metadata[ 'getMemoryType' ]   = $getMemoryType;
+        $metadata[ 'isXliff' ]         = $isXliff;
+        $metadata[ 'isGlossary' ]      = $isGlossary;
+        $metadata[ 'isTMX' ]           = $isTMX;
+        $metadata[ 'proprietary' ]     = [
+                [ 'proprietary' ]            => $info[ 'proprietary' ],
+                [ 'proprietary_name' ]       => $info[ 'proprietary_name' ],
+                [ 'proprietary_short_name' ] => $info[ 'proprietary_short_name' ],
+        ];
+
+        return $metadata;
     }
 
     /**

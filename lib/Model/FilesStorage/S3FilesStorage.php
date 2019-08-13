@@ -139,7 +139,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
 
     /**
-     * Create the cache bucket on S3 and store the files
+     * Create the cache folder on S3 and store the files
      *
      * @param      $hash
      * @param      $lang
