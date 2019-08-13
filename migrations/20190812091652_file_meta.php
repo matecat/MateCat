@@ -5,7 +5,7 @@ use Phinx\Migration\AbstractMigration;
 class FileMeta extends AbstractMigration
 {
     public $sql_up = <<<EOF
-      ALTER TABLE `files` ADD COLUMN `is_converted` TINYINT NULL AFTER `sha1_original_file`;
+      ALTER TABLE `files` ADD COLUMN `is_converted` TINYINT NULL , ALGORITHM = INPLACE, LOCK=NONE ;
 EOF;
 
     public $sql_down = <<<EOF
