@@ -109,6 +109,7 @@ class downloadFileController extends downloadController {
          */
 
         $sDao = new Segments_SegmentDao();
+        $s3Client = S3FilesStorage::getStaticS3Client();
 
         //file array is chuncked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
@@ -117,19 +118,6 @@ class downloadFileController extends downloadController {
             $files_to_be_converted = [];
 
             foreach ( $chunk as $file ) {
-
-                $s3Client = S3FilesStorage::getStaticS3Client();
-
-                //:{
-                //"id_file":"31",
-                //"filename":"test.txt",
-                //"id_project":"93",
-                //"source":"it-IT",
-                //"mime_type":"txt",
-                //"sha1_original_file":"20190530\/aad03b600bc4792b3dc4bf3a2d7191327a482d4a",
-                //"originalFilePath":"files\/20190530\/31\/orig\/test.txt",
-                //"xliffFilePath":"files\/20190530\/31\/xliff\/test.txt.sdlxliff"
-                //}
 
                 $mime_type        = $file[ 'mime_type' ];
                 $fileID           = $file[ 'id_file' ];
@@ -199,7 +187,6 @@ class downloadFileController extends downloadController {
 
                 $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
 
-
                 if ( $this->forceXliff ) {
                     //clean the output filename by removing
                     // the unique hash identifier 55e5739b467109.05614837_.out.Test_English.doc.sdlxliff
@@ -238,7 +225,6 @@ class downloadFileController extends downloadController {
                 } else {
                     $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
                 }
-
 
                 // When the 'proprietary' flag is set to false, the xliff
                 // is not passed to any converter, because is handled

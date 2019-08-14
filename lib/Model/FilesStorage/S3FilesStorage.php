@@ -97,10 +97,6 @@ class S3FilesStorage extends AbstractFilesStorage {
                 self::$CLIENT->addCache( new RedisCache( $redis->getConnection() ) );
             }
 
-            // add encoding
-            $encoder = new UrlEncoder();
-//            self::$CLIENT->addEncoder( $encoder );
-
             // disable SSL verify from configuration
             if ( false === INIT::$AWS_SSL_VERIFY ) {
                 self::$CLIENT->disableSslVerify();
