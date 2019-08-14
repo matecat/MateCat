@@ -7,50 +7,96 @@
 <body>
 
 <header metal:define-macro="main_header">
-    <p class="warning" tal:condition="php:supportedBrowser EQ -1" >
+
+    <p class="warning" tal:condition="php:supportedBrowser EQ -1">
         MateCAT was not tested with this browser.<br/>
         Please, use Google Chrome or Mozilla Firefox
     </p>
+
     <div class="wrapper">
+
         <div class="logo-menu">
             <a href="${basepath}" class="logo">
             </a>
-        </div>
+        </div> <!-- .logo-menu -->
+
         <div class="breadcrumbs file-list">
             <div class="icon-container">
-                <img src="/public/img/icons/icon-folder.svg" alt="" />
-                <span><span tal:replace="jid">---</span></span>
+                <span id="project-badge"><span tal:replace="jid">---</span></span>
+                <img src="/public/img/icons/icon-folder.svg" alt=""/>
             </div>
             <a href="#" onClick="return false" id="pname" tal:content="pname">Project</a>
-        </div>
+        </div> <!-- .breadcrumbs -->
 
         <div class="action-menu">
-            <a href="#" class="btn-action">
-                    <img src="/public/img/icons/icon-download.svg"/>
-            </a>
-            <a href="#" class="btn-action">
-                    <img src="/public/img/icons/icon-QR-line.svg"/>
-            </a>
-            <a href="#" class="btn-action">
-                    <img src="/public/img/icons/icon-QA-line.svg"/>
-            </a>
-            <a href="#" class="btn-action">
-                    <img src="/public/img/icons/icon-comments.svg"/>
+            <div class="action-submenu ui dropdown">
+                <span class="btn-action" id="action-download"> </span>
+                <div class="menu">
+                    <div class="item">Draft 1</div>
+                    <div class="item">Original</div>
+                    <div class="item">Export XLIF</div>
+                    <div class="item">Export Job TMX</div>
+                </div>
+            </div>
+
+            <div class="action-submenu ui dropdown">
+                <span class="btn-action" id="action-QR"> </span>
+                <div class="menu">
+                    <div class="item">Voce 1</div>
+                    <div class="item">Voce 2</div>
+                </div>
+            </div>
+
+            <div class="action-submenu ui dropdown">
+                <span class="btn-action" id="action-QA"> </span>
+                <div class="menu">
+                    <div class="item">Voce 1</div>
+                    <div class="item"></div>
+                </div>
+            </div>
+
+            <div class="action-submenu ui dropdown">
+                <span class="btn-action" id="action-comments">
                     <span class="badge">1</span>
-            </a>
-            <a href="#" class="btn-action">
-                    <img src="/public/img/icons/icon-search.svg"/>
-            </a>
-            <a href="#" class="btn-action">
-                    <img src="/public/img/icons/icon-filter.svg"/>
-            </a>
-            <a href="#" class="btn-action">
-                    <img id="icon-settings" src="/public/img/icons/icon-settings-blue.svg"/>
-            </a>
-            <a href="#" class="btn-action">
-                    <img src="/public/img/icons/icon-3dots.svg"/>
-            </a>
+                </span>
+
+                <div class="menu">
+                    <div class="item">Voce 1</div>
+                    <div class="item">Voce 2</div>
+                    <div class="item">Voce 3</div>
+                    <div class="item">Voce 4</div>
+                </div>
+            </div>
+
+            <div class="action-submenu ui dropdown">
+                <span class="btn-action" id="action-search"> </span>
+            </div>
+
+            <div class="action-submenu ui dropdown">
+                <span class="btn-action" id="action-filter"> </span>
+            </div>
+
+            <div class="action-submenu ui dropdown">
+                <span class="btn-action" id="action-settings"> </span>
+                <div class="menu">
+                    <div class="item">Voce 1</div>
+                    <div class="item">Voce 2</div>
+                    <div class="item">Voce 3</div>
+                    <div class="item">Voce 4</div>
+                </div>
+            </div>
+
+            <div class="action-submenu ui dropdown">
+                <!--<a href="#" class="btn-action" id="action-three-dots"> </a>-->
+                <span class="btn-action" id="action-three-dots"> </span>
+                <div class="menu">
+                    <div class="item">Revise/Translate</div>
+                    <div class="item">Volume analisys</div>
+                    <div class="item">Export XLIF to target</div>
+                </div>
+            </div>
         </div>  <!-- .action-menu -->
+
 
         <div class="profile-menu">
             <div class="column-separator"></div>
@@ -59,8 +105,9 @@
                     <img src="/public/img/icons/icon-manage.svg"/>
                 </a>
             </div>
-            <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/common.html/login_includes" />
-        </div>
+            <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/common.html/login_includes"/>
+        </div> <!-- .profile-menu -->
+
     </div>   <!-- .wrapper -->
 
     <!-- Mount point subHeader -->
@@ -68,8 +115,9 @@
 
     </div>
 
-    <div class="qa-wrapper"></div>
+    <div class="qa-wrapper">
 
+    </div>
 
 
 </header>
