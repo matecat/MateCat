@@ -1,5 +1,6 @@
 let PropTypes = require('prop-types');
 
+
 class ModalComponent extends React.Component {
 
 
@@ -7,7 +8,7 @@ class ModalComponent extends React.Component {
         super(props);
     }
 
-    closeModal(event){
+    closeModal(event) {
         event.stopPropagation();
         if ($(event.target).closest('.matecat-modal-content').length == 0 || $(event.target).hasClass('close-matecat-modal')) {
             this.props.onClose();
@@ -28,22 +29,26 @@ class ModalComponent extends React.Component {
 
 
     allowHTML(string) {
-        return { __html: string };
+        return {__html: string};
     }
 
     render() {
-        return <div id="matecat-modal" className="matecat-modal" onClick={(e) => this.closeModal.call(this,e)}>
-                <div className="matecat-modal-content" style={this.props.styleContainer}>
-                    <div className="matecat-modal-header">
-                        <span className="close-matecat-modal x-popup" onClick={this.closeModal.bind(this)}/>
+        return <div id="matecat-modal" className="matecat-modal" onClick={(e) => this.closeModal.call(this, e)}>
+            <div className="matecat-modal-content" style={this.props.styleContainer}>
+                <div className="matecat-modal-header">
+                    <div className="modal-logo"/>
+                    <div>
                         <h2>{this.props.title}</h2>
                     </div>
-                    <div className="matecat-modal-body">
-                        {this.props.children}
+                    <div>
+                        <span className="close-matecat-modal x-popup" onClick={this.closeModal.bind(this)}/>
                     </div>
-                   
+                </div>
+                <div className="matecat-modal-body">
+                    {this.props.children}
                 </div>
             </div>
+        </div>
     }
 }
 
@@ -56,4 +61,4 @@ ModalComponent.propTypes = {
 //
 // };
 
-export default ModalComponent ;
+export default ModalComponent;

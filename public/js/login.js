@@ -151,7 +151,7 @@ $.extend(APP, {
     },
 
     openLoginModal: function (param) {
-        var title = '';
+        var title = 'Add project to your management panel';
         var style = {
             'width': '80%',
             'maxWidth': '800px',
