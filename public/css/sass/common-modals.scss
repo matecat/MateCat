@@ -602,12 +602,24 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     overflow: visible;
     max-height: inherit;
     font-size: 24px;
-    background: #4D4D4D url(../img/logo-ico.png) 25px 13px no-repeat;
-    padding: 10px 10px 7px 70px;
+    background: #002b5c;
+    padding: 10px 10px 7px 24px;
     background-size: 35px;
     color: #fff;
     margin: 0 !important;
-    text-align: left;
+    display: grid;
+    grid-template-columns: 34px 1fr 16px;
+    position: relative;
+    grid-column-gap: 16px;
+}
+
+.modal-logo {
+    background: url(../../img/logo-Onlycat-white.svg);
+    background-size: inherit;
+    background-repeat: no-repeat;
+    background-position-y: center;
+    width: 40px;
+    height: 26px;
 }
 
 .matecat-modal-header h2 {
@@ -640,7 +652,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
 /* Modal Content */
 .matecat-modal-content {
-    position: relative;
     margin: auto;
     position: absolute;
     left: 50%;
