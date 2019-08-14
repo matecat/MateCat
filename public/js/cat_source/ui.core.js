@@ -468,11 +468,13 @@ UI = {
     createJobMenu: function() {
         var menu = '<nav id="jobMenu" class="topMenu">' +
             '<ul class="gotocurrentsegment">' +
-            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="javascript:void(0)">Go to current segment</a></li>' +
+            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="javascript:void(0)"><span class="label">Go to current segment</span></a></li>' +
+            '<li class="firstSegment" ><a href="#"><span class="label">Go to first segment of the file</span></a></li>' +
             '</ul>' +
+            '<div class="separator"></div>' +
             '<ul class="jobmenu-list">';
         $.each(config.firstSegmentOfFiles, function() {
-            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("[...]" ).concat((this.file_name).substring(this.file_name.length-20))  + '</a></li>';
+            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("..." )  + '</a></li>';
         });
         menu += '</ul>' +
             '</nav>';
