@@ -8,6 +8,7 @@
 
 namespace Features;
 
+use BasicFeatureStruct;
 use catController;
 use Chunks_ChunkStruct;
 use Constants;
@@ -168,4 +169,18 @@ class SecondPassReview extends BaseFeature {
 
         return $data ;
     }
+
+    /**
+     * @param $projectFeatures
+     * @param $controller \NewController|\createProjectController
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function filterCreateProjectFeatures( $projectFeatures, $controller ) {
+        $projectFeatures[ self::FEATURE_CODE ] = new BasicFeatureStruct( [ 'feature_code' => self::FEATURE_CODE ] );
+        $projectFeatures                       = $controller->getFeatureSet()->filter( 'filterOverrideReviewExtended', $projectFeatures, $controller );
+        return $projectFeatures;
+    }
+
 }
