@@ -300,9 +300,9 @@ class SearchModel {
 					( LENGTH( s.segment ) - LENGTH( 
                         REPLACE ( 
                           {$this->queryParams->matchCase->SQL_LENGHT_CASE}( segment ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->source}' ), ''
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( ' {$this->queryParams->source} ' ), ''
                         ) 
-					) ) / LENGTH('{$this->queryParams->source}') )
+					) ) / LENGTH(' {$this->queryParams->source} ') )
 			) AS count
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
