@@ -1,5 +1,6 @@
 <?php
 
+use FilesStorage\AbstractFilesStorage;
 use FilesStorage\S3FilesStorage;
 
 /**
@@ -25,7 +26,7 @@ class ZipContentObject extends stdClass {
         }
 
         if ( !empty( $this->input_filename ) ) {
-            if ( \INIT::$FILE_STORAGE_METHOD === 's3' ) {
+            if ( AbstractFilesStorage::isOnS3() ) {
                 $this->setDocumentContentFromS3();
             } else {
                 $this->setDocumentContentFromFileSystem();

@@ -530,7 +530,9 @@ class ProjectManager {
                 // NOTE: 12 Aug 2019
                 // I am not absolute sure that the queue file exists,
                 // so I check it and in negative case I force the download of the file to file system from S3
-                if ( INIT::$FILE_STORAGE_METHOD == 's3' and false === file_exists($filePathName)) {
+                $isFsOnS3 = AbstractFilesStorage::isOnS3();
+
+                if ( $isFsOnS3 and false === file_exists($filePathName)) {
                     $this->getSingleS3QueueFile( $filePathName );
                 }
 
@@ -797,7 +799,7 @@ class ProjectManager {
 
         try {
 
-            if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+            if ( $isFsOnS3 ) {
                 \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue( $this->uploadDir );
@@ -846,7 +848,7 @@ class ProjectManager {
      * @return string
      */
     private function __getStorageFilesDelimiter() {
-        if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+        if ( AbstractFilesStorage::isOnS3() ) {
             return S3FilesStorage::OBJECTS_SAFE_DELIMITER;
         }
 
@@ -1920,7 +1922,7 @@ class ProjectManager {
      * @throws Exception
      */
     private function getXliffFileContent( $xliff_file_content ) {
-        if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+        if ( AbstractFilesStorage::isOnS3() ) {
             $s3Client = S3FilesStorage::getStaticS3Client();
 
             if ( $s3Client->hasEncoder() ) {
