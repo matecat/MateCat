@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class FileMeta extends AbstractMigration
+class FileMeta extends AbstractMatecatMigration
 {
     public $sql_up = <<<EOF
       ALTER TABLE `files` ADD COLUMN `is_converted` TINYINT NULL , ALGORITHM = INPLACE, LOCK=NONE ;
@@ -12,11 +12,4 @@ EOF;
       ALTER TABLE `files` DROP COLUMN `is_converted`;
 EOF;
 
-    public function up(){
-        $this->execute($this->sql_up);
-    }
-
-    public function down(){
-        $this->execute($this->sql_down);
-    }
 }
