@@ -301,6 +301,7 @@ CREATE TABLE `files` (
   `source_language` varchar(45) NOT NULL,
   `mime_type` varchar(45) DEFAULT NULL,
   `sha1_original_file` varchar(100) DEFAULT NULL,
+  `is_converted` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
@@ -713,14 +714,17 @@ CREATE TABLE `qa_chunk_reviews` (
   `id_job` bigint(20) NOT NULL,
   `password` varchar(45) NOT NULL,
   `review_password` varchar(45) NOT NULL,
-  `penalty_points` bigint(20) DEFAULT NULL,
-  `num_errors` int(11) NOT NULL DEFAULT '0',
+  `penalty_points` double(20,2) DEFAULT NULL,
+  `source_page` int(11) DEFAULT NULL,
   `is_pass` tinyint(4) DEFAULT NULL,
   `force_pass_at` timestamp NULL DEFAULT NULL,
   `reviewed_words_count` int(11) NOT NULL DEFAULT '0',
   `undo_data` text,
+  `advancement_wc` float(10,2) NOT NULL DEFAULT '0.00',
+  `total_tte` bigint(20) NOT NULL DEFAULT '0',
+  `avg_pee` float(10,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_job_password` (`id_job`,`password`),
+  UNIQUE KEY `job_pw_source_page` (`id_job`,`password`,`source_page`),
   KEY `id_project` (`id_project`),
   KEY `review_password` (`review_password`),
   KEY `id_job` (`id_job`)
@@ -748,11 +752,13 @@ CREATE TABLE `qa_entries` (
   `end_offset` int(11) NOT NULL,
   `target_text` varchar(255) DEFAULT NULL,
   `is_full_segment` tinyint(4) NOT NULL,
-  `penalty_points` int(11) NOT NULL,
+  `penalty_points` double(20,2) DEFAULT NULL,
   `comment` text,
   `replies_count` int(11) NOT NULL DEFAULT '0',
   `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `rebutted_at` datetime DEFAULT NULL,
+  `source_page` int(11) NOT NULL,
+  `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `job_and_segment` (`id_job`,`id_segment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -871,6 +877,9 @@ CREATE TABLE `segment_translation_events` (
   `version_number` int(11) NOT NULL,
   `source_page` tinyint(4) NOT NULL,
   `status` varchar(45) NOT NULL,
+  `create_date` datetime DEFAULT NULL,
+  `final_revision` tinyint(4) DEFAULT '0',
+  `time_to_edit` int(11) DEFAULT '0',
   PRIMARY KEY (`id`,`id_job`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_segment`) USING BTREE
@@ -893,7 +902,6 @@ CREATE TABLE `segment_translation_versions` (
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `propagated_from` bigint(20) DEFAULT NULL,
   `time_to_edit` int(11) DEFAULT NULL,
-  `is_review` tinyint(4) NOT NULL DEFAULT '0',
   `raw_diff` text,
   `old_status` int(11) DEFAULT NULL,
   `new_status` int(11) DEFAULT NULL,
@@ -1183,8 +1191,8 @@ USE `matecat`;
 /*!50001 SET character_set_results     = utf8 */;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`matecat`@`10.3%` SQL SECURITY DEFINER */
-/*!50001 VIEW `show_clients` AS select substring_index(`information_schema`.`processlist`.`HOST`,':',1) AS `host_short`,group_concat(distinct `information_schema`.`processlist`.`USER` separator ',') AS `users`,count(0) AS `COUNT(*)` from `information_schema`.`processlist` group by substring_index(`information_schema`.`processlist`.`HOST`,':',1) order by count(0),substring_index(`information_schema`.`processlist`.`HOST`,':',1) */;
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `show_clients` AS select 1 AS `host_short`,1 AS `users`,1 AS `COUNT(*)` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -1198,7 +1206,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-08-12 17:59:39
+-- Dump completed on 2019-08-16 11:41:40
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1366,6 +1374,13 @@ INSERT INTO `phinxlog` VALUES (20180330145502,'2018-03-30 17:15:03','2018-03-30 
 INSERT INTO `phinxlog` VALUES (20180921144444,'2018-09-21 16:47:50','2018-09-21 16:47:52');
 INSERT INTO `phinxlog` VALUES (20180924143503,'2018-09-25 10:47:17','2018-09-25 10:47:20');
 INSERT INTO `phinxlog` VALUES (20181026145655,'2018-10-31 12:59:37','2018-10-31 12:59:38');
+INSERT INTO `phinxlog` VALUES (20190306105740,'2019-08-16 10:58:30','2019-08-16 10:58:30');
+INSERT INTO `phinxlog` VALUES (20190327093656,'2019-08-16 11:05:37','2019-08-16 11:05:37');
+INSERT INTO `phinxlog` VALUES (20190517080829,'2019-08-16 11:05:37','2019-08-16 11:05:37');
+INSERT INTO `phinxlog` VALUES (20190617082146,'2019-08-16 11:05:37','2019-08-16 11:05:37');
+INSERT INTO `phinxlog` VALUES (20190618151911,'2019-08-16 11:05:37','2019-08-16 11:05:37');
+INSERT INTO `phinxlog` VALUES (20190627093658,'2019-08-16 11:05:37','2019-08-16 11:05:37');
+INSERT INTO `phinxlog` VALUES (20190812091652,'2019-08-16 08:59:20','2019-08-16 08:59:20');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1377,4 +1392,4 @@ INSERT INTO `phinxlog` VALUES (20181026145655,'2018-10-31 12:59:37','2018-10-31 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-08-12 17:59:39
+-- Dump completed on 2019-08-16 11:41:40
