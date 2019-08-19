@@ -55,7 +55,9 @@
             UI.getSegmentTagsProjection().done(function(response) {
                 if (response.errors && (response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
-                    UI.disableTPOnSegment()
+                    UI.disableTPOnSegment();
+                    UI.copyTagProjectionInCurrentSegment();
+                    UI.autoFillTagsInTarget();
                 } else {
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                     UI.autoFillTagsInTarget();

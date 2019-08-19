@@ -137,14 +137,14 @@ class getSegmentsController extends ajaxController {
     }
 
     private function getOptionalQueryFields() {
-        $feature = $this->job->getProject()->isFeatureEnabled('translation_versions');
-        $options = array();
+        $feature = $this->job->getProject()->isFeatureEnabled( 'translation_versions' );
+        $options = [];
 
         if ( $feature ) {
-            $options['optional_fields'] = array('st.version_number');
+            $options[ 'optional_fields' ] = [ 'st.version_number' ];
         }
 
-        $options = $this->featureSet->filter('filter_get_segments_optional_fields', $options);
+        $options = $this->featureSet->filter( 'filter_get_segments_optional_fields', $options );
 
         return $options;
     }
