@@ -14,6 +14,8 @@ use PDO;
  * 1. FILE HANDLING ON FILE SYSTEM
  * 2. CACHE PACKAGE HELPERS
  * 3. PROJECT
+ * 4. ZIP ARCHIVES HANDLING
+ * 5. MISC
  *
  * @package FilesStorage
  */
@@ -357,7 +359,9 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      * @throws \ReflectionException
      */
     public function getTemporaryUploadedZipFile( $uploadToken ) {
-        if ( \INIT::$FILE_STORAGE_METHOD === 's3' ) {
+        $isFsOnS3 = AbstractFilesStorage::isOnS3();
+
+        if ( $isFsOnS3 ) {
             $s3Client = S3FilesStorage::getStaticS3Client();
             $files    = $s3Client->getItemsInABucket( [
                     'bucket' => S3FilesStorage::getFilesStorageBucket(),
@@ -377,7 +381,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             }
         }
 
-        if ( \INIT::$FILE_STORAGE_METHOD === 's3' ) {
+        if ( $isFsOnS3 ) {
             $files = $s3Client->getItemsInABucket( [
                     'bucket' => S3FilesStorage::getFilesStorageBucket(),
                     'prefix' => S3FilesStorage::ZIP_FOLDER . DIRECTORY_SEPARATOR . $zip_name
@@ -398,5 +402,18 @@ abstract class AbstractFilesStorage implements IFilesStorage {
         } else {
             return \INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file;
         }
+    }
+
+    /**
+     **********************************************************************************************
+     * 4. MISC
+     **********************************************************************************************
+     */
+
+    /**
+     * @return bool
+     */
+    public static function isOnS3(){
+        return (\INIT::$FILE_STORAGE_METHOD === 's3');
     }
 }

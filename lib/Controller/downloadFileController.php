@@ -109,7 +109,11 @@ class downloadFileController extends downloadController {
          */
 
         $sDao = new Segments_SegmentDao();
-        $s3Client = S3FilesStorage::getStaticS3Client();
+
+        // instantiate $s3Client only if S3 is enabled
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+        }
 
         //file array is chuncked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
@@ -125,9 +129,6 @@ class downloadFileController extends downloadController {
 
                 //get path for the output file converted to know it's right extension
                 $xliffFilePath = $file[ 'xliffFilePath' ];
-                if($s3Client->hasEncoder()){
-                    $xliffFilePath = $s3Client->getEncoder()->decode($file[ 'xliffFilePath' ]);
-                }
 
                 $_fileName  = explode( DIRECTORY_SEPARATOR, $xliffFilePath );
                 $outputPath = INIT::$TMP_DOWNLOAD . DIRECTORY_SEPARATOR . $this->id_job . DIRECTORY_SEPARATOR . $fileID . DIRECTORY_SEPARATOR . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
@@ -152,9 +153,7 @@ class downloadFileController extends downloadController {
                     $transUnits[ $internalId ] [] = $i;
 
                     $data[ 'matecat|' . $internalId ] [] = $i;
-
                 }
-
 
                 /**
                  * Because of a bug in the filters for the cjk languages ( Exception when downloading translations )
@@ -212,15 +211,12 @@ class downloadFileController extends downloadController {
                 $convertBackToOriginal = true;
 
                 //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
-                if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+                if ( AbstractFilesStorage::isOnS3() ) {
                     $originalFilePath = $file[ 'originalFilePath' ];
-                    if($s3Client->hasEncoder()){
-                        $originalFilePath = $s3Client->getEncoder()->decode($file[ 'originalFilePath' ]);
-                    }
 
                     $file[ 'original_file' ] = $s3Client->openItem( [
                             'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                            'key' => $originalFilePath
+                            'key'    => $originalFilePath
                     ] );
                 } else {
                     $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
