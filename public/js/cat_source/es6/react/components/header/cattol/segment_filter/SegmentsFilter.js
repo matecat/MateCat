@@ -114,7 +114,7 @@ class SegmentsFilter extends React.Component {
             this.setState({
                 filtering: false,
             });
-            setTimeout(()=>SegmentFilter.clearFilter);
+            setTimeout(()=>SegmentFilter.clearFilter());
         }
     }
 
@@ -235,24 +235,6 @@ class SegmentsFilter extends React.Component {
             $(this.dataSampleDropDown).dropdown({
                 onChange: function(value, text, $selectedItem) {
                     self.dataSampleChange(value);
-                }
-            });
-            $(this.toggleFilters).checkbox({
-                onChecked: function() {
-                    $(self.filtersDropdown).dropdown('restore defaults');
-                    self.setState({
-                        filtersEnabled: false,
-                        dataSampleEnabled: true,
-                        samplingType: '',
-                    });
-                },
-                onUnchecked: function() {
-                    $(self.dataSampleDropDown).dropdown('restore defaults');
-                    self.setState({
-                        filtersEnabled: true,
-                        dataSampleEnabled: false,
-                        samplingType: '',
-                    });
                 }
             });
             $(this.toggleFilters).checkbox({
