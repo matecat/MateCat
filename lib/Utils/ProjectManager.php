@@ -434,16 +434,16 @@ class ProjectManager {
 
         //sort files in order to process TMX first
         $sortedFiles      = [];
+        $sortedMeta       = [];
         $firstTMXFileName = "";
 
-        $i = 0;
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
             // get metadata
-            $meta = $this->projectStructure[ 'array_files_meta' ][ $i ];
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
 
             //check for glossary files and tmx and put them in front of the list
-            if ( $meta[ 'getMemoryFileType' ] ) {
+            if ( $meta[ 'getMemoryType' ] ) {
 
                 //found TMX, enable language checking routines
                 if ( $meta[ 'isTMX' ] ) {
@@ -460,16 +460,20 @@ class ProjectManager {
 
                 //prepend in front of the list
                 array_unshift( $sortedFiles, $fileName );
+                array_unshift( $sortedMeta, $meta );
+
             } else {
 
                 //append at the end of the list
                 array_push( $sortedFiles, $fileName );
+                array_push( $sortedMeta, $meta );
             }
-
-            $i++;
         }
+
         $this->projectStructure[ 'array_files' ] = $sortedFiles;
+        $this->projectStructure[ 'array_files_meta' ] = $sortedMeta;
         unset( $sortedFiles );
+        unset( $sortedMeta );
 
         if ( count( $this->projectStructure[ 'private_tm_key' ] ) ) {
             $this->setPrivateTMKeys( $firstTMXFileName );
@@ -511,11 +515,10 @@ class ProjectManager {
             Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
          */
 
-        $i = 0;
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
             // get corresponding meta
-            $meta            = $this->projectStructure[ 'array_files_meta' ][ $i ];
+            $meta            = $this->projectStructure[ 'array_files_meta' ][ $pos ];
             $mustBeConverted = $meta[ 'mustBeConverted' ];
 
             //if it's one of the listed formats or conversion is not enabled in first place
@@ -560,8 +563,6 @@ class ProjectManager {
                 $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
                 unset( $sha1 );
             }
-
-            $i++;
         }
 
 
@@ -836,6 +837,11 @@ class ProjectManager {
      */
     public function getSingleS3QueueFile( $fileName ) {
         $fs = FilesStorageFactory::create();
+
+        if(false === is_dir($this->uploadDir)){
+            mkdir($this->uploadDir, 0755);
+        }
+
         /** @var $fs S3FilesStorage */
         $client              = $fs::getStaticS3Client();
         $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
@@ -937,13 +943,11 @@ class ProjectManager {
      */
     protected function _pushTMXToMyMemory() {
 
-        $i = 0;
-
         //TMX Management
         foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
             // get corresponding meta
-            $meta = $this->projectStructure[ 'array_files_meta' ][ $i ];
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
 
             $ext = $meta[ 'extension' ];
 
@@ -972,9 +976,6 @@ class ProjectManager {
                     continue;
                 }
 
-                unset( $this->projectStructure[ 'array_files' ][ $pos ] );
-                unset( $this->projectStructure[ 'array_files_meta' ][ $pos ] );
-
             } catch ( Exception $e ) {
 
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
@@ -983,10 +984,7 @@ class ProjectManager {
                 ];
 
                 throw new Exception( $e );
-
             }
-
-            $i++;
         }
 
         /**
@@ -1107,7 +1105,7 @@ class ProjectManager {
         }
 
         if ( 1 == $this->checkTMX ) {
-            //this means that noone of uploaded TMX were usable for this project. Warn the user.
+            //this means that none of uploaded TMX were usable for this project. Warn the user.
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => -16,
                     "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
@@ -1952,12 +1950,10 @@ class ProjectManager {
         //return structure
         $filesStructure = [];
 
-        $i = 0;
-
-        foreach ( $_originalFileNames as $originalFileName ) {
+        foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
             // get metadata
-            $meta = $this->projectStructure[ 'array_files_meta' ][ $i ];
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
 
             $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
             $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, @$meta );
@@ -1979,8 +1975,6 @@ class ProjectManager {
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
             $filesStructure[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
-
-            $i++;
         }
 
         return $filesStructure;
