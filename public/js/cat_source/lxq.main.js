@@ -779,7 +779,7 @@ LXQ.init  = function () {
                         }
                         else
                             root.append(row);
-                        if (warningData.suggestions && warningData.suggestions.length && word && word.length) {
+                        if (warningData.suggestions && warningData.suggestions.length && Array.isArray(warningData.suggestions) && word && word.length) {
                           $.each(warningData.suggestions, function (i, suggest) {
                               var suggestRow = $(tpls.lxqTooltipSuggestionBody);
                               if (cl ==='o1') {

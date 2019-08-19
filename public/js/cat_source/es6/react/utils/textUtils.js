@@ -112,14 +112,14 @@ let TAGS_UTILS =  {
          */
         var phTagsObject = {};
         var diff;
-        source = source.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, group1, group2) {
+        source = source.replace( /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, group1, group2) {
             if ( _.isUndefined(phTagsObject[group2]) ) {
                 phTagsObject[group2] = match;
             }
             return '<' + Base64.encode(group2) +'> ';
         });
 
-        target = target.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, gruop1, group2) {
+        target = target.replace( /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, gruop1, group2) {
             if ( _.isUndefined(phTagsObject[group2]) ) {
                 phTagsObject[group2] = match;
             }
@@ -127,8 +127,8 @@ let TAGS_UTILS =  {
         });
 
         diff   = dmp.diff_main(
-            this.replacePlaceholder(source.replace(/&nbsp;/g, '')),
-            this.replacePlaceholder(target.replace(/&nbsp;/g, '')),
+            this.replacePlaceholder(source.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, '')),
+            this.replacePlaceholder(target.replace(/&nbsp; /g, '  ').replace(/&nbsp;/g, ''))
         );
 
         dmp.diff_cleanupSemantic( diff ) ;
@@ -154,6 +154,10 @@ let TAGS_UTILS =  {
             });
             var rootElem;
             var newElem;
+            if ( self.htmlDecode(text[1]) === " " ) {
+                text[1] = "&nbsp;";
+            }
+
             if(text[0] === -1) {
                 rootElem = $( document.createElement( 'div' ) );
                 newElem = $.parseHTML( '<span class="deleted"/>' );
