@@ -1,1 +1,0 @@
-<?php return unserialize('a:3:{s:2:"db";a:2:{s:5:"class";s:8:"Database";s:6:"method";s:6:"obtain";}s:5:"redis";a:2:{s:5:"class";s:12:"RedisHandler";s:6:"method";s:13:"getConnection";}s:2:"fs";a:1:{s:5:"class";s:27:"FilesStorage\S3FilesStorage";}}');
