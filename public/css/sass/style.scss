@@ -5162,8 +5162,7 @@ header {
         }
 
         /* Todo: make this trigger onClick */
-        .action-submenu:hover .menu {
-            display: block;
+        .action-submenu .menu {
             position: absolute;
             z-index: 1;
             width: 200px;

@@ -102,6 +102,12 @@ $.extend(UI, {
 		this.checkQueryParams();
 
         UI.firstLoad = false;
+
+        //temporary js for header
+
+        if($('#action-download-init').length){
+			$('#action-download-init').dropdown()
+		}
 	},
     restart: function () {
         UI.unmountSegments();
