@@ -29,37 +29,31 @@
         </div> <!-- .breadcrumbs -->
 
         <div class="action-menu">
-            <div class="action-submenu ui dropdown" id="action-download-init">
-                <span class="btn-action" id="action-download"> </span>
+            <div class="action-submenu ui floating pointing dropdown" id="action-download">
                 <div class="menu">
-                    <div class="item">Draft 1</div>
-                    <div class="item">Original</div>
-                    <div class="item">Export XLIF</div>
-                    <div class="item">Export Job TMX</div>
+                    <div class="item" data-value="draft">Draft</div>
+                    <div class="item" data-value="original">Original</div>
+                    <div class="item" data-value="xlif">Export XLIF</div>
+                    <div class="item" data-value="tmx">Export Job TMX</div>
                 </div>
             </div>
 
-            <div class="action-submenu ui dropdown">
-                <span class="btn-action" id="action-QR"> </span>
+            <div class="action-submenu ui floating pointing dropdown" id="action-QR">
                 <div class="menu">
                     <div class="item">Voce 1</div>
                     <div class="item">Voce 2</div>
                 </div>
             </div>
 
-            <div class="action-submenu ui dropdown">
-                <span class="btn-action" id="action-QA"> </span>
+            <div class="action-submenu ui floating pointing dropdown" id="action-QA">
                 <div class="menu">
                     <div class="item">Voce 1</div>
-                    <div class="item"></div>
+                    <div class="item">Voce 1</div>
                 </div>
             </div>
 
-            <div class="action-submenu ui dropdown">
-                <span class="btn-action" id="action-comments">
-                    <span class="badge">1</span>
-                </span>
-
+            <div class="action-submenu ui floating pointing dropdown" id="action-comments">
+                <span class="badge">1</span>
                 <div class="menu">
                     <div class="item">Voce 1</div>
                     <div class="item">Voce 2</div>
@@ -68,16 +62,13 @@
                 </div>
             </div>
 
-            <div class="action-submenu ui dropdown">
-                <span class="btn-action" id="action-search"> </span>
+            <div class="action-submenu ui floating pointing dropdown" id="action-search">
             </div>
 
-            <div class="action-submenu ui dropdown">
-                <span class="btn-action" id="action-filter"> </span>
+            <div class="action-submenu ui floating pointing dropdown" id="action-filter">
             </div>
 
-            <div class="action-submenu ui dropdown">
-                <span class="btn-action" id="action-settings"> </span>
+            <div class="action-submenu ui floating pointing dropdown" id="action-settings">
                 <div class="menu">
                     <div class="item">Voce 1</div>
                     <div class="item">Voce 2</div>
@@ -86,13 +77,12 @@
                 </div>
             </div>
 
-            <div class="action-submenu ui dropdown">
+            <div class="action-submenu ui floating pointing dropdown" id="action-three-dots">
                 <!--<a href="#" class="btn-action" id="action-three-dots"> </a>-->
-                <span class="btn-action" id="action-three-dots"> </span>
                 <div class="menu">
-                    <div class="item">Revise/Translate</div>
-                    <div class="item">Volume analisys</div>
-                    <div class="item">Export XLIF to target</div>
+                    <div class="item" data-value="revise">Revise/Translate</div>
+                    <div class="item" data-value="analisys">Volume analisys</div>
+                    <div class="item" data-value="target">Export XLIF to target</div>
                 </div>
             </div>
         </div>  <!-- .action-menu -->
@@ -101,7 +91,7 @@
         <div class="profile-menu">
             <div class="column-separator"></div>
             <div>
-                <a href="#" class="btn-action">
+                <a href="#" class="action-submenu">
                     <img src="/public/img/icons/icon-manage.svg"/>
                 </a>
             </div>
