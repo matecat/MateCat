@@ -824,6 +824,46 @@ CREATE TABLE `remote_files` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `replace_events`
+--
+
+DROP TABLE IF EXISTS `replace_events`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `replace_events` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `replace_version` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
+  `job_password` varchar(45) NOT NULL,
+  `id_segment` int(11) NOT NULL,
+  `segment_version` int(11) DEFAULT NULL,
+  `translation_before_replacement` text,
+  `translation_after_replacement` text,
+  `source` text,
+  `target` text,
+  `status` varchar(45) NOT NULL,
+  `replacement` text,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `replace_events_current_version`
+--
+
+DROP TABLE IF EXISTS `replace_events_current_version`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `replace_events_current_version` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_job` bigint(20) NOT NULL,
+  `version` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `segment_notes`
 --
 
@@ -1206,7 +1246,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-08-16 11:41:40
+-- Dump completed on 2019-08-19 11:48:43
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1375,11 +1415,13 @@ INSERT INTO `phinxlog` VALUES (20180921144444,'2018-09-21 16:47:50','2018-09-21 
 INSERT INTO `phinxlog` VALUES (20180924143503,'2018-09-25 10:47:17','2018-09-25 10:47:20');
 INSERT INTO `phinxlog` VALUES (20181026145655,'2018-10-31 12:59:37','2018-10-31 12:59:38');
 INSERT INTO `phinxlog` VALUES (20190306105740,'2019-08-16 10:58:30','2019-08-16 10:58:30');
-INSERT INTO `phinxlog` VALUES (20190327093656,'2019-08-16 11:05:37','2019-08-16 11:05:37');
-INSERT INTO `phinxlog` VALUES (20190517080829,'2019-08-16 11:05:37','2019-08-16 11:05:37');
-INSERT INTO `phinxlog` VALUES (20190617082146,'2019-08-16 11:05:37','2019-08-16 11:05:37');
-INSERT INTO `phinxlog` VALUES (20190618151911,'2019-08-16 11:05:37','2019-08-16 11:05:37');
-INSERT INTO `phinxlog` VALUES (20190627093658,'2019-08-16 11:05:37','2019-08-16 11:05:37');
+INSERT INTO `phinxlog` VALUES (20190327093656,'2019-08-19 11:48:22','2019-08-19 11:48:22');
+INSERT INTO `phinxlog` VALUES (20190517080829,'2019-08-19 11:48:22','2019-08-19 11:48:22');
+INSERT INTO `phinxlog` VALUES (20190617082146,'2019-08-19 11:48:22','2019-08-19 11:48:22');
+INSERT INTO `phinxlog` VALUES (20190618151911,'2019-08-19 11:48:22','2019-08-19 11:48:22');
+INSERT INTO `phinxlog` VALUES (20190627093658,'2019-08-19 11:48:22','2019-08-19 11:48:22');
+INSERT INTO `phinxlog` VALUES (20190719095651,'2019-08-19 11:48:22','2019-08-19 11:48:22');
+INSERT INTO `phinxlog` VALUES (20190723092053,'2019-08-19 11:48:22','2019-08-19 11:48:22');
 INSERT INTO `phinxlog` VALUES (20190812091652,'2019-08-16 08:59:20','2019-08-16 08:59:20');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -1392,4 +1434,4 @@ INSERT INTO `phinxlog` VALUES (20190812091652,'2019-08-16 08:59:20','2019-08-16 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-08-16 11:41:40
+-- Dump completed on 2019-08-19 11:48:43
