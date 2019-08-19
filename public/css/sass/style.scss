@@ -5015,7 +5015,7 @@ header {
 
 
     .wrapper {
-        grid-template-columns: 200px auto auto 148px;
+        grid-template-columns: 260px auto auto 148px;
         align-items: center;
     }
 
@@ -5026,6 +5026,10 @@ header {
 
         .logo {
             margin-top:0;
+            width: 160px;
+            height: 32px;
+            background: url(../../img/white_logo.png) 0px 2px no-repeat;
+            background-size: 160px 32px;
         }
     }
 
@@ -5283,15 +5287,17 @@ header {
                 background: $white;
                 &::before {
                     color: $medium-gray;
+                    font-size: 16px;
                 }
             }
             .label {
                 height: auto !important;
                 margin: 0 !important;
-                width: 190px !important;
-                padding: 4px !important;
+                width: 236px !important;
+                padding: 4px 8px !important;
                 border-radius: 2px;
                 float:none !important;
+                display: inline-block;
 
                 &:hover {
                     background-color: $light-gray;
@@ -5302,7 +5308,7 @@ header {
 
         .firstSegment {
             a {
-                padding: 4px 10px 4px 15px;
+                padding: 4px 8px 4px 8px;
             }
             .label {
                 height: auto !important;
@@ -5322,13 +5328,20 @@ header {
 
     ul.jobmenu-list {
         margin-top: 0;
+        span {
+            padding: 4px 4px 0px 2px;
+        }
     }
 
     ul {
         li {
             a {
                 color: #000;
-                padding: 13px 10px 10px 15px;
+                padding: 10px 8px;
+                /*width: 250px;*/
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 &:hover {
                     color: $light-blue;
                 }
