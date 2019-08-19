@@ -676,16 +676,14 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             st.status,
             st.eq_word_count,
             s.raw_word_count
-        FROM jobs j 
-        JOIN segment_translations st ON st.id_job = j.id 
-        JOIN segments s ON s.id = st.id_segment
-        JOIN files on s.id_file = files.id
-        where j.id = :id_job AND j.password = :password AND files.id = :id_file 
+        FROM files 
+        JOIN segments s ON s.id_file = files.id
+        LEFT JOIN segment_translations st ON s.id = st.id_segment AND st.id_job = :id_job
+        WHERE files.id = :id_file
 ";
 
         $bind_keys = [
                 'id_job'   => $jStruct->id,
-                'password' => $jStruct->password,
                 'id_file'  => $id_file
         ];
 
