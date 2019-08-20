@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class ReplaceEventCreateTable extends AbstractMigration
+class ReplaceEventCreateTable extends AbstractMatecatMigration
 {
     public $sql_up = "CREATE TABLE `replace_events` (
     `id` bigint(20) NOT NULL AUTO_INCREMENT,
