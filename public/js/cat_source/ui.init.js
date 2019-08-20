@@ -104,7 +104,7 @@ $.extend(UI, {
         UI.firstLoad = false;
 
         // Temporary js for header action menu
-		UI.initHeaderDropDown();
+		UI.initHeader();
 	},
     restart: function () {
         UI.unmountSegments();

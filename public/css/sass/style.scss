@@ -5113,7 +5113,7 @@ header {
                 }*/
 
                 .item {
-                    border-radius: 2px;
+                    border-radius: 3px;
                     padding: 8px !important;
                     font-size: 16px;
 
@@ -5121,8 +5121,12 @@ header {
                         background-color: $light-gray;
                         color: $light-blue;
                     }
-
                     &.selected {
+                        background-color: transparent;
+                        font-weight: normal;
+                    }
+
+                    /*&.selected {
                         background-color: $matecat-blue;
                         color: #fff;
                         font-weight: normal;
@@ -5135,7 +5139,7 @@ header {
                             position: absolute;
                             top: 10px;
                         }
-                    }
+                    }*/
                 }
             }
 
