@@ -70,7 +70,7 @@ $.extend(UI, {
         this.offline = false;
 
 		if (SearchUtils.searchEnabled)
-            $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 50) } );
+            $('#action-search').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 50) } );
 		setTimeout(function() {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);
