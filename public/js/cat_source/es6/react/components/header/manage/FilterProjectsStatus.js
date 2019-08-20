@@ -46,7 +46,7 @@ class FilterProjects extends React.Component {
 
 		return <div className="ui top left pointing dropdown" title="Status Filter"
 					ref={(dropdown) => this.dropdown = dropdown}>
-			<IconFilter width={24} height={24} color={'#002b5c'}/>
+			<IconFilter width={36} height={36} color={'#002b5c'}/>
 			<div style={{ textTransform: 'capitalize'}} className="text">Active</div>
 			<div className="menu" >
 				{status.map((e, i) => <div style={{ textTransform: 'capitalize'}} key={i} className="item" data-value={e}>{e} {e === this.currentFilter ?
