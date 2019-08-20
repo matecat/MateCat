@@ -76,9 +76,13 @@
     </tal:block>
 
     <tal:block tal:condition="php: !empty(logged_user)">
-        <div class="user-menu-container">
+        <div class="user-menu-container ui floating dropdown" id="user-menu-dropdown">
             <div class="ui user label user-menu-preferences edit-log">${logged_user}</div>
             <div class="organization-name"></div>
+            <div class="menu">
+                <div class="item" data-value="profile" id="profile-item">Profile</div>
+                <div class="item" data-value="logout" id="logout-item">Logout</div>
+            </div>
         </div>
     </tal:block>
 </div>

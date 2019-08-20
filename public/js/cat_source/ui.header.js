@@ -10,5 +10,8 @@ $.extend( UI, {
         if($('#action-three-dots').length){
             $('#action-three-dots').dropdown();
         }
+        if($('#user-menu-dropdown').length){
+            $('#user-menu-dropdown').dropdown();
+        }
     }
 });
