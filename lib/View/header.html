@@ -71,8 +71,8 @@
 
         <div class="profile-menu">
             <div class="column-separator"></div>
-            <div>
-                <a href="#" class="action-submenu">
+            <div tal:condition="isLoggedIn">
+                <a href="/manage" class="action-submenu">
                     <img src="/public/img/icons/icon-manage.svg"/>
                 </a>
             </div>
