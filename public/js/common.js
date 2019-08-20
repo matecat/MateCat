@@ -898,12 +898,6 @@ APP = {
             var html = '<img class="ui-user-top-image-general user-menu-preferences" src="' + urlImage + '"/>';
             $('.user-menu-container .user-menu-preferences').replaceWith(html);
             /*$('.user-menu-preferences').on('click', function (e) {*/
-            $('#profile-item').on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                $('#modal').trigger('openpreferences');
-                return false;
-            });
         } else {
             setTimeout(this.setUserImage.bind(this), 500);
         }

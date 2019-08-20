@@ -40,4 +40,11 @@ const initEvents = () => {
 		e.preventDefault();
 		UI.logoutAction();
 	});
+
+    $('#profile-item').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#modal').trigger('openpreferences');
+        return false;
+    });
 };
