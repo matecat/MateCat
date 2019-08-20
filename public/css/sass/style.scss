@@ -5283,6 +5283,7 @@ header {
         .currSegment {
             a {
                 background: $white;
+                padding: 8px 16px;
                 &::before {
                     color: $medium-gray;
                     font-size: 16px;
