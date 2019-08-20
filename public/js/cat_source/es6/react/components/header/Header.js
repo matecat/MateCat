@@ -64,10 +64,12 @@ class Header extends React.Component {
 	getUserIcon = () => {
 		if (this.props.loggedUser) {
 			if (this.props.user.metadata && this.props.user.metadata.gplus_picture) {
-				return <img onClick={this.openPreferencesModal.bind(this)}
-							className="ui mini circular image ui-user-top-image"
-							src={this.props.user.metadata.gplus_picture + "?sz=80"} title="Personal settings"
-							alt="Profile picture"/>
+				return 	<div>
+							<img onClick={this.openPreferencesModal.bind(this)}
+							 className="ui mini circular image ui-user-top-image"
+							 src={this.props.user.metadata.gplus_picture + "?sz=80"} title="Personal settings"
+							 alt="Profile picture"/>
+						</div>
 			}
 			return <div className="ui user label"
 						onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
@@ -78,6 +80,13 @@ class Header extends React.Component {
 			</div>
 
 		}
+	}
+
+	getDropdownMenu = () => {
+		return 	<div className="menu">
+					<div className="item" data-value="profile" id="profile-item">Profile</div>
+					<div className="item" data-value="logout" id="logout-item">Logout</div>
+				</div>;
 	}
 
 	getHeaderComponentToShow = () => {

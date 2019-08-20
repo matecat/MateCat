@@ -160,6 +160,7 @@ if (SegmentFilter.enabled())
          */
         openFilter : function() {
             CatToolActions.openSegmentFilter();
+            $('#action-filter').addClass('active');
             this.open = true;
             var localStorageData = this.getStoredState();
             if ( localStorageData.serverData ) {
@@ -182,6 +183,7 @@ if (SegmentFilter.enabled())
 
         closeFilter : function() {
             CatToolActions.closeSubHeader();
+            $('#action-filter').removeClass('active');
             this.open = false;
             SegmentActions.removeAllMutedSegments();
             UI.createButtons();
@@ -278,16 +280,5 @@ if (SegmentFilter.enabled())
             SegmentFilter.setStoredState({ lastSegmentId : data.segment.absId }) ;
         }
     });
-
-    $(document).on('click', "header .filter", function(e) {
-        e.preventDefault();
-        if (!SegmentFilter.open) {
-            SegmentFilter.openFilter();
-        } else {
-            SegmentFilter.closeFilter();
-            SegmentFilter.open = false;
-        }
-    });
-
 
 })(jQuery, UI, SegmentFilter);

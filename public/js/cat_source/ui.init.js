@@ -68,9 +68,6 @@ $.extend(UI, {
 		this.savedSelActiveElement = null;
 		this.autoscrollCorrectionEnabled = true;
         this.offline = false;
-
-		if (SearchUtils.searchEnabled)
-            $('#action-search').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 50) } );
 		setTimeout(function() {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);

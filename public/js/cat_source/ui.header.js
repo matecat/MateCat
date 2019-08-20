@@ -4,6 +4,11 @@
 
 $.extend(UI, {
 	initHeader: () => {
+
+		if (SearchUtils.searchEnabled)
+			$('#action-search').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 50) } );
+
+
 		if ($('#action-download').length) {
 			$('#action-download').dropdown();
 		}
@@ -36,15 +41,24 @@ const initEvents = () => {
 		e.preventDefault();
 		UI.openOptionsPanel();
 	});
-	$('.user-menu-container').on('click', '#logout-item', (e) => {
+	$(".user-menu-container").on('click', '#logout-item', (e) => {
 		e.preventDefault();
 		UI.logoutAction();
 	});
+	$('#profile-item').on('click', function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+		$('#modal').trigger('openpreferences');
+		return false;
+	});
 
-    $('#profile-item').on('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $('#modal').trigger('openpreferences');
-        return false;
-    });
+	$(".action-menu").on('click', "#action-filter", function(e) {
+		e.preventDefault();
+		if (!SegmentFilter.open) {
+			SegmentFilter.openFilter();
+		} else {
+			SegmentFilter.closeFilter();
+			SegmentFilter.open = false;
+		}
+	});
 };
