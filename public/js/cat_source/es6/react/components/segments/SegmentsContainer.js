@@ -37,6 +37,8 @@ class SegmentsContainer extends React.Component {
         this.lastScrollTop = 0;
         this.segmentsHeightsMap = {};
         this.segmentsWithCollectionType = [];
+
+        this.scrollContainer;
     }
 
     splitSegments(segments, splitGroup) {
@@ -90,6 +92,7 @@ class SegmentsContainer extends React.Component {
 
     scrollToSegment(sid) {
         this.setState({scrollTo: sid});
+        setTimeout(()=>this.onScroll(), 500);
     }
 
     getIndexToScroll() {
@@ -101,12 +104,18 @@ class SegmentsContainer extends React.Component {
                     return segment.get('sid') === this.state.scrollTo;
                 }
             });
-            return {scrollTo:index-2, position: 'start'}
+            let scrollTo = ( index > 2 ) ? index-2 : index;
+            // if ( index < 10 ) {
+            //     UI.getMoreSegments('before');
+            // } else if ( index > this.state.segments.size - 10 ) {
+            //     UI.getMoreSegments('after');
+            // }
+            return { scrollTo: scrollTo, position: 'start' }
         } else if ( this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
             const diff = this.state.segments.size - this.lastListSize;
-            return {scrollTo:this.lastUpdateObj.startIndex + diff, position: 'start'}
+            return { scrollTo: this.lastUpdateObj.startIndex + diff, position: 'start' }
         }
-        return {scrollTo:null, position: null}
+        return { scrollTo: null, position: null }
     }
 
     getSegmentByIndex(index) {
@@ -274,8 +283,24 @@ class SegmentsContainer extends React.Component {
         return height;
     }
 
+    onScroll() {
+        let scrollTop = this.scrollContainer.scrollTop();
+        let scrollBottom = this.scrollContainer.prop('scrollHeight') - (scrollTop + this.scrollContainer.height());
+        this.scrollDirectionTop = (scrollTop < this.lastScrollTop);
+        if ( scrollBottom < 500 && !this.scrollDirectionTop) {
+            UI.getMoreSegments('after');
+        } else if( scrollTop < 500 && this.scrollDirectionTop) {
+            UI.getMoreSegments('before');
+        }
+        this.lastListSize = this.state.segments.size;
+        this.lastScrollTop = scrollTop;
+    }
+
+
+
     componentDidMount() {
         this.updateWindowDimensions();
+        this.scrollContainer = $(".article-segments-container > div");
         window.addEventListener('resize', this.updateWindowDimensions);
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
@@ -317,6 +342,7 @@ class SegmentsContainer extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        this.lastListSize = this.state.segments.size;
         if ( this.state.scrollTo !== null && this.state.segments.size > 0 ) {
             setTimeout(()=>{
                 this.setState({
@@ -343,18 +369,7 @@ class SegmentsContainer extends React.Component {
             scrollToAlignment={scrollToObject.position}
             scrollToIndex={scrollToObject.scrollTo}
             // scrollOffset={1000}
-            onScroll={(number, event) => {
-                let scrollTop = $(event.target).scrollTop();
-                let scrollBottom = $(event.target).prop('scrollHeight') - (scrollTop + $(event.target).height());
-                this.scrollDirectionTop = (scrollTop < this.lastScrollTop);
-                if ( scrollBottom < 500 && !this.scrollDirectionTop) {
-                    UI.getMoreSegments('after');
-                } else if( scrollTop < 500 && this.scrollDirectionTop) {
-                    UI.getMoreSegments('before');
-                }
-                this.lastListSize = items.length;
-                this.lastScrollTop = scrollTop;
-            } }
+            onScroll={(number, event) => this.onScroll() }
             renderItem={({index, style}) => {
                 let styleCopy = Object.assign({}, style);
                 if ( index === 0 ) {
