@@ -399,6 +399,10 @@ $.extend(UI, {
             }
 		});
 
+		$('.user-menu-container').on('click', '#logout-item', function (e) {
+			UI.logoutAction();
+		});
+		
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
