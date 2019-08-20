@@ -216,14 +216,6 @@ $.extend(UI, {
 		window.onbeforeunload = function(e) {
 			goodbye(e);
 		};
-
-		$("#action-search").bind('click', function(e) {
-            SearchUtils.toggleSearch(e);
-		});
-		$("#action-settings").bind('click', function(e) {
-			e.preventDefault();
-			UI.openOptionsPanel();
-		});
 		$("#segmentPointer").click(function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
@@ -397,11 +389,6 @@ $.extend(UI, {
                 e.preventDefault();
                 e.stopPropagation();
             }
-		});
-
-		$('.user-menu-container').on('click', '#logout-item', function (e) {
-			e.preventDefault();
-			UI.logoutAction();
 		});
 
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
