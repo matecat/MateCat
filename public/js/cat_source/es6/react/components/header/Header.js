@@ -29,7 +29,23 @@ class Header extends React.Component {
 		TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
 	}
 
-	componentDidUpdate = () => {
+	componentDidUpdate() {
+		this.initProfileDropdown();
+	}
+
+	initProfileDropdown = () => {
+		let dropdownProfile = $(this.dropdownProfile);
+		dropdownProfile.dropdown();
+	}
+
+	logoutUser() {
+		$.post('/api/app/user/logout',function(data){
+			if ($('body').hasClass('manage')) {
+				location.href = config.hostpath + config.basepath;
+			} else {
+				window.location.reload();
+			}
+		});
 	}
 
 	renderTeams = (teams) => {
@@ -61,15 +77,18 @@ class Header extends React.Component {
 		$('#modal').trigger('openlogin');
 	}
 
+
 	getUserIcon = () => {
+		let dropdownMenu = this.getDropdownMenu();
 		if (this.props.loggedUser) {
 			if (this.props.user.metadata && this.props.user.metadata.gplus_picture) {
-				return 	<div>
-							<img onClick={this.openPreferencesModal.bind(this)}
-							 className="ui mini circular image ui-user-top-image"
-							 src={this.props.user.metadata.gplus_picture + "?sz=80"} title="Personal settings"
-							 alt="Profile picture"/>
+				return 	<div className={"ui dropdown"} ref={(dropdownProfile) => this.dropdownProfile = dropdownProfile} id={"profile-menu"}>
+							<img className="ui mini circular image ui-user-top-image"
+								 src={this.props.user.metadata.gplus_picture + "?sz=80"} title="Personal settings"
+								 alt="Profile picture"/>
+							{dropdownMenu}
 						</div>
+
 			}
 			return <div className="ui user label"
 						onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
@@ -84,8 +103,8 @@ class Header extends React.Component {
 
 	getDropdownMenu = () => {
 		return 	<div className="menu">
-					<div className="item" data-value="profile" id="profile-item">Profile</div>
-					<div className="item" data-value="logout" id="logout-item">Logout</div>
+					<div className="item" data-value="profile" id="profile-item" onClick={this.openPreferencesModal.bind(this)}>Profile</div>
+					<div className="item" data-value="logout" id="logout-item" onClick={this.logoutUser.bind(this)}>Logout</div>
 				</div>;
 	}
 
@@ -127,10 +146,22 @@ class Header extends React.Component {
 					</div>
 					{componentToShow}
 
-					<div className={containerClass + " wide right floated right aligned column"}>
-						{userIcon}
-						{!!loggedUser && !showFilterProjects && <a href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
-						<div className={"separator"}></div>
+					<div className={containerClass + " wide column"}>
+						{(showLinks) ? (
+							<div>
+								<ul id="menu-site">
+									<li><a href="https://www.matecat.com/about/">About</a></li>
+									<li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
+									<li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
+									<li><a href="https://www.matecat.com/open-source/">Opensource</a></li>
+									<li><a href="https://www.matecat.com/support/">Contact us</a></li>
+									{/*<li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>*/}
+									<li><a href="" className={"btn btn-primary"}>Aligner</a></li>
+								</ul>
+							</div>
+
+						) : ('')}
+
 						{!!showFilterProjects && <TeamSelect
 							isManage={showFilterProjects}
 							showModals={showModals}
@@ -140,20 +171,9 @@ class Header extends React.Component {
 							teams={teams}
 							selectedTeamId={selectedTeamId}
 						/>}
-						{(showLinks) ? (
-							<ul id="menu-site">
-								<li><a href="https://www.matecat.com/about/">About</a></li>
-								<li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
-								<li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
-								<li><a href="https://www.matecat.com/open-source/">Opensource</a></li>
-								<li><a href="https://www.matecat.com/support/">Contact us</a></li>
-								{/*<li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>*/}
-								<li><a href="" className={"btn btn-primary"}>Aligner</a></li>
-							</ul>
-
-
-						) : ('')}
-
+						<div className={"separator"}></div>
+						{!!loggedUser && !showFilterProjects && <a href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
+						{userIcon}
 					</div>
 
 				</div>
