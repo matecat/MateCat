@@ -220,7 +220,7 @@ $.extend(UI, {
 		$("#action-search").bind('click', function(e) {
             SearchUtils.toggleSearch(e);
 		});
-		$("#advancedOptions").bind('click', function(e) {
+		$("#action-settings").bind('click', function(e) {
 			e.preventDefault();
 			UI.openOptionsPanel();
 		});
@@ -400,9 +400,10 @@ $.extend(UI, {
 		});
 
 		$('.user-menu-container').on('click', '#logout-item', function (e) {
+			e.preventDefault();
 			UI.logoutAction();
 		});
-		
+
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
