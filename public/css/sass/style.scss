@@ -115,8 +115,8 @@ header .wrapper {
     color: #ccc;
 }
 
-body.searchActive #filterSwitch {
-    color: yellow;
+body.search-open header .action-menu #action-search {
+    background-image: url("/public/img/icons/icon-search-active.svg");
 }
 
 .numbererror,
@@ -5177,9 +5177,6 @@ header {
         }
         #action-search {
             background-image: url("/public/img/icons/icon-search.svg");
-            &.active {
-                background-image: url("/public/img/icons/icon-search-active.svg");
-            }
         }
         #action-filter {
             background-image: url("/public/img/icons/icon-filter.svg");

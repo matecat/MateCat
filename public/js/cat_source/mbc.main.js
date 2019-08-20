@@ -963,7 +963,7 @@ if ( MBC.enabled() )
 
             $( '#mbc-history' ).remove();
             $( '.mbc-history-balloon-outer' ).remove();
-            $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
+            /*$( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );*/
             $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
 
@@ -984,7 +984,7 @@ if ( MBC.enabled() )
             $( document ).trigger( 'mbc:comment:new', message.data );
         } );
 
-        $( document ).on( 'click', '#filterSwitch', function ( e ) {
+        $( document ).on( 'click', '#action-search', function ( e ) {
             $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
         } );
 
