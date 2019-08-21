@@ -158,7 +158,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
 
     }
 
-    protected function setTransUnitState( $seg, $lastMrkState ){
+    protected function setTransUnitState( $seg, $state_prop, $lastMrkState ){
         return [ null, null ];
     }
 

@@ -429,7 +429,7 @@ class XliffSAXTranslationReplacer {
 
                         $lastMrkId = $this->segments[ $id ][ "mrk_id" ];
 
-                        list( $state_prop, $lastMrkState ) = $this->setTransUnitState( $seg, $lastMrkState );
+                        list( $state_prop, $lastMrkState ) = $this->setTransUnitState( $seg, $state_prop, $lastMrkState );
 
                     }
 
@@ -486,13 +486,12 @@ class XliffSAXTranslationReplacer {
 
     /**
      * @param $seg
+     * @param $state_prop
      * @param $lastMrkState
      *
      * @return array
      */
-    protected function setTransUnitState( $seg, $lastMrkState ){
-
-        $state_prop = '';
+    protected function setTransUnitState( $seg, $state_prop, $lastMrkState ){
 
         switch ( $seg[ 'status' ] ) {
 
