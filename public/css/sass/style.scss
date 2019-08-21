@@ -164,7 +164,7 @@ body.search-open header .action-menu #action-search {
     display: none
 }
 
-.action-submenu.notific:before {           
+.action-submenu.notific:before {
         font-size: 18px ;
         color: #3aa94f;
         content: "";                        /* Don't display icon if all ok */
@@ -5100,6 +5100,12 @@ header {
             border-radius: 3px;
             cursor: pointer;
 
+            /* Bug fix for Semantic UI Dropdown hover */
+            .dropdown-menu-overlay {
+                width: 36px;
+                height: 80px;
+            }
+
             .menu {
                 position: absolute;
                 z-index: 1;
@@ -5117,10 +5123,7 @@ header {
                 transform: translate(-50%,0) !important;
                */
 
-
-                 /* Utility for override pointing and set it on the left */
-
-                &::after {
+                /*&::after {
                     content: "";
                     width: 0;
                     height: 0;
@@ -5133,7 +5136,7 @@ header {
                     transform: translate(-90%, 0) !important;
                     position: absolute;
                     pointer-events: none;
-                }
+                }*/
 
                 .item {
                     border-radius: 3px;
@@ -5187,9 +5190,11 @@ header {
 
         #action-QR {
             background-image: url("/public/img/icons/icon-QR-line.svg");
+
         }
         #action-download {
             background-image: url("/public/img/icons/icon-download.svg");
+            background-size: 38px;
         }
         #action-QR {
             background-image: url("/public/img/icons/icon-QR-line.svg");

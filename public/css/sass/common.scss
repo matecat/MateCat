@@ -5158,6 +5158,7 @@ span.share-popup-item-email {
   padding-left: 50px;
   position: relative;
   float: right;
+  font-size:16px;
 }
 
 #user-menu-dropdown {
@@ -5165,11 +5166,11 @@ span.share-popup-item-email {
     width: 200px;
     margin: 0 0 0 -1px;
     padding: 8px !important;
-    top: 52px !important;
+    top: 36px !important;
     border-radius: 2px;
     border: solid 1px #cdd4de;
     right: 8px !important;
-    &::after {
+    /*&::after {
       content: "";
       width: 0;
       height: 0;
@@ -5182,7 +5183,7 @@ span.share-popup-item-email {
       transform: translate(90%, 0) !important;
       position: absolute;
       pointer-events: none;
-    }
+    }*/
     .item {
       border-radius: 3px;
       padding: 8px !important;

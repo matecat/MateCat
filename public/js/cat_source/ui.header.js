@@ -9,9 +9,9 @@ $.extend(UI, {
 			$('#action-search').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 50) } );
 
 
-		if ($('#action-download').length) {
+		/*if ($('#action-download').length) {
 			$('#action-download').dropdown();
-		}
+		}*/
 		if ($('#action-three-dots').length) {
 			$('#action-three-dots').dropdown();
 		}
