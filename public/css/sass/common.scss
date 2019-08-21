@@ -1311,9 +1311,9 @@ form.add-TM-Form {
   overflow: visible;
   max-height: inherit;
   font-size: 24px;
-  background: #4D4D4D url(../../img/logo-ico.png) 12px 12px no-repeat;
+  background: #002b5c url(../../img/logo-ico.png) 12px 12px no-repeat;
   padding: 10px 10px 7px 58px;
-  background-size: 35px;
+  background-size: 48px;
   /*border-bottom: 1px solid #000;*/
   color: #fff;
   margin: 0 !important;
@@ -1546,7 +1546,7 @@ form.add-TM-Form {
 
 
 .mgmt-panel-tm .nav-tabs {
-  background: #4D4D4D;
+  background: #002b5c;
   display: block;
 }
 
@@ -2975,7 +2975,8 @@ a.memory-mgmt.pull-right {
 .nav-tabs > li {
   float: left;
   position: relative;
-  background: #efefef;
+  border-radius: 4px 4px 0 0;
+  background-color: #cdd4de;
 }
 
 .nav > li {
@@ -3001,6 +3002,7 @@ a.memory-mgmt.pull-right {
   text-shadow: none;
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
+  border-radius: 4px 4px 0 0;
   margin: 0px 0 -1px 0;
   outline: none;
   padding-top: 5px !important;
