@@ -542,6 +542,9 @@ $.extend(UI, {
         var sourceClone = $( '.source', UI.currentSegment ).clone();
         //Remove inside-attribute for ph with equiv-text tags
         sourceClone.find('.locked.inside-attribute').remove();
+        sourceClone.find( 'mark.inGlossary' ).each( function () {
+            $( this ).replaceWith( $( this ).html() );
+        } );
         var sourceTags = sourceClone.html()
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
