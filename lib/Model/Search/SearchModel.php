@@ -19,6 +19,11 @@ use Utils;
 class SearchModel {
 
     /**
+     * Used to exclude html entities from full text queries
+     */
+    protected $regexHtmlEntities = '&#(lt;|gt;|amp;|quot;|apos;|[x]{0,1}[0-9A-F]{1,7};)';
+
+    /**
      * @var SearchQueryParamsStruct
      */
     protected $queryParams;
@@ -273,6 +278,7 @@ class SearchModel {
 			) AS count
 			FROM segment_translations st
 			WHERE st.id_job = {$this->queryParams->job}
+			AND st.translation NOT REGEXP '{$this->regexHtmlEntities}'
 		    AND st.translation REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
 			AND st.status != 'NEW'
@@ -308,6 +314,7 @@ class SearchModel {
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			WHERE fj.id_job = {$this->queryParams->job}
+			AND s.segment NOT REGEXP '{$this->regexHtmlEntities}'
 		    AND s.segment 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
@@ -326,9 +333,11 @@ class SearchModel {
 			FROM segment_translations as st
 			JOIN segments as s on id = id_segment
 			WHERE st.id_job = {$this->queryParams->job}
+			AND st.translation NOT REGEXP '{$this->regexHtmlEntities}'
 		    AND st.translation 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
+			AND s.segment NOT REGEXP '{$this->regexHtmlEntities}'
 			AND s.segment 
 			    REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 			      '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
@@ -377,6 +386,7 @@ class SearchModel {
             WHERE id_job = {$this->queryParams->job}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
             AND st.status != 'NEW'
+            AND translation NOT REGEXP '{$this->regexHtmlEntities}'
             AND translation 
             	REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
