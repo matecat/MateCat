@@ -136,7 +136,7 @@ class SubFilteringTest extends AbstractTest {
     /**
      * @throws \Exception
      */
-    public function testPlainTextInXML(){
+    public function testPlainTextInXMLWithNewLineFeed(){
 
         // 20 Aug 2019
         // ---------------------------
@@ -148,8 +148,8 @@ class SubFilteringTest extends AbstractTest {
 //        $original_segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand
 //
 //is &lt; 70 dB(A).';
-        $segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#13;&#13;is &lt; 70 dB(A).';
-        $expectedL1 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#13;&#13;is &lt; 70 dB(A).';
+        $segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#10;&#10;is &lt; 70 dB(A).';
+        $expectedL1 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#10;&#10;is &lt; 70 dB(A).';
         $expectedL2 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand##$_0A$####$_0A$##is &amp;lt; 70 dB(A).';
 
         $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
@@ -160,6 +160,28 @@ class SubFilteringTest extends AbstractTest {
         $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
 
         $string_from_UI = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand##$_0A$####$_0A$##is &lt; 70 dB(A).';
+
+        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $string_from_UI ) );
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testPlainTextInXMLWithCarriageReturn(){
+        $segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#13;&#13;is &lt; 70 dB(A).';
+        $expectedL1 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#13;&#13;is &lt; 70 dB(A).';
+        $expectedL2 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand##$_0D$####$_0D$##is &amp;lt; 70 dB(A).';
+
+        $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $this->filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals($segmentL1, $expectedL1);
+        $this->assertEquals($segmentL2, $expectedL2);
+        $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $string_from_UI = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand##$_0D$####$_0D$##is &lt; 70 dB(A).';
 
         $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
