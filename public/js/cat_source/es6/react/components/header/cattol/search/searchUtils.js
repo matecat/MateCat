@@ -481,12 +481,12 @@ let SearchUtils = {
                         spanArray.push(text);
                         return "$&";
                     });
-                    tt = htmlDecode(tt);
+                    // tt = htmlDecode(tt);
                     tt = tt.replace(regex, '<mark class="' + searchMarker + '">$1</mark>');
                     tt = tt.replace(/(\$&)/g, function ( match, text ) {
                         return spanArray.shift();
                     });
-                    tt = htmlEncode(tt);
+                    // tt = htmlEncode(tt);
                     $(this).html(tt);
                     //Temp fix for tags with equiv text
                     $(this).find('.tag-html-container-open').each(function (  ) {
