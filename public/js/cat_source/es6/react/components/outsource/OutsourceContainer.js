@@ -1,7 +1,6 @@
-let OutsourceConstants = require('../../constants/OutsourceConstants');
 let AssignToTranslator = require('./AssignToTranslator').default;
 let OutsourceVendor = require('./OutsourceVendor').default;
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
+let {TransitionGroup, CSSTransition} = require('react-transition-group');
 
 
 class OutsourceContainer extends React.Component {
@@ -101,77 +100,75 @@ class OutsourceContainer extends React.Component {
         let outsourceContainerClass = (!config.enable_outsource) ? ('no-outsource') :
             ((this.props.showTranslatorBox) ? 'showTranslator' : ((this.props.showOpenBox)? 'showOpenBox': 'showOutsource') );
 
-        return <CSSTransitionGroup component="div" className="ui grid"
-                                   transitionName="transitionOutsource"
-                                   transitionEnterTimeout={400}
-                                   transitionLeaveTimeout={100}
-        >
+        return <TransitionGroup>
             {this.props.openOutsource ? (
-                <div className={"outsource-container chunk ui grid " + outsourceContainerClass} ref={(container)=>this.container=container}>
-                    <div className=" outsource-header sixteen wide column shadow-1">
-                        {this.props.idJobLabel ? (
-                            <div className="job-id" title="Job Id">
-                                ID: {this.props.idJobLabel}
+                <CSSTransition key={this.props.idJobLabel} classNames="transitionOutsource" timeout={{ enter: 500, exit: 300 }}>
+                    <div className={"outsource-container chunk ui grid " + outsourceContainerClass} ref={(container)=>this.container=container}>
+                        <div className=" outsource-header sixteen wide column shadow-1">
+                            {this.props.idJobLabel ? (
+                                <div className="job-id" title="Job Id">
+                                    ID: {this.props.idJobLabel}
+                                </div>
+                            ) :(null)}
+                            <div className="source-target languages-tooltip"
+                                 ref={(tooltip) => this.languageTooltip = tooltip}
+                                 data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')} data-variation="tiny">
+                                <div className="source-box">
+                                    {this.props.job.get('sourceTxt')}
+                                </div>
+                                <div className="in-to"><i className="icon-chevron-right icon"/></div>
+                                <div className="target-box">
+                                    {this.props.job.get('targetTxt')}
+                                </div>
                             </div>
-                        ) :(null)}
-                        <div className="source-target languages-tooltip"
-                             ref={(tooltip) => this.languageTooltip = tooltip}
-                             data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')} data-variation="tiny">
-                            <div className="source-box">
-                                {this.props.job.get('sourceTxt')}
+                            <div className="job-payable">
+                                <div><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</div>
                             </div>
-                            <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                            <div className="target-box">
-                                {this.props.job.get('targetTxt')}
+                            <div className="project-subject">
+                                <b>Subject</b>: {this.props.job.get('subject_printable')}
                             </div>
                         </div>
-                        <div className="job-payable">
-                            <div><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</div>
-                        </div>
-                        <div className="project-subject">
-                            <b>Subject</b>: {this.props.job.get('subject_printable')}
-                        </div>
-                    </div>
-                    <div className="sixteen wide column">
-                        <div className="ui grid"
-                        ref={(container) => this.container = container}>
-                                {(this.props.showTranslatorBox ) ? (
-                                    <AssignToTranslator job={this.props.job}
-                                                        url={this.props.url}
-                                                        project={this.props.project}
-                                                        showOpenBox={this.props.showOpenBox}
-                                                        closeOutsource={this.props.onClickOutside}/>
-                                ) : (null)}
+                        <div className="sixteen wide column">
+                            <div className="ui grid"
+                            ref={(container) => this.container = container}>
+                                    {(this.props.showTranslatorBox ) ? (
+                                        <AssignToTranslator job={this.props.job}
+                                                            url={this.props.url}
+                                                            project={this.props.project}
+                                                            showOpenBox={this.props.showOpenBox}
+                                                            closeOutsource={this.props.onClickOutside}/>
+                                    ) : (null)}
 
-                                {(this.props.showOpenBox ) ? (
-                                    <OpenJobBox job={this.props.job}
-                                                url={this.props.url}
-                                                project={this.props.project}
-                                                outsourceJobId={this.props.outsourceJobId}
-                                    />
-                                ) : (null)}
+                                    {(this.props.showOpenBox ) ? (
+                                        <OpenJobBox job={this.props.job}
+                                                    url={this.props.url}
+                                                    project={this.props.project}
+                                                    outsourceJobId={this.props.outsourceJobId}
+                                        />
+                                    ) : (null)}
 
-                                {( (this.props.showTranslatorBox || this.props.showOpenBox) && config.enable_outsource ) ? (
-                                    <div className="divider-or sixteen wide column">
-                                        <div className="or">
-                                            or
+                                    {( (this.props.showTranslatorBox || this.props.showOpenBox) && config.enable_outsource ) ? (
+                                        <div className="divider-or sixteen wide column">
+                                            <div className="or">
+                                                or
+                                            </div>
                                         </div>
-                                    </div>
-                                ) : (null)}
-                                {config.enable_outsource ? (
-                                    <OutsourceVendor project={this.props.project}
-                                                     job={this.props.job}
-                                                     extendedView={this.props.extendedView}
-                                                     standardWC={this.props.standardWC}
-                                                     translatorsNumber={this.translatorsNumber}
-                                    />
-                                ) :(null)}
+                                    ) : (null)}
+                                    {config.enable_outsource ? (
+                                        <OutsourceVendor project={this.props.project}
+                                                         job={this.props.job}
+                                                         extendedView={this.props.extendedView}
+                                                         standardWC={this.props.standardWC}
+                                                         translatorsNumber={this.translatorsNumber}
+                                        />
+                                    ) :(null)}
 
+                            </div>
                         </div>
                     </div>
-                </div>
+                </CSSTransition>
             ) : (null)}
-        </CSSTransitionGroup>;
+        </TransitionGroup>;
     }
 }
 OutsourceContainer.defaultProps = {

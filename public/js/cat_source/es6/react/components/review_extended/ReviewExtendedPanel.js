@@ -21,6 +21,10 @@ class ReviewExtendedPanel extends React.Component {
 	removeSelection() {
         this.setCreationIssueLoader(false);
 		this.props.removeSelection();
+        this.setState({
+            showAddIssueMessage: false,
+            showAddIssueToSelectedTextMessage: false
+        })
 	}
 
 	getAllIssues() {
@@ -44,7 +48,8 @@ class ReviewExtendedPanel extends React.Component {
 			case this.addIssueToApproveMessageType:
                 if (this.props.issueRequiredOnSegmentChange) {
                     this.setState({
-                        showAddIssueMessage: true
+                        showAddIssueMessage: true,
+                        showAddIssueToSelectedTextMessage: false
                     });
                     setTimeout(()=>{
                         SegmentActions.openIssuesPanel({ sid: sid }, false);
@@ -53,6 +58,7 @@ class ReviewExtendedPanel extends React.Component {
                 break;
 			case this.addIssueToSelectedTextMessageType:
                 this.setState({
+                    showAddIssueMessage: false,
                     showAddIssueToSelectedTextMessage: true
                 });
 				break;
@@ -63,12 +69,10 @@ class ReviewExtendedPanel extends React.Component {
 	    UI.closeIssuesPanel();
     }
 
-	componentWillReceiveProps(nextProps) {
-		this.setState({
-			versionNumber: nextProps.segment.versions[0].version_number,
-            showAddIssueMessage: false,
-            showAddIssueToSelectedTextMessage: false
-		});
+    static getDerivedStateFromProps(props, state) {
+		return {
+			versionNumber: props.segment.versions[0].version_number
+		};
 	}
 
     componentDidMount() {

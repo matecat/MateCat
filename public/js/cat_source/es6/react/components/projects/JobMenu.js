@@ -3,7 +3,6 @@ class JobMenu extends React.Component {
 
     constructor(props) {
         super(props);
-        this.setState();
     }
 
     openSplitModal() {
@@ -49,12 +48,6 @@ class JobMenu extends React.Component {
             this.openSecondPassUrl();
         });
     }
-
-    componentDidMount() {}
-
-    componentDidUpdate(prevProps) {}
-
-    componentWillUpdate() {}
 
     render() {
 

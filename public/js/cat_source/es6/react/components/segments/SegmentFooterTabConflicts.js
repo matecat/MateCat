@@ -82,9 +82,6 @@ class SegmentFooterTabConflicts extends React.Component {
 
     }
 
-    componentWillMount() {
-
-    }
     allowHTML(string) {
         return { __html: string };
     }

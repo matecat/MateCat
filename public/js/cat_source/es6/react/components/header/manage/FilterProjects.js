@@ -38,20 +38,21 @@ class FilterProjects extends React.Component {
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        if ( (_.isUndefined(nextProps.selectedTeam) )) return;
-        if ( (_.isUndefined(this.props.selectedTeam)) ||
-            nextProps.selectedTeam.get('id') !== this.props.selectedTeam.get('id') ||
-            nextProps.selectedTeam.get('members') !== this.props.selectedTeam.get('members') ) {
+    getSnapshotBeforeUpdate(propsBefore, stateBefore) {
+        if ( (_.isUndefined(this.props.selectedTeam) )) return null;
+        if ( (_.isUndefined(propsBefore.selectedTeam)) ||
+            this.props.selectedTeam.get('id') !== propsBefore.selectedTeam.get('id') ||
+            this.props.selectedTeam.get('members') !== propsBefore.selectedTeam.get('members') ) {
             this.teamChanged = true;
             this.dropDownUsersInitialized = false;
-            if ( !_.isUndefined(this.props.selectedTeam) && nextProps.selectedTeam.get('id') !== this.props.selectedTeam.get('id')) {
+            if ( !_.isUndefined(propsBefore.selectedTeam) && this.props.selectedTeam.get('id') !== propsBefore.selectedTeam.get('id')) {
                 this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
             }
-            if ( nextProps.selectedTeam && nextProps.selectedTeam.get('type') !== 'personal' && nextProps.selectedTeam.get('members').size == 1) {
+            if ( this.props.selectedTeam && this.props.selectedTeam.get('type') !== 'personal' && this.props.selectedTeam.get('members').size === 1) {
                 this.dropDownUsersInitialized = true;
             }
         }
+        return null
     }
 
     changeUser(value) {

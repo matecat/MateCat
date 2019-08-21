@@ -1,8 +1,7 @@
 
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let ChunkAnalyzeHeader = require('./ChunkAnalyzeHeader').default;
 let ChunkAnalyzeFile = require('./ChunkAnalyzeFile').default;
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
+let {TransitionGroup, CSSTransition} = require('react-transition-group');
 
 class ChunkAnalyze extends React.Component {
 
@@ -54,13 +53,18 @@ class ChunkAnalyze extends React.Component {
                                 showFiles={this.showFiles.bind(this)}
                                 chunksSize={this.props.chunksSize}/>
 
-                <CSSTransitionGroup component="div" className="ui grid"
-                    transitionName="transition"
-                    transitionEnterTimeout={500}
-                    transitionLeaveTimeout={500}
-                >
-                    {this.state.showFiles ? (this.getFiles()): (null)}
-                </CSSTransitionGroup>
+                {/*<CSSTransitionGroup component="div" className="ui grid"*/}
+                    {/*transitionName="transition"*/}
+                    {/*transitionEnterTimeout={500}*/}
+                    {/*transitionLeaveTimeout={500}*/}
+                {/*>*/}
+                <TransitionGroup>
+                    {this.state.showFiles ? (
+                        <CSSTransition key={0} classNames="transition" timeout={{ enter: 500, exit: 300 }}>
+                            {this.getFiles()}
+                        </CSSTransition>
+                    ): (null)}
+                </TransitionGroup>
 
 
 

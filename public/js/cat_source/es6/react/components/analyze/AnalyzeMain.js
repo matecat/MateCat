@@ -3,7 +3,7 @@ let AnalyzeConstants = require('../../constants/AnalyzeConstants');
 let AnalyzeActions = require('../../actions/AnalyzeActions');
 let ProjectAnalyze = require('./ProjectAnalyze').default;
 let AnalyzeStore = require('../../stores/AnalyzeStore');
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
+let {TransitionGroup, CSSTransition} = require('react-transition-group');
 
 
 
@@ -135,18 +135,22 @@ class AnalyzeMain extends React.Component {
                                              openAnalysisReport={this.openAnalysisReport.bind(this)}
 
                         />
-                        <CSSTransitionGroup component="div" className="project-body ui grid"
-                                            transitionName="transition"
-                                            transitionEnterTimeout={1500}
-                                            transitionLeaveTimeout={1500}
-                        >
+
                         {this.state.showAnalysis ? (
-                                <ProjectAnalyze volumeAnalysis={this.state.volumeAnalysis.get('jobs')}
-                                                project={this.state.project}
-                                                jobsInfo={this.props.jobsInfo}
-                                                status={this.state.volumeAnalysis.get('summary').get('STATUS')}/>
+                            <div className="project-body ui grid">
+                            <TransitionGroup>
+                                <CSSTransition key={0} classNames="transitionAnalyzeMain" timeout={{ enter: 1000, exit: 300 }}>
+
+                                    <ProjectAnalyze volumeAnalysis={this.state.volumeAnalysis.get('jobs')}
+                                                    project={this.state.project}
+                                                    jobsInfo={this.props.jobsInfo}
+                                                    status={this.state.volumeAnalysis.get('summary').get('STATUS')}/>
+
+                                </CSSTransition>
+                            </TransitionGroup>
+                            </div>
                         ) :(null)}
-                        </CSSTransitionGroup>
+
 
                     </div>
                     {this.state.scrollTop > 200 ? (

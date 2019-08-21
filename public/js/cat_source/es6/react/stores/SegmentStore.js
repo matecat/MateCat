@@ -794,6 +794,7 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.LOCK_EDIT_AREA:
             SegmentStore.lockUnlockEditArea(action.id, action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.REGISTER_TAB:
             SegmentStore.setConfigTabs(action.tab, action.visible, action.open);

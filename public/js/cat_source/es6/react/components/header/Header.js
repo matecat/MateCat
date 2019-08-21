@@ -10,17 +10,20 @@ class Header extends React.Component {
         super(props);
         this.state = {
             teams: [],
-            selectedTeamId : null
+            selectedTeamId : null,
+            user: this.props.user
         };
         this.renderTeams = this.renderTeams.bind(this);
         this.updateTeams = this.updateTeams.bind(this);
         this.chooseTeams = this.chooseTeams.bind(this);
+        this.updateUser = this.updateUser.bind(this);
     }
 
     componentDidMount () {
         TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.addListener(TeamConstants.UPDATE_USER, this.updateUser);
     }
 
     componentWillUnmount() {
@@ -28,8 +31,6 @@ class Header extends React.Component {
         TeamsStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
     }
-
-    componentDidUpdate() {}
 
     renderTeams(teams) {
         this.setState({
@@ -61,12 +62,18 @@ class Header extends React.Component {
         $('#modal').trigger('openlogin');
     }
 
+    updateUser(user) {
+        this.setState({
+            user : user
+        });
+    }
+
     getUserIcon() {
         if (this.props.loggedUser ) {
-            if (this.props.user.metadata && this.props.user.metadata.gplus_picture) {
+            if (this.state.user.metadata && this.state.user.metadata.gplus_picture) {
                 return <img onClick={this.openPreferencesModal.bind(this)}
                             className="ui mini circular image ui-user-top-image"
-                            src={this.props.user.metadata.gplus_picture + "?sz=80"} title="Personal settings" alt="Profile picture"/>
+                            src={this.state.user.metadata.gplus_picture + "?sz=80"} title="Personal settings" alt="Profile picture"/>
             }
             return <div className="ui user label"
                         onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>

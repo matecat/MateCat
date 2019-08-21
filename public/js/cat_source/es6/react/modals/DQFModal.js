@@ -141,8 +141,6 @@ class DQFModal extends React.Component {
 
     }
 
-    componentWillMount() { }
-
     componentDidMount() {
         if (this.state.dqfOptions) {
             this.contentType.value = this.state.dqfOptions.contentType;

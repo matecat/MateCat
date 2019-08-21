@@ -29,15 +29,6 @@ class ProjectAnalyze extends React.Component {
         });
     }
 
-    componentDidUpdate() {
-    }
-
-    componentDidMount() {
-    }
-
-    componentWillUnmount() {
-    }
-
     shouldComponentUpdate(nextProps, nextState){
         return ( !nextProps.volumeAnalysis.equals(this.props.volumeAnalysis) ||
         nextProps.status !== this.props.status)

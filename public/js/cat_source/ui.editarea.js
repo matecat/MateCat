@@ -51,6 +51,8 @@ $.extend( UI, {
                 } else {
                     $('.selected', $(this)).remove();
                 }
+                setTimeout(()=>SegmentActions.modifiedTranslation( UI.currentSegmentId, null, true ));
+
                 UI.saveInUndoStack('cancel');
                 UI.segmentQA(UI.currentSegment);
                 UI.checkTagProximity();
@@ -79,6 +81,7 @@ $.extend( UI, {
                     )? true : false;
                     if(undeletableTag) {
                         selBound.prev().remove();
+                        setTimeout(()=>SegmentActions.modifiedTranslation( UI.currentSegmentId, null, true ));
                         // e.preventDefault();
                     }
                 }

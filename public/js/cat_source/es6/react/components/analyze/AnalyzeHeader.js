@@ -1,5 +1,4 @@
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
+let {TransitionGroup, CSSTransition} = require('react-transition-group');
 
 class AnalyzeHeader extends React.Component {
 
@@ -134,13 +133,19 @@ class AnalyzeHeader extends React.Component {
     getProgressBar() {
         if (this.showProgressBar) {
             let width = ((this.props.data.get('SEGMENTS_ANALYZED') / this.props.data.get('TOTAL_SEGMENTS')) * 100) + '%';
-            return <div className="progress-bar">
-                    <div className="progr">
-                        <div className="meter">
-                            <a className="approved-bar translate-tooltip"  data-html={'Approved ' + width}  style={{width: width}}/>
+            return <div className="progress sixteen wide column">
+                <TransitionGroup>
+                <CSSTransition key={0} classNames="transition" timeout={{ enter: 500, exit: 300 }} >
+                    <div className="progress-bar">
+                        <div className="progr">
+                            <div className="meter">
+                                <a className="approved-bar translate-tooltip"  data-html={'Approved ' + width}  style={{width: width}}/>
+                            </div>
                         </div>
                     </div>
-                </div>;
+                </CSSTransition>
+                </TransitionGroup>
+            </div>;
         }
         return null
 
@@ -263,13 +268,10 @@ class AnalyzeHeader extends React.Component {
             <div className="seven wide right floated column">
                 {wordsCountHtml}
             </div>
-            <CSSTransitionGroup component="div" className="progress sixteen wide column"
-                                transitionName="transition"
-                                transitionEnterTimeout={500}
-                                transitionLeaveTimeout={500}
-            >
-                {this.getProgressBar()}
-            </CSSTransitionGroup>
+
+
+            {this.getProgressBar()}
+
 
 
         </div>;

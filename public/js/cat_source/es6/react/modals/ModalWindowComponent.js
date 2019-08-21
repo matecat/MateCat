@@ -41,17 +41,6 @@ class ModalWindowComponent extends React.Component {
         });
     }
 
-    componentWillMount() {
-
-    }
-
-    componentDidMount() {
-
-    }
-
-    componentWillUnmount() {
-
-    }
     allowHTML(string) {
         return { __html: string };
     }

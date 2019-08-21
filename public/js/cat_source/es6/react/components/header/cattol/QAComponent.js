@@ -78,17 +78,17 @@ class QAComponent extends React.Component {
     componentWillUnmount() {
     }
 
-    componentWillReceiveProps(nextProps) {
-        const category = (nextProps.warnings[this.state.currentPriority]) ?
-            nextProps.warnings[this.state.currentPriority].Categories[this.state.currentCategory] : null;
-        if (nextProps.warnings && category) {
-            this.setState({
+    static getDerivedStateFromProps(props, state) {
+        const category = (props.warnings[state.currentPriority]) ?
+            props.warnings[state.currentPriority].Categories[state.currentCategory] : null;
+        if (props.warnings && category) {
+            return {
                 navigationList: category
-            });
+            };
         }else{
-            this.setState({
+            return {
                 navigationList: []
-            });
+            };
         }
     }
 

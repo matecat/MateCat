@@ -14,8 +14,6 @@ class SegmentFooterTabRevise extends React.Component {
 
     componentWillUnmount() {}
 
-    componentWillMount() {}
-
     allowHTML(string) {
         return { __html: string };
     }

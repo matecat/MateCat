@@ -1083,7 +1083,7 @@ body.analyze{
         -webkit-transition: height .3s ease;
     }
 
-    &.transition-leave.transition-leave-active {
+    &.transition-exit.transition-exit-active {
         height: 0;
         padding-top:0px !important;
         padding-bottom: 0 !important;
@@ -1105,7 +1105,7 @@ body.analyze{
         -webkit-transition: height .3s ease;
     }
 
-    &.transition-leave.transition-leave-active {
+    &.transition-exit.transition-exit-active {
         height: 0;
         padding-top:0px !important;
         padding-bottom: 0 !important;
@@ -1113,30 +1113,29 @@ body.analyze{
     }
 }
 
-.project-body {
+.project {
     .jobs {
         position: relative;
-        overflow-y: scroll;
         max-height: 2500px;
         opacity: 1;
-        &.transition-enter {
-            max-height: 0;
-            opacity: 0;
-        }
+    }
+    .transitionAnalyzeMain-enter {
+        max-height: 0;
+        opacity: 0;
+    }
 
-        &.transition-enter.transition-enter-active {
-            max-height: 3000px;
-            opacity: 1;
-            -webkit-transition: max-height .5s ease, opacity 1s ease;
-        }
+    .transitionAnalyzeMain-enter.transitionAnalyzeMain-enter-active {
+        max-height: 3000px;
+        opacity: 1;
+        -webkit-transition: max-height .5s ease, opacity 1s ease;
+    }
 
-        &.transition-leave.transition-leave-active {
-            max-height: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            opacity: 0;
-            -webkit-transition: max-height .5s ease, padding 1s ease, opacity 1s ease;
-        }
+    .transitionAnalyzeMain-exit.transitionAnalyzeMain-exit-active {
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        opacity: 0;
+        -webkit-transition: max-height .5s ease, padding 1s ease, opacity 1s ease;
     }
 }
 

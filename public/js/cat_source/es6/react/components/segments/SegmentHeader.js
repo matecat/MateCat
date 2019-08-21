@@ -56,12 +56,13 @@ class SegmentHeader extends React.PureComponent {
         SegmentStore.removeListener(SegmentConstants.HIDE_SEGMENT_HEADER, this.hideHeader);
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.autopropagated) {
-            this.setState({
+    static getDerivedStateFromProps(props, state) {
+        if (props.autopropagated) {
+            return {
                 autopropagated: true
-            });
+            };
         }
+        return null;
     }
 
     allowHTML(string) {

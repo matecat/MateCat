@@ -20,6 +20,8 @@ class SegmentSource extends React.Component {
         this.decodeTextSource = this.decodeTextSource.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
+
+        this.beforeRenderActions();
     }
 
     decodeTextSource(segment, source) {
@@ -150,11 +152,9 @@ class SegmentSource extends React.Component {
         $(this.source).off('click', 'mark.inGlossary');
         $.powerTip.destroy($('.blacklistItem', $(this.source)));
     }
-    componentWillMount() {
+    getSnapshotBeforeUpdate() {
         this.beforeRenderActions();
-    }
-    componentWillUpdate() {
-        this.beforeRenderActions();
+        return null;
     }
 
     componentDidUpdate() {

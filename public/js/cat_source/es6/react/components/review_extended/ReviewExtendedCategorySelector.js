@@ -3,16 +3,7 @@ class ReviewExtendedCategorySelector extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {
-            value : this.props.selectedValue
-        };
-
     }
-
-    componentWillReceiveProps(nextProps) {
-        this.setState({ value: nextProps.selectedValue });
-    }
-
     componentDidMount(){
     	$(this.selectRef).dropdown({
             // direction: "auto",
@@ -50,7 +41,7 @@ class ReviewExtendedCategorySelector extends React.Component{
 
             select = <div className="ui icon top right pointing dropdown basic tiny button"
                 ref={(input) => { this.selectRef = input;}}
-                data-value={this.state.value}
+                data-value={this.props.selectedValue}
                 autoFocus={this.props.focus}
                 name="severities"
                 title="Select severities">

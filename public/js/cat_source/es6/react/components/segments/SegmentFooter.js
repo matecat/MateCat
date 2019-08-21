@@ -315,10 +315,6 @@ class SegmentFooter extends React.Component {
         // SegmentStore.removeListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
     }
 
-    componentWillMount() {
-
-    }
-
     allowHTML(string) {
         return { __html: string };
     }
