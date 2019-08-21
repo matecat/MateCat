@@ -85,8 +85,8 @@ header .wrapper {
 
 #notifbox a {
     display: block;
-    width: 35px;
-    height: 35px;
+    width: 36px;
+    height: 36px;
     padding: 0;
     margin: 0 auto;
     text-decoration: none;
@@ -132,27 +132,49 @@ body.search-open header .action-menu #action-search {
     margin-top: -8px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    border: 1px solid #fff;
+    /*border: 1px solid #fff;*/
     display: block;
     font-size: 11px;
     padding: 0 4px;
     text-align: center;
-    min-width: 8px;
+    /*min-width: 8px;*/
     height: 15px;
     line-height: 1.5;
     box-sizing: content-box;
 }
 
+.numbererror {
+    border-radius: 25px;
+    right: -4px;
+    font-size: 10px;
+    line-height: 16px;
+    top: 0;
+    margin:0;
+    padding: 1px 6px;
+}
+
 .numberwarning{
-    background: #e28800!important;
+    background: #E2BE26!important;
 }
 .numberinfo{
-    background: #333333!important;
+    background: #0bbeec!important;
 }
 
 .numbererror:empty {
     display: none
 }
+
+.action-submenu.notific:before {           
+        font-size: 18px ;
+        color: #3aa94f;
+        content: "";                        /* Don't display icon if all ok */
+}
+
+#point2seg:after {
+    font-size: 18px ;
+    content: "";                            /* Don't display icon */
+}
+
 
 .notific a {
     color: #fff;
@@ -5147,16 +5169,18 @@ header {
             .badge {
                 position: absolute;
                 margin: 0;
-                top: 4%;
-                padding: 2% 16%;
-                right: -4%;
-                background: #e02020;
+                top: 0;
+                padding: 1px 6px;
+                right: -4px;
+                /*background: #e02020;*/
+                background: #0bbeec;
                 color: #fff;
                 font-size: 10px;
                 text-align: center;
                 border-radius: 25px;
                 vertical-align: middle;
                 line-height: 16px;
+                height: 17px;
             }
 
         }
@@ -5172,6 +5196,11 @@ header {
         }
         #notifbox {
             background-image: url("/public/img/icons/icon-QA-line.svg");
+            width: $icon-scale;
+            height: $icon-scale;
+            padding: 0;
+            text-align: right;
+            opacity: 1;
         }
         #action-comments {
             background-image: url("/public/img/icons/icon-comments.svg");
@@ -5307,7 +5336,7 @@ header {
 
         .firstSegment {
             a {
-                padding: 4px 8px 4px 8px;
+                padding: 4px 49px 19px 12px
             }
             .label {
                 height: auto !important;
