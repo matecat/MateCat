@@ -32,6 +32,7 @@ class getSegmentsController extends ajaxController {
 
     public function __construct() {
 
+
         parent::__construct();
 
         $filterArgs = array(
@@ -85,8 +86,8 @@ class getSegmentsController extends ajaxController {
                 $this->ref_segment, $this->where,
                 $this->getOptionalQueryFields()
         );
-
         $this->prepareNotes( $data );
+
         $contexts = $this->getContextGroups( $data );
 
 		foreach ($data as $i => $seg) {
@@ -158,6 +159,8 @@ class getSegmentsController extends ajaxController {
                 $this->data["$id_file"]['segments'] = array();
             }
 
+
+
             $seg = $this->featureSet->filter('filter_get_segments_segment_data', $seg) ;
 
             unset($seg['id_file']);
@@ -201,6 +204,7 @@ class getSegmentsController extends ajaxController {
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
+
 
         $this->result['data']['files'] = $this->data;
 
