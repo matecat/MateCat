@@ -106,8 +106,8 @@ LABEL;
         $this->segment = "tic";
         $this->old_translation = "tac";
 
-        $this->new_translation="toe";
-        $this->unset_seg="tol";
+        $this->new_translation="tac";
+        $this->unset_seg="tac";
 
         $this->first_url_delete = "http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->old_translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
         $this->second_url_delete="http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->new_translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";

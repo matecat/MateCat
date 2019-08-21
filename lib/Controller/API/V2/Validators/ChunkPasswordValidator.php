@@ -14,36 +14,42 @@
 namespace API\V2\Validators;
 
 use API\V2\KleinController;
-use Chunks_ChunkDao ;
-use Klein\Request ;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Chunks_ChunkDao;
+use Exceptions\NotFoundException;
+use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 
 class ChunkPasswordValidator extends Base {
     /**
      * @var \Chunks_ChunkStruct
      */
-    protected $chunk ;
+    protected $chunk;
+
+    /**
+     * @var ChunkReviewStruct
+     */
+    protected $chunkReview;
 
     protected $id_job;
-    protected $password ;
+    protected $password;
 
     public function __construct( KleinController $controller ) {
 
         parent::__construct( $controller->getRequest() );
 
-        $filterArgs = array(
-                'id_job' => array(
+        $filterArgs = [
+                'id_job'   => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
-                ),
-                'password'   => array(
+                ],
+                'password' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                ],
+        ];
 
         $postInput = (object)filter_var_array( $controller->getParams(), $filterArgs );
 
-        $this->id_job = $postInput->id_job;
-        $this->password   = $postInput->password;
+        $this->id_job   = $postInput->id_job;
+        $this->password = $postInput->password;
 
         $controller->id_job   = $this->id_job;
         $controller->password = $this->password;
@@ -52,7 +58,7 @@ class ChunkPasswordValidator extends Base {
 
     /**
      * @return mixed|void
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      */
     protected function _validate() {
         try {
@@ -60,26 +66,30 @@ class ChunkPasswordValidator extends Base {
                     $this->id_job,
                     $this->password
             );
-        } catch ( \Exceptions\NotFoundException $e ) {
-            $review_chunk = \LQA\ChunkReviewDao::findByReviewPasswordAndJobId(
+        } catch ( NotFoundException $e ) {
+            $this->chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId(
                     $this->password,
                     $this->id_job
             );
-            if ( $review_chunk ) {
-                $this->chunk = $review_chunk->getChunk();
+            if ( $this->chunkReview ) {
+                $this->chunk = $this->chunkReview->getChunk();
                 $this->chunk->setIsReview( true );
             } else {
-                throw new \Exceptions\NotFoundException( 'Record not found' );
+                throw new NotFoundException( 'Record not found' );
             }
         }
     }
 
     public function getChunk() {
-        return $this->chunk ;
+        return $this->chunk;
     }
 
-    public function getJobId(){
+    public function getJobId() {
         return $this->id_job;
+    }
+
+    public function getChunkReview(){
+        return $this->chunkReview;
     }
 
 }

@@ -21,7 +21,7 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
     public function getByIdSegment( $id_segment ) {
         $sql = "SELECT * FROM dqf_segments WHERE id_segment = ?" ;
 
-        $conn = $this->getConnection()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ $id_segment ] );
 
@@ -41,7 +41,7 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
     public function getByIdSegmentRange( $min, $max ) {
         $sql = "SELECT * FROM dqf_segments WHERE id_segment >= ? AND id_segment <= ? " ;
 
-        $conn = $this->getConnection()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ $min, $max ] );
 
@@ -63,7 +63,7 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
         $sql .= implode(', ', array_fill( 0, count( $structs ), " ( ?, ? ) " ) ) ;
         $sql .= " ON DUPLICATE KEY UPDATE dqf_segments.dqf_translation_id = VALUES(dqf_segments.dqf_translation_id) " ;
 
-        $conn = $this->getConnection()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection() ;
 
         $stmt = $conn->prepare( $sql );
         $flattened_values = array_reduce( $structs, 'array_merge', array() );
@@ -82,7 +82,7 @@ class DqfSegmentsDao extends DataAccess_AbstractDao {
         $sql = " INSERT INTO dqf_segments (id_segment, dqf_segment_id, dqf_translation_id) VALUES " ;
         $sql .= implode(', ', array_fill( 0, count( $structs ), " ( ?, ?, ? ) " ) );
 
-        $conn = $this->getConnection()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection() ;
 
         $stmt = $conn->prepare( $sql );
         $flattened_values = array_reduce( $structs, 'array_merge', array() );

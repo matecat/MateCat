@@ -24,7 +24,7 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
                 FROM segment_translations st WHERE st.id_segment IN ( " .
                 implode(',', $propagatedIds ) . " ) " ;
 
-        $conn = $this->getConnection()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection() ;
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute( $struct->toArray(['id_job', 'uid', 'source_page']) ) ;

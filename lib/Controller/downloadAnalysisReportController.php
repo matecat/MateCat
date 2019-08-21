@@ -52,7 +52,7 @@ class downloadAnalysisReportController extends downloadController {
      */
     function doAction() {
 
-        $_project_data = getProjectJobData( $this->id_project );
+        $_project_data = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
 
         $pCheck = new AjaxPasswordCheck();
         $access = $pCheck->grantProjectAccess( $_project_data, $this->password );

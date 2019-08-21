@@ -61,11 +61,12 @@ class ReviewExtended extends AbstractRevisionFeature {
      * @param $controller \NewController|\createProjectController
      *
      * @return mixed
+     * @throws \Exception
      */
     public function filterCreateProjectFeatures( $projectFeatures, $controller ) {
         $projectFeatures[ self::FEATURE_CODE ] = new BasicFeatureStruct( [ 'feature_code' => self::FEATURE_CODE ] );
-        $controller->getFeatureSet()->filter('filterOverrideReviewExtended', $projectFeatures, $controller );
-        return $projectFeatures ;
+        $projectFeatures                       = $controller->getFeatureSet()->filter( 'filterOverrideReviewExtended', $projectFeatures, $controller );
+        return $projectFeatures;
     }
 
 }

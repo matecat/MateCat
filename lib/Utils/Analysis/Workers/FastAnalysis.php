@@ -17,7 +17,7 @@ use \AMQHandler,
     \Constants_ProjectStatus as ProjectStatus,
     \Exception,
     \Analysis_PayableRates as PayableRates,
-    \WordCount_Counter,
+    \WordCount_CounterModel,
     \Engine,
     \Database,
     \Utils,
@@ -25,9 +25,6 @@ use \AMQHandler,
     \UnexpectedValueException,
     \Log,
     \INIT;
-
-
-include_once \INIT::$MODEL_ROOT . '/queries.php';
 
 /**
  * Created by PhpStorm.
@@ -37,6 +34,8 @@ include_once \INIT::$MODEL_ROOT . '/queries.php';
  *
  */
 class FastAnalysis extends AbstractDaemon {
+
+    use ProjectWordCount;
 
     protected static $queueHandler;
 
@@ -155,7 +154,7 @@ class FastAnalysis extends AbstractDaemon {
                 // disable TM analysis
 
                 $disable_Tms_Analysis = $this->actual_project_row[ 'id_tms' ] == 0 && $this->actual_project_row[ 'id_mt_engine' ] == 0 ;
-                
+
                 if ( $disable_Tms_Analysis ) {
 
                     /**
@@ -364,9 +363,39 @@ class FastAnalysis extends AbstractDaemon {
 
         self::_TimeStampMsg( "*** Project $pid: Changing status..." );
 
-        changeProjectStatus( $pid, $status );
+        \Projects_ProjectDao::changeProjectStatus( $pid, $status );
 
         self::_TimeStampMsg( "*** Project $pid: $status" );
+
+    }
+
+    /**
+     * @param $tuple_list
+     * @param $bind_values
+     * @throws PDOException
+     */
+    protected function _executeInsert( $tuple_list, $bind_values ) {
+
+        $db       = Database::obtain();
+        $query_st = "INSERT INTO `segment_translations` ( 
+                                      id_job, 
+                                      id_segment, 
+                                      segment_hash, 
+                                      match_type, 
+                                      eq_word_count, 
+                                      standard_word_count 
+                                 ) VALUES "
+                . implode( ", ", $tuple_list ) .
+                " ON DUPLICATE KEY UPDATE
+                        match_type = VALUES( match_type ),
+                        eq_word_count = VALUES( eq_word_count ),
+                        standard_word_count = VALUES( standard_word_count )
+                ";
+
+        self::_TimeStampMsg( "Executed " . ( count( $tuple_list ) ) );
+        $stmt = $db->getConnection()->prepare( $query_st );
+        $stmt->execute( $bind_values );
+        $stmt->closeCursor();
 
     }
 
@@ -388,22 +417,12 @@ class FastAnalysis extends AbstractDaemon {
         $projectFeaturesString = $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
         Database::obtain()->getConnection()->commit();
 
-        $db   = Database::obtain();
-        $data = array();
-
         $total_eq_wc       = 0;
         $total_standard_wc = 0;
 
-        $data[ 'id_segment' ]          = null;
-        $data[ 'id_job' ]              = null;
-        $data[ 'segment_hash' ]        = null;
-        $data[ 'match_type' ]          = null;
-        $data[ 'eq_word_count' ]       = null;
-        $data[ 'standard_word_count' ] = null;
-
-        $segment_translations = "INSERT INTO `segment_translations` ( " . implode( ", ", array_keys( $data ) ) . " ) VALUES ";
-        $st_values            = array();
-
+        $tuple_list  = [];
+        $bind_values = [];
+        $totalSegmentsToAnalyze = 0;
         foreach ( $this->segments as $k => $v ) {
 
             $jid_pass = explode( "-", $v[ 'jsid' ] );
@@ -424,15 +443,15 @@ class FastAnalysis extends AbstractDaemon {
 
                 list( $id_job, $job_pass ) = explode( ":", $id_job );
 
-                $data[ 'id_job' ]       = (int)$id_job;
-                $data[ 'id_segment' ]   = (int)$v[ 'id' ];
-                $data[ 'segment_hash' ] = $db->escape( $v[ 'segment_hash' ] );
-                $data[ 'match_type' ]   = $db->escape( $match_type );
+                $bind_values[] = (int)$id_job;
+                $bind_values[] = (int)$v[ 'id' ];
+                $bind_values[] = $v[ 'segment_hash' ];
+                $bind_values[] = $match_type;
+                $bind_values[] = (float)$eq_word;
+                $bind_values[] = (float)$standard_words;
 
-                $data[ 'eq_word_count' ]       = (float)$eq_word;
-                $data[ 'standard_word_count' ] = (float)$standard_words;
-
-                $st_values[] = " ( '" . implode( "', '", array_values( $data ) ) . "' )";
+                $tuple_list[]  = "( ?,?,?,?,?,? )";
+                $totalSegmentsToAnalyze++;
 
                 //WE TRUST ON THE FAST ANALYSIS RESULTS FOR THE WORD COUNT
                 //here we are pruning the segments that must not be sent to the engines for the TM analysis
@@ -462,6 +481,17 @@ class FastAnalysis extends AbstractDaemon {
                     //do nothing, but $perform_Tms_Analysis is false, so we want delete all elements after the end of the loop
                 }
 
+                if( ( $totalSegmentsToAnalyze % 200 ) == 0 ){
+                    try {
+                        $this->_executeInsert( $tuple_list, $bind_values );
+                    } catch ( PDOException $e ) {
+                        self::_TimeStampMsg( $e->getMessage() );
+                        return $e->getCode() * -1;
+                    }
+                    $tuple_list = [];
+                    $bind_values = [];
+                }
+
             }
 
             //anyway this key must be removed because he is no more needed and we want not to send it to the queue
@@ -470,36 +500,18 @@ class FastAnalysis extends AbstractDaemon {
 
         }
 
-        unset( $data );
-
-        $chunks_st = array_chunk( $st_values, 200 );
-
-        self::_TimeStampMsg( 'Insert Segment Translations: ' . count( $st_values ) );
-
-        self::_TimeStampMsg( 'Queries: ' . count( $chunks_st ) );
-
-        foreach ( $chunks_st as $k => $chunk ) {
-
-            $query_st = $segment_translations . implode( ", ", $chunk ) .
-                    " ON DUPLICATE KEY UPDATE
-                        match_type = VALUES( match_type ),
-                        eq_word_count = VALUES( eq_word_count ),
-                        standard_word_count = VALUES( standard_word_count )
-                ";
-
+        if ( ( $totalSegmentsToAnalyze % 200 ) != 0 ) {
             try {
-                self::_TimeStampMsg( "Executed " . ( $k + 1 ) );
-                $db->query( $query_st );
+                $this->_executeInsert( $tuple_list, $bind_values );
             } catch ( PDOException $e ) {
                 self::_TimeStampMsg( $e->getMessage() );
-
                 return $e->getCode() * -1;
             }
         }
 
-        $totalSegmentsToAnalyze = count( $st_values );
-
-        unset( $st_values );
+        unset( $data );
+        unset( $tuple_list );
+        unset( $chunks_bind_values );
         unset( $chunks_st );
 
         /*
@@ -507,14 +519,14 @@ class FastAnalysis extends AbstractDaemon {
          */
         if ( !$perform_Tms_Analysis ) {
 
-            $_details = getProjectSegmentsTranslationSummary( $pid );
+            $_details = $this->getProjectSegmentsTranslationSummary( $pid );
 
             self::_TimeStampMsg( "--- trying to initialize job total word count." );
 
             $project_details = array_pop( $_details ); //Don't remove, needed to remove rollup row
 
             foreach ( $_details as $job_info ) {
-                $counter = new WordCount_Counter();
+                $counter = new WordCount_CounterModel();
                 $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
             }
 
@@ -523,11 +535,13 @@ class FastAnalysis extends AbstractDaemon {
 
         //_TimeStampMsg( "Done." );
 
-        $data2 = array( 'fast_analysis_wc' => $total_eq_wc );
+        $data2 = [ 'fast_analysis_wc' => $total_eq_wc ];
+        $where = [ "id" => $pid ];
 
-        $where = " id = $pid";
+
         try {
-            $db->update( 'projects', $data2, $where );
+            $db = Database::obtain();
+            $project_creation_success = $db->update( 'projects', $data2, $where );
         } catch ( PDOException $e ) {
             self::_TimeStampMsg( $e->getMessage() );
 
@@ -616,7 +630,7 @@ class FastAnalysis extends AbstractDaemon {
 
         }
 
-        return $db->affected_rows;
+        return $project_creation_success;
     }
 
     protected function _getWordCountForSegment( $segmentArray, $equivalentWordMapping ){
@@ -673,7 +687,7 @@ class FastAnalysis extends AbstractDaemon {
             INNER JOIN files_job AS fj ON fj.id_file = s.id_file
             INNER JOIN jobs as j ON fj.id_job = j.id
             LEFT JOIN segment_translations AS st ON st.id_segment = s.id
-                WHERE j.id_project = '$pid'
+                WHERE j.id_project = ?
                 AND IFNULL( st.locked, 0 ) = 0
                 AND IFNULL( st.match_type, 'NO_MATCH' ) != 'ICE'
                 AND show_in_cattool != 0
@@ -683,7 +697,10 @@ HD;
 
         $db    = Database::obtain();
         try {
-            $results = $db->fetch_array( $query );
+            $stmt = $db->getConnection()->prepare( $query );
+            $stmt->setFetchMode( PDO::FETCH_ASSOC );
+            $stmt->execute( [ $pid ] );
+            $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
             throw $e;
@@ -790,8 +807,6 @@ HD;
 
         $bindParams = [ 'project_status' => Constants_ProjectStatus::STATUS_NEW ];
 
-        $query_limit = " LIMIT " . (int)$limit;
-
         $and_InstanceId = null;
         if( !is_null( INIT::$INSTANCE_ID ) ){
             $and_InstanceId = ' AND instance_id = :instance_id ';
@@ -804,8 +819,7 @@ HD;
             INNER JOIN jobs j ON j.id_project=p.id
             WHERE status_analysis = :project_status $and_InstanceId
             GROUP BY 1
-        ORDER BY id $query_limit ;
-	";
+        ORDER BY id LIMIT " . (int)$limit;
 
         $db    = Database::obtain();
         //Needed to address the query to the master database if exists
@@ -824,6 +838,7 @@ HD;
                 unset( $results[ $position ] );
             } else {
                 self::$queueHandler->getRedisClient()->expire( '_fPid:' . $project[ 'id' ], 60 * 60 * 24 );
+                $this->_updateProject( $project[ 'id' ], Constants_ProjectStatus::STATUS_BUSY );
             }
         }
 

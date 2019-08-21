@@ -9,7 +9,7 @@ set_time_limit( 180 );
 class downloadFileController extends downloadController {
 
     protected $download_type;
-    protected $jobInfo;
+    protected $job;
     protected $forceXliff;
     protected $downloadToken;
 
@@ -75,7 +75,7 @@ class downloadFileController extends downloadController {
     public function doAction() {
 
         //get Job Info, we need only a row of jobs ( split )
-        $jobData = $this->jobInfo = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
+        $jobData = $this->job = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
         //check for Password correctness
         if ( empty( $jobData ) ) {
@@ -86,18 +86,15 @@ class downloadFileController extends downloadController {
             return null;
         }
 
-        $this->job     = $this->getJob();
         $this->project = $this->job->getProject();
 
         $this->featureSet->loadForProject( $this->project );
 
         //get storage object
         $fs        = new FilesStorage();
-        $files_job = $fs->getFilesForJob( $this->id_job, $this->id_file );
+        $files_job = $fs->getFilesForJob( $this->id_job );
 
-        $nonew          = 0;
         $output_content = [];
-
 
         /*
            the procedure:
@@ -107,6 +104,8 @@ class downloadFileController extends downloadController {
            4)the temporary file is sent to the converter and an original file is obtained
            5)the temporary file is deleted
          */
+
+        $sDao = new Segments_SegmentDao();
 
         //file array is chuncked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
@@ -132,7 +131,7 @@ class downloadFileController extends downloadController {
 
                 }
 
-                $data = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
+                $data = $sDao->getSegmentsDownload( $this->job, $fileID );
 
                 $transUnits = [];
 
@@ -408,7 +407,7 @@ class downloadFileController extends downloadController {
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
-        $activity->id_project = $this->jobInfo[ 'id_project' ];
+        $activity->id_project = $this->job[ 'id_project' ];
         $activity->action     = $action;
         $activity->ip         = Utils::getRealIpAddr();
         $activity->uid        = $this->user->uid;
@@ -661,10 +660,8 @@ class downloadFileController extends downloadController {
      */
     public function reBuildZipContent( $zipFileName, $newInternalZipFiles ) {
 
-        $project = Projects_ProjectDao::findById( $this->jobInfo[ 'id_project' ] );
-
         $fs      = new FilesStorage();
-        $zipFile = $fs->getOriginalZipPath( $project->create_date, $this->jobInfo[ 'id_project' ], $zipFileName );
+        $zipFile = $fs->getOriginalZipPath( $this->project->create_date, $this->job[ 'id_project' ], $zipFileName );
 
         $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
         copy( $zipFile, $tmpFName );

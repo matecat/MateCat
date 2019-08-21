@@ -27,8 +27,6 @@ use \Exception;
 use \Database, \PDOException;
 use Translations_SegmentTranslationDao;
 
-include \INIT::$MODEL_ROOT . "/queries.php";
-
 /**
  * Class TMAnalysisWorker
  * @package Analysis\Workers
@@ -37,6 +35,8 @@ include \INIT::$MODEL_ROOT . "/queries.php";
  * This worker handle a queue element ( a segment ) and perform the analysis on it
  */
 class TMAnalysisWorker extends AbstractWorker {
+
+    use ProjectWordCount;
 
     /**
      * Matches vector
@@ -692,7 +692,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
 
-            $total_segs = getProjectSegmentsTranslationSummary( $pid );
+            $total_segs = $this->getProjectSegmentsTranslationSummary( $pid );
 
             $total_segs = array_pop( $total_segs ); // get the Rollup Value
             $this->_doLog( $total_segs );
@@ -774,7 +774,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @throws ReQueueException
      * @throws \Predis\Connection\ConnectionException
-     * @throws EndQueueException
+     * @throws \ReflectionException
      */
     protected function _tryToCloseProject( $_project_id ) {
 
@@ -806,14 +806,20 @@ class TMAnalysisWorker extends AbstractWorker {
             }
 
             //TODO use a simplest query to get job id and password
-            $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
+            $_analyzed_report = $this->getProjectSegmentsTranslationSummary( $_project_id );
 
             $total_segs = array_pop( $_analyzed_report ); //remove Rollup
 
             $this->_doLog( "--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE" );
 
-            changeProjectStatus( $_project_id, \Constants_ProjectStatus::STATUS_DONE );
-            changeTmWc( $_project_id, $project_totals[ 'eq_wc' ], $project_totals[ 'st_wc' ] );
+            Projects_ProjectDao::updateFields(
+                    [
+                            'status_analysis'      => \Constants_ProjectStatus::STATUS_DONE,
+                            'tm_analysis_wc'       => $project_totals[ 'eq_wc' ],
+                            'standard_analysis_wc' => $project_totals[ 'st_wc' ]
+                    ],
+                    [ 'id' => $_project_id ]
+            );
 
             /*
              * Remove this job from the project list
@@ -825,7 +831,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $database = Database::obtain();
             foreach ( $_analyzed_report as $job_info ) {
-                $counter = new \WordCount_Counter();
+                $counter = new \WordCount_CounterModel();
                 $database->begin();
                 $wordCountStructs[] = $counter->initializeJobWordCount( $job_info[ 'id_job' ], $job_info[ 'password' ] );
                 $database->commit();
@@ -857,7 +863,10 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _forceSetSegmentAnalyzed( QueueElement $elementQueue ) {
 
         $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an inconsistent state
-        $where                        = " id_segment = {$elementQueue->params->id_segment} and id_job = {$elementQueue->params->id_job} ";
+        $where                        = [
+                "id_segment" => $elementQueue->params->id_segment,
+                "id_job"     => $elementQueue->params->id_job
+        ];
 
         $db = Database::obtain();
         try {

@@ -11,6 +11,9 @@ namespace API\V2;
 use API\V2\Json\Chunk;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
+use Jobs_JobDao;
+use Translations_SegmentTranslationDao;
+use Utils;
 
 class ChunkController extends KleinController {
 
@@ -59,8 +62,11 @@ class ChunkController extends KleinController {
 
     private function changeStatus( $status ) {
 
-        updateJobsStatus( "", $this->chunk->id, $status, $this->chunk->password );
+        Jobs_JobDao::updateJobStatus( $this->chunk, $status );
+        $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );
+        Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
         $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );
+
     }
 
     protected function afterConstruct() {

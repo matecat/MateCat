@@ -725,6 +725,16 @@
     ,
         {
             "localized":[{
+                "en":"Gilbertese"
+            }],
+            "isocode":"gil",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"gil-KI"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Glavda"
             }],
             "isocode":"glw",
@@ -825,6 +835,16 @@
     ,
         {
             "localized":[{
+                "en":"Hiligaynon"
+            }],
+            "isocode":"hil",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"hil-PH"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Hill Mari"
             }],
             "isocode":"mrj",
@@ -881,6 +901,15 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"ibo-NG"
+        }
+    ,        {
+            "localized":[{
+                "en":"Ilocano"
+            }],
+            "isocode":"ilo",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ilo-PH"
         }
     ,
         {
@@ -1215,6 +1244,16 @@
     ,
         {
             "localized":[{
+                "en":"Luba-Kasai"
+            }],
+            "isocode":"lua",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"lua-CD"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Luganda"
             }],
             "isocode":"lug",
@@ -1398,7 +1437,7 @@
                 "en":"Marshallese"
             }],
             "isocode":"mh",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"mh-MH"
         }
@@ -1703,7 +1742,7 @@
             "isocode":"qu",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"qu-XN"
+            "rfc3066code":"qu-PE"
         }
     ,
         {
@@ -2137,6 +2176,16 @@
             "enabled":true,
             "rtl":false,
             "rfc3066code":"th-TH"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Tahitian"
+            }],
+            "isocode":"ty",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ty-PF"
         }
     ,
         {

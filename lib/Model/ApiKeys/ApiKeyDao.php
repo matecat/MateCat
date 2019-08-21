@@ -17,7 +17,7 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
   }
 
   public function create( $obj ) {
-    $conn = $this->con->getConnection();
+    $conn = $this->database->getConnection();
 
     $obj->create_date = date('Y-m-d H:i:s');
     $obj->last_update = date('Y-m-d H:i:s');
@@ -30,10 +30,10 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
 
     $values = array_diff_key( $obj->toArray(), array('id' => null) );
 
-    $this->con->begin();
+    $this->database->begin();
     $stmt->execute( $values );
     $result = $this->getById( $conn->lastInsertId() ) ;
-    $this->con->commit();
+    $this->database->commit();
 
     return $result[0];
   }
@@ -43,7 +43,7 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
      * @return ApiKeys_ApiKeyStruct[]
      */
   public function getById( $id ) {
-    $conn = $this->con->getConnection();
+    $conn = $this->database->getConnection();
 
     $stmt = $conn->prepare(" SELECT * FROM api_keys WHERE id = ? ");
     $stmt->execute( array( $id ) );

@@ -46,16 +46,14 @@ class getUpdatedTranslationsController extends ajaxController {
 
     public function doAction() {
 
-        $pCheck = new AjaxPasswordCheck();
-
-        $jobData = Chunks_ChunkDao::getByJobID( $this->id_job );
+        $jobData = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->password );
         //check for Password correctness
-        if (!$pCheck->grantJobAccessByJobData( $jobData, $this->password)) {
+        if ( empty( $jobData ) ) {
             $this->result['error'][] = array("code" => -10, "message" => "wrong password");
             return;
         }
 
-        $data                   = getUpdatedTranslations( $this->last_timestamp, $this->first_segment, $this->last_segment, $this->id_job );
+        $data                   = Translations_SegmentTranslationDao::getUpdatedTranslations( $this->last_timestamp, $this->first_segment, $this->last_segment, $this->id_job );
         $this->result[ 'data' ] = $data;
     }
 

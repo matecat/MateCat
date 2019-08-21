@@ -47,7 +47,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
 
     public function findById( $id ) {
         $sql  = " SELECT * FROM " . self::TABLE . " WHERE id = ? ";
-        $stmt = $this->getConnection()->getConnection()->prepare( $sql );
+        $stmt = $this->getDatabaseHandler()->getConnection()->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( array( $id ) );
 

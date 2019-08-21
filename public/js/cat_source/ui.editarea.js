@@ -1,4 +1,8 @@
 $.extend( UI, {
+    editAreaEditing: false,
+    setEditAreaEditing: function(isEditing) {
+        this.editAreaEditing = isEditing;
+    },
     setEditAreaEvents: function () {
         /**
          * Start EditArea Events Shortcuts
@@ -69,11 +73,17 @@ $.extend( UI, {
                 var selBound = $('.rangySelectionBoundary', UI.editarea);
                 if(undeletableMonad) selBound.prev().remove();
                 if(code == 8) { // backspace
-                    var undeletableTag = (($(translation[sbIndex-1]).hasClass('locked'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
-                    if(undeletableTag) selBound.prev().remove();
+                    var undeletableTag = (
+                        ( $(translation[sbIndex-1]).hasClass('locked') && ($(translation[sbIndex-2]).prop("tagName") === 'BR')) ||
+                        ( ( $(translation[sbIndex-2]).hasClass("monad") || $(translation[sbIndex-2]).hasClass("locked")) && $(translation[sbIndex-1]).hasClass('undoCursorPlaceholder') )
+                    )? true : false;
+                    if(undeletableTag) {
+                        selBound.prev().remove();
+                        // e.preventDefault();
+                    }
                 }
 
-                restoreSelection();
+                // restoreSelection();
 
                 // insideTag management
                 if ((code == 8)&&(isInsideTag)) {
@@ -82,13 +92,13 @@ $.extend( UI, {
                 }
 
                 setTimeout(function() {
-                    saveSelection();
                     // detect if selection ph is inside a monad tag
                     if($('.monad .rangySelectionBoundary', UI.editarea).length) {
+                        saveSelection();
                         $('.monad:has(.rangySelectionBoundary)', UI.editarea).after($('.monad .rangySelectionBoundary', UI.editarea));
+                        restoreSelection();
                         // move selboundary after the monad
                     }
-                    restoreSelection();
                     var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                     var numSpacesAfter = $('.space-marker', UI.editarea).length;
 //                        var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
@@ -279,9 +289,10 @@ $.extend( UI, {
         }
     },
     inputEditAreaEventHandler: function (e) {
-        SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'waiting_for_check_result');
-        SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
-        UI.currentSegment.data('modified', true);
+        if ( !UI.currentSegment.data('modified') ) {
+            SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
+            UI.currentSegment.data('modified', true);
+        }
         UI.currentSegment.trigger('modified');
         //UI.updateSegmentTranslation();
         UI.registerQACheck();

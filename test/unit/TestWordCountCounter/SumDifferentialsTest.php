@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_Counter::sumDifferentials
+ * @covers WordCount_CounterModel::sumDifferentials
  * User: dinies
  * Date: 14/06/16
  * Time: 17.16
@@ -33,8 +33,9 @@ class SumDifferentialsTest extends AbstractTest
 
     }
     /**
-     * @covers WordCount_Counter::sumDifferentials
+     * @covers WordCount_CounterModel::sumDifferentials
      * @group regression
+     *
      * @param WordCount_Struct[] $wordCount_Struct
      */
     public function test_sumDifferentials_with_rejection()
@@ -48,7 +49,7 @@ class SumDifferentialsTest extends AbstractTest
         $this->word_count_struct->setOldStatus("TRANSLATED");
         $this->word_count_struct->setNewStatus("REJECTED");
 
-        $this->word_counter = new WordCount_Counter($this->word_count_struct);
+        $this->word_counter = new WordCount_CounterModel($this->word_count_struct);
         $this->word_counter->setOldStatus("TRANSLATED");
         $this->word_counter->setNewStatus("REJECTED");
 
@@ -82,8 +83,9 @@ class SumDifferentialsTest extends AbstractTest
     }
 
     /**
-     * @covers WordCount_Counter::sumDifferentials
+     * @covers WordCount_CounterModel::sumDifferentials
      * @group regression
+     *
      * @param WordCount_Struct[] $wordCount_Struct
      */
     public function test_sumDifferentials_with_chunks_of_split_from_NEW_to_APPROVED()
@@ -98,7 +100,7 @@ class SumDifferentialsTest extends AbstractTest
         $this->word_count_struct->setNewStatus("APPROVED");
 
 
-        $this->word_counter = new WordCount_Counter($this->word_count_struct);
+        $this->word_counter = new WordCount_CounterModel($this->word_count_struct);
         $this->word_counter->setOldStatus("NEW");
         $this->word_counter->setNewStatus("APPROVED");
 

@@ -4,6 +4,7 @@
 namespace Translations ;
 
 use Constants_TranslationStatus;
+use DataAccess\ShapelessConcreteStruct;
 use Jobs\WarningsCountStruct;
 use PDO;
 
@@ -42,7 +43,7 @@ class WarningDao extends \DataAccess_AbstractDao {
 
         $params = array_merge( $projectIds, $statuses );
 
-        $con = $this->con->getConnection();
+        $con = $this->database->getConnection();
 
         $stmt = $con->prepare( $sql );
 
@@ -56,7 +57,7 @@ class WarningDao extends \DataAccess_AbstractDao {
      * @return int
      */
     public function getErrorsByChunk( \Chunks_ChunkStruct $chunk ) {
-        $con = $this->con->getConnection() ;
+        $con = $this->database->getConnection() ;
 
         $stmt = $con->prepare( $this->_query_warnings_by_chunk ) ;
         $stmt->execute( [
@@ -141,6 +142,30 @@ class WarningDao extends \DataAccess_AbstractDao {
 
     protected function _buildResult( $array_result ) {
         // TODO: Implement _buildResult() method.
+    }
+
+    public static function getWarningsByJobIdAndPassword( $jid, $jpassword ) {
+
+        $thisDao = new self();
+        $db = $thisDao->getDatabaseHandler();
+
+        $query = "SELECT id_segment, serialized_errors_list
+		FROM segment_translations
+		JOIN jobs ON jobs.id = id_job AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+		WHERE jobs.id = :id_job
+		  AND jobs.password = :password
+		  AND segment_translations.status != :segment_status 
+		-- following is a condition on bitmask to filter by severity ERROR
+		  AND warning & 1 = 1 ";
+
+        $stmt = $db->getConnection()->prepare( $query );
+
+        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_job'             => $jid,
+                'password'           => $jpassword,
+                'segment_status'     => Constants_TranslationStatus::STATUS_NEW
+        ] );
+
     }
 
 

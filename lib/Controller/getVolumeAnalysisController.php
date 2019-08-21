@@ -32,7 +32,7 @@ class getVolumeAnalysisController extends ajaxController {
             return -1;
         }
 
-        $_project_data = getProjectJobData( $this->id_project );
+        $_project_data = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
 
         $passCheck = new AjaxPasswordCheck();
         $access    = $passCheck->grantProjectAccess( $_project_data, $this->ppassword ) || $passCheck->grantProjectJobAccessOnJobPass( $_project_data, null, $this->jpassword );

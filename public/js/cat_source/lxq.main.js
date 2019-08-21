@@ -779,7 +779,7 @@ LXQ.init  = function () {
                         }
                         else
                             root.append(row);
-                        if (warningData.suggestions && warningData.suggestions.length && word && word.length) {
+                        if (warningData.suggestions && warningData.suggestions.length && Array.isArray(warningData.suggestions) && word && word.length) {
                           $.each(warningData.suggestions, function (i, suggest) {
                               var suggestRow = $(tpls.lxqTooltipSuggestionBody);
                               if (cl ==='o1') {
@@ -1316,16 +1316,14 @@ LXQ.init  = function () {
                 return;
             }
 
-            // var html = $( segment ).find( '.source' )
-            //     .html()
-            //     .replace( /<.*?>/g, '' )
-            //     .replace( /\&gt;/g, '>' )
-            //     .replace( /\&lt;/g, '<' );
+            // var sourcetext = UI.getSegmentSource(segment);
+            // var translation = UI.postProcessEditarea(segment, '.targetarea');
+            // translation = UI.clenaupTextFromPleaceholders( translation ).replace(/\uFEFF/g,'');
 
-            //var sourcetext = $( segment ).find( '.source' ).text();
-            var sourcetext = UI.getSegmentSource(segment)
-            var translation = UI.postProcessEditarea(segment, '.targetarea');
-            translation = UI.clenaupTextFromPleaceholders( translation ).replace(/\uFEFF/g,'');
+            var sourcetext = $( segment ).find( '.source' ).text();
+            var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
+
+            
             var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;
             $.lexiqaAuthenticator.doLexiQA(
                 {

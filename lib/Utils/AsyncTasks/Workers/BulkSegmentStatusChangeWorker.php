@@ -17,7 +17,7 @@ use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use Translations_SegmentTranslationDao;
-use WordCount_Counter;
+use WordCount_CounterModel;
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
@@ -69,7 +69,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         }
 
         if ( !empty( $params[ 'segment_ids' ] ) ) {
-            $counter = new WordCount_Counter();
+            $counter = new WordCount_CounterModel();
             $counter->initializeJobWordCount( $job->id, $job->password );
         }
 
