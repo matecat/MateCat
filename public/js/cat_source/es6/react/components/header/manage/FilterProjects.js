@@ -176,7 +176,7 @@ class FilterProjects extends React.Component {
             case 'cancelled':
                 return <div className="cancelled">Cancelled:</div>;
         }
-    }
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         return _.isUndefined(this.props.selectedTeam) || (!_.isUndefined(nextProps.selectedTeam) && !nextProps.selectedTeam.equals(this.props.selectedTeam))
@@ -197,7 +197,7 @@ class FilterProjects extends React.Component {
                     </div>
 
                     <div className="six wide column pad-right-0">
-                        {getUserFilter}
+                        {getUserFilter()}
                     </div>
 
                 </div>
