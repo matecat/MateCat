@@ -83,7 +83,7 @@ $.extend( UI, {
                     }
                 }
 
-                restoreSelection();
+                // restoreSelection();
 
                 // insideTag management
                 if ((code == 8)&&(isInsideTag)) {
@@ -92,13 +92,13 @@ $.extend( UI, {
                 }
 
                 setTimeout(function() {
-                    saveSelection();
                     // detect if selection ph is inside a monad tag
                     if($('.monad .rangySelectionBoundary', UI.editarea).length) {
+                        saveSelection();
                         $('.monad:has(.rangySelectionBoundary)', UI.editarea).after($('.monad .rangySelectionBoundary', UI.editarea));
+                        restoreSelection();
                         // move selboundary after the monad
                     }
-                    restoreSelection();
                     var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                     var numSpacesAfter = $('.space-marker', UI.editarea).length;
 //                        var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;

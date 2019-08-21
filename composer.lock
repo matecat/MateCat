@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.109.6",
+            "version": "3.109.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "c129c2120943340cb102ab1a1c7c76d03c00bcc4"
+                "reference": "a7948d0de42185cb1af551713a0e99ad593fd962"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/c129c2120943340cb102ab1a1c7c76d03c00bcc4",
-                "reference": "c129c2120943340cb102ab1a1c7c76d03c00bcc4",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/a7948d0de42185cb1af551713a0e99ad593fd962",
+                "reference": "a7948d0de42185cb1af551713a0e99ad593fd962",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-08-16T18:13:56+00:00"
+            "time": "2019-08-20T18:42:25+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -413,15 +413,15 @@
             "authors": [
                 {
                     "name": "Chris O'Hara",
+                    "role": "Creator/Developer",
                     "email": "cohara87@gmail.com",
-                    "homepage": "http://chris6f.com/",
-                    "role": "Creator/Developer"
+                    "homepage": "http://chris6f.com/"
                 },
                 {
                     "name": "Trevor Suarez",
+                    "role": "Contributor/Developer",
                     "email": "rican7@gmail.com",
-                    "homepage": "https://trevorsuarez.com/",
-                    "role": "Contributor/Developer"
+                    "homepage": "https://trevorsuarez.com/"
                 }
             ],
             "description": "A lightning fast router for PHP",
