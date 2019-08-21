@@ -21,11 +21,11 @@ class EncodeToRawXML extends AbstractHandler {
 
         // handling &#10; (new lien feed)
         // prevent to convert it to \n
-        $segment = preg_replace( '/&(#10;|#x0A;)/', '##_ent_0A_##', $segment );
+        $segment = preg_replace( '/&(#10;|#x0A;|\n)/', '##_ent_0A_##', $segment );
 
         // handling &#13; (carriage return)
         // prevent to convert it to \r
-        $segment = preg_replace( '/&(#13;|#x0D;)/', '##_ent_0D_##', $segment );
+        $segment = preg_replace( '/&(#13;|#x0D;|\r)/', '##_ent_0D_##', $segment );
 
         //decode all html entities found and re-encode in the right way
         $segment = htmlspecialchars(
