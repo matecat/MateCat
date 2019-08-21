@@ -21,7 +21,7 @@ class SearchModel {
     /**
      * Used to exclude html entities from full text queries
      */
-    protected $regexHtmlEntities = '&#(lt;|gt;|amp;|quot;|apos;|[x]{0,1}[0-9A-F]{1,7};)';
+    protected $regexHtmlEntities = '&(lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)';
 
     /**
      * @var SearchQueryParamsStruct
