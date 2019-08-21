@@ -1,5 +1,13 @@
 <?php
 
+namespace XliffReplacer;
+
+use FeatureSet;
+use Log;
+use QA;
+use SubFiltering\Filter;
+use SubFiltering\Filters\RemoveDangerousChars;
+
 class XliffSAXTranslationReplacer {
 
     protected $originalFP;
@@ -33,11 +41,11 @@ class XliffSAXTranslationReplacer {
     protected $featureSet;
 
     /**
-     * @var \SubFiltering\Filter
+     * @var Filter
      */
     protected $filter;
 
-    public function __construct( $originalXliffFilename, $segments, $transUnits, $trg_lang = null, $outputFile = null ) {
+    public function __construct( &$segments, &$transUnits, $trg_lang = null ) {
 
         self::$INTERNAL_TAG_PLACEHOLDER = "§" .
                 substr(
@@ -47,6 +55,15 @@ class XliffSAXTranslationReplacer {
                                 base64_encode( openssl_random_pseudo_bytes( 10, $_crypto_strong ) )
                         ), 0, 4
                 );
+
+        $this->segments       = $segments;
+        $this->target_lang    = $trg_lang;
+        $this->sourceInTarget = false;
+        $this->transUnits     = $transUnits;
+
+    }
+
+    public function setFileDescriptors( $originalXliffFilename, $outputFile = null ){
 
         if ( is_resource( $outputFile ) ) {
             $this->outputFP = $outputFile;
@@ -58,11 +75,6 @@ class XliffSAXTranslationReplacer {
         if ( !( $this->originalFP = fopen( $originalXliffFilename, "r" ) ) ) {
             die( "could not open XML input" );
         }
-
-        $this->segments       = $segments;
-        $this->target_lang    = $trg_lang;
-        $this->sourceInTarget = false;
-        $this->transUnits     = $transUnits;
 
     }
 
@@ -87,7 +99,7 @@ class XliffSAXTranslationReplacer {
         }
 
         $this->featureSet = $featureSet;
-        $this->filter = \SubFiltering\Filter::getInstance( $featureSet );
+        $this->filter = Filter::getInstance( $featureSet );
 
         //write xml header
         fwrite( $this->outputFP, '<?xml version="1.0" encoding="UTF-8"?>' );
@@ -200,7 +212,7 @@ class XliffSAXTranslationReplacer {
                     $tag .= "$k=\"$this->target_lang\" ";
                     //Log::doJsonLog($k . " => " . $this->target_lang);
                 } else {
-                    //put attributes in it
+                    //normal tag flux, put attributes in it
                     $tag .= "$k=\"$v\" ";
                 }
 
@@ -224,6 +236,11 @@ class XliffSAXTranslationReplacer {
                 //if it's out, simple use the last character of the chunk
                 $tmp_offset = $this->len - 1;
                 $lastChar   = $this->currentBuffer[ $this->len - 1 ];
+            }
+
+            //add MateCat specific namespace, we want maybe add non-XLIFF attributes
+            if( $name == 'xliff' ){
+                $tag .= 'xmlns:mtc="https://www.matecat.com" ';
             }
 
             //trim last space
@@ -390,58 +407,14 @@ class XliffSAXTranslationReplacer {
 
                         $lastMrkId = $this->segments[ $id ][ "mrk_id" ];
 
-                        switch ( $seg[ 'status' ] ) {
-
-                            case \Constants_TranslationStatus::STATUS_FIXED:
-                            case \Constants_TranslationStatus::STATUS_APPROVED:
-                                if ( $lastMrkState == null || $lastMrkState == \Constants_TranslationStatus::STATUS_APPROVED ) {
-                                    $state_prop = "state=\"signed-off\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_APPROVED;
-                                }
-                                break;
-
-                            case \Constants_TranslationStatus::STATUS_TRANSLATED:
-                                if ( $lastMrkState == null || $lastMrkState == \Constants_TranslationStatus::STATUS_TRANSLATED || $lastMrkState == \Constants_TranslationStatus::STATUS_APPROVED ) {
-                                    $state_prop = "state=\"translated\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_TRANSLATED;
-                                }
-                                break;
-
-                            case \Constants_TranslationStatus::STATUS_REJECTED:  // if there is a mark REJECTED and there is not a DRAFT, all the trans-unit is REJECTED
-                            case \Constants_TranslationStatus::STATUS_REBUTTED:
-                                if ( ( $lastMrkState == null ) || ( $lastMrkState != \Constants_TranslationStatus::STATUS_NEW || $lastMrkState != \Constants_TranslationStatus::STATUS_DRAFT ) ) {
-                                    $state_prop = "state=\"needs-review-translation\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_REJECTED;
-                                }
-                                break;
-
-                            case \Constants_TranslationStatus::STATUS_NEW:
-                                if ( ( $lastMrkState == null ) || $lastMrkState != \Constants_TranslationStatus::STATUS_DRAFT ) {
-                                    $state_prop = "state=\"new\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_NEW;
-                                }
-                                break;
-
-                            case \Constants_TranslationStatus::STATUS_DRAFT:
-                                $state_prop = "state=\"needs-translation\"";
-                                $lastMrkState      = \Constants_TranslationStatus::STATUS_DRAFT;
-                                break;
-                            default:
-                                // this is the case when a segment is not showed in cattool, so the row in
-                                // segment_translations does not exists and
-                                // ---> $seg[ 'status' ] is NULL
-                                if( $lastMrkState == null ){ //this is the first MRK ID
-                                    $state_prop = "state=\"translated\"";
-                                    $lastMrkState      = \Constants_TranslationStatus::STATUS_TRANSLATED;
-                                } else { /* Do nothing and preserve the last state */ }
-                                break;
-                        }
+                        list( $state_prop, $lastMrkState ) = $this->setTransUnitState( $seg, $lastMrkState );
 
                     }
 
                     //append translation
                     $tag = "<target xml:lang=\"" . $this->target_lang . "\" $state_prop>$translation</target>";
-                    $tag .= "\n<count-group name=\"x-matecat-word-count\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group>";
+                    $tag .= $this->getWordCountGroup( $raw_word_count, $eq_word_count );
+
                 }
 
                 //signal we are leaving a target
@@ -485,6 +458,71 @@ class XliffSAXTranslationReplacer {
 
     }
 
+    protected function getWordCountGroup( $raw_word_count, $eq_word_count ){
+        return "\n<group mtc:name=\"x-matecat-word-count\"><count-group name=\"$this->currentId\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group></group>";
+    }
+
+    /**
+     * @param $seg
+     * @param $lastMrkState
+     *
+     * @return array
+     */
+    protected function setTransUnitState( $seg, $lastMrkState ){
+
+        $state_prop = '';
+
+        switch ( $seg[ 'status' ] ) {
+
+            case \Constants_TranslationStatus::STATUS_FIXED:
+            case \Constants_TranslationStatus::STATUS_APPROVED:
+                if ( $lastMrkState == null || $lastMrkState == \Constants_TranslationStatus::STATUS_APPROVED ) {
+                    $state_prop = "state=\"signed-off\"";
+                    $lastMrkState      = \Constants_TranslationStatus::STATUS_APPROVED;
+                }
+                break;
+
+            case \Constants_TranslationStatus::STATUS_TRANSLATED:
+                if ( $lastMrkState == null || $lastMrkState == \Constants_TranslationStatus::STATUS_TRANSLATED || $lastMrkState == \Constants_TranslationStatus::STATUS_APPROVED ) {
+                    $state_prop = "state=\"translated\"";
+                    $lastMrkState      = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                }
+                break;
+
+            case \Constants_TranslationStatus::STATUS_REJECTED:  // if there is a mark REJECTED and there is not a DRAFT, all the trans-unit is REJECTED
+            case \Constants_TranslationStatus::STATUS_REBUTTED:
+                if ( ( $lastMrkState == null ) || ( $lastMrkState != \Constants_TranslationStatus::STATUS_NEW || $lastMrkState != \Constants_TranslationStatus::STATUS_DRAFT ) ) {
+                    $state_prop = "state=\"needs-review-translation\"";
+                    $lastMrkState      = \Constants_TranslationStatus::STATUS_REJECTED;
+                }
+                break;
+
+            case \Constants_TranslationStatus::STATUS_NEW:
+                if ( ( $lastMrkState == null ) || $lastMrkState != \Constants_TranslationStatus::STATUS_DRAFT ) {
+                    $state_prop = "state=\"new\"";
+                    $lastMrkState      = \Constants_TranslationStatus::STATUS_NEW;
+                }
+                break;
+
+            case \Constants_TranslationStatus::STATUS_DRAFT:
+                $state_prop = "state=\"needs-translation\"";
+                $lastMrkState      = \Constants_TranslationStatus::STATUS_DRAFT;
+                break;
+            default:
+                // this is the case when a segment is not showed in cattool, so the row in
+                // segment_translations does not exists and
+                // ---> $seg[ 'status' ] is NULL
+                if( $lastMrkState == null ){ //this is the first MRK ID
+                    $state_prop = "state=\"translated\"";
+                    $lastMrkState      = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                } else { /* Do nothing and preserve the last state */ }
+                break;
+        }
+
+        return [ $state_prop, $lastMrkState ];
+
+    }
+
     /*
        callback for CDATA event
      */
@@ -524,7 +562,7 @@ class XliffSAXTranslationReplacer {
     protected function prepareSegment( $seg, $trans_unit_translation = "" ) {
         $end_tags = "";
 
-        $channel = new SubFiltering\Filters\RemoveDangerousChars();
+        $channel = new RemoveDangerousChars();
         $segment = $channel->transform( $seg [ 'segment' ] );
         $translation = $channel->transform( $seg [ 'translation' ] );
 
