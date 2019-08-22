@@ -283,7 +283,7 @@ header {
 .user-teams {
     //padding-right: 52px !important;
     display: grid !important;
-    grid-template-columns: 1fr 30px 50px auto;
+    grid-template-columns: auto 30px 50px auto;
     justify-content: right;
     align-items: center;
 

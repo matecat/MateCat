@@ -128,7 +128,7 @@ class Header extends React.Component {
 		const {teams,selectedTeamId} = this.state;
 
 		const userIcon = getUserIcon();
-		let containerClass = "user-teams four";
+		let containerClass = "user-teams three";
 		const componentToShow = getHeaderComponentToShow();
 
 		if (showLinks) {
@@ -146,7 +146,7 @@ class Header extends React.Component {
 					</div>
 					{componentToShow}
 
-					<div className={containerClass + " wide column"}>
+					<div className={containerClass + " wide column right floated"}>
 						{(showLinks) ? (
 							<div>
 								<ul id="menu-site">

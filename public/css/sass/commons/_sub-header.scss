@@ -34,14 +34,12 @@
 		border-radius: 5px;
 		font-size: 14px;
 		min-width: 168px;
-		float: right;
+		float: left;
 
 		display: grid;
 		width: 168px;
 		grid-template-columns: auto 16px;
 		align-items: center;
-
-		float: right;
 
 		.icon {
 			padding-top: 6px;
