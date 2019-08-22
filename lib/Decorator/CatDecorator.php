@@ -45,7 +45,7 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->header_quality_report_item_class = '';
 
         $this->template->header_main_button_enabled = true;
-        $this->template->header_main_button_label   = $this->getHeaderMainButtonLabel();
+        $this->template->header_main_button_label   = $this->getHeaderMainButtonLabelNew();
         $this->template->header_main_button_id      = 'downloadProject';
 
         $this->template->isCJK = false;
@@ -142,6 +142,26 @@ class CatDecorator extends \AbstractDecorator {
 
       return $label;
   }
+
+    private function getHeaderMainButtonLabelNew() {
+        $label = '';
+
+        if ( $this->jobStatsStruct->isDownloadable() ) {
+            if($this->isGDriveProject) {
+                $label = 'Open in Google Drive';
+            } else {
+                $label = 'Download Translation';
+            }
+        } else {
+            if($this->isGDriveProject) {
+                $label = 'Preview in Google Drive';
+            } else {
+                $label = 'Draft';
+            }
+        }
+
+        return $label;
+    }
 
 
 

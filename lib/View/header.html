@@ -32,10 +32,16 @@
             <div class="action-submenu ui simple pointing top left floating dropdown" id="action-download">
                 <div class="dropdown-menu-overlay"></div>
                 <ul class="menu">
-                    <li class="item" data-value="draft"><a href="#">Draft</a></li>
-                    <li class="item" data-value="original"><a href="#">Original</a></li>
-                    <li class="item" data-value="xlif"><a href="#">Export XLIF</a></li>
-                    <li class="item" data-value="tmx"><a href="#">Export Job TMX</a></li>
+                    <li class="item" data-value="draft"><a href="#" onclick="runDownload();">${header_main_button_label}</a></li>
+                    <li tal:condition="not:isGDriveProject" class="item" data-value="original">
+                        <a href="/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all" target="_blank">Original</a>
+                    </li>
+                    <li class="item" data-value="xlif" tal:condition="php: uses_matecat_filters == true || INIT::$DEPRECATE_LEGACY_XLIFFS == false">
+                        <a href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank">Export XLIF</a>
+                    </li>
+                    <li class="item" data-value="tmx">
+                        <a href="/TMX/${jid}/${password}" target="_blank">Export Job TMX</a>
+                    </li>
                 </ul>
             </div>
 
