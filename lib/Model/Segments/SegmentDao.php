@@ -555,7 +555,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 JOIN files ON files.id = s.id_file
                 JOIN segment_translations st ON st.id_segment = s.id
                 JOIN jobs j ON j.id = st.id_job
-                LEFT JOIN segment_translations_splits sts ON sts.id_segment = s.id
+                LEFT JOIN segment_translations_splits sts ON sts.id_segment = s.id AND sts.id_job = :id_job
                 JOIN (
 
                   $subQuery
