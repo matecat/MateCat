@@ -85,9 +85,9 @@ class OAuthSignInModel {
         $this->user->uid = Users_UserDao::insertStruct($this->user);
 
         $dao = new TeamDao();
-        $dao->getConnection()->begin();
+        $dao->getDatabaseHandler()->begin();
         $dao->createPersonalTeam($this->user);
-        $dao->getConnection()->commit();
+        $dao->getDatabaseHandler()->commit();
     }
 
     protected function _updateExistingUser(Users_UserStruct $existing_user) {

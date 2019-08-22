@@ -19,7 +19,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
 
         $query = "INSERT INTO " . self::TABLE .
                 " (id_job, id_segment, err_typing, err_translation, err_terminology, err_language, err_style, original_translation)
-                    VALUES ( %d, %d, '%s', '%s', '%s', '%s', '%s', '%s' ) ON DUPLICATE KEY UPDATE
+                    VALUES ( ?, ?, ?, ?, ?, ?, ?, ? ) ON DUPLICATE KEY UPDATE
                         err_typing = VALUES(err_typing),
                         err_translation = VALUES(err_translation),
                         err_terminology = VALUES(err_terminology),
@@ -28,8 +28,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
                         original_translation = original_translation
             ";
 
-        $query = sprintf(
-                $query,
+        $bind_values = [
                 (int)$obj->id_job,
                 (int)$obj->id_segment,
                 $obj->err_typing,
@@ -37,13 +36,14 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
                 $obj->err_terminology,
                 $obj->err_language,
                 $obj->err_style,
-                $this->con->escape( $obj->original_translation )
-        );
+                $obj->original_translation
+        ];
 
-        $this->con->query( $query );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( $bind_values );
 
         //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $stmt->rowCount() > 0 ) {
             return $obj;
         }
 
@@ -54,8 +54,10 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
 
         $obj = $this->sanitize( $obj );
 
-        $where_conditions = array();
-        $query            = "SELECT id_job,
+        $where_conditions = [];
+        $bind_values      = [];
+
+        $query = "SELECT id_job,
                                     id_segment,
                                     err_typing,
                                     err_translation,
@@ -66,11 +68,13 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
                              FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->id_job !== null ) {
-            $where_conditions[ ] = "id_job = " . (int)$obj->id_job;
+            $bind_values[ 'id_job' ] = $obj->id_job;
+            $where_conditions[]      = "id_job = :id_job";
         }
 
         if ( $obj->id_segment !== null ) {
-            $where_conditions[ ] = "id_segment = " . (int)$obj->id_segment;
+            $bind_values[ 'id_segment' ] = $obj->id_segment;
+            $where_conditions[]          = "id_segment = :id_segment";
         }
 
 
@@ -81,17 +85,17 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
         }
 
         $query = sprintf( $query, $where_string );
+        $stmt  = $this->database->getConnection()->prepare( $query );
 
-        $arr_result = $this->con->fetch_array( $query );
+        return $this->_fetchObject( $stmt, new Revise_ReviseStruct(), $bind_values );
 
-        return $this->_buildResult( $arr_result );
     }
 
-    public function readBySegments($segments_id, $job_id){
+    public function readBySegments( $segments_id, $job_id ) {
 
-        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1);
+        $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
 
-        $query            = "SELECT id_job,
+        $query = "SELECT id_job,
                                 id_segment,
                                 err_typing,
                                 err_translation,
@@ -100,8 +104,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
                                 err_style,
                                 original_translation
                          FROM " . self::TABLE . " JOIN (
-                            SELECT ? as id_segment
-                            ".$prepare_str_segments_id."
+                            SELECT ? as id_segment " . $prepare_str_segments_id . "
                          ) AS SLIST USING( id_segment )
                          WHERE id_job = ?";
 
@@ -109,7 +112,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $query );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
 
-        $stmt->execute( array_merge($segments_id, array($job_id)) );
+        $stmt->execute( array_merge( $segments_id, [ $job_id ] ) );
 
         return $stmt->fetchAll();
     }
@@ -119,45 +122,37 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
 
         $this->_validatePrimaryKey( $obj );
 
-        $set_array        = array();
-        $where_conditions = array();
-        $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
+        $set_array   = [];
+        $bind_values = [];
+        $query       = "UPDATE " . self::TABLE . " SET %s WHERE id_job = ? AND id_segment = ?";
 
-        $where_conditions[ ] = "id_job = " . (int)$obj->id_job;
-        $where_conditions[ ] = "id_segment = " . (int)$obj->id_segment;
+        $bind_values[] = $obj->id_job;
+        $bind_values[] = $obj->id_segment;
 
         if ( $obj->err_typing !== null ) {
-            $condition    = "err_typing = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->err_typing );
+            $set_array[] = "err_typing = ?";
+            $bind_values[] = $obj->err_typing;
         }
 
         if ( $obj->err_typing !== null ) {
-            $condition    = "err_translation = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->err_translation );
+            $set_array   = "err_translation = ?";
+            $bind_values[] = $obj->err_translation;
         }
 
         if ( $obj->err_typing !== null ) {
-            $condition    = "err_terminology = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->err_terminology );
+            $set_array [] = "err_terminology = ?";
+            $bind_values[]  = $obj->err_terminology;
         }
 
         if ( $obj->err_typing !== null ) {
-            $condition    = "err_language = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->err_language );
+            $set_array [] = "err_language = ?";
+            $bind_values[]  = $obj->err_language;
         }
 
         if ( $obj->err_typing !== null ) {
-            $condition    = "err_style = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->err_style );
+            $set_array [] = "err_style = ?";
+            $bind_values[]  = $obj->err_style;
         }
-
-//        if($obj->original_translation !== null){
-//            $condition = "origin_translation = '%s'";
-//            $set_array[ ] = sprintf($condition, $this->con->escape( $obj->original_translation ) );
-//        }
-
-        $set_string   = null;
-        $where_string = implode( " AND ", $where_conditions );
 
         if ( count( $set_array ) ) {
             $set_string = implode( ", ", $set_array );
@@ -165,11 +160,11 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
             throw new Exception( "Array given is empty. Please set at least one value." );
         }
 
-        $query = sprintf( $query, $set_string, $where_string );
+        $query = sprintf( $query, $set_string );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( $bind_values );
 
-        $this->con->query( $query );
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $stmt->rowCount() > 0 ) {
             return $obj;
         }
 
@@ -198,31 +193,6 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
             throw new Exception( "Segment id cannot be null" );
         }
 
-    }
-
-
-    protected function _buildResult( $array_result ) {
-        $result = array();
-
-        foreach ( $array_result as $item ) {
-
-            $build_arr = array(
-                    'id_job'               => $item[ 'id_job' ],
-                    'id_segment'           => $item[ 'id_segment' ],
-                    'err_typing'           => $item[ 'err_typing' ],
-                    'err_translation'      => $item[ 'err_translation' ],
-                    'err_terminology'      => $item[ 'err_terminology' ],
-                    'err_language'         => $item[ 'err_language' ],
-                    'err_style'            => $item[ 'err_style' ],
-                    'original_translation' => $item[ 'original_translation' ]
-            );
-
-            $obj = new Revise_ReviseStruct( $build_arr );
-
-            $result[ ] = $obj;
-        }
-
-        return $result;
     }
 
     /**

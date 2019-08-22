@@ -104,16 +104,20 @@ LABEL;
      */
     public function test_delete_segment_general_check_without_time_for_MyMemory_to_make_the_transation_and_id_user_not_in_array_purpose_()
     {
-
         /**
          * initialization of the value to delete
          */
         sleep(2);
-        $this->engine_MyMemory->set($this->config_param_set);
+        $res = $this->engine_MyMemory->set($this->config_param_set);
+
+        $this->assertTrue($res);
+
         /**
          * end of initialization
          */
-        $this->config_param_delete['id_user']="fc7ba5edf8d5e8401593";
+        $this->config_param_delete['id_user'] = "fc7ba5edf8d5e8401593";
+
+        //"MIXTURE OF PARAMETERS OF DIFFERENT MODES IS NOT ALLOWED. CHOOSE BETWEEN "DELETE?ID=1,2,3,5&LANGPAIR=EN|IT" OR "DELETE?SEG=CIAO&TRA=HELLO&LANGPAIR=EN|IT
         $result = $this->engine_MyMemory->delete($this->config_param_delete);
 
         $this->assertTrue($result);
@@ -187,8 +191,7 @@ LABEL;
         $this->assertTrue(property_exists($result_object,'responseData'));
         $this->assertTrue(property_exists($result_object,'error'));
         $this->assertTrue(property_exists($result_object,'_rawResponse'));
-        $this->assertEquals("", $result_object->responseDetails);
-
+        $this->assertEmpty('', $result_object->responseDetails);
     }
 
     /**
@@ -214,11 +217,19 @@ LABEL;
             'id_user' => array()
         );
 
-        $curl_mock_param=array(
-            '80' => true,
-            '13' => 10
-        );
-        $url_mock_param= "http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com";
+        $curl_mock_param = [
+                CURLOPT_POSTFIELDS => [
+                        'seg' => 'Il Sistema registra le informazioni sul nuovo film.',
+                        'tra'   => 'The system records the information on the new movie.',
+                        'langpair' => 'IT|EN',
+                        'de' => 'demo@matecat.com',
+                ],
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT => 120,
+        ];
+
+//        $url_mock_param= "http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com";
+        $url_mock_param= "http://api.mymemory.translated.net/delete";
 
         $mock_json_return=<<<'TAB'
 {"responseStatus":200,"responseData":"Found and deleted 1 segments"}
@@ -293,11 +304,19 @@ TAB;
             'id_user' => array()
         );
 
-        $curl_mock_param=array(
-            '80' => true,
-            '13' => 10
-        );
-        $url_mock_param= "http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com";
+        $curl_mock_param = [
+                CURLOPT_POSTFIELDS => [
+                        'seg' => 'Il Sistema registra le informazioni sul nuovo film.',
+                        'tra'   => 'The system records the information on the new movie.',
+                        'langpair' => 'IT|EN',
+                        'de' => 'demo@matecat.com',
+                ],
+                CURLINFO_HEADER_OUT => true,
+                CURLOPT_TIMEOUT => 120,
+        ];
+
+//        $url_mock_param= "http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com";
+        $url_mock_param= "http://api.mymemory.translated.net/delete";
 
         $rawValue_error = array(
             'error' => array(

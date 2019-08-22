@@ -13,9 +13,9 @@
         <includePath>test/support/lib</includePath>
     </php>
     <testsuites>
-        <testsuite name="cURL based tests">
-            <directory>test/integration</directory>
-        </testsuite>
+        <!--<testsuite name="cURL based tests">-->
+            <!--<directory>test/integration</directory>-->
+        <!--</testsuite>-->
         <testsuite name="Unit tests">
             <directory>test/unit</directory>
         </testsuite>

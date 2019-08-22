@@ -12,6 +12,8 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "EnginesModel_EngineStruct";
 
+    protected static $auto_increment_field = [ 'id' ];
+    protected static $primary_keys         = [ 'id' ];
 
     /**
      * Build the query,
@@ -19,34 +21,42 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      *
      * @param EnginesModel_EngineStruct $obj
      *
-     * @return string
+     * @return array
      * @throws Exception
      */
-    protected function _buildQueryForEngine( EnginesModel_EngineStruct $obj  ){
+    protected function _buildQueryForEngine( EnginesModel_EngineStruct $obj ) {
 
-        $where_conditions = array();
+        $where_conditions = [];
         $query            = "SELECT * FROM " . self::TABLE . " WHERE %s";
 
+        $bind_values = [];
+
         if ( $obj->id !== null ) {
-            $where_conditions[ ] = "id = " . (int)$obj->id;
+            $bind_values[ 'id' ] = (int)$obj->id;
+            $where_conditions[]  = "id = :id";
         }
 
         if ( $obj->uid !== null ) {
 
-            if( $obj->uid == 'NULL' ){
-                $where_conditions[ ] = "uid IS " . $obj->uid;
-            } elseif( is_numeric( $obj->uid ) ){
-                $where_conditions[ ] = "uid = " . (int)$obj->uid;
+            if ( $obj->uid == 'NULL' ) {
+                $where_conditions[] = "uid IS NULL";
+            } elseif ( empty( $obj->uid ) || $obj->uid <= 0 ) {
+                throw new DomainException( "Anonymous User." ); //do not perform any query on anonymous user requests
+            } elseif ( is_numeric( $obj->uid ) ) {
+                $bind_values[ 'uid' ] = (int)$obj->uid;
+                $where_conditions[]   = "uid = :uid";
             }
 
         }
 
         if ( $obj->active !== null ) {
-            $where_conditions[ ] = "active = " . (int)$obj->active;
+            $bind_values[ 'active' ] = (int)$obj->active;
+            $where_conditions[]      = "active = :active";
         }
 
         if ( $obj->type !== null ) {
-            $where_conditions[ ] = "type = '" . $this->con->escape( $obj->type ) . "'";
+            $bind_values[ 'type' ] = $obj->type;
+            $where_conditions[]    = "type = :type";
         }
 
         if ( count( $where_conditions ) ) {
@@ -57,7 +67,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
 //        Log::doJsonLog( sprintf( $query, $where_string ) );
 
-        return sprintf( $query, $where_string );
+        return [ sprintf( $query, $where_string ), $bind_values ];
 
     }
 
@@ -75,46 +85,37 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         $query = "INSERT INTO " . self::TABLE .
                 " ( name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url,
                 delete_relative_url, others, extra_parameters, class_load, google_api_compliant_version, penalty, active, uid)
-                    VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s ) ON DUPLICATE KEY UPDATE
-                        active = VALUES(active),
-                        others = VALUES(others),
-                        extra_parameters = VALUES(extra_parameters),
-                        name = VALUES(name)
+                    VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
             ";
 
-        $query = sprintf(
-                $query,
-                ( $obj->name == null ) ? "NULL" : "'" . $obj->name . "'",
-                ( $obj->type == null ) ? "NULL" : "'" . $obj->type . "'",
-                ( $obj->description == null ) ? "NULL" : "'" . $obj->description . "'",
-                ( $obj->base_url == null ) ? "NULL" : "'" . $obj->base_url . "'",
-                ( $obj->translate_relative_url == null ) ? "NULL" : "'" . $obj->translate_relative_url . "'",
-                ( $obj->contribute_relative_url == null ) ? "NULL" : "'" . $obj->contribute_relative_url . "'",
-                ( $obj->update_relative_url == null ) ? "NULL" : "'" . $obj->update_relative_url . "'",
-                ( $obj->delete_relative_url == null ) ? "NULL" : "'" . $obj->delete_relative_url . "'",
-                ( $obj->others == null ) ? "NULL" : "'" . $obj->others . "'",
+        $bind_values   = [];
+        $bind_values[] = $obj->name;
+        $bind_values[] = $obj->type;
+        $bind_values[] = $obj->description;
+        $bind_values[] = $obj->base_url;
+        $bind_values[] = $obj->translate_relative_url;
+        $bind_values[] = $obj->contribute_relative_url;
+        $bind_values[] = $obj->update_relative_url;
+        $bind_values[] = $obj->delete_relative_url;
+        $bind_values[] = $obj->others;
+        $bind_values[] = $obj->extra_parameters;
 
-                ( $obj->extra_parameters == null ) ? "NULL" : "'" . $obj->extra_parameters . "'",
+        //This parameter MUST be set from Engine, Needed to load the right Engine
+        $bind_values[] = $obj->class_load;
 
-                //This parameter MUST be set from Engine, Needed to load the right Engine
-                ( $obj->class_load == null ) ? "NULL" : "'" . $obj->class_load . "'",
+        $bind_values[] = 2;
+        $bind_values[] = ( $obj->penalty == null ) ? "14" : $obj->penalty;
+        $bind_values[] = ( $obj->active == null ) ? "1" : $obj->active; //TODO BUG This is every time 1!!!
+        $bind_values[] = $obj->uid;
 
-                2,
-                //harcoded because we're planning to implement variable penalty
-                ( $obj->penalty == null ) ? "14" : $obj->penalty,
-                ( $obj->active == null ) ? "1" : $obj->active, //TODO BUG This is every time 1!!!
-                ( $obj->uid == null ) ? "NULL" : $obj->uid
-        );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( $bind_values );
 
-        $this->con->query( $query );
+        //return the inserted object on success
+        $obj->id = $this->database->last_insert();
 
-        //return the inserted object on success, null otherwise
-        if ( $this->con->affected_rows > 0 ) {
-            $obj->id = $this->con->last_insert();
-            return $obj;
-        }
+        return $obj;
 
-        return null;
     }
 
     /**
@@ -130,9 +131,19 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         /*
          * build the query
          */
-        $query = $this->_buildQueryForEngine( $obj );
-        $arr_result = $this->_fetch_array( $query );
-        return $this->_buildResult( $arr_result, Constants_Engines::getAvailableEnginesList() );
+        try {
+            $query_and_bindValues = $this->_buildQueryForEngine( $obj );
+        } catch ( DomainException $e ) {
+            return []; //anonymous use request, he can not have any associated engine, do not perform queries
+        }
+
+        list( $query, $bind_values ) = $query_and_bindValues;
+
+
+        $stmt      = $this->database->getConnection()->prepare( $query );
+        $resultSet = $this->_fetchObject( $stmt, new EnginesModel_EngineStruct(), $bind_values );
+
+        return $this->_buildResult( $resultSet, Constants_Engines::getAvailableEnginesList() );
 
     }
 
@@ -144,64 +155,56 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      * @return bool
      * @throws Exception
      */
-    public function destroyCache( EnginesModel_EngineStruct $obj ){
+    public function destroyCache( EnginesModel_EngineStruct $obj ) {
 
         $obj = $this->sanitize( $obj );
 
         /*
         * build the query
         */
-        $query = $this->_buildQueryForEngine( $obj );
-        return $this->_destroyCache( $query );
+        try {
+            $query_and_bindValues = $this->_buildQueryForEngine( $obj );
+        } catch ( DomainException $e ) {
+            return true; //anonymous use request, he can not have any associated engine, do not perform queries
+        }
+
+        list( $query, $bind_values ) = $query_and_bindValues;
+        $stmt = $this->database->getConnection()->prepare( $query );
+
+        return $this->_destroyObjectCache( $stmt, $bind_values );
 
     }
 
     public function update( EnginesModel_EngineStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+        $obj = $this->sanitize( clone $obj );
 
         $this->_validatePrimaryKey( $obj );
 
-        $set_array        = array();
-        $where_conditions = array();
-        $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
-
-        $where_conditions[ ] = "id = " . (int)$obj->id;
-        $where_conditions[ ] = "uid = " . (int)$obj->uid;
+        $fieldsToUpdate = [];
 
         if ( $obj->active !== null ) {
-            $condition    = "active = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->active );
+            $fieldsToUpdate[] = 'active';
         }
 
         if ( $obj->others !== null ) {
-            $condition    = "others = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->others );
+            $fieldsToUpdate[] = 'others';
         }
 
         if ( $obj->extra_parameters !== null ) {
-            $condition    = "extra_parameters = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->extra_parameters );
+            $fieldsToUpdate[] = 'extra_parameters';
         }
 
         if ( $obj->name !== null ) {
-            $condition    = "name = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->name );
+            $fieldsToUpdate[] = 'name';
         }
 
-        $set_string   = null;
-        $where_string = implode( " AND ", $where_conditions );
-
-        if ( count( $set_array ) ) {
-            $set_string = implode( ", ", $set_array );
-        } else {
+        if ( !count( $fieldsToUpdate ) ) {
             throw new Exception( "Array given is empty. Please set at least one value." );
         }
 
-        $query = sprintf( $query, $set_string, $where_string );
+        $res = static::updateStruct( $obj, [ 'fields' => $fieldsToUpdate ] );
 
-        $this->con->query( $query );
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $res ) {
             return $obj;
         }
 
@@ -213,64 +216,60 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
         $this->_validatePrimaryKey( $obj );
 
-        $query = "DELETE FROM " . self::TABLE . " WHERE id = %d and uid = %d";
+        $query = "DELETE FROM " . self::TABLE . " WHERE id = :id and uid = :uid";
 
-        $query = sprintf(
-                $query,
-                $obj->id,
-                $obj->uid
-        );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( [
+                'id'  => $obj->id,
+                'uid' => $obj->uid
+        ] );
 
 
-        $this->con->query( $query );
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $stmt->rowCount() > 0 ) {
             return $obj;
         }
 
         return null;
     }
 
-    public function disable( EnginesModel_EngineStruct $obj ){
+    public function disable( EnginesModel_EngineStruct $obj ) {
+
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
 
-        $query = "UPDATE " . self::TABLE . " SET active = 0 WHERE id = %d and uid = %d";
+        $query = "UPDATE " . self::TABLE . " SET active = 0 WHERE id = :id and uid = :uid";
 
-        $query = sprintf(
-                $query,
-                $obj->id,
-                $obj->uid
-        );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( [
+                'id'  => $obj->id,
+                'uid' => $obj->uid
+        ] );
 
-        $this->con->query( $query );
-
-        if ( $this->con->affected_rows > 0 ) {
-            $tmpEng = $this->setCacheTTL( 60 * 60 * 5 )->read( $obj )[0];
+        if ( $stmt->rowCount() > 0 ) {
+            $tmpEng         = $this->setCacheTTL( 60 * 60 * 5 )->read( $obj )[ 0 ];
             $tmpEng->active = 0; // avoid slave replication delay
+
             return $tmpEng;
         }
 
         return null;
     }
 
-    public function enable( EnginesModel_EngineStruct $obj ){
+    public function enable( EnginesModel_EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
 
-        $query = "UPDATE " . self::TABLE . " SET active = 1 WHERE id = %d and uid = %d";
+        $query = "UPDATE " . self::TABLE . " SET active = 1 WHERE id = :id and uid = :uid";
 
-        $query = sprintf(
-                $query,
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->execute( [
                 $obj->id,
                 $obj->uid
-        );
+        ] );
 
-        $this->con->query( $query );
-
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $stmt->rowCount() > 0 ) {
             return $obj;
         }
 
@@ -278,20 +277,24 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     }
 
     /**
+     * Needed to decode json fields
+     *
      * @param array $array_result
      *
      * @return array|EnginesModel_EngineStruct|EnginesModel_EngineStruct[]
      */
     protected function _buildResult( $array_result ) {
-        $result = array();
-
-        $availableEngines = func_get_arg( 1 );
+        $result = [];
 
         foreach ( $array_result as $item ) {
 
-            if( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
-                $result[ ] = new EnginesModel_NONEStruct();
-                continue;
+            if ( func_num_args() > 1 ) { // check if $availableEngines is provided as second argument
+                $availableEngines = func_get_arg( 1 );
+
+                if ( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
+                    $result[] = new EnginesModel_NONEStruct();
+                    continue;
+                }
             }
 
             $build_arr = [
@@ -315,7 +318,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
             $obj = new EnginesModel_EngineStruct( $build_arr );
 
-            $result[ ] = $obj;
+            $result[] = $obj;
         }
 
         return $result;
@@ -328,19 +331,18 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public function sanitize( $input ) {
-        $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        $input->name                    = ( $input->name !== null ) ? $con->escape( $input->name ) : null;
-        $input->description             = ( $input->description !== null ) ? $con->escape( $input->description ) : null;
-        $input->base_url                = ( $input->base_url !== null ) ? $con->escape( $input->base_url ) : null;
-        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ? $con->escape( $input->translate_relative_url ) : null;
-        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ? $con->escape( $input->contribute_relative_url ) : null;
-        $input->update_relative_url     = ( $input->update_relative_url !== null ) ? $con->escape( $input->update_relative_url ) : null;
-        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? $con->escape( $input->delete_relative_url ) : null;
-        $input->others                  = ( $input->others !== null ) ? $con->escape( json_encode( $input->others ) ) : "{}";
-        $input->class_load              = ( $input->class_load !== null ) ? $con->escape( $input->class_load ) : null;
-        $input->extra_parameters        = ( $input->extra_parameters !== null ) ? $con->escape( json_encode( $input->extra_parameters ) ) : '{}';
+        $input->name                    = ( $input->name !== null ) ?  $input->name  : null;
+        $input->description             = ( $input->description !== null ) ?  $input->description  : null;
+        $input->base_url                = ( $input->base_url !== null ) ?  $input->base_url  : null;
+        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ?  $input->translate_relative_url  : null;
+        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ?  $input->contribute_relative_url  : null;
+        $input->update_relative_url     = ( $input->update_relative_url !== null ) ?  $input->update_relative_url  : null;
+        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ?  $input->delete_relative_url  : null;
+        $input->others                  = ( $input->others !== null and $input->others !== '{}' ) ?  json_encode( $input->others )  : '{}';
+        $input->class_load              = ( $input->class_load !== null ) ?  $input->class_load  : null;
+        $input->extra_parameters        = ( $input->extra_parameters !== null and $input->extra_parameters !== '{}' ) ?  json_encode( $input->extra_parameters ) : '{}';
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
         $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;
@@ -348,7 +350,13 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         return $input;
     }
 
-    protected function _validateNotNullFields( EnginesModel_EngineStruct $obj ) {
+    /**
+     * @param DataAccess_IDaoStruct $obj
+     *
+     * @return bool|void
+     * @throws Exception
+     */
+    protected function _validateNotNullFields( $obj ) {
         /**
          * @var $obj EnginesModel_EngineStruct
          */
@@ -356,15 +364,18 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
             throw new Exception( "Base URL cannot be null" );
         }
 
-        $reflect   = new ReflectionClass( 'Constants_Revise' );
-        $constants = $reflect->getConstants();
-
-        if ( !empty ( $obj->type ) && !in_array( $obj->type, $constants ) ) {
+        if ( !empty ( $obj->type ) && !in_array( $obj->type, [ Constants_Engines::TM, Constants_Engines::MT, Constants_Engines::NONE ], true ) ) {
             throw new Exception( "Type not allowed" );
         }
 
     }
 
+    /**
+     * @param EnginesModel_EngineStruct|DataAccess_IDaoStruct $obj
+     *
+     * @return void
+     * @throws Exception
+     */
     protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
         if ( $obj->id === null ) {
             throw new Exception( "Engine ID required" );

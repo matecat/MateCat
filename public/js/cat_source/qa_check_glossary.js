@@ -21,7 +21,9 @@ if ( QaCheckGlossary.enabled() )
     });
 
     $(document).on('getWarning:global:success', function(e, data) {
-        updateGlobalWarnings(data.resp.data.glossary) ;
+        if (data.resp.data.glossary)  {
+            updateGlobalWarnings(data.resp.data.glossary) ;
+        }
     });
 
     /**

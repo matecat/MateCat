@@ -50,7 +50,7 @@ class reviseSummaryController extends viewController {
 	public function doAction() {
 
         //pay a little query to avoid to fetch 5000 rows
-        $this->data = $jobData = getJobData( $this->jid, $this->password );
+        $this->data = $jobData = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
 
         $wStruct = new WordCount_Struct();
         $wStruct->setIdJob( $this->jid );
@@ -69,8 +69,8 @@ class reviseSummaryController extends viewController {
 
 		$this->job_stats = CatUtils::getFastStatsForJob($wStruct);
 
-        $proj = getProject( $jobData['id_project'] );
-        $this->project_status = $proj[0];
+        $projectStruct = $this->data->getProject();
+        $this->project_status = $projectStruct;
 
         /**
          * Retrieve information about job errors

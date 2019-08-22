@@ -1,11 +1,13 @@
 <?php
 
+use Segments\SegmentUIStruct;
+
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments';
     protected static $auto_increment_field = [ 'id' ];
 
     public function countByFile( Files_FileStruct $file ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
         $sql  = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file ";
 
         $stmt = $conn->prepare( $sql );
@@ -25,7 +27,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return Segments_SegmentStruct[]
      */
     public function getByFileId( $id_file, $fields_list = [] ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
 
         if ( empty( $fields_list ) ) {
             $fields_list[] = '*';
@@ -45,7 +47,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return mixed
      */
     function countByChunk( Chunks_ChunkStruct $chunk ) {
-        $conn  = $this->con->getConnection();
+        $conn  = $this->database->getConnection();
         $query = "SELECT COUNT(1) FROM segments s
             JOIN segment_translations st ON s.id = st.id_segment
             JOIN jobs ON st.id_job = jobs.id
@@ -68,7 +70,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return \Segments_SegmentStruct
      */
     function getByChunkIdAndSegmentId( $id_job, $password, $id_segment ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
 
         $query = " SELECT segments.* FROM segments " .
                 " INNER JOIN files_job fj USING (id_file) " .
@@ -98,7 +100,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return Segments_SegmentStruct[]
      */
     function getByChunkId( $id_job, $password ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
 
         $query = "SELECT segments.* FROM segments
                  INNER JOIN files_job fj USING (id_file)
@@ -128,7 +130,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return Segments_SegmentStruct
      */
     public function getById( $id_segment ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
 
         $query = "select * from segments where id = :id";
         $stmt  = $conn->prepare( $query );
@@ -432,7 +434,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
             try {
 
-                $stm = $this->con->getConnection()->prepare( $query );
+                $stm = $this->database->getConnection()->prepare( $query );
                 $stm->execute( $values );
                 Log::doJsonLog( "Segments: Executed Query " . ( $i + 1 ) );
 
@@ -443,6 +445,328 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         }
 
+
+    }
+
+    /**
+     * @param Jobs_JobStruct $jStruct
+     * @param                $step
+     * @param                $ref_segment
+     * @param                $where
+     * @param array          $options
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public function getPaginationSegments( Jobs_JobStruct $jStruct, $step, $ref_segment, $where, $options = [] ) {
+
+        switch ( $where ) {
+            case 'after':
+                $step = $step * 2;
+                $subQuery = "
+                SELECT * FROM (
+                    SELECT segments.id AS __sid
+                    FROM segments
+                    JOIN segment_translations ON id = id_segment
+                    JOIN jobs ON jobs.id = id_job
+                    WHERE id_job = :id_job
+                        AND password = :password
+                        AND show_in_cattool = 1
+                        AND segments.id > :ref_segment
+                    LIMIT $step
+                ) AS TT1
+                ";
+                break;
+            case 'before':
+                $step = $step * 2;
+                $subQuery = "
+                SELECT * FROM (
+                    SELECT  segments.id AS __sid
+                    FROM segments
+                    JOIN segment_translations ON id = id_segment
+                    JOIN jobs ON jobs.id =  id_job
+                    WHERE id_job = :id_job
+                        AND password = :password
+                        AND show_in_cattool = 1
+                        AND segments.id < :ref_segment
+                    ORDER BY __sid DESC
+                    LIMIT $step
+                ) as TT2
+                ";
+                break;
+            case 'center':
+                $subQuery = "
+                  SELECT * FROM ( 
+                        SELECT segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations ON id = id_segment
+                        JOIN jobs ON jobs.id = id_job
+                        WHERE id_job = :id_job
+                            AND password = :password
+                            AND show_in_cattool = 1
+                            AND segments.id >= :ref_segment
+                        LIMIT $step
+                  ) AS TT1
+                  UNION
+                  SELECT * FROM (
+                        SELECT  segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations ON id = id_segment
+                        JOIN jobs ON jobs.id =  id_job
+                        WHERE id_job = :id_job
+                            AND password = :password
+                            AND show_in_cattool = 1
+                            AND segments.id < :ref_segment
+                        ORDER BY __sid DESC
+                        LIMIT $step
+                  ) AS TT2
+    ";
+                break;
+        }
+
+        $optional_fields = "";
+        if ( isset( $options[ 'optional_fields' ] ) && !empty( $options[ 'optional_fields' ] ) ) {
+            $optional_fields = ', ' . implode( ', ', $options[ 'optional_fields' ] );
+        }
+
+        $query = "SELECT j.id AS jid,
+                s.id_file,
+                files.filename,
+                s.id AS sid,
+                s.segment,
+                s.segment_hash,
+                IF ( st.status='NEW', NULL, st.translation ) AS translation,
+                IF( st.locked AND match_type = 'ICE', 1, 0 ) AS ice_locked,
+                st.status,
+                COALESCE( time_to_edit, 0 ) AS time_to_edit,
+                st.warning,
+                sts.source_chunk_lengths,
+                sts.target_chunk_lengths,
+                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
+                , COALESCE( autopropagated_from, 0 ) as autopropagated_from
+                ,( SELECT COUNT( segment_hash )
+                          FROM segment_translations
+                          WHERE segment_hash = s.segment_hash
+                          AND id_job =  j.id
+                ) repetitions_in_chunk
+
+                $optional_fields
+
+                FROM segments s
+                JOIN files ON files.id = s.id_file
+                JOIN segment_translations st ON st.id_segment = s.id
+                JOIN jobs j ON j.id = st.id_job
+                LEFT JOIN segment_translations_splits sts ON sts.id_segment = s.id AND sts.id_job = :id_job
+                JOIN (
+
+                  $subQuery
+
+                ) AS TEMP ON TEMP.__sid = s.id
+
+            WHERE j.id = :id_job
+            AND j.password = :password
+            ORDER BY sid ASC
+";
+
+        $bind_keys = [
+                'id_job'      => $jStruct->id,
+                'password'    => $jStruct->password,
+                'ref_segment' => $ref_segment
+        ];
+
+        $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
+
+        return $this->_fetchObject( $stm, new SegmentUIStruct(), $bind_keys );
+
+    }
+
+    public function getSegmentsDownload( Jobs_JobStruct $jStruct, $id_file ) {
+
+        $query = "SELECT
+            s.id AS sid, 
+            s.segment, 
+            s.internal_id,
+            s.xliff_mrk_id AS mrk_id, 
+            s.xliff_ext_prec_tags AS prev_tags, 
+            s.xliff_ext_succ_tags AS succ_tags,
+            s.xliff_mrk_ext_prec_tags AS mrk_prev_tags, 
+            s.xliff_mrk_ext_succ_tags AS mrk_succ_tags,
+            st.translation, 
+            st.status,
+            st.eq_word_count,
+            s.raw_word_count
+        FROM files 
+        JOIN segments s ON s.id_file = files.id
+        LEFT JOIN segment_translations st ON s.id = st.id_segment AND st.id_job = :id_job
+        WHERE files.id = :id_file
+";
+
+        $bind_keys = [
+                'id_job'   => $jStruct->id,
+                'id_file'  => $id_file
+        ];
+
+        $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
+
+        $stm->setFetchMode( PDO::FETCH_ASSOC );
+        $stm->execute( $bind_keys );
+        return $stm->fetchAll();
+
+    }
+
+    public function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
+
+        $isPropagationToAlreadyTranslatedAvailable = "
+        SELECT COUNT(segment_hash) AS available
+        FROM segment_translations
+        JOIN jobs ON id_job = id AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+        WHERE segment_hash = (
+            SELECT segment_hash FROM segments WHERE id = :id_segment
+        )
+        AND id_job = :id_job
+        AND id_segment != :id_segment
+        AND password = :password
+        AND segment_translations.status IN( 
+          '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' , 
+          '" . Constants_TranslationStatus::STATUS_APPROVED . "' 
+        )
+    ";
+
+        $bind_keys = [
+                'id_job'     => $jid,
+                'password'   => $jpassword,
+                'id_segment' => $sid
+        ];
+
+        $stm = $this->getDatabaseHandler()->getConnection()->prepare( $isPropagationToAlreadyTranslatedAvailable );
+        $stm->setFetchMode( PDO::FETCH_ASSOC );
+        $stm->execute( $bind_keys );
+        return $stm->fetch();
+
+    }
+
+    public function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
+
+        $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
+        $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
+
+        $jStructs   = Jobs_JobDao::getById( $jid );
+        $filtered   = array_filter( $jStructs, function ( $item ) use ( $jpassword ) {
+            return $item->password == $jpassword;
+        } );
+
+        $currentJob = array_pop( $filtered );
+
+        $bind_keys = [];
+
+        if ( $sid != null ) {
+
+            /**
+             * Get all the available translations for this segment id,
+             * the amount of equal translations,
+             * a list of id,
+             * and an editable boolean field identifying if jobs is mine or not
+             *
+             */
+            $query = "
+			SELECT
+			translation,
+			COUNT( distinct id_segment ) as TOT,
+			GROUP_CONCAT( distinct id_segment ) AS involved_id,
+			IF( password = '{$currentJob->password}' AND id_segment between job_first_segment AND job_last_segment, 1, 0 ) AS editable
+				FROM segment_translations
+				JOIN jobs ON id_job = id AND id_segment between {$jStructs[0]->job_first_segment} AND " . end( $jStructs )->job_last_segment . "
+				WHERE segment_hash = (
+					SELECT segment_hash FROM segments WHERE id = :id_segment
+				)
+				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
+				AND id_job = {$jStructs[0]->id}
+				AND id_segment != :id_segment
+				GROUP BY translation, id_job
+		";
+
+            $bind_keys = [ 'id_segment' => $sid ];
+
+        } else {
+
+            /**
+             * This query gets, for each hash with more than one translations available, the min id of the segments
+             *
+             * If we want also to check for mismatches against approved translations also,
+             * we have to add the APPROVED status condition.
+             *
+             * But be careful, queries are much more heaviest.
+             * ( Ca. 4X -> 0.01/0.02s for a job with 55k segments on a dev environment )
+             *
+             */
+            $query = "
+			SELECT
+			COUNT( segment_hash ) AS total_sources,
+			COUNT( DISTINCT translation ) AS translations_available,
+			IF( password = '{$currentJob->password}', MIN( id_segment ), NULL ) AS first_of_my_job
+				FROM segment_translations
+				JOIN jobs ON id_job = id AND id_segment between {$currentJob->job_first_segment} AND {$currentJob->job_last_segment}
+				WHERE id_job = {$currentJob->id}
+				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
+				GROUP BY segment_hash, CONCAT( id_job, '-', password )
+				HAVING translations_available > 1
+		";
+
+        }
+
+        $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
+        $stm->setFetchMode( PDO::FETCH_ASSOC );
+        $stm->execute( $bind_keys );
+        return $stm->fetchAll();
+
+    }
+
+    /**
+     * Used to get a resultset of segments id and statuses
+     *
+     * @param      $sid
+     * @param      $jid
+     * @param      $password
+     * @param bool $getTranslatedInstead
+     *
+     * @return array
+     */
+    public static function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = false ) {
+
+        if ( !$getTranslatedInstead ) {
+            $translationStatus = " ( st.status IN (
+                '" . Constants_TranslationStatus::STATUS_NEW . "',
+                '" . Constants_TranslationStatus::STATUS_DRAFT . "',
+                '" . Constants_TranslationStatus::STATUS_REJECTED . "'
+            ) OR st.status IS NULL )"; //status NULL is not possible
+        } else {
+            $translationStatus = " st.status IN(
+            '" . Constants_TranslationStatus::STATUS_TRANSLATED . "',
+            '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+        )";
+        }
+
+        $bind_values = [
+                'jid'               => $jid,
+                'sid'               => $sid,
+                'password'          => $password
+        ];
+
+        $query = "SELECT s.id, st.status
+		FROM segments AS s
+		JOIN segment_translations st ON st.id_segment = s.id
+		JOIN jobs ON jobs.id = st.id_job
+		WHERE jobs.id = :jid 
+		AND jobs.password = :password
+		AND $translationStatus
+		AND s.show_in_cattool = 1
+		AND s.id <> :sid
+		AND s.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+		";
+
+        $stmt = Database::obtain()->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( $bind_values );
+        return $stmt->fetchAll();
 
     }
 

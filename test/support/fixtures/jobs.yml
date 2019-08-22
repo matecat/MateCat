@@ -10,6 +10,7 @@ job1:
   source: en-GB
   target: es-ES
   total_time_to_edit: 157967
+  only_private_tm: 0
   avg_post_editing_effort: 9700
   id_job_to_revise: NULL
   last_opened_segment: 64
@@ -54,6 +55,7 @@ job2:
   source: en-US
   target: ru-RU
   total_time_to_edit: 0
+  only_private_tm: 0
   avg_post_editing_effort: 0
   id_job_to_revise: NULL
   last_opened_segment: NULL

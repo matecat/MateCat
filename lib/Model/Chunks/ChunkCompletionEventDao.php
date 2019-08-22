@@ -16,7 +16,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
 
     public function deleteEvent( Chunks_ChunkCompletionEventStruct $event ) {
         $sql = "DELETE FROM chunk_completion_events WHERE id = :id_event ";
-        $stmt = $this->con->getConnection()->prepare( $sql ) ;
+        $stmt = $this->database->getConnection()->prepare( $sql ) ;
 
         $stmt->execute( ['id_event' => $event->id ] ) ;
         return $stmt->rowCount();
@@ -102,6 +102,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         }
         return self::TRANSLATE ;
     }
+
     /**
      *
      * Returns true or false if the chunk is completed. Requires 'is_review' to be passed
@@ -116,13 +117,13 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
      * chunk_completion_updates stores the last time a job was updated and is updated with a
      * timestamp every time an invalidating change is done to the job, like a translation.
      *
-     * @param $chunk chunk to examinate
+     * @param $chunk  chunk to examinate
      * @param $params list of params for query: is_review
      *
      * @return array
      *
+     * @throws Exception
      */
-
     public static function lastCompletionRecord( Chunks_ChunkStruct $chunk, array $params = array() ) {
         $params = Utils::ensure_keys($params, array('is_review'));
         $is_review = $params['is_review'] || false;

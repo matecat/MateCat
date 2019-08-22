@@ -1,5 +1,7 @@
 <?php
 
+namespace XliffReplacer;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -9,7 +11,6 @@
  */
 class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
 
-    protected $isTargetDefinition = false;
     protected $markerPos = "";
 
     /*
@@ -126,13 +127,13 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
 
                 //WARNING BECAUSE SOURCE AND SEG-SOURCE TAGS CAN BE EMPTY IN SOME CASES!!!!!
                 //so check for isEmpty also in conjunction with name
-                if( $this->isEmpty && ( 'source' == $name || 'seg-source' == $name ) ) {
+                if ( $this->isEmpty && ( 'source' == $name || 'seg-source' == $name ) ) {
                     $this->postProcAndFlush( $this->outputFP, $tag );
 
                 } else {
                     //these are NOT source/seg-source/value empty tags, THERE IS A CONTENT, write it in buffer
                     $this->bufferIsActive = true;
-                    $this->CDATABuffer .= $tag;
+                    $this->CDATABuffer    .= $tag;
                 }
 
             } else {
@@ -155,6 +156,14 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
 
         return "conf=\"{$statusMap[ $segment[ 'status' ] ]}\" ";
 
+    }
+
+    protected function setTransUnitState( $seg, $state_prop, $lastMrkState ){
+        return [ null, null ];
+    }
+
+    protected function getWordCountGroup( $raw_word_count, $eq_word_count ){
+        return '';
     }
 
 }

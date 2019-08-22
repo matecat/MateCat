@@ -64,7 +64,7 @@ class exportTMXController extends downloadController {
      * When Called it perform the controller action to retrieve/manipulate data
      *
      * @return mixed
-     * @throws \Exceptions\NotFoundError
+     * @throws \Exceptions\NotFoundException
      */
     function doAction() {
 
@@ -78,8 +78,7 @@ class exportTMXController extends downloadController {
         $jobData = $this->jobInfo = Chunks_ChunkDao::getByIdAndPassword( $this->jobID, $this->jobPass );
         $this->featureSet->loadForProject( $this->jobInfo->getProject() );
 
-
-        $projectData = getProject( $jobData[ 'id_project' ] );
+        $projectData = $this->jobInfo->getProject();
 
         $source = $jobData[ 'source' ];
         $target = $jobData[ 'target' ];
@@ -92,14 +91,14 @@ class exportTMXController extends downloadController {
                  * @var $tmx SplTempFileObject
                  */
                 $this->tmx = $tmsService->exportJobAsCSV( $this->jobID, $this->jobPass, $source, $target );
-                $this->fileName = $projectData[0][ 'name' ] . "-" . $this->jobID . ".csv";
+                $this->fileName = $projectData[ 'name' ] . "-" . $this->jobID . ".csv";
                 break;
             default:
                 /**
                  * @var $tmx SplTempFileObject
                  */
                 $this->tmx = $tmsService->exportJobAsTMX( $this->jobID, $this->jobPass, $source, $target );
-                $this->fileName = $projectData[0][ 'name' ] . "-" . $this->jobID . ".tmx";
+                $this->fileName = $projectData[ 'name' ] . "-" . $this->jobID . ".tmx";
                 break;
         }
 

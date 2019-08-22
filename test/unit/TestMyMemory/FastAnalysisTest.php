@@ -317,7 +317,8 @@ LAB;
 
         $curl_mock_param= array(
             CURLOPT_POSTFIELDS => $parameters,
-            CURLOPT_TIMEOUT    => 120
+            CURLOPT_TIMEOUT    => 120,
+            CURLINFO_HEADER_OUT => true,
         );
 
         $url_mock_param="http://api.mymemory.translated.net/analyze";

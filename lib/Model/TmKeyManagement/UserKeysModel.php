@@ -49,7 +49,7 @@ class UserKeysModel {
             Log::doJsonLog( $e->getMessage() );
         }
 
-        $reverse_lookup_user_personal_keys = array( 'pos' => array(), 'elements' => array() );
+        $reverse_lookup_user_personal_keys = [ 'pos' => [], 'elements' => [] ];
 
         /**
          * Set these keys as editable for the client

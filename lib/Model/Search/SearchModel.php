@@ -20,23 +20,6 @@ use Utils;
 class SearchModel {
 
     /**
-     * Used to exclude html entities from full text queries
-     *
-     * &amp;  e io cerco & e lo deve trovare
-     * &quot;|&#39;|&#160; ecc. e io cerco & e non deve trovare niente
-     * --  &#38;    e io cerco & e lo deve trovare  ( amp in decimale ) SKIP
-     * &apos; o &#34; e io cerco cerco ' e mi deve trovare &apos; e/o &#34;
-     * &#39; e io cerco " e mi deve trovare &quot;
-     *
-     * &#9786; e cerco la faccina me la deve trovare
-     *
-     * tutte le forme &#9786; hanno il corrispondente &#x263a;
-     *
-     * se cerco ; e c'è ; lo deve trovare
-     */
-    protected $regexHtmlEntities = '&(lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)';
-
-    /**
      * @var SearchQueryParamsStruct
      */
     protected $queryParams;
@@ -373,7 +356,6 @@ class SearchModel {
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			WHERE fj.id_job = {$this->queryParams->job}
-			
 		    AND s.segment 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
@@ -392,11 +374,9 @@ class SearchModel {
 			FROM segment_translations as st
 			JOIN segments as s on id = id_segment
 			WHERE st.id_job = {$this->queryParams->job}
-			
 		    AND st.translation 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
-			
 			AND s.segment 
 			    REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 			      '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
@@ -445,7 +425,6 @@ class SearchModel {
             WHERE id_job = {$this->queryParams->job}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
             AND st.status != 'NEW'
-            
             AND translation 
             	REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'

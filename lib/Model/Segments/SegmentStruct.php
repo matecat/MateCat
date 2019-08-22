@@ -4,7 +4,7 @@ class Segments_SegmentStruct extends DataAccess_AbstractDaoSilentStruct implemen
 
     public $id;
     public $id_file;
-    public $id_project;
+    private $id_project; //keep private, this is not implemented in Database schema
     public $internal_id;
     public $xliff_mrk_id;
     public $xliff_ext_prec_tags;

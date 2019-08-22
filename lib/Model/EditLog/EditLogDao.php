@@ -20,7 +20,8 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
      * @return $this
      */
     public function setNumSegs( $NUM_SEGS = 10 ) {
-        self::$NUM_SEGS = $NUM_SEGS;
+        self::$NUM_SEGS = (int)$NUM_SEGS;
+
         return $this;
     }
 
@@ -44,35 +45,6 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $querySegments = "
-                    SELECT * FROM (
-                        SELECT segments.id AS __sid
-                        FROM segments
-                        JOIN segment_translations st ON id = id_segment
-                        JOIN jobs ON jobs.id = id_job
-                        WHERE id_job = %d
-                            AND password = '%s'
-                            AND show_in_cattool = 1
-                            AND segments.id >= %d
-                            AND st.status not in( '%s', '%s' )
-                        LIMIT %u
-                    ) AS TT1
-                    UNION
-                    SELECT * from(
-                            SELECT  segments.id AS __sid
-                        FROM segments
-                        JOIN segment_translations st ON id = id_segment
-                        JOIN jobs ON jobs.id =  id_job
-                        WHERE id_job = %d
-                            AND password = '%s'
-                            AND show_in_cattool = 1
-                            AND segments.id < %d
-                            AND st.status not in( '%s', '%s' )
-                        ORDER BY __sid DESC
-                        LIMIT %u
-                    ) as TT2
-                ";
-
         $query = "SELECT
             s.id,
             s.segment AS source,
@@ -88,6 +60,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             st.match_type,
             st.locked,
             ste.uid,
+            us.email,
             j.id_translator,
             j.source AS job_source,
             j.target AS job_target,
@@ -100,57 +73,59 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 INNER JOIN segments s ON s.id = st.id_segment
                 INNER JOIN projects p on p.id=j.id_project
                 JOIN(
-                  %s
+                    SELECT * FROM (
+                        SELECT segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations st ON id = id_segment
+                        JOIN jobs ON jobs.id = id_job
+                        WHERE id_job = :id_job
+                            AND password = :password
+                            AND show_in_cattool = 1
+                            AND segments.id >= :id_segment
+                            AND st.status not in( :_new, :_draft )
+                        LIMIT " . self::$NUM_SEGS . "
+                    ) AS TT1
+                    UNION
+                    SELECT * from(
+                            SELECT  segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations st ON id = id_segment
+                        JOIN jobs ON jobs.id =  id_job
+                        WHERE id_job = :id_job
+                            AND password = :password
+                            AND show_in_cattool = 1
+                            AND segments.id < :id_segment
+                            AND st.status not in( :_new, :_draft )
+                        ORDER BY __sid DESC
+                        LIMIT " . self::$NUM_SEGS . "
+                    ) as TT2
                 ) AS TEMP ON TEMP.__sid = s.id
 
                 LEFT JOIN segment_translation_events ste on st.id_segment = ste.id_segment
                   AND st.version_number = ste.version_number
+                LEFT JOIN users AS us ON us.uid = ste.uid
 
                 WHERE
-                st.id_job = %d AND
-                j.password = '%s' AND
+                st.id_job = :id_job AND
+                j.password = :password AND
                 translation IS NOT NULL AND
-                st.status not in( '%s', '%s' )
+                st.status not in( :_new, :_draft )
                 AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                 ORDER BY st.id_segment ASC";
 
-        $querySegments = sprintf(
-                $querySegments,
-                $job_id,
-                $password,
-                $ref_segment,
-                Constants_TranslationStatus::STATUS_NEW,
-                Constants_TranslationStatus::STATUS_DRAFT,
-                self::$NUM_SEGS,
-                $job_id,
-                $password,
-                $ref_segment,
-                Constants_TranslationStatus::STATUS_NEW,
-                Constants_TranslationStatus::STATUS_DRAFT,
-                self::$NUM_SEGS
-        );
+        $stmt = $this->getDatabaseHandler()->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'EditLog_EditLogSegmentStruct' );
+        $stmt->execute( [
+                'id_job' => $job_id,
+                'password' => $password,
+                'id_segment' => $ref_segment,
+                '_new' => Constants_TranslationStatus::STATUS_NEW,
+                '_draft' => Constants_TranslationStatus::STATUS_DRAFT
+        ] );
+        $result = $stmt->fetchAll();
 
-        $result = $this->_fetch_array(
-                sprintf(
-                        $query,
-                        $querySegments,
-                        $job_id,
-                        $password,
-                        Constants_TranslationStatus::STATUS_NEW,
-                        Constants_TranslationStatus::STATUS_DRAFT
-                )
-        );
+        return $result;
 
-        $userDao = new Users_UserDao() ;
-        $userDao->setCacheTTL( 60 * 60 * 24 * 30 ) ;
-
-        foreach( $result as $key => $value ) {
-            if ( !is_null( $result[ $key ] [ 'uid' ] ) ) {
-                $result[ $key ] [ 'email' ] = $userDao->getByUid( $result [ $key ] [ 'uid' ] )->email  ;
-            }
-        }
-
-        return $this->_buildResult( $result );
     }
 
     /**
@@ -160,25 +135,25 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
      * @return bool
      */
     public function isEditLogEmpty( $job_id, $password ) {
+
         $query = "SELECT count(segments.id) as num_segs
                     FROM segments
                     JOIN segment_translations st ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
-                    WHERE id_job = %d
-                        AND password = '%s'
+                    WHERE id_job = :id_job
+                        AND password = :password
                         AND show_in_cattool = 1
-                        AND st.status not in( '%s', '%s' )";
+                        AND st.status not in( :_new, :_draft )";
 
-        $result = $this->con->query_first(
-                sprintf(
-                        $query,
-                        $job_id,
-                        $password,
-                        Constants_TranslationStatus::STATUS_NEW,
-                        Constants_TranslationStatus::STATUS_DRAFT
-                )
-        );
-
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [
+                'id_job'   => $job_id,
+                'password' => $password,
+                '_new'     => Constants_TranslationStatus::STATUS_NEW,
+                '_draft'   => Constants_TranslationStatus::STATUS_DRAFT
+        ] );
+        $result = $stmt->fetch();
         return (int)$result[ 'num_segs' ] == 0;
     }
 
@@ -194,26 +169,25 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job id required" );
         }
 
-        $queryBefore = "select segment_hash,
-                        COUNT( DISTINCT translation ) -1 AS translation_mismatch
-                        FROM segment_translations
-                        JOIN jobs ON id_job = id
-                                  AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
-                        WHERE id_job = %d
-                        AND segment_translations.status not in( '%s', '%s' )
-                        GROUP BY segment_hash,
-                                 CONCAT( id_job, '-', password )";
+        $query = "select segment_hash,
+                    COUNT( DISTINCT translation ) -1 AS translation_mismatch
+                    FROM segment_translations
+                    JOIN jobs ON id_job = id
+                              AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
+                    WHERE id_job = ?
+                    AND segment_translations.status not in( ?, ? )
+                    GROUP BY segment_hash, CONCAT( id_job, '-', password )
+                  ";
 
-        $result = $this->_fetch_array(
-                sprintf(
-                        $queryBefore,
-                        $job_id,
-                        Constants_TranslationStatus::STATUS_NEW,
-                        Constants_TranslationStatus::STATUS_DRAFT
-                )
-        );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [
+                $job_id,
+                Constants_TranslationStatus::STATUS_NEW,
+                Constants_TranslationStatus::STATUS_DRAFT
+        ] );
 
-        return $result;
+        return $stmt->fetchAll();
     }
 
     /**
@@ -233,34 +207,34 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $queryBefore = "select * from (
+        $query = "select * from (
                             SELECT segments.id AS __sid
                             FROM segments
                             JOIN segment_translations st ON id = id_segment
                             JOIN jobs ON jobs.id =  id_job
-                            WHERE id_job = %d
-                                AND password = '%s'
+                            WHERE id_job = ?
+                                AND password = ?
                                 AND show_in_cattool = 1
                                 AND segments.id < jobs.job_last_segment
-                                AND st.status not in( '%s', '%s' )
+                                AND st.status not in( ?, ? )
                             ORDER BY __sid DESC
-                            LIMIT %u
+                            LIMIT " . self::$NUM_SEGS . "
                       ) x
                       order by __sid ASC
                       limit 1";
 
-        $result = $this->_fetch_array(
-                sprintf(
-                        $queryBefore,
-                        $job_id,
-                        $password,
-                        Constants_TranslationStatus::STATUS_NEW,
-                        Constants_TranslationStatus::STATUS_DRAFT,
-                        self::$NUM_SEGS
-                )
-        );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [
+                $job_id,
+                $password,
+                Constants_TranslationStatus::STATUS_NEW,
+                Constants_TranslationStatus::STATUS_DRAFT
+        ] );
 
-        return (int)$result[ 0 ][ '__sid' ];
+        $result = $stmt->fetch();
+
+        return (int)$result[ '__sid' ];
     }
 
     /**
@@ -279,29 +253,29 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $queryBefore = "SELECT min(segments.id) AS __sid
+        $query = "SELECT min(segments.id) AS __sid
                         FROM segments
                         JOIN segment_translations st ON id = id_segment
                         JOIN jobs ON jobs.id =  id_job
-                        WHERE id_job = %d
-                            AND password = '%s'
+                        WHERE id_job = ?
+                            AND password = ?
                             AND show_in_cattool = 1
                             AND segments.id >= jobs.job_first_segment
-                            AND st.status not in ( '%s', '%s' )
+                            AND st.status not in ( ?, ? )
                         ORDER BY __sid DESC";
 
-        $result = $this->_fetch_array(
-                sprintf(
-                        $queryBefore,
-                        $job_id,
-                        $password,
-                        Constants_TranslationStatus::STATUS_NEW,
-                        Constants_TranslationStatus::STATUS_DRAFT,
-                        self::$NUM_SEGS
-                )
-        );
 
-        return (int)$result[ 0 ][ '__sid' ];
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [
+                $job_id,
+                $password,
+                Constants_TranslationStatus::STATUS_NEW,
+                Constants_TranslationStatus::STATUS_DRAFT
+        ] );
+
+        $result = $stmt->fetch();
+        return (int)$result[ '__sid' ];
     }
 
     /**
@@ -320,33 +294,32 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $queryBefore = "
-        select start_segment, floor(idx / %d ) +1 as page from (
+        $query = "
+        select start_segment, floor(idx / ? ) +1 as page from (
           SELECT segments.id AS start_segment, @page := ( @page + 1 ) as idx
 		  FROM segments
 			JOIN segment_translations st ON id = id_segment
 			JOIN jobs ON jobs.id =  id_job
 	        JOIN ( SELECT @page:= -1 ) AS page
-		  WHERE id_job = %d
-            AND password = '%s'
+		  WHERE id_job = ?
+            AND password = ?
             AND show_in_cattool = 1
-            AND st.status not in ( '%s', '%s' )
+            AND st.status not in ( ?, ? )
 			ORDER BY start_segment asc
         ) x
         group by 2;";
 
-        $result = $this->_fetch_array(
-                sprintf(
-                        $queryBefore,
-                        self::$NUM_SEGS,
-                        $job_id,
-                        $password,
-                        Constants_TranslationStatus::STATUS_NEW,
-                        Constants_TranslationStatus::STATUS_DRAFT
-                )
-        );
+        $stmt = $this->database->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [
+                self::$NUM_SEGS,
+                $job_id,
+                $password,
+                Constants_TranslationStatus::STATUS_NEW,
+                Constants_TranslationStatus::STATUS_DRAFT
+        ] );
 
-        return $result;
+        return $stmt->fetchAll();
 
     }
 
@@ -368,14 +341,14 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         }
 
         $resultValidSegs = ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $job_id, $password );
-        $resultAllSegs = ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getJobRawStats( $job_id, $password );
+        $resultAllSegs   = ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getJobRawStats( $job_id, $password );
 
-        $result = array(
+        $result = [
                 'tot_tte'       => $resultAllSegs->tot_tte,
                 'raw_words'     => $resultAllSegs->raw_words,
                 'secs_per_word' => $resultAllSegs->secs_per_word,
                 'avg_pee'       => $resultValidSegs->avg_pee
-        );
+        ];
 
         return $result;
     }
@@ -386,7 +359,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
      * @return EditLog_EditLogSegmentStruct|EditLog_EditLogSegmentStruct[]
      */
     protected function _buildResult( $array_result ) {
-        $return = array();
+        $return = [];
 
         if ( Utils::is_assoc( $array_result ) ) { //single result
             $return = new EditLog_EditLogSegmentStruct( $array_result );

@@ -26,4 +26,9 @@ class TranslationVersions extends BaseFeature {
 
     }
 
+    public function filter_get_segments_optional_fields(){
+        $options[ 'optional_fields' ] = [ 'st.version_number' ];
+        return $options;
+    }
+
 }

@@ -119,10 +119,11 @@ class catController extends viewController {
      */
     private function findJobByIdAndPassword() {
         if ( self::isRevision() ) {
+
             $this->password = $this->featureSet->filter(
-                'filter_review_password_to_job_password',
-                $this->password,
-                $this->jid
+                    'filter_review_password_to_job_password',
+                    $this->password,
+                    $this->jid
             );
 
         }
@@ -144,19 +145,17 @@ class catController extends viewController {
             return;
         }
 
-        $data = getSegmentsInfo( $this->jid, $this->password );
-
         //retrieve job owner. It will be useful also if the job is archived or cancelled
-        $this->job_owner = ( $data[ 0 ][ 'job_owner' ] != "" ) ? $data[ 0 ][ 'job_owner' ] : INIT::$MAILER_RETURN_PATH;
+        $this->job_owner = ( $this->chunk->owner != "" ) ? $this->chunk->owner : INIT::$MAILER_RETURN_PATH;
 
-        if ( $data[ 0 ][ 'status' ] == Constants_JobStatus::STATUS_CANCELLED ) {
+        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_CANCELLED ) {
             $this->job_cancelled = true;
 
             //stop execution
             return;
         }
 
-        if ( $data[ 0 ][ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) {
+        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_ARCHIVED ) {
             $this->job_archived = true;
             //stop execution
             return;
@@ -171,41 +170,35 @@ class catController extends viewController {
          * the check on the last translation only if the job is older than 30 days
          *
          */
-        $lastUpdate  = new DateTime( $data[ 0 ][ 'last_update' ] );
+        $lastUpdate  = new DateTime( $this->chunk->last_update );
         $oneMonthAgo = new DateTime();
         $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
 
         if ( $lastUpdate < $oneMonthAgo && !$this->job_cancelled ) {
 
-            $lastTranslationInJob = new Datetime( getLastTranslationDate( $this->jid ) );
+            $lastTranslationInJob = new Datetime( ( new Translations_SegmentTranslationDao )->lastTranslationByJobOrChunk( $this->jid )->translation_date );
 
             if ( $lastTranslationInJob < $oneMonthAgo ) {
-                $res        = "job";
-                $new_status = Constants_JobStatus::STATUS_ARCHIVED;
-                //FIXME use Dao
-                updateJobsStatus( $res, $this->jid, $new_status, $this->password );
+                Jobs_JobDao::updateJobStatus( $this->chunk, Constants_JobStatus::STATUS_ARCHIVED );
                 $this->job_archived = true;
             }
 
         }
 
-        $this->pid = $data[0][ 'pid' ];
-        $this->cid = $data[0][ 'cid' ];
-        $this->source_code = $data[0][ 'source' ];
-        $this->target_code = $data[0][ 'target' ];
-        $this->create_date = $data[0][ 'create_date' ];
-        if ( $data[0][ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) {
-            $this->job_archived = true;
-            $this->job_owner    = $data[ 0 ][ 'job_owner' ];
-        }
+        $this->pid = $this->project->id;
+        $this->cid = $this->project->id_customer;
+        $this->source_code = $this->chunk->source;
+        $this->target_code = $this->chunk->target;
+        $this->create_date = $this->chunk->create_date;
 
-        $this->wStruct = CatUtils::getWStructFromJobArray( $data[0] );
+
+        $this->wStruct = CatUtils::getWStructFromJobArray( $this->chunk, $this->project );
         $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
         /**
          * get first segment of every file
          */
-        $fileInfo     = getFirstSegmentOfFilesInJob( $this->jid );
+        $fileInfo     = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->jid );
         $TotalPayable = array();
         foreach ( $fileInfo as &$file ) {
             $file[ 'file_name' ] = ZipArchiveExtended::getFileName( $file[ 'file_name' ] );
@@ -217,14 +210,14 @@ class catController extends viewController {
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->user->email == $data[ 0 ][ 'job_owner' ] ) {
+        } elseif ( $this->user->email == $this->chunk->status_owner ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
             $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         }
 
         $userKeys = new UserKeysModel($this->user, $this->userRole ) ;
-        $this->template->user_keys = $userKeys->getKeys( $data[ 0 ] [ 'tm_keys' ] ) ;
+        $this->template->user_keys = $userKeys->getKeys( $this->chunk->tm_keys ) ;
 
         /**
          * Retrieve information about job errors
@@ -450,8 +443,6 @@ class catController extends viewController {
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
         $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        //FIXME: temporarily disabled
-        $this->template->editLogClass         = ""; //$this->getEditLogClass();
         $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
         $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;

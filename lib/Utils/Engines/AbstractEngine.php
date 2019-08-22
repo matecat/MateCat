@@ -180,7 +180,7 @@ abstract class Engines_AbstractEngine implements Engines_EngineInterface {
 
     }
 
-    public function call( $function, Array $parameters = array(), $isPostRequest = false, $isJsonRequest = false ) {
+    public function call( $function, array $parameters = [], $isPostRequest = false, $isJsonRequest = false ) {
 
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
             $this->result = [];

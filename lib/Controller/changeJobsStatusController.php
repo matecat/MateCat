@@ -51,40 +51,45 @@ class changeJobsStatusController extends ajaxController {
 
         if ( $this->res_type == "prj" ) {
 
-            $pCheck = new AjaxPasswordCheck();
-            $projectData = getProjectJobData( $this->res_id );
-            $access = $pCheck->grantProjectAccess( $projectData, $this->password );
-
-            //check for Password correctness
-            if ( !$access ) {
+            try {
+                $project = Projects_ProjectDao::findByIdAndPassword( $this->res_id, $this->password );
+            } catch( Exception $e ){
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export( $_POST, true ) . "\n";
                 Log::doJsonLog( $msg );
                 Utils::sendErrMailReport( $msg );
                 return null;
             }
 
-            $strOld     = '';
-            foreach ( $projectData as $item ) {
-                $strOld .= $item[ 'id' ] . ':' . $item[ 'status_owner' ] . ',';
+            $chunks = $project->getJobs();
+
+            Jobs_JobDao::updateAllJobsStatusesByProjectId( $project->id, $this->new_status );
+
+            foreach( $chunks as $chunk ){
+                $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
+                Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
             }
-            $strOld = trim( $strOld, ',' );
-
-            $this->result[ 'old_status' ] = $strOld;
-
-            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status );
-
-            $this->result[ 'code' ]    = 1;
-            $this->result[ 'data' ]    = "OK";
-            $this->result[ 'status' ]  = $this->new_status;
 
         } else {
 
-            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->password );
+            try {
+                $firstChunk = Chunks_ChunkDao::getByIdAndPassword( $this->res_id, $this->password );
+            } catch( Exception $e ){
+                $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export( $_POST, true ) . "\n";
+                Log::doJsonLog( $msg );
+                Utils::sendErrMailReport( $msg );
+                return null;
+            }
 
-            $this->result[ 'code' ]   = 1;
-            $this->result[ 'data' ]   = "OK";
-            $this->result[ 'status' ] = $this->new_status;
+            Jobs_JobDao::updateJobStatus( $firstChunk, $this->new_status );
+            $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $firstChunk );
+            Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+
         }
+
+       $this->result[ 'code' ]    = 1;
+       $this->result[ 'data' ]    = "OK";
+       $this->result[ 'status' ]  = $this->new_status;
+
     }
 
 }
