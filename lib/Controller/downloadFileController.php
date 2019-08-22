@@ -3,6 +3,7 @@
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive;
+use XliffReplacer\XliffReplacerFactory;
 
 set_time_limit( 180 );
 
@@ -158,9 +159,11 @@ class downloadFileController extends downloadController {
                         , $file[ 'xliffFilePath' ]
                 );
 
+                $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
 
-                //instatiate parser
-                $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, $transUnits, $_target_lang, $outputPath );
+                //instantiate parser
+                $xsp = XliffReplacerFactory::getInstance( $fileType, $data, $transUnits, $_target_lang );
+                $xsp->setFileDescriptors( $file[ 'xliffFilePath' ], $outputPath );
 
                 if ( $this->download_type == 'omegat' ) {
                     $xsp->setSourceInTarget( true );
@@ -176,8 +179,6 @@ class downloadFileController extends downloadController {
 
                 $output_content[ $fileID ][ 'document_content' ] = file_get_contents( $outputPath );
                 $output_content[ $fileID ][ 'output_filename' ]  = $current_filename;
-
-                $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
 
                 if ( $this->forceXliff ) {
                     //clean the output filename by removing
