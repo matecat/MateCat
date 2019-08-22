@@ -45,6 +45,85 @@ class SearchModel {
     public function __construct( SearchQueryParamsStruct $queryParams ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
+        $this->_loadParams();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function replaceAll(){
+
+        $sql = $this->_loadReplaceAllQuery();
+        $resultSet = $this->_getQuery( $sql );
+
+        $sqlBatch = [];
+        $sqlValues = [];
+        foreach ( $resultSet as $key => $tRow ) {
+
+            //we get the spaces before needed string and re-apply before substitution because we can't know if there are
+            //and how much they are
+            $trMod = preg_replace( "#({$this->queryParams->exactMatch->Space_Left}){$this->queryParams->_regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}#{$this->queryParams->matchCase->REGEXP_MODIFIER}",
+                    '${1}' . $this->queryParams->replacement . '${2}',
+                    $tRow[ 'translation' ]
+            );
+
+            /**
+             * Escape for database
+             */
+            $sqlBatch[] = "(?,?,?)";
+            $sqlValues[] = $tRow['id_segment'];
+            $sqlValues[] = $tRow['id_job'];
+            $sqlValues[] = $trMod;
+
+        }
+
+        //MySQL default max_allowed_packet is 16MB, this system surely need more
+        //but we can assume that max translation length is more or less 2.5KB
+        // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
+        // 300KB is a very low number compared to 16MB
+        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
+        $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
+
+        foreach ( $sqlBatchChunk as $k => $batch ) {
+
+            //WE USE INSERT STATEMENT for it's convenience ( update multiple fields in multiple rows in batch )
+            //we try to insert these rows in a table wherein the primary key ( unique by definition )
+            //is a coupled key ( id_segment, id_job ), but these values are already present ( duplicates )
+            //so make an "ON DUPLICATE KEY UPDATE"
+            $sqlInsert = "
+            INSERT INTO segment_translations ( id_segment, id_job, translation )
+			  VALUES " . implode( ",", $batch ) . "
+			ON DUPLICATE KEY UPDATE translation = VALUES( translation )
+			";
+
+            try {
+
+                $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
+
+            } catch ( Exception $e ){
+
+                $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
+				- job id            : " . $this->queryParams->job . "
+				- original data and failed query stored in log ReplaceAll_Failures.log\n\n
+				";
+
+                Log::$fileName = 'ReplaceAll_Failures.log';
+                Log::doJsonLog( $sql );
+                Log::doJsonLog( $resultSet );
+                Log::doJsonLog( $sqlInsert );
+                Log::doJsonLog( $msg );
+
+                Utils::sendErrMailReport( $msg );
+
+                throw new Exception( 'Update translations failure.' ); //bye bye translations....
+
+            }
+
+            //we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
+            //Log::doJsonLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
+
+        }
+
     }
 
     /**
@@ -119,6 +198,27 @@ class SearchModel {
         }
 
         return $results;
+    }
+
+    /**
+     * @param $sql
+     * @param $data
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    protected function _insertQuery( $sql , $data ){
+
+        try {
+            $stmt = $this->db->getConnection()->prepare( $sql );
+            $stmt->execute( $data );
+        } catch ( PDOException $e ) {
+            Log::doJsonLog( $e->getMessage() );
+            throw new \Exception( $e->getMessage(), $e->getCode() * -1, $e );
+        }
+
+        return $stmt->rowCount();
+
     }
 
     /**
