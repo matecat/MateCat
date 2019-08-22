@@ -29,15 +29,15 @@
         </div> <!-- .breadcrumbs -->
 
         <div class="action-menu">
-            <a class="action-submenu ui simple pointing top left floating dropdown" id="action-download">
+            <div class="action-submenu ui simple pointing top left floating dropdown" id="action-download">
                 <div class="dropdown-menu-overlay"></div>
-                <div class="menu">
-                    <div class="item" data-value="draft">Draft</div>
-                    <div class="item" data-value="original">Original</div>
-                    <div class="item" data-value="xlif">Export XLIF</div>
-                    <div class="item" data-value="tmx">Export Job TMX</div>
-                </div>
-            </a>
+                <ul class="menu">
+                    <li class="item" data-value="draft"><a href="#">Draft</a></li>
+                    <li class="item" data-value="original"><a href="#">Original</a></li>
+                    <li class="item" data-value="xlif"><a href="#">Export XLIF</a></li>
+                    <li class="item" data-value="tmx"><a href="#">Export Job TMX</a></li>
+                </ul>
+            </div>
 
             <a class="action-submenu ui floating" href="${quality_report_href}" target="_blank" id="action-QR" > </a>
 
@@ -61,11 +61,11 @@
 
             <div class="action-submenu ui pointing top left floating dropdown" id="action-three-dots">
                 <!--<a href="#" class="btn-action" id="action-three-dots"> </a>-->
-                <div class="menu">
-                    <div class="item" data-value="revise">Revise/Translate</div>
-                    <div class="item" data-value="analisys">Volume analisys</div>
-                    <div class="item" data-value="target">Export XLIF to target</div>
-                </div>
+                <ul class="menu">
+                    <li class="item" data-value="revise"><a href="#">Revise/Translate</a></li>
+                    <li class="item" data-value="analisys"><a href="#">Volume analisys</a></li>
+                    <li class="item" data-value="target"><a href="#">Export XLIF to target</a></li>
+                </ul>
             </div>
         </div>  <!-- .action-menu -->
 
