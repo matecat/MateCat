@@ -14,14 +14,27 @@ use Exception;
 use Log;
 use PDO;
 use PDOException;
+use SubFiltering\Filter;
 use Utils;
 
 class SearchModel {
 
     /**
      * Used to exclude html entities from full text queries
+     *
+     * &amp;  e io cerco & e lo deve trovare
+     * &quot;|&#39;|&#160; ecc. e io cerco & e non deve trovare niente
+     * --  &#38;    e io cerco & e lo deve trovare  ( amp in decimale ) SKIP
+     * &apos; o &#34; e io cerco cerco ' e mi deve trovare &apos; e/o &#34;
+     * &#39; e io cerco " e mi deve trovare &quot;
+     *
+     * &#9786; e cerco la faccina me la deve trovare
+     *
+     * tutte le forme &#9786; hanno il corrispondente &#x263a;
+     *
+     * se cerco ; e c'è ; lo deve trovare
      */
-    protected $regexHtmlEntities = '&#(lt;|gt;|amp;|quot;|apos;|[x]{0,1}[0-9A-F]{1,7};)';
+    protected $regexHtmlEntities = '&(lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)';
 
     /**
      * @var SearchQueryParamsStruct
@@ -33,21 +46,27 @@ class SearchModel {
      */
     protected $db;
 
-    public function __construct( SearchQueryParamsStruct $queryParams ){
+    /**
+     * @var Filter
+     */
+    private $filters;
+
+    public function __construct( SearchQueryParamsStruct $queryParams, Filter $filters ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
+        $this->filters     = $filters;
         $this->_loadParams();
     }
 
     /**
      * @throws Exception
      */
-    public function replaceAll(){
+    public function replaceAll() {
 
-        $sql = $this->_loadReplaceAllQuery();
+        $sql       = $this->_loadReplaceAllQuery();
         $resultSet = $this->_getQuery( $sql );
 
-        $sqlBatch = [];
+        $sqlBatch  = [];
         $sqlValues = [];
         foreach ( $resultSet as $key => $tRow ) {
 
@@ -61,9 +80,9 @@ class SearchModel {
             /**
              * Escape for database
              */
-            $sqlBatch[] = "(?,?,?)";
-            $sqlValues[] = $tRow['id_segment'];
-            $sqlValues[] = $tRow['id_job'];
+            $sqlBatch[]  = "(?,?,?)";
+            $sqlValues[] = $tRow[ 'id_segment' ];
+            $sqlValues[] = $tRow[ 'id_job' ];
             $sqlValues[] = $trMod;
 
         }
@@ -72,7 +91,7 @@ class SearchModel {
         //but we can assume that max translation length is more or less 2.5KB
         // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
         // 300KB is a very low number compared to 16MB
-        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
+        $sqlBatchChunk  = array_chunk( $sqlBatch, 100 );
         $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
 
         foreach ( $sqlBatchChunk as $k => $batch ) {
@@ -91,7 +110,7 @@ class SearchModel {
 
                 $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
 
-            } catch ( Exception $e ){
+            } catch ( Exception $e ) {
 
                 $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
 				- job id            : " . $this->queryParams->job . "
@@ -121,10 +140,10 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    public function search(){
+    public function search() {
 
         $sql = null;
-        switch( $this->queryParams->key ){
+        switch ( $this->queryParams->key ) {
             case 'source':
                 $sql = $this->_loadSearchInSourceQuery();
                 break;
@@ -143,13 +162,14 @@ class SearchModel {
 
         $vector = [ 'sid_list' => [], 'count' => '0' ];
 
-        if ( $this->queryParams->key != 'coupled' && $this->queryParams->key != 'status_only' ) { //there is the ROLLUP
+        if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' ) { //there is the ROLLUP
 
-            $rollup = array_pop( $results );
+            $rollup            = array_pop( $results );
             $vector[ 'count' ] = $rollup[ 'count' ]; //can be null, suppress warning
 
             foreach ( $results as $occurrence ) {
-                $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
+                $vector[ 'sid_list' ][]   = $occurrence[ 'id' ];
+                $vector[ 'stext_list' ][] = $occurrence[ 'text' ];
             }
 
             //there should be empty values because of Sensitive search
@@ -157,8 +177,9 @@ class SearchModel {
             //empty search values removed
             //ROLLUP counter rules!
             if ( $vector[ 'count' ] == 0 ) {
-                $vector[ 'sid_list' ] = [];
-                $vector[ 'count' ]   = 0;
+                $vector[ 'sid_list' ]   = [];
+                $vector[ 'stext_list' ] = [];
+                $vector[ 'count' ]      = 0;
             }
 
         } else {
@@ -169,8 +190,46 @@ class SearchModel {
 
         }
 
-        return $vector;
+        return $this->_purgeHtmlEntities( $vector );
+    }
 
+    /**
+     * Handling a search for ";"
+     * Escaping all entries with html entities
+     *
+     * @param array $vector
+     *
+     * @return array
+     */
+    private function _purgeHtmlEntities( $vector ) {
+
+        if ( $this->queryParams->target === ';' || $this->queryParams->source === ';' ) {
+            foreach ( $vector[ 'stext_list' ] as $key => $item ) {
+
+                // preg match for html entity regexp
+                $reg = '/&(lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/';
+                preg_match_all( $reg, $item, $matches );
+
+                // decrease $vector[ 'count' ]
+                $count = count( $matches[ 0 ] );
+                $vector[ 'count' ] = $vector[ 'count' ] - $count;
+
+                // purge entries from $vector[ 'sid_list' ]
+                $text = str_replace( $matches[ 0 ][ 0 ], '', $item );
+                if ( strpos( $text, ';' ) === false ) {
+                    unset( $vector[ 'sid_list' ][ $key ] );
+                }
+            }
+
+            // reset the keys of the array after purging the entires with html entities
+            $vector[ 'sid_list' ] = array_values( $vector[ 'sid_list' ] );
+        }
+
+        // returning 'stext_list' is not useful for search purposes
+        // its only function is to help purging entries with html entities
+        unset( $vector[ 'stext_list' ] );
+
+        return $vector;
     }
 
     /**
@@ -179,7 +238,7 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    protected function _getQuery( $sql ){
+    protected function _getQuery( $sql ) {
 
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
@@ -200,7 +259,7 @@ class SearchModel {
      * @return mixed
      * @throws Exception
      */
-    protected function _insertQuery( $sql , $data ){
+    protected function _insertQuery( $sql, $data ) {
 
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
@@ -218,10 +277,11 @@ class SearchModel {
      * Pay attention to possible SQL injection
      *
      */
-    protected function _loadParams(){
+    protected function _loadParams() {
 
-        $this->queryParams->source = $this->db->escape( $this->queryParams->src );
-        $this->queryParams->target = $this->db->escape( $this->queryParams->trg );
+        // bring the src and target from layer 2 (UI) to layer 0 (DB)
+        $this->queryParams->source = $this->filters->fromLayer2ToLayer0( $this->queryParams->src );
+        $this->queryParams->target = $this->filters->fromLayer2ToLayer0( $this->queryParams->trg );
 
         $this->queryParams->where_status = "";
         if ( $this->queryParams->status != 'all' ) {
@@ -256,18 +316,18 @@ class SearchModel {
          * Escape Meta-characters to use in regular expression ( LIKE STATEMENT is treated inside MySQL as a Regexp pattern )
          *
          */
-        $this->queryParams->_regexpNotEscapedSrc = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->src );
+        $this->queryParams->_regexpNotEscapedSrc = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->source );
         $this->queryParams->regexpEscapedSrc     = $this->db->escape( $this->queryParams->_regexpNotEscapedSrc );
 
-        $this->queryParams->_regexpEscapedTrg = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->trg );
+        $this->queryParams->_regexpEscapedTrg = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->target );
         $this->queryParams->regexpEscapedTrg  = $this->db->escape( $this->queryParams->_regexpEscapedTrg );
 
     }
 
-    protected function _loadSearchInTargetQuery(){
+    protected function _loadSearchInTargetQuery() {
 
         $query = "
-        SELECT  st.id_segment as id, sum(
+        SELECT  st.id_segment as id, st.translation as text, sum(
 			ROUND (
 					( LENGTH( st.translation ) - LENGTH( 
                         REPLACE ( 
@@ -278,7 +338,7 @@ class SearchModel {
 			) AS count
 			FROM segment_translations st
 			WHERE st.id_job = {$this->queryParams->job}
-			AND st.translation NOT REGEXP '{$this->regexHtmlEntities}'
+		
 		    AND st.translation REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
 			AND st.status != 'NEW'
@@ -298,10 +358,9 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchInSourceQuery(){
-
+    protected function _loadSearchInSourceQuery() {
         $query = "
-        SELECT s.id, sum(
+        SELECT s.id, s.segment as text, sum(
 			ROUND (
 					( LENGTH( s.segment ) - LENGTH( 
                         REPLACE ( 
@@ -314,7 +373,7 @@ class SearchModel {
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			WHERE fj.id_job = {$this->queryParams->job}
-			AND s.segment NOT REGEXP '{$this->regexHtmlEntities}'
+			
 		    AND s.segment 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
@@ -326,18 +385,18 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchCoupledQuery(){
+    protected function _loadSearchCoupledQuery() {
 
         $query = "
         SELECT st.id_segment as id
 			FROM segment_translations as st
 			JOIN segments as s on id = id_segment
 			WHERE st.id_job = {$this->queryParams->job}
-			AND st.translation NOT REGEXP '{$this->regexHtmlEntities}'
+			
 		    AND st.translation 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
-			AND s.segment NOT REGEXP '{$this->regexHtmlEntities}'
+			
 			AND s.segment 
 			    REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 			      '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
@@ -363,7 +422,7 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchStatusOnlyQuery(){
+    protected function _loadSearchStatusOnlyQuery() {
 
         $query = "
         SELECT st.id_segment as id
@@ -376,7 +435,7 @@ class SearchModel {
 
     }
 
-    protected function _loadReplaceAllQuery(){
+    protected function _loadReplaceAllQuery() {
 
         $sql = "
         SELECT id_segment, id_job, translation
@@ -386,7 +445,7 @@ class SearchModel {
             WHERE id_job = {$this->queryParams->job}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
             AND st.status != 'NEW'
-            AND translation NOT REGEXP '{$this->regexHtmlEntities}'
+            
             AND translation 
             	REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
