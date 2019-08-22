@@ -32,7 +32,11 @@
             <div class="action-submenu ui simple pointing top left floating dropdown" id="action-download">
                 <div class="dropdown-menu-overlay"></div>
                 <ul class="menu">
-                    <li class="item" data-value="draft"><a href="#" onclick="runDownload();">${header_main_button_label}</a></li>
+                    <li tal:condition="not:php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )" class="item"
+                        data-value="draft"><a href="#" onclick="runDownload();">Draft</a></li>
+                    <li tal:condition="php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )" class="item"
+                        data-value="draft"><a href="#" onclick="runDownload();">Download Translation</a></li>
+
                     <li tal:condition="not:isGDriveProject" class="item" data-value="original">
                         <a href="/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all" target="_blank">Original</a>
                     </li>
