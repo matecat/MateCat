@@ -1,5 +1,4 @@
 
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
 let ManageConstants = require('../../constants/ManageConstants');
 
 class ProjectContainer extends React.Component {

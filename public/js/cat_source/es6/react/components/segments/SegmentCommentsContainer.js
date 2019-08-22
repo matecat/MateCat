@@ -123,7 +123,7 @@ class SegmentCommentsContainer extends React.Component {
             } );
             // Thread is not resolved
             if ( comments.length - 1 && !comments[comments.length - 1].thread_id ) {
-                resolveButton = <a href="javascript:" className="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right"
+                resolveButton = <a className="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right"
                 onClick={()=>this.resolveThread()}
                 >Resolve</a>
             }
@@ -141,19 +141,19 @@ class SegmentCommentsContainer extends React.Component {
         htmlInsert = <div className="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix mbc-first-input">
                                 {/*<div className="mbc-new-message-notification">*/}
                                    {/*<span className="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>*/}
-                                   {/*<a href="javascript:" className="mbc-new-message-link"/>*/}
+                                   {/*<a className="mbc-new-message-link"/>*/}
                                 {/*</div>*/}
                                 <div className="mbc-post-comment">
                                     <span className="mbc-comment-label mbc-comment-username mbc-comment-username-label mbc-truncate mbc-comment-anonymous-label">
                                         {(this.state.user)?  this.state.user.full_name : "Anonymous"}
                                     </span>
                                     { (!loggedUser) ? (
-                                        <a href="javascript:" className="mbc-comment-link-btn mbc-login-link" onClick={()=>{$('#modal').trigger('openlogin');}}>
+                                        <a className="mbc-comment-link-btn mbc-login-link" onClick={()=>{$('#modal').trigger('openlogin');}}>
                                             Login to receive comments</a>
                                     ) : (null)}
                                     <div ref={(input)=>this.commentInput=input} className="mbc-comment-input mbc-comment-textarea" contentEditable={true} data-placeholder="Write a comment..."/>
                                     <div>
-                                        <a href="javascript:;" className="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide"
+                                        <a className="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide"
                                            onClick={()=>this.sendComment()}>Comment</a>
                                     </div>
                                     {/*<div className="mbc-ajax-message-wrap hide">*/}
