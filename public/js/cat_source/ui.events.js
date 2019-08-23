@@ -306,7 +306,10 @@ $.extend(UI, {
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             runDownload();
-		}).on('click', '#previewDropdown .previewLink a', function(e) {
+		}).on('click', '#action-download', function(e) {
+            e.preventDefault();
+            runDownload();
+        }).on('click', '#previewDropdown .previewLink a', function(e) {
 			e.preventDefault();
 			runDownload();
 		}).on('click', '#previewDropdown a.tmx', function(e) {
