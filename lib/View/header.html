@@ -34,7 +34,7 @@
 
             </div>
 
-            <div class="action-submenu ui simple pointing top left floating dropdown" id="action-download">
+            <div class="action-submenu ui simple pointing top center floating dropdown" id="action-download">
                 <div class="dropdown-menu-overlay"></div>
                 <ul class="menu" id="previewDropdown"  tal:attributes="data-download php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'true' : 'false'" >
 
@@ -92,7 +92,7 @@
 
             </div>
 
-            <div class="action-submenu ui pointing top left floating dropdown" id="action-three-dots">
+            <div class="action-submenu ui pointing top center floating dropdown" id="action-three-dots">
                 <!--<a href="#" class="btn-action" id="action-three-dots"> </a>-->
                 <ul class="menu">
                     <li class="item" data-value="revise" tal:condition="footer_show_revise_link">
