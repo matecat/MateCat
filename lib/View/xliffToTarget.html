@@ -70,7 +70,7 @@
 
 <body tal:condition="php:supportedBrowser EQ 1" class="started ">
 
-<header>
+<!--<header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
         <ul class="pull-right" id="menu-site">
@@ -84,7 +84,36 @@
         </ul>
     </div>
     <div class="cl"></div>
+</header>-->
+
+<!-- Temporary, reused Header.js code -->
+
+<header>
+    <section class="nav-mc-bar ui grid">
+        <nav class="sixteen wide column navigation">
+            <div class="ui grid">
+                <div class="three wide column">
+                    <a href="/" class="logo"> </a>
+                </div>
+                <div class="thirteen wide column right floated">
+                    <div id="xliff-menu">
+                        <ul id="menu-site">
+                            <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
+                            <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
+                            <li><a href="https://www.matecat.com/support-plans/">Plans</a></li>
+                            <li><a href="https://www.matecat.com/about/">About</a></li>
+                            <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
+                            <li><a href="https://www.matecat.com/support/">Support</a></li>
+                            <li><a class="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
+                        </ul>
+                    </div>
+                    <div class="cl"></div>
+                </div>
+            </div>
+        </nav>
+    </section>
 </header>
+
 <div id="dropzone_wrapper">
     <div class="upload-files drag">
 
