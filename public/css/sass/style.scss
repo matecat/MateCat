@@ -5109,7 +5109,8 @@ header {
             .menu {
                 position: absolute;
                 z-index: 1;
-                width: 200px;
+                width: 200px !important;
+                left: -80px !important;
                 margin: 0 0 0 -1px;
                 background: white;
                 padding: 8px;
@@ -5139,6 +5140,28 @@ header {
                 }*/
 
                 .item {
+
+                    a {
+                        display: block;
+                        border-radius: 3px;
+                        padding: 8px !important;
+                        font-size: 16px;
+                        color: #000000;
+                        &:hover {
+                            background-color: $light-gray;
+                            color: $light-blue;
+                        }
+                        &.selected {
+                            background-color: transparent;
+                            font-weight: normal;
+                        }
+                    }
+
+                    padding: 0 !important;
+                    border-radius: 3px;
+
+                 /*
+                    Todo: remove all if Download Actions style approved
                     border-radius: 3px;
                     padding: 8px !important;
                     font-size: 16px;
@@ -5151,8 +5174,7 @@ header {
                         background-color: transparent;
                         font-weight: normal;
                     }
-
-                    /*&.selected {
+                    &.selected {
                         background-color: $matecat-blue;
                         color: #fff;
                         font-weight: normal;
