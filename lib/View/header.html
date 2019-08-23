@@ -36,19 +36,19 @@
 
             <div class="action-submenu ui simple pointing top left floating dropdown" id="action-download">
                 <div class="dropdown-menu-overlay"></div>
-                <ul class="menu" id="previewDropdown" >
+                <ul class="menu" id="previewDropdown"  tal:attributes="data-download php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'true' : 'false'" >
 
-                    <li tal:condition="not:php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )" class="item previewLink"
+                    <li class="item previewLink"
                         data-value="draft">
                         <a title="Draft" alt="Draft" href="#" >
                             Draft
                         </a>
                     </li>
 
-                    <li tal:condition="php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )" class="item downloadTranslation"
+                    <li  class="item downloadTranslation"
                         data-value="translation">
                         <a title="Translation" alt="Translation" href="#" >
-                            Translation
+                            Download Translation
                         </a>
                     </li>
 
@@ -95,17 +95,17 @@
             <div class="action-submenu ui pointing top left floating dropdown" id="action-three-dots">
                 <!--<a href="#" class="btn-action" id="action-three-dots"> </a>-->
                 <ul class="menu">
-                    <li class="item" data-value="revise">
-                        <a href="#">Revise</a>
+                    <li class="item" data-value="revise" tal:condition="footer_show_revise_link">
+                        <a href="${basepath}revise/${pname}/${source_code}-${target_code}/${jid}-${review_password}">Revise</a>
                     </li>
-                    <li class="item" data-value="translate">
-                        <a href="#">Translate</a>
+                    <li class="item" data-value="translate" tal:condition="footer_show_translate_link">
+                        <a href="${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}">Translate</a>
                     </li>
-                    <li class="item" data-value="analisys">
-                        <a href="#">Volume analisys</a>
+                    <li class="item" data-value="analisys" tal:condition="php: allow_link_to_analysis && !empty(analysis_enabled)">
+                        <a target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Volume analisys</a>
                     </li>
                     <li class="item" data-value="target">
-                        <a href="#">Export XLIF to target</a>
+                        <a target="_blank" href="${basepath}utils/xliff-to-target">Export XLIFF to target</a>
                     </li>
                 </ul>
             </div>
