@@ -5037,7 +5037,7 @@ header {
 
 
     .wrapper {
-        grid-template-columns: 260px auto auto 148px;
+        grid-template-columns: 240px auto auto 148px;
         align-items: center;
     }
 
@@ -5080,7 +5080,7 @@ header {
 
     .action-menu {
         display: grid;
-        grid-template-columns: repeat(8, auto);
+        grid-template-columns: repeat(9, auto); /* Todo: */
         grid-template-rows: $icon-scale;
         align-items:center;
         justify-content: right;
@@ -5207,7 +5207,7 @@ header {
             text-align: right;
             opacity: 1;
         }
-        #action-comments {
+        #action-comments, #action-comments2 {
             background-image: url("/public/img/icons/icon-comments.svg");
         }
         #action-search {

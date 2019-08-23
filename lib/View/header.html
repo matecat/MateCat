@@ -29,22 +29,45 @@
         </div> <!-- .breadcrumbs -->
 
         <div class="action-menu">
+
+            <div class="action-submenu ui floating dropdown" id="action-mark-as-complete">
+
+            </div>
+
             <div class="action-submenu ui simple pointing top left floating dropdown" id="action-download">
                 <div class="dropdown-menu-overlay"></div>
-                <ul class="menu">
-                    <li tal:condition="not:php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )" class="item"
-                        data-value="draft"><a href="#" onclick="runDownload();">Draft</a></li>
-                    <li tal:condition="php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )" class="item"
-                        data-value="draft"><a href="#" onclick="runDownload();">Download Translation</a></li>
+                <ul class="menu" id="previewDropdown" >
+
+                    <li tal:condition="not:php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )" class="item previewLink"
+                        data-value="draft">
+                        <a title="Draft" alt="Draft" href="#" >
+                            Draft
+                        </a>
+                    </li>
+
+                    <li tal:condition="php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )" class="item downloadTranslation"
+                        data-value="translation">
+                        <a title="Translation" alt="Translation" href="#" >
+                            Translation
+                        </a>
+                    </li>
 
                     <li tal:condition="not:isGDriveProject" class="item" data-value="original">
-                        <a href="/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all" target="_blank">Original</a>
+                        <a class="originalDownload" title="Original" alt="Original" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all" target="_blank">
+                            Original
+                        </a>
                     </li>
+
                     <li class="item" data-value="xlif" tal:condition="php: uses_matecat_filters == true || INIT::$DEPRECATE_LEGACY_XLIFFS == false">
-                        <a href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank">Export XLIF</a>
+                        <a class="sdlxliff" title="Export XLIFF" alt="Export XLIFF" href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank">
+                            Export XLIF
+                        </a>
                     </li>
+
                     <li class="item" data-value="tmx">
-                        <a href="/TMX/${jid}/${password}" target="_blank">Export Job TMX</a>
+                        <a class="tmx" title="Export job TMX for QA" alt="Export job TMX for QA" href="/TMX/${jid}/${password}" target="_blank">
+                            Export Job TMX
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -72,9 +95,18 @@
             <div class="action-submenu ui pointing top left floating dropdown" id="action-three-dots">
                 <!--<a href="#" class="btn-action" id="action-three-dots"> </a>-->
                 <ul class="menu">
-                    <li class="item" data-value="revise"><a href="#">Revise/Translate</a></li>
-                    <li class="item" data-value="analisys"><a href="#">Volume analisys</a></li>
-                    <li class="item" data-value="target"><a href="#">Export XLIF to target</a></li>
+                    <li class="item" data-value="revise">
+                        <a href="#">Revise</a>
+                    </li>
+                    <li class="item" data-value="translate">
+                        <a href="#">Translate</a>
+                    </li>
+                    <li class="item" data-value="analisys">
+                        <a href="#">Volume analisys</a>
+                    </li>
+                    <li class="item" data-value="target">
+                        <a href="#">Export XLIF to target</a>
+                    </li>
                 </ul>
             </div>
         </div>  <!-- .action-menu -->
