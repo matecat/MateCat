@@ -343,9 +343,9 @@ section.opened .warnings {
     border: 0;
     margin-top: 10px;
     /*background: url(../../img/logo.png) 0px 2px no-repeat;*/
-    width: 132px;
-    height: 31px;
-    background-size: 130px 26px;
+    width: 160px;
+    height: 32px;
+    background-size: 160px 32px;
     margin-left: 13px;
     margin-right: 13px;
 }
@@ -5044,7 +5044,7 @@ header {
     .logo-menu {
         display: grid;
         align-items:center;
-        justify-content: center;
+
 
         .logo {
             margin-top:0;
@@ -5302,7 +5302,7 @@ header {
         overflow: auto;
         top: 58px !important;
         display: block;
-        box-shadow: 0 0 4px #cecccc;
+        box-shadow: none;
         z-index: 13;
 
         &::after {
@@ -5363,7 +5363,7 @@ header {
 
         .firstSegment {
             a {
-                padding: 4px 49px 19px 12px
+                padding: 4px 12px;
             }
             .label {
                 height: auto !important;
