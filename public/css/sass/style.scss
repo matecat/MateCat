@@ -5210,6 +5210,13 @@ header {
 
         }
 
+        #action-mark-as-complete {
+            background-image: url("/public/img/icons/icon-mark.svg");
+            &.active {
+                background-image: url("/public/img/icons/icon-mark-active.svg");
+            }
+
+        }
         #action-QR {
             background-image: url("/public/img/icons/icon-QR-line.svg");
 
@@ -5229,7 +5236,7 @@ header {
             text-align: right;
             opacity: 1;
         }
-        #action-comments, #action-comments2 {
+        #action-comments {
             background-image: url("/public/img/icons/icon-comments.svg");
         }
         #action-search {
