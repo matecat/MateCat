@@ -10,7 +10,7 @@ use SubFiltering\Filter;
  * The test are performed against these records:
  *
  * ############################################
- * # SEGMENTS (used for source test)          #
+ * # SEGMENTS (used for source tests)         #
  * ############################################
  * - Hello Hello world 4WD &amp; ampoule %{variable}%
  * - Hello world &#13;&#13;
@@ -18,7 +18,7 @@ use SubFiltering\Filter;
  * - Hello world qarkullimit” &amp; faturës.
  *
  * ############################################
- * # TRANSLATIONS (used for source test)      #
+ * # TRANSLATIONS (used for target tests)     #
  * ############################################
  * - Ciao mondo 4WD &amp; ampolla
  * - Ciao mondo &#13;&#13;

@@ -58,8 +58,6 @@ class SearchModel {
      * - search for word ; the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
      * - search for word # the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
      *
-     *
-     *
      * For more examples see: @SearchModelTest
      *
      * @param array $vector
@@ -81,8 +79,9 @@ class SearchModel {
                 $matches                     = $this->htmlEntitesMatches( $item );
                 $searchTermHtmlEntitiesCount = count( $matches[ 0 ] );
 
+                // If the segment($item) does contain at least one html entity
                 if ( $searchTermHtmlEntitiesCount > 0 ) {
-                    // Purge entries from $vector[ 'sid_list' ]
+                    // Replace the matches from the segment($item)
                     $text = str_replace( $matches[ 0 ][ 0 ], '', $item );
 
                     // Check if in segment there is still the search term after purging
@@ -92,7 +91,9 @@ class SearchModel {
                         unset( $vector[ 'stext_list' ][ $key ] );
                         $vector[ 'count' ] = $vector[ 'count' ] - $searchTermHtmlEntitiesCount;
                     } else {
-                        // in the remaining segments
+                        // Here is the case of segments that contains html entites and the $searchTerm
+                        //
+                        // So in these remaining segments
                         // update the vector's count
                         // by looping the entites matches
                         // and decrease the count one by one
