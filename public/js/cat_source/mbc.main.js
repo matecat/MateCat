@@ -964,6 +964,7 @@ if ( MBC.enabled() )
             $( '#mbc-history' ).remove();
             $( '.mbc-history-balloon-outer' ).remove();
             /*$( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );*/
+            $( '.action-menu #action-filter' ).before( $( tpls.historyIcon ) );
             $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
 
