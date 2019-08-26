@@ -5091,6 +5091,10 @@ header {
             display: none;
         }
 
+        .draft:hover {
+            background: transparent;
+        }
+
         .action-submenu {
 
             position: relative;
@@ -5215,15 +5219,17 @@ header {
 
         }
 
-        #action-mark-as-complete {
+        #markAsCompleteButton {
             background-image: url("/public/img/icons/icon-mark.svg");
             &.active {
                 background-image: url("/public/img/icons/icon-mark-active.svg");
             }
-
-        }
-        #action-QR {
-            background-image: url("/public/img/icons/icon-QR-line.svg");
+            width: $icon-scale;
+            height: $icon-scale;
+            padding: 0;
+            text-align: right;
+            opacity: 1;
+            background-size: cover;
 
         }
         #action-download {
