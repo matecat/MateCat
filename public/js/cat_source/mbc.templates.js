@@ -23,9 +23,9 @@ if ( MBC.enabled() )
             ' <a href="#" class="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right">Resolve</a>',
 
         historyIcon : '' +
-            '  <li id="mbc-history" title="View comments"> ' +
-            '      <span class="icon-bubble2"></span> ' +
-            '  </li>',
+            '  <div id="mbc-history" title="View comments"> ' +
+            /*'      <span class="icon-bubble2"></span> ' +*/
+            '  </div>',
 
         historyOuter : '' +
             ' <div class="mbc-history-balloon-outer hide"> ' +
