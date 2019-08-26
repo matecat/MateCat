@@ -63,8 +63,10 @@ class CatDecorator extends AbstractDecorator {
 
         if ( $this->completable()  ) {
             $this->template->header_main_button_enabled = true ;
+            $this->template->mark_as_complete_button_enabled = true;
             $this->template->header_main_button_class = " isMarkableAsComplete" ;
         } else {
+            $this->template->mark_as_complete_button_enabled = false;
             $this->template->header_main_button_enabled = false ;
         }
     }
