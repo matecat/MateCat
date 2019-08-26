@@ -44,6 +44,7 @@ class INIT {
     public static $REDIS_SERVERS           = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
+    public static $QUEUE_CREDENTIALS;
     public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
 
