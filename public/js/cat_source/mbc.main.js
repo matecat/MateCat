@@ -137,6 +137,19 @@ if ( MBC.enabled() )
             }
         };
 
+        const getOpenedThreadCount =  () => {
+            return db.history ? db.history.filter((a)=> a.message_type === "1").length : 0;
+        }
+
+        const refreshBadgeHeaderIcon = () =>{
+            const count = getOpenedThreadCount();
+            $('#mbc-history .badge').remove();
+            if(count > 0){
+                $('#mbc-history').append(`<span class='badge'>${count}</span>`)
+            }
+
+
+        }
         var limitNum = function ( num ) {
             if ( Number( num ) > 99 ) return '+99';
             else return num;
@@ -533,6 +546,7 @@ if ( MBC.enabled() )
             $( '.mbc-history-balloon-has-no-comments' ).hide();
 
             $( '.mbc-history-balloon-outer' ).append( root );
+
         };
 
         var updateHistoryWithLoadedSegments = function () {
@@ -705,6 +719,7 @@ if ( MBC.enabled() )
             initCommentLinks();
             renderCommentIconLinks();
             updateHistoryWithLoadedSegments();
+            refreshBadgeHeaderIcon();
         };
 
         var getTeamUsers = function (  ) {
@@ -967,7 +982,6 @@ if ( MBC.enabled() )
             $( '.action-menu #action-filter' ).before( $( tpls.historyIcon ) );
             $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
-
             getTeamUsers().then( function() {
                 refreshElements()
                 // open a comment if was asked by hash
@@ -1014,7 +1028,6 @@ if ( MBC.enabled() )
 
             db.pushSegment( data ); // TODO: move this in ajax success?
             updateHistoryWithLoadedSegments();
-
             $( document ).trigger( 'mbc:segment:update:links', data.id_segment );
             appendSubmittedMessage( UI.Segment.findEl( data.id_segment ) );
         } );
