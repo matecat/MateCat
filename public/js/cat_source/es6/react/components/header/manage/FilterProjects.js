@@ -1,5 +1,6 @@
+import IconFilter from "../../icons/IconFilter";
+import IconTick from "../../icons/IconTick";
 import IconDown from "../../icons/IconDown";
-import {filterProjects} from "../../../actions/ManageActions";
 
 let FilterProjectsStatus = require("./FilterProjectsStatus").default;
 let SearchInput = require("./SearchInput").default;
@@ -12,35 +13,31 @@ class FilterProjects extends React.Component {
 
         this.teamChanged = false;
         this.dropDownUsersInitialized = false;
+        this.state = {
+            currentStatus: 'active'
+        };
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
     }
 
-    state = {
-        currentStatus: 'active'
-    };
-
     componentDidUpdate() {
-        const {changeUser, selectedUser, dropdownUsers} = this;
-        let {dropDownUsersInitialized, teamChanged} = this;
-        const {selectedTeam,} = this.props;
-        if (selectedTeam) {
-            if (teamChanged) {
-                if (!dropDownUsersInitialized && selectedTeam.get('members').size > 1) {
-                    if (selectedUser === ManageConstants.ALL_MEMBERS_FILTER) {
-                        $(dropdownUsers).dropdown('set selected', "-1");
+        let self = this;
+        if (this.props.selectedTeam) {
+            if (this.teamChanged) {
+                if (!this.dropDownUsersInitialized && this.props.selectedTeam.get('members').size > 1) {
+                    if (this.selectedUser === ManageConstants.ALL_MEMBERS_FILTER) {
+                        $(this.dropdownUsers).dropdown('set selected', "-1");
                     } else {
-                        $(dropdownUsers).dropdown('set selected', selectedUser);
+                        $(this.dropdownUsers).dropdown('set selected', this.selectedUser);
                     }
-                    $(
-                        dropdownUsers).dropdown({
+                    $(this.dropdownUsers).dropdown({
                         fullTextSearch: 'exact',
-                        onChange: (value, text, $selectedItem) => {
-                            changeUser(value);
+                        onChange: function (value, text, $selectedItem) {
+                            self.changeUser(value);
                         }
                     });
-                    dropDownUsersInitialized = true;
+                    this.dropDownUsersInitialized = true;
                 }
-                teamChanged = false;
+                this.teamChanged = false;
             }
         }
     }
@@ -61,52 +58,40 @@ class FilterProjects extends React.Component {
         }
     }
 
-    changeUser = (value) => {
-        const {ALL_MEMBERS, NOT_ASSIGNED} = this;
-        const {selectedTeam} = this.props;
+    changeUser(value) {
+
         let self = this;
         let selectedUser;
-
-        if (value === ALL_MEMBERS) {
+        if (value === this.ALL_MEMBERS) {
             selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
-        } else if (value === NOT_ASSIGNED && value !== this.selectedUser) {
+        } else if (value === this.NOT_ASSIGNED && value !== this.selectedUser) {
             selectedUser = ManageConstants.NOT_ASSIGNED_FILTER;
         } else {
-            selectedUser = selectedTeam.get('members').find(function (member) {
+            selectedUser = this.props.selectedTeam.get('members').find(function (member) {
                 if (parseInt(member.get('user').get("uid")) === parseInt(value)) {
                     return true;
                 }
             });
         }
-
         if (selectedUser !== this.selectedUser) {
             this.selectedUser = selectedUser;
-            filterProjects(self.selectedUser, self.currentText, self.state.currentStatus);
+            ManageActions.filterProjects(self.selectedUser, self.currentText, self.state.currentStatus);
         }
-    };
+    }
 
     onChangeSearchInput(value) {
-        let {currentText, selectedUser} = this;
-        const {currentStatus} = this.state;
-        currentText = value;
-
-        filterProjects(selectedUser, currentText, currentStatus);
+        this.currentText = value;
+        let self = this;
+        ManageActions.filterProjects(self.selectedUser, self.currentText, self.state.currentStatus);
     }
 
     filterByStatus(status) {
-        const {currentStatus} = this.state;
-        const {currentText, selectedUser} = this.state;
-
         this.setState({currentStatus: status});
-        filterProjects(selectedUser, currentText, currentStatus);
+        ManageActions.filterProjects(this.selectedUser, this.currentText, this.state.currentStatus);
     }
 
-    getUserFilter = () => {
+    getUserFilter() {
         let result = '';
-        let members = null;
-        let item = null;
-        const {} = this.props;
-
         if (this.props.selectedTeam && this.props.selectedTeam.get('type') === "general" &&
             this.props.selectedTeam.get('members') && this.props.selectedTeam.get('members').size > 1) {
 
@@ -114,40 +99,37 @@ class FilterProjects extends React.Component {
                 let classDisable = (member.get('projects') === 0) ? 'disabled' : '';
                 let userIcon = <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>;
                 if (member.get('user_metadata')) {
-                    userIcon = <img className="ui avatar image ui-user-dropdown-image" alt=""
+                    userIcon = <img className="ui avatar image ui-user-dropdown-image"
                                     src={member.get('user_metadata').get('gplus_picture') + "?sz=80"}/>;
                 }
                 return <div className={"item " + classDisable} data-value={member.get('user').get('uid')}
                             key={'user' + member.get('user').get('uid')}>
                     {userIcon}
                     <div className="user-projects">
-                        <div
-                            className="user-name-filter">{member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}</div>
+                        <div className="user-name-filter">{member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}</div>
                         <div className="box-number-project">{member.get('projects')}</div>
                     </div>
                 </div>;
 
             });
 
-            item = <div>
-                <div className="item" data-value="0"
-                     key={'user' + 0}>
-                    <a className="ui all label">NA</a>
-                    <div className="user-projects">
-                        <div className="user-name-filter">Not assigned</div>
-                        <div className="box-number-project"/>
-                    </div>
-                </div>
-                <div className="item" data-value="-1"
-                     key={'user' + -1}>
-                    <a className="ui all label">ALL</a>
-                    <div className="user-projects">
-                        <div className="user-name-filter">All Members</div>
-                        <div className="box-number-project"/>
-                    </div>
+            let item = <div className="item" data-value="-1"
+                            key={'user' + -1}>
+                <a className="ui all label">ALL</a>
+                <div className="user-projects">
+                    <div className="user-name-filter">All Members</div>
+                    <div className="box-number-project"></div>
                 </div>
             </div>;
-
+            members = members.unshift(item);
+            item = <div className="item" data-value="0"
+                        key={'user' + 0}>
+                <a className="ui all label">NA</a>
+                <div className="user-projects">
+                    <div className="user-name-filter">Not assigned</div>
+                    <div className="box-number-project"></div>
+                </div>
+            </div>;
             members = members.unshift(item);
 
             result = <div className="ui top left pointing dropdown users-filter" title="Filter project by members"
@@ -160,44 +142,80 @@ class FilterProjects extends React.Component {
                 <div className="menu">
                     {members}
                 </div>
+
             </div>;
+            /*result = <div className="users-filter" title="Filter project by members">
+
+                        <div className="assigned-list">
+                            <p>Projects of: </p>
+                        </div>
+
+                        <div className="list-team">
+                            <div className="ui dropdown top right pointing users-projects"
+                                 ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
+                                <div className="text">
+                                    <div className="ui all label">ALL</div>
+                                  All Members
+                                </div>
+                                <i className="dropdown icon"/>
+                                <div className="menu">
+                                    <div className="ui icon search input">
+                                        <i className="icon-search icon"/>
+                                        <input type="text" name="UserName" placeholder="Search by name." />
+                                    </div>
+                                    <div className="scrolling menu">
+                                    {members}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>;*/
         }
-
         return result;
-    };
+    }
 
-    getCurrentStatusLabel = () => {
-        const {currentStatus} = this.state;
-        switch (currentStatus) {
-            case'active':
+    getCurrentStatusLabel() {
+        switch (this.state.currentStatus) {
+            case 'active':
                 return <div className="active">Active:</div>;
+                break;
             case 'archived':
                 return <div className="archived">Archived:</div>;
+                break;
             case 'cancelled':
                 return <div className="cancelled">Cancelled:</div>;
+                break;
         }
-    };
+    }
 
     shouldComponentUpdate(nextProps, nextState) {
         return _.isUndefined(this.props.selectedTeam) || (!_.isUndefined(nextProps.selectedTeam) && !nextProps.selectedTeam.equals(this.props.selectedTeam))
     }
 
     render() {
-        const {getUserFilter,onChangeSearchInput,filterByStatus} = this;
-
+        let membersFilter = this.getUserFilter();
+        let currentStatusLabel = this.getCurrentStatusLabel();
         return (
             <section className="row sub-head">
                 <div className="ui grid">
 
                     <div className="ten wide column">
                         <div className="ui right labeled fluid input search-state-filters">
-                            <SearchInput onChange={onChangeSearchInput}/>
-                            <FilterProjectsStatus filterFunction={filterByStatus}/>
+                            <SearchInput
+                                onChange={this.onChangeSearchInput.bind(this)}/>
+                            <FilterProjectsStatus
+                                filterFunction={this.filterByStatus.bind(this)}/>
                         </div>
                     </div>
 
+                    {/*<div className="cta-create-team" onClick={this.openCreateTeams.bind(this)}>
+                        <a class="cta-create-team-text">Create New Team <i className="icon-settings icon"></i></a>
+                    </div>*/}
+
                     <div className="six wide column pad-right-0">
-                        {getUserFilter()}
+                        {membersFilter}
                     </div>
 
                 </div>

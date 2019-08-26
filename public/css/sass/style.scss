@@ -5241,13 +5241,14 @@ header {
                 background: transparent url("/public/img/icons/icon-mark.svg");
                 opacity: 0.7;
                 background-size: cover;
+                cursor:not-allowed;
             }
         }
         #action-download {
             background-image: url("/public/img/icons/icon-download.svg");
             background-size: 38px;
         }
-        #action-QR {
+        #action-QR, #quality-report-button {
             background-image: url("/public/img/icons/icon-QR-line.svg");
         }
         #notifbox {
