@@ -70,7 +70,7 @@ class SearchModel {
 
         // get the search term (source or target search)
         $searchTerm                  = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
-        $searchTermHtmlEntitiesCount = count( $this->htmlEntitesCount( $searchTerm )[ 0 ] );
+        $searchTermHtmlEntitiesCount = count( $this->htmlEntitesMatches( $searchTerm )[ 0 ] );
         $searchTermArray             = [ ';', '#' ];
 
         // the purge must be done if the search contains some special character (used to encode strings, like '#' or ';') or
@@ -78,7 +78,7 @@ class SearchModel {
         if ( $searchTermHtmlEntitiesCount === 0 || in_array( $searchTerm, $searchTermArray ) ) {
             foreach ( $vector[ 'stext_list' ] as $key => $item ) {
 
-                $matches                     = $this->htmlEntitesCount( $item );
+                $matches                     = $this->htmlEntitesMatches( $item );
                 $searchTermHtmlEntitiesCount = count( $matches[ 0 ] );
 
                 if ( $searchTermHtmlEntitiesCount > 0 ) {
@@ -268,7 +268,7 @@ class SearchModel {
      *
      * @return array
      */
-    private function htmlEntitesCount( $string ) {
+    private function htmlEntitesMatches( $string ) {
         $reg = '/&(lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/';
         preg_match_all( $reg, $string, $matches );
 
