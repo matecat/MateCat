@@ -6,7 +6,7 @@ segment1:
   xliff_mrk_id:
   xliff_ext_prec_tags:
   xliff_mrk_ext_prec_tags:
-  segment: Hello world 4WD
+  segment: Hello world 4WD &amp;
   segment_hash: f88037cf8f5d27f475cee79c603cecae
   xliff_mrk_ext_succ_tags:
   xliff_ext_succ_tags:
@@ -21,7 +21,7 @@ segment2:
   xliff_mrk_id:
   xliff_ext_prec_tags:
   xliff_mrk_ext_prec_tags:
-  segment: Hello world
+  segment: Hello world &#13;&#13;
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   xliff_mrk_ext_succ_tags:
   xliff_ext_succ_tags:
@@ -36,7 +36,7 @@ segment3:
   xliff_mrk_id:
   xliff_ext_prec_tags:
   xliff_mrk_ext_prec_tags:
-  segment: This unit has a comment too
+  segment: This unit has a &quot;comment&quot; too;
   segment_hash: 37d2a389ba71f6de1df030220703785d
   xliff_mrk_ext_succ_tags:
   xliff_ext_succ_tags:
@@ -51,7 +51,7 @@ segment4:
   xliff_mrk_id:
   xliff_ext_prec_tags:
   xliff_mrk_ext_prec_tags:
-  segment: Hello world
+  segment: Hello world qarkullimit”  faturës.
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   xliff_mrk_ext_succ_tags:
   xliff_ext_succ_tags:

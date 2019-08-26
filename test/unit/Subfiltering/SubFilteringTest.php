@@ -129,22 +129,34 @@ class SubFilteringTest extends AbstractTest {
         $tmpLayer2 = ( new LtGtDecode() )->transform( $segmentL2 );
         $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $tmpLayer2 ) );
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
-        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $tmpLayer2 ) );
+        $this->assertEquals( $segmentL1, $this->filtestHtmlInXML_2ter->fromLayer2ToLayer1( $tmpLayer2 ) );
 
     }
 
     /**
      * @throws \Exception
      */
-    public function testPlainTextInXML(){
+    public function testPlainTextInXMLWithNewLineFeed(){
 
-        $segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand
+        // 20 Aug 2019
+        // ---------------------------
+        // Originally we save new lines on DB ("level 0") without any encoding.
+        // This of course generates a wrong XML, because in XML the new lines does not make sense.
+        // Now we store them as "&#13;" entity in the DB, and return them as "##$_0A$##" for the view level ("level 2"")
 
-is &lt; 70 dB(A).';
+        // this was the segment from the original test
+//        $original_segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand
+//
+//is &lt; 70 dB(A).';
+        $segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#10;&#10;is &lt; 70 dB(A).';
+        $expectedL1 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#10;&#10;is &lt; 70 dB(A).';
+        $expectedL2 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand##$_0A$####$_0A$##is &amp;lt; 70 dB(A).';
 
         $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
         $segmentL2 = $this->filter->fromLayer0ToLayer2( $segment );
 
+        $this->assertEquals($segmentL1, $expectedL1);
+        $this->assertEquals($segmentL2, $expectedL2);
         $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
 
         $string_from_UI = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand##$_0A$####$_0A$##is &lt; 70 dB(A).';
@@ -152,7 +164,28 @@ is &lt; 70 dB(A).';
         $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
         $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $string_from_UI ) );
+    }
 
+    /**
+     * @throws \Exception
+     */
+    public function testPlainTextInXMLWithCarriageReturn(){
+        $segment = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#13;&#13;is &lt; 70 dB(A).';
+        $expectedL1 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand&#13;&#13;is &lt; 70 dB(A).';
+        $expectedL2 = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand##$_0D$####$_0D$##is &amp;lt; 70 dB(A).';
+
+        $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $this->filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals($segmentL1, $expectedL1);
+        $this->assertEquals($segmentL2, $expectedL2);
+        $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $string_from_UI = 'The energetically averaged emission sound level of the &lt;tag&gt; " pressure load cycling and bursting test stand##$_0D$####$_0D$##is &lt; 70 dB(A).';
+
+        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $string_from_UI ) );
     }
 
     /**
@@ -243,7 +276,7 @@ is &lt; 70 dB(A).';
 
         $featureSet = new FeatureSet();
         $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        
+
         $check = new \PostProcess( $raw_segment, $suggestion_raw );
         $check->setFeatureSet( $featureSet );
         $check->realignMTSpaces();

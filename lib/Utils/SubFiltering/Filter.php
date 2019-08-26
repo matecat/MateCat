@@ -222,7 +222,6 @@ class Filter {
 
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new PlaceHoldXliffTags() );
-
         $channel->addLast( new FromLayer2ToRawXML() );
 
         $channel->addLast( new RestoreXliffTagsContent() );

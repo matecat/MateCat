@@ -187,7 +187,8 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                   email, 
                   IF ( resolve_date IS NULL, NULL, MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) 
                 ) AS thread_id FROM comments
-                WHERE id_job = :id_job ";
+                WHERE id_job = :id_job 
+                AND message_type IN(1,2)";
 
         $params = [ 'id_job' => $chunk->id ];
 
@@ -237,6 +238,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
                  ) AS thread_id 
                  FROM " . self::TABLE . "
                  WHERE id_job = :id_job 
+                 AND message_type IN(1,2)
                  ORDER BY id_segment ASC, create_date ASC ";
 
         $stmt = $this->database->getConnection()->prepare( $query );
