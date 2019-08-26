@@ -138,7 +138,13 @@ if ( MBC.enabled() )
         };
 
         const getOpenedThreadCount =  () => {
-            return db.history ? db.history.filter((a)=> a.message_type === "1").length : 0;
+            let count = 0;
+
+            for(const segmentID in db.segments){
+                const el = db.segments[segmentID][db.segments[segmentID].length-1];
+                el.message_type === '1' ? count++: null;
+            }
+            return count
         }
 
         const refreshBadgeHeaderIcon = () =>{
@@ -1014,6 +1020,7 @@ if ( MBC.enabled() )
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
             updateHistoryWithLoadedSegments();
+            refreshBadgeHeaderIcon();
             $( document ).trigger( 'mbc:segment:update:links', data.id_segment );
 
             var section = UI.Segment.findEl( data.id_segment );
@@ -1030,6 +1037,7 @@ if ( MBC.enabled() )
             updateHistoryWithLoadedSegments();
             $( document ).trigger( 'mbc:segment:update:links', data.id_segment );
             appendSubmittedMessage( UI.Segment.findEl( data.id_segment ) );
+            refreshBadgeHeaderIcon();
         } );
 
         // $( window ).on( 'segmentClosed', function ( e ) {
