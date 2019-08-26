@@ -290,6 +290,7 @@ class Executor implements SplObserver {
 
                 $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************" );
                 $this->_logMsg( "Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() );
+                $this->_logMsg( $e->getTraceAsString() );
 
             }
 

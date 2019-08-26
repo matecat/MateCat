@@ -535,8 +535,8 @@ class ProjectManager {
                 // so I check it and in negative case I force the download of the file to file system from S3
                 $isFsOnS3 = AbstractFilesStorage::isOnS3();
 
-                if ( $isFsOnS3 and false === file_exists($filePathName)) {
-                    $this->getSingleS3QueueFile( $filePathName );
+                if ( $isFsOnS3 and false === file_exists( $filePathName ) ) {
+                    $this->getSingleS3QueueFile( $fileName );
                 }
 
                 //calculate hash + add the fileName, if i load 3 equal files with the same content
