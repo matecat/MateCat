@@ -254,11 +254,11 @@ class SearchModel {
             }
         }
 
-        // reset the keys of the array after purging the entires with html entities
+        // Reset the keys of the array after purging
         $vector[ 'sid_list' ] = array_values( $vector[ 'sid_list' ] );
 
-        // returning 'stext_list' is not useful for search purposes
-        // its only function is to help purging entries with html entities
+        // Unset 'stext_list' because returning it is not useful for search purposes
+        // its only function is to help purging entries
         unset( $vector[ 'stext_list' ] );
 
         return $vector;
