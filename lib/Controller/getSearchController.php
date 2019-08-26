@@ -176,6 +176,9 @@ class getSearchController extends ajaxController {
             $this->queryParams[ 'key' ] = 'status_only';
         }
 
+        $filter = \SubFiltering\Filter::getInstance($this->featureSet);
+        $searchModel = new SearchModel( $this->queryParams, $filter );
+
         try {
             $res = $this->searchModel->search();
         } catch ( Exception $e ) {
