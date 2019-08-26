@@ -5265,6 +5265,24 @@ header {
             height: $icon-scale;
             padding:0 !important;
             background-position: center;
+
+            .badge {
+                position: absolute;
+                margin: 0;
+                top: 0;
+                padding: 1px 6px;
+                right: -4px;
+                /*background: #e02020;*/
+                background: #0bbeec;
+                color: #fff;
+                font-size: 10px;
+                text-align: center;
+                border-radius: 25px;
+                vertical-align: middle;
+                line-height: 16px;
+                height: 17px;
+            }
+
             .mbc-history-balloon-outer {
                 background: #fff;
                 margin-top: 44px;
