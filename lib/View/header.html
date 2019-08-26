@@ -30,9 +30,11 @@
 
         <div class="action-menu">
 
-            <button class="action-submenu ui floating dropdown ${header_main_button_class}" id="markAsCompleteButton">
+            <button tal:condition="php: project_completion_feature_enabled | 'false' && header_main_button_enabled" class="action-submenu ui floating dropdown ${header_main_button_class}"
+                    id="markAsCompleteButton"></button>
 
-            </button>
+            <button tal:condition="php: project_completion_feature_enabled | 'false' && !header_main_button_enabled" class="action-submenu ui floating dropdown ${header_main_button_class}"
+                    id="markAsCompleteButton" disabled="disabled"></button>
 
             <div class="action-submenu ui simple pointing top center floating dropdown" id="action-download">
                 <div class="dropdown-menu-overlay"></div>
