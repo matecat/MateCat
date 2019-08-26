@@ -30,10 +30,10 @@
 
         <div class="action-menu">
 
-            <button tal:condition="php: project_completion_feature_enabled | 'false' && header_main_button_enabled" class="action-submenu ui floating dropdown ${header_main_button_class}"
+            <button tal:condition="php: (isset(project_completion_feature_enabled)) && project_completion_feature_enabled && header_main_button_enabled" class="action-submenu ui floating dropdown ${header_main_button_class}"
                     id="markAsCompleteButton"></button>
 
-            <button tal:condition="php: project_completion_feature_enabled | 'false' && !header_main_button_enabled" class="action-submenu ui floating dropdown ${header_main_button_class}"
+            <button tal:condition="php: (isset(project_completion_feature_enabled)) && project_completion_feature_enabled && !header_main_button_enabled" class="action-submenu ui floating dropdown ${header_main_button_class}"
                     id="markAsCompleteButton" disabled="disabled"></button>
 
             <div class="action-submenu ui simple pointing top center floating dropdown" id="action-download">
