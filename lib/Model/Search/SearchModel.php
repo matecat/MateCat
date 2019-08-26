@@ -42,92 +42,6 @@ class SearchModel {
     }
 
     /**
-     * -----------------------------------------------------------------------------------
-     * This method purges html entities from segments found in the research.
-     * -----------------------------------------------------------------------------------
-     *
-     * DOCUMENTATION:
-     *
-     * The purge is done only if some special character (used to encode strings, like '#' or ';') or
-     * if it does not contain any html entity at all.
-     *
-     * Examples:
-     * - search for word quot : the check/purge is needed, because is possible that in DB matches are present some segment containing &quote;
-     * - search for word & (converted and persisted as &amp; in DB): the check/purge is not required, because in this case we don't want to purge segments containing &amp;
-     * - search for word " (converted and persisted as &quot; in DB): the check/purge is not required, because in this  case we don't want to purge segments containing &quot;
-     * - search for word ; the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
-     * - search for word # the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
-     *
-     * For more examples see: @SearchModelTest
-     *
-     * @param array $vector
-     *
-     * @return array
-     */
-    private function _purgeHtmlEntities( $vector ) {
-
-        // get the search term (source or target search)
-        $searchTerm                  = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
-        $searchTermHtmlEntitiesCount = count( $this->htmlEntitesMatches( $searchTerm )[ 0 ] );
-        $searchTermArray             = [ ';', '#' ];
-
-        // the purge must be done if the search contains some special character (used to encode strings, like '#' or ';') or
-        // if it does not contain any html entity at all
-        if ( $searchTermHtmlEntitiesCount === 0 || in_array( $searchTerm, $searchTermArray ) ) {
-            foreach ( $vector[ 'stext_list' ] as $key => $item ) {
-
-                $matches                     = $this->htmlEntitesMatches( $item );
-                $searchTermHtmlEntitiesCount = count( $matches[ 0 ] );
-
-                // If the segment($item) does contain at least one html entity
-                if ( $searchTermHtmlEntitiesCount > 0 ) {
-                    // Replace the matches from the segment($item)
-                    $text = str_replace( $matches[ 0 ][ 0 ], '', $item );
-
-                    // Check if in segment there is still the search term after purging
-                    if ( strpos( $text, $searchTerm ) === false ) {
-                        // elements to be purged
-                        unset( $vector[ 'sid_list' ][ $key ] );
-                        unset( $vector[ 'stext_list' ][ $key ] );
-                        $vector[ 'count' ] = $vector[ 'count' ] - $searchTermHtmlEntitiesCount;
-                    } else {
-                        // Here is the case of segments that contains html entites and the $searchTerm
-                        //
-                        // So in these remaining segments
-                        // update the vector's count
-                        // by looping the entites matches
-                        // and decrease the count one by one
-                        // if there's a match against the search term
-                        //
-                        // Example:
-                        //
-                        // If the $searchTerm = 'Hello'
-                        // I don't want that the vector count is decreased
-                        //
-                        // Otherwise, if the search term is ; I want to
-                        // decrease the vector count for every html entity match
-                        //
-                        foreach ( $matches[ 0 ] as $match ) {
-                            if ( strpos( $match, $searchTerm ) ) {
-                                $vector[ 'count' ] = $vector[ 'count' ] - 1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // reset the keys of the array after purging the entires with html entities
-        $vector[ 'sid_list' ] = array_values( $vector[ 'sid_list' ] );
-
-        // returning 'stext_list' is not useful for search purposes
-        // its only function is to help purging entries with html entities
-        unset( $vector[ 'stext_list' ] );
-
-        return $vector;
-    }
-
-    /**
      * @throws Exception
      */
     public function replaceAll() {
@@ -260,6 +174,92 @@ class SearchModel {
             }
 
         }
+
+        return $vector;
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------
+     * This method purges html entities from segments found in the research.
+     * -----------------------------------------------------------------------------------
+     *
+     * DOCUMENTATION:
+     *
+     * The purge is done only if some special character (used to encode strings, like '#' or ';') or
+     * if it does not contain any html entity at all.
+     *
+     * Examples:
+     * - search for word quot : the check/purge is needed, because is possible that in DB matches are present some segment containing &quote;
+     * - search for word & (converted and persisted as &amp; in DB): the check/purge is not required, because in this case we don't want to purge segments containing &amp;
+     * - search for word " (converted and persisted as &quot; in DB): the check/purge is not required, because in this  case we don't want to purge segments containing &quot;
+     * - search for word ; the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
+     * - search for word # the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
+     *
+     * For more examples see: @SearchModelTest
+     *
+     * @param array $vector
+     *
+     * @return array
+     */
+    private function _purgeHtmlEntities( $vector ) {
+
+        // get the search term (source or target search)
+        $searchTerm                  = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
+        $searchTermHtmlEntitiesCount = count( $this->htmlEntitesMatches( $searchTerm )[ 0 ] );
+        $searchTermArray             = [ ';', '#' ];
+
+        // the purge must be done if the search contains some special character (used to encode strings, like '#' or ';') or
+        // if it does not contain any html entity at all
+        if ( $searchTermHtmlEntitiesCount === 0 || in_array( $searchTerm, $searchTermArray ) ) {
+            foreach ( $vector[ 'stext_list' ] as $key => $item ) {
+
+                $matches                     = $this->htmlEntitesMatches( $item );
+                $searchTermHtmlEntitiesCount = count( $matches[ 0 ] );
+
+                // If the segment($item) does contain at least one html entity
+                if ( $searchTermHtmlEntitiesCount > 0 ) {
+                    // Replace the matches from the segment($item)
+                    $text = str_replace( $matches[ 0 ][ 0 ], '', $item );
+
+                    // Check if in segment there is still the search term after purging
+                    if ( strpos( $text, $searchTerm ) === false ) {
+                        // elements to be purged
+                        unset( $vector[ 'sid_list' ][ $key ] );
+                        unset( $vector[ 'stext_list' ][ $key ] );
+                        $vector[ 'count' ] = $vector[ 'count' ] - $searchTermHtmlEntitiesCount;
+                    } else {
+                        // Here is the case of segments that contains html entites and the $searchTerm
+                        //
+                        // So in these remaining segments
+                        // update the vector's count
+                        // by looping the entites matches
+                        // and decrease the count one by one
+                        // if there's a match against the search term
+                        //
+                        // Example:
+                        //
+                        // If the $searchTerm = 'Hello'
+                        // I don't want that the vector count is decreased
+                        //
+                        // Otherwise, if the search term is ; I want to
+                        // decrease the vector count for every html entity match
+                        //
+                        foreach ( $matches[ 0 ] as $match ) {
+                            if ( strpos( $match, $searchTerm ) ) {
+                                $vector[ 'count' ] = $vector[ 'count' ] - 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // reset the keys of the array after purging the entires with html entities
+        $vector[ 'sid_list' ] = array_values( $vector[ 'sid_list' ] );
+
+        // returning 'stext_list' is not useful for search purposes
+        // its only function is to help purging entries with html entities
+        unset( $vector[ 'stext_list' ] );
 
         return $vector;
     }
