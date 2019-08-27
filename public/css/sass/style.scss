@@ -5231,30 +5231,54 @@ header {
         }
 
         #quality-report-button{
-            &[data-revised=true] {
-                #quality-report {
-                    svg {
-                        .st0{
-                            fill:#5EB304;
-                            stroke:#5EB304;}
 
-                        .st2{
-                            fill:#FFFFFF;
-                        }
+            #quality-report {
+                svg {
+                    .st0{
+                        fill:none;
+                        stroke:#FAFAFA;}
+
+                    .st2{
+                        fill:#FFFFFF;
                     }
                 }
             }
-            &[data-revised=false] {
-                #quality-report {
-                    svg {
-                        .st0{
-                            fill:#E02020;
-                            stroke:#E02020;}
 
-                        .st2{
-                            fill:#FFFFFF;
+            &[data-revised=true] {
+                #quality-report {
+
+                    &[data-vote=excellent],
+                    &[data-vote=good],
+                    &[data-vote=verygood]{
+                        svg {
+                            .st0{
+                                fill:#5EB304;
+                                stroke:#5EB304;}
                         }
                     }
+                    &[data-vote=poor]{
+                        svg {
+                            .st0{
+                                fill:#FFA935;
+                                stroke:#FFA935;}
+                        }
+                    }
+                    &[data-vote=acceptable]{
+                        svg {
+                            .st0{
+                                fill:#EABA22;
+                                stroke:#EABA22;}
+                        }
+                    }
+
+                    &[data-vote=fail]{
+                        svg {
+                            .st0{
+                                fill:#E02020;
+                                stroke:#E02020;}
+                        }
+                    }
+
                 }
             }
         }
