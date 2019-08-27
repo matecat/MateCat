@@ -114,7 +114,6 @@ class getSearchController extends ajaxController {
         }
 
         $this->db          = Database::obtain();
-        $this->searchModel = new SearchModel( $this->queryParams );
 
         // Search_ReplaceHistory init
         $srh_driver = ( isset( \INIT::$REPLACE_HISTORY_DRIVER ) and '' !== \INIT::$REPLACE_HISTORY_DRIVER ) ? \INIT::$REPLACE_HISTORY_DRIVER : 'redis';
@@ -177,7 +176,7 @@ class getSearchController extends ajaxController {
         }
 
         $filter = \SubFiltering\Filter::getInstance($this->featureSet);
-        $searchModel = new SearchModel( $this->queryParams, $filter );
+        $this->searchModel  = new SearchModel( $this->queryParams, $filter );
 
         try {
             $res = $this->searchModel->search();

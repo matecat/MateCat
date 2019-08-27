@@ -380,7 +380,7 @@ class SearchModel {
      * @return string
      */
     protected function _loadSearchInTargetQuery() {
-        $this->_loadParams();
+
         $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
@@ -422,7 +422,7 @@ class SearchModel {
      * @return string
      */
     protected function _loadSearchInSourceQuery() {
-        $this->_loadParams();
+
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -457,7 +457,7 @@ class SearchModel {
      * @return string
      */
     protected function _loadSearchCoupledQuery() {
-        $this->_loadParams();
+
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -497,7 +497,7 @@ class SearchModel {
     }
 
     protected function _loadSearchStatusOnlyQuery() {
-        $this->_loadParams();
+
         $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
@@ -514,8 +514,8 @@ class SearchModel {
 
     }
 
-    public function loadReplaceAllQuery() {
-        $this->_loadParams();
+    public function _loadReplaceAllQuery() {
+
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
