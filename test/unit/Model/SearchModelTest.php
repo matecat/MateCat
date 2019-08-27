@@ -73,7 +73,7 @@ class SearchModelTest extends AbstractTest {
      */
     public function testSearchTarget() {
         $this->_launchSearchAndVerifyResults( 'target', 'Ciao', 4, [ 1, 2, 4 ] );
-        $this->_launchSearchAndVerifyResults( 'target', '%', 2, [ 1 ] );
+        $this->_launchSearchAndVerifyResults( 'target', '%', 0, [] );
         $this->_launchSearchAndVerifyResults( 'target', '&', 1, [ 1 ] );
         $this->_launchSearchAndVerifyResults( 'target', ';', 1, [ 3 ] );
     }

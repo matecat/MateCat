@@ -375,9 +375,9 @@ class SearchModel {
 					( LENGTH( {$this->concatColumn('st.translation')} ) - LENGTH( 
                         REPLACE ( 
                           {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getSpacerForWholeWordSearch()}{$this->queryParams->target}{$this->getSpacerForWholeWordSearch()}' ), ''
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), ''
                         ) 
-					) ) / LENGTH('{$this->getSpacerForWholeWordSearch()}{$this->queryParams->target}{$this->getSpacerForWholeWordSearch()}') )
+					) ) / LENGTH('{$this->getTheSpacedString($this->queryParams->target)}') )
 			) AS count
 			FROM segment_translations st
 			WHERE st.id_job = {$this->queryParams->job}
@@ -389,10 +389,10 @@ class SearchModel {
 			AND ROUND (
                         ( LENGTH( st.translation ) - LENGTH( REPLACE ( 
                             {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
-                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getSpacerForWholeWordSearch()}{$this->queryParams->target}{$this->getSpacerForWholeWordSearch()}' ), 
+                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), 
                             ''
                             ) ) 
-                        ) / LENGTH('{$this->queryParams->target}') 
+                        ) / LENGTH('{$this->getTheSpacedString($this->queryParams->target)}') 
 			) > 0
 			GROUP BY st.id_segment WITH ROLLUP
 		";
@@ -408,9 +408,9 @@ class SearchModel {
 					( LENGTH( {$this->concatColumn('s.segment')}  ) - LENGTH( 
                         REPLACE ( 
                           {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('s.segment')} ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getSpacerForWholeWordSearch()}{$this->queryParams->source}{$this->getSpacerForWholeWordSearch()}' ), ''
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->source)}' ), ''
                         ) 
-					) ) / LENGTH('{$this->getSpacerForWholeWordSearch()}{$this->queryParams->source}{$this->getSpacerForWholeWordSearch()}') )
+					) ) / LENGTH('{$this->getTheSpacedString($this->queryParams->source)}') )
 			) AS count
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
@@ -443,14 +443,14 @@ class SearchModel {
 			AND LENGTH( 
 			    REPLACE ( 
 			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('segment')} ), 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getSpacerForWholeWordSearch()}{$this->queryParams->source}{$this->getSpacerForWholeWordSearch()}' ), 
+			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->source)}' ), 
 			      ''
 			    ) 
 			) != LENGTH( s.segment )
 			AND LENGTH( 
 			    REPLACE ( 
 			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getSpacerForWholeWordSearch()}{$this->queryParams->target}{$this->getSpacerForWholeWordSearch()}' ), 
+			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), 
 			      ''
 			    ) 
 			) != LENGTH( st.translation )
@@ -499,17 +499,36 @@ class SearchModel {
         return $sql;
     }
 
+
+    /**
+     * Gets the spaced string for a search query
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    private function getTheSpacedString($string){
+        return $this->getSpacerForSearchQueries().trim($string).$this->getSpacerForSearchQueries();
+    }
+
     /**
      * @return string
      */
-    private function getSpacerForWholeWordSearch() {
-        $exactMatch = $this->queryParams->exactMatch;
-
-        if ( $exactMatch->Space_Left === '' and $exactMatch->Space_Right === '' ) {
-            return '';
+    private function getSpacerForSearchQueries() {
+        if ( $this->isAnExactMatchQuery() ) {
+            return ' ';
         }
 
-        return ' ';
+        return '';
+    }
+
+    /**
+     * @return bool
+     */
+    private function isAnExactMatchQuery(){
+        $exactMatch = $this->queryParams->exactMatch;
+
+        return ( $exactMatch->Space_Left !== '' and $exactMatch->Space_Right !== '' );
     }
 
     /**
