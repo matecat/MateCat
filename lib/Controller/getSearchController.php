@@ -147,18 +147,17 @@ class getSearchController extends ajaxController {
      */
     private function doReplaceAll(){
 
-        $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
-
-        $this->queryParams[ 'trg' ]         = $Filter->fromLayer2ToLayer0( $this->target );
-        $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
-        $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
+        $filter = \SubFiltering\Filter::getInstance($this->featureSet);
+        $this->queryParams[ 'trg' ]         = $filter->fromLayer2ToLayer0( $this->target );
+        $this->queryParams[ 'src' ]         = $filter->fromLayer2ToLayer0( $this->source );
+        $this->queryParams[ 'replacement' ] = $filter->fromLayer2ToLayer0( $this->replace );
 
         /**
          * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
          * @throws Exception
          */
-        ( new SearchModel( $this->queryParams ) )->replaceAll();
 
+        (new SearchModel( $this->queryParams, $filter ))->replaceAll();
     }
 
 }
