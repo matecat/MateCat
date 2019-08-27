@@ -4,7 +4,7 @@ st1:
   segment_hash: f88037cf8f5d27f475cee79c603cecae
   autopropagated_from: NULL
   status: TRANSLATED
-  translation: Ciao mondo 4WD &amp;
+  translation: Ciao Ciao mondo 4WD &amp; ampolla %{variable}%
   translation_date: NULL
   time_to_edit: 0
   match_type: NO_MATCH
