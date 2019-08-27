@@ -142,7 +142,7 @@ if ( MBC.enabled() )
 
             for(const segmentID in db.segments){
                 const el = db.segments[segmentID][db.segments[segmentID].length-1];
-                el.message_type === '1' ? count++: null;
+                parseInt(el.message_type) === 1 ? count++: null;
             }
             return count
         }
@@ -153,8 +153,6 @@ if ( MBC.enabled() )
             if(count > 0){
                 $('#mbc-history').append(`<span class='badge'>${count}</span>`)
             }
-
-
         }
         var limitNum = function ( num ) {
             if ( Number( num ) > 99 ) return '+99';
@@ -1032,12 +1030,13 @@ if ( MBC.enabled() )
 
         $( document ).on( 'mbc:comment:saved', function ( ev, data ) {
             $( document ).find( 'section .mbc-thread-wrap' ).remove();
-
+            console.log(db.segments);
             db.pushSegment( data ); // TODO: move this in ajax success?
+            console.log('created',db.segments)
+            refreshBadgeHeaderIcon();
             updateHistoryWithLoadedSegments();
             $( document ).trigger( 'mbc:segment:update:links', data.id_segment );
             appendSubmittedMessage( UI.Segment.findEl( data.id_segment ) );
-            refreshBadgeHeaderIcon();
         } );
 
         // $( window ).on( 'segmentClosed', function ( e ) {
