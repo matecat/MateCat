@@ -995,7 +995,7 @@ if ( MBC.enabled() )
                 }
             });
             //New icon inserted in the header -> resize file name
-            APP.fitText($('.breadcrumbs'), $('#pname'), 42);
+            APP.fitText($('#pname-container'), $('#pname'), 25);
         } );
 
         $( document ).on( 'sse:comment', function ( ev, message ) {

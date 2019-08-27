@@ -15,7 +15,7 @@ $.extend(UI, {
         UI.setShortcuts();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
-            APP.fitText($('.breadcrumbs'), $('#pname'), 50);
+			APP.fitText($('#pname-container'), $('#pname'), 25);
         });
         setBrowserHistoryBehavior();
         $("article").each(function() {
