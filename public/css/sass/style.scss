@@ -278,7 +278,7 @@ section.opened .warnings {
     padding: 19px 0 4px 0px;
 }
 
-.cattool #quality-report {
+/*.cattool #quality-report {
     margin: 3px -10px 0px 10px !important;
     padding: 5px 20px;
     margin-right: 10px !important;
@@ -289,7 +289,7 @@ section.opened .warnings {
     font-size: 17px;
     color: #333;
     display: none;
-}
+}*/
 
 .cattool #quality-report[data-vote=acceptable],
 .cattool #quality-report[data-vote=poor],
@@ -5250,8 +5250,44 @@ header {
             background-size: 38px;
         }
         #action-QR, #quality-report-button {
-            background-image: url("/public/img/icons/icon-QR-line.svg");
+            /*background-image: url("/public/img/icons/icon-QR-line.svg");*/
+            #quality-report {
+                display: grid;
+                background: transparent;
+                border:none !important;
+            }
         }
+
+        #quality-report-button{
+            &[data-revised=true] {
+                #quality-report {
+                    svg {
+                        .st0{
+                            fill:#5EB304;
+                            stroke:#5EB304;}
+
+                        .st2{
+                            fill:#FFFFFF;
+                        }
+                    }
+                }
+            }
+            &[data-revised=false] {
+                #quality-report {
+                    svg {
+                        .st0{
+                            fill:#E20001;
+                            stroke:#E20001;}
+
+                        .st2{
+                            fill:#FFFFFF;
+                        }
+                    }
+                }
+            }
+        }
+
+
         #notifbox {
             background-image: url("/public/img/icons/icon-QA-line.svg");
             width: $icon-scale;
