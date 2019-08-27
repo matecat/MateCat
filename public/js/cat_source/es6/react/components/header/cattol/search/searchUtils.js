@@ -475,7 +475,7 @@ let SearchUtils = {
                         tt = LXQ.cleanUpHighLighting(tt);
                     }
                     let spanArray = [];
-                    tt = tt.replace(/(<[/]*span.*?>)/g, function ( match, text ) {
+                    tt = tt.replace(/(<[/]*span.*?>|<[/]*a.*?>)/g, function ( match, text ) {
                         spanArray.push(text);
                         return "$&";
                     });
