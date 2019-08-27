@@ -5370,7 +5370,7 @@ header {
 }
 
 .topMenu {
-    width: 280px;
+    width: 286px;
     background: $light-gray;
     z-index: 2;
     text-align: left;
@@ -5380,11 +5380,13 @@ header {
 
     &.open {
         max-height: 64%;
-        overflow: auto;
-        top: 58px !important;
+        overflow: visible;
+        top: 64px !important;
         display: block;
-        box-shadow: none;
+        box-shadow: 0px 1px 12px #999;
+        border-radius: 3px;
         z-index: 13;
+        border: solid 1px #cdd4de;
 
         &::after {
             content: "";
@@ -5396,23 +5398,24 @@ header {
             bottom: 100%;
             left: 50%;
             right: auto;
-            transform: translate(-50%, 0) !important;
+            transform: translate(-90%, 0) !important;
             position: absolute;
             pointer-events: none;
         }
+
     }
 
     .separator {
-        width: 260px;
+        width: 254px;
         height: 2px;
         background: $gray-2;
         align-items: center;
-        margin-left: 10px;
+        margin-left: 15px;
     }
 
     ul.gotocurrentsegment {
 
-        width: 280px;
+        width: 284px;
         line-height: 24px;
         font-size: 16px;
         position: relative;
@@ -5429,7 +5432,7 @@ header {
             .label {
                 height: auto !important;
                 margin: 0 !important;
-                width: 236px !important;
+                width: 226px !important;
                 padding: 4px 8px !important;
                 border-radius: 2px;
                 float:none !important;
@@ -5467,14 +5470,13 @@ header {
         span {
             padding: 4px 4px 0px 2px;
         }
-    }
-
-    ul {
-        li {
+        li.current{
             a {
+                font-weight: normal;
+                border-left: none;
+                font-size: 16px;
                 color: #000;
                 padding: 10px 8px;
-                /*width: 250px;*/
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -5484,12 +5486,6 @@ header {
             }
         }
     }
-
-    ul li.current a {
-        font-weight: normal;
-        border-left: none;
-    }
-
 }
 
 
