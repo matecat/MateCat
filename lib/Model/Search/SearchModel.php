@@ -369,7 +369,6 @@ class SearchModel {
     }
 
     protected function _loadSearchInTargetQuery() {
-
         $query = "
         SELECT  st.id_segment as id, st.translation as text, sum(
 			ROUND (
@@ -409,9 +408,9 @@ class SearchModel {
 					( LENGTH( s.segment ) - LENGTH( 
                         REPLACE ( 
                           {$this->queryParams->matchCase->SQL_LENGHT_CASE}( segment ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->source}' ), ''
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getSpacerForWholeWord()}{$this->queryParams->source}{$this->getSpacerForWholeWord()}' ), ''
                         ) 
-					) ) / LENGTH('{$this->queryParams->source}') )
+					) ) / LENGTH('{$this->getSpacerForWholeWord()}{$this->queryParams->source}{$this->getSpacerForWholeWord()}') )
 			) AS count
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
@@ -501,4 +500,16 @@ class SearchModel {
 
     }
 
+    /**
+     * @return string
+     */
+    private function getSpacerForWholeWord() {
+        $exactMatch = $this->queryParams->exactMatch;
+
+        if ( $exactMatch->Space_Left === '' and $exactMatch->Space_Right === '' ) {
+            return '';
+        }
+
+        return ' ';
+    }
 }
