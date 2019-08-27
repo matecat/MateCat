@@ -25,7 +25,9 @@
                 <span id="project-badge"><span tal:replace="php:count(json_decode(firstSegmentOfFiles))">---</span></span>
                 <img src="/public/img/icons/icon-folder.svg" alt=""/>
             </div>
-            <a href="#" onClick="return false" id="pname" tal:content="pname">Project</a>
+            <p id="pname-container">
+                <a href="#" onClick="return false" id="pname" tal:content="pname">Project</a>
+            </p>
         </div> <!-- .breadcrumbs -->
 
         <div class="action-menu">

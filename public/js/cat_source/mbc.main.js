@@ -137,6 +137,23 @@ if ( MBC.enabled() )
             }
         };
 
+        const getOpenedThreadCount =  () => {
+            let count = 0;
+
+            for(const segmentID in db.segments){
+                const el = db.segments[segmentID][db.segments[segmentID].length-1];
+                parseInt(el.message_type) === 1 ? count++: null;
+            }
+            return count
+        }
+
+        const refreshBadgeHeaderIcon = () =>{
+            const count = getOpenedThreadCount();
+            $('#mbc-history .badge').remove();
+            if(count > 0){
+                $('#mbc-history').append(`<span class='badge'>${count}</span>`)
+            }
+        }
         var limitNum = function ( num ) {
             if ( Number( num ) > 99 ) return '+99';
             else return num;
@@ -533,6 +550,7 @@ if ( MBC.enabled() )
             $( '.mbc-history-balloon-has-no-comments' ).hide();
 
             $( '.mbc-history-balloon-outer' ).append( root );
+
         };
 
         var updateHistoryWithLoadedSegments = function () {
@@ -705,6 +723,7 @@ if ( MBC.enabled() )
             initCommentLinks();
             renderCommentIconLinks();
             updateHistoryWithLoadedSegments();
+            refreshBadgeHeaderIcon();
         };
 
         var getTeamUsers = function (  ) {
@@ -967,7 +986,6 @@ if ( MBC.enabled() )
             $( '.action-menu #action-filter' ).before( $( tpls.historyIcon ) );
             $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
-
             getTeamUsers().then( function() {
                 refreshElements()
                 // open a comment if was asked by hash
@@ -977,7 +995,7 @@ if ( MBC.enabled() )
                 }
             });
             //New icon inserted in the header -> resize file name
-            APP.fitText($('.breadcrumbs'), $('#pname'), 42);
+            APP.fitText($('#pname-container'), $('#pname'), 25);
         } );
 
         $( document ).on( 'sse:comment', function ( ev, message ) {
@@ -1000,6 +1018,7 @@ if ( MBC.enabled() )
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
             updateHistoryWithLoadedSegments();
+            refreshBadgeHeaderIcon();
             $( document ).trigger( 'mbc:segment:update:links', data.id_segment );
 
             var section = UI.Segment.findEl( data.id_segment );
@@ -1011,10 +1030,11 @@ if ( MBC.enabled() )
 
         $( document ).on( 'mbc:comment:saved', function ( ev, data ) {
             $( document ).find( 'section .mbc-thread-wrap' ).remove();
-
+            console.log(db.segments);
             db.pushSegment( data ); // TODO: move this in ajax success?
+            console.log('created',db.segments)
+            refreshBadgeHeaderIcon();
             updateHistoryWithLoadedSegments();
-
             $( document ).trigger( 'mbc:segment:update:links', data.id_segment );
             appendSubmittedMessage( UI.Segment.findEl( data.id_segment ) );
         } );

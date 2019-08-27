@@ -307,7 +307,7 @@ function selectText(element) {
 function runDownload() {
     var continueDownloadFunction ;
 
-    if( $('#downloadProject').hasClass('disabled') ) return false;
+    if( $('#action-download').hasClass('disabled') ) return false;
 
     if ( config.isGDriveProject ) {
         continueDownloadFunction = 'continueDownloadWithGoogleDrive';

@@ -1528,21 +1528,11 @@ UI = {
 	},
 
     disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
-        var button = $('#downloadProject' ) ;
-        var labelDownloading = 'DOWNLOADING';
-        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
-            labelDownloading = 'OPENING FILES...';
-        }
-        button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
-        APP.fitText($('.breadcrumbs'), $('#pname'), 42);
-
+        $("#action-download").addClass('disabled' );
     },
 
     reEnableDownloadButton : function() {
-        var button = $('#downloadProject' ) ;
-        button.removeClass('disabled')
-            .val( button.data('oldValue') )
-            .removeData('oldValue');
+        $("#action-download").removeClass('disabled');
     },
 
     downloadFileURL : function( openOriginalFiles ) {
@@ -2585,5 +2575,5 @@ $(document).ready(function() {
 
 $(window).resize(function() {
     // UI.fixHeaderHeightChange();
-    APP.fitText($('.breadcrumbs'), $('#pname'), 50);
+    APP.fitText($('#pname-container'), $('#pname'), 25);
 });
