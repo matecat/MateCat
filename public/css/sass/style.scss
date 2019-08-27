@@ -5170,34 +5170,6 @@ header {
                     padding: 0 !important;
                     border-radius: 3px;
 
-                 /*
-                    Todo: remove all if Download Actions style approved
-                    border-radius: 3px;
-                    padding: 8px !important;
-                    font-size: 16px;
-
-                    &:hover {
-                        background-color: $light-gray;
-                        color: $light-blue;
-                    }
-                    &.selected {
-                        background-color: transparent;
-                        font-weight: normal;
-                    }
-                    &.selected {
-                        background-color: $matecat-blue;
-                        color: #fff;
-                        font-weight: normal;
-                        &::after {
-                            content: "";
-                            background: url(/public/img/icons/icon-check.svg) no-repeat;
-                            width: 16px;
-                            height: 12px;
-                            right: 16px;
-                            position: absolute;
-                            top: 10px;
-                        }
-                    }*/
                 }
             }
 
@@ -5247,7 +5219,7 @@ header {
         }
         #action-download {
             background-image: url("/public/img/icons/icon-download.svg");
-            background-size: 38px;
+            background-size: 36px;
         }
         #action-QR, #quality-report-button {
             /*background-image: url("/public/img/icons/icon-QR-line.svg");*/
@@ -5276,8 +5248,8 @@ header {
                 #quality-report {
                     svg {
                         .st0{
-                            fill:#E20001;
-                            stroke:#E20001;}
+                            fill:#E02020;
+                            stroke:#E02020;}
 
                         .st2{
                             fill:#FFFFFF;

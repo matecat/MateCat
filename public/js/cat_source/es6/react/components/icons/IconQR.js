@@ -10,6 +10,8 @@ const IconQR = ({width='42',height='42', style, color1='#FAFAFA', color2='#FFFFF
 			version="1.1"
 			viewBox="0 0 42 42"
 			xmlSpace="preserve"
+			width={`${width}px`}
+			height={`${height}px`}
 		>
 			<path
 				d="M2 0h36c1.1 0 2 .9 2 2v36c0 1.1-.9 2-2 2H2c-1.1 0-2-.9-2-2V2C0 .9.9 0 2 0z"
