@@ -6,7 +6,9 @@ $.extend(UI, {
 	initHeader: () => {
 
 		if (SearchUtils.searchEnabled)
-			$('#action-search').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 50) } );
+			$('#action-search').show( 100, function(){
+				APP.fitText($('#pname-container'), $('#pname'), 25);
+			} );
 
 
 		/*if ($('#action-download').length) {

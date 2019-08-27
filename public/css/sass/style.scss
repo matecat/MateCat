@@ -323,9 +323,10 @@ section.opened .warnings {
 .breadcrumbs a:hover {
     text-decoration: none
 }
-
+#pname-container{
+    margin: 0 10px 0 0;
+}
 .breadcrumbs #pname {
-    margin-left: 10px;
     word-break: break-all;
     text-decoration: underline;
 }
