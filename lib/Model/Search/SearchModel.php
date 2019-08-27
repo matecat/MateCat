@@ -165,6 +165,8 @@ class SearchModel {
                 $vector[ 'count' ]      = 0;
             }
 
+            $vector = $this->_purgeHtmlEntities( $vector );
+
         } else {
 
             foreach ( $results as $occurrence ) {
@@ -173,12 +175,27 @@ class SearchModel {
 
         }
 
-        return $this->_purgeHtmlEntities( $vector );
+        return $vector;
     }
 
     /**
-     * Handling a search for ";"
-     * Escaping all entries with html entities
+     * -----------------------------------------------------------------------------------
+     * This method purges html entities from segments found in the research.
+     * -----------------------------------------------------------------------------------
+     *
+     * DOCUMENTATION:
+     *
+     * The purge is done only if some special character (used to encode strings, like '#' or ';') or
+     * if it does not contain any html entity at all.
+     *
+     * Examples:
+     * - search for word quot : the check/purge is needed, because is possible that in DB matches are present some segment containing &quote;
+     * - search for word & (converted and persisted as &amp; in DB): the check/purge is not required, because in this case we don't want to purge segments containing &amp;
+     * - search for word " (converted and persisted as &quot; in DB): the check/purge is not required, because in this  case we don't want to purge segments containing &quot;
+     * - search for word ; the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
+     * - search for word # the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
+     *
+     * For more examples see: @SearchModelTest
      *
      * @param array $vector
      *
@@ -186,33 +203,77 @@ class SearchModel {
      */
     private function _purgeHtmlEntities( $vector ) {
 
-        if ( $this->queryParams->target === ';' || $this->queryParams->source === ';' ) {
+        // get the search term (source or target search)
+        $searchTerm                  = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
+        $searchTermHtmlEntitiesCount = count( $this->htmlEntitesMatches( $searchTerm )[ 0 ] );
+        $searchTermArray             = [ ';', '#' ];
+
+        // the purge must be done if the search contains some special character (used to encode strings, like '#' or ';') or
+        // if it does not contain any html entity at all
+        if ( $searchTermHtmlEntitiesCount === 0 || in_array( $searchTerm, $searchTermArray ) ) {
             foreach ( $vector[ 'stext_list' ] as $key => $item ) {
 
-                // preg match for html entity regexp
-                $reg = '/&(lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/';
-                preg_match_all( $reg, $item, $matches );
+                $matches                     = $this->htmlEntitesMatches( $item );
+                $searchTermHtmlEntitiesCount = count( $matches[ 0 ] );
 
-                // decrease $vector[ 'count' ]
-                $count = count( $matches[ 0 ] );
-                $vector[ 'count' ] = $vector[ 'count' ] - $count;
+                // If the segment($item) does contain at least one html entity
+                if ( $searchTermHtmlEntitiesCount > 0 ) {
+                    // Replace the matches from the segment($item)
+                    $text = str_replace( $matches[ 0 ][ 0 ], '', $item );
 
-                // purge entries from $vector[ 'sid_list' ]
-                $text = str_replace( $matches[ 0 ][ 0 ], '', $item );
-                if ( strpos( $text, ';' ) === false ) {
-                    unset( $vector[ 'sid_list' ][ $key ] );
+                    // Check if in segment there is still the search term after purging
+                    if ( strpos( $text, $searchTerm ) === false ) {
+                        // elements to be purged
+                        unset( $vector[ 'sid_list' ][ $key ] );
+                        unset( $vector[ 'stext_list' ][ $key ] );
+                        $vector[ 'count' ] = $vector[ 'count' ] - $searchTermHtmlEntitiesCount;
+                    } else {
+                        // Here is the case of segments that contains html entites and the $searchTerm
+                        //
+                        // So in these remaining segments
+                        // update the vector's count
+                        // by looping the entites matches
+                        // and decrease the count one by one
+                        // if there's a match against the search term
+                        //
+                        // Example:
+                        //
+                        // If the $searchTerm = 'Hello'
+                        // I don't want that the vector count is decreased
+                        //
+                        // Otherwise, if the search term is ; I want to
+                        // decrease the vector count for every html entity match
+                        //
+                        foreach ( $matches[ 0 ] as $match ) {
+                            if ( strpos( $match, $searchTerm ) ) {
+                                $vector[ 'count' ] = $vector[ 'count' ] - 1;
+                            }
+                        }
+                    }
                 }
             }
-
-            // reset the keys of the array after purging the entires with html entities
-            $vector[ 'sid_list' ] = array_values( $vector[ 'sid_list' ] );
         }
 
-        // returning 'stext_list' is not useful for search purposes
-        // its only function is to help purging entries with html entities
+        // Reset the keys of the array after purging
+        $vector[ 'sid_list' ] = array_values( $vector[ 'sid_list' ] );
+
+        // Unset 'stext_list' because returning it is not useful for search purposes
+        // its only function is to help purging entries
         unset( $vector[ 'stext_list' ] );
 
         return $vector;
+    }
+
+    /**
+     * @param $string
+     *
+     * @return array
+     */
+    private function htmlEntitesMatches( $string ) {
+        $reg = '/&(lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/';
+        preg_match_all( $reg, $string, $matches );
+
+        return $matches;
     }
 
     /**

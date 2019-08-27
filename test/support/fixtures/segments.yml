@@ -6,7 +6,7 @@ segment1:
   xliff_mrk_id:
   xliff_ext_prec_tags:
   xliff_mrk_ext_prec_tags:
-  segment: Hello world 4WD &amp;
+  segment: Hello Hello world 4WD &amp; ampoule %{variable}%
   segment_hash: f88037cf8f5d27f475cee79c603cecae
   xliff_mrk_ext_succ_tags:
   xliff_ext_succ_tags:
@@ -51,7 +51,7 @@ segment4:
   xliff_mrk_id:
   xliff_ext_prec_tags:
   xliff_mrk_ext_prec_tags:
-  segment: Hello world qarkullimit”  faturës.
+  segment: Hello world qarkullimit” &amp; faturës.
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   xliff_mrk_ext_succ_tags:
   xliff_ext_succ_tags:
