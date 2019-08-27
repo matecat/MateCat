@@ -408,9 +408,9 @@ class SearchModel {
 					( LENGTH( s.segment ) - LENGTH( 
                         REPLACE ( 
                           {$this->queryParams->matchCase->SQL_LENGHT_CASE}( segment ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getSpacerForWholeWord()}{$this->queryParams->source}{$this->getSpacerForWholeWord()}' ), ''
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getSpacerForWholeWordSearch()}{$this->queryParams->source}{$this->getSpacerForWholeWordSearch()}' ), ''
                         ) 
-					) ) / LENGTH('{$this->getSpacerForWholeWord()}{$this->queryParams->source}{$this->getSpacerForWholeWord()}') )
+					) ) / LENGTH('{$this->getSpacerForWholeWordSearch()}{$this->queryParams->source}{$this->getSpacerForWholeWordSearch()}') )
 			) AS count
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
@@ -497,13 +497,12 @@ class SearchModel {
         }
 
         return $sql;
-
     }
 
     /**
      * @return string
      */
-    private function getSpacerForWholeWord() {
+    private function getSpacerForWholeWordSearch() {
         $exactMatch = $this->queryParams->exactMatch;
 
         if ( $exactMatch->Space_Left === '' and $exactMatch->Space_Right === '' ) {
