@@ -147,12 +147,19 @@ class SearchModel {
 
         if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' ) { //there is the ROLLUP
 
-            $rollup            = array_pop( $results );
-            $vector[ 'count' ] = $rollup[ 'count' ]; //can be null, suppress warning
+//            $rollup            = array_pop( $results );
+//            $vector[ 'count' ] = $rollup[ 'count' ]; //can be null, suppress warning
+
+            $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $vector[ 'sid_list' ][]   = $occurrence[ 'id' ];
-                $vector[ 'stext_list' ][] = $occurrence[ 'text' ];
+                $matches = \StringSearcher::search($occurrence['text'], $searchTerm, true, $this->isExactMatchEnabled(), $this->isMatchCaseEnabled());
+                $matchesCount = count($matches);
+
+                if($matchesCount > 0){
+                    $vector[ 'sid_list' ][]   = $occurrence[ 'id' ];
+                    $vector[ 'count' ] = $vector[ 'count' ] + $matchesCount;
+                }
             }
 
             //there should be empty values because of Sensitive search
@@ -161,11 +168,8 @@ class SearchModel {
             //ROLLUP counter rules!
             if ( $vector[ 'count' ] == 0 ) {
                 $vector[ 'sid_list' ]   = [];
-                $vector[ 'stext_list' ] = [];
                 $vector[ 'count' ]      = 0;
             }
-
-            $vector = $this->_purgeHtmlEntities( $vector );
 
         } else {
 
@@ -324,8 +328,10 @@ class SearchModel {
     protected function _loadParams() {
 
         // bring the src and target from layer 2 (UI) to layer 0 (DB)
-        $this->queryParams->source = $this->filters->fromLayer2ToLayer0( $this->queryParams->src );
-        $this->queryParams->target = $this->filters->fromLayer2ToLayer0( $this->queryParams->trg );
+//        $this->queryParams->source = $this->filters->fromLayer2ToLayer0( $this->queryParams->src );
+//        $this->queryParams->target = $this->filters->fromLayer2ToLayer0( $this->queryParams->trg );
+        $this->queryParams->source = $this->queryParams->src;
+        $this->queryParams->target = $this->queryParams->trg;
 
         $this->queryParams->where_status = "";
         if ( $this->queryParams->status != 'all' ) {
@@ -369,59 +375,75 @@ class SearchModel {
     }
 
     protected function _loadSearchInTargetQuery() {
+//        $query = "
+//        SELECT  st.id_segment as id, st.translation as text, sum(
+//			ROUND (
+//					( LENGTH( {$this->concatColumn('st.translation')} ) - LENGTH(
+//                        REPLACE (
+//                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ),
+//                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), ''
+//                        )
+//					) ) / LENGTH('{$this->getTheSpacedString($this->queryParams->target)}') )
+//			) AS count
+//			FROM segment_translations st
+//			WHERE st.id_job = {$this->queryParams->job}
+//
+//		    AND st.translation REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE}
+//		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
+//			AND st.status != 'NEW'
+//			{$this->queryParams->where_status}
+//			AND ROUND (
+//                        ( LENGTH( st.translation ) - LENGTH( REPLACE (
+//                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ),
+//                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ),
+//                            ''
+//                            ) )
+//                        ) / LENGTH('{$this->getTheSpacedString($this->queryParams->target)}')
+//			) > 0
+//			GROUP BY st.id_segment WITH ROLLUP
+//		";
+
         $query = "
-        SELECT  st.id_segment as id, st.translation as text, sum(
-			ROUND (
-					( LENGTH( {$this->concatColumn('st.translation')} ) - LENGTH( 
-                        REPLACE ( 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), ''
-                        ) 
-					) ) / LENGTH('{$this->getTheSpacedString($this->queryParams->target)}') )
-			) AS count
+        SELECT  st.id_segment as id, st.translation as text
 			FROM segment_translations st
 			WHERE st.id_job = {$this->queryParams->job}
-		
-		    AND st.translation REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
-		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
 			AND st.status != 'NEW'
-			{$this->queryParams->where_status}
-			AND ROUND (
-                        ( LENGTH( st.translation ) - LENGTH( REPLACE ( 
-                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
-                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), 
-                            ''
-                            ) ) 
-                        ) / LENGTH('{$this->getTheSpacedString($this->queryParams->target)}') 
-			) > 0
-			GROUP BY st.id_segment WITH ROLLUP
-		";
+			";
 
         return $query;
 
     }
 
     protected function _loadSearchInSourceQuery() {
+//        $query = "
+//        SELECT s.id, s.segment as text, sum(
+//			ROUND (
+//					( LENGTH( {$this->concatColumn('s.segment')}  ) - LENGTH(
+//                        REPLACE (
+//                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('s.segment')} ),
+//                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->source)}' ), ''
+//                        )
+//					) ) / LENGTH('{$this->getTheSpacedString($this->queryParams->source)}') )
+//			) AS count
+//			FROM segments s
+//			INNER JOIN files_job fj on s.id_file=fj.id_file
+//			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
+//			WHERE fj.id_job = {$this->queryParams->job}
+//		    AND s.segment
+//		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE}
+//		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
+//			{$this->queryParams->where_status}
+//			AND show_in_cattool = 1
+//			GROUP BY s.id WITH ROLLUP";
+
         $query = "
-        SELECT s.id, s.segment as text, sum(
-			ROUND (
-					( LENGTH( {$this->concatColumn('s.segment')}  ) - LENGTH( 
-                        REPLACE ( 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('s.segment')} ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->source)}' ), ''
-                        ) 
-					) ) / LENGTH('{$this->getTheSpacedString($this->queryParams->source)}') )
-			) AS count
+        SELECT s.id, s.segment as text
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			WHERE fj.id_job = {$this->queryParams->job}
-		    AND s.segment 
-		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
-		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
-			{$this->queryParams->where_status}
 			AND show_in_cattool = 1
-			GROUP BY s.id WITH ROLLUP";
+			GROUP BY s.id";
 
         return $query;
 
@@ -515,7 +537,7 @@ class SearchModel {
      * @return string
      */
     private function getSpacerForSearchQueries() {
-        if ( $this->isAnExactMatchQuery() ) {
+        if ( $this->isExactMatchEnabled() ) {
             return ' ';
         }
 
@@ -525,10 +547,16 @@ class SearchModel {
     /**
      * @return bool
      */
-    private function isAnExactMatchQuery(){
+    private function isExactMatchEnabled(){
         $exactMatch = $this->queryParams->exactMatch;
 
         return ( $exactMatch->Space_Left !== '' and $exactMatch->Space_Right !== '' );
+    }
+
+    private function isMatchCaseEnabled(){
+        $matchCase = $this->queryParams->matchCase;
+
+        return ( $matchCase->SQL_REGEXP_CASE !== '' and $matchCase->SQL_LENGHT_CASE !== 'LOWER' and $matchCase->REGEXP_MODIFIER !== 'iu' );
     }
 
     /**
