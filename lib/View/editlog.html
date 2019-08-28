@@ -32,7 +32,7 @@
     <body class="editlog" tal:condition="php: supportedBrowser NE 0 && !job_archived">
 
         <header>
-            <div class="wrapper">       
+            <div class="wrapper">
                 <a href="${basepath}" class="logo"></a>
 
                 <div metal:use-macro="common.html/login_includes" />
@@ -140,14 +140,14 @@
                     <tr>
                         <th style="width: 100px">Segment</th>
                         <td style="text-align:left;font-size:16px;" tal:content="structure file_data/source | default">N/A</td>
-                    </tr>		
+                    </tr>
                     <tr>
                         <th style="width: 100px">Suggestion<br/>
                             (<span tal:content="file_data/suggestion_source | default"></span> -
                              <span tal:content="file_data/suggestion_match | default"></span>)
                         </th>
                         <td style="text-align:left;font-size:16px;" tal:content="structure file_data/suggestion_view | default">N/A</td>
-                    </tr>		
+                    </tr>
                     <tr>
                         <th style="width: 100px">Translation</th>
                         <td style="text-align:left;font-size:16px;" tal:content="structure file_data/translation | default">N/A</td>
@@ -180,7 +180,7 @@
 
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
-                    
+
                 </nav>
 
                 <div id="pagination_box" tal:condition="not: emptyJob">
@@ -254,5 +254,6 @@
 
         <div metal:use-macro="cookiebanner.html/cookieBanner"/>
         <div metal:use-macro="common.html/footer_includes" />
+        <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
     </body>
 </html>

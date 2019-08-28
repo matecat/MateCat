@@ -183,7 +183,7 @@
                                 <tal:block tal:condition="php: !empty(logged_user)">
 
                                     <div class="filter-box pull-right">
-                                        
+
                                         <input id="filterInactive" onfocus="if(this.value == 'Filter resources') { this.value = ''; }" value="Filter resources" type="text"/>
                                         <span class="icon-search"></span>
                                     </div>
@@ -275,9 +275,9 @@
                     <div class="mgmt-table-mt hide">
                         <div class="mgmt-container">
                                 <div class="insert-tm hide">
-                                 <h3 class="pull-left">Add MT engine</h3> 
+                                 <h3 class="pull-left">Add MT engine</h3>
                                   <div class="step1 pull-left">
-                                       
+
                                         <select name="mt_engine" id="mt_engine_int">
                                                 <option value="none" selected="">Choose provider...</option>
                                                 <option tal:condition="php:isset( Constants_Engines::getAvailableEnginesList()[ 'MMT' ] )" value="mmt">ModernMT</option>
@@ -300,7 +300,7 @@
 
                                     </div>
                                     <div class="step2 pull-left hide">
-                                    
+
                                         <form id="mt-provider-details">
                                             <span class="fields"></span>
                                             <a id="add-mt-provider-confirm" class="pull-right btn-ok uploadtm disabled">
@@ -315,10 +315,10 @@
                                     </div>
                                     <div class="step3 pull-left hide">
                                         <div class="text-left"></div>
-                                        
+
                                     </div>
                                 </div>
-                           
+
                             <div class="block pull-right ">
                                 <tal:block tal:condition="php: empty(logged_user)">
                                     <a class="btn-ok clear add-tm add-mt-engine disabled">Add a MT engine</a>
@@ -574,6 +574,6 @@
 
 </div>
 
-
+<script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
 </body>
 </html>
