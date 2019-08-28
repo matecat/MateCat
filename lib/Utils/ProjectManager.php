@@ -473,7 +473,7 @@ class ProjectManager {
 
         /*
             loop through all input files to
-            1) upload TMX and Glossaries
+            1) upload INSERT INTMX and Glossaries
         */
         try {
             $this->_pushTMXToMyMemory();
