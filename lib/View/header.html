@@ -20,6 +20,13 @@
             </a>
         </div> <!-- .logo-menu -->
 
+        <div class="header-el-placeholder">
+            <div tal:condition="php: (revisionNumber >= 1 && isset( secondRevisionsCount ) )" tal:attributes="class string: revision-mark revision-r${revisionNumber}"
+                 tal:content="string: R${revisionNumber}">
+                R
+            </div>
+        </div> <!-- revision number -->
+
         <div class="breadcrumbs file-list">
             <div class="icon-container">
                 <span id="project-badge"><span tal:replace="php:count(json_decode(firstSegmentOfFiles))">---</span></span>
