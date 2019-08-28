@@ -3127,11 +3127,10 @@ $reference = [
                 [
                         0 => 'opml',
                 ],
-//            'text/x-pascal'                    =>
-//                    array(
-//                        0 => 'p',
-//                        1 => 'pas',
-//                    ),
+        'text/x-pascal'                                                             =>
+                [
+                        0 => 'srt',
+                ],
         'text/x-po'                                                                 =>
                 [
                         0 => 'po'
