@@ -20,6 +20,13 @@
             </a>
         </div> <!-- .logo-menu -->
 
+        <div class="header-el-placeholder">
+            <div tal:condition="php: (revisionNumber >= 1 && isset( secondRevisionsCount ) )" tal:attributes="class string: revision-mark revision-r${revisionNumber}"
+                 tal:content="string: R${revisionNumber}">
+                R
+            </div>
+        </div> <!-- revision number -->
+
         <div class="breadcrumbs file-list">
             <div class="icon-container">
                 <span id="project-badge"><span tal:replace="php:count(json_decode(firstSegmentOfFiles))">---</span></span>
@@ -114,6 +121,9 @@
                     </li>
                     <li class="item" data-value="target">
                         <a target="_blank" href="${basepath}utils/xliff-to-target">Export XLIFF to target</a>
+                    </li>
+                    <li class="item">
+                        <a id="edit_log_link" target="_blank" tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a>
                     </li>
                 </ul>
             </div>

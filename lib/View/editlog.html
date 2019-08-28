@@ -6,6 +6,7 @@
         <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
         <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/build/semantic.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/build/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <!--<link href="${basepath}public/css/editlog.css?build=${build_number}" rel="stylesheet" type="text/css" />-->
         <link rel="stylesheet" href="${basepath}public/css/build/legacy-misc.css?build=${build_number}"/>
@@ -15,8 +16,10 @@
                 basepath: '${basepath | string:/}'
             };
         </script>
+
         <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/build/semantic.js?build=${build_number}"></script>
         <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
         <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
     </head>
@@ -33,10 +36,26 @@
 
         <header>
             <div class="wrapper">
-                <a href="${basepath}" class="logo"></a>
+                <div class="logo-menu">
+                    <a href="${basepath}" class="logo">
+                    </a>
+                </div> <!-- .logo-menu -->
 
-                <div metal:use-macro="common.html/login_includes" />
+                <div class="header-el-placeholder"></div>
+                <div class="header-el-placeholder"></div>
+                <div class="header-el-placeholder"></div>
 
+
+
+                <div class="profile-menu">
+                    <div class="column-separator"></div>
+                    <div tal:condition="isLoggedIn">
+                        <a href="/manage" class="action-submenu">
+                            <img src="/public/img/icons/icon-manage.svg"/>
+                        </a>
+                    </div>
+                    <div metal:use-macro="common.html/login_includes" />
+                </div> <!-- .profile-menu -->
 
             </div>
         </header>
@@ -254,6 +273,46 @@
 
         <div metal:use-macro="cookiebanner.html/cookieBanner"/>
         <div metal:use-macro="common.html/footer_includes" />
+
+        <script>
+            <tal:block>
+                /*<![CDATA[*/
+
+                function initLogoutAction() {
+                    $('.user-menu-container').on('click', '#logout-item', function (e) {
+                        e.preventDefault();
+                        $.post('/api/app/user/logout', function (data) {
+                            if ($('body').hasClass('manage')) {
+                                location.href = config.hostpath + config.basepath;
+                            } else {
+                                window.location.reload();
+                            }
+                        });
+                    });
+                }
+
+                function initProfileModal() {
+                    $('#profile-item').on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        $('#modal').trigger('openpreferences');
+                        return false;
+                    });
+                }
+
+                function initDropdown() {
+                    $('#user-menu-dropdown').dropdown();
+                }
+
+                $(document).ready(function(){
+                    initLogoutAction();
+                    initProfileModal();
+                    initDropdown();
+                });
+
+                /*]]>*/
+            </tal:block>
+        </script>
         <script type="text/javascript" id="hs-script-loader" src="//js.hs-scripts.com/5642498.js"></script>
     </body>
 </html>
