@@ -7,8 +7,8 @@ use Teams\TeamStruct;
 class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
-    protected static $auto_increment_field = array('id');
-    protected static $primary_keys         = array('id');
+    protected static $auto_increment_field = [ 'id' ];
+    protected static $primary_keys         = [ 'id' ];
 
     protected static $_sql_project_data = "
             SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject,
@@ -62,19 +62,15 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return Projects_ProjectStruct
      */
-    public function updateField( $project, $field, $value ) {
+    public function updateField( Projects_ProjectStruct $project, $field, $value ) {
 
-        $sql = "UPDATE projects SET {$field} = :value WHERE id = :id ";
+        $data           = [];
+        $data[ $field ] = $value;
+        $where          = [ "id" => $project->id ];
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $success = self::updateFields( $data, $where );
 
-        $success = $stmt->execute( array(
-            'value' => $value,
-            'id' => $project->id
-        ));
-
-        if( $success ){
+        if ( $success ) {
             $project->$field = $value;
         }
 
@@ -89,20 +85,24 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @return Projects_ProjectStruct
      * @internal param $pid
      */
-    public function changePassword( Projects_ProjectStruct $project, $newPass ){
+    public function changePassword( Projects_ProjectStruct $project, $newPass ) {
         $res = $this->updateField( $project, 'password', $newPass );
         $this->destroyCacheById( $project->id );
+
         return $res;
     }
 
-    public function deleteFailedProject( $idProject ){
+    public function deleteFailedProject( $idProject ) {
 
-        if( empty( $idProject ) ) return 0;
+        if ( empty( $idProject ) ) {
+            return 0;
+        }
 
-        $sql = "DELETE FROM projects WHERE id = :id_project";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+        $sql     = "DELETE FROM projects WHERE id = :id_project";
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( $sql );
         $success = $stmt->execute( [ 'id_project' => $idProject ] );
+
         return $stmt->rowCount();
 
     }
@@ -112,16 +112,18 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * This update can easily become massive in case of long lived teams.
      * TODO: make this update chunked.
      *
+     * @param TeamStruct       $team
      * @param Users_UserStruct $user
+     *
      * @return int
      */
-    public function unassignProjects( TeamStruct $team, Users_UserStruct $user) {
+    public function unassignProjects( TeamStruct $team, Users_UserStruct $user ) {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( static::$_sql_for_project_unassignment ) ;
+        $stmt = $conn->prepare( static::$_sql_for_project_unassignment );
         $stmt->execute( [
                 'id_assignee' => $user->uid,
                 'id_team'     => $team->id
-        ] ) ;
+        ] );
 
         return $stmt->rowCount();
     }
@@ -133,9 +135,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return int
      */
-    public function massiveSelfAssignment( TeamStruct $team, Users_UserStruct $user, TeamStruct $personalTeam ){
+    public function massiveSelfAssignment( TeamStruct $team, Users_UserStruct $user, TeamStruct $personalTeam ) {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( static::$_sql_massive_self_assignment ) ;
+        $stmt = $conn->prepare( static::$_sql_massive_self_assignment );
         $stmt->execute( [
                 'id_assignee'   => $user->uid,
                 'id_team'       => $team->id,
@@ -151,10 +153,11 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function findByTeamId( $id_team, $ttl = 0 ){
+    public static function findByTeamId( $id_team, $ttl = 0 ) {
         $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( self::$_sql_get_projects_for_team );
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( self::$_sql_get_projects_for_team );
+
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_team' => $id_team ] );
     }
 
@@ -166,13 +169,14 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      */
     public static function findByJobId( $id_job, $ttl = 0 ) {
         $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $sql = "SELECT projects.* FROM projects " .
-            " INNER JOIN jobs ON projects.id = jobs.id_project " .
-            " WHERE jobs.id = :id_job " .
-            " LIMIT 1 " ;
-        $stmt = $conn->prepare( $sql );
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[0];
+        $conn    = Database::obtain()->getConnection();
+        $sql     = "SELECT projects.* FROM projects " .
+                " INNER JOIN jobs ON projects.id = jobs.id_project " .
+                " WHERE jobs.id = :id_job " .
+                " LIMIT 1 ";
+        $stmt    = $conn->prepare( $sql );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[ 0 ];
     }
 
     /**
@@ -181,14 +185,15 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @return Projects_ProjectStruct[]
      */
 
-    static function findByIdCustomer($id_customer) {
+    static function findByIdCustomer( $id_customer ) {
         $conn = Database::obtain()->getConnection();
-        $sql = "SELECT projects.* FROM projects " .
+        $sql  = "SELECT projects.* FROM projects " .
                 " WHERE id_customer = :id_customer ";
 
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( array('id_customer' => $id_customer ) );
+        $stmt->execute( [ 'id_customer' => $id_customer ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Projects_ProjectStruct' );
+
         return $stmt->fetchAll();
     }
 
@@ -201,16 +206,18 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     public static function findById( $id, $ttl = 0 ) {
 
         $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
+
         return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
 
     }
 
-    public static function destroyCacheById( $id ){
+    public static function destroyCacheById( $id ) {
         $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
+
         return $thisDao->_destroyObjectCache( $stmt, [ 'id' => $id ] );
     }
 
@@ -220,10 +227,13 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @return Projects_ProjectStruct[]|DataAccess_IDaoStruct[]|[]
      */
     public function getByIdList( array $id_list ) {
-        if( empty( $id_list ) ) return [];
+        if ( empty( $id_list ) ) {
+            return [];
+        }
         $qMarks = str_repeat( '?,', count( $id_list ) - 1 ) . '?';
         $conn   = Database::obtain()->getConnection();
         $stmt   = $conn->prepare( " SELECT * FROM projects WHERE id IN( $qMarks ) ORDER BY projects.id DESC" );
+
         return $this->_fetchObject( $stmt, new Projects_ProjectStruct(), $id_list );
     }
 
@@ -239,8 +249,8 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     static function findByIdAndPassword( $id, $password, $ttl = 0 ) {
 
         $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = :id AND password = :password " );
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( "SELECT * FROM projects WHERE id = :id AND password = :password " );
         $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id, 'password' => $password ] )[ 0 ];
 
         if ( !$fetched ) {
@@ -256,13 +266,14 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return Chunks_ChunkStruct[]
      *
+     * @throws Exception
      */
-    static function uncompletedChunksByProjectId( $id_project, $params=array() ) {
-        $params = Utils::ensure_keys($params, array('is_review'));
-        $is_review = $params['is_review'] || false;
+    static function uncompletedChunksByProjectId( $id_project, $params = [] ) {
+        $params    = Utils::ensure_keys( $params, [ 'is_review' ] );
+        $is_review = $params[ 'is_review' ] || false;
 
         $sql = " SELECT jobs.* FROM jobs INNER join ( " .
-            " SELECT j.id, j.password from jobs j
+                " SELECT j.id, j.password from jobs j
                 LEFT JOIN chunk_completion_events events
                 ON events.id_job = j.id and events.password = j.password
                 LEFT JOIN chunk_completion_updates updates
@@ -283,12 +294,12 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( array(
-            'is_review' => $is_review,
-            'id_project' => $id_project
-        ) );
+        $stmt->execute( [
+                'is_review'  => $is_review,
+                'id_project' => $id_project
+        ] );
 
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkStruct');
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Chunks_ChunkStruct' );
 
         return $stmt->fetchAll();
 
@@ -297,21 +308,21 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     static function isGDriveProject( $id_project ) {
         $conn = Database::obtain()->getConnection();
 
-        $sql =  "  SELECT count(f.id) "
+        $sql  = "  SELECT count(f.id) "
                 . "  FROM files f "
                 . " INNER JOIN remote_files r "
                 . "    ON f.id = r.id_file "
                 . " WHERE f.id_project = :id_project "
                 . "   AND r.is_original = 1 ";
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( array( 'id_project' => $id_project ) );
+        $stmt->execute( [ 'id_project' => $id_project ] );
         $stmt->setFetchMode( PDO::FETCH_NUM );
 
         $result = $stmt->fetch();
 
         $countFiles = $result[ 0 ];
 
-        if($countFiles > 0) {
+        if ( $countFiles > 0 ) {
             return true;
         }
 
@@ -326,16 +337,16 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      */
     public function getRemoteFileServiceName( $project_ids ) {
 
-        $project_ids = implode(', ', array_map(function($id) {
-            return (int) $id ;
-        }, $project_ids ));
+        $project_ids = implode( ', ', array_map( function ( $id ) {
+            return (int)$id;
+        }, $project_ids ) );
 
         $sql = "SELECT id_project, c.service
           FROM files
           JOIN remote_files on files.id = remote_files.id_file
           JOIN connected_services c on c.id = connected_service_id
           WHERE id_project in ( $project_ids )
-          GROUP BY id_project, c.service " ;
+          GROUP BY id_project, c.service ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -344,35 +355,36 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     }
 
-    protected function _getProjectDataSQLAndValues(  $pid, $project_password = null, $jid = null, $jpassword = null  ){
+    protected function _getProjectDataSQLAndValues( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
         $query = self::$_sql_project_data;
 
-        $and_1 = $and_2 = $and_3 = null;
-        $values = [$pid];
+        $and_1  = $and_2 = $and_3 = null;
+        $values = [ $pid ];
 
         if ( !empty( $project_password ) ) {
-            $and_1 = " and p.password = ? ";
+            $and_1    = " and p.password = ? ";
             $values[] = $project_password;
         }
 
         if ( !empty( $jid ) ) {
-            $and_2 = " and j.id = ? ";
+            $and_2    = " and j.id = ? ";
             $values[] = $jid;
         }
 
         if ( !empty( $jpassword ) ) {
-            $and_3 = " and j.password = ? ";
+            $and_3    = " and j.password = ? ";
             $values[] = $jpassword;
         }
 
         $query = sprintf( $query, $and_1, $and_2, $and_3 );
-        return [$query, $values];
+
+        return [ $query, $values ];
 
     }
 
     /**
-     * @param      $pid
+     * @param             $pid
      * @param string|null $project_password
      * @param string|null $jid
      * @param string|null $jpassword
@@ -381,7 +393,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      */
     public function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
-        list($query, $values) = $this->_getProjectDataSQLAndValues(  $pid, $project_password, $jid, $jpassword  );
+        list( $query, $values ) = $this->_getProjectDataSQLAndValues( $pid, $project_password, $jid, $jpassword );
 
         $stmt = $this->_getStatementForCache( $query );
 
@@ -392,11 +404,81 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     }
 
-    public function destroyCacheForProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ){
-        list($query, $values) = $this->_getProjectDataSQLAndValues(  $pid, $project_password, $jid, $jpassword  );
+    public function destroyCacheForProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
+        list( $query, $values ) = $this->_getProjectDataSQLAndValues( $pid, $project_password, $jid, $jpassword );
 
         $stmt = $this->_getStatementForCache( $query );
+
         return $this->_destroyObjectCache( $stmt, $values );
+
+    }
+
+    public static function updateAnalysisStatus( $project_id, $status, $stWordCount ) {
+
+        $update_project_count = "
+            UPDATE projects
+              SET status_analysis = :status_analysis, 
+                  standard_analysis_wc = :standard_analysis_wc
+            WHERE id = :id
+        ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $update_project_count );
+
+        return $stmt->execute( [
+                'status_analysis'      => $status,
+                'standard_analysis_wc' => $stWordCount,
+                'id'                   => $project_id
+        ] );
+
+    }
+
+    public static function changeProjectStatus( $pid, $status ) {
+        $data                      = [];
+        $data[ 'status_analysis' ] = $status;
+        $where                     = [ "id" => $pid ];
+
+        return self::updateFields( $data, $where );
+    }
+
+    /**
+     * @param int $pid Project Id
+     *
+     * @return array
+     */
+    public static function getProjectAndJobData( $pid ) {
+
+
+        $db = Database::obtain();
+
+        $query = "SELECT projects.id AS pid,
+            projects.name AS pname,
+            projects.password AS ppassword,
+            projects.status_analysis,
+            projects.standard_analysis_wc,
+            projects.fast_analysis_wc,
+            projects.tm_analysis_wc,
+            projects.create_date,
+            jobs.id AS jid,
+            jobs.password AS jpassword,
+            job_first_segment,
+            job_last_segment,
+            CONCAT( jobs.id , '-', jobs.password ) AS jid_jpassword,
+            CONCAT( jobs.source, '|', jobs.target ) AS lang_pair,
+            CONCAT( projects.name, '/', jobs.source, '-', jobs.target, '/', jobs.id , '-', jobs.password ) AS job_url,
+            status_owner
+                FROM jobs
+                JOIN projects ON jobs.id_project = projects.id
+                WHERE projects.id = :pid
+                ORDER BY jid, job_last_segment
+                ";
+
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [ 'pid' => $pid ] );
+
+        return $stmt->fetchAll();
+
 
     }
 

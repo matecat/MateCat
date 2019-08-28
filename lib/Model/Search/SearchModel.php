@@ -14,6 +14,8 @@ use Exception;
 use Log;
 use PDO;
 use PDOException;
+use SubFiltering\Filter;
+use Search_ReplaceHistory;
 use Utils;
 
 class SearchModel {
@@ -28,21 +30,35 @@ class SearchModel {
      */
     protected $db;
 
-    public function __construct( SearchQueryParamsStruct $queryParams ){
+    /**
+     * @var Filter
+     */
+    private $filters;
+
+    /**
+     * SearchModel constructor.
+     *
+     * @param SearchQueryParamsStruct $queryParams
+     *
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
+     */
+    public function __construct( SearchQueryParamsStruct $queryParams, Filter $filters ) {
         $this->queryParams = $queryParams;
         $this->db          = Database::obtain();
+        $this->filters     = $filters;
         $this->_loadParams();
     }
 
     /**
      * @throws Exception
      */
-    public function replaceAll(){
+    public function replaceAll() {
 
-        $sql = $this->_loadReplaceAllQuery();
+        $sql       = $this->_loadReplaceAllQuery();
         $resultSet = $this->_getQuery( $sql );
 
-        $sqlBatch = [];
+        $sqlBatch  = [];
         $sqlValues = [];
         foreach ( $resultSet as $key => $tRow ) {
 
@@ -56,9 +72,9 @@ class SearchModel {
             /**
              * Escape for database
              */
-            $sqlBatch[] = "(?,?,?)";
-            $sqlValues[] = $tRow['id_segment'];
-            $sqlValues[] = $tRow['id_job'];
+            $sqlBatch[]  = "(?,?,?)";
+            $sqlValues[] = $tRow[ 'id_segment' ];
+            $sqlValues[] = $tRow[ 'id_job' ];
             $sqlValues[] = $trMod;
 
         }
@@ -67,7 +83,7 @@ class SearchModel {
         //but we can assume that max translation length is more or less 2.5KB
         // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
         // 300KB is a very low number compared to 16MB
-        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
+        $sqlBatchChunk  = array_chunk( $sqlBatch, 100 );
         $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
 
         foreach ( $sqlBatchChunk as $k => $batch ) {
@@ -86,7 +102,7 @@ class SearchModel {
 
                 $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
 
-            } catch ( Exception $e ){
+            } catch ( Exception $e ) {
 
                 $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
 				- job id            : " . $this->queryParams->job . "
@@ -116,10 +132,10 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    public function search(){
+    public function search() {
 
         $sql = null;
-        switch( $this->queryParams->key ){
+        switch ( $this->queryParams->key ) {
             case 'source':
                 $sql = $this->_loadSearchInSourceQuery();
                 break;
@@ -138,13 +154,14 @@ class SearchModel {
 
         $vector = [ 'sid_list' => [], 'count' => '0' ];
 
-        if ( $this->queryParams->key != 'coupled' && $this->queryParams->key != 'status_only' ) { //there is the ROLLUP
+        if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' ) { //there is the ROLLUP
 
-            $rollup = array_pop( $results );
+            $rollup            = array_pop( $results );
             $vector[ 'count' ] = $rollup[ 'count' ]; //can be null, suppress warning
 
             foreach ( $results as $occurrence ) {
-                $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
+                $vector[ 'sid_list' ][]   = $occurrence[ 'id' ];
+                $vector[ 'stext_list' ][] = $occurrence[ 'text' ];
             }
 
             //there should be empty values because of Sensitive search
@@ -152,9 +169,12 @@ class SearchModel {
             //empty search values removed
             //ROLLUP counter rules!
             if ( $vector[ 'count' ] == 0 ) {
-                $vector[ 'sid_list' ] = [];
-                $vector[ 'count' ]   = 0;
+                $vector[ 'sid_list' ]   = [];
+                $vector[ 'stext_list' ] = [];
+                $vector[ 'count' ]      = 0;
             }
+
+            $vector = $this->_purgeHtmlEntities( $vector );
 
         } else {
 
@@ -165,7 +185,104 @@ class SearchModel {
         }
 
         return $vector;
+    }
 
+    /**
+     * -----------------------------------------------------------------------------------
+     * This method purges html entities from segments found in the research.
+     * -----------------------------------------------------------------------------------
+     *
+     * DOCUMENTATION:
+     *
+     * The purge is done only if some special character (used to encode strings, like '#' or ';') or
+     * if it does not contain any html entity at all.
+     *
+     * Examples:
+     * - search for word quot : the check/purge is needed, because is possible that in DB matches are present some segment containing &quote;
+     * - search for word & (converted and persisted as &amp; in DB): the check/purge is not required, because in this case we don't want to purge segments containing &amp;
+     * - search for word " (converted and persisted as &quot; in DB): the check/purge is not required, because in this  case we don't want to purge segments containing &quot;
+     * - search for word ; the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
+     * - search for word # the check/purge is needed, because in this case we want to purge all entities containing ; (like &#13; for example)
+     *
+     * For more examples see: @SearchModelTest
+     *
+     * @param array $vector
+     *
+     * @return array
+     */
+    private function _purgeHtmlEntities( $vector ) {
+
+        // get the search term (source or target search)
+        $searchTerm                  = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
+        $searchTermHtmlEntitiesCount = count( $this->htmlEntitesMatches( $searchTerm )[ 0 ] );
+        $searchTermArray             = [ ';', '#' ];
+
+        // the purge must be done if the search contains some special character (used to encode strings, like '#' or ';') or
+        // if it does not contain any html entity at all
+        if ( $searchTermHtmlEntitiesCount === 0 || in_array( $searchTerm, $searchTermArray ) ) {
+            foreach ( $vector[ 'stext_list' ] as $key => $item ) {
+
+                $matches                     = $this->htmlEntitesMatches( $item );
+                $searchTermHtmlEntitiesCount = count( $matches[ 0 ] );
+
+                // If the segment($item) does contain at least one html entity
+                if ( $searchTermHtmlEntitiesCount > 0 ) {
+                    // Replace the matches from the segment($item)
+                    $text = str_replace( $matches[ 0 ][ 0 ], '', $item );
+
+                    // Check if in segment there is still the search term after purging
+                    if ( strpos( $text, $searchTerm ) === false ) {
+                        // elements to be purged
+                        unset( $vector[ 'sid_list' ][ $key ] );
+                        unset( $vector[ 'stext_list' ][ $key ] );
+                        $vector[ 'count' ] = $vector[ 'count' ] - $searchTermHtmlEntitiesCount;
+                    } else {
+                        // Here is the case of segments that contains html entites and the $searchTerm
+                        //
+                        // So in these remaining segments
+                        // update the vector's count
+                        // by looping the entites matches
+                        // and decrease the count one by one
+                        // if there's a match against the search term
+                        //
+                        // Example:
+                        //
+                        // If the $searchTerm = 'Hello'
+                        // I don't want that the vector count is decreased
+                        //
+                        // Otherwise, if the search term is ; I want to
+                        // decrease the vector count for every html entity match
+                        //
+                        foreach ( $matches[ 0 ] as $match ) {
+                            if ( strpos( $match, $searchTerm ) ) {
+                                $vector[ 'count' ] = $vector[ 'count' ] - 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Reset the keys of the array after purging
+        $vector[ 'sid_list' ] = array_values( $vector[ 'sid_list' ] );
+
+        // Unset 'stext_list' because returning it is not useful for search purposes
+        // its only function is to help purging entries
+        unset( $vector[ 'stext_list' ] );
+
+        return $vector;
+    }
+
+    /**
+     * @param $string
+     *
+     * @return array
+     */
+    private function htmlEntitesMatches( $string ) {
+        $reg = '/&(lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,7};)/';
+        preg_match_all( $reg, $string, $matches );
+
+        return $matches;
     }
 
     /**
@@ -174,7 +291,7 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    protected function _getQuery( $sql ){
+    protected function _getQuery( $sql ) {
 
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
@@ -195,7 +312,7 @@ class SearchModel {
      * @return mixed
      * @throws Exception
      */
-    protected function _insertQuery( $sql , $data ){
+    protected function _insertQuery( $sql, $data ) {
 
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
@@ -211,12 +328,12 @@ class SearchModel {
 
     /**
      * Pay attention to possible SQL injection
-     *
      */
-    protected function _loadParams(){
+    protected function _loadParams() {
 
-        $this->queryParams->source = $this->db->escape( $this->queryParams->src );
-        $this->queryParams->target = $this->db->escape( $this->queryParams->trg );
+        // bring the src and target from layer 2 (UI) to layer 0 (DB)
+        $this->queryParams->source = $this->filters->fromLayer2ToLayer0( $this->queryParams->src );
+        $this->queryParams->target = $this->filters->fromLayer2ToLayer0( $this->queryParams->trg );
 
         $this->queryParams->where_status = "";
         if ( $this->queryParams->status != 'all' ) {
@@ -251,18 +368,24 @@ class SearchModel {
          * Escape Meta-characters to use in regular expression ( LIKE STATEMENT is treated inside MySQL as a Regexp pattern )
          *
          */
-        $this->queryParams->_regexpNotEscapedSrc = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->src );
+        $this->queryParams->_regexpNotEscapedSrc = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->source );
         $this->queryParams->regexpEscapedSrc     = $this->db->escape( $this->queryParams->_regexpNotEscapedSrc );
 
-        $this->queryParams->_regexpEscapedTrg = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->trg );
+        $this->queryParams->_regexpEscapedTrg = preg_replace( '#([\#\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $this->queryParams->target );
         $this->queryParams->regexpEscapedTrg  = $this->db->escape( $this->queryParams->_regexpEscapedTrg );
 
     }
 
-    protected function _loadSearchInTargetQuery(){
+    /**
+     * @return string
+     */
+    protected function _loadSearchInTargetQuery() {
+
+        $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
+        $ste_where = $this->_SteWhere();
 
         $query = "
-        SELECT  st.id_segment as id, sum(
+        SELECT  st.id_segment as id, st.translation as text, sum(
 			ROUND (
 					( LENGTH( st.translation ) - LENGTH( 
                         REPLACE ( 
@@ -272,7 +395,9 @@ class SearchModel {
 					) ) / LENGTH('{$this->queryParams->target}') )
 			) AS count
 			FROM segment_translations st
+			$ste_join
 			WHERE st.id_job = {$this->queryParams->job}
+		
 		    AND st.translation REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
 			AND st.status != 'NEW'
@@ -285,6 +410,7 @@ class SearchModel {
                             ) ) 
                         ) / LENGTH('{$this->queryParams->target}') 
 			) > 0
+			$ste_where
 			GROUP BY st.id_segment WITH ROLLUP
 		";
 
@@ -292,10 +418,16 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchInSourceQuery(){
+    /**
+     * @return string
+     */
+    protected function _loadSearchInSourceQuery() {
+
+        $ste_join  = $this->_SteJoinInSegments();
+        $ste_where = $this->_SteWhere();
 
         $query = "
-        SELECT s.id, sum(
+        SELECT s.id, s.segment as text, sum(
 			ROUND (
 					( LENGTH( s.segment ) - LENGTH( 
                         REPLACE ( 
@@ -307,7 +439,9 @@ class SearchModel {
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
+            $ste_join
 			WHERE fj.id_job = {$this->queryParams->job}
+			$ste_where
 		    AND s.segment 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
@@ -319,12 +453,19 @@ class SearchModel {
 
     }
 
-    protected function _loadSearchCoupledQuery(){
+    /**
+     * @return string
+     */
+    protected function _loadSearchCoupledQuery() {
+
+        $ste_join  = $this->_SteJoinInSegments();
+        $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT st.id_segment as id
 			FROM segment_translations as st
 			JOIN segments as s on id = id_segment
+			$ste_join
 			WHERE st.id_job = {$this->queryParams->job}
 		    AND st.translation 
 		        REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
@@ -348,18 +489,24 @@ class SearchModel {
 			) != LENGTH( st.translation )
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
+			$ste_where
 		";
 
         return $query;
 
     }
 
-    protected function _loadSearchStatusOnlyQuery(){
+    protected function _loadSearchStatusOnlyQuery() {
+
+        $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
+        $ste_where = $this->_SteWhere();
 
         $query = "
         SELECT st.id_segment as id
 			FROM segment_translations as st
+			$ste_join
 			WHERE st.id_job = {$this->queryParams->job}
+			$ste_where
 		    {$this->queryParams->where_status}
 		";
 
@@ -367,13 +514,19 @@ class SearchModel {
 
     }
 
-    protected function _loadReplaceAllQuery(){
+    public function _loadReplaceAllQuery() {
+
+        $ste_join  = $this->_SteJoinInSegments();
+        $ste_where = $this->_SteWhere();
 
         $sql = "
-        SELECT id_segment, id_job, translation
+        SELECT st.id_segment, st.id_job, st.translation, st.status
             FROM segment_translations st
             JOIN jobs ON st.id_job = jobs.id AND password = '{$this->queryParams->password}' AND jobs.id = {$this->queryParams->job}
             JOIN segments as s ON st.id_segment = s.id 
+
+            $ste_join
+
             WHERE id_job = {$this->queryParams->job}
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
             AND st.status != 'NEW'
@@ -381,6 +534,9 @@ class SearchModel {
             	REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
 		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
             {$this->queryParams->where_status}
+
+            $ste_where
+
         ";
 
         if ( !empty( $this->queryParams->regexpEscapedSrc ) ) {
@@ -389,7 +545,58 @@ class SearchModel {
         }
 
         return $sql;
+    }
 
+    /**
+     * Sometimes queries make use of s alias or segments, sometimes they make use of st for segment_translations.
+     *
+     * @param string $joined_field
+     *
+     * @return string
+     */
+    protected function _SteJoinInSegments( $joined_field = 's.id' ) {
+        if ( !$this->queryParams->sourcePage ) {
+            return '';
+        }
+
+        return "
+            LEFT JOIN (
+                SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
+                SELECT max(id) FROM segment_translation_events
+                    WHERE id_job = {$this->queryParams->job}
+                    GROUP BY id_segment ) ORDER BY id_segment
+            ) ste ON ste.ste_id_segment = $joined_field ";
+    }
+
+    /**
+     * @return string
+     */
+    protected function _SteWhere() {
+        if ( !$this->queryParams->sourcePage ) {
+            return '';
+        }
+
+        /**
+         * This variable $first_revision_source_code is necessary because in case of first revision
+         * segment_translations_events may not have records
+         * for APPROVED segments ( in case of ICE match ). While in second pass reviews or later this should not happen.
+         */
+        $first_revision_source_code = \Constants::SOURCE_PAGE_REVISION;
+
+        return " AND ( ste.source_page = {$this->queryParams->sourcePage}
+                    OR ( {$this->queryParams->sourcePage} = $first_revision_source_code AND ste.source_page = null )
+               ) ";
+    }
+
+    public function loadReplaceQueryFromIds( $ids ) {
+        $ids = implode( ',', $ids );
+        $sql = "
+        SELECT st.id_segment, st.id_job, st.translation, st.status
+            FROM segment_translations st
+            WHERE id_segment IN ('{$ids}')
+        ";
+
+        return $sql;
     }
 
 }

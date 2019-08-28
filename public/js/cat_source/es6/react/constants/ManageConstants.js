@@ -16,6 +16,7 @@ module.exports = keyMirror({
     HIDE_PROJECT: null,
     ASSIGN_TRANSLATOR: null,
     SHOW_RELOAD_SPINNER: null,
+    ADD_SECOND_PASS: null,
     //MODALS
     OPEN_CREATE_TEAM_MODAL: null,
     OPEN_MODIFY_TEAM_MODAL: null,

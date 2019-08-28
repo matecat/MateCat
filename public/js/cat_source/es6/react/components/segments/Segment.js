@@ -18,7 +18,13 @@ class Segment extends React.Component {
 
     constructor(props) {
         super(props);
-
+        this.segmentStatus = {
+            approved: 'APPROVED',
+            translated : 'TRANSLATED',
+            draft: 'DRAFT',
+            new: 'NEW',
+            rejected: 'REJECTED'
+        };
         this.reviewExtendedFooter = 'extended-footer';
 
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
@@ -31,7 +37,7 @@ class Segment extends React.Component {
         this.handleChangeBulk = this.handleChangeBulk.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
-
+        this.secondPassLocked = ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number === 2 && config.revisionNumber !== 2);
         this.state = {
             segment_classes : [],
             modified: false,
@@ -56,7 +62,7 @@ class Segment extends React.Component {
             classes.push('readonly');
         }
 
-        if ( this.props.segment.ice_locked === "1" && !readonly) {
+        if ( (this.props.segment.ice_locked === "1" && !readonly) || this.secondPassLocked) {
             if (this.props.segment.unlocked) {
                 classes.push('ice-unlocked');
             } else {
@@ -65,8 +71,8 @@ class Segment extends React.Component {
             }
         }
 
-        if ( this.state.status ) {
-            classes.push( 'status-' + this.state.status.toLowerCase() );
+        if ( this.props.segment.status ) {
+            classes.push( 'status-' + this.props.segment.status.toLowerCase() );
         }
         else {
             classes.push('status-new');
@@ -95,6 +101,9 @@ class Segment extends React.Component {
         }
         if ( this.props.segment.muted ) {
             classes.push( 'muted' );
+        }
+        if ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number ) {
+            classes.push( 'approved-step-'+ this.props.segment.revision_number);
         }
         return classes;
     }
@@ -238,6 +247,16 @@ class Segment extends React.Component {
     lockUnlockSegment(event) {
         event.preventDefault();
         event.stopPropagation();
+        if ( !this.props.segment.unlocked && config.revisionNumber !== 2 && this.props.segment.revision_number === 2) {
+            var props = {
+                text: "You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.",
+                successText: "Ok",
+                successCallback: function() {
+                    APP.ModalWindow.onCloseModal();
+                }
+            };
+            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Modify locked and approved segment ");
+        }
         SegmentActions.setSegmentLocked( this.props.segment, this.props.fid, !this.props.segment.unlocked );
     }
 
@@ -264,7 +283,7 @@ class Segment extends React.Component {
     }
 
     openRevisionPanel(data) {
-        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) ) {
+        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) && !(this.props.segment.ice_locked == 1 &&  !this.props.segment.unlocked) ) {
             this.setState( {
                 showRevisionPanel: true,
                 showTranslationIssues: false,
@@ -356,7 +375,9 @@ class Segment extends React.Component {
         let job_marker = "";
         let timeToEdit = "";
 
-        let readonly = this.state.readonly;
+        let readonly = this.state.readonly ;
+        let showLockIcon = this.props.segment.ice_locked === '1' ||
+            this.secondPassLocked;
         let segment_classes = this.checkSegmentClasses();
         let split_group = this.props.segment.split_group || [];
         let autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
@@ -398,7 +419,7 @@ class Segment extends React.Component {
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
 
-                    {this.props.segment.ice_locked === '1' ? (
+                    {showLockIcon ? (
                         !readonly ? (
                             this.props.segment.unlocked ? (
                                 <div className="ice-locked-icon"
@@ -446,8 +467,9 @@ class Segment extends React.Component {
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
-                        locked={!this.props.segment.unlocked && this.props.segment.ice_locked === '1'}
+                        locked={!this.props.segment.unlocked && (this.props.segment.ice_locked === '1' || this.secondPassLocked) }
                         removeSelection={this.removeSelection.bind(this)}
+                        reviewType={this.props.reviewType}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

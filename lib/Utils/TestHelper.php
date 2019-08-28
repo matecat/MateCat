@@ -25,7 +25,7 @@ class TestHelper {
     }
 
     static function resetDb() {
-        TestHelper::$SCHEMA_HELPER->truncateAllTables();
+        TestHelper::$SCHEMA_HELPER->resetAllTables();
         TestHelper::$FIXTURES->loadFixtures();
     }
 

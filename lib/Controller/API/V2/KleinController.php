@@ -217,6 +217,7 @@ abstract class KleinController implements IController {
             $validator->validate();
         }
         $this->validators = [];
+        $this->afterValidate();
     }
 
     protected function appendValidator( Base $validator ){
@@ -264,6 +265,10 @@ abstract class KleinController implements IController {
         }
 
         $this->logPageCall();
+
+    }
+
+    protected function afterValidate() {
 
     }
 

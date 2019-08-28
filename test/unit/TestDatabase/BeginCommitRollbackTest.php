@@ -18,6 +18,10 @@ class BeginCommitRollbackTest extends AbstractTest
      * @var Database
      */
     protected $alfa_instance;
+
+    /**
+     * @var PDO
+     */
     protected $beta_connection;
     protected $sql_create;
     protected $sql_read;
@@ -56,13 +60,13 @@ class BeginCommitRollbackTest extends AbstractTest
         $this->sql_read = "SELECT * FROM Persons";
         $this->sql_insert_second_value = "INSERT INTO Persons VALUES (900341)";
 
-        $this->alfa_instance->query($this->sql_create);
+        $this->alfa_instance->getConnection()->query($this->sql_create);
     }
 
     public function tearDown()
     {
 
-        $this->alfa_instance->query($this->sql_drop);
+        $this->alfa_instance->getConnection()->query($this->sql_drop);
         $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
@@ -80,16 +84,16 @@ class BeginCommitRollbackTest extends AbstractTest
     {
 
 
-        $this->alfa_instance->query($this->sql_insert_first_value);
+        $this->alfa_instance->getConnection()->query($this->sql_insert_first_value);
 
-        $alfa_view_before_begin_state = $this->alfa_instance->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
+        $alfa_view_before_begin_state = $this->alfa_instance->getConnection()->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $beta_view_before_begin_state = $this->beta_connection->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $this->alfa_instance->begin();
-        $this->alfa_instance->query($this->sql_insert_second_value);
+        $this->alfa_instance->getConnection()->query($this->sql_insert_second_value);
 
-        $alfa_view_after_begin_state = $this->alfa_instance->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
+        $alfa_view_after_begin_state = $this->alfa_instance->getConnection()->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $beta_view_after_begin_state = $this->beta_connection->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -108,12 +112,12 @@ class BeginCommitRollbackTest extends AbstractTest
     public function test_commit()
     {
 
-        $this->alfa_instance->query($this->sql_insert_first_value);
+        $this->alfa_instance->getConnection()->query($this->sql_insert_first_value);
 
         $this->alfa_instance->begin();
-        $this->alfa_instance->query($this->sql_insert_second_value);
+        $this->alfa_instance->getConnection()->query($this->sql_insert_second_value);
 
-        $alfa_view_before_commit_state = $this->alfa_instance->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
+        $alfa_view_before_commit_state = $this->alfa_instance->getConnection()->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $beta_view_before_commit_state = $this->beta_connection->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -121,7 +125,7 @@ class BeginCommitRollbackTest extends AbstractTest
         $this->alfa_instance->commit();
 
 
-        $alfa_view_after_commit_state = $this->alfa_instance->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
+        $alfa_view_after_commit_state = $this->alfa_instance->getConnection()->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $beta_view_after_commit_state = $this->beta_connection->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -139,14 +143,14 @@ class BeginCommitRollbackTest extends AbstractTest
     public function test_rollback()
     {
 
-        $this->alfa_instance->query($this->sql_insert_first_value);
+        $this->alfa_instance->getConnection()->query($this->sql_insert_first_value);
 
-        $alfa_view_origin_state = $this->alfa_instance->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
+        $alfa_view_origin_state = $this->alfa_instance->getConnection()->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $this->alfa_instance->begin();
-        $this->alfa_instance->query($this->sql_insert_second_value);
+        $this->alfa_instance->getConnection()->query($this->sql_insert_second_value);
 
-        $alfa_view_before_rollback_state = $this->alfa_instance->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
+        $alfa_view_before_rollback_state = $this->alfa_instance->getConnection()->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $beta_view_before_rollback_state = $this->beta_connection->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
@@ -154,7 +158,7 @@ class BeginCommitRollbackTest extends AbstractTest
         $this->alfa_instance->rollback();
 
 
-        $alfa_view_after_rollback_state = $this->alfa_instance->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
+        $alfa_view_after_rollback_state = $this->alfa_instance->getConnection()->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $beta_view_after_rollback_state = $this->beta_connection->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 

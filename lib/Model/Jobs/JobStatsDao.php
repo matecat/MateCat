@@ -19,7 +19,7 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
      * @return PeeJobStatsStruct[]|null
      */
     public function readBySource( $source ){
-        $con = $this->con->getConnection();
+        $con = $this->database->getConnection();
         $stmt = $con->prepare("
                       SELECT
                         fuzzy_band,
@@ -52,7 +52,7 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
      * @return PeeJobStatsStruct[]|null
      */
     public function readByFuzzyBand ( $fuzzy_band ){
-        $con = $this->con->getConnection();
+        $con = $this->database->getConnection();
         $stmt = $con->prepare("
                       SELECT
                       fuzzy_band,
@@ -91,7 +91,7 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
      * @return PeeJobStatsStruct[]|null
      */
     public function readBySourceAndFuzzyBand( $source, $fuzzy_band ){
-        $con = $this->con->getConnection();
+        $con = $this->database->getConnection();
         $stmt = $con->prepare("
                       SELECT
                       fuzzy_band,
@@ -140,7 +140,7 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
                        total_time_to_edit = VALUES (total_time_to_edit),
                        total_raw_wc       = VALUES (total_raw_wc)";
 
-        $con = $this->con->getConnection();
+        $con = $this->database->getConnection();
 
         $stmt = $con->prepare( $query );
 

@@ -56,8 +56,8 @@ class CopySourceModal extends React.Component {
                 <div className="notes-action"><b>Note</b>: This action cannot be undone.</div>
             </div>
             <div className="boxed">
-                <input type="checkbox" className="dont_show" ref={(checkbox)=>this.checkbox=checkbox}/>
-                    <label> Don't show this dialog again for the current job</label>
+                <input id="copy_s2t_dont_show" type="checkbox" className="dont_show" ref={(checkbox)=>this.checkbox=checkbox}/>
+                    <label for="copy_s2t_dont_show"> Don't show this dialog again for the current job</label>
             </div>
         </div>;
     }

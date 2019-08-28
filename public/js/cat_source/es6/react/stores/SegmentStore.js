@@ -228,6 +228,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     setStatus(sid, fid, status) {
         var index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'status'], status);
+        this._segments[fid] = this._segments[fid].setIn([index, 'revision_number'], config.revisionNumber);
     },
 
     setSuggestionMatch(sid, fid, perc) {
@@ -468,7 +469,8 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_SEGMENT_STATUS:
             SegmentStore.setStatus(action.id, action.fid, action.status);
-            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
+            // SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.UPDATE_ALL_SEGMENTS:
             SegmentStore.emitChange(SegmentConstants.UPDATE_ALL_SEGMENTS);

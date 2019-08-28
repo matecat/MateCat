@@ -203,8 +203,19 @@ class Routes {
      */
     public static function revise( $project_name, $id_job, $password, $source, $target, $options = [] ) {
         $host = self::httpHost( $options );
+        $revise = 'revise' ;
 
-        return "$host/revise/$project_name/$source-$target/$id_job-$password";
+        if ( isset( $options['revision_number']) && $options['revision_number'] > 1 ) {
+            $revise .= $options['revision_number'] ;
+        }
+
+        $url = "$host/$revise/$project_name/$source-$target/$id_job-$password" ;
+
+        if ( isset( $options['id_segment']) ) {
+            $url .= '#' . $options['id_segment'] ;
+        }
+
+        return $url ;
     }
 
     /**

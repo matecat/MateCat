@@ -1,8 +1,7 @@
 <?php
 
 use SubFiltering\Filter;
-
-include_once INIT::$MODEL_ROOT . "/queries.php";
+use TMSService\TMSServiceDao;
 
 class TMSService {
 
@@ -463,18 +462,18 @@ class TMSService {
         switch ( $this->output_type ) {
 
             case 'translation':
-                $result = getTranslationsForTMXExport( $jid, $jPassword );
+                $result = TMSServiceDao::getTranslationsForTMXExport( $jid, $jPassword );
                 break;
             case 'mt' :
                 $hideUnconfirmedRows = false;
-                $result = getMTForTMXExport( $jid, $jPassword );
+                $result = TMSServiceDao::getMTForTMXExport( $jid, $jPassword );
                 break;
             case 'tm' :
                 $hideUnconfirmedRows = false;
-                $result = getTMForTMXExport( $jid, $jPassword );
+                $result = TMSServiceDao::getTMForTMXExport( $jid, $jPassword );
                 break;
             default:
-                $result = getTranslationsForTMXExport( $jid, $jPassword );
+                $result = TMSServiceDao::getTranslationsForTMXExport( $jid, $jPassword );
                 break;
         }
 
@@ -581,7 +580,7 @@ class TMSService {
 
         $tmpFile->fputcsv( $csv_fields );
 
-        $result = getTranslationsForTMXExport( $jid, $jPassword );
+        $result = TMSServiceDao::getTranslationsForTMXExport( $jid, $jPassword );
 
         foreach ( $result as $k => $row ) {
 

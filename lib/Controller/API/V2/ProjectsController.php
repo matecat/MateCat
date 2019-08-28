@@ -5,6 +5,9 @@ namespace API\V2;
 use API\V2\Json\Project;
 use API\V2\Json\ProjectAnonymous;
 use API\V2\Validators\ProjectPasswordValidator;
+use Jobs_JobDao;
+use Translations_SegmentTranslationDao;
+use Utils;
 
 /**
  * This controller can be called as Anonymous, but only if you already know the id and the password
@@ -97,7 +100,13 @@ class ProjectsController extends KleinController {
 
     private function changeStatus($status){
 
-        updateJobsStatus( "prj", $this->project->id, $status );
+        $chunks = $this->project->getJobs();
+        Jobs_JobDao::updateAllJobsStatusesByProjectId( $this->project->id, $status );
+        foreach( $chunks as $chunk ){
+            $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
+            Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+        }
+
         $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );
 
     }

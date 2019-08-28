@@ -2,6 +2,7 @@
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
+use Translations\WarningDao;
 
 class getWarningController extends ajaxController {
 
@@ -139,8 +140,8 @@ class getWarningController extends ajaxController {
         $this->result[ 'token' ] = $this->__postInput->token;
 
         try {
-            $result = getWarning( $this->__postInput->id_job, $this->__postInput->password );
-            $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
+            $result = WarningDao::getWarningsByJobIdAndPassword( $this->__postInput->id_job, $this->__postInput->password );
+            $tMismatch = ( new Segments_SegmentDao() )->getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
         } catch ( Exception $e ) {
             $this->result[ 'details' ]                = array();
             $this->result[ 'translation_mismatches' ] = array( 'total' => 0, 'mine' => 0, 'list_in_my_job' => array() );

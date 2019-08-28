@@ -557,7 +557,7 @@ class Xliff_Parser {
             $regexp = "|<{$tagName}[^>]*?>(.*?)</{$tagName}>|si";
 
             preg_match( $regexp, $domString, $temp );
-            $TagList[] = $temp[ 1 ];
+            $TagList[ $parentNodeName ] = $temp[ 1 ];
 
             libxml_clear_errors();
 
@@ -599,7 +599,7 @@ class Xliff_Parser {
 
                 }
 
-                $TagList[] = [
+                $TagList[ $_tag->parentNode->nodeName ] = [
                         'content' => $_tmpTag,
                         'attr'    => $_tagAttributes
                 ];
@@ -613,9 +613,9 @@ class Xliff_Parser {
         }
 
         if ( $asList ) {
-            return $TagList;
+            return array_values( $TagList );
         } else {
-            return $TagList[ 0 ];
+            return $TagList[ $parentNodeName ];
         }
 
     }

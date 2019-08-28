@@ -102,7 +102,8 @@ let SearchUtils = {
                     status: this.searchParams.status,
                     matchcase: this.searchParams['match-case'],
                     exactmatch: this.searchParams['exact-match'],
-                    replace: replace
+                    replace: replace,
+                    revision_number: config.revisionNumber
                 },
                 success: function(d) {
                     SearchUtils.execFind_success(d);
@@ -249,7 +250,8 @@ let SearchUtils = {
                 status: p.status,
                 matchcase: p['match-case'],
                 exactmatch: p['exact-match'],
-                replace: replace
+                replace: replace,
+                revision_number: config.revisionNumber
             },
             success: function(d) {
                 if(d.errors.length) {
@@ -321,7 +323,7 @@ let SearchUtils = {
                     $(this).replaceWith(a);
                 });
             } else {
-                if ( seg.length > 0 ) {
+                if ( seg && seg.length > 0 ) {
                     var sid = parseInt(UI.getSegmentId(seg));
                     if (where == 'before') {
                         $('section').each(function() {
@@ -479,10 +481,12 @@ let SearchUtils = {
                         spanArray.push(text);
                         return "$&";
                     });
+                    // tt = htmlDecode(tt);
                     tt = tt.replace(regex, '<mark class="' + searchMarker + '">$1</mark>');
                     tt = tt.replace(/(\$&)/g, function ( match, text ) {
                         return spanArray.shift();
                     });
+                    // tt = htmlEncode(tt);
                     $(this).html(tt);
                     //Temp fix for tags with equiv text
                     $(this).find('.tag-html-container-open').each(function (  ) {

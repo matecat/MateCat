@@ -11,6 +11,7 @@ use CommandLineTasks\DumpSchemaTask;
 use CommandLineTasks\Outsource\AirbnbOutsourceToHTS;
 use CommandLineTasks\Outsource\MicrosoftOutsourceToHTS;
 use CommandLineTasks\OwnerFeatures\AssignFeatureTask;
+use CommandLineTasks\SecondPassReview\FixChunkReviewRecordCounts;
 use CommandLineTasks\Test\PrepareDatabaseTask;
 use Features\Dqf\Task\DqfAttributesDumpTask;
 use Symfony\Component\Console\Application;
@@ -25,6 +26,7 @@ $app->add( new DumpSchemaTask() ) ;
 $app->add( new DqfAttributesDumpTask() ) ;
 $app->add( new MicrosoftOutsourceToHTS() ) ;
 $app->add( new AirbnbOutsourceToHTS() ) ;
+$app->add( new FixChunkReviewRecordCounts() ) ;
 
 $app->run();
 

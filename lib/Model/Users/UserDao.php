@@ -72,7 +72,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct
      */
     public function getByConfirmationToken( $token ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE confirmation_token = ?");
         $stmt->execute( array($token )) ;
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users_UserStruct');
@@ -80,7 +80,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     public function createUser( Users_UserStruct $obj ){
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
         \Database::obtain()->begin();
 
         $obj->create_date = date('Y-m-d H:i:s');
@@ -145,7 +145,8 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $stmt = $this->_getStatementForCache( self::$_query_user_by_email );
         $UserQuery = new Users_UserStruct();
         $UserQuery->email = $email;
-        return $this->_fetchObject( $stmt,
+
+        return @$this->_fetchObject( $stmt,
                 $UserQuery,
                 [ 'email' => $UserQuery->email ]
         )[ 0 ];
@@ -177,6 +178,17 @@ class Users_UserDao extends DataAccess_AbstractDao {
      */
     public function read( DataAccess_IDaoStruct $UserQuery ) {
 
+        list( $query, $where_parameters ) = $this->_buildReadQuery( $UserQuery );
+        $stmt = $this->_getStatementForCache( $query );
+
+        return $this->_fetchObject( $stmt,
+                $UserQuery,
+                $where_parameters
+        );
+
+    }
+
+    protected function _buildReadQuery( DataAccess_IDaoStruct $UserQuery ){
         $UserQuery = $this->sanitize( $UserQuery );
 
         $where_conditions = array();
@@ -205,24 +217,9 @@ class Users_UserDao extends DataAccess_AbstractDao {
             throw new Exception( "Where condition needed." );
         }
 
-        $query = sprintf( $query, $where_string );
-        $stmt = $this->_getStatementForCache( $query );
-
-        return $this->_fetchObject( $stmt,
-                $UserQuery,
-                $where_parameters
-        );
+        return [ sprintf( $query, $where_string ), $where_parameters ];
 
     }
-
-    protected function _getStatementForCache( $query ) {
-
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $query );
-
-        return $stmt;
-    }
-
 
     /***
      * @param $job_id
@@ -256,7 +253,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct[]
      */
     public function getByEmails( $email_list ) {
-        $conn = $this->con->getConnection();
+        $conn = $this->database->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE email IN ( " . str_repeat( '?,', count( $email_list ) - 1) . '?' . " ) ");
         $stmt->execute( $email_list ) ;
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\Users_UserStruct' );

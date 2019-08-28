@@ -1,5 +1,9 @@
 <?php
 
+use Features\SecondPassReview\Utils as SecondPassReviewUtils;
+use Features\TranslationVersions\Model\BatchEventCreator;
+use Features\TranslationVersions\Model\SegmentTranslationEventModel;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -12,26 +16,31 @@ class copyAllSource2TargetController extends ajaxController {
     private $pass;
 
     private static $errorMap;
+    private        $revisionNumber;
 
     protected function __construct() {
         parent::__construct();
 
         $this->setErrorMap();
 
-        $filterArgs = array(
-                'id_job' => array(
+        $filterArgs = [
+                'id_job'          => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
-                ),
-                'pass'   => array(
+                ],
+                'pass'            => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                ],
+                'revision_number' => [
+                        'filter' => FILTER_SANITIZE_NUMBER_INT
+                ],
+        ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job = $postInput[ 'id_job' ];
-        $this->pass   = $postInput[ 'pass' ];
+        $this->id_job         = $postInput[ 'id_job' ];
+        $this->pass           = $postInput[ 'pass' ];
+        $this->revisionNumber = $postInput[ 'revision_number' ];
 
         Log::doJsonLog( "Requested massive copy-source-to-target for job $this->id_job." );
 
@@ -50,14 +59,15 @@ class copyAllSource2TargetController extends ajaxController {
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *
-     * @return mixed
+     * @return mixed|void
+     * @throws ReflectionException
      */
     function doAction() {
         if ( !empty( $this->result[ 'errors' ] ) ) {
             return;
         }
 
-        $job_data = getJobData( $this->id_job, $this->pass );
+        $job_data = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->pass );
 
         if ( empty( $job_data ) ) {
             $errorCode = -3;
@@ -66,129 +76,116 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
-        $first_seg = $job_data[ 'job_first_segment' ];
-        $last_seg  = $job_data[ 'job_last_segment' ];
+        $this->_saveEventsAndUpdateTranslations( $job_data->id );
+    }
 
-        try {
-            $segments = $this->getNewSegments( $first_seg, $last_seg );
-            Log::doJsonLog( "SEGS: " . implode( ",", $segments ) );
+    /**
+     * @param $job_id
+     *
+     * @throws ReflectionException
+     */
+    private function _saveEventsAndUpdateTranslations( $job_id ) {
+        if ( !empty( $this->result[ 'errors' ] ) ) {
+            return;
+        }
 
-            $affected_rows = $this->copySegmentInTranslation( $first_seg, $last_seg );
-        } catch ( Exception $e ) {
-            $errorCode = -4;
+        $job_data = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->pass );
 
-            self::$errorMap[ $errorCode ][ 'internalMessage' ] .= $e->getMessage();
-
+        if ( empty( $job_data ) ) {
+            $errorCode = -3;
             $this->addError( $errorCode );
 
             return;
         }
-        $this->result[ 'data' ] = array(
-                'code'              => 1,
-                'segments_modified' => $affected_rows
-        );
-        Log::doJsonLog( $this->result[ 'data' ] );
-    }
 
+        // BEGIN TRANSACTION
+        $database = Database::obtain();
+        $database->begin();
 
-    /**
-     * Copies the segments.segment field into segment_translations.translation
-     * and sets the segment status to <b>DRAFT</b>.
-     * This operation is made only for the segments in <b>NEW</b> status
-     *
-     * @param $first_seg int
-     * @param $last_seg  int
-     */
-    private function copySegmentInTranslation( $first_seg, $last_seg ) {
+        $chunk    = Chunks_ChunkDao::getByJobID( $job_id )[ 0 ];
+        $features = $chunk->getProject()->getFeatures();
+        $status   = Constants_TranslationStatus::STATUS_DRAFT;
 
-        $query = "update segment_translations st
-                    join segments s on st.id_segment = s.id
-                    join jobs j on st.id_job = j.id
-                    set st.translation = s.segment,
-                    st.status = 'DRAFT',
-                    st.translation_date = now()
-                    where st.status = 'NEW'
-                    and j.id = %d
-                    and j.password = '%s'
-                    and st.id_segment between %d and %d";
+        $batchEventCreator = new BatchEventCreator( $chunk );
+        $batchEventCreator->setFeatureSet( $features );
 
-        $db = Database::obtain();
+        $source_page = SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
+        $segments    = $chunk->getSegments();
 
-        $result = $db->query(
-                sprintf(
-                        $query,
-                        $this->id_job,
-                        $this->pass,
-                        $first_seg,
-                        $last_seg
-                )
-        );
+        foreach ( $segments as $segment ) {
 
-        return $db->affected_rows;
-    }
+            $segment_id = (int)$segment->id;
+            $chunk_id   = (int)$chunk->id;
 
-    /**
-     * Copies the segments.segment field into segment_translations.translation
-     * and sets the segment status to <b>DRAFT</b>.
-     * This operation is made only for the segments in <b>NEW</b> status
-     *
-     * @param $first_seg int
-     * @param $last_seg  int
-     */
-    private function getNewSegments( $first_seg, $last_seg ) {
+            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
 
-        $query = "select s.id from segment_translations st
-                    join segments s on st.id_segment = s.id
-                    join jobs j on st.id_job = j.id
-                    where st.status = 'NEW'
-                    and j.id = %d
-                    and j.password = '%s'
-                    and st.id_segment between %d and %d";
+            if ( empty( $old_translation ) ) {
+                //no segment found
+                continue;
+            }
 
-        $db = Database::obtain();
+            $new_translation         = clone $old_translation;
+            $new_translation->status = $status;
 
-        $result = $db->fetch_array(
-                sprintf(
-                        $query,
-                        $this->id_job,
-                        $this->pass,
-                        $first_seg,
-                        $last_seg
-                )
-        );
+            Translations_SegmentTranslationDao::updateSegmentStatusBySegmentId( $chunk_id, $segment_id, $status );
 
-
-        //Array_column() is not supported on PHP 5.4, so i'll rewrite it
-        if ( !function_exists( 'array_column' ) ) {
-            $result = Utils::array_column( $result, 'id' );
-        } else {
-            $result = Utils::array_column( $result, 'id' );
+            if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
+                $segmentTranslationEventModel = new SegmentTranslationEventModel( $old_translation, $new_translation, $this->user, $source_page );
+                $batchEventCreator->addEventModel( $segmentTranslationEventModel );
+            }
         }
 
-        return $result;
+        // save all events
+        $batchEventCreator->save();
+
+        if ( !empty( $params[ 'segment_ids' ] ) ) {
+            $counter = new WordCount_CounterModel();
+            $counter->initializeJobWordCount( $chunk->id, $chunk->password );
+        }
+
+        Log::doJsonLog( 'Segment Translation events saved completed' );
+
+        try {
+            $affected_rows = Translations_SegmentTranslationDao::copyAllSourceToTargetForJob( $job_data );
+        } catch ( Exception $e ) {
+            $errorCode                                         = -4;
+            self::$errorMap[ $errorCode ][ 'internalMessage' ] .= $e->getMessage();
+            $this->addError( $errorCode );
+
+            return;
+        }
+
+        $this->result[ 'data' ] = [
+                'code'              => 1,
+                'segments_modified' => $affected_rows
+        ];
+
+        Log::doJsonLog( $this->result[ 'data' ] );
+
+        $database->commit(); // COMMIT TRANSACTION
     }
 
     private function setErrorMap() {
         $generalOutputError = "Error while copying sources to targets. Please contact support@matecat.com";
 
-        self::$errorMap = array(
-                "-1" => array(
+        self::$errorMap = [
+                "-1" => [
                         'internalMessage' => "Empty id job",
                         'outputMessage'   => $generalOutputError
-                ),
-                "-2" => array(
+                ],
+                "-2" => [
                         'internalMessage' => "Empty job password",
                         'outputMessage'   => $generalOutputError
-                ),
-                "-3" => array(
+                ],
+                "-3" => [
                         'internalMessage' => "Wrong id_job-password couple. Job not found",
                         'outputMessage'   => $generalOutputError
-                ),
-                "-4" => array(
+                ],
+                "-4" => [
                         'internalMessage' => "Error in copySegmentInTranslation: ",
                         'outputMessage'   => $generalOutputError
-                )
-        );
+                ]
+        ];
     }
 
     /**
@@ -196,10 +193,10 @@ class copyAllSource2TargetController extends ajaxController {
      */
     private function addError( $errorCode ) {
         Log::doJsonLog( $this->getErrorMessage( $errorCode ) );
-        $this->result[ 'errors' ][] = array(
+        $this->result[ 'errors' ][] = [
                 'code'    => $errorCode,
                 'message' => $this->getOutputErrorMessage( $errorCode )
-        );
+        ];
     }
 
     /**

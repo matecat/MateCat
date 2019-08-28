@@ -22,9 +22,9 @@ class QualityReportModel {
     /**
      * @var Chunks_ChunkStruct
      */
-    private $chunk;
+    protected $chunk;
 
-    private $quality_report_structure = array();
+    protected $quality_report_structure = array();
 
     private $current_file = array();
 
@@ -105,6 +105,7 @@ class QualityReportModel {
     public function getChunkReviewModel() {
         if ( $this->chunk_review_model == null ) {
             $this->chunk_review_model = RevisionFactory::initFromProject($this->getProject())
+                    ->setFeatureSet( $this->getProject()->getFeatures() )
                     ->getChunkReviewModel( $this->getChunkReview() ) ;
         }
 
@@ -147,20 +148,10 @@ class QualityReportModel {
      *
      * @return array
      */
-    private function buildQualityReportStructure( $records ) {
-
+    protected function buildQualityReportStructure( $records ) {
         $this->__setAverages();
-
-        $scoreFormatted = $this->getScore() ;
-
         $this->quality_report_structure = array(
                 'chunk'   => array(
-                        'review' => array(
-                                'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
-                                'is_pass'       => !!$this->getChunkReview()->is_pass,
-                                'score'         => $scoreFormatted,
-                                'reviewer_name' => $this->getReviewerName()
-                        ),
                         'files'  => array(),
                         'avg_time_to_edit' => $this->avg_time_to_edit,
                         'avg_edit_distance' => $this->avg_edit_distance
@@ -179,14 +170,26 @@ class QualityReportModel {
         );
 
         $this->buildFilesSegmentsNestedTree( $records );
-
+        $this->_attachReviewsData();
         return $this->quality_report_structure;
+    }
+
+    /**
+     *
+     */
+    protected function _attachReviewsData() {
+        $this->quality_report_structure['chunk']['review'] = [
+                'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
+                'is_pass'       => !!$this->getChunkReview()->is_pass,
+                'score'         => $this->getScore(),
+                'reviewer_name' => $this->getReviewerName()
+        ];
     }
 
     /**
      * @return string
      */
-    private function getReviewerName() {
+    protected function getReviewerName() {
         $completion_event = \Chunks_ChunkCompletionEventDao::lastCompletionRecord(
                 $this->chunk, array( 'is_review' => true )
         );
@@ -343,11 +346,15 @@ class QualityReportModel {
 
     private function __getCurrentStructure() {
         $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
-
-
         return $this->buildQualityReportStructure( $records );
     }
 
+    /**
+     * TODO: this method/feature does not belong here. It should be moved to ReviewImproved since archived quality report
+     * structure is not a core matecat feature.
+     *
+     * @return RecursiveArrayObject
+     */
     private function __getArchviedStructure() {
         $archivedRecord = ( new ArchivedQualityReportDao() )->getByChunkAndVersionNumber( $this->chunk, $this->version ) ;
         $decoded = new RecursiveArrayObject( json_decode( $archivedRecord->quality_report, true ) );

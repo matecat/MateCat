@@ -553,19 +553,28 @@ class FilesStorage {
      *
      * @return array
      */
-    public function getOriginalFilesForJob( $id_job, $id_file, $password ) {
+    public function getOriginalFilesForJob( $id_job, $password ) {
 
-        $where_id_file = "";
-        if ( !empty( $id_file ) ) {
-            $where_id_file = " and fj.id_file=$id_file";
-        }
-        $query = "select fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file, create_date from files_job fj
-			inner join files f on f.id=fj.id_file
-			inner join jobs j on j.id=fj.id_job
-			where fj.id_job=$id_job $where_id_file and j.password='$password'";
+        $query = "SELECT 
+            fj.id_file, 
+            f.filename, 
+            f.id_project, 
+            j.source, 
+            mime_type, 
+            sha1_original_file, 
+            create_date 
+            FROM files_job fj
+			INNER JOIN files f ON f.id = fj.id_file
+			INNER JOIN jobs j ON j.id = fj.id_job
+			WHERE fj.id_job = :id_job 
+			AND j.password = :password
+		";
 
-        $db      = Database::obtain();
-        $results = $db->fetch_array( $query );
+        $db   = Database::obtain();
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [ 'id_job' => $id_job, 'password' => $password ] );
+        $results = $stmt->fetchAll();
 
         foreach ( $results as $k => $result ) {
             //try fetching from files dir
@@ -584,23 +593,26 @@ class FilesStorage {
      *
      * @return array
      */
-    public function getFilesForJob( $id_job, $id_file ) {
+    public function getFilesForJob( $id_job ) {
 
-        $where_id_file = "";
-
-        if ( !empty( $id_file ) ) {
-            $where_id_file = " and id_file=$id_file";
-        }
-
-        $query = "SELECT fj.id_file, f.filename, f.id_project, j.source, mime_type, sha1_original_file 
+        $query = "SELECT 
+              fj.id_file, 
+              f.filename, 
+              f.id_project, 
+              j.source, 
+              mime_type, 
+              sha1_original_file 
             FROM files_job fj
-            INNER JOIN files f ON f.id=fj.id_file
-            JOIN jobs AS j ON j.id=fj.id_job
-            WHERE fj.id_job = $id_job $where_id_file 
+            JOIN files f ON f.id = fj.id_file
+            JOIN jobs AS j ON j.id = fj.id_job
+            WHERE fj.id_job = :id_job 
             GROUP BY id_file";
 
         $db      = Database::obtain();
-        $results = $db->fetch_array( $query );
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [ 'id_job' => $id_job ] );
+        $results = $stmt->fetchAll();
 
         foreach ( $results as $k => $result ) {
             //try fetching from files dir

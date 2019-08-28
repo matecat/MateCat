@@ -44,7 +44,8 @@ class SegmentsFilter extends React.Component {
                 moreFilters: this.moreFilters,
                 filtersEnabled: true,
                 dataSampleEnabled: false,
-                filterSubmitted: false
+                filterSubmitted: false,
+                revisionNumber: null
             }
         }
     }
@@ -101,6 +102,7 @@ class SegmentsFilter extends React.Component {
             SegmentFilter.filterSubmit({
                 status: this.state.selectedStatus,
                 sample: sample,
+                revision_number: this.state.revisionNumber
             },{
                 samplingType: this.state.samplingType,
                 samplingSize:this.state.samplingSize,
@@ -114,23 +116,34 @@ class SegmentsFilter extends React.Component {
             this.setState({
                 filtering: false,
             });
-            setTimeout(()=>SegmentFilter.clearFilter);
+            setTimeout(()=>SegmentFilter.clearFilter());
         }
     }
 
     filterSelectChanged(value) {
+        let revisionNumber;
+        if ( value === 'APPROVED-2') {
+            revisionNumber = 2;
+            value = 'APPROVED';
+        } else {
+            revisionNumber = null;
+        }
+
         if ( (!config.isReview && value === "TRANSLATED" && this.state.samplingType === "todo") ||
             config.isReview && value === "APPROVED" && this.state.samplingType === "todo" ) {
             setTimeout(()=>{
                 this.resetMoreFilter();
             });
+
             this.setState({
                 selectedStatus: value,
                 samplingType: "",
+                revisionNumber: revisionNumber
             });
         } else  {
             this.setState({
                 selectedStatus: value,
+                revisionNumber: revisionNumber
             });
         }
         setTimeout(this.doSubmitFilter, 100);
@@ -255,24 +268,6 @@ class SegmentsFilter extends React.Component {
                     });
                 }
             });
-            $(this.toggleFilters).checkbox({
-                onChecked: function() {
-                    $(self.filtersDropdown).dropdown('restore defaults');
-                    self.setState({
-                        filtersEnabled: false,
-                        dataSampleEnabled: true,
-                        samplingType: '',
-                    });
-                },
-                onUnchecked: function() {
-                    $(self.dataSampleDropDown).dropdown('restore defaults');
-                    self.setState({
-                        filtersEnabled: true,
-                        dataSampleEnabled: false,
-                        samplingType: '',
-                    });
-                }
-            });
         }
 
         if (!this.props.active) {
@@ -313,11 +308,19 @@ class SegmentsFilter extends React.Component {
 
     render () {
         let buttonArrowsClass = 'qa-arrows-disbled';
-        let options = config.searchable_statuses.map(function (item, index) {
-            return <div className="item" key={index} data-value={item.value}>
+        let options = config.searchable_statuses.map( (item, index) => {
+            return <React.Fragment key={index}>
+                    <div className="item" key={index} data-value={item.value}>
                         <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
                             {item.label}
-                    </div>;
+                    </div>
+                { config.secondRevisionsCount && item.value === 'APPROVED' ? (
+                    <div className="item" key={index+'-2'} data-value={'APPROVED-2'}>
+                        <div  className={"ui "+ item.label.toLowerCase() +"-2ndpass-color empty circular label"} />
+                        {item.label}
+                    </div>
+                ) : null }
+            </React.Fragment>;
         });
         let moreOptions = this.state.moreFilters.map(function (item, index) {
             return <div key={index} data-value={item.value} className="item">

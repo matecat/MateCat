@@ -9,6 +9,7 @@ use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\ReviewExtended\SegmentTranslationModel;
 use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
+use RevisionFactory;
 use SegmentTranslationChangeVector;
 
 class ReviewExtended extends AbstractRevisionFeature {
@@ -31,29 +32,34 @@ class ReviewExtended extends AbstractRevisionFeature {
      */
     public function postJobSplitted( \ArrayObject $projectStructure ) {
 
-        $id_job = $projectStructure['job_to_split'];
-        $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
-        $first_password = $old_reviews[0]->review_password ;
+        /**
+         * By definition, when running postJobSplitted callback the job is not splitted.
+         * So we expect to find just one record in chunk_reviews for the job.
+         * If we find more than one record, it's one record for each revision.
+         *
+         */
+
+        $id_job                     = $projectStructure['job_to_split'];
+        $previousRevisionRecords    = ChunkReviewDao::findByIdJob( $id_job );
+        $project                    = $previousRevisionRecords[0]->getChunk()->getProject() ;
+
+        $revisionFactory = RevisionFactory::initFromProject($project)
+                ->setFeatureSet( $project->getFeatures() ) ;
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ], [
-                'first_record_password' => $first_password
-        ] );
+        foreach( $previousRevisionRecords as $review ) {
+            $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ], [
+                    'first_record_password' => $review->review_password,
+                    'source_page'           => $review->source_page
+            ] );
+        }
 
         $reviews = ChunkReviewDao::findByIdJob( $id_job );
         foreach( $reviews as $review ) {
-            $model = new ChunkReviewModel($review);
+            $model = $revisionFactory->getChunkReviewModel( $review ) ;
             $model->recountAndUpdatePassFailResult();
         }
-
-    }
-
-    public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
-        $model = new SegmentTranslationModel( $translation );
-        $model->addOrSubtractCachedReviewedWordsCount();
-        // we need to recount score globally because of autopropagation.
-        $model->recountPenaltyPoints();
     }
 
     /**

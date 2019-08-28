@@ -23,7 +23,7 @@ class Factory_User extends Factory_Base {
         $user = $dao->createUser( $userStruct );
 
         $orgDao = new TeamDao() ;
-        $team = $orgDao->createUserTeam( $user, array(
+        $orgDao->createUserTeam( $user, array(
             'type' => Constants_Teams::PERSONAL,
             'name' => 'personal'
         ));

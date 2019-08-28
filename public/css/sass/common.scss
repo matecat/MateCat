@@ -1,12 +1,5 @@
-/*
-Document:       common
-Created:         7-ago-2013, 14.49.42
-Author:          andreamartines
-Description:      Common CSS rules.
- */
-
 html, body {
-  height: 100%;
+    height: 100%;
 }
 
 body {
@@ -71,7 +64,6 @@ ul {
   position: relative;
 
 }
-
 .offline .logo {
   margin-left: 13px;
 }
@@ -162,7 +154,6 @@ footer nav ul, footer ul.external-links {
 footer nav ul li {
   margin-left: 4px;
 }
-
 footer .wrapper nav ul li:last-child {
   border-right: none;
 }
@@ -172,7 +163,6 @@ footer li {
   padding: 5px 5px;
   float: left;
 }
-
 footer nav li, footer ul.external-links li {
   height: 18px;
   padding-top: 0px;

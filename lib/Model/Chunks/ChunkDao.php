@@ -57,7 +57,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      *
      * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
      */
-    public static function getByIdProjectAndIdJob( $id_project, $id_job, $ttl ) {
+    public static function getByIdProjectAndIdJob( $id_project, $id_job, $ttl = 0 ) {
         return Jobs_JobDao::getByIdProjectAndIdJob( $id_project, $id_job, $ttl, new Chunks_ChunkStruct() );
     }
 

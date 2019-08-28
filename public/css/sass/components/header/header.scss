@@ -1,0 +1,23 @@
+header {
+  .revision-mark {
+      float: left;
+      position: relative;
+      width: 29px;
+      height: 29px;
+      left: -7px;
+      top: 11px;
+
+      font-weight: bold;
+      font-size: 16px;
+      line-height: 29px;
+      color: white;
+      text-align: center;
+      border-radius: 2px;
+      &.revision-r1 {
+          background: #7CC576;
+      }
+      &.revision-r2 {
+          background: #BC6AC9;
+      }
+  }
+}

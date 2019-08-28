@@ -274,6 +274,9 @@ class INIT {
 
     public static $SKIP_SQL_CACHE = false ;
 
+    public static $REPLACE_HISTORY_DRIVER;
+    public static $REPLACE_HISTORY_TTL;
+
     public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];

@@ -10,8 +10,9 @@
 namespace Features\ReviewExtended;
 
 use Features\ReviewExtended\Model\ChunkReviewDao;
-
+use Features\SecondPassReview;
 use LQA\ChunkReviewStruct;
+use Projects_ProjectDao;
 
 class ChunkReviewModel implements IChunkReviewModel {
 
@@ -24,28 +25,7 @@ class ChunkReviewModel implements IChunkReviewModel {
 
     public function __construct( ChunkReviewStruct $chunk_review ) {
         $this->chunk_review = $chunk_review ;
-        $this->penalty_points = $this->chunk_review->penalty_points ;
-    }
 
-    /**
-     * Adds reviewed words count and recomputes result
-     *
-     * @param $count
-     */
-
-    public function addWordsCount( $count ) {
-        $this->chunk_review->reviewed_words_count += $count ;
-        $this->updatePassFailResult() ;
-    }
-
-    /**
-     * Subtracts reviewed_words_count and recomputes result
-     *
-     * @param $count
-     */
-    public function subtractWordsCount( $count ) {
-        $this->chunk_review->reviewed_words_count -= $count ;
-        $this->updatePassFailResult() ;
     }
 
     /**
@@ -93,24 +73,35 @@ class ChunkReviewModel implements IChunkReviewModel {
      * @throws \Exception
      */
     public function updatePassFailResult() {
-        $score_per_mille = $this->getScore();
+        $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit() ) ;
 
-        $project = \Projects_ProjectDao::findById( $this->chunk_review->id_project );
-        $lqa_model = $project->getLqaModel();
-
-        $this->chunk_review->is_pass = ( $score_per_mille <= $lqa_model->getLimit() ) ;
-
-        ChunkReviewDao::updateStruct( $this->chunk_review, array(
-                        'fields' => array('reviewed_words_count', 'is_pass', 'penalty_points'))
-        );
-
-        $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, array(
-             'fields' => array('reviewed_words_count', 'is_pass', 'penalty_points'))
+        $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, [
+                        'fields' => [
+                                'advancement_wc',
+                                'reviewed_words_count',
+                                'is_pass',
+                                'penalty_points',
+                                'total_tte'
+                        ]
+            ]
         );
 
         $this->chunk_review->getChunk()->getProject()->getFeatures()->run(
                 'chunkReviewUpdated', $this->chunk_review, $update_result, $this
         );
+
+        return $update_result ;
+    }
+
+    /**
+     * Returns the proper limit for the current review stage.
+     *
+     * @return array|mixed
+     */
+    public function getQALimit() {
+        $project = Projects_ProjectDao::findById( $this->chunk_review->id_project );
+        $lqa_model = $project->getLqaModel();
+        return SecondPassReview\Utils::filterLQAModelLimit( $lqa_model, $this->chunk_review->source_page ) ;
     }
 
     /**
@@ -125,6 +116,11 @@ class ChunkReviewModel implements IChunkReviewModel {
 
         $this->chunk_review->reviewed_words_count =
                 ChunkReviewDao::getReviewedWordsCountForChunk( $chunk );
+
+        $this->chunk_review->advancement_wc = ( new ChunkReviewDao() )
+                ->recountAdvancementWords( $chunk, $this->chunk_review->source_page ) ;
+
+        $this->chunk_review->total_tte = ( new ChunkReviewDao() )->countTimeToEdit( $chunk, $this->chunk_review->source_page ) ;
 
         $this->updatePassFailResult();
     }

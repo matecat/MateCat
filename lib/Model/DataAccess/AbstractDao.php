@@ -14,7 +14,7 @@ abstract class DataAccess_AbstractDao {
      * The connection object
      * @var Database
      */
-    protected $con;
+    protected $database;
 
     /**
      * The cache connection object
@@ -62,11 +62,14 @@ abstract class DataAccess_AbstractDao {
             $con = Database::obtain();
         }
 
-        $this->con = $con;
+        $this->database = $con;
     }
 
-    public function getConnection() {
-        return $this->con;
+    /**
+     * @return \Database|IDatabase
+     */
+    public function getDatabaseHandler() {
+        return $this->database;
     }
 
     /**
@@ -288,25 +291,6 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @param $query string A query
-     *
-     * @return array|mixed
-     */
-    protected function _fetch_array( $query ) {
-        $_cacheResult = $this->_getFromCache( $query );
-
-        if ( $_cacheResult !== false && $_cacheResult !== null ) {
-            return $_cacheResult;
-        }
-
-        $result = $this->con->fetch_array( $query );
-
-        $this->_setInCache( $query, $result );
-
-        return $result;
-    }
-
-    /**
      * @param $query
      *
      * @return bool
@@ -391,49 +375,19 @@ abstract class DataAccess_AbstractDao {
      * Returns a string suitable for insert of the fields
      * provided by the attributes array.
      *
-     * @param      $attrs    array of full attributes to update
-     * @param      $mask     array of attributes to include in the update
-     * @param bool $ignore   Use INSERT IGNORE query type
-     * @param bool $no_nulls Exclude NULL fields when build the sql
+     * @param       $attrs    array of full attributes to update
+     * @param       $mask     array of attributes to include in the update
+     * @param bool  $ignore   Use INSERT IGNORE query type
+     * @param bool  $no_nulls Exclude NULL fields when build the sql
+     *
+     * @param array $on_duplicate_fields
      *
      * @return string
-     * @internal param array $options of options for the SQL statement
-     *
      * @throws Exception
+     * @internal param array $options of options for the SQL statement
      */
-    public static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false, $on_duplicate_fields = null ) {
-
-        if ( is_null( static::TABLE ) ) {
-            throw new Exception( 'TABLE constant is not defined' );
-        }
-
-        $first  = [];
-        $second = [];
-
-        $sql_ignore = $ignore ? " IGNORE " : "";
-
-        $sql_on_duplicate_update = !empty( $on_duplicate_fields ) ? " ON DUPLICATE KEY UPDATE " . implode( ", ", $on_duplicate_fields ) : null;
-
-        if ( empty( $mask ) ) {
-            $mask = array_keys( $attrs );
-        }
-
-        foreach ( $attrs as $key => $value ) {
-            if ( in_array( $key, $mask ) ) {
-                if ( $no_nulls && is_null( $value ) ) {
-                    unset( $mask[ array_search( $key, $mask ) ] );
-                    continue;
-                }
-                $first[]  = "`$key`";
-                $second[] = ":$key";
-            }
-        }
-
-        $sql = "INSERT $sql_ignore INTO " . static::TABLE . " (" .
-                implode( ', ', $first ) . ") VALUES (" .
-                implode( ', ', $second ) . ") $sql_on_duplicate_update ;";
-
-        return $sql;
+    public static function buildInsertStatement( array $attrs, array &$mask = [], $ignore = false, $no_nulls = false, array $on_duplicate_fields = [] ) {
+        return Database::buildInsertStatement( static::TABLE, $attrs, $mask, $ignore, $no_nulls, $on_duplicate_fields );
     }
 
 
@@ -467,6 +421,8 @@ abstract class DataAccess_AbstractDao {
     /**
      * Returns a string suitable to identify the struct to perform
      * update or delete operations via PDO data binding.
+     *
+     * WARNING: only AND conditions are supported
      *
      * @return string
      *
@@ -514,6 +470,10 @@ abstract class DataAccess_AbstractDao {
         return $struct->attributes( $keys );
     }
 
+    public static function updateFields( array $data = [], array $where = [] ){
+        return Database::obtain()->update( static::TABLE, $data, $where );
+    }
+
     /**
      * Updates the struct. The record is found via the primary
      * key attributes provided by the struct.
@@ -522,8 +482,7 @@ abstract class DataAccess_AbstractDao {
      * @param array                                                    $options
      *
      * @return bool
-     * @throws \Exceptions\ValidationError
-     * @throws ReflectionException
+     * @throws Exception
      */
     public static function updateStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
         $struct->ensureValid();
@@ -554,7 +513,13 @@ abstract class DataAccess_AbstractDao {
         \Log::doJsonLog( $sql );
         \Log::doJsonLog( $data );
 
-        return $stmt->execute( $data );
+        $stmt->execute( $data );
+
+        //WARNING
+        //When updating a Mysql table with identical values, nothing's really affected so rowCount will return 0.
+        //If you need this value use this:
+        //https://www.php.net/manual/en/pdostatement.rowcount.php#example-1096
+        return $stmt->rowCount();
     }
 
     /**
@@ -575,7 +540,7 @@ abstract class DataAccess_AbstractDao {
 
         $ignore              = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
         $no_nulls            = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
-        $on_duplicate_fields = ( isset( $options[ 'on_duplicate_update' ] ) && !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : null );
+        $on_duplicate_fields = ( isset( $options[ 'on_duplicate_update' ] ) && !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : [] );
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
@@ -593,7 +558,7 @@ abstract class DataAccess_AbstractDao {
             if ( count( static::$auto_increment_field ) ) {
                 return $conn->lastInsertId();
             } else {
-                return true;
+                return $stmt->rowCount();
             }
         } else {
 

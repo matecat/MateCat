@@ -92,7 +92,7 @@ class activityLogController extends viewController {
      * @return mixed
      */
     function doAction() {
-        $this->project_data = getProjectJobData( $this->id_project );
+        $this->project_data = Projects_ProjectDao::getProjectAndJobData( $this->id_project );
 
         $pCheck = new AjaxPasswordCheck();
         $access = $pCheck->grantProjectAccess( $this->project_data, $this->password );

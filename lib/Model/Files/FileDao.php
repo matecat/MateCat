@@ -96,4 +96,15 @@ class Files_FileDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function insertFilesJob( $id_job, $id_file ) {
+
+        $data              = [];
+        $data[ 'id_job' ]  = (int)$id_job;
+        $data[ 'id_file' ] = (int)$id_file;
+
+        $db = Database::obtain();
+        $db->insert( 'files_job', $data );
+
+    }
+
 }

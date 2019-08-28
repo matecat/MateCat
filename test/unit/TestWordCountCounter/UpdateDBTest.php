@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers WordCount_Counter::updateDB
+ * @covers WordCount_CounterModel::updateDB
  * User: dinies
  * Date: 14/06/16
  * Time: 18.31
@@ -30,7 +30,7 @@ class UpdateDBTest extends AbstractTest
      */
     protected $word_count_struct;
     /**
-     * @var WordCount_Counter
+     * @var WordCount_CounterModel
      */
     protected $word_counter;
     /**
@@ -58,7 +58,6 @@ class UpdateDBTest extends AbstractTest
         $this->job_struct = new Jobs_JobStruct(
             array('id' => NULL, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
                 'password' => $this->job_password,
-                'id_project' => "47",
                 'job_first_segment' => "5659",
                 'job_last_segment' => "5660",
                 'source' => "de-DE",
@@ -103,8 +102,8 @@ class UpdateDBTest extends AbstractTest
         );
 
         $this->job_Dao = new Jobs_JobDao($this->database_instance);
-        $this->job_Dao->createFromStruct($this->job_struct);
-        $this->job_id = $this->database_instance->getConnection()->lastInsertId();
+        $jobStruct = $this->job_Dao->createFromStruct($this->job_struct);
+        $this->job_id = $jobStruct->id;
         $this->sql_delete_job = "DELETE FROM ".INIT::$DB_DATABASE.".`jobs` WHERE id='" . $this->job_id . "';";
 
 
@@ -112,10 +111,10 @@ class UpdateDBTest extends AbstractTest
          * Segment initialization
          */
         $sql_insert_first_segment = "INSERT INTO ".INIT::$DB_DATABASE.".`segments` 
-    ( internal_id, id_file, id_project, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values
-    ( '21922356366' , ".$this->job_id.", {$this->job_struct->id_project} , '- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.' , 'e0170a2e381f1969056a7eb5e5bd0ac9', '".$this->number_of_words_changed."' , null, '', '' , '1' , null , null )";
+    ( internal_id, id_file, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values
+    ( '21922356366' , ".$this->job_id.", '- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.' , 'e0170a2e381f1969056a7eb5e5bd0ac9', '".$this->number_of_words_changed."' , null, '', '' , '1' , null , null )";
 
-        $this->database_instance->query($sql_insert_first_segment);
+        $this->database_instance->getConnection()->query($sql_insert_first_segment);
         $this->first_segment_id= $this->database_instance->last_insert();
 
 
@@ -137,23 +136,25 @@ class UpdateDBTest extends AbstractTest
 
 
 
-        $this->word_counter= new WordCount_Counter( $this->word_count_struct );
+        $this->word_counter= new WordCount_CounterModel( $this->word_count_struct );
 
         $this->flusher = new Predis\Client(INIT::$REDIS_SERVERS);
+        $this->flusher->select( INIT::$INSTANCE_ID );
         $this->flusher->flushdb();
 
     }
 
     public function tearDown(){
-        $this->database_instance->query($this->sql_delete_job);
-        $this->database_instance->query($this->sql_delete_first_segment);
+        $this->database_instance->getConnection()->query($this->sql_delete_job);
+        $this->database_instance->getConnection()->query($this->sql_delete_first_segment);
+        $this->flusher->select( INIT::$INSTANCE_ID );
         $this->flusher->flushDB();
         parent::tearDown();
     }
 
     /**
      * @group regression
-     * @covers WordCount_Counter::updateDB
+     * @covers WordCount_CounterModel::updateDB
      */
     public function test_updateDB_from_NEW_to_TRANSLATED(){
 

@@ -212,8 +212,8 @@ class FixturesLoader {
             if ( $value === '@EVER_INCREMENT' ) {
                 // generate non conflicting integers using microtime and keep the number small
                 $maxInt = 2147483647 ;
-                $record[ $key ] = round( microtime( true ) * 1000 ) - 1497097000000 - $maxInt ;
-                Log::doLog( $key, $record[ $key ] );
+                $record[ $key ] = ( round( microtime( true ) * 1000 ) - 1497097000000 ) % $maxInt ;
+                Log::doJsonLog( [ $key, $record[ $key ] ] );
             }
 
             // Assign reference idenfiers
