@@ -147,7 +147,10 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
 
 <header>
     <div class="wrapper ">
-        <a href="/" class="logo"></a>
+
+        <div class="logo-menu">
+            <a href="/" class="logo"></a>
+        </div> <!-- .logo-menu -->
     </div>
 </header>
 <div id="contentBox" class="wrapper">
