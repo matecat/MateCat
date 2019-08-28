@@ -5162,6 +5162,8 @@ header {
                 height: 80px;
             }
 
+
+
             .menu {
                 position: absolute;
                 z-index: 1;
@@ -5208,14 +5210,18 @@ header {
                             color: $light-blue;
                         }
                         &.selected {
-                            background-color: transparent;
-                            font-weight: normal;
+                            background-color: transparent !important;
+                            font-weight: normal !important;
                         }
                     }
 
                     padding: 0 !important;
                     border-radius: 3px;
+                }
 
+                .active.item {
+                    background-color: transparent !important;
+                    font-weight: normal !important;
                 }
             }
 
