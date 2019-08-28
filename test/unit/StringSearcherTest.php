@@ -16,6 +16,10 @@ class StringSearcherTest extends AbstractTest
         $needle = "php";
         $matches = StringSearcher::search($haystack, $needle, true,true, true);
         $this->assertCount(0, $matches);
+
+        $needle = "choice";
+        $matches = StringSearcher::search($haystack, $needle, true,true, true);
+        $this->assertCount(1, $matches);
     }
 
     /**
