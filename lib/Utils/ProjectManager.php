@@ -192,7 +192,7 @@ class ProjectManager {
 
     }
 
-    protected function _log( $_msg ){
+    protected function _log( $_msg ) {
         Log::doJsonLog( $_msg );
     }
 
@@ -366,7 +366,7 @@ class ProjectManager {
      *
      */
     private function __createProjectRecord() {
-        $this-> project = ProjectManagerModel::createProjectRecord( $this->projectStructure );
+        $this->project = ProjectManagerModel::createProjectRecord( $this->projectStructure );
     }
 
     private function __checkForProjectAssignment() {
@@ -1875,6 +1875,7 @@ class ProjectManager {
      */
     protected function _insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
         $idFile = ProjectManagerModel::insertFile( $projectStructure, $file_name, $mime_type, $fileDateSha1Path );
+
         return $idFile;
     }
 
@@ -2175,7 +2176,19 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param $segment
+     *
+     * @return array
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
     protected function _strip_external( $segment ) {
+
+        $segment = CatUtils::transformNbspToInvisibleAsciiChar( $segment );
 
         if ( $this->features->filter( 'skipTagLessFeature', false, $segment ) ) {
             return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
@@ -2203,7 +2216,7 @@ class ProjectManager {
         // - Why scan entire string if the fist char is not a less-than sign? We can't strip nothing
         // - Why continue if the first char is a less-than sign but we realize that it is not a tag?
 
-        $segmentLength = strlen( $segment );
+        $segmentLength = mb_strlen( $segment );
 
         // This is the fastest way I found to spot Unicode whitespaces in the string.
         // Removing this step gives a gain of 7% in speed.
@@ -2348,6 +2361,12 @@ class ProjectManager {
             $before       = substr( $segment, 0, $segStart );
             $cleanSegment = substr( $segment, $segStart, $segEnd - $segStart + 1 );
             $after        = substr( $segment, $segEnd + 1 );
+
+            //this is not a simple space, we need to replace NBSP characters
+            $before       = CatUtils::transformInvisibleAsciiCharToNbsp( $before );
+            $cleanSegment = CatUtils::transformInvisibleAsciiCharToNbsp( $cleanSegment );
+            $after        = CatUtils::transformInvisibleAsciiCharToNbsp( $after );
+
             // Following line needed in case $segEnd points to the last char of $segment
             if ( $after === false ) {
                 $after = '';
