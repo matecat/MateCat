@@ -1188,7 +1188,7 @@ UI = {
          */
         var charCodePlaceholder = 57344;
 
-        listMainStr.forEach( ( element ) => {
+        listMainStr.forEach( function( element ) {
 
             var actualCharCode = String.fromCharCode( charCodePlaceholder );
 
@@ -1208,7 +1208,7 @@ UI = {
         } );
 
         var listTransDecoded = transDecoded.match( placeholderPhRegEx );
-        listTransDecoded.forEach( ( element ) => {
+        listTransDecoded.forEach( function( element ){
 
             var actualCharCode = String.fromCharCode( charCodePlaceholder );
 
@@ -1249,7 +1249,7 @@ UI = {
             var diff_obj = UI.execDiff( mainStr, transDecoded );
 
             //replace the original string in the diff object by the character placeholder
-            Object.keys( diff_obj ).forEach( ( element ) => {
+            Object.keys( diff_obj ).forEach( function( element ) {
                 if( replacementsMap[ diff_obj[ element ][ 1 ] ] ){
                     diff_obj[ element ][ 1 ] = replacementsMap[ diff_obj[ element ][ 1 ] ];
                 }

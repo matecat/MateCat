@@ -3,7 +3,7 @@
  */
 
 $.extend(UI, {
-	initHeader: () => {
+	initHeader: function() {
 
 		if (SearchUtils.searchEnabled)
 			$('#action-search').show( 100, function(){
@@ -24,8 +24,8 @@ $.extend(UI, {
 		initEvents();
 
 	},
-	logoutAction: () => {
-		$.post('/api/app/user/logout', (data) => {
+	logoutAction: function() {
+		$.post('/api/app/user/logout', function(data) {
 			if ($('body').hasClass('manage')) {
 				location.href = config.hostpath + config.basepath;
 			} else {
@@ -35,15 +35,15 @@ $.extend(UI, {
 	}
 });
 
-const initEvents = () => {
-	$("#action-search").bind('click', (e) => {
+var initEvents = function() {
+	$("#action-search").bind('click', function(e) {
 		SearchUtils.toggleSearch(e);
 	});
-	$("#action-settings").bind('click', (e) => {
+	$("#action-settings").bind('click', function(e) {
 		e.preventDefault();
 		UI.openOptionsPanel();
 	});
-	$(".user-menu-container").on('click', '#logout-item', (e) => {
+	$(".user-menu-container").on('click', '#logout-item', function(e) {
 		e.preventDefault();
 		UI.logoutAction();
 	});

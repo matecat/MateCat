@@ -152,7 +152,7 @@ $.extend(UI, {
         var idAfter = UI.getIdAfter(id);
 
         if ( _.isUndefined(config.id_client) ) {
-            setTimeout(() => {
+            setTimeout(function() {
                 UI.getContribution(segment, next);
             }, 3000);
             console.log("SSE: ID_CLIENT not found");

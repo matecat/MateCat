@@ -299,7 +299,7 @@ $.extend( UI, {
     },
     updateSegmentTranslationFn: function() {
         saveSelection();
-        let editareaClone = UI.editarea.clone();
+        var editareaClone = UI.editarea.clone();
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
         setTimeout(function () {
             restoreSelection();

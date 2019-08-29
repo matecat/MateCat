@@ -137,18 +137,18 @@ if ( MBC.enabled() )
             }
         };
 
-        const getOpenedThreadCount =  () => {
-            let count = 0;
+        var getOpenedThreadCount =  function() {
+            var count = 0;
 
-            for(const segmentID in db.segments){
-                const el = db.segments[segmentID][db.segments[segmentID].length-1];
+            for( var segmentID in db.segments){
+                var el = db.segments[segmentID][db.segments[segmentID].length-1];
                 parseInt(el.message_type) === 1 ? count++: null;
             }
             return count
         }
 
-        const refreshBadgeHeaderIcon = () =>{
-            const count = getOpenedThreadCount();
+        var refreshBadgeHeaderIcon = function(){
+            var count = getOpenedThreadCount();
             $('#mbc-history .badge').remove();
             if(count > 0){
                 $('#mbc-history').append(`<span class='badge'>${count}</span>`)
