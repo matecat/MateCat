@@ -831,7 +831,8 @@ class setTranslationController extends ajaxController {
         if (
                 $old_translation->isICE() &&
                 $new_translation->translation == $old_translation->translation &&
-                $new_translation->isTranslationStatus() && !$old_translation->isTranslationStatus()
+                $new_translation->isTranslationStatus() && !$old_translation->isTranslationStatus() &&
+                !$old_translation->isRejected() // this handle the case of rejection/rebut behaviour. A status change already happened
         ) {
             Database::obtain()->rollback();
             $msg                        = "Status change not allowed with identical translation on segment {$old_translation->id_segment}.";

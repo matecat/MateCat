@@ -114,7 +114,6 @@ class getSearchController extends ajaxController {
         }
 
         $this->db          = Database::obtain();
-        $this->searchModel = new SearchModel( $this->queryParams );
 
         // Search_ReplaceHistory init
         $srh_driver = ( isset( \INIT::$REPLACE_HISTORY_DRIVER ) and '' !== \INIT::$REPLACE_HISTORY_DRIVER ) ? \INIT::$REPLACE_HISTORY_DRIVER : 'redis';
@@ -175,6 +174,9 @@ class getSearchController extends ajaxController {
         } elseif ( empty( $this->source ) and empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'status_only';
         }
+
+        $filter = \SubFiltering\Filter::getInstance($this->featureSet);
+        $this->searchModel  = new SearchModel( $this->queryParams, $filter );
 
         try {
             $res = $this->searchModel->search();

@@ -16,7 +16,6 @@ use SubFiltering\Commons\Constants;
 class RestorePlaceHoldersToXLIFFLtGt extends AbstractHandler {
 
     public function transform( $segment ) {
-
         $segment = str_replace( Constants::LTPLACEHOLDER, "<", $segment );
         $segment = str_replace( Constants::GTPLACEHOLDER, ">", $segment );
 
