@@ -5521,12 +5521,14 @@ header {
                 &::before {
                     color: $medium-gray;
                     font-size: 16px;
+                    margin-right: 10px;
+                    padding-right: 2px;
                 }
             }
             .label {
                 height: auto !important;
                 margin: 0 !important;
-                width: 226px !important;
+                width: 224px !important;
                 padding: 4px 8px !important;
                 border-radius: 2px;
                 float:none !important;
@@ -5562,20 +5564,54 @@ header {
     ul.jobmenu-list {
         margin-top: 0;
         span {
-            padding: 4px 4px 0px 2px;
+            padding: 4px 4px 0 2px;
+            &.extdoc {
+                margin:0 !important;
+            }
         }
-        li.current{
+
+        li {
+            display: grid;
+            grid-template-columns: 40px auto;
+            grid-template-rows: 40px;
+            align-items: center;
+
+            font-weight: normal;
+            border-left: none;
+            font-size: 14px;
+            color: #000;
+            padding: 1px 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
             a {
-                font-weight: normal;
+                border-radius: 3px;
                 border-left: none;
-                font-size: 16px;
-                color: #000;
-                padding: 10px 8px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                padding: 6px 8px;
+                margin-right: 6px;
+                display: grid;
+                grid-template-columns: auto 18px;
+                align-items: center;
+
                 &:hover {
                     color: $light-blue;
+                }
+
+                svg {
+                    display: none;
+                }
+            }
+
+            &.current {
+                a {
+                    background: $matecat-blue;
+                    color: #ffffff;
+                    font-weight: normal;
+                    svg {
+                        display: block;
+                        width: 16px;
+                    }
                 }
             }
         }
