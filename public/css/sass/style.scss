@@ -5084,7 +5084,7 @@ $white: #FFF;
 header {
 
     .wrapper {
-        grid-template-columns: 208px minmax(0,48px) auto auto 120px;
+        grid-template-columns: 208px minmax(0,48px) minmax(200px, max-content) auto 120px;
         align-items: center;
     }
 
@@ -5104,8 +5104,9 @@ header {
 
     .breadcrumbs {
         display: grid;
-        grid-template-columns: auto 1fr;
+        grid-template-columns: 25px auto;
         padding:0;
+        margin-top:10px;
 
         .icon-container {
             position: relative;
@@ -5113,6 +5114,7 @@ header {
                 position: absolute;
                 left: -10px;
                 top: -8px;
+                font-family: Calibri, Arial, Helvetica, sans-serif !important;
             }
         }
 
