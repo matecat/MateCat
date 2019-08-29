@@ -38,7 +38,7 @@ header {
                     grid-template-rows: 28px;
                     align-items: center;
                     margin: 0;
-                    padding: 8px;
+                    padding: 8px 16px;
                     cursor: pointer;
                     color: #09beec;
                     &:hover {
@@ -202,7 +202,7 @@ header {
                     grid-template-columns: 1fr 40px;
                     align-items: center;
                     grid-template-rows: 28px;
-                    padding: 0 0 0 6px;
+                    padding: 0 0 0 8px;
                     .icon {
                         margin:0 !important;
                         padding: 0px 8px;

@@ -140,7 +140,7 @@ class TeamsSelect extends React.Component {
 					iconModal = <a className="team-filter button show right"
 								   onClick={(e) => openModifyTeam(e, team)}>
 						{/*<i className="icon-settings icon"/>*/}
-						<IconSettings width={16} height={16} color={'#0099CC'} />
+						<IconSettings width={17} height={17} color={'#0099CC'} />
 					</a>
 				}
 				return <div className="item" data-value={team.get('id')}
