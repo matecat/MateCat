@@ -2,6 +2,7 @@ let React = require('react');
 let CatToolConstants = require('../../../constants/CatToolConstants');
 let CatToolStore = require('../../../stores/CatToolStore');
 let SegmentSelectionPanel = require('../bulk_selection_bar/BulkSelectionBar').default ;
+let SegmentsFilter = require('./segment_filter/SegmentsFilter').default ;
 let Search = require('./search/Search').default;
 let QaComponent = require('./QAComponent').default;
 let SegmentConstants = require('../../../constants/SegmentConstants');
@@ -171,7 +172,7 @@ class SubHeaderContainer extends React.Component {
                 searchable_statuses ={config.searchable_statuses}
             />
             { this.props.filtersEnabled ? (
-                <SegmentFilter
+                <SegmentsFilter
                     active={this.state.segmentFilter}
                     isReview={config.isReview}
                 />

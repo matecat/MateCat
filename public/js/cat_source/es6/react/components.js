@@ -10,7 +10,7 @@ window.classnames = require('classnames');
 window.Review_QualityReportButton = require('./components/review/QualityReportButton').default ;
 
 window.SubHeaderContainer = require('./components/header/cattol/SubHeaderContainer').default ;
-window.SegmentFilter = require('./components/header/cattol/segment_filter/SegmentsFilter').default;
+window.SegmentFilter = require('./components/header/cattol/segment_filter/segment_filter');
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
 window.ManageConstants = require('./constants/ManageConstants');
