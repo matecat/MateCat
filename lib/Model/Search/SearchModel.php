@@ -11,6 +11,7 @@ namespace Search;
 
 use Database;
 use Exception;
+use Finder\WholeTextFinder;
 use Log;
 use PDO;
 use PDOException;
@@ -153,7 +154,7 @@ class SearchModel {
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $matches = \StringSearcher::search($occurrence['text'], $searchTerm, true, $this->isExactMatchEnabled(), $this->isMatchCaseEnabled());
+                $matches = WholeTextFinder::find($occurrence['text'], $searchTerm, true, $this->isExactMatchEnabled(), $this->isMatchCaseEnabled());
                 $matchesCount = count($matches);
 
                 if($matchesCount > 0 and $matches[0][0] !== ''){
