@@ -49,34 +49,22 @@ UI = {
 
 	},
 
-    activateSegment: function(segment) {
-        // SegmentActions.createFooter(UI.getSegmentId(segment));
-		// this.createButtons(segment);
-
-        $(document).trigger('segment:activate', { segment: segment } );
-	},
-
 	cacheObjects: function( editarea_or_segment ) {
-        var segment;
-        if ( editarea_or_segment instanceof UI.Segment ) {
-            segment = editarea_or_segment ;
-            this.editarea = segment.el.find( '.editarea' );
-        }
-        else {
-            this.editarea = $(".editarea", $(editarea_or_segment).closest('section'));
-            segment = new UI.Segment( $(editarea_or_segment).closest('section') );
-        }
+        var segment, $segment;
+
+        this.editarea = $(".editarea", $(editarea_or_segment).closest('section'));
+        $segment = $(editarea_or_segment).closest('section');
+        segment = SegmentStore.getSegmentByIdToJS( UI.getSegmentId($segment) );
 
 		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
                                                       // seems to be the previous current segment
 
-		this.currentSegmentId    = segment.id ;
-        this.lastOpenedSegmentId = segment.id ;
-		this.currentSegment      = segment.el ;
-		this.currentFile         = segment.el.closest("article");
+		this.currentSegmentId    = segment.sid ;
+		this.currentSegment      = $segment ;
+		this.currentFile         = $segment.closest("article");
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
 
-        this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
+        this.evalCurrentSegmentTranslationAndSourceTags( $segment );
     },
 
 
@@ -1567,34 +1555,29 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
-    segmentQA : function( segment ) {
+    segmentQA : function( $segment ) {
 	    if ( UI.tagMenuOpen ) return;
-        if ( ! ( segment instanceof UI.Segment) ) {
-            segment = new UI.Segment( segment );
-        }
+
+	    var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment));
 
 		var dd = new Date();
 		ts = dd.getTime();
-		var token = segment.id + '-' + ts.toString();
-        var segment_status_regex = new RegExp("status-([a-z]*)");
-        var segment_status = segment.el.attr('class' ).match(segment_status_regex);
-        if(segment_status.length > 0){
-            segment_status = segment_status[1];
-        }
+		var token = segment.sid + '-' + ts.toString();
+
+        segment_status = segment.status;
 
 		if( config.brPlaceholdEnabled ){
-			src_content = this.postProcessEditarea(segment.el , '.source');
-			trg_content = this.postProcessEditarea(segment.el);
+			src_content = this.prepareTextToSend(segment.segment);
+			trg_content = this.prepareTextToSend(segment.translation);
 		} else {
-			src_content = this.getSegmentSource();
-			trg_content = this.getSegmentTarget();
+			src_content = segment.segment;
+			trg_content = segment.translation;
 		}
 
-		this.checkSegmentsArray[token] = trg_content;
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
-				id: segment.id,
+				id: segment.sid,
 				token: token,
                 id_job: config.id_job,
 				password: config.password,
@@ -1608,13 +1591,13 @@ UI = {
 			success: function(d) {
 			    if (UI.editAreaEditing) return;
 			    if(d.details && d.details.id_segment){
-                    SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
-                    UI.markTagMismatch(d.details);
+                    SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info, d.details.tag_mismatch);
+                     // UI.markTagMismatch(d.details);
                 }else{
-                    SegmentActions.setSegmentWarnings(segment.id,{});
-                    UI.removeHighlightErrorsTags(UI.getSegmentById(segment.id));
+                    SegmentActions.setSegmentWarnings(segment.sid,{}, {});
+                    // UI.removeHighlightErrorsTags(UI.getSegmentById(segment.sid));
                 }
-                $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
+                $(document).trigger('getWarning:local:success', { resp : d, segment: UI.getSegmentById( segment.sid )    }) ;
 			}
 		}, 'local');
 

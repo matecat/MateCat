@@ -42,14 +42,12 @@ class SegmentSource extends React.Component {
     }
 
     beforeRenderActions() {
-        var area = $("#segment-" + this.props.segment.sid + " .source");
-        this.props.beforeRenderOrUpdate(area);
+        this.props.beforeRenderOrUpdate(this.props.segment.segment);
 
     }
 
     afterRenderActions() {
-        let area = $("#segment-" + this.props.segment.sid + " .source");
-        this.props.afterRenderOrUpdate(area);
+        this.props.afterRenderOrUpdate(this.props.segment.segment);
         let self = this;
         if ( this.splitContainer ) {
             $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function(e) {

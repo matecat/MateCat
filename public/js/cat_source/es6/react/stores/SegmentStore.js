@@ -468,10 +468,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return sid > -1
     },
     // Local warnings
-    setSegmentWarnings(sid, warning) {
+    setSegmentWarnings(sid, warning, tagMismatch) {
         const fid = this._segmentsFiles.get(sid);
         let index = this.getSegmentIndex(sid);
         this._segments = this._segments.setIn([index, 'warnings'], Immutable.fromJS(warning));
+        this._segments = this._segments.setIn([index, 'tagMismatch'], Immutable.fromJS(tagMismatch));
     },
     setQACheckMatches(sid, matches) {
         const index = this.getSegmentIndex(sid);
@@ -911,7 +912,7 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType);
             break;
         case SegmentConstants.SET_SEGMENT_WARNINGS:  // LOCAL
-            SegmentStore.setSegmentWarnings(action.sid, action.warnings);
+            SegmentStore.setSegmentWarnings(action.sid, action.warnings, action.tagMismatch);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.UPDATE_GLOBAL_WARNINGS:

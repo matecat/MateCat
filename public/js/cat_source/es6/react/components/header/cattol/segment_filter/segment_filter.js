@@ -59,9 +59,9 @@ let SegmentFilterUtils = {
             });
 
 
-            $(document).on('segment:activate', function( event, data ) {
+            $(window).on('segmentOpened', function( event, data ) {
                 if ( SegmentFilterUtils.filtering() ) {
-                    SegmentFilterUtils.setStoredState({ lastSegmentId : data.segment.absId }) ;
+                    SegmentFilterUtils.setStoredState({ lastSegmentId : data.segmentId }) ;
                 }
             });
 

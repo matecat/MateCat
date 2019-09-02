@@ -105,17 +105,15 @@ Speech2Text.init  = function () {
                     Speech2Text.stopSpeechRecognition(microphone);
 
                 } else {
-                    var segmentObj = new UI.Segment( microphone.closest('section') );
-                    var segmentRecord = MateCat.db.segments.by('sid', segmentObj.absId );
 
-                    Speech2Text.startSpeechRecognition(microphone, segmentRecord);
+                    Speech2Text.startSpeechRecognition(microphone);
                     Speech2Text.enableContinuousRecognizing();
                 }
             },
             startSpeechRecognition: function (microphone) {
-                var segment = microphone.closest('section');
-                var segmentId = new UI.Segment( segment ).absId ;
-                var segmentRecord = MateCat.db.segments.by('sid', segmentId);
+                var segmentSection = microphone.closest('section');
+                var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(segmentSection)) ;
+                var segmentRecord = MateCat.db.segments.by('sid', segment.original_sid);
 
                 if (!microphone.hasClass('micSpeechActive')) {
                     microphone.addClass('micSpeechActive');

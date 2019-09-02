@@ -142,16 +142,7 @@ let GlossaryUtils = {
             } );
         }
         GlossaryUtils.lastIntervalUnionAnalysed = null;
-        // setTimeout(function () {
-        //     $( '.editor .source mark mark' ).each( function () {
-        //         $( this ).replaceWith( $( this ).html() );
-        //     } );
-        try {
-            $(document).trigger('glossarySourceMarked', { segment :  new UI.Segment( UI.getSegmentById(sid) ) } );
-        } catch ( e ) {
-            console.log("markGlossaryItemsInText: segment not in the ui", sid);
-        }
-        // }, 100);
+
         return sourceReturn;
 
     },

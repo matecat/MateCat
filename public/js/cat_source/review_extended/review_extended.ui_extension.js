@@ -71,10 +71,9 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             return ReviewExtended.submitIssue(sid, data, diff);
         },
 
-        getSegmentVersionsIssuesHandler(event) {
-            var sid = event.segment.absId;
-            var fid = UI.getSegmentFileId(event.segment.el);
-            UI.getSegmentVersionsIssues(sid, fid);
+        getSegmentVersionsIssuesHandler(sid) {
+            var segment = SegmentStore.getSegmentByIdToJS(sid);
+            UI.getSegmentVersionsIssues(segment.original_sid, segment.id_file);
         },
 
         getSegmentVersionsIssues: function (segmentId, fileId) {

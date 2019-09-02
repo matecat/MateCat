@@ -420,12 +420,11 @@ if ( MBC.enabled() )
             updateHistoryWithLoadedSegments();
         } );
 
-        $( window ).on( 'segmentOpened', function ( e ) {
-            var segment = e.segment ;
-            if ( MBC.wasAskedByCommentHash( segment.absoluteId ) ) {
-                openSegmentComment( $( e.segment ) );
+        $( window ).on( 'segmentOpened', function ( e, data ) {
+            if ( MBC.wasAskedByCommentHash( data.segmentId ) ) {
+                openSegmentComment( $( UI.getSegmentById(data.segmentId) ) );
             }
-            checkOpenSegmentComment(segment.absoluteId);
+            checkOpenSegmentComment(data.segmentId);
         } );
 
         // $( document ).on( 'split:segment:complete', function ( e, sid ) {

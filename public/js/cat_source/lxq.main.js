@@ -97,10 +97,6 @@ LXQ.init  = function () {
     $(document).on('getWarning:local:success', function(e, data) {
         console.log('[LEXIQA] got getWarning:local:success');
         var segment = data.segment;
-        //new API?
-        if (data.segment.raw) {
-          segment = data.segment.raw;
-        }
         var id_segment = UI.getSegmentId(segment);
         LXQ.doLexiQA(segment, id_segment,false, function () {}) ;
     });

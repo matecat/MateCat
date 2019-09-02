@@ -9,7 +9,6 @@ $.extend(UI, {
         // of SegmentFilter, see below.
         UI.firstLoad = true;
         UI.body = $('body');
-        UI.checkSegmentsArray = {} ;
         UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
         UI.checkCrossLanguageSettings();
         UI.setShortcuts();
@@ -63,7 +62,6 @@ $.extend(UI, {
         this.offline = false;
 		if (SearchUtils.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
-		this.checkSegmentsArray = {};
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.logEnabled = true;

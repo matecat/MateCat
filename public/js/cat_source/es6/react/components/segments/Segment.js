@@ -85,15 +85,12 @@ class Segment extends React.Component {
 
             UI.evalNextSegment($(this.section), 'untranslated');
             UI.clearUndoStack();
-            $(document).trigger('segment:activate', {segment: new UI.Segment($(this.section))});  //Used by Segment Filter
             UI.getNextSegment(UI.currentSegment, 'untranslated');
 
             $('html').trigger('open'); // used by ui.review to open tab Revise in the footer next-unapproved
 
-            $(window).trigger({
-                type: "segmentOpened",
-                segment: new UI.Segment($(this.section))
-            });
+            //Used by Segment Filter, Comments, Footer, Review extended
+            $(document).trigger('segmentOpened', {segmentId: this.props.segment.original_sid});
 
             Speech2Text.enabled() && Speech2Text.enableMicrophone($(this.section));
             /************/

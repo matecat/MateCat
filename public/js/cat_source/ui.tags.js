@@ -2,23 +2,7 @@
 	Component: ui.tags
  */
 $.extend(UI, {
-    noTagsInSegment: function(options) {
-        var editarea = options.area;
-        var starting = options.starting;
 
-        if (starting) return false;
-
-        try{
-            if ( $(editarea).html().match(/\&lt;.*?\&gt;/gi) ) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch(e){
-            return true;
-        }
-
-    },
 	tagCompare: function(sourceTags, targetTags, prova) {
 
 		var mismatch = false;
@@ -471,43 +455,43 @@ $.extend(UI, {
         segment$.find('.locked.highlight').removeClass('highlight');
     },
 
-    removeHighlightErrorsTags: function (segment$) {
-        segment$.find('.locked.mismatch').removeClass('mismatch');
-        segment$.find('.locked.order-error').removeClass('order-error');
-    },
+    // removeHighlightErrorsTags: function (segment$) {
+    //     segment$.find('.locked.mismatch').removeClass('mismatch');
+    //     segment$.find('.locked.order-error').removeClass('order-error');
+    // },
 
     // TAG MISMATCH
-	markTagMismatch: function(d) {
+	markTagMismatch: function(tag_mismatch, sid) {
 
-        if( !_.isUndefined(d.tag_mismatch.source) && d.tag_mismatch.source.length > 0 ) {
-            $.each(d.tag_mismatch.source, function(index) {
-                $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
+        if( !_.isUndefined(tag_mismatch.source) && tag_mismatch.source.length > 0 ) {
+            $.each(tag_mismatch.source, function(index) {
+                $('#segment-' + sid + ' .source span.locked:not(.temp)').filter(function() {
                     var clone = $(this).clone();
                     clone.find('.inside-attribute').remove();
-                    return htmlEncode(clone.text()) === d.tag_mismatch.source[index];
+                    return htmlEncode(clone.text()) === tag_mismatch.source[index];
                 }).last().addClass('temp');
             });
         }
-        if( !_.isUndefined(d.tag_mismatch.target) && d.tag_mismatch.target.length > 0 ) {
-            $.each(d.tag_mismatch.target, function(index) {
-                $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
+        if( !_.isUndefined(tag_mismatch.target) && tag_mismatch.target.length > 0 ) {
+            $.each(tag_mismatch.target, function(index) {
+                $('#segment-' + sid + ' .editarea span.locked:not(.temp)').filter(function() {
                     var clone = $(this).clone();
                     clone.find('.inside-attribute').remove();
-                    return htmlEncode(clone.text()) === d.tag_mismatch.target[index];
+                    return htmlEncode(clone.text()) === tag_mismatch.target[index];
                 }).last().addClass('temp');
             });
         }
         // ??
-        $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
-        $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
-        $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+        $('#segment-' + sid + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+        $('#segment-' + sid + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+        $('#segment-' + sid + ' span.locked.mismatch-old').removeClass('mismatch-old');
 
-        $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
-        if( !_.isUndefined(d.tag_mismatch.order) && d.tag_mismatch.order.length > 0 ) {
-            $( '#segment-' + d.id_segment + ' .editarea .locked:not(.mismatch)' ).filter( function () {
+        $('#segment-' + sid + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
+        if( !_.isUndefined(tag_mismatch.order) && tag_mismatch.order.length > 0 ) {
+            $( '#segment-' + sid + ' .editarea .locked:not(.mismatch)' ).filter( function () {
                 var clone = $( this ).clone();
                 clone.find( '.inside-attribute' ).remove();
-                return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
+                return htmlEncode(clone.text()) === tag_mismatch.order[0];
             } ).addClass( 'order-error' );
         }
 	},	

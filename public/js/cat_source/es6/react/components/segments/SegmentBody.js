@@ -25,21 +25,9 @@ class SegmentBody extends React.Component {
     }
 
     checkLockTags(area) {
-        if (config.tagLockCustomizable) {
+        if (config.tagLockCustomizable || !UI.tagLockEnabled) {
             return false;
-        }
-
-        if (!UI.tagLockEnabled) {
-            return false;
-        }
-
-        // if ( !this.props.segment.decoded_translation.indexOf('class="locked') > 0 ) {
-        //     return false;
-        // }
-        if (UI.noTagsInSegment({area: area, starting: false })) {
-            return false;
-        }
-        return true;
+        } else return ( this.props.segment.segment.match(/&lt;.*?&gt;/gi) )
     }
 
     openStatusSegmentMenu(e) {
@@ -69,17 +57,16 @@ class SegmentBody extends React.Component {
 
     beforeRenderOrUpdate(area) {
         if ( area && area.length > 0 && this.checkLockTags(area) ) {
-            var segment = area.closest('section');
             if (LXQ.enabled()) {
-                $.powerTip.destroy($('.tooltipa', segment));
-                $.powerTip.destroy($('.tooltipas', segment));
+                $.powerTip.destroy($('.tooltipa', UI.getSegmentById(this.props.segment.sid)));
+                $.powerTip.destroy($('.tooltipas', UI.getSegmentById(this.props.segment.sid)));
             }
         }
     }
 
     afterRenderOrUpdate(area) {
         if ( area && area.length > 0 && this.checkLockTags(area)) {
-            var segment = area.closest('section');
+            var segment = UI.getSegmentById(this.props.segment.sid);
 
             if (LXQ.enabled()) {
                 LXQ.reloadPowertip(segment);
@@ -87,21 +74,22 @@ class SegmentBody extends React.Component {
             try {
                 if (UI.hasSourceOrTargetTags(segment)) {
                     segment.addClass('hasTagsToggle');
-                    UI.detectTagType(area);
+                    UI.detectTagType(segment);
 
                 } else {
                     segment.removeClass('hasTagsToggle');
                 }
 
-                if (UI.hasMissingTargetTags(segment)) {
+                if ( Object.size(this.props.segment.tagMismatch) > 0 ) {
+                    UI.markTagMismatch(this.props.segment.tagMismatch, this.props.segment.sid);
                     segment.addClass('hasTagsAutofill');
                 } else {
                     segment.removeClass('hasTagsAutofill');
                 }
+
             } catch ( e ) {
                 console.log("Fail afterRenderOrUpdate in SegmentBody component")
             }
-
         }
     }
 

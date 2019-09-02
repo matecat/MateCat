@@ -235,11 +235,12 @@ var SegmentActions = {
         });
     },
 
-    setSegmentWarnings: function(sid, warnings){
+    setSegmentWarnings: function(sid, warnings, tagMismatch){
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_WARNINGS,
             sid: sid,
-            warnings: warnings
+            warnings: warnings,
+            tagMismatch: tagMismatch
         });
     },
 

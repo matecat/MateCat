@@ -62,13 +62,11 @@ class SegmentTarget extends React.Component {
     }
 
     beforeRenderActions() {
-        var area = $("#segment-" + this.props.segment.sid + " .targetarea");
-        this.props.beforeRenderOrUpdate(area);
+        this.props.beforeRenderOrUpdate(this.props.segment.translation);
     }
 
     afterRenderActions() {
-        var area = $("#segment-" + this.props.segment.sid + " .targetarea");
-        this.props.afterRenderOrUpdate(area);
+        this.props.afterRenderOrUpdate(this.props.segment.translation);
     }
 
     onClickEvent(event) {

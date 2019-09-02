@@ -8,12 +8,12 @@ if (ReviewExtended.enabled()) {
         ReviewExtended.getSegmentsIssues();
     });
 
-    $( window ).on( 'segmentOpened', function ( e ) {
+    $( window ).on( 'segmentOpened', function ( e, data ) {
         var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) === 'true';
         if (config.isReview && panelClosed) {
-            SegmentActions.openIssuesPanel({sid:e.segment.absoluteId}, false)
+            SegmentActions.openIssuesPanel({sid: data.segmentId}, false)
         }
-        UI.getSegmentVersionsIssuesHandler(e);
+        UI.getSegmentVersionsIssuesHandler(data.segmentId);
     } );
 
     $(document).on('translation:change', function(e, data) {
