@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "de77c5e32827e32c4631ff422871f117",
+    "content-hash": "b6a41afa4d4a1c4442e76e5f7d0696cd",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -489,6 +489,55 @@
                 "sdk"
             ],
             "time": "2019-07-01T09:47:31+00:00"
+        },
+        {
+            "name": "mauretto78/whole-text-finder",
+            "version": "v1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mauretto78/whole-text-finder.git",
+                "reference": "16f1c9d6d7fd264cc428fbf40581af6210f977af"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mauretto78/whole-text-finder/zipball/16f1c9d6d7fd264cc428fbf40581af6210f977af",
+                "reference": "16f1c9d6d7fd264cc428fbf40581af6210f977af",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.15",
+                "fzaninotto/faker": "^1.8",
+                "phpstan/phpstan": "^0.11.12",
+                "phpunit/phpunit": "^8.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Finder\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mauro Cassani",
+                    "email": "maurocassani1978@gmail.com",
+                    "homepage": "https://github.com/mauretto78"
+                }
+            ],
+            "description": "A simple whole text finder written in PHP",
+            "homepage": "https://github.com/mauretto78/whole-text-finder",
+            "keywords": [
+                "php",
+                "search",
+                "text"
+            ],
+            "time": "2019-09-03T07:23:11+00:00"
         },
         {
             "name": "monolog/monolog",
