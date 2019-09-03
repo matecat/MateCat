@@ -26,7 +26,7 @@ $.extend( UI, {
          * Finish editArea Events
          */
     },
-    keydownEditAreaEventHandler: function (e) {
+    keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
         var code = e.which || e.keyCode;
         if (e.ctrlKey || e.shiftKey || e.metaKey){
             if ( code === 37 || code === 39 ) { //ctrl + left/right arrows
@@ -51,7 +51,7 @@ $.extend( UI, {
                 } else {
                     $('.selected', $(this)).remove();
                 }
-                setTimeout(()=>SegmentActions.modifiedTranslation( UI.currentSegmentId, null, true ));
+                setTimeout(()=>modifiedTranslationCallback.call());
 
                 UI.saveInUndoStack('cancel');
                 UI.segmentQA(UI.currentSegment);

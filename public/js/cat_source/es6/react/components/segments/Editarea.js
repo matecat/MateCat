@@ -106,15 +106,19 @@ class Editarea extends React.Component {
         if (!this.keyPressed && !this.compositionsStart) {
             UI.registerQACheck();
             if ( !this.props.segment.modified ) {
-                SegmentActions.modifiedTranslation(UI.getSegmentId( UI.currentSegment ),UI.getSegmentFileId(UI.currentSegment),true, this.editAreaRef.innerHTML);
+                this.modifiedTranslation();
             }
             UI.inputEditAreaEventHandler();
         }
     }
 
+    modifiedTranslation() {
+        SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true, this.editAreaRef.innerHTML);
+    }
+
     onKeyDownEvent(e) {
         this.keyPressed = true;
-        UI.keydownEditAreaEventHandler.call(this.editAreaRef, e);
+        UI.keydownEditAreaEventHandler.call(this.editAreaRef, e, this.modifiedTranslation.bind(this));
     }
     onKeyPressEvent(e) {
         UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e, this.props.segment.sid);
