@@ -14,6 +14,7 @@
         "defuse/php-encryption": "2.0.*",
         "phpmailer/phpmailer": "~5.2",
         "symfony/filesystem": "^2.8.9",
-        "symfony/console": "^2.8"
+        "symfony/console": "^2.8",
+        "mauretto78/whole-text-finder": "^1.0"
     }
 }

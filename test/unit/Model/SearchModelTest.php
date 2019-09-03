@@ -20,7 +20,7 @@ use SubFiltering\Filter;
  * ############################################
  * # TRANSLATIONS (used for target tests)     #
  * ############################################
- * - Ciao mondo 4WD &amp; ampolla
+ * - Ciao mondo 4WD &amp; ampolla %{variable}%
  * - Ciao mondo &#13;&#13;
  * - Anche questa unità ha un &quot;commento&quot;;
  * - Ciao mondo
@@ -72,8 +72,8 @@ class SearchModelTest extends AbstractTest {
      * @throws Exception
      */
     public function testSearchTarget() {
-        $this->_launchSearchAndVerifyResults( 'target', 'Ciao', 4, [ 1, 2, 4 ] );
-        $this->_launchSearchAndVerifyResults( 'target', '%', 0, [] );
+//        $this->_launchSearchAndVerifyResults( 'target', 'Ciao', 4, [ 1, 2, 4 ] );
+        $this->_launchSearchAndVerifyResults( 'target', '%', 2, [ 1 ] );
         $this->_launchSearchAndVerifyResults( 'target', '&', 1, [ 1 ] );
         $this->_launchSearchAndVerifyResults( 'target', ';', 1, [ 3 ] );
     }
@@ -84,10 +84,7 @@ class SearchModelTest extends AbstractTest {
     public function testWholeWordSearch() {
         $this->_launchSearchAndVerifyResults( 'source', 'is', 1, [ 3 ] );
         $this->_launchSearchAndVerifyResults( 'source', 'is', 0, [], true );
-
-        // if wholeWord is set to true fails!
-        // @TODO FIX THIS
-        $this->_launchSearchAndVerifyResults( 'source', 'too', 1, [ 3 ], false );
+        $this->_launchSearchAndVerifyResults( 'source', 'too', 1, [ 3 ], true );
     }
 
     /**
