@@ -95,9 +95,7 @@ $.extend(UI, {
             e.preventDefault();
         });
 	},
-	unbindShortcuts: function() {
-		$("body").off(".shortcuts").addClass('shortcutsDisabled');
-	},
+
 	setEvents: function() {
 		this.bindShortcuts();
 		this.setEditAreaEvents();
@@ -166,8 +164,6 @@ $.extend(UI, {
 		}).on('click', '#spellCheck .add', function(e) {
 			e.preventDefault();
 			UI.addWord(UI.selectedMisspelledElement.text());
-		}).on('click', '.reloadPage', function() {
-			location.reload(true);
 		});
 
 		$(window).on('mousedown', function(e) {
@@ -261,9 +257,6 @@ $.extend(UI, {
 
 
 		$('html')
-        //     .on('click', 'section .actions', function(e){
-        //     e.stopPropagation();
-        // })
             .on('keydown', function(e) {
             var esc = 27 ;
 
