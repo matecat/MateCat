@@ -272,7 +272,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $query = "INSERT INTO " . self::TABLE .
                 " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
-                VALUES %s;";
+                VALUES ";
 
         $values = [];
 

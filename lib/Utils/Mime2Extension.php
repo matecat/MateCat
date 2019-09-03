@@ -210,6 +210,10 @@ $reference = [
                         0 => 'doc',
                         1 => 'dot',
                 ],
+        'application/CDFV2-corrupt'                                                 => // NOTE 28th August 2019: this is added to accept old doc files
+                [
+                        0 => 'doc',
+                ],
         'application/mxf'                                                           =>
                 [
                         0 => 'mxf',
@@ -3123,11 +3127,10 @@ $reference = [
                 [
                         0 => 'opml',
                 ],
-//            'text/x-pascal'                    =>
-//                    array(
-//                        0 => 'p',
-//                        1 => 'pas',
-//                    ),
+        'text/x-pascal'                                                             =>
+                [
+                        0 => 'srt',
+                ],
         'text/x-po'                                                                 =>
                 [
                         0 => 'po'

@@ -483,7 +483,12 @@ class getSearchController extends ajaxController {
      */
     private function _getSearchResultsFromIds( $ids ) {
         $query = $this->searchModel->loadReplaceQueryFromIds( $ids );
+        /**
+         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
+         * @throws Exception
+         */
 
+        (new SearchModel( $this->queryParams, $filter ))->replaceAll();
         return $this->executeQuery( $query );
     }
 

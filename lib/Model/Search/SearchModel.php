@@ -387,12 +387,12 @@ class SearchModel {
         $query = "
         SELECT  st.id_segment as id, st.translation as text, sum(
 			ROUND (
-					( LENGTH( st.translation ) - LENGTH( 
+					( LENGTH( {$this->concatColumn('st.translation')} ) - LENGTH( 
                         REPLACE ( 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( st.translation ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->target}' ), ''
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), ''
                         ) 
-					) ) / LENGTH('{$this->queryParams->target}') )
+					) ) / LENGTH('{$this->getTheSpacedString($this->queryParams->target)}') )
 			) AS count
 			FROM segment_translations st
 			$ste_join
@@ -404,11 +404,11 @@ class SearchModel {
 			{$this->queryParams->where_status}
 			AND ROUND (
                         ( LENGTH( st.translation ) - LENGTH( REPLACE ( 
-                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( st.translation ), 
-                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->target}' ), 
+                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
+                            {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), 
                             ''
                             ) ) 
-                        ) / LENGTH('{$this->queryParams->target}') 
+                        ) / LENGTH('{$this->getTheSpacedString($this->queryParams->target)}') 
 			) > 0
 			$ste_where
 			GROUP BY st.id_segment WITH ROLLUP
@@ -429,12 +429,12 @@ class SearchModel {
         $query = "
         SELECT s.id, s.segment as text, sum(
 			ROUND (
-					( LENGTH( s.segment ) - LENGTH( 
+					( LENGTH( {$this->concatColumn('s.segment')}  ) - LENGTH( 
                         REPLACE ( 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( segment ), 
-                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->source}' ), ''
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('s.segment')} ), 
+                          {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->source)}' ), ''
                         ) 
-					) ) / LENGTH('{$this->queryParams->source}') )
+					) ) / LENGTH('{$this->getTheSpacedString($this->queryParams->source)}') )
 			) AS count
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
@@ -475,15 +475,15 @@ class SearchModel {
 			      '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}'
 			AND LENGTH( 
 			    REPLACE ( 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( segment ), 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->source}' ), 
+			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('segment')} ), 
+			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->source)}' ), 
 			      ''
 			    ) 
 			) != LENGTH( s.segment )
 			AND LENGTH( 
 			    REPLACE ( 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( st.translation ), 
-			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->queryParams->target}' ), 
+			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( {$this->concatColumn('st.translation')} ), 
+			      {$this->queryParams->matchCase->SQL_LENGHT_CASE}( '{$this->getTheSpacedString($this->queryParams->target)}' ), 
 			      ''
 			    ) 
 			) != LENGTH( st.translation )
@@ -599,4 +599,68 @@ class SearchModel {
         return $sql;
     }
 
+
+    /**
+     * Gets the spaced string for a search query
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    private function getTheSpacedString($string){
+        return $this->getSpacerForSearchQueries().trim($string).$this->getSpacerForSearchQueries();
+    }
+
+    /**
+     * @return string
+     */
+    private function getSpacerForSearchQueries() {
+        if ( $this->isAnExactMatchQuery() ) {
+            return ' ';
+        }
+
+        return '';
+    }
+
+    /**
+     * @return bool
+     */
+    private function isAnExactMatchQuery(){
+        $exactMatch = $this->queryParams->exactMatch;
+
+        return ( $exactMatch->Space_Left !== '' and $exactMatch->Space_Right !== '' );
+    }
+
+    /**
+     * -----------------------------------------------------------------------------------
+     * This method add a black space at the beginning and the end of column value
+     * -----------------------------------------------------------------------------------
+     *
+     * DOCUMENTATION:
+     *
+     * When we perform a "whole word" query, we need to add a black space at the beginning and at the end of the string against the query is performed. Why?
+     *
+     * Look at the example below:
+     *
+     * we are searching for "This" in "This is a test file"
+     *
+     * 1) the string, in the select query, is transformed to " This is a test file "
+     * 2) then we make word count for " This "
+     *
+     * As you can see, the blank spaces are needed, because in "whole word" queries we search for words separated by two blank spaces (" This " in our example).
+     *
+     * Otherwise, if we do not add the black spaces, no results were found:
+     *
+     * we are searching for "This" in "This is a test file"
+     *
+     * 1) the string remains as is
+     * 2) we make word count for " This "
+     *
+     * And as expected no results are found.
+     *
+     * @return string
+     */
+    private function concatColumn($column){
+        return 'CONCAT(" ", '.$column.', " " )';
+    }
 }
