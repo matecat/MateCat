@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b6a41afa4d4a1c4442e76e5f7d0696cd",
+    "content-hash": "057d277a5884b584d175905175b1a8a0",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -491,16 +491,16 @@
             "time": "2019-07-01T09:47:31+00:00"
         },
         {
-            "name": "mauretto78/whole-text-finder",
+            "name": "matecat/whole-text-finder",
             "version": "v1.0.3",
             "source": {
                 "type": "git",
-                "url": "https://github.com/mauretto78/whole-text-finder.git",
+                "url": "https://github.com/matecat/whole-text-finder.git",
                 "reference": "16f1c9d6d7fd264cc428fbf40581af6210f977af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mauretto78/whole-text-finder/zipball/16f1c9d6d7fd264cc428fbf40581af6210f977af",
+                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/16f1c9d6d7fd264cc428fbf40581af6210f977af",
                 "reference": "16f1c9d6d7fd264cc428fbf40581af6210f977af",
                 "shasum": ""
             },
