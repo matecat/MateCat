@@ -44,8 +44,8 @@ LXQ_PARTNERID = false
 
 FILE_STORAGE_METHOD = 's3'
 
-AWS_ACCESS_KEY_ID = 'xxxxxxx'
-AWS_SECRET_KEY = 'xxxxxxxxxxxx'
+;AWS_ACCESS_KEY_ID = 'xxxxxxx'
+;AWS_SECRET_KEY = 'xxxxxxxxxxxx'
 AWS_VERSION = 'latest'
 AWS_REGION = 'us-west-2'
 AWS_STORAGE_BASE_BUCKET = "xxxxxxxxxxxxxx"
@@ -101,8 +101,8 @@ LXQ_PARTNERID = false
 
 FILE_STORAGE_METHOD = 's3'
 
-AWS_ACCESS_KEY_ID = 'xxxxxxx'
-AWS_SECRET_KEY = 'xxxxxxxxxxxx'
+;AWS_ACCESS_KEY_ID = 'xxxxxxx'
+;AWS_SECRET_KEY = 'xxxxxxxxxxxx'
 AWS_VERSION = 'latest'
 AWS_REGION = 'us-west-2'
 AWS_PROFILE = 'default'
@@ -144,9 +144,9 @@ LXQ_PARTNERID = false
 
 FILE_STORAGE_METHOD = 's3'
 
-AWS_ACCESS_KEY_ID = 'xxxxxxx'
-AWS_SECRET_KEY = 'xxxxxxxxxxxx'
+;AWS_ACCESS_KEY_ID = 'xxxxxxx'
+;AWS_SECRET_KEY = 'xxxxxxxxxxxx'
 AWS_VERSION = 'latest'
 AWS_REGION = 'us-west-2'
 AWS_PROFILE = 'default'
-AWS_STORAGE_BUCKET = "storage-bucket"
+AWS_STORAGE_BASE_BUCKET = "storage-bucket"
