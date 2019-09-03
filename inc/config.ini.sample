@@ -42,7 +42,7 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 LXQ_LICENSE = false
 LXQ_PARTNERID = false
 
-$FILE_STORAGE_METHOD = 's3'
+FILE_STORAGE_METHOD = 's3'
 
 AWS_ACCESS_KEY_ID = 'xxxxxxx'
 AWS_SECRET_KEY = 'xxxxxxxxxxxx'
@@ -99,7 +99,7 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 LXQ_LICENSE = false
 LXQ_PARTNERID = false
 
-$FILE_STORAGE_METHOD = 's3'
+FILE_STORAGE_METHOD = 's3'
 
 AWS_ACCESS_KEY_ID = 'xxxxxxx'
 AWS_SECRET_KEY = 'xxxxxxxxxxxx'
@@ -142,7 +142,7 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 LXQ_LICENSE = false
 LXQ_PARTNERID = false
 
-$FILE_STORAGE_METHOD = 's3'
+FILE_STORAGE_METHOD = 's3'
 
 AWS_ACCESS_KEY_ID = 'xxxxxxx'
 AWS_SECRET_KEY = 'xxxxxxxxxxxx'
