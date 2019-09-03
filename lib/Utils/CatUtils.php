@@ -308,8 +308,8 @@ class CatUtils {
      * @deprecated because if the use of pre-formatted values
      */
     public static function getFastStatsForJob( WordCount_Struct $wCount, $performanceEstimation = true ) {
-        $job_stats            = self::getPlainStatsForJobs( $wCount );
-        $job_stats            = self::_getStatsForJob( $job_stats ); //true set estimation check if present
+        $job_stats = self::getPlainStatsForJobs( $wCount );
+        $job_stats = self::_getStatsForJob( $job_stats ); //true set estimation check if present
 
         if ( !$performanceEstimation ) {
             return $job_stats;
@@ -331,7 +331,7 @@ class CatUtils {
      */
     public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US', Filter $Filter = null ) {
 
-        if( $Filter === null ){
+        if ( $Filter === null ) {
             $Filter = SubFiltering\Filter::getInstance();
         }
 
@@ -365,7 +365,7 @@ class CatUtils {
         //take a look at this string:
         // This is a string &amp;nbsp;
         $string = html_entity_decode(
-                html_entity_decode( $string, ENT_HTML401 | ENT_QUOTES , 'UTF-8' )
+                html_entity_decode( $string, ENT_HTML401 | ENT_QUOTES, 'UTF-8' )
         );
 
         /**
@@ -398,7 +398,6 @@ class CatUtils {
             $string = preg_replace( '/\b[0-9]+(?:[\.,][0-9]+)*\b/', ' N ', $string );
 
         }
-
 
 
         return $string;
@@ -571,6 +570,28 @@ class CatUtils {
 
         return 20; //as default return a space ( should never happen )
 
+    }
+
+    /**
+     * This method is useful when in a string there is a invisible NBSP (http://www.fileformat.info/info/unicode/char/00a0/index.htm)
+     * Because invisible NBSP makes the string whitespace map wrong
+     *
+     * Transform NBSP in a single character ( Control group separator char )
+     * @see http://www.asciitable.com/
+     */
+    public static function transformNbspToInvisibleAsciiChar( $string ) {
+        return str_replace( ' ', chr( 0x1D ), $string );
+    }
+
+    /**
+     * This method is useful when in a string there is a invisible NBSP (http://www.fileformat.info/info/unicode/char/00a0/index.htm)
+     * Because invisible NBSP makes the string whitespace map wrong
+     *
+     * Transform a single character ( Control group separator char ) to original NBSP
+     * @see http://www.asciitable.com/
+     */
+    public static function transformInvisibleAsciiCharToNbsp( $string ) {
+        return str_replace( chr( 0x1D ), ' ', $string );
     }
 
     public static function htmlentitiesFromUnicode( $str ) {
@@ -749,7 +770,7 @@ class CatUtils {
             ];
         }
 
-        return $categories ;
+        return $categories;
     }
 
     /**
