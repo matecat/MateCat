@@ -166,16 +166,16 @@
         },
         {
             "name": "mauretto78/whole-text-finder",
-            "version": "v1.0.1",
+            "version": "v1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mauretto78/whole-text-finder.git",
-                "reference": "1c054906ecd7786a192976964879d8a46b06b80c"
+                "reference": "16f1c9d6d7fd264cc428fbf40581af6210f977af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mauretto78/whole-text-finder/zipball/1c054906ecd7786a192976964879d8a46b06b80c",
-                "reference": "1c054906ecd7786a192976964879d8a46b06b80c",
+                "url": "https://api.github.com/repos/mauretto78/whole-text-finder/zipball/16f1c9d6d7fd264cc428fbf40581af6210f977af",
+                "reference": "16f1c9d6d7fd264cc428fbf40581af6210f977af",
                 "shasum": ""
             },
             "require": {
@@ -211,7 +211,7 @@
                 "search",
                 "text"
             ],
-            "time": "2019-08-30T15:58:50+00:00"
+            "time": "2019-09-03T07:23:11+00:00"
         },
         {
             "name": "monolog/monolog",
