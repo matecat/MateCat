@@ -75,10 +75,11 @@ $.extend( UI, {
                 var selBound = $('.rangySelectionBoundary', UI.editarea);
                 if(undeletableMonad) selBound.prev().remove();
                 if(code == 8) { // backspace
-                    var undeletableTag = (
-                        ( $(translation[sbIndex-1]).hasClass('locked') && ($(translation[sbIndex-2]).prop("tagName") === 'BR')) ||
-                        ( ( $(translation[sbIndex-2]).hasClass("monad") || $(translation[sbIndex-2]).hasClass("locked")) && $(translation[sbIndex-1]).hasClass('undoCursorPlaceholder') )
-                    )? true : false;
+                    var undeletableTag = !!(
+                        ($( translation[sbIndex - 1] ).hasClass( 'locked' ) && ($( translation[sbIndex - 2] ).prop( "tagName" ) === 'BR')) ||
+                        (($( translation[sbIndex - 2] ).hasClass( "monad" ) || $( translation[sbIndex - 2] ).hasClass( "locked" )) && $( translation[sbIndex - 1] ).hasClass( 'undoCursorPlaceholder' )) ||
+                        ( $( translation[sbIndex - 1] ).hasClass( 'softReturn' ) && ($( translation[sbIndex - 2] ).hasClass( 'softReturn' )))
+                    );
                     if(undeletableTag) {
                         selBound.prev().remove();
                         setTimeout(()=>SegmentActions.modifiedTranslation( UI.currentSegmentId, null, true ));
@@ -102,15 +103,17 @@ $.extend( UI, {
                         restoreSelection();
                         // move selboundary after the monad
                     }
+                    // detect if selection ph is inside a monad tag
+                    if($('.monad .monad', UI.editarea).length) {
+                        saveSelection();
+                        $('.monad:has(.monad)', UI.editarea).after($('.monad .monad', UI.editarea));
+                        restoreSelection();
+                        // move selboundary after the monad
+                    }
                     var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                     var numSpacesAfter = $('.space-marker', UI.editarea).length;
-//                        var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
                     if (numTagsAfter < numTagsBefore) UI.saveInUndoStack('cancel');
                     if (numSpacesAfter < numSpacesBefore) UI.saveInUndoStack('cancel');
-//                        console.log('EE: ', UI.editarea.html());
-//                        console.log($(':focus'));
-
-
                 }, 50);
 
                 // insideMark management

@@ -354,7 +354,7 @@ UI = {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
-        node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
+        node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
@@ -366,7 +366,7 @@ UI = {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
-        node.setAttribute('class', 'monad softReturn ' + config.crPlaceholderClass);
+        node.setAttribute('class', 'monad marker softReturn ' + config.crPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
@@ -974,7 +974,7 @@ UI = {
          */
         var charCodePlaceholder = 57344;
 
-        listMainStr.forEach( ( element ) => {
+        listMainStr.forEach( function( element ) {
 
             var actualCharCode = String.fromCharCode( charCodePlaceholder );
 
@@ -994,7 +994,7 @@ UI = {
         } );
 
         var listTransDecoded = transDecoded.match( placeholderPhRegEx );
-        listTransDecoded.forEach( ( element ) => {
+        listTransDecoded.forEach( function( element ) {
 
             var actualCharCode = String.fromCharCode( charCodePlaceholder );
 
@@ -1457,7 +1457,7 @@ UI = {
 
         if (UI.logEnabled) dataMix.logs = this.extractLogs();
 
-        const mock = {
+        var mock = {
             ERRORS: {
                 categories: {
                     'TAG': ['23853','23854','23855','23856','23857'],
@@ -2276,7 +2276,7 @@ UI = {
         CatToolActions.closeSubHeader();
     },
 
-    showFixWarningsOnDownload( continueDownloadFunction ) {
+    showFixWarningsOnDownload: function( continueDownloadFunction ) {
         APP.confirm({
             name: 'confirmDownload', // <-- this is the name of the function that gets invoked?
             cancelTxt: 'Fix errors',
