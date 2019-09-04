@@ -2304,8 +2304,6 @@ class ProjectManager {
      */
     protected function _strip_external( $segment ) {
 
-        $segment = CatUtils::transformNbspToInvisibleAsciiChar( $segment );
-
         if ( $this->features->filter( 'skipTagLessFeature', false, $segment ) ) {
             return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
         }
@@ -2332,7 +2330,7 @@ class ProjectManager {
         // - Why scan entire string if the fist char is not a less-than sign? We can't strip nothing
         // - Why continue if the first char is a less-than sign but we realize that it is not a tag?
 
-        $segmentLength = mb_strlen( $segment );
+        $segmentLength = strlen( $segment );
 
         // This is the fastest way I found to spot Unicode whitespaces in the string.
         // Removing this step gives a gain of 7% in speed.
@@ -2342,7 +2340,7 @@ class ProjectManager {
                 // All the bytes in the matched groups are whitespaces and must be
                 // ignored in the next steps
                 $start = $match[ 1 ];
-                $end   = $start + mb_strlen( $match[ 0 ] );
+                $end   = $start + strlen( $match[ 0 ] );
                 for ( $i = $start; $i < $end; $i++ ) {
                     $isSpace[ $i ] = true;
                 }
@@ -2477,11 +2475,6 @@ class ProjectManager {
             $before       = substr( $segment, 0, $segStart );
             $cleanSegment = substr( $segment, $segStart, $segEnd - $segStart + 1 );
             $after        = substr( $segment, $segEnd + 1 );
-
-            //this is not a simple space, we need to replace NBSP characters
-            $before       = CatUtils::transformInvisibleAsciiCharToNbsp( $before );
-            $cleanSegment = CatUtils::transformInvisibleAsciiCharToNbsp( $cleanSegment );
-            $after        = CatUtils::transformInvisibleAsciiCharToNbsp( $after );
 
             // Following line needed in case $segEnd points to the last char of $segment
             if ( $after === false ) {
