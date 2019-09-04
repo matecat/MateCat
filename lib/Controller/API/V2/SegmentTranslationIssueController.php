@@ -6,8 +6,8 @@ use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\Validators\JobPasswordValidator;
 use Database;
+use LQA\EntryDao as EntryDao;
 use Features\SecondPassReview;
-use LQA\EntryDao;
 use LQA\EntryStruct;
 use RevisionFactory;
 

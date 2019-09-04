@@ -6,7 +6,6 @@ namespace Translations ;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
 use Jobs\WarningsCountStruct;
-use PDO;
 
 class WarningDao extends \DataAccess_AbstractDao {
 

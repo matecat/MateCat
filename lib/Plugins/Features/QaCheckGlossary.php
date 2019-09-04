@@ -2,15 +2,11 @@
 
 namespace Features;
 
-use TaskRunner\Commons\QueueElement;
-use Translations\WarningModel;
-use Translations\WarningStruct;
+use AMQHandler;
 use QA;
-
-use Translations\WarningDao ;
-
-use AMQHandler ;
-use WorkerClient ;
+use TaskRunner\Commons\QueueElement;
+use Translations\WarningDao;
+use WorkerClient;
 
 class QaCheckGlossary extends BaseFeature {
 

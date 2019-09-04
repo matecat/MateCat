@@ -70,7 +70,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
                         CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
                         CURLOPT_SSL_VERIFYPEER => true,
                         CURLOPT_SSL_VERIFYHOST => 2,
-                        CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( "admin:admin" ) ]
+                        CURLOPT_HTTPHEADER     => array( 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) )
                 ]
         );
         $curl->multiExec();

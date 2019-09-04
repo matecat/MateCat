@@ -9,10 +9,9 @@
  */
 
 namespace Contribution;
-use \Exception,
-        \Log,
-        \WorkerClient
-    ;
+use Exception;
+use Log;
+use WorkerClient;
 
 /**
  * Class Set

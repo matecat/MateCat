@@ -9,7 +9,4 @@
 
 namespace Features\Mmt\Decorator;
 
-use AbstractDecorator;
-use Features\Mmt\Utils\Routes;
-
 class CatDecorator extends NewProjectDecorator {}

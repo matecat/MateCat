@@ -3,13 +3,12 @@
 
 namespace Features\SegmentFilter\Controller\API;
 
+use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
-use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkStruct;
+use Features\SegmentFilter\Model\FilterDefinition;
 use Features\SegmentFilter\Model\SegmentFilterModel;
-
-use Features\SegmentFilter\Model\FilterDefinition ;
 
 
 class FilterController extends KleinController {

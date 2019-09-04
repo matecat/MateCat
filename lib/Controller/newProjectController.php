@@ -1,10 +1,8 @@
 <?php
 
 
-use ConnectedServices\GDrive;
-
-use LexiQA\LexiQADecorator;
 use Engines_Intento as Intento;
+use LexiQA\LexiQADecorator;
 
 class newProjectController extends viewController {
 

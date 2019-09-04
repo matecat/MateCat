@@ -8,11 +8,6 @@
 
 namespace ConnectedServices\GDrive;
 
-use API\App\Json\ConnectedService as ConnectedServiceFormatter;
-use API\App\Json\ConnectedService;
-use API\V2\KleinController;
-use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\ConnectedServiceStruct;
 use ConnectedServices\GDriveUserAuthorizationModel;
 
 class OAuthController extends \BaseKleinViewController

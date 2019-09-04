@@ -9,13 +9,12 @@
 
 namespace AsyncTasks\Workers;
 
+use PHPMailer;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-
-use \PHPMailer;
 
 class MailWorker extends AbstractWorker {
 

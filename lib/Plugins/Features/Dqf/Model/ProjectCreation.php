@@ -7,7 +7,6 @@ namespace Features\Dqf\Model ;
 use Database;
 use Exception;
 use Features\Dqf\Service\MasterProject;
-use Features\Dqf\Service\AbstractProjectFiles;
 use Features\Dqf\Service\MasterProjectFiles;
 use Features\Dqf\Service\MasterProjectReviewSettings;
 use Features\Dqf\Service\MasterProjectSegmentsBatch;

@@ -5,15 +5,17 @@
         "onelogin/php-saml": "^2.13"
     },
     "require": {
-        "php": ">=5.5.0",
-        "phpoffice/phpexcel": "~1.8.1",
-        "klein/klein": "^2.1",
-        "psr/log": "~1.0",
-        "monolog/monolog": "1.17.*",
         "google/apiclient": "1.1.7",
-        "defuse/php-encryption": "2.0.*",
+        "klein/klein": "^2.1",
+        "matecat/simple-s3": "^1.5",
+        "monolog/monolog": "1.17.*",
+        "php": ">=5.5.0",
         "phpmailer/phpmailer": "~5.2",
+        "phpoffice/phpexcel": "~1.8.1",
+        "psr/log": "~1.0",
+        "symfony/console": "^2.8",
         "symfony/filesystem": "^2.8.9",
-        "symfony/console": "^2.8"
+        "defuse/php-encryption": "2.0.*",
+        "mauretto78/whole-text-finder": "^1.0"
     }
 }

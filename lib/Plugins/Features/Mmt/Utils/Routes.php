@@ -9,7 +9,7 @@
 
 namespace Features\Mmt\Utils;
 
-use \Routes as DefaultRoutes;
+use Routes as DefaultRoutes;
 
 class Routes {
 

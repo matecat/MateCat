@@ -9,6 +9,7 @@ class Files_FileStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     public $source_language ;
     public $mime_type ;
     public $sha1_original_file ;
+    public $is_converted ;
 
     public function getSegmentsCount() {
         return ( new Segments_SegmentDao() )->countByFile( $this );

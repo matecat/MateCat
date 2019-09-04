@@ -11,8 +11,8 @@
 
 namespace Predis\Response\Iterator;
 
-use OuterIterator;
 use InvalidArgumentException;
+use OuterIterator;
 use UnexpectedValueException;
 
 /**
