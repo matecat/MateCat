@@ -484,7 +484,7 @@ UI = {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
-        node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
+        node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
@@ -496,7 +496,7 @@ UI = {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
-        node.setAttribute('class', 'monad softReturn ' + config.crPlaceholderClass);
+        node.setAttribute('class', 'monad marker softReturn ' + config.crPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
