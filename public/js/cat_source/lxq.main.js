@@ -1350,7 +1350,8 @@ LXQ.init  = function () {
                             }
 
                             //highlight the segments
-                            source_val = $( ".source", segment ).html();
+                            var segmentObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
+                            source_val = segmentObj.decoded_source;
                             var highlights = {
                                 source: {
                                     numbers: [],
