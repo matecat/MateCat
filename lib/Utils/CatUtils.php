@@ -572,28 +572,6 @@ class CatUtils {
 
     }
 
-    /**
-     * This method is useful when in a string there is a invisible NBSP (http://www.fileformat.info/info/unicode/char/00a0/index.htm)
-     * Because invisible NBSP makes the string whitespace map wrong
-     *
-     * Transform NBSP in a single character ( Control group separator char )
-     * @see http://www.asciitable.com/
-     */
-    public static function transformNbspToInvisibleAsciiChar( $string ) {
-        return str_replace( ' ', chr( 0x1D ), $string );
-    }
-
-    /**
-     * This method is useful when in a string there is a invisible NBSP (http://www.fileformat.info/info/unicode/char/00a0/index.htm)
-     * Because invisible NBSP makes the string whitespace map wrong
-     *
-     * Transform a single character ( Control group separator char ) to original NBSP
-     * @see http://www.asciitable.com/
-     */
-    public static function transformInvisibleAsciiCharToNbsp( $string ) {
-        return str_replace( chr( 0x1D ), ' ', $string );
-    }
-
     public static function htmlentitiesFromUnicode( $str ) {
         return "&#" . self::fastUnicode2ord( $str[ 1 ] ) . ";";
     }
