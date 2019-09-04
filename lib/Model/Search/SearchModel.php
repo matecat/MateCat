@@ -11,12 +11,11 @@ namespace Search;
 
 use Database;
 use Exception;
-use Finder\WholeTextFinder;
 use Log;
+use Matecat\Finder\WholeTextFinder;
 use PDO;
 use PDOException;
 use SubFiltering\Filter;
-use Search_ReplaceHistory;
 use Utils;
 
 class SearchModel {
