@@ -7,6 +7,7 @@ const $ = require('jquery');
 const SegmentConstants = require('../../constants/SegmentConstants');
 const SegmentStore = require('../../stores/SegmentStore');
 const Immutable = require('immutable');
+const EditArea = require('./utils/editarea');
 class Editarea extends React.Component {
 
     constructor(props) {
@@ -119,11 +120,11 @@ class Editarea extends React.Component {
 
     onKeyDownEvent(e) {
         this.keyPressed = true;
-        UI.keydownEditAreaEventHandler.call(this.editAreaRef, e, this.modifiedTranslation.bind(this));
+        EditArea.keydownEditAreaEventHandler.call(this.editAreaRef, e, this.modifiedTranslation.bind(this));
         this.openConcordance(e);
     }
     onKeyPressEvent(e) {
-        UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e, this.props.segment.sid);
+        EditArea.keyPressEditAreaEventHandler.call(this.editAreaRef, e, this.props.segment.sid);
     }
     onKeyUpEvent(e) {
         this.keyPressed = false;
@@ -131,12 +132,12 @@ class Editarea extends React.Component {
     }
     onCompositionStartEvent() {
         this.compositionsStart = true;
-        this.setEditAreaEditing(true);
+        EditArea.setEditAreaEditing(true);
         console.log('CompositionEvent START');
     }
     onCompositionEndEvent() {
         this.compositionsStart = false;
-        this.setEditAreaEditing(false);
+        EditArea.setEditAreaEditing(false);
         console.log('CompositionEvent END');
     }
     onCopyText(e) {
@@ -152,17 +153,17 @@ class Editarea extends React.Component {
         }
     }
     onPasteEvent(e) {
-        UI.pasteEditAreaEventHandler.call(this.editAreaRef, e.nativeEvent);
+        EditArea.pasteEditAreaEventHandler(e.nativeEvent);
 		// this.emitTrackChanges();
     }
     onDragEvent(e) {
         UI.handleDragEvent(e);
         this.draggingFromEditArea = true;
-        this.setEditAreaEditing(true);
+        EditArea.setEditAreaEditing(true);
     }
     onDragEnd() {
         this.draggingFromEditArea = false;
-        this.setEditAreaEditing(false);
+        EditArea.setEditAreaEditing(false);
 
     }
     onDropEvent(e) {
@@ -197,7 +198,7 @@ class Editarea extends React.Component {
     }
     setEditAreaEditing(editAreaIsEditing){
         this.editAreaIsEditing = editAreaIsEditing;
-        UI.setEditAreaEditing(editAreaIsEditing);
+        EditArea.setEditAreaEditing(editAreaIsEditing);
     }
     saveCursorPosition(containerEl) {
         var sel = window.getSelection && window.getSelection();

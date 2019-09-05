@@ -38,7 +38,6 @@ $.extend(UI, {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function (str) {
-        if(!UI.hiddenTextEnabled) return str;
         var _str = str;
         if(UI.markSpacesEnabled) {
             if(jumpSpacesEncode) {

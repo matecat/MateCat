@@ -1915,12 +1915,6 @@ UI = {
         return deferred.resolve();
     },
 
-	unnestMarkers: function() {
-		$('.editor .editarea .marker .marker').each(function() {
-			$(this).parents('.marker').after($(this));
-		});
-	},
-
 	processErrors: function(err, operation) {
 		$.each(err, function() {
 		    var codeInt = parseInt( this.code );
@@ -2268,7 +2262,10 @@ UI = {
      */
     execReplaceAll: function() {
         SearchUtils.execReplaceAll();
-    }
+    },
+    inputEditAreaEventHandler: function (e) {
+        UI.currentSegment.trigger('modified');
+    },
 };
 
 $(document).ready(function() {

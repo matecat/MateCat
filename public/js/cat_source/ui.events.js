@@ -98,7 +98,6 @@ $.extend(UI, {
 
 	setEvents: function() {
 		this.bindShortcuts();
-		this.setEditAreaEvents();
         var resetTextArea = _.debounce( function () {
             console.debug( 'resetting') ;
             var $this = $(this);
