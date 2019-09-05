@@ -7,10 +7,7 @@ $.extend( UI, {
         /**
          * Start EditArea Events Shortcuts
          */
-        $("#outer").on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.cattol.events.searchInConcordance.keystrokes.mac, function(e) {
-            e.preventDefault();
-            UI.preOpenConcordance();
-        }).on('keydown', '.editor .editarea', 'shift+return', function(e) {
+        $("#outer").on('keydown', '.editor .editarea', 'shift+return', function(e) {
             e.preventDefault();
             UI.handleSoftReturn(e);
         }).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
@@ -25,6 +22,28 @@ $.extend( UI, {
         /**
          * Finish editArea Events
          */
+    },
+    handleSoftReturn: function(e) {
+        if(!this.hiddenTextEnabled) return;
+        e.preventDefault();
+        var node = document.createElement("span");
+        var br = document.createElement("br");
+        node.setAttribute('class', 'monad marker softReturn ' + config.crPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.appendChild(br);
+        insertNodeAtCursor(node);
+        this.unnestMarkers();
+    },
+    handleReturn: function(e) {
+        if(!this.hiddenTextEnabled) return;
+        e.preventDefault();
+        var node = document.createElement("span");
+        var br = document.createElement("br");
+        node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.appendChild(br);
+        insertNodeAtCursor(node);
+        this.unnestMarkers();
     },
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
         var code = e.which || e.keyCode;

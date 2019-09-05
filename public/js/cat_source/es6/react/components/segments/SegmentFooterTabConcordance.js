@@ -37,7 +37,7 @@ class SegmentFooterTabConcordance extends React.Component {
 
     findConcordance(sid, data) {
         if (this.props.id_segment == sid) {
-            if (data.inTarget === 1) {
+            if (data.inTarget) {
                 this.setState({
                     source: '',
                     target: data.text,
@@ -50,7 +50,7 @@ class SegmentFooterTabConcordance extends React.Component {
                     results: []
                 });
             }
-            this.searchSubmit();
+            setTimeout(()=>this.searchSubmit());
         }
     }
 

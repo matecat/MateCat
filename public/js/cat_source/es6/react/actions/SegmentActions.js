@@ -579,6 +579,11 @@ var SegmentActions = {
         });
     },
 
+    openConcordance: function(sid, currentSelectedText, inTarget) {
+        SegmentActions.activateTab(sid, 'concordances');
+        SegmentActions.findConcordance(sid, {text: currentSelectedText, inTarget: inTarget});
+    },
+
     findConcordance: function ( sid, data ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.FIND_CONCORDANCE,

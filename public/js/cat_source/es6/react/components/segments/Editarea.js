@@ -22,6 +22,7 @@ class Editarea extends React.Component {
         this.onKeyDownEvent = this.onKeyDownEvent.bind(this);
         this.onKeyPressEvent = this.onKeyPressEvent.bind(this);
         this.onPasteEvent = this.onPasteEvent.bind(this);
+        this.openConcordance = this.openConcordance.bind(this);
         this.onInputDebounced = _.debounce(this.onInputEvent, 500);
         this.keyPressed = false;
     }
@@ -119,6 +120,7 @@ class Editarea extends React.Component {
     onKeyDownEvent(e) {
         this.keyPressed = true;
         UI.keydownEditAreaEventHandler.call(this.editAreaRef, e, this.modifiedTranslation.bind(this));
+        this.openConcordance(e);
     }
     onKeyPressEvent(e) {
         UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e, this.props.segment.sid);
@@ -179,6 +181,19 @@ class Editarea extends React.Component {
                 $(self.editAreaRef).find('span[style][class~=locked]').removeAttr('style');
             }
         });
+    }
+    openConcordance(e) {
+        if (e.altKey && e.key === 'k') {
+            e.preventDefault();
+            var selection = window.getSelection();
+            if ( selection.type === 'Range' ) { // something is selected
+                var str = selection.toString().trim();
+                if ( str.length ) { // the trimmed string is not empty
+                    SegmentActions.openConcordance( this.props.segment.sid, str, true );
+                }
+            }
+        }
+
     }
     setEditAreaEditing(editAreaIsEditing){
         this.editAreaIsEditing = editAreaIsEditing;
@@ -256,9 +271,12 @@ class Editarea extends React.Component {
     }
 
     componentDidMount() {
+        this.$editArea = $(this.editAreaRef);
+
         Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
+
     }
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);

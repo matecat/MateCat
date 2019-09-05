@@ -2,6 +2,7 @@ SSE = {
     init: function () {
         // TODO configure this
         this.baseURL = config.sse_base_url;
+        this.initEvents();
     },
     getSource: function ( what ) {
         var source = '';
@@ -20,6 +21,11 @@ SSE = {
             return new EventSource( '//' + SSE.baseURL + source );
         }
 
+    },
+    initEvents: function (  ) {
+        $( document ).on( 'sse:concordance', function ( ev, message ) {
+            SegmentActions.setConcordanceResult(message.data.id_segment, message.data);
+        } );
     }
 };
 

@@ -20,6 +20,7 @@ class SegmentSource extends React.Component {
         this.decodeTextSource = this.decodeTextSource.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
+        this.openConcordance = this.openConcordance.bind(this);
 
         this.beforeRenderActions();
     }
@@ -137,18 +138,35 @@ class SegmentSource extends React.Component {
         return source;
     }
 
+    openConcordance(e) {
+        e.preventDefault();
+        var selection = window.getSelection();
+        if (selection.type === 'Range') { // something is selected
+            var str = selection.toString().trim();
+            if (str.length) { // the trimmed string is not empty
+                SegmentActions.openConcordance(this.props.segment.sid, str, false);
+            }
+        }
+    }
+
     componentDidMount() {
-        $(this.source).on('click', 'mark.inGlossary',  ( e ) => {
+        this.$source = $(this.source);
+
+        this.$source.on('click', 'mark.inGlossary',  ( e ) => {
             e.preventDefault();
             SegmentActions.activateTab(this.props.segment.sid, 'glossary');
         });
 
         this.afterRenderActions();
+
+        this.$source.on('keydown', null, UI.shortcuts.cattol.events.searchInConcordance.keystrokes.mac, this.openConcordance);
     }
 
     componentWillUnmount() {
-        $(this.source).off('click', 'mark.inGlossary');
-        $.powerTip.destroy($('.blacklistItem', $(this.source)));
+        this.$source.off('click', 'mark.inGlossary');
+        $.powerTip.destroy($('.blacklistItem', this.$source));
+
+        this.$source.on('keydown', this.openConcordance);
     }
     getSnapshotBeforeUpdate() {
         this.beforeRenderActions();
