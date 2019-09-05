@@ -1,4 +1,3 @@
-import Editarea from "../Editarea";
 
 let EditArea = {
 

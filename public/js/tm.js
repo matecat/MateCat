@@ -2189,11 +2189,11 @@
             }
             UI.crossLanguageSettings = {primary: primary, secondary: secondary};
             localStorage.setItem("multiMatchLangs", JSON.stringify(UI.crossLanguageSettings));
-            if ( UI.getContribution ) {
+            if ( SegmentActions.getContribution ) {
                 if ( primary ) {
                     SegmentActions.modifyTabVisibility( 'multiMatches', true );
                     $( 'section.loaded' ).removeClass( 'loaded' );
-                    UI.getContribution( UI.currentSegment, 0 );
+                    SegmentActions.getContribution( UI.currentSegmentId);
                 } else {
                     SegmentActions.modifyTabVisibility( 'multiMatches', false );
                 }

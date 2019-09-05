@@ -6,6 +6,7 @@ const React = require('react');
 const SegmentConstants = require('../../constants/SegmentConstants');
 const SegmentStore = require('../../stores/SegmentStore');
 const Immutable = require('immutable');
+const TranslationMatches = require('./utils/translationMatches');
 
 class SegmentFooterTabMatches extends React.Component {
 
@@ -94,8 +95,8 @@ class SegmentFooterTabMatches extends React.Component {
         UI.editarea.focus();
         UI.disableTPOnSegment();
         setTimeout(function () {
-            UI.setChosenSuggestion(index);
-            UI.copySuggestionInEditarea(UI.currentSegment, $(ulDataItem + index + '] li.b .translation').html(),
+            TranslationMatches.setChosenSuggestion(index);
+            TranslationMatches.copySuggestionInEditarea(UI.currentSegment, $(ulDataItem + index + '] li.b .translation').html(),
                 $('.editor .editarea'), $(ulDataItem + index + '] ul.graysmall-details .percent').text(), index, $(ulDataItem + index + '] li.graydesc .bold').text());
             SegmentActions.highlightEditarea(self.props.id_segment);
         }, 200);

@@ -142,6 +142,10 @@ class SegmentBody extends React.Component {
 
             }
     }
+    copySource(e) {
+        e.preventDefault();
+        UI.copySource();
+    }
 
     componentDidMount() {
         document.addEventListener('mousedown', this.handleClickOutside);
@@ -169,7 +173,7 @@ class SegmentBody extends React.Component {
                             afterRenderOrUpdate={this.afterRenderOrUpdate}
                             beforeRenderOrUpdate={this.beforeRenderOrUpdate}
                         />
-                        <div className="copy" title="Copy source to target">
+                        <div className="copy" title="Copy source to target" onClick={(e)=>this.copySource(e)}>
                             <a href="#"/>
                             <p>{copySourceShortcuts.toUpperCase()}</p>
                         </div>

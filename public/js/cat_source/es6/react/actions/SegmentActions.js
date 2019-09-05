@@ -13,7 +13,7 @@ const AppDispatcher = require('../dispatcher/AppDispatcher');
 const SegmentConstants = require('../constants/SegmentConstants');
 const SegmentStore = require('../stores/SegmentStore');
 const GlossaryUtils = require('../components/segments/utils/glossaryUtils');
-
+const TranslationMatches = require('../components/segments/utils/translationMatches');
 
 var SegmentActions = {
     /********* SEGMENTS *********/
@@ -402,7 +402,7 @@ var SegmentActions = {
         });
     },
     deleteContribution: function(source, target, matchId, sid) {
-        UI.setDeleteSuggestion(source, target, matchId, sid).done((data) => {
+        TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).done((data) => {
             if (data.errors.length === 0) {
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.DELETE_CONTRIBUTION,
@@ -592,10 +592,19 @@ var SegmentActions = {
         });
     },
 
-    getContributions: function (sid, fid, target) {
-        UI.getContribution(sid, 0);
-        UI.getContribution(sid, 1);
-        UI.getContribution(sid, 2);
+    getContributions: function (sid) {
+        TranslationMatches.getContribution(sid, 0);
+        TranslationMatches.getContribution(sid, 1);
+        TranslationMatches.getContribution(sid, 2);
+    },
+
+    getContribution: function (sid) {
+        TranslationMatches.getContribution(sid, 0);
+    },
+
+    getContributionsSuccess: function(data, sid) {
+        UI.addInStorage('contribution-' + config.id_job + '-' + sid, JSON.stringify(data), 'contribution');
+        TranslationMatches.processContributions(data, UI.getSegmentById(sid));
     },
 
     setConcordanceResult: function (sid, data) {

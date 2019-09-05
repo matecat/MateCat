@@ -245,6 +245,10 @@ UI = {
         SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         UI.setSegmentModified(UI.currentSegment, true);
         this.segmentQA(UI.currentSegment );
+        if (config.translation_matches_enabled) {
+            SegmentActions.setChoosenSuggestion(currentSegmentId, index);
+            UI.setChosenSuggestion(UI.currentSegmentId, 0);
+        }
         $(this.currentSegment).trigger('copySourceToTarget');
 
         if(!config.isReview) {
@@ -1893,26 +1897,6 @@ UI = {
 
     targetContainerSelector : function() {
         return '.targetarea';
-    },
-
-    /**
-     * Method overwritten in the file ui.contribution.js
-     */
-    processContributions : function() {
-    },
-
-    /**
-     * This function is overwritten in ui.contribution.js. This version is meant to be used by
-     * customisations that do not make use of contributions.
-     *
-     * @param segment
-     * @param next
-     */
-    getContribution : function(segment, next) {
-        SegmentActions.addClassToSegment( UI.getSegmentId( segment ), 'loaded' ) ;
-        this.segmentQA(segment);
-        var deferred = new jQuery.Deferred() ;
-        return deferred.resolve();
     },
 
 	processErrors: function(err, operation) {

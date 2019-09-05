@@ -329,10 +329,7 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             UI.markSelectedTag( $( this ) );
-        }).on('click', '.editor .outersource .copy', function(e) {
-			e.preventDefault();
-			UI.copySource();
-		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
+        }).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
 			return false;
         }).on('keydown', function(e) {
             if((e.which == 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {

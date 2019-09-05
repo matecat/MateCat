@@ -26,6 +26,34 @@ SSE = {
         $( document ).on( 'sse:concordance', function ( ev, message ) {
             SegmentActions.setConcordanceResult(message.data.id_segment, message.data);
         } );
+
+
+        if (config.translation_matches_enabled) {
+
+            $( document ).on( 'sse:contribution', function ( ev, message ) {
+                var segment = SegmentStore.getSegmentByIdToJS(message.data.id_segment);
+                if ( segment && segment.splitted ) {
+                    var segments = SegmentStore.getSegmentsSplitGroup(message.data.id_segment);
+                    segments.forEach( function (item) {
+                        SegmentActions.getContributionsSuccess( message.data, item.sid );
+                    } );
+                } else if ( segment ) {
+                    SegmentActions.getContributionsSuccess( message.data, message.data.id_segment );
+                }
+            } );
+
+            $( document ).on( 'sse:cross_language_matches', function ( ev, message ) {
+                var segment = SegmentStore.getSegmentByIdToJS(message.data.id_segment);
+                if ( segment && segment.splitted ) {
+                    var segments = SegmentStore.getSegmentsSplitGroup(message.data.id_segment);
+                    segments.forEach( function (item) {
+                        SegmentActions.setSegmentCrossLanguageContributions( item.sid, segment.id_file, message.data.matches, [] );
+                    } );
+                } else if ( segment ) {
+                    SegmentActions.setSegmentCrossLanguageContributions( message.data.id_segment, segment.id_file, message.data.matches, [] );
+                }
+            } );
+        }
     }
 };
 
