@@ -1,4 +1,4 @@
-SSE = {
+let SSE = {
     init: function () {
         // TODO configure this
         this.baseURL = config.sse_base_url;
@@ -54,22 +54,22 @@ SSE = {
                 }
             } );
         }
+    },
+
+    Message: function ( data ) {
+        this._type = data._type;
+        this.data = data;
+        this.types = [ 'comment', 'ack', 'contribution', 'concordance', 'bulk_segment_status_change', 'cross_language_matches' ];
+        this.eventIdentifier = 'sse:' + this._type;
+
+        this.isValid = function () {
+
+            return (this.types.indexOf( this._type ) !== -1);
+        }
     }
 };
 
-SSE.Message = function ( data ) {
-    this._type = data._type;
-    this.data = data;
-    this.types = [ 'comment', 'ack', 'contribution', 'concordance', 'bulk_segment_status_change', 'cross_language_matches' ];
-    this.eventIdentifier = 'sse:' + this._type;
-
-    this.isValid = function () {
-
-        return (this.types.indexOf( this._type ) !== -1);
-    }
-};
-
-NOTIFICATIONS = {
+let NOTIFICATIONS = {
     start: function () {
         var self = this;
         SSE.init();
@@ -108,3 +108,5 @@ NOTIFICATIONS = {
         } );
     }
 };
+
+module.exports = NOTIFICATIONS;

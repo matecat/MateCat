@@ -36,7 +36,7 @@ $.extend(UI, {
             $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();
         }
-        NOTIFICATIONS.start();
+        CatToolActions.startNotifications();
         UI.checkTagProximity =  _.debounce( UI.checkTagProximityFn, 500);
         UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
     },
