@@ -11,7 +11,7 @@ namespace Search;
 
 use Database;
 use Exception;
-use Finder\WholeTextFinder;
+use Matecat\Finder\WholeTextFinder;
 use Log;
 use PDO;
 use PDOException;
