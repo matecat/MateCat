@@ -409,18 +409,24 @@ class S3FilesStorage extends AbstractFilesStorage {
         $fileMap       = unserialize( ( new RedisHandler() )->getConnection()->hget( $redisPosition, 'file_map' ) );
 
         foreach ( $fileMap as $hashName => $fileNameList ) {
-            // this method get the content from the hashes map file and convert it into an array of original file names
-            // Example:
-            //
-            // 'file.txt'
-            // 'file2.txt'
-            // ==>
-            // [
-            //     0 => 'file.txt',
-            //     1 => 'file2.txt'
-            // ]
-            $filesHashInfo[ 'sha' ][]                 = $hashName;
-            $filesHashInfo[ 'fileName' ][ $hashName ] = $fileMap[ $hashName ];
+
+            if ( strpos( $hashName, $this->getOriginalZipPlaceholder() ) !== false ) {
+                $zipFilesHash[] = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . "cache" . DIRECTORY_SEPARATOR . $this->getTheLastPartOfKey( $hashName );
+            } else {
+                // this method get the content from the hashes map file and convert it into an array of original file names
+                // Example:
+                //
+                // 'file.txt'
+                // 'file2.txt'
+                // ==>
+                // [
+                //     0 => 'file.txt',
+                //     1 => 'file2.txt'
+                // ]
+                $filesHashInfo[ 'sha' ][]                 = $hashName;
+                $filesHashInfo[ 'fileName' ][ $hashName ] = $fileMap[ $hashName ];
+            }
+
         }
 
         return [
@@ -545,22 +551,26 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         unlink( $zipPath );
 
+        //link this zip to the upload directory by creating a file name as the ash of the zip file
+        touch( dirname( $zipPath ) . DIRECTORY_SEPARATOR . $hash . $this->getOriginalZipPlaceholder() );
+
         return true;
     }
 
     /**
      * @param $create_date
-     * @param $zipHash
+     * @param $zipHashF
      * @param $projectID
      *
      * @return bool
      * @throws \Exception
      */
     public function linkZipToProject( $create_date, $zipHash, $projectID ) {
-        $cacheZipPackage = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . $zipHash . $this->getOriginalZipPlaceholder();
+        $cacheZipPackage = $zipHash;
 
         foreach ( $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $cacheZipPackage ] ) as $key ) {
-            $destination = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getOriginalZipPath( $create_date, $projectID, $this->getTheLastPartOfKey( $key ) );
+
+            $destination = self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getDatePath( $create_date ) . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $this->getTheLastPartOfKey( $key );
 
             $copied = $this->s3Client->copyItem( [
                     'source_bucket' => static::$FILES_STORAGE_BUCKET,
@@ -591,7 +601,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return string
      */
     public function getOriginalZipPath( $projectDate, $projectID, $zipName ) {
-        return $this->getOriginalZipDir( $projectDate, $projectID ) . DIRECTORY_SEPARATOR . $zipName;
+        return self::ZIP_FOLDER . DIRECTORY_SEPARATOR . $this->getDatePath( $projectDate ) . DIRECTORY_SEPARATOR . $projectID . DIRECTORY_SEPARATOR . $zipName;
     }
 
     /**

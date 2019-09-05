@@ -6,6 +6,7 @@ use ConnectedServices\GDrive;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use SimpleS3\Client;
 use XliffReplacer\XliffReplacerFactory;
 
 set_time_limit( 180 );
@@ -680,11 +681,19 @@ class downloadFileController extends downloadController {
 
         $project = Projects_ProjectDao::findById( $this->job[ 'id_project' ] );
 
-        $fs      = FilesStorageFactory::create();
-        $zipFile = $fs->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
-
+        // this is the filesystem path
+        $zipFile  = (new FilesStorage\FsFilesStorage())->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
         $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
-        copy( $zipFile, $tmpFName );
+
+        $isFsOnS3 = AbstractFilesStorage::isOnS3();
+        if ( $isFsOnS3 and false === file_exists( $zipFile ) ) {
+            // transfer zip file to tmp path
+            $fs = FilesStorageFactory::create();
+            $zipPath = $fs->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
+            $this->transferZipFromS3ToTmpDir( $zipPath, $tmpFName );
+        } else {
+            copy( $zipFile, $tmpFName );
+        }
 
         $zip = new ZipArchiveExtended();
         if ( $zip->open( $tmpFName ) ) {
@@ -747,4 +756,22 @@ class downloadFileController extends downloadController {
 
     }
 
+    /**
+     * @param $zipPath
+     * @param $tmpDir
+     *
+     * @throws ReflectionException
+     * @throws \Predis\Connection\ConnectionException
+     */
+    public function transferZipFromS3ToTmpDir( $zipPath, $tmpDir ) {
+
+        Log::doJsonLog("Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir);
+
+        /** @var $s3Client Client */
+        $s3Client = S3FilesStorage::getStaticS3Client();
+        $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
+        $params[ 'key' ]     = $zipPath;
+        $params[ 'save_as' ] = $tmpDir;
+        $s3Client->downloadItem( $params );
+    }
 }

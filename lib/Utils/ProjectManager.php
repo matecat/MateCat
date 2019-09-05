@@ -470,7 +470,7 @@ class ProjectManager {
             }
         }
 
-        $this->projectStructure[ 'array_files' ] = $sortedFiles;
+        $this->projectStructure[ 'array_files' ]      = $sortedFiles;
         $this->projectStructure[ 'array_files_meta' ] = $sortedMeta;
         unset( $sortedFiles );
         unset( $sortedMeta );
@@ -728,7 +728,7 @@ class ProjectManager {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
-                if( INIT::$FILE_STORAGE_METHOD != 's3' ){
+                if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
                 }
             } elseif ( $e->getCode() == -4 ) {
@@ -838,8 +838,8 @@ class ProjectManager {
     public function getSingleS3QueueFile( $fileName ) {
         $fs = FilesStorageFactory::create();
 
-        if(false === is_dir($this->uploadDir)){
-            mkdir($this->uploadDir, 0755);
+        if ( false === is_dir( $this->uploadDir ) ) {
+            mkdir( $this->uploadDir, 0755 );
         }
 
         /** @var $fs S3FilesStorage */
@@ -1151,7 +1151,7 @@ class ProjectManager {
                 //Exit
             }
 
-            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $fs->getZipDir() );
+//            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $fs->getZipDir() );
 
         } //end zip hashes manipulation
 
