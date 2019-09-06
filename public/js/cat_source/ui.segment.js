@@ -1,9 +1,5 @@
 (function($, undefined) {
 
-    $( document ).on( 'sse:bulk_segment_status_change', function ( ev, message ) {
-        UI.bulkChangeStatusCallback(message.data.segment_ids, message.data.status);
-    } );
-
     $.extend(UI, {
 
         getSegmentStatus: function (segment) {
