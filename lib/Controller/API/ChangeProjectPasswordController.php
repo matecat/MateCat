@@ -1,4 +1,5 @@
 <?php
+
 use Exceptions\NotFoundException;
 
 /**

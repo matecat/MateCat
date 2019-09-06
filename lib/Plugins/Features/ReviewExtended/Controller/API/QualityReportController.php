@@ -15,7 +15,7 @@ use Chunks_ChunkStruct;
 use Features\SecondPassReview;
 use Projects_ProjectStruct;
 use Features\ReviewExtended\Model\ArchivedQualityReportDao;
-use Features\ReviewExtended\Model\QualityReportModel ;
+use Features\ReviewExtended\Model\QualityReportModel;
 use QualityReport\QualityReportSegmentModel;
 
 class QualityReportController extends KleinController

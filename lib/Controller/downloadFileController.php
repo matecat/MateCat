@@ -3,6 +3,10 @@
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+use FilesStorage\S3FilesStorage;
+use SimpleS3\Client;
 use XliffReplacer\XliffReplacerFactory;
 
 set_time_limit( 180 );
@@ -92,7 +96,7 @@ class downloadFileController extends downloadController {
         $this->featureSet->loadForProject( $this->project );
 
         //get storage object
-        $fs        = new FilesStorage();
+        $fs        = FilesStorageFactory::create();
         $files_job = $fs->getFilesForJob( $this->id_job );
 
         $output_content = [];
@@ -108,6 +112,11 @@ class downloadFileController extends downloadController {
 
         $sDao = new Segments_SegmentDao();
 
+        // instantiate $s3Client only if S3 is enabled
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+        }
+
         //file array is chuncked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
         foreach ( $files_job as $chunk ) {
@@ -121,8 +130,10 @@ class downloadFileController extends downloadController {
                 $current_filename = $file[ 'filename' ];
 
                 //get path for the output file converted to know it's right extension
-                $_fileName  = explode( DIRECTORY_SEPARATOR, $file[ 'xliffFilePath' ] );
-                $outputPath = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
+                $xliffFilePath = $file[ 'xliffFilePath' ];
+
+                $_fileName  = explode( DIRECTORY_SEPARATOR, $xliffFilePath );
+                $outputPath = INIT::$TMP_DOWNLOAD . DIRECTORY_SEPARATOR . $this->id_job . DIRECTORY_SEPARATOR . $fileID . DIRECTORY_SEPARATOR . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
 
                 //make dir if doesn't exist
                 if ( !file_exists( dirname( $outputPath ) ) ) {
@@ -144,9 +155,7 @@ class downloadFileController extends downloadController {
                     $transUnits[ $internalId ] [] = $i;
 
                     $data[ 'matecat|' . $internalId ] [] = $i;
-
                 }
-
 
                 /**
                  * Because of a bug in the filters for the cjk languages ( Exception when downloading translations )
@@ -156,14 +165,14 @@ class downloadFileController extends downloadController {
                 $_target_lang = $this->featureSet->filter(
                         'changeXliffTargetLangCode',
                         $jobData[ 'target' ]
-                        , $file[ 'xliffFilePath' ]
+                        , $xliffFilePath
                 );
 
-                $fileType = DetectProprietaryXliff::getInfo( $file[ 'xliffFilePath' ] );
+                $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
 
                 //instantiate parser
                 $xsp = XliffReplacerFactory::getInstance( $fileType, $data, $transUnits, $_target_lang );
-                $xsp->setFileDescriptors( $file[ 'xliffFilePath' ], $outputPath );
+                $xsp->setFileDescriptors( $xliffFilePath, $outputPath );
 
                 if ( $this->download_type == 'omegat' ) {
                     $xsp->setSourceInTarget( true );
@@ -205,7 +214,16 @@ class downloadFileController extends downloadController {
                 $convertBackToOriginal = true;
 
                 //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
-                $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
+                if ( AbstractFilesStorage::isOnS3() ) {
+                    $originalFilePath = $file[ 'originalFilePath' ];
+
+                    $file[ 'original_file' ] = $s3Client->openItem( [
+                            'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                            'key'    => $originalFilePath
+                    ] );
+                } else {
+                    $file[ 'original_file' ] = file_get_contents( $file[ 'originalFilePath' ] );
+                }
 
                 // When the 'proprietary' flag is set to false, the xliff
                 // is not passed to any converter, because is handled
@@ -258,7 +276,7 @@ class downloadFileController extends downloadController {
 
                 //in case of .strings, they are required to be in UTF-16
                 //get extension to perform file detection
-                $extension = FilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ], PATHINFO_EXTENSION );
+                $extension = AbstractFilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ], PATHINFO_EXTENSION );
                 if ( strtoupper( $extension ) == 'STRINGS' ) {
                     //use this function to convert stuff
                     $encodingConvertedFile = CatUtils::convertEncoding( 'UTF-16', $output_content[ $fileID ][ 'document_content' ] );
@@ -303,7 +321,7 @@ class downloadFileController extends downloadController {
 
             try {
 
-                $pathinfo        = FilesStorage::pathinfo_fix( $this->getDefaultFileName( $this->project ) );
+                $pathinfo = AbstractFilesStorage::pathinfo_fix( $this->getDefaultFileName( $this->project ) );
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
 
@@ -347,7 +365,7 @@ class downloadFileController extends downloadController {
                         if ( $pathinfo[ 'extension' ] == 'zip' ) {
                             $this->setFilename( $oContent->output_filename );
                         } else {
-                            $this->setFilename( self::forceOcrExtension( $oContent->output_filename . ( $this->forceXliff ? ".xlf" : null  ) ) );
+                            $this->setFilename( self::forceOcrExtension( $oContent->output_filename . ( $this->forceXliff ? ".xlf" : null ) ) );
                         }
 
                         $this->setOutputContent( $oContent );
@@ -518,7 +536,7 @@ class downloadFileController extends downloadController {
      */
     public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
-        $extension = FilesStorage::pathinfo_fix( $path );
+        $extension = AbstractFilesStorage::pathinfo_fix( $path );
         if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
             return $documentContent;
         }
@@ -661,11 +679,21 @@ class downloadFileController extends downloadController {
      */
     public function reBuildZipContent( $zipFileName, $newInternalZipFiles ) {
 
-        $fs      = new FilesStorage();
-        $zipFile = $fs->getOriginalZipPath( $this->project->create_date, $this->job[ 'id_project' ], $zipFileName );
+        $project = Projects_ProjectDao::findById( $this->job[ 'id_project' ] );
 
+        // this is the filesystem path
+        $zipFile  = (new FilesStorage\FsFilesStorage())->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
         $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
-        copy( $zipFile, $tmpFName );
+
+        $isFsOnS3 = AbstractFilesStorage::isOnS3();
+        if ( $isFsOnS3 and false === file_exists( $zipFile ) ) {
+            // transfer zip file to tmp path
+            $fs = FilesStorageFactory::create();
+            $zipPath = $fs->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
+            $this->transferZipFromS3ToTmpDir( $zipPath, $tmpFName );
+        } else {
+            copy( $zipFile, $tmpFName );
+        }
 
         $zip = new ZipArchiveExtended();
         if ( $zip->open( $tmpFName ) ) {
@@ -679,14 +707,14 @@ class downloadFileController extends downloadController {
                 $realZipFilePath = str_replace(
                         [
                                 ZipArchiveExtended::INTERNAL_SEPARATOR,
-                                FilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
+                                AbstractFilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
                         ],
                         [ DIRECTORY_SEPARATOR, "" ],
                         $filePath );
                 $realZipFilePath = ltrim( $realZipFilePath, "/" );
 
                 //remove the tmx from the original zip ( we want not to be exported as preview )
-                if ( FilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
+                if ( AbstractFilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
                     $zip->deleteName( $realZipFilePath );
                     continue;
                 }
@@ -707,7 +735,7 @@ class downloadFileController extends downloadController {
                     if ( $isTheSameFile ) {
 
                         $zip->deleteName( $realZipFilePath );
-                        if ( FilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
+                        if ( AbstractFilesStorage::pathinfo_fix( $realZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
                             $realZipFilePath .= '.docx';
                         } elseif ( $this->forceXliff ) {
                             $realZipFilePath = $newInternalZipFile->output_filename;
@@ -728,4 +756,22 @@ class downloadFileController extends downloadController {
 
     }
 
+    /**
+     * @param $zipPath
+     * @param $tmpDir
+     *
+     * @throws ReflectionException
+     * @throws \Predis\Connection\ConnectionException
+     */
+    public function transferZipFromS3ToTmpDir( $zipPath, $tmpDir ) {
+
+        Log::doJsonLog("Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir);
+
+        /** @var $s3Client Client */
+        $s3Client = S3FilesStorage::getStaticS3Client();
+        $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
+        $params[ 'key' ]     = $zipPath;
+        $params[ 'save_as' ] = $tmpDir;
+        $s3Client->downloadItem( $params );
+    }
 }

@@ -56,7 +56,7 @@ class FindTranslatorByJobIdTest extends AbstractTest {
         $this->project[ "array_files" ] = [ "file-with-hello-world.xliff" ];
         $this->project[ "instance_id" ] = INIT::$INSTANCE_ID;
 
-        FilesStorage::moveFileFromUploadSessionToQueuePath( $guid );
+        FsFilesStorage::moveFileFromUploadSessionToQueuePath( $guid );
         $redisHandler = ( new RedisHandler() )->getConnection();
         $redisHandler->del( [ 'project_completed:' . $this->project[ 'id_project' ] ] );
 

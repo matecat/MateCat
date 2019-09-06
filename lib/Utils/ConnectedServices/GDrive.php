@@ -3,9 +3,8 @@
 
 namespace ConnectedServices ;
 
-use Google_Client ;
-
-use INIT ;
+use Google_Client;
+use INIT;
 
 class GDrive {
 

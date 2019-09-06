@@ -1,9 +1,9 @@
 <?php
 
 namespace Filters;
-use finfo,
-        INIT,
-        Langs_Languages;
+use finfo;
+use INIT;
+use Langs_Languages;
 
 /**
  * Created by PhpStorm.

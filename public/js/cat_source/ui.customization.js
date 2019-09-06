@@ -109,7 +109,7 @@ $.extend(UI, {
                         "label": "Open Settings panel",
                         "equivalent": "",
                         "keystrokes": {
-                            "standard": "alt+shift+l",
+                            "standard": "ctrl+shift+l",
                             "mac": "Meta+shift+l",
                         }
                     },
@@ -117,7 +117,7 @@ $.extend(UI, {
                         "label": "Switch Tag Display Mode",
                         "equivalent": "",
                         "keystrokes": {
-                            "standard": "alt+shift+s",
+                            "standard": "ctrl+shift+s",
                             "mac": "Meta+shift+s",
                         }
                     },

@@ -13,16 +13,16 @@ namespace Predis\Pipeline;
 
 use Exception;
 use InvalidArgumentException;
-use SplQueue;
 use Predis\ClientContextInterface;
 use Predis\ClientException;
 use Predis\ClientInterface;
 use Predis\Command\CommandInterface;
-use Predis\Connection\ConnectionInterface;
 use Predis\Connection\Aggregate\ReplicationInterface;
+use Predis\Connection\ConnectionInterface;
 use Predis\Response\ErrorInterface as ErrorResponseInterface;
 use Predis\Response\ResponseInterface;
 use Predis\Response\ServerException;
+use SplQueue;
 
 /**
  * Implementation of a command pipeline in which write and read operations of

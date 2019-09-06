@@ -12,7 +12,7 @@ namespace API\V2;
 use API\V2\Json\SegmentComment;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
-use Comments_CommentDao ;
+use Comments_CommentDao;
 
 class CommentsController extends KleinController {
 

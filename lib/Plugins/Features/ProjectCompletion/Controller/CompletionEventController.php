@@ -16,7 +16,6 @@ use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkStruct;
 use Database;
 use Exception;
-use \Exceptions\NotFoundException;
 
 class CompletionEventController extends BaseKleinViewController {
 
