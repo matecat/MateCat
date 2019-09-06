@@ -11,8 +11,8 @@ namespace Search;
 
 use Database;
 use Exception;
-use Log;
 use Matecat\Finder\WholeTextFinder;
+use Log;
 use PDO;
 use PDOException;
 use SubFiltering\Filter;

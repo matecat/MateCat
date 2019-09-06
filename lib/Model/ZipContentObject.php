@@ -22,11 +22,10 @@ class ZipContentObject extends stdClass {
     public function getContent() {
         if ( !empty( $this->document_content ) ) {
             return $this->document_content;
-
         }
 
         if ( !empty( $this->input_filename ) ) {
-            if ( AbstractFilesStorage::isOnS3() ) {
+            if ( AbstractFilesStorage::isOnS3() and false === file_exists( $this->input_filename ) ) {
                 $this->setDocumentContentFromS3();
             } else {
                 $this->setDocumentContentFromFileSystem();
