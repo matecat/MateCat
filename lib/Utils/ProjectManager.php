@@ -429,6 +429,7 @@ class ProjectManager {
             return false;
         }
 
+
         $this->__createProjectRecord();
         $this->saveMetadata();
 
@@ -608,7 +609,7 @@ class ProjectManager {
                     throw new Exception( 'No hash files found', -6 );
                 }
 
-                if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+                if ( AbstractFilesStorage::isOnS3() ) {
                     if ( null === $cachedXliffFilePathName ) {
                         throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', $_originalFileNames[ 0 ] ), -6 );
                     }
@@ -800,15 +801,16 @@ class ProjectManager {
 
         try {
 
-            if ( $isFsOnS3 ) {
+            if ( AbstractFilesStorage::isOnS3() ) {
                 \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue( $this->uploadDir );
-            }
-
-            Utils::deleteDir( $this->uploadDir );
-            if ( is_dir( $this->uploadDir . '_converted' ) ) {
-                Utils::deleteDir( $this->uploadDir . '_converted' );
+            } else {
+                \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
+                Utils::deleteDir( $this->uploadDir );
+                if ( is_dir( $this->uploadDir . '_converted' ) ) {
+                    Utils::deleteDir( $this->uploadDir . '_converted' );
+                }
             }
 
         } catch ( Exception $e ) {
@@ -827,6 +829,7 @@ class ProjectManager {
             Utils::sendErrMailReport( $output, $e->getMessage() );
 
         }
+
 
     }
 

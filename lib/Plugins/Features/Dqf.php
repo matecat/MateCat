@@ -144,9 +144,8 @@ class Dqf extends BaseFeature {
         if ( $master_project_created ) {
             return $result ;
         }
-        else {
-            return null ;
-        }
+
+        return null;
     }
 
     /**

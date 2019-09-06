@@ -197,6 +197,31 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_job
+     * @param $password
+     *
+     * @return bool
+     */
+    public static function exists( $id_job, $password ) {
+
+        $thisDao = new self();
+        $conn    = \Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( " SELECT id FROM ".self::TABLE." WHERE id_job = :id_job and password = :password " );
+        $stmt->execute( [
+                'id_job' => $id_job,
+                'password' => $password,
+        ] );
+
+        $row = $stmt->fetch( \PDO::FETCH_ASSOC );
+
+        if ( !$row ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * @param      $data array of data to use
      *
      * @param bool $setDefaults
