@@ -233,7 +233,12 @@ class XliffSAXTranslationReplacer {
                     //replace Target language with job language provided from constructor
                     $tag .= "$k=\"$this->target_lang\" ";
                     //Log::doJsonLog($k . " => " . $this->target_lang);
-                } else {
+                }
+                //add MateCat specific namespace, we want maybe add non-XLIFF attributes
+                else if( $name == 'xliff' && !array_key_exists( 'xmlns:mtc', $attr ) ){
+                    $tag .= 'xmlns:mtc="https://www.matecat.com" ';
+                }
+                else {
                     //normal tag flux, put attributes in it
                     $tag .= "$k=\"$v\" ";
                 }
@@ -261,7 +266,7 @@ class XliffSAXTranslationReplacer {
             }
 
             //add MateCat specific namespace, we want maybe add non-XLIFF attributes
-            if( $name == 'xliff' ){
+            if( $name == 'xliff' && !array_key_exists( 'xmlns:mtc', $attr ) ){
                 $tag .= 'xmlns:mtc="https://www.matecat.com" ';
             }
 
