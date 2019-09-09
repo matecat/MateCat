@@ -13,7 +13,6 @@ use Exception;
 use Features\Dqf\Model\DqfProjectMapStruct;
 use Features\Dqf\Utils\Functions;
 use INIT;
-use Projects_ProjectStruct;
 
 class ProjectMapping {
 

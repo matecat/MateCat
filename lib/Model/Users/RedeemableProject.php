@@ -8,9 +8,9 @@
 
 namespace Users;
 
-use Routes ;
-
-use Projects_ProjectDao, Jobs_JobDao ;
+use Jobs_JobDao;
+use Projects_ProjectDao;
+use Routes;
 
 class RedeemableProject
 {

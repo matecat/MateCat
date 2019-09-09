@@ -2,8 +2,8 @@
 
 namespace API\V2\Json  ;
 
-use LQA\EntryStruct;
 use LQA\EntryCommentDao;
+use LQA\EntryStruct;
 
 class SegmentTranslationIssue {
 

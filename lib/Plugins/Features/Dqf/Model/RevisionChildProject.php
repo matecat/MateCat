@@ -9,11 +9,11 @@
 namespace Features\Dqf\Model;
 
 use Chunks_ChunkStruct;
+use DataAccess\LoudArray;
 use Exception;
 use Features\Dqf\Service\ChildProjectRevisionBatchService;
 use Features\Dqf\Service\Struct\Request\RevisionRequestStruct;
 use Features\ReviewExtended\Model\QualityReportModel;
-use DataAccess\LoudArray;
 
 
 /**

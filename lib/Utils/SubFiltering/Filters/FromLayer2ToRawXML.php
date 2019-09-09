@@ -23,9 +23,18 @@ class FromLayer2ToRawXML extends AbstractHandler {
     private $brokenHTML = false;
 
     public function transform( $segment ) {
-
         //placehold for all XML entities
         $segment = preg_replace( '/&(lt;|gt;|amp;|quot;|apos;)/', '##_ent_$1_##', $segment );
+
+        // handling &#13;
+        if (strpos($segment, "\r") !== false) {
+            $segment = str_replace("\r", '##_ent_0D_##', $segment);
+        }
+
+        // handling &#13;
+        if (strpos($segment, "\n") !== false) {
+            $segment = str_replace("\n", '##_ent_0A_##', $segment);
+        }
 
         // Filters BUG, segmentation on HTML, we should never get this at this level ( Should be fixed, anyway we try to cover )
         $segment = $this->placeHoldBrokenHTML( $segment );
@@ -53,6 +62,16 @@ class FromLayer2ToRawXML extends AbstractHandler {
 
         //restore entities
         $segment = preg_replace( '/##_ent_(lt;|gt;|amp;|quot;|apos;)_##/', '&$1', $segment );
+
+        // handling &#10;
+        if (strpos($segment, '##_ent_0A_##') !== false) {
+            $segment = str_replace('##_ent_0A_##', '&#10;', $segment);
+        }
+
+        // handling &#13;
+        if (strpos($segment, '##_ent_0D_##') !== false) {
+            $segment = str_replace('##_ent_0D_##', '&#13;', $segment);
+        }
 
         return $segment;
 

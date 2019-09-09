@@ -3,14 +3,14 @@
 
 class INIT {
 
-    public static $MANDATORY_KEYS      = array(
+    public static $MANDATORY_KEYS = [
             'ENV',
             'CHECK_FS',
             'DB_SERVER',
             'DB_DATABASE',
             'DB_USER',
             'DB_PASS'
-    );
+    ];
 
     /**
      * @var $ENV
@@ -25,7 +25,7 @@ class INIT {
      * @see EnvWrap
      *
      */
-    public static $ENV ;
+    public static $ENV;
 
     public static $ROOT;
     public static $BASEURL;
@@ -41,9 +41,10 @@ class INIT {
     public static $DB_USER;
     public static $DB_PASS;
     public static $INSTANCE_ID             = 0;
-    public static $REDIS_SERVERS           = array();
+    public static $REDIS_SERVERS           = [];
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_JMX_ADDRESS;
+    public static $QUEUE_CREDENTIALS;
     public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
 
@@ -58,7 +59,7 @@ class INIT {
     public static $TRACKING_CODES_VIEW_PATH = "";
 
     public static $QUEUE_NAME                   = "matecat_analysis_queue";
-    public static $COMMENTS_ENABLED             = true ;
+    public static $COMMENTS_ENABLED             = true;
     public static $SSE_NOTIFICATIONS_QUEUE_NAME = "/topic/matecat_sse_notifications";
     public static $SSE_BASE_URL;
 
@@ -67,8 +68,8 @@ class INIT {
     public static $SMTP_SENDER;
     public static $SMTP_HOSTNAME;
 
-    public static $MAILER_FROM = 'cattool@matecat.com' ;
-    public static $MAILER_FROM_NAME = 'MateCat';
+    public static $MAILER_FROM        = 'cattool@matecat.com';
+    public static $MAILER_FROM_NAME   = 'MateCat';
     public static $MAILER_RETURN_PATH = 'no-reply@matecat.com';
 
     public static $LOG_REPOSITORY;
@@ -96,32 +97,32 @@ class INIT {
     public static $AUTHSECRET_PATH;
     public static $REFERENCE_REPOSITORY;
 
-    public static $FORCE_XLIFF_CONVERSION    = false;
-    public static $FILTERS_OCR_CHECK         = true;
-    public static $VOLUME_ANALYSIS_ENABLED   = true;
-    public static $WARNING_POLLING_INTERVAL  = 20; //seconds
-    public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
+    public static $FORCE_XLIFF_CONVERSION       = false;
+    public static $FILTERS_OCR_CHECK            = true;
+    public static $VOLUME_ANALYSIS_ENABLED      = true;
+    public static $WARNING_POLLING_INTERVAL     = 20; //seconds
+    public static $SEGMENT_QA_CHECK_INTERVAL    = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
-    public static $AUTHCOOKIENAME = 'matecat_login_v5';
-    public static $SUPPORT_MAIL = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
-    public static $ANALYSIS_WORDS_PER_DAYS = 3000;
-    public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
-    public static $MAX_UPLOAD_FILE_SIZE = 62914560;         // 60 * 1024 * 1024;  // bytes
-    public static $MAX_UPLOAD_TMX_FILE_SIZE = 314572800;    // 300 * 1024 * 1024; // bytes
-    public static $MAX_NUM_FILES = 100;
+    public static $AUTHCOOKIENAME               = 'matecat_login_v5';
+    public static $SUPPORT_MAIL                 = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
+    public static $ANALYSIS_WORDS_PER_DAYS      = 3000;
+    public static $AUTHCOOKIEDURATION           = 5184000;            // 86400 * 60;         // seconds
+    public static $MAX_UPLOAD_FILE_SIZE         = 62914560;         // 60 * 1024 * 1024;  // bytes
+    public static $MAX_UPLOAD_TMX_FILE_SIZE     = 314572800;    // 300 * 1024 * 1024; // bytes
+    public static $MAX_NUM_FILES                = 100;
 
     /**
      * DQF configuration
      *
      */
     public static $DQF_BASE_URL;
-    public static $DQF_ID_PREFIX = '' ;
+    public static $DQF_ID_PREFIX = '';
     public static $DQF_API_KEY;
     public static $DQF_ENCRYPTION_KEY;
-    public static $DQF_ENCRYPTION_IV ;
+    public static $DQF_ENCRYPTION_IV;
 
-    public static $DQF_GENERIC_USERNAME ;
-    public static $DQF_GENERIC_PASSWORD ;
+    public static $DQF_GENERIC_USERNAME;
+    public static $DQF_GENERIC_PASSWORD;
 
     /**
      * We proose that lxq_server is in a configuration file
@@ -138,7 +139,7 @@ class INIT {
      * @see http://www.lexiqa.net
      *
      */
-    public static $LXQ_PARTNERID  = false;
+    public static $LXQ_PARTNERID = false;
     /**
      * Time zone string that should match the one set in the database.
      * @var string
@@ -162,7 +163,7 @@ class INIT {
      * @var int Interval in seconds
      */
     public static $COPY_SOURCE_INTERVAL = 300;
-    public static $MAX_NUM_SEGMENTS = 500;
+    public static $MAX_NUM_SEGMENTS     = 500;
 
     /**
      * Default Matecat user agent string
@@ -188,11 +189,11 @@ class INIT {
     /**
      * MateCat Filters configuration
      */
-    public static $FILTERS_USER_AGENT = "MateCat Community Instance";
-    public static $FILTERS_ADDRESS = "https://translated-matecat-filters-v1.p.mashape.com";
-    public static $FILTERS_MASHAPE_KEY = "Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key";
+    public static $FILTERS_USER_AGENT                    = "MateCat Community Instance";
+    public static $FILTERS_ADDRESS                       = "https://translated-matecat-filters-v1.p.mashape.com";
+    public static $FILTERS_MASHAPE_KEY                   = "Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key";
     public static $FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = false;
-    public static $FILTERS_EMAIL_FAILURES = false;
+    public static $FILTERS_EMAIL_FAILURES                = false;
 
     /**
      * The MateCat Version
@@ -204,28 +205,28 @@ class INIT {
      * MyMemory Developer Email Key for the cattool
      * @var string
      */
-    public static $MYMEMORY_API_KEY = 'demo@matecat.com' ;
+    public static $MYMEMORY_API_KEY = 'demo@matecat.com';
 
     /**
      * MyMemory Developer Email Key for the analysis
      * @var string
      */
-    public static $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com' ;
+    public static $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com';
 
     /**
      * Default key used to call the TM Server on Import TMX panel
      * @var string
      */
-    public static $DEFAULT_TM_KEY = '' ;
+    public static $DEFAULT_TM_KEY = '';
 
 
-    public static $ENABLED_BROWSERS = array( 'applewebkit', 'chrome', 'safari' ); //, 'firefox');
+    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari' ]; //, 'firefox');
 
     // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
     // This occurs especially in mobile environment. As an example, when you try to open a link from within
     // the GMail app, it redirect to an internal browser that does not declare a valid user agent
     // In this case we will show a notice on the top of the page instead of deny the access
-    public static $UNTESTED_BROWSERS = array( 'mozillageneric' );
+    public static $UNTESTED_BROWSERS = [ 'mozillageneric' ];
 
     /**
      * If you don't have a client id and client secret, please visit
@@ -270,11 +271,27 @@ class INIT {
     public static $OAUTH_BROWSER_API_KEY;
 
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
-    public static $UNLOCKABLE_TAGS = false;
+    public static $UNLOCKABLE_TAGS        = false;
 
-    public static $SKIP_SQL_CACHE = false ;
+    public static $SKIP_SQL_CACHE = false;
 
-    public function __construct(){
+    /**
+     * FileStorage Configuration: [s3|fs]
+     */
+    public static $FILE_STORAGE_METHOD;
+
+    /**
+     * S3FilesStorage Configuration
+     */
+    public static $AWS_ACCESS_KEY_ID;
+    public static $AWS_SECRET_KEY;
+    public static $AWS_VERSION;
+    public static $AWS_REGION;
+    public static $AWS_SSL_VERIFY;
+    public static $AWS_CACHING = false;
+    public static $AWS_STORAGE_BASE_BUCKET;
+
+    public function __construct() {
 
         self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
         self::$OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
@@ -283,115 +300,113 @@ class INIT {
 
         self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/oauth/response";
 
-        self::$OAUTH_SCOPES       = array(
+        self::$OAUTH_SCOPES = [
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile',
                 'profile'
-        );
+        ];
+
         self::$MIME_TYPES = include( 'Mime2Extension.php' );
-
     }
-
-
 
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;
-    public static $SUPPORTED_FILE_TYPES = array(
-            'Office'              => array(
-                    'doc'  => array( '', '', 'extdoc' ),
-                    'dot'  => array( '', '', 'extdoc' ),
-                    'docx' => array( '', '', 'extdoc' ),
-                    'docm' => array( '', '', 'extdoc' ),
-                    'dotx' => array( '', '', 'extdoc' ),
-                    'dotm' => array( '', '', 'extdoc' ),
-                    'rtf'  => array( '', '', 'extdoc' ),
-                    'odt'  => array( '', '', 'extdoc' ),
-                    'ott'  => array( '', '', 'extdoc' ),
-                    'pdf'  => array( '', '', 'extpdf' ),
-                    'txt'  => array( '', '', 'exttxt' ),
-                    'xls'  => array( '', '', 'extxls' ),
-                    'xlt'  => array( '', '', 'extxls' ),
-                    'xlsx' => array( '', '', 'extxls' ),
-                    'xlsm' => array( '', '', 'extxls' ),
-                    'xltx' => array( '', '', 'extxls' ),
-                    'xltm' => array( '', '', 'extxls' ),
-                    'ods'  => array( '', '', 'extxls' ),
-                    'ots'  => array( '', '', 'extxls' ),
-                    //'csv'  => array( '', '', 'extxls' ),
-                    'tsv'  => array( '', '', 'extxls' ),
-                    'ppt'  => array( '', '', 'extppt' ),
-                    'pps'  => array( '', '', 'extppt' ),
-                    'pot'  => array( '', '', 'extppt' ),
-                    'pptx' => array( '', '', 'extppt' ),
-                    'pptm' => array( '', '', 'extppt' ),
-                    'ppsx' => array( '', '', 'extppt' ),
-                    'ppsm' => array( '', '', 'extppt' ),
-                    'potx' => array( '', '', 'extppt' ),
-                    'potm' => array( '', '', 'extppt' ),
-                    'odp'  => array( '', '', 'extppt' ),
-                    'otp'  => array( '', '', 'extppt' ),
-                    'xml'  => array( '', '', 'extxml' ),
-                    'zip'  => array( '', '', 'extzip' ),
-            ),
-            'Web'                 => array(
-                    'htm'   => array( '', '', 'exthtm' ),
-                    'html'  => array( '', '', 'exthtm' ),
-                    'xhtml' => array( '', '', 'exthtm' ),
-                    'xml'   => array( '', '', 'extxml' ),
-                    'dtd'   => array( '', '', 'extxml' ),
+    public static $SUPPORTED_FILE_TYPES       = [
+            'Office'              => [
+                    'doc'  => [ '', '', 'extdoc' ],
+                    'dot'  => [ '', '', 'extdoc' ],
+                    'docx' => [ '', '', 'extdoc' ],
+                    'docm' => [ '', '', 'extdoc' ],
+                    'dotx' => [ '', '', 'extdoc' ],
+                    'dotm' => [ '', '', 'extdoc' ],
+                    'rtf'  => [ '', '', 'extdoc' ],
+                    'odt'  => [ '', '', 'extdoc' ],
+                    'ott'  => [ '', '', 'extdoc' ],
+                    'pdf'  => [ '', '', 'extpdf' ],
+                    'txt'  => [ '', '', 'exttxt' ],
+                    'xls'  => [ '', '', 'extxls' ],
+                    'xlt'  => [ '', '', 'extxls' ],
+                    'xlsx' => [ '', '', 'extxls' ],
+                    'xlsm' => [ '', '', 'extxls' ],
+                    'xltx' => [ '', '', 'extxls' ],
+                    'xltm' => [ '', '', 'extxls' ],
+                    'ods'  => [ '', '', 'extxls' ],
+                    'ots'  => [ '', '', 'extxls' ],
+                //'csv'  => array( '', '', 'extxls' ),
+                    'tsv'  => [ '', '', 'extxls' ],
+                    'ppt'  => [ '', '', 'extppt' ],
+                    'pps'  => [ '', '', 'extppt' ],
+                    'pot'  => [ '', '', 'extppt' ],
+                    'pptx' => [ '', '', 'extppt' ],
+                    'pptm' => [ '', '', 'extppt' ],
+                    'ppsx' => [ '', '', 'extppt' ],
+                    'ppsm' => [ '', '', 'extppt' ],
+                    'potx' => [ '', '', 'extppt' ],
+                    'potm' => [ '', '', 'extppt' ],
+                    'odp'  => [ '', '', 'extppt' ],
+                    'otp'  => [ '', '', 'extppt' ],
+                    'xml'  => [ '', '', 'extxml' ],
+                    'zip'  => [ '', '', 'extzip' ],
+            ],
+            'Web'                 => [
+                    'htm'   => [ '', '', 'exthtm' ],
+                    'html'  => [ '', '', 'exthtm' ],
+                    'xhtml' => [ '', '', 'exthtm' ],
+                    'xml'   => [ '', '', 'extxml' ],
+                    'dtd'   => [ '', '', 'extxml' ],
 //                    'php'   => array( '', '', 'extxml' ),
-                    'json'  => array( '', '', 'extxml'),
-                    'yaml'  => array( '', '', 'extxml' ),
-                    'yml'   => array( '', '', 'extxml' ),
-                    'md'    => array( '', '', 'extxml' ),
-            ),
-            'Scanned Files'                 => array(
-                    'pdf'   => array( '', '', 'extpdf' ),
-                    'bmp'   => array( '', '', 'extimg' ),
-                    'png'   => array( '', '', 'extimg' ),
-                    'gif'   => array( '', '', 'extimg' ),
-                    'jpeg'  => array( '', '', 'extimg' ),
-                    'jpg'   => array( '', '', 'extimg' ),
-                    'tiff'  => array( '', '', 'extimg' )
-            ),
-            "Interchange Formats" => array(
-                    'xliff'    => array( 'default', '', 'extxif' ),
-                    'sdlxliff' => array( 'default', '', 'extxif' ),
-                    'tmx'      => array( '', '', 'exttmx' ),
-                    'ttx'      => array( '', '', 'extttx' ),
-                    'xlf'      => array( 'default', '', 'extxlf' ),
-            ),
-            "Desktop Publishing"  => array(
-                    'mif'  => array( '', '', 'extmif' ),
-                    'idml' => array( '', '', 'extidd' ),
-                    'icml' => array( '', '', 'exticml' ),
-                    'xml'  => array( '', '', 'extxml' ),
-                    'dita' => array( '', '', 'extdit' )
-            ),
-            "Localization"        => array(
-                    'properties'  => array( '', '', 'extpro' ),
-                    'resx'        => array( '', '', 'extres' ),
-                    'xml'         => array( '', '', 'extxml' ),
-                    'sxml'        => array( '', '', 'extxml' ),
-                    'txml'        => array( '', '', 'extxml' ),
-                    'dita'        => array( '', '', 'extdit' ),
-                    'Android xml' => array( '', '', 'extxml' ),
-                    'strings'     => array( '', '', 'extstr' ),
-                    'srt'         => array( '', '', 'extsrt' ),
-                    'wix'         => array( '', '', 'extwix' ),
-                    'po'          => array( '', '', 'extpo'  ),
-                    'g'           => array( '', '', 'extg' ),
-                    'ts'          => array( '', '', 'exts' ),
-            )
-    );
+                    'json'  => [ '', '', 'extxml' ],
+                    'yaml'  => [ '', '', 'extxml' ],
+                    'yml'   => [ '', '', 'extxml' ],
+                    'md'    => [ '', '', 'extxml' ],
+            ],
+            'Scanned Files'       => [
+                    'pdf'  => [ '', '', 'extpdf' ],
+                    'bmp'  => [ '', '', 'extimg' ],
+                    'png'  => [ '', '', 'extimg' ],
+                    'gif'  => [ '', '', 'extimg' ],
+                    'jpeg' => [ '', '', 'extimg' ],
+                    'jpg'  => [ '', '', 'extimg' ],
+                    'tiff' => [ '', '', 'extimg' ]
+            ],
+            "Interchange Formats" => [
+                    'xliff'    => [ 'default', '', 'extxif' ],
+                    'sdlxliff' => [ 'default', '', 'extxif' ],
+                    'tmx'      => [ '', '', 'exttmx' ],
+                    'ttx'      => [ '', '', 'extttx' ],
+                    'xlf'      => [ 'default', '', 'extxlf' ],
+            ],
+            "Desktop Publishing"  => [
+                    'mif'  => [ '', '', 'extmif' ],
+                    'idml' => [ '', '', 'extidd' ],
+                    'icml' => [ '', '', 'exticml' ],
+                    'xml'  => [ '', '', 'extxml' ],
+                    'dita' => [ '', '', 'extdit' ]
+            ],
+            "Localization"        => [
+                    'properties'  => [ '', '', 'extpro' ],
+                    'resx'        => [ '', '', 'extres' ],
+                    'xml'         => [ '', '', 'extxml' ],
+                    'sxml'        => [ '', '', 'extxml' ],
+                    'txml'        => [ '', '', 'extxml' ],
+                    'dita'        => [ '', '', 'extdit' ],
+                    'Android xml' => [ '', '', 'extxml' ],
+                    'strings'     => [ '', '', 'extstr' ],
+                    'srt'         => [ '', '', 'extsrt' ],
+                    'wix'         => [ '', '', 'extwix' ],
+                    'po'          => [ '', '', 'extpo' ],
+                    'g'           => [ '', '', 'extg' ],
+                    'ts'          => [ '', '', 'exts' ],
+            ]
+    ];
 
-    public static $MIME_TYPES = array();
+    public static $MIME_TYPES = [];
 
 
-    public static $UNSUPPORTED_FILE_TYPES = array(
-            'fm'   => array( '', "Try converting to MIF" ),
-            'indd' => array( '', "Try converting to INX" )
-    );
+    public static $UNSUPPORTED_FILE_TYPES = [
+            'fm'   => [ '', "Try converting to MIF" ],
+            'indd' => [ '', "Try converting to INX" ]
+    ];
 
     public static $DEPRECATE_LEGACY_XLIFFS = true;
 
@@ -403,15 +418,15 @@ class INIT {
      */
     public static $MAX_FILENAME_LENGTH = 210;
 
-    public static $PLUGIN_LOAD_PATHS = array();
+    public static $PLUGIN_LOAD_PATHS = [];
 
     /**
      * @deprecated use AUTOLOAD_PLUGINS
      * @var array
      */
-    public static $MANDATORY_PLUGINS = array();
+    public static $MANDATORY_PLUGINS = [];
 
-    public static $AUTOLOAD_PLUGINS = [] ;
+    public static $AUTOLOAD_PLUGINS = [];
 
     /**
      * Definitions for the asynchronous task runner
@@ -419,7 +434,7 @@ class INIT {
      */
     public static $TASK_RUNNER_CONFIG = null;
 
-    public static $SEND_ERR_MAIL_REPORT = true ;
+    public static $SEND_ERR_MAIL_REPORT = true;
 
     /**
      * Initialize the Class Instance

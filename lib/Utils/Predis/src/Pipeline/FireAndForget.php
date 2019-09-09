@@ -11,8 +11,8 @@
 
 namespace Predis\Pipeline;
 
-use SplQueue;
 use Predis\Connection\ConnectionInterface;
+use SplQueue;
 
 /**
  * Command pipeline that writes commands to the servers but discards responses.

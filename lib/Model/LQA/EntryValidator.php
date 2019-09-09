@@ -2,7 +2,7 @@
 
 namespace LQA;
 
-use \Exceptions\NotFoundException ;
+use Exceptions\NotFoundException;
 
 class EntryValidator extends \DataAccess_AbstractValidator {
 

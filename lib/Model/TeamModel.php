@@ -1,14 +1,13 @@
 <?php
 
-use Database;
 use Email\InvitedToTeamEmail;
 use Email\MembershipCreatedEmail;
 use Email\MembershipDeletedEmail;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
+use Teams\PendingInvitations;
 use Teams\TeamDao;
 use Teams\TeamStruct;
-use Teams\PendingInvitations;
 
 class TeamModel {
 

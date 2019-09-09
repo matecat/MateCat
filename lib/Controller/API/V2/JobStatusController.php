@@ -9,7 +9,6 @@
 namespace API\V2;
 
 use AMQHandler;
-use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\JobPasswordValidator;
 use Constants_TranslationStatus;
 use Jobs_JobStruct;

@@ -3,9 +3,8 @@
 namespace API\V2  ;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
-use Features\ReviewExtended\TranslationIssueModel;
-use LQA\EntryDao as EntryDao ;
 use Database;
+use LQA\EntryDao as EntryDao;
 use RevisionFactory;
 
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {

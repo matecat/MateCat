@@ -3,8 +3,8 @@ st1:
   id_job: @REF:jobs:job2:id
   segment_hash: f88037cf8f5d27f475cee79c603cecae
   autopropagated_from: NULL
-  status: NEW
-  translation: Ciao mondo 4WD
+  status: TRANSLATED
+  translation: Ciao Ciao mondo 4WD &amp; ampolla %{variable}%
   translation_date: NULL
   time_to_edit: 0
   match_type: NO_MATCH
@@ -29,8 +29,8 @@ st2:
   id_job: @REF:jobs:job2:id
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   autopropagated_from: NULL
-  status: NEW
-  translation: Ciao mondo
+  status: TRANSLATED
+  translation: Ciao mondo &#13;&#13;
   translation_date: NULL
   time_to_edit: 0
   match_type: 95%-99%
@@ -55,8 +55,8 @@ st3:
   id_job: @REF:jobs:job2:id
   segment_hash: 37d2a389ba71f6de1df030220703785d
   autopropagated_from: NULL
-  status: NEW
-  translation: Anche questa unità ha un commento
+  status: TRANSLATED
+  translation: Anche questa unità ha un &quot;commento&quot;;
   translation_date: NULL
   time_to_edit: 0
   match_type: NO_MATCH
@@ -81,7 +81,7 @@ st4:
   id_job: @REF:jobs:job2:id
   segment_hash: 3e25960a79dbc69b674cd4ec67a72c62
   autopropagated_from: NULL
-  status: NEW
+  status: TRANSLATED
   translation: Ciao mondo
   translation_date: NULL
   time_to_edit: 0

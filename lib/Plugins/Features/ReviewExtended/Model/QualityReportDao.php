@@ -9,7 +9,7 @@
 namespace Features\ReviewExtended\Model;
 
 use DataAccess_AbstractDao;
-use Database ;
+use Database;
 
 class QualityReportDao extends DataAccess_AbstractDao {
 

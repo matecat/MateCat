@@ -12,7 +12,6 @@ use Exception;
 use Features\Dqf\Utils\Functions;
 use Files_FileStruct;
 use INIT;
-use Log;
 
 class FileIdMapping {
 

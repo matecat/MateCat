@@ -14,7 +14,6 @@ use API\V2\Exceptions\AuthorizationError;
 use Outsource\ConfirmationDao;
 use Outsource\TranslatedConfirmationStruct;
 use Translators\TranslatorsModel;
-use Utils;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController {
 

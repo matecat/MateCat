@@ -2,7 +2,7 @@
 
 namespace Users;
 
-use Database ;
+use Database;
 use PDO;
 
 class MetadataDao extends \DataAccess_AbstractDao {

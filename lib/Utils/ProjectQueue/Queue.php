@@ -10,13 +10,12 @@
 namespace ProjectQueue;
 
 use AMQHandler;
-use \ArrayObject;
+use ArrayObject;
 use Constants_ProjectStatus;
-use \Exception,
-        \Log,
-        \WorkerClient
-    ;
+use Exception;
+use Log;
 use RedisHandler;
+use WorkerClient;
 
 /**
  * Class Enqueue

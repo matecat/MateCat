@@ -13,7 +13,6 @@ use Chunks_ChunkStruct;
 use Constants_Revise;
 use Constants_TranslationStatus;
 use Features\ReviewExtended\Model\QualityReportDao;
-use Features\ReviewExtended\Model\QualityReportModel;
 use Features\TranslationVersions;
 use FeatureSet;
 use LQA\CategoryDao;

@@ -5,10 +5,9 @@ use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
 use Database;
 use PDOException;
-use TaskRunner\Commons\AbstractElement,
-        TaskRunner\Commons\AbstractWorker,
-        TaskRunner\Commons\QueueElement,
-        TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Commons\AbstractElement;
+use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
 
 /**
  * Created by PhpStorm.

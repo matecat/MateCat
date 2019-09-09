@@ -1,7 +1,5 @@
 <?php
 
-use RedisHandler;
-
 class Engines_Intento extends Engines_AbstractEngine {
 
     const INTENTO_USER_AGENT = 'Intento.MatecatPlugin/1.0.0';

@@ -1,5 +1,7 @@
 <?php
 
+use FilesStorage\AbstractFilesStorage;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -229,7 +231,7 @@ class ZipArchiveExtended extends ZipArchive {
         foreach ( $this->treeList as $filePath ) {
 
             $realPath = str_replace(
-                    [ self::INTERNAL_SEPARATOR, FilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ],
+                    [ self::INTERNAL_SEPARATOR, AbstractFilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) ],
                     [ DIRECTORY_SEPARATOR, "" ],
                     $filePath
             );
@@ -285,7 +287,7 @@ class ZipArchiveExtended extends ZipArchive {
     }
 
     private function prependZipFileName( $fName ) {
-        return FilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
+        return AbstractFilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
     }
 
     /**

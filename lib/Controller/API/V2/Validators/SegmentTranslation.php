@@ -3,7 +3,7 @@
 namespace API\V2\Validators;
 
 use Database;
-use Exceptions\NotFoundException ;
+use Exceptions\NotFoundException;
 use Segments_SegmentDao;
 use Translations_SegmentTranslationDao;
 
