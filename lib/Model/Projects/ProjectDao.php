@@ -482,4 +482,24 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param $pid
+     *
+     * @return array
+     */
+    public function getJobIds($pid) {
+        $db = Database::obtain();
+
+        $query = "SELECT jobs.id
+                FROM jobs
+                WHERE jobs.id_project = :pid
+                ";
+
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [ 'pid' => $pid ] );
+
+        return $stmt->fetchAll();
+    }
+
 }

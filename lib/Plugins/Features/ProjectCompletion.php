@@ -2,12 +2,11 @@
 
 namespace Features;
 
-use Utils;
+use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkCompletionUpdateDao;
 use Chunks_ChunkCompletionUpdateStruct;
-use Chunks_ChunkCompletionEventDao;
-
 use Jobs_JobStruct;
+use Utils;
 
 class ProjectCompletion extends BaseFeature {
 

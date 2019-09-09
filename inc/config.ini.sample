@@ -24,6 +24,7 @@ REDIS_SERVERS = "tcp://localhost:6379?database=0"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
+QUEUE_CREDENTIALS = "admin:admin"
 SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
@@ -41,6 +42,15 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 LXQ_LICENSE = false
 LXQ_PARTNERID = false
 
+FILE_STORAGE_METHOD = 's3'
+
+;AWS_ACCESS_KEY_ID = 'xxxxxxx'
+;AWS_SECRET_KEY = 'xxxxxxxxxxxx'
+AWS_VERSION = 'latest'
+AWS_REGION = 'us-west-2'
+AWS_STORAGE_BASE_BUCKET = "xxxxxxxxxxxxxx"
+AWS_CACHING = true
+AWS_SSL_VERIFY = true
 
 DQF_ENABLED = yes
 DQF_BASE_URL = 'https://dqf-api.stag.taus.net/'
@@ -71,6 +81,7 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
+QUEUE_CREDENTIALS = "admin:admin"
 SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
@@ -88,7 +99,15 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 LXQ_LICENSE = false
 LXQ_PARTNERID = false
 
+FILE_STORAGE_METHOD = 's3'
 
+;AWS_ACCESS_KEY_ID = 'xxxxxxx'
+;AWS_SECRET_KEY = 'xxxxxxxxxxxx'
+AWS_VERSION = 'latest'
+AWS_REGION = 'us-west-2'
+;AWS_PROFILE = 'default'
+AWS_STORAGE_BASE_BUCKET = "storage-bucket"
+AWS_CACHING = true
 
 ;----------------------------------------
 [production]
@@ -105,7 +124,8 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
-SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
+QUEUE_CREDENTIALS = "admin:admin"
+SSE_BASE_URL      = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
@@ -121,3 +141,12 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 ; @see http://www.lexiqa.net
 LXQ_LICENSE = false
 LXQ_PARTNERID = false
+
+FILE_STORAGE_METHOD = 's3'
+
+;AWS_ACCESS_KEY_ID = 'xxxxxxx'
+;AWS_SECRET_KEY = 'xxxxxxxxxxxx'
+AWS_VERSION = 'latest'
+AWS_REGION = 'us-west-2'
+;AWS_PROFILE = 'default'
+AWS_STORAGE_BASE_BUCKET = "storage-bucket"

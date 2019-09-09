@@ -9,9 +9,6 @@
 namespace Features\ReviewExtended\Model;
 
 use Chunks_ChunkStruct;
-use Features\ReviewExtended\Model\ArchivedQualityReportDao;
-use Features\ReviewExtended\Model\QualityReportModel;
-use Features\ReviewExtended\Model\ArchivedQualityReportStruct;
 
 class ArchivedQualityReportModel {
 

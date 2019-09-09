@@ -9,12 +9,9 @@
 namespace API\App;
 
 
-use API\V2\KleinController;
 use Bootstrap;
 use Exceptions\NotFoundException;
-use Users\MetadataDao;
 use Users\MetadataModel;
-use Users_UserDao;
 
 class UserMetadataController extends AbstractStatefulKleinController {
 

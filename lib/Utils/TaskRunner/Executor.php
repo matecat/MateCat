@@ -9,24 +9,24 @@
 
 namespace TaskRunner;
 
+use AMQHandler;
+use Bootstrap;
 use Database;
-use TaskRunner\Commons\Context;
+use Exception;
+use INIT;
+use Log;
+use PDOException;
+use SplObserver;
+use SplSubject;
+use StompFrame;
 use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\Context;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EmptyElementException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\FrameException;
 use TaskRunner\Exceptions\ReQueueException;
 use TaskRunner\Exceptions\WorkerClassException;
-use \Exception,
-        \Bootstrap,
-        \SplObserver,
-        \SplSubject,
-        \AMQHandler,
-        \INIT,
-        \Log,
-        \PDOException,
-        \StompFrame;
 
 include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
 Bootstrap::start();
@@ -290,6 +290,7 @@ class Executor implements SplObserver {
 
                 $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************" );
                 $this->_logMsg( "Exception details: " . $e->getMessage() . " " . $e->getFile() . " line " . $e->getLine() );
+                $this->_logMsg( $e->getTraceAsString() );
 
             }
 

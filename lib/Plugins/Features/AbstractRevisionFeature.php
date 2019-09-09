@@ -16,8 +16,7 @@ use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\Model\QualityReportModel;
-use Features\TranslationVersions\Model\SegmentTranslationEventModel;
-use FilesStorage;
+use FilesStorage\FilesStorageFactory;
 use INIT;
 use Jobs_JobStruct;
 use Log;
@@ -436,8 +435,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         // otherwise assign the default model
 
         $qa_model = false;
-        $fs       = new FilesStorage();
-        $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure[ 'uploadToken' ] );
+        $fs = FilesStorageFactory::create();
+        $zip_file = $fs->getTemporaryUploadedZipFile( $projectStructure['uploadToken'] );
 
         Log::doJsonLog( $zip_file );
 

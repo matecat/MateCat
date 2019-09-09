@@ -8,8 +8,8 @@
 
 namespace ConnectedServices;
 
-use Google_Service_Oauth2 ;
-use Utils ;
+use Google_Service_Oauth2;
+use Utils;
 
 class GDriveUserAuthorizationModel {
 

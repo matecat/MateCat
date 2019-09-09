@@ -1,12 +1,15 @@
 <?php
+
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 14/10/14
  * Time: 16.04
- * 
+ *
  */
-
 class loadTMXController extends ajaxController {
 
 
@@ -30,7 +33,7 @@ class loadTMXController extends ajaxController {
      */
     private $exec;
 
-    private static $acceptedActions = array( "newTM", "uploadStatus" );
+    private static $acceptedActions = [ "newTM", "uploadStatus" ];
 
     protected $TMService;
 
@@ -39,28 +42,29 @@ class loadTMXController extends ajaxController {
         parent::__construct();
         parent::readLoginInfo();
 
-        $filterArgs = array(
-                'name'   => array(
+        $filterArgs = [
+                'name'   => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
-                ),
-                'tm_key' => array(
+                ],
+                'tm_key' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'exec'   => array(
+                ],
+                'exec'   => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                )
-        );
+                ]
+        ];
 
         $postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->name     = $postInput->name;
-        $this->tm_key   = $postInput->tm_key;
-        $this->exec     = $postInput->exec;
+        $this->name   = $postInput->name;
+        $this->tm_key = $postInput->tm_key;
+        $this->exec   = $postInput->exec;
 
         if ( !isset( $this->tm_key ) || is_null( $this->tm_key ) || empty( $this->tm_key ) ) {
 
-            if( empty( INIT::$DEFAULT_TM_KEY ) ){
-                $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "Please specify a TM key." );
+            if ( empty( INIT::$DEFAULT_TM_KEY ) ) {
+                $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Please specify a TM key." ];
+
                 return;
             }
 
@@ -73,7 +77,7 @@ class loadTMXController extends ajaxController {
         }
 
         if ( empty( $this->exec ) || !in_array( $this->exec, self::$acceptedActions ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -7, "message" => "Action not valid." );
+            $this->result[ 'errors' ][] = [ "code" => -7, "message" => "Action not valid." ];
         }
 
     }
@@ -88,10 +92,11 @@ class loadTMXController extends ajaxController {
         //check if there was an error in constructor. If so, stop execution.
         if ( !empty( $this->result[ 'errors' ] ) ) {
             $this->result[ 'success' ] = false;
+
             return false;
         }
 
-        $this->result[ 'errors' ]  = array();
+        $this->result[ 'errors' ] = [];
 
         $this->TMService = new TMSService();
         $this->TMService->setTmKey( $this->tm_key );
@@ -102,8 +107,8 @@ class loadTMXController extends ajaxController {
 
                 $this->file = $this->TMService->uploadFile();
 
-                foreach( $this->file as $fileInfo ){
-                    if ( FilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
+                foreach ( $this->file as $fileInfo ) {
+                    if ( AbstractFilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
                         throw new Exception( "Please upload a TMX.", -8 );
                     }
 
@@ -117,15 +122,15 @@ class loadTMXController extends ajaxController {
                      *
                      * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
                      */
-                    if( $this->tm_key != INIT::$DEFAULT_TM_KEY ){
+                    if ( $this->tm_key != INIT::$DEFAULT_TM_KEY ) {
 
                         /*
                          * Update a memory key with the name of th TMX if the key name is empty
                          */
-                        $mkDao                   = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                        $searchMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
-                        $key                     = new TmKeyManagement_TmKeyStruct();
-                        $key->key                = $this->tm_key;
+                        $mkDao           = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                        $searchMemoryKey = new TmKeyManagement_MemoryKeyStruct();
+                        $key             = new TmKeyManagement_TmKeyStruct();
+                        $key->key        = $this->tm_key;
 
                         $searchMemoryKey->uid    = $this->user->uid;
                         $searchMemoryKey->tm_key = $key;
@@ -152,8 +157,8 @@ class loadTMXController extends ajaxController {
             $this->result[ 'success' ] = true;
 
         } catch ( Exception $e ) {
-            $this->result[ 'success' ]   = false;
-            $this->result[ 'errors' ][ ] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+            $this->result[ 'success' ]  = false;
+            $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => $e->getMessage() ];
         }
 
     }

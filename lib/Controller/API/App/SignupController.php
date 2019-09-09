@@ -3,14 +3,11 @@
 namespace API\App;
 
 use Exceptions\ValidationError;
+use FlashMessage;
 use Teams\InvitedUser;
 use Users\PasswordReset;
-use Users\Signup ;
-use FlashMessage ;
-
-use Users\RedeemableProject ;
-
-use AuthCookie ;
+use Users\RedeemableProject;
+use Users\Signup;
 
 class SignupController extends AbstractStatefulKleinController  {
 

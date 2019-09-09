@@ -9,7 +9,7 @@
 namespace ConnectedServices;
 
 
-use OauthTokenEncryption ;
+use OauthTokenEncryption;
 
 class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   implements \DataAccess_IDaoStruct {
 
