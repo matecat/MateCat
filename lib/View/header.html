@@ -27,7 +27,7 @@
             </div>
         </div> <!-- revision number -->
 
-        <div class="breadcrumbs file-list">
+        <div class="breadcrumbs file-list" title="File list">
             <div class="icon-container">
                 <span id="project-badge"><span tal:replace="php:count(json_decode(firstSegmentOfFiles))">---</span></span>
                 <img src="/public/img/icons/icon-folder.svg" alt=""/>
@@ -103,7 +103,7 @@
             <div tal:condition="segmentFilterEnabled" class="action-submenu ui floating" id="action-filter" title="Filter segments">
             </div>
 
-            <div class="action-submenu ui floating" id="action-settings">
+            <div class="action-submenu ui floating" id="action-settings" title="Settings">
 
             </div>
 
@@ -132,7 +132,7 @@
 
         <div class="profile-menu">
             <div class="column-separator"></div>
-            <div tal:condition="isLoggedIn">
+            <div tal:condition="isLoggedIn" title="Manage">
                 <a href="/manage" class="action-submenu">
                     <img src="/public/img/icons/icon-manage.svg"/>
                 </a>

@@ -5105,8 +5105,7 @@ header {
     .breadcrumbs {
         display: grid;
         grid-template-columns: 25px auto;
-        padding:0;
-        margin-top:10px;
+        padding:14px 0 4px 0;
 
         .icon-container {
             position: relative;
