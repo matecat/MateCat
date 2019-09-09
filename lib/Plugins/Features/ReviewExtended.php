@@ -5,12 +5,9 @@ namespace Features ;
 
 use API\V2\Json\ProjectUrls;
 use BasicFeatureStruct;
-use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
-use Features\ReviewExtended\SegmentTranslationModel;
 use Features\ReviewExtended\View\API\JSON\ProjectUrlsDecorator;
 use RevisionFactory;
-use SegmentTranslationChangeVector;
 
 class ReviewExtended extends AbstractRevisionFeature {
 

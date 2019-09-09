@@ -1,6 +1,7 @@
 <?php
 
 use Klein\Request;
+use LQA\ChunkReviewStruct;
 
 /**
  * Created by PhpStorm.
@@ -8,7 +9,6 @@ use Klein\Request;
  * Date: 25/02/2019
  * Time: 15:55
  */
-
 class RevisionFactory {
 
     /** @var  \Features\AbstractRevisionFeature */
@@ -48,6 +48,12 @@ class RevisionFactory {
         }
     }
 
+    /**
+     * @param SegmentTranslationChangeVector $translation
+     * @param ChunkReviewStruct[]            $chunkReviews
+     *
+     * @return \Features\ISegmentTranslationModel
+     */
     public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews ) {
         return $this->revision->getSegmentTranslationModel( $translation, $chunkReviews );
     }
