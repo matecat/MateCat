@@ -5,15 +5,12 @@
 namespace Features\QaCheckBlacklist\Worker ;
 
 use Features\QaCheckBlacklist;
-use TaskRunner\Commons\AbstractElement ;
-use TaskRunner\Commons\AbstractWorker ;
-use TaskRunner\Commons\QueueElement ;
-
-use TaskRunner\Exceptions\EndQueueException ;
-
-use Translations\WarningModel ;
-use Translations\WarningStruct ;
-use Features\QaCheckBlacklist\BlacklistFromZip ;
+use Features\QaCheckBlacklist\BlacklistFromZip;
+use TaskRunner\Commons\AbstractElement;
+use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
+use Translations\WarningModel;
+use Translations\WarningStruct;
 
 class BlacklistWorker extends AbstractWorker {
 

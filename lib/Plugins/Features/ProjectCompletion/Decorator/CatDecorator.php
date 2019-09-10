@@ -1,10 +1,10 @@
 <?php
 
 namespace Features\ProjectCompletion\Decorator ;
-use AbstractDecorator ;
+use AbstractDecorator;
 use catController;
-use Features ;
-use Chunks_ChunkCompletionEventDao  ;
+use Chunks_ChunkCompletionEventDao;
+use Features;
 
 class CatDecorator extends AbstractDecorator {
 

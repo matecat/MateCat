@@ -10,7 +10,6 @@ namespace Features\Dqf\Controller\API;
 
 
 use API\V2\KleinController;
-use Features\Dqf\Service\Client;
 use Features\Dqf\Service\Session;
 
 class LoginController extends KleinController {

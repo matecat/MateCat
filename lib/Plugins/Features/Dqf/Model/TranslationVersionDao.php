@@ -10,8 +10,6 @@ namespace Features\Dqf\Model;
 
 use DataAccess_AbstractDao;
 use Database;
-use Features\Dqf\Model\CachedAttributes\SegmentOrigin;
-use Features\Dqf\Model\ExtendedTranslationStruct ;
 use Log;
 use PDO;
 

@@ -12,8 +12,8 @@
 namespace Predis\Profile;
 
 use InvalidArgumentException;
-use ReflectionClass;
 use Predis\ClientException;
+use ReflectionClass;
 
 /**
  * Factory class for creating profile instances from strings.

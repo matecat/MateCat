@@ -1,4 +1,5 @@
 <?php
+
 use Teams\MembershipDao;
 use Teams\TeamDao;
 use Users\MetadataDao;

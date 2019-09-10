@@ -1,13 +1,12 @@
 <?php
 namespace AsyncTasks\Workers;
 
-use INIT;
 use Jobs_JobDao;
 use Jobs_JobStruct;
-use TaskRunner\Commons\AbstractElement,
-        TaskRunner\Commons\AbstractWorker,
-        TaskRunner\Commons\QueueElement,
-        TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Commons\AbstractElement;
+use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EndQueueException;
 
 //include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 

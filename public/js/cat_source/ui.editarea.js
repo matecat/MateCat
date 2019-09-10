@@ -60,7 +60,7 @@ $.extend( UI, {
                 saveSelection();
 
                 var parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
-                var isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+                var isInsideTag = $('span.locked .rangySelectionBoundary, span.monad .rangySelectionBoundary', UI.editarea).length;
                 var isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
 
                 var sbIndex = 0;
@@ -73,18 +73,15 @@ $.extend( UI, {
                 var selBound = $('.rangySelectionBoundary', UI.editarea);
                 if(undeletableMonad) selBound.prev().remove();
                 if(code == 8) { // backspace
-                    var undeletableTag = (
-                        ( $(translation[sbIndex-1]).hasClass('locked') && ($(translation[sbIndex-2]).prop("tagName") === 'BR')) ||
-                        ( ( $(translation[sbIndex-2]).hasClass("monad") || $(translation[sbIndex-2]).hasClass("locked")) && $(translation[sbIndex-1]).hasClass('undoCursorPlaceholder') )
-                    )? true : false;
+                    var undeletableTag = !!(
+                        ($( translation[sbIndex - 1] ).hasClass( 'locked' ) && ($( translation[sbIndex - 2] ).prop( "tagName" ) === 'BR')) ||
+                        (($( translation[sbIndex - 2] ).hasClass( "monad" ) || $( translation[sbIndex - 2] ).hasClass( "locked" )) && $( translation[sbIndex - 1] ).hasClass( 'undoCursorPlaceholder' )) ||
+                        ( $( translation[sbIndex - 1] ).hasClass( "monad" ) && translation.length -1 === sbIndex )
+                    );
                     if(undeletableTag) {
                         selBound.prev().remove();
-                        // e.preventDefault();
                     }
                 }
-
-                // restoreSelection();
-
                 // insideTag management
                 if ((code == 8)&&(isInsideTag)) {
                     parentTag.remove();

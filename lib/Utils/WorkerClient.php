@@ -8,7 +8,7 @@
  */
 
 use TaskRunner\Commons\ContextList;
-use TaskRunner\Commons\QueueElement ;
+use TaskRunner\Commons\QueueElement;
 
 class WorkerClient {
 

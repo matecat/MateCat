@@ -13,8 +13,8 @@ use API\V2\Json\Membership;
 use API\V2\Validators\LoginValidator;
 use API\V2\Validators\TeamAccessValidator;
 use TeamModel;
-use Teams\TeamDao;
 use Teams\PendingInvitations;
+use Teams\TeamDao;
 
 class TeamMembersController extends KleinController {
 

@@ -1,4 +1,5 @@
 <?php
+
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
 

@@ -4,8 +4,6 @@ namespace LQA;
 
 use DataAccess_AbstractDao;
 use Database;
-use INIT;
-use Log;
 
 class ModelDao extends DataAccess_AbstractDao {
     const TABLE = "qa_models";
