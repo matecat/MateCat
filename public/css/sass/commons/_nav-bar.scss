@@ -169,6 +169,7 @@ header {
             /*border: 1px dashed;*/
             top: 2px;
             padding:0;
+            width: 40px;
             /*&:hover {
                 border: 1px dashed #09beec !important;
                 i {
@@ -251,7 +252,7 @@ header {
                 /*line-height: 32px;*/
                 text-decoration: none;
                 min-width: 0;
-                max-width: 74px;
+                /*max-width: 74px;*/
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
