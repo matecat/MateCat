@@ -176,12 +176,14 @@ body.search-open header .action-menu #action-search {
 .action-submenu.notific:before {
         font-size: 18px ;
         color: #3aa94f;
-        content: "";                        /* Don't display icon if all ok */
+        content: "";
+        display: none; /* Don't display icon if all ok */
 }
 
 #point2seg:after {
     font-size: 18px ;
-    content: "";                            /* Don't display icon */
+    content: "";
+    display: none; /* Don't display icon */
 }
 
 
