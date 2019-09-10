@@ -12,14 +12,13 @@
 namespace Predis;
 
 use InvalidArgumentException;
-use UnexpectedValueException;
 use Predis\Command\CommandInterface;
 use Predis\Command\RawCommand;
 use Predis\Command\ScriptCommand;
 use Predis\Configuration\Options;
 use Predis\Configuration\OptionsInterface;
-use Predis\Connection\ConnectionInterface;
 use Predis\Connection\AggregateConnectionInterface;
+use Predis\Connection\ConnectionInterface;
 use Predis\Connection\ParametersInterface;
 use Predis\Monitor\Consumer as MonitorConsumer;
 use Predis\Pipeline\Pipeline;
@@ -28,6 +27,7 @@ use Predis\Response\ErrorInterface as ErrorResponseInterface;
 use Predis\Response\ResponseInterface;
 use Predis\Response\ServerException;
 use Predis\Transaction\MultiExec as MultiExecTransaction;
+use UnexpectedValueException;
 
 /**
  * Client class used for connecting and executing commands on Redis.

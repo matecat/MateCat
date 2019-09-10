@@ -8,16 +8,13 @@
 
 namespace Features;
 
-use Translations\WarningDao ;
-use Translations\WarningStruct ;
-use Features\QaCheckBlacklist\BlacklistFromZip ;
+use AMQHandler;
+use Features\QaCheckBlacklist\BlacklistFromZip;
 use Projects\ProjectModel;
-
-use Translations\WarningModel ;
-
-use TaskRunner\Commons\QueueElement ;
-use WorkerClient ;
-use AMQHandler ;
+use TaskRunner\Commons\QueueElement;
+use Translations\WarningDao;
+use Translations\WarningStruct;
+use WorkerClient;
 
 class QaCheckBlacklist extends BaseFeature {
 

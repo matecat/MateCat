@@ -11,7 +11,6 @@
 
 namespace Predis\Pipeline;
 
-use SplQueue;
 use Predis\ClientException;
 use Predis\ClientInterface;
 use Predis\Connection\ConnectionInterface;
@@ -19,6 +18,7 @@ use Predis\Connection\NodeConnectionInterface;
 use Predis\Response\ErrorInterface as ErrorResponseInterface;
 use Predis\Response\ResponseInterface;
 use Predis\Response\ServerException;
+use SplQueue;
 
 /**
  * Command pipeline wrapped into a MULTI / EXEC transaction.

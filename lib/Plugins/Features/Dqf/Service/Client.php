@@ -3,10 +3,8 @@
 namespace Features\Dqf\Service;
 
 
-use Features\Dqf\Service\Struct\CreateProjectResponseStruct ;
-use Features\SegmentFilter\Model\SegmentFilterDao;
-use INIT ;
-use MultiCurlHandler ;
+use INIT;
+use MultiCurlHandler;
 
 class Client {
 

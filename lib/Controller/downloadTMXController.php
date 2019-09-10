@@ -1,6 +1,4 @@
 <?php
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
 
 /**
  * Created by PhpStorm.

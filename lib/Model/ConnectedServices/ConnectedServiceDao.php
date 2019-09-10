@@ -3,12 +3,8 @@
 
 namespace ConnectedServices ;
 
-use Database ;
 use Exceptions\ValidationError;
-use PDO ;
-use Utils ;
-
-use ConnectedServices\ConnectedServiceStruct as Struct ;
+use Utils;
 
 class ConnectedServiceDao extends \DataAccess_AbstractDao {
 

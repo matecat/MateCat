@@ -10,7 +10,7 @@ namespace API\V2\Validators;
 
 
 use API\V2\KleinController;
-use \Exceptions\NotFoundException;
+use Exceptions\NotFoundException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 

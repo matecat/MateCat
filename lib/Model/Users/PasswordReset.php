@@ -8,12 +8,9 @@
 
 namespace Users;
 
+use AuthCookie;
 use Exceptions\ValidationError;
 use Users_UserDao;
-
-use Utils;
-
-use AuthCookie;
 
 
 class PasswordReset {

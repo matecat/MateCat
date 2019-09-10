@@ -11,10 +11,8 @@ namespace LexiQA;
 
 
 use INIT;
-use OwnerFeatures_OwnerFeatureDao;
 use PHPTAL;
 use ProjectOptionsSanitizer;
-use Features ;
 
 class LexiQADecorator {
 

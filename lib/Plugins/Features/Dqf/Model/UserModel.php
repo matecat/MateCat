@@ -13,7 +13,6 @@ use Exception;
 use Features\Dqf\Service\GenericSession;
 use Features\Dqf\Service\ISession;
 use Features\Dqf\Service\Session;
-use Users_UserDao;
 use Users_UserStruct;
 
 class UserModel {

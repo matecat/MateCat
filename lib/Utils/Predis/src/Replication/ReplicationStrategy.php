@@ -11,8 +11,8 @@
 
 namespace Predis\Replication;
 
-use Predis\NotSupportedException;
 use Predis\Command\CommandInterface;
+use Predis\NotSupportedException;
 
 /**
  * Defines a strategy for master/slave replication.

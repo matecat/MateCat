@@ -1,8 +1,8 @@
 <?php
 
-use Defuse\Crypto\Key;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
+use Defuse\Crypto\Key;
 
 /**
  * Class DefuseEncryption.

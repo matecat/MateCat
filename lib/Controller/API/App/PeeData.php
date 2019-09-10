@@ -9,6 +9,7 @@
 
 namespace API\App;
 
+use API\App\Json\PeeGraphData;
 use API\App\Json\PeeTableData;
 use API\V2\KleinController;
 use API\V2\Validators\LoginValidator;
@@ -18,7 +19,6 @@ use DateTime;
 use Exception;
 use InvalidArgumentException;
 use LanguageStats_LanguageStatsDAO;
-use API\App\Json\PeeGraphData;
 
 class PeeData extends KleinController {
 

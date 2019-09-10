@@ -166,14 +166,15 @@
          */
         copySourcefromDataAttribute: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
-            var source = htmlDecode(currentSegment.find('.source').data('original'));
+            var segmentJS = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
+            var source = segmentJS.segment;
             source = UI.transformPlaceholdersAndTags(source);
             // source = source.replace(/\n/g , config.lfPlaceholder)
             //         .replace(/\r/g, config.crPlaceholder )
             //         .replace(/\r\n/g, config.crlfPlaceholder )
             //         .replace(/\t/g, config.tabPlaceholder )
             //         .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
-            SegmentActions.replaceSourceText(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment), source);
+            SegmentActions.replaceSourceText(segmentJS.sid, segmentJS.fid, source);
             UI.markGlossaryItemsInSource(currentSegment, UI.cachedGlossaryData);
         },
         /**

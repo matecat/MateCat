@@ -10,7 +10,6 @@ namespace API\V2\Json;
 
 
 use Teams\MembershipStruct;
-use Users\MetadataStruct;
 
 class Membership {
 

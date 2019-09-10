@@ -10,8 +10,6 @@
 namespace API\V2\Json;
 
 
-use stdClass;
-
 class CreationStatus {
 
     private $data;

@@ -1,5 +1,8 @@
 <?php
 
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+
 set_time_limit( 0 );
 
 class convertFileController extends ajaxController {
@@ -20,8 +23,12 @@ class convertFileController extends ajaxController {
     protected $convertZipFile = true;
     protected $lang_handler;
 
-    public function __construct() {
+    /**
+     * @var AbstractFilesStorage
+     */
+    protected $files_storage;
 
+    public function __construct() {
         parent::__construct();
 
         $filterArgs = array(
@@ -60,6 +67,7 @@ class convertFileController extends ajaxController {
 
         $this->readLoginInfo();
 
+        $this->files_storage = FilesStorageFactory::create();
     }
 
     public function doAction() {
@@ -90,7 +98,7 @@ class convertFileController extends ajaxController {
             $this->featureSet->loadFromUserEmail( $this->user->email ) ;
         }
 
-        $ext = FilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
+        $ext = AbstractFilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
 
         $conversionHandler = new ConversionHandler();
         $conversionHandler->setFileName( $this->file_name );

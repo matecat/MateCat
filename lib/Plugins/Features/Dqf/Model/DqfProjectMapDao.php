@@ -11,10 +11,6 @@ namespace Features\Dqf\Model;
 use Chunks_ChunkStruct;
 use DataAccess_AbstractDao;
 use Database;
-use Features\Dqf\Service\Struct\Request\ChildProjectRequestStruct;
-use Features\ProjectCompletion\ChunkStatus;
-use Files_FileStruct;
-use Jobs_JobStruct;
 use PDO;
 
 class DqfProjectMapDao extends DataAccess_AbstractDao  {

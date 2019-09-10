@@ -208,6 +208,8 @@ class Xliff_Parser {
                         // Getting Source and Target raw content
                         $this->getSource( $xliff, $i, $j, $trans_unit );
                         $this->getTarget( $xliff, $i, $j, $trans_unit );
+                        //TODO add seg-source from dom, il raw-content del target viene dal dom
+                        //TODO il raw-content del seg-source viene dalle regexp
                         $this->getContextGroups( $xliff, $i, $j, $trans_unit );
                         $this->getAltTrans( $xliff, $i, $j, $trans_unit );
                         $this->getSDLStatus( $xliff, $i, $j, $trans_unit );

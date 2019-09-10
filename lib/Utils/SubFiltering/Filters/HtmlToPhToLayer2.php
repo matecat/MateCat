@@ -9,8 +9,6 @@
 
 namespace SubFiltering\Filters;
 
-use SubFiltering\Commons\AbstractHandler;
-
 /**
  * Class HtmlToPh
  *

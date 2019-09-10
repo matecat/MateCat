@@ -11,6 +11,9 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use ConnectedServices\GDrive as GDrive;
 use ConnectedServices\GDrive\Session;
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use ProjectManager\ProjectManagerModel;
 use SubFiltering\Filter;
@@ -37,11 +40,6 @@ class ProjectManager {
     protected $projectStructure;
 
     protected $tmxServiceWrapper;
-
-    /**
-     * @var FilesStorage
-     */
-    protected $fileStorage;
 
     protected $uploadDir;
 
@@ -114,6 +112,7 @@ class ProjectManager {
                             'private_tm_pass'              => null,
                             'uploadToken'                  => null,
                             'array_files'                  => [], //list of file names
+                            'array_files_meta'             => [], //list of file names
                             'file_id_list'                 => [],
                             'source_language'              => null,
                             'target_language'              => null,
@@ -190,9 +189,18 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+        // sync array_files_meta
+        $array_files_meta = [];
+        foreach ( $this->projectStructure[ 'array_files_meta' ] as $fileMeta ) {
+            if ( in_array( $fileMeta[ 'basename' ], (array)$this->projectStructure[ 'array_files' ] ) ) {
+                $array_files_meta[] = $fileMeta;
+            }
+        }
+
+        $this->projectStructure[ 'array_files_meta' ] = $array_files_meta;
     }
 
-    protected function _log( $_msg ){
+    protected function _log( $_msg ) {
         Log::doJsonLog( $_msg );
     }
 
@@ -366,7 +374,7 @@ class ProjectManager {
      *
      */
     private function __createProjectRecord() {
-        $this-> project = ProjectManagerModel::createProjectRecord( $this->projectStructure );
+        $this->project = ProjectManagerModel::createProjectRecord( $this->projectStructure );
     }
 
     private function __checkForProjectAssignment() {
@@ -399,6 +407,8 @@ class ProjectManager {
             //Found Errors
         }
 
+        $fs = FilesStorageFactory::create();
+
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] );
         }
@@ -424,15 +434,19 @@ class ProjectManager {
 
         //sort files in order to process TMX first
         $sortedFiles      = [];
+        $sortedMeta       = [];
         $firstTMXFileName = "";
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+
+        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
+
+            // get metadata
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
 
             //check for glossary files and tmx and put them in front of the list
-            $infoFile = DetectProprietaryXliff::getInfo( $fileName );
-            if ( DetectProprietaryXliff::getMemoryFileType() ) {
+            if ( $meta[ 'getMemoryType' ] ) {
 
                 //found TMX, enable language checking routines
-                if ( DetectProprietaryXliff::isTMXFile() ) {
+                if ( $meta[ 'isTMX' ] ) {
 
                     //export the name of the first TMX Files for latter use
                     $firstTMXFileName = ( empty( $firstTMXFileName ) ? $firstTMXFileName = $fileName : null );
@@ -440,21 +454,26 @@ class ProjectManager {
                 }
 
                 //not used at moment but needed if we want to do a poll for status
-                if ( DetectProprietaryXliff::isGlossaryFile() ) {
+                if ( $meta[ 'isGlossary' ] ) {
                     $this->checkGlossary = 1;
                 }
 
                 //prepend in front of the list
                 array_unshift( $sortedFiles, $fileName );
+                array_unshift( $sortedMeta, $meta );
+
             } else {
 
                 //append at the end of the list
                 array_push( $sortedFiles, $fileName );
+                array_push( $sortedMeta, $meta );
             }
-
         }
-        $this->projectStructure[ 'array_files' ] = $sortedFiles;
+
+        $this->projectStructure[ 'array_files' ]      = $sortedFiles;
+        $this->projectStructure[ 'array_files_meta' ] = $sortedMeta;
         unset( $sortedFiles );
+        unset( $sortedMeta );
 
         if ( count( $this->projectStructure[ 'private_tm_key' ] ) ) {
             $this->setPrivateTMKeys( $firstTMXFileName );
@@ -467,13 +486,16 @@ class ProjectManager {
 
         $uploadDir = $this->uploadDir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
+        \Log::doJsonLog( $uploadDir );
+
         //we are going to access the storage, get model object to manipulate it
-        $this->fileStorage = new FilesStorage();
-        $linkFiles         = $this->fileStorage->getHashesFromDir( $this->uploadDir );
+        $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
+
+        \Log::doJsonLog( $linkFiles );
 
         /*
             loop through all input files to
-            1) upload TMX and Glossaries
+            1) upload INSERT INTMX and Glossaries
         */
         try {
             $this->_pushTMXToMyMemory();
@@ -492,21 +514,12 @@ class ProjectManager {
 
             Note that XLIFF that don't need conversion are moved anyway as they are to cache in order not to alter the workflow
          */
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
 
-            $forceXliff = $this->features->filter(
-                    'forceXLIFFConversion',
-                    INIT::$FORCE_XLIFF_CONVERSION,
-                    ( isset( $this->projectStructure[ 'userIsLogged' ] ) && $this->projectStructure[ 'userIsLogged' ] ),
-                    "$this->uploadDir/$fileName"
-            );
+        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
-            /*
-               Conversion Enforce
-               Checking Extension is no more sufficient, we want check content
-               $enforcedConversion = true; //( if conversion is enabled )
-             */
-            $mustBeConverted = $this->fileMustBeConverted( "$this->uploadDir/$fileName", $forceXliff );
+            // get corresponding meta
+            $meta            = $this->projectStructure[ 'array_files_meta' ][ $pos ];
+            $mustBeConverted = $meta[ 'mustBeConverted' ];
 
             //if it's one of the listed formats or conversion is not enabled in first place
             if ( !$mustBeConverted ) {
@@ -517,15 +530,24 @@ class ProjectManager {
                 //get file
                 $filePathName = "$this->uploadDir/$fileName";
 
+                // NOTE: 12 Aug 2019
+                // I am not absolute sure that the queue file exists,
+                // so I check it and in negative case I force the download of the file to file system from S3
+                $isFsOnS3 = AbstractFilesStorage::isOnS3();
+
+                if ( $isFsOnS3 and false === file_exists( $filePathName ) ) {
+                    $this->getSingleS3QueueFile( $fileName );
+                }
+
                 //calculate hash + add the fileName, if i load 3 equal files with the same content
                 // they will be squashed to the last one
                 $sha1 = sha1_file( $filePathName );
 
                 //make a cache package (with work/ only, emtpy orig/)
-                $this->fileStorage->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
 
                 //put reference to cache in upload dir to link cache to session
-                $this->fileStorage->linkSessionToCacheForAlreadyConvertedFiles(
+                $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
                         $this->projectStructure[ 'source_language' ],
                         $this->projectStructure[ 'uploadToken' ],
@@ -533,9 +555,9 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . $this->__getStorageFilesDelimiter() . $this->projectStructure[ 'source_language' ];
 
-                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
+                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . $this->__getStorageFilesDelimiter() . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
                 $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
@@ -560,14 +582,17 @@ class ProjectManager {
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
-            $hashFile = FilesStorage::basename_fix( $linkFile );
-            $hashFile = explode( '|', $hashFile );
+            $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
+            $hashFile = explode( $this->__getStorageFilesDelimiter(), $hashFile );
+
+            // Example:
+            // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
+            // $hashFile[ 1 ] = it-it
+            $sha1_original = $hashFile[ 0 ];
+            $lang          = $hashFile[ 1 ];
 
             //use hash and lang to fetch file from package
-            $cachedXliffFilePathName = $this->fileStorage->getXliffFromCache( $hashFile[ 0 ], $hashFile[ 1 ] );
-
-            //get sha
-            $sha1_original = $hashFile[ 0 ];
+            $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang );
 
             //associate the hash to the right file in upload directory
             //get original file name, to insert into DB and cp in storage
@@ -579,17 +604,31 @@ class ProjectManager {
 
             try {
 
-                if ( !file_exists( $cachedXliffFilePathName ) ) {
-                    throw new Exception( "File not found on server after upload.", -6 );
+                if ( count( $_originalFileNames ) === 0 ) {
+                    throw new Exception( 'No hash files found', -6 );
                 }
 
-                $info = FilesStorage::pathinfo_fix( $cachedXliffFilePathName );
+                if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+                    if ( null === $cachedXliffFilePathName ) {
+                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', $_originalFileNames[ 0 ] ), -6 );
+                    }
+                } else {
+                    if ( !file_exists( $cachedXliffFilePathName ) ) {
+                        throw new Exception( sprintf( 'File %s not found on server after upload.', $cachedXliffFilePathName ), -6 );
+                    }
+                }
+
+                $info = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName );
 
                 if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
                     throw new Exception( "Failed to find converted Xliff", -3 );
                 }
 
                 $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
+
+                if ( count( $filesStructure ) === 0 ) {
+                    throw new Exception( 'Files could not be saved in database.', -6 );
+                }
 
                 //check if the files language equals the source language. If not, set an error message.
                 if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
@@ -689,7 +728,9 @@ class ProjectManager {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
-                $this->fileStorage->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
+                if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
+                    $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
+                }
             } elseif ( $e->getCode() == -4 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -7,
@@ -756,7 +797,14 @@ class ProjectManager {
         Database::obtain()->commit();
 
         $this->features->run( 'postProjectCommit', $this->projectStructure );
+
         try {
+
+            if ( $isFsOnS3 ) {
+                \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
+                /** @var $fs S3FilesStorage */
+                $fs->deleteQueue( $this->uploadDir );
+            }
 
             Utils::deleteDir( $this->uploadDir );
             if ( is_dir( $this->uploadDir . '_converted' ) ) {
@@ -780,6 +828,37 @@ class ProjectManager {
 
         }
 
+    }
+
+    /**
+     * @param $fileName
+     *
+     * @throws Exception
+     */
+    public function getSingleS3QueueFile( $fileName ) {
+        $fs = FilesStorageFactory::create();
+
+        if ( false === is_dir( $this->uploadDir ) ) {
+            mkdir( $this->uploadDir, 0755 );
+        }
+
+        /** @var $fs S3FilesStorage */
+        $client              = $fs::getStaticS3Client();
+        $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
+        $params[ 'key' ]     = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName( $fs->getTheLastPartOfKey( $this->uploadDir ) ) . DIRECTORY_SEPARATOR . $fileName;
+        $params[ 'save_as' ] = "$this->uploadDir/$fileName";
+        $client->downloadItem( $params );
+    }
+
+    /**
+     * @return string
+     */
+    private function __getStorageFilesDelimiter() {
+        if ( AbstractFilesStorage::isOnS3() ) {
+            return S3FilesStorage::OBJECTS_SAFE_DELIMITER;
+        }
+
+        return '|';
     }
 
     private function __clearFailedProject( Exception $e ) {
@@ -818,7 +897,8 @@ class ProjectManager {
 
         }
 
-        FilesStorage::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
+        $fs = FilesStorageFactory::create();
+        $fs::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
 
         //free memory
         unset( $this->projectStructure[ 'segments_metadata' ] );
@@ -864,15 +944,24 @@ class ProjectManager {
     protected function _pushTMXToMyMemory() {
 
         //TMX Management
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+        foreach ( $this->projectStructure[ 'array_files' ] as $pos => $fileName ) {
 
-            $ext = FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION );
+            // get corresponding meta
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
+
+            $ext = $meta[ 'extension' ];
 
             $file = new stdClass();
             if ( in_array( $ext, [ 'tmx', 'g' ] ) ) {
+
+                if ( INIT::$FILE_STORAGE_METHOD == 's3' ) {
+                    $this->getSingleS3QueueFile( $fileName );
+                }
+
                 $file->file_path = "$this->uploadDir/$fileName";
                 $this->tmxServiceWrapper->setName( $fileName );
                 $this->tmxServiceWrapper->setFile( [ $file ] );
+
             }
 
             try {
@@ -895,9 +984,7 @@ class ProjectManager {
                 ];
 
                 throw new Exception( $e );
-
             }
-
         }
 
         /**
@@ -919,7 +1006,7 @@ class ProjectManager {
         foreach ( $this->projectStructure[ 'array_files' ] as $kname => $fileName ) {
 
             //if TMX,
-            if ( 'tmx' == FilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
+            if ( 'tmx' == AbstractFilesStorage::pathinfo_fix( $fileName, PATHINFO_EXTENSION ) ) {
 
                 $this->tmxServiceWrapper->setName( $fileName );
 
@@ -1011,13 +1098,14 @@ class ProjectManager {
                 }
 
                 unset( $this->projectStructure[ 'array_files' ][ $kname ] );
+                unset( $this->projectStructure[ 'array_files_meta' ][ $kname ] );
 
             }
 
         }
 
         if ( 1 == $this->checkTMX ) {
-            //this means that noone of uploaded TMX were usable for this project. Warn the user.
+            //this means that none of uploaded TMX were usable for this project. Warn the user.
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => -16,
                     "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
@@ -1045,10 +1133,12 @@ class ProjectManager {
 
     protected function _zipFileHandling( $linkFiles ) {
 
+        $fs = FilesStorageFactory::create();
+
         //begin of zip hashes manipulation
         foreach ( $linkFiles[ 'zipHashes' ] as $zipHash ) {
 
-            $result = $this->fileStorage->linkZipToProject(
+            $result = $fs->linkZipToProject(
                     $this->projectStructure[ 'create_date' ],
                     $zipHash,
                     $this->projectStructure[ 'id_project' ]
@@ -1061,7 +1151,7 @@ class ProjectManager {
                 //Exit
             }
 
-            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $this->fileStorage->getZipDir() );
+//            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $fs->getZipDir() );
 
         } //end zip hashes manipulation
 
@@ -1592,7 +1682,7 @@ class ProjectManager {
      */
     protected function _extractSegments( $fid, $file_info ) {
 
-        $xliff_file_content = file_get_contents( $file_info[ 'path_cached_xliff' ] );
+        $xliff_file_content = $this->getXliffFileContent( $file_info[ 'path_cached_xliff' ] );
         $mimeType           = $file_info[ 'mime_type' ];
 
         //create Structure fro multiple files
@@ -1605,7 +1695,6 @@ class ProjectManager {
         } catch ( Exception $e ) {
             throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
         }
-
 
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
@@ -1824,7 +1913,36 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param $xliff_file_content
+     *
+     * @return false|string
+     * @throws Exception
+     */
+    private function getXliffFileContent( $xliff_file_content ) {
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+
+            if ( $s3Client->hasEncoder() ) {
+                $xliff_file_content = $s3Client->getEncoder()->decode( $xliff_file_content );
+            }
+
+            return $s3Client->openItem( [ 'bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $xliff_file_content ] );
+        }
+
+        return file_get_contents( $xliff_file_content );
+    }
+
+    /**
+     * @param $_originalFileNames
+     * @param $sha1_original           (example: 917f7b03c8f54350fb65387bda25fbada43ff7d8)
+     * @param $cachedXliffFilePathName (example: 91/7f/7b03c8f54350fb65387bda25fbada43ff7d8!!it-it/work/test_2.txt.sdlxliff)
+     *
+     * @return array
+     * @throws Exception
+     */
     protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName ) {
+        $fs = FilesStorageFactory::create();
 
         $yearMonthPath    = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
         $fileDateSha1Path = $yearMonthPath . DIRECTORY_SEPARATOR . $sha1_original;
@@ -1832,13 +1950,13 @@ class ProjectManager {
         //return structure
         $filesStructure = [];
 
-        //PLEASE NOTE, this can be an array when the same file added more
-        // than once and with different names
-        //
-        foreach ( $_originalFileNames as $originalFileName ) {
+        foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
-            $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
+            // get metadata
+            $meta = $this->projectStructure[ 'array_files_meta' ][ $pos ];
+
+            $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, @$meta );
 
             if ( $this->gdriveSession ) {
                 $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
@@ -1847,7 +1965,7 @@ class ProjectManager {
                 }
             }
 
-            $this->fileStorage->moveFromCacheToFileDir(
+            $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
                     $this->projectStructure[ 'source_language' ],
                     $fid,
@@ -1857,11 +1975,9 @@ class ProjectManager {
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
             $filesStructure[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
-
         }
 
         return $filesStructure;
-
     }
 
     /**
@@ -1875,6 +1991,7 @@ class ProjectManager {
      */
     protected function _insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
         $idFile = ProjectManagerModel::insertFile( $projectStructure, $file_name, $mime_type, $fileDateSha1Path );
+
         return $idFile;
     }
 
@@ -2175,6 +2292,16 @@ class ProjectManager {
 
     }
 
+    /**
+     * @param $segment
+     *
+     * @return array
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     */
     protected function _strip_external( $segment ) {
 
         if ( $this->features->filter( 'skipTagLessFeature', false, $segment ) ) {
@@ -2213,7 +2340,7 @@ class ProjectManager {
                 // All the bytes in the matched groups are whitespaces and must be
                 // ignored in the next steps
                 $start = $match[ 1 ];
-                $end   = $start + mb_strlen( $match[ 0 ] );
+                $end   = $start + strlen( $match[ 0 ] );
                 for ( $i = $start; $i < $end; $i++ ) {
                     $isSpace[ $i ] = true;
                 }
@@ -2348,6 +2475,7 @@ class ProjectManager {
             $before       = substr( $segment, 0, $segStart );
             $cleanSegment = substr( $segment, $segStart, $segEnd - $segStart + 1 );
             $after        = substr( $segment, $segEnd + 1 );
+
             // Following line needed in case $segEnd points to the last char of $segment
             if ( $after === false ) {
                 $after = '';

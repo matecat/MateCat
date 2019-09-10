@@ -8,7 +8,8 @@
 
 namespace Features\Dqf\Service\Struct;
 
-use ReflectionClass, ReflectionProperty ;
+use ReflectionClass;
+use ReflectionProperty;
 
 abstract class BaseStruct {
 
