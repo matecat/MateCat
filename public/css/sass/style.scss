@@ -116,7 +116,16 @@ header .wrapper {
 }
 
 body.search-open header .action-menu #action-search {
-    background-image: url("../../img/icons/icon-search-active.svg");
+    /*background-image: url("../../img/icons/icon-search-active.svg");*/
+    opacity: 1;
+    svg {
+        circle {
+            fill:#002b5c;
+        }
+        .st1{
+            fill:#fff;
+        }
+    }
 }
 
 .numbererror,
@@ -5150,6 +5159,7 @@ header {
             align-items:center;
             grid-template-columns: $icon-scale;
             grid-template-rows: $icon-scale;
+            opacity: 0.8;
 
             background-repeat: no-repeat;
             background-position: center;
@@ -5157,6 +5167,10 @@ header {
             border-radius: 3px;
             cursor: pointer;
 
+            &:hover,
+            &.active {
+                opacity: 1;
+            }
 
             /* Bug fix for Semantic UI Dropdown hover */
             .dropdown-menu-overlay {
@@ -5244,10 +5258,6 @@ header {
 
         }
 
-        svg {
-            /*padding-left: 6px !important;*/
-        }
-
         #markAsCompleteButton {
             width: $icon-scale !important;
             height: $icon-scale;
@@ -5277,7 +5287,8 @@ header {
             background-image: url("../../img/icons/icon-download.svg");
             background-size: 36px;
         }
-        #action-QR, #quality-report-button {
+        #action-QR,
+        #quality-report-button {
             /*background-image: url("../../img/icons/icon-QR-line.svg");*/
             #quality-report {
                 display: grid;
@@ -5341,22 +5352,30 @@ header {
 
 
         #notifbox {
-            /*background-image: url("../../img/icons/icon-QA-line.svg");*/
-            svg {
-                margin-top: -35px;
-            }
             width: $icon-scale;
             height: $icon-scale;
-            padding: 0;
+            padding: 0 !important;
             text-align: right;
-            opacity: 1;
+            opacity: 0.8;
+            &:hover {
+                opacity: 1;
+            }
+            a{
+             position: absolute;
+            }
         }
+
         #action-comments, #mbc-history {
             /*background-image: url("../../img/icons/icon-comments.svg");*/
+            opacity: 0.8;
             width: $icon-scale !important;
             height: $icon-scale;
             padding:0 !important;
             background-position: center;
+
+            &:hover {
+                opacity:1;
+            }
 
             .badge {
                 position: absolute;
@@ -5377,7 +5396,7 @@ header {
 
             .mbc-history-balloon-outer {
                 background: #fff;
-                margin-top: 44px;
+                margin-top: 5px;
                 border-radius: 3px;
                 right: -136px;
                 .mbc-triangle-top {
@@ -5406,19 +5425,27 @@ header {
 
         }
         #action-search {
-            /*background-image: url("../../img/icons/icon-search.svg");*/
+            svg {
+                circle {
+                    fill: #fff;
+                }
+
+                .st1 {
+                    fill: #002b5c;
+                }
+            }
         }
         #action-filter {
-            /*background-image: url("../../img/icons/icon-filter.svg");*/
             &.active {
-                background-image: url("../../img/icons/icon-filter-active.svg");
+                opacity: 1;
+                #filter {
+                    fill:#fff;
+                }
             }
         }
         #action-three-dots {
-            /*background-image: url("../../img/icons/icon-3dots.svg");*/
         }
         #action-settings {
-            /*background-image: url("../../img/icons/icon-settings.svg");*/
         }
     }
 
@@ -5428,6 +5455,13 @@ header {
         grid-template-columns: auto auto 0.6fr;
         align-items: center;
         justify-content: center;
+
+        #action-manage {
+            opacity: 0.8;
+            &:hover {
+                opacity: 1;
+            }
+        }
 
         a {
             display: grid;
