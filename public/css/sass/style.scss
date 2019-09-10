@@ -5157,13 +5157,12 @@ header {
             border-radius: 3px;
             cursor: pointer;
 
+
             /* Bug fix for Semantic UI Dropdown hover */
             .dropdown-menu-overlay {
                 width: 36px;
                 height: 80px;
             }
-
-
 
             .menu {
                 position: absolute;
@@ -5243,6 +5242,10 @@ header {
                 height: 17px;
             }
 
+        }
+
+        svg {
+            /*padding-left: 6px !important;*/
         }
 
         #markAsCompleteButton {
@@ -5338,7 +5341,10 @@ header {
 
 
         #notifbox {
-            background-image: url("../../img/icons/icon-QA-line.svg");
+            /*background-image: url("../../img/icons/icon-QA-line.svg");*/
+            svg {
+                margin-top: -35px;
+            }
             width: $icon-scale;
             height: $icon-scale;
             padding: 0;
@@ -5346,7 +5352,7 @@ header {
             opacity: 1;
         }
         #action-comments, #mbc-history {
-            background-image: url("../../img/icons/icon-comments.svg");
+            /*background-image: url("../../img/icons/icon-comments.svg");*/
             width: $icon-scale !important;
             height: $icon-scale;
             padding:0 !important;
@@ -5400,19 +5406,19 @@ header {
 
         }
         #action-search {
-            background-image: url("../../img/icons/icon-search.svg");
+            /*background-image: url("../../img/icons/icon-search.svg");*/
         }
         #action-filter {
-            background-image: url("../../img/icons/icon-filter.svg");
+            /*background-image: url("../../img/icons/icon-filter.svg");*/
             &.active {
                 background-image: url("../../img/icons/icon-filter-active.svg");
             }
         }
         #action-three-dots {
-            background-image: url("../../img/icons/icon-3dots.svg");
+            /*background-image: url("../../img/icons/icon-3dots.svg");*/
         }
         #action-settings {
-            background-image: url("../../img/icons/icon-settings.svg");
+            /*background-image: url("../../img/icons/icon-settings.svg");*/
         }
     }
 
