@@ -59,16 +59,18 @@
                     UI.copyTagProjectionInCurrentSegment();
                     UI.autoFillTagsInTarget();
                 } else {
+                    UI.setSegmentAsTagged();
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                     UI.autoFillTagsInTarget();
                 }
 
             }).fail(function () {
+                UI.setSegmentAsTagged();
                 UI.copyTagProjectionInCurrentSegment();
                 UI.autoFillTagsInTarget();
                 UI.startOfflineMode();
             }).always(function () {
-                UI.setSegmentAsTagged();
+                // UI.setSegmentAsTagged();
                 UI.editarea.focus();
                 SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
                 UI.createButtons();
@@ -242,7 +244,7 @@
         },
         decodeText: function(segment, text) {
             var decoded_text;
-            if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
+            if (UI.enableTagProjection && !segment.tagged && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) && UI.removeAllTags(segment.segment) !== '' ) {
                 decoded_text = UI.removeAllTags(text);
             } else {
