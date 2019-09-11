@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class MatecatMultipleInstances extends AbstractMatecatMigration
 {
 

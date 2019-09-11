@@ -10,9 +10,7 @@ namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
 use Constants;
-use DataAccess\ShapelessConcreteStruct;
 use Features\ISegmentTranslationModel;
-use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\SecondPassReview\Email\RevisionChangedNotificationEmail;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use Features\SecondPassReview\Utils;

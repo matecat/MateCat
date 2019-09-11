@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class AddCompletedByEventIdToQaChunkReviews extends AbstractMatecatMigration
 {
     public $sql_up = "
