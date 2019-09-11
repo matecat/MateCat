@@ -119,9 +119,21 @@ class SegmentTarget extends React.Component {
         return {__html: string};
     }
 
+    getAllIssues() {
+        let issues = [];
+        if ( this.props.segment.versions ) {
+            this.props.segment.versions.forEach( function ( version ) {
+                if ( !_.isEmpty( version.issues ) ) {
+                    issues = issues.concat( version.issues );
+                }
+            } );
+        }
+        return issues;
+    }
+
     getTargetArea(translation) {
         var textAreaContainer = "";
-
+        let issues = this.getAllIssues();
         if ( this.props.segment.edit_area_locked ) {
             textAreaContainer = <div className="segment-text-area-container" data-mount="segment_text_area_container">
                 <div className="textarea-container" onClick={this.onClickEvent.bind( this )} onMouseUp={this.selectIssueText.bind(this)}
@@ -210,7 +222,7 @@ class SegmentTarget extends React.Component {
                     {config.isReview && ReviewExtended.enabled() ? (
                         <a href="#" className="revise-lock-editArea" onClick={this.lockEditArea.bind(this)} title="Highlight text and assign an issue to the selected text."/>
                     ): null}
-                    {ReviewExtended.enabled() && (config.overall_quality_class !== 'excellent' || config.isReview)  ? (
+                    {ReviewExtended.enabled() && (issues.length > 0 || config.isReview)  ? (
                         <a  className="revise-qr-link" title="Segment Quality Report." target="_blank" href={"/revise-summary/" +  config.id_job + "-" + config.password +"?revision_type="+ ((config.revisionNumber) ? config.revisionNumber : 1) + "&id_segment=" + this.props.segment.sid }>QR</a>
                     ): null}
                     {tagLockCustomizable}
