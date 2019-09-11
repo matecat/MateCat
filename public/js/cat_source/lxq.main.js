@@ -1514,6 +1514,7 @@ LXQ.init  = function () {
                             };
                             
                             let seg = UI.getSegmentById( element.segid );
+                            if ( seg.length === 0) return;
                             let translation = "";
                             if (seg.length>0) {
                                 translation = htmlEncode(UI.cleanTextFromPlaceholdersSpan($( UI.targetContainerSelector(), seg ).html()));

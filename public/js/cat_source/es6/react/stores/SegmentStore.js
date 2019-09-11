@@ -302,10 +302,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'edit_area_locked'], !lockedEditArea);
     },
     getSegmentByIdToJS(sid, fid) {
-        return this._segments[fid].find(function (seg) {
-            return seg.get('sid') == sid;
-        }).toJS();
-
+        let segment = this._segments[fid].find(function (seg) {
+            return seg.get('sid') === sid || seg.get('original_sid') === sid;
+        });
+        return (segment) ? segment.toJS() : null;
     },
 
     getAllSegments: function () {
