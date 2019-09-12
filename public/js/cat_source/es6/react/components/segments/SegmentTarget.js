@@ -108,7 +108,11 @@ class SegmentTarget extends React.Component {
 
     lockEditArea(event) {
         event.preventDefault();
+        if ( !this.props.segment.edit_area_locked ) {
+            UI.updateSegmentTranslationFn();
+        }
         SegmentActions.lockEditArea(this.props.segment.sid, this.props.segment.fid);
+
     }
 
     decodeTranslation(segment, translation) {
@@ -135,11 +139,12 @@ class SegmentTarget extends React.Component {
         var textAreaContainer = "";
         let issues = this.getAllIssues();
         if ( this.props.segment.edit_area_locked ) {
+            let currentTranslationVersion = this.props.segment.versions[0].translation;
             textAreaContainer = <div className="segment-text-area-container" data-mount="segment_text_area_container">
                 <div className="textarea-container" onClick={this.onClickEvent.bind( this )} onMouseUp={this.selectIssueText.bind(this)}
                      ref={(div)=> this.issuesHighlightArea = div}>
                     <div className="targetarea issuesHighlightArea errorTaggingArea"
-                         dangerouslySetInnerHTML={this.allowHTML( translation )}/>
+                         dangerouslySetInnerHTML={this.allowHTML( currentTranslationVersion )}/>
                 </div>
                 <div className="toolbar">
                     {config.isReview && ReviewExtended.enabled() ? (

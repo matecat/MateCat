@@ -144,8 +144,9 @@ $.extend(UI, {
      * @returns {*}
      */
     transformTagsWithHtmlAttribute: function (tx) {
-        var returnValue;
+        var returnValue = tx;
         try {
+            if (tx.indexOf('locked-inside') > -1) return tx;
             var base64Array=[];
             var phIDs =[];
             tx = tx.replace( /&quot;/gi, '"' );
