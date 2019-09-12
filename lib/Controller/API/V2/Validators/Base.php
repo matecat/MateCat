@@ -53,4 +53,11 @@ abstract class Base {
         }
     }
 
+    /**
+     * @return Request
+     */
+    public function getRequest() {
+        return $this->request;
+    }
+
 }

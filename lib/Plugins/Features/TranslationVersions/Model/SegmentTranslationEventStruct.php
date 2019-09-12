@@ -21,5 +21,8 @@ class SegmentTranslationEventStruct extends DataAccess_AbstractDaoSilentStruct i
     public $version_number ;
     public $source_page ;
     public $status ;
+    public $final_revision ;
+    public $create_date ;
+    public $time_to_edit ;
 
 }

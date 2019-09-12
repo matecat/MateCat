@@ -107,7 +107,8 @@ class BulkSelectionBar extends React.Component {
         let buttonClass = classnames({
             "ui button approve-all-segments": true,
             "translated-all-bulked": !this.props.isReview,
-            "approved-all-bulked": this.props.isReview
+            "approved-all-bulked": this.props.isReview,
+            "approved-2nd-pass": config.secondRevisionsCount && config.revisionNumber && config.revisionNumber === 2
         });
         return( this.state.count > 0 ? <div className="bulk-approve-bar">
 

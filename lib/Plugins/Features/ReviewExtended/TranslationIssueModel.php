@@ -8,6 +8,7 @@
 
 namespace Features\ReviewExtended;
 
+use LQA\ChunkReviewDao;
 use LQA\EntryDao;
 use LQA\EntryStruct;
 use Translations_TranslationVersionDao;
@@ -27,6 +28,7 @@ class TranslationIssueModel {
      * @var \LQA\ChunkReviewStruct
      */
     protected $chunk_review ;
+    private   $removePointsOnDelete;
 
 
     /**
@@ -37,12 +39,11 @@ class TranslationIssueModel {
     public function __construct( $id_job, $password, EntryStruct $issue ) {
         $this->issue = $issue;
 
-        $reviews = \LQA\ChunkReviewDao::findChunkReviewsByChunkIds( array(
-                array( $id_job, $password)
-        ));
+        $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( [
+                [ $id_job, $password ]
+        ], $issue->source_page );
 
         $this->chunk_review = $reviews[0];
-
     }
 
     /**

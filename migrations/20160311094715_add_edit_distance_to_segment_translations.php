@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class AddEditDistanceToSegmentTranslations extends AbstractMatecatMigration
 {
     public $sql_up = "ALTER TABLE `segment_translations` ADD COLUMN `edit_distance` int(11)";

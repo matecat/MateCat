@@ -2,7 +2,7 @@
 class QualitySummaryTableOldRevise extends React.Component {
     constructor (props) {
         super(props);
-        this.lqaNestedCategories = this.props.jobInfo.get('quality_summary').get('categories');
+        this.lqaNestedCategories = this.props.qualitySummary.get('categories');
         this.getTotalSeverities();
         this.htmlBody = this.getBody();
         this.htmlHead = this.getHeader();
@@ -32,8 +32,8 @@ class QualitySummaryTableOldRevise extends React.Component {
         });
     }
     getIssuesForCategory(categoryId) {
-        if (this.props.jobInfo.get('quality_summary').size > 0 ) {
-            return this.props.jobInfo.get('quality_summary').get('revise_issues').find((item, key)=>{
+        if (this.props.qualitySummary.size > 0 ) {
+            return this.props.qualitySummary.get('revise_issues').find((item, key)=>{
                 return key === categoryId;
             });
         }
@@ -47,7 +47,7 @@ class QualitySummaryTableOldRevise extends React.Component {
             </div>;
             html.push(item);
         });
-        let qualityVote = this.props.jobInfo.get('quality_summary').get('quality_overall');
+        let qualityVote = this.props.qualitySummary.get('quality_overall');
         let passedClass =  (qualityVote === 'poor' || qualityVote === 'fail') ? 'job-not-passed' : "job-passed";
         return <div className="qr-head">
             <div className="qr-title qr-issue">Issues</div>
@@ -62,7 +62,7 @@ class QualitySummaryTableOldRevise extends React.Component {
             </div>
 
             <div className={"qr-title qr-total-severity qr-old " + passedClass}>
-                <div className="qr-info">{this.props.jobInfo.get('quality_summary').get('quality_overall')}</div>
+                <div className="qr-info">{this.props.qualitySummary.get('quality_overall')}</div>
                 <div className="qr-label">Total Score</div>
             </div>
 

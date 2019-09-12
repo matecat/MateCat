@@ -408,6 +408,9 @@ body.editing .grayed, body.virtualEditing .grayed {
 .approved-bar {
     background-color: #7cc576;
 }
+.approved-bar-2nd-pass {
+    background-color: #BC6AC9;
+}
 
 .draft-bar {
     background-color: #d0d1d1;
@@ -2236,7 +2239,7 @@ body.searchActive .search-display {
     background:#fff;
 }
 
-.loader {
+.loader:not(.ui) {
     width: 20px;
     height: 20px;
     background: url(../../img/loading.gif) 0 0 no-repeat !important;
@@ -3209,6 +3212,9 @@ section.readonly:hover .ice-locked-label {
     top: 0;
     border-bottom: 0;
     z-index: 0;
+    &.no-hover {
+        cursor: default;
+    }
 }
 
 

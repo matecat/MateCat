@@ -29,6 +29,7 @@ abstract class BaseFeature implements IBaseFeature {
      * @var bool This property defines if the feature is automatically active when projects are created,
      *           or if it requires an explicit activation from the user when the project is created.
      *           If this property is true, the feature is added to project's metadata `features` string.
+     *           This property is only used to activate features that come from owner_features records.
      */
     protected $autoActivateOnProject = true ;
 

@@ -4,17 +4,20 @@ namespace LQA ;
 
 class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
 
-    public $id;
+    public $id ;
     public $id_project ;
     public $id_job ;
     public $password ;
     public $review_password ;
     public $penalty_points ;
-    public $num_errors ;
+    public $source_page ;
     public $is_pass ;
     public $force_pass_at ;
     public $reviewed_words_count ;
     public $undo_data ;
+    public $advancement_wc ;
+    public $total_tte ;
+    public $avg_pee ;
 
     /**
      * Sets default values for an empty struct
@@ -46,6 +49,5 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public function getUndoData() {
         return json_decode( $this->undo_data, true ) ;
     }
-
 
 }
