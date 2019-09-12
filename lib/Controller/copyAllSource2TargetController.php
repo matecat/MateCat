@@ -119,15 +119,16 @@ class copyAllSource2TargetController extends ajaxController {
 
             $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
 
-            if ( empty( $old_translation ) ) {
+            if ( empty( $old_translation ) || ($old_translation->status !== Constants_TranslationStatus::STATUS_DRAFT && $old_translation->status !== Constants_TranslationStatus::STATUS_NEW) ) {
                 //no segment found
                 continue;
             }
 
             $new_translation         = clone $old_translation;
+            $new_translation->translation = $segment->segment;
             $new_translation->status = $status;
 
-            Translations_SegmentTranslationDao::updateSegmentStatusBySegmentId( $chunk_id, $segment_id, $status );
+            Translations_SegmentTranslationDao::updateTranslation($new_translation);
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
                 $segmentTranslationEventModel = new SegmentTranslationEventModel( $old_translation, $new_translation, $this->user, $source_page );
