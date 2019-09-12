@@ -39,6 +39,7 @@ class catController extends viewController {
 
     public $target_code;
     public $source_code;
+    private $revision ;
 
     /**
      * @var Chunks_ChunkStruct
@@ -82,15 +83,16 @@ class catController extends viewController {
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                )
+                ),
+                'revision' => array( 'filter' => FILTER_VALIDATE_INT ),
         );
 
         $getInput   = (object)filter_input_array( INPUT_GET, $filterArgs );
 
-        $this->jid        = $getInput->jid;
-        $this->password   = $getInput->password;
-
+        $this->jid             = $getInput->jid;
+        $this->password        = $getInput->password;
         $this->review_password = $getInput->password;
+        $this->revision        = $getInput->revision ;
 
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
 
@@ -102,7 +104,6 @@ class catController extends viewController {
         ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
         $this->featureSet->loadForProject( $this->project ) ;
-
     }
 
     /**
@@ -126,10 +127,11 @@ class catController extends viewController {
                     $this->password,
                     $this->jid
             );
-
         }
 
         $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+
+        $this->featureSet->run('catControllerChunkFound', $this);
     }
 
     public function doAction() {
@@ -479,7 +481,7 @@ class catController extends viewController {
             $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
         }
 
-        $this->template->isGDriveProject =  $this->isCurrentProjectGDrive();
+        $this->template->isGDriveProject = $this->isCurrentProjectGDrive();
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
@@ -510,7 +512,6 @@ class catController extends viewController {
     /**
      * @return string
      */
-
     public function getReviewPassword() {
         return $this->review_password ;
     }
@@ -519,30 +520,21 @@ class catController extends viewController {
         return $this->password;
     }
 
+    /**
+     * Returns number indicating the current revision phase.
+     * Returns null when in translate page.
+     *
+     * @return int|null
+     */
+    public function getRevisionNumber() {
+        return catController::isRevision() ? (
+                $this->revision == null ? 1 : $this->revision
+        ) : null ;
+    }
 
     public function getQaOverall() {
         // TODO: is this str_replace really required?
         return str_replace( ' ', '', $this->qa_overall );
-    }
-
-    /**
-     * @return string
-     */
-    private function getEditLogClass() {
-        $return = "";
-
-        $editLogModel = new EditLog_EditLogModel( $this->jid, $this->password, $this->featureSet );
-        $issue = $editLogModel->getMaxIssueLevel();
-
-        $dao = new EditLog_EditLogDao(Database::obtain());
-
-        if( !$dao->isEditLogEmpty($this->jid, $this->password)) {
-            if ( $issue > 0 ) {
-                $return = "edit_" . $issue;
-            }
-        }
-
-        return $return;
     }
 
     public function isCurrentProjectGDrive() {

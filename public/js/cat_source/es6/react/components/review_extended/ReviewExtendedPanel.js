@@ -11,7 +11,6 @@ class ReviewExtendedPanel extends React.Component {
 		this.state = {
 			versionNumber: this.props.segment.versions[0].version_number,
 			diffPatch: null,
-			isDiffChanged: false,
 			newtranslation: this.props.segment.translation,
 			issueInCreation: false,
             showAddIssueMessage: false,
@@ -107,7 +106,7 @@ class ReviewExtendedPanel extends React.Component {
 				</div>
             ) : (null)}
 
-            {this.props.isReview? (<ReviewExtendedIssuePanel
+            { (this.props.isReview && !(this.props.segment.ice_locked == 1 &&  !this.props.segment.unlocked)) ? (<ReviewExtendedIssuePanel
 				sid={this.props.segment.sid}
 				selection={this.props.selectionObj}
 				segmentVersion={this.state.versionNumber}

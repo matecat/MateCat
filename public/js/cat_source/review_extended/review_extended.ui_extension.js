@@ -43,6 +43,26 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             };
             return promise;
         },
+        overrideButtonsForRevision: function () {
+            var div = $('<ul>' + UI.segmentButtons + '</ul>');
+            var className = "revise-button-" + ReviewExtended.number;
+            div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved').addClass(className);
+            var nextSegment = UI.currentSegment.next();
+            var nextSelector = this.getSelectorForNextSegment();
+            var goToNextApprovedButton = !nextSegment.is(nextSelector);
+            var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
+            div.find('.next-untranslated').parent().remove();
+            div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition').removeClass('primary').addClass('green');
+            div.find('.next-repetition-group').removeClass('next-repetition-group').addClass('next-review-repetition-group').removeClass('primary').addClass('green');
+            if (goToNextApprovedButton && !filtering) {
+                var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
+                    '-nexttranslated" href="#" class="btn next-unapproved ' + className + '" data-segmentid="segment-' +
+                    this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
+                    ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+                div.html(htmlButton + div.html());
+            }
+            UI.segmentButtons = div.html();
+        },
         /**
          * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
          * @param editarea
@@ -253,6 +273,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
 
             $( '.sub-editor.review .error-type' ).removeClass( 'error' );
 
+            UI.setTimeToEdit(UI.currentSegment);
             UI.changeStatus( button, 'approved', 0 );  // this does < setTranslation
 
             var original = UI.currentSegment.find( '.original-translation' ).text();
@@ -271,9 +292,19 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 segment: sid,
                 original: original
             };
-
+            // Lock the segment if it's approved in a second pass but was previously approved in first revision
+            if ( ReviewExtended.number > 1 ) {
+                UI.removeFromStorage('unlocked-' + sid);
+            }
             UI.setRevision( data );
-        }
+        },
+        getSelectorForNextSegment: function() {
+            if ( ReviewExtended.number === 1 ) {
+                return '.status-translated';
+            } else if ( ReviewExtended.number === 2 ){
+                return 'section.status-translated, section.status-approved.approved-step-1';
+            }
+        },
 
     });
 }

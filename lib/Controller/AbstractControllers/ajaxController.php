@@ -61,11 +61,31 @@ abstract class ajaxController extends controller {
 
     }
 
+    /**
+     * @return bool
+     */
     public static function isRevision() {
-        $_from_url       = parse_url( @$_SERVER[ 'HTTP_REFERER' ] );
-        $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
-
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $is_revision_url = strpos( $_from_url['path'] , "/revise" ) === 0;
         return $is_revision_url;
+    }
+
+    /**
+     * TODO: move this method to a Utils static class
+     *
+     * @param FeatureSet $featureSet
+     *
+     * @return mixed
+     */
+    public static function getRefererSourcePageCode( FeatureSet $featureSet ) {
+        if ( !static::isRevision() ) {
+            $sourcePage = Constants::SOURCE_PAGE_TRANSLATE ;
+        }
+        else {
+            $sourcePage = Constants::SOURCE_PAGE_REVISION ;
+        }
+
+        return $featureSet->filter('filterSourcePage', $sourcePage ) ;
     }
 
     public function parseIDSegment() {

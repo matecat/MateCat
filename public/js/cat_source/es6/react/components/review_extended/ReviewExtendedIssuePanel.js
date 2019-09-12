@@ -34,24 +34,24 @@ class ReviewExtendedIssuePanel extends React.Component{
             issue.end_offset = 0;
         }
 
-        if(this.props.isDiffChanged){
-        	let segment = this.props.segment;
-        	segment.translation = this.props.newtranslation;
-        	segment.status = 'approved';
-			API.SEGMENT.setTranslation(segment)
-				.done(function(response){
-					issue.version = response.translation.version;
-					deferred.resolve();
-				})
-				.fail( self.handleFail.bind(self) ) ;
-		}else{
-        	deferred.resolve();
-		}
+        let segment = this.props.segment;
+        if ( segment.status.toLowerCase() !== 'approved' || segment.revision_number !== ReviewExtended.number ) {
+            segment.status = 'approved';
+            API.SEGMENT.setTranslation( segment )
+                .done( function ( response ) {
+                    issue.version = response.translation.version_number;
+                    SegmentActions.addClassToSegment(segment.sid , 'modified');
+                    deferred.resolve();
+                } )
+                .fail( self.handleFail.bind( self ) );
 
+        } else {
+            deferred.resolve();
+        }
 		data.push(issue);
 
 		deferred.then(function () {
-		    SegmentActions.removeClassToSegment(self.props.sid, "modified");
+            SegmentActions.setStatus(segment.sid, segment.fid, segment.status);
             UI.currentSegment.data('modified', false);
 			SegmentActions.submitIssue(self.props.sid, data)
 				.done(function ( data ) {
@@ -60,13 +60,17 @@ class ReviewExtendedIssuePanel extends React.Component{
                         SegmentActions.issueAdded(self.props.sid, data.issue.id);
                     });
                 } )
-				.fail( self.handleFail.bind(self) ) ;
+				.fail( (response) => self.handleFail(response.responseJSON) ) ;
 		})
 
     }
 
-    handleFail() {
-        genericErrorAlertMessage() ;
+    handleFail(response) {
+        if ( response.errors && response.errors[0].code === -2000 ) {
+            UI.processErrors(response.errors, 'createIssue');
+        } else {
+            genericErrorAlertMessage() ;
+        }
         this.props.setCreationIssueLoader(false);
         this.props.handleFail();
         this.setState({ submitDone : false, submitDisabled : false });

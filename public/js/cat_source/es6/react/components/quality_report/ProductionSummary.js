@@ -4,7 +4,7 @@ class ProductionSummary extends React.Component {
     getTimeToEdit() {
         let str_pad_left = function(string,pad,length) {
             return (new Array(length+1).join(pad)+string).slice(-length);
-        }
+        };
         let time = parseInt(this.props.jobInfo.get("total_time_to_edit")/1000);
         let hours = Math.floor(time / 3600);
         let minutes = Math.floor( time % 3600 / 60);
@@ -40,14 +40,25 @@ class ProductionSummary extends React.Component {
             '<a style="text-decoration: underline" href="https://www.matecat.com/support/revising-projects/quality-report-matecat/" target="_blank">Learn more</a>' +
             '</div>';
         let tooltipText2 = '<div style="color:gray">Raw words that have actually been revised (ICE MATCHES NOT INCLUDED)</div>';
-        let score = parseFloat(this.props.jobInfo.get('quality_summary').get('score'));
-        let limit = (this.props.jobInfo.get('quality_summary').get('passfail') ) ? parseInt(this.props.jobInfo.getIn(['quality_summary', 'passfail', 'options', 'limit'])):0;
-        let qualityOverall = this.props.jobInfo.get('quality_summary').get('quality_overall');
-        let reviewedWordsCount = this.props.jobInfo.get('quality_summary').get('total_reviewed_words_count') ;
+        let score = parseFloat(this.props.qualitySummary.get('score'));
+        let limit = (this.props.qualitySummary.get('passfail') ) ? parseInt(this.props.qualitySummary.getIn(['passfail', 'options', 'limit'])):0;
+        let qualityOverall = this.props.qualitySummary.get('quality_overall');
+        let reviewedWordsCount = this.props.qualitySummary.get('total_reviewed_words_count') ;
         let jobPassed = qualityOverall !== null ? (qualityOverall !== "fail") && reviewedWordsCount > 0 : null;
         let jobPassedClass = (jobPassed === null || reviewedWordsCount === 0) ? "qr-norevision" : ((jobPassed)? "qr-pass" : "qr-fail");
         let translator = this.props.jobInfo.get('translator') ? this.props.jobInfo.get('translator').get('email'): "Not assigned";
         let stats = this.props.jobInfo.get('stats');
+        let approvedWords = stats.get('approved');
+        let approvedWords2ndPass;
+        let totalApprovedWord = 0;
+        if ( this.props.secondPassReviewEnabled && stats.has('reviews') && stats.get('reviews').get(1).get('advancement_wc') !== '0.00' ) {
+            let approved = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 1});
+            approvedWords = (approved) ? approved.get('advancement_wc') : approvedWords;
+            let approved2ndPass = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 2});
+            approvedWords2ndPass = (approved2ndPass) ? approved2ndPass.get('advancement_wc') : null;
+            totalApprovedWord += parseFloat(approvedWords2ndPass);
+        }
+        totalApprovedWord += parseFloat(approvedWords);
         return <div className="qr-production shadow-1">
             <div className="qr-effort job-id">ID: {this.props.jobInfo.get('id')}</div>
             <div className="qr-effort source-to-target">
@@ -64,11 +75,15 @@ class ProductionSummary extends React.Component {
                             <a className="warning-bar translate-tooltip" data-variation="tiny"
                                data-html={"Rejected " + Math.round(stats.get('rejected')/stats.get('total')*100) +"%"}
                                style={{width: Math.round(stats.get('rejected')/stats.get('total')*100)+"%"}}/>
-
                             <a className="approved-bar translate-tooltip" data-variation="tiny"
-                               data-html={"Approved " + Math.round(stats.get('approved')/stats.get('total')*100) +"%"}
-                               style={{width:Math.round(stats.get('approved')/stats.get('total')*100)+"%"}}/>
-
+                               data-html={"Approved " + Math.round(approvedWords/stats.get('total')*100) +"%"}
+                               style={{width:Math.round(approvedWords/stats.get('total')*100)+"%"}}/>
+                            { approvedWords2ndPass ? (
+                                    <a className="approved-bar-2nd-pass translate-tooltip" data-variation="tiny"
+                                       data-html={"Approved " + Math.round(approvedWords2ndPass/stats.get('total')*100) +"%"}
+                                       style={{width:Math.round(approvedWords2ndPass/stats.get('total')*100)+"%"}}/>
+                                ) : null
+                            }
                             <a className="translated-bar translate-tooltip" data-variation="tiny"
                                data-html={"Translated " + Math.round(stats.get('translated')/stats.get('total')*100) +"%"}
                                style={{width:Math.round(stats.get('translated')/stats.get('total')*100)+"%"}}/>
@@ -80,7 +95,7 @@ class ProductionSummary extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div className="percent">{Math.round((stats.get('approved')+Math.round(stats.get('translated')))/stats.get('total')*100)}%</div>
+                <div className="percent">{Math.round((stats.get('approved')+stats.get('translated'))/stats.get('total')*100)}%</div>
             </div>
             <div className="qr-effort">
                 <div className="qr-label">Reviewed Words</div>
@@ -90,7 +105,7 @@ class ProductionSummary extends React.Component {
             {/*{config.project_type !== "old" ? (*/}
             {/*<div className="qr-effort qr-review-words">*/}
                 {/*<div className="qr-label" data-html={tooltipText2} ref={(tooltip) => this.tooltipRev = tooltip}>Reviewed <i className="icon-info icon" /></div>*/}
-                {/*<div className="qr-info"><b>{this.props.jobInfo.get('quality_summary').get('total_reviewed_words_count')}</b></div>*/}
+                {/*<div className="qr-info"><b>{this.props.qualitySummary.get('total_reviewed_words_count')}</b></div>*/}
             {/*</div>*/}
             {/*) :null}*/}
 

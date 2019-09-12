@@ -213,6 +213,26 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param int $id
+     *
+     * @return bool
+     */
+    public static function exists( $id ) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( " SELECT id FROM projects WHERE id = :id " );
+        $stmt->execute( [ 'id' => $id ] );
+        $row = $stmt->fetch( PDO::FETCH_ASSOC );
+
+        if ( !$row ) {
+            return false;
+        }
+
+        return true;
+    }
+
     public static function destroyCacheById( $id ) {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
@@ -487,7 +507,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public function getJobIds($pid) {
+    public function getJobIds( $pid ) {
         $db = Database::obtain();
 
         $query = "SELECT jobs.id

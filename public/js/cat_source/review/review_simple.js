@@ -168,6 +168,7 @@ if ( ReviewSimple.enabled() ) {
                     action: 'setRevision',
                     job: config.id_job,
                     jpassword: config.password,
+                    revision_number: config.revisionNumber,
                     segment: sid,
                     original: original,
                     err_typing: err_typing,
