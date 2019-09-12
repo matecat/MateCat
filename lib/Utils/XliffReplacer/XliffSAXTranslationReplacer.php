@@ -233,16 +233,16 @@ class XliffSAXTranslationReplacer {
                     //replace Target language with job language provided from constructor
                     $tag .= "$k=\"$this->target_lang\" ";
                     //Log::doJsonLog($k . " => " . $this->target_lang);
-                }
-                //add MateCat specific namespace, we want maybe add non-XLIFF attributes
-                else if( $name == 'xliff' && !array_key_exists( 'xmlns:mtc', $attr ) ){
-                    $tag .= 'xmlns:mtc="https://www.matecat.com" ';
-                }
-                else {
+                } else {
                     //normal tag flux, put attributes in it
                     $tag .= "$k=\"$v\" ";
                 }
 
+            }
+
+            //add MateCat specific namespace, we want maybe add non-XLIFF attributes
+            if( $name == 'xliff' && !array_key_exists( 'xmlns:mtc', $attr ) ){
+                $tag .= 'xmlns:mtc="https://www.matecat.com" ';
             }
 
             //this logic helps detecting empty tags
@@ -263,11 +263,6 @@ class XliffSAXTranslationReplacer {
                 //if it's out, simple use the last character of the chunk
                 $tmp_offset = $this->len - 1;
                 $lastChar   = $this->currentBuffer[ $this->len - 1 ];
-            }
-
-            //add MateCat specific namespace, we want maybe add non-XLIFF attributes
-            if( $name == 'xliff' && !array_key_exists( 'xmlns:mtc', $attr ) ){
-                $tag .= 'xmlns:mtc="https://www.matecat.com" ';
             }
 
             //trim last space
