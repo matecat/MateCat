@@ -158,11 +158,11 @@ class CatUtils {
      *
      * @return array
      */
-    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, array &$errors ) {
+    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, $is_revision, array &$errors ) {
 
         try {
             //if needed here can be placed a check for affected_rows == 0 //( the return value of addTranslation )
-            Translations_SegmentTranslationDao::addTranslation( $translation );
+            Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
         } catch ( Exception $e ) {
             $errors[] = [ "code" => -101, "message" => $e->getMessage() ];
         }
@@ -633,7 +633,7 @@ class CatUtils {
      * @throws Exception
      */
     public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
-        $values = self::getQualityInfoFromJobStruct( $job, $project, $featureSet );
+        $values = self::getQualityInfoOrChunkReviewStructFromJobStruct( $job, $featureSet );
         $result = null;
 
         if ( $featureSet->hasRevisionFeature() ) {
@@ -654,42 +654,52 @@ class CatUtils {
     }
 
     /**
-     * @param Jobs_JobStruct         $job
+     * @param Jobs_JobStruct $job
      *
-     * @param Projects_ProjectStruct $project
-     * @param FeatureSet             $featureSet
+     * @param FeatureSet     $featureSet
      *
      * @return array|\LQA\ChunkReviewStruct|null
-     * @throws \Exception
+     * @internal   param Projects_ProjectStruct $project
+     * @deprecated this method should only return values for legacy revision, it should not return ChunkReviewStruct nor
+     *             it should make use of $featureSet to determine the revision type, use `getQualityOverallFromJobStruct`.
      */
-    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
+    public static function getQualityInfoOrChunkReviewStructFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet ) {
 
         $result = null;
-
         if ( $featureSet->hasRevisionFeature() ) {
             $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password );
             $result = $review;
         } else {
-            $struct = CatUtils::getWStructFromJobStruct( $job, $project->status_analysis );
-
-            $reviseClass = new Constants_Revise;
-
-            $jobQA = new Revise_JobQA(
-                    $job->id, $job->password, $struct->getTotal()
-                    , $reviseClass
-            );
-
-            /**
-             * @var $jobQA Revise_JobQA
-             */
-            list( $jobQA, ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
-            $jobQA->retrieveJobErrorTotals();
-            $result = $jobQA->evalJobVote();
+            $result = self::getQualityInfoFromJobStruct( $job, $featureSet ) ;
         }
 
         return $result;
-
     }
+
+    /**
+     * @param Jobs_JobStruct $job
+     * @param FeatureSet     $featureSet
+     *
+     * @return array
+     */
+    public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet ) {
+        $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
+        $reviseClass = new Constants_Revise;
+
+        $jobQA = new Revise_JobQA(
+                $job->id,
+                $job->password, $struct->getTotal(),
+                $reviseClass
+        );
+
+        /**
+         * @var $jobQA Revise_JobQA
+         */
+        list( $jobQA, ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
+        $jobQA->retrieveJobErrorTotals();
+        return $jobQA->evalJobVote();
+    }
+
 
     /**
      * @param Jobs_JobStruct $job

@@ -10,6 +10,5 @@
 namespace Features;
 
 interface ISegmentTranslationModel {
-    public function addOrSubtractCachedReviewedWordsCount();
-    public function recountPenaltyPoints();
+    public function evaluateChunkReviewTransition();
 }

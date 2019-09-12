@@ -429,6 +429,7 @@ class ProjectManager {
             return false;
         }
 
+
         $this->__createProjectRecord();
         $this->saveMetadata();
 
@@ -470,7 +471,7 @@ class ProjectManager {
             }
         }
 
-        $this->projectStructure[ 'array_files' ] = $sortedFiles;
+        $this->projectStructure[ 'array_files' ]      = $sortedFiles;
         $this->projectStructure[ 'array_files_meta' ] = $sortedMeta;
         unset( $sortedFiles );
         unset( $sortedMeta );
@@ -608,7 +609,7 @@ class ProjectManager {
                     throw new Exception( 'No hash files found', -6 );
                 }
 
-                if ( INIT::$FILE_STORAGE_METHOD === 's3' ) {
+                if ( AbstractFilesStorage::isOnS3() ) {
                     if ( null === $cachedXliffFilePathName ) {
                         throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', $_originalFileNames[ 0 ] ), -6 );
                     }
@@ -728,7 +729,7 @@ class ProjectManager {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code" => -1, "message" => "No text to translate in the file {$e->getMessage()}."
                 ];
-                if( INIT::$FILE_STORAGE_METHOD != 's3' ){
+                if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
                 }
             } elseif ( $e->getCode() == -4 ) {
@@ -800,15 +801,16 @@ class ProjectManager {
 
         try {
 
-            if ( $isFsOnS3 ) {
+            if ( AbstractFilesStorage::isOnS3() ) {
                 \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue( $this->uploadDir );
-            }
-
-            Utils::deleteDir( $this->uploadDir );
-            if ( is_dir( $this->uploadDir . '_converted' ) ) {
-                Utils::deleteDir( $this->uploadDir . '_converted' );
+            } else {
+                \Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
+                Utils::deleteDir( $this->uploadDir );
+                if ( is_dir( $this->uploadDir . '_converted' ) ) {
+                    Utils::deleteDir( $this->uploadDir . '_converted' );
+                }
             }
 
         } catch ( Exception $e ) {
@@ -828,6 +830,7 @@ class ProjectManager {
 
         }
 
+
     }
 
     /**
@@ -838,8 +841,8 @@ class ProjectManager {
     public function getSingleS3QueueFile( $fileName ) {
         $fs = FilesStorageFactory::create();
 
-        if(false === is_dir($this->uploadDir)){
-            mkdir($this->uploadDir, 0755);
+        if ( false === is_dir( $this->uploadDir ) ) {
+            mkdir( $this->uploadDir, 0755 );
         }
 
         /** @var $fs S3FilesStorage */
@@ -1151,7 +1154,7 @@ class ProjectManager {
                 //Exit
             }
 
-            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $fs->getZipDir() );
+//            $this->features->run( 'addInstructionsToZipProject', $this->projectStructure, $fs->getZipDir() );
 
         } //end zip hashes manipulation
 

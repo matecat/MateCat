@@ -10,20 +10,6 @@ namespace Features\ReviewExtended;
 
 interface IChunkReviewModel {
     /**
-     * Adds reviewed words count and recomputes result
-     *
-     * @param $count
-     */
-    public function addWordsCount( $count );
-
-    /**
-     * Subtracts reviewed_words_count and recomputes result
-     *
-     * @param $count
-     */
-    public function subtractWordsCount( $count );
-
-    /**
      * adds penalty_points and updates pass fail result
      *
      * @param $penalty_points
@@ -45,6 +31,8 @@ interface IChunkReviewModel {
     public function getPenaltyPoints();
 
     public function getReviewedWordsCount();
+
+    public function getQALimit();
 
     /**
      *

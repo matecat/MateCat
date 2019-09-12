@@ -1,11 +1,11 @@
 <?php
 
-use \Exceptions\NotFoundException;
-use API\V2\Json\Error;
 use API\V2\Exceptions\AuthenticationError;
 use API\V2\Exceptions\AuthorizationError;
-use API\V2\Exceptions\ValidationError;
 use API\V2\Exceptions\ExternalServiceException;
+use API\V2\Exceptions\ValidationError;
+use API\V2\Json\Error;
+use Exceptions\NotFoundException;
 use Exceptions\ValidationError as Model_ValidationError;
 
 require_once './inc/Bootstrap.php';

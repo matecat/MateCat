@@ -151,5 +151,17 @@ API.PROJECTS = {
             xhrFields: { withCredentials: true },
             url : APP.getRandomUrl() + "api/v2/projects/" + pid + "/" + jpassword + "/completion_status"
         });
+    },
+    
+    getSecondPassReview: function ( idProject, passwordProject, idJob ) {
+        var data = {
+            id_job: idJob,
+            revision_number: 2
+        };
+        return $.ajax({
+            data: data,
+            type: 'POST',
+            url : '/plugins/second_pass_review/project/' + idProject + '/'+ passwordProject +'/reviews'
+        });
     }
 };

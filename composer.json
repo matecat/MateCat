@@ -8,6 +8,7 @@
         "google/apiclient": "1.1.7",
         "klein/klein": "^2.1",
         "matecat/simple-s3": "^1.5",
+        "matecat/whole-text-finder": "^1.0",
         "monolog/monolog": "1.17.*",
         "php": ">=5.5.0",
         "phpmailer/phpmailer": "~5.2",
@@ -15,7 +16,6 @@
         "psr/log": "~1.0",
         "symfony/console": "^2.8",
         "symfony/filesystem": "^2.8.9",
-        "defuse/php-encryption": "2.0.*",
-        "mauretto78/whole-text-finder": "^1.0"
+        "defuse/php-encryption": "2.0.*"
     }
 }

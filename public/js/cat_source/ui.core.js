@@ -254,7 +254,7 @@ UI = {
                     saveBehaviour = false;
             }
 
-            if ((segment.data('modified')) && (saveBehaviour) && (!config.isReview)) {
+            if ((segment.data('modified')) && (saveBehaviour) && (!config.isReview) && UI.getStatus(segment) !== 'approved') {
                 this.saveSegment(segment);
             }
             this.deActivateSegment(byButton, segment);
@@ -338,7 +338,8 @@ UI = {
             data: {
                 action: 'copyAllSource2Target',
                 id_job: config.id_job,
-                pass: config.password
+                pass: config.password,
+                revision_number: config.revisionNumber
             },
             error: function() {
                 var notification = {
@@ -484,7 +485,7 @@ UI = {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
-        node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
+        node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
@@ -496,7 +497,7 @@ UI = {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
-        node.setAttribute('class', 'monad softReturn ' + config.crPlaceholderClass);
+        node.setAttribute('class', 'monad marker softReturn ' + config.crPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
@@ -1321,7 +1322,7 @@ UI = {
             .removeClass("draft translated approved")
             .addClass(t);
 
-        var downloadable = (t == 'translated' || t == 'approved') ;
+        var downloadable = (t === 'translated' || t.indexOf('approved') > -1 ) ;
 
         var isGDriveFile = false;
 
@@ -1353,7 +1354,7 @@ UI = {
 	},
     retrieveStatistics: function () {
         var path = sprintf(
-            APP.getRandomUrl() + 'api/v1/jobs/%s/%s/stats',
+            APP.getRandomUrl() + 'api/app/jobs/%s/%s/stats',
             config.id_job, config.password
         );
         $.ajax({
@@ -1363,6 +1364,7 @@ UI = {
         }).done( function( data ) {
             if (data.stats){
                 UI.setProgress(data.stats);
+                UI.setDownloadStatus(data.stats);
             }
         });
     },
@@ -1388,8 +1390,33 @@ UI = {
 		var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
-		var t_formatted = s.TODO_FORMATTED;
-		var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
+        var t_formatted = s.TODO_FORMATTED;
+        var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
+		// If second pass enabled
+		if ( config.secondRevisionsCount && s.reviews ) {
+		    var reviewedWords = s.reviews.find(function ( value ) {
+                return value.revision_number === 1;
+            });
+		    if ( reviewedWords ) {
+                var approvePerc = parseFloat(reviewedWords.advancement_wc)*100/s.TOTAL;
+                a_perc_formatted = _.round(approvePerc, 1);
+                a_perc = approvePerc;
+
+            }
+
+            var reviewWordsSecondPass = s.reviews.find(function ( value ) {
+                return value.revision_number === 2;
+            });
+
+            if ( reviewWordsSecondPass ) {
+                var approvePerc2ndPass = parseFloat(reviewWordsSecondPass.advancement_wc)*100/s.TOTAL;
+                a_perc_2nd_formatted = _.round(approvePerc2ndPass, 1);
+                a_perc_2nd = approvePerc2ndPass;
+                revise_todo_formatted = (config.revisionNumber === 2) ? revise_todo_formatted + _.round(parseFloat(reviewedWords.advancement_wc)) : revise_todo_formatted;
+            }
+        }
+
+
 
 		var wph = s.WORDS_PER_HOUR;
 		var completion = s.ESTIMATED_COMPLETION;
@@ -1412,6 +1439,9 @@ UI = {
 		$('.translated-bar', m).css('width', t_perc + '%').attr('title', 'Translated ' + t_perc_formatted + '%');
 		$('.draft-bar', m).css('width', d_perc + '%').attr('title', 'Draft ' + d_perc_formatted + '%');
 		$('.rejected-bar', m).css('width', r_perc + '%').attr('title', 'Rejected ' + r_perc_formatted + '%');
+		if ( reviewWordsSecondPass ) {
+            $('.approved-bar-2nd-pass', m).css('width', a_perc_2nd + '%').attr('title', 'Approved ' + a_perc_2nd_formatted + '%');
+        }
 
 		$('#stat-progress').html(this.progress_perc);
         if ( config.isReview ) {
@@ -1431,7 +1461,7 @@ UI = {
 	},
     formatSelection: function(op) {
         var str = getSelectionHtml();
-        insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
+        var rangeInsert = insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
         var newStr = '';
         var selection$ = $("<div/>").html(str);
         selection$.find('.undoCursorPlaceholder').remove();
@@ -1467,11 +1497,11 @@ UI = {
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
-            replaceSelectedHtml(newStr);
+            replaceSelectedHtml(newStr, rangeInsert);
             LXQ.reloadPowertip(this.currentSegment);
         }
         else {
-            replaceSelectedHtml(newStr);
+            replaceSelectedHtml(newStr, rangeInsert);
         }
         this.saveInUndoStack('formatSelection');
 
@@ -1485,19 +1515,8 @@ UI = {
 
 	setStatusButtons: function(button) {
 		var isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
-		this.editStop = new Date();
 		var segment = this.currentSegment;
-		var tte = $('.timetoedit', segment);
-		this.editTime = this.editStop - this.editStart;
-		this.totalTime = this.editTime + tte.data('raw-time-to-edit');
-		var editedTime = millisecondsToTime(this.totalTime);
-		if (config.time_to_edit_enabled) {
-			var editSec = $('.timetoedit .edit-sec', segment);
-			var editMin = $('.timetoedit .edit-min', segment);
-			editMin.text(APP.zerofill(editedTime[0], 2));
-			editSec.text(APP.zerofill(editedTime[1], 2));
-		}
-		tte.data('raw-time-to-edit', this.totalTime);
+
 		var statusSwitcher = $(".status", segment);
 		statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
 
@@ -1511,6 +1530,20 @@ UI = {
 		this.copyToNextIfSame(nextUntranslatedSegment);
 		this.byButton = true;
 	},
+    setTimeToEdit: function($segment) {
+        this.editStop = new Date();
+        var tte = $('.timetoedit', $segment);
+        this.editTime = this.editStop - this.editStart;
+        this.totalTime = this.editTime + tte.data('raw-time-to-edit');
+        var editedTime = millisecondsToTime(this.totalTime);
+        if (config.time_to_edit_enabled) {
+            var editSec = $('.timetoedit .edit-sec', $segment);
+            var editMin = $('.timetoedit .edit-min', $segment);
+            editMin.text(APP.zerofill(editedTime[0], 2));
+            editSec.text(APP.zerofill(editedTime[1], 2));
+        }
+        tte.data('raw-time-to-edit', this.totalTime);
+    },
 	collectSegmentErrors: function(segment) {
 		var errors = '';
 		// tag mismatch
@@ -1895,6 +1928,7 @@ UI = {
 
         this.lastTranslatedSegmentId = id_segment;
 
+
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 
@@ -1942,7 +1976,8 @@ UI = {
             id_before: idBefore,
             context_after: contextAfter,
             id_after: idAfter,
-            by_status: byStatus
+            by_status: byStatus,
+            revision_number: config.revisionNumber
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);
@@ -2142,32 +2177,24 @@ UI = {
 		$.each(err, function() {
 		    var codeInt = parseInt( this.code );
 
-			if (operation == 'setTranslation') {
-				if ( codeInt != -10) {
+			if (operation === 'setTranslation') {
+				if ( codeInt !== -10) {
 					APP.alert({msg: "Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 				}
 			}
 
-			if ( codeInt == -10 && operation != 'getSegments' ) {
+			if ( codeInt === -10 && operation !== 'getSegments' ) {
 				APP.alert({
 					msg: 'Job canceled or assigned to another translator',
 					callback: 'reloadPage'
 				});
-				//FIXME
-				// This Alert, will be NEVER displayed because are no-blocking
-				// Transform location.reload(); to a callable function passed as callback to alert
 			}
-			if ( codeInt == -1000) {
-				console.log('ERROR -1000');
-				console.log('operation: ', operation);
+			if ( codeInt === -1000 || codeInt === -101) {
+				console.log('ERROR '+ codeInt);
                 UI.startOfflineMode();
 			}
-            if ( codeInt == -101) {
-                console.log('ERROR -101');
-                UI.startOfflineMode();
-            }
 
-            if ( codeInt <= -2000 ) {
+            if ( codeInt <= -2000 && !_.isUndefined(this.message)) {
 			    APP.alert({ msg: this.message }) ;
             }
 		});
@@ -2190,14 +2217,9 @@ UI = {
         var propagate = options.propagate;
         var segment = $('#segment-' + id_segment);
 
-		if (d.errors.length)
-			this.processErrors(d.errors, 'setTranslation');
-        if (typeof d.pee_error_level != 'undefined') {
-            //TODO: we must check the quality fo th Revision Algorithm For now commented
-            //$('#edit_log_link' ).removeClass( "edit_1 edit_2 edit_3" ). addClass( UI.pee_error_level_map[d.pee_error_level] );
-            UI.body.addClass('peeError');
-        }
-		if (d.data == 'OK') {
+		if (d.errors.length) {
+            this.processErrors(d.errors, 'setTranslation');
+        } else if (d.data == 'OK') {
 			this.setStatus(segment, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
@@ -2496,6 +2518,8 @@ UI = {
         if(!UI.offline) UI.blockButtons = true;
 
         UI.setStatusButtons(button);
+
+        UI.setTimeToEdit(UI.currentSegment);
 
         if (!skipChange) {
             UI.changeStatus(button, 'translated', 0);

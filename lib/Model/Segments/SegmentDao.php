@@ -6,6 +6,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments';
     protected static $auto_increment_field = [ 'id' ];
 
+
+
+    const ISSUE_CATEGORY_ALL = 'all' ;
+
     public function countByFile( Files_FileStruct $file ) {
         $conn = $this->database->getConnection();
         $sql  = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file ";
@@ -163,16 +167,19 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param        $jid
-     * @param        $password
-     * @param int    $step
-     * @param        $ref_segment
-     * @param string $where
+     * @param Chunks_ChunkStruct $chunk
+     * @param int                $step
+     * @param                    $ref_segment
+     * @param string             $where
+     *
+     * @param array              $options
      *
      * @return array
      * @throws Exception
+     * @internal param $jid
+     * @internal param $password
      */
-    public function getSegmentsIdForQR( $jid, $password, $step = 10, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( Chunks_ChunkStruct $chunk, $step = 10, $ref_segment, $where = "after", $options = [] ) {
 
         $db = Database::obtain()->getConnection();
 
@@ -189,19 +196,29 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array( $options[ 'filter' ][ 'status' ], $statuses ) ) {
             $options_conditions_query              .= " AND st.status = :status ";
             $options_conditions_values[ 'status' ] = $options[ 'filter' ][ 'status' ];
+
         }
 
-        if ( ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) OR ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) ) {
+        if (
+                ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) ||
+                ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' )
+        ) {
 
-            $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job ";
+            $options_join_query .= " LEFT JOIN qa_entries e ON e.id_segment = st.id_segment AND e.id_job = st.id_job AND e.deleted_at IS NULL ";
             $options_join_query .= " LEFT JOIN segment_revisions sr ON sr.id_segment = st.id_segment AND sr.id_job = st.id_job ";
 
-            if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != '' ) {
+            if (
+                    isset( $options[ 'filter' ][ 'issue_category' ] ) &&
+                    $options[ 'filter' ][ 'issue_category' ] != '' &&
+                    $options[ 'filter' ][ 'issue_category' ] != self::ISSUE_CATEGORY_ALL
+            ) {
+
                 if ( in_array( $options[ 'filter' ][ 'issue_category' ], Constants_Revise::$categoriesDbNames ) ) {
-
-                    $options_conditions_query .= " AND (sr." . $options[ 'filter' ][ 'issue_category' ] . " != '' AND sr." . $options[ 'filter' ][ 'issue_category' ] . " != 'none')";
+                    // Case for legacy review  ^^
+                    $options_conditions_query .= " AND (sr." . $options[ 'filter' ][ 'issue_category' ] .
+                            " != '' AND sr." . $options[ 'filter' ][ 'issue_category' ] . " != 'none')";
                 } else {
-
+                    // Case for AbstractRevisionFeature
                     if ( is_array( $options[ 'filter' ][ 'issue_category' ] ) ) {
                         $placeholders = implode( ', ', array_map( function ( $id ) {
                             return ':issue_category_' . $id;
@@ -218,15 +235,55 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     }
                 }
             }
+            elseif (
+                    isset( $options[ 'filter' ][ 'issue_category' ] ) &&
+                    $options[ 'filter' ][ 'issue_category' ] == self::ISSUE_CATEGORY_ALL
+            ) {
+                if ( $chunk->getProject()->getFeatures()->hasRevisionFeature() ) {
+                    $options_conditions_query .= " AND e.id_category IS NOT NULL " ;
+                }
+                else {
+                    $options_conditions_query .= " AND ( " .
+                            implode(' OR ', array_map( function( $name ) {
+                                return " ( sr.$name != 'none' AND sr.$name != '') ";
+                            }, Constants_Revise::$categoriesDbNames ) ) . " ) " ;
+                }
+            }
+
 
             if ( isset( $options[ 'filter' ][ 'severity' ] ) && $options[ 'filter' ][ 'severity' ] != '' ) {
-                $options_conditions_query                .= " AND (e.severity = :severity OR 
-            (sr.err_typing = :severity OR sr.err_translation = :severity OR sr.err_terminology = :severity OR sr.err_language = :severity OR sr.err_style = :severity)) ";
+                $options_conditions_query .= " AND (
+                    e.severity = :severity OR (
+                        sr.err_typing = :severity OR
+                        sr.err_translation = :severity OR
+                        sr.err_terminology = :severity OR
+                        sr.err_language = :severity OR
+                        sr.err_style = :severity)
+                        ) ";
                 $options_conditions_values[ 'severity' ] = $options[ 'filter' ][ 'severity' ];
             }
+        }
+
+        if ( isset( $options['filter']['id_segment'] ) && !empty( $options['filter']['id_segment'] ) ) {
+            $options_conditions_query .= " AND s.id = :id_segment " ;
+            $options_conditions_values[ 'id_segment' ] = $options['filter']['id_segment'] ;
 
         }
 
+        if ( isset( $options['filter']['revision_number'] ) && !empty( $options['filter']['revision_number'] ) ) {
+            $join_revision_number = " JOIN segment_translation_events ste on s.id = ste.id_segment " .
+                    " AND ste.id_job = j.id  "  .
+                    " AND ste.source_page = :source_page  "  .
+                    " AND ste.version_number = st.version_number " .
+                    " AND ste.final_revision = 1 " ;
+
+            $options_conditions_values['source_page'] = \Features\SecondPassReview\Utils::revisionNumberToSourcePage(
+                    $options[ 'filter' ] [ 'revision_number' ]
+            ) ;
+        }
+        else {
+            $join_revision_number = '' ;
+        }
 
         $queryAfter = "
                 SELECT * FROM (
@@ -234,6 +291,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
                     JOIN jobs j ON j.id = st.id_job
+                    $join_revision_number
                     %s 
                     WHERE st.id_job = :id_job
                         AND j.password = :password
@@ -250,6 +308,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
                     JOIN jobs j ON j.id = st.id_job
+                    $join_revision_number
                     %s
                     WHERE st.id_job = :id_job
                         AND j.password = :password
@@ -264,15 +323,15 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         /*
          * This query is an union of the last two queries with only one difference:
          * the queryAfter parts differs for the equal sign.
-         * Here is needed
          *
          */
         $queryCenter = "
                   SELECT * FROM ( 
-                        SELECT distinct(s.id) AS __sid
+                        SELECT DISTINCT(s.id) AS __sid
                         FROM segments s
                         JOIN segment_translations st ON s.id = st.id_segment
                         JOIN jobs j ON j.id = st.id_job
+                        $join_revision_number
                         %s
                         WHERE st.id_job = :id_job
                             AND j.password = :password
@@ -282,8 +341,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         LIMIT %u 
                   ) AS TT1
                   UNION
-                  SELECT * from(
-                        SELECT distinct(s.id) AS __sid
+                  SELECT * FROM (
+                        SELECT DISTINCT(s.id) AS __sid
                         FROM segments s
                         JOIN segment_translations st ON s.id = st.id_segment
                         JOIN jobs j ON j.id = st.id_job
@@ -313,7 +372,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         }
 
         $stmt              = $db->prepare( $subQuery );
-        $conditions_values = array_merge( [ 'id_job' => $jid, 'password' => $password, 'ref_segment' => $ref_segment ], $options_conditions_values );
+        $conditions_values = array_merge( [
+                'id_job'      => $chunk->id,
+                'password'    => $chunk->password,
+                'ref_segment' => $ref_segment
+            ], $options_conditions_values );
+
         $stmt->execute( $conditions_values );
         $segments_id = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
@@ -337,6 +401,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
 
+        reset( $segments_id ) ;
+        $min = current( $segments_id );
+        $max = end( $segments_id );
+
         $query = "SELECT 
                 s.id AS sid,
                 s.segment,
@@ -356,23 +424,37 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.edit_distance,
                 st.locked,
                 st.match_type,
-                st.version_number
+                st.version_number,
+                ste.source_page
                 
                 FROM segments s
                 RIGHT JOIN segment_translations st ON st.id_segment = s.id
                 RIGHT JOIN jobs j ON j.id = st.id_job
                 RIGHT JOIN files_job fj ON fj.id_job = j.id
                 RIGHT JOIN files f ON f.id = fj.id_file AND s.id_file = f.id
+
+                LEFT JOIN (
+
+                    SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
+                        SELECT max(id) FROM segment_translation_events
+                        WHERE id_job = ?
+                        AND id_segment >= ? AND id_segment <= ?
+                        GROUP BY id_segment ) ORDER BY id_segment
+
+                ) ste ON ste.ste_id_segment = s.id
+
                 JOIN (
                     SELECT ? as id_segment
                     " . $prepare_str_segments_id . "
                  ) AS SLIST USING( id_segment )
+
                  WHERE j.id = ? AND j.password = ?
+
             ORDER BY sid ASC";
 
         $stmt = $db->prepare( $query );
         $stmt->setFetchMode( PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct" );
-        $stmt->execute( array_merge( $segments_id, [ $job_id, $job_password ] ) );
+        $stmt->execute( array_merge( [$job_id, $min, $max], $segments_id, [ $job_id, $job_password ] ) );
 
         $results = $stmt->fetchAll();
 

@@ -16,6 +16,7 @@ class SegmentBody extends React.Component {
         this.state = {
             showStatusMenu: false
         };
+        this.isReviewExtended = this.props.reviewType === 'extended'
     }
 
     statusHandleTitleAttr(status) {
@@ -118,7 +119,7 @@ class SegmentBody extends React.Component {
     }
 
     getStatusMenu() {
-        if ( this.state.showStatusMenu ) {
+        if ( this.state.showStatusMenu && !this.isReviewExtended ) {
             return <ul className="statusmenu" ref={(menu)=>this.statusMenuRef=menu}>
                     <li className="arrow"><span className="arrow-mcolor"/></li>
 
@@ -196,10 +197,16 @@ class SegmentBody extends React.Component {
                     </div>
                 </div>
                 <div className="status-container">
-                    <a href="#" title={status_change_title}
-                       className="status" id={"segment-"+ this.props.segment.sid + "-changestatus"}
-                       onClick={this.openStatusSegmentMenu}
-                    />
+                    { this.isReviewExtended ?  (
+                        <a href="#" className="status no-hover" onClick={this.openStatusSegmentMenu}
+                        />
+                        ) : (
+                        <a href="#" title={status_change_title}
+                           className="status" id={"segment-"+ this.props.segment.sid + "-changestatus"}
+                           onClick={this.openStatusSegmentMenu}
+                        />
+                    )}
+
                 </div>
 
                 {this.getStatusMenu()}

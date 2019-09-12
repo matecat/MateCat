@@ -88,11 +88,15 @@ class SegmentFooterTabIssuesListItem extends React.Component {
                     comment_text: ''
                 })
             })
-            .fail( this.handleFail );
+            .fail( (response) => self.handleFail(response.responseJSON) );
     }
 
-    handleFail() {
-        genericErrorAlertMessage() ;
+    handleFail(response) {
+        if ( response.errors && response.errors[0].code === 2000 ) {
+            UI.processErrors(response.errors, 'createIssue');
+        } else {
+            genericErrorAlertMessage() ;
+        }
         this.setState({ sendDisabled : false });
     }
 

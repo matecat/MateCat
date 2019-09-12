@@ -1,12 +1,13 @@
 <?php
 
-namespace Features ;
+namespace Features;
 
 use API\V2\Exceptions\ValidationError;
 use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
+use Constants;
 use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
@@ -39,7 +40,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     public function __construct( BasicFeatureStruct $feature ) {
         parent::__construct( $feature );
-        RevisionFactory::getInstance( $this ) ;
+        RevisionFactory::getInstance( $this );
     }
 
     /**
@@ -59,10 +60,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     public function filterContributionStructOnSetTranslation( ContributionSetStruct $contributionStruct, Projects_ProjectStruct $project ) {
 
         if ( $contributionStruct->fromRevision ) {
-            $contributionStruct->propagationRequest = true ;
+            $contributionStruct->propagationRequest = true;
         }
 
-        return $contributionStruct ;
+        return $contributionStruct;
     }
 
     /**
@@ -82,71 +83,71 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId(
                 $review_password, $id_job );
 
-        if ( ! $chunk_review ) {
-            throw new \Exceptions\NotFoundException('Review record was not found');
+        if ( !$chunk_review ) {
+            throw new \Exceptions\NotFoundException( 'Review record was not found' );
         }
 
-        return $chunk_review->password ;
+        return $chunk_review->password;
     }
 
     public function filter_job_password_to_review_password( $password, $id_job ) {
         $chunk_reviews = ChunkReviewDao::findChunkReviewsByChunkIds(
-                array( array($id_job, $password ) )
+                [ [ $id_job, $password ] ]
         );
 
-        $chunk_review = $chunk_reviews[0];
+        $chunk_review = $chunk_reviews[ 0 ];
 
-        if ( ! $chunk_review ) {
-            throw new \Exceptions\NotFoundException('Review record was not found');
+        if ( !$chunk_review ) {
+            throw new \Exceptions\NotFoundException( 'Review record was not found' );
         }
 
-        return $chunk_review->review_password ;
+        return $chunk_review->review_password;
     }
 
 
     public function filter_get_segments_segment_data( $seg ) {
-        if( isset($seg['edit_distance']) ) {
-            $seg['edit_distance'] = round( $seg['edit_distance'] / 1000, 2 );
+        if ( isset( $seg[ 'edit_distance' ] ) ) {
+            $seg[ 'edit_distance' ] = round( $seg[ 'edit_distance' ] / 1000, 2 );
         } else {
-            $seg['edit_distance'] = 0;
+            $seg[ 'edit_distance' ] = 0;
         }
+
         return $seg;
     }
 
     public function filter_get_segments_optional_fields( $options ) {
-        $options['optional_fields'][] = 'edit_distance';
-        return $options ;
+        $options[ 'optional_fields' ][] = 'edit_distance';
+
+        return $options;
     }
 
-
     /**
-     *
      * @param $project
      */
     public function filter_manage_single_project( $project ) {
-        $chunks = array();
+        $chunks = [];
 
-        foreach( $project['jobs'] as $job ) {
-            $chunks[] = array( $job['id'], $job['password'] );
+        foreach ( $project[ 'jobs' ] as $job ) {
+            $chunks[] = [ $job[ 'id' ], $job[ 'password' ] ];
         }
 
         $chunk_reviews = ChunkReviewDao::findChunkReviewsByChunkIds( $chunks );
 
-        foreach( $project['jobs'] as $kk => $job ) {
+        foreach ( $project[ 'jobs' ] as $kk => $job ) {
             /**
              * Inner cycle to match chunk_reviews records and modify
              * the data structure.
              */
-            foreach( $chunk_reviews as $chunk_review ) {
-                if ( $chunk_review->id_job == $job['id'] &&
-                        $chunk_review->password == $job['password']
+            foreach ( $chunk_reviews as $chunk_review ) {
+                if ( $chunk_review->id_job == $job[ 'id' ] &&
+                        $chunk_review->password == $job[ 'password' ]
                 ) {
-                    $project['jobs'][$kk]['review_password'] = $chunk_review->review_password ;
+                    $project[ 'jobs' ][ $kk ][ 'review_password' ] = $chunk_review->review_password;
                 }
             }
         }
 
-        return $project ;
+        return $project;
     }
 
     /**
@@ -156,7 +157,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * If not, then try to find the qa_model from the project structure.
      * @throws \Exceptions\ValidationError
      */
-    public function postProjectCreate($projectStructure) {
+    public function postProjectCreate( $projectStructure ) {
         $this->setQaModelFromJsonFile( $projectStructure );
         $this->createChunkReviewRecords( $projectStructure );
     }
@@ -166,26 +167,38 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param       $id_project
      * @param array $options
      *
+     * @return ChunkReviewStruct[]
      * @throws \Exceptions\ValidationError
+     *
      */
-    protected function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
+    public function createQaChunkReviewRecord( $id_job, $id_project, $options = [] ) {
+        $project        = Projects_ProjectDao::findById( $id_project );
+        $chunks         = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
+        $createdRecords = [];
 
-        $chunks     = Chunks_ChunkDao::getByIdProjectAndIdJob( $id_project, $id_job, 0 );
+        // expect one chunk
+        if ( !isset( $options[ 'source_page' ] ) ) {
+            $options[ 'source_page' ] = Constants::SOURCE_PAGE_REVISION;
+        }
 
         foreach ( $chunks as $k => $chunk ) {
             $data = [
-                    'id_project' => $id_project,
-                    'id_job'     => $chunk->id,
-                    'password'   => $chunk->password
+                    'id_project'  => $id_project,
+                    'id_job'      => $chunk->id,
+                    'password'    => $chunk->password,
+                    'source_page' => $options[ 'source_page' ]
             ];
 
             if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
                 $data[ 'review_password' ] = $options[ 'first_record_password' ];
             }
 
-            ChunkReviewDao::createRecord( $data );
+            $chunkReview = ChunkReviewDao::createRecord( $data );
+            $project->getFeatures()->run( 'chunkReviewRecordCreated', $chunkReview );
+            $createdRecords[] = $chunkReview;
         }
 
+        return $createdRecords;
     }
 
     /**
@@ -206,13 +219,16 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @param \ArrayObject $projectStructure
      *
+     * @todo this method is overridden two child classes, let's see if we can remove that duplication and use just
+     *       this method, perhaps moving the code from ReviewExtended (which is more recent) here.
+     *
      * @throws \Exceptions\ValidationError
      */
     public function postJobSplitted( \ArrayObject $projectStructure ) {
 
-        $id_job = $projectStructure['job_to_split'];
-        $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
-        $first_password = $old_reviews[0]->review_password ;
+        $id_job         = $projectStructure[ 'job_to_split' ];
+        $old_reviews    = ChunkReviewDao::findByIdJob( $id_job );
+        $first_password = $old_reviews[ 0 ]->review_password;
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
@@ -220,11 +236,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                 'first_record_password' => $first_password
         ] );
 
-        $project = Projects_ProjectDao::findById( $projectStructure['id_project'] ) ;
+        $project         = Projects_ProjectDao::findById( $projectStructure[ 'id_project' ] );
+        $revisionFactory = RevisionFactory::initFromProject( $project )->setFeatureSet( $project->getFeatures() );
 
         $reviews = ChunkReviewDao::findByIdJob( $id_job );
-        foreach( $reviews as $review ) {
-            $model = RevisionFactory::getInstance()->getChunkReviewModel( $review ) ;
+        foreach ( $reviews as $review ) {
+            $model = $revisionFactory->getChunkReviewModel( $review );
             $model->recountAndUpdatePassFailResult();
         }
     }
@@ -239,77 +256,75 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws \Exceptions\ValidationError
      */
     public function postJobMerged( $projectStructure ) {
-        $id_job               = $projectStructure[ 'job_to_merge' ];
-        $old_reviews          = ChunkReviewDao::findByIdJob( $id_job );
-        $first_password       = $old_reviews[ 0 ]->review_password;
-        $penalty_points       = 0;
-        $reviewed_words_count = 0;
+        $id_job      = $projectStructure[ 'job_to_merge' ];
+        $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
+
+        $project         = $old_reviews[ 0 ]->getChunk()->getProject();
+        $revisionFactory = RevisionFactory::initFromProject( $project )
+                ->setFeatureSet( $project->getFeatures() );
+
+        $reviewGroupedData = [];
+
+        foreach ( $old_reviews as $review ) {
+            if ( !isset( $reviewGroupedData[ $review->source_page ] ) ) {
+                $reviewGroupedData[ $review->source_page ] = [
+                        'first_record_password' => $review->review_password
+                ];
+            }
+        }
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        foreach($old_reviews as $row ) {
-            $penalty_points = $penalty_points + $row->penalty_points;
-            $reviewed_words_count = $reviewed_words_count + $row->reviewed_words_count ;
+        foreach ( $reviewGroupedData as $source_page => $data ) {
+            $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ], [
+                    'first_record_password' => $data[ 'first_record_password' ],
+                    'source_page'           => $source_page
+            ] );
         }
 
-        $this->createQaChunkReviewRecord( $id_job, $projectStructure[ 'id_project' ], [
-                'first_record_password' => $first_password
-        ] );
-
+        /**
+         * we expect to have on record for each revision
+         */
         $new_reviews = ChunkReviewDao::findByIdJob( $id_job );
-        $new_reviews[0]->penalty_points = $penalty_points;
-        $new_reviews[0]->reviewed_words_count = $reviewed_words_count ;
 
-        $model = RevisionFactory::getInstance()->getChunkReviewModel( $new_reviews[0] );
-        $model->recountAndUpdatePassFailResult();
+        foreach ( $new_reviews as $review ) {
+            $model = $revisionFactory->getChunkReviewModel( $review );
+            $model->recountAndUpdatePassFailResult();
+        }
     }
 
     /**
      * Entry point for project data validation for this feature.
+     *
+     * @param $projectStructure
      */
-    public function validateProjectCreation($projectStructure)  {
-        self::loadAndValidateModelFromJsonFile($projectStructure);
+    public function validateProjectCreation( $projectStructure ) {
+        self::loadAndValidateModelFromJsonFile( $projectStructure );
     }
 
     /**
-     * @param $params['translation'] Translations_SegmentTranslationStruct
-     * @param $params['old_translation'] Translations_SegmentTranslationStruct
-     * @param $params['propagated_ids'] array
+     * @param TranslationVersions\Model\BatchEventCreator $eventCreator
      *
+     * @internal param SegmentTranslationEventModel $event
      */
-    public function setTranslationCommitted( $params) {
-        $new_translation = $params['translation'];
-        $old_translation = $params['old_translation'];
-        $propagated_ids  = $params['propagated_ids'] ;
-
-        $translation_model = new SegmentTranslationChangeVector( $new_translation );
-
-        $translation_model->setPropagatedIds( $propagated_ids );
-        $translation_model->setOldTranslation( $old_translation );
-
-        $this->updateRevisionScore( $translation_model );
-    }
-
-    public function updateRevisionScore( SegmentTranslationChangeVector $translation ) {
-        $model = $this->getSegmentTranslationModel( $translation );
-        $model->addOrSubtractCachedReviewedWordsCount();
-        $model->recountPenaltyPoints();
+    public function batchEventCreationSaved( Features\TranslationVersions\Model\BatchEventCreator $eventCreator ) {
+        $batchReviewProcessor = new Features\ReviewExtended\Model\BatchReviewProcessor( $eventCreator );
+        $batchReviewProcessor->process();
     }
 
     /**
      * project_completion_event_saved
      *
-     * @param Chunks_ChunkStruct $chunk
+     * @param Chunks_ChunkStruct    $chunk
      * @param CompletionEventStruct $event
-     * @param $completion_event_id
+     * @param                       $completion_event_id
      */
     public function project_completion_event_saved( Chunks_ChunkStruct $chunk, CompletionEventStruct $event, $completion_event_id ) {
         if ( $event->is_review ) {
             $model = new ArchivedQualityReportModel( $chunk );
             $model->saveWithUID( $event->uid );
-        }
-        else {
-            $model = new QualityReportModel( $chunk ) ;
+        } else {
+            $model = new QualityReportModel( $chunk );
             $model->resetScore( $completion_event_id );
         }
     }
@@ -322,7 +337,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws \Exceptions\ValidationError
      * @throws \ReflectionException
      */
-    public function alter_chunk_review_struct( Chunks_ChunkCompletionEventStruct $event ){
+    public function alter_chunk_review_struct( Chunks_ChunkCompletionEventStruct $event ) {
 
         $review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
                 $event->id_job,
@@ -361,7 +376,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @throws ValidationError
      */
-    protected function _validateUndoData( Chunks_ChunkCompletionEventStruct $event , $undo_data ) {
+    protected function _validateUndoData( Chunks_ChunkCompletionEventStruct $event, $undo_data ) {
 
         try {
             Utils::ensure_keys( $undo_data, [
@@ -389,12 +404,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     private function setQaModelFromJsonFile( $projectStructure ) {
 
-        $model_json = $projectStructure['features'][ 'review_extended' ]['__meta']['qa_model'];
+        $model_json = $projectStructure[ 'features' ][ 'review_extended' ][ '__meta' ][ 'qa_model' ];
 
         $model_record = ModelDao::createModelFromJsonDefinition( $model_json );
 
         $project = Projects_ProjectDao::findById(
-                $projectStructure['id_project']
+                $projectStructure[ 'id_project' ]
         );
 
         $dao = new Projects_ProjectDao( Database::obtain() );
@@ -408,7 +423,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * If validation fails, adds errors to the projectStructure.
      *
-     * @param      $projectStructure
+     * @param             $projectStructure
      * @param null|string $jsonPath
      *
      *
@@ -428,44 +443,44 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         if ( $zip_file !== false ) {
             $zip = new ZipArchive();
             $zip->open( $zip_file );
-            $qa_model = $zip->getFromName( '__meta/qa_model.json');
+            $qa_model = $zip->getFromName( '__meta/qa_model.json' );
         }
 
         // File is not a zip OR model was not found in zip
 
-        Log::doJsonLog( "QA model is : " . var_export( $qa_model, true ) ) ;
+        Log::doJsonLog( "QA model is : " . var_export( $qa_model, true ) );
 
         if ( $qa_model === false ) {
-            if( $jsonPath == null ){
-                $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json');
+            if ( $jsonPath == null ) {
+                $qa_model = file_get_contents( INIT::$ROOT . '/inc/qa_model.json' );
             } else {
                 $qa_model = file_get_contents( $jsonPath );
             }
         }
 
-        $decoded_model = json_decode( $qa_model, true ) ;
+        $decoded_model = json_decode( $qa_model, true );
 
         if ( $decoded_model === null ) {
-            $projectStructure['result']['errors'][ ] = array(
-                    'code' => '-900',  // TODO: decide how to assign such errors
+            $projectStructure[ 'result' ][ 'errors' ][] = [
+                    'code'    => '-900',  // TODO: decide how to assign such errors
                     'message' => 'QA model failed to decode'
-            );
+            ];
         }
 
         /**
          * Append the qa model to the project structure for later use.
          */
-        if ( ! array_key_exists( 'features', $projectStructure ) ) {
-            $projectStructure['features'] = array();
+        if ( !array_key_exists( 'features', $projectStructure ) ) {
+            $projectStructure[ 'features' ] = [];
         }
 
-        $projectStructure['features'] = array(
-                'review_extended' => array(
-                        '__meta' => array(
+        $projectStructure[ 'features' ] = [
+                'review_extended' => [
+                        '__meta' => [
                                 'qa_model' => $decoded_model
-                        )
-                )
-        );
+                        ]
+                ]
+        ];
     }
 
     /**
@@ -474,18 +489,22 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @return IChunkReviewModel
      */
     public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
-        $class_name = get_class( $this ) . '\ChunkReviewModel' ;
+        $class_name = get_class( $this ) . '\ChunkReviewModel';
+
         return new $class_name( $chunkReviewStruct );
     }
 
     /**
      * @param SegmentTranslationChangeVector $translation
      *
+     * @param ChunkReviewStruct[]            $chunkReviews
+     *
      * @return ISegmentTranslationModel
      */
-    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation ) {
-        $class_name = get_class( $this ) . '\SegmentTranslationModel' ;
-        return new $class_name( $translation );
+    public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews = [] ) {
+        $class_name = get_class( $this ) . '\SegmentTranslationModel';
+
+        return new $class_name( $translation, $chunkReviews );
     }
 
     /**
@@ -495,14 +514,15 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @return mixed
      */
-    public function getTranslationIssueModel( $id_job, $password, $issue) {
-        $class_name = get_class( $this ) . '\TranslationIssueModel' ;
+    public function getTranslationIssueModel( $id_job, $password, $issue ) {
+        $class_name = get_class( $this ) . '\TranslationIssueModel';
+
         return new $class_name( $id_job, $password, $issue );
     }
 
 
     public function revise_summary_project_type( $old_value ) {
-        return 'new' ;
+        return 'new';
     }
 
 }

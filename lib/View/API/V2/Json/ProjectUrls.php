@@ -11,11 +11,9 @@ namespace API\V2\Json;
 use DataAccess\ShapelessConcreteStruct;
 use Routes;
 
-
 class ProjectUrls {
 
     protected $data ;
-
     protected $jobs = [];
     protected $files = array();
     protected $chunks = array();
@@ -157,6 +155,5 @@ class ProjectUrls {
             $record['source'],
             $record['target']
         );
-
     }
 }
