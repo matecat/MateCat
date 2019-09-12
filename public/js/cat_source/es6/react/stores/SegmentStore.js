@@ -254,7 +254,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         let index = this.getSegmentIndex(sid, fid);
         let segment = this._segments[fid].get(index);
         // var trans = htmlEncode(this.removeLockTagsFromString(source));
-        let source_decoded = UI.decodeText(segment.toJS(), source);
+        let source_decoded = source;
+        if ( source_decoded.indexOf('locked-inside') === -1 )  {
+            source_decoded = UI.decodeText(segment.toJS(), source);
+        }
         // this._segments[fid] = this._segments[fid].setIn([index, 'segment'], trans);
         this._segments[fid] = this._segments[fid].setIn([index, 'decoded_source'], source_decoded);
         return source_decoded;
