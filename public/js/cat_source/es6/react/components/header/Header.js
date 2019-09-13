@@ -172,7 +172,7 @@ class Header extends React.Component {
 							selectedTeamId={selectedTeamId}
 						/>}
 						<div className={"separator"}></div>
-						{!!loggedUser && !showFilterProjects && <a href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
+						{!!loggedUser && !showFilterProjects && <a class={"action-submenu"} href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
 						{userIcon}
 					</div>
 
