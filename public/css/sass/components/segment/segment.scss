@@ -145,3 +145,12 @@ section{
     display: flex;
     flex-direction: column;
 }
+.collection-type-separator {
+    color: #777;
+    font-size: 14px;
+    margin: 4px;
+    float: left;
+    width: 100%;
+    padding-top: 15px;
+    box-shadow: none !important;
+}
