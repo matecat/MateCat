@@ -20,32 +20,29 @@ class BatchReviewProcessor {
     protected $_batchEventCreator;
 
     public function __construct( BatchEventCreator $eventCreator ) {
-        $this->_batchEventCreator = $eventCreator ;
+        $this->_batchEventCreator = $eventCreator;
     }
 
     public function process() {
         $chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds(
                 [ [ $this->_batchEventCreator->getChunk()->id, $this->_batchEventCreator->getChunk()->password ] ]
-        ) ;
+        );
 
-        $project = $chunkReviews[0]->getChunk()->getProject() ;
-        $revisionFactory = RevisionFactory::initFromProject( $project )
-            ->setFeatureSet( $project->getFeatures() );
+        $project         = $chunkReviews[ 0 ]->getChunk()->getProject();
+        $revisionFactory = RevisionFactory::initFromProject( $project );
 
         foreach ( $this->_batchEventCreator->getPersistedEvents() as $event ) {
 
             $translationVector = new SegmentTranslationChangeVector( $event );
 
-            $segmentTranslationModel = $revisionFactory->getSegmentTranslationModel(
-                    $translationVector , $chunkReviews
-            ) ;
+            $segmentTranslationModel = $revisionFactory->getSegmentTranslationModel( $translationVector, $chunkReviews );
 
-            $segmentTranslationModel->evaluateChunkReviewTransition() ;
+            $segmentTranslationModel->evaluateChunkReviewTransition();
         }
 
-        foreach( $chunkReviews as $chunkReview ) {
-            $chunkReviewModel = $revisionFactory->getChunkReviewModel( $chunkReview ) ;
-            $chunkReviewModel->updatePassFailResult() ;
+        foreach ( $chunkReviews as $chunkReview ) {
+            $chunkReviewModel = $revisionFactory->getChunkReviewModel( $chunkReview );
+            $chunkReviewModel->updatePassFailResult( $this->_batchEventCreator->getProject() );
         }
     }
 }

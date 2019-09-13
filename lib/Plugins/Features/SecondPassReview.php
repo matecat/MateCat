@@ -41,9 +41,15 @@ class SecondPassReview extends BaseFeature {
                 'Features\SecondPassReview\Controller\ReviewsController', 'createReview' );
     }
 
-    public function chunkReviewRecordCreated($chunkReview) {
+    /**
+     * @param ChunkReviewStruct       $chunkReview
+     * @param \Projects_ProjectStruct $projectStruct
+     *
+     * @throws \Exception
+     */
+    public function chunkReviewRecordCreated( ChunkReviewStruct $chunkReview, \Projects_ProjectStruct $projectStruct ) {
         // This is needed to properly populate advancement wc for ICE matches
-        ( new ChunkReviewModel( $chunkReview ))->recountAndUpdatePassFailResult();
+        ( new ChunkReviewModel( $chunkReview ))->recountAndUpdatePassFailResult( $projectStruct );
     }
 
     /**

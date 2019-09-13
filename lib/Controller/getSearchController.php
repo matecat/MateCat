@@ -415,7 +415,8 @@ class getSearchController extends ajaxController {
                     'user'              => $this->user,
                     'source_page_code'  => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber),
                     'controller_result' => & $this->result,
-                    'features'          => $this->featureSet
+                    'features'          => $this->featureSet,
+                    'project'           => $project
             ] );
 
             // commit the transaction

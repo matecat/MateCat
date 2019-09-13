@@ -33,7 +33,7 @@ class FixChunkReviewRecordCounts extends Command
         ]) ;
 
         $project = $allChunkReviews[0]->getChunk()->getProject() ;
-        $revisionFactory = RevisionFactory::initFromProject( $project )->setFeatureSet( $project->getFeatures() ) ;
+        $revisionFactory = RevisionFactory::initFromProject( $project );
 
         foreach ( $allChunkReviews as $chunkReview ) {
             $model = $revisionFactory->getChunkReviewModel( $chunkReview ) ;

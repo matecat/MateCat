@@ -76,7 +76,7 @@ class CatDecorator extends \AbstractDecorator {
     }
 
     private function getOverallQualityClass() {
-        $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( array(
+        $reviews = ChunkReviewDao::findChunkReviewsByChunkIdsAndPasswords( array(
                 array(
                         $this->controller->getChunk()->id,
                         $this->controller->getChunk()->password

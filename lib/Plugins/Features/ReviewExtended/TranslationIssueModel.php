@@ -17,7 +17,12 @@ use Utils;
 
 class TranslationIssueModel {
 
-    private $diff;
+    /**
+     * @var \Projects_ProjectStruct
+     */
+    protected $project;
+
+    private   $diff;
 
     /**
      * @var EntryStruct
@@ -28,8 +33,11 @@ class TranslationIssueModel {
      * @var \LQA\ChunkReviewStruct
      */
     protected $chunk_review ;
-    private   $removePointsOnDelete;
 
+    /**
+     * @var \Chunks_ChunkStruct
+     */
+    protected $chunk;
 
     /**
      * @param $id_job
@@ -39,11 +47,14 @@ class TranslationIssueModel {
     public function __construct( $id_job, $password, EntryStruct $issue ) {
         $this->issue = $issue;
 
-        $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( [
+        $reviews = ChunkReviewDao::findChunkReviewsByChunkIdsAndPasswords( [
                 [ $id_job, $password ]
         ], $issue->source_page );
 
         $this->chunk_review = $reviews[0];
+        $this->chunk = $this->chunk_review->getChunk();
+        $this->project = $this->chunk->getProject();
+
     }
 
     /**
@@ -60,6 +71,8 @@ class TranslationIssueModel {
      * Inserts the struct in database and updates review result
      *
      * @return EntryStruct
+     * @throws \Exceptions\ValidationError
+     * @throws \Exception
      */
     public function save() {
         $this->setDefaultIssueValues();
@@ -72,7 +85,7 @@ class TranslationIssueModel {
         $this->issue = EntryDao::createEntry( $data );
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-        $chunk_review_model->addPenaltyPoints( $this->issue->penalty_points );
+        $chunk_review_model->addPenaltyPoints( $this->issue->penalty_points, $this->project );
 
         return $this->issue;
     }
@@ -124,13 +137,13 @@ class TranslationIssueModel {
      * Penalty points are not subtracted if deletion is coming from a review and the issue is rebutted, because in that
      * case we could end up with negative sum of penalty points
      *
+     * @throws \Exception
      */
-
     public function delete() {
         EntryDao::deleteEntry($this->issue);
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-        $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points );
+        $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points, $this->project );
     }
 
 }

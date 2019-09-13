@@ -1,5 +1,6 @@
 <?php
 
+use Features\AbstractRevisionFeature;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
 
@@ -21,12 +22,12 @@ class RevisionFactory {
     protected $_featureSet;
 
     /**
-     * @param \Features\BaseFeature|null $revisionFeature
+     * @param AbstractRevisionFeature $revisionFeature
      *
      * @return RevisionFactory
      * @throws Exception
      */
-    public static function getInstance( $revisionFeature = null ) {
+    public static function getInstance( AbstractRevisionFeature $revisionFeature = null ) {
         if ( static::$INSTANCE == null && $revisionFeature == null ) {
             throw new Exception( 'Revision not defined' );
         } elseif ( static::$INSTANCE == null ) {
@@ -95,9 +96,7 @@ class RevisionFactory {
     }
 
     public static function initFromProject( Projects_ProjectStruct $project ) {
-        $project->getFeatures();
-
-        return static::getInstance();
+        return static::getInstance()->setFeatureSet( $project->getFeatures() );
     }
 
     /**
