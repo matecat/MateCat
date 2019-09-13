@@ -252,7 +252,7 @@ class SegmentTarget extends React.Component {
 
     markTranslation(translation) {
         if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.target) {
-            translation = LXQ.highLightText(translation, this.props.segment.lexiqa.target, true, true, true );
+            translation = LXQ.highLightText(translation, this.props.segment.lexiqa.target, true, false, true );
         }
         if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
             translation = QaBlacklist.markBlacklistItemsInSegment(translation, this.props.segment.qaBlacklistGlossary);
