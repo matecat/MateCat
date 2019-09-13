@@ -16,7 +16,6 @@ use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 use INIT;
-use SegmentTranslationChangeVector;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -37,12 +36,16 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
      * @param AbstractElement $queueElement
      *
      * @return mixed|void
+     * @throws \ReflectionException
+     * @throws \StompException
+     * @throws \TaskRunner\Exceptions\EndQueueException
      */
     public function process( AbstractElement $queueElement ) {
         /**
          * @var $queueElement QueueElement
          */
         $this->_checkForReQueueEnd( $queueElement );
+        $this->_checkDatabaseConnection();
         $this->_doLog( 'data: ' . var_export( $queueElement->params->toArray(), true ) );
 
         $params = $queueElement->params->toArray();
@@ -53,13 +56,13 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $user        = ( new Users_UserDao())->getByUid( $params['id_user'] );
         $source_page = Utils::revisionNumberToSourcePage( $params['revision_number'] );
 
-        $this->_checkDatabaseConnection();
 
         $database = Database::obtain() ;
         $database->begin() ;
 
         $batchEventCreator = new BatchEventCreator( $chunk ) ;
         $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeatures() ) ;
+        $batchEventCreator->setProject( $chunk->getProject() );
 
         foreach ( $params[ 'segment_ids' ] as $segment ) {
 

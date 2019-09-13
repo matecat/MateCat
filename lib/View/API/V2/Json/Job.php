@@ -160,7 +160,7 @@ class Job {
                 'target'                => $chunk->target,
                 'sourceTxt'             => $lang_handler->getLocalizedName( $chunk->source ),
                 'targetTxt'             => $lang_handler->getLocalizedName( $chunk->target ),
-                'job_first_segment'     => $jStruct->job_first_segment,
+                'job_first_segment'     => $chunk->job_first_segment,
                 'status'                => $chunk->status_owner,
                 'subject'               => $chunk->subject,
                 'subject_printable'     => $subjects[$subject_key]['display'],
