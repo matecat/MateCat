@@ -414,6 +414,11 @@ $.extend(UI.UPLOAD_PAGE, {
             selectOnKeydown: false,
             fullTextSearch: 'exact'
         });
+
+        $('#project-team').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact'
+        });
         $('#project-subject').dropdown('set selected', 'general');
 
 
