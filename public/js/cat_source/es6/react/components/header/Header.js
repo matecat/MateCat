@@ -128,7 +128,7 @@ class Header extends React.Component {
 		const {teams,selectedTeamId} = this.state;
 
 		const userIcon = getUserIcon();
-		let containerClass = "user-teams three";
+		let containerClass = "user-teams four";
 		const componentToShow = getHeaderComponentToShow();
 
 		if (showLinks) {

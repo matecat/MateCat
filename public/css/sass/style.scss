@@ -5454,7 +5454,7 @@ header {
 
     .profile-menu {
         display: grid;
-        grid-template-columns: auto auto 0.6fr;
+        grid-template-columns: auto auto auto;
         align-items: center;
         justify-content: center;
 
@@ -5493,7 +5493,7 @@ header {
             width: 1px;
             height:$icon-scale;
             background: #fff;
-            margin-right: 24px;
+            margin-right: 14px;
             margin-left: 0;
         }
 

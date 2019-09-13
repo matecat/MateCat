@@ -284,9 +284,10 @@ header {
 .user-teams {
     //padding-right: 52px !important;
     display: grid !important;
-    grid-template-columns: auto 30px 50px auto;
+    grid-template-columns: auto auto auto auto;
     justify-content: right;
     align-items: center;
+    padding-right: 24px;
 
     #profile-menu {
         .menu{
@@ -296,7 +297,7 @@ header {
             top: 52px !important;
             border-radius: 2px;
             border: solid 1px #cdd4de;
-            right: 8px !important;
+            right: 18px !important;
             &::after {
                 content: "";
                 width: 0;
@@ -352,8 +353,8 @@ header {
         height: 37px;
         background: white;
         float: right;
-        margin-right: 16px;
-        margin-left: 16px;
+        margin-right: 14px;
+        margin-left: 14px;
     }
 }
 
@@ -396,7 +397,7 @@ header {
         max-height: 40px;
         border-radius: 5px;
         line-height: 1.25;
-        margin-left: 36px;
+        margin-left: 24px;
         border: none;
     }
 
