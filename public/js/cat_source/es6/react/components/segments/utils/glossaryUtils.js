@@ -126,7 +126,7 @@ let GlossaryUtils = {
         } );
 
         this.intervalsUnion = [];
-        this.checkIntervalsUnions( intervals );
+        if ( intervals.length > 0 ) this.checkIntervalsUnions( intervals );
         
         let markLength = this.startGlossaryMark.length + this.endGlossaryMark.length;
         let sourceString = text;
@@ -156,15 +156,17 @@ let GlossaryUtils = {
             if ( this === smallest ) smallestIndex = indice;
         } );
         let mod = 0;
-        $.each( intervals, function ( i ) {
-            if ( i !== smallestIndex ) {
-                if ( (smallest.startPos <= this.startPos) && (smallest.endPos >= this.startPos) ) { // this item is to be merged to the smallest
-                    mod++;
-                    intervals.splice( i, 1 );
-                    GlossaryUtils.checkIntervalsUnions( intervals );
+        if ( intervals.length > 0 ) {
+            $.each( intervals, function ( i ) {
+                if ( i !== smallestIndex && intervals.length > 0) {
+                    if ( (smallest.startPos <= this.startPos) && (smallest.endPos >= this.startPos) ) { // this item is to be merged to the smallest
+                        mod++;
+                        intervals.splice( i, 1 );
+                        GlossaryUtils.checkIntervalsUnions( intervals );
+                    }
                 }
-            }
-        } );
+            } );
+        }
         if ( GlossaryUtils.endedIntervalAnalysis ) {
             if ( !intervals.length ) return false;
             GlossaryUtils.checkIntervalsUnions( intervals );
