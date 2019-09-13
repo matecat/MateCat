@@ -2,10 +2,10 @@
 
 use Features\SecondPassReview\Utils as SecondPassReviewUtils;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
+use Matecat\Finder\WholeTextFinder;
 use Search\ReplaceEventStruct;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
-use SubFiltering\Filter;
 
 class getSearchController extends ajaxController {
 
@@ -17,6 +17,8 @@ class getSearchController extends ajaxController {
     private $status;
     private $replace;
     private $function; //can be search, replace
+    private $isMatchCaseRequested;
+    private $isExactMatchRequested;
     private $matchCase;
     private $exactMatch;
     private $revisionNumber;
@@ -65,17 +67,17 @@ class getSearchController extends ajaxController {
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->function       = $__postInput[ 'function' ]; //can be: search / replace
-        $this->job            = $__postInput[ 'job' ];
-        $this->token          = $__postInput[ 'token' ];
-        $this->source         = $__postInput[ 'source' ];
-        $this->target         = $__postInput[ 'target' ];
-        $this->status         = strtolower( $__postInput[ 'status' ] );
-        $this->replace        = $__postInput[ 'replace' ];
-        $this->password       = $__postInput[ 'password' ];
-        $this->matchCase      = $__postInput[ 'matchcase' ];
-        $this->exactMatch     = $__postInput[ 'exactmatch' ];
-        $this->revisionNumber = $__postInput[ 'revision_number' ];
+        $this->function              = $__postInput[ 'function' ]; //can be: search / replace
+        $this->job                   = $__postInput[ 'job' ];
+        $this->token                 = $__postInput[ 'token' ];
+        $this->source                = $__postInput[ 'source' ];
+        $this->target                = $__postInput[ 'target' ];
+        $this->status                = strtolower( $__postInput[ 'status' ] );
+        $this->replace               = $__postInput[ 'replace' ];
+        $this->password              = $__postInput[ 'password' ];
+        $this->isMatchCaseRequested  = $__postInput[ 'matchcase' ];
+        $this->isExactMatchRequested = $__postInput[ 'exactmatch' ];
+        $this->revisionNumber        = $__postInput[ 'revision_number' ];
 
         if ( empty( $this->status ) ) {
             $this->status = "all";
@@ -94,15 +96,15 @@ class getSearchController extends ajaxController {
         }
 
         $this->queryParams = new SearchQueryParamsStruct( [
-                'job'         => $this->job,
-                'password'    => $this->password,
-                'key'         => null,
-                'src'         => null,
-                'trg'         => null,
-                'status'      => $this->status,
-                'replacement' => $this->replace,
-                'matchCase'   => $this->matchCase,
-                'exactMatch'  => $this->exactMatch,
+                'job'                   => $this->job,
+                'password'              => $this->password,
+                'key'                   => null,
+                'src'                   => null,
+                'trg'                   => null,
+                'status'                => $this->status,
+                'replacement'           => $this->replace,
+                'isMatchCaseRequested'  => $this->isMatchCaseRequested,
+                'isExactMatchRequested' => $this->isExactMatchRequested,
         ] );
 
         if ( in_array( strtoupper( $this->queryParams->status ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
@@ -113,15 +115,15 @@ class getSearchController extends ajaxController {
             }
         }
 
-        $this->db          = Database::obtain();
+        $this->db = Database::obtain();
 
         // Search_ReplaceHistory init
         $srh_driver = ( isset( \INIT::$REPLACE_HISTORY_DRIVER ) and '' !== \INIT::$REPLACE_HISTORY_DRIVER ) ? \INIT::$REPLACE_HISTORY_DRIVER : 'redis';
         $srh_ttl    = ( isset( \INIT::$REPLACE_HISTORY_TTL ) and '' !== \INIT::$REPLACE_HISTORY_TTL ) ? \INIT::$REPLACE_HISTORY_TTL : 300;
-        $this->srh = Search_ReplaceHistoryFactory::create( $this->queryParams[ 'job' ], $srh_driver, $srh_ttl );
+        $this->srh  = Search_ReplaceHistoryFactory::create( $this->queryParams[ 'job' ], $srh_driver, $srh_ttl );
 
-        $filter = \SubFiltering\Filter::getInstance($this->featureSet);
-        $this->searchModel  = new SearchModel( $this->queryParams, $filter );
+        $filter            = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $this->searchModel = new SearchModel( $this->queryParams, $filter );
     }
 
     /**
@@ -162,6 +164,9 @@ class getSearchController extends ajaxController {
         }
     }
 
+    /**
+     * Perform a regular search
+     */
     private function doSearch() {
 
         if ( !empty( $this->source ) and !empty( $this->target ) ) {
@@ -188,24 +193,32 @@ class getSearchController extends ajaxController {
 
         $this->result[ 'total' ]    = $res[ 'count' ];
         $this->result[ 'segments' ] = $res[ 'sid_list' ];
-
     }
 
     /**
+     * Perform a search and replace αφετέρου
+     *
      * @throws Exception
      */
     private function doReplaceAll() {
 
-        $Filter = Filter::getInstance( $this->featureSet );
+        $search_results = [];
 
-        $this->queryParams[ 'trg' ]         = $Filter->fromLayer2ToLayer0( $this->target );
-        $this->queryParams[ 'src' ]         = $Filter->fromLayer2ToLayer0( $this->source );
-        $this->queryParams[ 'replacement' ] = $Filter->fromLayer2ToLayer0( $this->replace );
+        // perform a regular search
+        $this->doSearch();
 
-        $search_results = $this->_getSearchResults();
+        // and then hydrate the $search_results array
+        foreach ( $this->result[ 'segments' ] as $segmentId ) {
+            $search_results[] = Translations_SegmentTranslationDao::findBySegmentAndJob( $segmentId, $this->queryParams[ 'job' ] )->toArray();
+        }
+
+        // set the replacement in queryParams
+        $this->queryParams[ 'replacement' ] = $this->replace;
+
+        // update segment translations
         $this->_updateSegments( $search_results );
 
-        // replace events
+        // and save replace events
         $replace_version = ( $this->srh->getCursor() + 1 );
         foreach ( $search_results as $key => $tRow ) {
             $this->_saveReplacementEvent( $replace_version, $tRow );
@@ -241,10 +254,9 @@ class getSearchController extends ajaxController {
      * @return string|string[]|null
      */
     private function _getReplacedSegmentTranslation( $translation ) {
-        return preg_replace( "#({$this->queryParams->exactMatch->Space_Left}){$this->queryParams->_regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}#{$this->queryParams->matchCase->REGEXP_MODIFIER}",
-                '${1}' . $this->queryParams->replacement . '${2}',
-                $translation
-        );
+        $replacedSegmentTranslation = WholeTextFinder::findAndReplace( $translation, $this->queryParams->_regexpEscapedTrg, $this->queryParams->replacement );
+
+        return ( !empty( $replacedSegmentTranslation ) ) ? $replacedSegmentTranslation[ 'replacement' ] : $translation;
     }
 
     /**
@@ -413,7 +425,7 @@ class getSearchController extends ajaxController {
                     'chunk'             => $chunk,
                     'segment'           => $segment,
                     'user'              => $this->user,
-                    'source_page_code'  => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber),
+                    'source_page_code'  => SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
                     'controller_result' => & $this->result,
                     'features'          => $this->featureSet
             ] );
@@ -439,7 +451,7 @@ class getSearchController extends ajaxController {
                         'chunk'            => $chunk,
                         'segment'          => $segment,
                         'user'             => $this->user,
-                        'source_page_code' => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
+                        'source_page_code' => SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber )
                 ] );
             } catch ( Exception $e ) {
                 Log::doJsonLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
