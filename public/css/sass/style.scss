@@ -5040,7 +5040,7 @@ input#markAsCompleteButton[disabled] {
     background: #d7d7d8;
 }
 
-/* Header Restyling */
+/* Header/Footer Restyling */
 
 $icon-scale : 36px;
 $matecat-blue: #002b5c;
@@ -5053,6 +5053,10 @@ $white: #FFF;
 
 
 .editlog {
+
+    .wrapper {
+        margin: 0 auto 64px auto;
+    }
 
     padding-top: 88px;
 
@@ -5657,6 +5661,54 @@ header {
                     }
                 }
             }
+        }
+    }
+}
+
+
+.func-foo {
+    height: 44px;
+    background-color: #fafafa;
+    padding: 0 146px;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    display: grid;
+
+    #pagination_box {
+        nav {
+            ul {
+                li {
+                    padding: 0 8px ;
+                    margin: 0;
+                    border-right: none;
+                    a {
+                        text-decoration: none ;
+                        color: #000;
+                    }
+                }
+            }
+        }
+    }
+
+
+    .footer-body {
+        display: grid;
+        position: relative;
+        grid-column-gap: 32px;
+        grid-template-columns: auto; /* auto 0.5fr 0.5fr 0.5fr 0.5fr  */
+        align-items: center;
+        justify-content: center;
+
+        .item {
+            font-size: 16px;
+            font-weight: bold;
+            font-style: normal;
+            font-stretch: normal;
+            line-height: 1.5;
+            color: black;
         }
     }
 }
