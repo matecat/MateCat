@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class AddDeleteAtToQaEntries extends AbstractMatecatMigration
 {
     public $sql_up = [ "ALTER TABLE qa_entries ADD COLUMN  deleted_at DATETIME DEFAULT NULL" ];

@@ -9,13 +9,12 @@
 namespace CommandLineTasks\Test;
 
 
+use Exception;
+use SchemaCopy;
+use SeedLoader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
-use SeedLoader ;
-use SchemaCopy;
-use Exception ;
 
 class PrepareDatabaseTask extends Command
 {

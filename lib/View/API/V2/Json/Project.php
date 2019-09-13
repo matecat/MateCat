@@ -11,7 +11,6 @@ namespace API\V2\Json;
 
 use Chunks_ChunkStruct;
 use Constants_JobStatus;
-use DataAccess\ShapelessConcreteStruct;
 use Projects_ProjectStruct;
 use Utils;
 

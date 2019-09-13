@@ -3,12 +3,11 @@
 
 namespace Features\Dqf\Service\Struct\Request ;
 
-use Features\Dqf\Service\Struct\BaseRequestStruct ;
-use Features\Dqf\Service\Struct\ISessionBasedRequestStruct ;
-
+use Features\Dqf\Service\Struct\BaseRequestStruct;
+use Features\Dqf\Service\Struct\ISessionBasedRequestStruct;
 use Features\Dqf\Utils\Functions;
 use LengthException;
-use Segments_SegmentStruct ;
+use Segments_SegmentStruct;
 
 class SourceSegmentsBatchRequestStruct extends BaseRequestStruct implements ISessionBasedRequestStruct {
     const BATCH_LIMIT = 100;

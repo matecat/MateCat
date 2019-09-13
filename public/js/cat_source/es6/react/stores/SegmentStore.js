@@ -237,7 +237,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     setPropagation(sid, fid, propagation, from) {
-        var index = this.getSegmentIndex(sid);
+        let index = this.getSegmentIndex(sid);
         if (propagation) {
             this._segments = this._segments.setIn([index, 'autopropagated_from'], from);
         } else {

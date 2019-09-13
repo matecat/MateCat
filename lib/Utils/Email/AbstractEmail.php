@@ -8,9 +8,10 @@
 
 namespace Email;
 
-use WorkerClient ;
-use AMQHandler, Log ;
-use INIT ;
+use AMQHandler;
+use INIT;
+use Log;
+use WorkerClient;
 
 abstract class AbstractEmail
 {

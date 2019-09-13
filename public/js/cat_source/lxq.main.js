@@ -1281,12 +1281,10 @@ LXQ.init  = function () {
                 return;
             }
 
-            // var sourcetext = UI.getSegmentSource(segment);
-            // var translation = UI.postProcessEditarea(segment, '.targetarea');
-            // translation = UI.clenaupTextFromPleaceholders( translation ).replace(/\uFEFF/g,'');
+            var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.currentFileId);
 
-            var sourcetext = $( segment ).find( '.source' ).text();
-            var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
+            var sourcetext = htmlDecode(segObj.decoded_source);
+            var translation = UI.cleanTextFromPlaceholdersSpan($(UI.targetContainerSelector(), segment ).html().replace(/\uFEFF/g,''));
 
             
             var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;
@@ -1307,6 +1305,8 @@ LXQ.init  = function () {
                     if ( !err ) {
                         var noVisibleErrorsFound = false, source_val, target_val, ind;
                         //myWindow.location =result.qaurl;
+                        var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.currentFileId);
+                        source_val = segObj.decoded_source;
                         if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
                             //do something here -- enable qa errors
                             if ( (ind = LXQ.lexiqaData.segments.indexOf( id_segment )) < 0 ) {
@@ -1315,7 +1315,8 @@ LXQ.init  = function () {
                             }
 
                             //highlight the segments
-                            source_val = $( ".source", segment ).html();
+                            // source_val = $( ".source", segment ).html();
+
                             var highlights = {
                                 source: {
                                     numbers: [],
@@ -1479,9 +1480,10 @@ LXQ.init  = function () {
                             };
                             
                             let seg = UI.getSegmentById( element.segid );
+                            if ( seg.length === 0) return;
                             let translation = "";
                             if (seg.length>0) {
-                                translation = $( UI.targetContainerSelector(), seg ).text(); 
+                                translation = htmlEncode(UI.cleanTextFromPlaceholdersSpan($( UI.targetContainerSelector(), seg ).html()));
                             }
                             LXQ.lexiqaData.lexiqaWarnings[element.segid] = {};
                             

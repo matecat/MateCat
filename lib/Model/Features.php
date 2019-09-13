@@ -2,13 +2,13 @@
 
 use Features\BaseFeature;
 use Features\Dqf;
+use Features\Mmt;
 use Features\ProjectCompletion;
 use Features\QaCheckBlacklist;
 use Features\QaCheckGlossary;
 use Features\ReviewExtended;
 use Features\SecondPassReview;
 use Features\TranslationVersions;
-use Features\Mmt;
 use Klein\Klein;
 use Klein\Request;
 

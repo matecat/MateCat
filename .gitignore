@@ -3,7 +3,8 @@
 .idea
 .project
 nbproject/
-
+webgrind/
+_dic_cache
 
 # Configuration files
 .num_processes
@@ -39,7 +40,6 @@ unitTest/coverage/*
 internal_scripts
 local_storage
 test_storage
-webgrind
 lib/Utils/fileupload/thumbnails/*
 
 task_manager_config.ini

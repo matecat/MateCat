@@ -313,7 +313,7 @@ let SearchUtils = {
             }
         }
         let spanArray = [];
-        text = text.replace(/(<[/]*(span|mark).*?>)/g, function ( match, text ) {
+        text = text.replace(/(<[/]*(span|mark|a).*?>)/g, function ( match, text ) {
             spanArray.push(text);
             return "$&";
         });

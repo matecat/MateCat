@@ -11,15 +11,15 @@ namespace Features\Outsource\Traits;
 use API\V2\Json\ProjectUrls;
 use DataAccess\ShapelessConcreteStruct;
 use Email\AbstractEmail;
+use Exception;
 use Features\Outsource\Constants\ServiceTypes;
 use Features\Outsource\Email\ConfirmedQuotationEmail;
 use Features\Outsource\Email\ErrorQuotationEmail;
+use INIT;
 use MultiCurlHandler;
-use Outsource\TranslatedConfirmationStruct;
 use Outsource\ConfirmationDao;
-use \Exception;
+use Outsource\TranslatedConfirmationStruct;
 use Utils;
-use \INIT;
 
 /**
  * Trait Translated

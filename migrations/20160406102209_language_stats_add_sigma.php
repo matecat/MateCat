@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class LanguageStatsAddSigma extends AbstractMatecatMigration
 {
     public $sql_up = <<<EOF

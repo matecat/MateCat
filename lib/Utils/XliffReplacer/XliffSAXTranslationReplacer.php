@@ -2,7 +2,10 @@
 
 namespace XliffReplacer;
 
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\S3FilesStorage;
 use FeatureSet;
+use INIT;
 use Log;
 use QA;
 use SubFiltering\Filter;
@@ -72,7 +75,26 @@ class XliffSAXTranslationReplacer {
             $this->outputFP = fopen( $outputFile, 'w+' );
         }
 
-        if ( !( $this->originalFP = fopen( $originalXliffFilename, "r" ) ) ) {
+        // setting $this->originalFP
+        $xmlLink    = $originalXliffFilename;
+        $streamArgs = null;
+
+        if ( AbstractFilesStorage::isOnS3() ) {
+            $s3Client = S3FilesStorage::getStaticS3Client();
+            $xmlLink  = $s3Client->getPublicItemLink( ['bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $originalXliffFilename] );
+
+            if ( false === INIT::$AWS_SSL_VERIFY ) {
+                $streamArgs =
+                        [
+                                'ssl' => [
+                                        'verify_peer'      => INIT::$AWS_SSL_VERIFY,
+                                        'verify_peer_name' => INIT::$AWS_SSL_VERIFY
+                                ]
+                        ];
+            }
+        }
+
+        if ( !( $this->originalFP = fopen( $xmlLink, "r", false, stream_context_create( $streamArgs ) ) ) ) {
             die( "could not open XML input" );
         }
 
@@ -94,7 +116,7 @@ class XliffSAXTranslationReplacer {
 
     public function replaceTranslation( FeatureSet $featureSet = null ) {
 
-        if( $featureSet == null ){
+        if ( $featureSet == null ) {
             $featureSet = new FeatureSet();
         }
 
@@ -218,6 +240,11 @@ class XliffSAXTranslationReplacer {
 
             }
 
+            //add MateCat specific namespace, we want maybe add non-XLIFF attributes
+            if( $name == 'xliff' && !array_key_exists( 'xmlns:mtc', $attr ) ){
+                $tag .= 'xmlns:mtc="https://www.matecat.com" ';
+            }
+
             //this logic helps detecting empty tags
             //get current position of SAX pointer in all the stream of data is has read so far:
             //it points at the end of current tag
@@ -236,11 +263,6 @@ class XliffSAXTranslationReplacer {
                 //if it's out, simple use the last character of the chunk
                 $tmp_offset = $this->len - 1;
                 $lastChar   = $this->currentBuffer[ $this->len - 1 ];
-            }
-
-            //add MateCat specific namespace, we want maybe add non-XLIFF attributes
-            if( $name == 'xliff' ){
-                $tag .= 'xmlns:mtc="https://www.matecat.com" ';
             }
 
             //trim last space

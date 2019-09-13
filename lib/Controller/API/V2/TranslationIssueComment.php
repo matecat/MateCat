@@ -2,9 +2,9 @@
 namespace API\V2  ;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Json\TranslationIssueComment as JsonFormatter;
-use LQA\EntryCommentDao ;
-use LQA\EntryDao ;
-use Database ;
+use Database;
+use LQA\EntryCommentDao;
+use LQA\EntryDao;
 
 class TranslationIssueComment extends AbstractStatefulKleinController {
     /**

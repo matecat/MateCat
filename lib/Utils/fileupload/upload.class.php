@@ -1,9 +1,14 @@
 <?php
 
+use FilesStorage\AbstractFilesStorage;
+
 define( "DIRSEP", "//" );
 
 class UploadHandler {
 
+    /**
+     * @var array
+     */
     protected $options;
 
     function __construct() {
@@ -26,11 +31,11 @@ class UploadHandler {
             // Set the following option to false to enable resumable uploads:
                 'discard_aborted_uploads' => true,
         ];
-
     }
 
     protected function getFullUrl() {
         $https = INIT::$PROTOCOL === 'https';
+
         return
                 ( $https ? 'https://' : 'http://' ) .
                 ( !empty( $_SERVER[ 'REMOTE_USER' ] ) ? $_SERVER[ 'REMOTE_USER' ] . '@' : '' ) .
@@ -76,7 +81,7 @@ class UploadHandler {
      *
      * @throws Exception
      */
-    protected static function _validateFileName( $fileName ){
+    protected static function _validateFileName( $fileName ) {
         if ( !Utils::isValidFileName( $fileName ) ) {
             throw new Exception( "Invalid File Name" );
         }
@@ -87,8 +92,8 @@ class UploadHandler {
      *
      * @throws Exception
      */
-    protected static function _validateToken( $token ){
-        if( !Utils::isTokenValid( $token ) ){
+    protected static function _validateToken( $token ) {
+        if ( !Utils::isTokenValid( $token ) ) {
             throw new Exception( "Invalid Upload Token." );
         }
     }
@@ -98,20 +103,23 @@ class UploadHandler {
 
         if ( $error ) {
             $file->error = $error;
+
             return false;
         }
 
         try {
             self::_validateFileName( $file->name );
             self::_validateToken( $this->options[ 'upload_token' ] );
-        } catch( Exception $e ){
+        } catch ( Exception $e ) {
             $file->error = $e->getMessage();
+
             return false;
         }
 
         if ( $file->type !== null ) {
             if ( !$this->_isRightMime( $file ) && ( !isset( $file->error ) || empty( $file->error ) ) ) {
                 $file->error = "Mime type Not Allowed";
+
                 return false;
             }
         }
@@ -162,6 +170,7 @@ class UploadHandler {
                         count( $this->get_file_objects() ) >= $this->options[ 'max_number_of_files' ] )
         ) {
             $file->error = 'maxNumberOfFiles';
+
             return false;
         }
 
@@ -222,9 +231,9 @@ class UploadHandler {
         Log::$fileName = "upload.log";
         Log::doJsonLog( $uploaded_file );
 
-        $file       = new stdClass();
-        $file->name = $this->trim_file_name( $name );
-        $file->size = intval( $size );
+        $file           = new stdClass();
+        $file->name     = $this->trim_file_name( $name );
+        $file->size     = intval( $size );
         $file->tmp_name = $uploaded_file;
         //$file->type = $type; // Override and ignore the client type definition
         $file->type = mime_content_type( $file->tmp_name );
@@ -310,8 +319,8 @@ class UploadHandler {
             return $this->delete();
         }
 
-        if( !Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ){
-            $info = [ new stdClass() ];
+        if ( !Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
+            $info             = [ new stdClass() ];
             $info[ 0 ]->error = "Invalid Upload Token. Check your browser, cookies must be enabled for this domain.";
             $this->flush( $info );
         }
@@ -384,7 +393,7 @@ class UploadHandler {
 
     }
 
-    public function flush( $info ){
+    public function flush( $info ) {
 
         $json     = json_encode( $info );
         $redirect = isset( $_REQUEST[ 'redirect' ] ) ? stripslashes( $_REQUEST[ 'redirect' ] ) : null;
@@ -394,6 +403,7 @@ class UploadHandler {
 
         if ( $redirect ) {
             header( 'Location: ' . sprintf( $redirect, rawurlencode( $json ) ) );
+
             return;
         }
 
@@ -421,13 +431,14 @@ class UploadHandler {
         try {
             self::_validateFileName( $file_name );
             self::_validateToken( $this->options[ 'upload_token' ] );
-        } catch( Exception $e ){
+        } catch ( Exception $e ) {
             header( 'Content-type: application/json' );
             echo json_encode( [ "code" => -1, "error" => $e->getMessage() ] );
+
             return false;
         }
 
-        $file_info = FilesStorage::pathinfo_fix( $file_name );
+        $file_info = AbstractFilesStorage::pathinfo_fix( $file_name );
 
         //if it's a zip file, delete it and all its contained files.
         if ( $file_info[ 'extension' ] == 'zip' ) {
@@ -486,6 +497,7 @@ class UploadHandler {
         $out_file_name = ZipArchiveExtended::getFileName( $file_name );
 
         $success[ $out_file_name ] = is_file( $file_path ) && $file_name[ 0 ] !== '.' && unlink( $file_path );
+
         return $success;
     }
 
@@ -528,7 +540,7 @@ class UploadHandler {
         //remove the last line ( is an empty string )
         array_pop( $file_content_array );
 
-        $fileName = FilesStorage::basename_fix( $file_path );
+        $fileName = AbstractFilesStorage::basename_fix( $file_path );
 
         $key = array_search( $fileName, $file_content_array );
         unset( $file_content_array[ $key ] );

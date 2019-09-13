@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class AddTteToSegmentTranslationEvents extends AbstractMatecatMigration
 {
     public $sql_up = [

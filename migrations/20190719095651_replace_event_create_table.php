@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class ReplaceEventCreateTable extends AbstractMatecatMigration
 {
     public $sql_up = "CREATE TABLE `replace_events` (

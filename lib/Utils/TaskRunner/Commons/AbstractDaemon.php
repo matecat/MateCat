@@ -9,7 +9,7 @@
 
 namespace TaskRunner\Commons;
 
-use \Log;
+use Log;
 
 /**
  * The abstract Daemon definition.

@@ -119,6 +119,9 @@ class getSearchController extends ajaxController {
         $srh_driver = ( isset( \INIT::$REPLACE_HISTORY_DRIVER ) and '' !== \INIT::$REPLACE_HISTORY_DRIVER ) ? \INIT::$REPLACE_HISTORY_DRIVER : 'redis';
         $srh_ttl    = ( isset( \INIT::$REPLACE_HISTORY_TTL ) and '' !== \INIT::$REPLACE_HISTORY_TTL ) ? \INIT::$REPLACE_HISTORY_TTL : 300;
         $this->srh = Search_ReplaceHistoryFactory::create( $this->queryParams[ 'job' ], $srh_driver, $srh_ttl );
+
+        $filter = \SubFiltering\Filter::getInstance($this->featureSet);
+        $this->searchModel  = new SearchModel( $this->queryParams, $filter );
     }
 
     /**
@@ -174,9 +177,6 @@ class getSearchController extends ajaxController {
         } elseif ( empty( $this->source ) and empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'status_only';
         }
-
-        $filter = \SubFiltering\Filter::getInstance($this->featureSet);
-        $this->searchModel  = new SearchModel( $this->queryParams, $filter );
 
         try {
             $res = $this->searchModel->search();
@@ -470,25 +470,8 @@ class getSearchController extends ajaxController {
      * @throws Exception
      */
     private function _getSearchResults() {
-        $query = $this->searchModel->loadReplaceAllQuery();
+        $query = $this->searchModel->_loadReplaceAllQuery();
 
-        return $this->executeQuery( $query );
-    }
-
-    /**
-     * @param $ids
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function _getSearchResultsFromIds( $ids ) {
-        $query = $this->searchModel->loadReplaceQueryFromIds( $ids );
-        /**
-         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
-         * @throws Exception
-         */
-
-        (new SearchModel( $this->queryParams, $filter ))->replaceAll();
         return $this->executeQuery( $query );
     }
 

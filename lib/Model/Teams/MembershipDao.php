@@ -8,7 +8,6 @@
 
 namespace Teams;
 
-use API\V2\Json\User;
 use Database;
 use Exception;
 use PDO;

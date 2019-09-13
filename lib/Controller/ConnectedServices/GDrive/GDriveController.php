@@ -3,14 +3,11 @@
 
 namespace ConnectedServices\GDrive ;
 
-use Bootstrap ;
-use Log;
-use API\V2\KleinController ;
-use Utils ;
-use INIT ;
-use ConversionHandler ;
+use API\V2\KleinController;
+use Bootstrap;
 use Constants;
 use Exception;
+use Utils;
 
 class GDriveController extends KleinController {
 

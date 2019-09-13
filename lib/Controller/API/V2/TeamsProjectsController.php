@@ -16,8 +16,8 @@ use API\V2\Validators\ProjectExistsInTeamValidator;
 use API\V2\Validators\TeamAccessValidator;
 use API\V2\Validators\TeamProjectValidator;
 use FeatureSet;
-use Projects\ProjectModel;
 use ManageUtils;
+use Projects\ProjectModel;
 use Teams\TeamStruct;
 
 class TeamsProjectsController extends KleinController {

@@ -13,8 +13,8 @@ namespace Predis\Monitor;
 
 use Iterator;
 use Predis\ClientInterface;
-use Predis\NotSupportedException;
 use Predis\Connection\AggregateConnectionInterface;
+use Predis\NotSupportedException;
 
 /**
  * Redis MONITOR consumer.
