@@ -99,11 +99,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws NotFoundException
      */
     public function filter_job_password_to_review_password( $password, $id_job ) {
-        $chunk_reviews = ChunkReviewDao::findChunkReviewsByChunkIdsAndPasswords(
-                [ [ $id_job, $password ] ]
-        );
 
-        $chunk_review = $chunk_reviews[ 0 ];
+        $chunk_review = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( [ 'id' => $id_job, 'password' => $password ] ) )[ 0 ];
 
         if ( !$chunk_review ) {
             throw new NotFoundException( 'Review record was not found' );
@@ -138,10 +135,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $chunks = [];
 
         foreach ( $project[ 'jobs' ] as $job ) {
-            $chunks[] = [ $job[ 'id' ], $job[ 'password' ] ];
+            $ch           = new Chunks_ChunkStruct();
+            $ch->id       = $job[ 'id' ];
+            $ch->password = $job[ 'password' ];
+            $chunks[]     = $ch;
         }
 
-        $chunk_reviews = ChunkReviewDao::findChunkReviewsByChunkIdsAndPasswords( $chunks );
+        $chunk_reviews = ( new ChunkReviewDao() )->findChunkReviewsForList( $chunks );
 
         foreach ( $project[ 'jobs' ] as $kk => $job ) {
             /**
@@ -299,7 +299,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                             'first_record_password' => $review->review_password,
                             'source_page'           => $review->source_page
                     ]
-                )
+            )
             );
         }
 
@@ -350,7 +350,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                             'first_record_password' => $data[ 'first_record_password' ],
                             'source_page'           => $source_page
                     ]
-                )
+            )
             );
         }
 
@@ -409,10 +409,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     public function alter_chunk_review_struct( Chunks_ChunkCompletionEventStruct $event ) {
 
-        $review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $event->id_job,
-                $event->password
-        );
+        $review = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( [ 'id' => $event->id_job, 'password' => $event->password ] ) )[ 0 ];
 
         $undo_data = $review->getUndoData();
 

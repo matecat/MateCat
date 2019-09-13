@@ -156,87 +156,67 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         return $result[ 0 ] == null ? 0 : $result[ 0 ];
     }
 
-
     /**
-     * @param array    $chunk_ids Example: array( array($id_job, $password), ... )
-     *
-     * @param int|null $source_page
+     * @param Chunks_ChunkStruct $chunkStruct
      *
      * @return ChunkReviewStruct[]
      */
+    public function findChunkReviews( Chunks_ChunkStruct $chunkStruct ){
+        return $this->_findChunkReviews( [ $chunkStruct ] );
+    }
 
-    public static function findChunkReviewsByChunkIdsAndPasswords( array $chunk_ids, $source_page = Constants::SOURCE_PAGE_REVISION ) {
+    /**
+     * @param Chunks_ChunkStruct[] $chunkStructsArray
+     *
+     * @return ChunkReviewStruct[]
+     */
+    public function findChunkReviewsForList( Array $chunkStructsArray ){
+        return $this->_findChunkReviews( $chunkStructsArray );
+    }
+
+    /**
+     * @param Chunks_ChunkStruct $chunkStruct
+     * @param int                $source_page
+     *
+     * @return ChunkReviewStruct[]
+     */
+    public function findChunkReviewsForSourcePage( Chunks_ChunkStruct $chunkStruct, $source_page = Constants::SOURCE_PAGE_REVISION ){
         $sql_condition = " WHERE source_page = $source_page ";
-
-        return ( new self() )->findChunkReviewsByChunkIdsAndPasswordsAndCondition( $chunk_ids, $sql_condition );
+        return $this->_findChunkReviews( [ $chunkStruct ], $sql_condition );
     }
 
     /**
-     * @param array $chunk_ids
+     * @param Chunks_ChunkStruct[] $chunksArray
+     * @param   string             $default_condition
      *
      * @return ChunkReviewStruct[]
      */
-    public function findAllChunkReviewsByChunkIds( array $chunk_ids ) {
-        $sql_condition = " WHERE 1 = 1 ";
+    protected function _findChunkReviews( Array $chunksArray, $default_condition = ' WHERE 1 = 1 ' ){
 
-        return $this->findChunkReviewsByChunkIdsAndPasswordsAndCondition( $chunk_ids, $sql_condition );
-    }
-
-    /**
-     * @param $chunk_ids
-     * @param $source_pages
-     *
-     * @return ChunkReviewStruct[]
-     */
-    public function findChunkReviewsInSourcePages( $chunk_ids, $source_pages ) {
-        $sql_condition = " WHERE source_page IN ( " . implode( ',', $source_pages ) . ") ";
-
-        return $this->findChunkReviewsByChunkIdsAndPasswordsAndCondition( $chunk_ids, $sql_condition );
-    }
-
-    /**
-     * @param array $chunk_ids
-     * @param       $sql_condition
-     *
-     * @return ChunkReviewStruct[]
-     */
-    protected function findChunkReviewsByChunkIdsAndPasswordsAndCondition( array $chunk_ids, $sql_condition ) {
-        if ( count( $chunk_ids ) > 0 ) {
-            $conditions    = array_map( function ( $ids ) {
-                return " ( jobs.id = " . $ids[ 0 ] .
-                        " AND jobs.password = '" . $ids[ 1 ] . "' ) ";
-            }, $chunk_ids );
-            $sql_condition .= " AND " . implode( ' OR ', $conditions );
+        $_conditions = [];
+        $_parameters = [];
+        foreach( $chunksArray as $chunk ){
+            $_conditions[] = " ( jobs.id = ? AND jobs.password = ? ) ";
+            $_parameters[] = $chunk->id;
+            $_parameters[] = $chunk->password;
         }
 
-        $sql = "SELECT qa_chunk_reviews.* " .
-                " FROM jobs INNER JOIN qa_chunk_reviews ON " .
-                " jobs.id = qa_chunk_reviews.id_job AND " .
-                " jobs.password = qa_chunk_reviews.password " .
-                $sql_condition . " ORDER BY source_page ";
+        $default_condition .= " AND " . implode( ' OR ', $_conditions );
+
+        $sql = /** @lang text */
+                "SELECT qa_chunk_reviews.* 
+                FROM jobs 
+                INNER JOIN qa_chunk_reviews ON jobs.id = qa_chunk_reviews.id_job AND jobs.password = qa_chunk_reviews.password 
+                " . $default_condition . " 
+                ORDER BY source_page";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
-        $stmt->execute();
+        $stmt->execute( $_parameters );
 
         return $stmt->fetchAll();
-    }
 
-    /**
-     * @param     $id_job
-     * @param     $password
-     *
-     * @param int $source_page
-     *
-     * @return ChunkReviewStruct
-     */
-    public static function findOneChunkReviewByIdJobAndPassword( $id_job, $password, $source_page = Constants::SOURCE_PAGE_REVISION ) {
-        $records = self::findChunkReviewsByChunkIdsAndPasswords( [
-                [ $id_job, $password ]
-        ], $source_page );
-
-        return @$records[ 0 ];
     }
 
     /**

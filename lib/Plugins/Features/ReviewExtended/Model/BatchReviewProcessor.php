@@ -24,9 +24,7 @@ class BatchReviewProcessor {
     }
 
     public function process() {
-        $chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds(
-                [ [ $this->_batchEventCreator->getChunk()->id, $this->_batchEventCreator->getChunk()->password ] ]
-        );
+        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $this->_batchEventCreator->getChunk() );
 
         $project         = $chunkReviews[ 0 ]->getChunk()->getProject();
         $revisionFactory = RevisionFactory::initFromProject( $project );

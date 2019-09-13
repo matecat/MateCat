@@ -1,5 +1,6 @@
 <?php
 
+use LQA\ChunkReviewDao;
 use SubFiltering\Filter;
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
@@ -659,6 +660,7 @@ class CatUtils {
      * @param FeatureSet     $featureSet
      *
      * @return array|\LQA\ChunkReviewStruct|null
+     * @throws ReflectionException
      * @internal   param Projects_ProjectStruct $project
      * @deprecated this method should only return values for legacy revision, it should not return ChunkReviewStruct nor
      *             it should make use of $featureSet to determine the revision type, use `getQualityOverallFromJobStruct`.
@@ -667,8 +669,7 @@ class CatUtils {
 
         $result = null;
         if ( $featureSet->hasRevisionFeature() ) {
-            $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password );
-            $result = $review;
+            $result = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[0];
         } else {
             $result = self::getQualityInfoFromJobStruct( $job, $featureSet ) ;
         }

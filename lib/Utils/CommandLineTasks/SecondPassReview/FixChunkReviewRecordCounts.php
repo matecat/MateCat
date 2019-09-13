@@ -8,6 +8,7 @@
 
 namespace CommandLineTasks\SecondPassReview;
 
+use Chunks_ChunkStruct;
 use LQA\ChunkReviewDao;
 use RevisionFactory;
 use Symfony\Component\Console\Command\Command;
@@ -28,9 +29,9 @@ class FixChunkReviewRecordCounts extends Command
 
     public function execute( InputInterface $input, OutputInterface $output ) {
 
-        $allChunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([
-                [ $input->getArgument('id_job'), $input->getArgument('password') ]
-        ]) ;
+        $allChunkReviews = ( new ChunkReviewDao() )->findChunkReviews(
+                new Chunks_ChunkStruct( [ 'id' => $input->getArgument('id_job'), 'password' => $input->getArgument('password') ] )
+        ) ;
 
         $project = $allChunkReviews[0]->getChunk()->getProject() ;
         $revisionFactory = RevisionFactory::initFromProject( $project );

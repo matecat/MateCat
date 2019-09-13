@@ -8,6 +8,7 @@
 
 namespace Features\ReviewExtended;
 
+use Chunks_ChunkStruct;
 use LQA\ChunkReviewDao;
 use LQA\EntryDao;
 use LQA\EntryStruct;
@@ -47,11 +48,9 @@ class TranslationIssueModel {
     public function __construct( $id_job, $password, EntryStruct $issue ) {
         $this->issue = $issue;
 
-        $reviews = ChunkReviewDao::findChunkReviewsByChunkIdsAndPasswords( [
-                [ $id_job, $password ]
-        ], $issue->source_page );
+        $review = ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( new Chunks_ChunkStruct( [ 'id' => $id_job, 'password' => $password ] ) , $issue->source_page )[ 0 ];
 
-        $this->chunk_review = $reviews[0];
+        $this->chunk_review = $review;
         $this->chunk = $this->chunk_review->getChunk();
         $this->project = $this->chunk->getProject();
 
