@@ -405,6 +405,10 @@ LXQ.init  = function () {
 
         var highLightText = function (text, results,isSegmentCompleted,showHighlighting,isSource,segment) {
             //var text = $(area).val();
+            // TODO : Temporarily disable the highlight on segments with ph tags
+            if ( text.indexOf('&lt;ph id=') > -1 ) {
+                return text;
+            }
             var LTPLACEHOLDER = "##LESSTHAN##";
             var GTPLACEHOLDER = "##GREATERTHAN##";
             var rangesIn = [
@@ -1302,15 +1306,27 @@ LXQ.init  = function () {
 
 (function($, undefined) {
     $.extend(LXQ, {
-    lexiqaData : {
-        lexiqaWarnings : {},
-        enableHighlighting : true,
-        lexiqaFetching : false,
-        segments : [],
-        segmentsInfo : {},
-    },
+        lexiqaData : {
+            lexiqaWarnings : {},
+            enableHighlighting : true,
+            lexiqaFetching : false,
+            segments : [],
+            segmentsInfo : {},
+        },
 
-
+        getTargetTextForQa: function(segment) {
+            var clone =$(UI.targetContainerSelector(), segment ).clone();
+            clone.find('.inside-attribute').remove();
+            text = (clone.text().replace(/\uFEFF/g,''));
+            return text;
+        },
+        getSourceTextForQa: function(text) {
+            var div =  document.createElement('div');
+            var $div = $(div);
+            $div.html(text);
+            $div.find('.inside-attribute').remove();
+            return $div.text();
+        },
         doLexiQA: function ( segment, id_segment, isSegmentCompleted, callback ) {
             if ( !LXQ.enabled() ) {
                 if ( callback !== undefined && typeof callback === 'function' ) {
@@ -1321,8 +1337,8 @@ LXQ.init  = function () {
 
             var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.currentFileId);
 
-            var sourcetext = htmlDecode(segObj.decoded_source);
-            var translation = UI.cleanTextFromPlaceholdersSpan($(UI.targetContainerSelector(), segment ).html().replace(/\uFEFF/g,''));
+            var sourcetext =  this.getSourceTextForQa(segObj.decoded_source);
+            var translation = this.getTargetTextForQa(segment);
 
             
             var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;
@@ -1403,7 +1419,7 @@ LXQ.init  = function () {
                             LXQ.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
                             QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(segment);
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), segment ));
-
+                            source_val = LXQ.cleanUpHighLighting( source_val );
                             source_val = LXQ.highLightText( source_val, highlights.source, isSegmentCompleted, true, true, segment );
                             if ( source_val.indexOf('lxqwarning') > -1 ) {
                                 SegmentActions.replaceSourceText( id_segment, UI.getSegmentFileId( segment ), source_val );
@@ -1411,6 +1427,7 @@ LXQ.init  = function () {
                             if ( parseInt(UI.currentSegmentId) === parseInt(id_segment) )
                                 saveSelection();
                             target_val = $( UI.targetContainerSelector(), segment ).html();
+                            target_val = LXQ.cleanUpHighLighting( target_val );
                             target_val = LXQ.highLightText( target_val, highlights.target, isSegmentCompleted, true, false, segment );
                             if ( target_val.indexOf('lxqwarning') > -1 ) {
                                 SegmentActions.replaceEditAreaTextContent( id_segment, UI.getSegmentFileId( segment ), target_val );
@@ -1437,7 +1454,7 @@ LXQ.init  = function () {
                             }
                             if ( parseInt(UI.currentSegmentId) === parseInt(id_segment) )
                                 saveSelection();
-                            target_val = htmlEncode(UI.cleanTextFromPlaceholdersSpan($( UI.targetContainerSelector(), segment ).html()));
+                            target_val = $( UI.targetContainerSelector(), segment ).html();
                             if ( target_val.indexOf('lxqwarning') > -1 ) {
                                 target_val = LXQ.cleanUpHighLighting( target_val );
                                 SegmentActions.replaceEditAreaTextContent( UI.getSegmentId( segment ), UI.getSegmentFileId( segment ), target_val );
