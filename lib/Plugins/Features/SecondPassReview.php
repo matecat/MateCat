@@ -135,15 +135,20 @@ class SecondPassReview extends BaseFeature {
             $key = $job[ 'id' ] . $job[ 'password' ];
 
             if ( isset( $chunk_reviews[ $key ] ) ) {
-                $project[ 'jobs' ][ $kk ][ 'second_pass_review' ] = array_values( array_filter( array_map( function ( ChunkReviewStruct $chunk_review ) {
+
+                foreach ( $chunk_reviews[ $key ] as $chunk_review ) {
                     if ( $chunk_review->source_page > Constants::SOURCE_PAGE_REVISION ) {
-                        return $chunk_review->review_password;
+                        $project[ 'jobs' ][ $kk ][ 'revise_passwords' ][] = [
+                                'revision_number' => SecondPassReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
+                                'password'        => $chunk_review->review_password
+                        ];
                     }
-                }, $chunk_reviews[ $key ] ) ) );
+                }
 
                 if ( !isset( $project[ 'jobs' ][ $kk ] [ 'stats' ] [ 'reviews' ] ) ) {
                     $project[ 'jobs' ][ $kk ] [ 'stats' ] = SecondPassReviewUtils::formatStats( $project[ 'jobs' ][ $kk ] [ 'stats' ], $chunk_reviews[ $key ] );
                 }
+
             }
         }
 

@@ -149,10 +149,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
              * the data structure.
              */
             foreach ( $chunk_reviews as $chunk_review ) {
-                if ( $chunk_review->id_job == $job[ 'id' ] &&
-                        $chunk_review->password == $job[ 'password' ]
-                ) {
-                    $project[ 'jobs' ][ $kk ][ 'review_password' ] = $chunk_review->review_password;
+                if ( $chunk_review->id_job == $job[ 'id' ] && $chunk_review->password == $job[ 'password' ] && $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
+                    $project[ 'jobs' ][ $kk ][ 'revise_passwords' ][] = [
+                            'revision_number' => 1,
+                            'password'        => $chunk_review->review_password
+                    ];
                 }
             }
         }
