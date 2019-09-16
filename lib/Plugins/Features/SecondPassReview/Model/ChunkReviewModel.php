@@ -12,23 +12,24 @@ use Features\ReviewExtended\Model\ChunkReviewDao ;
 
 class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
 
-    public function recountAndUpdatePassFailResult() {
-        $chunk = $this->chunk_review->getChunk();
+    /**
+     * @param \Projects_ProjectStruct $project
+     *
+     * @throws \Exception
+     */
+    public function recountAndUpdatePassFailResult( \Projects_ProjectStruct $project ) {
 
         /**
          * Count penalty points based on this source_page
          */
-        $this->chunk_review->penalty_points = ChunkReviewDao::getPenaltyPointsForChunk( $chunk, $this->chunk_review->source_page ) ;
-        $this->chunk_review->reviewed_words_count = ( new ChunkReviewDao() )
-                        ->getReviewedWordsCountForSecondPass( $chunk, $this->chunk_review->source_page ) ;
-
-        $this->chunk_review->advancement_wc = ( new ChunkReviewDao() )
-                ->recountAdvancementWords( $chunk, $this->chunk_review->source_page ) ;
-
-        $this->chunk_review->total_tte = ( new ChunkReviewDao() )->countTimeToEdit( $chunk, $this->chunk_review->source_page ) ;
+        $chunkReviewDao = new ChunkReviewDao();
+        $this->chunk_review->penalty_points = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk, $this->chunk_review->source_page ) ;
+        $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass( $this->chunk, $this->chunk_review->source_page ) ;
+        $this->chunk_review->advancement_wc = $chunkReviewDao->recountAdvancementWords( $this->chunk, $this->chunk_review->source_page ) ;
+        $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page ) ;
 
 
-        $this->updatePassFailResult();
+        $this->updatePassFailResult( $project );
     }
 
 }

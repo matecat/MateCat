@@ -51,9 +51,7 @@ class StatsController extends KleinController {
         $job_stats = CatUtils::getFastStatsForJob( $wStruct );
         $job_stats['ANALYSIS_COMPLETE'] = $this->chunk->getProject()->analysisComplete() ;
 
-        $chunk_reviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( [[
-                $this->chunk->id, $this->chunk->password
-        ]] ) ;
+        $chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk ) ;
 
         $response = [
             'stats' => SecondPassReview\Utils::formatStats( $job_stats, $chunk_reviews )

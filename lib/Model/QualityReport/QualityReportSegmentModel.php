@@ -196,9 +196,8 @@ class QualityReportSegmentModel {
      */
     protected function _getChunkReviews() {
         if ( is_null( $this->_chunkReviews ) ) {
-            $this->_chunkReviews = ( new ChunkReviewDao() )->findAllChunkReviewsByChunkIds([ [ $this->chunk->id, $this->chunk->password ] ] );
+            $this->_chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
         }
-
         return $this->_chunkReviews ;
     }
 

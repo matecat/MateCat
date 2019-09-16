@@ -1,6 +1,8 @@
 <?php
 
+use Features\AbstractRevisionFeature;
 use Klein\Request;
+use LQA\ChunkReviewStruct;
 
 /**
  * Created by PhpStorm.
@@ -8,7 +10,6 @@ use Klein\Request;
  * Date: 25/02/2019
  * Time: 15:55
  */
-
 class RevisionFactory {
 
     /** @var  \Features\AbstractRevisionFeature */
@@ -21,12 +22,12 @@ class RevisionFactory {
     protected $_featureSet;
 
     /**
-     * @param \Features\BaseFeature|null $revisionFeature
+     * @param AbstractRevisionFeature $revisionFeature
      *
      * @return RevisionFactory
      * @throws Exception
      */
-    public static function getInstance( $revisionFeature = null ) {
+    public static function getInstance( AbstractRevisionFeature $revisionFeature = null ) {
         if ( static::$INSTANCE == null && $revisionFeature == null ) {
             throw new Exception( 'Revision not defined' );
         } elseif ( static::$INSTANCE == null ) {
@@ -48,6 +49,12 @@ class RevisionFactory {
         }
     }
 
+    /**
+     * @param SegmentTranslationChangeVector $translation
+     * @param ChunkReviewStruct[]            $chunkReviews
+     *
+     * @return \Features\ISegmentTranslationModel
+     */
     public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews ) {
         return $this->revision->getSegmentTranslationModel( $translation, $chunkReviews );
     }
@@ -89,9 +96,7 @@ class RevisionFactory {
     }
 
     public static function initFromProject( Projects_ProjectStruct $project ) {
-        $project->getFeatures();
-
-        return static::getInstance();
+        return static::getInstance()->setFeatureSet( $project->getFeatures() );
     }
 
     /**
