@@ -810,6 +810,7 @@ body.manage {
 
 .normal-foo{
     background-color: #f6f8fb;
+    min-width: 992px;
     padding: 16px 64px;
     height: 77px;
     width: 100%;
@@ -821,7 +822,7 @@ body.manage {
         display: grid;
         position: relative;
         grid-column-gap: 24px;
-        grid-template-columns: 0.5fr 0.5fr 1fr;
+        grid-template-columns: 0.6fr 0.6fr 1fr;
         align-items: center;
         .info{
             display: grid;

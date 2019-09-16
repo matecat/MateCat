@@ -128,7 +128,7 @@ class Header extends React.Component {
 		const {teams,selectedTeamId} = this.state;
 
 		const userIcon = getUserIcon();
-		let containerClass = "user-teams three";
+		let containerClass = "user-teams four";
 		const componentToShow = getHeaderComponentToShow();
 
 		if (showLinks) {
@@ -172,7 +172,7 @@ class Header extends React.Component {
 							selectedTeamId={selectedTeamId}
 						/>}
 						<div className={"separator"}></div>
-						{!!loggedUser && !showFilterProjects && <a href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
+						{!!loggedUser && !showFilterProjects && <a class={"action-submenu"} href={'/manage'}><IconManage width={'36'} height={'36'} style={{float:'right'}} /></a>}
 						{userIcon}
 					</div>
 
