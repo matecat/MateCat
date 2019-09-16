@@ -5462,6 +5462,26 @@ header {
         align-items: center;
         justify-content: center;
 
+        .user-nolog {
+            opacity: 0.8;
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        .ui.user.label {
+            top:0;
+            margin-left: 10px;
+            background: none;
+            background-color: transparent;
+            border: 2px solid #09beec;
+            opacity: 0.8;
+            color: #09beec;
+            &:hover {
+                opacity: 1;
+            }
+        }
+
         #action-manage {
             opacity: 0.8;
             &:hover {
