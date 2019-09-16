@@ -108,6 +108,7 @@ class copyAllSource2TargetController extends ajaxController {
 
         $batchEventCreator = new BatchEventCreator( $chunk );
         $batchEventCreator->setFeatureSet( $features );
+        $batchEventCreator->setProject( $chunk->getProject() );
 
         $source_page = SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
         $segments    = $chunk->getSegments();

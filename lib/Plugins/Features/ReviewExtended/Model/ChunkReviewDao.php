@@ -118,10 +118,12 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
             LEFT JOIN (
                 SELECT id_segment as id_segment, source_page FROM segment_translation_events
                 WHERE id IN (
-                    SELECT max(id) FROM segment_translation_events
-                        WHERE id_job = :id_job
-                        AND id_segment BETWEEN :job_first_segment AND :job_last_segment
-                        GROUP BY id_segment
+                   SELECT * FROM(
+                        SELECT max(id) FROM segment_translation_events
+                            WHERE id_job = :id_job
+                            AND id_segment BETWEEN :job_first_segment AND :job_last_segment
+                            GROUP BY id_segment
+                   ) AS X
                 )
 
                 ORDER BY id_segment
