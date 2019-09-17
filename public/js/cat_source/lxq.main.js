@@ -1272,7 +1272,19 @@ LXQ.init  = function () {
             segmentsInfo : {},
         },
 
-
+        getTargetTextForQa: function(segment) {
+            var clone =$(UI.targetContainerSelector(), segment ).clone();
+            clone.find('.inside-attribute').remove();
+            text = (clone.text().replace(/\uFEFF/g,''));
+            return text;
+        },
+        getSourceTextForQa: function(text) {
+            var div =  document.createElement('div');
+            var $div = $(div);
+            $div.html(text);
+            $div.find('.inside-attribute').remove();
+            return $div.text();
+        },
         doLexiQA: function ( segment, id_segment, isSegmentCompleted, callback ) {
             if ( !LXQ.enabled() ) {
                 if ( callback !== undefined && typeof callback === 'function' ) {
@@ -1283,8 +1295,8 @@ LXQ.init  = function () {
 
             var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.currentFileId);
 
-            var sourcetext = htmlDecode(segObj.decoded_source);
-            var translation = UI.cleanTextFromPlaceholdersSpan($(UI.targetContainerSelector(), segment ).html().replace(/\uFEFF/g,''));
+            var sourcetext =  this.getSourceTextForQa(segObj.decoded_source);
+            var translation = this.getTargetTextForQa(segment);
 
             
             var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;
