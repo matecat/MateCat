@@ -120,7 +120,7 @@ class AnalyzeMain extends React.Component {
             </div>
         </div>;
         return <div className="ui container">
-            {this.state.volumeAnalysis ? (
+            {this.state.volumeAnalysis && this.state.project ? (
 
                 <div className="project ui grid">
                     <div className="sixteen wide column">
