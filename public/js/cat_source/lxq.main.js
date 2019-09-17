@@ -1274,7 +1274,7 @@ LXQ.init  = function () {
 
         getTargetTextForQa: function(segment) {
             var clone =$(UI.targetContainerSelector(), segment ).clone();
-            clone.find('.inside-attribute').remove();
+            // clone.find('.inside-attribute').remove();
             text = (clone.text().replace(/\uFEFF/g,''));
             return text;
         },
@@ -1282,7 +1282,7 @@ LXQ.init  = function () {
             var div =  document.createElement('div');
             var $div = $(div);
             $div.html(text);
-            $div.find('.inside-attribute').remove();
+            // $div.find('.inside-attribute').remove();
             return $div.text();
         },
         doLexiQA: function ( segment, id_segment, isSegmentCompleted, callback ) {
