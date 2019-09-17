@@ -160,9 +160,7 @@ class Chunk extends \API\V2\Json\Chunk {
 
     protected function getChunkReviews() {
         if ( is_null( $this->chunk_reviews ) ) {
-            $this->chunk_reviews = (new ChunkReviewDao() )->findAllChunkReviewsByChunkIds( [ [
-                    $this->chunk->id, $this->chunk->password
-            ] ] ) ;
+            $this->chunk_reviews = (new ChunkReviewDao() )->findChunkReviews( $this->chunk ) ;
         }
         return $this->chunk_reviews ;
     }

@@ -15,6 +15,9 @@ use LQA\EntryDao;
 
 class TranslationIssueModel extends \Features\ReviewExtended\TranslationIssueModel {
 
+    /**
+     * @throws \Exception
+     */
     public function delete() {
         EntryDao::deleteEntry($this->issue);
 
@@ -26,7 +29,7 @@ class TranslationIssueModel extends \Features\ReviewExtended\TranslationIssueMod
 
         if ( $final_revision ) {
             $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-            $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points );
+            $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points, $this->project );
         }
 
     }
