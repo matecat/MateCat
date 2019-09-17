@@ -180,10 +180,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         return $project;
     }
 
-    public function filter_single_job(  ){
-        
-    }
-
     /**
      * Performs post project creation tasks for the current project.
      * Evaluates if a qa model is present in the feature options.
