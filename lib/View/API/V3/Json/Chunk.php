@@ -21,6 +21,7 @@ use FeatureSet;
 use Langs_LanguageDomains;
 use Langs_Languages;
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use Projects_ProjectStruct;
 use RevisionFactory;
 use Utils;
@@ -115,7 +116,9 @@ class Chunk extends \API\V2\Json\Chunk {
 
 
         if ( $featureSet->hasRevisionFeature() ) {
+
             foreach( $this->getChunkReviews() as $index => $chunkReview ) {
+
                 list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
                         $this->revisionQualityVars( $chunk, $project, $chunkReview );
 
@@ -124,6 +127,9 @@ class Chunk extends \API\V2\Json\Chunk {
                         $total_issues_weight, $total_reviewed_words_count, $passfail,
                         $chunkReview->total_tte
                 );
+
+                $result = $this->populateRevisePasswords( $chunkReview, $result );
+
             }
 
         } else {
@@ -163,6 +169,34 @@ class Chunk extends \API\V2\Json\Chunk {
             $this->chunk_reviews = (new ChunkReviewDao() )->findChunkReviews( $this->chunk ) ;
         }
         return $this->chunk_reviews ;
+    }
+
+    /**
+     * @param ChunkReviewStruct $chunk_review
+     * @param                   $result
+     *
+     * @return mixed
+     */
+    protected function populateRevisePasswords( ChunkReviewStruct $chunk_review, $result ){
+
+        if ( !isset( $result['revise_passwords'] ) ) {
+            $result['revise_passwords'] = [];
+        }
+
+        if ( $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
+            $result['revise_passwords'][] = [
+                    'revision_number' => 1,
+                    'password'        => $chunk_review->review_password
+            ];
+        } elseif ( $chunk_review->source_page > Constants::SOURCE_PAGE_REVISION ) {
+            $result['revise_passwords'][] = [
+                    'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
+                    'password'        => $chunk_review->review_password
+            ];
+        }
+
+        return $result;
+
     }
 
     /**
