@@ -16,7 +16,7 @@ use Chunks_ChunkStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use Features\ReviewExtended\Model\QualityReportDao;
-use Features\SecondPassReview;
+use Features\ReviewExtended\ReviewUtils;
 use FeatureSet;
 use Langs_LanguageDomains;
 use Langs_Languages;
@@ -187,7 +187,7 @@ class Chunk extends \API\V2\Json\Chunk {
         }
 
         $result['quality_summary'][] = [
-                'revision_number'     => SecondPassReview\Utils::sourcePageToRevisionNumber( $source_page ),
+                'revision_number'     => ReviewUtils::sourcePageToRevisionNumber( $source_page ),
                 'equivalent_class'    => $jStruct->getQualityInfo(),
                 'quality_overall'     => $quality_overall,
                 'errors_count'        => (int)$jStruct->getErrorsCount(),
@@ -207,7 +207,7 @@ class Chunk extends \API\V2\Json\Chunk {
         $stats = CatUtils::getPlainStatsForJobs( $jobStats );
         unset( $stats ['id'] );
         $stats = array_change_key_case( $stats, CASE_LOWER );
-        return SecondPassReview\Utils::formatStats( $stats, $this->getChunkReviews() ) ;
+        return ReviewUtils::formatStats( $stats, $this->getChunkReviews() ) ;
     }
 
     /**
