@@ -16,9 +16,9 @@ use LQA\ModelStruct;
 class Utils {
 
     public static function formatStats( $statsArray, $chunkReviews ) {
-        $statsArray [ 'reviews' ] = [];
+        $statsArray [ 'revises' ] = [];
         foreach ( $chunkReviews as $chunkReview ) {
-            $statsArray[ 'reviews' ][] = [
+            $statsArray[ 'revises' ][] = [
                     'revision_number' => Utils::sourcePageToRevisionNumber( $chunkReview->source_page ),
                     'advancement_wc'  => $chunkReview->advancement_wc
             ];
