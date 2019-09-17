@@ -12,16 +12,22 @@ interface IChunkReviewModel {
     /**
      * adds penalty_points and updates pass fail result
      *
-     * @param $penalty_points
+     * @param                         $penalty_points
+     * @param \Projects_ProjectStruct $projectStruct
+     *
+     * @return
      */
-    public function addPenaltyPoints( $penalty_points );
+    public function addPenaltyPoints( $penalty_points, \Projects_ProjectStruct $projectStruct );
 
     /**
      * subtract penalty_points and updates pass fail result
      *
-     * @param $penalty_points
+     * @param                         $penalty_points
+     * @param \Projects_ProjectStruct $projectStruct
+     *
+     * @return
      */
-    public function subtractPenaltyPoints( $penalty_points );
+    public function subtractPenaltyPoints( $penalty_points, \Projects_ProjectStruct $projectStruct );
 
     /**
      * Returns the calculated score
@@ -36,13 +42,17 @@ interface IChunkReviewModel {
 
     /**
      *
-     * @throws \Exception
+     * @param \Projects_ProjectStruct $project
+     *
      */
-    public function updatePassFailResult();
+    public function updatePassFailResult( \Projects_ProjectStruct $project );
 
     /**
      * This method invokes the recount of reviewed_words_count and
      * penalty_points for the chunk and updates the passfail result.
+     *
+     * @param \Projects_ProjectStruct $project
+     *
      */
-    public function recountAndUpdatePassFailResult();
+    public function recountAndUpdatePassFailResult( \Projects_ProjectStruct $project );
 }
