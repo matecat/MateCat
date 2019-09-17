@@ -1218,7 +1218,6 @@ button.ui-button::-moz-focus-inner {
 }
 
 @media (min-width: 1300px) and (max-width: 1410px) {
-
     /*.advanced-box .translate-box select {
         width: 210px !important;
         .item-key-name {
@@ -2815,5 +2814,16 @@ a.pull-right.confirmDelete {
                 width: 280px;
             }
         }
+    }
+}
+
+
+
+/* Header restyling */
+
+.action-submenu {
+    opacity: 0.8;
+    &:hover {
+        opacity: 1;
     }
 }

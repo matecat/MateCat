@@ -245,7 +245,7 @@
                                 <span tal:condition="isCJK">Characters</span>
                             </a>
                             <tal:block tal:condition="php: !allow_link_to_analysis && !empty(analysis_enabled)">
-                                <span tal:condition="not: isCJK">eighted words</span>
+                                <span tal:condition="not: isCJK">Weighted words</span>
                                 <span tal:condition="isCJK">Characters</span>
                             </tal:block>
                             <tal:block tal:condition="php: empty(analysis_enabled)">Weighted words</tal:block>
