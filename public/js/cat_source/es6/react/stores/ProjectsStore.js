@@ -145,7 +145,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         });
         let indexJob = project.get('jobs').indexOf(job);
         // let url = config.hostpath + '/revise2/' + project.get('name') + '/'+ job.get('source') +'-'+ job.get('target') +'/'+ jobId +'-'+ secondPAssPassword;
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'second_pass_review'], Immutable.fromJS([secondPAssPassword]));
+        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'revise_passwords', 1], Immutable.fromJS({revision_number: 2, password: secondPAssPassword}));
     },
 
     unwrapImmutableObject(object) {
