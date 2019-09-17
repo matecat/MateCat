@@ -405,10 +405,6 @@ LXQ.init  = function () {
 
         var highLightText = function (text, results,isSegmentCompleted,showHighlighting,isSource,segment) {
             //var text = $(area).val();
-            // TODO : Temporarily disable the highlight on segments with ph tags
-            if ( text.indexOf('&lt;ph id=') > -1 ) {
-                return text;
-            }
             var LTPLACEHOLDER = "##LESSTHAN##";
             var GTPLACEHOLDER = "##GREATERTHAN##";
             var rangesIn = [
@@ -1316,7 +1312,6 @@ LXQ.init  = function () {
 
         getTargetTextForQa: function(segment) {
             var clone =$(UI.targetContainerSelector(), segment ).clone();
-            clone.find('.inside-attribute').remove();
             text = (clone.text().replace(/\uFEFF/g,''));
             return text;
         },
@@ -1324,7 +1319,6 @@ LXQ.init  = function () {
             var div =  document.createElement('div');
             var $div = $(div);
             $div.html(text);
-            $div.find('.inside-attribute').remove();
             return $div.text();
         },
         doLexiQA: function ( segment, id_segment, isSegmentCompleted, callback ) {
