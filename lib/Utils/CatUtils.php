@@ -155,6 +155,7 @@ class CatUtils {
 
     /**
      * @param Translations_SegmentTranslationStruct $translation
+     * @param                                       $is_revision
      * @param array                                 $errors
      *
      * @return array

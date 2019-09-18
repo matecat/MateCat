@@ -3,9 +3,9 @@
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
 use Exceptions\ControllerReturnException;
+use Features\ReviewExtended\ReviewUtils;
 use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
-use Features\SecondPassReview\Utils as SecondPassReviewUtils;
 
 class setTranslationController extends ajaxController {
 
@@ -273,14 +273,7 @@ class setTranslationController extends ajaxController {
 
     /**
      * @return int|mixed
-     * @throws ControllerReturnException
-     * @throws ReflectionException
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \Predis\Connection\ConnectionException
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws Exception
      */
     public function doAction() {
         $this->checkData();
@@ -556,6 +549,7 @@ class setTranslationController extends ajaxController {
 
         }
 
+
         $this->featureSet->run( 'preSetTranslationCommitted', [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,
@@ -563,7 +557,7 @@ class setTranslationController extends ajaxController {
                 'chunk'             => $this->chunk,
                 'segment'           => $this->segment,
                 'user'              => $this->user,
-                'source_page_code'  => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber),
+                'source_page_code'  => ReviewUtils::revisionNumberToSourcePage($this->revisionNumber),
                 'controller_result' => & $this->result,
                 'features'          => $this->featureSet,
                 'project'           => $project
@@ -589,7 +583,7 @@ class setTranslationController extends ajaxController {
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
-                    'source_page_code' => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
+                    'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             ] );
 
         } catch ( Exception $e ) {
@@ -682,7 +676,7 @@ class setTranslationController extends ajaxController {
             $translation->warning                = false;
             $translation->translation_date       = date( "Y-m-d H:i:s" );
 
-            CatUtils::addSegmentTranslation( $translation, $this->result[ 'errors' ] );
+            CatUtils::addSegmentTranslation( $translation, self::isRevision(), $this->result[ 'errors' ] );
 
             if ( !empty( $this->result[ 'errors' ] ) ) {
                 Database::obtain()->rollback();
@@ -808,7 +802,7 @@ class setTranslationController extends ajaxController {
                     $this->id_segment,
                     $this->user->uid,
                     $this->jobData[ 'id_project' ],
-                    SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
+                    ReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             );
         }
     }
