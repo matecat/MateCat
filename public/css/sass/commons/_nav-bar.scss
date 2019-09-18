@@ -81,7 +81,7 @@ header {
             }
             .scrolling {
                 .item.item.item {
-                    padding: 4px 8px !important;
+                    padding: 8px !important;
                     width: 230px;
                     min-width: 150px;
                     white-space: nowrap;
@@ -91,6 +91,7 @@ header {
                     &:hover .team-filter,
                     &.active.selected .team-filter{
                         visibility: visible;
+                        background: #fff;
                     }
                 }
                 .team-filter {
@@ -180,7 +181,7 @@ header {
 
         .dropdown.select-org {
             background-color: #ffffff;
-            border-radius: 5px;
+            border-radius: 2px;
             min-width: 108px;
             color: #000000;
             font-size: 14px;
@@ -207,7 +208,7 @@ header {
                     display: grid;
                     grid-template-columns: 1fr 40px;
                     align-items: center;
-                    grid-template-rows: 28px;
+                    grid-template-rows: 32px;
                     padding: 0 0 0 8px;
                     .icon {
                         margin:0 !important;
