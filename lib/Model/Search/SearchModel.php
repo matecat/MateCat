@@ -11,12 +11,11 @@ namespace Search;
 
 use Database;
 use Exception;
-use Matecat\Finder\WholeTextFinder;
 use Log;
+use Matecat\Finder\WholeTextFinder;
 use PDO;
 use PDOException;
 use SubFiltering\Filter;
-use Utils;
 
 class SearchModel {
 
@@ -53,12 +52,12 @@ class SearchModel {
     /**
      * @throws Exception
      */
-    public function replaceAll() {
+    public function replaceAll(){
 
-        $sql       = $this->_loadReplaceAllQuery();
+        $sql = $this->_loadReplaceAllQuery();
         $resultSet = $this->_getQuery( $sql );
 
-        $sqlBatch  = [];
+        $sqlBatch = [];
         $sqlValues = [];
         foreach ( $resultSet as $key => $tRow ) {
 
@@ -72,9 +71,9 @@ class SearchModel {
             /**
              * Escape for database
              */
-            $sqlBatch[]  = "(?,?,?)";
-            $sqlValues[] = $tRow[ 'id_segment' ];
-            $sqlValues[] = $tRow[ 'id_job' ];
+            $sqlBatch[] = "(?,?,?)";
+            $sqlValues[] = $tRow['id_segment'];
+            $sqlValues[] = $tRow['id_job'];
             $sqlValues[] = $trMod;
 
         }
@@ -83,26 +82,27 @@ class SearchModel {
         //but we can assume that max translation length is more or less 2.5KB
         // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
         // 300KB is a very low number compared to 16MB
-        $sqlBatchChunk  = array_chunk( $sqlBatch, 100 );
+        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
         $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
 
         foreach ( $sqlBatchChunk as $k => $batch ) {
 
-            //WE USE INSERT STATEMENT for it's convenience ( update multiple fields in multiple rows in batch )
-            //we try to insert these rows in a table wherein the primary key ( unique by definition )
-            //is a coupled key ( id_segment, id_job ), but these values are already present ( duplicates )
-            //so make an "ON DUPLICATE KEY UPDATE"
-            $sqlInsert = "
-            INSERT INTO segment_translations ( id_segment, id_job, translation )
-			  VALUES " . implode( ",", $batch ) . "
-			ON DUPLICATE KEY UPDATE translation = VALUES( translation )
-			";
+            $sqlUpdate = "UPDATE segment_translations SET 
+                translation = :translation 
+                WHERE id_segment=:id_segment AND id_job=:id_job
+            ";
+
+            $data = [
+                    'id_segment' => $sqlValuesChunk[ $k ][ 0 ],
+                    'id_job' => $sqlValuesChunk[ $k ][ 1 ],
+                    'translation' => $sqlValuesChunk[ $k ][ 2 ],
+            ];
 
             try {
 
-                $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
+                $this->_insertQuery( $sqlUpdate, $data );
 
-            } catch ( Exception $e ) {
+            } catch ( Exception $e ){
 
                 $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
 				- job id            : " . $this->queryParams->job . "
@@ -154,7 +154,7 @@ class SearchModel {
 
         $vector = [
                 'sid_list' => [],
-                'count' => '0'
+                'count'    => '0'
         ];
 
         if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' ) {
@@ -162,18 +162,18 @@ class SearchModel {
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $matches = WholeTextFinder::find($occurrence['text'], $searchTerm, true, $this->isExactMatchEnabled(), $this->isMatchCaseEnabled());
-                $matchesCount = count($matches);
+                $matches      = WholeTextFinder::find( $occurrence[ 'text' ], $searchTerm, true, $this->isExactMatchEnabled(), $this->isMatchCaseEnabled() );
+                $matchesCount = count( $matches );
 
-                if($matchesCount > 0 and $matches[0][0] !== ''){
-                    $vector[ 'sid_list' ][]   = $occurrence[ 'id' ];
-                    $vector[ 'count' ] = $vector[ 'count' ] + $matchesCount;
+                if ( $matchesCount > 0 and $matches[ 0 ][ 0 ] !== '' ) {
+                    $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
+                    $vector[ 'count' ]      = $vector[ 'count' ] + $matchesCount;
                 }
             }
 
             if ( $vector[ 'count' ] == 0 ) {
-                $vector[ 'sid_list' ]   = [];
-                $vector[ 'count' ]      = 0;
+                $vector[ 'sid_list' ] = [];
+                $vector[ 'count' ]    = 0;
             }
 
         } else {
@@ -245,10 +245,8 @@ class SearchModel {
             $this->queryParams->where_status = "AND st.status = '{$this->queryParams->status}'";
         }
 
-        $matchCase = $this->queryParams->matchCase;
-
         $this->queryParams->matchCase = new \stdClass();
-        if ( $matchCase ) {
+        if ( $this->queryParams->isMatchCaseRequested ) {
             $this->queryParams->matchCase->SQL_REGEXP_CASE = "BINARY";
             $this->queryParams->matchCase->SQL_LENGHT_CASE = "";
             $this->queryParams->matchCase->REGEXP_MODIFIER = 'u';
@@ -258,10 +256,8 @@ class SearchModel {
             $this->queryParams->matchCase->REGEXP_MODIFIER = 'iu';
         }
 
-        $exactMatch = $this->queryParams->exactMatch;
-
         $this->queryParams->exactMatch = new \stdClass();
-        if ( $exactMatch ) {
+        if ( $this->queryParams->isExactMatchRequested ) {
             $this->queryParams->exactMatch->Space_Left  = "[[:space:]]{0,}";
             $this->queryParams->exactMatch->Space_Right = "([[:space:]]|$)";
         } else {
@@ -285,7 +281,7 @@ class SearchModel {
      */
     protected function _loadSearchInTargetQuery() {
 
-        $this-> _loadParams();
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
@@ -308,7 +304,7 @@ class SearchModel {
      */
     protected function _loadSearchInSourceQuery() {
 
-        $this-> _loadParams();
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -332,7 +328,7 @@ class SearchModel {
      */
     protected function _loadSearchCoupledQuery() {
 
-        $this-> _loadParams();
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -373,7 +369,7 @@ class SearchModel {
 
     protected function _loadSearchStatusOnlyQuery() {
 
-        $this-> _loadParams();
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments( 'st.id_segment' );
         $ste_where = $this->_SteWhere();
 
@@ -392,7 +388,7 @@ class SearchModel {
 
     public function _loadReplaceAllQuery() {
 
-        $this-> _loadParams();
+        $this->_loadParams();
         $ste_join  = $this->_SteJoinInSegments();
         $ste_where = $this->_SteWhere();
 
@@ -438,10 +434,14 @@ class SearchModel {
 
         return "
             LEFT JOIN (
-                SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
-                SELECT max(id) FROM segment_translation_events
-                    WHERE id_job = {$this->queryParams->job}
-                    GROUP BY id_segment ) ORDER BY id_segment
+                SELECT id_segment as ste_id_segment, source_page 
+                FROM  segment_translation_events 
+                JOIN ( 
+                    SELECT max(id) as _m_id FROM segment_translation_events
+                        WHERE id_job = {$this->queryParams->job}
+                        GROUP BY id_segment 
+                    ) AS X ON _m_id = segment_translation_events.id
+                ORDER BY id_segment
             ) ste ON ste.ste_id_segment = $joined_field ";
     }
 
@@ -484,8 +484,8 @@ class SearchModel {
      *
      * @return string
      */
-    private function getTheSpacedString($string){
-        return $this->getSpacerForSearchQueries().trim($string).$this->getSpacerForSearchQueries();
+    private function getTheSpacedString( $string ) {
+        return $this->getSpacerForSearchQueries() . trim( $string ) . $this->getSpacerForSearchQueries();
     }
 
     /**
@@ -502,7 +502,7 @@ class SearchModel {
     /**
      * @return bool
      */
-    private function isExactMatchEnabled(){
+    private function isExactMatchEnabled() {
         $exactMatch = $this->queryParams->exactMatch;
 
         return ( $exactMatch->Space_Left !== '' and $exactMatch->Space_Right !== '' );
@@ -511,7 +511,7 @@ class SearchModel {
     /**
      * @return bool
      */
-    private function isMatchCaseEnabled(){
+    private function isMatchCaseEnabled() {
         $matchCase = $this->queryParams->matchCase;
 
         return ( $matchCase->SQL_REGEXP_CASE !== '' and $matchCase->SQL_LENGHT_CASE !== 'LOWER' and $matchCase->REGEXP_MODIFIER !== 'iu' );
@@ -546,7 +546,7 @@ class SearchModel {
      *
      * @return string
      */
-    private function concatColumn($column){
-        return 'CONCAT(" ", '.$column.', " " )';
+    private function concatColumn( $column ) {
+        return 'CONCAT(" ", ' . $column . ', " " )';
     }
 }

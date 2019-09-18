@@ -29,7 +29,7 @@ class ReviewExtendedCategorySelector extends React.Component{
         // subcategories. Don't print the select box if no severity is found.
         let select = null;
         let severities;
-        let containerClass = (this.props.category.severities > 2) ? "" : "severity-buttons" ;
+        let containerClass = (this.props.category.severities > 0) ? "" : "severity-buttons" ;
         if ( this.props.category.severities.length > 3 ) {
             severities = this.props.category.severities.map((severity, i) =>{
                 return <div onClick={this.onChangeSelect.bind(this)}
@@ -51,49 +51,26 @@ class ReviewExtendedCategorySelector extends React.Component{
                 </div>
 
             </div>
-        } else if ( this.props.category.severities.length === 3 ) {
-            let button1 =  <button key={'value-' + this.props.category.severities[0].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
-                                   className="ui left attached button"
-                                   title={this.props.category.severities[0].label}>{this.props.category.severities[0].label.substring(0,3)}
-                                   </button>;
-            let button2 =  <button key={'value-' + this.props.category.severities[1].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[1].label)}
-                                   className="ui attached button"
-                                   title={this.props.category.severities[1].label}>{this.props.category.severities[1].label.substring(0,3)}
-            </button>;
-            let button3 =  <button key={'value-' + this.props.category.severities[2].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[2].label)}
-                                   className="ui right attached button"
-                                   title={this.props.category.severities[2].label}>{this.props.category.severities[2].label.substring(0,3)}
-                                   </button>;
-            select = <div className="re-severities-buttons ui tiny buttons" ref={(input) => { this.selectRef = input;}}
-                          name="severities"
-                          title="Select severities">
-                            {button1}
-                            {button2}
-                            {button3}
-                    </div>
-        } else if ( this.props.category.severities.length === 2 ) {
-            let button1 =  <button key={'value-' + this.props.category.severities[0].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[0].label)}
-                                   className="ui left attached button"
-                                   title={this.props.category.severities[0].label}>{this.props.category.severities[0].label.substring(0,3)}
-            </button>;
-            let button2 =  <button key={'value-' + this.props.category.severities[1].label}
-                                   onClick={this.onClick.bind(this, this.props.category.severities[1].label)}
-                                   className="ui right attached button"
-                                   title={this.props.category.severities[1].label}>{this.props.category.severities[1].label.substring(0,3)}
-            </button>;
+        } else {
+
+            severities = this.props.category.severities.map((severity, i) =>{
+                let buttonClass = (i === 0 && this.props.category.severities.length > 1) ?  'left' :
+                    ( i === this.props.category.severities.length - 1 || this.props.category.severities.length === 1) ? 'right' : '';
+                return <button key={'value-' + severity.label}
+                               onClick={this.onClick.bind(this, severity.label)}
+                               className={"ui " + buttonClass + " attached button"}
+                               title={severity.label}>{severity.label.substring(0,3)}
+                </button>;
+            });
 
             select = <div className="re-severities-buttons ui tiny buttons" ref={(input) => { this.selectRef = input;}}
                           name="severities"
                           title="Select severities">
-                {button1}
-                {button2}
-            </div>
+                {severities}
+            </div>;
+
         }
-		return <div className={"re-item re-category-item " + containerClass}>
+        return <div className={"re-item re-category-item " + containerClass}>
             <div className="re-item-box re-error">
                 <div className="error-name">
                     {/*{this.props.category.options && this.props.category.options.code ? (*/}

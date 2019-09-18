@@ -105,7 +105,7 @@ let SearchUtils = {
         var segment;
         try {
             segment = UI.Segment.findAbsolute( UI.currentSegmentId );
-            if ( UI.translationIsToSave( segment ) ) {
+            if ( UI.translationIsToSave( segment ) && UI.segmentIsModified(segment.id)) {
                 UI.saveSegment(UI.currentSegment).then(() => {
                     makeSearchFn()
                 });

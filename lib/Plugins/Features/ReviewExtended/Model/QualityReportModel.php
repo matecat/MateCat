@@ -24,13 +24,13 @@ class QualityReportModel {
      */
     protected $chunk;
 
-    protected $quality_report_structure = array();
+    protected $quality_report_structure = [];
 
-    private $current_file = array();
+    private $current_file = [];
 
-    private $current_segment = array();
+    private $current_segment = [];
 
-    private $current_issue = array();
+    private $current_issue = [];
 
     private $chunk_review;
 
@@ -39,14 +39,14 @@ class QualityReportModel {
      */
     private $chunk_review_model;
 
-    private $all_segments = array();
+    private $all_segments = [];
 
     private $date_format;
 
-    private $avg_time_to_edit ;
-    private $avg_edit_distance ;
+    private $avg_time_to_edit;
+    private $avg_edit_distance;
 
-    private $version ;
+    private $version;
 
     /**
      * @param Chunks_ChunkStruct $chunk
@@ -57,6 +57,7 @@ class QualityReportModel {
 
     /**
      * @param $version
+     *
      * @deprecated no need for a setter, pass in constructor, no need for mutation here.
      */
     public function setVersionNumber( $version ) {
@@ -64,7 +65,7 @@ class QualityReportModel {
     }
 
     public function getVersionNumber() {
-        return $this->version ;
+        return $this->version;
     }
 
     public function getChunk() {
@@ -78,17 +79,14 @@ class QualityReportModel {
     public function getStructure() {
         if ( $this->version ) {
             return $this->__getArchviedStructure();
-        }
-        else {
+        } else {
             return $this->__getCurrentStructure();
         }
     }
 
     public function getChunkReview() {
         if ( $this->chunk_review == null ) {
-            $this->chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                    $this->chunk->id, $this->chunk->password
-            );
+            $this->chunk_review = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk )[ 0 ];
         }
 
         return $this->chunk_review;
@@ -99,33 +97,33 @@ class QualityReportModel {
     }
 
     public function isPass() {
-        return (bool) $this->getChunkReview()->is_pass ;
+        return (bool)$this->getChunkReview()->is_pass;
     }
 
     public function getChunkReviewModel() {
         if ( $this->chunk_review_model == null ) {
-            $this->chunk_review_model = RevisionFactory::initFromProject($this->getProject())
+            $this->chunk_review_model = RevisionFactory::initFromProject( $this->getProject() )
                     ->setFeatureSet( $this->getProject()->getFeatures() )
-                    ->getChunkReviewModel( $this->getChunkReview() ) ;
+                    ->getChunkReviewModel( $this->getChunkReview() );
         }
 
         return $this->chunk_review_model;
     }
 
     public function resetScore( $event_id ) {
-        $chunkReview = $this->getChunkReview() ;
-        $chunkReview->undo_data = json_encode( array(
-            'reset_by_event_id' => $event_id,
-            'penalty_points' => $chunkReview->penalty_points,
-            'reviewed_words_count' => $chunkReview->reviewed_words_count,
-            'is_pass' => $chunkReview->is_pass
-        ));
+        $chunkReview            = $this->getChunkReview();
+        $chunkReview->undo_data = json_encode( [
+                'reset_by_event_id'    => $event_id,
+                'penalty_points'       => $chunkReview->penalty_points,
+                'reviewed_words_count' => $chunkReview->reviewed_words_count,
+                'is_pass'              => $chunkReview->is_pass
+        ] );
 
-        $chunkReview->penalty_points = 0 ;
-        $chunkReview->reviewed_words_count = 0 ;
-        $chunkReview->is_pass = 1 ;
+        $chunkReview->penalty_points       = 0;
+        $chunkReview->reviewed_words_count = 0;
+        $chunkReview->is_pass              = 1;
 
-        ChunkReviewDao::updateStruct( $chunkReview ) ;
+        ChunkReviewDao::updateStruct( $chunkReview );
     }
 
     /**
@@ -136,11 +134,11 @@ class QualityReportModel {
     }
 
     private function __setAverages() {
-        $dao = new QualityReportDao() ;
+        $dao  = new QualityReportDao();
         $avgs = $dao->getAverages( $this->getChunk() );
 
-        $this->avg_edit_distance = round( $avgs['avg_edit_distance'] / 1000, 2);
-        $this->avg_time_to_edit = round( $avgs['avg_time_to_edit'] / 1000, 2);
+        $this->avg_edit_distance = round( $avgs[ 'avg_edit_distance' ] / 1000, 2 );
+        $this->avg_time_to_edit  = round( $avgs[ 'avg_time_to_edit' ] / 1000, 2 );
     }
 
     /**
@@ -150,27 +148,28 @@ class QualityReportModel {
      */
     protected function buildQualityReportStructure( $records ) {
         $this->__setAverages();
-        $this->quality_report_structure = array(
-                'chunk'   => array(
-                        'files'  => array(),
-                        'avg_time_to_edit' => $this->avg_time_to_edit,
+        $this->quality_report_structure = [
+                'chunk'   => [
+                        'files'             => [],
+                        'avg_time_to_edit'  => $this->avg_time_to_edit,
                         'avg_edit_distance' => $this->avg_edit_distance
-                ),
-                'job'     => array(
+                ],
+                'job'     => [
                         'source' => $this->chunk->getJob()->source,
                         'target' => $this->chunk->getJob()->target,
-                ),
-                'project' => array(
+                ],
+                'project' => [
                         'metadata'   => $this->getProject()->getMetadataAsKeyValue(),
                         'id'         => $this->getProject()->id,
                         'created_at' => $this->filterDate(
                                 $this->getProject()->create_date
                         )
-                )
-        );
+                ]
+        ];
 
         $this->buildFilesSegmentsNestedTree( $records );
         $this->_attachReviewsData();
+
         return $this->quality_report_structure;
     }
 
@@ -178,7 +177,7 @@ class QualityReportModel {
      *
      */
     protected function _attachReviewsData() {
-        $this->quality_report_structure['chunk']['review'] = [
+        $this->quality_report_structure[ 'chunk' ][ 'review' ] = [
                 'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
                 'is_pass'       => !!$this->getChunkReview()->is_pass,
                 'score'         => $this->getScore(),
@@ -191,7 +190,7 @@ class QualityReportModel {
      */
     protected function getReviewerName() {
         $completion_event = \Chunks_ChunkCompletionEventDao::lastCompletionRecord(
-                $this->chunk, array( 'is_review' => true )
+                $this->chunk, [ 'is_review' => true ]
         );
         $name             = '';
 
@@ -223,7 +222,7 @@ class QualityReportModel {
                 $this->structureNestSegment( $record );
             }
 
-            if ( $current_issue_id != $record[ 'issue_id' ] && $record['issue_id'] !== null ) {
+            if ( $current_issue_id != $record[ 'issue_id' ] && $record[ 'issue_id' ] !== null ) {
                 $this->structureNestIssue( $record );
             }
 
@@ -232,7 +231,7 @@ class QualityReportModel {
             }
 
             if ( $record[ 'warning_scope' ] != null ) {
-                $this->structureNestQaChecks( $record ) ;
+                $this->structureNestQaChecks( $record );
             }
 
             $current_file_id    = $record[ 'file_id' ];
@@ -243,25 +242,24 @@ class QualityReportModel {
     }
 
     private function structureNestSegment( $record ) {
-        if ( $record['original_translation'] == null ) {
-            $original_translation = $record['translation'];
-        }
-        else {
-            $original_translation = $record['original_translation'];
+        if ( $record[ 'original_translation' ] == null ) {
+            $original_translation = $record[ 'translation' ];
+        } else {
+            $original_translation = $record[ 'original_translation' ];
         }
 
-        $this->current_segment = new ArrayObject( array(
+        $this->current_segment = new ArrayObject( [
                 'original_translation' => $original_translation,
                 'translation'          => $record[ 'translation' ],
                 'id'                   => $record[ 'segment_id' ],
                 'source'               => $record[ 'segment_source' ],
                 'status'               => $record[ 'translation_status' ],
-                // TODO: the following `round` is wrong, this should be done later in a presentation layer...
+            // TODO: the following `round` is wrong, this should be done later in a presentation layer...
                 'edit_distance'        => round( $record[ 'edit_distance' ] / 1000, 2 ),
                 'time_to_edit'         => round( $record[ 'time_to_edit' ] / 1000, 2 ),
-                'issues'               => array(),
-                'qa_checks'            => array()
-        ) );
+                'issues'               => [],
+                'qa_checks'            => []
+        ] );
 
         array_push( $this->all_segments, $this->current_segment );
 
@@ -272,21 +270,21 @@ class QualityReportModel {
     }
 
     private function structureNestIssue( $record ) {
-        $this->current_issue = new ArrayObject( array(
+        $this->current_issue = new ArrayObject( [
                 'id'               => $record[ 'issue_id' ],
                 'created_at'       => $this->filterDate( $record[ 'issue_create_date' ] ),
                 'category'         => $record[ 'issue_category' ],
                 'category_options' => $record[ 'category_options' ],
                 'severity'         => $record[ 'issue_severity' ],
 
-                'start_offset'     => $record[ 'issue_start_offset' ],
-                'end_offset'       => $record[ 'issue_end_offset' ],
+                'start_offset' => $record[ 'issue_start_offset' ],
+                'end_offset'   => $record[ 'issue_end_offset' ],
 
-                'target_text'      => $record[ 'target_text' ],
-                'comment'          => $record[ 'issue_comment' ],
-                'replies_count'    => $record[ 'issue_replies_count' ],
-                'comments'         => array()
-        ) );
+                'target_text'   => $record[ 'target_text' ],
+                'comment'       => $record[ 'issue_comment' ],
+                'replies_count' => $record[ 'issue_replies_count' ],
+                'comments'      => []
+        ] );
 
         array_push(
                 $this->current_segment[ 'issues' ],
@@ -296,23 +294,24 @@ class QualityReportModel {
     }
 
     private function structureNestQaChecks( $record ) {
-        $qa_check = new ArrayObject( array(
-                'severity'    => $record[ 'warning_severity' ],
-                'scope'       => $record[ 'warning_scope' ] ,
-                'data'        => $record[ 'warning_data' ]
-        ) );
+        $qa_check = new ArrayObject( [
+                'severity' => $record[ 'warning_severity' ],
+                'scope'    => $record[ 'warning_scope' ],
+                'data'     => $record[ 'warning_data' ]
+        ] );
 
         array_push(
                 $this->current_segment[ 'qa_checks' ],
                 $qa_check
         );
     }
+
     private function structureNestComment( $record ) {
-        $comment = new ArrayObject( array(
+        $comment = new ArrayObject( [
                 'comment'    => $record[ 'comment_comment' ],
                 'created_at' => $this->filterDate( $record[ 'comment_create_date' ] ),
                 'uid'        => $record[ 'comment_uid' ]
-        ) );
+        ] );
 
         array_push(
                 $this->current_issue[ 'comments' ],
@@ -322,11 +321,11 @@ class QualityReportModel {
     }
 
     private function structureNestFile( $record ) {
-        $this->current_file = new \ArrayObject( array(
+        $this->current_file = new \ArrayObject( [
                 'id'       => $record[ 'file_id' ],
                 'filename' => $record[ 'file_filename' ],
-                'segments' => array()
-        ) );
+                'segments' => []
+        ] );
 
         array_push(
                 $this->quality_report_structure[ 'chunk' ][ 'files' ],
@@ -346,6 +345,7 @@ class QualityReportModel {
 
     private function __getCurrentStructure() {
         $records = QualityReportDao::getSegmentsForQualityReport( $this->chunk );
+
         return $this->buildQualityReportStructure( $records );
     }
 
@@ -356,16 +356,16 @@ class QualityReportModel {
      * @return RecursiveArrayObject
      */
     private function __getArchviedStructure() {
-        $archivedRecord = ( new ArchivedQualityReportDao() )->getByChunkAndVersionNumber( $this->chunk, $this->version ) ;
-        $decoded = new RecursiveArrayObject( json_decode( $archivedRecord->quality_report, true ) );
+        $archivedRecord = ( new ArchivedQualityReportDao() )->getByChunkAndVersionNumber( $this->chunk, $this->version );
+        $decoded        = new RecursiveArrayObject( json_decode( $archivedRecord->quality_report, true ) );
 
-        foreach( $decoded['chunk']['files'] as $file ) {
-            foreach( $file['segments'] as $segment ) {
-                $this->all_segments[] = new ArrayObject( $segment ) ;
+        foreach ( $decoded[ 'chunk' ][ 'files' ] as $file ) {
+            foreach ( $file[ 'segments' ] as $segment ) {
+                $this->all_segments[] = new ArrayObject( $segment );
             }
         }
 
-        return $decoded ;
+        return $decoded;
     }
 
 }

@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.110.8",
+            "version": "3.112.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "1c4ec294479c0ab1d231431b04b2b2f14a72407f"
+                "reference": "0d7a3ecb5dca10d1872ee5106cb154cbef52cf1c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/1c4ec294479c0ab1d231431b04b2b2f14a72407f",
-                "reference": "1c4ec294479c0ab1d231431b04b2b2f14a72407f",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/0d7a3ecb5dca10d1872ee5106cb154cbef52cf1c",
+                "reference": "0d7a3ecb5dca10d1872ee5106cb154cbef52cf1c",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-09-03T19:34:31+00:00"
+            "time": "2019-09-17T18:07:57+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -492,16 +492,16 @@
         },
         {
             "name": "matecat/whole-text-finder",
-            "version": "v1.0.6",
+            "version": "v1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/whole-text-finder.git",
-                "reference": "fa43102b8f8be0cf0839e30d223b8292e11ae314"
+                "reference": "9bb5ede0033bca0a888633f4b303b157970be69d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/fa43102b8f8be0cf0839e30d223b8292e11ae314",
-                "reference": "fa43102b8f8be0cf0839e30d223b8292e11ae314",
+                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/9bb5ede0033bca0a888633f4b303b157970be69d",
+                "reference": "9bb5ede0033bca0a888633f4b303b157970be69d",
                 "shasum": ""
             },
             "require": {
@@ -537,7 +537,7 @@
                 "search",
                 "text"
             ],
-            "time": "2019-09-04T16:06:50+00:00"
+            "time": "2019-09-13T10:50:28+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -1340,16 +1340,16 @@
         },
         {
             "name": "onelogin/php-saml",
-            "version": "2.16.0",
+            "version": "2.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/onelogin/php-saml.git",
-                "reference": "e16161d89067866cabb6dd4f5ccd1437b6a64eda"
+                "reference": "2aaa5aaa9aa6d6887fbd15be0013dd7fac793fc9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/e16161d89067866cabb6dd4f5ccd1437b6a64eda",
-                "reference": "e16161d89067866cabb6dd4f5ccd1437b6a64eda",
+                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/2aaa5aaa9aa6d6887fbd15be0013dd7fac793fc9",
+                "reference": "2aaa5aaa9aa6d6887fbd15be0013dd7fac793fc9",
                 "shasum": ""
             },
             "require": {
@@ -1389,7 +1389,7 @@
                 "onelogin",
                 "saml"
             ],
-            "time": "2019-06-24T17:43:15+00:00"
+            "time": "2019-09-11T13:55:25+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",

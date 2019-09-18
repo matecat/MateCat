@@ -12,7 +12,7 @@ use API\V2\Json\TranslationIssueComment;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
-use Features\SecondPassReview;
+use Features\ReviewExtended\ReviewUtils;
 use Projects_ProjectStruct;
 use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
@@ -110,7 +110,7 @@ class QualityReportController extends KleinController
             foreach( $file['segments'] as $k1 => $segment ) {
                 if ( !empty( $segment->issues ) ) {
                     foreach( $segment->issues  as $k2 => $issue ) {
-                        $segment->issues[ $k2 ]['revision_number'] = SecondPassReview\Utils::sourcePageToRevisionNumber(
+                        $segment->issues[ $k2 ]['revision_number'] = ReviewUtils::sourcePageToRevisionNumber(
                                 $segment->issues[ $k2 ]['source_page']
                         );
                         unset( $segment->issues[ $k2 ]['source_page'] );
@@ -127,7 +127,7 @@ class QualityReportController extends KleinController
                 }
 
                 $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] = $file['segments'] [ $k1 ]->toArray();
-                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'revision_number' ] = SecondPassReview\Utils::sourcePageToRevisionNumber(
+                $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'revision_number' ] = ReviewUtils::sourcePageToRevisionNumber(
                         $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'source_page' ]
                 );
                 unset( $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'source_page']  );

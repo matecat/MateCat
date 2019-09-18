@@ -18,8 +18,8 @@ class JobMenu extends React.Component {
     }
 
     openSecondPassUrl() {
-        if ( this.props.job.has('second_pass_review') && this.props.job.get('second_pass_review').size > 0) {
-            let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('second_pass_review').get(0);
+        if ( this.props.job.has('revise_passwords') && this.props.job.get('revise_passwords').size > 1) {
+            let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('revise_passwords').get(1).get('password');
             console.log('Open url');
             window.open(url);
         }
@@ -32,8 +32,8 @@ class JobMenu extends React.Component {
 
     getSecondPassReviewMenuLink() {
         if (this.props.project.has('features') && this.props.project.get('features').indexOf('second_pass_review') > -1 ){
-            if ( this.props.job.has('second_pass_review') && this.props.job.get('second_pass_review').size > 0 ) {
-                let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('second_pass_review').get(0);
+            if ( this.props.job.has('revise_passwords') && this.props.job.get('revise_passwords').size > 1 ) {
+                let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('revise_passwords').get(1).get('password');
                 return <a className="item" target="_blank" href={url}><i className="icon-edit icon"/>Revise 2</a>
             } else {
                 return <a className="item" target="_blank" onClick={()=>this.retrieveSecondPassReviewLink()}><i className="icon-edit icon"/>Generate Revise 2</a>

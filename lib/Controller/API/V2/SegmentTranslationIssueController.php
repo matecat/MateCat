@@ -1,6 +1,7 @@
 <?php
 
-namespace API\V2  ;
+namespace API\V2;
+
 use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
@@ -16,25 +17,25 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     /**
      * @var Validators\SegmentTranslationIssue
      */
-    private $validator ;
-    private $issue ;
+    private $validator;
+    private $issue;
 
     /**
      * @var \Projects_ProjectStruct
      */
-    private $project ;
+    private $project;
 
     public function index() {
         $result = EntryDao::findAllByTranslationVersion(
-            $this->validator->translation->id_segment,
-            $this->validator->translation->id_job,
-            $this->getVersionNumber()
+                $this->validator->translation->id_segment,
+                $this->validator->translation->id_job,
+                $this->getVersionNumber()
         );
 
-        $json = new JsonFormatter( );
+        $json     = new JsonFormatter();
         $rendered = $json->render( $result );
 
-        $this->response->json( array('issues' => $rendered) );
+        $this->response->json( [ 'issues' => $rendered ] );
     }
 
     public function create() {
@@ -45,7 +46,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $sourcePage = \ajaxController::getRefererSourcePageCode( $this->project->getFeatures() );
         }
 
-        $data = array(
+        $data = [
             'id_segment'          => $this->request->id_segment,
             'id_job'              => $this->request->id_job,
             'id_category'         => $this->request->id_category,
@@ -61,7 +62,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             'uid'                 => $this->user->uid,
             'source_page'         => $sourcePage
 //            'source_page'         => SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number ),
-        );
+        ];
 
         $struct = new EntryStruct( $data );
 
@@ -69,36 +70,36 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 $this->request->id_job,
                 $this->request->password,
                 $struct
-        ) ;
+        );
 
         if ( $this->request->diff ) {
-            $model->setDiff( $this->request->diff ) ;
+            $model->setDiff( $this->request->diff );
         }
 
         $struct = $model->save();
 
-        $json = new JsonFormatter();
+        $json     = new JsonFormatter();
         $rendered = $json->renderItem( $struct );
 
-        $this->response->json( array('issue' => $rendered) );
+        $this->response->json( [ 'issue' => $rendered ] );
     }
 
     public function update() {
         $issue = null;
 
-        $postParams = $this->request->paramsPost() ;
+        $postParams = $this->request->paramsPost();
 
-        if ( $postParams['rebutted_at'] == null ) {
+        if ( $postParams[ 'rebutted_at' ] == null ) {
             $entryDao = new EntryDao( Database::obtain()->getConnection() );
-            $issue = $entryDao->updateRebutted(
-                $this->validator->issue->id, false
+            $issue    = $entryDao->updateRebutted(
+                    $this->validator->issue->id, false
             );
         }
 
-        $json = new JsonFormatter();
+        $json     = new JsonFormatter();
         $rendered = $json->renderItem( $issue );
 
-        $this->response->json( array('issue' => $rendered) );
+        $this->response->json( [ 'issue' => $rendered ] );
     }
 
     public function delete() {
@@ -109,7 +110,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         );
 
         $model->delete();
-        $this->response->code(200);
+        $this->response->code( 200 );
     }
 
     /**
@@ -123,15 +124,15 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {
 
         return RevisionFactory::getInstance()
-                ->setFeatureSet($this->featureSet)
-                ->getTranslationIssueModel( $id_job, $password, $issue ) ;
+                ->setFeatureSet( $this->featureSet )
+                ->getTranslationIssueModel( $id_job, $password, $issue );
 
     }
 
     protected function afterConstruct() {
 
         $jobValidator = new ChunkPasswordValidator( $this );
-        $jobValidator->onSuccess( function() use( $jobValidator ) {
+        $jobValidator->onSuccess( function () use ( $jobValidator ) {
 
             $this->project = $jobValidator->getChunk()->getProject();
             $this->featureSet->loadForProject( $this->project );
@@ -150,11 +151,10 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     private function getVersionNumber() {
-        if ( null !== $this->request->param('version_number') ) {
-            return $this->request->param('version_number') ;
-        }
-        else {
-            return $this->validator->translation->version_number ;
+        if ( null !== $this->request->param( 'version_number' ) ) {
+            return $this->request->param( 'version_number' );
+        } else {
+            return $this->validator->translation->version_number;
         }
     }
 
@@ -163,7 +163,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 ->getJob()->getProject()
                 ->getLqaModel()->getCategories();
 
-        return $categories ;
+        return $categories;
     }
 
 }
