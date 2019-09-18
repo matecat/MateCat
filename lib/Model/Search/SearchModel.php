@@ -77,7 +77,6 @@ class SearchModel {
 
         foreach ( $sqlBatchChunk as $k => $batch ) {
 
-
             $sqlUpdate = "UPDATE segment_translations SET 
                 translation = :translation 
                 WHERE id_segment=:id_segment AND id_job=:id_job
@@ -88,12 +87,6 @@ class SearchModel {
                     'id_job' => $sqlValuesChunk[ $k ][ 1 ],
                     'translation' => $sqlValuesChunk[ $k ][ 2 ],
             ];
-
-//            $sqlInsert = "
-//            INSERT INTO segment_translations ( id_segment, id_job, translation )
-//			  VALUES " . implode( ",", $batch ) . "
-//			ON DUPLICATE KEY UPDATE translation = VALUES( translation )
-//			";
 
             try {
 
