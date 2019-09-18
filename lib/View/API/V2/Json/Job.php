@@ -14,9 +14,11 @@ use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
+use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FeatureSet;
 use Langs_LanguageDomains;
 use Langs_Languages;
+use LQA\ChunkReviewDao;
 use ManageUtils;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
@@ -153,6 +155,8 @@ class Job {
             }
         }
 
+        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews($chunk);
+
         $result = [
                 'id'                    => (int)$chunk->id,
                 'password'              => $chunk->password,
@@ -176,7 +180,7 @@ class Job {
                 'private_tm_key'        => $this->getKeyList( $chunk ),
                 'warnings_count'        => $warningsCount->warnings_count,
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                 => CatUtils::getFastStatsForJob( $jobStats, false ),
+                'stats'                 => ReviewUtils::formatStats(CatUtils::getFastStatsForJob( $jobStats, false ), $chunkReviews),
                 'outsource'             => $outsource,
                 'translator'            => $translator,
                 'total_raw_wc'          => (int)$chunk->total_raw_wc,
@@ -189,6 +193,16 @@ class Job {
 
         ];
 
+        // add revise_passwords to stats
+
+        foreach ( $chunkReviews as $chunk_review ) {
+            if ( $chunk_review->source_page > \Constants::SOURCE_PAGE_REVISION ) {
+                $result[ 'revise_passwords' ][] = [
+                        'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
+                        'password'        => $chunk_review->review_password
+                ];
+            }
+        }
 
         $project = $chunk->getProject();
 
