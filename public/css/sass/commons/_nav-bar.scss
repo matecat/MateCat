@@ -191,6 +191,11 @@ header {
             grid-template-columns: auto 16px;
             align-items: center;
             grid-template-rows: 28px;
+            opacity:0.8;
+
+            &:hover, &.active {
+                opacity:1;
+            }
 
             .item {
                 display: grid;
