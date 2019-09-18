@@ -40,11 +40,8 @@ class ChunkController extends KleinController {
     public function show() {
 
         $format = new Chunk();
-
         $format->setUser( $this->user );
         $format->setCalledFromApi( true );
-
-        $r = $format->renderOne($this->chunk);
 
         $this->response->json( $format->renderOne($this->chunk) );
 
