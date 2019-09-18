@@ -87,6 +87,7 @@
 
 <div class="notifications-wrapper"></div>
 
+<!--
 <footer>
     <div class="wrapper">
 
@@ -105,7 +106,7 @@
 
 
         <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-            <!-- <p class="progress">Progress:</p> -->
+            &lt;!&ndash; <p class="progress">Progress:</p> &ndash;&gt;
             <div class="meter" style="width: 10%">
 
                 <a href="#" class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
@@ -122,25 +123,26 @@
                     <tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>
                     : <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                 </li>
-                <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
-                <!--
+                <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">&#45;&#45;</strong></li>
+                &lt;!&ndash;
                 <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
                 <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
-                -->
+                &ndash;&gt;
 
 
             </ul>
-            <!-- ul class="statistics-details">
+            &lt;!&ndash; ul class="statistics-details">
 
               <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">1.354</strong> Words/h</li>
                  <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">36h 58m</strong></li>
-             </ul -->
+             </ul &ndash;&gt;
 
         </div>
 
     </div>
-    <!-- .wrapper -->
+    &lt;!&ndash; .wrapper &ndash;&gt;
 </footer>
+-->
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
