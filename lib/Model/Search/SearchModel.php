@@ -294,6 +294,7 @@ class SearchModel {
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			WHERE fj.id_job = {$this->queryParams->job}
 			AND show_in_cattool = 1
+			{$this->queryParams->where_status}
 			GROUP BY s.id";
 
         return $query;
