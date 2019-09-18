@@ -77,19 +77,27 @@ class SearchModel {
 
         foreach ( $sqlBatchChunk as $k => $batch ) {
 
-            //WE USE INSERT STATEMENT for it's convenience ( update multiple fields in multiple rows in batch )
-            //we try to insert these rows in a table wherein the primary key ( unique by definition )
-            //is a coupled key ( id_segment, id_job ), but these values are already present ( duplicates )
-            //so make an "ON DUPLICATE KEY UPDATE"
-            $sqlInsert = "
-            INSERT INTO segment_translations ( id_segment, id_job, translation )
-			  VALUES " . implode( ",", $batch ) . "
-			ON DUPLICATE KEY UPDATE translation = VALUES( translation )
-			";
+
+            $sqlUpdate = "UPDATE segment_translations SET 
+                translation = :translation 
+                WHERE id_segment=:id_segment AND id_job=:id_job
+            ";
+
+            $data = [
+                    'id_segment' => $sqlValuesChunk[ $k ][ 0 ],
+                    'id_job' => $sqlValuesChunk[ $k ][ 1 ],
+                    'translation' => $sqlValuesChunk[ $k ][ 2 ],
+            ];
+
+//            $sqlInsert = "
+//            INSERT INTO segment_translations ( id_segment, id_job, translation )
+//			  VALUES " . implode( ",", $batch ) . "
+//			ON DUPLICATE KEY UPDATE translation = VALUES( translation )
+//			";
 
             try {
 
-                $this->_insertQuery( $sqlInsert, $sqlValuesChunk[ $k ] );
+                $this->_insertQuery( $sqlUpdate, $data );
 
             } catch ( Exception $e ){
 
