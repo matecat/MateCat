@@ -2,6 +2,7 @@
 
 namespace API\V2\Json  ;
 
+use Features\ReviewExtended\ReviewUtils;
 use Features\SecondPassReview;
 use LQA\EntryStruct;
 use LQA\EntryCommentDao;
@@ -45,7 +46,7 @@ class SegmentTranslationIssue {
                 'rebutted_at'         => $this->getDateValue( $record->rebutted_at ),
                 'diff'                => $record->getDiff(),
                 'comments'            => $comments,
-                'revision_number'     => SecondPassReview\Utils::sourcePageToRevisionNumber( $record->source_page )
+                'revision_number'     => ReviewUtils::sourcePageToRevisionNumber( $record->source_page )
         ];
 
         return $row;

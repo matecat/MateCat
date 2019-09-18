@@ -14,15 +14,14 @@ use Chunks_ChunkStruct;
 use Constants;
 use Exceptions\NotFoundException;
 use Features;
+use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Features\SecondPassReview\Controller\API\Json\ProjectUrls;
 use Features\SecondPassReview\Model\ChunkReviewModel;
-use Features\SecondPassReview\Utils as SecondPassReviewUtils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use Klein\Klein;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
-use Users_UserStruct;
 
 class SecondPassReview extends BaseFeature {
     const FEATURE_CODE = 'second_pass_review';
@@ -58,6 +57,8 @@ class SecondPassReview extends BaseFeature {
      *
      * @param $project_id
      * @param $_analyzed_report
+     *
+     * @throws \Exception
      */
     public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
         $project   = Projects_ProjectDao::findById( $project_id );
@@ -77,7 +78,7 @@ class SecondPassReview extends BaseFeature {
             $chunk_review = ( new ChunkReviewDao() )->findByJobIdPasswordAndSourcePage(
                     $controller->getChunk()->id,
                     $controller->getChunk()->password,
-                    SecondPassReviewUtils::revisionNumberToSourcePage( $controller->getRevisionNumber() )
+                    ReviewUtils::revisionNumberToSourcePage( $controller->getRevisionNumber() )
             );
 
             if ( empty( $chunk_review ) ) {
@@ -91,7 +92,7 @@ class SecondPassReview extends BaseFeature {
         $chunk_review = $matches = null;
         preg_match( '/revise([2-9])?\//s', $_from_url[ 'path' ], $matches );
         if ( count( $matches ) > 1 ) {
-            $sourcePage = SecondPassReviewUtils::revisionNumberToSourcePage( $matches[ 1 ] );
+            $sourcePage = ReviewUtils::revisionNumberToSourcePage( $matches[ 1 ] );
         }
 
         return $sourcePage;
@@ -102,7 +103,7 @@ class SecondPassReview extends BaseFeature {
         $chunk        = $options[ 'chunk' ];
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
 
-        return SecondPassReviewUtils::formatStats( $inputStats, $chunkReviews );
+        return ReviewUtils::formatStats( $inputStats, $chunkReviews );
     }
 
     /**
@@ -139,14 +140,10 @@ class SecondPassReview extends BaseFeature {
                 foreach ( $chunk_reviews[ $key ] as $chunk_review ) {
                     if ( $chunk_review->source_page > Constants::SOURCE_PAGE_REVISION ) {
                         $project[ 'jobs' ][ $kk ][ 'revise_passwords' ][] = [
-                                'revision_number' => SecondPassReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
+                                'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
                                 'password'        => $chunk_review->review_password
                         ];
                     }
-                }
-
-                if ( !isset( $project[ 'jobs' ][ $kk ] [ 'stats' ] [ 'reviews' ] ) ) {
-                    $project[ 'jobs' ][ $kk ] [ 'stats' ] = SecondPassReviewUtils::formatStats( $project[ 'jobs' ][ $kk ] [ 'stats' ], $chunk_reviews[ $key ] );
                 }
 
             }
@@ -175,7 +172,7 @@ class SecondPassReview extends BaseFeature {
 
         foreach ( $data[ 'files' ] as $file => $content ) {
             foreach ( $content[ 'segments' ] as $key => $segment ) {
-                $data [ 'files' ] [ $file ] [ 'segments' ] [ $key ] [ 'revision_number' ] = SecondPassReviewUtils::sourcePageToRevisionNumber(
+                $data [ 'files' ] [ $file ] [ 'segments' ] [ $key ] [ 'revision_number' ] = ReviewUtils::sourcePageToRevisionNumber(
                         $by_id_segment[ $segment[ 'sid' ] ]->source_page
                 );
             }

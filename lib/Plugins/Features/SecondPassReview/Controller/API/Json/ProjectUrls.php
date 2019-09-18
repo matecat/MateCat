@@ -9,7 +9,7 @@
 namespace Features\SecondPassReview\Controller\API\Json;
 
 use Chunks_ChunkStruct;
-use Features\SecondPassReview;
+use Features\ReviewExtended\ReviewUtils;
 use LQA\ChunkReviewDao;
 use Routes;
 
@@ -28,7 +28,7 @@ class ProjectUrls extends \API\V2\Json\ProjectUrls {
             $reviews = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( [ 'id' => $record[ 'jid' ], 'password' => $record[ 'jpassword' ] ] ) );
 
             foreach ( $reviews as $review ) {
-                $revisionNumber = SecondPassReview\Utils::sourcePageToRevisionNumber( $review->source_page );
+                $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $review->source_page );
                 $reviseUrl      = Routes::revise(
                         $record[ 'name' ],
                         $record[ 'jid' ],
