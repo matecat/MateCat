@@ -2,14 +2,17 @@
 
 namespace LQA;
 
+use Database;
+use PDO;
+
 class EntryCommentDao extends \DataAccess_AbstractDao {
 
     public function findByIssueId( $id_issue ) {
         $sql = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
             " ORDER BY create_date DESC ";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
         $stmt->execute( array( $id_issue ) );
         return $stmt->fetchAll();
     }
@@ -31,11 +34,11 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
             " VALUES " .
             " ( :uid, :id_qa_entry, :create_date, :comment, :source_page ) ";
 
-        $conn = \Database::obtain()->getConnection();
-        \Database::obtain()->begin();
+        $conn = Database::obtain()->getConnection();
+        Database::obtain()->begin();
 
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
         $result = $stmt->execute( $struct->attributes(
             array('uid', 'id_qa_entry', 'create_date', 'comment', 'source_page')
         ));
@@ -52,11 +55,22 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
 
     public function findById( $id ) {
         $sql = "SELECT * FROM qa_entry_comments WHERE id = ? " ;
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
         $stmt->execute( array( $id ) );
         return $stmt->fetch();
+    }
+
+    public function fetchCommentsGroupedByIssueIds( $ids ) {
+        $sql = "SELECT id_qa_entry, qa_entry_comments.* FROM qa_entry_comments WHERE id_qa_entry " .
+                " IN ( " . implode(', ' , $ids ) . " ) " .
+                " ORDER BY id_qa_entry, id " ;
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( );
+        return $stmt->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_ASSOC);
     }
 
     protected function _buildResult( $array_result ) { }

@@ -68,7 +68,7 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
     }
 
     shouldComponentUpdate (nextProps, nextState) {
-        return this.state.issues_count != nextState.issues_count  ;
+        return this.state.issues_count != nextState.issues_count || this.props.segment.unlocked !== nextProps.segment.unlocked;
     }
 
     componentDidUpdate() {
@@ -85,7 +85,7 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
                     <span className="revise-button-counter">{this.state.issues_count}</span>
                 </a>
             </div>);
-        } else  if (config.isReview){
+        } else  if (config.isReview && !(this.props.segment.ice_locked == 1 &&  !this.props.segment.unlocked) ){
             return (<div title="Show Issues" onClick={this.handleClick.bind(this)}>
                 <a ref={(button)=> this.button=button} className={"revise-button " + openClass} href="javascript:void(0);">
                     <span className="icon-error_outline" />

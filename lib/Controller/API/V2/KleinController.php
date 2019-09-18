@@ -212,11 +212,15 @@ abstract class KleinController implements IController {
         return true;
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function validateRequest() {
         foreach( $this->validators as $validator ){
             $validator->validate();
         }
         $this->validators = [];
+        $this->afterValidate();
     }
 
     protected function appendValidator( Base $validator ){
@@ -264,6 +268,10 @@ abstract class KleinController implements IController {
         }
 
         $this->logPageCall();
+
+    }
+
+    protected function afterValidate() {
 
     }
 

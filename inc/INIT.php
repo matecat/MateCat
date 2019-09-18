@@ -291,7 +291,10 @@ class INIT {
     public static $AWS_CACHING = false;
     public static $AWS_STORAGE_BASE_BUCKET;
 
-    public function __construct() {
+    public static $REPLACE_HISTORY_DRIVER;
+    public static $REPLACE_HISTORY_TTL;
+
+    public function __construct(){
 
         self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
         self::$OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];

@@ -26,21 +26,19 @@ class SegmentTranslationVersionHandler {
      */
     private $dao;
 
-    private $id_job;
-    private $id_segment;
-    private $project;
-    private $feature_enalbed;
-    private $source_page;
+    private $id_job ;
+    private $id_segment ;
+    private $project ;
+    private $feature_enalbed ;
 
-    public function __construct( $id_job, $id_segment, $uid, $id_project, $is_review ) {
-        $this->id_job      = $id_job;
-        $this->id_segment  = $id_segment;
-        $this->uid         = $uid;
-        $this->source_page = ( $is_review ?
-                Constants::SOURCE_PAGE_REVISION :
-                Constants::SOURCE_PAGE_TRANSLATE
-        );
 
+    public function __construct($id_job, $id_segment, $uid, $id_project) {
+        $this->id_job     = $id_job ;
+        $this->id_segment = $id_segment ;
+        $this->uid        = $uid ;
+
+
+        // TODO: refactor, why id_project should be null
         if ( null !== $id_project ) {
             $this->project = Projects_ProjectDao::findById( $id_project );
 
@@ -167,12 +165,6 @@ class SegmentTranslationVersionHandler {
         $this->db               = Database::obtain();
         $this->dao              = new Translations_TranslationVersionDao( $this->db );
         $this->dao->source_page = $this->source_page;
-
-        // TODO: ^^^ this is safe for now because we have
-        // one connection for request, so the object returned
-        // by the obtain is the same we started the transaction
-        // on in setTranslation.
-
     }
 
 }

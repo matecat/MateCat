@@ -21,8 +21,22 @@ class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $create_date ;
     public $target_text ;
     public $rebutted_at ;
+    public $source_page ;
+    public $deleted_at ;
 
+    protected $_comments ;
     protected $_diff;
+
+    public function addComments( $comments ) {
+        $this->_comments = $comments ;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getComments() {
+        return $this->_comments ;
+    }
 
     /**
      * @return mixed

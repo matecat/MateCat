@@ -230,6 +230,7 @@ class JobContainer extends React.Component {
             jobId={this.props.job.get('id')}
             review_password={this.props.job.get('review_password')}
             project={this.props.project}
+            job={this.props.job}
             isChunk={this.props.isChunk}
             status={this.props.job.get('status')}
             isChunkOutsourced = {this.props.isChunkOutsourced}
@@ -311,7 +312,7 @@ class JobContainer extends React.Component {
 
     getQRIcon() {
         var icon = '';
-        var quality = this.props.job.get('quality_overall');
+        var quality = this.props.job.get('quality_summary').get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
             let tooltipText = "Overall quality: " + quality.toUpperCase();
@@ -383,7 +384,7 @@ class JobContainer extends React.Component {
 
     getQRMenuItem() {
         var icon = '';
-        var quality = this.props.job.get('quality_overall');
+        var quality = this.props.job.get('quality_summary').get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
             let tooltipText = "Overall quality: " + quality.toUpperCase();
@@ -520,7 +521,7 @@ class JobContainer extends React.Component {
             number: 0,
             icon: ''
         };
-        let quality = this.props.job.get('quality_overall');
+        let quality = this.props.job.get('quality_summary').get('quality_overall');
         if (quality && quality === "poor" || quality === "fail") {
             n.number++;
             n.icon = this.getQRIcon();
@@ -573,7 +574,7 @@ class JobContainer extends React.Component {
         return (!nextProps.job.equals(this.props.job) ||
         nextProps.lastAction !== this.props.lastAction ||
         nextState.showDownloadProgress !== this.state.showDownloadProgress ||
-        nextState.openOutsource !== this.state.openOutsource)
+        nextState.openOutsource !== this.state.openOutsource )
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -612,6 +613,7 @@ class JobContainer extends React.Component {
     initTooltips() {
         $(this.rejectedTooltip).popup();
         $(this.approvedTooltip).popup();
+        $(this.approved2ndPassTooltip).popup();
         $(this.translatedTooltip).popup();
         $(this.draftTooltip).popup();
         $(this.activityTooltip).popup();
@@ -638,10 +640,19 @@ class JobContainer extends React.Component {
         let tmIcon = this.getTMIcon();
         let outsourceClass = this.props.job.get('outsource') ? ('outsource') : ('translator');
 
-        let outsourceContainerClass = (!config.enable_outsource) ? ('no-outsource') : ((this.state.showTranslatorBox) ? 'showTranslator' : 'showOutsource');
-
-
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
+        let approvedPercFormatted = this.props.job.get('stats').get('APPROVED_PERC_FORMATTED');
+        let approvedPerc = this.props.job.get('stats').get('APPROVED_PERC');
+        let approvedPerc2ndPass, approvedPercFormatted2ndPass;
+        if (this.props.project.has('features') && this.props.project.get('features').indexOf('second_pass_review') > -1 && this.props.job.get('stats').has('reviews')
+            && this.props.job.get('stats').get('reviews').size > 1 && this.props.job.get('stats').get('reviews').get(1).get('advancement_wc') !== '0.00') {
+            let approved = this.props.job.get('stats').get('reviews').find(( item ) => {return item.get('revision_number') === 1});
+            approvedPerc = (approved) ? parseFloat(approved.get('advancement_wc'))*100/this.props.job.get('stats').get('TOTAL') : approvedPerc;
+            approvedPercFormatted = _.round(approvedPerc, 1);
+            let approved2ndPass = this.props.job.get('stats').get('reviews').find(( item ) => {return item.get('revision_number') === 2});
+            approvedPerc2ndPass = (approved2ndPass) ? parseFloat(approved2ndPass.get('advancement_wc'))*100/this.props.job.get('stats').get('TOTAL') : approved2ndPass;
+            approvedPercFormatted2ndPass = _.round(approvedPerc2ndPass, 1);
+        }
 
         return <div className="sixteen wide column chunk-container">
                 <div className="ui grid" ref={(container) => this.container = container}>
@@ -664,13 +675,17 @@ class JobContainer extends React.Component {
                         <div className="progress-bar">
                             <div className="progr">
                                 <div className="meter">
-                                    <a className="warning-bar translate-tooltip" data-variation="tiny" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}
+                                    <a className="warning-bar translate-tooltip" data-variation="tiny" data-html={'Rejected '+ this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}
                                        ref={(tooltip) => this.rejectedTooltip = tooltip}/>
-                                    <a className="approved-bar translate-tooltip" data-variation="tiny" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}
+                                    <a className="approved-bar translate-tooltip" data-variation="tiny" data-html={'Approved '+ approvedPercFormatted +'%'} style={{width: approvedPerc+ '%' }}
                                        ref={(tooltip) => this.approvedTooltip = tooltip}/>
-                                    <a className="translated-bar translate-tooltip" data-variation="tiny" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}
+                                    { approvedPercFormatted2ndPass ? (
+                                        <a className="approved-bar-2nd-pass translate-tooltip" data-variation="tiny" data-html={'Approved '+ approvedPercFormatted2ndPass +'%'} style={{width: approvedPerc2ndPass+ '%' }}
+                                           ref={(tooltip) => this.approved2ndPassTooltip = tooltip}/>
+                                    ) : null }
+                                    <a className="translated-bar translate-tooltip" data-variation="tiny" data-html={'Translated '+ this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}
                                        ref={(tooltip) => this.translatedTooltip = tooltip}/>
-                                    <a className="draft-bar translate-tooltip" data-variation="tiny" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}
+                                    <a className="draft-bar translate-tooltip" data-variation="tiny" data-html={'Draft '+ this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}
                                        ref={(tooltip) => this.draftTooltip = tooltip}/>
                                 </div>
                             </div>

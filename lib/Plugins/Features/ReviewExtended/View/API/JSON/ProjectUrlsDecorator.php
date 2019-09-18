@@ -10,6 +10,7 @@ namespace Features\ReviewExtended\View\API\JSON;
 
 
 use API\V2\Json\ProjectUrls;
+use Chunks_ChunkStruct;
 use LQA\ChunkReviewDao;
 
 
@@ -17,9 +18,9 @@ class ProjectUrlsDecorator extends ProjectUrls {
 
     public function reviseUrl( $record ) {
 
-        $reviewChunk = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $record[ 'jid' ], $record[ 'jpassword' ]
-        );
+        $reviewChunk = ( new ChunkReviewDao() )->findChunkReviews(
+                new Chunks_ChunkStruct( [ 'id' => $record[ 'jid' ], 'password' => $record[ 'jpassword' ] ] )
+        )[ 0 ];
 
         return \Routes::revise(
                 $record[ 'name' ],

@@ -5,6 +5,7 @@ use Contribution\Set;
 use Exceptions\ControllerReturnException;
 use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
+use Features\SecondPassReview\Utils as SecondPassReviewUtils;
 
 class setTranslationController extends ajaxController {
 
@@ -63,6 +64,7 @@ class setTranslationController extends ajaxController {
      * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
      */
     private $VersionsHandler;
+    private $revisionNumber;
 
     public function __construct() {
 
@@ -95,12 +97,14 @@ class setTranslationController extends ajaxController {
                 'context_after'           => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'id_before'               => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_after'                => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'revision_number'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
         ];
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job   = $this->__postInput[ 'id_job' ];
-        $this->password = $this->__postInput[ 'password' ];
+        $this->id_job         = $this->__postInput[ 'id_job' ];
+        $this->password       = $this->__postInput[ 'password' ];
+        $this->revisionNumber = $this->__postInput[ 'revision_number' ];
 
         /*
          * set by the client, mandatory
@@ -264,7 +268,8 @@ class setTranslationController extends ajaxController {
         $this->featureSet->filter( 'rewriteContributionContexts', $segmentsList, $this->__postInput );
 
         $this->context_before = $this->filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
-        $this->context_after  = $this->filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );}
+        $this->context_after  = $this->filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+    }
 
     /**
      * @return int|mixed
@@ -278,22 +283,7 @@ class setTranslationController extends ajaxController {
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
     public function doAction() {
-        try {
-
-            $this->_checkData();
-
-        } catch ( Exception $e ) {
-
-            if ( $e->getCode() == -1 ) {
-                Utils::sendErrMailReport( $e->getMessage() );
-            }
-
-            Log::doJsonLog( $e->getMessage() );
-
-            return $e->getCode();
-
-        }
-
+        $this->checkData();
         $this->readLoginInfo();
         $this->initVersionHandler();
         $this->_getContexts();
@@ -306,10 +296,10 @@ class setTranslationController extends ajaxController {
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
         $spaceHandler = new FromViewNBSPToSpaces();
-        $__seg = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
-        $__tra = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
+        $__seg        = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
+        $__tra        = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
 
-        $check        = new QA( $__seg, $__tra );
+        $check = new QA( $__seg, $__tra );
         $check->setFeatureSet( $this->featureSet );
         $check->performConsistencyCheck();
 
@@ -394,7 +384,7 @@ class setTranslationController extends ajaxController {
         /**
          * Translation is inserted here.
          */
-        CatUtils::addSegmentTranslation( $new_translation, $this->result[ 'errors' ] );
+        CatUtils::addSegmentTranslation( $new_translation, self::isRevision(), $this->result[ 'errors' ] );
 
         if ( !empty( $this->result[ 'errors' ] ) ) {
             $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " .
@@ -508,7 +498,9 @@ class setTranslationController extends ajaxController {
 
         //update total time to edit
         try {
-            Jobs_JobDao::updateTotalTimeToEdit( $this->chunk, $this->time_to_edit );
+            if ( !self::isRevision() ) {
+                Jobs_JobDao::updateTotalTimeToEdit( $this->chunk, $this->time_to_edit );
+            }
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -101, "message" => "database errors" ];
             Log::doJsonLog( "Lock: Transaction Aborted. " . $e->getMessage() );
@@ -559,11 +551,23 @@ class setTranslationController extends ajaxController {
                     'len'      => $this->split_chunk_lengths,
                     'statuses' => $this->split_statuses
             ];
-
             $translationDao                          = new TranslationsSplit_SplitDAO( Database::obtain() );
             $result                                  = $translationDao->update( $translationStruct );
 
         }
+
+        $this->featureSet->run( 'preSetTranslationCommitted', [
+                'translation'       => $new_translation,
+                'old_translation'   => $old_translation,
+                'propagation'       => $propagationTotal,
+                'chunk'             => $this->chunk,
+                'segment'           => $this->segment,
+                'user'              => $this->user,
+                'source_page_code'  => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber),
+                'controller_result' => & $this->result,
+                'features'          => $this->featureSet,
+                'project'           => $project
+        ] );
 
         //COMMIT THE TRANSACTION
         try {
@@ -585,7 +589,7 @@ class setTranslationController extends ajaxController {
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
-                    'source_page_code' => $this->_getSourcePageCode()
+                    'source_page_code' => SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             ] );
 
         } catch ( Exception $e ) {
@@ -614,7 +618,8 @@ class setTranslationController extends ajaxController {
 
             try {
                 $update_completed = Jobs_JobDao::setJobComplete( $this->chunk );
-            } catch ( Exception $ignore ) {}
+            } catch ( Exception $ignore ) {
+            }
 
             if ( empty( $update_completed ) ) {
                 $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
@@ -625,8 +630,28 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $this->evalSetContribution( $new_translation, $old_translation );
+        $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk ] );
 
+        $this->evalSetContribution( $new_translation, $old_translation );
+    }
+
+    /**
+     * @return int|mixed
+     */
+    protected function checkData() {
+        try {
+            $this->_checkData();
+        } catch ( Exception $e ) {
+
+            if ( $e->getCode() == -1 ) {
+                Utils::sendErrMailReport( $e->getMessage() );
+            }
+
+            Log::doJsonLog( $e->getMessage() );
+
+            return $e->getCode();
+
+        }
     }
 
     /**
@@ -783,7 +808,7 @@ class setTranslationController extends ajaxController {
                     $this->id_segment,
                     $this->user->uid,
                     $this->jobData[ 'id_project' ],
-                    $this->isRevision()
+                    SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             );
         }
     }
@@ -807,7 +832,8 @@ class setTranslationController extends ajaxController {
         if (
                 $old_translation->isICE() &&
                 $new_translation->translation == $old_translation->translation &&
-                $new_translation->isTranslationStatus() && !$old_translation->isTranslationStatus()
+                $new_translation->isTranslationStatus() && !$old_translation->isTranslationStatus() &&
+                !$old_translation->isRejected() // this handle the case of rejection/rebut behaviour. A status change already happened
         ) {
             Database::obtain()->rollback();
             $msg                        = "Status change not allowed with identical translation on segment {$old_translation->id_segment}.";
@@ -933,7 +959,7 @@ class setTranslationController extends ajaxController {
             $element         = new \TaskRunner\Commons\QueueElement();
             $element->params = $contributionStruct;
             $element->__toString();
-            \Utils::raiseJsonExceptionError( true );
+            Utils::raiseJsonExceptionError( true );
         } catch ( Exception $e ) {
             Log::doJsonLog( $contributionStruct );
         }

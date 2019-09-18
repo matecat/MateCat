@@ -24,7 +24,7 @@ use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\QueueElement;
 use UnexpectedValueException;
 use Utils;
-use WordCount_Counter;
+use WordCount_CounterModel;
 
 /**
  * Created by PhpStorm.

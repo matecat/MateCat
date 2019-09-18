@@ -13,8 +13,8 @@ class SegmentsDetails extends React.Component {
         let files = [];
         if ( this.props.files ) {
             this.props.files.keySeq().forEach(( key, index ) => {
-                let file = <FileDetails key={key} file={this.props.files.get(key)} urls={this.props.urls}/>
-                files.push(file)
+                let file = <FileDetails key={key} file={this.props.files.get(key)} urls={this.props.urls} secondPassReviewEnabled={this.props.secondPassReviewEnabled}/>
+                files.push(file);
                 this.lastSegment = this.props.files.get(key).get('segments').last().get('sid');
             });
         }
@@ -63,7 +63,11 @@ class SegmentsDetails extends React.Component {
                 <div className="qr-filter-container">
                     <h3>Segment details</h3>
                     <Filters applyFilter={this.filterSegments.bind(this)}
-                            categories={this.props.categories}
+                             categories={this.props.categories}
+                             secondPassReviewEnabled={this.props.secondPassReviewEnabled}
+                             segmentToFilter={this.props.segmentToFilter}
+                             updateSegmentToFilter={this.props.updateSegmentToFilter}
+
                     />
                 </div>
                 {this.props.files && this.props.files.size === 0 ?

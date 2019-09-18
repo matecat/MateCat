@@ -6,7 +6,7 @@
  * Time: 15:33
  */
 
-namespace Features\ReviewExtended\Decorator ;
+namespace Features\ReviewExtended\Decorator;
 
 use LQA\ChunkReviewDao;
 use LQA\ModelStruct;
@@ -16,7 +16,7 @@ class CatDecorator extends \AbstractDecorator {
     /**
      * @var \catController
      */
-    protected $controller ;
+    protected $controller;
 
     /**
      * decorate
@@ -27,7 +27,7 @@ class CatDecorator extends \AbstractDecorator {
 
         $project = $this->controller->getChunk()->getProject();
 
-        $model = $project->getLqaModel() ;
+        $model = $project->getLqaModel();
 
         /**
          * TODO: remove this lqa_categories here, this serialization work should be done
@@ -35,15 +35,15 @@ class CatDecorator extends \AbstractDecorator {
          */
         $this->template->lqa_categories = $model->getSerializedCategories();
 
-        $this->template->lqa_flat_categories = $this->getCategoriesAsJson($model);
-        $this->template->review_type = 'extended';
-        $this->template->review_extended = true;
-        $this->template->project_type = null;
+        $this->template->lqa_flat_categories  = $this->getCategoriesAsJson( $model );
+        $this->template->review_type          = 'extended';
+        $this->template->review_extended      = true;
+        $this->template->project_type         = null;
         $this->template->segmentFilterEnabled = true;
 
         $this->template->quality_report_href = \INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
 
-        $this->template->showReplaceOptionsInSearch = true ;
+        $this->template->showReplaceOptionsInSearch = true;
 
         $this->template->overall_quality_class = $this->getOverallQualityClass();
 
@@ -60,15 +60,16 @@ class CatDecorator extends \AbstractDecorator {
         /**
          * override review_password
          */
-        $chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword($this->controller->getChunk()->id, $this->controller->getChunk()->password);
+        $chunk_review                    = ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( $this->controller->getChunk() )[ 0 ];
         $this->template->review_password = $chunk_review->review_password;
+
     }
 
-    private function getCategoriesAsJson(ModelStruct $model) {
+    private function getCategoriesAsJson( ModelStruct $model ) {
         $categories = $model->getCategories();
-        $out = array();
+        $out        = [];
 
-        foreach($categories as $category) {
+        foreach ( $categories as $category ) {
             $out[] = $category->toArrayWithJsonDecoded();
         }
 
@@ -76,20 +77,19 @@ class CatDecorator extends \AbstractDecorator {
     }
 
     private function getOverallQualityClass() {
-        $reviews = ChunkReviewDao::findChunkReviewsByChunkIds( array(
-                array(
-                        $this->controller->getChunk()->id,
-                        $this->controller->getChunk()->password
-                )
-        ));
 
-        if ( $reviews[0]->is_pass === null ) {
+        $review = ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( $this->controller->getChunk() )[ 0 ];
+
+        if ( $review->is_pass === null ) {
             return '';
-        } else if ($reviews[0]->is_pass) {
-            return 'excellent';
         } else {
-            return 'fail';
+            if ( $review->is_pass ) {
+                return 'excellent';
+            } else {
+                return 'fail';
+            }
         }
+
     }
 
 }

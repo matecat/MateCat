@@ -1,3 +1,4 @@
+import InputField from "../../common/InputField";
 
 class FilterSegments extends React.Component {
 
@@ -14,7 +15,8 @@ class FilterSegments extends React.Component {
             filter: {
                 status: "",
                 issue_category: null,
-                severity: null
+                severity: null,
+                id_segment: this.props.segmentToFilter
             }
         }
     }
@@ -47,6 +49,12 @@ class FilterSegments extends React.Component {
     filterSelectChanged(type, value) {
         let filter = jQuery.extend({}, this.state.filter);
         filter[type] = value;
+        if ( type === 'status' && value === 'APPROVED-2') {
+            filter.revision_number = 2;
+            filter[type] = 'APPROVED';
+        } else {
+            filter.revision_number = null;
+        }
         this.setState({
             filter: filter
         });
@@ -90,6 +98,22 @@ class FilterSegments extends React.Component {
         });
     }
 
+    filterIdSegmentChange(value) {
+        if (value && value !== "") {
+            this.filterSelectChanged('id_segment', value);
+        } else {
+            let filter = jQuery.extend({}, this.state.filter);
+            filter.id_segment = null;
+            this.setState({
+                filter: filter
+            });
+            setTimeout(()=> {
+                this.props.applyFilter(this.state.filter)
+            });
+        }
+        this.props.updateSegmentToFilter(value);
+    }
+
     initDropDown() {
         let self = this;
         $(this.statusDropdown).dropdown({
@@ -127,17 +151,29 @@ class FilterSegments extends React.Component {
     }
 
     render () {
-        let optionsStatus = config.searchable_statuses.map(function (item, index) {
-            return <div className="item" key={index} data-value={item.value}>
+        let optionsStatus = config.searchable_statuses.map( (item, index)=> {
+            return <React.Fragment key={index}>
+
+                <div className="item" key={index} data-value={item.value}>
                 <div  className={"ui "+ item.label.toLowerCase() +"-color empty circular label"} />
                 {item.label}
-            </div>;
+            </div>
+            { this.props.secondPassReviewEnabled && item.value === 'APPROVED' ? (
+                <div className="item" key={index+'-2'} data-value={'APPROVED-2'}>
+                    <div  className={"ui "+ item.label.toLowerCase() +"-2ndpass-color empty circular label"} />
+                    {item.label}
+                </div>
+            ) : null }
+            </React.Fragment>
         });
         let optionsCategory = this.lqaNestedCategories.map((item, index) => {
             return <div className="item" key={index} data-value={item.get('id')}>
                 {item.get('label')}
             </div>;
         });
+        optionsCategory = optionsCategory.insert(0, <div className="item" key={'all'} data-value={'all'}>
+           All
+        </div>);
         let optionsSeverities = this.severities.map((item, index) => {
             return <div className="item" key={index} data-value={item.get('label')}>
                 {item.get('label')}
@@ -148,6 +184,9 @@ class FilterSegments extends React.Component {
         let severityFilterClass = (this.state.filter.severity && this.state.filter.severity !== "") ? "filtered" : "not-filtered";
         return <div className="qr-filter-list">Filters by
             <div className="filter-dropdown left-10">
+                <div className={"filter-idSegment "}>
+                    <InputField placeholder="Id Segment" name="id_segment" onFieldChanged={this.filterIdSegmentChange.bind(this)} tabindex={0} showCancel={true} value={this.state.filter.id_segment}/>
+                </div>
                 <div className={"filter-status " + statusFilterClass}>
                     <div className="ui top left pointing dropdown basic tiny button right-0" ref={(dropdown)=>this.statusDropdown=dropdown}>
                         <div className="text">

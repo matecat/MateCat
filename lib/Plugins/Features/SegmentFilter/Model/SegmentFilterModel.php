@@ -14,11 +14,18 @@ class SegmentFilterModel {
      * @var \Chunks_ChunkStruct
      */
     private $chunk;
+
     /**
-     * @var array
+     * @var FilterDefinition
      */
     private $filter;
 
+    /**
+     * SegmentFilterModel constructor.
+     *
+     * @param \Chunks_ChunkStruct $chunk
+     * @param FilterDefinition    $filter
+     */
     public function __construct( \Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
         $this->chunk  = $chunk;
         $this->filter = $filter;

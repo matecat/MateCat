@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class CreateTablesForTeams extends AbstractMatecatMigration
 {
     public $sql_up = array(

@@ -106,9 +106,7 @@ class SplitAndMergeTest extends IntegrationTest {
          * information ( score, reviewed_words_count, is_pass ).
          */
 
-        $review_data = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $chunks[0]->id, $chunks[0]->password
-        );
+        $review_data = ( new ChunkReviewDao() )->findChunkReviews( $chunks[0] )[ 0 ];
 
         $this->assertEquals(3, $review_data->penalty_points );
 
@@ -124,12 +122,8 @@ class SplitAndMergeTest extends IntegrationTest {
         $chunks = $project->getChunks();
         $this->assertEquals(2, count($chunks));
 
-        $first_chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $chunks[0]->id, $chunks[0]->password
-        );
-        $last_chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $chunks[1]->id, $chunks[1]->password
-        );
+        $first_chunk_review = ( new ChunkReviewDao() )->findChunkReviews( $chunks[ 0 ] )[ 0 ];
+        $last_chunk_review  = ( new ChunkReviewDao() )->findChunkReviews( $chunks[ 1 ] )[ 0 ];
 
         $this->assertEquals(2, $first_chunk_review->penalty_points);
         $this->assertEquals(1, $last_chunk_review->penalty_points);
@@ -180,12 +174,8 @@ class SplitAndMergeTest extends IntegrationTest {
         $result = $this->makeIssueOnChunk($chunks[0]);
         $result = $this->makeIssueOnChunk($chunks[1]);
 
-        $first_chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $chunks[0]->id, $chunks[0]->password
-        );
-        $last_chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $chunks[1]->id, $chunks[1]->password
-        );
+        $first_chunk_review = ( new ChunkReviewDao() )->findChunkReviews( $chunks[ 0 ] )[ 0 ];
+        $last_chunk_review = ( new ChunkReviewDao() )->findChunkReviews( $chunks[ 1 ] )[ 0 ];
 
         $this->assertEquals(1, $first_chunk_review->penalty_points);
         $this->assertEquals(1, $last_chunk_review->penalty_points);
@@ -201,9 +191,7 @@ class SplitAndMergeTest extends IntegrationTest {
 
         $this->assertEquals(1, count( $chunks ));
 
-        $merged_review_record = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword(
-                $chunks[0]->id, $chunks[0]->password
-        );
+        $merged_review_record = ( new ChunkReviewDao() )->findChunkReviews( $chunks[ 0 ] )[ 0 ];
 
         $this->assertEquals(2, $merged_review_record->penalty_points);
     }

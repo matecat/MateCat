@@ -135,6 +135,19 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], Immutable.fromJS(translator));
     },
 
+    setSecondPassUrl: function (prId, jobId, jobPassword, secondPAssPassword) {
+        let project = this.projects.find(function (prj) {
+            return prj.get('id') == prId;
+        });
+        let indexProject = this.projects.indexOf(project);
+        let job = project.get('jobs').find(function (j) {
+            return j.get('id') == jobId && j.get('password') === jobPassword;
+        });
+        let indexJob = project.get('jobs').indexOf(job);
+        // let url = config.hostpath + '/revise2/' + project.get('name') + '/'+ job.get('source') +'-'+ job.get('target') +'/'+ jobId +'-'+ secondPAssPassword;
+        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'revise_passwords', 1], Immutable.fromJS({revision_number: 2, password: secondPAssPassword}));
+    },
+
     unwrapImmutableObject(object) {
         if (object && typeof object.toJS === "function") {
             return object.toJS();
@@ -204,6 +217,10 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.CHANGE_PROJECT_TEAM:
             ProjectsStore.changeProjectTeam(action.project, action.teamId);
+            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.ADD_SECOND_PASS:
+            ProjectsStore.setSecondPassUrl(action.idProject, action.idJob, action.passwordJob, action.secondPAssPassword);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.HIDE_PROJECT:
