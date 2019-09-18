@@ -1,0 +1,62 @@
+<p>Hi <?= $recipientUser['first_name'] ?>, </p>
+<p>
+    <?php if ( $changeAuthor ) { ?>
+        <?= $changeAuthor['first_name'] . " " . $changeAuthor['last_name'] ?>
+    <?php } else { ?>
+        someone
+    <?php } ?>
+
+    <?php if ( $data['isPreviousChangeAuthor'] ) { ?>
+    changed a segment which was earlier approved by you.
+    <?php } else { ?>
+    changed a previously approved segment.
+    <?php } ?>
+</p>
+
+<p>
+    <strong>Source</strong>: <?= $segmentInfo['segment_source'] ?>
+</p>
+
+<p>
+    <strong>Old target</strong>: <?= $segmentInfo['old_translation'] ?>
+</p>
+
+<p>
+    <strong>New target</strong>: <?= $segmentInfo['new_translation'] ?>
+</p>
+
+<p>
+    <?php if ( count( $segmentInfo['issues']) > 0 ) { ?>
+        <p><strong>Issues</strong><p>
+        <ul>
+
+        <?php foreach( $segmentInfo['issues'] as $issue ) { ?>
+
+            <li>
+                <?= $issue['category'] ?> <strong> [<?= $issue['severity'] ?>]</strong>
+
+                <?php if ( count( $issue['comments'] ) > 0 ) { ?>
+                <ul>
+                    <?php foreach( $issue['comments'] as $comment ) { ?>
+                    <li>
+                        <?= ( $comment['source_page'] == \Constants::SOURCE_PAGE_TRANSLATE ? 'Translator' : 'Reviewer' ) ?>
+                        (<?php
+                            $date = DateTime::createFromFormat('Y-m-d H:i:s', $comment['create_date']);
+                            echo $date->format('M d, Y h:i A') ;
+                         ?>):
+
+                        <?php echo $comment['comment'] ; ?>
+                    </li>
+                    <?php } ?>
+                </ul>
+                <?php } ?>
+            </li>
+        <?php } ?>
+        </ul>
+    <?php } ?>
+
+</p>
+
+<p>
+    Here's the link to the segment for you to review the change: <a href="<?= $segmentUrl ?>"><?= $segmentUrl ?></a>.
+</p>

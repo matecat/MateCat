@@ -5,7 +5,7 @@ path = /channel/updates
 
 [queue]
 name = /topic/matecat_sse_notifications
-host = activemq-0.svc.production.matecat.cloud
+host = amq
 port = 61613
 login = login
 passcode = passcode

@@ -131,10 +131,10 @@ class getSegmentsController extends ajaxController {
         }
 
         $this->result[ 'data' ][ 'files' ] = $this->data;
-
         $this->result[ 'data' ][ 'where' ] = $this->where;
-    }
 
+        $this->result['data'] = $this->featureSet->filter('filterGetSegmentsResult', $this->result['data'], $this->job );
+    }
 
     private function getOptionalQueryFields() {
         $feature = $this->job->getProject()->isFeatureEnabled( 'translation_versions' );

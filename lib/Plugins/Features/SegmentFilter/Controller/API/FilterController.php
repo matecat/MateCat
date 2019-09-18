@@ -3,13 +3,12 @@
 
 namespace Features\SegmentFilter\Controller\API;
 
+use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
-use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkStruct;
+use Features\SegmentFilter\Model\FilterDefinition;
 use Features\SegmentFilter\Model\SegmentFilterModel;
-
-use Features\SegmentFilter\Model\FilterDefinition ;
 
 
 class FilterController extends KleinController {
@@ -43,14 +42,11 @@ class FilterController extends KleinController {
 
     public function index() {
        // TODO: validate the input filter
-
         $this->model = new SegmentFilterModel( $this->chunk, $this->filter );
-
 
         // TODO: move this into a formatter
         $ids_as_array   = [];
         $ids_grouping   = [];
-        $reorderedGroup = [];
         $segments_id    = $this->model->getSegmentList();
         foreach ( $segments_id as $segment_id ) {
             $ids_as_array[] = $segment_id[ 'id' ];

@@ -9,23 +9,22 @@
 
 namespace AsyncTasks\Workers;
 
-use CatUtils;
 use Constants\Ices;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Database;
 use FeatureSet;
-use PDOException;
-use SubFiltering\Filter;
-use TaskRunner\Commons\AbstractWorker,
-        TaskRunner\Commons\QueueElement,
-        TaskRunner\Exceptions\EndQueueException,
-        TaskRunner\Exceptions\ReQueueException,
-        TmKeyManagement_TmKeyManagement,
-        TaskRunner\Commons\AbstractElement;
 use INIT;
+use PDOException;
 use PostProcess;
 use Stomp;
+use SubFiltering\Filter;
+use TaskRunner\Commons\AbstractElement;
+use TaskRunner\Commons\AbstractWorker;
+use TaskRunner\Commons\QueueElement;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
+use TmKeyManagement_TmKeyManagement;
 use Utils;
 
 class GetContributionWorker extends AbstractWorker {

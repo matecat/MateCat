@@ -102,7 +102,8 @@ let SearchUtils = {
                     status: this.searchParams.status,
                     matchcase: this.searchParams['match-case'],
                     exactmatch: this.searchParams['exact-match'],
-                    replace: replace
+                    replace: replace,
+                    revision_number: config.revisionNumber
                 },
                 success: function(d) {
                     SearchUtils.execFind_success(d);
@@ -249,7 +250,8 @@ let SearchUtils = {
                 status: p.status,
                 matchcase: p['match-case'],
                 exactmatch: p['exact-match'],
-                replace: replace
+                replace: replace,
+                revision_number: config.revisionNumber
             },
             success: function(d) {
                 if(d.errors.length) {
@@ -321,7 +323,7 @@ let SearchUtils = {
                     $(this).replaceWith(a);
                 });
             } else {
-                if ( seg.length > 0 ) {
+                if ( seg && seg.length > 0 ) {
                     var sid = parseInt(UI.getSegmentId(seg));
                     if (where == 'before') {
                         $('section').each(function() {
@@ -475,7 +477,7 @@ let SearchUtils = {
                         tt = LXQ.cleanUpHighLighting(tt);
                     }
                     let spanArray = [];
-                    tt = tt.replace(/(<[/]*span.*?>)/g, function ( match, text ) {
+                    tt = tt.replace(/(<[/]*span.*?>|<[/]*a.*?>)/g, function ( match, text ) {
                         spanArray.push(text);
                         return "$&";
                     });

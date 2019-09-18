@@ -337,6 +337,18 @@ header {
                             }
                         }
                     }
+                    .qr-header {
+                        height: 70px;
+                        .filter-dropdown .dropdown{
+                            font-size: 20px !important;
+                            max-width: 190px;
+                        }
+                    }
+                    .qr-filter-container, .qr-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
                     .qr-segment-details-container {
                         background: #E5E9F1;
                         padding: 35px 15px 15px;
@@ -344,12 +356,6 @@ header {
                             h3{
                                 margin-bottom: 0;
                             }
-                            .qr-filter-container {
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                            }
-                            .filters-qr {}
                             .qr-segments {
                                 margin-top: 50px;
                                 &:nth-child(2) {
@@ -396,6 +402,9 @@ header {
                                                     color: #09beec;
                                                 }
                                                 .status-approved {
+                                                    &.approved-r2 {
+                                                        color: #BC6AC9;
+                                                    }
                                                     font-size: 20px;
                                                     color: #7eaf3e;
                                                 }
@@ -464,12 +473,26 @@ header {
                                                     }
                                                     a.qr-segment-title {
                                                         b {
-                                                            color: #000;
                                                             text-decoration: underline;
                                                             cursor: pointer;
                                                             &:hover {
                                                                 text-decoration: none;
                                                             }
+                                                        }
+                                                    }
+                                                    &.qr-translated {
+                                                        b {
+                                                            color: #0abeec;
+                                                        }
+                                                    }
+                                                    &.qr-revised {
+                                                        b {
+                                                            color: #7cc576;
+                                                        }
+                                                    }
+                                                    &.qr-revised-2ndpass {
+                                                        b {
+                                                            color: #BC6AC9;
                                                         }
                                                     }
                                                     &.rtl-lang {
@@ -503,6 +526,7 @@ header {
                                                                 margin-right: 5px;
                                                                 margin-top: 5px;
                                                                 background: #f2f4f7;
+
                                                                 &.automated {
                                                                     padding: 0;
                                                                     padding-right: 5px;
@@ -529,6 +553,33 @@ header {
                                                                 }
                                                                 .qr-severity {
                                                                     margin-left: 5px;
+                                                                }
+                                                                .qr-comment-list {
+                                                                    padding: 5px 10px;
+                                                                    font-size: 14px;
+                                                                    background: #ffffff;
+                                                                    color: #787878;
+                                                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                                                    max-height: 300px;
+                                                                    min-width: 200px;
+                                                                    overflow: auto !important;
+                                                                    .re-comment {
+                                                                        font-size: 16px;
+                                                                        margin-bottom: 0;
+                                                                        .re-revisor {
+                                                                            color: #00b76c;
+                                                                        }
+                                                                        .re-revisor2 {
+                                                                            color: #BC6AC9;
+                                                                        }
+                                                                        .re-translator {
+                                                                            color: #0997bc;
+                                                                        }
+                                                                        .re-comment-date{
+                                                                            font-size: 13px;
+                                                                            color: lightslategray;
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
                                                         }
@@ -630,188 +681,6 @@ header {
 
 /*End Placehoder*/
 
-
-.filter-list {
-    display: flex;
-    flex-grow: 3;
-    align-items: center;
-    box-sizing: border-box;
-    .filter-dropdown {
-        display: flex;
-        align-items: center;
-        &:nth-child(2){
-            margin-left: 15px;
-        }
-        .ui.basic.button{
-            font-family: "calibri", Arial, Helvetica, sans-serif;
-            font-size: 16px !important;
-            padding: 10px 20px;
-            border-radius: 40px;
-            transition: 0.3s ease;
-            box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-            .text {
-                transition: 0.3s ease;
-                display: flex;
-            }
-            .ui.cancel.label {
-                position: absolute;
-                padding: 4px;
-                background-color: #d6d6d6;
-                border-radius: 15px;
-                top: 8px;
-                line-height: 0px;
-                right: 0px;
-                visibility: hidden;
-                &:hover {
-                    background-color: #cccccc !important;
-                }
-            }
-        }
-        .filter-status, .filter-activities, .filter-data-sample {
-            &.not-filtered {
-                .ui.basic.button {
-                    &:hover {
-                        box-shadow: 0px 0px 0px 1px #09beec inset;
-                        color: #09beec !important;
-                    }
-                    &.disabled {
-                        box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-                        pointer-events: none;
-                    }
-                }
-            }
-            &.filtered {
-                .ui.basic.button {
-                    background-color: #ffffff !important;
-                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                    color: #000000 !important;
-                    padding: 9px 20px;
-                    &:hover {
-                        width: fit-content;
-                        .text {
-                            margin-right: 15px;
-                        }
-                        .ui.cancel.label {
-                            visibility: unset;
-                            right: 5px;
-                        }
-                    }
-                }
-            }
-            &.disabled {
-                background: unset;
-                opacity: 0.5 !important;
-                box-shadow: unset;
-                border: none;
-                pointer-events: none;
-            }
-        }
-        .filter-status {
-            .circular.label {
-                &.new-color {
-                    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-                    background: #FFFFFF
-                }
-                &.draft-color {
-                    background: #E8E8E8;;
-                }
-                &.translated-color {
-                    background: #09beec;
-                }
-                &.approved-color {
-                    background: #7cc576;
-                }
-                &.rejected-color {
-                    background: #dc2e34;
-                }
-            }
-        }
-        .filter-activities {
-
-        }
-        .filter-toggle {
-            .checkbox {
-                left: 5px;
-                top: 4px;
-                margin: 0 !important;
-                float: none;
-                label {
-                    &:before {
-                        background: #dcdfe4 !important;
-                    }
-                    &:after {
-                        box-shadow: inset 0 0 0 1px rgba(34, 36, 38, 0.25);
-                        background: #FFFFFF;
-                    }
-                }
-            }
-        }
-        .filter-data-sample {
-            display: flex;
-            align-items: center;
-            .percent-item {
-                margin-left: 5px;
-            }
-            .menu {
-                width: 220px;
-                .head-dropdown {
-                    label {
-                        display: inline-block;
-                        width: 60%;
-                        position: relative;
-                        font-size: 12px;
-                        top: 16px;
-                    }
-                    input {
-                        width: 40%;
-                        display: inline-block;
-                        right: 0;
-                        padding: 5px 10px;
-                        margin-top: 10px;
-                    }
-                }
-            }
-            .item, .text {
-                .type-item, .order-item {
-                    display: inline-block;
-                }
-                .order-item {
-                    float: right;
-                }
-            }
-            .text {
-                .order-item {
-                    margin-left: 2px;
-                }
-            }
-        }
-    }
-    .clear-filter-element {
-        margin-left: 13px;
-        border-left: 1px solid #d6d6d7;
-        padding-left: 13px;
-        color: black;
-        display: flex;
-        justify-content: space-around;
-        width: 135px;
-        .clear-filter, .select-all-filter {
-            display: inline;
-            button {
-                background: none;
-                color: grey;
-                text-decoration: underline;
-                cursor: pointer;
-                border: none;
-                padding: 0;
-                outline: none;
-                &:hover {
-                    text-decoration: none;
-                }
-            }
-        }
-    }
-}
-
 .qr-filter-list {
     display: flex;
     align-items: center;
@@ -839,85 +708,102 @@ header {
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .ui.cancel.label {
-                position: absolute;
-                padding: 4px;
-                background-color: #d6d6d6;
-                border-radius: 15px;
-                top: 8px;
-                line-height: 0px;
-                right: 0px;
-                visibility: hidden;
-                &:hover {
-                    background-color: #cccccc !important;
-                }
-            }
+
+        }
+        .ui.cancel.label {
+          position: absolute;
+          padding: 4px;
+          background-color: #d6d6d6;
+          border-radius: 15px;
+          top: 8px;
+          line-height: 0px;
+          right: 0px;
+          visibility: hidden;
+          &:hover {
+            background-color: #cccccc !important;
+          }
         }
         .filter-category {
             margin-left: 5px;
         }
-        .filter-status, .filter-severity , .filter-category, .filter-activities, .filter-data-sample {
-            &.not-filtered {
-                .ui.basic.button {
-                    &:hover {
-                        box-shadow: 0px 0px 0px 1px #09beec inset;
-                        color: #09beec !important;
+        .not-filtered {
+            .ui.basic.button {
+                &:hover {
+                    box-shadow: 0px 0px 0px 1px #09beec inset;
+                    color: #09beec !important;
+                }
+                &.disabled {
+                    box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
+                    pointer-events: none;
+                }
+            }
+        }
+        .filtered {
+            .ui.basic.button {
+                background-color: #ffffff !important;
+                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                color: #000000 !important;
+                padding: 9px 20px 9px 15px;
+                &:hover {
+                    width: fit-content;
+                    .text {
+                        margin-right: 15px;
                     }
-                    &.disabled {
-                        box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-                        pointer-events: none;
+                    .ui.cancel.label {
+                        visibility: unset;
+                        right: 5px;
                     }
                 }
             }
-            &.filtered {
-                .ui.basic.button {
+        }
+        .active {
+            .ui.basic.button {
+                background: transparent none !important;
+                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                color: #000000 !important;
+                padding: 9px 20px 9px 15px;
+                &:hover {
                     background-color: #ffffff !important;
-                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                    color: #000000 !important;
-                    padding: 9px 20px 9px 15px;
-                    &:hover {
-                        width: fit-content;
-                        .text {
-                            margin-right: 15px;
-                        }
-                        .ui.cancel.label {
-                            visibility: unset;
-                            right: 5px;
-                        }
+                    .ui.cancel.label {
+                        visibility: unset;
+                        right: 5px;
                     }
                 }
             }
-            &.disabled {
-                background: unset;
-                opacity: 0.5 !important;
-                box-shadow: unset;
-                border: none;
-                pointer-events: none;
-            }
         }
-        .filter-status {
-            .circular.label {
-                &.new-color {
-                    box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-                    background: #FFFFFF
-                }
-                &.draft-color {
-                    background: #E8E8E8;;
-                }
-                &.translated-color {
-                    background: #09beec;
-                }
-                &.approved-color {
-                    background: #7cc576;
-                }
-                &.rejected-color {
-                    background: #dc2e34;
-                }
-            }
+        .disabled {
+            background: unset;
+            opacity: 0.5 !important;
+            box-shadow: unset;
+            border: none;
+            pointer-events: none;
         }
-        .filter-activities {
 
+        .circular.label {
+            &.new-color {
+                box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+                background: #FFFFFF
+            }
+            &.draft-color {
+                background: #E8E8E8;;
+            }
+            &.translated-color {
+                background: #09beec;
+            }
+            &.approved-color {
+                background: #7cc576;
+            }
+            &.rejected-color {
+                background: #dc2e34;
+            }
+            &.revision-color {
+                background: #7cc576;
+            }
+            &.second-revision-color, &.approved-2ndpass-color {
+                background: #BC6AC9;
+            }
         }
+
         .filter-toggle {
             .checkbox {
                 left: 5px;

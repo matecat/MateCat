@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 
 class FixChunkReviewModelScore extends AbstractMatecatMigration
 {

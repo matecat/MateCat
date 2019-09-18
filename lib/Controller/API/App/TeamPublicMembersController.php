@@ -9,12 +9,8 @@
 
 namespace API\App;
 
-use API\V2\KleinController;
 use API\V2\Json\Membership;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\TeamAccessValidator;
-use TeamModel;
-use Teams\TeamDao;
+use API\V2\KleinController;
 use Teams\MembershipDao;
 
 class TeamPublicMembersController extends KleinController {

@@ -148,7 +148,6 @@ class analyzeController extends viewController {
         $this->decorator = new AnalyzeDecorator( $this, $this->template );
         $this->decorator->decorate();
 
-
         /**
          * This loading is forced for HTML customization purpose only
          * when a plugin in beginDoAction needs to customize the behaviour
@@ -163,7 +162,6 @@ class analyzeController extends viewController {
                 $this,
                 $this->template
         );
-
     }
 
     private function __evalModalBoxForLogin() {

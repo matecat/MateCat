@@ -59,16 +59,18 @@
                     UI.copyTagProjectionInCurrentSegment();
                     UI.autoFillTagsInTarget();
                 } else {
+                    UI.setSegmentAsTagged();
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                     UI.autoFillTagsInTarget();
                 }
 
             }).fail(function () {
+                UI.setSegmentAsTagged();
                 UI.copyTagProjectionInCurrentSegment();
                 UI.autoFillTagsInTarget();
                 UI.startOfflineMode();
             }).always(function () {
-                UI.setSegmentAsTagged();
+                // UI.setSegmentAsTagged();
                 UI.editarea.focus();
                 SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
                 UI.createButtons();
@@ -166,14 +168,15 @@
          */
         copySourcefromDataAttribute: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
-            var source = htmlDecode(currentSegment.find('.source').data('original'));
+            var segmentJS = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
+            var source = segmentJS.segment;
             source = UI.transformPlaceholdersAndTags(source);
             // source = source.replace(/\n/g , config.lfPlaceholder)
             //         .replace(/\r/g, config.crPlaceholder )
             //         .replace(/\r\n/g, config.crlfPlaceholder )
             //         .replace(/\t/g, config.tabPlaceholder )
             //         .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
-            SegmentActions.replaceSourceText(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment), source);
+            SegmentActions.replaceSourceText(segmentJS.sid, segmentJS.fid, source);
             UI.markGlossaryItemsInSource(currentSegment, UI.cachedGlossaryData);
         },
         /**
@@ -241,7 +244,7 @@
         },
         decodeText: function(segment, text) {
             var decoded_text;
-            if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
+            if (UI.enableTagProjection && !segment.tagged && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) && UI.removeAllTags(segment.segment) !== '' ) {
                 decoded_text = UI.removeAllTags(text);
             } else {
@@ -438,12 +441,13 @@
             }
         },
         isReadonlySegment : function( segment ) {
-            return ( (segment.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
+            return ( segment.readonly == 'true' ||UI.body.hasClass('archived')) ;
         },
 
         isUnlockedSegment: function ( segment ) {
-            var readonly = UI.isReadonlySegment(segment);
-            return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid))
+            // var readonly = UI.isReadonlySegment(segment) ;
+            // return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid));
+            return !_.isNull(UI.getFromStorage('unlocked-' + segment.sid));
         },
         getStatusForAutoSave : function( segment ) {
             var status ;
@@ -738,6 +742,7 @@
             } else {
                 return API.SEGMENT.approveSegments(segmentsArray).then(function ( response ) {
                     self.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
+                    UI.retrieveStatistics();
                 });
             }
         },
@@ -752,6 +757,7 @@
             } else {
                 return API.SEGMENT.translateSegments(segmentsArray).then(function ( response ) {
                     self.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
+                    UI.retrieveStatistics();
                 });
             }
         },

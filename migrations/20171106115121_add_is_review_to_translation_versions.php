@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class AddIsReviewToTranslationVersions extends AbstractMatecatMigration {
 
     public $sql_up = [

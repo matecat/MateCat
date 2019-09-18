@@ -1,4 +1,8 @@
 <?php
+
+use FilesStorage\AbstractFilesStorage;
+use FilesStorage\FilesStorageFactory;
+
 /**
  * Created by PhpStorm.
  * User: domenico
@@ -6,7 +10,6 @@
  * Time: 18.57
  *
  */
-
 abstract class downloadController extends controller {
 
     public $id_job;
@@ -55,7 +58,7 @@ abstract class downloadController extends controller {
 
     protected function setMimeType() {
 
-        $extension = FilesStorage::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
+        $extension = AbstractFilesStorage::pathinfo_fix( $this->_filename, PATHINFO_EXTENSION );
 
         switch ( strtolower( $extension ) ) {
             case "xlf":
@@ -112,7 +115,7 @@ abstract class downloadController extends controller {
                             "code"    => 0,
                             "message" => "Download complete."
                     ] ) : json_encode( $tokenContent ) ),
-                    time() + 3600            // expires in 1 hour
+                    time() + 600            // expires in 5 minutes
                     , '/',
                     \INIT::$COOKIE_DOMAIN
             );
@@ -203,7 +206,7 @@ abstract class downloadController extends controller {
                 $fName = self::forceOcrExtension( $fName );
             }
 
-            $nFinfo = FilesStorage::pathinfo_fix( $fName );
+            $nFinfo = AbstractFilesStorage::pathinfo_fix( $fName );
             $_name  = $nFinfo[ 'filename' ];
             if ( strlen( $_name ) < 3 ) {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
@@ -231,7 +234,7 @@ abstract class downloadController extends controller {
 
     public static function forceOcrExtension( $filename ) {
 
-        $pathinfo = FilesStorage::pathinfo_fix( $filename );
+        $pathinfo = AbstractFilesStorage::pathinfo_fix( $filename );
 
         switch ( strtolower( $pathinfo[ 'extension' ] ) ) {
             case 'pdf':

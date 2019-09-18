@@ -2,7 +2,7 @@
 
 namespace Jobs;
 
-use Database ;
+use Database;
 
 class MetadataDao extends \DataAccess_AbstractDao {
 

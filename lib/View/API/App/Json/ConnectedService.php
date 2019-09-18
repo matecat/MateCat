@@ -10,7 +10,7 @@ namespace API\App\Json;
 
 
 use ConnectedServices\ConnectedServiceStruct;
-use Utils ;
+use Utils;
 
 class ConnectedService {
 

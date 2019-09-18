@@ -12,7 +12,7 @@ use API\V2\Exceptions\AuthenticationError;
 use Exception;
 use Features\Dqf\Service\Struct\IBaseStruct;
 use Features\Dqf\Service\Struct\LoginRequestStruct;
-Use Features\Dqf\Service\Struct\LoginResponseStruct ;
+use Features\Dqf\Service\Struct\LoginResponseStruct;
 use Log;
 
 class Session implements ISession {

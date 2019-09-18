@@ -10,11 +10,9 @@ namespace Features\Dqf\Model;
 
 
 use Features\Dqf;
-use Features\Dqf\Service\AbstractProjectFiles;
 use Features\Dqf\Service\ChildProjectFiles;
 use Features\Dqf\Service\MasterProjectFiles;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
-use Jobs\MetadataDao;
 use Users_UserDao;
 
 class ProjectModel {
