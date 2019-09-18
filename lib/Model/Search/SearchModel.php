@@ -434,10 +434,14 @@ class SearchModel {
 
         return "
             LEFT JOIN (
-                SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
-                SELECT max(id) FROM segment_translation_events
-                    WHERE id_job = {$this->queryParams->job}
-                    GROUP BY id_segment ) ORDER BY id_segment
+                SELECT id_segment as ste_id_segment, source_page 
+                FROM  segment_translation_events 
+                JOIN ( 
+                    SELECT max(id) as _m_id FROM segment_translation_events
+                        WHERE id_job = {$this->queryParams->job}
+                        GROUP BY id_segment 
+                    ) AS X ON _m_id = segment_translation_events.id
+                ORDER BY id_segment
             ) ste ON ste.ste_id_segment = $joined_field ";
     }
 

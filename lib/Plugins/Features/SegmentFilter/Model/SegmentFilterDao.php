@@ -29,14 +29,17 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         if ( $filter->revisionNumber() ) {
 
             $join_events = " JOIN (
-                SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
-
-                    SELECT max(id) FROM segment_translation_events
-                        WHERE id_job = :id_job
-                        AND id_segment BETWEEN :job_first_segment AND :job_last_segment
-                        GROUP BY id_segment
-                        ) ORDER BY id_segment
-
+            
+                    SELECT id_segment as ste_id_segment, source_page 
+                    FROM  segment_translation_events 
+                    JOIN ( 
+                        SELECT max(id) as _m_id FROM segment_translation_events
+                            WHERE id_job = :id_job
+                            AND id_segment BETWEEN :job_first_segment AND :job_last_segment
+                            GROUP BY id_segment 
+                    ) AS X ON _m_id = segment_translation_events.id
+                    ORDER BY id_segment
+            
                 ) ste ON ste.ste_id_segment = st.id_segment AND ste.source_page = :source_page " ;
 
             $join_data ['source_page' ] = SecondPassReview\Utils::revisionNumberToSourcePage( $filter->revisionNumber() );
@@ -413,13 +416,18 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
     public static function segmentTranslationEventsJoin( $source_page ) {
         if ( $source_page ) {
             return " LEFT JOIN (
-                SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
-                SELECT max(id) FROM segment_translation_events
-                            WHERE id_job = :id_job
-                            AND id_segment >= :job_first_segment AND id_segment <= :job_last_segment
-                            GROUP BY id_segment
-                        ) ORDER BY id_segment
-                ) ste ON ste.ste_id_segment = st.id_segment " ;
+            
+                SELECT id_segment as ste_id_segment, source_page 
+                FROM  segment_translation_events 
+                JOIN ( 
+                    SELECT max(id) as _m_id FROM segment_translation_events
+                        WHERE id_job = :id_job
+                        AND id_segment BETWEEN :job_first_segment AND :job_last_segment
+                        GROUP BY id_segment 
+                ) AS X ON _m_id = segment_translation_events.id
+                ORDER BY id_segment
+
+            ) ste ON ste.ste_id_segment = st.id_segment " ;
         }
         else {
             return ''; ;
