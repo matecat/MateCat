@@ -151,7 +151,7 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     checkAddItemButton(source, target) {
-        return source && target;
+        return !!source && !!target;
     }
 
     copyItemInEditArea(translation) {
@@ -197,11 +197,12 @@ class SegmentFooterTabGlossary extends React.Component {
                     commentOriginal = commentOriginal.replace(/\}\#/gi, "</mark>");
                 }
 
-                let addCommentHtml = <div className="glossary-add-comment">
-                            <a href="#" onClick={self.openAddCommentExistingMatch.bind(self, name)}>Add a Comment</a>
-                            <div className="input gl-comment" contentEditable="true" style={{display: 'none'}}
-                                 onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
-                        </div>;
+                let addCommentHtml = "";
+                    {/*<div className="glossary-add-comment">*/}
+                            {/*<a href="#" onClick={self.openAddCommentExistingMatch.bind(self, name)}>Add a Comment</a>*/}
+                            {/*<div className="input gl-comment" contentEditable="true" style={{display: 'none'}}*/}
+                                 {/*onKeyPress={self.updateGlossaryItem.bind(self, name)}/>*/}
+                        {/*</div>;*/}
 
                 let html = <div key={name} ref={(match)=>self.matches[name] = match}>
                     <div className="glossary-item"><span>{name}</span></div>
@@ -225,7 +226,8 @@ class SegmentFooterTabGlossary extends React.Component {
                                 <div className="comment"
                                     data-original={UI.decodePlaceholdersToText( commentOriginal, true )}
                                      dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(commentOriginal, true ))}
-                                     onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
+                                     // onKeyPress={self.updateGlossaryItem.bind(self, name)}
+                                />
                             }
                             <ul className="graysmall-details">
                                 <li>{match.last_update_date}</li>
@@ -272,10 +274,10 @@ class SegmentFooterTabGlossary extends React.Component {
         return ( (!_.isUndefined(nextProps.segment.glossary) || !_.isUndefined(this.props.segment.glossary)) &&
             ( (!_.isUndefined(nextProps.segment.glossary) && _.isUndefined(this.props.segment.glossary)) ||
                 !Immutable.fromJS(this.props.segment.glossary).equals(Immutable.fromJS(nextProps.segment.glossary)) ) )||
-                this.props.loading !== nextProps.loading ||
-                this.props.openComment !== nextProps.openComment ||
+                this.state.loading !== nextState.loading ||
+                this.state.openComment !== nextState.openComment ||
                 this.props.active_class !== nextProps.active_class ||
-                this.props.enableAddButton !== nextProps.enableButton ||
+                this.state.enableAddButton !== nextState.enableButton ||
                 this.props.tab_class !== nextProps.tab_class
     }
 

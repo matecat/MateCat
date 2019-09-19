@@ -538,7 +538,7 @@ var SegmentActions = {
                 UI.failedConnection( 0, 'addGlossaryItem' );
             }).done(function ( response ) {
                 if ( response.data.created_tm_key ) {
-                    UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( self.props.id_segment ) );
+                    UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( sid ) );
                 } else {
                     let msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
                     UI.footerMessage( msg, UI.getSegmentById( sid ) );
