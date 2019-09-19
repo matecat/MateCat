@@ -317,6 +317,7 @@ class SearchModel {
 			WHERE fj.id_job = {$this->queryParams->job}
 			$ste_where
 			AND show_in_cattool = 1
+			{$this->queryParams->where_status}
 			GROUP BY s.id";
 
         return $query;
