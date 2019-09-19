@@ -106,10 +106,6 @@ SELECT
   issues.target_text  as target_text,
   issues.uid          as issue_uid,
 
-  translation_warnings.scope as warning_scope,
-  translation_warnings.data as warning_data,
-  translation_warnings.severity as warning_severity
-
 FROM segment_translations st
 
   JOIN jobs
@@ -143,10 +139,6 @@ FROM segment_translations st
 
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
-
-  LEFT JOIN translation_warnings
-    ON translation_warnings.id_segment = s.id
-      AND translation_warnings.id_job = jobs.id
 
 WHERE
 

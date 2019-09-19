@@ -79,9 +79,9 @@ class QualityReportModel {
     public function getStructure() {
         if ( $this->version ) {
             return $this->__getArchviedStructure();
-        } else {
-            return $this->__getCurrentStructure();
         }
+
+        return $this->__getCurrentStructure();
     }
 
     public function getChunkReview() {
