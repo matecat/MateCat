@@ -1,6 +1,7 @@
 <?php
 
 use Segments\SegmentUIStruct;
+use Features\ReviewExtended\ReviewUtils;
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
     const TABLE = 'segments';
@@ -277,7 +278,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     " AND ste.version_number = st.version_number " .
                     " AND ste.final_revision = 1 " ;
 
-            $options_conditions_values['source_page'] = \Features\SecondPassReview\Utils::revisionNumberToSourcePage(
+            $options_conditions_values['source_page'] = ReviewUtils::revisionNumberToSourcePage(
                     $options[ 'filter' ] [ 'revision_number' ]
             ) ;
         }
