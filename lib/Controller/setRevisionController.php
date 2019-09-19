@@ -1,6 +1,6 @@
 <?php
 
-use Features\SecondPassReview\Utils as SecondPassReviewUtils;
+use Features\ReviewExtended\ReviewUtils;
 use Features\ReviewExtended\Model\QualityReportDao;
 
 class setRevisionController extends ajaxController {
@@ -162,7 +162,7 @@ class setRevisionController extends ajaxController {
 
             $qa_data = $qualityReportDao->getReviseIssuesByChunk(
                     $job_data->id, $job_data->password,
-                    SecondPassReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
+                    ReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             );
 
             foreach ( $qa_data as $issue ) {

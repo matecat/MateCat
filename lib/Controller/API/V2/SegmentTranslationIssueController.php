@@ -5,10 +5,9 @@ namespace API\V2;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
-use API\V2\Validators\JobPasswordValidator;
 use Database;
+use Features\ReviewExtended\ReviewUtils;
 use LQA\EntryDao as EntryDao;
-use Features\SecondPassReview;
 use LQA\EntryStruct;
 use RevisionFactory;
 
@@ -53,7 +52,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'is_full_segment'     => false,
                 'comment'             => $this->request->comment,
                 'uid'                 => $this->user->uid,
-                'source_page'         => SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number ),
+                'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ),
         ];
 
         $struct = new EntryStruct( $data );

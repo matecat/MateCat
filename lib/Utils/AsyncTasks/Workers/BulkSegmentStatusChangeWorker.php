@@ -12,7 +12,7 @@ namespace AsyncTasks\Workers;
 use Chunks_ChunkStruct;
 use Database;
 use Features;
-use Features\SecondPassReview\Utils;
+use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 use INIT;
@@ -54,7 +54,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $status      = $params['destination_status'] ;
         $client_id   = $params['client_id'];
         $user        = ( new Users_UserDao())->getByUid( $params['id_user'] );
-        $source_page = Utils::revisionNumberToSourcePage( $params['revision_number'] );
+        $source_page = ReviewUtils::revisionNumberToSourcePage( $params['revision_number'] );
 
 
         $database = Database::obtain() ;

@@ -13,7 +13,6 @@ use Constants;
 use Features\ISegmentTranslationModel;
 use Features\SecondPassReview\Email\RevisionChangedNotificationEmail;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
-use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryCommentDao;
@@ -289,7 +288,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         $emails = $this->_chunk->getProject()->getFeatures()->filter( 'filterRevisionChangeNotificationList', $emails );
         $url    = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
                 $this->_chunk->source, $this->_chunk->target, [
-                        'revision_number' => Utils::sourcePageToRevisionNumber( $revision->source_page ),
+                        'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $revision->source_page ),
                         'id_segment'      => $this->_model->getSegmentStruct()->id
                 ] );
 
