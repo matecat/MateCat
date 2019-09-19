@@ -6,7 +6,7 @@ namespace API\V2\Validators;
 use API\V2\Exceptions\ValidationError;
 use Chunks_ChunkStruct;
 use Exception;
-use Features\SecondPassReview\Utils;
+use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
@@ -110,7 +110,7 @@ class SegmentTranslationIssue extends Base {
 
         if ( !$latestSegmentEvent && $this->translation->isICE() ) {
             throw new ValidationError( 'Cannot set issues on unmodified ICE.', -2000 );
-        } elseif ( $latestSegmentEvent->source_page != Utils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
+        } elseif ( $latestSegmentEvent->source_page != ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
             // Can latest event be missing here? Actually yes, for example in case we are setting an issue on
             // a locked ice match, which never received a submit from the UI. How do we handle that case?
             // No reviewed words yet an issue. That's not possible, we need to ensure the reviewed words
