@@ -4,6 +4,7 @@ namespace API\V2\Validators;
 
 
 use API\V2\Exceptions\ValidationError;
+use Chunks_ChunkStruct;
 use Exception;
 use Features\SecondPassReview\Utils;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
@@ -54,7 +55,9 @@ class SegmentTranslationIssue extends Base {
             }
             $password = $this->chunk_review->password;
         } else {
-            $this->chunk_review = ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $this->request->id_job, $this->request->password );
+            $this->chunk_review = ( new ChunkReviewDao() )->findChunkReviews(
+                    new Chunks_ChunkStruct( [ 'id' => $this->request->id_job, 'password' => $this->request->password ] )
+            )[ 0 ];
             $password           = $this->request->password;
         }
 

@@ -434,15 +434,16 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 RIGHT JOIN files f ON f.id = fj.id_file AND s.id_file = f.id
 
                 LEFT JOIN (
-                    /* This double sub-select id needed to avoid full table scan because MySQL query planner seems do not understand IN( MAX(id) ) */
-                    SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
-                        SELECT * FROM (
-                                SELECT max(id) FROM segment_translation_events
-                                    WHERE id_job = ?
-                                    AND id_segment >= ? AND id_segment <= ?
-                                    GROUP BY id_segment 
-                            ) AS X
-                    ) ORDER BY id_segment
+                
+                	SELECT id_segment as ste_id_segment, source_page 
+                    FROM  segment_translation_events 
+                    JOIN ( 
+                        SELECT max(id) as _m_id FROM segment_translation_events
+                            WHERE id_job = ?
+                            AND id_segment BETWEEN ? AND ?
+                            GROUP BY id_segment 
+                        ) AS X ON _m_id = segment_translation_events.id
+                    ORDER BY id_segment
 
                 ) ste ON ste.ste_id_segment = s.id
 

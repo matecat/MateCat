@@ -50,6 +50,85 @@ class SearchModel {
     }
 
     /**
+     * @throws Exception
+     */
+    public function replaceAll(){
+
+        $sql = $this->_loadReplaceAllQuery();
+        $resultSet = $this->_getQuery( $sql );
+
+        $sqlBatch = [];
+        $sqlValues = [];
+        foreach ( $resultSet as $key => $tRow ) {
+
+            //we get the spaces before needed string and re-apply before substitution because we can't know if there are
+            //and how much they are
+            $trMod = preg_replace( "#({$this->queryParams->exactMatch->Space_Left}){$this->queryParams->_regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}#{$this->queryParams->matchCase->REGEXP_MODIFIER}",
+                    '${1}' . $this->queryParams->replacement . '${2}',
+                    $tRow[ 'translation' ]
+            );
+
+            /**
+             * Escape for database
+             */
+            $sqlBatch[] = "(?,?,?)";
+            $sqlValues[] = $tRow['id_segment'];
+            $sqlValues[] = $tRow['id_job'];
+            $sqlValues[] = $trMod;
+
+        }
+
+        //MySQL default max_allowed_packet is 16MB, this system surely need more
+        //but we can assume that max translation length is more or less 2.5KB
+        // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
+        // 300KB is a very low number compared to 16MB
+        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
+        $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
+
+        foreach ( $sqlBatchChunk as $k => $batch ) {
+
+            $sqlUpdate = "UPDATE segment_translations SET 
+                translation = :translation 
+                WHERE id_segment=:id_segment AND id_job=:id_job
+            ";
+
+            $data = [
+                    'id_segment' => $sqlValuesChunk[ $k ][ 0 ],
+                    'id_job' => $sqlValuesChunk[ $k ][ 1 ],
+                    'translation' => $sqlValuesChunk[ $k ][ 2 ],
+            ];
+
+            try {
+
+                $this->_insertQuery( $sqlUpdate, $data );
+
+            } catch ( Exception $e ){
+
+                $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
+				- job id            : " . $this->queryParams->job . "
+				- original data and failed query stored in log ReplaceAll_Failures.log\n\n
+				";
+
+                Log::$fileName = 'ReplaceAll_Failures.log';
+                Log::doJsonLog( $sql );
+                Log::doJsonLog( $resultSet );
+                Log::doJsonLog( $sqlInsert );
+                Log::doJsonLog( $msg );
+
+                Utils::sendErrMailReport( $msg );
+
+                throw new Exception( 'Update translations failure.' ); //bye bye translations....
+
+            }
+
+            //we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
+            //Log::doJsonLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
+
+        }
+
+    }
+
+    /**
      * @return array
      * @throws Exception
      */
@@ -355,10 +434,14 @@ class SearchModel {
 
         return "
             LEFT JOIN (
-                SELECT id_segment as ste_id_segment, source_page FROM segment_translation_events WHERE id IN (
-                SELECT max(id) FROM segment_translation_events
-                    WHERE id_job = {$this->queryParams->job}
-                    GROUP BY id_segment ) ORDER BY id_segment
+                SELECT id_segment as ste_id_segment, source_page 
+                FROM  segment_translation_events 
+                JOIN ( 
+                    SELECT max(id) as _m_id FROM segment_translation_events
+                        WHERE id_job = {$this->queryParams->job}
+                        GROUP BY id_segment 
+                    ) AS X ON _m_id = segment_translation_events.id
+                ORDER BY id_segment
             ) ste ON ste.ste_id_segment = $joined_field ";
     }
 

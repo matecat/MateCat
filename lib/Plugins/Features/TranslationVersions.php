@@ -26,12 +26,15 @@ class TranslationVersions extends BaseFeature {
         $chunk            = $params['chunk'];
         /** @var \FeatureSet $features */
         $features         = $params['features'];
+        /** @var \Projects_ProjectStruct $project */
+        $project          = $params['project'];
 
         $sourceEvent = new SegmentTranslationEventModel($old_translation, $translation, $user, $source_page_code );
 
         $batchEventCreator = new BatchEventCreator( $chunk ) ;
         $batchEventCreator->setFeatureSet( $features ) ;
         $batchEventCreator->addEventModel( $sourceEvent ) ;
+        $batchEventCreator->setProject( $project );
 
         // Start cycle for propagated segments
         foreach( $params['propagation']['propagated_segments'] as $segmentTranslationBeforeChange ) {

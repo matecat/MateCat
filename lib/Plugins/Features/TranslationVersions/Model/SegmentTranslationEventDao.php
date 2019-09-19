@@ -27,17 +27,14 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
      */
     public function getLatestEventsInSegmentInterval( $id_job, $min_segment, $max_segment ) {
 
-        //The 2 subqueries are needed because a simple sub-select query hits a mysql bug and make a full scan
-        $sql = "SELECT * FROM segment_translation_events 
-                  WHERE id IN ( 
-                        SELECT * FROM ( 
-                            SELECT max(id) FROM segment_translation_events 
-                            WHERE id_job = :id_job 
-                            AND id_segment >= :min_segment AND id_segment <= :max_segment 
-                            GROUP BY id_segment 
-                        ) AS X 
-                  ) 
-        ORDER BY id_segment ";
+        $sql = "SELECT * FROM  segment_translation_events 
+                JOIN (
+                        SELECT max(id) as _m_id FROM segment_translation_events
+                        WHERE id_job = :id_job
+                        AND id_segment BETWEEN :min_segment AND :max_segment
+                        GROUP BY id_segment 
+                ) AS X ON _m_id = segment_translation_events.id
+                ORDER BY id_segment";
 
         $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare( $sql );
