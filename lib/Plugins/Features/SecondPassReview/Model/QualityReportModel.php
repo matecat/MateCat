@@ -10,7 +10,7 @@ namespace Features\SecondPassReview\Model;
 
 
 use Features\ReviewExtended\Model\ChunkReviewDao;
-use Features\SecondPassReview;
+use Features\ReviewExtended\ReviewUtils;
 use RevisionFactory;
 
 class QualityReportModel extends \Features\ReviewExtended\Model\QualityReportModel {
@@ -24,7 +24,7 @@ class QualityReportModel extends \Features\ReviewExtended\Model\QualityReportMod
             $chunkReviewModel = RevisionFactory::initFromProject( $this->getProject() )->getChunkReviewModel( $chunk_review );
 
             $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
-                    'revision_number' => SecondPassReview\Utils::sourcePageToRevisionNumber( $chunk_review->source_page ),
+                    'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
                     'is_pass'         => !!$chunk_review->is_pass,
                     'score'           => $chunkReviewModel->getScore(),
                     'reviewer_name'   => $this->getReviewerName()
