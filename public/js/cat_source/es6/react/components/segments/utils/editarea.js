@@ -5,7 +5,7 @@ let EditArea = {
     setEditAreaEditing: function(isEditing) {
         this.editAreaEditing = isEditing;
     },
-    handleSoftReturn: function(e) {
+    handleSoftReturn: function(e, modifiedTranslationCallback) {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
@@ -14,8 +14,12 @@ let EditArea = {
         node.appendChild(br);
         insertNodeAtCursor(node);
         EditArea.unnestMarkers();
+        setTimeout(()=>{
+            modifiedTranslationCallback.call();
+            UI.saveInUndoStack();
+        });
     },
-    handleReturn: function(e) {
+    handleReturn: function(e, modifiedTranslationCallback) {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
@@ -24,24 +28,28 @@ let EditArea = {
         node.appendChild(br);
         insertNodeAtCursor(node);
         EditArea.unnestMarkers();
+        setTimeout(()=>{
+            modifiedTranslationCallback.call();
+            UI.saveInUndoStack();
+        });
     },
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
         var code = e.which || e.keyCode;
 
         if (e.shiftKey && e.key === 'Enter') {
             e.preventDefault();
-            EditArea.handleSoftReturn(e);
+            EditArea.handleSoftReturn(e, modifiedTranslationCallback);
             return;
         } else if (e.key === 'Enter') {
             if( !UI.tagMenuOpen ) {
                 e.preventDefault();
-                EditArea.handleReturn(e);
+                EditArea.handleReturn(e, modifiedTranslationCallback);
                 return;
             }
         }
         if ( e.altKey && e.key === " " || e.ctrlKey && e.shiftKey && e.key === " ") {
             e.preventDefault();
-            EditArea.insertNbspAtCursor();
+            EditArea.insertNbspAtCursor(modifiedTranslationCallback);
             return;
         }
 
@@ -65,7 +73,6 @@ let EditArea = {
                 setTimeout(()=>{
                     modifiedTranslationCallback.call();
                     UI.saveInUndoStack('cancel');
-                    UI.segmentQA(UI.currentSegment);
                     UI.checkTagProximity();
                 });
 
@@ -275,7 +282,7 @@ let EditArea = {
         UI.registerQACheck();
     },
 
-    insertNbspAtCursor: function (  ) {
+    insertNbspAtCursor: function ( modifiedTranslationCallback ) {
         UI.editarea.find('.lastInserted').removeClass('lastInserted');
 
         var node = document.createElement("span");
@@ -284,15 +291,18 @@ let EditArea = {
         node.textContent = htmlDecode("&nbsp;");
         insertNodeAtCursor(node);
         EditArea.unnestMarkers();
+        setTimeout(()=>{
+            modifiedTranslationCallback.call();
+            UI.saveInUndoStack();
+            UI.segmentQA(UI.currentSegment);
+        });
     },
 
     unnestMarkers: function() {
         $('.editor .editarea .marker .marker').each(function() {
             $(this).parents('.marker').after($(this));
         });
-    },
-
-
+    }
 };
 
 module.exports = EditArea;

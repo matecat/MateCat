@@ -121,7 +121,7 @@ class Editarea extends React.Component {
 
     onKeyDownEvent(e) {
         this.keyPressed = true;
-        EditArea.keydownEditAreaEventHandler.call(this.editAreaRef, e, this.modifiedTranslation.bind(this));
+        EditArea.keydownEditAreaEventHandler.call(this.editAreaRef, e, this.props.sendTranslationWithoutUpdate);
         this.openConcordance(e);
     }
     onKeyPressEvent(e) {
@@ -202,24 +202,25 @@ class Editarea extends React.Component {
         EditArea.setEditAreaEditing(editAreaIsEditing);
     }
     saveCursorPosition(containerEl) {
-        var sel = window.getSelection && window.getSelection();
+        let sel = window.getSelection && window.getSelection();
+        let start;
         if (sel && sel.rangeCount > 0 && document.createRange) {
-            var range = window.getSelection().getRangeAt(0);
-            var preSelectionRange = range.cloneRange();
+            let range = window.getSelection().getRangeAt(0);
+            let preSelectionRange = range.cloneRange();
             preSelectionRange.selectNodeContents(containerEl);
             preSelectionRange.setEnd(range.startContainer, range.startOffset);
-            var start = preSelectionRange.toString().length;
+            start = preSelectionRange.toString().length;
 
             return {
                 start: start,
                 end: start + range.toString().length
             }
         } else if (document.selection && document.body.createTextRange) {
-            var selectedTextRange = document.selection.createRange();
-            var preSelectionTextRange = document.body.createTextRange();
+            let selectedTextRange = document.selection.createRange();
+            let preSelectionTextRange = document.body.createTextRange();
             preSelectionTextRange.moveToElementText(containerEl);
             preSelectionTextRange.setEndPoint("EndToStart", selectedTextRange);
-            var start = preSelectionTextRange.text.length;
+            start = preSelectionTextRange.text.length;
 
             return {
                 start: start,
