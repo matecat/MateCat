@@ -7,6 +7,7 @@ use API\V2\Validators\ChunkPasswordValidator;
 use CatUtils;
 use Chunks_ChunkStruct;
 use Features\SecondPassReview;
+use Features\ReviewExtended\ReviewUtils;
 use FeatureSet;
 use LQA\ChunkReviewDao;
 use WordCount_Struct;
@@ -54,7 +55,7 @@ class StatsController extends KleinController {
         $chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk ) ;
 
         $response = [
-            'stats' => SecondPassReview\Utils::formatStats( $job_stats, $chunk_reviews )
+            'stats' => ReviewUtils::formatStats( $job_stats, $chunk_reviews )
         ];
 
         $this->featureSet = new FeatureSet();

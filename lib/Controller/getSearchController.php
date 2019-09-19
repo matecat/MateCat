@@ -1,6 +1,6 @@
 <?php
 
-use Features\SecondPassReview\Utils as SecondPassReviewUtils;
+use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use Matecat\Finder\WholeTextFinder;
 use Search\ReplaceEventStruct;
@@ -109,7 +109,7 @@ class getSearchController extends ajaxController {
 
         if ( in_array( strtoupper( $this->queryParams->status ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
             if ( !empty( $this->revisionNumber ) ) {
-                $this->queryParams->sourcePage = SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
+                $this->queryParams->sourcePage = ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
             } else {
                 $this->queryParams->sourcePage = Constants::SOURCE_PAGE_REVISION;
             }
@@ -425,7 +425,7 @@ class getSearchController extends ajaxController {
                     'chunk'             => $chunk,
                     'segment'           => $segment,
                     'user'              => $this->user,
-                    'source_page_code'  => SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
+                    'source_page_code'  => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
                     'controller_result' => & $this->result,
                     'features'          => $this->featureSet,
                     'project'           => $project
@@ -452,7 +452,7 @@ class getSearchController extends ajaxController {
                         'chunk'            => $chunk,
                         'segment'          => $segment,
                         'user'             => $this->user,
-                        'source_page_code' => SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber )
+                        'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber )
                 ] );
             } catch ( Exception $e ) {
                 Log::doJsonLog( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );

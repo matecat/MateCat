@@ -1,6 +1,6 @@
 <?php
 
-use Features\SecondPassReview\Utils as SecondPassReviewUtils;
+use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 
@@ -110,7 +110,7 @@ class copyAllSource2TargetController extends ajaxController {
         $batchEventCreator->setFeatureSet( $features );
         $batchEventCreator->setProject( $chunk->getProject() );
 
-        $source_page = SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
+        $source_page = ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
         $segments    = $chunk->getSegments();
 
         foreach ( $segments as $segment ) {
