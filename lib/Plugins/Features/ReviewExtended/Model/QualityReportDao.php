@@ -104,7 +104,7 @@ SELECT
   issues.severity     as issue_severity,
   issues.comment      as issue_comment,
   issues.target_text  as target_text,
-  issues.uid          as issue_uid,
+  issues.uid          as issue_uid
 
 FROM segment_translations st
 
