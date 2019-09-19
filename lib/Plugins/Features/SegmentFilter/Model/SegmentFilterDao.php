@@ -11,6 +11,7 @@ namespace Features\SegmentFilter\Model;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
 use Database;
+use Features\ReviewExtended\ReviewUtils;
 use Features\SecondPassReview;
 use Features\SegmentFilter\Model\FilterDefinition;
 use Chunks_ChunkStruct;
@@ -42,7 +43,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             
                 ) ste ON ste.ste_id_segment = st.id_segment AND ste.source_page = :source_page " ;
 
-            $join_data ['source_page' ] = SecondPassReview\Utils::revisionNumberToSourcePage( $filter->revisionNumber() );
+            $join_data ['source_page' ] = ReviewUtils::revisionNumberToSourcePage( $filter->revisionNumber() );
         }
         else {
             $join_events = "" ;
@@ -97,7 +98,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
 
             if ( in_array( $filter->getSegmentStatus(), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
                 $where .= " AND ste.source_page = :source_page OR ste.source_page = null " ;
-                $where_data[ 'source_page' ] = SecondPassReview\Utils::revisionNumberToSourcePage(
+                $where_data[ 'source_page' ] = ReviewUtils::revisionNumberToSourcePage(
                         $filter->revisionNumber()
                 );
             }
@@ -127,7 +128,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         }
 
         if ( in_array( $filter->getSegmentStatus(), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
-            $data = array_merge ( $data, [ 'source_page' => SecondPassReview\Utils::revisionNumberToSourcePage(
+            $data = array_merge ( $data, [ 'source_page' => ReviewUtils::revisionNumberToSourcePage(
                     $filter->revisionNumber()
             ) ] ) ;
         }
@@ -244,7 +245,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
 
     public static function findSegmentIdsForSample( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
 
-        $source_page = SecondPassReview\Utils::revisionNumberToSourcePage( $filter->revisionNumber() );
+        $source_page = ReviewUtils::revisionNumberToSourcePage( $filter->revisionNumber() );
 
         if ( $filter->sampleSize() > 0 ) {
             $limit = self::__getLimit( $chunk, $filter, $source_page );

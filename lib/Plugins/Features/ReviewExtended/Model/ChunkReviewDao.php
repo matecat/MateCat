@@ -127,13 +127,13 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                 ) AS X ON _m_id = segment_translation_events.id
                 ORDER BY id_segment
                 
-            ) ste ON ste.id_segment = s.id
+            ) ste ON ste.ste_id_segment = s.id
 
             WHERE
                 j.id = :id_job AND j.password = :password
                 AND
                 ( source_page = :source_page OR
-                  ( :source_page = 2 AND ste.id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
+                  ( :source_page = 2 AND ste.ste_id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
                   ) ;
             "  ;
 
