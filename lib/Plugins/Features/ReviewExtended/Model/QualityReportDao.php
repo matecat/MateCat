@@ -145,8 +145,6 @@ WHERE
 s.show_in_cattool AND
 (
   st.status IN ( :approved, :rejected )
-  OR
-  translation_warnings.id_segment IS NOT NULL
 )
 
 ORDER BY f.id, s.id, issues.id, comments.id
