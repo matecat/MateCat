@@ -110,11 +110,7 @@ LXQ.init  = function () {
         globalReceived = true;
       });
     });
-    /* invoked when segment is completed (translated clicked)*/
-    $(document).on('setTranslation:success', function(e, data) {
-        var segment = data.segment;
-        LXQ.doLexiQA(segment,UI.getSegmentId(segment),true,null);
-    });
+
     /* invoked when more segments are loaded...*/
     $( window ).on( 'segmentsAdded', function ( e , data) {
         globalReceived = false ;

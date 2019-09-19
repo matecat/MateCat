@@ -1547,10 +1547,10 @@ UI = {
         segment_status = segment.status;
 
 		if( config.brPlaceholdEnabled ){
-			src_content = this.prepareTextToSend(segment.segment);
-			trg_content = this.prepareTextToSend(segment.translation);
+			src_content = this.prepareTextToSend(segment.decoded_source);
+			trg_content = this.prepareTextToSend(segment.decoded_translation);
 		} else {
-			src_content = segment.segment;
+			src_content = segment.decoded_source;
 			trg_content = segment.translation;
 		}
 
@@ -2094,6 +2094,7 @@ UI = {
         if (typeof currentItem != 'undefined') {
             var regExp = /(<\s*\/*\s*(span class="undoCursorPlaceholder|span id="selectionBoundary)\s*.*span>)/gmi;
             var editAreaText = this.editarea.html().replace(regExp, '');
+            var segment = SegmentStore.getCurrentSegment()
             var itemText = currentItem.replace(regExp, '');
             if (itemText.trim() == editAreaText.trim())
                 return;

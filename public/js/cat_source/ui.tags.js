@@ -582,6 +582,7 @@ $.extend(UI, {
         //lock tags and run again getWarnings
         setTimeout(function (  ) {
             UI.segmentQA(UI.currentSegment);
+            UI.saveInUndoStack();
         }, 100);
     },
 

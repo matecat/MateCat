@@ -110,6 +110,7 @@ class Editarea extends React.Component {
             if ( !this.props.segment.modified ) {
                 this.modifiedTranslation();
             }
+            UI.saveInUndoStack();
             UI.inputEditAreaEventHandler();
         }
     }

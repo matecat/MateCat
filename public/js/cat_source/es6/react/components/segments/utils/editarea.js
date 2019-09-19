@@ -62,11 +62,13 @@ let EditArea = {
                 } else {
                     $('.selected', $(this)).remove();
                 }
-                setTimeout(()=>modifiedTranslationCallback.call());
+                setTimeout(()=>{
+                    modifiedTranslationCallback.call();
+                    UI.saveInUndoStack('cancel');
+                    UI.segmentQA(UI.currentSegment);
+                    UI.checkTagProximity();
+                });
 
-                UI.saveInUndoStack('cancel');
-                UI.segmentQA(UI.currentSegment);
-                UI.checkTagProximity();
             } else {
                 var numTagsBefore = (UI.editarea.text().match( /<.*?\>/gi ) !== null) ? UI.editarea.text().match( /<.*?\>/gi ).length : 0;
                 var numSpacesBefore = $( '.space-marker', UI.editarea ).length;
@@ -223,15 +225,15 @@ let EditArea = {
             }, 10);
         }
 
-        if (((code == 37) || (code == 38) || (code == 39) || (code == 40) || (code == 8))) { // not arrows, backspace, canc
-            UI.saveInUndoStack('arrow');
-        }
+        // if (((code == 37) || (code == 38) || (code == 39) || (code == 40) || (code == 8))) { // not arrows, backspace, canc
+        //     UI.saveInUndoStack('arrow');
+        // }
 
-        if (code == 32) { // space
-            setTimeout(function() {
-                UI.saveInUndoStack('space');
-            }, 100);
-        }
+        // if (code == 32) { // space
+        //     setTimeout(function() {
+        //         UI.saveInUndoStack('space');
+        //     }, 100);
+        // }
     },
 
     keyPressEditAreaEventHandler: function (e, sid) {
