@@ -128,59 +128,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param $project
-     *
-     * @return Projects_ProjectStruct
-     */
-    public function filter_manage_single_project( $project ) {
-        $chunks = [];
-
-        foreach ( $project[ 'jobs' ] as $job ) {
-            $ch           = new Chunks_ChunkStruct();
-            $ch->id       = $job[ 'id' ];
-            $ch->password = $job[ 'password' ];
-            $chunks[]     = $ch;
-        }
-
-        $chunk_reviews = [];
-
-        foreach ( ( new ChunkReviewDao() )->findChunkReviewsForList( $chunks ) as $chunk_review ) {
-            $key = $chunk_review->id_job . $chunk_review->password;
-            if ( !isset( $chunk_reviews[ $key ] ) ) {
-                $chunk_reviews[ $key ] = [];
-            }
-            $chunk_reviews[ $key ] [] = $chunk_review;
-        }
-
-        foreach ( $project[ 'jobs' ] as $kk => $job ) {
-
-            $key = $job[ 'id' ] . $job[ 'password' ];
-
-            /**
-             * Inner cycle to match chunk_reviews records and modify
-             * the data structure.
-             */
-            foreach ( $chunk_reviews[ $key ] as $chunk_review ) {
-
-                if ( $chunk_review->id_job == $job[ 'id' ] && $chunk_review->password == $job[ 'password' ] && $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
-                    $project[ 'jobs' ][ $kk ][ 'revise_passwords' ][] = [
-                            'revision_number' => 1,
-                            'password'        => $chunk_review->review_password
-                    ];
-                }
-
-            }
-
-            if ( !isset( $project[ 'jobs' ][ $kk ] [ 'stats' ] [ 'revises' ] ) ) {
-                $project[ 'jobs' ][ $kk ] [ 'stats' ] = ReviewUtils::formatStats( $project[ 'jobs' ][ $kk ] [ 'stats' ], $chunk_reviews[ $key ] );
-            }
-
-        }
-
-        return $project;
-    }
-
-    /**
      * Performs post project creation tasks for the current project.
      * Evaluates if a qa model is present in the feature options.
      * If so, then try to assign the defined qa_model.

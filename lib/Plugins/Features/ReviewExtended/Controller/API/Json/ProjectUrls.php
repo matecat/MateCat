@@ -6,7 +6,7 @@
  * Time: 15:57
  */
 
-namespace Features\SecondPassReview\Controller\API\Json;
+namespace Features\ReviewExtended\Controller\API\Json;
 
 use Chunks_ChunkStruct;
 use Features\ReviewExtended\ReviewUtils;
