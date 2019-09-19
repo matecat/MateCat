@@ -1432,6 +1432,7 @@ LXQ.init  = function () {
 
         },
         lxqRemoveSegmentFromWarningList: function ( id_segment ) {
+            SegmentActions.addLexiqaHighlight(id_segment, {});
             LXQ.removeSegmentWarning(id_segment);
         },
         getLexiqaWarnings: function (callback) {
