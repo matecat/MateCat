@@ -22,7 +22,7 @@
 
         <div class="header-el-placeholder">
             <div tal:condition="php: (revisionNumber >= 1 && isset( secondRevisionsCount ) )" tal:attributes="class string: revision-mark revision-r${revisionNumber}"
-                 tal:content="string: R${revisionNumber}">
+                 tal:content="string: R${revisionNumber}" title="Revision number">
                 R
             </div>
         </div> <!-- revision number -->
@@ -45,7 +45,7 @@
             <button tal:condition="php: (isset(project_completion_feature_enabled)) && project_completion_feature_enabled && !header_main_button_enabled" class="action-submenu ui floating dropdown ${header_main_button_class}"
                     id="markAsCompleteButton" disabled="disabled"></button>
 
-            <div class="action-submenu ui simple pointing top center floating dropdown" id="action-download">
+            <div class="action-submenu ui simple pointing top center floating dropdown" id="action-download" title="Download">
 
                 <div class="dropdown-menu-overlay"></div>
                 <ul class="menu" id="previewDropdown"  tal:attributes="data-download php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'true' : 'false'" >
@@ -85,7 +85,7 @@
             </div>
 
             <div class="action-submenu ui floating ${header_quality_report_item_class}" id="quality-report-button"
-                 tal:attributes="data-revised php:(job_stats['APPROVED_PERC_FORMATTED'] > 10)? 'true' : 'false'">
+                 tal:attributes="data-revised php:(job_stats['APPROVED_PERC_FORMATTED'] > 10)? 'true' : 'false'" title="Quality Report">
                 <svg version="1.1" id="Livello_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
                      viewBox="0 0 42 42" xml:space="preserve">
                     <g id="Icon-QR">
@@ -164,7 +164,7 @@
                 </svg>
             </div>
 
-            <div class="action-submenu ui pointing top center floating dropdown" id="action-three-dots">
+            <div class="action-submenu ui pointing top center floating dropdown" id="action-three-dots" title="Menu">
                 <!--<a href="#" class="btn-action" id="action-three-dots"> </a>-->
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="5 5 32 32">
                     <g
