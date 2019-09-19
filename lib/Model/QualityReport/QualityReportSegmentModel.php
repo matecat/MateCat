@@ -14,6 +14,7 @@ use Constants;
 use Constants_Revise;
 use Constants_TranslationStatus;
 use Features\ReviewExtended\Model\QualityReportDao;
+use Features\ReviewExtended\ReviewUtils;
 use Features\SecondPassReview;
 use Features\TranslationVersions;
 use FeatureSet;
@@ -68,7 +69,7 @@ class QualityReportSegmentModel {
             if ( isset( $options['filter']['revision_number'] ) ) {
 
                 $validRevisionNumbers = array_map( function( $chunkReview ) {
-                    return SecondPassReview\Utils::sourcePageToRevisionNumber( $chunkReview->source_page );
+                    return ReviewUtils::sourcePageToRevisionNumber( $chunkReview->source_page );
                 }, $this->_getChunkReviews() ) ;
 
                 if ( !in_array( (int) $options['filter']['revision_number'], $validRevisionNumbers )  ) {
@@ -301,7 +302,7 @@ class QualityReportSegmentModel {
                 $seg->last_revisions = [] ;
                 foreach( $last_segment_revisions as $source_page => $revision ) {
                     $seg->last_revisions[] = [
-                            'revision_number' => SecondPassReview\Utils::sourcePageToRevisionNumber( $source_page ) ,
+                            'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $source_page ) ,
                             'translation'     => $revision->translation
                     ];
                 }

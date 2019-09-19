@@ -104,11 +104,7 @@ SELECT
   issues.severity     as issue_severity,
   issues.comment      as issue_comment,
   issues.target_text  as target_text,
-  issues.uid          as issue_uid,
-
-  translation_warnings.scope as warning_scope,
-  translation_warnings.data as warning_data,
-  translation_warnings.severity as warning_severity
+  issues.uid          as issue_uid
 
 FROM segment_translations st
 
@@ -144,17 +140,11 @@ FROM segment_translations st
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
 
-  LEFT JOIN translation_warnings
-    ON translation_warnings.id_segment = s.id
-      AND translation_warnings.id_job = jobs.id
-
 WHERE
 
 s.show_in_cattool AND
 (
   st.status IN ( :approved, :rejected )
-  OR
-  translation_warnings.id_segment IS NOT NULL
 )
 
 ORDER BY f.id, s.id, issues.id, comments.id
