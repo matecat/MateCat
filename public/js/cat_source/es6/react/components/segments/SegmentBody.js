@@ -65,30 +65,32 @@ class SegmentBody extends React.Component {
     }
 
     afterRenderOrUpdate(area) {
-        if ( area && area.length > 0 && this.checkLockTags(area)) {
+        if ( area && area.length > 0 ) {
             var segment = UI.getSegmentById(this.props.segment.sid);
 
             if (LXQ.enabled()) {
                 LXQ.reloadPowertip(segment);
             }
-            try {
-                if (UI.hasSourceOrTargetTags(segment)) {
-                    segment.addClass('hasTagsToggle');
-                    UI.detectTagType(segment);
+            if ( this.checkLockTags(area) ) {
+                try {
+                    if ( UI.hasSourceOrTargetTags( segment ) ) {
+                        segment.addClass( 'hasTagsToggle' );
+                        UI.detectTagType( segment );
 
-                } else {
-                    segment.removeClass('hasTagsToggle');
+                    } else {
+                        segment.removeClass( 'hasTagsToggle' );
+                    }
+
+                    if ( Object.size( this.props.segment.tagMismatch ) > 0 ) {
+                        UI.markTagMismatch( this.props.segment.tagMismatch, this.props.segment.sid );
+                        segment.addClass( 'hasTagsAutofill' );
+                    } else {
+                        segment.removeClass( 'hasTagsAutofill' );
+                    }
+
+                } catch ( e ) {
+                    console.log( "Fail afterRenderOrUpdate in SegmentBody component" )
                 }
-
-                if ( Object.size(this.props.segment.tagMismatch) > 0 ) {
-                    UI.markTagMismatch(this.props.segment.tagMismatch, this.props.segment.sid);
-                    segment.addClass('hasTagsAutofill');
-                } else {
-                    segment.removeClass('hasTagsAutofill');
-                }
-
-            } catch ( e ) {
-                console.log("Fail afterRenderOrUpdate in SegmentBody component")
             }
         }
     }
