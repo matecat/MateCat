@@ -465,13 +465,15 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     public static function updateTranslation( Translations_SegmentTranslationStruct $translation_struct ) {
         $query = "UPDATE segment_translations 
                     SET translation=:translation, status=:status 
-                    WHERE id_segment = :id_segment";
+                    WHERE id_segment = :id_segment
+                    AND id_job=:id_job";
 
         $db   = Database::obtain();
         $stmt = $db->getConnection()->prepare( $query );
         $stmt->execute( [
                 'translation' => $translation_struct->translation,
                 'id_segment'  => $translation_struct->id_segment,
+                'id_job'      => $translation_struct->id_job,
                 'status'      => $translation_struct->status
         ] );
 
