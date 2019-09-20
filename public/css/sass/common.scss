@@ -4703,10 +4703,18 @@ table.left-aligned tr th {
 
 /* activity log */
 
+.activity-log-page {
+  header {
+    .wrapper {
+      grid-template-columns: 1fr 120px;
+    }
+  }
+}
+
 .activity-log-container {
   width: 92%;
-  padding-bottom: 4%;
   margin: 0 auto;
+  padding: 32px 0;
 }
 
 .activity-log-container h1 {
@@ -4825,16 +4833,23 @@ table.activitylog th .th-inner:after {
 
 .downloadtr-button.backbtn {
   float: right;
-  margin: 5px 0px 0px 15px !important;
-  font-weight: bold;
-  float: right;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  border: 1px solid #ccc !important;
-  border-radius: 2px;
-  border-radius: 2px;
-  padding: 5px 17px !important;
+  border-radius: 5px;
+  padding: 8px 16px!important;
   min-width: 110px;
+  background: #FFF;
+}
+
+
+/* XLIFF to Target page */
+
+.xliff-to-target-page {
+  header {
+    .wrapper {
+        grid-template-columns: 208px 1fr 120px !important;
+    }
+  }
 }
 
 /*** Share Key Popup ***/
