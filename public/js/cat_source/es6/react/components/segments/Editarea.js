@@ -16,6 +16,7 @@ class Editarea extends React.Component {
             editAreaClasses : ['targetarea']
         };
         this.editAreaIsEditing = false;
+
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
         this.addClass = this.addClass.bind(this);
         this.onMouseUpEvent = this.onMouseUpEvent.bind(this);
@@ -24,8 +25,15 @@ class Editarea extends React.Component {
         this.onKeyPressEvent = this.onKeyPressEvent.bind(this);
         this.onPasteEvent = this.onPasteEvent.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
+        this.redoInUndoStack = this.redoInUndoStack.bind(this);
+        this.undoInUndoStack = this.undoInUndoStack.bind(this);
+
         this.onInputDebounced = _.debounce(this.onInputEvent, 500);
+        this.saveInUndoStackDebounced = _.debounce(this.saveInUndoStack, 200);
         this.keyPressed = false;
+
+        this.undoStack = [];
+        this.undoStackPosition = 0;
     }
 
     allowHTML(string) {
@@ -110,13 +118,14 @@ class Editarea extends React.Component {
             if ( !this.props.segment.modified ) {
                 this.modifiedTranslation();
             }
-            UI.saveInUndoStack();
             UI.inputEditAreaEventHandler();
         }
     }
 
-    modifiedTranslation() {
-        SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true, this.editAreaRef.innerHTML);
+    modifiedTranslation(translation) {
+        let translationToSend = (translation) ? translation : this.editAreaRef.innerHTML;
+        SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true, translationToSend);
+        UI.registerQACheck();
     }
 
     onKeyDownEvent(e) {
@@ -149,8 +158,6 @@ class Editarea extends React.Component {
         if ( elem.hasClass('locked') || elem.parent().hasClass('locked') ) {
             UI.handleCopyEvent(e);
             removeSelectedText();
-            UI.saveInUndoStack('cut');
-            // this.emitTrackChanges();
         }
     }
     onPasteEvent(e) {
@@ -171,7 +178,6 @@ class Editarea extends React.Component {
         if ( this.draggingFromEditArea ) {
             removeSelectedText();
         }
-        UI.saveInUndoStack('paste');
         // this.emitTrackChanges();
         this.draggingFromEditArea = false;
         let self = this;
@@ -201,6 +207,77 @@ class Editarea extends React.Component {
         this.editAreaIsEditing = editAreaIsEditing;
         EditArea.setEditAreaEditing(editAreaIsEditing);
     }
+
+    undoInUndoStack(){
+        if ( !this.props.segment.opened ) return;
+
+        if ( this.undoStackPosition === 0 ) {
+            return;
+        }
+        this.undoStackPosition =  (this.undoStackPosition === 1) ? 1 : this.undoStackPosition - 1;
+        let translation = this.undoStack[this.undoStackPosition - 1];
+
+        this.undoRedoAction = true;
+        this.cursorPosition = translation.position;
+        setTimeout(()=>this.modifiedTranslation(translation.text));
+
+        console.log("UNDO IN SEGMENT", translation);
+        console.log("UNDOSTACK = ", this.undoStack);
+        console.log("UNDOPOSITION = ", this.undoStackPosition);
+    }
+
+    redoInUndoStack() {
+        if ( !this.props.segment.opened ) return;
+
+        if ( this.undoStackPosition === this.undoStack.length ) {
+            return;
+        }
+
+        this.undoStackPosition++;
+        let translation = this.undoStack[this.undoStackPosition - 1];
+
+        this.undoRedoAction = true;
+        this.cursorPosition = translation.position;
+        setTimeout(()=>this.modifiedTranslation(translation.text));
+
+        console.log("REDO IN SEGMENT", translation);
+        console.log("UNDOSTACK = ", this.undoStack);
+        console.log("UNDOPOSITION = ", this.undoStackPosition);
+    }
+
+    saveInUndoStack() {
+        if ( !this.props.segment.opened || this.editAreaRef.innerHTML === "") return;
+
+        let currentItem = this.undoStack[this.undoStackPosition - 1];
+
+        let $editAreaClone = $(this.editAreaRef).clone();
+
+        $editAreaClone.find('.tag-autocomplete-endcursor, .rangySelectionBoundary').remove();
+        $editAreaClone.find('.locked.selected, .locked.mismatch, .locked.selfClosingTag').removeClass('startTag endTag selected highlight order-error selfClosingTag mismatch');
+        $editAreaClone.find('lxqwarning').replaceWith(function() { return $(this).contents(); });
+        $editAreaClone.find('br.end').remove();
+
+        let textToSave = $editAreaClone.html();
+
+        if ( currentItem &&  UI.cleanTextFromPlaceholdersSpan(currentItem.text).replace(/\uFEFF/g,'') === UI.cleanTextFromPlaceholdersSpan(textToSave).replace(/\uFEFF/g,'') ) {
+            return;
+        }
+
+        var pos = this.undoStackPosition;
+        if (pos > 0) {
+            this.undoStack.splice(pos);
+        }
+        this.undoStackPosition++;
+        this.undoStack.push({
+            text: textToSave,
+            position: this.saveCursorPosition(this.editAreaRef)
+        });
+
+        console.log("SAVE IN STACK IN SEGMENT", textToSave);
+        console.log("UNDOSTACK = ", this.undoStack);
+        console.log("UNDOPOSITION = ", this.undoStackPosition);
+    }
+
     saveCursorPosition(containerEl) {
         let sel = window.getSelection && window.getSelection();
         let start;
@@ -271,14 +348,17 @@ class Editarea extends React.Component {
             textRange.moveStart("character", savedSel.start);
             textRange.select();
         }
+        this.undoRedoAction = false;
     }
 
     componentDidMount() {
         this.$editArea = $(this.editAreaRef);
-
+        this.saveInUndoStack();
         Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
+        SegmentStore.addListener(SegmentConstants.UNDO_TEXT, this.undoInUndoStack);
+        SegmentStore.addListener(SegmentConstants.REDO_TEXT, this.redoInUndoStack);
 
     }
     componentWillUnmount() {
@@ -299,7 +379,7 @@ class Editarea extends React.Component {
     }
     getSnapshotBeforeUpdate(prevProps) {
         try {
-            if (this.props.segment.opened) {
+            if (this.props.segment.opened && !this.undoRedoAction) {
                 this.cursorPosition = this.saveCursorPosition(this.editAreaRef);
             }
         } catch ( e ) {
@@ -321,7 +401,7 @@ class Editarea extends React.Component {
                 console.log("Error restoring cursor position in EditArea component", e)
             }
         }
-
+        this.saveInUndoStack();
         focusOnPlaceholder(); //??
     }
     render() {
@@ -361,6 +441,7 @@ class Editarea extends React.Component {
                     onCopy={this.onCopyText.bind(this)}
                     onInput={()=>{
                         this.props.sendTranslationWithoutUpdate();
+                        this.saveInUndoStackDebounced();
                         this.onInputDebounced();
                     }}
                     onCompositionStart={this.onCompositionStartEvent.bind(this)}

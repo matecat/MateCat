@@ -562,7 +562,6 @@ $.extend(UI, {
             }
         }
 
-        var undoCursorPlaceholder = $('.undoCursorPlaceholder', UI.currentSegment ).detach();
         var brEnd = $('br.end', UI.currentSegment ).detach();
 
 
@@ -575,14 +574,10 @@ $.extend(UI, {
             }
         }
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newhtml);
-        //add again undoCursorPlaceholder
-        UI.editarea.append(undoCursorPlaceholder );
-        // .append(brEnd);
 
         //lock tags and run again getWarnings
         setTimeout(function (  ) {
             UI.segmentQA(UI.currentSegment);
-            UI.saveInUndoStack();
         }, 100);
     },
 
@@ -639,7 +634,7 @@ $.extend(UI, {
         area = this.transformPlaceholdersHtml(area);
 
         area.find('span.space-marker').replaceWith(' ');
-        area.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        area.find('span.rangySelectionBoundary').remove();
         area = this.encodeTagsWithHtmlAttribute(area);
         return view2rawxliff( area.text() );
     },
@@ -651,7 +646,7 @@ $.extend(UI, {
         $div = this.transformPlaceholdersHtml($div);
 
         $div.find('span.space-marker').replaceWith(' ');
-        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        $div.find('span.rangySelectionBoundary').remove();
         $div = this.encodeTagsWithHtmlAttribute($div);
         return $div.text();
     },

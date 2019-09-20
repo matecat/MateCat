@@ -197,7 +197,6 @@ let GlossaryUtils = {
     },
 
     copyGlossaryItemInEditarea: function ( translation , segment) {
-        UI.saveInUndoStack('paste');
         // var range = window.getSelection().getRangeAt( 0 );
         var clonedElem = $( '.editor .editarea').clone();
         var nodeInsert = clonedElem.find( '.focusOut' );

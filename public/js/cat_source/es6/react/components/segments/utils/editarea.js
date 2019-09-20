@@ -16,7 +16,6 @@ let EditArea = {
         EditArea.unnestMarkers();
         setTimeout(()=>{
             modifiedTranslationCallback.call();
-            UI.saveInUndoStack();
         });
     },
     handleReturn: function(e, modifiedTranslationCallback) {
@@ -30,7 +29,6 @@ let EditArea = {
         EditArea.unnestMarkers();
         setTimeout(()=>{
             modifiedTranslationCallback.call();
-            UI.saveInUndoStack();
         });
     },
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
@@ -55,9 +53,6 @@ let EditArea = {
 
         // ??
         if (e.ctrlKey || e.shiftKey || e.metaKey){
-            // if ( code === 37 || code === 39 ) { //ctrl + left/right arrows
-            //     UI.saveInUndoStack('arrow');
-            // }
             return;
         }
         var selection, range, r, rr, referenceNode;
@@ -72,7 +67,6 @@ let EditArea = {
                 }
                 setTimeout(()=>{
                     modifiedTranslationCallback.call();
-                    UI.saveInUndoStack('cancel');
                     UI.checkTagProximity();
                 });
 
@@ -97,7 +91,6 @@ let EditArea = {
                 if ( code == 8 ) { // backspace
                     var undeletableTag = !!(
                         ($( translation[sbIndex - 1] ).hasClass( 'locked' ) && ($( translation[sbIndex - 2] ).prop( "tagName" ) === 'BR')) ||
-                        (($( translation[sbIndex - 2] ).hasClass( "monad" ) || $( translation[sbIndex - 2] ).hasClass( "locked" )) && $( translation[sbIndex - 1] ).hasClass( 'undoCursorPlaceholder' )) ||
                         ( $( translation[sbIndex - 1] ).hasClass( "marker" ) &&  $( translation[sbIndex - 2] ).hasClass( "marker" ) && translation.length -1 === sbIndex )
                     );
                     if ( undeletableTag ) {
@@ -129,8 +122,6 @@ let EditArea = {
                     }
                     var numTagsAfter = (UI.editarea.text().match( /<.*?\>/gi ) !== null) ? UI.editarea.text().match( /<.*?\>/gi ).length : 0;
                     var numSpacesAfter = $( '.space-marker', UI.editarea ).length;
-                    if ( numTagsAfter < numTagsBefore ) UI.saveInUndoStack( 'cancel' );
-                    if ( numSpacesAfter < numSpacesBefore ) UI.saveInUndoStack( 'cancel' );
                 }, 50 );
             }
         }
@@ -231,16 +222,6 @@ let EditArea = {
                 UI.checkTagProximity();
             }, 10);
         }
-
-        // if (((code == 37) || (code == 38) || (code == 39) || (code == 40) || (code == 8))) { // not arrows, backspace, canc
-        //     UI.saveInUndoStack('arrow');
-        // }
-
-        // if (code == 32) { // space
-        //     setTimeout(function() {
-        //         UI.saveInUndoStack('space');
-        //     }, 100);
-        // }
     },
 
     keyPressEditAreaEventHandler: function (e, sid) {
@@ -248,8 +229,11 @@ let EditArea = {
             SegmentActions.showTagsMenu(sid);
         }
     },
-    handleEditAreaPaste: function(elem, e) {
-        var clonedElem = elem.cloneNode(true), txt;
+    handleEditAreaPaste: function( e) {
+        if ( !e.target.classList.contains('editarea') ) {
+            return false;
+        }
+        var clonedElem = e.target.cloneNode(true), txt;
         if (e && e.clipboardData && e.clipboardData.getData) {
             if (/text\/html/.test(e.clipboardData.types)) {
                 txt = htmlEncode(e.clipboardData.getData('text/plain'));
@@ -272,13 +256,12 @@ let EditArea = {
         }
     },
     pasteEditAreaEventHandler: function (e) {
-        UI.saveInUndoStack('paste');
         $('#placeHolder').remove();
         var node = document.createElement("span");
         node.setAttribute('id', 'placeHolder');
         removeSelectedText();
         insertNodeAtCursor(node);
-        this.handleEditAreaPaste(this, e);
+        this.handleEditAreaPaste(e);
         UI.registerQACheck();
     },
 
@@ -293,8 +276,6 @@ let EditArea = {
         EditArea.unnestMarkers();
         setTimeout(()=>{
             modifiedTranslationCallback.call();
-            UI.saveInUndoStack();
-            UI.segmentQA(UI.currentSegment);
         });
     },
 

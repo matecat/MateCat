@@ -356,6 +356,16 @@ var SegmentActions = {
             actionType: SegmentConstants.CLOSE_TAGS_MENU
         });
     },
+    undoInSegment: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UNDO_TEXT
+        });
+    },
+    redoInSegment: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REDO_TEXT
+        });
+    },
     /************ SPLIT ****************/
     openSplitSegment: function(sid) {
         AppDispatcher.dispatch({

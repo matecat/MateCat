@@ -198,21 +198,8 @@ UI = {
     getSegmentId: function (segment) {
         if(typeof segment == 'undefined') return false;
         if ( segment.el ) {
-            return segment.el.attr('id').replace('segment-', '');
+            return segment.el.attr( 'id' ).replace( 'segment-', '' );
         }
-
-        /*
-         sometimes:
-         typeof $(segment).attr('id') == 'undefined'
-
-         The preeceding if doesn't works because segment is a list ==
-         '[<span class="undoCursorPlaceholder monad" contenteditable="false"></span>]'
-
-         so for now i put a try-catch block here
-
-         TODO FIX
-         */
-
         try {
             segment = segment.closest("section");
             return $(segment).attr('id').replace('segment-', '');
@@ -240,7 +227,6 @@ UI = {
         // by I ignore the quote conversion done before adding to the data-original
         // I hope it still works.
 
-        this.saveInUndoStack('copysource');
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.currentSegment), UI.getSegmentFileId(this.currentSegment), source_val);
         SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         UI.setSegmentModified(UI.currentSegment, true);
@@ -1075,12 +1061,7 @@ UI = {
     },
 	copyAlternativeInEditarea: function(translation) {
 		if ($.trim(translation) !== '') {
-
-			this.saveInUndoStack('copyalternative');
-
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), translation);
-
-            this.saveInUndoStack('copyalternative');
 		}
 	},
 	setDownloadStatus: function(stats) {
@@ -1232,7 +1213,6 @@ UI = {
         var rangeInsert = insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
         var newStr = '';
         var selection$ = $("<div/>").html(str);
-        selection$.find('.undoCursorPlaceholder').remove();
         var rightString = selection$.html();
 
         $.each($.parseHTML(rightString), function(index) {
@@ -1271,14 +1251,10 @@ UI = {
         else {
             replaceSelectedHtml(newStr, rangeInsert);
         }
-        this.saveInUndoStack('formatSelection');
 
         $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
         $('.editor .editarea .formatSelection-placeholder').remove();
         $('.editor .editarea').trigger('afterFormatSelection');
-        setTimeout(function () {
-            setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
-        }, 0);
     },
 
 	setStatusButtons: function(button) {
@@ -2050,90 +2026,6 @@ UI = {
         Cookies.set('client_info', JSON.stringify(clientInfo), { expires: 3650 });
     },
 
-	undoInSegment: function() {
-		console.log('undoInSegment');
-        if (this.undoStack.length === 0) {
-            return;
-        }
-        if (this.undoStackPosition === 0) {
-            this.saveInUndoStack( 'undo' );
-        }
-        var ind = 0;
-		if (this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1])
-			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), this.undoStack[ind]);
-        setTimeout(function () {
-            setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
-            $('.undoCursorPlaceholder').remove();
-        });
-		if (this.undoStackPosition < (this.undoStack.length - 1))
-			this.undoStackPosition++;
-        // SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
-		this.registerQACheck();
-	},
-	redoInSegment: function() {
-        var index = this.undoStack.length - 1 - this.undoStackPosition - 1 + 2;  //??
-        if ( index >= this.undoStack.length ) {
-            return false;
-        }
-        var html = this.undoStack[index];
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), html);
-        setTimeout(function () {
-            setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
-            $('.undoCursorPlaceholder').remove();
-        }, 100);
-		// this.editarea.html();
-		if (this.undoStackPosition > 0) {
-            this.undoStackPosition--;
-        }
-		this.registerQACheck();
-	},
-	saveInUndoStack: function(action) {
-		var currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
-
-        if (typeof currentItem != 'undefined') {
-            var regExp = /(<\s*\/*\s*(span class="undoCursorPlaceholder|span id="selectionBoundary)\s*.*span>)/gmi;
-            var editAreaText = this.editarea.html().replace(regExp, '');
-            var segment = SegmentStore.getCurrentSegment()
-            var itemText = currentItem.replace(regExp, '');
-            if (itemText.trim() == editAreaText.trim())
-                return;
-        }
-
-        if (this.editarea === '') return;
-		if (this.editarea.html() === '') return;
-        if (this.editarea.length === 0 ) return ;
-
-        // var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
-        // var tt = this.editarea.html().match(/&lt;/gi);
-        // if ( tt ) {
-        //     if ( (tt.length) && (!ss) )
-        //         return;
-        // }
-
-		var pos = this.undoStackPosition;
-		if (pos > 0) {
-			this.undoStack.splice(this.undoStack.length - pos, pos);
-			this.undoStackPosition = 0;
-		}
-        if(action !== 'paste'){
-            saveSelection();
-        }
-
-        // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
-        $('.undoCursorPlaceholder').remove();
-        if ($('.rangySelectionBoundary').closest('.editarea').length && !$('body').hasClass('rtl-target')) {
-            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
-        }
-        if(action !== 'paste'){
-            restoreSelection();
-        }
-
-        var htmlToSave = this.editarea.html();
-        this.undoStack.push(htmlToSave);
-        // $('.undoCursorPlaceholder').remove();
-
-	},
 	clearUndoStack: function() {
 		this.undoStack = [];
 	},

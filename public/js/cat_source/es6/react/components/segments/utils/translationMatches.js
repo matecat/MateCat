@@ -8,8 +8,6 @@ let TranslationMatches = {
         var percentageClass = UI.getPercentuageClass(match);
         if ($.trim(translation) !== '') {
 
-            UI.saveInUndoStack('copysuggestion');
-
             if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
 
             // XXX we are modifing the APP state so that MateCat will know that the object is changed
@@ -200,7 +198,6 @@ let TranslationMatches = {
         if (config.translation_matches_enabled && data) {
             if ( !data ) return true;
             this.renderContributions( data, segment );
-            UI.saveInUndoStack();
         }
     },
 

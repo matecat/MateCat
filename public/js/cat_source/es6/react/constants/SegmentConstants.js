@@ -89,5 +89,7 @@ module.exports = keyMirror({
     SET_QA_BLACKLIST_MATCHES: null,
     ADD_LXQ_HIGHLIGHT: null,
     ADD_SEARCH_RESULTS: null,
-    REMOVE_SEARCH_RESULTS: null
+    REMOVE_SEARCH_RESULTS: null,
+    UNDO_TEXT: null,
+    REDO_TEXT: null
 });

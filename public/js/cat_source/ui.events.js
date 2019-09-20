@@ -23,10 +23,12 @@ $.extend(UI, {
             if((SearchUtils.searchEnabled)&&($('#filterSwitch').length)) SearchUtils.toggleSearch(e);
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
-            UI.redoInSegment(UI.currentSegment);
+            // UI.redoInSegment(UI.currentSegment);
+            SegmentActions.redoInSegment();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.undoInSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
-            UI.undoInSegment(UI.currentSegment);
+            SegmentActions.undoInSegment();
+            // UI.undoInSegment(UI.currentSegment);
             UI.closeTagAutocompletePanel();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
