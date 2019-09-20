@@ -82,7 +82,7 @@ ul {
     display: grid;
     position: relative;
     grid-column-gap: 24px;
-    grid-template-columns: 0.6fr 0.6fr 1fr;
+    grid-template-columns: minmax(auto,max-content) minmax(auto,max-content) auto;
     align-items: center;
     .info{
       display: grid;
@@ -108,28 +108,25 @@ ul {
   }
   .side-info{
     padding: 0 16px;
-    position: absolute;
     display: grid;
     align-items: center;
-    bottom: 0;
-    right: 0;
-    width: 419px;
-    height: 35px;
-    box-shadow: -2px -2px 12px 0 rgba(198, 198, 198, 0.5);
-    background-color: #ffffff;
-    .side-info-body{
-      display: grid;
-      grid-template-columns: 80px 80px 80px;
-      align-items: center;
-      .item{
-        a{
-          margin: 0;
-          padding: 0;
-          color: #788190;
-          display: block;
-          text-decoration: none;
-          text-align: left;
-        }
+    box-shadow: none;
+    grid-template-columns: repeat(3, minmax(auto,max-content));
+    justify-content: right;
+    .item{
+      padding: 0 16px;
+      border-right: 1px solid #afafaf;
+
+      &:last-child {
+        border: none;
+      }
+      a{
+        margin: 0;
+        padding: 0;
+        color: #afafaf;
+        display: block;
+        text-decoration: none;
+        text-align: left;
       }
     }
   }
@@ -4703,10 +4700,18 @@ table.left-aligned tr th {
 
 /* activity log */
 
+.activity-log-page {
+  header {
+    .wrapper {
+      grid-template-columns: 1fr 120px;
+    }
+  }
+}
+
 .activity-log-container {
   width: 92%;
-  padding-bottom: 4%;
   margin: 0 auto;
+  padding: 32px 0;
 }
 
 .activity-log-container h1 {
@@ -4825,16 +4830,23 @@ table.activitylog th .th-inner:after {
 
 .downloadtr-button.backbtn {
   float: right;
-  margin: 5px 0px 0px 15px !important;
-  font-weight: bold;
-  float: right;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  border: 1px solid #ccc !important;
-  border-radius: 2px;
-  border-radius: 2px;
-  padding: 5px 17px !important;
+  border-radius: 5px;
+  padding: 8px 16px!important;
   min-width: 110px;
+  background: #FFF;
+}
+
+
+/* XLIFF to Target page */
+
+.xliff-to-target-page {
+  header {
+    .wrapper {
+        grid-template-columns: 208px 1fr 120px !important;
+    }
+  }
 }
 
 /*** Share Key Popup ***/

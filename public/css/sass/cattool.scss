@@ -36,28 +36,49 @@ body.cattool {
   .stats-foo {
 	height: 44px;
 	background-color: #fafafa;
-	padding: 0 146px;
+	padding: 0 32px;
 	width: 100%;
 	position: fixed;
 	bottom: 0;
 	left: 0;
 	z-index: 2;
 	display: grid;
+	min-width:1024px;
 
 	.footer-body {
 	  display: grid;
 	  position: relative;
-	  grid-column-gap: 32px;
-	  grid-template-columns: auto 0.5fr 0.5fr 0.5fr 0.5fr;
+	  grid-column-gap: 10px;
+	  grid-template-columns: 80px minmax(104px, 420px) minmax(160px, 216px) minmax(188px, 0.3fr) minmax(100px, 0.2fr) minmax(296px, 0.4fr);
 	  align-items: center;
 
 	  .item {
-		font-size: 16px;
+		font-size: 14px;
 		font-weight: bold;
 		font-style: normal;
 		font-stretch: normal;
 		line-height: 1.5;
 		color: black;
+
+		  p {
+			  margin:0;
+			  float: none;
+
+			  white-space: nowrap;
+			  overflow: hidden;
+			  text-overflow: ellipsis;
+		  }
+
+		  #job_id {
+			  font-size: 12px !important;
+			  text-align:left;
+		  }
+
+
+		  &.language {
+			  display: grid;
+			  justify-self: end;
+		  }
 
 		.to-arrow {
 		  font-size: 14px;
@@ -81,7 +102,6 @@ body.cattool {
 
 		.statistics-core {
 		  font-size: 14px;
-		  line-height: 1.29;
 		  color: #0055b8;
 		  font-weight: 200;
 
@@ -96,7 +116,7 @@ body.cattool {
 	  .progress-bar {
 		display: grid;
 		grid-template-columns: 1fr auto;
-		grid-column-gap: 16px;
+		grid-column-gap: 12px;
 
 		.percent {
 		  font-weight: 600;
@@ -113,6 +133,11 @@ body.cattool {
 		  }
 		}
 	  }
+		.statistics-details {
+			display: grid;
+			grid-template-columns: minmax(132px,0.4fr) minmax(164px,0.6fr);
+			justify-self: end;
+		}
 	}
   }
 }

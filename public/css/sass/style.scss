@@ -30,6 +30,7 @@ header .wrapper {
     padding: 0 20px;
     align-content: center;
     box-sizing: border-box;
+    top:0;
 }
 
 .header-menu {;
@@ -5054,24 +5055,13 @@ $white: #FFF;
 
 .editlog {
 
+    padding-top: 88px;
+
     .wrapper {
         margin: 0 auto 64px auto;
     }
 
-    padding-top: 88px;
-
     header {
-        background-color: #4D4D4D;
-        top: 0;
-        left: 0;
-        text-align: left;
-        width: 100%;
-        position: fixed;
-        z-index: 999999999;
-        border-bottom: 1px solid #5F5F5F;
-        padding: 0px;
-        height: 38px;
-        margin-top: 0;
 
         #user-menu-dropdown {
             .organization-name {
@@ -5109,11 +5099,13 @@ header {
 
 
         .logo {
-            margin-top:0;
+            margin:0;
             width: 160px;
             height: 32px;
             background: url(../../img/white_logo.png) 0 0 no-repeat;
             background-size: 160px 32px;
+            top:0;
+            left:0;
         }
     }
 
@@ -5170,7 +5162,7 @@ header {
             background-repeat: no-repeat;
             background-position: center;
             margin:0;
-            border-radius: 3px;
+            border-radius: 2px;
             cursor: pointer;
 
             &:hover,
@@ -5191,7 +5183,7 @@ header {
                 left: -80px !important;
                 margin: 0 0 0 -1px;
                 background: white;
-                padding: 8px;
+                padding: 12px 8px;
                 top: 50px;
                 font-size: 16px;
                 border-radius: 2px;
@@ -5221,7 +5213,7 @@ header {
 
                     a {
                         display: block;
-                        border-radius: 3px;
+                        border-radius: 2px;
                         padding: 8px !important;
                         font-size: 16px;
                         color: #000000;
@@ -5462,6 +5454,19 @@ header {
         align-items: center;
         justify-content: center;
 
+        .ui.user.label {
+            top:0;
+            margin-left: 10px;
+            background: none;
+            background-color: transparent;
+            border: 2px solid #09beec;
+            opacity: 0.8;
+            color: #09beec;
+            &:hover {
+                opacity: 1;
+            }
+        }
+
         #action-manage {
             opacity: 0.8;
             &:hover {
@@ -5487,6 +5492,7 @@ header {
                 width: 44px !important;
                 height: 44px !important;
                 border:none !important;
+                background: none;
                 svg {
                     width: 40px;
                 }
@@ -5506,6 +5512,17 @@ header {
             img {
                 margin-top:0;
             }
+
+            .organization-name {
+                display: none;
+            }
+        }
+    }
+
+    #action-manage {
+        opacity: 0.8;
+        &:hover {
+            opacity: 1;
         }
     }
 }
@@ -5525,7 +5542,7 @@ header {
         top: 64px !important;
         display: block;
         box-shadow: 0px 1px 12px #999;
-        border-radius: 3px;
+        border-radius: 2px;
         z-index: 13;
         border: solid 1px #cdd4de;
 

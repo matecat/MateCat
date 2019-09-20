@@ -81,20 +81,21 @@ header {
             }
             .scrolling {
                 .item.item.item {
-                    padding: 4px 8px !important;
+                    padding: 8px !important;
                     width: 230px;
                     min-width: 150px;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
 
-                    &:hover .team-filter,
+                    /*&:hover .team-filter,
                     &.active.selected .team-filter{
-                        visibility: visible;
-                    }
+                        background: #fff;
+                        border-radius: 50px;
+                    }*/
                 }
                 .team-filter {
-                    visibility: hidden;
+                    visibility: visible;
                 }
 
             }
@@ -184,13 +185,18 @@ header {
             min-width: 108px;
             color: #000000;
             font-size: 14px;
-            padding: 7px 16px;
+            padding: 6px 16px;
             float: left;
             margin-left: 10px;
             display: grid;
             grid-template-columns: auto 16px;
             align-items: center;
             grid-template-rows: 28px;
+
+            /*opacity:0.8;
+            &:hover, &.active {
+                opacity:1;
+            }*/
 
             .item {
                 display: grid;
@@ -202,7 +208,7 @@ header {
                     display: grid;
                     grid-template-columns: 1fr 40px;
                     align-items: center;
-                    grid-template-rows: 28px;
+                    grid-template-rows: 32px;
                     padding: 0 0 0 8px;
                     .icon {
                         margin:0 !important;
@@ -229,12 +235,19 @@ header {
                 &.selected {
                     .item-info {
                         color: #fff;
-                        border-radius: 3px;
+                        border-radius: 2px;
                         background: #002b5c;
                         a {
                             svg {
                                 path {
                                     fill: #fff;
+                                }
+                            }
+                            &:hover {
+                                svg {
+                                    path {
+                                        fill: #09BEEC;
+                                    }
                                 }
                             }
                         }
@@ -293,7 +306,7 @@ header {
         .menu{
             width: 200px;
             margin: 0 0 0 -1px;
-            padding: 8px !important;
+            padding: 12px 8px !important;
             top: 52px !important;
             border-radius: 2px;
             border: solid 1px #cdd4de;
@@ -313,7 +326,7 @@ header {
                 pointer-events: none;
             }
             .item {
-                border-radius: 3px;
+                border-radius: 2px;
                 padding: 8px !important;
                 font-size: 16px !important;
 
@@ -368,15 +381,10 @@ header {
     width: 160px;
     height: 32px;
     background-size: 160px 32px;
-    left: 13px;
+    left: 0;
     top: 3px;
 }
 
-#xliff-menu {
-    #menu-site {
-        margin-top: 8px;
-    }
-}
 
 #menu-site {
 

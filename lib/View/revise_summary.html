@@ -64,83 +64,19 @@
 
 
 <body class="reviselog" tal:condition="php: supportedBrowser NE 0 ">
-<!--metal:use-macro="header.html/main_header"-->
+
 <header>
-    <!--<div class="wrapper">-->
-        <!--<a href="${basepath}" class="logo"></a>-->
 
-        <!--&lt;!&ndash;<div metal:use-macro="common.html/login_includes" />&ndash;&gt;-->
-
-        <!--<div class="breadcrumbs">-->
-            <!--<span id="pname" tal:content="pname">Project</span>-->
-            <!--<span>&nbsp;(<span tal:replace="jid">-&#45;&#45;</span>) &gt; <b><span tal:replace="source_code">-&#45;&#45;</span> </b> &gt; <b><span tal:replace="target_code">-&#45;&#45;</span></b></span>-->
-        <!--</div>-->
-
-    <!--</div>-->
 </header>
 
 
 
 <div class="qr-wrapper" id="qr-root">
-    <!--<script src="${basepath}public/js/build/qa-report.js?build=${build_number}"></script>-->
 </div>
 
 <div class="notifications-wrapper"></div>
 
-<footer>
-    <div class="wrapper">
 
-        <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
-            <ul>
-                <li><a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}" class="footer_show_translate_link">Translate</a></li>
-
-                <li><a tal:attributes="href string:${basepath}revise/${pname}/${source_code}-${target_code}/${jid}-${password}" class="footer_show_revise_link">Revise</a></li>
-
-                <li><a class="link-manage-page" href="/manage/">Manage</a></li>
-
-                <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
-            </ul>
-
-        </nav>
-
-
-        <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-            <!-- <p class="progress">Progress:</p> -->
-            <div class="meter" style="width: 10%">
-
-                <a href="#" class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
-                <a href="#" class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
-                <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
-                <a href="#" class="draft-bar" tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
-            </div>
-            <p class="percent">
-                <span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
-            <ul>
-
-                <li id="stat-eqwords">
-                    <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a>
-                    <tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>
-                    : <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
-                </li>
-                <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
-                <!--
-                <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
-                <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
-                -->
-
-
-            </ul>
-            <!-- ul class="statistics-details">
-
-              <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">1.354</strong> Words/h</li>
-                 <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">36h 58m</strong></li>
-             </ul -->
-
-        </div>
-
-    </div>
-    <!-- .wrapper -->
-</footer>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 

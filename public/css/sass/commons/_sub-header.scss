@@ -29,17 +29,21 @@
 		background-color: #fff;
 		color: #002b5c;
 		font-weight: 500;
-		padding: 7px 16px;
+		padding: 6px 16px;
 		line-height: 1.21;
 		border-radius: 5px;
 		font-size: 14px;
 		min-width: 168px;
 		float: left;
-
 		display: grid;
 		width: 168px;
 		grid-template-columns: auto 16px;
 		align-items: center;
+
+		/*opacity:0.8;
+		&:hover, &.active {
+			opacity: 1;
+		}*/
 
 		.icon {
 			padding-top: 6px;
@@ -50,9 +54,6 @@
 			align-items: center;
 			column-gap: 8px;
 			margin-right: 4px;
-
-			/*grid-template-columns: 36px 72px 0;
-			grid-template-rows: 28px;*/
 
 			img{
 				margin: 0!important;
@@ -109,7 +110,6 @@
 					}
 				}
 				.box-number-project{
-					/*background: #0099cc;*/
 					border-radius: 50%;
 					padding: 4px;
 					text-align: center;
@@ -125,7 +125,7 @@
 					display: grid;
 					grid-template-columns: auto 0.13fr;
 					align-items: center;
-					padding: 8px;
+					padding: 4px 8px;
 				}
 
 				&:hover {
@@ -140,7 +140,9 @@
 							background: #002b5c;
 							color: #fff;
 							font-weight: normal;
-							border-radius: 3px;
+							border-radius: 2px;
+							display: grid;
+							grid-template-rows: 18px;
 						}
 						.box-number-project{
 							color: #fff;
@@ -240,7 +242,7 @@
 		input.search-projects {
 			height: 40px;
 			border-radius: 2px;
-			background-color: #e4e4e4;
+			background-color: #fff;
 			color: #002b5c;
 			transition: 0.2s ease-in;
 			font-size: 14px;
@@ -249,25 +251,23 @@
 			padding: 12px 16px;
 			box-shadow: none;
 			border: none;
+			opacity: 0.4;
 			&::placeholder{
 				color: #002b5c;
 			}
-			/*&:hover {
-				background-color: #676767 !important;
-			}
-			*/
+
 			&:focus {
                 border: none!important;
-				background-color: #ffffff;
+				opacity: 1;
 				& + .dropdown{
 					background-color: #ffffff;
 				}
 			}
 		}
 		.ui.dropdown {
-            background-color: #e4e4e4;
+            background-color: #fff;
 			border-left: 1px solid #002b5c;
-			transition: 0.2s ease-in;
+			/*transition: 0.2s ease-in;*/
 			color: #002b5c;
 			font-weight: 500;
 			padding: 2px 16px 2px 8px;
@@ -278,17 +278,12 @@
 			display: grid;
 			grid-template-columns: 36px auto;
 			align-items: center;
-
-            &:hover {
-                background-color: #ffffff;
+			opacity: 0.4;
+            &:hover,
+			&:active,
+			&:focus {
+                opacity:1;
             }
-            &:active {
-                background-color: #ffffff;
-            }
-            &:focus {
-                background-color: #ffffff
-            }
-
 			.text{
 				svg{
 					display: none;
@@ -296,7 +291,7 @@
 			}
 			.menu {
 				min-width: 144px;
-				padding: 14px 8px 8px 8px;
+				padding: 8px 8px 12px 8px;
 				border-radius: 2px;
 				border: solid 1px #cdd4de;
 				right: 0 !important;
@@ -316,6 +311,7 @@
 					display:grid;
 					grid-template-columns: auto 16px;
 					align-items: center;
+					margin: 4px 0 0 0 ;
 
 					&:hover {
 						background-color: rgba(0, 0, 0, 0.03);
