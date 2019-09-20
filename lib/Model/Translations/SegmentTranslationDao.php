@@ -458,21 +458,27 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @deprecated
+     * @TODO use Update Struct with mask
+     *
      * @param Translations_SegmentTranslationStruct $translation_struct
      *
      * @return int
      */
-    public static function updateTranslation( Translations_SegmentTranslationStruct $translation_struct ) {
+    public static function updateTranslationAndStatusAndDate( Translations_SegmentTranslationStruct $translation_struct ) {
         $query = "UPDATE segment_translations 
-                    SET translation=:translation, status=:status 
-                    WHERE id_segment = :id_segment";
+                    SET translation = :translation, status = :status, translation_date = :translation_date
+                    WHERE id_segment = :id_segment
+                    AND id_job=:id_job ";
 
         $db   = Database::obtain();
         $stmt = $db->getConnection()->prepare( $query );
         $stmt->execute( [
-                'translation' => $translation_struct->translation,
-                'id_segment'  => $translation_struct->id_segment,
-                'status'      => $translation_struct->status
+                'translation'      => $translation_struct->translation,
+                'id_segment'       => $translation_struct->id_segment,
+                'id_job'           => $translation_struct->id_job,
+                'status'           => $translation_struct->status,
+                'translation_date' => $translation_struct->translation_date
         ] );
 
         return $stmt->rowCount();
