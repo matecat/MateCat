@@ -19,7 +19,11 @@
     }
 }
 
-
+.wrapper-upload .translate-box.tmx-select {
+    div.dropdown{
+        width: 175px!important;
+    }
+}
 
 .translate-box.target,
 .translate-box.source,
@@ -54,7 +58,7 @@
     #project-subject,
     #source-lang,
     #target-lang {
-        width: 210px ;
+        width: 170px ;
     }
     #target-lang {
         .multiple-none-text {
@@ -118,7 +122,7 @@
         margin-top: 0 !important;
         pointer-events: none;
         line-height: 28px !important;
-        max-width: 180px !important;
+        max-width: 130px !important;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -139,12 +143,12 @@
 
 }
 
-.translate-box.tmx-select {
+.wrapper-upload .translate-box.tmx-select {
     span.text {
         margin: 0 !important;
         line-height: 28px !important;
-        max-width: 237px !important;
-        font-size: 16px !important;
+        max-width: 150px !important;
+        font-size: 14px !important;
         i.icon-checkmark2.icon {
             display: none;
         }
@@ -187,7 +191,7 @@
     }
     .icon-info {
         font-size: 19px;
-        margin-top: 5px;
+        margin-top: 1px;
         margin-left: 5px;
         color: rgba(117, 117, 117, 0.7);
     }
@@ -195,7 +199,7 @@
         text-align: left;
     }
     .tm-info-icon {
-        float: left;   
+        float: left;
     }
     .tm-info-title {
         line-height: 19px;
@@ -215,7 +219,7 @@
         #project-subject,
         #source-lang,
         #target-lang {
-            width: 155px ;
+            width: 127px ;
             .ui.icon.search.input {
                 min-width: unset;
             }
@@ -279,7 +283,7 @@
             margin-top: 0 !important;
             pointer-events: none;
             line-height: 28px !important;
-            max-width: 115px !important;
+            max-width: 90px !important;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -299,9 +303,9 @@
         }
     }
     .translate-box.project-name {
-        width: 160px;
+        width: 130px;
         .upload-input {
-            width: 160px;
+            width: 130px;
         }
     }
     .translate-box.settings {
@@ -311,6 +315,19 @@
     }
     .translate-box.tmx-select {
         margin-right: 0;
+    }
+    .wrapper-upload{
+        .translate-box {
+          div.dropdown{
+            width: 127px;
+          }
+        }
+    }
+
+    div.more-options-cont {
+        span{
+            display: none;
+        }
     }
 }
 

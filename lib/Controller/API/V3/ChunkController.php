@@ -12,6 +12,7 @@ use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V3\Json\Chunk;
 use Chunks_ChunkStruct;
+use Projects_ProjectStruct;
 
 class ChunkController extends KleinController {
 
@@ -21,12 +22,44 @@ class ChunkController extends KleinController {
     protected $chunk;
 
     /**
+     * @var Projects_ProjectStruct
+     */
+    protected $project;
+
+    /**
+     * @var \FeatureSet
+     */
+    protected $featuresSet;
+
+    /**
      * @param Chunks_ChunkStruct $chunk
      *
      * @return $this
      */
     public function setChunk( $chunk ) {
         $this->chunk = $chunk;
+
+        return $this;
+    }
+
+    /**
+     * @param Projects_ProjectStruct $project
+     *
+     * @return $this
+     */
+    public function setProject( $project ) {
+        $this->project = $project;
+
+        return $this;
+    }
+
+    /**
+     * @param \FeatureSet $featuresSet
+     *
+     * @return $this
+     */
+    public function setFeaturesSet( $featuresSet ) {
+        $this->featuresSet = $featuresSet;
 
         return $this;
     }
@@ -48,9 +81,10 @@ class ChunkController extends KleinController {
 
     protected function afterConstruct() {
         $Validator = new ChunkPasswordValidator( $this ) ;
-        $Controller = $this;
-        $Validator->onSuccess( function () use ( $Validator, $Controller ) {
-            $Controller->setChunk( $Validator->getChunk() );
+        $Validator->onSuccess( function () use ( $Validator ) {
+            $this->setChunk( $Validator->getChunk() );
+            $this->setProject( $Validator->getChunk()->getProject() );
+            $this->setFeatureSet( $this->project->getFeatures() );
         } );
         $this->appendValidator( $Validator );
     }

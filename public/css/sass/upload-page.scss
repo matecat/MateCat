@@ -1210,6 +1210,13 @@ button.ui-button::-moz-focus-inner {
     margin-left: 3px;
 }
 
+.translate-box.settings{
+    .more-options-cont {
+        margin-top: 0;
+        margin-left: 10px;
+    }
+}
+
 @media (min-width: 1300px) and (max-width: 1410px) {
     /*.advanced-box .translate-box select {
         width: 210px !important;
@@ -1328,7 +1335,7 @@ button.ui-button::-moz-focus-inner {
             margin-top: 0 !important;
             pointer-events: none;
             line-height: 28px !important;
-            max-width: 180px !important;
+            max-width: 90px !important;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1390,7 +1397,7 @@ button.ui-button::-moz-focus-inner {
 
 .translate-box {
     float: left;
-    margin: 20px 17px 0px 0px;
+    margin: 20px 10px 0px 0px;
     position: relative;
     display: block;
 }
@@ -1795,7 +1802,7 @@ color:#000; background:#efefef url(../img/point.gif) 0 0 repeat-x;border-bottom:
 .sublist {margin:0;float:right;font-size:18px;padding:0;}
 .col{ float:left;width:180px;padding:10px;text-align:center;}
 .top20{font-weight:bold;font-size:16px;}
-.listlang input{margin:1px 2px 0px 5px;} 
+.listlang input{margin:1px 2px 0px 5px;}
 .listlang  li:hover, .listlang .on{ background:#e6e7e8; font-weight:bold;cursor:pointer}
 .listlang .on, .listlang .on:hover{ background:#81b951;}
 .col2{ width:600px;}
@@ -2102,19 +2109,15 @@ tr.ready .size span {
 
 .more-options-cont {
     margin-top: 7px;
-
     .more-options {
         float: left ;
-      /*  margin-left: 20px;*/
         font-size: 16px;
-        margin-top: 2px !important;
     }
     .more-options, span:hover {
         text-decoration: none;
         cursor: pointer;
     }
     span {
-        text-decoration: underline;
         font-size: 16px;
         float: left;
         color: #39699a;
@@ -2793,6 +2796,27 @@ a.pull-left.btn-grey.canceladdtmx {
 a.pull-right.confirmDelete {
     margin-right: 3px;
 }
+
+
+.wrapper-upload{
+    .translate-box{
+        h2{
+            font-size: 19px;
+            margin-left: 0;
+        }
+        input{
+            width: 170px;
+        }
+        div.dropdown{
+            font-size: 14px!important;
+            width: 150px;
+            .menu{
+                width: 280px;
+            }
+        }
+    }
+}
+
 
 
 /* Header restyling */

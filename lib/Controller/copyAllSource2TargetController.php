@@ -1,6 +1,6 @@
 <?php
 
-use Features\SecondPassReview\Utils as SecondPassReviewUtils;
+use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
 
@@ -104,15 +104,15 @@ class copyAllSource2TargetController extends ajaxController {
 
         $chunk    = Chunks_ChunkDao::getByJobID( $job_id )[ 0 ];
         $features = $chunk->getProject()->getFeatures();
-        $status   = Constants_TranslationStatus::STATUS_DRAFT;
 
         $batchEventCreator = new BatchEventCreator( $chunk );
         $batchEventCreator->setFeatureSet( $features );
         $batchEventCreator->setProject( $chunk->getProject() );
 
-        $source_page = SecondPassReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
+        $source_page = ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber );
         $segments    = $chunk->getSegments();
 
+        $affected_rows = 0;
         foreach ( $segments as $segment ) {
 
             $segment_id = (int)$segment->id;
@@ -120,16 +120,26 @@ class copyAllSource2TargetController extends ajaxController {
 
             $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
 
-            if ( empty( $old_translation ) || ($old_translation->status !== Constants_TranslationStatus::STATUS_DRAFT && $old_translation->status !== Constants_TranslationStatus::STATUS_NEW) ) {
+            if ( empty( $old_translation ) || ( $old_translation->status !== Constants_TranslationStatus::STATUS_NEW ) ) {
                 //no segment found
                 continue;
             }
 
-            $new_translation         = clone $old_translation;
+            $new_translation              = clone $old_translation;
             $new_translation->translation = $segment->segment;
-            $new_translation->status = $status;
+            $new_translation->status      = Constants_TranslationStatus::STATUS_DRAFT;
+            $new_translation->translation_date      = date( "Y-m-d H:i:s" );
 
-            Translations_SegmentTranslationDao::updateTranslation($new_translation);
+
+            try {
+                $affected_rows += Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+            } catch ( Exception $e ) {
+                $errorCode                                         = -4;
+                self::$errorMap[ $errorCode ][ 'internalMessage' ] .= $e->getMessage();
+                $this->addError( $errorCode );
+                $database->rollback();
+                return;
+            }
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
                 $segmentTranslationEventModel = new SegmentTranslationEventModel( $old_translation, $new_translation, $this->user, $source_page );
@@ -146,16 +156,6 @@ class copyAllSource2TargetController extends ajaxController {
         }
 
         Log::doJsonLog( 'Segment Translation events saved completed' );
-
-        try {
-            $affected_rows = Translations_SegmentTranslationDao::copyAllSourceToTargetForJob( $job_data );
-        } catch ( Exception $e ) {
-            $errorCode                                         = -4;
-            self::$errorMap[ $errorCode ][ 'internalMessage' ] .= $e->getMessage();
-            $this->addError( $errorCode );
-
-            return;
-        }
 
         $this->result[ 'data' ] = [
                 'code'              => 1,

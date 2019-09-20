@@ -117,7 +117,7 @@ class ChunkReviewModel implements IChunkReviewModel {
         $project   = Projects_ProjectDao::findById( $this->chunk_review->id_project );
         $lqa_model = $project->getLqaModel();
 
-        return SecondPassReview\Utils::filterLQAModelLimit( $lqa_model, $this->chunk_review->source_page );
+        return ReviewUtils::filterLQAModelLimit( $lqa_model, $this->chunk_review->source_page );
     }
 
     /**

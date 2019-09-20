@@ -116,24 +116,24 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                 AND s.id <= j.job_last_segment
                 AND s.id >= j.job_first_segment
             LEFT JOIN (
-                SELECT id_segment as id_segment, source_page FROM segment_translation_events
-                WHERE id IN (
-                   SELECT * FROM(
-                        SELECT max(id) FROM segment_translation_events
-                            WHERE id_job = :id_job
-                            AND id_segment BETWEEN :job_first_segment AND :job_last_segment
-                            GROUP BY id_segment
-                   ) AS X
-                )
-
+            
+                SELECT id_segment as ste_id_segment, source_page 
+                FROM  segment_translation_events 
+                JOIN ( 
+                    SELECT max(id) as _m_id FROM segment_translation_events
+                        WHERE id_job = :id_job
+                        AND id_segment BETWEEN :job_first_segment AND :job_last_segment
+                        GROUP BY id_segment 
+                ) AS X ON _m_id = segment_translation_events.id
                 ORDER BY id_segment
-            ) ste ON ste.id_segment = s.id
+                
+            ) ste ON ste.ste_id_segment = s.id
 
             WHERE
                 j.id = :id_job AND j.password = :password
                 AND
                 ( source_page = :source_page OR
-                  ( :source_page = 2 AND ste.id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
+                  ( :source_page = 2 AND ste.ste_id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
                   ) ;
             "  ;
 

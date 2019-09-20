@@ -7,19 +7,19 @@
  */
 
 
-namespace Features\SecondPassReview;
+namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
 use LQA\ChunkReviewDao;
 use LQA\ModelStruct;
 
-class Utils {
+class ReviewUtils {
 
     public static function formatStats( $statsArray, $chunkReviews ) {
         $statsArray [ 'revises' ] = [];
         foreach ( $chunkReviews as $chunkReview ) {
             $statsArray[ 'revises' ][] = [
-                    'revision_number' => Utils::sourcePageToRevisionNumber( $chunkReview->source_page ),
+                    'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunkReview->source_page ),
                     'advancement_wc'  => $chunkReview->advancement_wc
             ];
         }

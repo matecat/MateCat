@@ -115,7 +115,28 @@
         <h2>Project name</h2>
         <input name="project-name" tal:attributes="value project_name|nothing" type="text" class="upload-input" id="project-name" autofocus="autofocus"/>
     </div>
-
+    <div class="translate-box project-subject" tal:condition="isLoggedIn">
+        <h2>Team</h2>
+        <div class="ui fluid selection dropdown" id="project-team">
+            <i class="dropdown icon"></i>
+            <span class="text">Select Team</span>
+            <div class="menu menu-dropdown">
+                <div class="divider"></div>
+                <div class="ui icon search input">
+                    <i class="icon-search icon"/>
+                    <input type="text" name="sourceLang" placeholder="Search" />
+                </div>
+                <div class="divider"></div>
+                <div class="scrolling menu">
+                    <tal:block tal:repeat="team teams">
+                        <div class="item" tal:attributes="data-value team/id" tal:content="team/name">
+                            ---
+                        </div>
+                    </tal:block>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="translate-box source">
         <h2>From</h2>
         <div class="ui fluid selection dropdown" id="source-lang">
@@ -267,7 +288,7 @@
     <div class="translate-box settings">
         <div class="more-options-cont">
             <a href="#" class="more-options"></a>
-            <span>Settings</span>
+            <span>More settings</span>
         </div>
         <h2 class="resources" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
     </div>

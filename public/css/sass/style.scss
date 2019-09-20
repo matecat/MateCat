@@ -5454,6 +5454,13 @@ header {
         align-items: center;
         justify-content: center;
 
+        .user-nolog {
+          opacity: 0.8;
+          &:hover {
+            opacity: 1;
+          }
+        }
+
         .ui.user.label {
             top:0;
             margin-left: 10px;
@@ -5697,6 +5704,20 @@ header {
     #pagination_box {
         nav {
             ul {
+               #current_page{
+                   padding: 0 4px;
+                   a{
+                       color: #09beec;
+                       padding: 2px 6px;
+                       border: 2px solid #09beec;
+                       border-radius: 25px;
+                   }
+               }
+
+                li a {
+                    opacity: 0.8;
+                }
+
                 li {
                     padding: 0 8px ;
                     margin: 0;
@@ -5718,6 +5739,7 @@ header {
         grid-template-columns: auto; /* auto 0.5fr 0.5fr 0.5fr 0.5fr  */
         align-items: center;
         justify-content: center;
+        min-width: 616px;
 
         .item {
             font-size: 16px;

@@ -17,6 +17,7 @@ use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\Model\QualityReportModel;
+use Features\ReviewExtended\ReviewUtils;
 use FilesStorage\FilesStorageFactory;
 use INIT;
 use Jobs_JobStruct;
@@ -124,41 +125,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $options[ 'optional_fields' ][] = 'edit_distance';
 
         return $options;
-    }
-
-    /**
-     * @param $project
-     *
-     * @return Projects_ProjectStruct
-     */
-    public function filter_manage_single_project( $project ) {
-        $chunks = [];
-
-        foreach ( $project[ 'jobs' ] as $job ) {
-            $ch           = new Chunks_ChunkStruct();
-            $ch->id       = $job[ 'id' ];
-            $ch->password = $job[ 'password' ];
-            $chunks[]     = $ch;
-        }
-
-        $chunk_reviews = ( new ChunkReviewDao() )->findChunkReviewsForList( $chunks );
-
-        foreach ( $project[ 'jobs' ] as $kk => $job ) {
-            /**
-             * Inner cycle to match chunk_reviews records and modify
-             * the data structure.
-             */
-            foreach ( $chunk_reviews as $chunk_review ) {
-                if ( $chunk_review->id_job == $job[ 'id' ] && $chunk_review->password == $job[ 'password' ] && $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
-                    $project[ 'jobs' ][ $kk ][ 'revise_passwords' ][] = [
-                            'revision_number' => 1,
-                            'password'        => $chunk_review->review_password
-                    ];
-                }
-            }
-        }
-
-        return $project;
     }
 
     /**
