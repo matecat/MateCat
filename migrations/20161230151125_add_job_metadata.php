@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class AddJobMetadata extends AbstractMatecatMigration  {
 
     public $sql_up = <<<EOF

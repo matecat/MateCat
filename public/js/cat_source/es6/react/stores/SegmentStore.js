@@ -237,7 +237,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     setPropagation(sid, fid, propagation, from) {
-        var index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid, fid);
         if (propagation) {
             this._segments[fid] = this._segments[fid].setIn([index, 'autopropagated_from'], from);
         } else {
@@ -251,10 +251,16 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return translation;
     },
     replaceSource(sid, fid, source) {
-        var index = this.getSegmentIndex(sid, fid);
-        var trans = htmlEncode(this.removeLockTagsFromString(source));
-        this._segments[fid] = this._segments[fid].setIn([index, 'decoded_translation'], trans);
-        return source;
+        let index = this.getSegmentIndex(sid, fid);
+        let segment = this._segments[fid].get(index);
+        // var trans = htmlEncode(this.removeLockTagsFromString(source));
+        let source_decoded = source;
+        if ( source_decoded.indexOf('locked-inside') === -1 )  {
+            source_decoded = UI.decodeText(segment.toJS(), source);
+        }
+        // this._segments[fid] = this._segments[fid].setIn([index, 'segment'], trans);
+        this._segments[fid] = this._segments[fid].setIn([index, 'decoded_source'], source_decoded);
+        return source_decoded;
     },
     decodeSegmentsText: function () {
         let self = this;
@@ -264,8 +270,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
     },
     setSegmentAsTagged(sid, fid) {
-        var index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid, fid);
         this._segments[fid] = this._segments[fid].setIn([index, 'tagged'], true);
+        let segment = this._segments[fid].get(index);
+        this._segments[fid] = this._segments[fid].setIn([index, 'decoded_translation'], UI.decodeText(segment.toJS(), segment.get('translation')));
+        this._segments[fid] = this._segments[fid].setIn([index, 'decoded_source'], UI.decodeText(segment.toJS(), segment.get('segment')));
     },
 
     setSegmentOriginalTranslation(sid, fid, translation) {
@@ -296,10 +305,10 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments[fid] = this._segments[fid].setIn([index, 'edit_area_locked'], !lockedEditArea);
     },
     getSegmentByIdToJS(sid, fid) {
-        return this._segments[fid].find(function (seg) {
-            return seg.get('sid') == sid;
-        }).toJS();
-
+        let segment = this._segments[fid].find(function (seg) {
+            return seg.get('sid') === sid || seg.get('original_sid') === sid;
+        });
+        return (segment) ? segment.toJS() : null;
     },
 
     getAllSegments: function () {
@@ -495,6 +504,7 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.REPLACE_SOURCE:
             let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
             SegmentStore.emitChange(action.actionType, action.id, source);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);

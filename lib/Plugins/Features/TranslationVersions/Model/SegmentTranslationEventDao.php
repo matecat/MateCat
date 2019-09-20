@@ -6,14 +6,14 @@
  * Time: 17:20
  */
 
-namespace Features\TranslationVersions\Model ;
+namespace Features\TranslationVersions\Model;
 
 use PDO;
 
 class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
 
     const TABLE       = "segment_translation_events";
-    const STRUCT_TYPE = "\Features\TranslationVersions\Model\SegmentTranslationEventStruct" ;
+    const STRUCT_TYPE = "\Features\TranslationVersions\Model\SegmentTranslationEventStruct";
 
     protected static $auto_increment_field = [ 'id' ];
     protected static $primary_keys         = [ 'id' ];
@@ -26,19 +26,26 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
      * @return \Features\TranslationVersions\Model\SegmentTranslationEventStruct[]
      */
     public function getLatestEventsInSegmentInterval( $id_job, $min_segment, $max_segment ) {
-        $sql = "SELECT * FROM segment_translation_events WHERE id IN (  " .
-                " SELECT max(id) FROM segment_translation_events " .
-                " WHERE id_job = :id_job  " .
-                " AND id_segment >= :min_segment AND id_segment <= :max_segment " .
-                " GROUP BY id_segment ) ORDER BY id_segment " ;
 
-        $conn = $this->getDatabaseHandler()->getConnection() ;
+        //The 2 subqueries are needed because a simple sub-select query hits a mysql bug and make a full scan
+        $sql = "SELECT * FROM segment_translation_events 
+                  WHERE id IN ( 
+                        SELECT * FROM ( 
+                            SELECT max(id) FROM segment_translation_events 
+                            WHERE id_job = :id_job 
+                            AND id_segment >= :min_segment AND id_segment <= :max_segment 
+                            GROUP BY id_segment 
+                        ) AS X 
+                  ) 
+        ORDER BY id_segment ";
+
+        $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [
-            'id_job'      => $id_job,
-            'min_segment' => $min_segment,
-            'max_segment' => $max_segment
+                'id_job'      => $id_job,
+                'min_segment' => $min_segment,
+                'max_segment' => $max_segment
         ] );
 
         return $stmt->fetchAll();
@@ -50,9 +57,9 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
                     AND id_segment = :id_segment
                     AND final_revision = 1
                     AND source_page = :source_page
-                " ;
+                ";
 
-        $conn = $this->getDatabaseHandler()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [
@@ -69,13 +76,13 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
                 WHERE id_job = :id_job
                     AND id_segment = :id_segment
                     AND final_revision = 1
-                " ;
+                ";
 
-        $conn = $this->getDatabaseHandler()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [
-                'id_job'      => $id_job,
+                'id_job'     => $id_job,
                 'id_segment' => $id_segment
         ] );
 
@@ -85,18 +92,18 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
     public function getFinalRevisionForSegments( $id_job, $segment_ids ) {
         $sql = "SELECT source_page, segment_translation_events.* FROM segment_translation_events
                 WHERE id_job = :id_job
-                    AND id_segment IN (" . implode(',', $segment_ids ) . " )
+                    AND id_segment IN (" . implode( ',', $segment_ids ) . " )
                     AND final_revision = 1
-                " ;
+                ";
 
-        $conn = $this->getDatabaseHandler()->getConnection() ;
+        $conn = $this->getDatabaseHandler()->getConnection();
         $stmt = $conn->prepare( $sql );
         // $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
         $stmt->execute( [
                 'id_job' => $id_job,
         ] );
 
-        return $stmt->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        return $stmt->fetchAll( PDO::FETCH_GROUP | PDO::FETCH_CLASS, self::STRUCT_TYPE );
     }
 
     /**
@@ -106,10 +113,11 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
      * @return SegmentTranslationEventStruct|null
      */
     public function getLatestEventForSegment( $id_job, $id_segment ) {
-        $latest_events = $this->getLatestEventsInSegmentInterval( $id_job, $id_segment, $id_segment ) ;
+        $latest_events = $this->getLatestEventsInSegmentInterval( $id_job, $id_segment, $id_segment );
         if ( $latest_events ) {
-            return $latest_events[0] ;
+            return $latest_events[ 0 ];
         }
-        return null ;
+
+        return null;
     }
 }

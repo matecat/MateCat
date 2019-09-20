@@ -32,6 +32,9 @@ class BatchEventCreator {
      */
     protected   $_chunk;
 
+    /** @var \Projects_ProjectStruct */
+    protected $_project;
+
     public function  __construct( Chunks_ChunkStruct $chunkStruct ) {
         $this->_chunk = $chunkStruct ;
     }
@@ -53,6 +56,26 @@ class BatchEventCreator {
     public function addEventModel( SegmentTranslationEventModel $eventModel ) {
         $this->_events [] = $eventModel ;
     }
+
+    /**
+     * @return \Projects_ProjectStruct
+     */
+    public function getProject() {
+        return $this->_project;
+    }
+
+    /**
+     * @param \Projects_ProjectStruct $project
+     *
+     * @return $this
+     */
+    public function setProject( $project ) {
+        $this->_project = $project;
+
+        return $this;
+    }
+
+
 
     public function save() {
         $this->openTransaction() ;
