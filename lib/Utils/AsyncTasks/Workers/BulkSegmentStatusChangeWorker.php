@@ -64,19 +64,20 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeatures() ) ;
         $batchEventCreator->setProject( $chunk->getProject() );
 
-        foreach ( $params[ 'segment_ids' ] as $segment ) {
+        foreach ( $params[ 'segment_ids' ] as $segment_id ) {
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment, $chunk->id );
+            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk->id );
 
             if ( empty( $old_translation ) ) {
                 //no segment found
                 continue;
             }
 
-            $new_translation         = clone $old_translation;
-            $new_translation->status = $status;
+            $new_translation                   = clone $old_translation;
+            $new_translation->status           = $status;
+            $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
-            Translations_SegmentTranslationDao::updateSegmentStatusBySegmentId( $chunk->id, $segment, $status );
+            Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
                 $segmentTransaltionEvent = new SegmentTranslationEventModel( $old_translation, $new_translation, $user, $source_page ) ;

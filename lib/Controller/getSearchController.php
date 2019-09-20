@@ -433,7 +433,7 @@ class getSearchController extends ajaxController {
 
             // commit the transaction
             try {
-                Translations_SegmentTranslationDao::updateTranslation( $new_translation );
+                Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
                 $this->db->commit();
             } catch ( Exception $e ) {
                 $this->result[ 'errors' ][] = [ "code" => -101, "message" => $e->getMessage() ];
