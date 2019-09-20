@@ -71,13 +71,10 @@ let EditArea = {
                 });
 
             } else {
-                var numTagsBefore = (UI.editarea.text().match( /<.*?\>/gi ) !== null) ? UI.editarea.text().match( /<.*?\>/gi ).length : 0;
-                var numSpacesBefore = $( '.space-marker', UI.editarea ).length;
                 saveSelection();
 
                 var parentTag = $( 'span.locked', UI.editarea ).has( '.rangySelectionBoundary' );
                 var isInsideTag = $( 'span.locked .rangySelectionBoundary , span.monad .rangySelectionBoundary', UI.editarea ).length;
-                var isInsideMark = $( '.searchMarker .rangySelectionBoundary', UI.editarea ).length;
 
                 var sbIndex = 0;
                 var translation = $.parseHTML( UI.editarea.html() );
@@ -87,16 +84,18 @@ let EditArea = {
 
                 var undeletableMonad = (($( translation[sbIndex - 1] ).hasClass( 'monad' )) && ($( translation[sbIndex - 2] ).prop( "tagName" ) == 'BR')) ? true : false;
                 var selBound = $( '.rangySelectionBoundary', UI.editarea );
-                if ( undeletableMonad ) selBound.prev().remove();
+                if ( undeletableMonad ) $(selBound.prev()).remove();
                 if ( code == 8 ) { // backspace
                     var undeletableTag = !!(
                         ($( translation[sbIndex - 1] ).hasClass( 'locked' ) && ($( translation[sbIndex - 2] ).prop( "tagName" ) === 'BR')) ||
                         ( $( translation[sbIndex - 1] ).hasClass( "marker" ) &&  $( translation[sbIndex - 2] ).hasClass( "marker" ) && translation.length -1 === sbIndex )
                     );
                     if ( undeletableTag ) {
-                        selBound.prev().remove();
+                        $(selBound.prev()).remove();
                         setTimeout( () => SegmentActions.modifiedTranslation( UI.currentSegmentId, null, true ) );
-                        // e.preventDefault();
+                        // Adding many "enter" at the end and deleting the last one mysteriously matecat adds two br at the end. Blocking the propagation doesn't happen.
+                        e.preventDefault();
+                        e.stopPropagation();
                     }
                 }
                 // insideTag management
@@ -120,8 +119,6 @@ let EditArea = {
                         restoreSelection();
                         // move selboundary after the monad
                     }
-                    var numTagsAfter = (UI.editarea.text().match( /<.*?\>/gi ) !== null) ? UI.editarea.text().match( /<.*?\>/gi ).length : 0;
-                    var numSpacesAfter = $( '.space-marker', UI.editarea ).length;
                 }, 50 );
             }
         }

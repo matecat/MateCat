@@ -221,9 +221,9 @@ class Editarea extends React.Component {
         this.cursorPosition = translation.position;
         setTimeout(()=>this.modifiedTranslation(translation.text));
 
-        console.log("UNDO IN SEGMENT", translation);
-        console.log("UNDOSTACK = ", this.undoStack);
-        console.log("UNDOPOSITION = ", this.undoStackPosition);
+        // console.log("UNDO IN SEGMENT", translation);
+        // console.log("UNDOSTACK = ", this.undoStack);
+        // console.log("UNDOPOSITION = ", this.undoStackPosition);
     }
 
     redoInUndoStack() {
@@ -240,9 +240,9 @@ class Editarea extends React.Component {
         this.cursorPosition = translation.position;
         setTimeout(()=>this.modifiedTranslation(translation.text));
 
-        console.log("REDO IN SEGMENT", translation);
-        console.log("UNDOSTACK = ", this.undoStack);
-        console.log("UNDOPOSITION = ", this.undoStackPosition);
+        // console.log("REDO IN SEGMENT", translation);
+        // console.log("UNDOSTACK = ", this.undoStack);
+        // console.log("UNDOPOSITION = ", this.undoStackPosition);
     }
 
     saveInUndoStack() {
@@ -273,9 +273,9 @@ class Editarea extends React.Component {
             position: this.saveCursorPosition(this.editAreaRef)
         });
 
-        console.log("SAVE IN STACK IN SEGMENT", textToSave);
-        console.log("UNDOSTACK = ", this.undoStack);
-        console.log("UNDOPOSITION = ", this.undoStackPosition);
+        // console.log("SAVE IN STACK IN SEGMENT", textToSave);
+        // console.log("UNDOSTACK = ", this.undoStack);
+        // console.log("UNDOPOSITION = ", this.undoStackPosition);
     }
 
     saveCursorPosition(containerEl) {
