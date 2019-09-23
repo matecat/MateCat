@@ -1393,8 +1393,8 @@ UI = {
         var t_formatted = s.TODO_FORMATTED;
         var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
 		// If second pass enabled
-		if ( config.secondRevisionsCount && s.reviews ) {
-		    var reviewedWords = s.reviews.find(function ( value ) {
+		if ( config.secondRevisionsCount && s.revises ) {
+		    var reviewedWords = s.revises.find(function ( value ) {
                 return value.revision_number === 1;
             });
 		    if ( reviewedWords ) {
@@ -1404,7 +1404,7 @@ UI = {
 
             }
 
-            var reviewWordsSecondPass = s.reviews.find(function ( value ) {
+            var reviewWordsSecondPass = s.revises.find(function ( value ) {
                 return value.revision_number === 2;
             });
 
