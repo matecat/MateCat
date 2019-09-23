@@ -130,7 +130,10 @@ class Editarea extends React.Component {
 
     onKeyDownEvent(e) {
         this.keyPressed = true;
-        EditArea.keydownEditAreaEventHandler.call(this.editAreaRef, e, this.props.sendTranslationWithoutUpdate);
+        EditArea.keydownEditAreaEventHandler.call(this.editAreaRef, e, ()=>{
+            this.props.sendTranslationWithoutUpdate();
+            UI.registerQACheck();
+        });
         this.openConcordance(e);
     }
     onKeyPressEvent(e) {
