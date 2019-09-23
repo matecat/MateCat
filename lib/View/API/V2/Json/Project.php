@@ -116,7 +116,7 @@ class Project {
                 'create_date'          => $project->create_date,
                 'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
                 'standard_analysis_wc' => (int)$project->standard_analysis_wc,
-                'tm_analysis_wc'       => (int)$project->tm_analysis_wc,
+                'tm_analysis_wc'       => $project->tm_analysis_wc,
                 'project_slug'         => Utils::friendly_slug( $project->name ),
                 'jobs'                 => $jobJSONs,
                 'features'             => implode( ",", $featureSet->getCodes() ),
