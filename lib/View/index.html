@@ -48,6 +48,8 @@
                 password: '${password}',
                 source_rfc: '${source_code}',
                 target_rfc: '${target_code}',
+                source_code: '${source_code}',
+                target_code: '${target_code}',
                 targetIsCJK: ${targetIsCJK|string:false},
                 ownerIsMe: ${jobOwnerIsMe},
                 id_team: ${id_team | string:null},
@@ -220,7 +222,7 @@
 
                 <!-- to from -->
                 <div class="item language">
-                    <p> Italian <span class="to-arrow"> &#8594; </span> English </p>
+                    <p> <span tal:content="source_code"></span> <span class="to-arrow"> &#8594; </span> <span tal:content="target_code"></span> </p>
                 </div>
 
                 <!-- progress -->
