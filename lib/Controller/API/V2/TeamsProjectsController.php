@@ -103,24 +103,8 @@ class TeamsProjectsController extends KleinController {
         $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], 60 );
 
         $projectsList     = ( new Project( $projectsList ) )->render();
-        $projectsList = $this->filterProjectsWithUserFeatures( $projectsList ) ;
-        $projectsList = $this->filterProjectsWithProjectFeatures( $projectsList ) ;
         $this->response->json( array( 'projects' => $projectsList ) );
 
-    }
-
-    private function filterProjectsWithUserFeatures( $projects ) {
-        $projects = $this->featureSet->filter('filter_manage_projects_loaded', $projects);
-        return $projects ;
-    }
-
-    private function filterProjectsWithProjectFeatures( $projects ) {
-        foreach( $projects as $key => $project ) {
-            $features = new FeatureSet() ;
-            $features->loadFromString( $project['features'] );
-            $projects[ $key ] = $features->filter('filter_manage_single_project', $project );
-        }
-        return $projects ;
     }
 
     public function setTeam($team){

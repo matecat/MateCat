@@ -159,29 +159,10 @@ class getProjectsController extends ajaxController {
             $this->no_assignee
             );
 
-        $projects = $this->filterProjectsWithUserFeatures( $projects ) ;
-
-        $projects = $this->filterProjectsWithProjectFeatures( $projects ) ;
-
         $this->result[ 'data' ]     = $projects;
         $this->result[ 'page' ]     = $this->page;
         $this->result[ 'pnumber' ]  = $projnum[ 0 ][ 'c' ];
         $this->result[ 'pageStep' ] = $this->step;
-    }
-
-    private function filterProjectsWithUserFeatures( $projects ) {
-        $projects = $this->featureSet->filter('filter_manage_projects_loaded', $projects);
-        return $projects ;
-    }
-
-    private function filterProjectsWithProjectFeatures( $projects ) {
-        foreach( $projects as $key => $project ) {
-            $features = new FeatureSet() ;
-            $features->loadFromString( $project['features'] );
-
-            $projects[ $key ] = $features->filter('filter_manage_single_project', $project );
-        }
-        return $projects ;
     }
 
     /**

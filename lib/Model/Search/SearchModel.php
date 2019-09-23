@@ -162,7 +162,7 @@ class SearchModel {
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $matches      = WholeTextFinder::find( $occurrence[ 'text' ], $searchTerm, true, $this->isExactMatchEnabled(), $this->isMatchCaseEnabled() );
+                $matches      = WholeTextFinder::find( $occurrence[ 'text' ], $searchTerm, true, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
                 $matchesCount = count( $matches );
 
                 if ( $matchesCount > 0 and $matches[ 0 ][ 0 ] !== '' ) {
@@ -317,6 +317,7 @@ class SearchModel {
 			WHERE fj.id_job = {$this->queryParams->job}
 			$ste_where
 			AND show_in_cattool = 1
+			{$this->queryParams->where_status}
 			GROUP BY s.id";
 
         return $query;

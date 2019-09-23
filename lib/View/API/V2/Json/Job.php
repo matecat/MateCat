@@ -14,9 +14,11 @@ use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
+use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FeatureSet;
 use Langs_LanguageDomains;
 use Langs_Languages;
+use LQA\ChunkReviewDao;
 use ManageUtils;
 use TmKeyManagement_ClientTmKeyStruct;
 use Users_UserStruct;
@@ -47,6 +49,7 @@ class Job {
      */
     public function setUser( Users_UserStruct $user = null ) {
         $this->user = $user;
+
         return $this;
     }
 
@@ -57,6 +60,7 @@ class Job {
      */
     public function setCalledFromApi( $called_from_api ) {
         $this->called_from_api = (bool)$called_from_api;
+
         return $this;
     }
 
@@ -67,7 +71,7 @@ class Job {
      */
     protected function getKeyList( Chunks_ChunkStruct $jStruct ) {
 
-        if( empty( $this->user ) ){
+        if ( empty( $this->user ) ) {
             return [];
         }
 
@@ -119,10 +123,10 @@ class Job {
 
         $warningsCount = $chunk->getWarningsCount();
 
-        if( $featureSet->hasRevisionFeature() ) {
+        if ( $featureSet->hasRevisionFeature() ) {
             $reviseIssues = new \stdClass();
 
-        } else{
+        } else {
 
             $reviseClass = new \Constants_Revise();
 
@@ -142,16 +146,18 @@ class Job {
              */
             $jobQA->retrieveJobErrorTotals();
             $jobQA->evalJobVote();
-            $qa_data      = $jobQA->getQaData();
+            $qa_data = $jobQA->getQaData();
 
             $reviseIssues = [];
             foreach ( $qa_data as $issue ) {
-                $reviseIssues[ str_replace( " " , "_", strtolower( $issue[ 'type' ] ) ) ] = [
+                $reviseIssues[ str_replace( " ", "_", strtolower( $issue[ 'type' ] ) ) ] = [
                         'allowed' => $issue[ 'allowed' ],
                         'found'   => $issue[ 'found' ]
                 ];
             }
         }
+
+        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
 
         $result = [
                 'id'                    => (int)$chunk->id,
@@ -163,7 +169,7 @@ class Job {
                 'job_first_segment'     => $chunk->job_first_segment,
                 'status'                => $chunk->status_owner,
                 'subject'               => $chunk->subject,
-                'subject_printable'     => $subjects[$subject_key]['display'],
+                'subject_printable'     => $subjects[ $subject_key ][ 'display' ],
                 'owner'                 => $chunk->owner,
                 'open_threads_count'    => (int)$chunk->getOpenThreadsCount(),
                 'create_timestamp'      => strtotime( $chunk->create_date ),
@@ -172,11 +178,11 @@ class Job {
                 'formatted_create_date' => ManageUtils::formatJobDate( $chunk->create_date ),
                 'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $chunk, $project, $featureSet ),
                 'pee'                   => $chunk->getPeeForTranslatedSegments(),
-                'tte'                   => (int)((int)$chunk->total_time_to_edit/1000),
+                'tte'                   => (int)( (int)$chunk->total_time_to_edit / 1000 ),
                 'private_tm_key'        => $this->getKeyList( $chunk ),
                 'warnings_count'        => $warningsCount->warnings_count,
                 'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
-                'stats'                 => CatUtils::getFastStatsForJob( $jobStats, false ),
+                'stats'                 => ReviewUtils::formatStats( CatUtils::getFastStatsForJob( $jobStats, false ), $chunkReviews ),
                 'outsource'             => $outsource,
                 'translator'            => $translator,
                 'total_raw_wc'          => (int)$chunk->total_raw_wc,
@@ -184,11 +190,27 @@ class Job {
                         'equivalent_class' => $chunk->getQualityInfo(),
                         'quality_overall'  => $chunk->getQualityOverall(),
                         'errors_count'     => (int)$chunk->getErrorsCount(),
-                        'revise_issues' => $reviseIssues
+                        'revise_issues'    => $reviseIssues
                 ],
 
         ];
 
+        // add revise_passwords to stats
+        foreach ( $chunkReviews as $chunk_review ) {
+
+            if ( $chunk_review->source_page <= \Constants::SOURCE_PAGE_REVISION ) {
+                $result[ 'revise_passwords' ][] = [
+                        'revision_number' => 1,
+                        'password'        => $chunk_review->review_password
+                ];
+            } else {
+                $result[ 'revise_passwords' ][] = [
+                        'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
+                        'password'        => $chunk_review->review_password
+                ];
+            }
+
+        }
 
         $project = $chunk->getProject();
 
@@ -202,7 +224,7 @@ class Job {
         /** @var $formatted ProjectUrls */
         $formatted = $featureSet->filter( 'projectUrls', $formatted );
 
-        $urlsObject = $formatted->render( true );
+        $urlsObject       = $formatted->render( true );
         $result[ 'urls' ] = $urlsObject[ 'jobs' ][ $chunk->id ][ 'chunks' ][ $chunk->password ];
 
         $result[ 'urls' ][ 'original_download_url' ]    = $urlsObject[ 'jobs' ][ $chunk->id ][ 'original_download_url' ];

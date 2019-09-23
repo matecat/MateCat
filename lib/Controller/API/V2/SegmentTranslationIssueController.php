@@ -5,10 +5,9 @@ namespace API\V2;
 use API\App\AbstractStatefulKleinController;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
-use API\V2\Validators\JobPasswordValidator;
 use Database;
+use Features\ReviewExtended\ReviewUtils;
 use LQA\EntryDao as EntryDao;
-use Features\SecondPassReview;
 use LQA\EntryStruct;
 use RevisionFactory;
 
@@ -39,29 +38,21 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     public function create() {
-        //TODO Review
-        if($this->project->hasFeature('second_pass_review')){
-            $sourcePage = SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number );
-        } else {
-            $sourcePage = \ajaxController::getRefererSourcePageCode( $this->project->getFeatures() );
-        }
-
         $data = [
-            'id_segment'          => $this->request->id_segment,
-            'id_job'              => $this->request->id_job,
-            'id_category'         => $this->request->id_category,
-            'severity'            => $this->request->severity,
-            'translation_version' => $this->validator->translation->version_number,
-            'target_text'         => $this->request->target_text,
-            'start_node'          => $this->request->start_node,
-            'start_offset'        => $this->request->start_offset,
-            'end_node'            => $this->request->end_node,
-            'end_offset'          => $this->request->end_offset,
-            'is_full_segment'     => false,
-            'comment'             => $this->request->comment,
-            'uid'                 => $this->user->uid,
-            'source_page'         => $sourcePage
-//            'source_page'         => SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number ),
+                'id_segment'          => $this->request->id_segment,
+                'id_job'              => $this->request->id_job,
+                'id_category'         => $this->request->id_category,
+                'severity'            => $this->request->severity,
+                'translation_version' => $this->validator->translation->version_number,
+                'target_text'         => $this->request->target_text,
+                'start_node'          => $this->request->start_node,
+                'start_offset'        => $this->request->start_offset,
+                'end_node'            => $this->request->end_node,
+                'end_offset'          => $this->request->end_offset,
+                'is_full_segment'     => false,
+                'comment'             => $this->request->comment,
+                'uid'                 => $this->user->uid,
+                'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ),
         ];
 
         $struct = new EntryStruct( $data );

@@ -15,7 +15,7 @@ use Constants;
 use Exceptions\NotFoundException;
 use Features;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
-use Features\SecondPassReview\Controller\API\Json\ProjectUrls;
+use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
 use Features\SecondPassReview\Model\ChunkReviewModel;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use Klein\Klein;
@@ -104,52 +104,6 @@ class SecondPassReview extends BaseFeature {
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
 
         return ReviewUtils::formatStats( $inputStats, $chunkReviews );
-    }
-
-    /**
-     *
-     * @param $project
-     *
-     * @return
-     */
-    public function filter_manage_single_project( $project ) {
-        $chunks = [];
-
-        foreach ( $project[ 'jobs' ] as $job ) {
-            $ch           = new Chunks_ChunkStruct();
-            $ch->id       = $job[ 'id' ];
-            $ch->password = $job[ 'password' ];
-            $chunks[]     = $ch;
-        }
-
-        $chunk_reviews = [];
-
-        foreach ( ( new ChunkReviewDao() )->findChunkReviewsForList( $chunks ) as $chunk_review ) {
-            $key = $chunk_review->id_job . $chunk_review->password;
-            if ( !isset( $chunk_reviews[ $key ] ) ) {
-                $chunk_reviews[ $key ] = [];
-            }
-            $chunk_reviews[ $key ] [] = $chunk_review;
-        }
-
-        foreach ( $project[ 'jobs' ] as $kk => $job ) {
-            $key = $job[ 'id' ] . $job[ 'password' ];
-
-            if ( isset( $chunk_reviews[ $key ] ) ) {
-
-                foreach ( $chunk_reviews[ $key ] as $chunk_review ) {
-                    if ( $chunk_review->source_page > Constants::SOURCE_PAGE_REVISION ) {
-                        $project[ 'jobs' ][ $kk ][ 'revise_passwords' ][] = [
-                                'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
-                                'password'        => $chunk_review->review_password
-                        ];
-                    }
-                }
-
-            }
-        }
-
-        return $project;
     }
 
     public function filterGetSegmentsResult( $data, Chunks_ChunkStruct $chunk ) {

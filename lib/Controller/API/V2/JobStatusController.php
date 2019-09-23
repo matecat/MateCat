@@ -9,14 +9,10 @@
 namespace API\V2;
 
 use AMQHandler;
-use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\ChunkPasswordValidator;
-use API\V2\Validators\JobPasswordValidator;
-use Constants;
 use Constants_TranslationStatus;
-use Features\ReviewExtended\Model\ChunkReviewDao;
+use Features\ReviewExtended\ReviewUtils;
 use Features\SecondPassReview;
-use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use WorkerClient;
@@ -51,13 +47,13 @@ class JobStatusController extends KleinController {
         $source_page = null ;
 
         if ( $this->request->revision_number ) {
-            $validRevisions = SecondPassReview\Utils::validRevisionNumbers( $this->chunk ) ;
+            $validRevisions = ReviewUtils::validRevisionNumbers( $this->chunk ) ;
             if ( !in_array( $this->request->revision_number, $validRevisions ) ) {
                 $this->response->code( 400 ) ;
                 $this->response->json( [ 'error' => 'Invalid revision number' ] );
                 return;
             }
-            $source_page = SecondPassReview\Utils::revisionNumberToSourcePage( $this->request->revision_number ) ;
+            $source_page = ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ) ;
         }
 
         if ( in_array( $status, [
