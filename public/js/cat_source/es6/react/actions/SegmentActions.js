@@ -622,7 +622,7 @@ var SegmentActions = {
 
     getContributionsSuccess: function(data, sid) {
         UI.addInStorage('contribution-' + config.id_job + '-' + sid, JSON.stringify(data), 'contribution');
-        TranslationMatches.processContributions(data, UI.getSegmentById(sid));
+        TranslationMatches.processContributions(data, sid);
     },
 
     setConcordanceResult: function (sid, data) {

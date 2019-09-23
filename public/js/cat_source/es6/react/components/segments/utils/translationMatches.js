@@ -43,12 +43,14 @@ let TranslationMatches = {
         });
     },
 
-    renderContributions: function(data, segment) {
+    renderContributions: function(data, sid) {
         if(!data) return true;
+        var segmentObj = SegmentStore.getSegmentByIdToJS(sid);
+        if ( _.isUndefined(segmentObj) ) return;
 
-        var editarea = $('.editarea', segment);
-        SegmentActions.setSegmentContributions(UI.getSegmentId(segment), UI.getSegmentFileId(segment), data.matches, data.errors);
-        var segmentObj = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(segment));
+        let segment = UI.getSegmentById(sid);
+        let editarea = $('.editarea', segment);
+        SegmentActions.setSegmentContributions(UI.getSegmentId(segment), segment.id_file, data.matches, data.errors);
 
         if ( data.matches && data.matches.length > 0 && _.isUndefined(data.matches[0].error)) {
             var editareaLength = segmentObj.translation.length;
@@ -194,10 +196,10 @@ let TranslationMatches = {
         });
     },
 
-    processContributions: function(data, segment) {
+    processContributions: function(data, sid) {
         if (config.translation_matches_enabled && data) {
             if ( !data ) return true;
-            this.renderContributions( data, segment );
+            this.renderContributions( data, sid );
         }
     },
 

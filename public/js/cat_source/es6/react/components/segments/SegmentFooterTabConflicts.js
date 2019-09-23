@@ -11,6 +11,16 @@ class SegmentFooterTabConflicts extends React.Component {
         super(props);
     }
 
+    chooseAlternative(text) {
+        UI.editarea.focus();
+        UI.disableTPOnSegment();
+        setTimeout(()=>{
+            SegmentActions.replaceEditAreaTextContent( this.props.segment.sid, this.props.segment.id_file, text);
+            SegmentActions.highlightEditarea( this.props.segment.sid );
+            SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.id_file,true);
+        });
+    }
+
     renderAlternatives(alternatives) {
         let segment = this.props.segment;
         let segment_id = this.props.segment.sid;
@@ -37,7 +47,7 @@ class SegmentFooterTabConflicts extends React.Component {
             } );
 
             let translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-            html.push(<ul className="graysmall" data-item={(index + 1)} key={'editable' + index}>
+            html.push(<ul className="graysmall" data-item={(index + 1)} key={'editable' + index} onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
                         <li className="sugg-source">
                             <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
                         </li>
@@ -56,7 +66,7 @@ class SegmentFooterTabConflicts extends React.Component {
             let diff_obj = UI.execDiff(mainStr, this.translation);
             let translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
 
-            html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.data.editable.length + 1)} key={'not-editable' + index}>
+            html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.data.editable.length + 1)} key={'not-editable' + index}  onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
                 <li className="sugg-source">
                     <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
                 </li>

@@ -475,7 +475,7 @@ LXQ.init  = function () {
             }
             //console.log('spacesBefore: **'+spacesBefore+'**');
             text = text.replace(/\&nbsp;/g, ' ');
-            text = text.replace(/\&amp;/g, '&');
+            // text = text.replace(/\&amp;/g, '&');
 
 
             text = text.replace(/>/g, GTPLACEHOLDER).replace(/</g, LTPLACEHOLDER);
@@ -632,7 +632,7 @@ LXQ.init  = function () {
             // text  = text.slice(0,lastspace)+ '&nbsp;'+ text.slice(lastspace+1);
             // text =  text.replace(/\*\*\*SPACE\*\*\*/g, ' ');
 
-            text = text.replace(/\&/g, '&amp;');
+            // text = text.replace(/\&/g, '&amp;');
 
             text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
             //console.log('-- text3: ' + text);

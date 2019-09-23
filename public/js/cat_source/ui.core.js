@@ -1053,17 +1053,6 @@ UI = {
         return diff_obj;
     },
 
-    chooseAlternative: function(w) {
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
-        this.editarea.focus();
-        SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-        this.disableTPOnSegment();
-    },
-	copyAlternativeInEditarea: function(translation) {
-		if ($.trim(translation) !== '') {
-            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), translation);
-		}
-	},
 	setDownloadStatus: function(stats) {
         var t = translationStatus( stats );
 
@@ -2078,7 +2067,6 @@ UI = {
 
     handleClickOnReadOnly : function(section) {
         if ( UI.justSelecting('readonly') )   return;
-        if ( UI.someUserSelection )           return;
         if ( section.hasClass('ice-locked') || section.hasClass('ice-unlocked') ) {
             UI.selectingReadonly = setTimeout(function() {
                 APP.alert({ msg: UI.messageForClickOnIceMatch() });

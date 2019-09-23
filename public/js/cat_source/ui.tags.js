@@ -455,10 +455,10 @@ $.extend(UI, {
         segment$.find('.locked.highlight').removeClass('highlight');
     },
 
-    // removeHighlightErrorsTags: function (segment$) {
-    //     segment$.find('.locked.mismatch').removeClass('mismatch');
-    //     segment$.find('.locked.order-error').removeClass('order-error');
-    // },
+    removeHighlightErrorsTags: function (segment$) {
+        segment$.find('.locked.mismatch').removeClass('mismatch');
+        segment$.find('.locked.order-error').removeClass('order-error');
+    },
 
     // TAG MISMATCH
 	markTagMismatch: function(tag_mismatch, sid) {

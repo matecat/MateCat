@@ -86,6 +86,7 @@ class SegmentBody extends React.Component {
                         segment.addClass( 'hasTagsAutofill' );
                     } else {
                         segment.removeClass( 'hasTagsAutofill' );
+                        UI.removeHighlightErrorsTags(segment);
                     }
 
                 } catch ( e ) {

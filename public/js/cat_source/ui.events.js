@@ -234,24 +234,6 @@ $.extend(UI, {
 			$("#search").toggle();
 		});
 
-		//overlay
-
-		$("#outer").on('click', 'a.sid', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			return false;
-		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
-			sel = window.getSelection();
-			UI.someUserSelection = (sel.type == 'Range') ? true : false;
-		}).on('dblclick', 'section.readonly', function() {
-			clearTimeout(UI.selectingReadonly);
-		}).on('dblclick', '.alternatives .graysmall', function(e) {
-            if ($(e.target).closest('li').hasClass('goto')) {
-                return;
-            }
-			UI.chooseAlternative($(this));
-        });
-
 		$("form#fileDownload").bind('submit', function(e) {
 			e.preventDefault();
 		});
