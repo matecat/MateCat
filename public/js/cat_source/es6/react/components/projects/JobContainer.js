@@ -54,8 +54,8 @@ class JobContainer extends React.Component {
     getReviseUrl() {
         let use_prefix = ( this.props.jobsLenght > 1 );
         let chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
-        let possibly_different_review_password = ( this.props.job.has('review_password') ?
-            this.props.job.get('review_password') :
+        let possibly_different_review_password = ( this.props.job.has('revise_passwords') ?
+            this.props.job.get('revise_passwords').get(0).get('password') :
             this.props.job.get('password')
         );
 
@@ -644,12 +644,12 @@ class JobContainer extends React.Component {
         let approvedPercFormatted = this.props.job.get('stats').get('APPROVED_PERC_FORMATTED');
         let approvedPerc = this.props.job.get('stats').get('APPROVED_PERC');
         let approvedPerc2ndPass, approvedPercFormatted2ndPass;
-        if (this.props.project.has('features') && this.props.project.get('features').indexOf('second_pass_review') > -1 && this.props.job.get('stats').has('reviews')
-            && this.props.job.get('stats').get('reviews').size > 1 && this.props.job.get('stats').get('reviews').get(1).get('advancement_wc') !== '0.00') {
-            let approved = this.props.job.get('stats').get('reviews').find(( item ) => {return item.get('revision_number') === 1});
+        if (this.props.project.has('features') && this.props.project.get('features').indexOf('second_pass_review') > -1 && this.props.job.get('stats').has('revises')
+            && this.props.job.get('stats').get('revises').size > 1 && this.props.job.get('stats').get('revises').get(1).get('advancement_wc') !== '0.00') {
+            let approved = this.props.job.get('stats').get('revises').find(( item ) => {return item.get('revision_number') === 1});
             approvedPerc = (approved) ? parseFloat(approved.get('advancement_wc'))*100/this.props.job.get('stats').get('TOTAL') : approvedPerc;
             approvedPercFormatted = _.round(approvedPerc, 1);
-            let approved2ndPass = this.props.job.get('stats').get('reviews').find(( item ) => {return item.get('revision_number') === 2});
+            let approved2ndPass = this.props.job.get('stats').get('revises').find(( item ) => {return item.get('revision_number') === 2});
             approvedPerc2ndPass = (approved2ndPass) ? parseFloat(approved2ndPass.get('advancement_wc'))*100/this.props.job.get('stats').get('TOTAL') : approved2ndPass;
             approvedPercFormatted2ndPass = _.round(approvedPerc2ndPass, 1);
         }
