@@ -40,6 +40,7 @@ class ReviewExtendedIssuePanel extends React.Component{
             API.SEGMENT.setTranslation( segment )
                 .done( function ( response ) {
                     issue.version = response.translation.version_number;
+                    SegmentActions.setStatus(segment.sid, segment.id_file, segment.status);
                     SegmentActions.addClassToSegment(segment.sid , 'modified');
                     deferred.resolve();
                 } )

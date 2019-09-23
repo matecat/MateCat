@@ -52,7 +52,7 @@ UI = {
 	cacheObjects: function( editarea_or_segment ) {
         var segment, $segment;
 
-        this.editarea = $(".editarea", $(editarea_or_segment).closest('section'));
+        this.editarea = $(".targetarea", $(editarea_or_segment).closest('section'));
         $segment = $(editarea_or_segment).closest('section');
         segment = SegmentStore.getSegmentByIdToJS( UI.getSegmentId($segment) );
 
