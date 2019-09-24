@@ -29,6 +29,7 @@ class SegmentCommentsContainer extends React.Component {
     sendComment() {
         let text = $(this.commentInput).html();
         (text.trim().length > 0 ) && CommentsActions.sendComment(text, this.props.segment.original_sid);
+        this.commentInput.textContent = "";
     }
 
     resolveThread() {
@@ -36,7 +37,7 @@ class SegmentCommentsContainer extends React.Component {
     }
 
     updateComments(sid) {
-        if ( _.isUndefined(sid) || sid === this.props.segment.sid ) {
+        if ( _.isUndefined(sid) || sid === this.props.segment.original_sid ) {
             const comments = CommentsStore.getCommentsBySegment( this.props.segment.original_sid );
             const user = CommentsStore.getUser();
             this.setState( {
@@ -221,7 +222,7 @@ class SegmentCommentsContainer extends React.Component {
 
     render() {
         //if is not splitted or is the first of the splitted group
-        if ( (!this.props.segment.splitted || this.props.segment.sid.split('-')[1] === 1) && this.state.comments) {
+        if ( (!this.props.segment.splitted || this.props.segment.sid.split('-')[1] === "1") && this.state.comments) {
             if (this.props.segment.openComments) {
                 return this.getComments();
             }

@@ -41,6 +41,8 @@ class Segment extends React.Component {
         this.openSegment = this.openSegment.bind(this);
         this.openSegmentFromAction = this.openSegmentFromAction.bind(this);
         this.checkIfCanOpenSegment = this.checkIfCanOpenSegment.bind(this);
+        this.closeRevisionPanel = this.closeRevisionPanel.bind(this);
+        this.openRevisionPanel = this.openRevisionPanel.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
         this.secondPassLocked = ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number === 2 && config.revisionNumber !== 2);
@@ -431,8 +433,8 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
         //Review
-        SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel.bind(this));
-        SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel.bind(this));
+        SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
+        SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel);
         if (this.state.showRevisionPanel) {
             setTimeout(()=>{
                 UI.openIssuesPanel({sid: this.props.segment.sid}, false)
@@ -631,7 +633,7 @@ class Segment extends React.Component {
                 {/*//!-- TODO: place this element here only if it's not a split --*/}
                 <div className="segment-side-buttons">
 
-                    {config.comments_enabled && !this.props.segment.openComments ? (
+                    {config.comments_enabled && (!this.props.segment.openComments || !this.props.segment.opened) ? (
                         <SegmentsCommentsIcon {...this.props} />
                     ) : (null)}
 
@@ -640,7 +642,7 @@ class Segment extends React.Component {
                     </div>
                 </div>
                 <div className="segment-side-container">
-                    {config.comments_enabled && this.props.segment.openComments ? (
+                    {config.comments_enabled && this.props.segment.openComments && this.props.segment.opened ? (
                         <SegmentCommentsContainer {...this.props} />
                     ) : (null)}
                     {this.props.isReviewExtended && this.state.showRevisionPanel && this.props.segment.opened  ? (

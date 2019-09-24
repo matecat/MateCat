@@ -21,7 +21,7 @@ class SegmentsCommentsIcon extends React.Component {
 
     updateComments(sid) {
         if ( _.isUndefined(sid) || sid === this.props.segment.sid ) {
-            const comments = CommentsStore.getCommentsCountBySegment( this.props.segment.sid );
+            const comments = CommentsStore.getCommentsCountBySegment( this.props.segment.original_sid );
             this.setState( {
                 comments: comments
             } );
@@ -52,7 +52,7 @@ class SegmentsCommentsIcon extends React.Component {
 
     render() {
         //if is not splitted or is the first of the splitted group
-        if ( (!this.props.segment.splitted || this.props.segment.sid.split('-')[1] === 1) && this.state.comments) {
+        if ( (!this.props.segment.splitted || this.props.segment.sid.split('-')[1] === "1") && this.state.comments) {
             let html;
             let rootClasses = ['mbc-comment-icon-button',
                 'txt'];
