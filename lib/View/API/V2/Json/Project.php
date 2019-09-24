@@ -43,6 +43,7 @@ class Project {
      */
     public function setUser( $user ) {
         $this->user = $user;
+
         return $this;
     }
 
@@ -63,7 +64,7 @@ class Project {
      * @param Projects_ProjectStruct[] $data
      */
     public function __construct( array $data = [] ) {
-        $this->data = $data;
+        $this->data      = $data;
         $this->jRenderer = new Job();
     }
 
@@ -77,7 +78,7 @@ class Project {
     public function renderItem( Projects_ProjectStruct $project ) {
 
         $featureSet = $project->getFeatures();
-        $jobs = $project->getJobs(60 * 10 ); //cached
+        $jobs       = $project->getJobs( 60 * 10 ); //cached
 
         $jobJSONs    = [];
         $jobStatuses = [];
@@ -88,11 +89,11 @@ class Project {
              */
             $jobJSON = new $this->jRenderer();
 
-            if( !empty( $this->user ) ){
+            if ( !empty( $this->user ) ) {
                 $jobJSON->setUser( $this->user );
             }
 
-            if( $this->called_from_api ) {
+            if ( $this->called_from_api ) {
                 $jobJSON->setCalledFromApi( true );
             }
 
@@ -115,11 +116,12 @@ class Project {
                 'create_date'          => $project->create_date,
                 'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
                 'standard_analysis_wc' => (int)$project->standard_analysis_wc,
+                'tm_analysis_wc'       => $project->tm_analysis_wc,
                 'project_slug'         => Utils::friendly_slug( $project->name ),
                 'jobs'                 => $jobJSONs,
                 'features'             => implode( ",", $featureSet->getCodes() ),
-                'is_cancelled'        => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
-                'is_archived'         => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
+                'is_cancelled'         => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
+                'is_archived'          => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
                 'remote_file_service'  => $project->getRemoteFileServiceName(),
                 'due_date'             => Utils::api_timestamp( $project->due_date )
         ];
