@@ -124,7 +124,7 @@ class SegmentCommentsContainer extends React.Component {
             } );
             // Thread is not resolved
             if ( comments.length - 1 && !comments[comments.length - 1].thread_id ) {
-                resolveButton = <a className="mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right"
+                resolveButton = <a className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right"
                 onClick={()=>this.resolveThread()}
                 >Resolve</a>
             }
@@ -213,6 +213,8 @@ class SegmentCommentsContainer extends React.Component {
         CommentsStore.addListener(CommentsConstants.ADD_COMMENT, this.updateComments);
         CommentsStore.addListener(CommentsConstants.STORE_COMMENTS, this.updateComments);
         this.scrollToBottom();
+        this.commentInput.focus();
+
     }
 
     componentWillUnmount() {
