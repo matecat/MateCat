@@ -31,7 +31,7 @@ class SegmentsCommentsIcon extends React.Component {
     openComments(event) {
         event.stopPropagation();
         SegmentsActions.openSegmentComment(this.props.segment.sid);
-        SegmentsActions.scrollToSegment(this.props.segment.sid);
+        SegmentsActions.openSegment(this.props.segment.sid);
         localStorage.setItem(MBC.localStorageCommentsClosed, false);
     }
 
@@ -53,24 +53,22 @@ class SegmentsCommentsIcon extends React.Component {
     render() {
         //if is not splitted or is the first of the splitted group
         if ( (!this.props.segment.splitted || this.props.segment.sid.split('-')[1] === 1) && this.state.comments) {
-            if (!this.props.segment.openComments) {
-                let html;
-                let rootClasses = ['mbc-comment-icon-button',
-                    'txt'];
-                if ( this.state.comments.total === 0 ) {
-                    html = <span className="mbc-comment-notification mbc-comment-highlight-segment mbc-comment-highlight-invite">+</span>
-                } else if ( this.state.comments.active > 0 ) {
-                    rootClasses.push( 'has-object' );
-                    html = <span className="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment">
-                    {this.state.comments.active}
-                </span>
-                }
-
-                return <div className={rootClasses.join( ' ' )} title="Add comment" onClick={(e) => this.openComments(e)}>
-                    <span className="mbc-comment-icon icon-bubble2"/>
-                    {html}
-                </div>
+            let html;
+            let rootClasses = ['mbc-comment-icon-button',
+                'txt'];
+            if ( this.state.comments.total === 0 ) {
+                html = <span className="mbc-comment-notification mbc-comment-highlight-segment mbc-comment-highlight-invite">+</span>
+            } else if ( this.state.comments.active > 0 ) {
+                rootClasses.push( 'has-object' );
+                html = <span className="mbc-comment-notification mbc-comment-highlight mbc-comment-highlight-segment">
+                {this.state.comments.active}
+            </span>
             }
+
+            return <div className={rootClasses.join( ' ' )} title="Add comment" onClick={(e) => this.openComments(e)}>
+                <span className="mbc-comment-icon icon-bubble2"/>
+                {html}
+            </div>
         } else {
             return null;
         }
