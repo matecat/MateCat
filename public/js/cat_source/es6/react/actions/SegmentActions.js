@@ -366,6 +366,11 @@ var SegmentActions = {
             actionType: SegmentConstants.REDO_TEXT
         });
     },
+    setFocusOnEditArea: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.FOCUS_EDITAREA
+        });
+    },
     /************ SPLIT ****************/
     openSplitSegment: function(sid) {
         AppDispatcher.dispatch({

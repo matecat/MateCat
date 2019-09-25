@@ -24,7 +24,7 @@ if ( MBC.enabled() )
         var loggedUserName = null;
         var customUserName = null;
         var lastCommentHash = null;
-
+        var commentsLoaded = false;
         var tpls = MBC.const.tpls;
 
         var initConstants = function () {
@@ -54,6 +54,7 @@ if ( MBC.enabled() )
         };
         var openSegmentCommentNoScroll = function ( idSegment ) {
             SegmentActions.openSegmentComment(idSegment);
+            SegmentActions.scrollToSegment(idSegment);
 
             // $( 'article' ).removeClass('comment-opened-0').removeClass('comment-opened-1').removeClass('comment-opened-2').removeClass('comment-opened-empty-0');
             localStorage.setItem(MBC.localStorageCommentsClosed, false);
@@ -69,6 +70,7 @@ if ( MBC.enabled() )
 
         var closeBalloon = function (segmentClose) {
             SegmentActions.closeSegmentComment(segmentClose);
+            localStorage.setItem(MBC.localStorageCommentsClosed, true);
         };
 
         var populateCommentTemplate = function ( data ) {
@@ -349,6 +351,7 @@ if ( MBC.enabled() )
 
             $( document ).on( 'getSegments_success', function ( e ) {
                 loadCommentData( function ( resp ) {
+                    MBC.commentsLoaded = true;
                     resetDatabase( resp );
                     $( document ).trigger( 'mbc:ready' );
                 } );
@@ -379,6 +382,7 @@ if ( MBC.enabled() )
             if ( e.which == '27' ) {
                 e.preventDefault();
                 SegmentActions.closeSegmentComment();
+                localStorage.setItem(MBC.localStorageCommentsClosed, true);
             }
         } );
 
@@ -421,10 +425,18 @@ if ( MBC.enabled() )
         } );
 
         $( window ).on( 'segmentOpened', function ( e, data ) {
-            if ( MBC.wasAskedByCommentHash( data.segmentId ) ) {
-                openSegmentComment( $( UI.getSegmentById(data.segmentId) ) );
+            var fn = function (  ) {
+                if ( MBC.wasAskedByCommentHash( data.segmentId ) ) {
+                    openSegmentComment( $( UI.getSegmentById(data.segmentId) ) );
+                }
+                checkOpenSegmentComment(data.segmentId);
+            };
+
+            if ( MBC.commentsLoaded ) {
+                fn();
+            } else {
+                setTimeout(fn, 1000);
             }
-            checkOpenSegmentComment(data.segmentId);
         } );
 
         // $( document ).on( 'split:segment:complete', function ( e, sid ) {

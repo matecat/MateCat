@@ -58,11 +58,11 @@ $.extend(UI, {
                         }
                     },
                     "gotoCurrent": {
-                        "label": "Go to current segment",
+                        "label": "Go to current segment and focus on target",
                         "equivalent": "",
                         "keystrokes": {
-                            "standard": "ctrl+home",
-                            "mac": "meta+shift+up",
+                            "standard": "ctrl+shift+f",
+                            "mac": "meta+shift+f",
                         }
                     },
                     "copySource": {

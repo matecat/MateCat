@@ -32,7 +32,8 @@ $.extend(UI, {
             UI.closeTagAutocompletePanel();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
-            UI.pointToOpenSegment();
+            SegmentActions.scrollToSegment(UI.currentSegmentId);
+            SegmentActions.setFocusOnEditArea();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openPrevious.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -74,7 +75,9 @@ $.extend(UI, {
             e.preventDefault();
             var segment = SegmentStore.getCurrentSegment();
             if (segment) {
-                SegmentActions.openSegmentComment(segment.sid)
+                SegmentActions.openSegmentComment(segment.sid);
+                SegmentActions.scrollToSegment(segment.sid);
+                CommentsActions.setFocusOnCurrentInput();
             }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();

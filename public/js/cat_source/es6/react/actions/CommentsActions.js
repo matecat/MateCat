@@ -51,6 +51,11 @@ const CommentsActions = {
             actionType: CommentsConstants.SET_TEAM_USERS,
             users: users
         });
+    },
+    setFocusOnCurrentInput: function () {
+        AppDispatcher.dispatch({
+            actionType: CommentsConstants.SET_FOCUS,
+        });
     }
 
 };

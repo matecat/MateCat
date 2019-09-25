@@ -19,6 +19,7 @@ class SegmentCommentsContainer extends React.Component {
         };
         this.types = {sticky: 3, resolve: 2, comment: 1};
         this.updateComments = this.updateComments.bind(this);
+        this.setFocusOnInput = this.setFocusOnInput.bind(this);
     }
 
     closeComments() {
@@ -29,7 +30,8 @@ class SegmentCommentsContainer extends React.Component {
     sendComment() {
         let text = $(this.commentInput).html();
         (text.trim().length > 0 ) && CommentsActions.sendComment(text, this.props.segment.original_sid);
-        this.commentInput.textContent = "";
+        setTimeout(()=>this.commentInput.textContent = "");
+
     }
 
     resolveThread() {
@@ -203,6 +205,10 @@ class SegmentCommentsContainer extends React.Component {
         this.wrap.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
     }
 
+    setFocusOnInput() {
+        this.commentInput.focus();
+    }
+
     componentDidUpdate() {
         // const comments = CommentsStore.getCommentsBySegment(this.props.segment.sid);
         this.scrollToBottom();
@@ -213,6 +219,7 @@ class SegmentCommentsContainer extends React.Component {
         this.addTagging();
         CommentsStore.addListener(CommentsConstants.ADD_COMMENT, this.updateComments);
         CommentsStore.addListener(CommentsConstants.STORE_COMMENTS, this.updateComments);
+        CommentsStore.addListener(CommentsConstants.SET_FOCUS, this.setFocusOnInput);
         this.scrollToBottom();
         this.commentInput.focus();
     }
@@ -220,6 +227,7 @@ class SegmentCommentsContainer extends React.Component {
     componentWillUnmount() {
         CommentsStore.removeListener(CommentsConstants.ADD_COMMENT, this.updateComments);
         CommentsStore.removeListener(CommentsConstants.STORE_COMMENTS, this.updateComments);
+        CommentsStore.removeListener(CommentsConstants.SET_FOCUS, this.setFocusOnInput);
     }
 
     render() {
