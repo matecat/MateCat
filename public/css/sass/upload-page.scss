@@ -1101,6 +1101,26 @@ button.ui-button::-moz-focus-inner {
     cursor: pointer;
 }
 
+.fileinput-link input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0;
+    border: solid transparent;
+    border-width: 0 0 0 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    -moz-transform: translate(-300px, 0) scale(4);
+    direction: ltr;
+    /*cursor: pointer;*/
+}
+
+.fileupload-buttonbar .fileinput-link:before {
+    display: none;
+}
+
 .fileupload-buttonbar .ui-button,
 .fileupload-buttonbar .toggle {
     margin-bottom: 5px;
@@ -1282,10 +1302,10 @@ button.ui-button::-moz-focus-inner {
         #project-subject,
         #source-lang,
         #target-lang {
-            width: 150px ;
+            /*width: 150px ;*/
         }
         #tmx-select {
-            width: 150px;
+            /*width: 150px;*/
             &:hover {
                 box-shadow: none !important;
             }
@@ -1335,10 +1355,17 @@ button.ui-button::-moz-focus-inner {
             margin-top: 0 !important;
             pointer-events: none;
             line-height: 28px !important;
-            max-width: 90px !important;
+            /*max-width: 90px !important;
             white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;*/
+
+            width: 100%;
+            overflow: hidden;
             text-overflow: ellipsis;
+            font-size: 16px;
+            white-space: nowrap;
+
             .item-key-id {
                 margin-top: 0px;
                 float: none;
@@ -1397,13 +1424,20 @@ button.ui-button::-moz-focus-inner {
 
 .translate-box {
     float: left;
-    margin: 20px 10px 0px 0px;
+    margin: 20px 0 0 0;
     position: relative;
     display: block;
 }
 
+.translate-box {
+    h2 {
+        color: #666;
+        font-weight: 100;
+    }
+}
+
 .translate-box.settings {
-    margin: 49px 0 0;
+    margin: 52px 0 0 0;
 }
 
 .translate-box.qa-box {
@@ -1452,15 +1486,21 @@ button.ui-button::-moz-focus-inner {
 .wrapper-upload {
     text-align: left;
     margin: 0 auto;
-    width: 92%;
-    min-width: 960px;
+    width: 94%;
+    min-width: 992px;
     position: relative;
+    padding: 24px;
+    background: #F6F8FB;
 }
 
 .wrapper-upload h1 {
     margin: 0;
     padding: 0;
-    font-size: 40px
+    font-size: 40px;
+
+    h2 {
+        font-weight: 100;
+    }
 }
 
 .wrapper-upload .translate-box h2 {
@@ -1468,12 +1508,26 @@ button.ui-button::-moz-focus-inner {
 }
 
 .wrapper-claim {
-    color: #fff;
-    margin: -3px 0 10px 0;
-    height: 123px;
-    background-color: #1f7ead;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    min-width: 992px;
+    /*margin: -3px 0 10px 0;*/
+    height: 160px;
+    /*background-color: #1f7ead;
     background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIGNvdW50PScxMDAlJyBoZWlnaHQ9JzEwMCUnPgoJPGNpcmNsZSBjeD0nNTAlJyBjeT0nNTAlJyByPSc1JScgZmlsbC1vcGFjaXR5PScuMycgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9JzUwJScgcj0nMTAlJyBmaWxsLW9wYWNpdHk9Jy4zJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nNTAlJyBjeT0nNTAlJyByPScxNSUnIGZpbGwtb3BhY2l0eT0nLjMnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzIwJScgZmlsbC1vcGFjaXR5PScuMycgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9JzUwJScgcj0nMjUlJyBmaWxsLW9wYWNpdHk9Jy4zJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nNTAlJyBjeT0nNTAlJyByPSczMCUnIGZpbGwtb3BhY2l0eT0nLjMnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzM1JScgZmlsbC1vcGFjaXR5PScuMycgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9JzUwJScgcj0nNDAlJyBmaWxsLW9wYWNpdHk9Jy4zJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nNTAlJyBjeT0nNTAlJyByPSc0NSUnIGZpbGwtb3BhY2l0eT0nLjMnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PSc1MCUnIGN5PSc1MCUnIHI9JzUwJScgZmlsbC1vcGFjaXR5PScuMycgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzIwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzMwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzQwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzUwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzYwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzcwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzgwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzkwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzUwJScgY3k9Jy0xMCUnIHI9JzEwMCUnIGZpbGwtb3BhY2l0eT0nLjInIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScwJyBjeT0nMCcgcj0nMTAlJyBmaWxsLW9wYWNpdHk9Jy4yJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMCcgY3k9JzAnIHI9JzIwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzAnIGN5PScwJyByPSczMCUnIGZpbGwtb3BhY2l0eT0nLjInIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScwJyBjeT0nMCcgcj0nNDAlJyBmaWxsLW9wYWNpdHk9Jy4yJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMCcgY3k9JzAnIHI9JzUwJScgZmlsbC1vcGFjaXR5PScuMicgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzAnIGN5PScwJyByPSc2MCUnIGZpbGwtb3BhY2l0eT0nLjInIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScwJyBjeT0nMCcgcj0nNzAlJyBmaWxsLW9wYWNpdHk9Jy4yJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzAnIHI9JzEwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScwJyByPScyMCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScxMDAlJyBjeT0nMCcgcj0nMzAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMWY3ZWFkJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzAnIHI9JzQwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScwJyByPSc1MCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScxMDAlJyBjeT0nMCcgcj0nNjAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMWY3ZWFkJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzAnIHI9JzcwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScxMDAlJyByPScxMCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScxMDAlJyBjeT0nMTAwJScgcj0nMjAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzEwMCUnIHI9JzMwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScxMDAlJyByPSc0MCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScxMDAlJyBjeT0nMTAwJScgcj0nNTAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMjRiZGViJyAvPgoJPGNpcmNsZSBjeD0nMTAwJScgY3k9JzEwMCUnIHI9JzYwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzI0YmRlYicgLz4KCTxjaXJjbGUgY3g9JzEwMCUnIGN5PScxMDAlJyByPSc3MCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMyNGJkZWInIC8+Cgk8Y2lyY2xlIGN4PScwJScgY3k9JzEwMCUnIHI9JzEwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzAlJyBjeT0nMTAwJScgcj0nMjAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMWY3ZWFkJyAvPgoJPGNpcmNsZSBjeD0nMCUnIGN5PScxMDAlJyByPSczMCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScwJScgY3k9JzEwMCUnIHI9JzQwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KCTxjaXJjbGUgY3g9JzAlJyBjeT0nMTAwJScgcj0nNTAlJyBmaWxsLW9wYWNpdHk9Jy4xJyBmaWxsPScjMWY3ZWFkJyAvPgoJPGNpcmNsZSBjeD0nMCUnIGN5PScxMDAlJyByPSc2MCUnIGZpbGwtb3BhY2l0eT0nLjEnIGZpbGw9JyMxZjdlYWQnIC8+Cgk8Y2lyY2xlIGN4PScwJScgY3k9JzEwMCUnIHI9JzcwJScgZmlsbC1vcGFjaXR5PScuMScgZmlsbD0nIzFmN2VhZCcgLz4KPC9zdmc+');
-    background-size: cover;
+    background-size: cover;*/
+
+    .wrapper-claim-content {
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-column-gap: 16px;
+    }
+
+    svg {
+        width: 50px;
+    }
 }
 
 .wrapper-claim h1 {
@@ -1481,12 +1535,15 @@ button.ui-button::-moz-focus-inner {
     padding: 8px 0 6px;
     margin: 0px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
+    .highlight {
+        color:#09beec;
+    }
 }
 
 h2 {
     margin: 0;
     padding: 0;
-    font-size: 22px
+    font-size: 18px
 }
 
 h2.payoff {
@@ -1500,17 +1557,17 @@ h2.payoff {
 
 .uploadbtn {
     background: #09beec;
-    font-weight: bold;
-    padding: 6px 30px 6px 30px;
+    font-weight: 100;
+    padding: 8px 16px;
     width: auto !important;
-    min-width: 250px;
+    min-width: 200px;
     margin: 20px 0px 8px 0px;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
     font-size: 26px !important;
     cursor: pointer;
     color: #fff;
-    border: 1px solid #797979;
+    border: none;
     border-radius: 2px;
 }
 
@@ -1535,7 +1592,7 @@ h2.payoff {
 .uploadbtn-box {
     text-align: center;
     float: right;
-    margin-bottom: 30px;
+    margin: 16px 0;
 }
 
 .uploadbtn-box p {
@@ -1643,6 +1700,29 @@ h2.payoff {
     margin-bottom: 30px !important;
 }
 
+/* Ovverride file-input-button to style it as a link */
+.fileinput-link {
+    font-size: 16px;
+    overflow: hidden;
+    margin: 0 auto;
+    cursor: pointer;
+    color: #666666;
+    font-weight: 100;
+    margin-bottom: 30px !important;
+    background: transparent;
+    border: none !important;
+    padding: 0;
+    width:200px;
+
+    label {
+        font-size:24px;
+        &:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    }
+}
+
 .upload-footer .fileinput-button {
     position: relative;
 }
@@ -1651,11 +1731,19 @@ h2.payoff {
     background-color: #12b4df;
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
+
 .fileinput-button:active {
     box-shadow: none !important;
 }
 
 .fileinput-button:focus {
+    box-shadow: none !important;
+}
+
+.fileinput-link:hover,
+.fileinput-link:focus,
+.fileinput-link:active {
+    background-color: transparent;
     box-shadow: none !important;
 }
 
@@ -1864,7 +1952,7 @@ a {
     font-weight: bold;
     font-size: 16px;
     color: #666;
-    margin-top: 1em;
+    margin-top: 48px;
 }
 
 /*upload table*/
@@ -1893,12 +1981,12 @@ a {
 
     position: relative;
     border: 1px dashed #ccc;
-    margin-top: 30px;
-    /*	min-height:150px;*/
-    min-height: 270px;
+    margin: 32px 72px;
+    min-height:200px;
+    /*min-height: 270px;*/
     -moz-border-radius: 4px;
     border-radius: 4px;
-    background: #fbfbfb;
+    background: #fff;
     -webkit-transition: all 50ms ease-in;
     -moz-transition: all 50ms ease-in;
 }
@@ -1937,7 +2025,7 @@ span.gdrive-icon {
 
 .drag p {
     text-align: center;
-    margin: 30px 0 30px 0;
+    margin: 8px 0 0 0;
     font-size: 36px;
     line-height: 50px;
 }
@@ -2027,7 +2115,7 @@ span.gdrive-icon {
     overflow: hidden;
     /*height:100px;*/
     margin: 10px auto;
-    cursor: pointer;
+    /*cursor: pointer;*/
     position: relative;
     transition: all 0.1s linear;
     -webkit-transition: all 0.1s linear;
@@ -2041,7 +2129,9 @@ span.gdrive-icon {
     display: none;
 }
 
-.file-drop, .upload-footer, .uploaded .btn-success, .dragging .btn-success {
+.file-drop, .upload-footer, .uploaded .btn-success, .dragging .btn-success,
+.uploaded .fileinput-link, .dragging .fileinput-link
+{
     display: none !important;
 }
 
@@ -2111,14 +2201,14 @@ tr.ready .size span {
     margin-top: 7px;
     .more-options {
         float: left ;
-        font-size: 16px;
+        font-size: 14px;
     }
     .more-options, span:hover {
         text-decoration: none;
         cursor: pointer;
     }
     span {
-        font-size: 16px;
+        font-size: 14px;
         float: left;
         color: #39699a;
     }
@@ -2134,7 +2224,7 @@ tr.ready .size span {
 }
 
 .btn {
-    height: 44px !important;
+    height: 44px;
     display: block;
     border: 1px solid #848689;
     text-decoration: none;
@@ -2155,12 +2245,12 @@ tr.ready .size span {
     cursor: default;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
-    border: 1px solid #666
+    border: none;
 }
 
 header {
     position: relative;
-    min-width: 600px;
+    min-width: 992px;
 }
 
 .wrapper {
@@ -2488,7 +2578,7 @@ ul.test li {
     width: 10px;
     text-decoration: none;
     height: 18px;
-    margin: 56px 14px 0 5px;
+    margin: 52px 14px 0 5px;
     font-size: 20px;
     color: #ccc;
 }
@@ -2719,6 +2809,7 @@ div.continue-gdrive {
 
 #upload-files-list {
     display: block;
+    padding: 24px;
 }
 
 #gdrive-files-list {
@@ -2797,25 +2888,6 @@ a.pull-right.confirmDelete {
     margin-right: 3px;
 }
 
-
-.wrapper-upload{
-    .translate-box{
-        h2{
-            font-size: 19px;
-            margin-left: 0;
-        }
-        input{
-            width: 170px;
-        }
-        div.dropdown{
-            font-size: 14px!important;
-            width: 150px;
-            .menu{
-                width: 280px;
-            }
-        }
-    }
-}
 
 
 
