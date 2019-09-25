@@ -635,11 +635,11 @@
         bulkChangeStatusCallback: function( segmentsArray, status) {
             if (segmentsArray.length > 0) {
                 segmentsArray.forEach(function ( item ) {
+                    var segment = SegmentStore.getSegmentByIdToJS(item);
                     var $segment = UI.getSegmentById(item);
-                    if ( $segment.length > 0) {
-                        var fileId = UI.getSegmentFileId(UI.getSegmentById(item));
-                        SegmentActions.setStatus(item, fileId, status);
-                        UI.setSegmentModified( $segment, false ) ;
+                    if ( segment ) {
+                        SegmentActions.setStatus(item, segment.id_file, status);
+                        SegmentActions.modifiedTranslation(item, segment.id_file, false);
                         UI.disableTPOnSegment( $segment )
                     }
                 });

@@ -121,6 +121,14 @@ $.extend(UI, {
                             "mac": "Meta+shift+s",
                         }
                     },
+                    "openComments": {
+                        "label": "Open comments in current segment",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "ctrl+shift+c",
+                            "mac": "Meta+shift+c",
+                        }
+                    },
                     "copyContribution1": {
                         "label": "Copy first translation match in Target",
                         "equivalent": "",

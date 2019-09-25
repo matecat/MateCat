@@ -613,7 +613,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     getSegmentByIdToJS(sid) {
         let segment = this._segments.find(function (seg) {
-            return seg.get('sid') === sid || seg.get('original_sid') === sid;
+            return seg.get('sid') == sid || seg.get('original_sid') === sid;
         });
         return (segment) ? segment.toJS() : null;
     },

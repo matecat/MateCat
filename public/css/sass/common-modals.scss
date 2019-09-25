@@ -1407,6 +1407,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                             &.\33 :after {
                                 content: "3";
                             }
+                            &.c:after {
+                                content: "C";
+                            }
                             &.i:after {
                                 content: "I";
                             }

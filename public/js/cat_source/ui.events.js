@@ -70,6 +70,12 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             UI.toggleTagsMode();
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openComments.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            var segment = SegmentStore.getCurrentSegment();
+            if (segment) {
+                SegmentActions.openSegmentComment(segment.sid)
+            }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);

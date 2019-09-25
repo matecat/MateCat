@@ -152,7 +152,8 @@ class SegmentCommentsContainer extends React.Component {
                                         <a className="mbc-comment-link-btn mbc-login-link" onClick={()=>{$('#modal').trigger('openlogin');}}>
                                             Login to receive comments</a>
                                     ) : (null)}
-                                    <div ref={(input)=>this.commentInput=input} className="mbc-comment-input mbc-comment-textarea" contentEditable={true} data-placeholder="Write a comment..."/>
+                                    <div ref={(input)=>this.commentInput=input} onKeyDown={(e)=>(e.key === 'Enter') && this.sendComment()}
+                                         className="mbc-comment-input mbc-comment-textarea" contentEditable={true} data-placeholder="Write a comment..."/>
                                     <div>
                                         <a className="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide"
                                            onClick={()=>this.sendComment()}>Comment</a>
@@ -214,7 +215,6 @@ class SegmentCommentsContainer extends React.Component {
         CommentsStore.addListener(CommentsConstants.STORE_COMMENTS, this.updateComments);
         this.scrollToBottom();
         this.commentInput.focus();
-
     }
 
     componentWillUnmount() {
