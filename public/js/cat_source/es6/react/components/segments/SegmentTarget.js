@@ -296,7 +296,7 @@ class SegmentTarget extends React.Component {
         let buttonsDisabled = false;
         translation = this.markTranslation(translation);
 
-        if (translation === "") {
+        if (translation.trim().length === 0) {
             buttonsDisabled = true;
         }
 
