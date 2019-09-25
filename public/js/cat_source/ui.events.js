@@ -79,6 +79,13 @@ $.extend(UI, {
                 SegmentActions.scrollToSegment(segment.sid);
                 CommentsActions.setFocusOnCurrentInput();
             }
+        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openIssuesPanel.keystrokes[this.shortCutskey], function(e) {
+            e.preventDefault();
+            var segment = SegmentStore.getCurrentSegment();
+            if (segment) {
+                SegmentActions.openIssuesPanel({sid: segment.sid});
+                SegmentActions.scrollToSegment(segment.sid);
+            }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);

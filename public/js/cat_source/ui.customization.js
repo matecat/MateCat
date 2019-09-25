@@ -129,6 +129,14 @@ $.extend(UI, {
                             "mac": "Meta+shift+c",
                         }
                     },
+                    "openIssuesPanel": {
+                        "label": "Open issues panel",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "ctrl+shift+a",
+                            "mac": "Meta+shift+a",
+                        }
+                    },
                     "copyContribution1": {
                         "label": "Copy first translation match in Target",
                         "equivalent": "",
@@ -167,6 +175,14 @@ $.extend(UI, {
                         "keystrokes": {
                             "standard": "alt+t",
                             "mac": "alt+t",
+                        }
+                    },
+                    "navigateIssues": {
+                        "label": "Navigate issues penel to add one",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "ctrl+alt+arrows",
+                            "mac": "Meta+alt+arrows",
                         }
                     }
                 }

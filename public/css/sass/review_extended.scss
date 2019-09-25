@@ -50,7 +50,7 @@ h1, h2, h3, h4, h5, a, input {
                     }
                 }
                 .re-item {
-                    &:hover {
+                    &:hover, &.active {
                         background: #f2f4f7 !important;
                     }
                     .re-item-box {
@@ -135,13 +135,13 @@ h1, h2, h3, h4, h5, a, input {
                     .re-severities-buttons {
                         display: none;
                     }
-                    &.severity-buttons:hover {
+                    &.severity-buttons:hover, &.active {
                         .re-severities-buttons {
                             display: flex;
                             button {
                                 padding: 7px 10px;
                                 background-color: #f2f4f7;
-                                &:hover {
+                                &:hover, &.active {
                                     background-color: #CACBCD;
                                 }
                             }
