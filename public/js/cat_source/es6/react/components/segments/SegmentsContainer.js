@@ -49,10 +49,12 @@ class SegmentsContainer extends React.Component {
     }
 
     openSide() {
+        this.segmentsHeightsMap = {};
         this.setState({sideOpen: true});
     }
 
     closeSide() {
+        this.segmentsHeightsMap = {};
         this.setState({sideOpen: false});
     }
 
@@ -245,6 +247,11 @@ class SegmentsContainer extends React.Component {
             }
         }
         if (itemHeight === 0) {
+            if ( this.state.sideOpen ) {
+                $('#hiddenHtml section').addClass('slide-right');
+            } else {
+                $('#hiddenHtml section').removeClass('slide-right');
+            }
             let source = $('#hiddenHtml .source');
             source.html(segment.get('decoded_source'));
             const sourceHeight = source.outerHeight();
@@ -323,6 +330,8 @@ class SegmentsContainer extends React.Component {
     }
 
     updateWindowDimensions()  {
+        this.segmentsHeightsMap = {};
+
         let data = {};
         data.width = window.innerWidth;
         data.height = window.innerHeight;

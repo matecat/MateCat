@@ -255,8 +255,8 @@ $.extend(UI, {
             var handleEscPressed = function() {
                 var segment = SegmentStore.getCurrentSegment();
                 if ( segment &&
-                    !UI.body.hasClass('side-tools-opened') &&
-					!UI.body.hasClass("side-popup" ) &&
+                    !segment.openComments &&
+					!segment.openIssues &&
                     !UI.body.hasClass('search-open') &&
                     !UI.tagMenuOpen ) {
                         SegmentActions.closeSegment(UI.currentSegmentId);
