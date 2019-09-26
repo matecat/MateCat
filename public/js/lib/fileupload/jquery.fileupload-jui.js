@@ -107,10 +107,10 @@
             this.element
                 .find('.fileupload-buttonbar')
                 .find('.fileinput-button').each(function () {
-                   /* var input = $(this).find('input:file').detach();
+                    var input = $(this).find('input:file').detach();
                     $(this)
                         .button({icons: {primary: 'ui-icon-plusthick'}})
-                        .append(input);*/
+                        .append(input);
                 })
                 .end().find('.start')
                 .button({icons: {primary: 'ui-icon-circle-arrow-e'}})
