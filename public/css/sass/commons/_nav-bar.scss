@@ -346,9 +346,13 @@ header {
     }
 
     .ui-user-top-image {
-       /* margin-top: 2px;*/
         float: right;
+        margin: 0 20px;
+       /* margin-left: 10px;
+        margin-right: 20px;*/
+        cursor: pointer;
     }
+
     .organization-name {
         color: #fff;
         font-size: 15px;
