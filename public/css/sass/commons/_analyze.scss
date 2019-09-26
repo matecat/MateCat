@@ -1163,8 +1163,16 @@ body.analyze{
     text-align: right;
 }*/
 
+/* Header */
 
+#action-manage {
+    opacity: 0.8;
+    &:hover {
+        opacity: 1;
+    }
+}
 
+/* Footer */
 .normal-foo{
     background-color: #f6f8fb;
     min-width: 992px;
