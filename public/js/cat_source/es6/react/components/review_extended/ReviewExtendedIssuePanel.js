@@ -69,7 +69,7 @@ class ReviewExtendedIssuePanel extends React.Component{
                     });
                 } )
 				.fail( (response) => self.handleFail(response.responseJSON) ) ;
-		})
+		});
 
     }
 
@@ -210,9 +210,8 @@ class ReviewExtendedIssuePanel extends React.Component{
             this.setState({
                 severityIndex:index
             });
-        } else if ( this.state.enableArrows && e.code === "Enter" ){
-            e.preventDefault();
-            e.stopPropagation();
+        }
+        else if ( this.state.enableArrows && e.code === "Enter" ){
             this.sendIssue(this.issueCategoriesFlat[this.state.categorySelectedIndex], this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[this.state.severityIndex]);
             setTimeout(()=>SegmentActions.setFocusOnEditArea(), 1000);
         }

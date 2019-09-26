@@ -384,13 +384,15 @@ class Segment extends React.Component {
         }
     }
     removeSelection() {
-        var selection = document.getSelection();
-        if ( this.section.contains(selection.anchorNode) ) {
-            selection.removeAllRanges();
+        if ( this.state.selectedTextObj ) {
+            var selection = document.getSelection();
+            if ( this.section.contains( selection.anchorNode ) ) {
+                selection.removeAllRanges();
+            }
+            this.setState( {
+                selectedTextObj: null
+            } );
         }
-        this.setState({
-            selectedTextObj: null
-        });
     }
     /*
     Is possible to close the single segmentIssue panel passing the id or all segments issue panel

@@ -91,7 +91,6 @@ class Editarea extends React.Component {
                     }
                 } catch ( e ) {
                     console.log("Fail in checkEditToolbar", e);
-                    console.log("Focus On: ", $( "*:focus" ));
                 }
 
             }
@@ -153,12 +152,10 @@ class Editarea extends React.Component {
     onCompositionStartEvent() {
         this.compositionsStart = true;
         EditArea.setEditAreaEditing(true);
-        console.log('CompositionEvent START');
     }
     onCompositionEndEvent() {
         this.compositionsStart = false;
         EditArea.setEditAreaEditing(false);
-        console.log('CompositionEvent END');
     }
     onCopyText(e) {
         UI.handleCopyEvent(e);
