@@ -127,6 +127,7 @@ class TeamsSelect extends React.Component {
 				if (team.get('type') == 'personal') {
 					personalTeam = <div className="item" data-value={team.get('id')}
 										data-text={team.get('name')}
+										title={team.get('name')}
 										key={'team' + team.get('name') + team.get('id')}
 										onClick={(e) => changeTeamHandler(e, team)}>
 						<div className={"item-info"}>
@@ -145,6 +146,7 @@ class TeamsSelect extends React.Component {
 				}
 				return <div className="item" data-value={team.get('id')}
 							data-text={team.get('name')}
+							title={team.get('name')}
 							key={'team' + team.get('name') + team.get('id')}
 							onClick={(e) => changeTeamHandler(e, team)}>
 					<div className={"item-info"}>
