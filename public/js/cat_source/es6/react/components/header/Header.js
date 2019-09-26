@@ -5,7 +5,6 @@ import TeamConstants from "./../../constants/TeamConstants";
 import TeamsStore from "./../../stores/TeamsStore";
 import IconManage from "../icons/IconManage";
 import IconUserLogout from "../icons/IconUserLogout";
-import IconDown from "../icons/IconDown";
 
 
 class Header extends React.Component {
@@ -21,6 +20,7 @@ class Header extends React.Component {
 		TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
 		TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
 		TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
+		this.initProfileDropdown();
 	}
 
 	componentWillUnmount = () => {
@@ -30,7 +30,6 @@ class Header extends React.Component {
 	}
 
 	componentDidUpdate() {
-		this.initProfileDropdown();
 	}
 
 	initProfileDropdown = () => {
@@ -79,14 +78,16 @@ class Header extends React.Component {
 
 
 	getUserIcon = () => {
-		let dropdownMenu = this.getDropdownMenu();
 		if (this.props.loggedUser) {
 			if (this.props.user.metadata && this.props.user.metadata.gplus_picture) {
 				return 	<div className={"ui dropdown"} ref={(dropdownProfile) => this.dropdownProfile = dropdownProfile} id={"profile-menu"}>
 							<img className="ui mini circular image ui-user-top-image"
 								 src={this.props.user.metadata.gplus_picture + "?sz=80"} title="Personal settings"
 								 alt="Profile picture"/>
-							{dropdownMenu}
+							<div className="menu">
+								<div className="item" data-value="profile" id="profile-item" onClick={this.openPreferencesModal.bind(this)}>Profile</div>
+								<div className="item" data-value="logout" id="logout-item" onClick={this.logoutUser.bind(this)}>Logout</div>
+							</div>
 						</div>
 
 			}
@@ -101,14 +102,9 @@ class Header extends React.Component {
 		}
 	}
 
-	getDropdownMenu = () => {
-		return 	<div className="menu">
-					<div className="item" data-value="profile" id="profile-item" onClick={this.openPreferencesModal.bind(this)}>Profile</div>
-					<div className="item" data-value="logout" id="logout-item" onClick={this.logoutUser.bind(this)}>Logout</div>
-				</div>;
-	}
 
 	getHeaderComponentToShow = () => {
+
 		if (this.props.showFilterProjects) {
 			return <div className="nine wide column">
 				<FilterProjects
@@ -116,11 +112,12 @@ class Header extends React.Component {
 				/>
 			</div>;
 		} else if (this.props.showJobInfo) {
-			return <div className="header-project-container-info">
+			return <div className="nine wide column header-project-container-info">
 				<ProjectInfo/>
 			</div>;
 		}
 	}
+
 
 	render = () => {
 		const {getHeaderComponentToShow, getUserIcon} = this;
@@ -134,7 +131,7 @@ class Header extends React.Component {
 		if (showLinks) {
 			containerClass = "user-teams thirteen";
 		} else if (showJobInfo) {
-			containerClass = "user-teams one";
+			containerClass = "user-teams three";
 		}
 
 		return <section className="nav-mc-bar ui grid">
