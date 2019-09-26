@@ -34,11 +34,11 @@ let EditArea = {
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
         var code = e.which || e.keyCode;
 
-        if (e.shiftKey && e.key === 'Enter') {
+        if (e.shiftKey && e.key === 'Enter' && !e.ctrlKey) {
             e.preventDefault();
             EditArea.handleSoftReturn(e, modifiedTranslationCallback);
             return;
-        } else if (e.key === 'Enter') {
+        } else if (e.key === 'Enter' && !e.ctrlKey) {
             if( !UI.tagMenuOpen ) {
                 e.preventDefault();
                 EditArea.handleReturn(e, modifiedTranslationCallback);

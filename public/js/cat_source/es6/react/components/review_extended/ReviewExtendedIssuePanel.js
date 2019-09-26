@@ -185,7 +185,6 @@ class ReviewExtendedIssuePanel extends React.Component{
             this.setState({
                 enableArrows: true
             });
-            console.log('Pressed');
         }
         if ( this.state.enableArrows && e.code === "ArrowDown" ){
             let index = this.getNextCategoryIndex('next');
@@ -212,19 +211,23 @@ class ReviewExtendedIssuePanel extends React.Component{
                 severityIndex:index
             });
         } else if ( this.state.enableArrows && e.code === "Enter" ){
-            this.sendIssue(this.issueCategoriesFlat[this.state.categorySelectedIndex], this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[this.state.severityIndex])
+            e.preventDefault();
+            e.stopPropagation();
+            this.sendIssue(this.issueCategoriesFlat[this.state.categorySelectedIndex], this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[this.state.severityIndex]);
+            setTimeout(()=>SegmentActions.setFocusOnEditArea(), 1000);
         }
     }
 
     handleShortcutsKeyUp(e) {
-        if ( !e.ctrlKey || !e.altKey ) {
+        if ( (!e.ctrlKey || !e.altKey) && this.state.enableArrows ) {
+            e.preventDefault();
+            e.stopPropagation();
             this.setState({
                 enableArrows: false,
                 categorySelectedIndex: 0,
                 categorySelectedId: this.issueCategoriesFlat[0].id,
                 severityIndex: 0
             });
-            console.log('Not Pressed');
         }
     }
 

@@ -198,9 +198,9 @@ $.extend(UI, {
 			 on a glossary item to paste the text in the correct position
 			 */
 
-            if(!$('.editor .targetarea .rangySelectionBoundary.focusOut').length) {
-                saveSelection();
-            }
+            // if(!$('.editor .targetarea .rangySelectionBoundary.focusOut').length) {
+            //     saveSelection();
+            // }
 
             $('.editor .targetarea .rangySelectionBoundary').addClass('focusOut');
 

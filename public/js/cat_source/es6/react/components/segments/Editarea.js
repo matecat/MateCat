@@ -84,10 +84,16 @@ class Editarea extends React.Component {
         let self = this;
         setTimeout(function () {
             if(!$(self.editAreaRef).find('.locked.selected').length) {
-                if(window.getSelection() && !$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                    //ShowEditToolbar
-                    $('.editor .editToolbar').addClass('visible');
+                try {
+                    if(window.getSelection() && !$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                        //ShowEditToolbar
+                        $('.editor .editToolbar').addClass('visible');
+                    }
+                } catch ( e ) {
+                    console.log("Fail in checkEditToolbar", e);
+                    console.log("Focus On: ", $( "*:focus" ));
                 }
+
             }
         }, 100);
     }
