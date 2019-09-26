@@ -1712,7 +1712,6 @@ h2.payoff {
     background: transparent;
     border: none !important;
     padding: 0;
-    width:200px;
 
     label {
         font-size:24px;
@@ -2130,7 +2129,8 @@ span.gdrive-icon {
 }
 
 .file-drop, .upload-footer, .uploaded .btn-success, .dragging .btn-success,
-.uploaded .fileinput-link, .dragging .fileinput-link
+.uploaded .fileinput-link, .dragging .fileinput-link,
+.uploaded .upload-icon, .dragging .upload-icon
 {
     display: none !important;
 }
