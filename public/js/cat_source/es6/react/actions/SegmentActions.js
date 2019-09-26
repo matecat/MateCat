@@ -678,6 +678,7 @@ var SegmentActions = {
             actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
             sid: sid
         });
+        this.scrollToSegment(sid);
     },
 
     showIssuesMessage: function ( sid, type ) {

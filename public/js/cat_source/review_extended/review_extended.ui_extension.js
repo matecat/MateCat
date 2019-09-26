@@ -152,6 +152,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             window.dispatchEvent(new Event('resize'));
             if (data && openSegment) {
                 SegmentActions.openSegment(data.sid);
+                SegmentActions.scrollToSegment(data.sid);
                 window.setTimeout( function ( data ) {
                     UI.scrollSegment( data.sid );
                 }, 500, data );

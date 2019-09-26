@@ -66,7 +66,7 @@ class ReviewExtendedPanel extends React.Component {
     }
 
     closePanel() {
-	    UI.closeIssuesPanel();
+	    SegmentActions.closeSegmentIssuePanel(this.props.segment.sid);
     }
 
     static getDerivedStateFromProps(props, state) {

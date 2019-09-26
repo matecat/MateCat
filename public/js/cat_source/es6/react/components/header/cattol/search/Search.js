@@ -296,13 +296,14 @@ class Search extends React.Component {
         return html;
     }
     handelKeydownFunction(event){
-
-        if(event.keyCode === 27) {
-            this.handleCancelClick();
-        } else if (event.keyCode === 13 && $(event.target).closest(".find-container").length > 0){
-            if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" )  {
-                event.preventDefault();
-                this.handleSubmit();
+        if ( this.props.active ) {
+            if ( event.keyCode === 27 ) {
+                this.handleCancelClick();
+            } else if ( event.keyCode === 13 && $( event.target ).closest( ".find-container" ).length > 0 ) {
+                if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" ) {
+                    event.preventDefault();
+                    this.handleSubmit();
+                }
             }
         }
     }
