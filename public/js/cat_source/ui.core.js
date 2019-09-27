@@ -967,6 +967,7 @@ UI = {
         if (where === "center" && !starting) {
             this.unmountSegments();
         }
+        var lastArticleAdded;
         $.each(files, function(k) {
 			var newFile = '';
 			var fid = k;
