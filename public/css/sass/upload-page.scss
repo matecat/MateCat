@@ -1233,7 +1233,7 @@ button.ui-button::-moz-focus-inner {
 .translate-box.settings{
     .more-options-cont {
         margin-top: 0;
-        margin-left: 10px;
+        /*margin-left: 10px;*/
     }
 }
 
@@ -1437,7 +1437,7 @@ button.ui-button::-moz-focus-inner {
 }
 
 .translate-box.settings {
-    margin: 52px 0 0 0;
+    margin: 48px 0 0 0;
 }
 
 .translate-box.qa-box {
@@ -1712,6 +1712,7 @@ h2.payoff {
     background: transparent;
     border: none !important;
     padding: 0;
+    width: max-content;
 
     label {
         font-size:24px;
@@ -2202,6 +2203,9 @@ tr.ready .size span {
     .more-options {
         float: left ;
         font-size: 14px;
+        &:before {
+            display: none;
+        }
     }
     .more-options, span:hover {
         text-decoration: none;
@@ -2210,8 +2214,20 @@ tr.ready .size span {
     span {
         font-size: 14px;
         float: left;
-        color: #39699a;
+        color: #09BEEC;
+
+        &.text {
+            margin-top: 2px;
+        }
     }
+
+    .more-options-icon {
+        svg {
+            width: 24px;
+            height: auto;
+        }
+    }
+
 }
 
 
