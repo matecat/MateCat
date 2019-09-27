@@ -27,14 +27,11 @@ class FromLayer2ToRawXML extends AbstractHandler {
         $segment = preg_replace( '/&(lt;|gt;|amp;|quot;|apos;)/', '##_ent_$1_##', $segment );
 
         // handling &#13;
-        if (strpos($segment, "\r") !== false) {
-            $segment = str_replace("\r", '##_ent_0D_##', $segment);
-        }
+        $segment = str_replace( "\r", '##_ent_0D_##', $segment );
 
         // handling &#13;
-        if (strpos($segment, "\n") !== false) {
-            $segment = str_replace("\n", '##_ent_0A_##', $segment);
-        }
+        $segment = str_replace( "\n", '##_ent_0A_##', $segment );
+
 
         // Filters BUG, segmentation on HTML, we should never get this at this level ( Should be fixed, anyway we try to cover )
         $segment = $this->placeHoldBrokenHTML( $segment );
