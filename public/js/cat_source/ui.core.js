@@ -1979,7 +1979,8 @@ UI = {
             context_after: contextAfter,
             id_after: idAfter,
             by_status: byStatus,
-            revision_number: config.revisionNumber
+            revision_number: config.revisionNumber,
+            guess_tag_used: !UI.checkCurrentSegmentTPEnabled(segment)
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);

@@ -37,6 +37,7 @@ if (true)
          * @param next
          * @returns {boolean}
          */
+        cachedGlossaryData: {},
         getGlossary: function ( segment, entireSegment, next ) {
             var txt;
             if ( !_.isUndefined(next) ) {
@@ -72,7 +73,7 @@ if (true)
         cacheGlossaryData: function ( matches, sid ) {
 
             if ( UI.currentSegmentId == sid && matches) {
-                UI.cachedGlossaryData = matches;
+                UI.cachedGlossaryData.sid = matches;
             }
         },
 
@@ -85,7 +86,7 @@ if (true)
 
             if ( ! Object.size( matchesObj ) ) return ;
 
-            var segment = (segmentToMark) ? segmentToMark : UI.currentSegment;
+            var segment = (segmentToMark);
             var container = $('.source', segment ) ;
 
             root.QaCheckGlossary.enabled() && root.QaCheckGlossary.removeUnusedGlossaryMarks( container );
