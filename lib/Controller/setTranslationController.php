@@ -273,7 +273,7 @@ class setTranslationController extends ajaxController {
             Log::doJsonLog( [ 'Error' => 'Inconsistent segment source', 'code' => 409, 'post_values' => $_POST, 'segment_struct' => $this->segment ] );
 
             // won't save translation something went wrong in the UI
-            throw new ValidationError( "Inconsistent segment source", 409 );
+//            throw new ValidationError( "Inconsistent segment source", 409 );
         }
     }
 
