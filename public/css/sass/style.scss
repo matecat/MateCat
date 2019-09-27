@@ -5086,10 +5086,20 @@ $white: #FFF;
     }
 }
 
+/* XLIFF to Target page */
+
+.xliff-to-target-page {
+    header {
+        .wrapper {
+            grid-template-columns: 208px 1fr max-content !important;
+        }
+    }
+}
+
 header {
 
     .wrapper {
-        grid-template-columns: 208px minmax(0,48px) minmax(200px, max-content) auto 120px;
+        grid-template-columns: 208px minmax(0, 48px) minmax(200px, max-content) auto max-content; /*208px minmax(0,48px) minmax(200px, max-content) auto 120px;*/
         align-items: center;
     }
 
@@ -5511,7 +5521,7 @@ header {
             height:$icon-scale;
             background: #fff;
             margin-right: 14px;
-            margin-left: 0;
+            margin-left: 10px;
         }
 
         .user-menu-container {
@@ -5542,6 +5552,7 @@ header {
     padding: 0;
     font-size: 14px;
     display: none;
+    box-shadow: none;
 
     &.open {
         max-height: 64%;
