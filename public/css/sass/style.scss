@@ -3255,7 +3255,7 @@ section.status-rejected .status {
     margin-top: 1px;
 }
 
-body[data-offline-mode="light-off"] section.setTranslationPending .status {
+body[data-offline-mode="light-off"] section.setTranslationPending .status, section.setTranslationError .status {
     background-image: url(../../img/offline-bg.png) !important;
     background-color: #0798bc !important;
     background-repeat: no-repeat !important;
@@ -3263,7 +3263,7 @@ body[data-offline-mode="light-off"] section.setTranslationPending .status {
     background-size: 20px 40px;
 }
 
-body[data-offline-mode="light-off"] editor.setTranslationPending .status {
+body[data-offline-mode="light-off"] .editor.setTranslationPending .status, .editor.setTranslationError .status {
     background-size: 20px 50px;
 }
 

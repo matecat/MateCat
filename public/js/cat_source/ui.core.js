@@ -924,6 +924,7 @@ UI = {
 	reloadToSegment: function(segmentId) {
 		this.infiniteScroll = false;
 		config.last_opened_segment = segmentId;
+		UI.cacheObjects(UI.getSegmentById(segmentId));
         UI.unmountSegments();
 		this.render({ segmentToOpen : segmentId });
 	},
@@ -1992,11 +1993,31 @@ UI = {
         return APP.doRequest({
             data: reqData,
 			context: [reqArguments, options],
-			error: function() {
-                UI.addToSetTranslationTail(this[1]);
-                UI.changeStatusOffline(this[0][0].id_segment);
-                UI.failedConnection(this[0], 'setTranslation');
-                UI.decrementOfflineCacheRemaining();
+			error: function(response) {
+                if ( response.status ===  409 ) {
+                    UI.executingSetTranslation = false;
+                    var idSegment = this[0][0].id_segment;
+                    SegmentActions.addClassToSegment(idSegment, 'setTranslationError');
+                    var callback = function() {
+                        UI.lastOpenedSegment = null;
+                        UI.reloadToSegment(idSegment);
+                    };
+                    var props = {
+                        text: "There was an error saving segment "+ idSegment +".</br></br>" +
+                            "Press OK to refresh segments.",
+                        successText: "Ok",
+                        successCallback: function (  ) {
+                            APP.ModalWindow.onCloseModal();
+                        }
+                    };
+                    APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Error saving segment", {}, callback);
+                    return false;
+                } else {
+                    UI.addToSetTranslationTail(this[1]);
+                    UI.changeStatusOffline(this[0][0].id_segment);
+                    UI.failedConnection(this[0], 'setTranslation');
+                    UI.decrementOfflineCacheRemaining();
+                }
             },
 			success: function( data ) {
                 UI.executingSetTranslation = false;

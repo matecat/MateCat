@@ -269,7 +269,7 @@ class setTranslationController extends ajaxController {
      * @throws Exception
      */
     protected function _checkSourceIntegrity( $layer0FromPostInput, $databaseRawSegment ){
-        if( $layer0FromPostInput != $databaseRawSegment ){
+        if( trim( $layer0FromPostInput ) != trim( $databaseRawSegment ) ){
             Log::doJsonLog( [ 'Error' => 'Inconsistent segment source', 'code' => 409, 'post_values' => $_POST, 'segment_struct' => $this->segment ] );
 
             // won't save translation something went wrong in the UI
