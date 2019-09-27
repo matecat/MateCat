@@ -269,6 +269,18 @@ class setTranslationController extends ajaxController {
      * @throws Exception
      */
     protected function _checkSourceIntegrity( $layer0FromPostInput, $databaseRawSegment ){
+
+        // handling &#13;
+        if ( strpos( $databaseRawSegment, "\r" ) !== false ) {
+            $databaseRawSegment = str_replace( "\r", '&#13;', $databaseRawSegment );
+        }
+
+        // handling &#10;
+        if ( strpos( $databaseRawSegment, "\n" ) !== false ) {
+            $databaseRawSegment = str_replace( "\n", '&#10;', $databaseRawSegment );
+        }
+
+
         if( trim( $layer0FromPostInput ) != trim( $databaseRawSegment ) ){
             Log::doJsonLog( [ 'Error' => 'Inconsistent segment source', 'code' => 409, 'post_values' => $_POST, 'segment_struct' => $this->segment ] );
 
@@ -298,7 +310,7 @@ class setTranslationController extends ajaxController {
         $__seg        = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
         $__tra        = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
 
-        $this->_checkSourceIntegrity( $this->filter->fromLayer1ToLayer0( $__seg ), $this->segment->segment );
+        $this->_checkSourceIntegrity( $this->filter->fromLayer2ToLayer0( $__seg ), $this->segment->segment );
 
         $check = new QA( $__seg, $__tra );
         $check->setFeatureSet( $this->featureSet );
