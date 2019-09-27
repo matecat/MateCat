@@ -3,6 +3,7 @@
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
 use Exceptions\ControllerReturnException;
+use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
 use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -34,15 +35,10 @@ class setTranslationController extends ajaxController {
     protected $split_statuses;
 
     /**
-     * @var Jobs_JobStruct
-     */
-    protected $jobData;
-
-
-    /**
      * @var Chunks_ChunkStruct
      */
     protected $chunk;
+
 
     protected $client_target_version;
 
@@ -163,22 +159,17 @@ class setTranslationController extends ajaxController {
         } else {
 
             //get Job Info, we need only a row of jobs ( split )
-            $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
+            $this->chunk = Chunks_ChunkDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
-            if ( empty( $this->jobData ) ) {
+            if ( empty( $this->chunk ) ) {
                 $this->result[ 'errors' ][] = [ "code" => -10, "message" => "wrong password" ];
             }
 
             //add check for job status archived.
-            if ( strtolower( $this->jobData[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+            if ( strtolower( $this->chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
                 $this->result[ 'errors' ][] = [ "code" => -3, "message" => "job archived" ];
             }
 
-            /**
-             * Here we instantiate new objects in order to migrate towards
-             * a more object oriented approach.
-             */
-            $this->chunk   = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
             $this->project = $this->chunk->getProject();
 
             $this->featureSet->loadForProject( $this->project );
@@ -272,6 +263,21 @@ class setTranslationController extends ajaxController {
     }
 
     /**
+     * @param $layer0FromPostInput
+     * @param $databaseRawSegment
+     *
+     * @throws Exception
+     */
+    protected function _checkSourceIntegrity( $layer0FromPostInput, $databaseRawSegment ){
+        if( $layer0FromPostInput != $databaseRawSegment ){
+            Log::doJsonLog( [ 'Error' => 'Inconsistent segment source', 'code' => 409, 'post_values' => $_POST, 'segment_struct' => $this->segment ] );
+
+            // won't save translation something went wrong in the UI
+            throw new ValidationError( "Inconsistent segment source", 409 );
+        }
+    }
+
+    /**
      * @return int|mixed
      * @throws Exception
      */
@@ -291,6 +297,8 @@ class setTranslationController extends ajaxController {
         $spaceHandler = new FromViewNBSPToSpaces();
         $__seg        = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
         $__tra        = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
+
+        $this->_checkSourceIntegrity( $this->filter->fromLayer1ToLayer0( $__seg ), $this->segment->segment );
 
         $check = new QA( $__seg, $__tra );
         $check->setFeatureSet( $this->featureSet );
@@ -422,13 +430,13 @@ class setTranslationController extends ajaxController {
                     $this->VersionsHandler->savePropagation( [
                             'propagation'     => $TPropagation,
                             'old_translation' => $old_translation,
-                            'job_data'        => $this->jobData
+                            'job_data'        => $this->chunk
                     ] );
                 }
 
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                         $TPropagation,
-                        $this->jobData,
+                        $this->chunk,
                         $this->id_segment,
                         $this->project
                 );
@@ -724,11 +732,11 @@ class setTranslationController extends ajaxController {
         $old_wStruct = new WordCount_Struct();
         $old_wStruct->setIdJob( $this->id_job );
         $old_wStruct->setJobPassword( $this->password );
-        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
-        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
-        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
-        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
-        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
+        $old_wStruct->setNewWords( $this->chunk[ 'new_words' ] );
+        $old_wStruct->setDraftWords( $this->chunk[ 'draft_words' ] );
+        $old_wStruct->setTranslatedWords( $this->chunk[ 'translated_words' ] );
+        $old_wStruct->setApprovedWords( $this->chunk[ 'approved_words' ] );
+        $old_wStruct->setRejectedWords( $this->chunk[ 'rejected_words' ] );
 
         $old_wStruct->setIdSegment( $this->id_segment );
 
@@ -767,10 +775,10 @@ class setTranslationController extends ajaxController {
         if ( $segment->isValidForEditLog() ) {
             //if the segment was not valid for editlog and now it is, then just add the weighted pee
             if ( !$oldSegment->isValidForEditLog() ) {
-                $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] + $newPee_weighted );
+                $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] + $newPee_weighted );
             } //otherwise, evaluate it normally
             else {
-                $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
+                $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
             }
 
             Jobs_JobDao::updateFields(
@@ -783,7 +791,7 @@ class setTranslationController extends ajaxController {
         } //segment was valid but now it is no more
         else {
             if ( $oldSegment->isValidForEditLog() ) {
-                $newTotalJobPee = ( $this->jobData[ 'avg_post_editing_effort' ] - $oldPee_weighted );
+                $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
                 Jobs_JobDao::updateFields(
                         [ 'avg_post_editing_effort' => $newTotalJobPee, ],
@@ -801,7 +809,7 @@ class setTranslationController extends ajaxController {
                     $this->id_job,
                     $this->id_segment,
                     $this->user->uid,
-                    $this->jobData[ 'id_project' ],
+                    $this->chunk[ 'id_project' ],
                     ReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
             );
         }
@@ -937,7 +945,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
         $contributionStruct->propagationRequest   = $this->propagate;
-        $contributionStruct->id_mt                = $this->jobData->id_mt_engine;
+        $contributionStruct->id_mt                = $this->chunk->id_mt_engine;
 
         $contributionStruct->context_after  = $this->context_after;
         $contributionStruct->context_before = $this->context_before;
