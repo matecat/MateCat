@@ -1015,7 +1015,7 @@ LXQ.init  = function () {
                 }
             });
             var html = '';
-            var segObj = SegmentStore.getSegmentByIdToJS(segmentId, UI.currentFileId);
+            var segObj = SegmentStore.getSegmentByIdToJS(segmentId, UI.getSegmentFileId(segment));
             if (insource) {
                 // html = $(".source", segment).html();
 
@@ -1329,7 +1329,7 @@ LXQ.init  = function () {
                 return;
             }
 
-            var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.currentFileId);
+            var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
 
             var sourcetext =  this.getSourceTextForQa(segObj.decoded_source);
             var translation = this.getTargetTextForQa(segment);
@@ -1353,7 +1353,7 @@ LXQ.init  = function () {
                     if ( !err ) {
                         var noVisibleErrorsFound = false, source_val, target_val, ind;
                         //myWindow.location =result.qaurl;
-                        var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.currentFileId);
+                        var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
                         source_val = segObj.decoded_source;
                         if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
                             //do something here -- enable qa errors
@@ -1560,7 +1560,7 @@ LXQ.init  = function () {
                                 return; //this segment has not been loaded yet...
 
                             LXQ.shouldHighlighWarningsForSegment( element.segid, element.show );
-                            var segObj = SegmentStore.getSegmentByIdToJS(element.segid, UI.currentFileId);
+                            var segObj = SegmentStore.getSegmentByIdToJS(element.segid, UI.getSegmentFileId(seg));
                             source_val = segObj.decoded_source;
                             // var source_val = $( ".source", seg ).html();
                             QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(seg);
