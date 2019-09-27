@@ -38,6 +38,7 @@ if (true)
          * @returns {boolean}
          */
         cachedGlossaryData: {},
+        glossaryMatchesErrors: ['g', 'G'],
         getGlossary: function ( segment, entireSegment, next ) {
             var txt;
             if ( !_.isUndefined(next) ) {
@@ -109,7 +110,7 @@ if (true)
             });
             $.each( matches, function ( index, k ) {
                 var glossaryTerm_noPlaceholders = UI.decodePlaceholdersToText( k, true );
-
+                if ( UI.glossaryMatchesErrors.indexOf(glossaryTerm_noPlaceholders) !== -1 ) return;
                 if ( matchesToRemove.indexOf( glossaryTerm_noPlaceholders ) != -1 ) return true ;
 
                 var glossaryTerm_escaped = glossaryTerm_noPlaceholders
