@@ -144,12 +144,10 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         segmentIsModified: function ( sid ) {
             var segmentFid = UI.getSegmentFileId(UI.currentSegment);
             var segment = SegmentStore.getSegmentByIdToJS(sid, segmentFid);
-            var versionTranslation = $('<div/>').html(UI.transformTagsWithHtmlAttribute(segment.versions[0].translation)).text();
+            var versionTranslation = ( segment.versions[0] ) ? $('<div/>').html(UI.transformTagsWithHtmlAttribute(segment.versions[0].translation)).text() :
+                segment.translation;
 
-            if (UI.currentSegment.hasClass('modified') && versionTranslation.trim() !== UI.getSegmentTarget(UI.currentSegment).trim()) {
-                return true;
-            }
-            return false;
+            return ( UI.currentSegment.hasClass('modified') && versionTranslation.trim() !== UI.getSegmentTarget(UI.currentSegment).trim() );
         },
         submitComment : function(id_segment, id_issue, data) {
             return ReviewExtended.submitComment(id_segment, id_issue, data)

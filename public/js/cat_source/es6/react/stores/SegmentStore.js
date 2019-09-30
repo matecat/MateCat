@@ -266,8 +266,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
     replaceTranslation(sid, fid, translation) {
-        if ( index === -1 ) return;
         var index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         var trans = htmlEncode(this.removeLockTagsFromString(translation));
         this._segments[fid] = this._segments[fid].setIn([index, 'decoded_translation'], trans);
         return translation;
@@ -586,7 +586,9 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
             let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
-            SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
+            if ( seg ) {
+                SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
+            }
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:

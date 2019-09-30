@@ -2312,7 +2312,7 @@ UI = {
 
                 SegmentActions.setSegmentPropagation(UI.getSegmentId(this), UI.getSegmentFileId(this), true ,UI.getSegmentId(segment));
 
-                LXQ.doLexiQA(this,UI.getSegmentId(this),true,null);
+                LXQ.doLexiQA($(this),UI.getSegmentId(this),true,null);
             });
 
             //unset actual segment as autoPropagated because now it is translated
