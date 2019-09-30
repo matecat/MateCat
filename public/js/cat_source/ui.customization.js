@@ -90,7 +90,7 @@ $.extend(UI, {
                         }
                     },
                     "openSearch": {
-                        "label": "Open/Close search panel",
+                        "label": "Open search panel",
                         "equivalent": "",
                         "keystrokes": {
                             "standard": "ctrl+f",
@@ -183,6 +183,14 @@ $.extend(UI, {
                         "keystrokes": {
                             "standard": "ctrl+alt+arrows",
                             "mac": "Meta+alt+arrows",
+                        }
+                    },
+                    "navigateTabs": {
+                        "label": "Navigate segments Tabs",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "alt + s",
+                            "mac": "alt + s",
                         }
                     }
                 }

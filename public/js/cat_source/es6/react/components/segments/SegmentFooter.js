@@ -100,6 +100,7 @@ class SegmentFooter extends React.Component {
         this.changeTab = this.changeTab.bind(this);
         this.openTab = this.openTab.bind(this);
         this.addTabIndex = this.addTabIndex.bind(this);
+        this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this);
         // this.setDefaultTabOpen = this.setDefaultTabOpen.bind(this);
     }
 
@@ -297,7 +298,14 @@ class SegmentFooter extends React.Component {
             tabs: tabs
         });
     }
+
+    handleShortcutsKeyDown(e) {
+        if ( this.props.segment.opened && e.altKey && e.key === 's' ) {
+            console.log("Navigate Tabs");
+        }
+    }
     componentDidMount() {
+        document.addEventListener('keydown', this.handleShortcutsKeyDown);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.MODIFY_TAB_VISIBILITY, this.modifyTabVisibility);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
@@ -307,6 +315,7 @@ class SegmentFooter extends React.Component {
     }
 
     componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleShortcutsKeyDown);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.MODIFY_TAB_VISIBILITY, this.modifyTabVisibility);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
