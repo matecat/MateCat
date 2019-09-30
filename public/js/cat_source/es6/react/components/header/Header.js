@@ -5,7 +5,7 @@ import TeamConstants from "./../../constants/TeamConstants";
 import TeamsStore from "./../../stores/TeamsStore";
 import IconManage from "../icons/IconManage";
 import IconUserLogout from "../icons/IconUserLogout";
-
+import ActionMenu from "./ActionMenu";
 
 class Header extends React.Component {
 	constructor(props) {
@@ -121,7 +121,7 @@ class Header extends React.Component {
 
 	render = () => {
 		const {getHeaderComponentToShow, getUserIcon} = this;
-		const {showLinks, showJobInfo, showFilterProjects, showModals, loggedUser, showTeams, changeTeam} = this.props;
+		const {showLinks, showJobInfo, showFilterProjects, showModals, loggedUser, showTeams, changeTeam, isQualityReport} = this.props;
 		const {teams,selectedTeamId} = this.state;
 
 		const userIcon = getUserIcon();
@@ -168,6 +168,7 @@ class Header extends React.Component {
 							teams={teams}
 							selectedTeamId={selectedTeamId}
 						/>}
+						{!!isQualityReport && <ActionMenu />}
 						<div className={"separator"}></div>
 						{!!loggedUser && !showFilterProjects && <div title="Manage" id="action-manage">
 																	<a className={"action-submenu"} href={'/manage'}>
@@ -191,6 +192,8 @@ Header.defaultProps = {
 	loggedUser: true,
 	showTeams: true,
 	changeTeam: true,
+	isQualityReport:false,
+
 };
 
 export default Header;

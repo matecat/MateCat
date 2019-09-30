@@ -22,9 +22,19 @@
             first_job_segment: '${first_job_segment}',
             project_type: '${project_type}',
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
-            ajaxDomainsNumber: ${ajaxDomainsNumber | string:false}
+            ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
+
+            isReview: ${isReview | string: false},
+            source_code: '${source_code}',
+            target_code: '${target_code}',
+            pname: '${pname}',
+
         };
         /*]]>*/
+    </script>
+
+    <script tal:condition="true:isReview" type="text/javascript">
+        config.review_password = '${review_password}';
     </script>
 
     <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">

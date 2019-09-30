@@ -5151,6 +5151,10 @@ header {
         justify-content: right;
         column-gap: 12px;
 
+        &.qr-element {
+            grid-template-columns: auto;
+        }
+
         #previewDropdown[data-download='false'] li.downloadTranslation,
         #previewDropdown[data-download='true'] li.previewLink {
             display: none;
