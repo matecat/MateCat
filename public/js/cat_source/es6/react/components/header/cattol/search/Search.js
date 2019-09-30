@@ -74,7 +74,7 @@ class Search extends React.Component {
     handleCancelClick() {
         this.dropdownInit = false;
         UI.body.removeClass('searchActive');
-        this.handleClearClick();
+        this.handleClearClick()
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
             setTimeout(()=>SegmentActions.scrollToSegment(UI.currentSegmentId));
         } else {

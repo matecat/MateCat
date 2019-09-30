@@ -160,6 +160,8 @@ class Bootstrap {
 
         Log::$fileName = 'fatal_errors.txt';
 
+        $response_message = "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>";
+
         try {
             /**
              * @var $exception Exception
@@ -172,10 +174,15 @@ class Bootstrap {
             $code = 404;
             $message = "Not Found";
             \Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        }  catch ( Exceptions\AuthorizationError $e ) {
-            $code = 403;
+        } catch ( Exceptions\AuthorizationError $e ) {
+            $code    = 403;
             $message = "Forbidden";
             \Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+        } catch ( Exceptions\ValidationError $e ) {
+            $code    = 409;
+            $message = "Conflict";
+            $response_message = $exception->getMessage();
+            \Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( \PDOException $e ) {
             $code = 503;
             $message = "Service Unavailable";
@@ -204,7 +211,7 @@ class Bootstrap {
                         "errors"  => [
                                 [
                                         "code"    => -1000,
-                                        "message" => "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>"
+                                        "message" => $response_message
                                 ]
                         ], "data" => []
                 ] );

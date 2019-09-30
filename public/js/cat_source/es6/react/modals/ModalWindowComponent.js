@@ -17,8 +17,8 @@ class ModalWindowComponent extends React.Component {
     }
 
     onCloseModal() {
-        if ( this.props.onCloseCallback) {
-            this.props.onCloseCallback();
+        if ( this.state.onCloseCallback) {
+            this.state.onCloseCallback();
         }
         this.setState({
             isShowingModal: false,

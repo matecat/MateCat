@@ -1286,7 +1286,7 @@ LXQ.init  = function () {
                 return;
             }
 
-            var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.currentFileId);
+            var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
 
             var sourcetext =  this.getSourceTextForQa(segObj.decoded_source);
             var translation = this.getTargetTextForQa(segment);
@@ -1310,7 +1310,7 @@ LXQ.init  = function () {
                     if ( !err ) {
                         var noVisibleErrorsFound = false, source_val, target_val, ind;
                         //myWindow.location =result.qaurl;
-                        var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.currentFileId);
+                        var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
                         source_val = segObj.decoded_source;
                         if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
                             //do something here -- enable qa errors

@@ -83,8 +83,26 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             this.setBulkSelectionSegments(this.segmentsInBulk);
         }
     },
-
-    normalizeSplittedSegments: function (segments) {
+    removeAllSegments: function() {
+        this._segments = {};
+        this._segmentsFiles = Immutable.fromJS({});
+        this._globalWarnings = {
+            lexiqa: [],
+                matecat: {
+                ERROR: {
+                    Categories: []
+                },
+                WARNING: {
+                    Categories: []
+                },
+                INFO: {
+                    Categories: []
+                }
+            }
+        };
+        this.segmentsInBulk = [];
+    },
+    normalizeSplittedSegments: function (segments, fid) {
         let newSegments = [];
         let self = this;
         $.each(segments, function (index) {
@@ -227,17 +245,20 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     setStatus(sid, fid, status) {
         var index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'status'], status);
         this._segments = this._segments.setIn([index, 'revision_number'], config.revisionNumber);
     },
 
     setSuggestionMatch(sid, fid, perc) {
         var index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'suggestion_match'], perc.replace('%', ''));
     },
 
     setPropagation(sid, fid, propagation, from) {
         let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         if (propagation) {
             this._segments = this._segments.setIn([index, 'autopropagated_from'], from);
         } else {
@@ -246,6 +267,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     replaceTranslation(sid, translation) {
         var index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         let segment = this._segments.get(index);
         var trans = htmlEncode(this.removeLockTagsFromString(translation));
         let decoded_translation = UI.decodeText(segment.toJS(), trans);
@@ -255,6 +277,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     modifiedTranslation(sid, fid, status) {
         const index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'modified'], status);
     },
     decodeSegmentsText: function () {
@@ -264,6 +287,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setSegmentAsTagged(sid, fid) {
         var index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'tagged'], true);
         let segment = this._segments.get(index);
         this._segments = this._segments.setIn([index, 'decoded_translation'], UI.decodeText(segment.toJS(), segment.get('translation')));
@@ -272,6 +296,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     setSegmentOriginalTranslation(sid, fid, translation) {
         var index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'original_translation'], translation);
     },
 
@@ -282,6 +307,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     addSegmentVersions(fid, sid, versions) {
         //If is a splitted segment the versions are added to the first of the split
         let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         let segment = this._segments.get(index);
         if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
@@ -293,12 +319,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     lockUnlockEditArea(sid, fid) {
         let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         let segment = this._segments.get(index);
         let lockedEditArea = segment.get('edit_area_locked');
         this._segments = this._segments.setIn([index, 'edit_area_locked'], !lockedEditArea);
     },
     setToggleBulkOption: function (sid, fid) {
         let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         if (this._segments.getIn([index, 'inBulk'])) {
             let indexArray = this.segmentsInBulk.indexOf(sid);
             this.segmentsInBulk.splice(indexArray, 1);
@@ -360,15 +388,18 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setUnlockedSegment: function (sid, fid, unlocked) {
         let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'unlocked'], unlocked);
     },
 
     setConcordanceMatches: function (sid, matches ,errors) {
         const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'concordance'], Immutable.fromJS(matches));
     },
     setContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'contributions'], Immutable.fromJS({
             matches: contributions,
             errors: errors
@@ -376,6 +407,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setAlternatives: function (sid, alternatives) {
         const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'alternatives'], Immutable.fromJS(alternatives));
     },
     deleteContribution: function(sid, matchId) {
@@ -412,6 +444,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setCrossLanguageContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'cl_contributions'], {
             matches: contributions,
             errors: errors
@@ -422,6 +455,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     openSegmentIssuePanel: function(sid) {
         const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         if ( !( this._segments.get(index).get('ice_locked') === 1 && !this._segments.get(index).get('unlocked') ) ) {
             this._segments = this._segments.setIn([index, 'openIssues'], true);
         }
@@ -431,6 +465,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     openSegmentComments: function(sid) {
         const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.map((segment)=>segment.set('openComments', false));
         this._segments = this._segments.setIn([index, 'openComments'], true);
     },
@@ -471,15 +506,18 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     setSegmentWarnings(sid, warning, tagMismatch) {
         const fid = this._segmentsFiles.get(sid);
         let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'warnings'], Immutable.fromJS(warning));
         this._segments = this._segments.setIn([index, 'tagMismatch'], Immutable.fromJS(tagMismatch));
     },
     setQACheckMatches(sid, matches) {
         const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'qaCheckGlossary'], matches);
     },
     setQABlacklistMatches(sid, matches) {
         const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'qaBlacklistGlossary'], matches);
     },
     /**
@@ -529,6 +567,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     openSegmentSplit: function(sid) {
         let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'openSplit'], true);
     },
     closeSegmentsSplit: function(sid) {
