@@ -42,7 +42,6 @@ EventEmitter.prototype.setMaxListeners(0);
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
     _segments: Immutable.fromJS([]),
-    _segmentsFiles: Immutable.fromJS({}),
     _globalWarnings: {
         lexiqa: [],
         matecat: {
@@ -77,30 +76,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             this._segments = Immutable.fromJS(this.normalizeSplittedSegments(segments));
         }
 
-        this.buildSegmentsFiles(segments);
-
         if (this.segmentsInBulk.length > 0) {
             this.setBulkSelectionSegments(this.segmentsInBulk);
         }
     },
     removeAllSegments: function() {
-        this._segments = {};
-        this._segmentsFiles = Immutable.fromJS({});
-        this._globalWarnings = {
-            lexiqa: [],
-                matecat: {
-                ERROR: {
-                    Categories: []
-                },
-                WARNING: {
-                    Categories: []
-                },
-                INFO: {
-                    Categories: []
-                }
-            }
-        };
-        this.segmentsInBulk = [];
+        this._segments = Immutable.fromJS([]);
     },
     normalizeSplittedSegments: function (segments, fid) {
         let newSegments = [];
@@ -171,20 +152,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
         });
         return newSegments;
-    },
-
-    buildSegmentsFiles: function (segments) {
-        segments.map(segment => {
-            var splittedSourceAr = segment.segment.split(UI.splittedTranslationPlaceholder);
-            if (splittedSourceAr.length > 1) {
-                let self = this;
-                $.each(splittedSourceAr, function (i) {
-                    self._segmentsFiles = self._segmentsFiles.set(segment.sid + '-' + (i + 1), segment.fid);
-                });
-            } else {
-                this._segmentsFiles = this._segmentsFiles.set(segment.sid, segment.fid);
-            }
-        });
     },
 
     splitSegment(oldSid, newSegments, fid, splitGroup) {
@@ -487,14 +454,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
-
-            let fid = this._segmentsFiles.get(sid);
-            if ( !fid) {
-                fid = this._segmentsFiles.get(sid + "-1");
-            }
-            if(!fid){
-                return true
-            }
             let index = this.getSegmentIndex(sid);
             let segment = this._segments.get(index);
             return segment.get('tagged');
@@ -504,7 +463,6 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     // Local warnings
     setSegmentWarnings(sid, warning, tagMismatch) {
-        const fid = this._segmentsFiles.get(sid);
         let index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'warnings'], Immutable.fromJS(warning));
