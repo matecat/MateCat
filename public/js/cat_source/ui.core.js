@@ -87,7 +87,16 @@ UI = {
         this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
     },
 
+    removeCacheObjects: function() {
+        this.editarea = "";
+        this.lastOpenedSegment = undefined;
+        this.currentSegmentId = undefined;
+        this.lastOpenedSegmentId = undefined;
+        this.currentSegment = undefined;
+        this.currentFile = undefined;
+        this.currentFileId = undefined;
 
+    },
     /**
      * shouldSegmentAutoPropagate
      *
@@ -894,6 +903,8 @@ UI = {
             delete UI.SegmentsContainers;
         });
         this.removeWaypoints();
+        this.removeCacheObjects();
+        SegmentStore.removeAllSegments();
         $('#outer').empty();
     },
 
