@@ -1473,6 +1473,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                             &.arrows:after {
                                 content: "Arrows";
                             }
+                            &.arrows-enter:after {
+                                content: "Arrows/Enter";
+                            }
                         }
                     }
                 }

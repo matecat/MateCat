@@ -94,6 +94,7 @@ class SegmentFooter extends React.Component {
             tabs: this.registerTabInit(tabs, SegmentStore._footerTabsConfig.toJS()),
             hideMatches: hideMatches
         };
+        this.selectedTab = 0;
         this.registerTab = this.registerTab.bind(this);
         this.modifyTabVisibility = this.modifyTabVisibility.bind(this);
         this.getTabContainer = this.getTabContainer.bind(this);
@@ -293,15 +294,28 @@ class SegmentFooter extends React.Component {
             this.setHideMatchesCookie(false);
         }
         tabs[tabName] = tab;
+        //Update selected Tab
+        let tabsEnabled = _.filter(this.state.tabs, (tab)=>tab.visible);
+        this.selectedTab = _.findIndex(tabsEnabled, (elem)=>tab.code === elem.code );
 
         this.setState({
             tabs: tabs
         });
     }
 
+    getNextTab() {
+        let idx = this.selectedTab;
+        let tabs = _.filter( this.state.tabs, (tab)=>tab.visible );
+        let tabIndex = (idx + 1) % tabs.length;
+        let tabToOpen = tabs[tabIndex];
+        tabToOpen = Object.keys( this.state.tabs ).find( key => this.state.tabs[key].code === tabToOpen.code );
+        this.selectedTab = tabIndex;
+        this.changeTab( tabToOpen, true );
+    }
+
     handleShortcutsKeyDown(e) {
         if ( this.props.segment.opened && e.altKey && e.key === 's' ) {
-            console.log("Navigate Tabs");
+            this.getNextTab();
         }
     }
     componentDidMount() {

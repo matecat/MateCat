@@ -181,7 +181,7 @@ $.extend(UI, {
                         "label": "Navigate issues penel to add one",
                         "equivalent": "",
                         "keystrokes": {
-                            "standard": "ctrl+alt+arrows",
+                            "standard": "ctrl+alt+arrows-enter",
                             "mac": "Meta+alt+arrows",
                         }
                     },
