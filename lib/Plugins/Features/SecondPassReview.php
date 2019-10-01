@@ -65,7 +65,7 @@ class SecondPassReview extends BaseFeature {
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviewsForList( $project->getChunks() );
         foreach ( $chunkReviews as $chunkReview ) {
             $model = new ChunkReviewModel( $chunkReview );
-            $model->recountAndUpdatePassFailResult();
+            $model->recountAndUpdatePassFailResult( $project );
         }
     }
 
