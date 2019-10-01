@@ -87,7 +87,16 @@ UI = {
         this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
     },
 
+    removeCacheObjects: function() {
+        this.editarea = "";
+        this.lastOpenedSegment = undefined;
+        this.currentSegmentId = undefined;
+        this.lastOpenedSegmentId = undefined;
+        this.currentSegment = undefined;
+        this.currentFile = undefined;
+        this.currentFileId = undefined;
 
+    },
     /**
      * shouldSegmentAutoPropagate
      *
@@ -901,6 +910,8 @@ UI = {
             delete UI.SegmentsContainers;
         });
         this.removeWaypoints();
+        this.removeCacheObjects();
+        SegmentStore.removeAllSegments();
         $('#outer').empty();
     },
 
@@ -931,6 +942,7 @@ UI = {
 	reloadToSegment: function(segmentId) {
 		this.infiniteScroll = false;
 		config.last_opened_segment = segmentId;
+		UI.cacheObjects(UI.getSegmentById(segmentId));
         UI.unmountSegments();
 		this.render({ segmentToOpen : segmentId });
 	},
@@ -973,6 +985,7 @@ UI = {
         if (where === "center" && !starting) {
             this.unmountSegments();
         }
+        var lastArticleAdded;
         $.each(files, function(k) {
 			var newFile = '';
 			var fid = k;
@@ -1978,7 +1991,8 @@ UI = {
             context_after: contextAfter,
             id_after: idAfter,
             by_status: byStatus,
-            revision_number: config.revisionNumber
+            revision_number: config.revisionNumber,
+            guess_tag_used: !UI.checkCurrentSegmentTPEnabled(segment)
         };
         if(isSplitted) {
             this.setStatus($('#segment-' + id_segment), status);
@@ -1993,11 +2007,31 @@ UI = {
         return APP.doRequest({
             data: reqData,
 			context: [reqArguments, options],
-			error: function() {
-                UI.addToSetTranslationTail(this[1]);
-                UI.changeStatusOffline(this[0][0].id_segment);
-                UI.failedConnection(this[0], 'setTranslation');
-                UI.decrementOfflineCacheRemaining();
+			error: function(response) {
+                if ( response.status ===  409 ) {
+                    UI.executingSetTranslation = false;
+                    var idSegment = this[0][0].id_segment;
+                    SegmentActions.addClassToSegment(idSegment, 'setTranslationError');
+                    var callback = function() {
+                        UI.lastOpenedSegment = null;
+                        UI.reloadToSegment(idSegment);
+                    };
+                    var props = {
+                        text: "There was an error saving segment "+ idSegment +".</br></br>" +
+                            "Press OK to refresh segments.",
+                        successText: "Ok",
+                        successCallback: function (  ) {
+                            APP.ModalWindow.onCloseModal();
+                        }
+                    };
+                    APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Error saving segment", {}, callback);
+                    return false;
+                } else {
+                    UI.addToSetTranslationTail(this[1]);
+                    UI.changeStatusOffline(this[0][0].id_segment);
+                    UI.failedConnection(this[0], 'setTranslation');
+                    UI.decrementOfflineCacheRemaining();
+                }
             },
 			success: function( data ) {
                 UI.executingSetTranslation = false;
@@ -2279,7 +2313,7 @@ UI = {
 
                 SegmentActions.setSegmentPropagation(UI.getSegmentId(this), UI.getSegmentFileId(this), true ,UI.getSegmentId(segment));
 
-                LXQ.doLexiQA(this,UI.getSegmentId(this),true,null);
+                LXQ.doLexiQA($(this),UI.getSegmentId(this),true,null);
             });
 
             //unset actual segment as autoPropagated because now it is translated
