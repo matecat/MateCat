@@ -79,7 +79,25 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
         // console.timeEnd("Time: updateAll segments"+fid);
     },
-
+    removeAllSegments: function() {
+        this._segments = {};
+        this._segmentsFiles = Immutable.fromJS({});
+        this._globalWarnings = {
+            lexiqa: [],
+                matecat: {
+                ERROR: {
+                    Categories: []
+                },
+                WARNING: {
+                    Categories: []
+                },
+                INFO: {
+                    Categories: []
+                }
+            }
+        };
+        this.segmentsInBulk = [];
+    },
     normalizeSplittedSegments: function (segments, fid) {
         let newSegments = [];
         let self = this;
@@ -227,17 +245,20 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     setStatus(sid, fid, status) {
         var index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments[fid] = this._segments[fid].setIn([index, 'status'], status);
         this._segments[fid] = this._segments[fid].setIn([index, 'revision_number'], config.revisionNumber);
     },
 
     setSuggestionMatch(sid, fid, perc) {
         var index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments[fid] = this._segments[fid].setIn([index, 'suggestion_match'], perc.replace('%', ''));
     },
 
     setPropagation(sid, fid, propagation, from) {
         let index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         if (propagation) {
             this._segments[fid] = this._segments[fid].setIn([index, 'autopropagated_from'], from);
         } else {
@@ -246,12 +267,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     replaceTranslation(sid, fid, translation) {
         var index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         var trans = htmlEncode(this.removeLockTagsFromString(translation));
         this._segments[fid] = this._segments[fid].setIn([index, 'decoded_translation'], trans);
         return translation;
     },
     replaceSource(sid, fid, source) {
         let index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         let segment = this._segments[fid].get(index);
         // var trans = htmlEncode(this.removeLockTagsFromString(source));
         let source_decoded = source;
@@ -271,6 +294,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setSegmentAsTagged(sid, fid) {
         let index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments[fid] = this._segments[fid].setIn([index, 'tagged'], true);
         let segment = this._segments[fid].get(index);
         this._segments[fid] = this._segments[fid].setIn([index, 'decoded_translation'], UI.decodeText(segment.toJS(), segment.get('translation')));
@@ -279,6 +303,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     setSegmentOriginalTranslation(sid, fid, translation) {
         var index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments[fid] = this._segments[fid].setIn([index, 'original_translation'], translation);
     },
 
@@ -289,6 +314,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     addSegmentVersions(fid, sid, versions) {
         //If is a splitted segment the versions are added to the first of the split
         let index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         let segment = this._segments[fid].get(index);
         if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
@@ -300,6 +326,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     lockUnlockEditArea(sid, fid) {
         let index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         let segment = this._segments[fid].get(index);
         let lockedEditArea = segment.get('edit_area_locked');
         this._segments[fid] = this._segments[fid].setIn([index, 'edit_area_locked'], !lockedEditArea);
@@ -320,6 +347,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setToggleBulkOption: function (sid, fid) {
         let index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         if (this._segments[fid].getIn([index, 'inBulk'])) {
             let indexArray = this.segmentsInBulk.indexOf(sid);
             this.segmentsInBulk.splice(indexArray, 1);
@@ -389,11 +417,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     setUnlockedSegment: function (sid, fid, unlocked) {
         let index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
     },
 
     setContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], {
             matches: contributions,
             errors: errors
@@ -402,6 +432,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     setCrossLanguageContributionsToCache: function (sid, fid, contributions,errors) {
         const index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments[fid] = this._segments[fid].setIn([index, 'cl_contributions'], {
             matches: contributions,
             errors: errors
@@ -429,6 +460,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     setSegmentWarnings(sid, warning) {
         const fid = this._segmentsFiles.get(sid);
         let index = this.getSegmentIndex(sid, fid);
+        if ( index === -1 ) return;
         this._segments[fid] = this._segments[fid].setIn([index, 'warnings'], Immutable.fromJS(warning));
     },
     updateGlobalWarnings: function (warnings) {
@@ -554,7 +586,9 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
             let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
-            SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
+            if ( seg ) {
+                SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
+            }
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:

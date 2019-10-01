@@ -37,6 +37,8 @@ if (true)
          * @param next
          * @returns {boolean}
          */
+        cachedGlossaryData: {},
+        glossaryMatchesErrors: ['g', 'G'],
         getGlossary: function ( segment, entireSegment, next ) {
             var txt;
             if ( !_.isUndefined(next) ) {
@@ -72,7 +74,7 @@ if (true)
         cacheGlossaryData: function ( matches, sid ) {
 
             if ( UI.currentSegmentId == sid && matches) {
-                UI.cachedGlossaryData = matches;
+                UI.cachedGlossaryData.sid = matches;
             }
         },
 
@@ -85,7 +87,7 @@ if (true)
 
             if ( ! Object.size( matchesObj ) ) return ;
 
-            var segment = (segmentToMark) ? segmentToMark : UI.currentSegment;
+            var segment = (segmentToMark);
             var container = $('.source', segment ) ;
 
             root.QaCheckGlossary.enabled() && root.QaCheckGlossary.removeUnusedGlossaryMarks( container );
@@ -108,7 +110,7 @@ if (true)
             });
             $.each( matches, function ( index, k ) {
                 var glossaryTerm_noPlaceholders = UI.decodePlaceholdersToText( k, true );
-
+                if ( UI.glossaryMatchesErrors.indexOf(glossaryTerm_noPlaceholders) !== -1 ) return;
                 if ( matchesToRemove.indexOf( glossaryTerm_noPlaceholders ) != -1 ) return true ;
 
                 var glossaryTerm_escaped = glossaryTerm_noPlaceholders
