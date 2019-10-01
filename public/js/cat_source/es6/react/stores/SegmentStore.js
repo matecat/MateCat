@@ -449,12 +449,12 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'enabled'], true);
     },
     setChoosenSuggestion: function(sid, sugIndex) {
-        const index = this.getSegmentIndex(sid);
         this._segments = this._segments.map((segment)=>segment.set('choosenSuggestionIndex', sugIndex));
     },
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
             let index = this.getSegmentIndex(sid);
+            if ( index === -1 ) return;
             let segment = this._segments.get(index);
             return segment.get('tagged');
         }
@@ -865,7 +865,7 @@ AppDispatcher.register(function (action) {
             if ( seg ) {
                 SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
             }
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:
             SegmentStore.emitChange(action.actionType, action.sid, action.tab, action.data);

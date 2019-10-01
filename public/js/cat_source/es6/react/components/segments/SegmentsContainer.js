@@ -106,7 +106,8 @@ class SegmentsContainer extends React.Component {
                     return segment.get('sid') === this.state.scrollTo;
                 }
             });
-            let scrollTo = ( index >= 2 ) ? index-2 : (index === 0) ? 0 : index-1 ;
+            let scrollTo = ( index >= 2 ) ? index-2 : ( index === 0 ) ? 0 : index-1 ;
+            scrollTo = ( index > this.state.segments.size - 8 ) ? index : scrollTo;
             return { scrollTo: scrollTo, position: 'start' }
         } else if ( this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
             const diff = this.state.segments.size - this.lastListSize;
