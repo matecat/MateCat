@@ -93,7 +93,7 @@ class SegmentFooterTabMatches extends React.Component {
         var self = this;
         var ulDataItem = '.editor .tab.matches ul[data-item=';
         UI.editarea.focus();
-        UI.disableTPOnSegment();
+        UI.disableTPOnSegment(this.props.segment);
         setTimeout(function () {
             TranslationMatches.setChosenSuggestion(index);
             TranslationMatches.copySuggestionInEditarea(UI.currentSegment, $(ulDataItem + index + '] li.b .translation').html(),

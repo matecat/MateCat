@@ -50,8 +50,8 @@ let TranslationMatches = {
 
         let segment = UI.getSegmentById(sid);
         let editarea = $('.editarea', segment);
-        SegmentActions.setSegmentContributions(UI.getSegmentId(segment), segment.id_file, data.matches, data.errors);
-
+        SegmentActions.setSegmentContributions(segmentObj.sid, segmentObj.id_file, data.matches, data.errors);
+        segmentObj = SegmentStore.getSegmentByIdToJS(sid);
         if ( data.matches && data.matches.length > 0 && _.isUndefined(data.matches[0].error)) {
             var editareaLength = segmentObj.translation.length;
             var translation = data.matches[0].translation;
@@ -70,13 +70,13 @@ let TranslationMatches = {
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
                  * the source with the text with tags, the segment is tagged
                  */
-                if (UI.checkCurrentSegmentTPEnabled(segment)) {
+                if (UI.checkCurrentSegmentTPEnabled(segmentObj)) {
                     var currentContribution = UI.getCurrentSegmentContribution(segmentObj);
                     if (parseInt(currentContribution.match) !== 100) {
                         translation = currentContribution.translation;
                         translation = UI.removeAllTags(translation);
                     } else {
-                        UI.disableTPOnSegment(segment);
+                        UI.disableTPOnSegment(segmentObj);
                     }
                 }
 

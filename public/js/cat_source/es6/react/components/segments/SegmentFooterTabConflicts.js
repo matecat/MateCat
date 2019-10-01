@@ -13,7 +13,7 @@ class SegmentFooterTabConflicts extends React.Component {
 
     chooseAlternative(text) {
         UI.editarea.focus();
-        UI.disableTPOnSegment();
+        UI.disableTPOnSegment(this.props.segment);
         setTimeout(()=>{
             SegmentActions.replaceEditAreaTextContent( this.props.segment.sid, this.props.segment.id_file, text);
             SegmentActions.highlightEditarea( this.props.segment.sid );

@@ -98,8 +98,9 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if ((UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment)) {
-                SegmentActions.showTagsMenu(UI.getSegmentId(UI.currentSegment));
+            var currentSegment = SegmentStore.getCurrentSegment();
+            if ((UI.tagLockEnabled) && UI.hasDataOriginalTags(currentSegment.segment)) {
+                SegmentActions.showTagsMenu(currentSegment.sid);
             }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.splitSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();

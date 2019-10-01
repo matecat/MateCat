@@ -125,16 +125,14 @@
          * Check if the  the Tag Projection in the current segment is enabled and still not tagged
          * @returns {boolean}
          */
-        checkCurrentSegmentTPEnabled: function (segment) {
-            var currentSegment = (segment)? segment : UI.currentSegment;
+        checkCurrentSegmentTPEnabled: function (segmentObj) {
+            var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
             if (currentSegment && this.enableTagProjection) {
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
-                var segmentNoTags = UI.removeAllTags( htmlDecode(currentSegment.find('.source').data('original')));
-                var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment) && currentSegment.hasClass('enableTP') && segmentNoTags !== '';
-                // The segment is already been tagged
-                var dataAttribute = currentSegment.attr('data-tagprojection');
+                var segmentNoTags = UI.removeAllTags( segmentObj.segment );
+                var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment.segment ) && !currentSegment.tagged && segmentNoTags !== '';
                 // If the segment has already be tagged
-                var isCurrentAlreadyTagged = ( !_.isUndefined(dataAttribute) && dataAttribute === 'tagged')? true : false;
+                var isCurrentAlreadyTagged = currentSegment.tagged;
                 return ( tagProjectionEnabled && !isCurrentAlreadyTagged );
             }
             return false;
@@ -142,12 +140,12 @@
         /**
          * Disable the Tag Projection, for example after clicking on the Translation Matches
          */
-        disableTPOnSegment: function (segment) {
-            var currentSegment = (segment)? segment : UI.currentSegment;
-            var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment)  && currentSegment.hasClass('enableTP');
+        disableTPOnSegment: function (segmentObj) {
+            var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
+            var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
             if (this.enableTagProjection && tagProjectionEnabled) {
-                SegmentActions.setSegmentAsTagged(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
-                currentSegment.data('tagprojection', 'tagged');
+                SegmentActions.setSegmentAsTagged(currentSegment.sid, currentSegment.id_file);
+                UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged');
             }
         },
         /**
@@ -207,7 +205,8 @@
             var returnArray = array;
             if (UI.enableTagProjection) {
                 returnArray = array.filter(function (value) {
-                    return !UI.checkCurrentSegmentTPEnabled($('#segment-' + value));
+                    SegmentStore.getSegmentByIdToJS(value);
+                    return !UI.checkCurrentSegmentTPEnabled( SegmentStore.getSegmentByIdToJS(value) );
                 });
             }
             return returnArray;
@@ -636,11 +635,10 @@
             if (segmentsArray.length > 0) {
                 segmentsArray.forEach(function ( item ) {
                     var segment = SegmentStore.getSegmentByIdToJS(item);
-                    var $segment = UI.getSegmentById(item);
                     if ( segment ) {
                         SegmentActions.setStatus(item, segment.id_file, status);
                         SegmentActions.modifiedTranslation(item, segment.id_file, false);
-                        UI.disableTPOnSegment( $segment )
+                        UI.disableTPOnSegment( segment )
                     }
                 });
                 setTimeout(CatToolActions.reloadSegmentFilter, 500);

@@ -587,9 +587,9 @@ $.extend(UI, {
      * @param segment
      * @returns {boolean}
      */
-    hasDataOriginalTags: function (segment) {
-        var originalText = $(segment).find('.source').data('original');
-        var reg = new RegExp(/(&amp;lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&amp;gt;)/gmi);
+    hasDataOriginalTags: function (segmentSource) {
+        var originalText = segmentSource;
+        var reg = new RegExp(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi);
         if (!_.isUndefined(originalText) && reg.test(originalText)) {
             return true;
         }

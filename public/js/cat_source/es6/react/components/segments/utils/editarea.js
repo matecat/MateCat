@@ -222,7 +222,8 @@ let EditArea = {
     },
 
     keyPressEditAreaEventHandler: function (e, sid) {
-        if( (e.which == 60) && (UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment) && !UI.tagMenuOpen) { // opening tag sign
+        let segmentObj = SegmentStore.getSegmentByIdToJS(sid);
+        if( (e.which == 60) && (UI.tagLockEnabled) && UI.hasDataOriginalTags(segmentObj.segment) && !UI.tagMenuOpen) { // opening tag sign
             SegmentActions.showTagsMenu(sid);
         }
     },
