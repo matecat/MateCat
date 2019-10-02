@@ -34,7 +34,7 @@ class AnalyzeHeader extends React.Component {
                 </div>
             </div>;
 
-        } else if ( (status === 'NEW') || (status === '') || in_queue_before > 0 ) {
+        } else if ( (status === 'NEW') || (status === 'BUSY') ||(status === '') || in_queue_before > 0 ) {
             if ( config.daemon_warning ) {
 
                 html = this.errorAnalysisHtml();
@@ -58,6 +58,15 @@ class AnalyzeHeader extends React.Component {
                         </div>
                     </div>
                 }
+            } else {
+                html = <div className="analysis-create">
+                    <div className="search-tm-matches">
+                        <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
+                        <span className="complete">Please wait...
+                             <p className="label">There are other projects in queue. </p>
+                            </span>
+                    </div>
+                </div>
             }
             this.previousQueueSize = in_queue_before;
 
