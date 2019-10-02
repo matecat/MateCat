@@ -222,7 +222,17 @@
 
                 <!-- to from -->
                 <div class="item language">
-                    <p> <span id="footer-source-lang" tal:content="source_code"></span> <span class="to-arrow"> &#8594; </span> <span id="footer-target-lang" tal:content="target_code"></span> </p>
+                    <p>
+                        <!--<span id="footer-source-lang" tal:content="languages_array_obj"></span>-->
+                        <tal:block tal:repeat="lang languages_array_obj">
+                            <span tal:condition="php: lang['code'] == source_code"  id="footer-source-lang" tal:content="lang/name"></span>
+                            <tal:block tal:condition="php: lang['code'] == target_code" >
+                                <span class="to-arrow"> &#8594; </span>
+                                <span id="footer-target-lang" tal:content="lang/name"></span>
+                            </tal:block>
+                        </tal:block>
+                        <!--<span id="footer-target-lang" tal:content="target_code"></span>-->
+                    </p>
                 </div>
 
                 <!-- progress -->

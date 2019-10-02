@@ -1016,10 +1016,6 @@ UI = {
 						'	</ul>' +
                         '   <div class="article-segments-container-' + fid + ' article-segments-container"></div>' +
                         '</article>';
-
-                /* Todo: change */
-                $('#footer-source-lang').text(this.source);
-                $('#footer-target-lang').text(this.target);
 			}
 
 			if (articleToAdd) {
