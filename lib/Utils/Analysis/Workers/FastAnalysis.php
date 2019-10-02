@@ -148,6 +148,8 @@ class FastAnalysis extends AbstractDaemon {
 
             self::_TimeStampMsg( "Projects found: " . var_export( $projects_list ) . "." );
 
+            $featureSet = new FeatureSet();
+
             foreach ( $projects_list as $project_row ) {
 
                 $this->actual_project_row = $project_row;
@@ -170,7 +172,11 @@ class FastAnalysis extends AbstractDaemon {
                      */
                     $perform_Tms_Analysis = false;
                     $status               = ProjectStatus::STATUS_DONE;
+
+                    $featureSet->run( 'fastAnalysisDisabled', $pid );
+
                     self::_TimeStampMsg( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
+
                 }
 
                 try {
@@ -231,7 +237,6 @@ class FastAnalysis extends AbstractDaemon {
                     continue;
                 }
 
-                $featureSet = new FeatureSet();
                 $featureSet->run( 'fastAnalysisComplete', $this->segments, $this->actual_project_row );
 
                 self::_TimeStampMsg( "done" );
