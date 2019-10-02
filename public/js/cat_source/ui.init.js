@@ -14,7 +14,7 @@ $.extend(UI, {
         UI.setShortcuts();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
-            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+			APP.fitText($('#pname-container'), $('#pname'), 25);
         });
         setBrowserHistoryBehavior();
         $("article").each(function() {
@@ -60,8 +60,6 @@ $.extend(UI, {
 		this.savedSel = null;
 		this.savedSelActiveElement = null;
         this.offline = false;
-		if (SearchUtils.searchEnabled)
-            $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.logEnabled = true;
@@ -89,6 +87,9 @@ $.extend(UI, {
 		this.checkQueryParams();
 
         UI.firstLoad = false;
+
+        // Temporary js for header action menu
+		UI.initHeader();
 	},
     restart: function () {
         UI.unmountSegments();

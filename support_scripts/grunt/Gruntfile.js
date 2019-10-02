@@ -59,6 +59,7 @@ module.exports = function(grunt) {
 
     var es2015Preset = require('babel-preset-env');
     var reactPreset = require('babel-preset-react');
+    const babelstage2 = require('babel-preset-stage-2');
 
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
@@ -89,11 +90,12 @@ module.exports = function(grunt) {
             libs: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
-                    }
+                    },
+                    watch: true,
                 },
                 src: [
                     basePath + 'cat_source/es6/react-libs.js'
@@ -103,11 +105,12 @@ module.exports = function(grunt) {
             components: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
-                    }
+                    },
+                    watch: true,
                 },
                 src: [
                     basePath + 'cat_source/es6/react/*.js'
@@ -117,11 +120,12 @@ module.exports = function(grunt) {
             qualityReport: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
-                    }
+                    },
+                    watch: true,
                 },
                 src: [
                     basePath + 'cat_source/es6/react/components/quality_report/*.js',
@@ -174,6 +178,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.tags.js',
                     basePath + 'cat_source/ui.concordance.js',
                     basePath + 'cat_source/ui.glossary.js',
+                    basePath + 'cat_source/ui.header.js',
 
                     basePath + 'cat_source/qa_check_glossary.js',
                     basePath + 'cat_source/qa_check_blacklist.js',
@@ -331,7 +336,7 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            react_libs: {
+            /*react_libs: {
                 files: [
                     basePath + 'cat_source/es6/react-libs.js'
                 ],
@@ -343,14 +348,14 @@ module.exports = function(grunt) {
             },
             react: {
                 files: [
-                    basePath + 'cat_source/es6/react/**/*.js'
+                    basePath + 'cat_source/es6/react/!**!/!*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {
                     interrupt: true,
                     livereload : true
                 }
-            },
+            },*/
             js: {
                 files: [
                     basePath + 'cat_source/*.js',
@@ -368,7 +373,7 @@ module.exports = function(grunt) {
             },
             cssCattol: {
                 files: cssWatchFiles ,
-                tasks: ['sass:distCattol'],
+                tasks: ['sass'],
                 options: {
                     interrupt: true,
                     livereload : true
@@ -394,7 +399,7 @@ module.exports = function(grunt) {
         sass: {
             distCommon: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -404,7 +409,7 @@ module.exports = function(grunt) {
             },
             distCattol: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -414,7 +419,7 @@ module.exports = function(grunt) {
             },
             distUpload: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -424,7 +429,7 @@ module.exports = function(grunt) {
             },
             distManage: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -434,7 +439,7 @@ module.exports = function(grunt) {
             },
             distAnalyze: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -444,7 +449,7 @@ module.exports = function(grunt) {
             },
             distQR: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
@@ -454,7 +459,7 @@ module.exports = function(grunt) {
             },
             distIcons: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase ]
                 },
                 src: [
@@ -464,7 +469,7 @@ module.exports = function(grunt) {
             },
             distSemantic: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
                 },
                 src: [
@@ -474,7 +479,7 @@ module.exports = function(grunt) {
             },
             distLegacy: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
                 },
                 src: [
@@ -484,7 +489,7 @@ module.exports = function(grunt) {
             },
             distStyleOld: {
                 options : {
-                    sourceMap : false,
+                    sourceMap : true,
                     includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
                 },
                 src: [

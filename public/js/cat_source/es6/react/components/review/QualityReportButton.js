@@ -1,3 +1,5 @@
+import IconQR from "../icons/IconQR";
+
 class QualityReportButton extends React.Component {
     constructor(props) {
         super(props);
@@ -35,7 +37,10 @@ class QualityReportButton extends React.Component {
         className="draft"
         data-vote={this.getVote()} 
         href={this.props.quality_report_href}
-        target="_blank">{label}</a> ;
+        target="_blank">
+           {/* {label}*/}
+            <IconQR width={36} height={36}/>
+        </a> ;
     }
 }
 

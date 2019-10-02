@@ -1,16 +1,20 @@
+import IconFilter from "../../icons/IconFilter";
+import IconTick from "../../icons/IconTick";
+import IconDown from "../../icons/IconDown";
+
 let FilterProjectsStatus = require("./FilterProjectsStatus").default;
 let SearchInput = require("./SearchInput").default;
 
 class FilterProjects extends React.Component {
-    constructor (props) {
+    constructor(props) {
         super(props);
         this.ALL_MEMBERS = "-1";
         this.NOT_ASSIGNED = "0";
 
         this.teamChanged = false;
         this.dropDownUsersInitialized = false;
-        this.state= {
-            currentStatus : 'active'
+        this.state = {
+            currentStatus: 'active'
         };
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
     }
@@ -27,7 +31,7 @@ class FilterProjects extends React.Component {
                     }
                     $(this.dropdownUsers).dropdown({
                         fullTextSearch: 'exact',
-                        onChange: function(value, text, $selectedItem) {
+                        onChange: function (value, text, $selectedItem) {
                             self.changeUser(value);
                         }
                     });
@@ -61,7 +65,7 @@ class FilterProjects extends React.Component {
         let selectedUser;
         if (value === this.ALL_MEMBERS) {
             selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
-        } else if ( value === this.NOT_ASSIGNED && value !== this.selectedUser) {
+        } else if (value === this.NOT_ASSIGNED && value !== this.selectedUser) {
             selectedUser = ManageConstants.NOT_ASSIGNED_FILTER;
         } else {
             selectedUser = this.props.selectedTeam.get('members').find(function (member) {
@@ -92,37 +96,56 @@ class FilterProjects extends React.Component {
         if (this.props.selectedTeam && this.props.selectedTeam.get('type') === "general" &&
             this.props.selectedTeam.get('members') && this.props.selectedTeam.get('members').size > 1) {
 
-            let members = this.props.selectedTeam.get('members').map(function(member, i) {
+            let members = this.props.selectedTeam.get('members').map((member, i) => {
                 let classDisable = (member.get('projects') === 0) ? 'disabled' : '';
                 let userIcon = <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>;
-                if ( member.get('user_metadata') ) {
+                if (member.get('user_metadata')) {
                     userIcon = <img className="ui avatar image ui-user-dropdown-image"
-                                     src={member.get('user_metadata').get('gplus_picture') + "?sz=80"}/>;
+                                    src={member.get('user_metadata').get('gplus_picture') + "?sz=80"}/>;
                 }
                 return <div className={"item " + classDisable} data-value={member.get('user').get('uid')}
-                     key={'user' + member.get('user').get('uid')}>
+                            key={'user' + member.get('user').get('uid')}>
                     {userIcon}
-                    <span className="user-name-filter">{member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}</span>
-                    <div className="box-number-project">{member.get('projects')}</div>
+                    <div className="user-projects">
+                        <div className="user-name-filter">{member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}</div>
+                        <div className="box-number-project">{member.get('projects')}</div>
+                    </div>
                 </div>;
 
             });
 
             let item = <div className="item" data-value="-1"
                             key={'user' + -1}>
-                            <a className="ui all label">All</a>
-                            All Members
-                        </div>;
+                <a className="ui all label">ALL</a>
+                <div className="user-projects">
+                    <div className="user-name-filter">All Members</div>
+                    <div className="box-number-project"></div>
+                </div>
+            </div>;
             members = members.unshift(item);
             item = <div className="item" data-value="0"
-                            key={'user' + 0}>
-                        <a className="ui all label">NA</a>
-                        Not assigned
-                    </div>;
+                        key={'user' + 0}>
+                <a className="ui all label">NA</a>
+                <div className="user-projects">
+                    <div className="user-name-filter">Not assigned</div>
+                    <div className="box-number-project"></div>
+                </div>
+            </div>;
             members = members.unshift(item);
 
+            result = <div className="ui top left pointing dropdown users-filter" title="Filter project by members"
+                          ref={(dropdown) => this.dropdownUsers = dropdown}>
+                <div className="text">
+                    <div className="ui all label">ALL</div>
+                    All Members
+                </div>
+                <div className="icon"><IconDown width={16} height={16} color={'#788190'}/></div>
+                <div className="menu">
+                    {members}
+                </div>
 
-            result = <div className="users-filter" title="Filter project by members">
+            </div>;
+            /*result = <div className="users-filter" title="Filter project by members">
 
                         <div className="assigned-list">
                             <p>Projects of: </p>
@@ -149,7 +172,7 @@ class FilterProjects extends React.Component {
 
                         </div>
 
-                    </div>;
+                    </div>;*/
         }
         return result;
     }
@@ -169,17 +192,17 @@ class FilterProjects extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return _.isUndefined(this.props.selectedTeam) || (!_.isUndefined(nextProps.selectedTeam) && !nextProps.selectedTeam.equals(this.props.selectedTeam) )
+        return _.isUndefined(this.props.selectedTeam) || (!_.isUndefined(nextProps.selectedTeam) && !nextProps.selectedTeam.equals(this.props.selectedTeam))
     }
 
-    render () {
+    render() {
         let membersFilter = this.getUserFilter();
         let currentStatusLabel = this.getCurrentStatusLabel();
         return (
             <section className="row sub-head">
                 <div className="ui grid">
 
-                    <div className="eight wide column">
+                    <div className="ten wide column">
                         <div className="ui right labeled fluid input search-state-filters">
                             <SearchInput
                                 onChange={this.onChangeSearchInput.bind(this)}/>
@@ -192,7 +215,7 @@ class FilterProjects extends React.Component {
                         <a class="cta-create-team-text">Create New Team <i className="icon-settings icon"></i></a>
                     </div>*/}
 
-                    <div className="eight wide column pad-right-0">
+                    <div className="six wide column pad-right-0">
                         {membersFilter}
                     </div>
 
@@ -202,4 +225,4 @@ class FilterProjects extends React.Component {
     }
 }
 
-export default FilterProjects ;
+export default FilterProjects;

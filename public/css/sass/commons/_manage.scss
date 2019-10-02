@@ -808,70 +808,71 @@ body.manage {
     }
 }
 
-.manage footer {
-    background: #6d6e71;
-    height: 27px;
-    text-align: right;
-    border-top: 1px solid #333;
-    color: #fff;
+.normal-foo{
+    background-color: #f6f8fb;
+    min-width: 992px;
+    padding: 16px 64px;
+    height: 77px;
+    width: 100%;
     position: fixed;
     bottom: 0;
     left: 0;
-    width: 100%;
-    z-index: 1001;
-}
-
-.manage footer .wrapper {
-    margin: 0px auto 0 auto;
-    padding: 3px 0 0 0;
-    width: 92%;
-    font-size: 14px;
-    position: relative;
-    text-align: right;
-}
-
-
-
-footer ul {
-    margin: -5px 0 0 0;
-    padding: 0;
-    float: left;
-    list-style: none;
-}
-
-footer nav {
-    background: none;
-    float: right;
-    display: block;
-    line-height: 19px;
-    box-shadow: none;
-    text-align: right;
-}
-
-footer nav, footer nav a {
-    font-size: 14px;
-    color: #ffffff !important;
-    text-decoration: underline;
-    &:hover {
-        text-decoration: none;
+    z-index: 2;
+    .footer-body{
+        display: grid;
+        position: relative;
+        grid-column-gap: 24px;
+        grid-template-columns: 0.6fr 0.6fr 1fr;
+        align-items: center;
+        .info{
+            display: grid;
+            align-items: center;
+            grid-template-columns: 40px auto;
+            grid-column-gap: 8px;
+            .logo{
+                background-position: center;
+                background-size: cover;
+            }
+            .description{
+                color: #afafaf;
+                font-weight: 100;
+                font-size: 12px;
+                text-align: left;
+                line-height: 14px;
+                .link{
+                    color: #00aee4;
+                    text-decoration: underline;
+                }
+            }
+        }
     }
-}
-
-
-footer nav ul li {
-    padding:7px 5px 5px 5px;
-}
-
-footer nav ul a, #welcomebox {
-    text-decoration: underline;
-    &:hover {
-        text-decoration: none;
+    .side-info{
+        padding: 0 16px;
+        position: absolute;
+        display: grid;
+        align-items: center;
+        bottom: 0;
+        right: 0;
+        width: 419px;
+        height: 35px;
+        box-shadow: -2px -2px 12px 0 rgba(198, 198, 198, 0.5);
+        background-color: #ffffff;
+        .side-info-body{
+            display: grid;
+            grid-template-columns: 80px 80px 80px;
+            align-items: center;
+            .item{
+                a{
+                    margin: 0;
+                    padding: 0;
+                    color: #788190;
+                    display: block;
+                    text-decoration: none;
+                    text-align: left;
+                }
+            }
+        }
     }
-}
-
-footer nav ul a:hover {
-    background: none!important;
-    color: #ffffff;
 }
 
 .modal[data-type=view] {

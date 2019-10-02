@@ -47,6 +47,32 @@ if ( MBC.enabled() )
             }
         };
 
+        var getOpenedThreadCount =  function() {
+            var count = 0;
+
+            for( var segmentID in db.segments){
+                var el = db.segments[segmentID][db.segments[segmentID].length-1];
+                parseInt(el.message_type) === 1 ? count++: null;
+            }
+            return count
+        }
+
+        var refreshBadgeHeaderIcon = function(){
+            var count = getOpenedThreadCount();
+            $('#mbc-history .badge').remove();
+            if(count > 0){
+                $('#mbc-history').append(`<span class='badge'>${count}</span>`)
+            }
+        }
+        var limitNum = function ( num ) {
+            if ( Number( num ) > 99 ) return '+99';
+            else return num;
+        };
+
+        var buildFirstCommentHeader = function () {
+            return $( tpls.firstCommentWrap );
+        };
+
         var popLastCommentHash = function () {
             var l = lastCommentHash;
             lastCommentHash = null;
@@ -146,6 +172,7 @@ if ( MBC.enabled() )
             $( '.mbc-history-balloon-has-no-comments' ).hide();
 
             $( '.mbc-history-balloon-outer' ).append( root );
+
         };
 
         var updateHistoryWithLoadedSegments = function () {
@@ -273,6 +300,7 @@ if ( MBC.enabled() )
 
         var refreshElements = function () {
             updateHistoryWithLoadedSegments();
+            refreshBadgeHeaderIcon();
         };
 
         var getTeamUsers = function (  ) {
@@ -359,9 +387,10 @@ if ( MBC.enabled() )
 
             $( document ).on( 'mbc:ready', function ( ev ) {
 
-                $( '#mbc-history' ).remove();
-                $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
-                $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
+            $( '#mbc-history' ).remove();
+            /*$( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );*/
+            $( '.action-menu #action-filter' ).before( $( tpls.historyIcon ) );
+            $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
 
                 getTeamUsers().then( function() {
@@ -373,7 +402,7 @@ if ( MBC.enabled() )
                     }
                 });
                 //New icon inserted in the header -> resize file name
-                APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+                APP.fitText($('#pname-container'), $('#pname'), 25);
             } );
         } );
 
@@ -402,7 +431,7 @@ if ( MBC.enabled() )
             $( document ).trigger( 'mbc:comment:new', message.data );
         } );
 
-        $( document ).on( 'click', '#filterSwitch', function ( e ) {
+        $( document ).on( 'click', '#action-search', function ( e ) {
             $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
         } );
 
@@ -417,11 +446,13 @@ if ( MBC.enabled() )
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
             updateHistoryWithLoadedSegments();
+            refreshBadgeHeaderIcon();
         } );
 
         $( document ).on( 'mbc:comment:saved', function ( ev, data ) {
             //Update Header icon
             updateHistoryWithLoadedSegments();
+            refreshBadgeHeaderIcon();
         } );
 
         $( window ).on( 'segmentOpened', function ( e, data ) {

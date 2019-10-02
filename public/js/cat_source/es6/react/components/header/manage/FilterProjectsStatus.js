@@ -1,45 +1,59 @@
+import IconFilter from "../../icons/IconFilter";
+import IconTick from "../../icons/IconTick";
+
 class FilterProjects extends React.Component {
-    constructor (props) {
-        super(props);
+	constructor(props) {
+		super(props);
+		this.state = {
+			status: ['active', 'archived', 'cancelled'],
+			currentStatus: 'active'
+		}
 
-        this.onChangeFunction = this.onChangeFunction.bind(this);
-    }
+		this.onChangeFunction = this.onChangeFunction.bind(this);
+	}
 
-    componentDidMount () {
-        let self = this;
+	componentDidMount() {
+		let self = this;
 
-        $(this.dropdown).dropdown({
-            onChange: function() {
-                self.onChangeFunction();
-            }
-        });
-        this.currentFilter = 'active';
-        $(this.dropdown).dropdown('set selected', 'active');
-    }
+		const {currentStatus} = this.state;
 
-    onChangeFunction() {
-        if (this.currentFilter !== $(this.dropdown).dropdown('get value')) {
-            this.props.filterFunction($(this.dropdown).dropdown('get value'));
-            this.currentFilter = $(this.dropdown).dropdown('get value');
-        }
-    }
+		$(this.dropdown).dropdown({
+			onChange: function () {
+				self.onChangeFunction();
+			}
+		});
+		this.currentFilter = currentStatus;
+		$(this.dropdown).dropdown('set selected', currentStatus);
+	}
 
-    componentDidUpdate() {
-        this.currentFilter = 'active';
-        $(this.dropdown).dropdown('set selected', 'active');
-    }
+	onChangeFunction() {
+		if (this.currentFilter !== $(this.dropdown).dropdown('get value')) {
+			this.props.filterFunction($(this.dropdown).dropdown('get value'));
+			this.currentFilter = $(this.dropdown).dropdown('get value');
 
-    render () {
-        return <div className="ui top left pointing dropdown" title="Status Filter" ref={(dropdown) => this.dropdown = dropdown}>
-                    <i className="icon-filter icon" />
-                    <div className="text">Active</div>
-                    <div className="menu">
-                        <div className="item" data-value="active">Active</div>
-                        <div className="item" data-value="archived">Archived</div>
-                        <div className="item" data-value="cancelled">Cancelled</div>
-                    </div>
-                </div> ;
-    }
+			this.setState({
+				currentStatus: this.currentFilter
+			});
+		}
+	}
+
+	componentDidUpdate() {
+
+	}
+
+	render = () => {
+		const {status} = this.state;
+
+		return <div className="ui top left pointing dropdown" title="Status Filter"
+					ref={(dropdown) => this.dropdown = dropdown}>
+			<IconFilter width={36} height={36} color={'#002b5c'}/>
+			<div style={{ textTransform: 'capitalize'}} className="text">Active</div>
+			<div className="menu" >
+				{status.map((e, i) => <div style={{ textTransform: 'capitalize'}} key={i} className="item" data-value={e}>{e} {e === this.currentFilter ?
+					<IconTick width={14} height={14} color={'#ffffff'}/> : null}</div>)}
+			</div>
+		</div>;
+	}
 }
 
-export default FilterProjects ;
+export default FilterProjects;

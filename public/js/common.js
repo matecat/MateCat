@@ -163,7 +163,7 @@ APP = {
 			setup.beforeSend = req.beforeSend;
 
 		return $.ajax(setup);
-	}, 
+	},
     appendTime: function() {
         var t = new Date();
         return '&time=' + t.getTime();
@@ -569,7 +569,7 @@ APP = {
                 $(".notifications-wrapper")[0]
             );
         }
-        
+
         return APP.notificationBox.addNotification(notification);
     },
     removeNotification: function (notification) {
@@ -898,12 +898,7 @@ APP = {
             var urlImage = APP.USER.STORE.metadata.gplus_picture;
             var html = '<img class="ui-user-top-image-general user-menu-preferences" src="' + urlImage + '"/>';
             $('.user-menu-container .user-menu-preferences').replaceWith(html);
-            $('.user-menu-preferences').on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                $('#modal').trigger('openpreferences');
-                return false;
-            });
+            /*$('.user-menu-preferences').on('click', function (e) {*/
         } else {
             setTimeout(this.setUserImage.bind(this), 500);
         }

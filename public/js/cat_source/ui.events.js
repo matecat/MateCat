@@ -20,7 +20,7 @@ $.extend(UI, {
         }).on('keydown.shortcuts',null, UI.shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
             UI.openLanguageResourcesPanel();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
-            if((SearchUtils.searchEnabled)&&($('#filterSwitch').length)) SearchUtils.toggleSearch(e);
+            if((SearchUtils.searchEnabled)&&($('#action-search').length)) SearchUtils.toggleSearch(e);
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             // UI.redoInSegment(UI.currentSegment);
@@ -224,14 +224,6 @@ $.extend(UI, {
 		window.onbeforeunload = function(e) {
 			goodbye(e);
 		};
-
-		$("#filterSwitch").bind('click', function(e) {
-            SearchUtils.toggleSearch(e);
-		});
-		$("#advancedOptions").bind('click', function(e) {
-			e.preventDefault();
-			UI.openOptionsPanel();
-		});
 		$("#segmentPointer").click(function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
@@ -279,7 +271,10 @@ $.extend(UI, {
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             runDownload();
-		}).on('click', '#previewDropdown .previewLink a', function(e) {
+		}).on('click', '#action-download', function(e) {
+            e.preventDefault();
+            runDownload();
+        }).on('click', '#previewDropdown .previewLink a', function(e) {
 			e.preventDefault();
 			runDownload();
 		}).on('click', '#previewDropdown a.tmx', function(e) {
@@ -307,7 +302,7 @@ $.extend(UI, {
 		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
 			UI.checkConnection( 'Click from Human Authorized' );
-		}).on('click', '#statistics .meter a, #statistics #stat-todo', function(e) {
+		}).on('click', '#statistics .meter a, #stat-todo', function(e) {
 			e.preventDefault();
 			if ( config.isReview ) {
                 UI.openNextTranslated();
@@ -352,7 +347,7 @@ $.extend(UI, {
 			e.preventDefault();
 		});
 
-		$("#pname").on('click', function(e) {
+		$(".file-list").on('click', function(e) {
 			UI.closeAllMenus(e);
 			e.preventDefault();
 			UI.toggleFileMenu();

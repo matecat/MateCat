@@ -12,9 +12,9 @@ header {
     width: 100%;
     position: fixed;
     z-index: 999999999;
-    border-bottom: 1px solid #5F5F5F;
-    padding: 4px 0 5px 0;
-    height: 38px;
+    /*border-bottom: 1px solid #5F5F5F;
+    padding: 4px 0 5px 0;*/
+    height: 77px; /* was 38px for previous header*/
     margin-top: 0;
 }
 
@@ -67,7 +67,7 @@ h3 {
 }
 
 .logo {
-    margin-top: 6px !important;
+    /*margin-top: 6px !important;*/
 }
 
 .error-symbol {

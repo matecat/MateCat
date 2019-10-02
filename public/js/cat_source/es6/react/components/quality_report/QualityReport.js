@@ -199,6 +199,7 @@ if (config.isLoggedIn) {
             showJobInfo: true,
             showModals: true,
             showTeams: false,
+            isQualityReport: true,
             user: data
         }), headerMountPoint);
     });
@@ -207,6 +208,7 @@ if (config.isLoggedIn) {
         showJobInfo: true,
         showModals: true,
         showTeams: false,
+        isQualityReport: true,
         loggedUser: false,
     }), headerMountPoint);
 }

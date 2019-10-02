@@ -92,11 +92,11 @@ class SubHeaderContainer extends React.Component {
     updateIcon(total,warnings) {
         if (total > 0) {
             if(warnings.ERROR.total>0){
-                $('#notifbox').attr('class', 'warningbox')
+                $('#notifbox').attr('class', 'warningbox action-submenu')
                     .attr("title", "Click to see the segments with potential issues")
                     .find('.numbererror')
                     .text(total)
-                    .removeClass('numberwarning numberinfo');
+                    .removeClass('numberwarning numberinfo action-submenu');
             }else if(warnings.WARNING.total>0){
                 $('#notifbox').attr('class', 'warningbox')
                     .attr("title", "Click to see the segments with potential issues")
@@ -105,7 +105,7 @@ class SubHeaderContainer extends React.Component {
                     .addClass('numberwarning')
                     .removeClass('numberinfo');
             }else{
-                $('#notifbox').attr('class', 'warningbox')
+                $('#notifbox').attr('class', 'warningbox action-submenu')
                     .attr("title", "Click to see the segments with potential issues")
                     .find('.numbererror')
                     .text(total)
@@ -114,9 +114,13 @@ class SubHeaderContainer extends React.Component {
             }
 
         } else {
-            $('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!").find('.numbererror').text('')
+            $('#notifbox').attr('class', 'notific action-submenu')
+                .attr("title", "Well done, no errors found!")
+                .find('.numbererror')
+                .text('')
         }
     }
+
     closeSubHeader() {
         this.setState({
             search: false,
