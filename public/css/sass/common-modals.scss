@@ -608,16 +608,16 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     color: #fff;
     margin: 0 !important;
     display: grid;
-    grid-template-columns: 34px 1fr 16px;
+    grid-template-columns: 40px 1fr 24px;
     position: relative;
     grid-column-gap: 16px;
 }
 
 .modal-logo {
-    background: url(../../img/logo-Onlycat-white.svg);
     background-size: inherit;
-    background-repeat: no-repeat;
+    background: url(../../img/logo-Onlycat-white.svg) no-repeat;
     background-position-y: center;
+    background-size: contain;
     width: 40px;
     height: 26px;
 }
