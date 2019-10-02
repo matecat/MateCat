@@ -85,12 +85,13 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     shouldComponentUpdate(nextProps,  nextState) {
-        return ( (!_.isUndefined(nextProps.notes) || !_.isUndefined(this.props.notes)) &&
-            ( (!_.isUndefined(nextProps.notes) && _.isUndefined(this.props.notes)) ||
-                !Immutable.fromJS(this.props.notes).equals(Immutable.fromJS(nextProps.notes)) )) ||
-                this.props.loading !== nextProps.loading ||
-                this.props.active_class !== nextProps.active_class ||
-                this.props.tab_class !== nextProps.tab_class
+        return true
+            // ( (!_.isUndefined(nextProps.notes) || !_.isUndefined(this.props.notes)) &&
+            // ( (!_.isUndefined(nextProps.notes) && _.isUndefined(this.props.notes)) ||
+            //     !Immutable.fromJS(this.props.notes).equals(Immutable.fromJS(nextProps.notes)) )) ||
+            //     this.props.loading !== nextProps.loading ||
+            //     this.props.active_class !== nextProps.active_class ||
+            //     this.props.tab_class !== nextProps.tab_class
 
 
     }
