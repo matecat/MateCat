@@ -115,7 +115,7 @@ body.cattool {
 
 	  .progress-bar {
 		display: grid;
-		grid-template-columns: 1fr 32px;
+		grid-template-columns: 1fr 44px;
 		grid-column-gap: 8px;
 
 		.percent {
@@ -135,7 +135,8 @@ body.cattool {
 	  }
 		.statistics-details {
 			display: grid;
-			grid-template-columns: minmax(132px,0.4fr) minmax(164px,0.6fr);
+			grid-template-columns: minmax(144px,0.4fr) minmax(168px,0.6fr);
+			grid-column-gap: 4px;
 			justify-self: end;
 		}
 	}
