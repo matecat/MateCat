@@ -99,6 +99,15 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
                 }
             } );
             return {active: active, total: total};
+        },
+        getOpenedThreadCount:  function() {
+            var count = 0;
+
+            for( var segmentID in CommentsStore.db.segments){
+                var el = CommentsStore.db.segments[segmentID][CommentsStore.db.segments[segmentID].length-1];
+                parseInt(el.message_type) === 1 ? count++: null;
+            }
+            return count
         }
     },
     getCommentsBySegment: function(sid) {

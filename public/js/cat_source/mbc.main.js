@@ -47,23 +47,13 @@ if ( MBC.enabled() )
             }
         };
 
-        var getOpenedThreadCount =  function() {
-            var count = 0;
-
-            for( var segmentID in db.segments){
-                var el = db.segments[segmentID][db.segments[segmentID].length-1];
-                parseInt(el.message_type) === 1 ? count++: null;
-            }
-            return count
-        }
-
         var refreshBadgeHeaderIcon = function(){
-            var count = getOpenedThreadCount();
+            var count = CommentsStore.db.getOpenedThreadCount();
             $('#mbc-history .badge').remove();
             if(count > 0){
                 $('#mbc-history').append(`<span class='badge'>${count}</span>`)
             }
-        }
+        };
         var limitNum = function ( num ) {
             if ( Number( num ) > 99 ) return '+99';
             else return num;
@@ -446,13 +436,13 @@ if ( MBC.enabled() )
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
             updateHistoryWithLoadedSegments();
-            refreshBadgeHeaderIcon();
+            setTimeout(refreshBadgeHeaderIcon);
         } );
 
         $( document ).on( 'mbc:comment:saved', function ( ev, data ) {
             //Update Header icon
             updateHistoryWithLoadedSegments();
-            refreshBadgeHeaderIcon();
+            setTimeout(refreshBadgeHeaderIcon);
         } );
 
         $( window ).on( 'segmentOpened', function ( e, data ) {
