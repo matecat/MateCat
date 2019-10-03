@@ -17,9 +17,9 @@ class FeatureSet {
     /**
      * @var BasicFeatureStruct[]
      */
-    private $features = [] ;
+    private $features = [];
 
-    protected  $_ignoreDependencies = false ;
+    protected $_ignoreDependencies = false;
 
     /**
      * Initializes a new FeatureSet. If $features param is provided, FeaturesSet is populated with the given params.
@@ -50,7 +50,9 @@ class FeatureSet {
      * @return array
      */
     public function getCodes() {
-        return array_values( array_map( function( $feature ) { return $feature->feature_code ; }, $this->features) );
+        return array_values( array_map( function ( $feature ) {
+            return $feature->feature_code;
+        }, $this->features ) );
     }
 
     /**
@@ -60,7 +62,7 @@ class FeatureSet {
      *             for new implementations.
      */
     public function hasRevisionFeature() {
-       return $this->detectInstanceOf('Features\AbstractRevisionFeature' ) ;
+        return $this->detectInstanceOf( 'Features\AbstractRevisionFeature' );
     }
 
     /**
@@ -71,6 +73,7 @@ class FeatureSet {
      * feature which may require special conditionals.
      *
      * @param $class_name
+     *
      * @deprecated This method was introduced for to facilitate refactoring and should not be
      *             used for new implementations.
      *
@@ -80,13 +83,14 @@ class FeatureSet {
         foreach ( $this->features as $feature ) {
             $name = Features::getPluginClass( $feature->feature_code );
             if ( $name ) {
-                $obj = new $name($feature);
+                $obj = new $name( $feature );
                 if ( in_array( $class_name, class_parents( $obj ) ) ) {
-                    return $obj ;
+                    return $obj;
                 }
             }
         }
-        return false ;
+
+        return false;
     }
 
     /**
@@ -95,7 +99,7 @@ class FeatureSet {
      * @throws Exception
      */
     public function loadFromString( $string ) {
-        $this->loadFromCodes( FeatureSet::splitString( $string ) ) ;
+        $this->loadFromCodes( FeatureSet::splitString( $string ) );
     }
 
     /**
@@ -104,14 +108,14 @@ class FeatureSet {
      * @throws Exception
      */
     private function loadFromCodes( $feature_codes ) {
-        $features = array();
+        $features = [];
 
         if ( !empty( $feature_codes ) ) {
-            foreach( $feature_codes as $code ) {
-                $features [ $code ] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
+            foreach ( $feature_codes as $code ) {
+                $features [ $code ] = new BasicFeatureStruct( [ 'feature_code' => $code ] );
             }
 
-            $this->merge( $features ) ;
+            $this->merge( $features );
         }
     }
 
@@ -128,22 +132,22 @@ class FeatureSet {
      * @return void
      * @throws Exception
      */
-     public function loadForProject( Projects_ProjectStruct $project ) {
-         $this->clear();
-         $this->_setIgnoreDependencies( true );
-         $this->loadForceableProjectFeatures();
-         $this->loadFromCodes(
-                 FeatureSet::splitString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY  ) )
-         );
-         $this->_setIgnoreDependencies( false ) ;
+    public function loadForProject( Projects_ProjectStruct $project ) {
+        $this->clear();
+        $this->_setIgnoreDependencies( true );
+        $this->loadForceableProjectFeatures();
+        $this->loadFromCodes(
+                FeatureSet::splitString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) )
+        );
+        $this->_setIgnoreDependencies( false );
     }
 
-    protected function _setIgnoreDependencies(  $value ) {
-         $this->_ignoreDependencies = $value ;
+    protected function _setIgnoreDependencies( $value ) {
+        $this->_ignoreDependencies = $value;
     }
 
     public function clear() {
-         $this->features = [];
+        $this->features = [];
     }
 
     /**
@@ -155,10 +159,10 @@ class FeatureSet {
      */
     public function loadProjectDependenciesFromProjectMetadata( $metadata ) {
         $project_dependencies = [];
-        $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata );
-        $features = [] ;
-        foreach( $project_dependencies as $dependency ) {
-            $features [ $dependency ] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
+        $project_dependencies = $this->filter( 'filterProjectDependencies', $project_dependencies, $metadata );
+        $features             = [];
+        foreach ( $project_dependencies as $dependency ) {
+            $features [ $dependency ] = new BasicFeatureStruct( [ 'feature_code' => $dependency ] );
         }
 
         $this->merge( $features );
@@ -184,7 +188,8 @@ class FeatureSet {
     public function loadForceableProjectFeatures() {
         $returnable = array_filter( $this->__getAutoloadPlugins(), function ( BasicFeatureStruct $feature ) {
             $concreteClass = $feature->toNewObject();
-            return $concreteClass->isForceableOnProject() ;
+
+            return $concreteClass->isForceableOnProject();
         } );
 
         $this->merge( $returnable );
@@ -200,7 +205,7 @@ class FeatureSet {
      *
      * @throws Exception
      */
-    public function forceAutoLoadFeatures(){
+    public function forceAutoLoadFeatures() {
         $this->__loadFromMandatory();
     }
 
@@ -225,18 +230,18 @@ class FeatureSet {
     public function loadAutoActivableOwnerFeatures( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
 
-        $objs = array_map( function( $feature ) {
+        $objs = array_map( function ( $feature ) {
             /* @var $feature BasicFeatureStruct */
             return $feature->toNewObject();
-        }, $features ) ;
+        }, $features );
 
-        $returnable =  array_filter($objs, function( BaseFeature $obj ) {
+        $returnable = array_filter( $objs, function ( BaseFeature $obj ) {
             return $obj->isAutoActivableOnProject();
-        }) ;
+        } );
 
-        $this->merge( array_map( function( BaseFeature $feature ) {
+        $this->merge( array_map( function ( BaseFeature $feature ) {
             return $feature->getFeatureStruct();
-        }, $returnable ) ) ;
+        }, $returnable ) );
     }
 
     /**
@@ -255,10 +260,10 @@ class FeatureSet {
      * @throws \TaskRunner\Exceptions\ReQueueException
      * @throws \TaskRunner\Exceptions\EndQueueException
      */
-    public function filter($method, $filterable) {
-        $args = array_slice( func_get_args(), 1);
+    public function filter( $method, $filterable ) {
+        $args = array_slice( func_get_args(), 1 );
 
-        foreach( $this->features as $feature ) {
+        foreach ( $this->features as $feature ) {
             /* @var $feature BasicFeatureStruct */
             $obj = $feature->toNewObject();
 
@@ -279,26 +284,25 @@ class FeatureSet {
                          * do whatever they need to based on the behaviour of the other features.
                          *
                          */
-                        $filterable = call_user_func_array( array( $obj, $method ), $args );
+                        $filterable = call_user_func_array( [ $obj, $method ], $args );
                     } catch ( ValidationError $e ) {
-                        throw $e ;
+                        throw $e;
                     } catch ( \Exceptions\NotFoundException $e ) {
-                        throw $e ;
+                        throw $e;
                     } catch ( AuthenticationError $e ) {
-                        throw $e ;
-                    } catch( \TaskRunner\Exceptions\ReQueueException $e ){
                         throw $e;
-                    } catch( \TaskRunner\Exceptions\EndQueueException $e ){
+                    } catch ( \TaskRunner\Exceptions\ReQueueException $e ) {
                         throw $e;
-                    }
-                    catch ( Exception $e ) {
-                        Log::doJsonLog("Exception running filter " . $method . ": " . $e->getMessage() );
+                    } catch ( \TaskRunner\Exceptions\EndQueueException $e ) {
+                        throw $e;
+                    } catch ( Exception $e ) {
+                        Log::doJsonLog( "Exception running filter " . $method . ": " . $e->getMessage() );
                     }
                 }
             }
         }
 
-        return $filterable ;
+        return $filterable;
     }
 
 
@@ -308,11 +312,11 @@ class FeatureSet {
      * @throws Exception
      */
     public function run( $method ) {
-        $args = array_slice( func_get_args(), 1 );
+        $args       = array_slice( func_get_args(), 1 );
         $returnable = [];
 
         foreach ( $this->features as $feature ) {
-            $returnable[ $feature->feature_code ] = $this->runOnFeature($method, $feature, $args);
+            $returnable[ $feature->feature_code ] = $this->runOnFeature( $method, $feature, $args );
         }
     }
 
@@ -333,10 +337,10 @@ class FeatureSet {
     public function appendDecorators( $name, IController $controller, PHPTAL $template ) {
 
         /** @var BasicFeatureStruct $feature */
-        foreach( $this->features as $feature ) {
+        foreach ( $this->features as $feature ) {
 
             $cls = Features::getFeatureClassDecorator( $feature, $name );
-            if( !empty( $cls ) ){
+            if ( !empty( $cls ) ) {
                 /** @var AbstractDecorator $obj */
                 $obj = new $cls( $controller, $template );
                 $obj->decorate();
@@ -357,11 +361,11 @@ class FeatureSet {
     public function sortFeatures() {
 
 
-        $toBeSorted = array_values( $this->features );
+        $toBeSorted     = array_values( $this->features );
         $sortedFeatures = $this->_quickSort( $toBeSorted );
 
         $this->clear();
-        foreach( $sortedFeatures as $value ){
+        foreach ( $sortedFeatures as $value ) {
             $this->features[ $value->feature_code ] = $value;
         }
 
@@ -386,7 +390,7 @@ class FeatureSet {
         /**
          * @var $firstInList BasicFeatureStruct
          */
-        $firstInList = $featureStructsList[ 0 ];
+        $firstInList        = $featureStructsList[ 0 ];
         $ObjectFeatureFirst = $firstInList->toNewObject();
 
         $leftBucket = $rightBucket = [];
@@ -409,19 +413,19 @@ class FeatureSet {
      * Foe each feature Load it's defined dependencies
      * @throws Exception
      */
-    private function _loadFeatureDependencies(){
+    private function _loadFeatureDependencies() {
 
-        $codes = $this->getCodes() ;
-        foreach( $this->features as $feature ){
+        $codes = $this->getCodes();
+        foreach ( $this->features as $feature ) {
             /**
              * @var $feature BasicFeatureStruct
              */
-            $baseFeature = $feature->toNewObject();
-            $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes ) ;
+            $baseFeature          = $feature->toNewObject();
+            $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes );
 
             if ( !empty( $missing_dependencies ) ) {
-                foreach( $missing_dependencies as $code ) {
-                    $this->features [ $code ] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
+                foreach ( $missing_dependencies as $code ) {
+                    $this->features [ $code ] = new BasicFeatureStruct( [ 'feature_code' => $code ] );
                 }
             }
 
@@ -439,35 +443,35 @@ class FeatureSet {
      */
     private function merge( $new_features ) {
 
-        if ( ! $this->_ignoreDependencies ) {
+        if ( !$this->_ignoreDependencies ) {
             $this->_loadFeatureDependencies();
         }
 
-        $all_features = [] ;
-        $conflictingDeps = [] ;
+        $all_features    = [];
+        $conflictingDeps = [];
 
-        foreach( $new_features as $feature ) {
+        foreach ( $new_features as $feature ) {
             // flat dependency management
 
-            $baseFeature     = $feature->toNewObject();
+            $baseFeature = $feature->toNewObject();
 
             $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
 
-            $deps = [] ;
+            $deps = [];
 
-            if (!$this->_ignoreDependencies ) {
-                $deps = array_map( function( $code ) {
-                    return new BasicFeatureStruct(['feature_code' => $code ]);
+            if ( !$this->_ignoreDependencies ) {
+                $deps = array_map( function ( $code ) {
+                    return new BasicFeatureStruct( [ 'feature_code' => $code ] );
                 }, $baseFeature->getDependencies() );
             }
 
-            $all_features = array_merge( $all_features, $deps, [$feature]  ) ;
+            $all_features = array_merge( $all_features, $deps, [ $feature ] );
         }
 
         /** @var BasicFeatureStruct $feature */
         foreach ( $all_features as $feature ) {
             foreach ( $conflictingDeps as $key => $value ) {
-                if( empty( $conflictingDeps[ $key ] ) ){
+                if ( empty( $conflictingDeps[ $key ] ) ) {
                     continue;
                 }
                 if ( in_array( $feature->feature_code, $value ) ) {
@@ -479,13 +483,13 @@ class FeatureSet {
             }
         }
 
-        $this->features = $this->filter('filterFeaturesMerged', $this->features ) ;
+        $this->features = $this->filter( 'filterFeaturesMerged', $this->features );
         $this->sortFeatures();
 
     }
 
     public static function splitString( $string ) {
-        return array_filter( explode(',', trim( $string ) ) ) ;
+        return array_filter( explode( ',', trim( $string ) ) );
     }
 
     /**
@@ -497,14 +501,14 @@ class FeatureSet {
      */
     private function __loadFromMandatory() {
         $features = $this->__getAutoloadPlugins();
-        $this->merge( $features ) ;
+        $this->merge( $features );
     }
 
-    private function __getAutoloadPlugins(){
-        $features = [] ;
+    private function __getAutoloadPlugins() {
+        $features = [];
 
-        if ( !empty( INIT::$AUTOLOAD_PLUGINS ) )  {
-            foreach( INIT::$AUTOLOAD_PLUGINS as $plugin ) {
+        if ( !empty( INIT::$AUTOLOAD_PLUGINS ) ) {
+            foreach ( INIT::$AUTOLOAD_PLUGINS as $plugin ) {
                 $features[ $plugin ] = new BasicFeatureStruct( [ 'feature_code' => $plugin ] );
             }
         }
@@ -518,14 +522,16 @@ class FeatureSet {
      * @param $method
      * @param $feature
      * @param $args
+     *
+     * @return mixed
      */
-    private function runOnFeature($method, BasicFeatureStruct $feature, $args) {
+    private function runOnFeature( $method, BasicFeatureStruct $feature, $args ) {
         $name = Features::getPluginClass( $feature->feature_code );
         if ( $name ) {
-            $obj = new $name($feature);
+            $obj = new $name( $feature );
 
-            if (method_exists($obj, $method)) {
-                return call_user_func_array(array($obj, $method), $args);
+            if ( method_exists( $obj, $method ) ) {
+                return call_user_func_array( [ $obj, $method ], $args );
             }
         }
     }

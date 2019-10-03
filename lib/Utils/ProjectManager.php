@@ -709,15 +709,24 @@ class ProjectManager {
                     }
                 }
 
-                if ( $this->total_segments > 100000 || ( $this->total_segments * count( $this->projectStructure[ 'target_language' ] ) ) > 420000 ) {
-                    //Allow projects with only one target language and 100000 segments ( ~ 550.000 words )
-                    //OR
-                    //A multi language project with max 420000 segments ( EX: 42000 segments in 10 languages ~ 2.700.000 words )
-                    throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL, 128 );
-                }
+            }
 
+            if ( $this->total_segments > 100000 || ( $this->files_word_count * count( $this->projectStructure[ 'target_language' ] ) ) > 1000000 ) {
+                //Allow projects with only one target language and 100000 segments ( ~ 550.000 words )
+                //OR
+                //A multi language project with max 420000 segments ( EX: 42000 segments in 10 languages ~ 2.700.000 words )
+                throw new Exception( "MateCat is unable to create your project. We can do it for you. Please contact " . INIT::$SUPPORT_MAIL, 128 );
+            }
+
+            $this->features->run( "beforeInsertSegments", $this->projectStructure,
+                    [
+                            'total_project_segments' => $this->total_segments,
+                            'files_wc'               => $this->files_word_count
+                    ]
+            );
+
+            foreach( $totalFilesStructure as $fid => $empty ){
                 $this->_storeSegments( $fid );
-
             }
 
             $this->_createJobs( $this->projectStructure );
@@ -1218,7 +1227,11 @@ class ProjectManager {
             $newJob->total_raw_wc      = $this->files_word_count;
             $newJob->only_private_tm   = $projectStructure[ 'only_private' ];
 
-            $this->features->run( "beforeInsertJobStruct", $newJob );
+            $this->features->run( "beforeInsertJobStruct", $newJob, $projectStructure, [
+                            'total_project_segments' => $this->total_segments,
+                            'files_wc'               => $this->files_word_count
+                    ]
+            );
 
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 
