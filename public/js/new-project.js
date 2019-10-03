@@ -241,7 +241,7 @@ APP.getCreateProjectParams = function() {
 		speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
-        id_team                     : $('#project-team').dropdown('get value'), //UI.UPLOAD_PAGE.getSelectedTeam(),
+        id_team                     : ($('#project-team').length > 0) ? $('#project-team').dropdown('get value') : undefined, //UI.UPLOAD_PAGE.getSelectedTeam(),
         dqf                         : dqf.dqfEnabled,
         dqf_content_type            : dqf.dqf_content_type,
         dqf_industry                : dqf.dqf_industry,
