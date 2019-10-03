@@ -85,13 +85,11 @@ class SegmentFooterTabMessages extends React.Component {
     }
 
     shouldComponentUpdate(nextProps,  nextState) {
-        return true
-            // ( (!_.isUndefined(nextProps.notes) || !_.isUndefined(this.props.notes)) &&
-            // ( (!_.isUndefined(nextProps.notes) && _.isUndefined(this.props.notes)) ||
-            //     !Immutable.fromJS(this.props.notes).equals(Immutable.fromJS(nextProps.notes)) )) ||
-            //     this.props.loading !== nextProps.loading ||
-            //     this.props.active_class !== nextProps.active_class ||
-            //     this.props.tab_class !== nextProps.tab_class
+        return  (_.isUndefined(nextProps.notes) || _.isUndefined(this.props.note)) ||
+                !Immutable.fromJS(this.props.notes).equals(Immutable.fromJS(nextProps.notes))  ||
+                this.props.loading !== nextProps.loading ||
+                this.props.active_class !== nextProps.active_class ||
+                this.props.tab_class !== nextProps.tab_class
 
 
     }
@@ -100,16 +98,16 @@ class SegmentFooterTabMessages extends React.Component {
         return  <div key={"container_" + this.props.code}
                     className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
                     id={"segment-" + this.props.id_segment + "-" + this.props.tab_class}>
-                <div className="overflow">
-                    <div className="segment-notes-container">
-                        <div className="segment-notes-panel-body">
-                            <div className="segments-notes-container">
-                                {this.getNotes()}
+                    <div className="overflow">
+                        <div className="segment-notes-container">
+                            <div className="segment-notes-panel-body">
+                                <div className="segments-notes-container">
+                                    {this.getNotes()}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
     }
 }
 
