@@ -7,6 +7,7 @@ const SegmentConstants = require('../../constants/SegmentConstants');
 const SegmentStore = require('../../stores/SegmentStore');
 const Immutable = require('immutable');
 const TranslationMatches = require('./utils/translationMatches');
+import TagUtils from "../../utils/tagUtils";
 
 class SegmentFooterTabMatches extends React.Component {
 
@@ -52,8 +53,8 @@ class SegmentFooterTabMatches extends React.Component {
             // Attention Bug: We are mixing the view mode and the raw data mode.
             // before doing a enanched  view you will need to add a data-original tag
             //
-            item.suggestionDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText(this.segment));
-            item.translationDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText( this.translation));
+            item.suggestionDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText(this.segment));
+            item.translationDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText( this.translation));
             item.sourceDiff = item.suggestionDecodedHtml;
             if (this.match !== "MT" && parseInt(this.match) > 74) {
                 let sourceDecoded = UI.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
@@ -61,7 +62,7 @@ class SegmentFooterTabMatches extends React.Component {
                 let diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
                 item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
-                item.sourceDiff = UI.decodePlaceholdersToText(item.sourceDiff);
+                item.sourceDiff = TagUtils.decodePlaceholdersToText(item.sourceDiff);
             }
             if ( !_.isUndefined(this.tm_properties) ) {
                 item.tm_properties = this.tm_properties;

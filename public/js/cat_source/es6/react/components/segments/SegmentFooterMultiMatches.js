@@ -4,6 +4,7 @@
  */
 const React = require('react');
 const Immutable = require('immutable');
+import TagUtils from "../../utils/tagUtils"
 
 class SegmentFooterMultiMatches extends React.Component {
 
@@ -60,8 +61,8 @@ class SegmentFooterMultiMatches extends React.Component {
             // Attention Bug: We are mixing the view mode and the raw data mode.
             // before doing a enanched  view you will need to add a data-original tag
             //
-            item.suggestionDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText(this.segment));
-            item.translationDecodedHtml = UI.transformTextForLockTags(UI.decodePlaceholdersToText( this.translation));
+            item.suggestionDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText(this.segment));
+            item.translationDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText( this.translation));
             item.sourceDiff = item.suggestionDecodedHtml;
             item.target = this.target;
             if (this.match !== "MT" && parseInt(this.match) > 74) {
