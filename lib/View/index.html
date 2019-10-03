@@ -226,6 +226,8 @@
                         <!--<span id="footer-source-lang" tal:content="languages_array_obj"></span>-->
                         <tal:block tal:repeat="lang languages_array_obj">
                             <span tal:condition="php: lang['code'] == source_code"  id="footer-source-lang" tal:content="lang/name"></span>
+                        </tal:block>
+                        <tal:block tal:repeat="lang languages_array_obj">
                             <tal:block tal:condition="php: lang['code'] == target_code" >
                                 <span class="to-arrow"> &#8594; </span>
                                 <span id="footer-target-lang" tal:content="lang/name"></span>
