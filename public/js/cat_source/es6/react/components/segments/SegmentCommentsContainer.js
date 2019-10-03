@@ -22,7 +22,9 @@ class SegmentCommentsContainer extends React.Component {
         this.setFocusOnInput = this.setFocusOnInput.bind(this);
     }
 
-    closeComments() {
+    closeComments(e) {
+        e.preventDefault();
+        e.stopPropagation();
         SegmentsActions.closeSegmentComment(this.props.segment.sid);
         localStorage.setItem(MBC.localStorageCommentsClosed, true);
     }
@@ -173,7 +175,7 @@ class SegmentCommentsContainer extends React.Component {
         return <div className="mbc-comment-balloon-outer">
             <div className="mbc-comment-balloon-inner">
                 <div className="mbc-triangle mbc-open-view mbc-re-messages"/>
-                <a className="re-close-balloon shadow-1" onClick={()=>this.closeComments()}>
+                <a className="re-close-balloon shadow-1" onClick={(e)=>this.closeComments(e)}>
                     <i className="icon-cancel3 icon"/></a>
                 <div className="mbc-comments-wrap" ref={(wrap)=>this.wrap=wrap}>
                     {htmlComments}
