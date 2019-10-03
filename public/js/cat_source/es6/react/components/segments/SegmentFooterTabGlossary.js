@@ -8,6 +8,8 @@ const SegmentStore = require('../../stores/SegmentStore');
 const SegmentActions = require('../../actions/SegmentActions');
 const GlossaryUtils = require('./utils/glossaryUtils');
 const Immutable = require('immutable');
+import TagUtils from "../../utils/tagUtils"
+
 
 class SegmentFooterTabGlossary extends React.Component {
 
@@ -60,8 +62,8 @@ class SegmentFooterTabGlossary extends React.Component {
 
     deleteMatch(name, idMatch, event) {
         event.preventDefault();
-        let source = UI.decodePlaceholdersToText(this.props.segment.glossary[name][0].segment);
-        let target = UI.decodePlaceholdersToText(this.props.segment.glossary[name][0].translation);
+        let source = TagUtils.decodePlaceholdersToText(this.props.segment.glossary[name][0].segment);
+        let target = TagUtils.decodePlaceholdersToText(this.props.segment.glossary[name][0].translation);
         SegmentActions.deleteGlossaryItem(source, target, idMatch, name, this.props.id_segment);
     }
 
@@ -155,7 +157,7 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     copyItemInEditArea(translation) {
-        GlossaryUtils.copyGlossaryItemInEditarea(UI.decodePlaceholdersToText(translation, true), this.props.segment)
+        GlossaryUtils.copyGlossaryItemInEditarea(TagUtils.decodePlaceholdersToText(translation, true), this.props.segment)
     }
     onPasteEvent(e) {
         // cancel paste
@@ -213,19 +215,19 @@ class SegmentFooterTabGlossary extends React.Component {
                             { disabled ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'} className="trash" title="delete this row"
                                                  onClick={self.deleteMatch.bind(self, name, match.id)}/>}
                             <span id={self.props.id_segment + '-tm-' + match.id + '-source'} className="suggestion_source"
-                                  dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText( leftTxt, true ))}/>
+                                  dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText( leftTxt, true ))}/>
                         </li>
                         <li className="b sugg-target" onDoubleClick={()=>self.copyItemInEditArea(rightTxt)}>
                             <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className="translation"
-                                  data-original={UI.decodePlaceholdersToText( rightTxt, true )}
-                                  dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(rightTxt, true))}
+                                  data-original={TagUtils.decodePlaceholdersToText( rightTxt, true )}
+                                  dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText(rightTxt, true))}
                                   onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
                         </li>
                         <li className="details">
                             { ( !match.comment || match.comment === '') ? addCommentHtml :
                                 <div className="comment"
-                                    data-original={UI.decodePlaceholdersToText( commentOriginal, true )}
-                                     dangerouslySetInnerHTML={self.allowHTML(UI.decodePlaceholdersToText(commentOriginal, true ))}
+                                    data-original={TagUtils.decodePlaceholdersToText( commentOriginal, true )}
+                                     dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText(commentOriginal, true ))}
                                      // onKeyPress={self.updateGlossaryItem.bind(self, name)}
                                 />
                             }

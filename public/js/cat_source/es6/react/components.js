@@ -77,4 +77,5 @@ window.TranslationIssuesSideButton = require('./components/review/TranslationIss
 window.SearchUtils = require('./components/header/cattol/search/searchUtils');
 window.QaCheckGlossary = require('./components/segments/utils/qaCheckGlossaryUtils');
 window.QaCheckBlacklist = require('./components/segments/utils/qaCheckBlacklistUtils');
+window.TagUtils = require('./utils/tagUtils');
 

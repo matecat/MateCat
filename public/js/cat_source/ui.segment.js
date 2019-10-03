@@ -219,16 +219,16 @@
             } else {
                 decoded_text = text;
             }
-            decoded_text = UI.decodePlaceholdersToText(decoded_text || '');
+            decoded_text = TagUtils.decodePlaceholdersToText(decoded_text || '');
             if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
-                decoded_text = UI.transformTextForLockTags(decoded_text);
+                decoded_text = TagUtils.transformTextForLockTags(decoded_text);
             }
             return decoded_text;
         },
         transformPlaceholdersAndTags: function(text) {
-            text = UI.decodePlaceholdersToText(text || '');
+            text = TagUtils.decodePlaceholdersToText(text || '');
             if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
-                text = UI.transformTextForLockTags(text);
+                text = TagUtils.transformTextForLockTags(text);
             }
             return text;
         },
