@@ -5402,15 +5402,16 @@ header {
         }
 
         #action-comments, #mbc-history {
-            /*background-image: url("../../img/icons/icon-comments.svg");*/
-            opacity: 0.8;
             width: $icon-scale !important;
             height: $icon-scale;
             padding:0 !important;
             background-position: center;
 
-            &:hover {
-                opacity:1;
+            svg {
+                opacity: 0.8;
+                &:hover {
+                    opacity:1;
+                }
             }
 
             .badge {
