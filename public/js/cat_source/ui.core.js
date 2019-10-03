@@ -1473,8 +1473,9 @@ UI = {
 		$('#stat-completion strong').html(completion);
         $('#total-payable').html(s.TOTAL_FORMATTED);
 
-        $(document).trigger('setProgress:rendered', { stats : stats } );
+        $('.bg-loader',m).css('display', 'none');
 
+        $(document).trigger('setProgress:rendered', { stats : stats } );
     },
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly:not(.ice-locked)').length;
