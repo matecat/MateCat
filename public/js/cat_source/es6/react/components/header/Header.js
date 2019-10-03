@@ -82,6 +82,7 @@ class Header extends React.Component {
         this.setState({
             user : user
         });
+        setTimeout(this.initProfileDropdown)
     }
 	getUserIcon = () => {
 		if (this.props.loggedUser) {
