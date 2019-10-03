@@ -58,10 +58,12 @@ class ChunkAnalyze extends React.Component {
                     {/*transitionEnterTimeout={500}*/}
                     {/*transitionLeaveTimeout={500}*/}
                 {/*>*/}
-                <TransitionGroup>
+                <TransitionGroup style={{width: '100%', padding: 0}}>
                     {this.state.showFiles ? (
-                        <CSSTransition key={0} classNames="transition" timeout={{ enter: 500, exit: 300 }}>
+                        <CSSTransition key={0} classNames="transition" timeout={{ enter: 500, exit: 300 }}  >
+                            <div>
                             {this.getFiles()}
+                            </div>
                         </CSSTransition>
                     ): (null)}
                 </TransitionGroup>
