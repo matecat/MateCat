@@ -233,11 +233,13 @@ var SegmentActions = {
     },
 
     disableTagLock: function (  ) {
+        UI.tagLockEnabled = false;
         AppDispatcher.dispatch({
             actionType: SegmentConstants.DISABLE_TAG_LOCK
         });
     },
     enableTagLock: function (  ) {
+        UI.tagLockEnabled = true;
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ENABLE_TAG_LOCK
         });

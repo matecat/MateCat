@@ -1,4 +1,4 @@
-
+import TagUtils from "../../../utils/tagUtils";
 let GlossaryUtils = {
 
     startGlossaryMark: '<mark class="inGlossary">',
@@ -52,7 +52,7 @@ let GlossaryUtils = {
             return b.length - a.length;
         });
         $.each( matches, function ( index, k ) {
-            let glossaryTerm_noPlaceholders = UI.decodePlaceholdersToText( k, true );
+            let glossaryTerm_noPlaceholders = TagUtils.decodePlaceholdersToText( k, true );
 
             if ( matchesToRemove.indexOf( glossaryTerm_noPlaceholders ) != -1 ) return true ;
 

@@ -4,6 +4,8 @@
  */
 let React = require('react');
 const Immutable = require('immutable');
+import TagUtils from "../../utils/tagUtils";
+
 
 class SegmentFooterTabConflicts extends React.Component {
 
@@ -24,7 +26,7 @@ class SegmentFooterTabConflicts extends React.Component {
     renderAlternatives(alternatives) {
         let segment = this.props.segment;
         let segment_id = this.props.segment.sid;
-        let escapedSegment = UI.decodePlaceholdersToText(segment.segment);
+        let escapedSegment = TagUtils.decodePlaceholdersToText(segment.segment);
         // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
         let mainStr = htmlEncode(UI.prepareTextToSend(segment.decoded_translation)).replace(/&amp;/g, "&");
         let html = [];
@@ -46,7 +48,7 @@ class SegmentFooterTabConflicts extends React.Component {
                 }
             } );
 
-            let translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
+            let translation = TagUtils.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
             html.push(<ul className="graysmall" data-item={(index + 1)} key={'editable' + index} onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
                         <li className="sugg-source">
                             <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
@@ -64,7 +66,7 @@ class SegmentFooterTabConflicts extends React.Component {
 
         $.each(alternatives.not_editable, function(index1) {
             let diff_obj = UI.execDiff(mainStr, this.translation);
-            let translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
+            let translation = TagUtils.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
 
             html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.data.editable.length + 1)} key={'not-editable' + index}  onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
                 <li className="sugg-source">

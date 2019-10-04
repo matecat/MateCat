@@ -954,7 +954,7 @@ UI = {
          *      <span contenteditable="false" class="locked locked-inside inside-attribute" data-original="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="></span>
          *  </span>
          *
-         *  When this happens, the function UI.transformTextForLockTags fails to find the PH tag by regexp and do not lock the tags or lock it in a wrong way
+         *  When this happens, the function TagUtils.transformTextForLockTags fails to find the PH tag by regexp and do not lock the tags or lock it in a wrong way
          *
          *  So, transform the string in a single character ( Private Use Unicode char ) for the diff function, place it in a map and reinsert in the diff_obj after the UI.execDiff executed
          *
@@ -1005,58 +1005,6 @@ UI = {
 
     },
 
-    // TODO: refactoring React
-    // renderAlternatives: function(d) {
-    //     var segment = UI.currentSegment;
-    //     var segment_id = UI.currentSegmentId;
-    //     var escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
-    //     // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
-    //     var mainStr = htmlEncode(UI.postProcessEditarea(UI.currentSegment)).replace(/&amp;/g, "&");
-    //     $('.sub-editor.alternatives .overflow', segment).empty();
-    //     $.each(d.data.editable, function(index) {
-    //         // Decode the string from the server
-    //         var transDecoded = this.translation;
-    //         // Make the diff between the text with the same codification
-    //
-    //         [ mainStr, transDecoded, replacementsMap ] = UI._treatTagsAsBlock( mainStr, transDecoded, [] );
-    //
-    //         var diff_obj = UI.execDiff( mainStr, transDecoded );
-    //
-    //         //replace the original string in the diff object by the character placeholder
-    //         Object.keys( diff_obj ).forEach( ( element ) => {
-    //             if( replacementsMap[ diff_obj[ element ][ 1 ] ] ){
-    //                 diff_obj[ element ][ 1 ] = replacementsMap[ diff_obj[ element ][ 1 ] ];
-    //             }
-    //         } );
-    //
-    //         var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-    //         $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
-    //             '<li class="sugg-source">' +
-    //             '   <span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
-    //             escapedSegment + '</span>' +
-    //             '</li>' +
-    //             '<li class="b sugg-target">' +
-    //             '<span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation"></span>' +
-    //             '<span class="realData hide">' + this.translation +
-    //             '</span>' +
-    //             '</li>' +
-    //             '<li class="goto">' +
-    //             '<a href="#" data-goto="' + this.involved_id[0]+ '">View</a>' +
-    //             '</li>' +
-    //         '</ul>');
-    //         $('.sub-editor.alternatives .overflow .graysmall[data-item='+ (index + 1) +']', segment).find('.sugg-target .translation').html(translation);
-    //     });
-    //
-    //     $.each(d.data.not_editable, function(index1) {
-    //         var diff_obj = UI.execDiff(mainStr, this.translation);
-    //         var translation = UI.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
-    //         $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '">' +
-    //             '<li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li>' +
-    //             '<li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span>' +
-    //             '<span class="translation">' + translation + '</span><span class="realData hide">' + this.translation + '</span></li>' +
-    //             '<li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
-    //     });
-    // },
     execDiff: function (mainStr, cfrStr) {
         _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
             .replace( config.crPlaceholderRegex, "\r" )

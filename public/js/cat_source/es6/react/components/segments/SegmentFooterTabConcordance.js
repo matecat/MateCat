@@ -6,6 +6,8 @@ const React = require('react');
 const SegmentConstants = require('../../constants/SegmentConstants');
 const SegmentStore = require('../../stores/SegmentStore');
 const Immutable = require('immutable');
+import TagUtils from "../../utils/tagUtils"
+
 
 class SegmentFooterTabConcordance extends React.Component {
 
@@ -120,12 +122,12 @@ class SegmentFooterTabConcordance extends React.Component {
                 let cb = item.created_by;
 
                 let leftTxt = item.segment;
-                leftTxt = UI.decodePlaceholdersToText(leftTxt);
+                leftTxt = TagUtils.decodePlaceholdersToText(leftTxt);
                 leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
                 leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
 
                 let rightTxt = item.translation;
-                rightTxt = UI.decodePlaceholdersToText(rightTxt);
+                rightTxt = TagUtils.decodePlaceholdersToText(rightTxt);
                 rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
                 rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
 

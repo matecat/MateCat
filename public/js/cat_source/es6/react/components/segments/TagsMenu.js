@@ -5,6 +5,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 const escapeStringRegexp = require('escape-string-regexp');
+const TagUtils = require('../../utils/tagUtils');
 
 class TagsMenu extends React.Component {
 
@@ -140,12 +141,12 @@ class TagsMenu extends React.Component {
                 if (this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1) {
                     return;
                 }
-                let textDecoded = UI.transformTextForLockTags(item);
+                let textDecoded = TagUtils.transformTextForLockTags(item);
                 let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
                 if (this.state.filter !== "") {
                     label = label.replace(htmlEncode(this.state.filter), "<mark>" + htmlEncode(this.state.filter) + "</mark>");
                 } else {
-                    textDecoded = UI.transformTextForLockTags(item);
+                    textDecoded = TagUtils.transformTextForLockTags(item);
                 }
 
                 let classSelected = (this.state.selectedItem === tagIndex) ? "active" : "";
@@ -170,12 +171,12 @@ class TagsMenu extends React.Component {
                 if ( this.state.filter !== "" && this.state.totalTags.indexOf(item) === -1 ) {
                     return;
                 }
-                let textDecoded = UI.transformTextForLockTags(item);
+                let textDecoded = TagUtils.transformTextForLockTags(item);
                 let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
                 if ( this.state.filter !== "" ) {
                     label = label.replace(htmlEncode(this.state.filter), "<mark>" + htmlEncode(this.state.filter) + "</mark>");
                 } else {
-                    textDecoded = UI.transformTextForLockTags(item);
+                    textDecoded = TagUtils.transformTextForLockTags(item);
                 }
 
                 let classSelected = ( this.state.selectedItem === tagIndex ) ? "active" : "";
@@ -295,7 +296,7 @@ class TagsMenu extends React.Component {
             event.preventDefault();
             let tag = this.state.totalTags[this.state.selectedItem];
             if ( !_.isUndefined(tag) ) {
-                tag = UI.transformTextForLockTags(tag);
+                tag = TagUtils.transformTextForLockTags(tag);
                 this.selectTag(tag)
             }
         } else if ( event.key ===  'Escape' ) {
@@ -339,7 +340,7 @@ class TagsMenu extends React.Component {
         }
         let filteredTags = _.filter(tags, (tag)=>{
             if ( tag.indexOf('equiv-text') > -1 ) {
-                let tagHtml = UI.transformTextForLockTags(tag);
+                let tagHtml = TagUtils.transformTextForLockTags(tag);
                 return $(tagHtml).find('.inside-attribute').text().indexOf(filter) !== -1;
             } else {
                 return htmlDecode( tag ).indexOf( filter ) !== -1;

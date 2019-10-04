@@ -164,9 +164,9 @@ $.extend(UI, {
 		}).on('click', '.tagLockCustomize', function(e) {
 			e.preventDefault();
 			if (UI.tagLockEnabled) {
-				UI.disableTagMark();
+				SegmentActions.disableTagLock();
 			} else {
-				UI.enableTagMark();
+                SegmentActions.enableTagLock();
 			}
 			UI.setTagLockCustomizeCookie(false);
 		}).on('click', '.open-popup-addtm-tr', function(e) {

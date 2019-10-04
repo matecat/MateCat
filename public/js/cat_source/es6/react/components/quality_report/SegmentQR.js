@@ -1,4 +1,5 @@
-import TagsUtils from "../../utils/textUtils"
+import TextUtils from "../../utils/textUtils"
+import TagUtils from "../../utils/tagUtils"
 import classnames from "classnames";
 import SegmentQRLine from "./SegmentQRLine";
 import SegmentQRIssue from "./SegmentQRIssue";
@@ -216,7 +217,7 @@ class SegmentQR extends React.Component {
 
     }
     getDiffPatch(source, text) {
-        return TagsUtils.getDiffHtml(source, text);
+        return TextUtils.getDiffHtml(source, text);
     }
     openTranslateLink() {
         window.open(this.props.urls.get("translate_url") + "#" + this.props.segment.get("sid"))
@@ -233,8 +234,8 @@ class SegmentQR extends React.Component {
 
     decodeTextAndTransformTags( text) {
         if (text) {
-            let decodedText = TagsUtils.decodePlaceholdersToText(text);
-            decodedText = TagsUtils.transformTextForLockTags(decodedText);
+            let decodedText = TagUtils.decodePlaceholdersToText(text);
+            decodedText = TagUtils.transformTextForLockTags(decodedText);
             return decodedText;
         }
         return text;

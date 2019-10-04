@@ -106,7 +106,7 @@ if ( config.enableReview && config.isReview ) {
                 var target = UI.postProcessEditarea($segment, '.targetarea');
                 target = UI.clenaupTextFromPleaceholders( target );
                 var diffHTML = trackChangesHTML( htmlEncode(source), htmlEncode(target) );
-                diffHTML = UI.transformTextForLockTags(diffHTML);
+                diffHTML = TagUtils.transformTextForLockTags(diffHTML);
                 $('.sub-editor.review .track-changes p', $segment).html( diffHTML );
             },
             setRevision: function( data ){

@@ -242,7 +242,7 @@ let EditArea = {
             else {
                 txt = "";
             }
-            txt = UI.transformTextForLockTags(txt);
+            txt = TagUtils.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
             var newHtml = $(clonedElem).html();
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
