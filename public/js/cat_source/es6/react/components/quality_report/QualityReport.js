@@ -22,6 +22,8 @@ class QualityReport extends React.Component {
         this.renderSegmentsFiles = this.renderSegmentsFiles.bind(this);
         this.renderJobInfo = this.renderJobInfo.bind(this);
         this.noMoreSegments = this.noMoreSegments.bind(this);
+
+        QRActions.loadInitialAjaxData({id_segment: this.state.idSegment});
     }
     getReviseUrlParameter() {
         let url = new URL(window.location.href);
@@ -82,10 +84,6 @@ class QualityReport extends React.Component {
             });
             this.dropdownInitialized = true;
         }
-    }
-
-    componentWillMount() {
-        QRActions.loadInitialAjaxData({id_segment: this.state.idSegment});
     }
 
     componentDidMount() {

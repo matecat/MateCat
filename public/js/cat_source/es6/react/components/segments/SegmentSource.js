@@ -2,19 +2,31 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentStore = require('../../stores/SegmentStore');
-var SegmentConstants = require('../../constants/SegmentConstants');
-
+const React = require('react');
+const SegmentStore = require('../../stores/SegmentStore');
+const SegmentConstants = require('../../constants/SegmentConstants');
+const SegmentActions = require('../../actions/SegmentActions');
+const GlossaryUtils = require('./utils/glossaryUtils');
+const QACheckGlossary = require('./utils/qaCheckGlossaryUtils');
+const SearchUtils = require('../header/cattol/search/searchUtils');
 
 class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
+
         this.originalSource = this.createEscapedSegment(this.props.segment.segment);
         this.createEscapedSegment = this.createEscapedSegment.bind(this);
+        this.decodeTextSource = this.decodeTextSource.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
+        this.openConcordance = this.openConcordance.bind(this);
+
+        this.beforeRenderActions();
+    }
+
+    decodeTextSource(segment, source) {
+        return this.props.decodeTextFn(segment, source);
     }
 
     createEscapedSegment(text) {
@@ -31,14 +43,38 @@ class SegmentSource extends React.Component {
     }
 
     beforeRenderActions() {
-        var area = $("#segment-" + this.props.segment.sid + " .source");
-        this.props.beforeRenderOrUpdate(area);
+        this.props.beforeRenderOrUpdate(this.props.segment.segment);
 
     }
 
     afterRenderActions() {
-        var area = $("#segment-" + this.props.segment.sid + " .source");
-        this.props.afterRenderOrUpdate(area);
+        this.props.afterRenderOrUpdate(this.props.segment.segment);
+        let self = this;
+        if ( this.splitContainer ) {
+            $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $(this).remove();
+                self.updateSplitNumber();
+            })
+        }
+    }
+
+    updateSplitNumber() {
+        if (this.props.segment.splitted) return;
+        let numSplits = $(this.splitContainer).find('.splitpoint').length + 1;
+        let splitnum = $(this.splitContainer).find('.splitNum');
+        $(splitnum).find('.num').text(numSplits);
+        this.splitNum = numSplits;
+        if (numSplits > 1) {
+            $(splitnum).find('.plural').text('s');
+            $(this.splitContainer).find('.btn-ok').removeClass('disabled');
+        } else {
+            $(splitnum).find('.plural').text('');
+            splitnum.hide();
+            $(this.splitContainer).find('.btn-ok').addClass('disabled');
+        }
+        $(this.splitContainer).find('.splitArea').blur();
     }
 
     onCopyEvent(e) {
@@ -49,18 +85,98 @@ class SegmentSource extends React.Component {
         UI.handleDragEvent(e);
     }
 
-    componentDidMount() {
-        this.afterRenderActions();
+    addSplitPoint(event) {
+        if(window.getSelection().type === 'Range') return false;
+        pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"/></span>');
+
+        this.updateSplitNumber();
     }
 
-    componentWillMount() {
-        this.beforeRenderActions();
+    splitSegment(split) {
+        let text = $(this.splitContainer).find('.splitArea').html();
+        text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/, '##$_SPLIT$##');
+        text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
+        text = UI.prepareTextToSend(text);
+        // let splitArray = text.split('##_SPLIT_##');
+        SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
-    componentWillUpdate() {
+
+    markSource() {
+        let source = this.props.segment.decoded_source;
+        source = this.markGlossary(source);
+        source = this.markQaCheckGlossary(source);
+        source = this.markLexiqa(source);
+        source = this.markSearch(source);
+        return source;
+    }
+
+    markSearch(source) {
+        if ( this.props.segment.search && Object.size(this.props.segment.search) > 0 && this.props.segment.search.source) {
+            source = SearchUtils.markText(source, this.props.segment.search, true, this.props.segment.sid);
+        }
+        return source;
+    }
+
+    markGlossary(source) {
+        if ( this.props.segment.glossary && Object.size(this.props.segment.glossary) > 0 ) {
+            return GlossaryUtils.markGlossaryItemsInText(source, this.props.segment.glossary, this.props.segment.sid);
+        }
+        return source;
+    }
+
+    markQaCheckGlossary(source) {
+        if (QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary && this.props.segment.qaCheckGlossary.length > 0) {
+            return QACheckGlossary.markGlossaryUnusedMatches(source, this.props.segment.qaCheckGlossary);
+        }
+        return source;
+    }
+
+    markLexiqa(source) {
+        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source) {
+            source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
+        }
+        return source;
+    }
+
+    openConcordance(e) {
+        e.preventDefault();
+        var selection = window.getSelection();
+        if (selection.type === 'Range') { // something is selected
+            var str = selection.toString().trim();
+            if (str.length) { // the trimmed string is not empty
+                SegmentActions.openConcordance(this.props.segment.sid, str, false);
+            }
+        }
+    }
+
+    componentDidMount() {
+        this.$source = $(this.source);
+
+        this.$source.on('click', 'mark.inGlossary',  ( e ) => {
+            e.preventDefault();
+            SegmentActions.activateTab(this.props.segment.sid, 'glossary');
+        });
+
+        this.afterRenderActions();
+
+        this.$source.on('keydown', null, UI.shortcuts.cattol.events.searchInConcordance.keystrokes.mac, this.openConcordance);
+    }
+
+    componentWillUnmount() {
+        this.$source.off('click', 'mark.inGlossary');
+        $.powerTip.destroy($('.blacklistItem', this.$source));
+
+        this.$source.on('keydown', this.openConcordance);
+    }
+    getSnapshotBeforeUpdate() {
         this.beforeRenderActions();
+        return null;
     }
 
     componentDidUpdate() {
+        if ( QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary &&  this.props.segment.qaCheckGlossary.length ) {
+            $(this.source).find('.unusedGlossaryTerm').each((index, item)=>QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
+        }
         this.afterRenderActions()
     }
 
@@ -69,16 +185,62 @@ class SegmentSource extends React.Component {
     }
 
     render() {
-        return (
-            <div className={"source item"}
-                 tabIndex={0}
-                 id={"segment-" + this.props.segment.sid +"-source"}
-                 data-original={this.originalSource}
-                 dangerouslySetInnerHTML={ this.allowHTML(this.props.segment.decoded_source) }
-                 onCopy={this.onCopyEvent.bind(this)}
-                 onDragStart={this.onDragEvent.bind(this)}
-            />
-        )
+        let source = this.markSource();
+
+        let html = <div ref={(source)=>this.source=source}
+                        className={"source item"}
+                        tabIndex={0}
+                        id={"segment-" + this.props.segment.sid +"-source"}
+                        data-original={this.originalSource}
+                        dangerouslySetInnerHTML={ this.allowHTML(source) }
+                        onCopy={this.onCopyEvent.bind(this)}
+                        onDragStart={this.onDragEvent.bind(this)}
+        />;
+        if ( this.props.segment.openSplit ) {
+            if ( this.props.segment.splitted ) {
+                let segmentsSplit = this.props.segment.split_group;
+                let sourceHtml = '';
+                segmentsSplit.forEach((sid, index)=>{
+                    let segment = SegmentStore.getSegmentByIdToJS(sid);
+                    if ( sid === this.props.segment.sid) {
+                        sourceHtml += '<span class="currentSplittedSegment">'+UI.transformPlaceholdersAndTags(segment.segment)+'</span>';
+                    } else {
+                        sourceHtml+= UI.transformPlaceholdersAndTags(segment.segment);
+                    }
+                    if(index !== segmentsSplit.length - 1)
+                        sourceHtml += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
+                });
+                html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
+                    <div className="splitArea" contentEditable = "false"
+                         onClick={(e)=>this.addSplitPoint(e)}
+                         dangerouslySetInnerHTML={this.allowHTML(sourceHtml)}/>
+                    <div className="splitBar">
+                        <div className="buttons">
+                            <a className="cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
+                            <a className = {"done btn-ok pull-right" } onClick={()=>this.splitSegment()}> Confirm </a>
+                        </div>
+                        <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
+                        </div>
+                    </div>
+                </div >;
+            } else {
+                html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
+                    <div className="splitArea" contentEditable = "false"
+                         onClick={(e)=>this.addSplitPoint(e)}
+                         dangerouslySetInnerHTML={this.allowHTML(UI.transformPlaceholdersAndTags(this.props.segment.segment))}/>
+                    <div className="splitBar">
+                        <div className="buttons">
+                            <a className="cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
+                            <a className = {"done btn-ok pull-right disabled" } onClick={()=>this.splitSegment()}> Confirm </a>
+                        </div>
+                        <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
+                        </div>
+                    </div>
+                </div >;
+            }
+        }
+        return html;
+
     }
 }
 

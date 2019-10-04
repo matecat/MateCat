@@ -86,7 +86,7 @@ class BulkSelectionBar extends React.Component {
                 this.onClickBack();
             });
         }
-        UI.closeSegment(UI.currentSegment, 1);
+        SegmentActions.closeSegment(UI.currentSegmentId);
     }
 
     componentDidMount() {

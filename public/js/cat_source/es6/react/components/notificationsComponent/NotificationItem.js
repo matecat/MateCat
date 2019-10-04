@@ -12,6 +12,9 @@ class NotificationItem extends React.Component {
         this._isMounted = false;
         this.dismissNotification = this.dismissNotification.bind(this);
         this.hideNotification = this.hideNotification.bind(this);
+
+        this.styleNameContainer =  "notification-type-" + this.props.type;
+        this.styleNameTitle =  "notification-title-" + this.props.type;
     }
 
     dismissNotification() {
@@ -43,11 +46,6 @@ class NotificationItem extends React.Component {
             this.props.closeCallback.call();
         }
 
-    }
-
-    componentWillMount() {
-        this.styleNameContainer =  "notification-type-" + this.props.type;
-        this.styleNameTitle =  "notification-title-" + this.props.type;
     }
 
     componentDidMount() {

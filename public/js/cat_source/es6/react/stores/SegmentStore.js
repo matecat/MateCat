@@ -41,8 +41,7 @@ EventEmitter.prototype.setMaxListeners(0);
 
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
-    _segments: {},
-    _segmentsFiles: Immutable.fromJS({}),
+    _segments: Immutable.fromJS([]),
     _globalWarnings: {
         lexiqa: [],
         matecat: {
@@ -58,45 +57,31 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
     segmentsInBulk: [],
+    _footerTabsConfig: Immutable.fromJS({}),
+    search : {
+        active: false,
+        segments: null,
+        params: null
+    },
     /**
      * Update all
      */
-    updateAll: function (segments, fid, where) {
+    updateAll: function (segments, where) {
         // console.time("Time: updateAll segments" + fid);
-        if (this._segments[fid] && where === "before") {
-            this._segments[fid] = this._segments[fid].unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
-        } else if (this._segments[fid] && where === "after") {
-            this._segments[fid] = this._segments[fid].push(...Immutable.fromJS(this.normalizeSplittedSegments(segments, fid)));
+        if (this._segments.size > 0 && where === "before") {
+            this._segments = this._segments.unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
+        } else if (this._segments.size > 0 && where === "after") {
+            this._segments = this._segments.push(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else {
-            this._segments[fid] = Immutable.fromJS(this.normalizeSplittedSegments(segments, fid));
+            this._segments = Immutable.fromJS(this.normalizeSplittedSegments(segments));
         }
-
-        this.buildSegmentsFiles(fid, segments);
-        // console.log(this._segmentsFiles);
 
         if (this.segmentsInBulk.length > 0) {
             this.setBulkSelectionSegments(this.segmentsInBulk);
         }
-        // console.timeEnd("Time: updateAll segments"+fid);
     },
     removeAllSegments: function() {
-        this._segments = {};
-        this._segmentsFiles = Immutable.fromJS({});
-        this._globalWarnings = {
-            lexiqa: [],
-                matecat: {
-                ERROR: {
-                    Categories: []
-                },
-                WARNING: {
-                    Categories: []
-                },
-                INFO: {
-                    Categories: []
-                }
-            }
-        };
-        this.segmentsInBulk = [];
+        this._segments = Immutable.fromJS([]);
     },
     normalizeSplittedSegments: function (segments, fid) {
         let newSegments = [];
@@ -104,6 +89,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         $.each(segments, function (index) {
             let splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
             let segment = this;
+            let inSearch = false;
+            //if search active
+            if ( self.search.active ) {
+                inSearch = (self.search.segments.indexOf(segment.sid) > -1);
+            }
             if (splittedSourceAr.length > 1) {
                 var splitGroup = [];
                 $.each(splittedSourceAr, function (i) {
@@ -124,12 +114,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         segment_hash: segment.segment_hash,
                         original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
-                        fid: fid,
                         split_group: splitGroup,
                         split_points_source: [],
                         status: status,
                         time_to_edit: "0",
-                        translation: translation,
+                        translation: (translation) ? translation : '',
                         decoded_translation: UI.decodeText(segment, translation),
                         version: segment.version,
                         warning: "0",
@@ -137,7 +126,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         tagged: !self.hasSegmentTagProjectionEnabled(segment),
                         unlocked: false,
                         edit_area_locked: false,
-                        notes: segment.notes
+                        notes: segment.notes,
+                        modified: false,
+                        opened: false,
+                        id_file: segment.id_file,
+                        originalSource: segment.segment,
+                        firstOfSplit: (i===0),
+                        search: (inSearch) ? self.search.params : null
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -147,56 +142,20 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.decoded_source = UI.decodeText(segment, segment.segment);
                 segment.unlocked = UI.isUnlockedSegment(segment);
                 segment.warnings = {};
-                segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
-                segment.fid = fid;
-                segment.edit_area_locked = false;
+                segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);segment.edit_area_locked = false;
                 segment.original_sid = segment.sid;
+                segment.modified = false;
+                segment.opened = false;
+                segment.search = (inSearch) ? self.search.params : null;
                 newSegments.push(this);
             }
 
         });
         return newSegments;
     },
-    hasSegmentTagProjectionEnabled: function ( segment ) {
-        if (UI.enableTagProjection) {
-            if ( (segment.status === "NEW" || segment.status === "DRAFT") && (UI.checkXliffTagsInText(segment.segment) && (!UI.checkXliffTagsInText(segment.translation))) ) {
-                return true;
-            }
-        }
-        return false;
-    },
-    buildSegmentsFiles: function (fid, segments) {
-        segments.map(segment => {
-            var splittedSourceAr = segment.segment.split(UI.splittedTranslationPlaceholder);
-            if (splittedSourceAr.length > 1) {
-                let self = this;
-                $.each(splittedSourceAr, function (i) {
-                    self._segmentsFiles = self._segmentsFiles.set(segment.sid + '-' + (i + 1), fid);
-                });
-            } else {
-                this._segmentsFiles = this._segmentsFiles.set(segment.sid, fid);
-            }
-        });
-    },
-
-    getSegmentById(sid, fid) {
-        return this._segments[fid].find(function (seg) {
-            return seg.get('sid') == sid;
-        });
-    },
-    getSegmentIndex(sid, fid) {
-        return this._segments[fid].findIndex(function (segment, index) {
-            if (sid.toString().indexOf("-") === -1) {
-                return parseInt(segment.get('sid')) === parseInt(sid);
-            } else {
-                return segment.get('sid') === sid;
-            }
-        });
-
-    },
 
     splitSegment(oldSid, newSegments, fid, splitGroup) {
-        var index = this._segments[fid].findIndex(function (segment, index) {
+        var index = this._segments.findIndex(function (segment, index) {
             return (segment.get('sid') == oldSid);
         });
         if (index > -1) {
@@ -208,12 +167,20 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             });
 
             newSegments = Immutable.fromJS(newSegments);
-            this._segments[fid] = this._segments[fid].splice(index, 1, ...newSegments);
+            this._segments = this._segments.splice(index, 1, ...newSegments);
         } else {
             this.removeSplit(oldSid, newSegments, fid, splitGroup);
         }
     },
 
+    openSegment(sid) {
+        var index = this.getSegmentIndex(sid);
+        this.closeSegments()
+        this._segments = this._segments.setIn([index, 'opened'], true);
+    },
+    closeSegments() {
+        this._segments = this._segments.map(segment => segment.set('opened', false));
+    },
     removeSplit(oldSid, newSegments, fid, splitGroup) {
         var self = this;
         var elementsToRemove = [];
@@ -226,7 +193,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
         newSegments = Immutable.fromJS(newSegments);
         var indexes = [];
-        this._segments[fid].map(function (segment, index) {
+        this._segments.map(function (segment, index) {
             if (segment.get('sid').split('-').length && segment.get('sid').split('-')[0] == oldSid) {
                 elementsToRemove.push(segment);
                 indexes.push(index);
@@ -235,76 +202,69 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         if (elementsToRemove.length) {
             elementsToRemove.forEach(function (seg) {
-                self._segments[fid] = self._segments[fid].splice(self._segments[fid].indexOf(seg), 1)
+                self._segments = self._segments.splice(self._segments.indexOf(seg), 1)
             });
-            this._segments[fid] = this._segments[fid].splice(indexes[0], 0, ...newSegments);
+            this._segments = this._segments.splice(indexes[0], 0, ...newSegments);
 
             // Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
         }
     },
 
     setStatus(sid, fid, status) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments[fid] = this._segments[fid].setIn([index, 'status'], status);
-        this._segments[fid] = this._segments[fid].setIn([index, 'revision_number'], config.revisionNumber);
+        this._segments = this._segments.setIn([index, 'status'], status);
+        this._segments = this._segments.setIn([index, 'revision_number'], config.revisionNumber);
     },
 
     setSuggestionMatch(sid, fid, perc) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments[fid] = this._segments[fid].setIn([index, 'suggestion_match'], perc.replace('%', ''));
+        this._segments = this._segments.setIn([index, 'suggestion_match'], perc.replace('%', ''));
     },
 
     setPropagation(sid, fid, propagation, from) {
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         if (propagation) {
-            this._segments[fid] = this._segments[fid].setIn([index, 'autopropagated_from'], from);
+            this._segments = this._segments.setIn([index, 'autopropagated_from'], from);
         } else {
-            this._segments[fid] = this._segments[fid].setIn([index, 'autopropagated_from'], "0");
+            this._segments = this._segments.setIn([index, 'autopropagated_from'], "0");
         }
     },
-    replaceTranslation(sid, fid, translation) {
-        var index = this.getSegmentIndex(sid, fid);
+    replaceTranslation(sid, translation) {
+        var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
+        let segment = this._segments.get(index);
         var trans = htmlEncode(this.removeLockTagsFromString(translation));
-        this._segments[fid] = this._segments[fid].setIn([index, 'decoded_translation'], trans);
-        return translation;
+        let decoded_translation = UI.decodeText(segment.toJS(), trans);
+        this._segments = this._segments.setIn([index, 'translation'], trans);
+        this._segments = this._segments.setIn([index, 'decoded_translation'], decoded_translation);
+        return decoded_translation;
     },
-    replaceSource(sid, fid, source) {
-        let index = this.getSegmentIndex(sid, fid);
+    modifiedTranslation(sid, fid, status) {
+        const index = this.getSegmentIndex(sid, fid);
         if ( index === -1 ) return;
-        let segment = this._segments[fid].get(index);
-        // var trans = htmlEncode(this.removeLockTagsFromString(source));
-        let source_decoded = source;
-        if ( source_decoded.indexOf('locked-inside') === -1 )  {
-            source_decoded = UI.decodeText(segment.toJS(), source);
-        }
-        // this._segments[fid] = this._segments[fid].setIn([index, 'segment'], trans);
-        this._segments[fid] = this._segments[fid].setIn([index, 'decoded_source'], source_decoded);
-        return source_decoded;
+        this._segments = this._segments.setIn([index, 'modified'], status);
     },
     decodeSegmentsText: function () {
         let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(segment => segment.set('decoded_translation', UI.decodeText(segment.toJS(), segment.get('translation'))));
-            self._segments[index] = self._segments[index].map(segment => segment.set('decoded_source', UI.decodeText(segment.toJS(), segment.get('segment'))));
-        });
+        this._segments = this._segments.map(segment => segment.set('decoded_translation', UI.decodeText(segment.toJS(), segment.get('translation'))));
+        this._segments = this._segments.map(segment => segment.set('decoded_source', UI.decodeText(segment.toJS(), segment.get('segment'))));
     },
     setSegmentAsTagged(sid, fid) {
-        let index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments[fid] = this._segments[fid].setIn([index, 'tagged'], true);
-        let segment = this._segments[fid].get(index);
-        this._segments[fid] = this._segments[fid].setIn([index, 'decoded_translation'], UI.decodeText(segment.toJS(), segment.get('translation')));
-        this._segments[fid] = this._segments[fid].setIn([index, 'decoded_source'], UI.decodeText(segment.toJS(), segment.get('segment')));
+        this._segments = this._segments.setIn([index, 'tagged'], true);
+        let segment = this._segments.get(index);
+        this._segments = this._segments.setIn([index, 'decoded_translation'], UI.decodeText(segment.toJS(), segment.get('translation')));
+        this._segments = this._segments.setIn([index, 'decoded_source'], UI.decodeText(segment.toJS(), segment.get('segment')));
     },
 
     setSegmentOriginalTranslation(sid, fid, translation) {
-        var index = this.getSegmentIndex(sid, fid);
+        var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments[fid] = this._segments[fid].setIn([index, 'original_translation'], translation);
+        this._segments = this._segments.setIn([index, 'original_translation'], translation);
     },
 
     removeLockTagsFromString(str) {
@@ -313,66 +273,50 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
     addSegmentVersions(fid, sid, versions) {
         //If is a splitted segment the versions are added to the first of the split
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        let segment = this._segments[fid].get(index);
+        let segment = this._segments.get(index);
         if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
-            this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS([]));
-            return this._segments[fid].get(index);
+            this._segments = this._segments.setIn([index, 'versions'], Immutable.fromJS([]));
+            return this._segments.get(index);
         }
-        this._segments[fid] = this._segments[fid].setIn([index, 'versions'], Immutable.fromJS(versions));
-        return this._segments[fid].get(index);
+        this._segments = this._segments.setIn([index, 'versions'], Immutable.fromJS(versions));
+        return this._segments.get(index);
     },
     lockUnlockEditArea(sid, fid) {
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        let segment = this._segments[fid].get(index);
+        let segment = this._segments.get(index);
         let lockedEditArea = segment.get('edit_area_locked');
-        this._segments[fid] = this._segments[fid].setIn([index, 'edit_area_locked'], !lockedEditArea);
-    },
-    getSegmentByIdToJS(sid, fid) {
-        let segment = this._segments[fid].find(function (seg) {
-            return seg.get('sid') === sid || seg.get('original_sid') === sid;
-        });
-        return (segment) ? segment.toJS() : null;
-    },
-
-    getAllSegments: function () {
-        var result = [];
-        $.each(this._segments, function (key, value) {
-            result = result.concat(value.toJS());
-        });
-        return result;
+        this._segments = this._segments.setIn([index, 'edit_area_locked'], !lockedEditArea);
     },
     setToggleBulkOption: function (sid, fid) {
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        if (this._segments[fid].getIn([index, 'inBulk'])) {
+        if (this._segments.getIn([index, 'inBulk'])) {
             let indexArray = this.segmentsInBulk.indexOf(sid);
             this.segmentsInBulk.splice(indexArray, 1);
-            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], false);
+            this._segments = this._segments.setIn([index, 'inBulk'], false);
         } else {
             this.segmentsInBulk.push(sid);
-            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], true);
+            this._segments = this._segments.setIn([index, 'inBulk'], true);
         }
     },
     removeBulkOption: function () {
         let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(segment => segment.set('inBulk', false));
-        });
+        this._segments = self._segments.map(segment => segment.set('inBulk', false));
         this.segmentsInBulk = [];
     },
     setBulkSelectionInterval: function (from, to, fid) {
-        let index = this.getSegmentIndex(from, fid);
+        let index = this.getSegmentIndex(from);
         if (index > -1 &&
-            this._segments[fid].get(index).get("readonly") == "false" &&  //not readonly
-            (this._segments[fid].get(index).get("ice_locked") === "0" ||  //not ice_locked
-                (this._segments[fid].get(index).get("ice_locked") === "1" && this._segments[fid].get(index).get("unlocked"))  //unlocked
+            this._segments.get(index).get("readonly") == "false" &&  //not readonly
+            (this._segments.get(index).get("ice_locked") === "0" ||  //not ice_locked
+                (this._segments.get(index).get("ice_locked") === "1" && this._segments.get(index).get("unlocked"))  //unlocked
             )
         ) {
-            this._segments[fid] = this._segments[fid].setIn([index, 'inBulk'], true);
+            this._segments = this._segments.setIn([index, 'inBulk'], true);
             if (this.segmentsInBulk.indexOf(from.toString()) === -1) {
                 this.segmentsInBulk.push(from.toString());
             }
@@ -382,86 +326,174 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         }
     },
     setBulkSelectionSegments: function (segmentsArray) {
-        let self = this;
         this.segmentsInBulk = segmentsArray;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(function (segment) {
-                if (segmentsArray.indexOf(segment.get('sid')) > -1) {
-                    if (segment.get('ice_locked') == "1" && !segment.get('unlocked')) {
-                        let index = segmentsArray.indexOf(segment.get('sid'));
-                        self.segmentsInBulk.splice(index, 1);  // if is a locked segment remove it from bulk
-                    } else {
-                        return segment.set('inBulk', true);
-                    }
+        this._segments = this._segments.map( (segment) => {
+            if (segmentsArray.indexOf(segment.get('sid')) > -1) {
+                if (segment.get('ice_locked') == "1" && !segment.get('unlocked')) {
+                    let index = segmentsArray.indexOf(segment.get('sid'));
+                    this.segmentsInBulk.splice(index, 1);  // if is a locked segment remove it from bulk
+                } else {
+                    return segment.set('inBulk', true);
                 }
-                return segment.set('inBulk', false);
-            });
+            }
+            return segment.set('inBulk', false);
         });
+
     },
     setMutedSegments: function (segmentsArray) {
-        let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(function (segment) {
-                if (segmentsArray.indexOf(segment.get('sid')) === -1) {
-                    return segment.set('muted', true);
-                }
-                return segment;
-            });
+        this._segments = this._segments.map(segment => segment.set('filtering', true));
+        this._segments = this._segments.map( (segment) => {
+            if (segmentsArray.indexOf(segment.get('sid')) === -1) {
+                return segment.set('muted', true);
+            }
+            return segment;
         });
     },
     removeAllMutedSegments: function () {
-        let self = this;
-        _.forEach(this._segments, function (item, index) {
-            self._segments[index] = self._segments[index].map(segment => segment.set('muted', false));
-        });
+        this._segments = this._segments.map(segment => segment.set('filtering', false));
+        this._segments = this._segments.map(segment => segment.set('muted', false));
     },
     setUnlockedSegment: function (sid, fid, unlocked) {
-        let index = this.getSegmentIndex(sid, fid);
+        let index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments[fid] = this._segments[fid].setIn([index, 'unlocked'], unlocked);
+        this._segments = this._segments.setIn([index, 'unlocked'], unlocked);
     },
 
+    setConcordanceMatches: function (sid, matches ,errors) {
+        const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        this._segments = this._segments.setIn([index, 'concordance'], Immutable.fromJS(matches));
+    },
     setContributionsToCache: function (sid, fid, contributions,errors) {
-        const index = this.getSegmentIndex(sid, fid);
+        const index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments[fid] = this._segments[fid].setIn([index, 'contributions'], {
+        this._segments = this._segments.setIn([index, 'contributions'], Immutable.fromJS({
             matches: contributions,
             errors: errors
-        });
+        }));
     },
+    setAlternatives: function (sid, alternatives) {
+        const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        this._segments = this._segments.setIn([index, 'alternatives'], Immutable.fromJS(alternatives));
+    },
+    deleteContribution: function(sid, matchId) {
+        const index = this.getSegmentIndex(sid);
+        let contributions = this._segments.get(index).get('contributions');
+        const indexCont = contributions.get('matches').findIndex((contr, index) => contr.get("id") === matchId);
+        let matches = contributions.get('matches').splice(indexCont, 1);
+        this._segments = this._segments.setIn([index, 'contributions', 'matches'], matches);
 
+    },
+    setGlossaryToCache: function (sid, fid, glossary) {
+        let index = this.getSegmentIndex(sid, fid);
+        this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
+    },
+    deleteFromGlossary: function(sid, matchId, name) {
+        let index = this.getSegmentIndex(sid);
+        let glossary = this._segments.get(index).get('glossary').toJS();
+        delete glossary[name];
+        this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
+    },
+    changeGlossaryItem: function(sid, matchId, name, comment, target_note, translation) {
+        let index = this.getSegmentIndex(sid);
+        let glossary = this._segments.get(index).get('glossary').toJS();
+        glossary[name].comment = comment;
+        glossary[name].target_note = comment;
+        glossary[name].translation = translation;
+        this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
+    },
+    addGlossaryItem: function(sid, match, name) {
+        let index = this.getSegmentIndex(sid);
+        let glossary = this._segments.get(index).get('glossary').toJS();
+        glossary[name] = match;
+        this._segments = this._segments.setIn([index, 'glossary'], Immutable.fromJS(glossary));
+    },
     setCrossLanguageContributionsToCache: function (sid, fid, contributions,errors) {
-        const index = this.getSegmentIndex(sid, fid);
+        const index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments[fid] = this._segments[fid].setIn([index, 'cl_contributions'], {
+        this._segments = this._segments.setIn([index, 'cl_contributions'], {
             matches: contributions,
             errors: errors
         });
     },
+    showTranslationsIssues: function() {
+        this._segments = this._segments.map((segment)=>segment.set('showIssues', true));
+    },
+    openSegmentIssuePanel: function(sid) {
+        const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        if ( !( this._segments.get(index).get('ice_locked') === 1 && !this._segments.get(index).get('unlocked') ) ) {
+            this._segments = this._segments.setIn([index, 'openIssues'], true);
+        }
+    },
+    closeSegmentIssuePanel: function() {
+        this._segments = this._segments.map((segment)=>segment.set('openIssues', false));
+    },
+    openSegmentComments: function(sid) {
+        const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        this._segments = this._segments.map((segment)=>segment.set('openComments', false));
+        this._segments = this._segments.setIn([index, 'openComments'], true);
+    },
+    closeSegmentComments: function() {
+        this._segments = this._segments.map((segment)=>segment.set('openComments', false));
+    },
 
+    setConfigTabs: function (tabName, visible, open) {
+        if ( open ) {
+            this._footerTabsConfig = this._footerTabsConfig.map((tab)=>tab.set('open', false));
+        }
+        this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'visible'], visible);
+        this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'open'], open);
+        this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'enabled'], true);
+    },
+    setChoosenSuggestion: function(sid, sugIndex) {
+        this._segments = this._segments.map((segment)=>segment.set('choosenSuggestionIndex', sugIndex));
+    },
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
-
-            let fid = this._segmentsFiles.get(sid);
-            if ( !fid) {
-                fid = this._segmentsFiles.get(sid + "-1");
-            }
-            if(!fid){
-                return true
-            }
-            let index = this.getSegmentIndex(sid, fid);
-            let segment = this._segments[fid].get(index);
+            let index = this.getSegmentIndex(sid);
+            if ( index === -1 ) return;
+            let segment = this._segments.get(index);
             return segment.get('tagged');
         }
 
         return sid > -1
     },
     // Local warnings
-    setSegmentWarnings(sid, warning) {
-        const fid = this._segmentsFiles.get(sid);
-        let index = this.getSegmentIndex(sid, fid);
+    setSegmentWarnings(sid, warning, tagMismatch) {
+        let index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments[fid] = this._segments[fid].setIn([index, 'warnings'], Immutable.fromJS(warning));
+        this._segments = this._segments.setIn([index, 'warnings'], Immutable.fromJS(warning));
+        this._segments = this._segments.setIn([index, 'tagMismatch'], Immutable.fromJS(tagMismatch));
+    },
+    setQACheckMatches(sid, matches) {
+        const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        this._segments = this._segments.setIn([index, 'qaCheckGlossary'], matches);
+    },
+    setQABlacklistMatches(sid, matches) {
+        const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        this._segments = this._segments.setIn([index, 'qaBlacklistGlossary'], matches);
+    },
+    /**
+     *
+     * @param sid
+     * @param matches
+     * @param type 1 -> source, 2->target
+     */
+    addLexiqaHighlight(sid, matches, type) {
+        const index = this.getSegmentIndex(sid);
+        if ( type === 1 ) {
+            this._segments = this._segments.setIn([index, 'lexiqa', 'source'], Immutable.fromJS(matches));
+        } else if ( type === 2 ){
+            this._segments = this._segments.setIn([index, 'lexiqa', 'target'], Immutable.fromJS(matches));
+        } else {
+            this._segments = this._segments.setIn([index, 'lexiqa'], Immutable.fromJS(matches));
+        }
+
     },
     updateGlobalWarnings: function (warnings) {
         Object.keys(warnings).map(key => {
@@ -471,8 +503,199 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         });
         this._globalWarnings.matecat = warnings;
     },
+    addSearchResults: function(segments, params) {
+        this.removeSearchResults();
+        segments.forEach((sid)=> {
+            let index = this.getSegmentIndex(sid);
+            this._segments = this._segments.setIn([index, 'search'], Immutable.fromJS(params));
+        });
+        this.search = {
+            active: true,
+            segments: segments,
+            params: params
+        }
+    },
+    removeSearchResults: function() {
+        this._segments = this._segments.map((segment)=>segment.set('search', null));
+        this.search = {
+            active: false,
+            segments: null,
+            params: null
+        };
+    },
+    openSegmentSplit: function(sid) {
+        let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        this._segments = this._segments.setIn([index, 'openSplit'], true);
+    },
+    closeSegmentsSplit: function(sid) {
+        this._segments = this._segments.map((segment)=>segment.set('openSplit', false));
+    },
     updateLexiqaWarnings: function(warnings){
         this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning.bind(this, "LXQ"));
+    },
+    hasSegmentTagProjectionEnabled: function ( segment ) {
+        if (UI.enableTagProjection) {
+            if ( (segment.status === "NEW" || segment.status === "DRAFT") && (UI.checkXliffTagsInText(segment.segment) && (!UI.checkXliffTagsInText(segment.translation))) ) {
+                return true;
+            }
+        }
+        return false;
+    },
+    /**
+     *
+     * @param current_sid
+     * @param current_fid
+     * @param status
+     * status values:
+     * null|undefined|false NEXT WITHOUT CHECK STATUS
+     * 1 APPROVED
+     * 2 DRAFT
+     * 3 FIXED
+     * 4 NEW
+     * 5 REBUTTED
+     * 6 REJECTED
+     * 7 TRANSLATED
+     * 8 UNTRANSLATED | is draft or new
+     * @param revisionNumber
+     */
+    getNextSegment(current_sid, current_fid, status, revisionNumber) {
+        current_sid = ( !current_sid) ? this.getCurrentSegment().sid : current_sid;
+        let allStatus = {
+            1: "APPROVED",
+            2: "DRAFT",
+            3: "FIXED",
+            4: "NEW",
+            5: "REBUTTED",
+            6: "REJECTED",
+            7: "TRANSLATED",
+            8: "UNTRANSLATED",
+            9: "UNAPPROVED"
+        };
+        let result,
+            currentFind = false;
+        this._segments.forEach((segment, key) => {
+            if (_.isUndefined(result)) {
+                if ( currentFind || current_sid === -1) {
+                    if ( status === 8 && (segment.get( 'status' ) === allStatus[2] || segment.get( 'status' ) === allStatus[4]) && !segment.get('muted') ) {
+                        result = segment.toJS();
+                        return false;
+                    } else if ( status === 9 && revisionNumber ) { // Second pass
+                        if ( (segment.get('status') === allStatus[1] || segment.get('status') === allStatus[7]) && segment.get('revision_number') === revisionNumber ) {
+                            result = segment.toJS();
+                            return false;
+                        }
+                    } else if ( ((status && segment.get( 'status' ) === allStatus[status]) || !status) && !segment.get('muted') ) {
+                        result = segment.toJS();
+                        return false;
+                    }
+                }
+                if ( segment.get( 'sid' ) === current_sid ) {
+                    currentFind = true;
+                }
+            } else {
+                return null;
+            }
+        });
+        return result;
+    },
+    getPrevSegment(sid, alsoMutedSegments) {
+        sid = ( !sid) ? this.getCurrentSegment().sid : sid;
+        var index = this.getSegmentIndex(sid);
+        let segment = (index > 0) ? this._segments.get(index-1).toJS() : null;
+        if ( segment && !alsoMutedSegments && !segment.muted || !segment || segment && alsoMutedSegments) {
+            return segment;
+        }
+        return this.getPrevSegment(segment.sid);
+    },
+    getSegmentByIdToJS(sid) {
+        let segment = this._segments.find(function (seg) {
+            return seg.get('sid') == sid || seg.get('original_sid') === sid;
+        });
+        return (segment) ? segment.toJS() : null;
+    },
+
+    getSegmentsSplitGroup(sid) {
+        let segments = this._segments.filter(function (seg) {
+            return seg.get('original_sid') == sid;
+        });
+        return (segments) ? segments.toJS() : null;
+    },
+
+    getAllSegments: function () {
+        var result = [];
+        $.each(this._segments, function (key, value) {
+            result = result.concat(value.toJS());
+        });
+        return result;
+    },
+    getSegmentById(sid) {
+        return this._segments.find(function (seg) {
+            return seg.get('sid') == sid;
+        });
+    },
+    getSegmentIndex(sid) {
+        return this._segments.findIndex(function (segment, index) {
+            if (sid.toString().indexOf("-") === -1) {
+                return parseInt(segment.get('sid')) === parseInt(sid);
+            } else {
+                return segment.get('sid') === sid;
+            }
+        });
+
+    },
+    getLastSegmentId() {
+        return this._segments.last().get('sid');
+    },
+    getFirstSegmentId() {
+        return this._segments.first().get('sid');
+    },
+    getCurrentSegment: function(){
+        let current = null,
+            tmpCurrent = null;
+        tmpCurrent = this._segments.find((segment) => {
+            return segment.get('opened') === true
+        });
+        if(tmpCurrent){
+            current = Object.assign({},tmpCurrent.toJS());
+        }
+        return current;
+    },
+    getSegmentsInPropagation(hash, isReview) {
+        let reviewStatus = [
+            "DRAFT",
+            "NEW",
+            "REBUTTED",
+            "REJECTED",
+            "TRANSLATED",
+            "APPROVED"
+        ];
+        let translateStatus = [
+            "DRAFT",
+            "NEW",
+            "REBUTTED",
+            "REJECTED",
+            "TRANSLATED",
+
+        ];
+        return this._segments.filter((segment)=>{
+            if ( isReview && reviewStatus.indexOf(segment.get('status').toUpperCase() > -1) ){
+                return segment.get('segment_hash') === hash;
+            } else if (!isReview && translateStatus.indexOf(segment.status)){
+                return segment.get('segment_hash') === hash;
+            }
+            return false;
+        }).toJS();
+    },
+    getSegmentsInSplit(sid) {
+        return this._segments.filter((segment)=>{
+              return segment.get('original_sid') === sid;
+        }).toJS();
+    },
+    isSidePanelOpen: function() {
+        const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);
+        const issueOpen = this._segments.findIndex((segment)=>segment.get('openIssues') === true);
+        return ( commentOpen !== -1 ||  issueOpen !== -1);
     },
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
@@ -485,16 +708,39 @@ AppDispatcher.register(function (action) {
 
     switch (action.actionType) {
         case SegmentConstants.RENDER_SEGMENTS:
-            SegmentStore.updateAll(action.segments, action.fid);
-            SegmentStore.emitChange(action.actionType, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.updateAll(action.segments);
+            if ( action.idToOpen ) {
+                SegmentStore.openSegment(action.idToOpen);
+            }
+            SegmentStore.emitChange(action.actionType, SegmentStore._segments);
+            if ( action.idToOpen ) {
+                SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
+            }
+            break;
+        case SegmentConstants.SET_OPEN_SEGMENT:
+            SegmentStore.openSegment(action.sid);
+            SegmentStore.closeSegmentsSplit();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.OPEN_SEGMENT:
+            SegmentStore.openSegment(action.sid);
+            SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
+            // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
+            break;
+        case SegmentConstants.CLOSE_SEGMENT:
+            SegmentStore.closeSegments(action.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_SEGMENTS:
-            SegmentStore.updateAll(action.segments, action.fid, action.where);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.updateAll(action.segments, action.where);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.SCROLL_TO_SEGMENT:
+            SegmentStore.emitChange(action.actionType, action.sid);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
             SegmentStore.splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);
-            SegmentStore.emitChange(action.actionType, SegmentStore._segments[action.fid], action.splitGroup, action.fid);
+            SegmentStore.emitChange(action.actionType, SegmentStore._segments, action.splitGroup, action.fid);
             break;
         case SegmentConstants.HIGHLIGHT_EDITAREA:
             SegmentStore.emitChange(action.actionType, action.id);
@@ -502,16 +748,13 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.ADD_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.newClass);
             break;
-        case SegmentConstants.ADD_SEGMENTS_CLASS:
-            SegmentStore.emitChange(action.actionType, action.sidList, action.newClass);
-            break;
         case SegmentConstants.REMOVE_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
         case SegmentConstants.SET_SEGMENT_STATUS:
             SegmentStore.setStatus(action.id, action.fid, action.status);
             // SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.UPDATE_ALL_SEGMENTS:
             SegmentStore.emitChange(SegmentConstants.UPDATE_ALL_SEGMENTS);
@@ -530,55 +773,88 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            let trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
+            let trans = SegmentStore.replaceTranslation(action.id, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, trans);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
-        case SegmentConstants.REPLACE_SOURCE:
-            let source = SegmentStore.replaceSource(action.id, action.fid, action.source);
-            SegmentStore.emitChange(action.actionType, action.id, source);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+        case SegmentConstants.UPDATE_TRANSLATION:
+            SegmentStore.replaceTranslation(action.id, action.translation);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
-        case SegmentConstants.TRANSLATION_EDITED:
-            let translation = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
-            SegmentStore.emitChange(action.actionType, action.id, action.translation);
+        case SegmentConstants.MODIFIED_TRANSLATION:
+            SegmentStore.modifiedTranslation(action.sid, action.fid, action.status);
+            if (action.translation) {
+                SegmentStore.replaceTranslation(action.sid, action.translation);
+            }
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.LOCK_EDIT_AREA:
             SegmentStore.lockUnlockEditArea(action.id, action.fid);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.REGISTER_TAB:
-            SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
+            SegmentStore.setConfigTabs(action.tab, action.visible, action.open);
+            SegmentStore.emitChange(action.actionType, action.tab, SegmentStore._footerTabsConfig.toJS());
+            break;
+        case SegmentConstants.SET_DEFAULT_TAB:
+            SegmentStore.setConfigTabs(action.tabName, true, true);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.MODIFY_TAB_VISIBILITY:
             SegmentStore.emitChange(action.actionType, action.tabName, action.visible);
             break;
-        case SegmentConstants.CREATE_FOOTER:
-            SegmentStore.emitChange(action.actionType, action.sid);
-            break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);
-            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.SET_CL_CONTRIBUTIONS:
             SegmentStore.setCrossLanguageContributionsToCache(action.sid, action.fid, action.matches, action.errors);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
-            SegmentStore.emitChange(action.actionType, action.sid, action.fid, action.matches, action.errors);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.SET_ALTERNATIVES:
+            SegmentStore.setAlternatives(action.sid, action.alternatives);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.CHOOSE_CONTRIBUTION:
             SegmentStore.emitChange(action.actionType, action.sid, action.index);
+            break;
+        case SegmentConstants.DELETE_CONTRIBUTION:
+            SegmentStore.deleteContribution(action.sid, action.matchId);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.SET_GLOSSARY_TO_CACHE:
+            SegmentStore.setGlossaryToCache(action.sid, action.fid, action.glossary);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            SegmentStore.emitChange(action.actionType, action.sid);
+            break;
+        case SegmentConstants.DELETE_FROM_GLOSSARY:
+            SegmentStore.deleteFromGlossary(action.sid, action.matchId, action.name);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.CHANGE_GLOSSARY:
+            SegmentStore.changeGlossaryItem(action.sid, action.matchId, action.name, action.comment, action.target_note, action.translation);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.ADD_GLOSSARY_ITEM:
+            SegmentStore.addGlossaryItem(action.sid, action.match, action.name);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.CONCORDANCE_RESULT:
+            SegmentStore.setConcordanceMatches(action.sid, action.matches);
+            SegmentStore.emitChange(action.actionType, action.sid, action.matches);
             break;
         case SegmentConstants.RENDER_GLOSSARY:
             SegmentStore.emitChange(action.actionType, action.sid, action.segment);
             break;
         case SegmentConstants.MOUNT_TRANSLATIONS_ISSUES:
+            SegmentStore.showTranslationsIssues();
             SegmentStore.emitChange(action.actionType);
             break;
         case SegmentConstants.SET_SEGMENT_TAGGED:
             SegmentStore.setSegmentAsTagged(action.id, action.fid);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION:
             SegmentStore.setSegmentOriginalTranslation(action.id, action.fid, action.originalTranslation);
@@ -589,7 +865,7 @@ AppDispatcher.register(function (action) {
             if ( seg ) {
                 SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
             }
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:
             SegmentStore.emitChange(action.actionType, action.sid, action.tab, action.data);
@@ -597,55 +873,46 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.TOGGLE_SEGMENT_ON_BULK:
             SegmentStore.setToggleBulkOption(action.sid, action.fid);
             SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.REMOVE_SEGMENTS_ON_BULK:
             SegmentStore.removeBulkOption();
             SegmentStore.emitChange(SegmentConstants.REMOVE_SEGMENTS_ON_BULK, []);
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+
             break;
         case SegmentConstants.SET_BULK_SELECTION_INTERVAL:
             SegmentStore.setBulkSelectionInterval(action.from, action.to, action.fid);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
             break;
         case SegmentConstants.SET_BULK_SELECTION_SEGMENTS:
             SegmentStore.setBulkSelectionSegments(action.segmentsArray);
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(SegmentConstants.SET_BULK_SELECTION_SEGMENTS, SegmentStore.segmentsInBulk);
             break;
         case SegmentConstants.SET_UNLOCKED_SEGMENT:
             SegmentStore.setUnlockedSegment(action.sid, action.fid, action.unlocked);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.SET_MUTED_SEGMENTS:
             SegmentStore.setMutedSegments(action.segmentsArray);
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.REMOVE_MUTED_SEGMENTS:
             SegmentStore.removeAllMutedSegments();
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.DISABLE_TAG_LOCK:
         case SegmentConstants.ENABLE_TAG_LOCK:
             SegmentStore.decodeSegmentsText();
-            _.forEach(SegmentStore._segments, function (item, index) {
-                SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[index], index);
-            });
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             // Todo remove this
             SegmentStore.emitChange(action.actionType);
             break;
         case SegmentConstants.SET_SEGMENT_WARNINGS:  // LOCAL
-            SegmentStore.setSegmentWarnings(action.sid, action.warnings);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[SegmentStore._segmentsFiles.get(action.sid)], SegmentStore._segmentsFiles.get(action.sid));
+            SegmentStore.setSegmentWarnings(action.sid, action.warnings, action.tagMismatch);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.UPDATE_GLOBAL_WARNINGS:
             SegmentStore.updateGlobalWarnings(action.warnings);
@@ -657,7 +924,59 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.UPDATE_GLOBAL_WARNINGS, SegmentStore._globalWarnings);
             break;
         case SegmentConstants.OPEN_ISSUES_PANEL:
+            SegmentStore.openSegmentIssuePanel(action.data.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(action.actionType, action.data);
+            break;
+        case SegmentConstants.CLOSE_ISSUES_PANEL:
+            SegmentStore.closeSegmentIssuePanel();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(action.actionType);
+            if ( !SegmentStore.isSidePanelOpen() ) {
+                SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
+            }
+            break;
+        case SegmentConstants.OPEN_COMMENTS:
+            SegmentStore.openSegmentComments(action.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.CLOSE_COMMENTS:
+            SegmentStore.closeSegmentComments(action.sid);
+            if ( !SegmentStore.isSidePanelOpen() ) {
+                SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
+            }
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.OPEN_SPLIT_SEGMENT:
+            SegmentStore.openSegmentSplit(action.sid);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.CLOSE_SPLIT_SEGMENT:
+            SegmentStore.closeSegmentsSplit();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.SET_CHOOSEN_SUGGESTION:
+            SegmentStore.setChoosenSuggestion(action.sid, action.index);
+            break;
+        case SegmentConstants.SET_QA_CHECK_MATCHES:
+            SegmentStore.setQACheckMatches(action.sid, action.matches);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.SET_QA_BLACKLIST_MATCHES:
+            SegmentStore.setQABlacklistMatches(action.sid, action.matches);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.ADD_LXQ_HIGHLIGHT:
+            SegmentStore.addLexiqaHighlight(action.sid, action.matches, action.type);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.ADD_SEARCH_RESULTS:
+            SegmentStore.addSearchResults(action.segments, action.params);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.REMOVE_SEARCH_RESULTS:
+            SegmentStore.removeSearchResults();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

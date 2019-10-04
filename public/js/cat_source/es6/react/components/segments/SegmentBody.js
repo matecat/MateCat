@@ -25,21 +25,9 @@ class SegmentBody extends React.Component {
     }
 
     checkLockTags(area) {
-        if (config.tagLockCustomizable) {
+        if (config.tagLockCustomizable || !UI.tagLockEnabled) {
             return false;
-        }
-
-        if (!UI.tagLockEnabled) {
-            return false;
-        }
-
-        // if ( !this.props.segment.decoded_translation.indexOf('class="locked') > 0 ) {
-        //     return false;
-        // }
-        if (UI.noTagsInSegment({area: area, starting: false })) {
-            return false;
-        }
-        return true;
+        } else return ( this.props.segment.segment.match(/&lt;.*?&gt;/gi) )
     }
 
     openStatusSegmentMenu(e) {
@@ -69,34 +57,41 @@ class SegmentBody extends React.Component {
 
     beforeRenderOrUpdate(area) {
         if ( area && area.length > 0 && this.checkLockTags(area) ) {
-            var segment = area.closest('section');
             if (LXQ.enabled()) {
-                $.powerTip.destroy($('.tooltipa', segment));
-                $.powerTip.destroy($('.tooltipas', segment));
+                $.powerTip.destroy($('.tooltipa', UI.getSegmentById(this.props.segment.sid)));
+                $.powerTip.destroy($('.tooltipas', UI.getSegmentById(this.props.segment.sid)));
             }
         }
     }
 
     afterRenderOrUpdate(area) {
-        if ( area && area.length > 0 && this.checkLockTags(area)) {
-            var segment = area.closest('section');
+        if ( area && area.length > 0 ) {
+            var segment = UI.getSegmentById(this.props.segment.sid);
 
             if (LXQ.enabled()) {
                 LXQ.reloadPowertip(segment);
             }
+            if ( this.checkLockTags(area) ) {
+                try {
+                    if ( UI.hasSourceOrTargetTags( segment ) ) {
+                        segment.addClass( 'hasTagsToggle' );
+                        UI.detectTagType( segment );
 
-            if (UI.hasSourceOrTargetTags(segment)) {
-                segment.addClass('hasTagsToggle');
-                UI.detectTagType(area);
+                    } else {
+                        segment.removeClass( 'hasTagsToggle' );
+                    }
 
-            } else {
-                segment.removeClass('hasTagsToggle');
-            }
+                    if ( Object.size( this.props.segment.tagMismatch ) > 0 ) {
+                        UI.markTagMismatch( this.props.segment.tagMismatch, this.props.segment.sid );
+                        segment.addClass( 'hasTagsAutofill' );
+                    } else {
+                        segment.removeClass( 'hasTagsAutofill' );
+                        UI.removeHighlightErrorsTags(segment);
+                    }
 
-            if (UI.hasMissingTargetTags(segment)) {
-                segment.addClass('hasTagsAutofill');
-            } else {
-                segment.removeClass('hasTagsAutofill');
+                } catch ( e ) {
+                    console.log( "Fail afterRenderOrUpdate in SegmentBody component" )
+                }
             }
         }
     }
@@ -150,6 +145,10 @@ class SegmentBody extends React.Component {
 
             }
     }
+    copySource(e) {
+        e.preventDefault();
+        UI.copySource();
+    }
 
     componentDidMount() {
         document.addEventListener('mousedown', this.handleClickOutside);
@@ -177,13 +176,17 @@ class SegmentBody extends React.Component {
                             afterRenderOrUpdate={this.afterRenderOrUpdate}
                             beforeRenderOrUpdate={this.beforeRenderOrUpdate}
                         />
-                        <div className="copy" title="Copy source to target">
+                        <div className="copy" title="Copy source to target" onClick={(e)=>this.copySource(e)}>
                             <a href="#"/>
                             <p>{copySourceShortcuts.toUpperCase()}</p>
                         </div>
                         <SegmentTarget
                             segment={this.props.segment}
                             enableTagProjection={this.props.enableTagProjection}
+                            isReview={this.props.isReview}
+                            isReviewExtended={this.props.isReviewExtended}
+                            isReviewImproved={this.props.isReviewImproved}
+                            reviewType={this.props.reviewType}
                             decodeTextFn={this.props.decodeTextFn}
                             tagModesEnabled={this.props.tagModesEnabled}
                             speech2textEnabledFn={this.props.speech2textEnabledFn}
@@ -191,6 +194,7 @@ class SegmentBody extends React.Component {
                             beforeRenderOrUpdate={this.beforeRenderOrUpdate}
                             locked={this.props.locked}
                             readonly={this.props.readonly}
+                            openSegment={this.props.openSegment}
                             removeSelection={this.props.removeSelection}
                         />
 

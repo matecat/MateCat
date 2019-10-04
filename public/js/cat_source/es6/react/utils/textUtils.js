@@ -8,7 +8,6 @@ let TAGS_UTILS =  {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function (str) {
-        // if(!UI.hiddenTextEnabled) return str;
         let _str = str;
         // if(UI.markSpacesEnabled) {
         //     if(jumpSpacesEncode) {

@@ -58,11 +58,11 @@ $.extend(UI, {
                         }
                     },
                     "gotoCurrent": {
-                        "label": "Go to current segment",
+                        "label": "Go to current segment and focus on target",
                         "equivalent": "",
                         "keystrokes": {
-                            "standard": "ctrl+home",
-                            "mac": "meta+shift+up",
+                            "standard": "ctrl+shift+f",
+                            "mac": "meta+shift+f",
                         }
                     },
                     "copySource": {
@@ -90,7 +90,7 @@ $.extend(UI, {
                         }
                     },
                     "openSearch": {
-                        "label": "Open/Close search panel",
+                        "label": "Open search panel",
                         "equivalent": "",
                         "keystrokes": {
                             "standard": "ctrl+f",
@@ -119,6 +119,22 @@ $.extend(UI, {
                         "keystrokes": {
                             "standard": "ctrl+shift+s",
                             "mac": "Meta+shift+s",
+                        }
+                    },
+                    "openComments": {
+                        "label": "Open comments in current segment",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "ctrl+shift+c",
+                            "mac": "Meta+shift+c",
+                        }
+                    },
+                    "openIssuesPanel": {
+                        "label": "Open issues panel",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "ctrl+shift+a",
+                            "mac": "Meta+shift+a",
                         }
                     },
                     "copyContribution1": {
@@ -159,6 +175,22 @@ $.extend(UI, {
                         "keystrokes": {
                             "standard": "alt+t",
                             "mac": "alt+t",
+                        }
+                    },
+                    "navigateIssues": {
+                        "label": "Navigate issues penel to add one",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "ctrl+alt+arrows-enter",
+                            "mac": "Meta+alt+arrows",
+                        }
+                    },
+                    "navigateTabs": {
+                        "label": "Navigate segments Tabs",
+                        "equivalent": "",
+                        "keystrokes": {
+                            "standard": "alt + s",
+                            "mac": "alt + s",
                         }
                     }
                 }

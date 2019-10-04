@@ -170,7 +170,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
                     basePath + 'cat_source/ui.editarea.js',
-                    basePath + 'cat_source/ui.scrollsegment.js',
                     basePath + 'cat_source/ui.classes.js',
                     basePath + 'cat_source/ui.init.js',
                     basePath + 'cat_source/ui.render.js',
@@ -192,9 +191,8 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.customization.js',
                     // basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/ui.offline.js',
-                    basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/ui.opensegment.js',
-                    basePath + 'cat_source/sse.js',
+                    //basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/db.js',
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
@@ -231,7 +229,6 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery.powertip.min.js',
                     basePath + 'lib/jquery-dateFormat.min.js',
                     // basePath + 'lib/handlebars.runtime-v4.0.5.js',
-                    basePath + 'lib/jquery.waypoints.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',
@@ -362,6 +359,8 @@ module.exports = function(grunt) {
             js: {
                 files: [
                     basePath + 'cat_source/*.js',
+                    basePath + 'cat_source/review/*.js',
+                    basePath + 'cat_source/review_extended/*.js',
                     basePath + 'tm.js',
                     basePath + 'login.js',
                     basePath + 'advancedOptionsTab.js'

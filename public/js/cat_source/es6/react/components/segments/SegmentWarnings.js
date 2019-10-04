@@ -2,8 +2,8 @@
  * React Component for the warnings.
 
  */
-var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
+const React = require('react');
+const Immutable = require('immutable');
 
 class SegmentWarnings extends React.Component {
 
@@ -16,6 +16,10 @@ class SegmentWarnings extends React.Component {
     }
 
     componentWillUnmount() {
+    }
+
+    shouldComponentUpdate(nextProps) {
+        return !Immutable.fromJS(this.props.warnings).equals(Immutable.fromJS(nextProps.warnings))
     }
 
     render() {

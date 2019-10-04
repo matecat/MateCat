@@ -8,6 +8,8 @@ var EditArea = require('./Editarea').default;
 var TagsMenu = require('./TagsMenu').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
+const SegmentButtons = require('./SegmentButtons').default;
+const QaBlacklist = require('./utils/qaCheckBlacklistUtils');
 
 
 class SegmentTarget extends React.Component {
@@ -15,16 +17,14 @@ class SegmentTarget extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            translation: this.props.segment.decoded_translation,
             originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
                 : this.props.segment.translation),
-            showTagsMenu: false
+            showTagsMenu: false,
         };
         this.replaceTranslation = this.replaceTranslation.bind(this);
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
-        this.toggleTagLock = this.toggleTagLock.bind(this);
         this.showTagsMenu = this.showTagsMenu.bind(this);
         this.hideTagsMenu = this.hideTagsMenu.bind(this);
     }
@@ -35,12 +35,6 @@ class SegmentTarget extends React.Component {
                 translation: translation
             });
         }
-    }
-
-    toggleTagLock(sid, source) {
-        this.setState({
-            translation: this.props.segment.decoded_translation
-        });
     }
 
     showTagsMenu(sid) {
@@ -68,18 +62,18 @@ class SegmentTarget extends React.Component {
     }
 
     beforeRenderActions() {
-        var area = $("#segment-" + this.props.segment.sid + " .targetarea");
-        this.props.beforeRenderOrUpdate(area);
+        this.props.beforeRenderOrUpdate(this.props.segment.translation);
     }
 
     afterRenderActions() {
-        var area = $("#segment-" + this.props.segment.sid + " .targetarea");
-        this.props.afterRenderOrUpdate(area);
+        this.props.afterRenderOrUpdate(this.props.segment.translation);
     }
 
     onClickEvent(event) {
         if (this.props.readonly) {
             UI.handleClickOnReadOnly($(event.currentTarget).closest('section'));
+        } else {
+            this.props.openSegment();
         }
     }
 
@@ -96,7 +90,6 @@ class SegmentTarget extends React.Component {
             });
         } else {
             this.props.removeSelection();
-            UI.editAreaClick(event.currentTarget);
         }
     }
 
@@ -112,15 +105,26 @@ class SegmentTarget extends React.Component {
             UI.updateSegmentTranslationFn();
         }
         SegmentActions.lockEditArea(this.props.segment.sid, this.props.segment.fid);
-
-    }
-
-    decodeTranslation(segment, translation) {
-        return this.props.decodeTextFn(segment, translation);
     }
 
     allowHTML(string) {
         return {__html: string};
+    }
+
+    sendTranslationUpdate() {
+        if (this.editArea && this.props.segment.modified ) {
+            let textToSend = this.editArea.editAreaRef.innerHTML;
+            let sid = this.props.segment.sid;
+            SegmentActions.replaceEditAreaTextContent(sid, null, textToSend);
+        }
+    }
+
+    sendTranslationWithoutUpdate() {
+        if (this.editArea && this.props.segment.modified ) {
+            let textToSend = this.editArea.editAreaRef.innerHTML;
+            let sid = this.props.segment.sid;
+            SegmentActions.updateTranslation(sid, textToSend);
+        }
     }
 
     getAllIssues() {
@@ -207,10 +211,12 @@ class SegmentTarget extends React.Component {
 
 
                 <EditArea
+                    ref={(ref) => this.editArea = ref}
                     segment={this.props.segment}
                     translation={translation}
                     locked={this.props.locked}
                     readonly={this.props.readonly}
+                    sendTranslationWithoutUpdate={this.sendTranslationWithoutUpdate.bind(this)}
                 />
                 { this.state.showTagsMenu ? (
 
@@ -244,11 +250,21 @@ class SegmentTarget extends React.Component {
         return textAreaContainer;
     }
 
+    markTranslation(translation) {
+        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.target) {
+            translation = LXQ.highLightText(translation, this.props.segment.lexiqa.target, true, false, true );
+        }
+        if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
+            translation = QaBlacklist.markBlacklistItemsInSegment(translation, this.props.segment.qaBlacklistGlossary);
+        }
+        if ( this.props.segment.search && Object.size(this.props.segment.search) > 0 && this.props.segment.search.target) {
+            translation = SearchUtils.markText(translation, this.props.segment.search, false, this.props.segment.sid);
+        }
+        return translation
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
-        // SegmentStore.addListener(SegmentConstants.TRANSLATION_EDITED, this.replaceTranslation);
-        SegmentStore.addListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
-        SegmentStore.addListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
         SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
         SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
@@ -258,38 +274,43 @@ class SegmentTarget extends React.Component {
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
-        // SegmentStore.removeListener(SegmentConstants.TRANSLATION_EDITED, this.replaceTranslation);
-        SegmentStore.removeListener(SegmentConstants.DISABLE_TAG_LOCK, this.toggleTagLock);
-        SegmentStore.removeListener(SegmentConstants.ENABLE_TAG_LOCK, this.toggleTagLock);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
         SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
     }
 
-    componentWillMount() {
-        this.beforeRenderActions();
-    }
-
-    componentWillUpdate() {
-        this.beforeRenderActions();
-    }
-
     componentDidUpdate() {
         this.afterRenderActions();
+        if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
+            $(this.target).find('.blacklistItem').each((index, item)=>QaBlacklist.powerTipFn(item, this.props.segment.qaCheckGlossary));
+        }
+    }
+
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+        this.beforeRenderActions();
+        return null;
     }
 
     render() {
-        let translation = this.state.translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
+        let translation = this.props.segment.decoded_translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
+        let buttonsDisabled = false;
+        translation = this.markTranslation(translation);
 
+        if (translation.trim().length === 0) {
+            buttonsDisabled = true;
+        }
 
         return (
-            <div className="target item" id={"segment-" + this.props.segment.sid + "-target"}>
+            <div className="target item" id={"segment-" + this.props.segment.sid + "-target"} ref={(target)=>this.target=target}>
 
                 {this.getTargetArea(translation)}
                 <p className="warnings"/>
 
-                <ul className="buttons toggle" data-mount="main-buttons"
-                    id={"segment-" + this.props.segment.sid + "-buttons"}/>
+                <SegmentButtons
+                    disabled={buttonsDisabled}
+                    {...this.props}
+                    updateTranslation={this.sendTranslationUpdate.bind(this)}
+                />
 
                 {this.props.segment.warnings ?
                     <SegmentWarnings

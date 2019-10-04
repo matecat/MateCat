@@ -1,6 +1,6 @@
 let AppDispatcher = require('../dispatcher/AppDispatcher');
 let CattolConstants = require('../constants/CatToolConstants');
-
+let Notifications = require('../sse/sse');
 
 let CatToolActions = {
 
@@ -69,6 +69,9 @@ let CatToolActions = {
         AppDispatcher.dispatch({
             actionType: CattolConstants.CLOSE_SEARCH
         });
+    },
+    startNotifications: function ( ) {
+        Notifications.start();
     }
 };
 

@@ -3,16 +3,7 @@ class ReviewExtendedCategorySelector extends React.Component{
 
     constructor(props) {
         super(props);
-        this.state = {
-            value : this.props.selectedValue
-        };
-
     }
-
-    componentWillReceiveProps(nextProps) {
-        this.setState({ value: nextProps.selectedValue });
-    }
-
     componentDidMount(){
     	$(this.selectRef).dropdown({
             // direction: "auto",
@@ -38,7 +29,13 @@ class ReviewExtendedCategorySelector extends React.Component{
         // subcategories. Don't print the select box if no severity is found.
         let select = null;
         let severities;
-        let containerClass = (this.props.category.severities > 0) ? "" : "severity-buttons" ;
+
+        let containerClasses = classnames({
+            "re-item": true,
+            "re-category-item": true,
+            "severity-buttons" : (this.props.category.severities.length > 0),
+            "active" : this.props.active
+        });
         if ( this.props.category.severities.length > 3 ) {
             severities = this.props.category.severities.map((severity, i) =>{
                 return <div onClick={this.onChangeSelect.bind(this)}
@@ -50,7 +47,7 @@ class ReviewExtendedCategorySelector extends React.Component{
 
             select = <div className="ui icon top right pointing dropdown basic tiny button"
                 ref={(input) => { this.selectRef = input;}}
-                data-value={this.state.value}
+                data-value={this.props.selectedValue}
                 autoFocus={this.props.focus}
                 name="severities"
                 title="Select severities">
@@ -63,11 +60,18 @@ class ReviewExtendedCategorySelector extends React.Component{
         } else {
 
             severities = this.props.category.severities.map((severity, i) =>{
-                let buttonClass = (i === 0 && this.props.category.severities.length > 1) ?  'left' :
-                    ( i === this.props.category.severities.length - 1 || this.props.category.severities.length === 1) ? 'right' : '';
+                let buttonClass = classnames({
+                    "ui": true,
+                    "attached": true,
+                    "button": true,
+                    "left": (i === 0 && this.props.category.severities.length > 1),
+                    "right": ( i === this.props.category.severities.length - 1 || this.props.category.severities.length === 1),
+                    "active": this.props.active && i === this.props.severityActiveIndex
+                });
+
                 return <button key={'value-' + severity.label}
                                onClick={this.onClick.bind(this, severity.label)}
-                               className={"ui " + buttonClass + " attached button"}
+                               className={buttonClass}
                                title={severity.label}>{severity.label.substring(0,3)}
                 </button>;
             });
@@ -79,7 +83,7 @@ class ReviewExtendedCategorySelector extends React.Component{
             </div>;
 
         }
-        return <div className={"re-item re-category-item " + containerClass}>
+        return <div className={containerClasses}>
             <div className="re-item-box re-error">
                 <div className="error-name">
                     {/*{this.props.category.options && this.props.category.options.code ? (*/}

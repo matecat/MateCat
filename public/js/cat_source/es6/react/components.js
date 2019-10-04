@@ -10,7 +10,7 @@ window.classnames = require('classnames');
 window.Review_QualityReportButton = require('./components/review/QualityReportButton').default ;
 
 window.SubHeaderContainer = require('./components/header/cattol/SubHeaderContainer').default ;
-window.SegmentFilter = require('./components/header/cattol/segment_filter/SegmentsFilter').default;
+window.SegmentFilter = require('./components/header/cattol/segment_filter/segment_filter');
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
 window.ManageConstants = require('./constants/ManageConstants');
@@ -66,9 +66,15 @@ window.SegmentFooter = require('./components/segments/SegmentFooter').default;
 window.SegmentTabMatches = require('./components/segments/SegmentFooterTabMatches').default;
 window.SegmentTabMessages = require('./components/segments/SegmentFooterTabMessages').default;
 window.SegmentWarnings = require('./components/segments/SegmentWarnings').default;
+window.SegmentButtons = require('./components/segments/SegmentButtons').default;
+
+window.CommentsActions = require('./actions/CommentsActions');
+window.CommentsStore = require('./stores/CommentsStore');
+
 
 window.TranslationIssuesSideButton = require('./components/review/TranslationIssuesSideButton').default;
 
 window.SearchUtils = require('./components/header/cattol/search/searchUtils');
-
+window.QaCheckGlossary = require('./components/segments/utils/qaCheckGlossaryUtils');
+window.QaCheckBlacklist = require('./components/segments/utils/qaCheckBlacklistUtils');
 

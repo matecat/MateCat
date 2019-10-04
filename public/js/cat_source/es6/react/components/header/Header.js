@@ -12,7 +12,8 @@ class Header extends React.Component {
 		super(props);
 		this.state = {
 			teams: [],
-			selectedTeamId: null
+			selectedTeamId: null,
+			user: this.props.user
 		};
 	}
 
@@ -20,6 +21,7 @@ class Header extends React.Component {
 		TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
 		TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
 		TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.addListener(TeamConstants.UPDATE_USER, this.updateUser);
 		this.initProfileDropdown();
 	}
 
@@ -76,13 +78,18 @@ class Header extends React.Component {
 		$('#modal').trigger('openlogin');
 	}
 
-
+    updateUser = (user) => {
+        this.setState({
+            user : user
+        });
+        setTimeout(this.initProfileDropdown)
+    }
 	getUserIcon = () => {
 		if (this.props.loggedUser) {
-			if (this.props.user.metadata && this.props.user.metadata.gplus_picture) {
+			if (this.state.user.metadata && this.state.user.metadata.gplus_picture) {
 				return 	<div className={"ui dropdown"} ref={(dropdownProfile) => this.dropdownProfile = dropdownProfile} id={"profile-menu"}>
 							<img className="ui mini circular image ui-user-top-image"
-								 src={this.props.user.metadata.gplus_picture + "?sz=80"} title="Personal settings"
+								 src={this.state.user.metadata.gplus_picture + "?sz=80"} title="Personal settings"
 								 alt="Profile picture"/>
 							<div className="menu">
 								<div className="item" data-value="profile" id="profile-item" onClick={this.openPreferencesModal.bind(this)}>Profile</div>

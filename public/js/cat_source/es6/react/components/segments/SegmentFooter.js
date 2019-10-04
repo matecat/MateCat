@@ -23,7 +23,8 @@ class SegmentFooter extends React.Component {
         else {
             tMLabel = 'Translation Matches' + " (No MT) ";
         }
-        this.tabs = {
+        let hideMatches = this.getHideMatchesCookie();
+        let tabs = {
             matches: {
                 label: tMLabel,
                 code : 'tm',
@@ -55,18 +56,18 @@ class SegmentFooter extends React.Component {
                 label : 'Translation conflicts',
                 code : 'al',
                 tab_class : 'alternatives',
-                enabled : false,
-                visible : false,
-                open : false,
+                enabled : !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0),
+                visible : !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0),
+                open : !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0),
                 elements : []
             },
             messages: {
                 label : 'Messages',
                 code : 'notes',
                 tab_class : 'segment-notes',
-                enabled : !!(this.props.segment.notes && this.props.segment.notes.length > 0) || !!this.props.segment.context_groups,
-                visible : !!(this.props.segment.notes && this.props.segment.notes.length > 0) || !!this.props.segment.context_groups,
-                open : !!(this.props.segment.notes && this.props.segment.notes.length > 0),
+                enabled : false,
+                visible : false,
+                open : false,
                 elements : []
             },
             multiMatches: {
@@ -90,37 +91,49 @@ class SegmentFooter extends React.Component {
         };
 
         this.state = {
-            tabs: {}
+            tabs: this.registerTabInit(tabs, SegmentStore._footerTabsConfig.toJS()),
+            hideMatches: hideMatches
         };
+        this.selectedTab = 0;
         this.registerTab = this.registerTab.bind(this);
         this.modifyTabVisibility = this.modifyTabVisibility.bind(this);
-        this.createFooter = this.createFooter.bind(this);
         this.getTabContainer = this.getTabContainer.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.openTab = this.openTab.bind(this);
         this.addTabIndex = this.addTabIndex.bind(this);
-        this.setDefaultTabOpen = this.setDefaultTabOpen.bind(this);
+        this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this);
+        // this.setDefaultTabOpen = this.setDefaultTabOpen.bind(this);
     }
 
-    registerTab(tabName, visible, open) {
-        this.tabs[tabName].visible = visible;
-        // Ensure there is only one tab open.
-        if (open === true) {
-            for (let key in this.tabs) {
-                this.tabs[key].open = false;
-            }
+    registerTabInit(tabs,configs) {
+        let allTabs = tabs;
+        for(let key in configs){
+            allTabs[key].open = (this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0) ? false : configs[key].open;
+            allTabs[key].visible = configs[key].visible;
+            allTabs[key].enabled = true;
         }
-        this.tabs[tabName].open = this.state.hideMatches ? false : open;
-        this.tabs[tabName].enabled = true;
+        if ( this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0 )  {
+            tabs.alternatives.visible = !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0);
+            tabs.alternatives.enabled = !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0);
+            tabs.alternatives.open = !!(this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0);
+        }
+        return allTabs
+    }
+
+    registerTab(tabs,configs) {
+        let allTabs = _.cloneDeep(this.state.tabs);
+        for(let key in configs){
+            allTabs[key].open = configs[key].open;
+            allTabs[key].visible = configs[key].visible;
+            allTabs[key].enabled = true;
+        }
+        this.setState({
+            tabs: allTabs
+        });
     }
 
     modifyTabVisibility(tabName, visible) {
-        let tabs;
-        if ( this.state.tabs.tabName ) {
-            tabs = _.cloneDeep(this.state.tabs);
-        } else {
-            tabs = this.tabs;
-        }
+        let tabs = _.cloneDeep(this.state.tabs);
         tabs[tabName].visible = visible;
         tabs[tabName].enabled = visible;
         if ( _.size(this.state.tabs) ) {
@@ -129,14 +142,6 @@ class SegmentFooter extends React.Component {
             });
         }
 
-    }
-
-    createFooter(sid) {
-        if (this.props.sid == sid) {
-            this.setState({
-                tabs: this.tabs
-            });
-        }
     }
 
     getTabContainer(tab, active_class) {
@@ -158,7 +163,9 @@ class SegmentFooter extends React.Component {
                     code = {tab.code}
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
-                    id_segment = {this.props.sid}/>;
+                    id_segment = {this.props.sid}
+                    segment = {this.props.segment}
+                />;
                 break;
             case 'gl':
                 return <SegmentTabGlossary
@@ -166,7 +173,8 @@ class SegmentFooter extends React.Component {
                     code = {tab.code}
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
-                    id_segment = {this.props.sid}/>;
+                    id_segment = {this.props.sid}
+                    segment = {this.props.segment}/>;
                 break;
             case 'al':
                 return <SegmentTabConflicts
@@ -174,7 +182,9 @@ class SegmentFooter extends React.Component {
                     code = {tab.code}
                     active_class = {open_class}
                     tab_class = {tab.tab_class}
-                    id_segment = {this.props.sid}/>;
+                    segment = {this.props.segment}
+                    id_segment = {this.props.sid}
+                />;
                 break;
             case 'notes':
                 return <SegmentTabMessages
@@ -185,7 +195,9 @@ class SegmentFooter extends React.Component {
                     id_segment = {this.props.sid}
                     notes={this.props.segment.notes}
                     context_groups={this.props.segment.context_groups}
-                    segmentSource = {this.props.segment.segment}/>;
+                    segmentSource = {this.props.segment.segment}
+                    segment = {this.props.segment}
+                />;
                 break;
             case 'cl':
                 return <SegmentFooterMultiMatches
@@ -220,15 +232,16 @@ class SegmentFooter extends React.Component {
             tabs: tabs
         });
     }
-    setDefaultTabOpen( sid, tabName) {
-        if (this.tabs[tabName]) {
-            //Close all tabs
-            for ( let item in this.tabs ) {
-                this.tabs[item].open = false
-            }
-            this.tabs[tabName].open = true;
-        }
-    }
+    // setDefaultTabOpen( sid, tabName) {
+    //     let tabs = jQuery.extend(true, {}, this.state.tabs);
+    //     if (tabs[tabName]) {
+    //         //Close all tabs
+    //         for ( let item in tabs ) {
+    //             tabs[item].open = false
+    //         }
+    //         tabs[tabName].open = true;
+    //     }
+    // }
     openTab(sid, tabCode) {
         // Todo: refactoring, no jquery
         if (this.props.sid === sid ) {
@@ -281,33 +294,48 @@ class SegmentFooter extends React.Component {
             this.setHideMatchesCookie(false);
         }
         tabs[tabName] = tab;
+        //Update selected Tab
+        let tabsEnabled = _.filter(this.state.tabs, (tab)=>tab.visible);
+        this.selectedTab = _.findIndex(tabsEnabled, (elem)=>tab.code === elem.code );
 
         this.setState({
             tabs: tabs
         });
     }
+
+    getNextTab() {
+        let idx = this.selectedTab;
+        let tabs = _.filter( this.state.tabs, (tab)=>tab.visible );
+        let tabIndex = (idx + 1) % tabs.length;
+        let tabToOpen = tabs[tabIndex];
+        tabToOpen = Object.keys( this.state.tabs ).find( key => this.state.tabs[key].code === tabToOpen.code );
+        this.selectedTab = tabIndex;
+        this.changeTab( tabToOpen, true );
+    }
+
+    handleShortcutsKeyDown(e) {
+        if ( this.props.segment.opened && e.altKey && e.key === 's' ) {
+            this.getNextTab();
+        }
+    }
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
+        document.addEventListener('keydown', this.handleShortcutsKeyDown);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.addListener(SegmentConstants.MODIFY_TAB_VISIBILITY, this.modifyTabVisibility);
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.addListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
-        SegmentStore.addListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
+        // SegmentStore.addListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
+        document.removeEventListener('keydown', this.handleShortcutsKeyDown);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
         SegmentStore.removeListener(SegmentConstants.MODIFY_TAB_VISIBILITY, this.modifyTabVisibility);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.removeListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.removeListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
-        SegmentStore.removeListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
-    }
-
-    componentWillMount() {
-
+        // SegmentStore.removeListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
     }
 
     allowHTML(string) {
@@ -336,6 +364,8 @@ class SegmentFooter extends React.Component {
                 return _.isUndefined(this.props.segment.cl_contributions) ||
                     (_.isUndefined(this.props.segment.cl_contributions.matches) &&
                     this.props.segment.cl_contributions.errors.length === 0);
+            case 'gl':
+                return _.isUndefined(this.props.segment.glossary);
             default:
                 return false;
         }
@@ -347,6 +377,8 @@ class SegmentFooter extends React.Component {
                 return this.props.segment.contributions.matches.length;
             case 'cl':
                 return this.props.segment.cl_contributions.matches.length;
+            case 'gl':
+                return Object.size(this.props.segment.glossary);
             default:
                 return tab.index;
         }

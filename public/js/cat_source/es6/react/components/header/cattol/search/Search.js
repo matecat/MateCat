@@ -71,14 +71,12 @@ class Search extends React.Component {
         }
     }
 
-
-
     handleCancelClick() {
         this.dropdownInit = false;
         UI.body.removeClass('searchActive');
-        this.handleClearClick();
+        this.handleClearClick()
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
-            UI.gotoOpenSegment();
+            setTimeout(()=>SegmentActions.scrollToSegment(UI.currentSegmentId));
         } else {
             UI.render({
                 firstLoad: false,
@@ -87,20 +85,20 @@ class Search extends React.Component {
         }
 
         this.resetStatusFilter();
-        let segment = UI.currentSegment;
         setTimeout(() => {
             CatToolActions.closeSubHeader();
-            UI.markGlossaryItemsInSource(segment, UI.cachedGlossaryData.sid);
+            SegmentActions.removeSearchResultToSegments();
             this.setState(_.cloneDeep(this.defaultState));
         });
     }
 
     handleClearClick() {
         this.dropdownInit = false;
-        SearchUtils.clearSearchMarkers();
+        // SearchUtils.clearSearchMarkers();
         this.resetStatusFilter();
         setTimeout(() => {
             this.setState(_.cloneDeep(this.defaultState));
+            SegmentActions.removeSearchResultToSegments();
             SearchUtils.updateSearchItemsCount();
         });
     }
@@ -135,24 +133,26 @@ class Search extends React.Component {
             return false;
         }
 
-        if (UI.searchMode !== 'onlyStatus') {
+        // todo: redo marksearchresults on the target
+        let mark = $("mark.currSearchItem");
+        mark.text(this.state.search.replaceTarget);
+        let $segment = mark.parents('section');
+        mark.replaceWith(mark.text());
+        let segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment));
+        SegmentActions.modifiedTranslation(segment.sid, null, true, $segment.find('.targetarea').html() );
+        let status = segment.status;
 
-            // todo: redo marksearchresults on the target
-
-            $("mark.currSearchItem").text(this.state.search.replaceTarget);
-            let segment = $("mark.currSearchItem").parents('section');
-            let status = UI.getStatus(segment);
-
+        setTimeout(()=>
             UI.setTranslation({
-                id_segment: $(segment).attr('id').split('-')[1],
+                id_segment: segment.original_sid,
                 status: status,
                 caller: 'replace'
-            });
+            })
+        );
 
-            SearchUtils.updateSearchDisplayCount(segment);
+        SearchUtils.updateSearchDisplayCount($segment);
 
-            if (SearchUtils.numSearchResultsSegments > 1) SearchUtils.gotoNextResultItem(true);
-        }
+        if (SearchUtils.numSearchResultsSegments > 1) this.goToNext();
     }
 
     handleStatusChange(value) {
@@ -296,13 +296,14 @@ class Search extends React.Component {
         return html;
     }
     handelKeydownFunction(event){
-
-        if(event.keyCode === 27) {
-            this.handleCancelClick();
-        } else if (event.keyCode === 13 && $(event.target).closest(".find-container").length > 0){
-            if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" )  {
-                event.preventDefault();
-                this.handleSubmit();
+        if ( this.props.active ) {
+            if ( event.keyCode === 27 ) {
+                this.handleCancelClick();
+            } else if ( event.keyCode === 13 && $( event.target ).closest( ".find-container" ).length > 0 ) {
+                if ( this.state.search.searchTarget !== "" || this.state.search.searchSource !== "" ) {
+                    event.preventDefault();
+                    this.handleSubmit();
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 let CatToolConstants = require('../../../../constants/CatToolConstants');
 let CatToolStore = require('../../../../stores/CatToolStore');
+let SegmentFilterUtils = require('./segment_filter');
 
 class SegmentsFilter extends React.Component {
     constructor(props) {
@@ -20,6 +21,8 @@ class SegmentsFilter extends React.Component {
         this.moreFilterSelectChanged = this.moreFilterSelectChanged.bind(this);
         this.doSubmitFilter = this.doSubmitFilter.bind(this);
         this.dropdownInitialized = false;
+
+        SegmentFilterUtils.initEvents();
 
     }
 
@@ -68,7 +71,7 @@ class SegmentsFilter extends React.Component {
 
     clearClick(e) {
         e.preventDefault();
-        SegmentFilter.clearFilter();
+        SegmentFilterUtils.clearFilter();
         this.resetState();
         $(this.filtersDropdown).dropdown('restore defaults');
         $(this.dataSampleDropDown).dropdown('restore defaults');
@@ -79,7 +82,7 @@ class SegmentsFilter extends React.Component {
     closeClick(e) {
         e.preventDefault();
         this.dropdownInitialized = false;
-        SegmentFilter.closeFilter();
+        SegmentFilterUtils.closeFilter();
     }
 
     doSubmitFilter(segmentToOpen = null) {
@@ -99,7 +102,7 @@ class SegmentsFilter extends React.Component {
 
         }
         if ( sample || this.state.selectedStatus !== "" ) {
-            SegmentFilter.filterSubmit({
+            SegmentFilterUtils.filterSubmit({
                 status: this.state.selectedStatus,
                 sample: sample,
                 revision_number: this.state.revisionNumber
@@ -116,7 +119,7 @@ class SegmentsFilter extends React.Component {
             this.setState({
                 filtering: false,
             });
-            setTimeout(()=>SegmentFilter.clearFilter());
+            setTimeout(()=>SegmentFilterUtils.clearFilter());
         }
     }
 
@@ -208,7 +211,8 @@ class SegmentsFilter extends React.Component {
         }
     }
 
-    selectAllSegments() {
+    selectAllSegments(event) {
+        event.stopPropagation();
         SegmentActions.setBulkSelectionSegments(this.state.segmentsArray.slice(0));
     }
 
@@ -428,7 +432,7 @@ class SegmentsFilter extends React.Component {
                             </div>
                             {this.state.filteredCount > 0 ? (
                             <div className="select-all-filter">
-                                <button href="#" ref={(button)=>this.selectAllButton=button} onClick={this.selectAllSegments.bind(this)}>Select All</button>
+                                <button href="#" ref={(button)=>this.selectAllButton=button} onClick={(event)=>this.selectAllSegments(event)}>Select All</button>
                             </div>
                             ): (null)}
                         </div>

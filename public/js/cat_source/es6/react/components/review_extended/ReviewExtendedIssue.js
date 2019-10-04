@@ -1,4 +1,3 @@
-let ReviewVersionDiff =  require("./ReviewVersionsDiff").default;
 let SegmentConstants = require('../../constants/SegmentConstants');
 class ReviewExtendedIssue extends React.Component {
 

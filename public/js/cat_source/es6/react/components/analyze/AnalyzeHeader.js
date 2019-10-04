@@ -1,5 +1,4 @@
-let CSSTransitionGroup = React.addons.CSSTransitionGroup;
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
+let {TransitionGroup, CSSTransition} = require('react-transition-group');
 
 class AnalyzeHeader extends React.Component {
 
@@ -34,7 +33,7 @@ class AnalyzeHeader extends React.Component {
                 </div>
             </div>;
 
-        } else if ( (status === 'NEW') || (status === '') || in_queue_before > 0 ) {
+        } else if ( (status === 'NEW') || (status === 'BUSY') ||(status === '') || in_queue_before > 0 ) {
             if ( config.daemon_warning ) {
 
                 html = this.errorAnalysisHtml();
@@ -58,6 +57,15 @@ class AnalyzeHeader extends React.Component {
                         </div>
                     </div>
                 }
+            } else {
+                html = <div className="analysis-create">
+                    <div className="search-tm-matches">
+                        <div style={{top: '-12px'}} className="ui active inline loader right-15"/>
+                        <span className="complete">Please wait...
+                             <p className="label">There are other projects in queue. </p>
+                            </span>
+                    </div>
+                </div>
             }
             this.previousQueueSize = in_queue_before;
 
@@ -134,13 +142,19 @@ class AnalyzeHeader extends React.Component {
     getProgressBar() {
         if (this.showProgressBar) {
             let width = ((this.props.data.get('SEGMENTS_ANALYZED') / this.props.data.get('TOTAL_SEGMENTS')) * 100) + '%';
-            return <div className="progress-bar">
-                    <div className="progr">
-                        <div className="meter">
-                            <a className="approved-bar translate-tooltip"  data-html={'Approved ' + width}  style={{width: width}}/>
+            return <div className="progress sixteen wide column">
+                <TransitionGroup>
+                <CSSTransition key={0} classNames="transition" timeout={{ enter: 500, exit: 300 }} >
+                    <div className="progress-bar">
+                        <div className="progr">
+                            <div className="meter">
+                                <a className="approved-bar translate-tooltip"  data-html={'Approved ' + width}  style={{width: width}}/>
+                            </div>
                         </div>
                     </div>
-                </div>;
+                </CSSTransition>
+                </TransitionGroup>
+            </div>;
         }
         return null
 
@@ -263,13 +277,10 @@ class AnalyzeHeader extends React.Component {
             <div className="seven wide right floated column">
                 {wordsCountHtml}
             </div>
-            <CSSTransitionGroup component="div" className="progress sixteen wide column"
-                                transitionName="transition"
-                                transitionEnterTimeout={500}
-                                transitionLeaveTimeout={500}
-            >
-                {this.getProgressBar()}
-            </CSSTransitionGroup>
+
+
+            {this.getProgressBar()}
+
 
 
         </div>;

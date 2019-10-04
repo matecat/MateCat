@@ -2,13 +2,20 @@ let ReviewExtendedCategorySelector = require('./ReviewExtendedCategorySelector')
 class ReviewExtendedIssuePanel extends React.Component{
 
     constructor(props) {
-        super(props);
+        super( props );
+        this.issueCategoriesFlat = JSON.parse( config.lqa_flat_categories );
         this.state = {
-            submitDisabled : true
+            submitDisabled: true,
+            categorySelectedIndex: 0,
+            categorySelectedId: this.issueCategoriesFlat[0].id,
+            enableArrows: false,
+            severityIndex:0
         };
-        this.issueCategories = JSON.parse(config.lqa_nested_categories).categories;
-    }
+        this.issueCategories = JSON.parse( config.lqa_nested_categories ).categories;
 
+        this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this);
+        this.handleShortcutsKeyUp = this.handleShortcutsKeyUp.bind(this);
+    }
     sendIssue(category, severity) {
         this.props.setCreationIssueLoader(true);
         let data = [];
@@ -40,6 +47,7 @@ class ReviewExtendedIssuePanel extends React.Component{
             API.SEGMENT.setTranslation( segment )
                 .done( function ( response ) {
                     issue.version = response.translation.version_number;
+                    SegmentActions.setStatus(segment.sid, segment.id_file, segment.status);
                     SegmentActions.addClassToSegment(segment.sid , 'modified');
                     deferred.resolve();
                 } )
@@ -61,7 +69,7 @@ class ReviewExtendedIssuePanel extends React.Component{
                     });
                 } )
 				.fail( (response) => self.handleFail(response.responseJSON) ) ;
-		})
+		});
 
     }
 
@@ -95,6 +103,8 @@ class ReviewExtendedIssuePanel extends React.Component{
                     nested={false}
                     category={category}
                     sid={this.props.sid}
+                    active={this.state.enableArrows && this.state.categorySelectedId === category.id}
+                    severityActiveIndex={(this.state.enableArrows && this.state.categorySelectedId === category.id)? this.state.severityIndex : null}
                 />);
         }.bind(this));
 
@@ -124,6 +134,8 @@ class ReviewExtendedIssuePanel extends React.Component{
                             nested={true}
                             category={category}
                             sid={this.props.sid}
+                            active={this.state.enableArrows && this.state.categorySelectedId === category.id}
+                            severityActiveIndex={(this.state.enableArrows && this.state.categorySelectedId === category.id)? this.state.severityIndex : null}
                         />
                     );
                 } );
@@ -136,6 +148,8 @@ class ReviewExtendedIssuePanel extends React.Component{
                         nested={true}
                         category={category}
                         sid={this.props.sid}
+                        active={this.state.enableArrows && this.state.categorySelectedId === category.id}
+                        severityActiveIndex={(this.state.enableArrows && this.state.categorySelectedId === category.id)? this.state.severityIndex : null}
                     />
                 );
             }
@@ -147,6 +161,83 @@ class ReviewExtendedIssuePanel extends React.Component{
         }.bind(this));
 
         return categoryComponents;
+    }
+    getNextCategoryIndex(direction) {
+        let idx = this.state.categorySelectedIndex;
+        let length = this.issueCategoriesFlat.length;
+        switch (direction) {
+            case 'next': return (idx + 1) % length;
+            case 'prev': return (idx === 0) && length - 1 || idx - 1;
+            default:     return idx;
+        }
+    }
+    getNextSeverityIndex(direction) {
+        let idx = this.state.severityIndex;
+        let length = this.issueCategoriesFlat[this.state.categorySelectedIndex].severities.length;
+        switch (direction) {
+            case 'next': return (idx + 1) % length;
+            case 'prev': return (idx === 0) && length - 1 || idx - 1;
+            default:     return idx;
+        }
+    }
+    handleShortcutsKeyDown(e) {
+        if (e.ctrlKey && e.altKey && !this.state.enableArrows) {
+            this.setState({
+                enableArrows: true
+            });
+        }
+        if ( this.state.enableArrows && e.code === "ArrowDown" ){
+            let index = this.getNextCategoryIndex('next');
+            this.setState({
+                categorySelectedIndex: index,
+                categorySelectedId: this.issueCategoriesFlat[index].id,
+                severityIndex:0
+            });
+        } else if ( this.state.enableArrows && e.code === "ArrowUp" ){
+            let index = this.getNextCategoryIndex('prev');
+            this.setState({
+                categorySelectedIndex: index,
+                categorySelectedId: this.issueCategoriesFlat[index].id,
+                severityIndex:0
+            });
+        } else if ( this.state.enableArrows && e.code === "ArrowLeft" ){
+            let index = this.getNextSeverityIndex('prev');
+            this.setState({
+                severityIndex:index
+            });
+        } else if ( this.state.enableArrows && e.code === "ArrowRight" ){
+            let index = this.getNextSeverityIndex('next');
+            this.setState({
+                severityIndex:index
+            });
+        }
+        else if ( this.state.enableArrows && e.code === "Enter" ){
+            this.sendIssue(this.issueCategoriesFlat[this.state.categorySelectedIndex], this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[this.state.severityIndex]);
+            setTimeout(()=>SegmentActions.setFocusOnEditArea(), 1000);
+        }
+    }
+
+    handleShortcutsKeyUp(e) {
+        if ( (!e.ctrlKey || !e.altKey) && this.state.enableArrows ) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.setState({
+                enableArrows: false,
+                categorySelectedIndex: 0,
+                categorySelectedId: this.issueCategoriesFlat[0].id,
+                severityIndex: 0
+            });
+        }
+    }
+
+    componentDidMount() {
+        document.addEventListener('keydown', this.handleShortcutsKeyDown);
+        document.addEventListener('keyup', this.handleShortcutsKeyUp);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keyup', this.handleShortcutsKeyUp);
+        document.removeEventListener('keydown', this.handleShortcutsKeyDown);
     }
 
     render() {

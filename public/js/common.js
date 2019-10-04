@@ -6,6 +6,7 @@ APP = {
         if (config.isLoggedIn) {
             var self = this;
             APP.USER.loadUserData().done(function ( ) {
+                TeamsActions.updateUser(APP.USER.STORE);
                 self.setTeamNameInMenu();
                 self.setUserImage();
             });
@@ -44,7 +45,7 @@ APP = {
         } ).on( 'click', '.modal[data-type=confirm_checkbox] .btn-cancel, .modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function ( e ) {
             e.preventDefault();
             APP.closePopup();
-            el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
+            var el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
             if ( $( el ).attr( 'data-callback' ) ) {
                 if ( typeof UI[$( el ).attr( 'data-callback' )] === 'function' ) {
                     var context = $( el ).attr( 'data-context' ) || '';

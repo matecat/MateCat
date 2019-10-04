@@ -493,8 +493,7 @@ function ParsedHash( hash ) {
 
 function setBrowserHistoryBehavior() {
 
-    window.onpopstate = function() {
-        segmentId = location.hash.substr(1); // TODO: check this global var is no longer used and remove it
+    window.onpopstate = function(ev) {
 
         if ( UI.parsedHash.onlyActionRemoved( window.location.hash ) ) {
             return ;
@@ -508,7 +507,8 @@ function setBrowserHistoryBehavior() {
 
         function updateAppByPopState() {
             var segment = UI.getSegmentById( UI.parsedHash.segmentId );
-            if ( UI.currentSegmentId === UI.parsedHash.segmentId ) return;
+            var currentSegment = SegmentStore.getCurrentSegment();
+            if ( currentSegment.sid === UI.parsedHash.segmentId ) return;
             if ( segment.length ) {
                 UI.gotoSegment( UI.parsedHash.segmentId );
             } else {
@@ -963,10 +963,10 @@ if (typeof String.prototype.endsWith !== 'function') {
     };
 }
 
-function isTranslated(section) {
+function isTranslated(segment) {
     return ! (
-        section.hasClass('status-new') ||
-        section.hasClass('status-draft')
+        segment.status === 'NEW' ||
+        segment.status === 'DRAFT'
     );
 }
 

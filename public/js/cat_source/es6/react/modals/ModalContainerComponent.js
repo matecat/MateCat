@@ -15,10 +15,6 @@ class ModalComponent extends React.Component {
         }
     }
 
-    componentWillMount() {
-
-    }
-
     componentDidMount() {
         $("body").addClass("side-popup");
     }

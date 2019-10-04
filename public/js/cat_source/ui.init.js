@@ -9,7 +9,6 @@ $.extend(UI, {
         // of SegmentFilter, see below.
         UI.firstLoad = true;
         UI.body = $('body');
-        UI.checkSegmentsArray = {} ;
         UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
         UI.checkCrossLanguageSettings();
         UI.setShortcuts();
@@ -37,13 +36,12 @@ $.extend(UI, {
             $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();
         }
-        NOTIFICATIONS.start();
+        CatToolActions.startNotifications();
         UI.checkTagProximity =  _.debounce( UI.checkTagProximityFn, 500);
-        UI.updateSegmentTranslation =  _.debounce( UI.updateSegmentTranslationFn, 500);
+        UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
     },
 	init: function() {
 
-		this.registerFooterTabs();
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
 
@@ -53,25 +51,15 @@ $.extend(UI, {
 		this.numMatchesResults = 10;
 		this.editarea = '';
 		this.byButton = false;
-		this.blockGetMoreSegments = true;
-		this.noGlossary = false;
 		this.displayedMessages = [];
-		setTimeout(function() {
-			UI.blockGetMoreSegments = false;
-		}, 200);
+
 		this.loadCustomization();
         $('html').trigger('init');
         this.setTagMode();
-		this.detectFirstLast();
 		rangy.init();
 		this.savedSel = null;
 		this.savedSelActiveElement = null;
-		this.autoscrollCorrectionEnabled = true;
         this.offline = false;
-		setTimeout(function() {
-			UI.autoscrollCorrectionEnabled = false;
-		}, 2000);
-		this.checkSegmentsArray = {};
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.logEnabled = true;

@@ -4,6 +4,13 @@ let TeamConstants = require('../constants/TeamConstants');
 
 let TeamsActions = {
 
+    updateUser: function (user) {
+        AppDispatcher.dispatch({
+            actionType: TeamConstants.UPDATE_USER,
+            user: user
+        });
+    },
+
     renderTeams: function (teams, defaultTeam) {
         AppDispatcher.dispatch({
             actionType: TeamConstants.RENDER_TEAMS,

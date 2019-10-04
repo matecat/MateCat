@@ -2,17 +2,16 @@
  * React Component .
 
  */
-var React = require('react');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
+const React = require('react');
+const Immutable = require('immutable');
 
 class SegmentFooterMultiMatches extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            matches: undefined
-        };
+        // this.state = {
+        //     matches: (this.props.segment.cl_contributions) ? this.processContributions(this.props.segment.cl_contributions) : undefined
+        // };
         this.parseMatches = this.parseMatches.bind(this);
     }
 
@@ -103,7 +102,7 @@ class SegmentFooterMultiMatches extends React.Component {
 
     suggestionDblClick(match, index) {
         UI.editarea.focus();
-        UI.disableTPOnSegment();
+        UI.disableTPOnSegment(this.props.segment);
         setTimeout( () => {
             SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, this.props.segment.fid, match.translationDecodedHtml);
             SegmentActions.highlightEditarea(this.props.id_segment);
@@ -112,23 +111,30 @@ class SegmentFooterMultiMatches extends React.Component {
 
     componentDidMount() {
         this._isMounted = true;
-        SegmentStore.addListener(SegmentConstants.SET_CL_CONTRIBUTIONS, this.parseMatches);
     }
 
     componentWillUnmount() {
         this._isMounted = false;
-        SegmentStore.removeListener(SegmentConstants.SET_CL_CONTRIBUTIONS, this.parseMatches);
     }
 
     allowHTML(string) {
         return { __html: string };
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return ( (!_.isUndefined(nextProps.segment.cl_contributions) || !_.isUndefined(this.props.segment.cl_contributions)) &&
+            ( (!_.isUndefined(nextProps.segment.cl_contributions) && _.isUndefined(this.props.segment.cl_contributions)) ||
+            !Immutable.fromJS(this.props.segment.cl_contributions).equals(Immutable.fromJS(nextProps.segment.cl_contributions)) ) ) ||
+            this.props.active_class !== nextProps.active_class ||
+                this.props.tab_class !== nextProps.tab_class
+    }
+
     render() {
         var matches = [];
-        if ( this.state.matches && this.state.matches.length > 0 ) {
+        if (this.props.segment.cl_contributions && this.props.segment.cl_contributions.matches && this.props.segment.cl_contributions.matches.length > 0) {
+            let tpmMatches = this.processContributions(this.props.segment.cl_contributions.matches);
             var self = this;
-            this.state.matches.forEach(function (match, index) {
+            tpmMatches.forEach(function (match, index) {
                 var item =
                     <ul key={match.id + index}
                         className="suggestion-item crosslang-item graysmall"
@@ -154,7 +160,7 @@ class SegmentFooterMultiMatches extends React.Component {
                     </ul>;
                 matches.push(item);
             });
-        } else if (this.state.matches && this.state.matches.length === 0 ){
+        } else if (this.props.segment.cl_contributions && this.props.segment.cl_contributions.matches && this.props.segment.cl_contributions.matches.length === 0 ){
             if((config.mt_enabled)&&(!config.id_translator)) {
                 matches.push( <ul key={0} className="graysmall message">
                     <li>There are no matches for this segment in the languages you have selected. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li>

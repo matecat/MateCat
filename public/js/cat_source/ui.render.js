@@ -19,17 +19,14 @@ $.extend(UI, {
 		this.numOpenedSegments = 0;
 		this.maxMinutesBeforeRerendering = 60;
 		this.loadingMore = false;
-		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;
 		this.noMoreSegmentsBefore = false;
-		this.blockButtons = false;
 		this.dmp = new diff_match_patch();
 		this.undoStack = [];
 		this.undoStackPosition = 0;
 		this.nextUntranslatedSegmentIdByServer = 0;
 		this.checkUpdatesEvery = 180000;
 		this.goingToNext = false;
-        this.hiddenTextEnabled = true;
         this.setGlobalTagProjection();
 		this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
 		if(this.tagModesEnabled && !this.enableTagProjection) {
@@ -47,16 +44,6 @@ $.extend(UI, {
          */
         this.globalWarnings = [];
 
-        // this.downOpts = {offset: '130%'};
-		// this.upOpts = {offset: '-40%'};
-        this.downOpts = {
-            offset: '100%',
-            context: $('#outer')
-        };
-        this.upOpts = {
-            offset: '-100%',
-            context: $('#outer')
-        };
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 
 

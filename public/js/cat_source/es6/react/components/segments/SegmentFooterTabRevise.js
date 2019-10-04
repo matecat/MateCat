@@ -2,29 +2,25 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
+const React = require('react');
+
 class SegmentFooterTabRevise extends React.Component {
 
     constructor(props) {
         super(props);
     }
 
-    componentDidMount() {
+    componentDidMount() {}
 
-    }
-
-    componentWillUnmount() {
-
-    }
-
-    componentWillMount() {
-
-    }
+    componentWillUnmount() {}
 
     allowHTML(string) {
         return { __html: string };
+    }
+
+    shouldComponentUpdate(nextProps) {
+        return this.props.active_class !== nextProps.active_class ||
+        this.props.tab_class !== nextProps.tab_class
     }
 
     render() {
@@ -82,7 +78,7 @@ class SegmentFooterTabRevise extends React.Component {
 
             <div className="track-changes">
                 <h3>Revision (track changes)</h3>
-                <p></p>
+                <p/>
             </div>
         </div>
     }

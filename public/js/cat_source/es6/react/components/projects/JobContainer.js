@@ -473,7 +473,7 @@ class JobContainer extends React.Component {
                                 </div>;
         } else {
             outsourceJobLabel = <div className="job-to-translator not-assigned" data-variation="tiny">
-                <a href="javascript:void(0)" onClick={this.openOutsourceModal.bind(this, true, false)}>Assign job to translator</a>
+                <a onClick={this.openOutsourceModal.bind(this, true, false)}>Assign job to translator</a>
             </div>;
         }
         return outsourceJobLabel;

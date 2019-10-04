@@ -208,6 +208,22 @@ API.SEGMENT = {
         });
     },
 
+    splitSegment: function ( sid, source ) {
+        var data = {
+            segment:            source,
+            id_segment:          sid,
+            id_job:              config.id_job,
+            password:            config.password
+        };
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "post",
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "?action=setSegmentSplit"
+        });
+    },
+
     getConcordance: function (query, type) {
         var data = {
             action: 'getContribution',

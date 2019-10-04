@@ -9,21 +9,22 @@
  * TodoActions
  */
 
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var SegmentConstants = require('../constants/SegmentConstants');
-var SegmentStore = require('../stores/SegmentStore');
+const AppDispatcher = require('../dispatcher/AppDispatcher');
+const SegmentConstants = require('../constants/SegmentConstants');
+const SegmentStore = require('../stores/SegmentStore');
+const GlossaryUtils = require('../components/segments/utils/glossaryUtils');
+const TranslationMatches = require('../components/segments/utils/translationMatches');
 
 var SegmentActions = {
     /********* SEGMENTS *********/
     /**
      * @param segments
-     * @param fid
      */
-    renderSegments: function (segments, fid) {
+    renderSegments: function (segments, idToOpen) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_SEGMENTS,
             segments: segments,
-            fid: fid
+            idToOpen: idToOpen
         });
     },
     splitSegments: function (oldSid, newSegments, splitGroup, fid) {
@@ -35,11 +36,36 @@ var SegmentActions = {
             fid: fid
         });
     },
-    addSegments: function (segments, fid, where) {
+    splitSegment: function(sid, text)  {
+        API.SEGMENT.splitSegment(sid , text)
+            .done(function (response) {
+                if(response.errors.length) {
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error'
+                    };
+                    APP.addNotification(notification);
+                } else {
+                    UI.unmountSegments();
+                    UI.render({
+                        segmentToOpen: UI.currentSegmentId.split('-')[0]
+                    });
+                }
+            })
+            .fail(function (d) {
+                var notification = {
+                    title: 'Error',
+                    text: d.errors[0].message,
+                    type: 'error'
+                };
+                APP.addNotification(notification);
+            });
+    },
+    addSegments: function (segments, where) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENTS,
             segments: segments,
-            fid: fid,
             where: where
         });
     },
@@ -55,13 +81,74 @@ var SegmentActions = {
             actionType: SegmentConstants.MOUNT_TRANSLATIONS_ISSUES
         });
     },
-
+    addSearchResultToSegments: function (segments, params) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEARCH_RESULTS,
+            segments: segments,
+            params: params
+        });
+    },
+    removeSearchResultToSegments: function () {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REMOVE_SEARCH_RESULTS
+        });
+    },
     /********** Segment **********/
-
-    closeSegment: function ( sid, fid ) {
-        this.closeIssuesPanel();
+    setOpenSegment: function (sid, fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_OPEN_SEGMENT,
+            sid: sid,
+            fid: fid
+        });
     },
 
+    openSegment:  function (sid) {
+        const segment = SegmentStore.getSegmentByIdToJS(sid);
+
+        if ( segment ) {
+            //Check first if the segment is in the view
+            let $segment = (segment.splitted && sid.indexOf('-') === -1) ? UI.getSegmentById(sid + "-1") : UI.getSegmentById(sid);
+            if ( $segment.length === 0 ) {
+                this.scrollToSegment(sid);
+                setTimeout(()=>this.openSegment(sid));
+                return;
+            }
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.OPEN_SEGMENT,
+                sid: sid
+            });
+        } else {
+            UI.unmountSegments();
+            UI.render({
+                firstLoad: false,
+                segmentToScroll: sid
+            });
+        }
+    },
+    closeSegment: function ( sid, fid ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_SEGMENT,
+        });
+        this.closeIssuesPanel();
+    },
+    scrollToSegment: function (sid, callback) {
+        const segment = SegmentStore.getSegmentByIdToJS(sid);
+        if ( segment ) {
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+                sid: sid,
+            });
+            if (callback) {
+                callback.apply(this, [sid]);
+            }
+        } else {
+            UI.unmountSegments();
+            UI.render({
+                firstLoad: false,
+                segmentToScroll: sid
+            }).done(()=> callback && setTimeout(()=>callback.apply(this, [sid]), 1000));
+        }
+    },
     addClassToSegment: function (sid, newClass) {
         setTimeout( function () {
             AppDispatcher.dispatch({
@@ -70,16 +157,6 @@ var SegmentActions = {
                 newClass: newClass
             });
         }, 0);
-    },
-
-    addClassToSegments: function (sidList, newClass) {
-        setTimeout( function () {
-            AppDispatcher.dispatch({
-                actionType: SegmentConstants.ADD_SEGMENTS_CLASS,
-                sidList: sidList,
-                newClass: newClass
-            });
-        }, 0)
     },
 
     removeClassToSegment: function (sid, className) {
@@ -132,15 +209,6 @@ var SegmentActions = {
         });
     },
 
-    replaceSourceText: function(sid, fid, text) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.REPLACE_SOURCE,
-            id: sid,
-            fid: fid,
-            source: text
-        });
-    },
-
     setSegmentAsTagged: function (sid, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_TAGGED,
@@ -175,11 +243,12 @@ var SegmentActions = {
         });
     },
 
-    setSegmentWarnings: function(sid, warnings){
+    setSegmentWarnings: function(sid, warnings, tagMismatch){
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_WARNINGS,
             sid: sid,
-            warnings: warnings
+            warnings: warnings,
+            tagMismatch: tagMismatch
         });
     },
 
@@ -196,6 +265,35 @@ var SegmentActions = {
             warnings: issues
         });
     },
+    setChoosenSuggestion: function( sid, index) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_CHOOSEN_SUGGESTION,
+            sid: sid,
+            index: index
+        });
+    },
+    addQaCheckMatches: function(sid, matches) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_QA_CHECK_MATCHES,
+            sid: sid,
+            matches: matches
+        });
+    },
+    addQaBlacklistMatches: function(sid, matches) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_QA_BLACKLIST_MATCHES,
+            sid: sid,
+            matches: matches
+        });
+    },
+    addLexiqaHighlight: function(sid, matches, type) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_LXQ_HIGHLIGHT,
+            sid: sid,
+            matches: matches,
+            type: type
+        });
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({
@@ -203,12 +301,29 @@ var SegmentActions = {
             id: sid
         });
     },
+    modifiedTranslation: function (sid, fid, status, translation) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.MODIFIED_TRANSLATION,
+            sid: sid,
+            fid: fid,
+            status: status,
+            translation: translation
+        });
 
+    },
     replaceEditAreaTextContent: function(sid, fid, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_TRANSLATION,
             id: sid,
             fid: fid,
+            translation: text
+        });
+    },
+
+    updateTranslation: function(sid, text) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UPDATE_TRANSLATION,
+            id: sid,
             translation: text
         });
     },
@@ -219,14 +334,6 @@ var SegmentActions = {
             id: sid,
             fid: fid,
             className: className
-        });
-    },
-    updateTranslation: function (fid, sid, editAreaText) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.TRANSLATION_EDITED,
-            fid: fid,
-            id: sid,
-            translation: editAreaText
         });
     },
     lockEditArea : function ( sid, fid ) {
@@ -249,6 +356,33 @@ var SegmentActions = {
             actionType: SegmentConstants.CLOSE_TAGS_MENU
         });
     },
+    undoInSegment: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UNDO_TEXT
+        });
+    },
+    redoInSegment: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REDO_TEXT
+        });
+    },
+    setFocusOnEditArea: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.FOCUS_EDITAREA
+        });
+    },
+    /************ SPLIT ****************/
+    openSplitSegment: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_SPLIT_SEGMENT,
+            sid: sid
+        });
+    },
+    closeSplitSegment: function() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_SPLIT_SEGMENT
+        });
+    },
     /************ FOOTER ***************/
     registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({
@@ -256,12 +390,6 @@ var SegmentActions = {
             tab: tab,
             visible: visible,
             open: open
-        });
-    },
-    createFooter: function (sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.CREATE_FOOTER,
-            sid: sid
         });
     },
     setSegmentContributions: function (sid, fid, contributions, errors) {
@@ -282,11 +410,29 @@ var SegmentActions = {
             errors: errors
         });
     },
+    setAlternatives: function (sid, alternatives) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_ALTERNATIVES,
+            sid: sid,
+            alternatives: alternatives
+        });
+    },
     chooseContribution: function (sid, index) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
             sid: sid,
             index: index
+        });
+    },
+    deleteContribution: function(source, target, matchId, sid) {
+        TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).done((data) => {
+            if (data.errors.length === 0) {
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.DELETE_CONTRIBUTION,
+                    sid: sid,
+                    matchId: matchId
+                });
+            }
         });
     },
     renderSegmentGlossary: function(sid, segment) {
@@ -315,15 +461,7 @@ var SegmentActions = {
     setTabOpen: function (sid, tabName ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_DEFAULT_TAB,
-            sid: sid,
-            data: tabName
-        });
-    },
-    renderPreview: function ( sid, data ) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.RENDER_PREVIEW,
-            sid: sid,
-            data: data
+            tabName: tabName
         });
     },
 
@@ -334,32 +472,125 @@ var SegmentActions = {
         });
     },
 
-    getGlossaryForSegment: function ( text ) {
-        return API.SEGMENT.getGlossaryForSegment(text)
-            .fail(function (  ) {
-                UI.failedConnection( 0, 'glossary' );
+    // getGlossaryForSegment: function ( text ) {
+    //     return API.SEGMENT.getGlossaryForSegment(text)
+    //         .fail(function (  ) {
+    //             UI.failedConnection( 0, 'glossary' );
+    //         });
+    // },
+    getGlossaryForSegment: function (sid, fid, text) {
+        let requestes = [{
+            sid: sid,
+            fid: fid,
+            text: text
+        }];
+        let nextSegment = SegmentStore.getNextSegment(sid, fid);
+        if (nextSegment) {
+            requestes.push({
+                sid: nextSegment.sid,
+                fid: nextSegment.fid,
+                text: nextSegment.segment
+            });
+            let nextSegmentUntranslated = SegmentStore.getNextSegment(sid, fid, 8);
+            if (nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid) {
+                requestes.push({
+                    sid: nextSegmentUntranslated.sid,
+                    fid: nextSegmentUntranslated.fid,
+                    text: nextSegmentUntranslated.segment
+                });
+            }
+        }
+
+        for (let index = 0; index < requestes.length; index++) {
+            let request = requestes[index];
+            let segment = SegmentStore.getSegmentByIdToJS(request.sid, request.fid);
+            if (typeof segment.glossary === 'undefined') {
+                API.SEGMENT.getGlossaryForSegment(request.text)
+                    .done(function (response) {
+                        GlossaryUtils.storeGlossaryData(request.sid, response.data.matches);
+                        AppDispatcher.dispatch({
+                            actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
+                            sid: request.sid,
+                            fid: request.fid,
+                            glossary: response.data.matches.length !== 0 ? response.data.matches : {}
+                        });
+                    })
+                    .fail(function (error) {
+                        UI.failedConnection(sid, 'getGlossaryForSegment');
+                    });
+            }
+        }
+
+    },
+
+    searchGlossary: function (sid, fid, text) {
+        text = UI.removeAllTags(htmlEncode(text));
+        text = text.replace(/\"/g, "");
+        API.SEGMENT.getGlossaryMatch(text)
+            .done(response => {
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
+                    sid: sid,
+                    fid: fid,
+                    glossary: response.data.matches.length !== 0 ? response.data.matches : {}
+                });
+            })
+            .fail(function () {
+                UI.failedConnection(0, 'glossary');
             });
     },
 
-    deleteGlossaryItem: function ( source, target, id ) {
+    deleteGlossaryItem: function ( source, target, id, name, sid ) {
         return API.SEGMENT.deleteGlossaryItem(source, target, id)
             .fail(function (  ) {
                 UI.failedConnection( 0, 'deleteGlossaryItem' );
+            }).done(function ( data ) {
+                UI.footerMessage( 'A glossary item has been deleted', UI.getSegmentById(id) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
+                    sid: sid,
+                    matchId: id,
+                    name: name
+                });
             });
     },
 
-    addGlossaryItem: function ( source, target, comment ) {
+    addGlossaryItem: function ( source, target, comment, sid ) {
         return API.SEGMENT.addGlossaryItem(source, target, comment)
             .fail(function (  ) {
                 UI.failedConnection( 0, 'addGlossaryItem' );
+            }).done(function ( response ) {
+                if ( response.data.created_tm_key ) {
+                    UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( sid ) );
+                } else {
+                    let msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
+                    UI.footerMessage( msg, UI.getSegmentById( sid ) );
+                }
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
+                    sid: sid,
+                    match: response.data.matches.length !== 0 ? response.data.matches[source] : {},
+                    name: source
+                });
             });
     },
 
-    updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, newComment ) {
-        return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment, newComment)
+    updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, name, sid ) {
+        return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment)
             .fail(function (  ) {
                 UI.failedConnection( 0, 'updateGlossaryItem' );
-            });
+            }).done( function ( response ) {
+                UI.footerMessage( 'A glossary item has been updated', UI.getSegmentById( sid ) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.CHANGE_GLOSSARY,
+                    sid: sid,
+                    matchId: idItem,
+                    name: name,
+                    comment: comment,
+                    target_note: comment,
+                    translation: newTranslation
+                });
+            } );
     },
 
     setTabIndex: function ( sid, tab, index ) {
@@ -371,6 +602,11 @@ var SegmentActions = {
         });
     },
 
+    openConcordance: function(sid, currentSelectedText, inTarget) {
+        SegmentActions.activateTab(sid, 'concordances');
+        SegmentActions.findConcordance(sid, {text: currentSelectedText, inTarget: inTarget});
+    },
+
     findConcordance: function ( sid, data ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.FIND_CONCORDANCE,
@@ -379,11 +615,26 @@ var SegmentActions = {
         });
     },
 
+    getContributions: function (sid) {
+        TranslationMatches.getContribution(sid, 0);
+        TranslationMatches.getContribution(sid, 1);
+        TranslationMatches.getContribution(sid, 2);
+    },
+
+    getContribution: function (sid) {
+        TranslationMatches.getContribution(sid, 0);
+    },
+
+    getContributionsSuccess: function(data, sid) {
+        UI.addInStorage('contribution-' + config.id_job + '-' + sid, JSON.stringify(data), 'contribution');
+        TranslationMatches.processContributions(data, sid);
+    },
+
     setConcordanceResult: function (sid, data) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CONCORDANCE_RESULT,
             sid: sid,
-            data: data
+            matches: data.matches
         });
     },
 
@@ -405,12 +656,15 @@ var SegmentActions = {
     },
 
     openIssuesPanel: function (data, openSegment) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.OPEN_ISSUES_PANEL,
-            data: data,
-        });
+        if ( UI.openIssuesPanel(data, openSegment) ) {
 
-        UI.openIssuesPanel(data, openSegment);
+            AppDispatcher.dispatch({
+                actionType: SegmentConstants.OPEN_ISSUES_PANEL,
+                data: data,
+            });
+            this.openSideSegments();
+        }
+
     },
 
     closeIssuesPanel: function () {
@@ -424,6 +678,7 @@ var SegmentActions = {
             actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
             sid: sid
         });
+        this.scrollToSegment(sid);
     },
 
     showIssuesMessage: function ( sid, type ) {
@@ -452,6 +707,7 @@ var SegmentActions = {
             sid: sid,
             data: issueId
         });
+        this.openSideSegments();
     },
 
     addPreloadedIssuesToSegment: function ( sid, issues ) {
@@ -499,7 +755,6 @@ var SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
         });
-        UI.setWaypoints();
     },
 
     setSegmentLocked( segment, fid, unlocked) {
@@ -511,8 +766,7 @@ var SegmentActions = {
             }
         } else {
             UI.addInStorage('unlocked-'+ segment.sid, true);
-            UI.editAreaClick(UI.getEditAreaBySegmentId(segment.sid));
-            setTimeout(()=> UI.cacheObjects(UI.getEditAreaBySegmentId(segment.sid)));
+            SegmentActions.openSegment(segment.sid);
 
         }
         AppDispatcher.dispatch({
@@ -536,22 +790,42 @@ var SegmentActions = {
             actionType: SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
             segmentsArray: segmentsArray
         });
-        UI.setWaypoints();
     },
     setMutedSegments(segmentsArray) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_MUTED_SEGMENTS,
             segmentsArray: segmentsArray
         });
-        UI.setWaypoints();
     },
     removeAllMutedSegments() {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REMOVE_MUTED_SEGMENTS
         });
+    },
+
+    openSideSegments() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_SIDE
+        });
+    },
+    closeSideSegments() {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_SIDE
+        });
+    },
+    openSegmentComment(sid) {
+        this.openSideSegments();
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.OPEN_COMMENTS,
+            sid: sid
+        });
+    },
+    closeSegmentComment(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CLOSE_COMMENTS,
+            sid: sid
+        });
     }
-
-
 
 };
 

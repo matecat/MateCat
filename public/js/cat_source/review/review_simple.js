@@ -38,60 +38,6 @@ if ( ReviewSimple.enabled() ) {
 
                 $( '.sub-editor.review .track-changes p', $segment ).html( diffHTML );
             },
-
-            openNextTranslated: function ( sid ) {
-                sid = sid || UI.currentSegmentId;
-                var el = $( '#segment-' + sid );
-
-                var translatedList = [];
-                // find in next segments in the current file
-                if ( el.nextAll( '.status-translated' ).length ) {
-                    translatedList = el.nextAll( '.status-translated' );
-                    if ( translatedList.length ) {
-                        translatedList.first().find( UI.targetContainerSelector() ).click();
-                    }
-                    // find in next segments in the next files
-                } else if ( el.parents( 'article' ).nextAll( 'section.status-translated' ).length ) {
-
-                    file = el.parents( 'article' );
-                    file.nextAll( 'section.status-translated' ).each( function () {
-                        if ( !$( this ).is( UI.currentSegment ) ) {
-                            translatedList = $( this );
-                            translatedList.first().find( UI.targetContainerSelector() ).click();
-                            return false;
-                        }
-                    } );
-                    // else find from the beginning of the currently loaded segments in all files
-                } else if ( $( 'section.status-translated' ).length ) {
-                    $( 'section.status-translated' ).each( function () {
-                        if ( !$( this ).is( UI.currentSegment ) ) {
-                            translatedList = $( this );
-                            translatedList.first().find( UI.targetContainerSelector() ).click();
-                            return false;
-                        }
-                    } );
-                } else { // find in not loaded segments or go to the next approved
-                    // Go to the next segment saved before
-                    var callback = function () {
-                        $( window ).off( 'modalClosed' );
-                        //Check if the next is inside the view, if not render the file
-                        var next = UI.Segment.findEl( UI.nextUntranslatedSegmentIdByServer );
-                        if ( next.length > 0 ) {
-                            UI.gotoSegment( UI.nextUntranslatedSegmentIdByServer );
-                        } else {
-                            UI.renderAfterConfirm( UI.nextUntranslatedSegmentIdByServer );
-                        }
-                    };
-                    // If the modal is open wait the close event
-                    if ( $( ".modal[data-type='confirm']" ).length ) {
-                        $( window ).on( 'modalClosed', function ( e ) {
-                            callback();
-                        } );
-                    } else {
-                        callback();
-                    }
-                }
-            },
             setRevision: function ( data ) {
                 APP.doRequest( {
                     data: data,
@@ -134,20 +80,26 @@ if ( ReviewSimple.enabled() ) {
                 } );
             },
 
-            clickOnApprovedButton: function ( e, button ) {
+            clickOnApprovedButton: function (button ) {
                 // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
                 // because of the event is triggered even on download button
-                e.preventDefault();
                 var sid = UI.currentSegmentId;
-                var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? false : true;
-                UI.tempDisablingReadonlyAlert = true;
+                var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? true : false;
                 SegmentActions.removeClassToSegment( sid, 'modified' );
                 UI.currentSegment.data( 'modified', false );
 
 
                 $( '.sub-editor.review .error-type' ).removeClass( 'error' );
 
-                UI.changeStatus( button, 'approved', 0 );  // this does < setTranslation
+                var afterApproveFn = function (  ) {
+                    if ( goToNextNotApproved ) {
+                        UI.openNextTranslated();
+                    } else {
+                        UI.gotoNextSegment( sid );
+                    }
+                };
+
+                UI.changeStatus( button, 'approved', 0, afterApproveFn );  // this does < setTranslation
 
                 var original = UI.currentSegment.find( '.original-translation' ).text();
 
@@ -158,11 +110,8 @@ if ( ReviewSimple.enabled() ) {
                 var err_language = $( err ).find( 'input[name=t4]:checked' ).val();
                 var err_style = $( err ).find( 'input[name=t5]:checked' ).val();
 
-                if ( goToNextNotApproved ) {
-                    UI.openNextTranslated();
-                } else {
-                    UI.gotoNextSegment( sid );
-                }
+
+
 
                 var data = {
                     action: 'setRevision',

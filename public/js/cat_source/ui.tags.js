@@ -2,23 +2,7 @@
 	Component: ui.tags
  */
 $.extend(UI, {
-    noTagsInSegment: function(options) {
-        var editarea = options.area;
-        var starting = options.starting;
 
-        if (starting) return false;
-
-        try{
-            if ( $(editarea).html().match(/\&lt;.*?\&gt;/gi) ) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch(e){
-            return true;
-        }
-
-    },
 	tagCompare: function(sourceTags, targetTags, prova) {
 
 		var mismatch = false;
@@ -54,7 +38,6 @@ $.extend(UI, {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function (str) {
-        if(!UI.hiddenTextEnabled) return str;
         var _str = str;
         if(UI.markSpacesEnabled) {
             if(jumpSpacesEncode) {
@@ -478,37 +461,37 @@ $.extend(UI, {
     },
 
     // TAG MISMATCH
-	markTagMismatch: function(d) {
+	markTagMismatch: function(tag_mismatch, sid) {
 
-        if( !_.isUndefined(d.tag_mismatch.source) && d.tag_mismatch.source.length > 0 ) {
-            $.each(d.tag_mismatch.source, function(index) {
-                $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
+        if( !_.isUndefined(tag_mismatch.source) && tag_mismatch.source.length > 0 ) {
+            $.each(tag_mismatch.source, function(index) {
+                $('#segment-' + sid + ' .source span.locked:not(.temp)').filter(function() {
                     var clone = $(this).clone();
                     clone.find('.inside-attribute').remove();
-                    return htmlEncode(clone.text()) === d.tag_mismatch.source[index];
+                    return htmlEncode(clone.text()) === tag_mismatch.source[index];
                 }).last().addClass('temp');
             });
         }
-        if( !_.isUndefined(d.tag_mismatch.target) && d.tag_mismatch.target.length > 0 ) {
-            $.each(d.tag_mismatch.target, function(index) {
-                $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
+        if( !_.isUndefined(tag_mismatch.target) && tag_mismatch.target.length > 0 ) {
+            $.each(tag_mismatch.target, function(index) {
+                $('#segment-' + sid + ' .editarea span.locked:not(.temp)').filter(function() {
                     var clone = $(this).clone();
                     clone.find('.inside-attribute').remove();
-                    return htmlEncode(clone.text()) === d.tag_mismatch.target[index];
+                    return htmlEncode(clone.text()) === tag_mismatch.target[index];
                 }).last().addClass('temp');
             });
         }
         // ??
-        $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
-        $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
-        $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+        $('#segment-' + sid + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+        $('#segment-' + sid + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+        $('#segment-' + sid + ' span.locked.mismatch-old').removeClass('mismatch-old');
 
-        $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
-        if( !_.isUndefined(d.tag_mismatch.order) && d.tag_mismatch.order.length > 0 ) {
-            $( '#segment-' + d.id_segment + ' .editarea .locked:not(.mismatch)' ).filter( function () {
+        $('#segment-' + sid + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' )
+        if( !_.isUndefined(tag_mismatch.order) && tag_mismatch.order.length > 0 ) {
+            $( '#segment-' + sid + ' .editarea .locked:not(.mismatch)' ).filter( function () {
                 var clone = $( this ).clone();
                 clone.find( '.inside-attribute' ).remove();
-                return htmlEncode(clone.text()) === d.tag_mismatch.order[0];
+                return htmlEncode(clone.text()) === tag_mismatch.order[0];
             } ).addClass( 'order-error' );
         }
 	},	
@@ -579,7 +562,6 @@ $.extend(UI, {
             }
         }
 
-        var undoCursorPlaceholder = $('.undoCursorPlaceholder', UI.currentSegment ).detach();
         var brEnd = $('br.end', UI.currentSegment ).detach();
 
 
@@ -592,9 +574,6 @@ $.extend(UI, {
             }
         }
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newhtml);
-        //add again undoCursorPlaceholder
-        UI.editarea.append(undoCursorPlaceholder );
-        // .append(brEnd);
 
         //lock tags and run again getWarnings
         setTimeout(function (  ) {
@@ -608,9 +587,9 @@ $.extend(UI, {
      * @param segment
      * @returns {boolean}
      */
-    hasDataOriginalTags: function (segment) {
-        var originalText = $(segment).find('.source').data('original');
-        var reg = new RegExp(/(&amp;lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&amp;gt;)/gmi);
+    hasDataOriginalTags: function (segmentSource) {
+        var originalText = segmentSource;
+        var reg = new RegExp(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi);
         if (!_.isUndefined(originalText) && reg.test(originalText)) {
             return true;
         }
@@ -655,7 +634,7 @@ $.extend(UI, {
         area = this.transformPlaceholdersHtml(area);
 
         area.find('span.space-marker').replaceWith(' ');
-        area.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        area.find('span.rangySelectionBoundary').remove();
         area = this.encodeTagsWithHtmlAttribute(area);
         return view2rawxliff( area.text() );
     },
@@ -667,7 +646,7 @@ $.extend(UI, {
         $div = this.transformPlaceholdersHtml($div);
 
         $div.find('span.space-marker').replaceWith(' ');
-        $div.find('span.rangySelectionBoundary, span.undoCursorPlaceholder').remove();
+        $div.find('span.rangySelectionBoundary').remove();
         $div = this.encodeTagsWithHtmlAttribute($div);
         return $div.text();
     },

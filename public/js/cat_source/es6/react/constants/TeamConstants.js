@@ -7,5 +7,6 @@ module.exports = keyMirror({
     UPDATE_TEAM: null,
     UPDATE_TEAMS: null,
     CHOOSE_TEAM: null,
+    UPDATE_USER: null
 
 });

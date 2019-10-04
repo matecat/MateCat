@@ -17,15 +17,18 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
 
     users : [],
 
+    user: null,
+
     updateAll: function (teams) {
         this.teams = Immutable.fromJS(teams);
     },
 
-
     addTeam: function(team) {
         this.teams = this.teams.concat(Immutable.fromJS([team]));
     },
-
+    updateUser: function(user) {
+        this.user = user;
+    },
     updateTeam: function (team) {
         let teamOld = this.teams.find(function (org) {
             return org.get('id') == team.id;
@@ -102,6 +105,10 @@ AppDispatcher.register(function(action) {
         case TeamConstants.ADD_TEAM:
             TeamsStore.addTeam(action.team);
             TeamsStore.emitChange(TeamConstants.RENDER_TEAMS, TeamsStore.teams);
+            break;
+        case TeamConstants.UPDATE_USER:
+            TeamsStore.updateUser(action.user);
+            TeamsStore.emitChange(TeamConstants.UPDATE_USER, TeamsStore.user);
             break;
         // Move this actions
         case ManageConstants.OPEN_CREATE_TEAM_MODAL:

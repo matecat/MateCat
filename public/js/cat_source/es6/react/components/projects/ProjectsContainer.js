@@ -1,7 +1,4 @@
-// var React = require('react');
 let ProjectContainer = require('./ProjectContainer').default;
-let FilterProjects = require("../header/manage/FilterProjectsStatus").default;
-
 
 class ProjectsContainer extends React.Component {
 
@@ -169,9 +166,6 @@ class ProjectsContainer extends React.Component {
             }, 3000);
         }
     }
-
-    componentWillUpdate() {}
-
 
     shouldComponentUpdate(nextProps, nextState) {
         return (!nextState.projects.equals(this.state.projects) ||

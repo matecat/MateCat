@@ -73,14 +73,6 @@ class ResetPasswordModal extends React.Component {
         return this.state.validationErrors[field];
     }
 
-    componentWillMount() {
-
-    }
-
-    componentDidMount() {
-
-    }
-
     render() {
         var generalErrorHtml = '';
         if (this.state.generalError.length) {

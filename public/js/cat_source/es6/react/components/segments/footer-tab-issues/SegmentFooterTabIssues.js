@@ -7,9 +7,12 @@ class SegmentFooterTabIssues extends React.Component {
 
     constructor( props ) {
         super( props );
+
+        let categories = JSON.parse( config.lqa_nested_categories ).categories;
+
         this.state = {
             categorySelected: null,
-            categoriesIssue: [],
+            categoriesIssue: categories,
             segment: this.props.segment,
             translation: this.props.segment.translation,
             oldTranslation: this.props.segment.translation,
@@ -23,7 +26,7 @@ class SegmentFooterTabIssues extends React.Component {
         $( this.selectIssueSeverity ).dropdown();
 
         SegmentStore.addListener( SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened.bind( this ) );
-        SegmentStore.addListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind( this ) );
+        // SegmentStore.addListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges.bind( this ) );
     }
 
     componentDidUpdate() {
@@ -37,14 +40,7 @@ class SegmentFooterTabIssues extends React.Component {
 
     componentWillUnmount() {
         SegmentStore.removeListener( SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.segmentOpened );
-        SegmentStore.removeListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges );
-    }
-
-    componentWillMount() {
-        let categories = JSON.parse( config.lqa_nested_categories ).categories;
-        this.setState( {
-            categoriesIssue: categories
-        } )
+        // SegmentStore.removeListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges );
     }
 
     trackChanges( sid, editareaText ) {

@@ -121,8 +121,6 @@ class DQFCredentials extends React.Component {
         }
     }
 
-    componentWillMount() { }
-
     componentDidMount() {}
 
     render() {

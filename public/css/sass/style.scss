@@ -375,10 +375,6 @@ section.opened .warnings {
     z-index: 1;
 }
 
-body.editing .grayed, body.virtualEditing .grayed {
-    display: block;
-}
-
 .toggle {
     display: none;
 }
@@ -576,7 +572,7 @@ body.editing .grayed, body.virtualEditing .grayed {
     color: #b6b8bb;
     text-decoration: none;
     cursor: default;
-    height: inherit;
+    height: 100%;
     padding-bottom: 1px;
     width: 4.5%;
 }
@@ -587,16 +583,8 @@ body.editing .grayed, body.virtualEditing .grayed {
     background: #f2f4f7;
 }
 
-.editing .sid .txt {
+.sid .txt {
     background: #f2f4f7;
-}
-
-section .sid .txt input {
-    display: none;
-}
-
-section:hover .sid .txt input {
-    display: unset;
 }
 
 section.readonly .txt input {
@@ -691,15 +679,11 @@ section.currSearchSegment .sid .txt {
 }
 
 .editor .sid {
-    height: inherit;
+    height: 100%;
 }
 
 div.sid .implicit {
     /*    display: none; */
-}
-
-.sid .actions {
-    display: none;
 }
 
 .sid .actions.disabled {
@@ -743,8 +727,9 @@ div.sid .implicit {
 section {
     position: relative;
     float: left;
-    width: 100%;
-    height: 100%;
+    width: 88%;
+    margin-left: 5%;
+    //height: 100%;
     /*-webkit-transition: all 100ms ease-in;*/
     /*transition: all 100ms ease-in;*/
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -788,6 +773,10 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     font-size: 14px;
     float: left !important;
     margin: 0 10px 0 0 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    overflow: hidden;
 }
 
 .filenameshow {
@@ -798,14 +787,12 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 }
 
 .projectbar {
-    margin: 0 0 0 5px;
+    margin: 0 0 0 5%;
     padding: 0;
     height: 43px;
     color: #777;
-    width: 100%;
+    width: 88%;
     font-size: 14px;
-    position: absolute;
-    margin-top: -43px
 }
 
 .projectbar li {
@@ -952,7 +939,8 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 .buttons .next-unapproved.disabled ,
 .buttons .next-untranslated.disabled ,
 .buttons .translated.disabled,
-.buttons .guesstags.disabled{
+.buttons .guesstags.disabled,
+.buttons .disabled {
     pointer-events: none;
     color: #666 !important;
     border-color: #666;
@@ -1303,18 +1291,20 @@ article .approved:active {
 }
 
 article {
-    margin: 40px auto 100px auto;
+    margin: 0px auto 100px auto;
     -moz-border-radius: 2px;
     -moz-box-shadow: 0 1px 3px #ccc;
     position: relative;
-    margin-left: 5%;
     width: 91.5%;
     float: left;
     box-sizing: content-box;
+    .hiddenHtml {
+        position: absolute;
+        top: 0;
+    }
 }
 body #outer {
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     position: relative;
     display: inline-block;
     height: 100%;
@@ -1325,30 +1315,18 @@ body .main-container {
     width: 100%;
     height: 100%;
 }
-#outer.loadingBefore {
-    display: block;
-    background: url(../../img/loading.gif) 48% bottom no-repeat;
-    float: left;
-    background-size: 20px 20px;
-    position: relative;
-}
-
-#outer.loadingBefore {
-    background: url(../../img/loading.gif) 48% top no-repeat !important;
-    padding-top: 40px;
-    background-size: 30px 30px !important;
-}
-
+//#outer.loadingBefore {
+//    display: block;
+//    background: url(../../img/loading.gif) 48% top no-repeat !important;
+//    position: relative;
+//    background-size: 30px 30px !important;
+//}
 #outer.loading {
     display: block;
     background: url(../../img/loading.gif) 48% center no-repeat;
     background-size: 30px 30px !important;
     float: left;
     position: relative;
-}
-
-#outer.loading article .projectbar {
-    display: none;
 }
 
 .main-searched {
@@ -1386,7 +1364,6 @@ body .main-container {
 section .body > .text {
     width: 100%;
     position: relative;
-    background: #ffffff;
     float: left;
     min-height: 87px;
 }
@@ -1412,8 +1389,9 @@ body.cattool.editing {
     background: #f2f4f7;
 }
 
-body.editing section:not(.editor) .text {
+body section:not(.editor) {
     background: #dcdfe4;
+    cursor: pointer;
 }
 
 section:not(.editor) .text:first-child {
@@ -1421,7 +1399,7 @@ section:not(.editor) .text:first-child {
     border-top-right-radius: 4px;
 }
 
-body.cattool.editing section:not(.editor) .text:hover {
+body.cattool section:not(.editor):not(.muted):hover {
     background: #d4d7dc !important;
     color: #000;
 }
@@ -2461,7 +2439,7 @@ section .text .warning {
     display: none;
 }
 
-section.status-new .editarea {
+section.status-new:not(.modified) .editarea {
     text-indent: -20000px;
 }
 
@@ -2472,13 +2450,11 @@ section.status-new.opened .editarea {
 section.editor {
     z-index: 2;
     position: relative;
-    height: 100%;
-    width: 101%;
-    margin-left: -.5%;
+    //height: 100%;
+    width: 89%;
 }
 
 section.editor .sid {
-    left: -5%;
     color: black;
 }
 
@@ -2541,7 +2517,7 @@ section.ice-locked .text {
     background-color: #f2f4f7 !important;
 }
 
-body.editing section:not(.editor).ice-locked .text {
+body section:not(.editor).ice-locked {
     background: #dde0e4 !important;
 }
 
@@ -3722,7 +3698,7 @@ section.modified.editor .status {
         display: block;
     }
 
-    p.split-shortcut, .editing .sid .txt {
+    p.split-shortcut, .sid .txt {
         font-size: 10px;
     }
     .sid {
@@ -3858,10 +3834,6 @@ section.modified.editor .status {
     .text .target.item,
     .white li, .track-changes {
         width: 44% !important
-    }
-
-    article {
-        margin-left: 6%;
     }
 
     .sid {
@@ -4773,14 +4745,6 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
     box-shadow: inset 0 0 1px 1px #888;
 }
 
-.undoCursorPlaceholder {
-    /*    width: 3px;
-     height: 3px;
-     background: orange;
-     display: inline-block;*/
-    display: none;
-}
-
 .sub-editor.review .error-type {
     width: 45.6%;
     padding: 0 1%;
@@ -4872,30 +4836,40 @@ body.cattool .mgmt-table-mt .activemt {
     opacity: 1 !important;
 }
 
-.splitArea {
-    width: 45.5%;
-    position: absolute;
-    padding: 3px 0px 5px 3px;
-    margin: 0 0.7%;
-    background: #efefef;
-    font-size: 18px;
-    min-height: 70px;
-    outline: 0;
-    text-align: left;
-    border-radius: 2px;
-    line-height: 27px;
-    color: #000;
-    border: 1px solid #727272;
-    box-shadow: 0 1px 2px #ccc;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    word-break: normal !important;
-    cursor: col-resize;
-}
-
-.splitBar {
-    width: 46.6%;
-    position: absolute;
-    z-index: 10000;
+.splitContainer {
+    position: relative;
+    float: left;
+    width: 45.2%;
+    .splitArea {
+        width: 100%;
+        padding: 3px 0px 5px 3px;
+        margin: 7px 1.7%;
+        background: #efefef;
+        font-size: 18px;
+        min-height: 70px;
+        outline: 0;
+        text-align: left;
+        border-radius: 2px;
+        line-height: 27px;
+        color: #000;
+        border: 1px solid #727272;
+        word-break: normal !important;
+        cursor: col-resize;
+        float: left;
+    }
+    .splitBar {
+        position: relative;
+        clear: both;
+        margin-top: 100px;
+        width: 100%;
+        margin-left: 19px;
+    }
+    .cancel {
+        margin-right: 4px;
+        width: 108px;
+        float: left;
+        color: #333;
+    }
 }
 
 .splitBar p,
@@ -4917,8 +4891,6 @@ body.cattool .mgmt-table-mt .activemt {
 .splitBar .buttons a {
     margin-left: 20px;
     margin-top: 2px;
-    color: #fff;
-
 }
 
 .splitBar .btn-ok:hover {
