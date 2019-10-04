@@ -2,12 +2,12 @@
  * Projects Store
  */
 
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let EventEmitter = require('events').EventEmitter;
-let ManageConstants = require('../constants/ManageConstants');
-let TeamConstants = require('../constants/TeamConstants');
-let assign = require('object-assign');
-let Immutable = require('immutable');
+import AppDispatcher  from '../dispatcher/AppDispatcher';
+import {EventEmitter} from 'events';
+import ManageConstants  from '../constants/ManageConstants';
+import TeamConstants  from '../constants/TeamConstants';
+import assign  from 'object-assign';
+import Immutable  from 'immutable';
 
 EventEmitter.prototype.setMaxListeners(0);
 

@@ -4,14 +4,13 @@
  */
 import SegmentFooterMultiMatches from "./SegmentFooterMultiMatches";
 
-let React = require('react');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentStore = require('../../stores/SegmentStore');
-// let SegmentTabMatches = require('./SegmentFooterTabMatches').default;
-let SegmentTabConcordance = require('./SegmentFooterTabConcordance').default;
-let SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
-let SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
-let SegmentTabRevise = require('./SegmentFooterTabRevise').default;
+import React  from 'react';
+import SegmentConstants  from '../../constants/SegmentConstants';
+import SegmentStore  from '../../stores/SegmentStore';
+import SegmentTabConcordance  from './SegmentFooterTabConcordance';
+import SegmentTabGlossary  from './SegmentFooterTabGlossary';
+import SegmentTabConflicts  from './SegmentFooterTabConflicts';
+import SegmentTabRevise  from './SegmentFooterTabRevise';
 class SegmentFooter extends React.Component {
 
     constructor(props) {

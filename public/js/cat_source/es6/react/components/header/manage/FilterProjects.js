@@ -1,5 +1,5 @@
-let FilterProjectsStatus = require("./FilterProjectsStatus").default;
-let SearchInput = require("./SearchInput").default;
+import FilterProjectsStatus  from "./FilterProjectsStatus";
+import SearchInput  from "./SearchInput";
 
 class FilterProjects extends React.Component {
     constructor (props) {

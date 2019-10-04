@@ -2,11 +2,9 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentStore = require('../../stores/SegmentStore');
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentActions = require('../../actions/SegmentActions');
-
+import React  from 'react';
+import SegmentStore  from '../../stores/SegmentStore';
+import SegmentConstants  from '../../constants/SegmentConstants';
 
 class SegmentHeader extends React.PureComponent {
 

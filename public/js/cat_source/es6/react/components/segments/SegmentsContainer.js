@@ -2,13 +2,13 @@
  * React Component for the editarea.
 
  */
-var React = require('react');
-let PropTypes = require('prop-types');
-var SegmentStore = require('../../stores/SegmentStore');
-let Segment = require('./Segment').default;
-var SegmentConstants = require('../../constants/SegmentConstants');
+import React from 'react';
+import PropTypes from 'prop-types';
 import VirtualList from 'react-tiny-virtual-list';
-const Immutable = require('immutable');
+import SegmentStore from '../../stores/SegmentStore';
+import Segment from './Segment';
+import SegmentConstants from '../../constants/SegmentConstants';
+import Immutable from 'immutable';
 
 
 class SegmentsContainer extends React.Component {

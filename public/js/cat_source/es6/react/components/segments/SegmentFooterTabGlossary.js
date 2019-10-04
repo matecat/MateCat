@@ -2,12 +2,12 @@
  * React Component .
 
  */
-const React = require('react');
-const SegmentConstants = require('../../constants/SegmentConstants');
-const SegmentStore = require('../../stores/SegmentStore');
-const SegmentActions = require('../../actions/SegmentActions');
-const GlossaryUtils = require('./utils/glossaryUtils');
-const Immutable = require('immutable');
+import React  from 'react';
+import SegmentConstants  from '../../constants/SegmentConstants';
+import SegmentStore  from '../../stores/SegmentStore';
+import SegmentActions  from '../../actions/SegmentActions';
+import GlossaryUtils  from './utils/glossaryUtils';
+import Immutable  from 'immutable';
 import TagUtils from "../../utils/tagUtils"
 
 

@@ -5,17 +5,16 @@
 import SegmentCommentsContainer from "./SegmentCommentsContainer";
 import SegmentsCommentsIcon from "./SegmentsCommentsIcon";
 
-let React = require('react');
-let SegmentStore = require('../../stores/SegmentStore');
-let SegmentActions = require('../../actions/SegmentActions');
-let SegmentConstants = require('../../constants/SegmentConstants');
-let SegmentHeader = require('./SegmentHeader').default;
-let SegmentFooter = require('./SegmentFooter').default;
-let IssuesContainer = require('./footer-tab-issues/SegmentFooterTabIssues').default;
-let ReviewExtendedPanel = require('../review_extended/ReviewExtendedPanel').default;
-let WrapperLoader = require('../../common/WrapperLoader').default;
+import React from 'react';
+import SegmentStore from '../../stores/SegmentStore';
+import SegmentActions from '../../actions/SegmentActions';
+import SegmentConstants from '../../constants/SegmentConstants';
+import SegmentHeader from './SegmentHeader';
+import SegmentFooter from './SegmentFooter';
+import IssuesContainer from './footer-tab-issues/SegmentFooterTabIssues';
+import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel';
 
-let Immutable = require('immutable');
+import Immutable from 'immutable';
 
 class Segment extends React.Component {
 

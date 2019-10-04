@@ -1,4 +1,4 @@
-let PropTypes = require('prop-types');
+import PropTypes  from 'prop-types';
 
 class NotificationItem extends React.Component {
 

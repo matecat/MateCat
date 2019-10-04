@@ -1,6 +1,6 @@
-let CatToolConstants = require('../../../../constants/CatToolConstants');
-let CatToolStore = require('../../../../stores/CatToolStore');
-let SegmentFilterUtils = require('./segment_filter');
+import CatToolConstants  from '../../../../constants/CatToolConstants';
+import CatToolStore  from '../../../../stores/CatToolStore';
+import SegmentFilterUtils  from './segment_filter';
 
 class SegmentsFilter extends React.Component {
     constructor(props) {

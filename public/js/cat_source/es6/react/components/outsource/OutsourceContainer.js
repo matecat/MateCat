@@ -1,6 +1,6 @@
-let AssignToTranslator = require('./AssignToTranslator').default;
-let OutsourceVendor = require('./OutsourceVendor').default;
-let {TransitionGroup, CSSTransition} = require('react-transition-group');
+import AssignToTranslator  from './AssignToTranslator';
+import OutsourceVendor  from './OutsourceVendor';
+import {TransitionGroup, CSSTransition}  from 'react-transition-group';
 
 
 class OutsourceContainer extends React.Component {

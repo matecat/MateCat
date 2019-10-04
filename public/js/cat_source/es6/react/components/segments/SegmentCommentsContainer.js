@@ -2,11 +2,11 @@
  * React Component for the warnings.
 
  */
-var React = require('react');
-const CommentsStore = require('../../stores/CommentsStore');
-const CommentsActions = require('../../actions/CommentsActions');
-const CommentsConstants = require('../../constants/CommentsConstants');
-const SegmentsActions = require('../../actions/SegmentActions');
+import React  from 'react';
+import CommentsStore  from '../../stores/CommentsStore';
+import CommentsActions  from '../../actions/CommentsActions';
+import CommentsConstants  from '../../constants/CommentsConstants';
+import SegmentsActions  from '../../actions/SegmentActions';
 
 class SegmentCommentsContainer extends React.Component {
 

@@ -1,6 +1,5 @@
 
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
-let JobAnalyze = require('./JobAnalyze').default;
+import JobAnalyze  from './JobAnalyze';
 
 class ProjectAnalyze extends React.Component {
 

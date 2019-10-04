@@ -2,11 +2,11 @@
  * Analyze Store
  */
 
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let EventEmitter = require('events').EventEmitter;
-let AnalyzeConstants = require('../constants/AnalyzeConstants');
-let assign = require('object-assign');
-let Immutable = require('immutable');
+import AppDispatcher  from '../dispatcher/AppDispatcher';
+import {EventEmitter} from 'events';
+import AnalyzeConstants  from '../constants/AnalyzeConstants';
+import assign  from 'object-assign';
+import Immutable  from 'immutable';
 
 EventEmitter.prototype.setMaxListeners(0);
 

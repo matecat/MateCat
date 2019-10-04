@@ -1,4 +1,4 @@
-let DQFCredentials = require('./DQFCredentials').default;
+import DQFCredentials  from './DQFCredentials';
 class DQFModal extends React.Component {
 
 

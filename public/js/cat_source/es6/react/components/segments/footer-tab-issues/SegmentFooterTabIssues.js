@@ -1,7 +1,7 @@
-var React = require( 'react' );
-var SegmentConstants = require( '../../../constants/SegmentConstants' );
-var SegmentStore = require( '../../../stores/SegmentStore' );
-let SegmentFooterTabIssuesListItem = require( "./SegmentFooterTabIssuesListItem" ).default;
+import React  from  'react' ;
+import SegmentConstants  from  '../../../constants/SegmentConstants' ;
+import SegmentStore  from  '../../../stores/SegmentStore' ;
+import SegmentFooterTabIssuesListItem  from  "./SegmentFooterTabIssuesListItem" ;
 
 class SegmentFooterTabIssues extends React.Component {
 

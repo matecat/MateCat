@@ -2,10 +2,10 @@
  * React Component for the warnings.
 
  */
-var React = require('react');
-const CommentsStore = require('../../stores/CommentsStore');
-const SegmentsActions = require('../../actions/SegmentActions');
-const CommentsConstants = require('../../constants/CommentsConstants');
+import React  from 'react';
+import CommentsStore  from '../../stores/CommentsStore';
+import SegmentsActions  from '../../actions/SegmentActions';
+import CommentsConstants  from '../../constants/CommentsConstants';
 
 class SegmentsCommentsIcon extends React.Component {
 

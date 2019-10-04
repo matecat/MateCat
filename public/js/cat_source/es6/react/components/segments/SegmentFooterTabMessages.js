@@ -2,9 +2,9 @@
  * React Component .
 
  */
-const React = require('react');
-const Immutable = require('immutable');
-const showdown = require( "showdown" );
+import React  from 'react';
+import Immutable  from 'immutable';
+import showdown  from  "showdown" ;
 class SegmentFooterTabMessages extends React.Component {
 
     constructor(props) {

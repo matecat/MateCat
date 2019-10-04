@@ -1,5 +1,5 @@
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let TeamConstants = require('../constants/TeamConstants');
+import AppDispatcher  from '../dispatcher/AppDispatcher';
+import TeamConstants  from '../constants/TeamConstants';
 
 
 let TeamsActions = {

@@ -1,5 +1,5 @@
 
-var keyMirror = require('keymirror');
+import keyMirror  from 'keymirror';
 
 module.exports = keyMirror({
     RENDER_ANALYSIS: null,

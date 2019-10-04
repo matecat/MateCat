@@ -1,6 +1,7 @@
-let SegmentActions = require("../../../../actions/SegmentActions");
-let CatToolActions = require("../../../../actions/CatToolActions");
-let SegmentStore = require("../../../../stores/SegmentStore");
+import SegmentActions  from "../../../../actions/SegmentActions";
+import CatToolActions  from "../../../../actions/CatToolActions";
+import SegmentStore  from "../../../../stores/SegmentStore";
+
 let SearchUtils = {
 
     searchEnabled: true,

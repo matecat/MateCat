@@ -1,9 +1,9 @@
 
-let JobAnalyzeHeader = require('./JobAnalyzeHeader').default;
-let JobTableHeader = require('./JobTableHeader').default;
-let ChunkAnalyze = require('./ChunkAnalyze').default;
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
-let AnalyzeStore = require('../../stores/AnalyzeStore');
+import JobAnalyzeHeader  from './JobAnalyzeHeader';
+import JobTableHeader  from './JobTableHeader';
+import ChunkAnalyze  from './ChunkAnalyze';
+import AnalyzeConstants  from '../../constants/AnalyzeConstants';
+import AnalyzeStore  from '../../stores/AnalyzeStore';
 
 class JobAnalyze extends React.Component {
 

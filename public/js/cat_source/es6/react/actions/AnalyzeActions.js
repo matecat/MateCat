@@ -1,5 +1,5 @@
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let AnalyzeConstants = require('../constants/AnalyzeConstants');
+import AppDispatcher from '../dispatcher/AppDispatcher';
+import AnalyzeConstants from '../constants/AnalyzeConstants';
 
 
 let AnalyzeActions = {

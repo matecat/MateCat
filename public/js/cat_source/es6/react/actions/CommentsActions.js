@@ -1,5 +1,5 @@
-const AppDispatcher = require('../dispatcher/AppDispatcher');
-const CommentsConstants = require('../constants/CommentsConstants');
+import AppDispatcher from '../dispatcher/AppDispatcher';
+import CommentsConstants from '../constants/CommentsConstants';
 const CommentsActions = {
 
     storeComments: function (comments, user) {

@@ -1,5 +1,5 @@
-var ModalContainerComponent = require('./ModalContainerComponent').default;
-var PreferencesModal = require('./PreferencesModal').default;
+import ModalContainerComponent  from './ModalContainerComponent';
+import PreferencesModal  from './PreferencesModal';
 class ModalWindowComponent extends React.Component {
 
 

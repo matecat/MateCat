@@ -1,4 +1,4 @@
-var TextField = require('../common/TextField').default;
+import TextField  from '../common/TextField';
 import * as RuleRunner from '../common/ruleRunner';
 import * as FormRules from '../common/formRules';
 import update from 'react-addons-update';

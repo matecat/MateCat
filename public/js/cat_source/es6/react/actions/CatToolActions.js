@@ -1,6 +1,6 @@
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let CattolConstants = require('../constants/CatToolConstants');
-let Notifications = require('../sse/sse');
+import AppDispatcher from '../dispatcher/AppDispatcher';
+import CattolConstants from '../constants/CatToolConstants';
+import Notifications from '../sse/sse';
 
 let CatToolActions = {
 

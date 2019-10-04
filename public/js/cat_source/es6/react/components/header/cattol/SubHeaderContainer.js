@@ -1,12 +1,12 @@
-let React = require('react');
-let CatToolConstants = require('../../../constants/CatToolConstants');
-let CatToolStore = require('../../../stores/CatToolStore');
-let SegmentSelectionPanel = require('../bulk_selection_bar/BulkSelectionBar').default ;
-let SegmentsFilter = require('./segment_filter/SegmentsFilter').default ;
-let Search = require('./search/Search').default;
-let QaComponent = require('./QAComponent').default;
-let SegmentConstants = require('../../../constants/SegmentConstants');
-let SegmentStore = require('../../../stores/SegmentStore');
+import React  from 'react';
+import CatToolConstants  from '../../../constants/CatToolConstants';
+import CatToolStore  from '../../../stores/CatToolStore';
+import SegmentSelectionPanel  from '../bulk_selection_bar/BulkSelectionBar';
+import SegmentsFilter  from './segment_filter/SegmentsFilter';
+import Search  from './search/Search';
+import QaComponent  from './QAComponent';
+import SegmentConstants  from '../../../constants/SegmentConstants';
+import SegmentStore  from '../../../stores/SegmentStore';
 
 class SubHeaderContainer extends React.Component {
 

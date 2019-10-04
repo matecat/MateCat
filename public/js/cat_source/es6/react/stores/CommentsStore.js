@@ -2,10 +2,10 @@
  * Analyze Store
  */
 
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let EventEmitter = require('events').EventEmitter;
-let assign = require('object-assign');
-const CommentsConstants = require('../constants/CommentsConstants');
+import AppDispatcher  from '../dispatcher/AppDispatcher';
+import {EventEmitter} from 'events';
+import assign  from 'object-assign';
+import CommentsConstants  from '../constants/CommentsConstants';
 
 EventEmitter.prototype.setMaxListeners(0);
 

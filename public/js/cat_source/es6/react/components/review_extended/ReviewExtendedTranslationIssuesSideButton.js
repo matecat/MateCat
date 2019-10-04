@@ -1,5 +1,5 @@
-let SegmentStore = require('../../stores/SegmentStore');
-let SegmentConstants = require('../../constants/SegmentConstants');
+import SegmentStore  from '../../stores/SegmentStore';
+import SegmentConstants  from '../../constants/SegmentConstants';
 
 class ReviewExtendedTranslationIssuesSideButton extends React.Component{
 

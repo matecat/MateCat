@@ -1,5 +1,5 @@
 
-let ReviewSideButton = require('../review_extended/ReviewExtendedTranslationIssuesSideButton').default;
+import ReviewSideButton  from '../review_extended/ReviewExtendedTranslationIssuesSideButton';
 class TranslationIssuesSideButton extends React.Component{
 
     render() {

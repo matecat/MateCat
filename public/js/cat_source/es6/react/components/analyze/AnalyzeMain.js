@@ -1,9 +1,9 @@
 
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
-let AnalyzeActions = require('../../actions/AnalyzeActions');
-let ProjectAnalyze = require('./ProjectAnalyze').default;
-let AnalyzeStore = require('../../stores/AnalyzeStore');
-let {TransitionGroup, CSSTransition} = require('react-transition-group');
+import AnalyzeConstants  from '../../constants/AnalyzeConstants';
+import AnalyzeActions  from '../../actions/AnalyzeActions';
+import ProjectAnalyze  from './ProjectAnalyze';
+import AnalyzeStore  from '../../stores/AnalyzeStore';
+import {TransitionGroup, CSSTransition}  from 'react-transition-group';
 
 
 

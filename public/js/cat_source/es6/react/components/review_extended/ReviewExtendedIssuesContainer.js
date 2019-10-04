@@ -1,6 +1,6 @@
-let ReviewExtendedIssue =  require("./ReviewExtendedIssue").default;
-let WrapperLoader =         require("../../common/WrapperLoader").default;
-let SegmentConstants = require('../../constants/SegmentConstants');
+import ReviewExtendedIssue  from "./ReviewExtendedIssue";
+import WrapperLoader  from "../../common/WrapperLoader";
+import SegmentConstants  from '../../constants/SegmentConstants';
 class ReviewExtendedIssuesContainer extends React.Component {
 
     constructor(props) {

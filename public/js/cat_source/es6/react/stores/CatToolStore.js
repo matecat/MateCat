@@ -2,10 +2,10 @@
  * Analyze Store
  */
 
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let EventEmitter = require('events').EventEmitter;
-let CatToolConstants = require('../constants/CatToolConstants');
-let assign = require('object-assign');
+import AppDispatcher  from '../dispatcher/AppDispatcher';
+import {EventEmitter} from 'events';
+import CatToolConstants  from '../constants/CatToolConstants';
+import assign  from 'object-assign';
 
 EventEmitter.prototype.setMaxListeners(0);
 

@@ -2,13 +2,12 @@
  * React Component .
 
  */
-const React = require('react');
-const SegmentStore = require('../../stores/SegmentStore');
-const SegmentConstants = require('../../constants/SegmentConstants');
-const SegmentActions = require('../../actions/SegmentActions');
-const GlossaryUtils = require('./utils/glossaryUtils');
-const QACheckGlossary = require('./utils/qaCheckGlossaryUtils');
-const SearchUtils = require('../header/cattol/search/searchUtils');
+import React  from 'react';
+import SegmentStore  from '../../stores/SegmentStore';
+import SegmentActions  from '../../actions/SegmentActions';
+import GlossaryUtils  from './utils/glossaryUtils';
+import QACheckGlossary  from './utils/qaCheckGlossaryUtils';
+import SearchUtils  from '../header/cattol/search/searchUtils';
 
 class SegmentSource extends React.Component {
 

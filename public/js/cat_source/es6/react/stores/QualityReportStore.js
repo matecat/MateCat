@@ -1,7 +1,7 @@
-const AppDispatcher = require('../dispatcher/AppDispatcher');
-const EventEmitter = require('events').EventEmitter;
-const assign = require('object-assign');
-const Immutable = require('immutable');
+import AppDispatcher  from '../dispatcher/AppDispatcher';
+import {EventEmitter} from 'events';
+import assign  from 'object-assign';
+import Immutable  from 'immutable';
 import QRConstants from "./../constants/QualityReportConstants";
 
 EventEmitter.prototype.setMaxListeners(0);

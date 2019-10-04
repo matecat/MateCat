@@ -1,6 +1,6 @@
-var React = require('react');
-var SegmentConstants = require('../../../constants/SegmentConstants');
-var SegmentStore = require('../../../stores/SegmentStore');
+import React  from 'react';
+import SegmentConstants  from '../../../constants/SegmentConstants';
+import SegmentStore  from '../../../stores/SegmentStore';
 
 class BulkSelectionBar extends React.Component {
 

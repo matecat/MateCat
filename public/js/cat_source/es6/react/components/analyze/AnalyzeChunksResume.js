@@ -1,6 +1,5 @@
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
-let AnalyzeActions = require('../../actions/AnalyzeActions');
-let OutsourceContainer = require('../outsource/OutsourceContainer').default;
+import AnalyzeActions  from '../../actions/AnalyzeActions';
+import OutsourceContainer  from '../outsource/OutsourceContainer';
 
 
 

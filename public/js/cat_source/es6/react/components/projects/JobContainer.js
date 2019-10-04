@@ -1,5 +1,5 @@
 import JobMenu from "./JobMenu";
-let OutsourceContainer = require('../outsource/OutsourceContainer').default;
+import OutsourceContainer  from '../outsource/OutsourceContainer';
 
 class JobContainer extends React.Component {
 

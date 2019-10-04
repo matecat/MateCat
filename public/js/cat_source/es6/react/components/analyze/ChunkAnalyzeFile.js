@@ -1,6 +1,3 @@
-
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
-
 class ChunkAnalyzeFile extends React.Component {
 
     constructor(props) {

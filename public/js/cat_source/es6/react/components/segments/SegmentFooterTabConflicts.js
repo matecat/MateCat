@@ -2,8 +2,8 @@
  * React Component .
 
  */
-let React = require('react');
-const Immutable = require('immutable');
+import React  from 'react';
+import Immutable  from 'immutable';
 import TagUtils from "../../utils/tagUtils";
 
 

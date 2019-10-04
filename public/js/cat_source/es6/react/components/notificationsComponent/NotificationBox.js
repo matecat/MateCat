@@ -16,7 +16,7 @@
  * timer            (Number, Default 700) The timer to auto dismiss the notification
  */
 
-var NotificationItem = require('./NotificationItem').default;
+import NotificationItem  from './NotificationItem';
 
 class NotificationBox extends React.Component {
 

@@ -2,7 +2,7 @@
  * React Component for the editarea.
 
  */
-let React = require('react');
+import React  from 'react';
 
 class QAComponent extends React.Component {
 

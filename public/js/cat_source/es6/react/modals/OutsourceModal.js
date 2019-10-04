@@ -1,4 +1,4 @@
-let OutsourceConstants = require('../constants/OutsourceConstants');
+import OutsourceConstants  from '../constants/OutsourceConstants';
 
 class OutsourceModal extends React.Component {
 

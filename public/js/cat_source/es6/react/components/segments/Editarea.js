@@ -2,12 +2,12 @@
  * React Component for the editarea.
  
  */
-const React = require('react');
-const $ = require('jquery');
-const SegmentConstants = require('../../constants/SegmentConstants');
-const SegmentStore = require('../../stores/SegmentStore');
-const Immutable = require('immutable');
-const EditArea = require('./utils/editarea');
+import React  from 'react';
+import $  from 'jquery';
+import SegmentConstants  from '../../constants/SegmentConstants';
+import SegmentStore  from '../../stores/SegmentStore';
+import Immutable  from 'immutable';
+import EditArea  from './utils/editarea';
 class Editarea extends React.Component {
 
     constructor(props) {

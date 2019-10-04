@@ -2,10 +2,10 @@
  * React Component for the warnings.
 
  */
-var React = require('react');
-var ReactDOM = require('react-dom');
-const escapeStringRegexp = require('escape-string-regexp');
-const TagUtils = require('../../utils/tagUtils');
+import React  from 'react';
+import ReactDOM  from 'react-dom';
+import escapeStringRegexp  from 'escape-string-regexp';
+import TagUtils  from '../../utils/tagUtils';
 
 class TagsMenu extends React.Component {
 

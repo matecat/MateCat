@@ -1,5 +1,5 @@
 
-let ManageConstants = require('../../constants/ManageConstants');
+import ManageConstants  from '../../constants/ManageConstants';
 
 class ProjectContainer extends React.Component {
 

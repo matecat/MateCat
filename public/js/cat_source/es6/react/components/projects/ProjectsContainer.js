@@ -1,4 +1,4 @@
-let ProjectContainer = require('./ProjectContainer').default;
+import ProjectContainer  from './ProjectContainer';
 
 class ProjectsContainer extends React.Component {
 

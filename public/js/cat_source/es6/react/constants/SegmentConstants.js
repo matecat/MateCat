@@ -2,9 +2,7 @@
  * TodoConstants
  */
 
-import TagsMenu from "../components/segments/TagsMenu";
-
-var keyMirror = require('keymirror');
+import keyMirror  from 'keymirror';
 
 module.exports = keyMirror({
     HIGHLIGHT_EDITAREA: null,

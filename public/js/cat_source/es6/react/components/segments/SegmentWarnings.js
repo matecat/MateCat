@@ -2,8 +2,8 @@
  * React Component for the warnings.
 
  */
-const React = require('react');
-const Immutable = require('immutable');
+import React  from 'react';
+import Immutable  from 'immutable';
 
 class SegmentWarnings extends React.Component {
 

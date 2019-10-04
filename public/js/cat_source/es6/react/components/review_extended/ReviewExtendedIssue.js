@@ -1,4 +1,4 @@
-let SegmentConstants = require('../../constants/SegmentConstants');
+import SegmentConstants  from '../../constants/SegmentConstants';
 class ReviewExtendedIssue extends React.Component {
 
 	constructor(props) {

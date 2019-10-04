@@ -1,7 +1,7 @@
 
-let ChunkAnalyzeHeader = require('./ChunkAnalyzeHeader').default;
-let ChunkAnalyzeFile = require('./ChunkAnalyzeFile').default;
-let {TransitionGroup, CSSTransition} = require('react-transition-group');
+import ChunkAnalyzeHeader  from './ChunkAnalyzeHeader';
+import ChunkAnalyzeFile  from './ChunkAnalyzeFile';
+import {TransitionGroup, CSSTransition}  from 'react-transition-group';
 
 class ChunkAnalyze extends React.Component {
 

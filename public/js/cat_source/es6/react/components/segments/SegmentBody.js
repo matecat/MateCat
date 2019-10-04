@@ -2,8 +2,8 @@
  * React Component .
 
  */
-var React = require('react');
-var SegmentSource = require('./SegmentSource').default;
+import React  from 'react';
+import SegmentSource  from './SegmentSource';
 
 class SegmentBody extends React.Component {
 

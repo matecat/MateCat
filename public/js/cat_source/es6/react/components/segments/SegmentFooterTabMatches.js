@@ -2,11 +2,11 @@
  * React Component .
 
  */
-const React = require('react');
-const SegmentConstants = require('../../constants/SegmentConstants');
-const SegmentStore = require('../../stores/SegmentStore');
-const Immutable = require('immutable');
-const TranslationMatches = require('./utils/translationMatches');
+import React  from 'react';
+import SegmentConstants  from '../../constants/SegmentConstants';
+import SegmentStore  from '../../stores/SegmentStore';
+import Immutable  from 'immutable';
+import TranslationMatches  from './utils/translationMatches';
 import TagUtils from "../../utils/tagUtils";
 
 class SegmentFooterTabMatches extends React.Component {

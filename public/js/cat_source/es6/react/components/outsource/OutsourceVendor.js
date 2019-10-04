@@ -1,6 +1,6 @@
-let OutsourceInfo = require('./OutsourceInfo').default;
-let Immutable = require('immutable');
-let GMTSelect = require('./GMTSelect').default;
+import OutsourceInfo  from './OutsourceInfo';
+import Immutable  from 'immutable';
+import GMTSelect  from './GMTSelect';
 
 
 class OutsourceVendor extends React.Component {

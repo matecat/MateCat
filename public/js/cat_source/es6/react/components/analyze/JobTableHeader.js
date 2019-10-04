@@ -1,6 +1,4 @@
 
-let AnalyzeConstants = require('../../constants/AnalyzeConstants');
-
 class JobTableHeader extends React.Component {
 
     constructor(props) {

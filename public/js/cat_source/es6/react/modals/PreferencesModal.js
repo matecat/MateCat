@@ -1,5 +1,5 @@
-let TextField = require('../common/TextField').default;
-let DQFCredentials = require('./DQFCredentials').default;
+import TextField  from '../common/TextField';
+import DQFCredentials  from './DQFCredentials';
 
 import * as RuleRunner from '../common/ruleRunner';
 import * as FormRules from '../common/formRules';

@@ -1,6 +1,5 @@
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let Immutable = require('immutable');
-let OutsourceConstants = require('../constants/OutsourceConstants');
+import AppDispatcher  from '../dispatcher/AppDispatcher' ;
+import OutsourceConstants  from '../constants/OutsourceConstants' ;
 
 
 

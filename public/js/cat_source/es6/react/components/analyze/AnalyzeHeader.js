@@ -1,4 +1,4 @@
-let {TransitionGroup, CSSTransition} = require('react-transition-group');
+import {TransitionGroup, CSSTransition}  from 'react-transition-group';
 
 class AnalyzeHeader extends React.Component {
 

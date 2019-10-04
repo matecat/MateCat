@@ -9,11 +9,11 @@
  * TodoActions
  */
 
-const AppDispatcher = require('../dispatcher/AppDispatcher');
-const SegmentConstants = require('../constants/SegmentConstants');
-const SegmentStore = require('../stores/SegmentStore');
-const GlossaryUtils = require('../components/segments/utils/glossaryUtils');
-const TranslationMatches = require('../components/segments/utils/translationMatches');
+import AppDispatcher  from '../dispatcher/AppDispatcher';
+import SegmentConstants  from '../constants/SegmentConstants';
+import SegmentStore  from '../stores/SegmentStore';
+import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
+import TranslationMatches  from '../components/segments/utils/translationMatches';
 
 var SegmentActions = {
     /********* SEGMENTS *********/

@@ -1,4 +1,3 @@
-let Immutable = require('immutable');
 class ModifyTeam extends React.Component {
 
 

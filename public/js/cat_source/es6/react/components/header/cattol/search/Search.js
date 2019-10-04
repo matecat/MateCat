@@ -1,9 +1,8 @@
-let React = require('react');
-let SegmentConstants = require('../../../../constants/SegmentConstants');
-let CattolConstants = require('../../../../constants/CatToolConstants');
-let SegmentStore = require('../../../../stores/SegmentStore');
-let CatToolStore = require('../../../../stores/CatToolStore');
-let SearchUtils = require('./searchUtils');
+import React  from 'react';
+import CattolConstants  from '../../../../constants/CatToolConstants';
+import SegmentStore  from '../../../../stores/SegmentStore';
+import CatToolStore  from '../../../../stores/CatToolStore';
+import SearchUtils  from './searchUtils';
 
 class Search extends React.Component {
 

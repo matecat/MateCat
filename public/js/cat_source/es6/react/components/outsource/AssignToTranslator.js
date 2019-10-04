@@ -1,5 +1,4 @@
-let OutsourceConstants = require('../../constants/OutsourceConstants');
-let GMTSelect = require('./GMTSelect').default;
+import GMTSelect  from './GMTSelect';
 class AssignToTranslator extends React.Component {
 
 

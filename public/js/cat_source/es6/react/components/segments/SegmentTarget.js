@@ -3,13 +3,13 @@
  * React Component .
 
  */
-var React = require('react');
-var EditArea = require('./Editarea').default;
-var TagsMenu = require('./TagsMenu').default;
-var SegmentConstants = require('../../constants/SegmentConstants');
-var SegmentStore = require('../../stores/SegmentStore');
-const SegmentButtons = require('./SegmentButtons').default;
-const QaBlacklist = require('./utils/qaCheckBlacklistUtils');
+import React  from 'react';
+import EditArea  from './Editarea';
+import TagsMenu  from './TagsMenu';
+import SegmentConstants  from '../../constants/SegmentConstants';
+import SegmentStore  from '../../stores/SegmentStore';
+import SegmentButtons  from './SegmentButtons';
+import QaBlacklist  from './utils/qaCheckBlacklistUtils';
 
 
 class SegmentTarget extends React.Component {

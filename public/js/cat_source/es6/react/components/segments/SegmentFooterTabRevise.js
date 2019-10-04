@@ -2,7 +2,7 @@
  * React Component .
 
  */
-const React = require('react');
+import React  from 'react';
 
 class SegmentFooterTabRevise extends React.Component {
 

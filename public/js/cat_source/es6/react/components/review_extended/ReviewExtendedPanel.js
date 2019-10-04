@@ -1,6 +1,6 @@
-let ReviewExtendedIssuesContainer = require('./ReviewExtendedIssuesContainer').default;
-let ReviewExtendedIssuePanel = require('./ReviewExtendedIssuePanel').default;
-let SegmentConstants = require('../../constants/SegmentConstants');
+import ReviewExtendedIssuesContainer  from './ReviewExtendedIssuesContainer';
+import ReviewExtendedIssuePanel  from './ReviewExtendedIssuePanel';
+import SegmentConstants  from '../../constants/SegmentConstants';
 
 class ReviewExtendedPanel extends React.Component {
 

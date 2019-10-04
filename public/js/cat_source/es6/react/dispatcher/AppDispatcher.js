@@ -4,6 +4,6 @@
  * A singleton that operates as the central hub for application updates.
  */
 
-var Dispatcher = require('flux').Dispatcher;
+import {Dispatcher} from 'flux';
 
 module.exports = new Dispatcher();

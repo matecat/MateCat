@@ -1,4 +1,4 @@
-let ReviewExtendedCategorySelector = require('./ReviewExtendedCategorySelector').default;
+import ReviewExtendedCategorySelector  from './ReviewExtendedCategorySelector';
 class ReviewExtendedIssuePanel extends React.Component{
 
     constructor(props) {

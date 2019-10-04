@@ -1,6 +1,6 @@
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let ManageConstants = require('../constants/ManageConstants');
-let TeamConstants = require('../constants/TeamConstants');
+import AppDispatcher from '../dispatcher/AppDispatcher';
+import ManageConstants from '../constants/ManageConstants';
+import TeamConstants from '../constants/TeamConstants';
 
 
 let ManageActions = {

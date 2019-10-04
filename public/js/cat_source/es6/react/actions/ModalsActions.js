@@ -1,8 +1,3 @@
-let AppDispatcher = require('../dispatcher/AppDispatcher');
-let Immutable = require('immutable');
-
-
-
 let ModalsActions = {
 
     //********* Modals **************//

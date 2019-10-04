@@ -2,8 +2,8 @@
  * React Component .
 
  */
-let React = require('react');
-let SegmentStore = require('../../stores/SegmentStore');
+import React  from 'react';
+import SegmentStore  from '../../stores/SegmentStore';
 
 class SegmentButton extends React.Component {
 
