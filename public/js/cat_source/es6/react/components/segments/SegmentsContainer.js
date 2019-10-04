@@ -365,7 +365,7 @@ class SegmentsContainer extends React.Component {
         return <VirtualList
             ref={this.listRef}
             width={width}
-            height={this.state.window.height-79}
+            height={this.state.window.height-132}
             style={{overflowX: 'hidden'}}
             estimatedItemSize={80}
             overscanCount={5}
