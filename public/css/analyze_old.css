@@ -1065,6 +1065,15 @@ top: 25%;
 	justify-content: center;
 }
 
+#analyze header .profile-menu .column-separator {
+	width: 1px;
+	height: 36px;
+	background: #fff;
+	margin-right: 14px;
+	margin-left: 10px;
+}
+
+
 #analyze a.downloadAnalysisReport {
 	padding: 10px 20px;
 	border-radius: 40px;
