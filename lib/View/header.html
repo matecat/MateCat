@@ -192,7 +192,7 @@
                     <li class="item" title="Export XLIFF to target" data-value="target">
                         <a target="_blank" href="${basepath}utils/xliff-to-target">Export XLIFF to target</a>
                     </li>
-                    <li class="item" title="Edit log">
+                    <li class="item" title="Edit log" data-value="editlog" tal:condition="footer_show_editlog_link">
                         <a id="edit_log_link" target="_blank" tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a>
                     </li>
                 </ul>
