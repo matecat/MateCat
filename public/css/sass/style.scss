@@ -5189,7 +5189,8 @@ header {
 
     .action-menu {
         display: grid;
-        grid-template-columns: repeat(9, auto); /* Todo: */
+        /*grid-template-columns: repeat(9, auto);*/
+        grid-auto-flow: column;
         grid-template-rows: $icon-scale;
         align-items:center;
         justify-content: right;
