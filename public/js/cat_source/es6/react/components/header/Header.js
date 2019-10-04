@@ -147,11 +147,11 @@ class Header extends React.Component {
 						{(showLinks) ? (
 							<div>
 								<ul id="menu-site">
-									<li><a href="https://www.matecat.com/about/">About</a></li>
-									<li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
-									<li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
-									<li><a href="https://www.matecat.com/open-source/">Opensource</a></li>
-									<li><a href="https://www.matecat.com/support/">Contact us</a></li>
+									<li><a href="/about/">About</a></li>
+									<li><a href="/benefits/">Benefits</a></li>
+									<li><a href="/outsourcing/">Outsource</a></li>
+									<li><a href="/open-source/">Opensource</a></li>
+									<li><a href="/support/">Contact us</a></li>
 									{/*<li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>*/}
 									<li><a href="/plugins/aligner/index"  target="_blank" className={"btn btn-primary"}>Aligner</a></li>
 								</ul>
