@@ -3,16 +3,6 @@
  */
 $.extend(UI, {
 
-    disableTagMark: function() {
-		this.tagLockEnabled = false;
-        SegmentActions.disableTagLock();
-
-	},
-	enableTagMark: function() {
-		this.tagLockEnabled = true;
-        SegmentActions.enableTagLock();
-	},
-
     encodeSpacesAsPlaceholders: function(str, root) {
         var newStr = '';
         $.each($.parseHTML(str), function() {

@@ -53,7 +53,7 @@ let SearchUtils = {
 			APP.alert({msg: 'Enter text in source or target input boxes<br /> or select a status.'});
 			return false;
 		}
-		UI.disableTagMark();
+		SegmentActions.disableTagLock();
 
 		let p = this.searchParams;
 
