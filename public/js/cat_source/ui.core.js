@@ -1016,10 +1016,6 @@ UI = {
 						'	</ul>' +
                         '   <div class="article-segments-container-' + fid + ' article-segments-container"></div>' +
                         '</article>';
-
-                /* Todo: change */
-                $('#footer-source-lang').text(this.source);
-                $('#footer-target-lang').text(this.target);
 			}
 
 			if (articleToAdd) {
@@ -1477,8 +1473,9 @@ UI = {
 		$('#stat-completion strong').html(completion);
         $('#total-payable').html(s.TOTAL_FORMATTED);
 
-        $(document).trigger('setProgress:rendered', { stats : stats } );
+        $('.bg-loader',m).css('display', 'none');
 
+        $(document).trigger('setProgress:rendered', { stats : stats } );
     },
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly:not(.ice-locked)').length;

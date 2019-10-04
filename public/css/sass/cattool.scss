@@ -38,7 +38,7 @@ body.cattool {
 	background-color: #fafafa;
 	padding: 0 12px 0 14px;
 	width: 100%;
-	position: fixed;
+	position: relative;
 	bottom: 0;
 	left: 0;
 	z-index: 2;
@@ -115,7 +115,7 @@ body.cattool {
 
 	  .progress-bar {
 		display: grid;
-		grid-template-columns: 1fr 32px;
+		grid-template-columns: 1fr 44px;
 		grid-column-gap: 8px;
 
 		.percent {
@@ -126,6 +126,58 @@ body.cattool {
 		  margin: 0 !important;
 		  height: auto;
 
+			@-webkit-keyframes move-bg {
+				from {
+					-webkit-transform: translateX(0);
+				}
+				to {
+					-webkit-transform: translateX(46px);
+				}
+			}
+
+			@keyframes move-bg {
+				from {
+					transform: translateX(0);
+				}
+				to {
+					transform: translateX(46px);
+				}
+			}
+
+			.bg-loader{
+				position: absolute;
+				left: -46px;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				z-index: 1;
+
+				background: -webkit-repeating-linear-gradient(
+								110deg,
+								#e8e8e8 0px,
+								#e8e8e8 10px,
+								#D8D8D8 0px,
+								#D8D8D8 20px
+				);
+				background: repeating-linear-gradient(
+								110deg,
+								#e8e8e8 0px,
+								#e8e8e8 10px,
+								#D8D8D8 0px,
+								#D8D8D8 20px
+				);
+
+				-webkit-animation-name: move-bg;
+				-webkit-animation-duration: .8s;
+				-webkit-animation-timing-function: linear;
+				-webkit-animation-iteration-count: infinite;
+
+				animation-name: move-bg;
+				animation-duration: .8s;
+				animation-timing-function: linear;
+				animation-iteration-count: infinite;
+			}
+
 		  a {
 			&:after {
 			  background-image: none;
@@ -135,7 +187,8 @@ body.cattool {
 	  }
 		.statistics-details {
 			display: grid;
-			grid-template-columns: minmax(132px,0.4fr) minmax(164px,0.6fr);
+			grid-template-columns: minmax(144px,0.4fr) minmax(168px,0.6fr);
+			grid-column-gap: 4px;
 			justify-self: end;
 		}
 	}
@@ -224,6 +277,3 @@ Styles from other css files should be ported over time.
 	display: none !important;
   }
 }
-
-
-

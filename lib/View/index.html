@@ -222,18 +222,31 @@
 
                 <!-- to from -->
                 <div class="item language">
-                    <p> <span id="footer-source-lang" tal:content="source_code"></span> <span class="to-arrow"> &#8594; </span> <span id="footer-target-lang" tal:content="target_code"></span> </p>
+                    <p>
+                        <!--<span id="footer-source-lang" tal:content="languages_array_obj"></span>-->
+                        <tal:block tal:repeat="lang languages_array_obj">
+                            <span tal:condition="php: lang['code'] == source_code"  id="footer-source-lang" tal:content="lang/name"></span>
+                        </tal:block>
+                        <tal:block tal:repeat="lang languages_array_obj">
+                            <tal:block tal:condition="php: lang['code'] == target_code" >
+                                <span class="to-arrow"> &#8594; </span>
+                                <span id="footer-target-lang" tal:content="lang/name"></span>
+                            </tal:block>
+                        </tal:block>
+                        <!--<span id="footer-target-lang" tal:content="target_code"></span>-->
+                    </p>
                 </div>
 
                 <!-- progress -->
                 <div class="progress-bar" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                    <div class="meter" style="width:100%">
-                        <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
-                        <a href="#"  class="approved-bar-2nd-pass"/>
-                        <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
-                        <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
-                        <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
-                    </div>
+                     <div class="meter" style="width:100%;position:relative;">
+                         <div class="bg-loader"></div>
+                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
+                         <a href="#"  class="approved-bar-2nd-pass"/>
+                         <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
+                         <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
+                         <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
+                     </div>
                     <div class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</div>
                 </div>
 
