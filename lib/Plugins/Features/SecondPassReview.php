@@ -61,11 +61,11 @@ class SecondPassReview extends BaseFeature {
      * @throws \Exception
      */
     public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
-        $project   = Projects_ProjectDao::findById( $project_id );
+        $project   = Projects_ProjectDao::findById( $project_id, 300 );
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviewsForList( $project->getChunks() );
         foreach ( $chunkReviews as $chunkReview ) {
             $model = new ChunkReviewModel( $chunkReview );
-            $model->recountAndUpdatePassFailResult();
+            $model->recountAndUpdatePassFailResult( $project );
         }
     }
 

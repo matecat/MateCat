@@ -204,7 +204,7 @@ $.extend(UI, {
             if ( UI.editarea && UI.editarea != '') {
                 var hasFocusBefore = UI.editarea.is(":focus");
                 setTimeout(function() {
-                    var hasFocusAfter = UI.editarea.is(":focus");
+                    var hasFocusAfter = UI.editarea && UI.editarea.is(":focus");
                     if(hasFocusBefore && hasFocusAfter){
                         $('.editor .rangySelectionBoundary.focusOut').remove();
 						UI.editarea.get(0).normalize();
