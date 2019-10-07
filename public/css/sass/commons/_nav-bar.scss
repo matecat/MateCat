@@ -222,6 +222,7 @@ header {
                             height: 24px;
                             justify-content: center;
                             align-items: center;
+                            visibility: hidden;
                             &:hover {
                                 background: rgba(0, 0, 0, 0.03);
                                 border-radius: 50px;
@@ -233,6 +234,9 @@ header {
                             }
                         }
                     }
+                }
+                &:hover .icon a {
+                    visibility: visible;
                 }
 
                 &.selected {
