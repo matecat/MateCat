@@ -417,10 +417,18 @@ $.extend(UI.UPLOAD_PAGE, {
 
         $('#project-team').dropdown({
             selectOnKeydown: false,
-            fullTextSearch: 'exact'
+            fullTextSearch: 'exact',
+            onChange: function (value) {
+                APP.setTeamInStorage(value);
+            }
         });
 
-        $('#project-team').dropdown('set selected', $('#project-team .menu .item:first-child').data('value'));
+        var selectedTeam = APP.getLastTeamSelected(APP.USER.STORE.teams);
+        if ( selectedTeam ) {
+            $('#project-team').dropdown('set selected', selectedTeam.id);
+        } else {
+            $('#project-team').dropdown('set selected', $('#project-team .menu .item:first-child').data('value'));
+        }
 
 
         $('#project-subject').dropdown('set selected', 'general');

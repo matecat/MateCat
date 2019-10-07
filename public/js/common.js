@@ -882,7 +882,8 @@ APP = {
     setTeamNameInMenu: function () {
         if (APP.USER.STORE.teams) {
             var team = this.getLastTeamSelected(APP.USER.STORE.teams);
-            $('.user-menu-container .organization-name').text(team.name);
+            $('.user-menu-container .organization-name').text(team.name); //??
+            $('.user-menu-container .organization-name').text(team.name); //??
         } else {
             var self = this;
             APP.USER.loadUserData().done(function (  ) {
