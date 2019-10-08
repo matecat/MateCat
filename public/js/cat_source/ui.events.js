@@ -189,14 +189,6 @@ $.extend(UI, {
             if( $('body' ).hasClass( '.job_archived' ) || $('body' ).hasClass( '.job_cancelled' ) ){
                 return false;
             }
-			/*Show the cursor position to paste the glossary item (Ex: check dbclick)
-			 We have to know the old cursor position when clicking for example
-			 on a glossary item to paste the text in the correct position
-			 */
-
-            // if(!$('.editor .targetarea .rangySelectionBoundary.focusOut').length) {
-            //     saveSelection();
-            // }
 
             $('.editor .targetarea .rangySelectionBoundary').addClass('focusOut');
 
@@ -273,16 +265,16 @@ $.extend(UI, {
 
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
-            runDownload();
+            UI.runDownload();
 		}).on('click', '#previewDropdown .previewLink a', function(e) {
 			e.preventDefault();
-			runDownload();
+			UI.runDownload();
 		}).on('click', '#previewDropdown a.tmx', function(e) {
 			e.preventDefault();
 			window.open($(this).attr('href'));
 		}).on('click', '#downloadProject', function(e) {
             e.preventDefault();
-            runDownload();
+            UI.runDownload();
 		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
             if( e.which == 1 ){ // left click
                 e.preventDefault();

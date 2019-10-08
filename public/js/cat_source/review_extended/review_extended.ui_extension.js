@@ -161,7 +161,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         },
 
         closeIssuesPanel : function() {
-            hackIntercomButton( false );
             SegmentActions.closeIssuesPanel();
             $('body').removeClass('side-tools-opened review-side-panel-opened review-extended-opened');
             localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);

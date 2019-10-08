@@ -18,7 +18,10 @@ $.extend( UI, {
         return text;
     },
     evalOpenableSegment: function ( segment ) {
-        if ( isTranslated( segment ) ) return true;
+        if ( ! (
+            segment.status === 'NEW' ||
+            segment.status === 'DRAFT'
+        ) ) return true;
 
         if ( UI.projectStats && UI.projectStats.TRANSLATED_PERC === 0 ) {
             alertNoTranslatedSegments()
@@ -105,7 +108,7 @@ if ( config.enableReview && config.isReview ) {
 
                 var target = EditAreaUtils.postProcessEditarea($segment, '.targetarea');
                 target = UI.clenaupTextFromPleaceholders( target );
-                var diffHTML = trackChangesHTML( TextUtils.htmlEncode(source), TextUtils.htmlEncode(target) );
+                var diffHTML = TextUtils.trackChangesHTML( TextUtils.htmlEncode(source), TextUtils.htmlEncode(target) );
                 diffHTML = TagUtils.transformTextForLockTags(diffHTML);
                 $('.sub-editor.review .track-changes p', $segment).html( diffHTML );
             },

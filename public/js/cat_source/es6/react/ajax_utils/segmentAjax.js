@@ -230,7 +230,7 @@ API.SEGMENT = {
             is_concordance: 1,
             from_target: type,
             id_segment: UI.currentSegmentId,
-            text: view2rawxliff(query),
+            text: TextUtils.view2rawxliff(query),
             id_job: config.job_id,
             num_results: UI.numMatchesResults,
             id_translator: config.id_translator,

@@ -240,10 +240,10 @@ const TAGS_UTILS =  {
         let elem = $tag.hasClass('locked') && !$tag.hasClass('inside-attribute')? $tag : $tag.closest('.locked:not(.inside-attribute)');
         if( elem.hasClass('selected') ) {
             elem.removeClass('selected');
-            setCursorPosition(elem[0], 'end');
+            TextUtils.setCursorPosition(elem[0], 'end');
         } else {
-            setCursorPosition(elem[0]);
-            selectText(elem[0]);
+            TextUtils.setCursorPosition(elem[0]);
+            CursorUtils.selectText(elem[0]);
             this.removeSelectedClassToTags();
             elem.addClass('selected');
             if(UI.body.hasClass('tagmode-default-compressed')) {
@@ -273,7 +273,7 @@ const TAGS_UTILS =  {
                 return true
             }
         } else {
-            pasteHtmlAtCaret('<span class="temp-highlight-tags"/>');
+            TextUtils.pasteHtmlAtCaret('<span class="temp-highlight-tags"/>');
         }
         let htmlEditarea = $.parseHTML(UI.editarea.html());
         if (htmlEditarea) {

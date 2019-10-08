@@ -1,4 +1,6 @@
 import ReviewExtendedCategorySelector  from './ReviewExtendedCategorySelector';
+import CommonUtils  from '../../utils/commonUtils';
+
 class ReviewExtendedIssuePanel extends React.Component{
 
     constructor(props) {
@@ -77,7 +79,7 @@ class ReviewExtendedIssuePanel extends React.Component{
         if ( response.errors && response.errors[0].code === -2000 ) {
             UI.processErrors(response.errors, 'createIssue');
         } else {
-            genericErrorAlertMessage() ;
+            CommonUtils.genericErrorAlertMessage() ;
         }
         this.props.setCreationIssueLoader(false);
         this.props.handleFail();

@@ -113,8 +113,8 @@ class SegmentFooterTabMatches extends React.Component {
         } else {
             target = $('.translation', ul).text();
         }
-        target = view2rawxliff(target);
-        source = view2rawxliff(source);
+        target = TextUtils.view2rawxliff(target);
+        source = TextUtils.view2rawxliff(source);
         SegmentActions.deleteContribution(source, target, match.id, this.props.segment.original_sid);
     }
 

@@ -1,5 +1,6 @@
 import TagUtils from '../../../utils/tagUtils';
 import TextUtils from '../../../utils/textUtils';
+import CommonUtils from '../../../utils/commonUtils';
 let TranslationMatches = {
 
 
@@ -114,7 +115,7 @@ let TranslationMatches = {
         **/
         var s1 = $('#segment-' + UI.lastTranslatedSegmentId + ' .source').text();
         var s2 = currentSegment.segment;
-        var areSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 < 50;
+        var areSimilar = CommonUtils.levenshteinDistance(s1,s2)/Math.max(s1.length,s2.length)*100 < 50;
         var isEqual = (s1 == s2) && s1 !== '';
 
         var callNewContributions = areSimilar || isEqual;
@@ -131,7 +132,7 @@ let TranslationMatches = {
 
         txt = TagUtils.prepareTextToSend(currentSegment.segment);
 
-        txt = view2rawxliff(txt);
+        txt = TextUtils.view2rawxliff(txt);
         // Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 
         // `next` and `untranslated next` are the same

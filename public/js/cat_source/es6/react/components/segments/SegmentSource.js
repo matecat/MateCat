@@ -88,7 +88,7 @@ class SegmentSource extends React.Component {
 
     addSplitPoint(event) {
         if(window.getSelection().type === 'Range') return false;
-        pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"/></span>');
+        TextUtils.pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"/></span>');
 
         this.updateSplitNumber();
     }
@@ -112,14 +112,14 @@ class SegmentSource extends React.Component {
     }
 
     markSearch(source) {
-        if ( this.props.segment.search && Object.size(this.props.segment.search) > 0 && this.props.segment.search.source) {
+        if ( this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.source) {
             source = SearchUtils.markText(source, this.props.segment.search, true, this.props.segment.sid);
         }
         return source;
     }
 
     markGlossary(source) {
-        if ( this.props.segment.glossary && Object.size(this.props.segment.glossary) > 0 ) {
+        if ( this.props.segment.glossary && _.size(this.props.segment.glossary) > 0 ) {
             return GlossaryUtils.markGlossaryItemsInText(source, this.props.segment.glossary, this.props.segment.sid);
         }
         return source;

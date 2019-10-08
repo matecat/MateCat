@@ -1,5 +1,6 @@
 import TextUtils from '../../../utils/textUtils';
 import TagUtils from '../../../utils/tagUtils';
+import CursorUtils from '../../../utils/cursorUtils';
 
 let EditArea = {
 
@@ -14,7 +15,7 @@ let EditArea = {
         node.setAttribute('class', 'monad marker softReturn ' + config.crPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
-        insertNodeAtCursor(node);
+        TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
             modifiedTranslationCallback.call();
@@ -27,7 +28,7 @@ let EditArea = {
         node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
-        insertNodeAtCursor(node);
+        TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
             modifiedTranslationCallback.call();
@@ -73,7 +74,7 @@ let EditArea = {
                 });
 
             } else {
-                saveSelection();
+                CursorUtils.saveSelection();
 
                 var parentTag = $( 'span.locked', UI.editarea ).has( '.rangySelectionBoundary' );
                 var isInsideTag = $( 'span.locked .rangySelectionBoundary , span.monad .rangySelectionBoundary', UI.editarea ).length;
@@ -109,16 +110,16 @@ let EditArea = {
                 setTimeout( function () {
                     // detect if selection ph is inside a monad tag
                     if ( $( '.monad .rangySelectionBoundary', UI.editarea ).length ) {
-                        saveSelection();
+                        CursorUtils.saveSelection();
                         $( '.monad:has(.rangySelectionBoundary)', UI.editarea ).after( $( '.monad .rangySelectionBoundary', UI.editarea ) );
-                        restoreSelection();
+                        CursorUtils.restoreSelection();
                         // move selboundary after the monad
                     }
                     // detect if selection ph is inside a monad tag
                     if ( $( '.monad .monad', UI.editarea ).length ) {
-                        saveSelection();
+                        CursorUtils.saveSelection();
                         $( '.monad:has(.monad)', UI.editarea ).after( $( '.monad .monad', UI.editarea ) );
-                        restoreSelection();
+                        CursorUtils.restoreSelection();
                         // move selboundary after the monad
                     }
                 }, 50 );
@@ -132,7 +133,7 @@ let EditArea = {
             node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
             node.setAttribute('contenteditable', 'false');
             node.textContent = TextUtils.htmlDecode("&#8677;");
-            insertNodeAtCursor(node);
+            TextUtils.insertNodeAtCursor(node);
             EditArea.unnestMarkers();
         }
         if (code == 37) { // left arrow
@@ -146,7 +147,7 @@ let EditArea = {
                 r = range.startContainer.innerText;
                 if (r && (r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
                     e.preventDefault();
-                    saveSelection();
+                    CursorUtils.saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
                     rr.setStartBefore(referenceNode);
@@ -167,7 +168,7 @@ let EditArea = {
             if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
                 r = range.startContainer.data;
                 if (r &&(r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
-                    saveSelection();
+                    CursorUtils.saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
                     rr.setStartAfter(referenceNode);
@@ -189,7 +190,7 @@ let EditArea = {
             if (range.startOffset != range.endOffset) {
                 r = range.startContainer.innerText;
                 if (r &&(r[0] == '<') && (r[r.length - 1] == '>')) {
-                    saveSelection();
+                    CursorUtils.saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
                     rr.setStartAfter(referenceNode);
@@ -209,7 +210,7 @@ let EditArea = {
             if (range.startOffset != range.endOffset) {
                 r = range.startContainer.data;
                 if (r &&(r[0] == '<') && (r[r.length - 1] == '>')) {
-                    saveSelection();
+                    CursorUtils.saveSelection();
                     rr = document.createRange();
                     referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
                     rr.setStartAfter(referenceNode);
@@ -259,8 +260,8 @@ let EditArea = {
         $('#placeHolder').remove();
         var node = document.createElement("span");
         node.setAttribute('id', 'placeHolder');
-        removeSelectedText();
-        insertNodeAtCursor(node);
+        TextUtils.removeSelectedText();
+        TextUtils.insertNodeAtCursor(node);
         this.handleEditAreaPaste(e);
         UI.registerQACheck();
     },
@@ -272,7 +273,7 @@ let EditArea = {
         node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.textContent = TextUtils.htmlDecode("&nbsp;");
-        insertNodeAtCursor(node);
+        TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
             modifiedTranslationCallback.call();
@@ -302,7 +303,7 @@ let EditArea = {
         area.find('span.space-marker').replaceWith(' ');
         area.find('span.rangySelectionBoundary').remove();
         area = TagUtils.encodeTagsWithHtmlAttribute(area);
-        return view2rawxliff( area.text() );
+        return TextUtils.view2rawxliff( area.text() );
     },
 };
 

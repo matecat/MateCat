@@ -37,7 +37,7 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     setTotalMatchesInTab(matches) {
-        let totalMatches = Object.size( matches );
+        let totalMatches = _.size( matches );
         if ( totalMatches > 0 ) {
             SegmentActions.setTabIndex(this.props.id_segment, "glossary" , totalMatches);
         }
@@ -169,7 +169,7 @@ class SegmentFooterTabGlossary extends React.Component {
     }
     renderMatches() {
         let htmlResults = [];
-        if ( Object.size( this.props.segment.glossary ) ) {
+        if ( _.size( this.props.segment.glossary ) ) {
 
             let self = this;
             $.each( this.props.segment.glossary, function ( name, value ) {

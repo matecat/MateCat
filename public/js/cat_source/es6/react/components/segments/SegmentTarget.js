@@ -7,6 +7,7 @@ import React  from 'react';
 import EditArea  from './Editarea';
 import TagsMenu  from './TagsMenu';
 import TagUtils from '../../utils/tagUtils';
+import CursorUtils from '../../utils/cursorUtils';
 import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentButtons  from './SegmentButtons';
@@ -87,7 +88,7 @@ class SegmentTarget extends React.Component {
         if ( this.textSelectedInsideSelectionArea(selection, container ) )  {
             event.preventDefault();
             event.stopPropagation();
-            selection = getSelectionData( selection, container ) ;
+            selection = CursorUtils.getSelectionData( selection, container ) ;
             SegmentActions.openIssuesPanel({ sid: this.props.segment.sid,  selection : selection }, true);
             setTimeout(()=> {
                 SegmentActions.showIssuesMessage(this.props.segment.sid, 2);
@@ -106,7 +107,7 @@ class SegmentTarget extends React.Component {
     lockEditArea(event) {
         event.preventDefault();
         if ( !this.props.segment.edit_area_locked ) {
-            UI.updateSegmentTranslationFn();
+            this.sendTranslationUpdate();
         }
         SegmentActions.lockEditArea(this.props.segment.sid, this.props.segment.fid);
     }
@@ -271,7 +272,7 @@ class SegmentTarget extends React.Component {
         if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
             translation = QaBlacklist.markBlacklistItemsInSegment(translation, this.props.segment.qaBlacklistGlossary);
         }
-        if ( this.props.segment.search && Object.size(this.props.segment.search) > 0 && this.props.segment.search.target) {
+        if ( this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.target) {
             translation = SearchUtils.markText(translation, this.props.segment.search, false, this.props.segment.sid);
         }
         return translation

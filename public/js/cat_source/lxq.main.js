@@ -946,9 +946,9 @@ LXQ.init  = function () {
                     }
                 }
                 $.powerTip.hide();
-                saveSelection();
+                CursorUtils.saveSelection();
                 $(target).text(suggest);
-                restoreSelection();
+                CursorUtils.restoreSelection();
                 $(target).addClass('lxq-invisible');
                 UI.segmentQA(UI.currentSegment);
             }
@@ -1005,43 +1005,7 @@ LXQ.init  = function () {
             });
             SegmentActions.addLexiqaHighlight(segmentId, highlights);
 
-            // var html = '';
-            // if (insource) {
-            //     html = $(".source", segment).html();
-            //     html = highLightText(html,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(segmentId),true,segment);
-            //     html.indexOf('lxqwarning') > -1 && SegmentActions.replaceSourceText(segmentId, UI.getSegmentFileId(segment), html);
-            // }
-            // else {
-            //     if ( parseInt(UI.currentSegmentId) === parseInt(segmentId) )
-            //         saveSelection();
-            //     html = $(UI.targetContainerSelector(), segment).html();
-            //     var html_new = highLightText(html,highlights.target,(segment===UI.currentSegment ? true : false),
-            //         LXQ.shouldHighlighWarningsForSegment(segmentId),false,segment);
-            //     if ( html.length !== html_new.length ) {
-            //         html_new.indexOf('lxqwarning') > -1 && SegmentActions.replaceEditAreaTextContent(segmentId, UI.getSegmentFileId(segment), html_new);
-            //     }
-            //     if ( parseInt(UI.currentSegmentId) === parseInt(segmentId) )
-            //         restoreSelection();
-            // }
-            // reloadPowertip(segment);
-
         };
-
-        // var postShowHighlight = function(segmentid, show) {
-        //     $.ajax({
-        //         type: "POST",
-        //         url: config.lexiqaServer+"/showhighlighting",
-        //         data: {
-        //             data: {
-        //                     segmentid: segmentid,
-        //                     show: show
-        //                     }
-        //         },
-        //         success:function(result){
-        //             // console.log('postShowHighlight success: '+result);
-        //         }
-        //     });
-        // };
 
         var postIgnoreError = function(errorid) {
             $.ajax({
@@ -1366,31 +1330,9 @@ LXQ.init  = function () {
                                     }
                                 }
                             } );
-                            //delete LXQ.lexiqaWarnings[id_segment];
                             LXQ.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
-                            // QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(segment);
-                            // QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), segment ));
                             SegmentActions.addLexiqaHighlight(id_segment, highlights);
 
-                            // source_val = LXQ.highLightText( source_val, highlights.source, isSegmentCompleted, true, true, segment );
-                            // if ( source_val.indexOf('lxqwarning') > -1 ) {
-                            //     SegmentActions.replaceSourceText( id_segment, UI.getSegmentFileId( segment ), source_val );
-                            // }
-                            // if ( parseInt(UI.currentSegmentId) === parseInt(id_segment) )
-                            //     saveSelection();
-                            // target_val = $( UI.targetContainerSelector(), segment ).html();
-                            // target_val = LXQ.highLightText( target_val, highlights.target, isSegmentCompleted, true, false, segment );
-                            // if ( target_val.indexOf('lxqwarning') > -1 ) {
-                            //     SegmentActions.replaceEditAreaTextContent( id_segment, UI.getSegmentFileId( segment ), target_val );
-                            // }
-                            // if ( parseInt(UI.currentSegmentId) === parseInt(id_segment) )
-                            //     restoreSelection();
-                            // LXQ.reloadPowertip( segment );
-
-                            // QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), segment ));
-                            // QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(segment);
-                            //only reload dropdown menu and link, if there was an error...
-                            //if ( LXQ.enabled() ) LXQ.refreshElements();
 
                             if ( !(LXQ.getVisibleWarningsCountForSegment( id_segment ) > 0) ) {
                                 noVisibleErrorsFound = true;
@@ -1399,21 +1341,6 @@ LXQ.init  = function () {
                         else {
                             //do something else
                             noVisibleErrorsFound = true;
-
-                            // source_val = $( ".source", segment ).html();
-                            // if ( source_val.indexOf('lxqwarning') > -1 ) {
-                            //     source_val = LXQ.cleanUpHighLighting( source_val );
-                            //     SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val);
-                            // }
-                            // if ( parseInt(UI.currentSegmentId) === parseInt(id_segment) )
-                            //     saveSelection();
-                            // target_val = $( UI.targetContainerSelector(), segment ).html();
-                            // if ( target_val.indexOf('lxqwarning') > -1 ) {
-                            //     target_val = LXQ.cleanUpHighLighting( target_val );
-                            //     SegmentActions.replaceEditAreaTextContent( UI.getSegmentId( segment ), UI.getSegmentFileId( segment ), target_val );
-                            // }
-                            // if ( parseInt(UI.currentSegmentId) === parseInt(id_segment) )
-                            //     restoreSelection();
 
                             if ( callback != null )
                                 callback();

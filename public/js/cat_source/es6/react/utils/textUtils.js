@@ -204,6 +204,288 @@ const TEXT_UTILS =  {
 
     escapeRegExp(str) {
         return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    },
+    insertNodeAtCursor(node) {
+        try {
+            var range, html;
+            if (window.getSelection && window.getSelection().getRangeAt) {
+                if ((window.getSelection().type == 'Caret') || (UI.isFirefox)) {
+                    range = window.getSelection().getRangeAt(0);
+                    range.insertNode(node);
+                    this.setCursorAfterNode(range, node);
+                }
+            } else if (document.selection && document.selection.createRange) {
+                range = document.selection.createRange();
+                html = (node.nodeType == 3) ? node.data : node.outerHTML;
+                range.pasteHTML(html);
+            }
+        } catch (e) {
+            console.error("Fail to insert node at cursor", e);
+        }
+    },
+    insertTextAtCursor(text) {
+        var sel, range, html;
+        if (window.getSelection) {
+            sel = window.getSelection();
+            if (sel.getRangeAt && sel.rangeCount) {
+                range = sel.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode( document.createTextNode(text) );
+            }
+        } else if (document.selection && document.selection.createRange) {
+            document.selection.createRange().text = text;
+        }
+    },
+
+    setCursorAfterNode(range, node) {
+        range.setStartAfter(node);
+        range.setEndAfter(node);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+    },
+
+    pasteHtmlAtCaret(html, selectPastedContent) {
+        var sel, range;
+        let __ignoreSelection = ( range ) => {
+            if (
+                range.startContainer == range.endContainer &&
+                range.startContainer == document
+            ) {
+                return true ;
+            }
+        }
+        if (window.getSelection) {
+            // IE9 and non-IE
+            sel = window.getSelection();
+
+            if (sel.getRangeAt && sel.rangeCount) {
+                range = sel.getRangeAt(0);
+
+                if ( __ignoreSelection( range ) ) return ;
+
+                range.deleteContents();
+
+                // Range.createContextualFragment() would be useful here but is
+                // only relatively recently standardized and is not supported in
+                // some browsers (IE9, for one)
+                var el = document.createElement("div");
+                el.innerHTML = html;
+                var frag = document.createDocumentFragment(), node, lastNode;
+                while ( (node = el.firstChild) ) {
+                    lastNode = frag.appendChild(node);
+                }
+                var firstNode = frag.firstChild;
+                range.insertNode(frag);
+
+                // Preserve the selection
+                if (lastNode) {
+                    range = range.cloneRange();
+                    range.setStartAfter(lastNode);
+                    if (selectPastedContent) {
+                        range.setStartBefore(firstNode);
+                    } else {
+                        range.collapse(true);
+                    }
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            }
+        } else if ( (sel = document.selection) && sel.type != "Control") {
+            // IE < 9
+            var originalRange = sel.createRange();
+            originalRange.collapse(true);
+            sel.createRange().pasteHTML(html);
+            if (selectPastedContent) {
+                range = sel.createRange();
+                range.setEndPoint("StartToStart", originalRange);
+                range.select();
+            }
+        }
+    },
+    setCursorPosition(el, pos) {
+        var isDetatched = $(el).parents('body').length == 0 ;
+        if ( isDetatched ) return ;
+
+        pos = pos || 0;
+
+        var range = document.createRange();
+
+        var sel = window.getSelection();
+
+        if (pos == 'end') {
+            range.setStartAfter(el);
+        } else {
+            console.debug('setCursorPosition setting start at pos', el, pos);
+            range.setStart(el, pos);
+        }
+
+        range.collapse(true);
+
+        sel.removeAllRanges();
+
+        sel.addRange(range);
+
+        if(typeof el[0] != 'undefined') {
+            console.debug('setCursorPosition setting focus');
+            el.focus();
+        }
+    },
+    removeSelectedText() {
+        if (window.getSelection || document.getSelection) {
+            var oSelection = (window.getSelection ? window : document).getSelection();
+            if (oSelection.type == 'Caret' && (oSelection.extentOffset != oSelection.baseOffset)) {
+                oSelection.deleteFromDocument();
+            } else if (oSelection.type == 'Range') {
+                var ss = $(oSelection.baseNode).parent()[0];
+                var ssParentTag = $(oSelection.baseNode).closest('.locked.selfClosingTag')[0];
+                if ($(ss).hasClass('selected')) {
+                    $(ss).remove();
+                } else if (ssParentTag) {
+                    $(ssParentTag).remove();
+                } else {
+                    oSelection.deleteFromDocument();
+                    oSelection.collapseToStart();
+                }
+
+            }
+        } else {
+            document.selection.clear();
+        }
+    },
+
+
+    // test jsfiddle http://jsfiddle.net/YgKDu/
+    placehold_xliff_tags(segment) {
+        let LTPLACEHOLDER = "##LESSTHAN##";
+        let GTPLACEHOLDER = "##GREATERTHAN##";
+        segment = segment.replace(/<(g\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(\/g)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(x\s*.*?\/)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(bx\s*.*?\/)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(ex\s*.*?\/)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(bpt\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(\/bpt)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(ept\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(\/ept)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(ph\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(\/it)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(mrk\s*.*?)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        segment = segment.replace(/<(\/mrk)>/gi, LTPLACEHOLDER + "$1" + GTPLACEHOLDER);
+        return segment;
+    },
+    view2rawxliff(segment) {
+        // return segment+"____";
+        // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
+        // output : <g id="43"> bang &amp; olufsen are &gt; 555 </g> <x/>
+
+        // caso controverso <g id="4" x="&lt; dfsd &gt;">
+        //segment=htmlDecode(segment);
+        segment = this.placehold_xliff_tags(segment);
+        segment = this.htmlEncode(segment);
+
+        segment = this.restore_xliff_tags(segment);
+
+        return segment;
+    },
+
+    restore_xliff_tags(segment) {
+        let LTPLACEHOLDER = "##LESSTHAN##";
+        let GTPLACEHOLDER = "##GREATERTHAN##";
+        let re_lt = new RegExp(LTPLACEHOLDER, "g");
+        let re_gt = new RegExp(GTPLACEHOLDER, "g");
+        segment = segment.replace(re_lt, "<");
+        segment = segment.replace(re_gt, ">");
+        return segment;
+    },
+
+    cleanupHTMLCharsForDiff( string ) {
+        return this.replacePlaceholder(string.replace(/&nbsp;/g, ''));
+    },
+
+    trackChangesHTML(source, target) {
+        /*
+        There are problems when you delete or add a tag next to another, the algorithm that makes the diff fails to recognize the tags,
+        they come out of the function broken.
+        Before passing them to the function that makes the diff we replace all the tags with placeholders and we keep a map of the tags
+        indexed with the id of the tags.
+         */
+        var phTagsObject = {};
+        var diff;
+        source = source.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, group1, group2) {
+            if ( _.isUndefined(phTagsObject[group2]) ) {
+                phTagsObject[group2] = match;
+            }
+            return '<' + Base64.encode(group2) +'> ';
+        });
+
+        target = target.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, gruop1, group2) {
+            if ( _.isUndefined(phTagsObject[group2]) ) {
+                phTagsObject[group2] = match;
+            }
+            return '<'+ Base64.encode(group2) +'> ';
+        });
+
+        diff   = UI.dmp.diff_main(
+            this.cleanupHTMLCharsForDiff( source ),
+            this.cleanupHTMLCharsForDiff( target )
+        );
+
+        UI.dmp.diff_cleanupSemantic( diff ) ;
+
+        /*
+        Before adding spans to identify added or subtracted portions we need to check and fix broken tags
+         */
+        diff = this.setUnclosedTagsInDiff(diff);
+        var diffTxt = '';
+
+        $.each(diff, function (index, text) {
+            text[1] = text[1].replace( /<(.*?)>/gi, function (match, text) {
+                try {
+                    var decodedText = Base64.decode( text );
+                    if ( !_.isUndefined( phTagsObject[ decodedText ] ) ) {
+                        return phTagsObject[ decodedText ];
+                    }
+                    return match;
+                } catch ( e ) {
+                    return match;
+                }
+
+            });
+            var rootElem;
+            var newElem;
+            if(this[0] === -1) {
+                rootElem = $( document.createElement( 'div' ) );
+                newElem = $.parseHTML( '<span class="deleted"/>' );
+                $( newElem ).text( TextUtils.htmlDecode(text[1]) );
+                rootElem.append( newElem );
+                diffTxt += $( rootElem ).html();
+            } else if(text[0] === 1) {
+                rootElem = $( document.createElement( 'div' ) );
+                newElem = $.parseHTML( '<span class="added"/>' );
+                $( newElem ).text( TextUtils.htmlDecode(text[1]) );
+                rootElem.append( newElem );
+                diffTxt += $( rootElem ).html();
+            } else {
+                diffTxt += text[1];
+            }
+        });
+
+        return this.restorePlaceholders(diffTxt) ;
+    },
+    getDiffPatch(source, target) {
+        var diff   = UI.dmp.diff_main(
+            this.cleanupHTMLCharsForDiff( source ),
+            this.cleanupHTMLCharsForDiff( target )
+        );
+
+        UI.dmp.diff_cleanupSemantic( diff ) ;
+        return diff;
     }
+
+
 };
 module.exports =  TEXT_UTILS;

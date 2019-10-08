@@ -7,6 +7,7 @@ import ReactDOM  from 'react-dom';
 import escapeStringRegexp  from 'escape-string-regexp';
 import TagUtils  from '../../utils/tagUtils';
 import TextUtils  from '../../utils/textUtils';
+import CursorUtils  from '../../utils/cursorUtils';
 
 class TagsMenu extends React.Component {
 
@@ -215,11 +216,11 @@ class TagsMenu extends React.Component {
         try {
             if ( $( '.selected', UI.editarea ).length ) {
                 let range = window.getSelection().getRangeAt( 0 );
-                setCursorAfterNode( range, $( '.selected', UI.editarea )[0] );
+                TextUtils.setCursorAfterNode( range, $( '.selected', UI.editarea )[0] );
             }
             var endCursor = document.createElement( "span" );
             endCursor.setAttribute( 'class', 'tag-autocomplete-endcursor' );
-            insertNodeAtCursor( endCursor );
+            TextUtils.insertNodeAtCursor( endCursor );
         } catch ( e ) {
             console.log('Fail to insert tag', e);
         }
@@ -231,8 +232,8 @@ class TagsMenu extends React.Component {
             if ( $(".tag-autocomplete-endcursor", UI.editarea).length === 0 ) {
                 this.openTagAutocompletePanel();
             }
-            setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
-            saveSelection();
+            TextUtils.setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
+            CursorUtils.saveSelection();
         } catch ( e ) {
             console.log(e);
         }

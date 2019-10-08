@@ -484,7 +484,7 @@ var UI = {
 			this.processErrors(d.errors, 'getMoreSegments');
 		var where = d.data.where;
         var section = $('section');
-		if ( d.data.files && Object.size(d.data.files) ) {
+		if ( d.data.files && _.size(d.data.files) ) {
 			var firstSeg = section.first();
 			var lastSeg = section.last();
 
@@ -979,7 +979,7 @@ var UI = {
     },
 
 	setDownloadStatus: function(stats) {
-        var t = translationStatus( stats );
+        var t = CommonUtils.getTranslationStatus( stats );
 
         $('.downloadtr-button')
             .removeClass("draft translated approved")
@@ -1123,8 +1123,8 @@ var UI = {
 		return $('section.readonly:not(.ice-locked)').length;
 	},
     formatSelection: function(op) {
-        var str = getSelectionHtml();
-        var rangeInsert = insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
+        var str = CursorUtils.getSelectionHtml();
+        var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
         var newStr = '';
         var selection$ = $("<div/>").html(str);
         var rightString = selection$.html();
@@ -1134,9 +1134,9 @@ var UI = {
             if(this.nodeName == '#text') {
 				d = this.data;
 				jump = ((!index)&&(!selection$));
-				capStr = toTitleCase(d);
+				capStr = CommonUtils.toTitleCase(d);
 				if(jump) {
-					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+					capStr = d.charAt(0) + CommonUtils.toTitleCase(d).slice(1);
 				}
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
@@ -1144,9 +1144,9 @@ var UI = {
             else if(this.nodeName == 'LXQWARNING') {
                 d = this.childNodes[0].data;
                 jump = ((!index)&&(!selection$));
-				capStr = toTitleCase(d);
+				capStr = CommonUtils.toTitleCase(d);
 				if(jump) {
-					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+					capStr = d.charAt(0) + CommonUtils.toTitleCase(d).slice(1);
 				}
                 toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
@@ -1155,15 +1155,14 @@ var UI = {
 				newStr += this.outerHTML;
 			}
 		});
-        // saveSelection();
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
-            replaceSelectedHtml(newStr, rangeInsert);
+            CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
             LXQ.reloadPowertip(this.currentSegment);
         }
         else {
-            replaceSelectedHtml(newStr, rangeInsert);
+            CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
         }
 
         $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
@@ -1324,8 +1323,6 @@ var UI = {
             password: config.password,
             token: token
         };
-
-        if (UI.logEnabled) dataMix.logs = this.extractLogs();
 
         var mock = {
             ERRORS: {
@@ -1779,32 +1776,6 @@ var UI = {
 		});
 	},
 
-    log: function(operation, d) {
-        if(!UI.logEnabled) return false;
-        data = d;
-        var dd = new Date();
-        logValue = {
-            "data": data,
-            "stack": stackTrace()
-        };
-        UI.addInStorage('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue), 'log');
-    },
-
-    extractLogs: function() {
-        if(this.isPrivateSafari) return;
-        var pendingLogs = [];
-        inp = 'log';
-        $.each(localStorage, function(k,v) {
-            if(k.substring(0, inp.length) === inp) {
-                pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
-            }
-        });
-        logs = JSON.stringify(pendingLogs);
-        this.clearStorage('log');
-
-        return logs;
-    },
-
     targetContainerSelector : function() {
         return '.targetarea';
     },
@@ -2076,6 +2047,25 @@ var UI = {
     inputEditAreaEventHandler: function (e) {
         UI.currentSegment.trigger('modified');
     },
+    runDownload: function() {
+        var continueDownloadFunction ;
+
+        if( $('#downloadProject').hasClass('disabled') ) return false;
+
+        if ( config.isGDriveProject ) {
+            continueDownloadFunction = 'continueDownloadWithGoogleDrive';
+        }
+        else  {
+            continueDownloadFunction = 'continueDownload';
+        }
+
+        //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+        if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.ERROR && UI.globalWarnings.ERROR.total > 0 ) {
+            UI.showFixWarningsOnDownload(continueDownloadFunction);
+        } else {
+            UI[ continueDownloadFunction ]();
+        }
+    }
 };
 
 $(document).ready(function() {

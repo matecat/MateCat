@@ -6,6 +6,135 @@ const CommonUtils = {
         var seconds = Math.round((milli / 1000) % 60);
         var minutes = Math.floor((milli / (60 * 1000)) % 60);
         return [minutes, seconds];
+    },
+    /**
+     * Returns the translation status evaluating the job stats
+     */
+    getTranslationStatus(stats) {
+        var t = 'approved';
+        var app = parseFloat(stats.APPROVED);
+        var tra = parseFloat(stats.TRANSLATED);
+        var dra = parseFloat(stats.DRAFT);
+        var rej = parseFloat(stats.REJECTED);
+
+        // If second pass enabled
+        if ( config.secondRevisionsCount && stats.reviews ) {
+
+            var revWords1 = stats.reviews.find(function ( value ) {
+                return value.revision_number === 1;
+            });
+
+            var revWords2 = stats.reviews.find(function ( value ) {
+                return value.revision_number === 2;
+            });
+
+            if ( revWords1 && _.round(parseFloat(revWords1.advancement_wc)) > 0 ) {
+                app = parseFloat(revWords1.advancement_wc);
+            } else if ( revWords2 && _.round(parseFloat(revWords2.advancement_wc)) > 0 ) {
+                app = parseFloat(revWords2.advancement_wc);
+                t = 'approved-2ndpass';
+            }
+        }
+
+
+        if (tra) t = 'translated';
+        if (dra) t = 'draft';
+        if (rej) t = 'draft';
+
+        if( !tra && !dra && !rej && !app ){
+            t = 'draft';
+        }
+
+        return t ;
+    },
+    levenshteinDistance(s1, s2) {
+        //       discuss at: http://phpjs.org/functions/levenshtein/
+        //      original by: Carlos R. L. Rodrigues (http://www.jsfromhell.com)
+        //      bugfixed by: Onno Marsman
+        //       revised by: Andrea Giammarchi (http://webreflection.blogspot.com)
+        // reimplemented by: Brett Zamir (http://brett-zamir.me)
+        // reimplemented by: Alexander M Beedie
+        //        example 1: levenshtein('Kevin van Zonneveld', 'Kevin van Sommeveld');
+        //        returns 1: 3
+
+        if (s1 == s2) {
+            return 0;
+        }
+
+        var s1_len = s1.length;
+        var s2_len = s2.length;
+        if (s1_len === 0) {
+            return s2_len;
+        }
+        if (s2_len === 0) {
+            return s1_len;
+        }
+
+        // BEGIN STATIC
+        var split = false;
+        try {
+            split = !('0')[0];
+        } catch (e) {
+            split = true; // Earlier IE may not support access by string index
+        }
+        // END STATIC
+        if (split) {
+            s1 = s1.split('');
+            s2 = s2.split('');
+        }
+
+        var v0 = new Array(s1_len + 1);
+        var v1 = new Array(s1_len + 1);
+
+        var s1_idx = 0,
+            s2_idx = 0,
+            cost = 0;
+        for (s1_idx = 0; s1_idx < s1_len + 1; s1_idx++) {
+            v0[s1_idx] = s1_idx;
+        }
+        var char_s1 = '',
+            char_s2 = '';
+        for (s2_idx = 1; s2_idx <= s2_len; s2_idx++) {
+            v1[0] = s2_idx;
+            char_s2 = s2[s2_idx - 1];
+
+            for (s1_idx = 0; s1_idx < s1_len; s1_idx++) {
+                char_s1 = s1[s1_idx];
+                cost = (char_s1 == char_s2) ? 0 : 1;
+                var m_min = v0[s1_idx + 1] + 1;
+                var b = v1[s1_idx] + 1;
+                var c = v0[s1_idx] + cost;
+                if (b < m_min) {
+                    m_min = b;
+                }
+                if (c < m_min) {
+                    m_min = c;
+                }
+                v1[s1_idx + 1] = m_min;
+            }
+            var v_tmp = v0;
+            v0 = v1;
+            v1 = v_tmp;
+        }
+        return v0[s1_len];
+    },
+    toTitleCase(str) {
+        return str.replace(/[\wwÀ-ÿЀ-џ]\S*/g, function(txt){
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    },
+
+    /**
+     * A generic error message to show in modal window.
+     *
+     * @returns {*}
+     */
+    genericErrorAlertMessage() {
+        return APP.alert({
+            msg: sprintf('There was an error while saving data to server, please try again. ' +
+                'If the problem persists please contact %s reporting the web address of the current browser tab.',
+                sprintf('<a href="mailto:%s">%s</a>', config.support_mail, config.support_mail ) )
+        });
     }
 };
 

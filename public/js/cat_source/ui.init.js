@@ -57,14 +57,11 @@ $.extend(UI, {
         $('html').trigger('init');
         this.setTagMode();
 		rangy.init();
-		this.savedSel = null;
-		this.savedSelActiveElement = null;
         this.offline = false;
 		if (SearchUtils.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
 		this.warningStopped = false;
 		this.abortedOperations = [];
-        this.logEnabled = true;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.setTranslationTail = [];

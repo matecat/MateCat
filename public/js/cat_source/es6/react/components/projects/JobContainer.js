@@ -1,5 +1,6 @@
 import JobMenu from "./JobMenu";
 import OutsourceContainer  from '../outsource/OutsourceContainer';
+import CommonUtils from '../../utils/commonUtils';
 
 class JobContainer extends React.Component {
 
@@ -21,28 +22,6 @@ class JobContainer extends React.Component {
         this.archiveJob = this.archiveJob.bind(this);
         this.activateJob = this.activateJob.bind(this);
         this.cancelJob = this.cancelJob.bind(this);
-    }
-
-    /**
-     * Returns the translation status evaluating the job stats
-     */
-
-    getTranslationStatus() {
-        let stats = this.props.job.get('stats').toJS();
-        let t = 'approved';
-        let app = parseFloat(stats.APPROVED);
-        let tra = parseFloat(stats.TRANSLATED);
-        let dra = parseFloat(stats.DRAFT);
-        let rej = parseFloat(stats.REJECTED);
-
-        if (tra) t = 'translated';
-        if (dra) t = 'draft';
-        if (rej) t = 'draft';
-
-        if( !tra && !dra && !rej && !app ){
-            t = 'draft';
-        }
-        return t ;
     }
 
     getTranslateUrl() {
@@ -197,17 +176,17 @@ class JobContainer extends React.Component {
     }
 
     getDownloadLabel() {
-        let jobStatus = this.getTranslationStatus();
+        let jobStatus = CommonUtils.getTranslationStatus(this.props.job.get('stats').toJS());
         let remoteService = this.props.project.get('remote_file_service');
         let label = <a className="item" onClick={this.downloadTranslation}
-                       ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-eye icon"></i> Preview</a>;
-        if ((jobStatus == 'translated' || jobStatus == 'approved') && (!remoteService)) {
+                       ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-eye icon"/> Preview</a>;
+        if ((jobStatus === 'translated' || jobStatus === 'approved') && (!remoteService)) {
             label = <a className="item" onClick={this.downloadTranslation}
                        ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-download icon"/> Download Translation</a>;
-        } else if ((jobStatus == 'translated' || jobStatus == 'approved') && (remoteService == 'gdrive')) {
+        } else if ((jobStatus === 'translated' || jobStatus === 'approved') && (remoteService === 'gdrive')) {
             label = <a className="item" onClick={this.downloadTranslation}
                        ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-download icon"/> Open in Google Drive</a>;
-        } else if (remoteService && (remoteService == 'gdrive')) {
+        } else if (remoteService && (remoteService === 'gdrive')) {
             label = <a className="item" onClick={this.downloadTranslation}
                        ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-eye icon"/> Preview in Google Drive</a>;
         }

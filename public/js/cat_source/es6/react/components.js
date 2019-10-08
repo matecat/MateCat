@@ -81,4 +81,5 @@ window.TagUtils = require('./utils/tagUtils');
 window.TextUtils = require('./utils/textUtils');
 window.EditAreaUtils = require('./components/segments/utils/editarea');
 window.CommonUtils = require('./utils/commonUtils');
+window.CursorUtils = require('./utils/cursorUtils');
 

@@ -213,7 +213,7 @@ let GlossaryUtils = {
 
             var tempCopyGlossPlaceholder = UI.editarea.find( '.tempCopyGlossaryPlaceholder' );
             // var node = tempCopyGlossPlaceholder[0];
-            // setCursorAfterNode( range, node );
+            // TextUtils.setCursorAfterNode( range, node );
             tempCopyGlossPlaceholder.remove();
         });
     },

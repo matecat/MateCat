@@ -108,7 +108,7 @@ class SegmentFooterTabConflicts extends React.Component {
 
     render() {
         let html;
-        if ( this.props.segment.alternatives && Object.size(this.props.segment.alternatives) > 0  ) {
+        if ( this.props.segment.alternatives && _.size(this.props.segment.alternatives) > 0  ) {
             html = this.renderAlternatives(this.props.segment.alternatives);
             return (
                 <div key={"container_" + this.props.code} className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}

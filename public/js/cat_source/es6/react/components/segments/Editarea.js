@@ -167,7 +167,7 @@ class Editarea extends React.Component {
         var elem = $(e.target);
         if ( elem.hasClass('locked') || elem.parent().hasClass('locked') ) {
             EventHandlersUtils.handleCopyEvent(e);
-            removeSelectedText();
+            TextUtils.removeSelectedText();
         }
     }
     onPasteEvent(e) {
@@ -186,7 +186,7 @@ class Editarea extends React.Component {
     }
     onDropEvent(e) {
         if ( this.draggingFromEditArea ) {
-            removeSelectedText();
+            TextUtils.removeSelectedText();
         }
         // this.emitTrackChanges();
         this.draggingFromEditArea = false;
@@ -422,7 +422,6 @@ class Editarea extends React.Component {
             }
         }
         this.saveInUndoStack();
-        focusOnPlaceholder(); //??
     }
     render() {
         let lang = '';

@@ -1,4 +1,5 @@
 import React  from  'react' ;
+import CommonUtils  from '../../../utils/commonUtils';
 
 class SegmentFooterTabIssuesListItem extends React.Component {
 
@@ -93,7 +94,7 @@ class SegmentFooterTabIssuesListItem extends React.Component {
         if ( response.errors && response.errors[0].code === 2000 ) {
             UI.processErrors(response.errors, 'createIssue');
         } else {
-            genericErrorAlertMessage() ;
+            CommonUtils.genericErrorAlertMessage() ;
         }
         this.setState({ sendDisabled : false });
     }

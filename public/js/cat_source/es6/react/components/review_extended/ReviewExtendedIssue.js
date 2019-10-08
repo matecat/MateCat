@@ -1,4 +1,5 @@
 import SegmentConstants  from '../../constants/SegmentConstants';
+import CommonUtils  from '../../utils/commonUtils';
 class ReviewExtendedIssue extends React.Component {
 
 	constructor(props) {
@@ -142,7 +143,7 @@ class ReviewExtendedIssue extends React.Component {
 	}
 
     handleFail() {
-        genericErrorAlertMessage() ;
+        CommonUtils.genericErrorAlertMessage() ;
         this.setState({ sendDisabled : false });
     }
     generateHtmlCommentLines(){
