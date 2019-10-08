@@ -345,8 +345,8 @@
 
         },
         gotoSegment: function(id) {
-            if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
-                id = UI.parsedHash.splittedSegmentId ;
+            if ( !this.segmentIsLoaded(id) && CommonUtils.parsedHash.splittedSegmentId ) {
+                id = CommonUtils.parsedHash.splittedSegmentId ;
             }
             if ( id ) {
                 SegmentActions.openSegment(id);

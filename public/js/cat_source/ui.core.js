@@ -382,7 +382,7 @@ var UI = {
 		if (this.segmentToScrollAtRender) {
 			this.startSegmentId = this.segmentToScrollAtRender;
 		} else {
-			var hash = UI.parsedHash.segmentId;
+			var hash = CommonUtils.parsedHash.segmentId;
             config.last_opened_segment = UI.getLastSegmentFromLocalStorage();
             if (!config.last_opened_segment) {
                 config.last_opened_segment = config.first_job_segment;

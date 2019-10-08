@@ -209,7 +209,7 @@ $.extend(UI, {
         });
 
 		window.onbeforeunload = function(e) {
-			goodbye(e);
+			return CommonUtils.goodbye(e);
 		};
 
 		$("#filterSwitch").bind('click', function(e) {

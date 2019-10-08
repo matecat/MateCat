@@ -169,8 +169,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.render.js',
                     basePath + 'cat_source/ui.events.js',
 
-                    basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
-
                     basePath + 'cat_source/es6/react/ajax_utils/segmentAjax.js',
 
                     basePath + 'cat_source/ui.customization.js',

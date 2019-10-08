@@ -16,7 +16,7 @@ $.extend(UI, {
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
         });
-        setBrowserHistoryBehavior();
+        CommonUtils.setBrowserHistoryBehavior();
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
