@@ -65,7 +65,7 @@ let TranslationMatches = {
                     var currentContribution = UI.getCurrentSegmentContribution(segmentObj);
                     if (parseInt(currentContribution.match) !== 100) {
                         translation = currentContribution.translation;
-                        translation = UI.removeAllTags(translation);
+                        translation = TagUtils.removeAllTags(translation);
                     } else {
                         UI.disableTPOnSegment(segmentObj);
                     }

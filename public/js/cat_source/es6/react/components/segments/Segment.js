@@ -53,7 +53,7 @@ class Segment extends React.Component {
             readonly: readonly,
             inBulk: false,
             tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
-            && !UI.checkXliffTagsInText(this.props.segment.translation) && UI.removeAllTags(this.props.segment.segment) !== '',
+            && !TagUtils.checkXliffTagsInText(this.props.segment.translation) && TagUtils.removeAllTags(this.props.segment.segment) !== '',
             showRevisionPanel: this.props.segment.openIssues,
             selectedTextObj: null,
             showActions: false

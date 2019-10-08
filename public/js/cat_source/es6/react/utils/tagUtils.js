@@ -490,5 +490,25 @@ const TAGS_UTILS =  {
 
     },
 
+    /**
+     * Remove all xliff source tags from the string
+     * @param currentString : the string to parse
+     * @returns the decoded String
+     */
+    removeAllTags: function (currentString) {
+        if (currentString) {
+            var regExp = TagUtils.getXliffRegExpression();
+            currentString =  currentString.replace(regExp, '');
+            return TagUtils.decodePlaceholdersToText(currentString);
+        } else {
+            return '';
+        }
+    },
+
+    checkXliffTagsInText: function (text) {
+        var reg = TagUtils.getXliffRegExpression();
+        return reg.test(text);
+    },
+
 };
 module.exports =  TAGS_UTILS;

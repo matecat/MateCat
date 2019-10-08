@@ -35,6 +35,7 @@ import AppDispatcher  from '../dispatcher/AppDispatcher';
 import {EventEmitter} from 'events';
 import SegmentConstants  from '../constants/SegmentConstants';
 import assign  from 'object-assign';
+import TagUtils  from '../utils/tagUtils';
 import Immutable  from 'immutable';
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -538,7 +539,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     hasSegmentTagProjectionEnabled: function ( segment ) {
         if (UI.enableTagProjection) {
-            if ( (segment.status === "NEW" || segment.status === "DRAFT") && (UI.checkXliffTagsInText(segment.segment) && (!UI.checkXliffTagsInText(segment.translation))) ) {
+            if ( (segment.status === "NEW" || segment.status === "DRAFT") && (TagUtils.checkXliffTagsInText(segment.segment) && (!TagUtils.checkXliffTagsInText(segment.translation))) ) {
                 return true;
             }
         }

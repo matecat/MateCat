@@ -532,7 +532,7 @@ var SegmentActions = {
     },
 
     searchGlossary: function (sid, fid, text) {
-        text = UI.removeAllTags(htmlEncode(text));
+        text = TagUtils.removeAllTags(htmlEncode(text));
         text = text.replace(/\"/g, "");
         API.SEGMENT.getGlossaryMatch(text)
             .done(response => {
