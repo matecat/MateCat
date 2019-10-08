@@ -2,6 +2,18 @@
 
 let TEXT_UTILS =  {
 
+
+    prepareTextToSend: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div);
+        $div.html(text);
+        $div = UI.transformPlaceholdersHtml($div);
+
+        $div.find('span.space-marker').replaceWith(' ');
+        $div.find('span.rangySelectionBoundary').remove();
+        $div = UI.encodeTagsWithHtmlAttribute($div);
+        return $div.text();
+    },
     getDiffHtml: function(source, target) {
         let dmp = new diff_match_patch();
         /*
@@ -203,5 +215,4 @@ let TEXT_UTILS =  {
         }
     }
 };
-
-export default TEXT_UTILS ;
+module.exports =  TEXT_UTILS;

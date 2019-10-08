@@ -5,6 +5,7 @@
 import React  from 'react';
 import Immutable  from 'immutable';
 import TagUtils from "../../utils/tagUtils";
+import TextUtils from "../../utils/textUtils";
 
 
 class SegmentFooterTabConflicts extends React.Component {
@@ -28,7 +29,7 @@ class SegmentFooterTabConflicts extends React.Component {
         let segment_id = this.props.segment.sid;
         let escapedSegment = TagUtils.decodePlaceholdersToText(segment.segment);
         // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
-        let mainStr = htmlEncode(UI.prepareTextToSend(segment.decoded_translation)).replace(/&amp;/g, "&");
+        let mainStr = htmlEncode(TextUtils.prepareTextToSend(segment.decoded_translation)).replace(/&amp;/g, "&");
         let html = [];
         let self = this;
         let replacementsMap;

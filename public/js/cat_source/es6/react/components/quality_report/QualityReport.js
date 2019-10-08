@@ -5,7 +5,7 @@ import QRActions from "./../../actions/QualityReportActions";
 import QRStore from "./../../stores/QualityReportStore";
 import QRConstants from "./../../constants/QualityReportConstants";
 import Header from "./../header/Header";
-import QRApi from "../../ajax_utils/quality_report/qrUtils";
+import QRApi from "../../ajax_utils/quality_report/qrAjax";
 
 
 class QualityReport extends React.Component {

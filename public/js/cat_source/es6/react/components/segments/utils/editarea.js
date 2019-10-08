@@ -281,7 +281,27 @@ let EditArea = {
         $('.editor .editarea .marker .marker').each(function() {
             $(this).parents('.marker').after($(this));
         });
-    }
+    },
+
+    /**
+     *
+     * This function is used before the text is sent to the server or to transform editArea content.
+     * @return Return a cloned element without tag inside
+     *
+     * @param context
+     * @param selector
+     * @returns {*|jQuery}
+     */
+    postProcessEditarea: function(context, selector) {
+        selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
+        var area = $( selector, context ).clone();
+        area = UI.transformPlaceholdersHtml(area);
+
+        area.find('span.space-marker').replaceWith(' ');
+        area.find('span.rangySelectionBoundary').remove();
+        area = UI.encodeTagsWithHtmlAttribute(area);
+        return view2rawxliff( area.text() );
+    },
 };
 
 module.exports = EditArea;

@@ -8,6 +8,7 @@ import SegmentActions  from '../../actions/SegmentActions';
 import GlossaryUtils  from './utils/glossaryUtils';
 import QACheckGlossary  from './utils/qaCheckGlossaryUtils';
 import SearchUtils  from '../header/cattol/search/searchUtils';
+import TextUtils  from '../../utils/textUtils';
 
 class SegmentSource extends React.Component {
 
@@ -95,7 +96,7 @@ class SegmentSource extends React.Component {
         let text = $(this.splitContainer).find('.splitArea').html();
         text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/, '##$_SPLIT$##');
         text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
-        text = UI.prepareTextToSend(text);
+        text = TextUtils.prepareTextToSend(text);
         // let splitArray = text.split('##_SPLIT_##');
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }

@@ -108,7 +108,7 @@ class SegmentFooterTabMatches extends React.Component {
         source = htmlDecode( match.segment );
         var ul = $('.suggestion-item[data-id="'+ match.id +'"]');
         if( config.brPlaceholdEnabled ){
-            target = UI.postProcessEditarea( ul, '.translation' );
+            target = EditAreaUtils.postProcessEditarea( ul, '.translation' );
         } else {
             target = $('.translation', ul).text();
         }

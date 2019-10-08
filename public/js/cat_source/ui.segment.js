@@ -87,7 +87,7 @@
             }
 
             //Before send process with this.postProcessEditarea
-            var target = UI.postProcessEditarea(UI.currentSegment, ".editarea");
+            var target = EditAreaUtils.postProcessEditarea(UI.currentSegment, ".editarea");
             return APP.doRequest({
                 data: {
                     action: 'getTagProjection',
@@ -540,7 +540,7 @@
                     return this.getContextBefore(segmentBeforeId);
                 }
             } else {
-                return UI.prepareTextToSend(segmentBefore.segment);
+                return TextUtils.prepareTextToSend(segmentBefore.segment);
             }
         },
         getContextAfter: function(segmentId) {
@@ -558,7 +558,7 @@
                     return this.getContextAfter(segmentAfterId);
                 }
             } else   {
-                return UI.prepareTextToSend(segmentAfter.segment);
+                return TextUtils.prepareTextToSend(segmentAfter.segment);
             }
         },
         getIdBefore: function(segmentId) {

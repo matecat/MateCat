@@ -51,37 +51,9 @@ $.extend(UI, {
 
 
 
-    /**
-     *
-     * This function is used before the text is sent to the server or to transform editArea content.
-     * @return Return a cloned element without tag inside
-     *
-     * @param context
-     * @param selector
-     * @returns {*|jQuery}
-     */
-    postProcessEditarea: function(context, selector) {
-        selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
-        var area = $( selector, context ).clone();
-        area = this.transformPlaceholdersHtml(area);
 
-        area.find('span.space-marker').replaceWith(' ');
-        area.find('span.rangySelectionBoundary').remove();
-        area = this.encodeTagsWithHtmlAttribute(area);
-        return view2rawxliff( area.text() );
-    },
 
-    prepareTextToSend: function (text) {
-        var div =  document.createElement('div');
-        var $div = $(div);
-        $div.html(text);
-        $div = this.transformPlaceholdersHtml($div);
 
-        $div.find('span.space-marker').replaceWith(' ');
-        $div.find('span.rangySelectionBoundary').remove();
-        $div = this.encodeTagsWithHtmlAttribute($div);
-        return $div.text();
-    },
 
     /**
      * It does the same as postProcessEditarea function but does not remove the cursor span

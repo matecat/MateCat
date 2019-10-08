@@ -2,6 +2,8 @@ import React  from  'react' ;
 import SegmentConstants  from  '../../../constants/SegmentConstants' ;
 import SegmentStore  from  '../../../stores/SegmentStore' ;
 import SegmentFooterTabIssuesListItem  from  "./SegmentFooterTabIssuesListItem" ;
+import TextUtils from "../../../utils/textUtils";
+
 
 class SegmentFooterTabIssues extends React.Component {
 
@@ -44,7 +46,7 @@ class SegmentFooterTabIssues extends React.Component {
     }
 
     trackChanges( sid, editareaText ) {
-        let text = htmlEncode( UI.prepareTextToSend( editareaText ) );
+        let text = htmlEncode( TextUtils.prepareTextToSend( editareaText ) );
         if ( this.state.segment.sid === sid && this.state.oldTranslation !== text) {
             UI.setDisabledOfButtonApproved(this.props.sid, true);
             this.setState( {
