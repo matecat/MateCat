@@ -711,18 +711,20 @@ APP = {
     },
 
     getLastTeamSelected: function (teams) {
-        if (localStorage.getItem(this.teamStorageName)) {
-            var lastId = localStorage.getItem(this.teamStorageName);
-            var team = teams.find(function (t, i) {
-                return parseInt(t.id) === parseInt(lastId);
-            });
-            if (team) {
-                return team;
+        if (config.isLoggedIn) {
+            if (localStorage.getItem(this.teamStorageName)) {
+                var lastId = localStorage.getItem(this.teamStorageName);
+                var team = teams.find(function (t, i) {
+                    return parseInt(t.id) === parseInt(lastId);
+                });
+                if (team) {
+                    return team;
+                } else {
+                    return teams[0];
+                }
             } else {
                 return teams[0];
             }
-        } else {
-            return teams[0];
         }
     },
 
