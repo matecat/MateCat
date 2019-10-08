@@ -9,6 +9,7 @@ import GlossaryUtils  from './utils/glossaryUtils';
 import QACheckGlossary  from './utils/qaCheckGlossaryUtils';
 import SearchUtils  from '../header/cattol/search/searchUtils';
 import TextUtils  from '../../utils/textUtils';
+import EventHandlersUtils  from './utils/eventsHandlersUtils';
 
 class SegmentSource extends React.Component {
 
@@ -78,11 +79,11 @@ class SegmentSource extends React.Component {
     }
 
     onCopyEvent(e) {
-        UI.handleCopyEvent(e);
+        EventHandlersUtils.handleCopyEvent(e);
     }
 
     onDragEvent(e) {
-        UI.handleDragEvent(e);
+        EventHandlersUtils.handleDragEvent(e);
     }
 
     addSplitPoint(event) {

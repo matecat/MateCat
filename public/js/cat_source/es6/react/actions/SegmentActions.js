@@ -14,6 +14,7 @@ import SegmentConstants  from '../constants/SegmentConstants';
 import SegmentStore  from '../stores/SegmentStore';
 import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
 import TranslationMatches  from '../components/segments/utils/translationMatches';
+import TagUtils from "../utils/tagUtils";
 
 var SegmentActions = {
     /********* SEGMENTS *********/

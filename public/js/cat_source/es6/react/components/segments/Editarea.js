@@ -9,6 +9,7 @@ import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
 import EditArea  from './utils/editarea';
 import TagUtils  from '../../utils/tagUtils';
+import EventHandlersUtils  from './utils/eventsHandlersUtils';
 
 class Editarea extends React.Component {
 
@@ -114,7 +115,7 @@ class Editarea extends React.Component {
         if (this.props.readonly || this.props.locked) {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
         } else {
-            UI.removeSelectedClassToTags()
+            TagUtils.removeSelectedClassToTags()
         }
     }
 
@@ -160,12 +161,12 @@ class Editarea extends React.Component {
         EditArea.setEditAreaEditing(false);
     }
     onCopyText(e) {
-        UI.handleCopyEvent(e);
+        EventHandlersUtils.handleCopyEvent(e);
     }
     onCutText(e) {
         var elem = $(e.target);
         if ( elem.hasClass('locked') || elem.parent().hasClass('locked') ) {
-            UI.handleCopyEvent(e);
+            EventHandlersUtils.handleCopyEvent(e);
             removeSelectedText();
         }
     }
@@ -174,7 +175,7 @@ class Editarea extends React.Component {
 		// this.emitTrackChanges();
     }
     onDragEvent(e) {
-        UI.handleDragEvent(e);
+        EventHandlersUtils.handleDragEvent(e);
         this.draggingFromEditArea = true;
         EditArea.setEditAreaEditing(true);
     }

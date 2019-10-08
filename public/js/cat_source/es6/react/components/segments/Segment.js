@@ -13,6 +13,7 @@ import SegmentHeader from './SegmentHeader';
 import SegmentFooter from './SegmentFooter';
 import IssuesContainer from './footer-tab-issues/SegmentFooterTabIssues';
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel';
+import TagUtils from '../../utils/tagUtils';
 
 import Immutable from 'immutable';
 
@@ -417,7 +418,7 @@ class Segment extends React.Component {
             return;
         } else if ( !this.props.segment.opened ){
             this.openSegment();
-            UI.removeSelectedClassToTags()
+            TagUtils.removeSelectedClassToTags()
         }
     }
 
@@ -488,6 +489,7 @@ class Segment extends React.Component {
             setTimeout(()=>{UI.setCurrentSegment()},0);
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
             clearTimeout(this.timeoutScroll);
+            TagUtils.removeHighlightCorrespondingTags($(this.section));
         }
         return null;
     }

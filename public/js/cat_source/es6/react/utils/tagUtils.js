@@ -112,14 +112,14 @@ const TAGS_UTILS =  {
             if(this.nodeName == '#text') {
                 newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
             } else {
-                match = this.outerHTML.match(/<.*?>/gi);
+                let match = this.outerHTML.match(/<.*?>/gi);
                 if(match.length == 1) { // se è 1 solo, è un tag inline
 
                 } else if(match.length == 2) { // se sono due, non ci sono tag innestati
                     newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
                 } else { // se sono più di due, ci sono tag innestati
 
-                    newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
+                    newStr += htmlEncode(match[0]) + TAGS_UTILS.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
 
                 }
             }
@@ -236,7 +236,7 @@ const TAGS_UTILS =  {
         } else {
             setCursorPosition(elem[0]);
             selectText(elem[0]);
-            UI.removeSelectedClassToTags();
+            this.removeSelectedClassToTags();
             elem.addClass('selected');
             if(UI.body.hasClass('tagmode-default-compressed')) {
                 $('.editor .tagModeToggle').click();
@@ -555,6 +555,16 @@ const TAGS_UTILS =  {
         $elem.find('.inside-attribute').remove();
         return $elem;
     },
+
+    /**
+     * When you click on a tag, it is selected and the selected class is added (ui.events->382).
+     * Clicking on the edititarea to remove the tags with the selected class that otherwise are
+     * removed the first time you press the delete key (ui.editarea-> 51 )
+     */
+    removeSelectedClassToTags: function (  ) {
+        $('.targetarea .locked.selected').removeClass('selected');
+        $('.editor .source .locked').removeClass('selected');
+    }
 
 };
 module.exports =  TAGS_UTILS;
