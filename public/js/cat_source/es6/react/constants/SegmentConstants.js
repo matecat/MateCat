@@ -90,5 +90,6 @@ module.exports = keyMirror({
     REMOVE_SEARCH_RESULTS: null,
     UNDO_TEXT: null,
     REDO_TEXT: null,
-    FOCUS_EDITAREA: null
+    FOCUS_EDITAREA: null,
+    FILL_TAGS_IN_TARGET: null
 });

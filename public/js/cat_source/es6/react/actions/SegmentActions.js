@@ -373,6 +373,12 @@ var SegmentActions = {
             actionType: SegmentConstants.FOCUS_EDITAREA
         });
     },
+    autoFillTagsInTarget: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.FILL_TAGS_IN_TARGET,
+            sid: sid
+        });
+    },
     /************ SPLIT ****************/
     openSplitSegment: function(sid) {
         AppDispatcher.dispatch({

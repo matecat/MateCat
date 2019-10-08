@@ -76,8 +76,8 @@ class Segment extends React.Component {
             // TODO Remove this block
             /**************************/
             //From EditAreaClick
-            UI.closeTagAutocompletePanel();
-            UI.removeHighlightCorrespondingTags($(this.section));
+            SegmentActions.closeTagsMenu();
+            TagUtils.removeHighlightCorrespondingTags($(this.section));
             if (UI.warningStopped) {
                 UI.warningStopped = false;
                 UI.checkWarnings(false);

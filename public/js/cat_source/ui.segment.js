@@ -46,23 +46,23 @@
             }
             return this.tpCanActivate;
         },
-        startSegmentTagProjection: function () {
+        startSegmentTagProjection: function (sid) {
             UI.getSegmentTagsProjection().done(function(response) {
                 if (response.errors && (response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     UI.disableTPOnSegment();
                     UI.copyTagProjectionInCurrentSegment();
-                    UI.autoFillTagsInTarget();
+                    SegmentActions.autoFillTagsInTarget(sid);
                 } else {
                     UI.setSegmentAsTagged();
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
-                    UI.autoFillTagsInTarget();
+                    SegmentActions.autoFillTagsInTarget(sid);
                 }
 
             }).fail(function () {
                 UI.setSegmentAsTagged();
                 UI.copyTagProjectionInCurrentSegment();
-                UI.autoFillTagsInTarget();
+                SegmentActions.autoFillTagsInTarget(sid);
                 UI.startOfflineMode();
             }).always(function () {
                 UI.editarea.focus();
@@ -130,7 +130,7 @@
             if (currentSegment && this.enableTagProjection) {
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
                 var segmentNoTags = UI.removeAllTags( currentSegment.segment );
-                var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment.segment ) && !currentSegment.tagged && segmentNoTags !== '';
+                var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment ) && !currentSegment.tagged && segmentNoTags !== '';
                 // If the segment has already be tagged
                 var isCurrentAlreadyTagged = currentSegment.tagged;
                 return ( tagProjectionEnabled && !isCurrentAlreadyTagged );
@@ -142,7 +142,7 @@
          */
         disableTPOnSegment: function (segmentObj) {
             var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
-            var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
+            var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
             if (this.enableTagProjection && tagProjectionEnabled) {
                 SegmentActions.setSegmentAsTagged(currentSegment.sid, currentSegment.id_file);
                 UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged');

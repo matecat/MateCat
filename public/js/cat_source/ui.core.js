@@ -1464,10 +1464,8 @@ UI = {
 			    if (UI.editAreaEditing) return;
 			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info, d.details.tag_mismatch);
-                     // UI.markTagMismatch(d.details);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.sid,{}, {});
-                    // UI.removeHighlightErrorsTags(UI.getSegmentById(segment.sid));
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: UI.getSegmentById( segment.sid )    }) ;
 			}

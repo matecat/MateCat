@@ -6,6 +6,7 @@
 import React  from 'react';
 import EditArea  from './Editarea';
 import TagsMenu  from './TagsMenu';
+import TagUtils from '../../utils/tagUtils';
 import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentButtons  from './SegmentButtons';
@@ -27,6 +28,7 @@ class SegmentTarget extends React.Component {
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.showTagsMenu = this.showTagsMenu.bind(this);
         this.hideTagsMenu = this.hideTagsMenu.bind(this);
+        this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this);
     }
 
     replaceTranslation(sid, translation) {
@@ -50,6 +52,8 @@ class SegmentTarget extends React.Component {
             this.setState({
                 showTagsMenu: false
             });
+            //TODO Move it
+            $('.tag-autocomplete-endcursor').remove();
         }
     }
 
@@ -202,7 +206,7 @@ class SegmentTarget extends React.Component {
 
             }
             if (this.props.tagModesEnabled  && UI.tagLockEnabled) {
-                tagCopyButton = <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
+                tagCopyButton = <a className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target" onClick={()=>this.autoFillTagsInTarget()}/>
 
             }
 
@@ -220,8 +224,7 @@ class SegmentTarget extends React.Component {
                 />
                 { this.state.showTagsMenu ? (
 
-                    <TagsMenu sourceTags={UI.sourceTags}
-                              segment={this.props.segment}
+                    <TagsMenu segment={this.props.segment}
                     />
 
                 ): null}
@@ -249,6 +252,18 @@ class SegmentTarget extends React.Component {
         return textAreaContainer;
     }
 
+    autoFillTagsInTarget(sid) {
+        if ( _.isUndefined(sid) || sid === this.props.segment.sid ) {
+            let newTranslation = TagUtils.autoFillTagsInTarget(this.props.segment);
+            //lock tags and run again getWarnings
+            setTimeout( (  )=> {
+                SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, this.props.segment.id_file, newTranslation);
+                UI.segmentQA(UI.getSegmentById(this.props.segment.sid));
+            }, 100);
+        }
+
+    }
+
     markTranslation(translation) {
         if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.target) {
             translation = LXQ.highLightText(translation, this.props.segment.lexiqa.target, true, false, true );
@@ -267,6 +282,7 @@ class SegmentTarget extends React.Component {
         SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
         SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
+        SegmentStore.addListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
         this.afterRenderActions();
 
     }
@@ -276,6 +292,7 @@ class SegmentTarget extends React.Component {
         SegmentStore.removeListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
         SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
+        SegmentStore.removeListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
     }
 
     componentDidUpdate() {

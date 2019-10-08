@@ -35,7 +35,7 @@ class SegmentButton extends React.Component {
     clickOnGuessTags(e) {
         e.preventDefault();
         $(e.target).addClass('disabled');
-        UI.startSegmentTagProjection();
+        UI.startSegmentTagProjection(this.props.segment.sid);
         return false;
     }
 

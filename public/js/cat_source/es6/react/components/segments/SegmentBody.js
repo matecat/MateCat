@@ -74,7 +74,7 @@ class SegmentBody extends React.Component {
             }
             if ( this.checkLockTags(area) ) {
                 try {
-                    if ( UI.hasSourceOrTargetTags( segment ) ) {
+                    if ( this.hasSourceOrTargetTags() ) {
                         segment.addClass( 'hasTagsToggle' );
                         TagUtils.detectTagType( segment );
 
@@ -83,11 +83,11 @@ class SegmentBody extends React.Component {
                     }
 
                     if ( Object.size( this.props.segment.tagMismatch ) > 0 ) {
-                        UI.markTagMismatch( this.props.segment.tagMismatch, this.props.segment.sid );
+                        TagUtils.markTagMismatch( this.props.segment.tagMismatch, this.props.segment.sid );
                         segment.addClass( 'hasTagsAutofill' );
                     } else {
                         segment.removeClass( 'hasTagsAutofill' );
-                        UI.removeHighlightErrorsTags(segment);
+                        TagUtils.removeHighlightErrorsTags(segment);
                     }
 
                 } catch ( e ) {
@@ -98,13 +98,13 @@ class SegmentBody extends React.Component {
     }
 
     hasSourceOrTargetTags() {
-        var regExp = UI.getXliffRegExpression();
+        var regExp = TagUtils.getXliffRegExpression();
         var sourceTags = this.props.segment.segment.match( regExp );
         return sourceTags && sourceTags.length > 0 ;
     }
 
     hasMissingTargetTags() {
-        var regExp = UI.getXliffRegExpression();
+        var regExp = TagUtils.getXliffRegExpression();
         var sourceTags = this.props.segment.segment.match( regExp );
         if ( !sourceTags || sourceTags.length === 0 ) {
             return false;

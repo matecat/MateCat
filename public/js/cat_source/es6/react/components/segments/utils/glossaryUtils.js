@@ -32,6 +32,7 @@ let GlossaryUtils = {
      * Mark the glossary matches in text
      * @param text
      * @param matchesObj
+     * @param sid
      */
     markGlossaryItemsInText ( text, matchesObj, sid ) {
 
@@ -98,7 +99,7 @@ let GlossaryUtils = {
             //find all glossary matches
             let match = re.exec(cleanString);
             //Check if glossary term break a marker EX: &lt;g id="3"&gt;
-            if ((glossaryTerm_escaped.toLocaleLowerCase() == 'lt' || glossaryTerm_escaped.toLocaleLowerCase() == 'gt') && UI.hasSourceOrTargetTags(segment)) {
+            if ((glossaryTerm_escaped.toLocaleLowerCase() == 'lt' || glossaryTerm_escaped.toLocaleLowerCase() == 'gt') && TagUtils.hasSourceOrTargetTags(sid)) {
                 return;
             }
             while(match) {

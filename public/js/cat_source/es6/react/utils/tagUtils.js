@@ -1,4 +1,5 @@
-let TAGS_UTILS =  {
+import SegmentStore  from '../stores/SegmentStore';
+const TAGS_UTILS =  {
 
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
@@ -26,8 +27,8 @@ let TAGS_UTILS =  {
     },
 
     transformTextForLockTags: function ( tx ) {
-        var brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked style-tag \">$1</_plh_>";
-        var brTx2 =  "<span contenteditable=\"false\" class=\"locked style-tag\">$1</span>";
+        let brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked style-tag \">$1</_plh_>";
+        let brTx2 =  "<span contenteditable=\"false\" class=\"locked style-tag\">$1</span>";
 
         tx = tx.replace( /&amp;/gi, "&" )
             .replace( /<span/gi, "<_plh_" )
@@ -70,11 +71,11 @@ let TAGS_UTILS =  {
      * @returns {*}
      */
     transformTagsWithHtmlAttribute: function (tx) {
-        var returnValue = tx;
+        let returnValue = tx;
         try {
             if (tx.indexOf('locked-inside') > -1) return tx;
-            var base64Array=[];
-            var phIDs =[];
+            let base64Array=[];
+            let phIDs =[];
             tx = tx.replace( /&quot;/gi, '"' );
 
             tx = tx.replace( /&lt;ph.*?id="(.*?)"/gi, function (match, text) {
@@ -87,11 +88,11 @@ let TAGS_UTILS =  {
             });
             tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
                 base64Array.push(text);
-                var id = phIDs.shift();
+                let id = phIDs.shift();
                 return "<span contenteditable='false' class='locked locked-inside inside-attribute' data-original='base64:" + text+ "'><a>("+ id + ")</a>" + Base64.decode(text) + "</span>";
             });
             tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
-                var base = base64Array.shift();
+                let base = base64Array.shift();
                 return "<span contenteditable='false' class='locked locked-inside tag-html-container-open' >" + text + "base64:" + base + "</span>";
             });
             // delete(base64Array);
@@ -105,7 +106,7 @@ let TAGS_UTILS =  {
     },
 
     encodeSpacesAsPlaceholders: function(str, root) {
-        var newStr = '';
+        let newStr = '';
         $.each($.parseHTML(str), function() {
 
             if(this.nodeName == '#text') {
@@ -228,7 +229,7 @@ let TAGS_UTILS =  {
     },
 
     markSelectedTag: function($tag) {
-        var elem = $tag.hasClass('locked') && !$tag.hasClass('inside-attribute')? $tag : $tag.closest('.locked:not(.inside-attribute)');
+        let elem = $tag.hasClass('locked') && !$tag.hasClass('inside-attribute')? $tag : $tag.closest('.locked:not(.inside-attribute)');
         if( elem.hasClass('selected') ) {
             elem.removeClass('selected');
             setCursorPosition(elem[0], 'end');
@@ -242,9 +243,9 @@ let TAGS_UTILS =  {
             }
         }
         if ( elem.closest('.source').length > 0 ) {
-            UI.removeHighlightCorrespondingTags(elem.closest('.source'));
-            UI.highlightCorrespondingTags(elem);
-            UI.highlightEquivalentTaginSourceOrTarget(elem.closest('.source'), UI.editarea);
+            this.removeHighlightCorrespondingTags(elem.closest('.source'));
+            this.highlightCorrespondingTags(elem);
+            this.highlightEquivalentTaginSourceOrTarget(elem.closest('.source'), UI.editarea);
         } else {
             this.checkTagProximityFn();
         }
@@ -253,9 +254,9 @@ let TAGS_UTILS =  {
     checkTagProximityFn:  function () {
         if(!UI.editarea || UI.editarea.html() == '') return false;
 
-        var selection = window.getSelection();
+        let selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
-        var range = selection.getRangeAt(0);
+        let range = selection.getRangeAt(0);
         UI.editarea.find('.temp-highlight-tags').remove();
         if(!range.collapsed) {
             if ( UI.editarea.find( '.locked.selected' ).length > 0 ) {
@@ -266,20 +267,20 @@ let TAGS_UTILS =  {
         } else {
             pasteHtmlAtCaret('<span class="temp-highlight-tags"/>');
         }
-        var htmlEditarea = $.parseHTML(UI.editarea.html());
+        let htmlEditarea = $.parseHTML(UI.editarea.html());
         if (htmlEditarea) {
-            UI.removeHighlightCorrespondingTags(UI.editarea);
+            this.removeHighlightCorrespondingTags(UI.editarea);
             let self = this;
             $.each(htmlEditarea, function (index) {
                 if($(this).hasClass('temp-highlight-tags')) {
                     self.numCharsUntilTagRight = 0;
                     self.numCharsUntilTagLeft = 0;
-                    var nearTagOnRight = self.nearTagOnRight(index+1, htmlEditarea);
-                    var nearTagOnLeft = self.nearTagOnLeft(index-1, htmlEditarea);
+                    let nearTagOnRight = self.nearTagOnRight(index+1, htmlEditarea);
+                    let nearTagOnLeft = self.nearTagOnLeft(index-1, htmlEditarea);
 
                     if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
                         (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
-                        UI.highlightCorrespondingTags($(UI.editarea.find('.locked:not(.locked-inside)')[TAGS_UTILS.indexTags]));
+                        self.highlightCorrespondingTags($(UI.editarea.find('.locked:not(.locked-inside)')[TAGS_UTILS.indexTags]));
                     }
 
                     self.numCharsUntilTagRight = null;
@@ -291,11 +292,203 @@ let TAGS_UTILS =  {
             });
         }
         $('body').find('.temp-highlight-tags').remove();
-        UI.highlightEquivalentTaginSourceOrTarget(UI.editarea, UI.currentSegment.find('.source'));
+        this.highlightEquivalentTaginSourceOrTarget(UI.editarea, UI.currentSegment.find('.source'));
     },
 
     checkTagProximity : _.debounce(()=> TAGS_UTILS.checkTagProximityFn(), 500),
 
+    /**
+     * Search in container for a highlighted tad and switch on the corresponding
+     * tag in source or target
+     * @param containerSearch The container where to search for the tag
+     * @param containerHighlight
+     */
+    highlightEquivalentTaginSourceOrTarget: function(containerSearch, containerHighlight) {
+        this.removeHighlightCorrespondingTags(containerHighlight);
+        let highlightedTag = containerSearch.find('.startTag.locked.highlight, .selfClosingTag.locked.highlight');
+        if ( highlightedTag.length > 0 ) {
+            let sourceTag, text;
+            if ( highlightedTag.find('.locked-inside').length > 0 ) {
+                text = highlightedTag.find('.inside-attribute').text();
+                sourceTag = containerHighlight.find('span.inside-attribute:contains('+text+')').parent();
+            } else {
+                text = $(highlightedTag.get(0)).text();
+                sourceTag = containerHighlight.find('span.locked:contains('+text+')');
+            }
+            this.highlightCorrespondingTags(sourceTag);
+        }
+    },
+    highlightCorrespondingTags: function (el) {
+        let pairEl, num, ind;
+        if(el.hasClass('startTag')) {
+            if(el.next('.endTag').length) {
+                el.next('.endTag').addClass('highlight');
+            } else {
+                num = 1;
+                ind = 0;
+                $(el).nextAll('.locked').each(function () {
+                    ind++;
+                    if($(this).hasClass('startTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+
+                });
+                if (pairEl) {
+                    $(pairEl).addClass('highlight');
+                }
+
+
+            }
+        } else if(el.hasClass('endTag')) {
+            if(el.prev('.startTag').length) {
+                el.prev('.startTag').first().addClass('highlight');
+            } else {
+                num = 1;
+                ind = 0;
+                $(el).prevAll('.locked').each(function () {
+                    ind++;
+                    if($(this).hasClass('endTag')) {
+                        num++;
+                    } else if($(this).hasClass('selfClosingTag')) {
+
+                    } else { // end tag
+                        num--;
+                        if(num == 0) {
+                            pairEl = $(this);
+                            return false;
+                        }
+                    }
+
+                });
+                if (pairEl) {
+                    $(pairEl).addClass('highlight');
+                }
+            }
+        }
+        $(el).addClass('highlight');
+    },
+
+    removeHighlightCorrespondingTags: function (segment$) {
+        segment$.find('.locked.highlight').removeClass('highlight');
+    },
+
+    removeHighlightErrorsTags: function (segment$) {
+        segment$.find('.locked.mismatch').removeClass('mismatch');
+        segment$.find('.locked.order-error').removeClass('order-error');
+    },
+    // TAG MISMATCH
+    markTagMismatch: function(tag_mismatch, sid) {
+
+        if( !_.isUndefined(tag_mismatch.source) && tag_mismatch.source.length > 0 ) {
+            $.each(tag_mismatch.source, function(index) {
+                $('#segment-' + sid + ' .source span.locked:not(.temp)').filter(function() {
+                    let clone = $(this).clone();
+                    clone.find('.inside-attribute').remove();
+                    return htmlEncode(clone.text()) === tag_mismatch.source[index];
+                }).last().addClass('temp');
+            });
+        }
+        if( !_.isUndefined(tag_mismatch.target) && tag_mismatch.target.length > 0 ) {
+            $.each(tag_mismatch.target, function(index) {
+                $('#segment-' + sid + ' .editarea span.locked:not(.temp)').filter(function() {
+                    let clone = $(this).clone();
+                    clone.find('.inside-attribute').remove();
+                    return htmlEncode(clone.text()) === tag_mismatch.target[index];
+                }).last().addClass('temp');
+            });
+        }
+        // ??
+        $('#segment-' + sid + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+        $('#segment-' + sid + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+        $('#segment-' + sid + ' span.locked.mismatch-old').removeClass('mismatch-old');
+
+        $('#segment-' + sid + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' );
+        if( !_.isUndefined(tag_mismatch.order) && tag_mismatch.order.length > 0 ) {
+            $( '#segment-' + sid + ' .editarea .locked:not(.mismatch)' ).filter( function () {
+                let clone = $( this ).clone();
+                clone.find( '.inside-attribute' ).remove();
+                return htmlEncode(clone.text()) === tag_mismatch.order[0];
+            } ).addClass( 'order-error' );
+        }
+    },
+    /**
+     *  Return the Regular expression to match all xliff source tags
+     */
+    getXliffRegExpression: function () {
+        return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi;
+    },
+
+    hasSourceOrTargetTags: function ( sid ) {
+        let regExp = this.getXliffRegExpression();
+        let segment = SegmentStore.getSegmentByIdToJS(sid);
+        let sourceTags = segment.segment.match( regExp );
+        return sourceTags && sourceTags.length > 0 ;
+    },
+
+    /**
+     * Add at the end of the target the missing tags
+     */
+    autoFillTagsInTarget: function ( segmentObj ) {
+
+        let sourceTags = segmentObj.segment
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+
+        let newhtml = segmentObj.translation;
+
+        let targetTags = segmentObj.translation
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
+        if(targetTags == null ) {
+            targetTags = [];
+        } else {
+            targetTags = targetTags.map(function(elem) {
+                return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+            });
+        }
+
+        let missingTags = sourceTags.map(function(elem) {
+            return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
+        });
+        //remove from source tags all the tags in target segment
+        for(let i = 0; i < targetTags.length; i++ ){
+            let pos = missingTags.indexOf(targetTags[i]);
+            if( pos > -1){
+                missingTags.splice(pos,1);
+            }
+        }
+
+        //add tags into the target segment
+        for(let i = 0; i < missingTags.length; i++){
+            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
+                newhtml = newhtml + TagUtils.transformTextForLockTags(missingTags[i]);
+            } else {
+                newhtml = newhtml + missingTags[i];
+            }
+        }
+        return newhtml;
+    },
+
+    /**
+     * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>)
+     * (Note that in the data-original attribute there are the &amp;lt instead of &lt)
+     * @param segmentSource
+     * @returns {boolean}
+     */
+    hasDataOriginalTags: function (segmentSource) {
+        var originalText = segmentSource;
+        var reg = new RegExp(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi);
+        return !_.isUndefined( originalText ) && reg.test( originalText );
+
+    },
 
 };
 module.exports =  TAGS_UTILS;

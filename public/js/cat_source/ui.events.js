@@ -28,8 +28,7 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.undoInSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.undoInSegment();
-            // UI.undoInSegment(UI.currentSegment);
-            UI.closeTagAutocompletePanel();
+            SegmentActions.closeTagsMenu();
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.scrollToSegment(UI.currentSegmentId);
@@ -53,7 +52,7 @@ $.extend(UI, {
                 } else if ( $('.editor .translated:not(.disabled)').length > 0 ) {
                     UI.clickOnTranslatedButton($('.editor .translated'));
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    UI.startSegmentTagProjection();
+                    UI.startSegmentTagProjection(UI.currentSegmentId);
                 }
             }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
@@ -65,7 +64,7 @@ $.extend(UI, {
                 if ( $('.editor .translated:not(.disabled)').length > 0 ) {
                     UI.clickOnTranslatedButton($('.editor .translated'));
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    UI.startSegmentTagProjection();
+                    UI.startSegmentTagProjection(UI.currentSegmentId);
                 }
             }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {
@@ -99,7 +98,7 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             var currentSegment = SegmentStore.getCurrentSegment();
-            if ((UI.tagLockEnabled) && UI.hasDataOriginalTags(currentSegment.segment)) {
+            if ((UI.tagLockEnabled) && TagUtils.hasDataOriginalTags(currentSegment.segment)) {
                 SegmentActions.showTagsMenu(currentSegment.sid);
             }
         }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.splitSegment.keystrokes[this.shortCutskey], function(e) {
@@ -157,11 +156,7 @@ $.extend(UI, {
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
 		} );
 
-		$("body").on('click', '.autofillTag', function(e){
-			e.preventDefault();
-			UI.autoFillTagsInTarget();
-
-		}).on('click', '.tagLockCustomize', function(e) {
+		$("body").on('click', '.tagLockCustomize', function(e) {
 			e.preventDefault();
 			if (UI.tagLockEnabled) {
 				SegmentActions.disableTagLock();
