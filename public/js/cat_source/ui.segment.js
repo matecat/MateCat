@@ -129,7 +129,7 @@
             var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
             if (currentSegment && this.enableTagProjection) {
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
-                var segmentNoTags = UI.removeAllTags( segmentObj.segment );
+                var segmentNoTags = UI.removeAllTags( currentSegment.segment );
                 var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment.segment ) && !currentSegment.tagged && segmentNoTags !== '';
                 // If the segment has already be tagged
                 var isCurrentAlreadyTagged = currentSegment.tagged;

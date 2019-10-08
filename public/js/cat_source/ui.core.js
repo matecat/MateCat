@@ -63,8 +63,6 @@ UI = {
 		this.currentSegment      = $segment ;
 		this.currentFile         = $segment.closest("article");
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
-
-        this.evalCurrentSegmentTranslationAndSourceTags( $segment );
     },
 
     removeCacheObjects: function() {
@@ -76,19 +74,6 @@ UI = {
         this.currentFile = undefined;
         this.currentFileId = undefined;
 
-    },
-    /**
-     * shouldSegmentAutoPropagate
-     *
-     * Returns whether or not the segment should be propagated. Default is true.
-     *
-     * @returns {boolean}
-     */
-    shouldSegmentAutoPropagate : function( $segment, newStatus ) {
-        var segmentClassToFind = "status-" + newStatus.toLowerCase();
-        var statusChanged = !$segment.hasClass(segmentClassToFind);
-        var segmentModified = UI.currentSegmentTranslation.trim() !== UI.editarea.text().trim();
-        return statusChanged || segmentModified;
     },
 
     /**
@@ -105,69 +90,52 @@ UI = {
             segment_id      : segment_id,
             status          : status,
             byStatus        : byStatus,
-            noPropagation   : ! UI.shouldSegmentAutoPropagate( segment, status ),
+            propagation     : false,
             callback        : callback
         };
 
-        if ( byStatus || opts.noPropagation ) {
-            opts.noPropagation = true;
-            this.execChangeStatus(opts);// no propagation
-        } else {
+        // ask if the user wants propagation or this is valid only
+        // for this segment
 
-            // ask if the user wants propagation or this is valid only
-            // for this segment
+        if ( this.autopropagateConfirmNeeded() && !byStatus) {
 
-            if ( this.autopropagateConfirmNeeded() ) {
-
-                // var optionsStr = opts;
-                var props = {
-                    text: "There are other identical segments. <br><br>Would you " +
-                        "like to propagate the translation to all of them, " +
-                        "or keep this translation only for this segment?",
-                    successText: 'Only this segment',
-                    successCallback: function(){
-                            UI.preExecChangeStatus(opts);
-                            APP.ModalWindow.onCloseModal();
-                        },
-                    cancelText: 'Propagate to All',
-                    cancelCallback: function(){
-                            UI.execChangeStatus(opts);
-                            APP.ModalWindow.onCloseModal();
-                        },
-                    onClose: function(){
+            // var optionsStr = opts;
+            var props = {
+                text: "There are other identical segments. <br><br>Would you " +
+                    "like to propagate the translation to all of them, " +
+                    "or keep this translation only for this segment?",
+                successText: 'Only this segment',
+                successCallback: function(){
                         UI.preExecChangeStatus(opts);
-                    }
-                };
-                APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
-                // APP.confirm({
-                //     name: 'confirmAutopropagation',
-                //     cancelTxt: 'Propagate to All',
-                //     onCancel: 'execChangeStatus',
-                //     callback: 'preExecChangeStatus',
-                //     okTxt: 'Only this segment',
-                //     context: optionsStr,
-                //     msg: "There are other identical segments. <br><br>Would you " +
-                //          "like to propagate the translation to all of them, " +
-                //          "or keep this translation only for this segment?"
-                // });
-            } else {
-                this.execChangeStatus( opts ); // autopropagate
-            }
+                        APP.ModalWindow.onCloseModal();
+                    },
+                cancelText: 'Propagate to All',
+                cancelCallback: function(){
+                        opts.propagation = true;
+                        UI.execChangeStatus(opts);
+                        APP.ModalWindow.onCloseModal();
+                    },
+                onClose: function(){
+                    UI.preExecChangeStatus(opts);
+                }
+            };
+            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
+        } else {
+            this.execChangeStatus( opts ); // autopropagate
         }
-
 	},
 
     autopropagateConfirmNeeded: function () {
-        var segment = UI.currentSegment;
-        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim() && !config.isReview) { //segment not modified
+        var segment = SegmentStore.getCurrentSegment();
+        if( !segment.modified && !config.isReview) { //segment not modified
             return false;
         }
 
-        if(segment.attr('data-propagable') == 'true') {
+        if(segment.propagable) {
             if(config.isReview) {
                 return true;
             } else {
-                return !!segment.is('.status-translated, .status-approved, .status-rejected');
+                return segment.status !== "NEW" && segment.status !== "DRAFT";
             }
         }
         return false;
@@ -175,17 +143,17 @@ UI = {
     },
     preExecChangeStatus: function (optStr) {
         var opt = optStr;
-        opt.noPropagation = true;
+        opt.propagation = false;
         this.execChangeStatus(opt);
     },
     execChangeStatus: function (optStr) {
         var options = optStr;
 
-        var noPropagation = options.noPropagation;
+        var propagation   = options.propagation;
         var status        = options.status;
         var byStatus      = options.byStatus;
 
-        noPropagation = noPropagation || false;
+        ropagation = propagation || false;
 
         // $('.percentuage', segment.el).removeClass('visible');
         SegmentActions.hideSegmentHeader(options.segment_id);
@@ -195,7 +163,7 @@ UI = {
             status: status,
             caller: false,
             byStatus: byStatus,
-            propagate: !noPropagation
+            propagate: propagation
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
         UI.setSegmentModified( UI.getSegmentById(options.segment_id), false ) ;

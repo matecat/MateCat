@@ -1,4 +1,5 @@
 let TAGS_UTILS =  {
+
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
      * @param str
@@ -101,9 +102,200 @@ let TAGS_UTILS =  {
         } finally {
             return returnValue;
         }
-
-
     },
+
+    encodeSpacesAsPlaceholders: function(str, root) {
+        var newStr = '';
+        $.each($.parseHTML(str), function() {
+
+            if(this.nodeName == '#text') {
+                newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
+            } else {
+                match = this.outerHTML.match(/<.*?>/gi);
+                if(match.length == 1) { // se è 1 solo, è un tag inline
+
+                } else if(match.length == 2) { // se sono due, non ci sono tag innestati
+                    newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+                } else { // se sono più di due, ci sono tag innestati
+
+                    newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
+
+                }
+            }
+        });
+        if(root) {
+            newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
+        }
+        return newStr;
+    },
+
+    /**
+     * To transform text with the' ph' tags that have the attribute' equiv-text' into text only, without html tags
+     */
+    removePhTagsWithEquivTextIntoText: function ( tx ) {
+        try {
+            tx = tx.replace( /&quot;/gi, '"' );
+
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/&gt;)/gi, function (match, text) {
+                return match.replace(text, "");
+            });
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/>)/gi, function (match, text) {
+                return match.replace(text, "");
+            });
+            tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
+                return "";
+            });
+            tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
+                return Base64.decode(text);
+            });
+            return tx;
+        } catch (e) {
+            console.error("Error parsing tag ph in removePhTagsWithEquivTextIntoText function");
+        }
+    },
+
+    detectTagType: function (area) {
+        if (!UI.tagLockEnabled || config.tagLockCustomizable ) {
+            return false;
+        }
+        $('span.locked:not(.locked-inside)', area).each(function () {
+            if($(this).text().startsWith('</')) {
+                $(this).addClass('endTag')
+            } else {
+                if($(this).text().endsWith('/>')) {
+                    $(this).addClass('selfClosingTag')
+                } else {
+                    $(this).addClass('startTag')
+                }
+            }
+        })
+    },
+    indexTags: null,
+    numCharsUntilTagRight: null,
+    numCharsUntilTagLeft: null,
+    nearTagOnRight: function (index, ar) {
+        if($(ar[index]).hasClass('locked')) {
+            if(this.numCharsUntilTagRight === 0) {
+                // count index of this tag in the tags list
+                TAGS_UTILS.indexTags = 0;
+                $.each(ar, function (ind) {
+                    if(ind == index) {
+                        return false;
+                    } else {
+                        if($(this).hasClass('locked')) {
+                            TAGS_UTILS.indexTags++;
+                        }
+                    }
+                });
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (typeof ar[index] == 'undefined') return false;
+
+            if(ar[index].nodeName === '#text') {
+                this.numCharsUntilTagRight += ar[index].data.length;
+            }
+            this.nearTagOnRight(index+1, ar);
+        }
+    },
+    nearTagOnLeft: function (index, ar) {
+        if (index < 0) return false;
+        if($(ar[index]).hasClass('locked')) {
+            if(this.numCharsUntilTagLeft === 0) {
+                // count index of this tag in the tags list
+                TAGS_UTILS.indexTags = 0;
+                $.each(ar, function (ind) {
+                    if(ind === index) {
+                        return false;
+                    } else {
+                        if($(this).hasClass('locked')) {
+                            TAGS_UTILS.indexTags++;
+                        }
+                    }
+                });
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if(ar[index].nodeName === '#text') {
+                this.numCharsUntilTagLeft += ar[index].data.length;
+            }
+            this.nearTagOnLeft(index-1, ar);
+        }
+    },
+
+    markSelectedTag: function($tag) {
+        var elem = $tag.hasClass('locked') && !$tag.hasClass('inside-attribute')? $tag : $tag.closest('.locked:not(.inside-attribute)');
+        if( elem.hasClass('selected') ) {
+            elem.removeClass('selected');
+            setCursorPosition(elem[0], 'end');
+        } else {
+            setCursorPosition(elem[0]);
+            selectText(elem[0]);
+            UI.removeSelectedClassToTags();
+            elem.addClass('selected');
+            if(UI.body.hasClass('tagmode-default-compressed')) {
+                $('.editor .tagModeToggle').click();
+            }
+        }
+        if ( elem.closest('.source').length > 0 ) {
+            UI.removeHighlightCorrespondingTags(elem.closest('.source'));
+            UI.highlightCorrespondingTags(elem);
+            UI.highlightEquivalentTaginSourceOrTarget(elem.closest('.source'), UI.editarea);
+        } else {
+            this.checkTagProximityFn();
+        }
+    },
+
+    checkTagProximityFn:  function () {
+        if(!UI.editarea || UI.editarea.html() == '') return false;
+
+        var selection = window.getSelection();
+        if(selection.rangeCount < 1) return false;
+        var range = selection.getRangeAt(0);
+        UI.editarea.find('.temp-highlight-tags').remove();
+        if(!range.collapsed) {
+            if ( UI.editarea.find( '.locked.selected' ).length > 0 ) {
+                UI.editarea.find( '.locked.selected' ).after('<span class="temp-highlight-tags"/>');
+            } else {
+                return true
+            }
+        } else {
+            pasteHtmlAtCaret('<span class="temp-highlight-tags"/>');
+        }
+        var htmlEditarea = $.parseHTML(UI.editarea.html());
+        if (htmlEditarea) {
+            UI.removeHighlightCorrespondingTags(UI.editarea);
+            let self = this;
+            $.each(htmlEditarea, function (index) {
+                if($(this).hasClass('temp-highlight-tags')) {
+                    self.numCharsUntilTagRight = 0;
+                    self.numCharsUntilTagLeft = 0;
+                    var nearTagOnRight = self.nearTagOnRight(index+1, htmlEditarea);
+                    var nearTagOnLeft = self.nearTagOnLeft(index-1, htmlEditarea);
+
+                    if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
+                        (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
+                        UI.highlightCorrespondingTags($(UI.editarea.find('.locked:not(.locked-inside)')[TAGS_UTILS.indexTags]));
+                    }
+
+                    self.numCharsUntilTagRight = null;
+                    self.numCharsUntilTagLeft = null;
+                    UI.editarea.find('.temp-highlight-tags').remove();
+                    UI.editarea.get(0).normalize();
+                    return false;
+                }
+            });
+        }
+        $('body').find('.temp-highlight-tags').remove();
+        UI.highlightEquivalentTaginSourceOrTarget(UI.editarea, UI.currentSegment.find('.source'));
+    },
+
+    checkTagProximity : _.debounce(()=> TAGS_UTILS.checkTagProximityFn(), 500),
+
 
 };
 module.exports =  TAGS_UTILS;

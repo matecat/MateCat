@@ -15,7 +15,7 @@ class TagsMenu extends React.Component {
 
         this.tagsRefs = {};
         let missingTags = this.getMissingTags();
-        let uniqueSourceTags = TagsMenu.arrayUnique(this.props.sourceTags);
+        let uniqueSourceTags = TagsMenu.arrayUnique(this.evalCurrentSegmentSourceTags());
         let addedTags = _.filter(uniqueSourceTags, function ( item ) {
             return missingTags.indexOf(item.replace(/&quot;/g, '"')) === -1 ;
         });
@@ -40,6 +40,13 @@ class TagsMenu extends React.Component {
             return p;
         }, []);
     };
+
+    evalCurrentSegmentSourceTags() {
+
+        var sourceTags = this.props.segment.segment
+            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+        return  sourceTags || [];
+    }
 
     getSelectionCoords() {
         let win = window;
@@ -84,21 +91,10 @@ class TagsMenu extends React.Component {
 
     getMissingTags() {
         const selfClosedTag = "&lt;/g&gt;";
-        var sourceClone = $( '.source', UI.currentSegment ).clone();
-        //Remove inside-attribute for ph with equiv-text tags
-        sourceClone.find('.locked.inside-attribute').remove();
-        var sourceHtml = sourceClone.html();
-        sourceHtml = sourceHtml.replace(/<mark class="inGlossary">/g, '');
-        sourceHtml = sourceHtml.replace(/<\/mark>/g, '');
+        var sourceHtml = this.props.segment.segment;
         var sourceTags = sourceHtml.match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
         //get target tags from the segment
-        var targetClone =  $( '.targetarea', UI.currentSegment ).clone();
-
-
-        //Remove inside-attribute for ph with equiv-text tags
-        targetClone.find('.locked.inside-attribute').remove();
-
-        var targetTags = targetClone.html()
+        var targetTags = this.props.segment.translation
             .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
         if(targetTags == null ) {
@@ -278,7 +274,7 @@ class TagsMenu extends React.Component {
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
         setTimeout(function () {
             UI.segmentQA(UI.currentSegment);
-            UI.checkTagProximity();
+            TagUtils.checkTagProximity();
         });
 
     }

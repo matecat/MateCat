@@ -102,7 +102,7 @@ class Segment extends React.Component {
             SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
 
             //From EditAreaClick
-            UI.checkTagProximity();
+            TagUtils.checkTagProximity();
 
             window.location.hash = this.props.segment.sid;
             // setTimeout(() => {

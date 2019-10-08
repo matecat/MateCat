@@ -67,7 +67,7 @@ let EditArea = {
                 }
                 setTimeout(()=>{
                     modifiedTranslationCallback.call();
-                    UI.checkTagProximity();
+                    TagUtils.checkTagProximity();
                 });
 
             } else {
@@ -137,7 +137,7 @@ let EditArea = {
             selection = window.getSelection();
             range = selection.getRangeAt(0);
             setTimeout(function() {
-                UI.checkTagProximity();
+                TagUtils.checkTagProximity();
             }, 10);
 
             if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -174,14 +174,14 @@ let EditArea = {
                 }
             }
             setTimeout(function() {
-                UI.checkTagProximity();
+                TagUtils.checkTagProximity();
             }, 10);
         }
         if (code == 39) { // right arrow
             selection = window.getSelection();
             range = selection.getRangeAt(0);
             setTimeout(function() {
-                UI.checkTagProximity();
+                TagUtils.checkTagProximity();
             }, 10);
 
             if (range.startOffset != range.endOffset) {
@@ -216,7 +216,7 @@ let EditArea = {
                 }
             }
             setTimeout(function() {
-                UI.checkTagProximity();
+                TagUtils.checkTagProximity();
             }, 10);
         }
     },

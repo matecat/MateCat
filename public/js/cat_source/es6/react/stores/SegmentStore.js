@@ -142,11 +142,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.decoded_source = UI.decodeText(segment, segment.segment);
                 segment.unlocked = UI.isUnlockedSegment(segment);
                 segment.warnings = {};
-                segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);segment.edit_area_locked = false;
+                segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
+                segment.edit_area_locked = false;
                 segment.original_sid = segment.sid;
                 segment.modified = false;
                 segment.opened = false;
                 segment.search = (inSearch) ? self.search.params : null;
+                segment.propagable = (segment.repetitions_in_chunk !== "1");
                 newSegments.push(this);
             }
 

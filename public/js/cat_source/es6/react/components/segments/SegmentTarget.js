@@ -221,8 +221,7 @@ class SegmentTarget extends React.Component {
                 { this.state.showTagsMenu ? (
 
                     <TagsMenu sourceTags={UI.sourceTags}
-
-
+                              segment={this.props.segment}
                     />
 
                 ): null}

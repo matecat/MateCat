@@ -329,7 +329,7 @@ $.extend(UI, {
             '.editor .source .locked a,.editor .editarea .locked a', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            UI.markSelectedTag( $( this ) );
+            TagUtils.markSelectedTag( $( this ) );
         }).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
 			return false;
         }).on('keydown', function(e) {

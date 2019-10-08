@@ -1,4 +1,4 @@
-
+import TagUtils from '../../../utils/tagUtils';
 let TranslationMatches = {
 
 
@@ -8,16 +8,7 @@ let TranslationMatches = {
         var percentageClass = UI.getPercentuageClass(match);
         if ($.trim(translation) !== '') {
 
-            if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
-
-            // XXX we are modifing the APP state so that MateCat will know that the object is changed
-            // in particular this is needed for the Speech2Text to know that the newly added text is coming
-            // from a 100% match.
-            var segmentObj = MateCat.db.segments.by('sid', UI.getSegmentId( segment ) );
-            if ( segmentObj ) {
-                segmentObj.suggestion_match = match.replace('%', '');
-                MateCat.db.segments.update( segmentObj );
-            }
+            if(!which) translation = TagUtils.encodeSpacesAsPlaceholders(translation, true);
 
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), translation);
             SegmentActions.addClassToEditArea(UI.getSegmentId(segment), UI.getSegmentFileId(segment), 'fromSuggestion');

@@ -57,8 +57,8 @@ class SegmentFooterTabMatches extends React.Component {
             item.translationDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText( this.translation));
             item.sourceDiff = item.suggestionDecodedHtml;
             if (this.match !== "MT" && parseInt(this.match) > 74) {
-                let sourceDecoded = UI.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
-                let matchDecoded = UI.removePhTagsWithEquivTextIntoText( this.segment );
+                let sourceDecoded = TagUtils.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
+                let matchDecoded = TagUtils.removePhTagsWithEquivTextIntoText( this.segment );
                 let diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
                 item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");

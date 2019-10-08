@@ -66,8 +66,8 @@ class SegmentFooterMultiMatches extends React.Component {
             item.sourceDiff = item.suggestionDecodedHtml;
             item.target = this.target;
             if (this.match !== "MT" && parseInt(this.match) > 74) {
-                let sourceDecoded = UI.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
-                let matchDecoded = UI.removePhTagsWithEquivTextIntoText( this.segment );
+                let sourceDecoded = TagUtils.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
+                let matchDecoded = TagUtils.removePhTagsWithEquivTextIntoText( this.segment );
                 let diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
                 item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");

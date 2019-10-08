@@ -37,7 +37,7 @@ $.extend(UI, {
             LXQ.initPopup();
         }
         CatToolActions.startNotifications();
-        UI.checkTagProximity =  _.debounce( UI.checkTagProximityFn, 500);
+
         UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
     },
 	init: function() {

@@ -3,81 +3,6 @@
  */
 $.extend(UI, {
 
-    encodeSpacesAsPlaceholders: function(str, root) {
-        var newStr = '';
-        $.each($.parseHTML(str), function() {
-
-            if(this.nodeName == '#text') {
-                newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
-            } else {
-                match = this.outerHTML.match(/<.*?>/gi);
-                if(match.length == 1) { // se è 1 solo, è un tag inline
-
-                } else if(match.length == 2) { // se sono due, non ci sono tag innestati
-                    newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
-                } else { // se sono più di due, ci sono tag innestati
-
-                    newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
-
-                }
-            }
-        });
-        if(root) {
-            newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
-        }
-        return newStr;
-    },
-    /**
-     * To transform text with the' ph' tags that have the attribute' equiv-text' into text only, without html
-     */
-    removePhTagsWithEquivTextIntoText: function ( tx ) {
-        try {
-            tx = tx.replace( /&quot;/gi, '"' );
-
-            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/&gt;)/gi, function (match, text) {
-                return match.replace(text, "");
-            });
-            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?(\/>)/gi, function (match, text) {
-                return match.replace(text, "");
-            });
-            tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
-                return "";
-            });
-            tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
-                return Base64.decode(text);
-            });
-            return tx;
-        } catch (e) {
-            console.error("Error parsing tag ph in removePhTagsWithEquivTextIntoText function");
-        }
-    },
-
-    evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
-        if ( segment.length == 0 ) return ;
-
-        var sourceTags = htmlDecode($('.source', segment).data('original'))
-            .match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
-        this.sourceTags = sourceTags || [];
-        this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
-    },
-
-    detectTagType: function (area) {
-        if (!this.tagLockEnabled || config.tagLockCustomizable ) {
-            return false;
-        }
-        $('span.locked:not(.locked-inside)', area).each(function () {
-            if($(this).text().startsWith('</')) {
-                $(this).addClass('endTag')
-            } else {
-                if($(this).text().endsWith('/>')) {
-                    $(this).addClass('selfClosingTag')
-                } else {
-                    $(this).addClass('startTag')
-                }
-            }
-        })
-    },
-
     toggleTagsMode: function () {
         if (UI.body.hasClass('tagmode-default-compressed')) {
             this.setExtendedTagMode();
@@ -96,147 +21,19 @@ $.extend(UI, {
     setExtendedTagMode: function () {
         this.body.removeClass('tagmode-default-compressed');
         $(".tagModeToggle").addClass('active');
-        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
         this.custom.extended_tagmode = true;
         this.saveCustomization();
     },
     setCrunchedTagMode: function () {
         this.body.addClass('tagmode-default-compressed');
         $(".tagModeToggle").removeClass('active');
-        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
         this.custom.extended_tagmode = false;
         this.saveCustomization();
     },
 
-    enableTagMode: function () {
-        UI.render(
-            {tagModesEnabled: true}
-        )
-    },
-    disableTagMode: function () {
-        UI.render(
-            {tagModesEnabled: false}
-        )
-    },
-    nearTagOnRight: function (index, ar) {
-        if($(ar[index]).hasClass('locked')) {
-            if(UI.numCharsUntilTagRight == 0) {
-                // count index of this tag in the tags list
-                indexTags = 0;
-                $.each(ar, function (ind) {
-                    if(ind == index) {
-                        return false;
-                    } else {
-                        if($(this).hasClass('locked')) {
-                            indexTags++;
-                        }
-                    }
-                });
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if (typeof ar[index] == 'undefined') return false;
 
-            if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTagRight += ar[index].data.length;
-            }
-            this.nearTagOnRight(index+1, ar);
-        }
-    },
-    nearTagOnLeft: function (index, ar) {
-        if (index < 0) return false;
-        if($(ar[index]).hasClass('locked')) {
-            if(UI.numCharsUntilTagLeft == 0) {
-                // count index of this tag in the tags list
-                indexTags = 0;
-                $.each(ar, function (ind) {
-                    if(ind == index) {
-                        return false;
-                    } else {
-                        if($(this).hasClass('locked')) {
-                            indexTags++;
-                        }
-                    }
-                });
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            if(ar[index].nodeName == '#text') {
-                UI.numCharsUntilTagLeft += ar[index].data.length;
-            }
-            this.nearTagOnLeft(index-1, ar);
-        }
-    },
 
-    markSelectedTag: function($tag) {
-        var elem = $tag.hasClass('locked') && !$tag.hasClass('inside-attribute')? $tag : $tag.closest('.locked:not(.inside-attribute)');
-        if( elem.hasClass('selected') ) {
-            elem.removeClass('selected');
-            setCursorPosition(elem[0], 'end');
-        } else {
-            setCursorPosition(elem[0]);
-            selectText(elem[0]);
-            UI.removeSelectedClassToTags();
-            elem.addClass('selected');
-            if(UI.body.hasClass('tagmode-default-compressed')) {
-                $('.editor .tagModeToggle').click();
-            }
-        }
-        if ( elem.closest('.source').length > 0 ) {
-            UI.removeHighlightCorrespondingTags(elem.closest('.source'));
-            UI.highlightCorrespondingTags(elem);
-            UI.highlightEquivalentTaginSourceOrTarget(elem.closest('.source'), UI.editarea);
-        } else {
-            UI.checkTagProximityFn();
-        }
-    },
 
-    checkTagProximityFn: function () {
-        if(!UI.editarea || UI.editarea.html() == '') return false;
-
-        var selection = window.getSelection();
-        if(selection.rangeCount < 1) return false;
-        var range = selection.getRangeAt(0);
-        UI.editarea.find('.temp-highlight-tags').remove();
-        if(!range.collapsed) {
-            if ( UI.editarea.find( '.locked.selected' ).length > 0 ) {
-                UI.editarea.find( '.locked.selected' ).after('<span class="temp-highlight-tags"/>');
-            } else {
-                return true
-            }
-        } else {
-            pasteHtmlAtCaret('<span class="temp-highlight-tags"/>');
-        }
-        var htmlEditarea = $.parseHTML(UI.editarea.html());
-        if (htmlEditarea) {
-            UI.removeHighlightCorrespondingTags(UI.editarea);
-            $.each(htmlEditarea, function (index) {
-                if($(this).hasClass('temp-highlight-tags')) {
-                    UI.numCharsUntilTagRight = 0;
-                    UI.numCharsUntilTagLeft = 0;
-                    var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
-                    var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
-
-                    if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
-                        (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
-                        UI.highlightCorrespondingTags($(UI.editarea.find('.locked:not(.locked-inside)')[indexTags]));
-                    }
-
-                    UI.numCharsUntilTagRight = null;
-                    UI.numCharsUntilTagLeft = null;
-                    UI.editarea.find('.temp-highlight-tags').remove();
-                    UI.editarea.get(0).normalize();
-                    return false;
-                }
-            });
-        }
-        $('body').find('.temp-highlight-tags').remove();
-        UI.highlightEquivalentTaginSourceOrTarget(UI.editarea, UI.currentSegment.find('.source'));
-    },
     /**
      * Search in container for a highlighted tad and switch on the corresponding
      * tag in source or target

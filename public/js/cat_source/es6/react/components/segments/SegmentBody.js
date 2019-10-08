@@ -4,6 +4,7 @@
  */
 import React  from 'react';
 import SegmentSource  from './SegmentSource';
+import TagUtils  from '../../utils/tagUtils';
 
 class SegmentBody extends React.Component {
 
@@ -75,7 +76,7 @@ class SegmentBody extends React.Component {
                 try {
                     if ( UI.hasSourceOrTargetTags( segment ) ) {
                         segment.addClass( 'hasTagsToggle' );
-                        UI.detectTagType( segment );
+                        TagUtils.detectTagType( segment );
 
                     } else {
                         segment.removeClass( 'hasTagsToggle' );
