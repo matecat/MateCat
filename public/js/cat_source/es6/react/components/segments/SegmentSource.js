@@ -35,7 +35,7 @@ class SegmentSource extends React.Component {
             text = text.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
         }
 
-        let escapedSegment = htmlEncode(text.replace(/\"/g, "&quot;"));
+        let escapedSegment = TextUtils.htmlEncode(text.replace(/\"/g, "&quot;"));
         /* this is to show line feed in source too, because server side we replace \n with placeholders */
         escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
         escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
@@ -97,7 +97,7 @@ class SegmentSource extends React.Component {
         let text = $(this.splitContainer).find('.splitArea').html();
         text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/, '##$_SPLIT$##');
         text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
-        text = TextUtils.prepareTextToSend(text);
+        text = TagUtils.prepareTextToSend(text);
         // let splitArray = text.split('##_SPLIT_##');
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }

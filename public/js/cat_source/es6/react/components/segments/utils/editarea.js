@@ -1,3 +1,5 @@
+import TextUtils from '../../../utils/textUtils';
+import TagUtils from '../../../utils/tagUtils';
 
 let EditArea = {
 
@@ -129,7 +131,7 @@ let EditArea = {
             var node = document.createElement("span");
             node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
             node.setAttribute('contenteditable', 'false');
-            node.textContent = htmlDecode("&#8677;");
+            node.textContent = TextUtils.htmlDecode("&#8677;");
             insertNodeAtCursor(node);
             EditArea.unnestMarkers();
         }
@@ -234,10 +236,10 @@ let EditArea = {
         var clonedElem = e.target.cloneNode(true), txt;
         if (e && e.clipboardData && e.clipboardData.getData) {
             if (/text\/html/.test(e.clipboardData.types)) {
-                txt = htmlEncode(e.clipboardData.getData('text/plain'));
+                txt = TextUtils.htmlEncode(e.clipboardData.getData('text/plain'));
             }
             else if (/text\/plain/.test(e.clipboardData.types)) {
-                txt = htmlEncode(e.clipboardData.getData('text/plain'));
+                txt = TextUtils.htmlEncode(e.clipboardData.getData('text/plain'));
             }
             else {
                 txt = "";
@@ -269,7 +271,7 @@ let EditArea = {
         var node = document.createElement("span");
         node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
-        node.textContent = htmlDecode("&nbsp;");
+        node.textContent = TextUtils.htmlDecode("&nbsp;");
         insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{

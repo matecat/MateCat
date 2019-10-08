@@ -10,7 +10,7 @@ API.SEGMENT = {
         var idBefore = UI.getIdBefore(segment.sid);
         var contextAfter = UI.getContextAfter(segment.sid);
         var idAfter = UI.getIdAfter(segment.sid);
-        var trans = TextUtils.prepareTextToSend(segment.translation);
+        var trans = TagUtils.prepareTextToSend(segment.translation);
         var time_to_edit = new Date() - UI.editStart;
         // var id_translator = config.id_translator;
 
@@ -258,7 +258,7 @@ API.SEGMENT = {
         var contextAfter = UI.getContextAfter(id_segment);
         var idAfter = UI.getIdAfter(id_segment);
         // check if this function is ok for al cases
-        let txt = TextUtils.prepareTextToSend(target);
+        let txt = TagUtils.prepareTextToSend(target);
         let data = {
             action: 'getContribution',
             password: config.password,

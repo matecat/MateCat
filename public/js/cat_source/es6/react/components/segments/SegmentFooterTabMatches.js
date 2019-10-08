@@ -8,6 +8,7 @@ import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
 import TranslationMatches  from './utils/translationMatches';
 import TagUtils from "../../utils/tagUtils";
+import TextUtils from "../../utils/textUtils";
 
 class SegmentFooterTabMatches extends React.Component {
 
@@ -105,7 +106,7 @@ class SegmentFooterTabMatches extends React.Component {
 
     deleteSuggestion(match, index) {
         var source, target;
-        source = htmlDecode( match.segment );
+        source = TextUtils.htmlDecode( match.segment );
         var ul = $('.suggestion-item[data-id="'+ match.id +'"]');
         if( config.brPlaceholdEnabled ){
             target = EditAreaUtils.postProcessEditarea( ul, '.translation' );

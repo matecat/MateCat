@@ -129,7 +129,7 @@ let TranslationMatches = {
         var id = currentSegment.original_sid;
         var id_segment_original = id.split('-')[0];
 
-        txt = TextUtils.prepareTextToSend(currentSegment.segment);
+        txt = TagUtils.prepareTextToSend(currentSegment.segment);
 
         txt = view2rawxliff(txt);
         // Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;

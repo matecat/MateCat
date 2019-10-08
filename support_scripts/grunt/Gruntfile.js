@@ -165,27 +165,17 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
-                    basePath + 'cat_source/ui.editarea.js',
-                    basePath + 'cat_source/ui.classes.js',
                     basePath + 'cat_source/ui.init.js',
                     basePath + 'cat_source/ui.render.js',
                     basePath + 'cat_source/ui.events.js',
-                    basePath + 'cat_source/ui.contribution.js',
-                    basePath + 'cat_source/ui.concordance.js',
-                    basePath + 'cat_source/ui.glossary.js',
-
-                    basePath + 'cat_source/qa_check_glossary.js',
-                    basePath + 'cat_source/qa_check_blacklist.js',
 
                     basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
-                    basePath + 'cat_source/utils.js', // TODO: why this depends on this position?
 
                     basePath + 'cat_source/es6/react/ajax_utils/segmentAjax.js',
 
                     basePath + 'cat_source/ui.customization.js',
                     // basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/ui.offline.js',
-                    basePath + 'cat_source/ui.opensegment.js',
                     //basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/db.js',
                     basePath + 'cat_source/mbc.main.js',
@@ -195,7 +185,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/lxq.main.js',
                     basePath + 'cat_source/lxq.templates.js',
                     basePath + 'cat_source/project_completion.*.js',
-                    basePath + 'cat_source/segment_notes.*.js',
 
                     basePath + 'cat_source/ui.review.js',
                     basePath + 'cat_source/review/review_simple.js',
@@ -204,8 +193,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/review_extended/review_extended.ui_extension.js',
                     basePath + 'cat_source/review_extended/review_extended.common_events.js',
 
-                    basePath + 'cat_source/segment_filter.js',
-                    basePath + 'cat_source/segment_filter.*.js',
+                    basePath + 'cat_source/segment_filter.common_extension.js',
 
                     basePath + 'cat_source/speech2text.js',
                     basePath + 'tm.js',

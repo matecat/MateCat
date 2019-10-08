@@ -15,6 +15,7 @@ import SegmentStore  from '../stores/SegmentStore';
 import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
 import TranslationMatches  from '../components/segments/utils/translationMatches';
 import TagUtils from "../utils/tagUtils";
+import TextUtils from "../utils/textUtils";
 
 var SegmentActions = {
     /********* SEGMENTS *********/
@@ -533,7 +534,7 @@ var SegmentActions = {
     },
 
     searchGlossary: function (sid, fid, text) {
-        text = TagUtils.removeAllTags(htmlEncode(text));
+        text = TagUtils.removeAllTags(TextUtils.htmlEncode(text));
         text = text.replace(/\"/g, "");
         API.SEGMENT.getGlossaryMatch(text)
             .done(response => {

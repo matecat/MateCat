@@ -1,19 +1,6 @@
-import TagUtils from '../utils/tagUtils';
 
-let TEXT_UTILS =  {
+const TEXT_UTILS =  {
 
-
-    prepareTextToSend: function (text) {
-        var div =  document.createElement('div');
-        var $div = $(div);
-        $div.html(text);
-        $div = TagUtils.transformPlaceholdersHtml($div);
-
-        $div.find('span.space-marker').replaceWith(' ');
-        $div.find('span.rangySelectionBoundary').remove();
-        $div = TagUtils.encodeTagsWithHtmlAttribute($div);
-        return $div.text();
-    },
     getDiffHtml: function(source, target) {
         let dmp = new diff_match_patch();
         /*
@@ -213,6 +200,10 @@ let TEXT_UTILS =  {
         } else {
             return '';
         }
+    },
+
+    escapeRegExp(str) {
+        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     }
 };
 module.exports =  TEXT_UTILS;

@@ -1,6 +1,19 @@
 import SegmentStore  from '../stores/SegmentStore';
-const TAGS_UTILS =  {
+import TextUtils from './textUtils';
 
+const TAGS_UTILS =  {
+    // TODO: move it in another module
+    prepareTextToSend: function (text) {
+        var div =  document.createElement('div');
+        var $div = $(div);
+        $div.html(text);
+        $div = this.transformPlaceholdersHtml($div);
+
+        $div.find('span.space-marker').replaceWith(' ');
+        $div.find('span.rangySelectionBoundary').remove();
+        $div = this.encodeTagsWithHtmlAttribute($div);
+        return $div.text();
+    },
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
      * @param str
@@ -8,11 +21,6 @@ const TAGS_UTILS =  {
      */
     decodePlaceholdersToText: function (str) {
         let _str = str;
-        // if(UI.markSpacesEnabled) {
-        //     if(jumpSpacesEncode) {
-        //         _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
-        //     }
-        // }
 
         _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
             .replace( config.crPlaceholderRegex, '<span class="monad marker softReturn' + config.crPlaceholderClass +'"><br /></span>' )
@@ -116,10 +124,10 @@ const TAGS_UTILS =  {
                 if(match.length == 1) { // se è 1 solo, è un tag inline
 
                 } else if(match.length == 2) { // se sono due, non ci sono tag innestati
-                    newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+                    newStr += TextUtils.htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
                 } else { // se sono più di due, ci sono tag innestati
 
-                    newStr += htmlEncode(match[0]) + TAGS_UTILS.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
+                    newStr += TextUtils.htmlEncode(match[0]) + TAGS_UTILS.encodeSpacesAsPlaceholders(this.innerHTML) + TextUtils.htmlEncode(match[1], false);
 
                 }
             }
@@ -392,7 +400,7 @@ const TAGS_UTILS =  {
                 $('#segment-' + sid + ' .source span.locked:not(.temp)').filter(function() {
                     let clone = $(this).clone();
                     clone.find('.inside-attribute').remove();
-                    return htmlEncode(clone.text()) === tag_mismatch.source[index];
+                    return TextUtils.htmlEncode(clone.text()) === tag_mismatch.source[index];
                 }).last().addClass('temp');
             });
         }
@@ -401,7 +409,7 @@ const TAGS_UTILS =  {
                 $('#segment-' + sid + ' .editarea span.locked:not(.temp)').filter(function() {
                     let clone = $(this).clone();
                     clone.find('.inside-attribute').remove();
-                    return htmlEncode(clone.text()) === tag_mismatch.target[index];
+                    return TextUtils.htmlEncode(clone.text()) === tag_mismatch.target[index];
                 }).last().addClass('temp');
             });
         }
@@ -415,7 +423,7 @@ const TAGS_UTILS =  {
             $( '#segment-' + sid + ' .editarea .locked:not(.mismatch)' ).filter( function () {
                 let clone = $( this ).clone();
                 clone.find( '.inside-attribute' ).remove();
-                return htmlEncode(clone.text()) === tag_mismatch.order[0];
+                return TextUtils.htmlEncode(clone.text()) === tag_mismatch.order[0];
             } ).addClass( 'order-error' );
         }
     },

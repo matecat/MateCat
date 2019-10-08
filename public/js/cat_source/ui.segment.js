@@ -76,8 +76,8 @@
          */
         getSegmentTagsProjection: function () {
             var source = UI.currentSegment.find('.source').data('original');
-            source = htmlDecode(source).replace(/&quot;/g, '\"');
-            source = htmlDecode(source);
+            source = TextUtils.htmlDecode(source).replace(/&quot;/g, '\"');
+            source = TextUtils.htmlDecode(source);
             //Retrieve the chosen suggestion if exist
             var suggestion;
             var currentContribution = this.getCurrentSegmentContribution();
@@ -540,7 +540,7 @@
                     return this.getContextBefore(segmentBeforeId);
                 }
             } else {
-                return TextUtils.prepareTextToSend(segmentBefore.segment);
+                return TagUtils.prepareTextToSend(segmentBefore.segment);
             }
         },
         getContextAfter: function(segmentId) {
@@ -558,7 +558,7 @@
                     return this.getContextAfter(segmentAfterId);
                 }
             } else   {
-                return TextUtils.prepareTextToSend(segmentAfter.segment);
+                return TagUtils.prepareTextToSend(segmentAfter.segment);
             }
         },
         getIdBefore: function(segmentId) {

@@ -1,4 +1,4 @@
-
+import TextUtils from '../../../utils/textUtils';
 
 const EnventHandlers =  {
     handleCopyEvent: function ( e ) {
@@ -14,7 +14,7 @@ const EnventHandlers =  {
         } else if (elem.hasClass('locked')) {
             cloneTag = elem.clone();
             cloneTag.find('.inside-attribute').remove();
-            text = htmlEncode(cloneTag.text());
+            text = TextUtils.htmlEncode(cloneTag.text());
             e.clipboardData.setData('text/plain', text.trim());
             e.clipboardData.setData('text/html', text.trim());
             e.preventDefault();
@@ -26,11 +26,11 @@ const EnventHandlers =  {
             let tag = elem.closest('span.locked:not(.inside-attribute)');
             let cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
-            let text = htmlEncode(cloneTag.text());
+            let text = TextUtils.htmlEncode(cloneTag.text());
             e.dataTransfer.setData('text/plain', TagUtils.transformTextForLockTags(text).trim());
             e.dataTransfer.setData('text/html', TagUtils.transformTextForLockTags(text).trim());
         } else if (elem.hasClass('locked')) {
-            let text = htmlEncode(elem.text());
+            let text = TextUtils.htmlEncode(elem.text());
             e.dataTransfer.setData('text/plain', TagUtils.transformTextForLockTags(text).trim());
             e.dataTransfer.setData('text/html', TagUtils.transformTextForLockTags(text).trim());
         }

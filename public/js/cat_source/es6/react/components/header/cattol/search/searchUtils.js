@@ -1,6 +1,7 @@
 import SegmentActions  from "../../../../actions/SegmentActions";
 import CatToolActions  from "../../../../actions/CatToolActions";
 import SegmentStore  from "../../../../stores/SegmentStore";
+import TextUtils from "../../../../utils/textUtils";
 
 let SearchUtils = {
 
@@ -70,8 +71,8 @@ let SearchUtils = {
 
         this.searchParams.searchMode = this.searchMode;
 
-		let source = (p.source) ? htmlEncode(p.source) : '';
-		let target = (p.target) ? htmlEncode(p.target) : '';
+		let source = (p.source) ? TextUtils.htmlEncode(p.source) : '';
+		let target = (p.target) ? TextUtils.htmlEncode(p.target) : '';
 		let replace = (p.replace) ? p.replace : '';
 
 		// this.clearSearchMarkers();
@@ -228,8 +229,8 @@ let SearchUtils = {
         this.searchParams['exact-match'] = params.exactMatch;
 
         let p = this.searchParams;
-        let source = (p.source) ? htmlEncode(p.source) : '';
-        let target = (p.target) ? htmlEncode(p.target) : '';
+        let source = (p.source) ? TextUtils.htmlEncode(p.source) : '';
+        let target = (p.target) ? TextUtils.htmlEncode(p.target) : '';
         let replace = (p.replace) ? p.replace : '';
         let dd = new Date();
 
@@ -294,7 +295,7 @@ let SearchUtils = {
         if ( this.searchMode === 'source&target' ) {
             let txt = (isSource) ? params.source : params.target;
             txt = txt.replace(/(\W)/gi, "\\$1");
-            reg = new RegExp('(' + htmlEncode(txt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            reg = new RegExp('(' + TextUtils.htmlEncode(txt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 
         } else if ( params.source || params.target ) {
 	        let txt = params.source ? params.source : params.target ;
@@ -302,10 +303,10 @@ let SearchUtils = {
             let regTxt = txt.replace(/(\W)/gi, "\\$1");
             regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
-            reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            reg = new RegExp('(' + TextUtils.htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 
             if (params['exact-match'] ) {
-                reg = new RegExp('\\b(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')\\b', "g" + ignoreCase);
+                reg = new RegExp('\\b(' + TextUtils.htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')\\b', "g" + ignoreCase);
             }
 
             // Finding double spaces

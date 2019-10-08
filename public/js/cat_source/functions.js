@@ -243,7 +243,7 @@ function view2rawxliff(segment) {
 	// caso controverso <g id="4" x="&lt; dfsd &gt;">
 	//segment=htmlDecode(segment);
 	segment = placehold_xliff_tags(segment);
-	segment = htmlEncode(segment);
+	segment = TextUtils.htmlEncode(segment);
 
 	segment = restore_xliff_tags(segment);
 
@@ -254,7 +254,7 @@ function rawxliff2view(segment) { // currently unused
 	// input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
 	// output : &lt;g id="43"&gt;bang & < 3 olufsen &lt;/g&gt;;  &lt;x id="33"/&gt;
 	segment = placehold_xliff_tags(segment);
-	segment = htmlDecode(segment);
+	segment = TextUtils.htmlDecode(segment);
 	segment = segment.replace(/<(.*?)>/i, "&lt;$1&gt;");
 	segment = restore_xliff_tags_for_view(segment);		// li rendering avviene via concat o via funzione html()
 	return segment;
@@ -263,7 +263,7 @@ function rawxliff2view(segment) { // currently unused
 function rawxliff2rawview(segment) { // currently unused
 	// input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
 	segment = placehold_xliff_tags(segment);
-	segment = htmlDecode(segment);
+	segment = TextUtils.htmlDecode(segment);
 	segment = restore_xliff_tags_for_view(segment);
 	return segment;
 }
@@ -638,13 +638,13 @@ function trackChangesHTML(source, target) {
         if(this[0] === -1) {
             rootElem = $( document.createElement( 'div' ) );
             newElem = $.parseHTML( '<span class="deleted"/>' );
-            $( newElem ).text( htmlDecode(text[1]) );
+            $( newElem ).text( TextUtils.htmlDecode(text[1]) );
             rootElem.append( newElem );
             diffTxt += $( rootElem ).html();
         } else if(text[0] === 1) {
             rootElem = $( document.createElement( 'div' ) );
             newElem = $.parseHTML( '<span class="added"/>' );
-            $( newElem ).text( htmlDecode(text[1]) );
+            $( newElem ).text( TextUtils.htmlDecode(text[1]) );
             rootElem.append( newElem );
             diffTxt += $( rootElem ).html();
         } else {
@@ -744,13 +744,13 @@ function trackChangesHTMLFromDiffArray(diff) {
         if(this[0] == -1) {
             var rootElem = $( document.createElement( 'div' ) );
             var newElem = $.parseHTML( '<span class="deleted"/>' );
-            $( newElem ).text( htmlDecode(this[1]) );
+            $( newElem ).text( TextUtils.htmlDecode(this[1]) );
             rootElem.append( newElem );
             diffTxt += $( rootElem ).html();
         } else if(this[0] == 1) {
             var rootElem = $( document.createElement( 'div' ) );
             var newElem = $.parseHTML( '<span class="added"/>' );
-            $( newElem ).text( htmlDecode(this[1]) );
+            $( newElem ).text( TextUtils.htmlDecode(this[1]) );
             rootElem.append( newElem );
             diffTxt += $( rootElem ).html();
         } else {

@@ -1,3 +1,5 @@
+import TextUtils from '../../../utils/textUtils';
+
 const QaCheckBlacklist = {
     enabled() {
         return config.qa_check_blacklist_enabled ;
@@ -10,7 +12,7 @@ const QaCheckBlacklist = {
             var newHTML = text ;
 
             $(matched_words).each(function(index, value) {
-                value = escapeRegExp( value );
+                value = TextUtils.escapeRegExp( value );
                 var re = new RegExp('\\b(' + value + ')\\b',"g");
                 newHTML = newHTML.replace(
                     re , '<span class="blacklistItem">$1</span>'

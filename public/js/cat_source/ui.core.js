@@ -847,7 +847,7 @@ var UI = {
          */
         var sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
-            if( this.translation == htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+            if( this.translation == TextUtils.htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
                 sameContentIndex = ind;
             }
         });
@@ -856,7 +856,7 @@ var UI = {
         let sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if( this.translation == htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+            if( this.translation == TextUtils.htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
                 sameContentIndex1 = ind;
             }
         });
@@ -1193,7 +1193,7 @@ var UI = {
         var tte = $('.timetoedit', $segment);
         this.editTime = this.editStop - this.editStart;
         this.totalTime = this.editTime + tte.data('raw-time-to-edit');
-        var editedTime = millisecondsToTime(this.totalTime);
+        var editedTime = CommonUtils.millisecondsToTime(this.totalTime);
         if (config.time_to_edit_enabled) {
             var editSec = $('.timetoedit .edit-sec', $segment);
             var editMin = $('.timetoedit .edit-min', $segment);
@@ -1437,8 +1437,8 @@ var UI = {
         segment_status = segment.status;
 
 		if( config.brPlaceholdEnabled ){
-			src_content = TextUtils.prepareTextToSend(segment.decoded_source);
-			trg_content = TextUtils.prepareTextToSend(segment.decoded_translation);
+			src_content = TagUtils.prepareTextToSend(segment.decoded_source);
+			trg_content = TagUtils.prepareTextToSend(segment.decoded_translation);
 		} else {
 			src_content = segment.decoded_source;
 			trg_content = segment.translation;
@@ -1584,8 +1584,8 @@ var UI = {
 		caller = (typeof caller == 'undefined') ? false : caller;
 
 		// Attention, to be modified when we will lock tags
-        translation = TextUtils.prepareTextToSend(segment.decoded_translation);
-        sourceSegment = TextUtils.prepareTextToSend(segment.segment);
+        translation = TagUtils.prepareTextToSend(segment.decoded_translation);
+        sourceSegment = TagUtils.prepareTextToSend(segment.segment);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
@@ -1704,7 +1704,7 @@ var UI = {
         var segments = SegmentStore.getSegmentsInSplit(sid);
         $.each(segments, function (index) {
             var segment = this;
-            totalTranslation += (selector === '.source') ? segment.segment : TextUtils.prepareTextToSend(segment.translation);
+            totalTranslation += (selector === '.source') ? segment.segment : TagUtils.prepareTextToSend(segment.translation);
             if(index < (segments.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
         });
         return totalTranslation;

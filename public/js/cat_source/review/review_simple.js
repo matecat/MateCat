@@ -34,7 +34,7 @@ if ( ReviewSimple.enabled() ) {
                 source = UI.clenaupTextFromPleaceholders( source );
 
                 var target = $( editarea ).text();
-                var diffHTML = trackChangesHTML( source, htmlEncode( target ) );
+                var diffHTML = trackChangesHTML( source, TextUtils.htmlEncode( target ) );
 
                 $( '.sub-editor.review .track-changes p', $segment ).html( diffHTML );
             },

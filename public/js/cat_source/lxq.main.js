@@ -1489,7 +1489,7 @@ LXQ.init  = function () {
                             if ( seg.length === 0) return;
                             let translation = "";
                             if (seg.length>0) {
-                                translation = htmlEncode(TagUtils.cleanTextFromPlaceholdersSpan($( UI.targetContainerSelector(), seg ).html()));
+                                translation = TextUtils.htmlEncode(TagUtils.cleanTextFromPlaceholdersSpan($( UI.targetContainerSelector(), seg ).html()));
                             }
                             LXQ.lexiqaData.lexiqaWarnings[element.segid] = {};
                             

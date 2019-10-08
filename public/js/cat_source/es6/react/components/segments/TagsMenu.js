@@ -6,6 +6,7 @@ import React  from 'react';
 import ReactDOM  from 'react-dom';
 import escapeStringRegexp  from 'escape-string-regexp';
 import TagUtils  from '../../utils/tagUtils';
+import TextUtils  from '../../utils/textUtils';
 
 class TagsMenu extends React.Component {
 
@@ -140,7 +141,7 @@ class TagsMenu extends React.Component {
                 let textDecoded = TagUtils.transformTextForLockTags(item);
                 let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
                 if (this.state.filter !== "") {
-                    label = label.replace(htmlEncode(this.state.filter), "<mark>" + htmlEncode(this.state.filter) + "</mark>");
+                    label = label.replace(TextUtils.htmlEncode(this.state.filter), "<mark>" + TextUtils.htmlEncode(this.state.filter) + "</mark>");
                 } else {
                     textDecoded = TagUtils.transformTextForLockTags(item);
                 }
@@ -170,7 +171,7 @@ class TagsMenu extends React.Component {
                 let textDecoded = TagUtils.transformTextForLockTags(item);
                 let label = textDecoded.indexOf('inside-attribute') !== -1 ? $(textDecoded).find('.inside-attribute').html() : $(textDecoded).html();
                 if ( this.state.filter !== "" ) {
-                    label = label.replace(htmlEncode(this.state.filter), "<mark>" + htmlEncode(this.state.filter) + "</mark>");
+                    label = label.replace(TextUtils.htmlEncode(this.state.filter), "<mark>" + TextUtils.htmlEncode(this.state.filter) + "</mark>");
                 } else {
                     textDecoded = TagUtils.transformTextForLockTags(item);
                 }
@@ -244,8 +245,8 @@ class TagsMenu extends React.Component {
                 $('.selected', $(editareaClone)).remove();
             }
         }
-        let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(htmlEncode(this.state.filter)) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
-        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\/span>)(<span.*?<\\/span>)(&lt;)+'+ htmlEncode(this.state.filter), 'gi');
+        let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(TextUtils.htmlEncode(this.state.filter)) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
+        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\/span>)(<span.*?<\\/span>)(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
 
         editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
         editareaClone.find('.tag-autocomplete-endcursor').after(editareaClone.find('.tag-autocomplete-endcursor').html());
@@ -339,7 +340,7 @@ class TagsMenu extends React.Component {
                 let tagHtml = TagUtils.transformTextForLockTags(tag);
                 return $(tagHtml).find('.inside-attribute').text().indexOf(filter) !== -1;
             } else {
-                return htmlDecode( tag ).indexOf( filter ) !== -1;
+                return TextUtils.htmlDecode( tag ).indexOf( filter ) !== -1;
             }
         });
 

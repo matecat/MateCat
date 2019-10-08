@@ -36,6 +36,7 @@ import {EventEmitter} from 'events';
 import SegmentConstants  from '../constants/SegmentConstants';
 import assign  from 'object-assign';
 import TagUtils  from '../utils/tagUtils';
+import TextUtils  from '../utils/textUtils';
 import Immutable  from 'immutable';
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -239,7 +240,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         let segment = this._segments.get(index);
-        var trans = htmlEncode(this.removeLockTagsFromString(translation));
+        var trans = TextUtils.htmlEncode(this.removeLockTagsFromString(translation));
         let decoded_translation = UI.decodeText(segment.toJS(), trans);
         this._segments = this._segments.setIn([index, 'translation'], trans);
         this._segments = this._segments.setIn([index, 'decoded_translation'], decoded_translation);

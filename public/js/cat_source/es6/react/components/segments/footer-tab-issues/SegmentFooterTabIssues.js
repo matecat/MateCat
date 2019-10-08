@@ -46,7 +46,7 @@ class SegmentFooterTabIssues extends React.Component {
     }
 
     trackChanges( sid, editareaText ) {
-        let text = htmlEncode( TextUtils.prepareTextToSend( editareaText ) );
+        let text = TextUtils.htmlEncode( TagUtils.prepareTextToSend( editareaText ) );
         if ( this.state.segment.sid === sid && this.state.oldTranslation !== text) {
             UI.setDisabledOfButtonApproved(this.props.sid, true);
             this.setState( {

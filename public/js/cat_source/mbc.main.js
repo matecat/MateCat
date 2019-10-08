@@ -76,10 +76,10 @@ if ( MBC.enabled() )
         var populateCommentTemplate = function ( data ) {
             if ( Number( data.message_type ) === types.resolve ) {
                 var root = $( tpls.showResolve );
-                root.find( '.mbc-comment-username' ).text( htmlDecode( data.full_name ) );
+                root.find( '.mbc-comment-username' ).text( TextUtils.htmlDecode( data.full_name ) );
             } else {
                 var root = $( tpls.showComment );
-                root.find( '.mbc-comment-username' ).text( htmlDecode( data.full_name ) );
+                root.find( '.mbc-comment-username' ).text( TextUtils.htmlDecode( data.full_name ) );
                 root.find( '.mbc-comment-time' ).text( data.formatted_date );
                 var text = nl2br( data.message );
                 text = parseCommentHtml(text);

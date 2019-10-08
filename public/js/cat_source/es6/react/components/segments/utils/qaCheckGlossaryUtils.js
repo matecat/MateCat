@@ -1,3 +1,4 @@
+import TextUtils from '../../../utils/textUtils';
 
 const QaCheckGlossary = {
     matchRegExp: '\\b(%s)\\b',
@@ -27,7 +28,7 @@ const QaCheckGlossary = {
             return;
         }
         // container.find('.inside-attribute').remove();
-        // var newHTML = htmlEncode(container.text());
+        // var newHTML = TextUtils.htmlEncode(container.text());
         var newHTML = segmentSource;
 
         //Replace ph tags
@@ -41,7 +42,7 @@ const QaCheckGlossary = {
         });
         $.each(unusedMatches, function( index ) {
             var value = (this.raw_segment) ? this.raw_segment : this.translation ;
-            value = escapeRegExp( value );
+            value = TextUtils.escapeRegExp( value );
             value = value.replace(/ /g, '(?: *<\/*(?:mark)*(?:span *)*(?: (data-id="(.*?)" )*class="(unusedGlossaryTerm)*(inGlossary)*")*> *)* *');
             var re = new RegExp( sprintf( QaCheckGlossary.matchRegExp, value ), QaCheckGlossary.regExpFlags);
 
