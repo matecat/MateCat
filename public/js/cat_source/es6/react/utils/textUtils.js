@@ -1,4 +1,4 @@
-
+import TagUtils from '../utils/tagUtils';
 
 let TEXT_UTILS =  {
 
@@ -7,11 +7,11 @@ let TEXT_UTILS =  {
         var div =  document.createElement('div');
         var $div = $(div);
         $div.html(text);
-        $div = UI.transformPlaceholdersHtml($div);
+        $div = TagUtils.transformPlaceholdersHtml($div);
 
         $div.find('span.space-marker').replaceWith(' ');
         $div.find('span.rangySelectionBoundary').remove();
-        $div = UI.encodeTagsWithHtmlAttribute($div);
+        $div = TagUtils.encodeTagsWithHtmlAttribute($div);
         return $div.text();
     },
     getDiffHtml: function(source, target) {

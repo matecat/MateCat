@@ -8,6 +8,8 @@ import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
 import EditArea  from './utils/editarea';
+import TagUtils  from '../../utils/tagUtils';
+
 class Editarea extends React.Component {
 
     constructor(props) {
@@ -266,7 +268,7 @@ class Editarea extends React.Component {
 
         let textToSave = $editAreaClone.html();
 
-        if ( currentItem &&  UI.cleanTextFromPlaceholdersSpan(currentItem.text).replace(/\uFEFF/g,'') === UI.cleanTextFromPlaceholdersSpan(textToSave).replace(/\uFEFF/g,'') ) {
+        if ( currentItem &&  TagUtils.cleanTextFromPlaceholdersSpan(currentItem.text).replace(/\uFEFF/g,'') === TagUtils.cleanTextFromPlaceholdersSpan(textToSave).replace(/\uFEFF/g,'') ) {
             return;
         }
 

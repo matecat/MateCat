@@ -55,52 +55,10 @@ $.extend(UI, {
 
 
 
-    /**
-     * It does the same as postProcessEditarea function but does not remove the cursor span
-     * @param text
-     * @returns {*}
-     */
 
-    cleanTextFromPlaceholdersSpan: function (text) {
-        var div =  document.createElement('div');
-        var $div = $(div);
-        $div.html(text);
-        $div = this.transformPlaceholdersHtml($div);
-        $div.find('span.space-marker').replaceWith(' ');
-        $div = this.encodeTagsWithHtmlAttribute($div);
-        return $div.text();
-    },
 
-    transformPlaceholdersHtml: function ($elem) {
-        var divs = $elem.find( 'div' );
 
-        if( divs.length ){
-            divs.each(function(){
-                $(this).find( 'br:not([class])' ).remove();
-                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
-            });
-        } else {
-            $elem.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
-            $elem.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
-            $elem.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
-            $elem.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
-        }
 
-        $elem.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
-        $elem.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
-
-        return $elem;
-    },
-
-    /**
-     * This function is called to return the tag inside ph attribute 'equiv-text' to base64
-     * @param $elem
-     * @returns {*}
-     */
-    encodeTagsWithHtmlAttribute: function ($elem) {
-        $elem.find('.inside-attribute').remove();
-        return $elem;
-    },
 
     handleCopyEvent: function ( e ) {
         var elem = $(e.target);

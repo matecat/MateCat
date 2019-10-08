@@ -271,7 +271,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
 
     removeLockTagsFromString(str) {
-        return UI.cleanTextFromPlaceholdersSpan(str);
+        return TagUtils.cleanTextFromPlaceholdersSpan(str);
     },
 
     addSegmentVersions(fid, sid, versions) {
