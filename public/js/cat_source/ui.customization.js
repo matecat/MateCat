@@ -20,6 +20,7 @@ $.extend(UI, {
 	saveCustomization: function() {
         Cookies.set('user_customization', JSON.stringify(this.custom), { expires: 3650 });
 	},
+
 	setShortcuts: function() {
         UI.shortcuts =  {
             cattol: {
