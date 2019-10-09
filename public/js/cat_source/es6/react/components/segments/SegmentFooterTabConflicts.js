@@ -40,7 +40,7 @@ class SegmentFooterTabConflicts extends React.Component {
 
             [ mainStr, transDecoded, replacementsMap ] = UI._treatTagsAsBlock( mainStr, transDecoded, [] );
 
-            let diff_obj = UI.execDiff( mainStr, transDecoded );
+            let diff_obj = TextUtils.execDiff( mainStr, transDecoded );
 
             //replace the original string in the diff object by the character placeholder
             Object.keys( diff_obj ).forEach( ( element ) => {
@@ -49,7 +49,7 @@ class SegmentFooterTabConflicts extends React.Component {
                 }
             } );
 
-            let translation = TagUtils.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
+            let translation = TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj));
             html.push(<ul className="graysmall" data-item={(index + 1)} key={'editable' + index} onDoubleClick={()=>self.chooseAlternative(this.translation)}>
                         <li className="sugg-source">
                             <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
@@ -66,8 +66,8 @@ class SegmentFooterTabConflicts extends React.Component {
         });
 
         $.each(alternatives.not_editable, function(index1) {
-            let diff_obj = UI.execDiff(mainStr, this.translation);
-            let translation = TagUtils.transformTextForLockTags(UI.dmp.diff_prettyHtml(diff_obj));
+            let diff_obj = TextUtils.execDiff(mainStr, this.translation);
+            let translation = TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj));
 
             html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.data.editable.length + 1)} key={'not-editable' + index}  onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
                 <li className="sugg-source">

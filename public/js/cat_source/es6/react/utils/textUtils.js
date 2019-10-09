@@ -1,6 +1,6 @@
 
 const TEXT_UTILS =  {
-
+    diffMatchPatch : new diff_match_patch(),
     getDiffHtml: function(source, target) {
         let dmp = new diff_match_patch();
         /*
@@ -429,12 +429,12 @@ const TEXT_UTILS =  {
             return '<'+ Base64.encode(group2) +'> ';
         });
 
-        diff   = UI.dmp.diff_main(
+        diff   = this.diffMatchPatch.diff_main(
             this.cleanupHTMLCharsForDiff( source ),
             this.cleanupHTMLCharsForDiff( target )
         );
 
-        UI.dmp.diff_cleanupSemantic( diff ) ;
+        this.diffMatchPatch.diff_cleanupSemantic( diff ) ;
 
         /*
         Before adding spans to identify added or subtracted portions we need to check and fix broken tags
@@ -477,14 +477,32 @@ const TEXT_UTILS =  {
         return this.restorePlaceholders(diffTxt) ;
     },
     getDiffPatch(source, target) {
-        var diff   = UI.dmp.diff_main(
+        var diff   = this.diffMatchPatch.diff_main(
             this.cleanupHTMLCharsForDiff( source ),
             this.cleanupHTMLCharsForDiff( target )
         );
 
-        UI.dmp.diff_cleanupSemantic( diff ) ;
+        this.diffMatchPatch.diff_cleanupSemantic( diff ) ;
         return diff;
-    }
+    },
+
+    execDiff: function (mainStr, cfrStr) {
+        _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
+            .replace( config.crPlaceholderRegex, "\r" )
+            .replace( config.crlfPlaceholderRegex, "\r\n" )
+            .replace( config.tabPlaceholderRegex, "\t" )
+            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+        _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+
+        //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
+        //used to detect initial and final spaces in html diff
+        _str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str + String.fromCharCode( parseInt( 0x200B, 10 ) );
+        _edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit + String.fromCharCode( parseInt( 0x200B, 10 ) );
+
+        diff_obj = this.diffMatchPatch.diff_main( _edit, _str );
+        this.diffMatchPatch.diff_cleanupEfficiency( diff_obj );
+        return diff_obj;
+    },
 
 
 };

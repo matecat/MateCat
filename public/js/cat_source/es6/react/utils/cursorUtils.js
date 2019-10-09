@@ -6,7 +6,7 @@ const CursorUtils = {
 
     saveSelection() {
         if (this.savedSel) {
-            rangy.removeMarkers(UI.savedSel);
+            rangy.removeMarkers(this.savedSel);
         }
 
         this.savedSel = rangy.saveSelection();

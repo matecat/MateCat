@@ -5,6 +5,7 @@
 import React  from 'react';
 import Immutable  from 'immutable';
 import TagUtils from "../../utils/tagUtils"
+import TextUtils from "../../utils/textUtils"
 
 class SegmentFooterMultiMatches extends React.Component {
 
@@ -68,8 +69,8 @@ class SegmentFooterMultiMatches extends React.Component {
             if (this.match !== "MT" && parseInt(this.match) > 74) {
                 let sourceDecoded = TagUtils.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
                 let matchDecoded = TagUtils.removePhTagsWithEquivTextIntoText( this.segment );
-                let diff_obj = UI.execDiff( matchDecoded, sourceDecoded );
-                item.sourceDiff =  UI.dmp.diff_prettyHtml( diff_obj ) ;
+                let diff_obj = TextUtils.execDiff( matchDecoded, sourceDecoded );
+                item.sourceDiff =  TextUtils.diffMatchPatch.diff_prettyHtml( diff_obj ) ;
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
             }
             if ( !_.isUndefined(this.tm_properties) ) {

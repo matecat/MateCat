@@ -21,7 +21,7 @@ $.extend(UI, {
 		this.loadingMore = false;
 		this.noMoreSegmentsAfter = false;
 		this.noMoreSegmentsBefore = false;
-		this.dmp = new diff_match_patch();
+
 		this.undoStack = [];
 		this.undoStackPosition = 0;
 		this.nextUntranslatedSegmentIdByServer = 0;
