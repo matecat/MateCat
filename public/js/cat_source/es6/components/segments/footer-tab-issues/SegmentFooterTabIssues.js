@@ -1,7 +1,7 @@
 import React  from  'react' ;
-import SegmentConstants  from  '../../../constants/SegmentConstants' ;
-import SegmentStore  from  '../../../stores/SegmentStore' ;
-import SegmentFooterTabIssuesListItem  from  "./SegmentFooterTabIssuesListItem" ;
+import SegmentConstants  from '../../../constants/SegmentConstants' ;
+import SegmentStore  from '../../../stores/SegmentStore' ;
+import SegmentFooterTabIssuesListItem  from "./SegmentFooterTabIssuesListItem" ;
 import TextUtils from "../../../utils/textUtils";
 
 

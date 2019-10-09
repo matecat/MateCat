@@ -1,10 +1,10 @@
 import JobSummary from "./JobSummary";
 import SegmentsDetails from "./SegmentsDetailsContainer";
 import ReactDom from "react-dom";
-import QRActions from "./../../actions/QualityReportActions";
-import QRStore from "./../../stores/QualityReportStore";
-import QRConstants from "./../../constants/QualityReportConstants";
-import Header from "./../header/Header";
+import QRActions from "../../actions/QualityReportActions";
+import QRStore from "../../stores/QualityReportStore";
+import QRConstants from "../../constants/QualityReportConstants";
+import Header from "../header/Header";
 import QRApi from "../../ajax_utils/quality_report/qrAjax";
 
 

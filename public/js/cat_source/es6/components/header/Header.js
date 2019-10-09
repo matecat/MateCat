@@ -2,8 +2,8 @@
 import TeamSelect from "./TeamsSelect";
 import ProjectInfo from "./HeaderProjectInfo";
 import FilterProjects from "./manage/FilterProjects"
-import TeamConstants from "./../../constants/TeamConstants";
-import TeamsStore from "./../../stores/TeamsStore";
+import TeamConstants from "../../constants/TeamConstants";
+import TeamsStore from "../../stores/TeamsStore";
 
 class Header extends React.Component {
     constructor (props) {

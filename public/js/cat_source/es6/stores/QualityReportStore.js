@@ -2,7 +2,7 @@ import AppDispatcher  from '../dispatcher/AppDispatcher';
 import {EventEmitter} from 'events';
 import assign  from 'object-assign';
 import Immutable  from 'immutable';
-import QRConstants from "./../constants/QualityReportConstants";
+import QRConstants from "../constants/QualityReportConstants";
 
 EventEmitter.prototype.setMaxListeners(0);
 

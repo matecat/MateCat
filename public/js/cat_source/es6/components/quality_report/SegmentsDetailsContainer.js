@@ -1,6 +1,6 @@
 import Filters from "./FilterSegments";
 import FileDetails from "./FileDetails"
-import QualityReportActions from "./../../actions/QualityReportActions"
+import QualityReportActions from "../../actions/QualityReportActions"
 
 class SegmentsDetails extends React.Component {
     constructor(props) {

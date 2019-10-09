@@ -1,7 +1,7 @@
 
-import TeamConstants from "./../../constants/TeamConstants";
-import ManageConstants from "./../../constants/ManageConstants";
-import TeamsStore from "./../../stores/TeamsStore";
+import TeamConstants from "../../constants/TeamConstants";
+import ManageConstants from "../../constants/ManageConstants";
+import TeamsStore from "../../stores/TeamsStore";
 
 class TeamsSelect extends React.Component {
     constructor (props) {

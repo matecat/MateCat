@@ -83,7 +83,7 @@ class SegmentBody extends React.Component {
                         segment.removeClass( 'hasTagsToggle' );
                     }
 
-                    if ( _.size( this.props.segment.tagMismatch ) > 0 ) {
+                    if ( this.props.segment.tagMismatch && (_.size( this.props.segment.tagMismatch.source ) || _.size( this.props.segment.tagMismatch.target )) > 0 ) {
                         TagUtils.markTagMismatch( this.props.segment.tagMismatch, this.props.segment.sid );
                         segment.addClass( 'hasTagsAutofill' );
                     } else {

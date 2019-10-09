@@ -2,9 +2,6 @@
 
     $.extend(UI, {
 
-        getSegmentStatus: function (segment) {
-            return (segment.status)? segment.status.toLowerCase() : 'new';
-        },
         /**
          * Return che Suggestion, if exist, used by the current segment
          * return json
@@ -213,7 +210,7 @@
         },
         decodeText: function(segment, text) {
             var decoded_text;
-            if (UI.enableTagProjection && !segment.tagged && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
+            if (UI.enableTagProjection && !segment.tagged && ( segment.status.toLowerCase() === 'draft' || segment.status.toLowerCase() === 'new')
                 && !TagUtils.checkXliffTagsInText(segment.translation) && TagUtils.removeAllTags(segment.segment) !== '' ) {
                 decoded_text = TagUtils.removeAllTags(text);
             } else {
