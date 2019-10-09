@@ -5,6 +5,7 @@
 import React  from 'react';
 import SegmentSource  from './SegmentSource';
 import TagUtils  from '../../utils/tagUtils';
+import Shortcuts  from '../../utils/shortcuts';
 
 class SegmentBody extends React.Component {
 
@@ -166,7 +167,7 @@ class SegmentBody extends React.Component {
         } else {
             status_change_title = 'Change segment status' ;
         }
-        let copySourceShortcuts = (UI.isMac) ? UI.shortcuts.cattol.events.copySource.keystrokes.mac : UI.shortcuts.cattol.events.copySource.keystrokes.standard;
+        let copySourceShortcuts = (UI.isMac) ? Shortcuts.cattol.events.copySource.keystrokes.mac : Shortcuts.cattol.events.copySource.keystrokes.standard;
         return (
             <div className="text segment-body-content" ref={(body)=>this.segmentBody=body}>
                 <div className="wrap">

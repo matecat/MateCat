@@ -14,34 +14,34 @@ $.extend(UI, {
 		if (UI.isMac) {
             this.shortCutskey = "mac";
         }
-        $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
+        $("body").on('keydown.shortcuts', null, Shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             UI.copySource();
-        }).on('keydown.shortcuts',null, UI.shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts',null, Shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
             UI.openLanguageResourcesPanel();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
             if((SearchUtils.searchEnabled)&&($('#filterSwitch').length)) SearchUtils.toggleSearch(e);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             // UI.redoInSegment(UI.currentSegment);
             SegmentActions.redoInSegment();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.undoInSegment.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.undoInSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.undoInSegment();
             SegmentActions.closeTagsMenu();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.scrollToSegment(UI.currentSegmentId);
             SegmentActions.setFocusOnEditArea();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openPrevious.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openPrevious.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
             UI.gotoPreviousSegment();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openNext.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openNext.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
             UI.gotoNextSegment();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
@@ -55,7 +55,7 @@ $.extend(UI, {
                     UI.startSegmentTagProjection(UI.currentSegmentId);
                 }
             }
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
@@ -67,10 +67,10 @@ $.extend(UI, {
                     UI.startSegmentTagProjection(UI.currentSegmentId);
                 }
             }
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
-            UI.toggleTagsMode();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openComments.keystrokes[this.shortCutskey], function(e) {
+            Customizations.toggleTagsMode();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openComments.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             var segment = SegmentStore.getCurrentSegment();
             if (segment) {
@@ -78,30 +78,30 @@ $.extend(UI, {
                 SegmentActions.scrollToSegment(segment.sid);
                 CommentsActions.setFocusOnCurrentInput();
             }
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openIssuesPanel.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openIssuesPanel.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             var segment = SegmentStore.getCurrentSegment();
             if (segment) {
                 SegmentActions.openIssuesPanel({sid: segment.sid});
                 SegmentActions.scrollToSegment(segment.sid);
             }
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution2.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution2.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 2);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
             var currentSegment = SegmentStore.getCurrentSegment();
             if ((UI.tagLockEnabled) && TagUtils.hasDataOriginalTags(currentSegment.segment)) {
                 SegmentActions.showTagsMenu(currentSegment.sid);
             }
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.splitSegment.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.splitSegment.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             e.stopPropagation();
             SegmentActions.openSplitSegment(UI.currentSegmentId);
@@ -150,21 +150,8 @@ $.extend(UI, {
         } );
 
 
-		$("body").on('click', '.tagModeToggle', function(e) {
-            e.preventDefault();
-            UI.toggleTagsMode();
-            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
-		} );
 
-		$("body").on('click', '.tagLockCustomize', function(e) {
-			e.preventDefault();
-			if (UI.tagLockEnabled) {
-				SegmentActions.disableTagLock();
-			} else {
-                SegmentActions.enableTagLock();
-			}
-			UI.setTagLockCustomizeCookie(false);
-		}).on('click', '.open-popup-addtm-tr', function(e) {
+		$("body").on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
             UI.openLanguageResourcesPanel();
         }).on('click', '.modal .x-popup', function() {
@@ -376,10 +363,7 @@ $.extend(UI, {
     },
 
     openShortcutsModal: function (  ) {
-        var props = {
-            shortcuts: UI.shortcuts
-        };
-        APP.ModalWindow.showModalComponent(ShortCutsModal, props, 'Shortcuts');
+        APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts');
     },
 
 });

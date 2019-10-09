@@ -11,7 +11,6 @@ $.extend(UI, {
         UI.body = $('body');
         UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
         UI.checkCrossLanguageSettings();
-        UI.setShortcuts();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
@@ -53,9 +52,8 @@ $.extend(UI, {
 		this.byButton = false;
 		this.displayedMessages = [];
 
-		this.loadCustomization();
+        Customizations.loadCustomization();
         $('html').trigger('init');
-        this.setTagMode();
 		rangy.init();
 		if (SearchUtils.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );

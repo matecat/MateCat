@@ -434,7 +434,7 @@ APP = {
                     .attr('disabled','disabled' )
                     .removeAttr('data-callback' )
                     .attr('data-callback-disabled', callback)
-                    .bind("click",UI.disableLink);
+                    .bind("click",APP.disableLink);
         };
 
         var enableOk = function ( context ) {
@@ -444,7 +444,7 @@ APP = {
                     .removeAttr('disabled')
                     .removeAttr('data-callback-disabled' )
                     .attr('data-callback', callback)
-                    .unbind('click', UI.disableLink);
+                    .unbind('click', APP.disableLink);
         };
 
         newPopup = renderPopup( conf );
@@ -775,7 +775,6 @@ APP = {
                             type: 'error'
                         };
                         APP.addNotification(notification);
-                        // UI.showMessage({msg: tokenData.message})
                     }
                     if (callback) {
                         callback();
@@ -823,9 +822,6 @@ APP = {
         // TODO: this should be relative to the current USER, find a
         // way to generate this at runtime.
         //
-        /*if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
-         UI.showDownloadCornerTip();
-         }*/
 
         if ( typeof window.googleDriveWindows == 'undefined' ) {
             window.googleDriveWindows = {};

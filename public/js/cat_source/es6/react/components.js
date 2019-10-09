@@ -83,4 +83,6 @@ window.EditAreaUtils = require('./components/segments/utils/editarea');
 window.CommonUtils = require('./utils/commonUtils');
 window.CursorUtils = require('./utils/cursorUtils');
 window.OfflineUtils = require('./utils/offlineUtils');
+window.Shortcuts = require('./utils/shortcuts');
+window.Customizations = require('./utils/customizations');
 

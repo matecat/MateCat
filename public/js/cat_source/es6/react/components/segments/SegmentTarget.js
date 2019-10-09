@@ -8,6 +8,7 @@ import EditArea  from './Editarea';
 import TagsMenu  from './TagsMenu';
 import TagUtils from '../../utils/tagUtils';
 import CursorUtils from '../../utils/cursorUtils';
+import Customizations from '../../utils/customizations';
 import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentButtons  from './SegmentButtons';
@@ -167,9 +168,9 @@ class SegmentTarget extends React.Component {
             var tagCopyButton = "";
             var tagLockCustomizable;
             if ((this.props.segment.segment.match(/\&lt;.*?\&gt;/gi) && config.tagLockCustomizable)) {
-                var tagLockCustomizable = (UI.tagLockEnabled ?
-                    <a href="#" className="tagLockCustomize icon-lock" title="Toggle Tag Lock"/> :
-                    <a href="#" className="tagLockCustomize icon-unlocked3" title="Toggle Tag Lock"/>);
+                tagLockCustomizable = (UI.tagLockEnabled ?
+                    <a className="tagLockCustomize icon-lock" title="Toggle Tag Lock" onClick={()=>SegmentActions.disableTagLock()}/> :
+                    <a className="tagLockCustomize icon-unlocked3" title="Toggle Tag Lock" onClick={()=>SegmentActions.enableTagLock()}/>);
             }
 
 
@@ -198,7 +199,7 @@ class SegmentTarget extends React.Component {
             if (this.props.tagModesEnabled && !this.props.enableTagProjection && UI.tagLockEnabled) {
                 var buttonClass = ($('body').hasClass("tagmode-default-extended")) ? "active" : "";
                 tagModeButton =
-                    <a href="#" className={"tagModeToggle " + buttonClass} alt="Display full/short tags"
+                    <a className={"tagModeToggle " + buttonClass} alt="Display full/short tags" onClick={() => Customizations.toggleTagsMode()}
                        title="Display full/short tags">
                         <span className="icon-chevron-left"/>
                         <span className="icon-tag-expand"/>

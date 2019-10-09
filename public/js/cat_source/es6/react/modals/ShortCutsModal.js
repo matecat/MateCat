@@ -1,4 +1,4 @@
-
+import Shortcuts from '../utils/shortcuts';
 class ShortCutsModal extends React.Component {
 
 
@@ -10,7 +10,7 @@ class ShortCutsModal extends React.Component {
         let html = [];
         let self = this;
         let label = UI.isMac ? "mac" : "standard";
-        _.each(this.props.shortcuts, function ( elem, c) {
+        _.each(Shortcuts, function ( elem, c) {
             let events = [];
             _.each(elem.events, function ( item, z ) {
                 let keys = item.keystrokes[label].split( '+' );

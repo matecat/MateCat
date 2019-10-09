@@ -9,6 +9,7 @@ import GlossaryUtils  from './utils/glossaryUtils';
 import QACheckGlossary  from './utils/qaCheckGlossaryUtils';
 import SearchUtils  from '../header/cattol/search/searchUtils';
 import TextUtils  from '../../utils/textUtils';
+import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 
 class SegmentSource extends React.Component {
@@ -160,7 +161,7 @@ class SegmentSource extends React.Component {
 
         this.afterRenderActions();
 
-        this.$source.on('keydown', null, UI.shortcuts.cattol.events.searchInConcordance.keystrokes.mac, this.openConcordance);
+        this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes.mac, this.openConcordance);
     }
 
     componentWillUnmount() {

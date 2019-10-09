@@ -171,7 +171,6 @@ module.exports = function(grunt) {
 
                     basePath + 'cat_source/es6/react/ajax_utils/segmentAjax.js',
 
-                    basePath + 'cat_source/ui.customization.js',
                     // basePath + 'cat_source/ui.review.js',
                     //basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/db.js',
