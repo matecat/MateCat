@@ -113,14 +113,13 @@ Speech2Text.init  = function () {
             startSpeechRecognition: function (microphone) {
                 var segmentSection = microphone.closest('section');
                 var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(segmentSection)) ;
-                var segmentRecord = MateCat.db.segments.by('sid', segment.original_sid);
 
                 if (!microphone.hasClass('micSpeechActive')) {
                     microphone.addClass('micSpeechActive');
                     Speech2Text.animateSpeechActive();
                 }
 
-                if (Speech2Text.shouldEmptyTargetElement( segmentRecord )) {
+                if (Speech2Text.shouldEmptyTargetElement( segment )) {
                     Speech2Text.finalTranscript = '';
                     SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), UI.getSegmentFileId(Speech2Text.targetElement), '');
                     // Speech2Text.targetElement.html('');

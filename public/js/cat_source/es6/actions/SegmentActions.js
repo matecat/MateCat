@@ -522,7 +522,6 @@ var SegmentActions = {
             if (typeof segment.glossary === 'undefined') {
                 API.SEGMENT.getGlossaryForSegment(request.text)
                     .done(function (response) {
-                        GlossaryUtils.storeGlossaryData(request.sid, response.data.matches);
                         AppDispatcher.dispatch({
                             actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
                             sid: request.sid,

@@ -1648,8 +1648,6 @@ var UI = {
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
 
-                var record = MateCat.db.segments.by('sid', data.translation.sid);
-                MateCat.db.segments.update( _.extend(record, data.translation) );
                 data.translation.segment = segment;
                 $(document).trigger('translation:change', data.translation);
                 data.segment = segment;

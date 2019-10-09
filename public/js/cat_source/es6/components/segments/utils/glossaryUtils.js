@@ -216,19 +216,7 @@ let GlossaryUtils = {
             // TextUtils.setCursorAfterNode( range, node );
             tempCopyGlossPlaceholder.remove();
         });
-    },
-    storeGlossaryData: function (sid, matches) {
-        matches = _.chain(Object.keys(matches)).map(function (item) {
-            return matches[item];
-        }).flatten().value();
-
-        // find current segment record
-        let record = MateCat.db.segments.by('sid', sid);
-        if (record) {
-            record.glossary_matches = matches;
-            MateCat.db.segments.update(record);
-        }
-    },
+    }
 };
 
 module.exports = GlossaryUtils;

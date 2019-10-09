@@ -110,7 +110,7 @@ module.exports = function(grunt) {
                     }
                 },
                 src: [
-                    basePath + 'cat_source/es6/react/*.js'
+                    basePath + 'cat_source/es6/*.js'
                 ],
                 dest: buildPath + 'cat-react.js'
             },
@@ -124,9 +124,9 @@ module.exports = function(grunt) {
                     }
                 },
                 src: [
-                    basePath + 'cat_source/es6/react/components/quality_report/*.js',
-                    basePath + 'cat_source/es6/react/ajax_utils/quality_report/*.js',
-                    basePath + 'cat_source/es6/react/utils/textUtils.js',
+                    basePath + 'cat_source/es6/components/quality_report/*.js',
+                    basePath + 'cat_source/es6/ajax_utils/quality_report/*.js',
+                    basePath + 'cat_source/es6/utils/textUtils.js',
                 ],
                 dest: buildPath + 'qa-report.js'
             }
@@ -169,11 +169,10 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.render.js',
                     basePath + 'cat_source/ui.events.js',
 
-                    basePath + 'cat_source/es6/react/ajax_utils/segmentAjax.js',
+                    basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
 
                     // basePath + 'cat_source/ui.review.js',
                     //basePath + 'cat_source/sse.js',
-                    basePath + 'cat_source/db.js',
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
                     //WARNING: lxq.main.js: this should always be below qa_check_glossary and
@@ -230,6 +229,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery-ui.min.js',
                     basePath + 'lib/lodash.min.js',
                     basePath + 'lib/sprintf.min.js',
+                    basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/js.cookie.js',
                     basePath + 'lib/jquery.powertip.min.js',
                     // <!-- The Templates plugin is included to render the upload/download listings -->
@@ -278,7 +278,7 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'manage.js',
                     basePath + 'outsource.js',
-                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
+                    basePath + 'cat_source/es6/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'manage.js'
             },
@@ -287,7 +287,7 @@ module.exports = function(grunt) {
                     basePath + 'analyze_old.js',
                     basePath + 'forcedelivery.js',
                     basePath + 'outsource_old.js',
-                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
+                    basePath + 'cat_source/es6/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'analyze_old.js'
             },
@@ -295,7 +295,7 @@ module.exports = function(grunt) {
                 src: [
                     basePath + 'analyze.js',
                     basePath + 'outsource.js',
-                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
+                    basePath + 'cat_source/es6/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'analyze-build.js'
             },
@@ -306,7 +306,7 @@ module.exports = function(grunt) {
                     basePath + 'upload.js',
                     basePath + 'new-project.js',
                     basePath + 'tm.js',
-                    basePath + 'cat_source/es6/react/ajax_utils/*.js'
+                    basePath + 'cat_source/es6/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'upload.js'
             }
@@ -326,7 +326,7 @@ module.exports = function(grunt) {
             },
             react: {
                 files: [
-                    basePath + 'cat_source/es6/react/**/*.js'
+                    basePath + 'cat_source/es6/**/*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {

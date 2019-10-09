@@ -483,8 +483,6 @@
          * the segment as modified. When a segment is modified we set the class and we set
          * data. And we trigger an event.
          *
-         * Preferred way would be to use MateCat.db.segments to save this data, and have the
-         * UI redraw after this change. This would help transition to component based architecture.
          *
          * @param el
          */
