@@ -1,4 +1,4 @@
-
+import OfflineUtils from './offlineUtils';
 
 const CommonUtils = {
 
@@ -197,9 +197,10 @@ const CommonUtils = {
             return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
         }
 
-        if ( UI.offline ) {
+        if ( OfflineUtils.offline ) {
             if(UI.setTranslationTail.length) {
-                return say_goodbye( 'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. Do you want to proceed with the refresh ?' );
+                return say_goodbye( 'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. ' +
+                    'Do you want to proceed with the refresh ?' );
             }
         }
 

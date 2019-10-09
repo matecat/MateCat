@@ -1,6 +1,7 @@
 import TagUtils from '../../../utils/tagUtils';
 import TextUtils from '../../../utils/textUtils';
 import CommonUtils from '../../../utils/commonUtils';
+import OfflineUtils from '../../../utils/offlineUtils';
 let TranslationMatches = {
 
 
@@ -177,7 +178,7 @@ let TranslationMatches = {
             },
             context: $('#segment-' + id),
             error: function() {
-                UI.failedConnection(0, 'getContribution');
+                OfflineUtils.failedConnection(0, 'getContribution');
                 TranslationMatches.showContributionError(this);
             },
             success: function(d) {
@@ -223,7 +224,7 @@ let TranslationMatches = {
                 id_match: id
             },
             error: function() {
-                UI.failedConnection(0, 'deleteContribution');
+                OfflineUtils.failedConnection(0, 'deleteContribution');
             },
             success: function(d) {
                 TranslationMatches.setDeleteSuggestion_success(d);

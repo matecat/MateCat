@@ -7,6 +7,7 @@ import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
 import TagUtils from "../../utils/tagUtils"
+import OfflineUtils from "../../utils/offlineUtils"
 
 
 class SegmentFooterTabConcordance extends React.Component {
@@ -79,7 +80,7 @@ class SegmentFooterTabConcordance extends React.Component {
         let self = this;
         API.SEGMENT.getConcordance(query, type)
             .fail(function () {
-            UI.failedConnection(this, 'getConcordance');
+            OfflineUtils.failedConnection(this, 'getConcordance');
         });
         this.setState({
             loading: true,

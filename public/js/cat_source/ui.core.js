@@ -471,7 +471,7 @@ var UI = {
 				where: where
 			},
 			error: function() {
-				UI.failedConnection(0, 'getMoreSegments');
+				OfflineUtils.failedConnection(0, 'getMoreSegments');
 			},
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
@@ -539,7 +539,7 @@ var UI = {
 				where: where
 			},
 			error: function() {
-				UI.failedConnection(0, 'getSegments');
+                OfflineUtils.failedConnection(0, 'getSegments');
 			},
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
@@ -616,7 +616,7 @@ var UI = {
                     password: config.password
 				},
 				error: function() {
-					UI.failedConnection(0, 'getUpdatedTranslations');
+                    OfflineUtils.failedConnection(0, 'getUpdatedTranslations');
 				},
 				success: function(d) {
 					UI.lastUpdateRequested = new Date();
@@ -817,7 +817,7 @@ var UI = {
             },
             context: id_segment,
             error: function(d) {
-                UI.failedConnection(this, 'getTranslationMismatches');
+                OfflineUtils.failedConnection(this, 'getTranslationMismatches');
             },
             success: function(d) {
                 if (d.errors.length) {
@@ -1329,7 +1329,7 @@ var UI = {
             data: dataMix,
             error: function() {
                 UI.warningStopped = true;
-                UI.failedConnection(0, 'getWarning');
+                OfflineUtils.failedConnection(0, 'getWarning');
             },
             success: function(data) {//console.log('check warnings success');
                 UI.startWarning();
@@ -1435,7 +1435,7 @@ var UI = {
                 segment_status: segment_status,
 			},
 			error: function() {
-				UI.failedConnection(0, 'getWarning');
+                OfflineUtils.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
 			    if (UI.editAreaEditing) return;
@@ -1494,14 +1494,14 @@ var UI = {
 
         // If is offline and is in the tail I decrease the counter
         // else I execute the tail
-        if ( this.offline && config.offlineModeEnabled ) {
+        if ( OfflineUtils.offline && config.offlineModeEnabled ) {
             if ( saveTranslation ) {
-                this.decrementOfflineCacheRemaining();
-                options.callback = UI.incrementOfflineCacheRemaining;
-                this.failedConnection( options, 'setTranslation' );
+                OfflineUtils.decrementOfflineCacheRemaining();
+                options.callback = OfflineUtils.incrementOfflineCacheRemaining;
+                OfflineUtils.failedConnection( options, 'setTranslation' );
             }
-            this.changeStatusOffline( id_segment );
-            this.checkConnection( 'Set Translation check Authorized' );
+            OfflineUtils.changeStatusOffline( id_segment );
+            OfflineUtils.checkConnection( 'Set Translation check Authorized' );
         } else {
             if ( !this.executingSetTranslation )  {
                 return this.execSetTranslationTail();
@@ -1635,9 +1635,9 @@ var UI = {
                     return false;
                 } else {
                     UI.addToSetTranslationTail(this[1]);
-                    UI.changeStatusOffline(this[0][0].id_segment);
-                    UI.failedConnection(this[0], 'setTranslation');
-                    UI.decrementOfflineCacheRemaining();
+                    OfflineUtils.changeStatusOffline(this[0][0].id_segment);
+                    OfflineUtils.failedConnection(this[0], 'setTranslation');
+                    OfflineUtils.decrementOfflineCacheRemaining();
                 }
             },
 			success: function( data ) {
@@ -1780,7 +1780,7 @@ var UI = {
 			}
 			if ( codeInt === -1000 || codeInt === -101) {
 				console.log('ERROR '+ codeInt);
-                UI.startOfflineMode();
+                OfflineUtils.startOfflineMode();
 			}
 
             if ( codeInt <= -2000 && !_.isUndefined(this.message)) {

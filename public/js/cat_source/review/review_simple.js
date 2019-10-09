@@ -42,7 +42,7 @@ if ( ReviewSimple.enabled() ) {
                 APP.doRequest( {
                     data: data,
                     error: function () {
-                        UI.failedConnection( data, 'setRevision' );
+                        OfflineUtils.failedConnection( data, 'setRevision' );
                     },
                     success: function ( d ) {
 

@@ -63,7 +63,7 @@
                 UI.setSegmentAsTagged();
                 UI.copyTagProjectionInCurrentSegment();
                 SegmentActions.autoFillTagsInTarget(sid);
-                UI.startOfflineMode();
+                OfflineUtils.startOfflineMode();
             }).always(function () {
                 UI.editarea.focus();
                 SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
@@ -446,7 +446,7 @@
                 },
                 context: [reqArguments, id_segment],
                 error: function() {
-                    UI.failedConnection(this[0], 'setCurrentSegment');
+                    OfflineUtils.failedConnection(this[0], 'setCurrentSegment');
                 },
                 success: function(d) {
                     UI.setCurrentSegment_success(this[1], d);

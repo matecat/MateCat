@@ -78,7 +78,7 @@ const TEXT_UTILS =  {
     },
 
     /**
-     *This function takes in the array that exits the UI.dmp.diff_main function and parses the array elements to see if they contain broken tags.
+     *This function takes in the array that exits the TextUtils.diffMatchPatch.diff_main function and parses the array elements to see if they contain broken tags.
      * The array is of the type:
      *
      * [0, "text"],
@@ -487,19 +487,19 @@ const TEXT_UTILS =  {
     },
 
     execDiff: function (mainStr, cfrStr) {
-        _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
+        let _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
             .replace( config.crPlaceholderRegex, "\r" )
             .replace( config.crlfPlaceholderRegex, "\r\n" )
             .replace( config.tabPlaceholderRegex, "\t" )
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-        _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+        let _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
 
         //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
         //used to detect initial and final spaces in html diff
         _str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str + String.fromCharCode( parseInt( 0x200B, 10 ) );
         _edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit + String.fromCharCode( parseInt( 0x200B, 10 ) );
 
-        diff_obj = this.diffMatchPatch.diff_main( _edit, _str );
+        let diff_obj = this.diffMatchPatch.diff_main( _edit, _str );
         this.diffMatchPatch.diff_cleanupEfficiency( diff_obj );
         return diff_obj;
     },

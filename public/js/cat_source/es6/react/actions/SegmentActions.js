@@ -16,6 +16,7 @@ import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
 import TranslationMatches  from '../components/segments/utils/translationMatches';
 import TagUtils from "../utils/tagUtils";
 import TextUtils from "../utils/textUtils";
+import OfflineUtils from "../utils/offlineUtils";
 
 var SegmentActions = {
     /********* SEGMENTS *********/
@@ -383,6 +384,10 @@ var SegmentActions = {
     },
     /************ SPLIT ****************/
     openSplitSegment: function(sid) {
+        if ( OfflineUtils.offline ) {
+            APP.alert('Split is disabled in Offline Mode');
+            return;
+        }
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_SPLIT_SEGMENT,
             sid: sid
@@ -478,14 +483,14 @@ var SegmentActions = {
     getGlossaryMatch: function ( text ) {
         return API.SEGMENT.getGlossaryMatch(text)
             .fail(function (  ) {
-                UI.failedConnection( 0, 'glossary' );
+                OfflineUtils.failedConnection( 0, 'glossary' );
         });
     },
 
     // getGlossaryForSegment: function ( text ) {
     //     return API.SEGMENT.getGlossaryForSegment(text)
     //         .fail(function (  ) {
-    //             UI.failedConnection( 0, 'glossary' );
+    //             OfflineUtils.failedConnection( 0, 'glossary' );
     //         });
     // },
     getGlossaryForSegment: function (sid, fid, text) {
@@ -526,7 +531,7 @@ var SegmentActions = {
                         });
                     })
                     .fail(function (error) {
-                        UI.failedConnection(sid, 'getGlossaryForSegment');
+                        OfflineUtils.failedConnection(sid, 'getGlossaryForSegment');
                     });
             }
         }
@@ -546,14 +551,14 @@ var SegmentActions = {
                 });
             })
             .fail(function () {
-                UI.failedConnection(0, 'glossary');
+                OfflineUtils.failedConnection(0, 'glossary');
             });
     },
 
     deleteGlossaryItem: function ( source, target, id, name, sid ) {
         return API.SEGMENT.deleteGlossaryItem(source, target, id)
             .fail(function (  ) {
-                UI.failedConnection( 0, 'deleteGlossaryItem' );
+                OfflineUtils.failedConnection( 0, 'deleteGlossaryItem' );
             }).done(function ( data ) {
                 UI.footerMessage( 'A glossary item has been deleted', UI.getSegmentById(id) );
                 AppDispatcher.dispatch({
@@ -568,7 +573,7 @@ var SegmentActions = {
     addGlossaryItem: function ( source, target, comment, sid ) {
         return API.SEGMENT.addGlossaryItem(source, target, comment)
             .fail(function (  ) {
-                UI.failedConnection( 0, 'addGlossaryItem' );
+                OfflineUtils.failedConnection( 0, 'addGlossaryItem' );
             }).done(function ( response ) {
                 if ( response.data.created_tm_key ) {
                     UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( sid ) );
@@ -588,7 +593,7 @@ var SegmentActions = {
     updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, name, sid ) {
         return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment)
             .fail(function (  ) {
-                UI.failedConnection( 0, 'updateGlossaryItem' );
+                OfflineUtils.failedConnection( 0, 'updateGlossaryItem' );
             }).done( function ( response ) {
                 UI.footerMessage( 'A glossary item has been updated', UI.getSegmentById( sid ) );
                 AppDispatcher.dispatch({

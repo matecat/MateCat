@@ -209,7 +209,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             APP.doRequest( {
                 data: data,
                 error: function () {
-                    UI.failedConnection( data, 'setRevision' );
+                    OfflineUtils.failedConnection( data, 'setRevision' );
                 },
                 success: function ( d ) {
                     window.quality_report_btn_component.setState( {
