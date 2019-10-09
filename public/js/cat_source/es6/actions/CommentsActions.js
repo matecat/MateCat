@@ -1,5 +1,6 @@
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import CommentsConstants from '../constants/CommentsConstants';
+import MBC from '../utils/mbc.main';
 const CommentsActions = {
 
     storeComments: function (comments, user) {

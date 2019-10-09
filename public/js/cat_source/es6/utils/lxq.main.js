@@ -1491,9 +1491,11 @@ LXQ.init  = function () {
 };
 
 
+$(document).ready(function() {
+    if (LXQ.enabled()) {
+        LXQ.init();
+    }
+});
 
-if (LXQ.enabled()) {
-    LXQ.init();
-}
 
 module.exports = LXQ;

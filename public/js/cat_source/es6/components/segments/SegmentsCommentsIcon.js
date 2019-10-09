@@ -6,6 +6,8 @@ import React  from 'react';
 import CommentsStore  from '../../stores/CommentsStore';
 import SegmentsActions  from '../../actions/SegmentActions';
 import CommentsConstants  from '../../constants/CommentsConstants';
+import MBC from '../../utils/mbc.main';
+
 
 class SegmentsCommentsIcon extends React.Component {
 

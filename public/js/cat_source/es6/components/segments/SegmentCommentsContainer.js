@@ -7,6 +7,8 @@ import CommentsStore  from '../../stores/CommentsStore';
 import CommentsActions  from '../../actions/CommentsActions';
 import CommentsConstants  from '../../constants/CommentsConstants';
 import SegmentsActions  from '../../actions/SegmentActions';
+import MBC from '../../utils/mbc.main';
+
 
 class SegmentCommentsContainer extends React.Component {
 

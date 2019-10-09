@@ -13,6 +13,8 @@ import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentButtons  from './SegmentButtons';
 import QaBlacklist  from './utils/qaCheckBlacklistUtils';
+import LXQ from '../../utils/lxq.main';
+
 
 
 class SegmentTarget extends React.Component {

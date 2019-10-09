@@ -6,6 +6,8 @@ import React  from 'react';
 import SegmentSource  from './SegmentSource';
 import TagUtils  from '../../utils/tagUtils';
 import Shortcuts  from '../../utils/shortcuts';
+import LXQ from '../../utils/lxq.main';
+
 
 class SegmentBody extends React.Component {
 

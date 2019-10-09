@@ -88,4 +88,5 @@ window.Customizations = require('./utils/customizations');
 
 
 window.LXQ = require('./utils/lxq.main');
+window.MBC = require('./utils/mbc.main');
 

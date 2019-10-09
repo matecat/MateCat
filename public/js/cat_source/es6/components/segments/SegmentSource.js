@@ -11,6 +11,8 @@ import SearchUtils  from '../header/cattol/search/searchUtils';
 import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
+import LXQ from '../../utils/lxq.main';
+
 
 class SegmentSource extends React.Component {
 

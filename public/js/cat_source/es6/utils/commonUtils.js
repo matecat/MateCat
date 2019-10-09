@@ -1,4 +1,5 @@
 import OfflineUtils from './offlineUtils';
+import MBC from './mbc.main';
 
 const CommonUtils = {
 
