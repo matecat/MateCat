@@ -86,3 +86,6 @@ window.OfflineUtils = require('./utils/offlineUtils');
 window.Shortcuts = require('./utils/shortcuts');
 window.Customizations = require('./utils/customizations');
 
+
+window.LXQ = require('./utils/lxq.main');
+
