@@ -14,6 +14,7 @@ import SegmentFooter from './SegmentFooter';
 import IssuesContainer from './footer-tab-issues/SegmentFooterTabIssues';
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel';
 import TagUtils from '../../utils/tagUtils';
+import SegmentFilter from "../header/cattol/segment_filter/segment_filter";
 
 import Immutable from 'immutable';
 

@@ -6,6 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import VirtualList from 'react-tiny-virtual-list';
 import SegmentStore from '../../stores/SegmentStore';
+import CommentsStore from '../../stores/CommentsStore';
 import Segment from './Segment';
 import SegmentConstants from '../../constants/SegmentConstants';
 import Immutable from 'immutable';

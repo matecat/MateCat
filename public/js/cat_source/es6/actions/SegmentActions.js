@@ -17,6 +17,8 @@ import TranslationMatches  from '../components/segments/utils/translationMatches
 import TagUtils from "../utils/tagUtils";
 import TextUtils from "../utils/textUtils";
 import OfflineUtils from "../utils/offlineUtils";
+import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
+import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
 
 var SegmentActions = {
     /********* SEGMENTS *********/
@@ -605,6 +607,15 @@ var SegmentActions = {
                     translation: newTranslation
                 });
             } );
+    },
+
+    updateGlossaryData (data) {
+        if (QaCheckGlossary.enabled() && data.glossary) {
+            QaCheckGlossary.update(data.glossary);
+        }
+        if (QaCheckBlacklist.enabled() && data.blacklist) {
+            QaCheckBlacklist.update(data.blacklist);
+        }
     },
 
     setTabIndex: function ( sid, tab, index ) {

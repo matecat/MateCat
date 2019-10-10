@@ -1,6 +1,9 @@
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import CattolConstants from '../constants/CatToolConstants';
 import Notifications from '../sse/sse';
+import Review_QualityReportButton from '../components/review/QualityReportButton';
+import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer';
+import SegmentFilter from "../components/header/cattol/segment_filter/segment_filter";
 
 let CatToolActions = {
 
@@ -72,6 +75,24 @@ let CatToolActions = {
     },
     startNotifications: function ( ) {
         Notifications.start();
+    },
+    renderQualityReportButton() {
+        var revision_number = (config.revisionNumber) ? config.revisionNumber : '1';
+        var qrParam = (config.secondRevisionsCount) ? '?revision_type=' + revision_number : '' ;
+        window.quality_report_btn_component = ReactDOM.render(
+            React.createElement( Review_QualityReportButton, {
+                vote                : config.overall_quality_class,
+                quality_report_href : config.quality_report_href + qrParam
+            }), $('#quality-report-button')[0] );
+    },
+    renderSubHeader() {
+        ReactDOM.render(
+            React.createElement(
+                SubHeaderContainer, {
+                    filtersEnabled: SegmentFilter.enabled()
+                }),
+            $('#header-bars-wrapper')[0]
+        );
     }
 };
 

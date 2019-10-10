@@ -1,7 +1,7 @@
 /*
  Component: mbc.main
  */
-
+import CommentsStore from '../stores/CommentsStore';
 const MBC = {
     enabled: function () {
         return ( config.comments_enabled && !!window.EventSource );

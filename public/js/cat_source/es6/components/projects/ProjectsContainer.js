@@ -1,5 +1,5 @@
 import ProjectContainer  from './ProjectContainer';
-
+import TeamConstants from '../../constants/TeamConstants';
 class ProjectsContainer extends React.Component {
 
     constructor(props) {

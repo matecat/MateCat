@@ -1,4 +1,5 @@
 import OutsourceConstants  from '../constants/OutsourceConstants';
+import OutsourceStore  from '../stores/OutsourceStore';
 
 class OutsourceModal extends React.Component {
 

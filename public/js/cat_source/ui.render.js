@@ -63,16 +63,17 @@ $.extend(UI, {
 
 		}
 
-		ReactDOM.render(
-            React.createElement(
-                SubHeaderContainer, {
-                	filtersEnabled: SegmentFilter.enabled()
-				}),
-            $('#header-bars-wrapper')[0]
-        );
-
+		CatToolActions.renderSubHeader();
+		this.renderQualityReportButton();
         return UI.getSegments(options);
 
 	},
+
+	renderQualityReportButton: function() {
+		CatToolActions.renderQualityReportButton();
+		if ( config.secondRevisionsCount ) {
+			UI.reloadQualityReport();
+		}
+	}
 });
 

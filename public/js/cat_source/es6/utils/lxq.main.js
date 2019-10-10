@@ -394,12 +394,9 @@ LXQ.init  = function () {
                       console.log('in loadmore segments, segment: '+segment.sid+' already has qa info...');
                       //clean up and redo powertip on any glossaries/blacklists
                       var _segment = UI.getSegmentById(segment.sid)
-                      // QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(_segment);
-                      // QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), _segment ));
                       LXQ.redoHighlighting(segment.sid,true);
                       LXQ.redoHighlighting(segment.sid,false);
-                      // QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), _segment ));
-                      // QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(_segment);
+
                   }
             });
           }

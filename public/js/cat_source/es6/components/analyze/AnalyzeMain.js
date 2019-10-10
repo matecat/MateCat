@@ -1,6 +1,8 @@
 
 import AnalyzeConstants  from '../../constants/AnalyzeConstants';
 import AnalyzeActions  from '../../actions/AnalyzeActions';
+import AnalyzeHeader  from './AnalyzeHeader';
+import AnalyzeChunksResume  from './AnalyzeChunksResume';
 import ProjectAnalyze  from './ProjectAnalyze';
 import AnalyzeStore  from '../../stores/AnalyzeStore';
 import {TransitionGroup, CSSTransition}  from 'react-transition-group';

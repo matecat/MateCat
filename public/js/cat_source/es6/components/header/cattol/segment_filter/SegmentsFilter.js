@@ -27,7 +27,6 @@ class SegmentsFilter extends React.Component {
     }
 
     defaultState() {
-        // let storedState = SegmentFilter.getStoredState();
         let storedState = {};
 
 

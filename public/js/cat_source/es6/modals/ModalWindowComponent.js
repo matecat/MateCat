@@ -1,5 +1,5 @@
 import ModalContainerComponent  from './ModalContainerComponent';
-import PreferencesModal  from './PreferencesModal';
+
 class ModalWindowComponent extends React.Component {
 
 

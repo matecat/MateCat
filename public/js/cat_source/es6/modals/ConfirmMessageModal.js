@@ -34,7 +34,7 @@ class ConfirmMessageModal extends React.Component {
         </div>;
     }
 }
-SuccessModal.propTypes = {
+ConfirmMessageModal.propTypes = {
     text: PropTypes.string
 };
 

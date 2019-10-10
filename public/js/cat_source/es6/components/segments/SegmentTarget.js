@@ -12,9 +12,10 @@ import Customizations from '../../utils/customizations';
 import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentButtons  from './SegmentButtons';
+import SegmentWarnings  from './SegmentWarnings';
 import QaBlacklist  from './utils/qaCheckBlacklistUtils';
 import LXQ from '../../utils/lxq.main';
-
+import SearchUtils  from '../header/cattol/search/searchUtils';
 
 
 class SegmentTarget extends React.Component {

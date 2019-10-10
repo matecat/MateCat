@@ -4,6 +4,7 @@
  */
 import React  from 'react';
 import SegmentStore  from '../../stores/SegmentStore';
+import SegmentFilter from "../header/cattol/segment_filter/segment_filter";
 
 class SegmentButton extends React.Component {
 
