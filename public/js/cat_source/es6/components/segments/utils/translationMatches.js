@@ -2,13 +2,16 @@ import TagUtils from '../../../utils/tagUtils';
 import TextUtils from '../../../utils/textUtils';
 import CommonUtils from '../../../utils/commonUtils';
 import OfflineUtils from '../../../utils/offlineUtils';
+import Speech2Text from '../../../utils/speech2text';
+
+
 let TranslationMatches = {
 
 
     copySuggestionInEditarea: function(segment, translation, editarea, match, which, createdBy) {
         if (!config.translation_matches_enabled) return;
 
-        var percentageClass = UI.getPercentuageClass(match);
+        var percentageClass = this.getPercentuageClass(match);
         if ($.trim(translation) !== '') {
 
             if(!which) translation = TagUtils.encodeSpacesAsPlaceholders(translation, true);
@@ -56,8 +59,7 @@ let TranslationMatches = {
 
             if (editareaLength === 0) {
 
-                TranslationMatches.setChosenSuggestion(1, segmentObj);
-
+                SegmentActions.setChoosenSuggestion(segmentObj.sid, 1);
 
                 // translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
 
@@ -65,8 +67,8 @@ let TranslationMatches = {
                  * the source with the text with tags, the segment is tagged
                  */
                 if (UI.checkCurrentSegmentTPEnabled(segmentObj)) {
-                    var currentContribution = UI.getCurrentSegmentContribution(segmentObj);
-                    if (parseInt(currentContribution.match) !== 100) {
+                    var currentContribution = data.matches[0];
+                    if (parseInt(match) !== 100) {
                         translation = currentContribution.translation;
                         translation = TagUtils.removeAllTags(translation);
                     } else {
@@ -235,10 +237,32 @@ let TranslationMatches = {
         if (d.errors.length)
             UI.processErrors(d.errors, 'setDeleteSuggestion');
     },
-    setChosenSuggestion: function(index, segmentObj) {
-        var currentSegmentId = (segmentObj)? segmentObj.sid : UI.currentSegmentId;
-        SegmentActions.setChoosenSuggestion(currentSegmentId, index);
-    }
+    getPercentuageClass: function(match) {
+        var percentageClass = "";
+        var m_parse = parseInt(match);
+
+        if (!isNaN(m_parse)) {
+            match = m_parse;
+        }
+
+        switch (true) {
+            case (match == 100):
+                percentageClass = "per-green";
+                break;
+            case (match == 101):
+                percentageClass = "per-blue";
+                break;
+            case(match > 0 && match <= 99):
+                percentageClass = "per-orange";
+                break;
+            case (match == "MT"):
+                percentageClass = "per-yellow";
+                break;
+            default :
+                percentageClass = "";
+        }
+        return percentageClass;
+    },
 
 };
 

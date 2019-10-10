@@ -9,6 +9,7 @@ import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
 import EditArea  from './utils/editarea';
 import TagUtils  from '../../utils/tagUtils';
+import Speech2Text from '../../utils/speech2text';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 
 class Editarea extends React.Component {

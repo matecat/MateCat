@@ -207,8 +207,7 @@ var UI = {
         UI.setSegmentModified(UI.currentSegment, true);
         this.segmentQA(UI.currentSegment );
         if (config.translation_matches_enabled) {
-            SegmentActions.setChoosenSuggestion(currentSegmentId, index);
-            UI.setChosenSuggestion(UI.currentSegmentId, 0);
+            SegmentActions.setChoosenSuggestion(UI.currentSegmentId, null);
         }
         $(this.currentSegment).trigger('copySourceToTarget');
 
@@ -558,9 +557,6 @@ var UI = {
 
 		var where = d.data.where;
 
-        // Why here?? Investigate
-        UI.setGlobalTagProjection();
-
 		if (!this.startSegmentId){
             var firstFile = d.data.files[Object.keys(d.data.files)[0]];
             this.startSegmentId = firstFile.segments[0].sid;
@@ -771,9 +767,7 @@ var UI = {
                     isReviewExtended: ReviewExtended.enabled(),
                     reviewType: Review.type,
                     enableTagProjection: UI.enableTagProjection,
-                    decodeTextFn: UI.decodeText,
                     tagModesEnabled: UI.tagModesEnabled,
-                    speech2textEnabledFn: Speech2Text.enabled,
                     startSegmentId: this.startSegmentId
                 }), mountPoint);
                 SegmentActions.renderSegments(segments, this.startSegmentId);

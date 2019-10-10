@@ -76,7 +76,6 @@ const TEXT_UTILS =  {
 
         return this.restorePlaceholders(diffTxt) ;
     },
-
     /**
      *This function takes in the array that exits the TextUtils.diffMatchPatch.diff_main function and parses the array elements to see if they contain broken tags.
      * The array is of the type:

@@ -14,6 +14,28 @@ const TAGS_UTILS =  {
         $div = this.encodeTagsWithHtmlAttribute($div);
         return $div.text();
     },
+
+    decodeText(segment, text) {
+        var decoded_text;
+        if (UI.enableTagProjection && !segment.tagged && ( segment.status.toLowerCase() === 'draft' || segment.status.toLowerCase() === 'new')
+            && !this.checkXliffTagsInText(segment.translation) && this.removeAllTags(segment.segment) !== '' ) {
+            decoded_text = this.removeAllTags(text);
+        } else {
+            decoded_text = text;
+        }
+        decoded_text = this.decodePlaceholdersToText(decoded_text || '');
+        if ( !(config.tagLockCustomizable && !UI.tagLockEnabled) ) {
+            decoded_text = this.transformTextForLockTags(decoded_text);
+        }
+        return decoded_text;
+    },
+    transformPlaceholdersAndTags: function(text) {
+        text = this.decodePlaceholdersToText(text || '');
+        if ( !(config.tagLockCustomizable && !UI.tagLockEnabled) ) {
+            text = this.transformTextForLockTags(text);
+        }
+        return text;
+    },
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
      * @param str
@@ -476,7 +498,7 @@ const TAGS_UTILS =  {
 
         //add tags into the target segment
         for(let i = 0; i < missingTags.length; i++){
-            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
+            if ( !(config.tagLockCustomizable && !UI.tagLockEnabled) ) {
                 newhtml = newhtml + TagUtils.transformTextForLockTags(missingTags[i]);
             } else {
                 newhtml = newhtml + missingTags[i];

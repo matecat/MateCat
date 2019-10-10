@@ -81,4 +81,5 @@ window.Customizations = require('./utils/customizations');
 
 window.LXQ = require('./utils/lxq.main');
 window.MBC = require('./utils/mbc.main');
+window.Speech2Text = require('./utils/speech2text');
 

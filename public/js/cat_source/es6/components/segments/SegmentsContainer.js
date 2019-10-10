@@ -9,6 +9,8 @@ import SegmentStore from '../../stores/SegmentStore';
 import CommentsStore from '../../stores/CommentsStore';
 import Segment from './Segment';
 import SegmentConstants from '../../constants/SegmentConstants';
+import Speech2Text from '../../utils/speech2text';
+import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
 
 
@@ -152,10 +154,10 @@ class SegmentsContainer extends React.Component {
             isReviewExtended={isReviewExtended}
             reviewType={this.props.reviewType}
             enableTagProjection={this.props.enableTagProjection}
-            decodeTextFn={this.props.decodeTextFn}
+            decodeTextFn={TagUtils.decodeText}
             tagLockEnabled={this.state.tagLockEnabled}
             tagModesEnabled={this.props.tagModesEnabled}
-            speech2textEnabledFn={this.props.speech2textEnabledFn}
+            speech2textEnabledFn={Speech2Text.enabled}
             setLastSelectedSegment={this.setLastSelectedSegment.bind(this)}
             setBulkSelection={this.setBulkSelection.bind(this)}
             sideOpen={this.state.sideOpen}

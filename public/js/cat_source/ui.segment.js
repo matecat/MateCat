@@ -1,29 +1,14 @@
 (function($, undefined) {
 
     $.extend(UI, {
-
-        /**
-         * Return che Suggestion, if exist, used by the current segment
-         * return json
+        /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Tag Proj start
          */
-        getCurrentSegmentContribution: function (segment) {
-            var currentSegment = (segment) ? segment: SegmentStore.getCurrentSegment();
-            var chosen_suggestion = ( currentSegment.contributions && currentSegment.contributions.matches.length > 0 ) ? currentSegment.contributions.matches[0] : undefined;
-            if (_.isUndefined(chosen_suggestion)) {
-                var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(currentSegment));
-                if (storedContributions) {
-                    chosen_suggestion = JSON.parse(storedContributions).matches[chosen_suggestion - 1];
-
-                }
-            }
-            return chosen_suggestion;
-        },
         setGlobalTagProjection: function () {
             UI.enableTagProjection = UI.checkTPEnabled();
         },
         /**
          * Tag Projection: check if is enable the Tag Projection
-         * @param file
          */
         checkTPEnabled: function () {
             return (this.checkTpCanActivate() && !!config.tag_projection_enabled);
@@ -45,7 +30,7 @@
         },
         startSegmentTagProjection: function (sid) {
             UI.getSegmentTagsProjection().done(function(response) {
-                if (response.errors && (response.errors.length || response.errors.code) ) {
+                if (response.errors && !!(response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     UI.disableTPOnSegment();
                     UI.copyTagProjectionInCurrentSegment();
@@ -77,7 +62,7 @@
             source = TextUtils.htmlDecode(source);
             //Retrieve the chosen suggestion if exist
             var suggestion;
-            var currentContribution = this.getCurrentSegmentContribution();
+            var currentContribution = SegmentStore.getSegmentChoosenContribution(UI.currentSegmentId);
             // Send the suggestion to Tag Projection only if is > 89% and is not MT
             if (!_.isUndefined(currentContribution) && currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
                 suggestion = currentContribution.translation;
@@ -94,7 +79,7 @@
                     target: target,
                     source_lang: config.source_rfc,
                     target_lang: config.target_rfc,
-                    sl: suggestion
+                    suggestion: suggestion
                 }
             });
 
@@ -208,83 +193,18 @@
             }
             return returnArray;
         },
-        decodeText: function(segment, text) {
-            var decoded_text;
-            if (UI.enableTagProjection && !segment.tagged && ( segment.status.toLowerCase() === 'draft' || segment.status.toLowerCase() === 'new')
-                && !TagUtils.checkXliffTagsInText(segment.translation) && TagUtils.removeAllTags(segment.segment) !== '' ) {
-                decoded_text = TagUtils.removeAllTags(text);
-            } else {
-                decoded_text = text;
-            }
-            decoded_text = TagUtils.decodePlaceholdersToText(decoded_text || '');
-            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
-                decoded_text = TagUtils.transformTextForLockTags(decoded_text);
-            }
-            return decoded_text;
-        },
-        transformPlaceholdersAndTags: function(text) {
-            text = TagUtils.decodePlaceholdersToText(text || '');
-            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
-                text = TagUtils.transformTextForLockTags(text);
-            }
-            return text;
-        },
-        getPercentuageClass: function(match) {
-            var percentageClass = "";
-            var m_parse = parseInt(match);
-
-            if (!isNaN(m_parse)) {
-                match = m_parse;
-            }
-
-            switch (true) {
-                case (match == 100):
-                    percentageClass = "per-green";
-                    break;
-                case (match == 101):
-                    percentageClass = "per-blue";
-                    break;
-                case(match > 0 && match <= 99):
-                    percentageClass = "per-orange";
-                    break;
-                case (match == "MT"):
-                    percentageClass = "per-yellow";
-                    break;
-                default :
-                    percentageClass = "";
-            }
-            return percentageClass;
-        },
-        getSegmentSource: function(seg) {
-            segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
-            return $('.source', segment).text();
-        },
-        getStatus: function(segment) {
-            status = ($(segment).hasClass('status-new') ? 'new' : $(segment).hasClass('status-draft') ? 'draft' : $(segment).hasClass('status-translated') ? 'translated' : $(segment).hasClass('status-approved') ? 'approved' : 'rejected');
-            return status;
-        },
-        getSegmentTarget: function(seg) {
-            var editarea = (typeof seg == 'undefined') ? this.editarea : $('.editarea', seg);
-            return editarea.text();
-        },
-        /**
-         * getNextSegment
-         *
-         * Returns the next segment.
-         *
+        /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Tag Proj end
          */
-        getNextSegment: function(segment, status) {
-            UI.evalNextSegment( segment, status) ;
-            return this.nextSegmentId ;
-        },
 
-        /**
+
+        /** TODO: Remove
          * evalNextSegment
          *
          * Evaluates the next segment and populates this.nextSegmentId ;
          *
          */
-        evalNextSegment: function( section, status ) {
+        evalNextSegment: function( ) {
             var currentSegment = SegmentStore.getCurrentSegment();
             var nextUntranslated = (currentSegment) ? SegmentStore.getNextSegment(currentSegment.sid, null, 8): null;
 
@@ -295,8 +215,6 @@
             }
             var next = (currentSegment) ?  SegmentStore.getNextSegment(currentSegment.sid, null, null) : null;
             this.nextSegmentId = (next) ? next.sid : null;
-            var prev = (currentSegment) ? SegmentStore.getPrevSegment(currentSegment.sid) : null;
-            this.previousSegmentId = ( prev ) ? prev.sid : null;
         },
         gotoNextUntranslatedSegment: function() {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
@@ -456,7 +374,6 @@
             }
 
             this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
-            this.getNextSegment(this.currentSegment, 'untranslated');
 
             var segment = SegmentStore.getSegmentByIdToJS(id_segment);
             if (config.alternativesEnabled && !segment.alternatives) {
@@ -508,11 +425,6 @@
         getSegmentById: function(id) {
             return $('#segment-' + id);
         },
-
-        getSegmentsSplit: function(id) {
-            return SegmentStore.getSegmentsSplitGroup(id);
-        },
-
         getEditAreaBySegmentId: function(id) {
             return $('#segment-' + id + ' .targetarea');
         },
@@ -520,6 +432,9 @@
         segmentIsLoaded: function(segmentId) {
             var segment = SegmentStore.getSegmentByIdToJS(segmentId);
             return segment || UI.getSegmentsSplit(segmentId).length > 0 ;
+        },
+        getSegmentsSplit: function(id) {
+            return SegmentStore.getSegmentsSplitGroup(id);
         },
         getContextBefore: function(segmentId) {
             var segmentBefore = SegmentStore.getPrevSegment(segmentId);

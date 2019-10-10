@@ -48,7 +48,7 @@ class SegmentFooterTabMatches extends React.Component {
                 item.suggestion_info = '';
             }
 
-            item.percentClass = UI.getPercentuageClass(this.match);
+            item.percentClass = TranslationMatches.getPercentuageClass(this.match);
             item.percentText = this.match;
 
             // Attention Bug: We are mixing the view mode and the raw data mode.
@@ -97,7 +97,7 @@ class SegmentFooterTabMatches extends React.Component {
         UI.editarea.focus();
         UI.disableTPOnSegment(this.props.segment);
         setTimeout(function () {
-            TranslationMatches.setChosenSuggestion(index);
+            SegmentActions.setChoosenSuggestion(this.props.segment, index);
             TranslationMatches.copySuggestionInEditarea(UI.currentSegment, $(ulDataItem + index + '] li.b .translation').html(),
                 $('.editor .editarea'), $(ulDataItem + index + '] ul.graysmall-details .percent').text(), index, $(ulDataItem + index + '] li.graydesc .bold').text());
             SegmentActions.highlightEditarea(self.props.id_segment);

@@ -112,7 +112,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
                         segment: splittedSourceAr[i],
-                        decoded_source: UI.decodeText(segment, splittedSourceAr[i]),
+                        decoded_source: TagUtils.decodeText(segment, splittedSourceAr[i]),
                         segment_hash: segment.segment_hash,
                         original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
@@ -121,7 +121,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                         status: status,
                         time_to_edit: "0",
                         translation: (translation) ? translation : '',
-                        decoded_translation: UI.decodeText(segment, translation),
+                        decoded_translation: TagUtils.decodeText(segment, translation),
                         version: segment.version,
                         warning: "0",
                         warnings: {},
@@ -140,8 +140,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
                     segData = null;
                 });
             } else {
-                segment.decoded_translation = UI.decodeText(segment, segment.translation);
-                segment.decoded_source = UI.decodeText(segment, segment.segment);
+                segment.decoded_translation = TagUtils.decodeText(segment, segment.translation);
+                segment.decoded_source = TagUtils.decodeText(segment, segment.segment);
                 segment.unlocked = UI.isUnlockedSegment(segment);
                 segment.warnings = {};
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
@@ -166,8 +166,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
             newSegments.forEach(function (element) {
                 element.split_group = splitGroup;
-                element.decoded_translation = UI.decodeText(element, element.translation);
-                element.decoded_source = UI.decodeText(element, element.segment);
+                element.decoded_translation = TagUtils.decodeText(element, element.translation);
+                element.decoded_source = TagUtils.decodeText(element, element.segment);
             });
 
             newSegments = Immutable.fromJS(newSegments);
@@ -191,8 +191,8 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
 
         newSegments.forEach(function (element) {
             element.split_group = splitGroup;
-            element.decoded_translation = UI.decodeText(element, element.translation);
-            element.decoded_source = UI.decodeText(element, element.segment);
+            element.decoded_translation = TagUtils.decodeText(element, element.translation);
+            element.decoded_source = TagUtils.decodeText(element, element.segment);
         });
 
         newSegments = Immutable.fromJS(newSegments);
@@ -241,7 +241,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         if ( index === -1 ) return;
         let segment = this._segments.get(index);
         var trans = TextUtils.htmlEncode(this.removeLockTagsFromString(translation));
-        let decoded_translation = UI.decodeText(segment.toJS(), trans);
+        let decoded_translation = TagUtils.decodeText(segment.toJS(), trans);
         this._segments = this._segments.setIn([index, 'translation'], trans);
         this._segments = this._segments.setIn([index, 'decoded_translation'], decoded_translation);
         return decoded_translation;
@@ -253,16 +253,16 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     },
     decodeSegmentsText: function () {
         let self = this;
-        this._segments = this._segments.map(segment => segment.set('decoded_translation', UI.decodeText(segment.toJS(), segment.get('translation'))));
-        this._segments = this._segments.map(segment => segment.set('decoded_source', UI.decodeText(segment.toJS(), segment.get('segment'))));
+        this._segments = this._segments.map(segment => segment.set('decoded_translation', TagUtils.decodeText(segment.toJS(), segment.get('translation'))));
+        this._segments = this._segments.map(segment => segment.set('decoded_source', TagUtils.decodeText(segment.toJS(), segment.get('segment'))));
     },
     setSegmentAsTagged(sid, fid) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'tagged'], true);
         let segment = this._segments.get(index);
-        this._segments = this._segments.setIn([index, 'decoded_translation'], UI.decodeText(segment.toJS(), segment.get('translation')));
-        this._segments = this._segments.setIn([index, 'decoded_source'], UI.decodeText(segment.toJS(), segment.get('segment')));
+        this._segments = this._segments.setIn([index, 'decoded_translation'], TagUtils.decodeText(segment.toJS(), segment.get('translation')));
+        this._segments = this._segments.setIn([index, 'decoded_source'], TagUtils.decodeText(segment.toJS(), segment.get('segment')));
     },
 
     setSegmentOriginalTranslation(sid, fid, translation) {
@@ -695,6 +695,14 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         return this._segments.filter((segment)=>{
               return segment.get('original_sid') === sid;
         }).toJS();
+    },
+    getSegmentChoosenContribution(sid) {
+        let seg = this.getSegmentById(sid);
+        let currContrIndex = seg.get('choosenSuggestionIndex');
+        if ( currContrIndex ) {
+            return seg.get('contributions').get('matches').get(currContrIndex-1).toJS();
+        }
+        return null;
     },
     isSidePanelOpen: function() {
         const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);

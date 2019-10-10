@@ -1,4 +1,4 @@
-Speech2Text = {
+const Speech2Text = {
     enabled: function () {
         return !!('webkitSpeechRecognition' in window && !!config.speech2text_enabled);
     },
@@ -245,7 +245,10 @@ Speech2Text.init  = function () {
         });
     })(jQuery, Speech2Text);
 };
+$(document).ready(function() {
+    if (Speech2Text.enabled()) {
+        Speech2Text.init();
+    }
+});
 
-if (Speech2Text.enabled()) {
-    Speech2Text.init();
-}
+module.exports = Speech2Text;

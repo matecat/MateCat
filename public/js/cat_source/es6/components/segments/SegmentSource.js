@@ -207,9 +207,9 @@ class SegmentSource extends React.Component {
                 segmentsSplit.forEach((sid, index)=>{
                     let segment = SegmentStore.getSegmentByIdToJS(sid);
                     if ( sid === this.props.segment.sid) {
-                        sourceHtml += '<span class="currentSplittedSegment">'+UI.transformPlaceholdersAndTags(segment.segment)+'</span>';
+                        sourceHtml += '<span class="currentSplittedSegment">'+TagUtils.transformPlaceholdersAndTags(segment.segment)+'</span>';
                     } else {
-                        sourceHtml+= UI.transformPlaceholdersAndTags(segment.segment);
+                        sourceHtml+= TagUtils.transformPlaceholdersAndTags(segment.segment);
                     }
                     if(index !== segmentsSplit.length - 1)
                         sourceHtml += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
@@ -231,7 +231,7 @@ class SegmentSource extends React.Component {
                 html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
                     <div className="splitArea" contentEditable = "false"
                          onClick={(e)=>this.addSplitPoint(e)}
-                         dangerouslySetInnerHTML={this.allowHTML(UI.transformPlaceholdersAndTags(this.props.segment.segment))}/>
+                         dangerouslySetInnerHTML={this.allowHTML(TagUtils.transformPlaceholdersAndTags(this.props.segment.segment))}/>
                     <div className="splitBar">
                         <div className="buttons">
                             <a className="cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >

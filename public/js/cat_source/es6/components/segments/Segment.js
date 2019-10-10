@@ -15,6 +15,8 @@ import IssuesContainer from './footer-tab-issues/SegmentFooterTabIssues';
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel';
 import TagUtils from '../../utils/tagUtils';
 import SegmentFilter from "../header/cattol/segment_filter/segment_filter";
+import Speech2Text from '../../utils/speech2text';
+
 
 import Immutable from 'immutable';
 
@@ -88,9 +90,8 @@ class Segment extends React.Component {
             UI.cacheObjects($(this.section));
             //end old cache
 
-            UI.evalNextSegment($(this.section), 'untranslated');
+            UI.evalNextSegment();
             UI.clearUndoStack();
-            UI.getNextSegment(UI.currentSegment, 'untranslated');
 
             $('html').trigger('open'); // used by ui.review to open tab Revise in the footer next-unapproved
 

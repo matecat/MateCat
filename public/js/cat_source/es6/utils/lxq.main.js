@@ -1372,7 +1372,8 @@ LXQ.init  = function () {
             if (!segment)
                 return;
             var seg =  UI.getSegmentById(segment);
-            if (UI.getSegmentTarget(seg).length > 0) {
+            var segObj = SegmentStore.getSegmentByIdToJS(seg);
+            if ( segObj.translation ) {
                 // console.log('Requesting QA for: '+segment);
                 LXQ.doLexiQA(seg,segment, true, checkNextUncheckedSegment);
             }

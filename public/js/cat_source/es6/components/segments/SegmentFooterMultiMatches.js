@@ -6,6 +6,7 @@ import React  from 'react';
 import Immutable  from 'immutable';
 import TagUtils from "../../utils/tagUtils"
 import TextUtils from "../../utils/textUtils"
+import TranslationMatches from "./utils/translationMatches";
 
 class SegmentFooterMultiMatches extends React.Component {
 
@@ -56,7 +57,7 @@ class SegmentFooterMultiMatches extends React.Component {
                 item.suggestion_info = '';
             }
 
-            item.percentClass = UI.getPercentuageClass(this.match);
+            item.percentClass = TranslationMatches.getPercentuageClass(this.match);
             item.percentText = this.match;
 
             // Attention Bug: We are mixing the view mode and the raw data mode.
