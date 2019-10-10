@@ -484,28 +484,9 @@ var UI = {
 		var where = d.data.where;
         var section = $('section');
 		if ( d.data.files && _.size(d.data.files) ) {
-			var firstSeg = section.first();
-			var lastSeg = section.last();
-
-			// var numsegToAdd = 0;
-			// $.each(d.data.files, function() {
-			// 	numsegToAdd = numsegToAdd + this.segments.length;
-			// });
 
 			this.renderFiles(d.data.files, where, false);
 
-			// // if getting segments before, UI points to the segment triggering the event
-			// if ((where == 'before') && (numsegToAdd)) {
-			// 	this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
-			// }
-
-			// if (this.body.hasClass('searchActive')) {
-			// 	segLimit = (where == 'before') ? firstSeg : lastSeg;
-			// 	SearchUtils.markSearchResults({
-			// 		where: where,
-			// 		seg: segLimit
-			// 	});
-			// }
             $(window).trigger('segmentsAdded',{ resp : d.data.files });
 
 		}
@@ -572,10 +553,10 @@ var UI = {
 			}
 
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
-				this.scrollSegment(options.segmentToScroll );
+                SegmentActions.scrollToSegment( options.segmentToScroll );
                 SegmentActions.openSegment(options.segmentToScroll);
 			} else if (options.segmentToOpen) {
-                this.scrollSegment(options.segmentToOpen);
+                SegmentActions.scrollToSegment( options.segmentToOpen );
                 SegmentActions.openSegment(options.segmentToOpen);
             }
 

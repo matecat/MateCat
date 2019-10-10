@@ -44,7 +44,7 @@ let SegmentFilterUtils = {
         }
 
         if ( segment.opened ) {
-            UI.scrollSegment( segment.original_sid ) ;
+            SegmentActions.scrollToSegment( segment.original_sid );
         } else {
             segment.el.find( UI.targetContainerSelector() ).click();
         }
@@ -215,7 +215,7 @@ let SegmentFilterUtils = {
         SegmentFilterUtils.open = false;
         SegmentActions.removeAllMutedSegments();
         setTimeout( function() {
-            UI.scrollSegment( UI.currentSegmentId ) ;
+            SegmentActions.scrollToSegment( UI.currentSegmentId );
         }, 600 );
     },
     goToNextRepetition: function ( button, status ) {

@@ -56,7 +56,7 @@ class QAComponent extends React.Component {
                 window.location.hash = $segment.sid;
             }
             setTimeout(function (  ) {
-                UI.scrollSegment(segmentId);
+                SegmentActions.scrollToSegment( segmentId );
             });
             SegmentActions.openSegment(segmentId);
         }

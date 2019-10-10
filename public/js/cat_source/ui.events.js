@@ -350,7 +350,7 @@ $.extend(UI, {
                     firstLoad: false
                 });
 			} else {
-				UI.scrollSegment(current.original_sid);
+                SegmentActions.scrollToSegment( current.original_sid );
 			}
 		});
 		this.initEnd = new Date();

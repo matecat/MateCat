@@ -232,7 +232,7 @@
             quick = quick || false;
 
             if (this.currentSegmentId) {
-                UI.scrollSegment(this.currentSegmentId);
+                SegmentActions.scrollToSegment( this.currentSegmentId );
             } else {
                 this.render({
                     firstLoad: false,
@@ -553,9 +553,6 @@
                 });
                 setTimeout(CatToolActions.reloadSegmentFilter, 500);
             }
-        },
-        scrollSegment: function(idSegment) {
-            SegmentActions.scrollToSegment( idSegment );
         },
 
         /**

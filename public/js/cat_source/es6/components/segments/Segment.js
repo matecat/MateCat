@@ -486,7 +486,6 @@ class Segment extends React.Component {
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
         if (!prevProps.segment.opened && this.props.segment.opened) {
-            //UI.scrollSegment($(this.section), this.props.segment.sid);
             this.timeoutScroll = setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},200);
             setTimeout(()=>{UI.setCurrentSegment()},0);
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
