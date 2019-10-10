@@ -166,7 +166,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
                     basePath + 'cat_source/ui.init.js',
-                    basePath + 'cat_source/ui.render.js',
                     basePath + 'cat_source/ui.events.js',
 
                     basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',

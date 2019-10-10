@@ -54,8 +54,6 @@ window.ModifyTeamModal = require('./modals/ModifyTeam').default;
 /*****/
 
 
-
-
 /*
 Override by plugins
  */

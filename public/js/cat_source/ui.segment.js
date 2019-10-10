@@ -641,6 +641,25 @@
         },
         scrollSegment: function(idSegment) {
             SegmentActions.scrollToSegment( idSegment );
+        },
+
+        /**
+         * Register tabs in segment footer
+         */
+        registerFooterTabs: function () {
+            SegmentActions.registerTab('concordances', true, false);
+
+            if ( config.translation_matches_enabled ) {
+                SegmentActions.registerTab('matches', true, true);
+            }
+
+            SegmentActions.registerTab('glossary', true, false);
+            SegmentActions.registerTab('alternatives', false, false);
+            // SegmentActions.registerTab('messages', false, false);
+            if ( ReviewSimple.enabled() ) {
+                UI.registerReviseTab();
+
+            }
         }
     });
 })(jQuery); 

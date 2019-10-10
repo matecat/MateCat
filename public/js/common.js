@@ -976,7 +976,44 @@ APP = {
             expiration.setYear(new Date().getFullYear() + 1);
         }
         document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
-    }
+    },
+
+    checkQueryParams: function () {
+        var action = APP.getParameterByName("action");
+        if (action) {
+            switch (action) {
+                case 'download':
+                    var interval = setTimeout(function () {
+                        $('#downloadProject').trigger('click');
+                        clearInterval(interval);
+                    }, 300);
+                    APP.removeParam('action');
+                    break;
+                case 'openComments':
+                    if ( MBC.enabled() ) {
+                        var interval = setInterval(function () {
+                            if ( $( '.mbc-history-balloon-outer' ) ) {
+                                $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
+                                clearInterval(interval);
+                            }
+                        }, 500);
+
+                    }
+                    APP.removeParam('action');
+                    break;
+                case 'warnings':
+                    var interval = setInterval(function () {
+                        if ( $( '#notifbox.warningbox' ) ) {
+                            $("#point2seg").trigger('mousedown');
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                    APP.removeParam('action');
+                    break;
+            }
+        }
+
+    },
 
 
 };
