@@ -10,147 +10,6 @@ const MBC = {
 
 MBC.init = function() {
 
-    /**
-     * Close balloon if the user click on some dead area
-     * of the page.
-     */
-    $( document ).on( 'click', function ( e ) {
-        if ( $( e.target ).closest( 'section' ) == null ) {
-            closeBalloon();
-        }
-    } );
-
-    $( document ).ready( function () {
-        initConstants();
-        // XXX: there'a binding on 'section' are delegated to #outer in ui.events.js.
-        //      Since our DOM elements are children of `section` we must attach to #outer
-        //      to in order to prevent bubbling.
-        //
-        //      If a click event reaches #outer, we assume the user clicked outside
-        //      the section, so we close the balloon.
-        //
-        //
-        var delegate = '#outer';
-
-
-        // Click reached #outer , close the history balloon
-        $( delegate ).on( 'click', function () {
-            $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
-        } );
-
-        $( window ).on( 'segmentsAdded', function ( e ) {
-            loadCommentData( function ( resp ) {
-                resetDatabase( resp );
-                refreshElements();
-            } );
-        } );
-
-        $( document ).on( 'getSegments_success', function ( e ) {
-            loadCommentData( function ( resp ) {
-                MBC.commentsLoaded = true;
-                resetDatabase( resp );
-                $( document ).trigger( 'mbc:ready' );
-            } );
-        } );
-
-        $( document ).on( 'mbc:ready', function ( ev ) {
-
-            $( '#mbc-history' ).remove();
-            $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
-            $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
-
-
-            getTeamUsers().then( function () {
-                refreshElements();
-                // open a comment if was asked by hash
-                var lastAsked = popLastCommentHash();
-                if ( lastAsked ) {
-                    openSegmentComment( lastAsked.segmentId );
-                }
-            } );
-            //New icon inserted in the header -> resize file name
-            APP.fitText( $( '.breadcrumbs' ), $( '#pname' ), 30 );
-        } );
-    } );
-
-
-    $( document ).on( 'keydown', function ( e ) {
-        if ( e.which == '27' ) {
-            e.preventDefault();
-            SegmentActions.closeSegmentComment();
-            localStorage.setItem( MBC.localStorageCommentsClosed, true );
-        }
-    } );
-
-    $( document ).on( 'click', '.mbc-show-comment-btn', function ( e ) {
-        e.preventDefault();
-        e.stopPropagation();
-        $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
-
-        var sid = $( e.target ).closest( 'div' ).data( 'id' ) + "";
-        SegmentActions.scrollToSegment( sid, SegmentActions.openSegmentComment );
-    } );
-
-
-    $( document ).on( 'sse:comment', function ( ev, message ) {
-        CommentsActions.updateCommentsFromSse( message.data );
-        $( document ).trigger( 'mbc:comment:new', message.data );
-    } );
-
-    $( document ).on( 'click', '#filterSwitch', function ( e ) {
-        $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
-    } );
-
-    $( document ).on( 'click', '#mbc-history', function ( ev ) {
-        if ( $( '.mbc-history-balloon-outer' ).hasClass( 'mbc-visible' ) ) {
-            UI.closeAllMenus( ev );
-        } else {
-            UI.closeAllMenus( ev );
-            $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
-        }
-    } );
-
-    $( document ).on( 'mbc:comment:new', function ( ev, data ) {
-        updateHistoryWithLoadedSegments();
-    } );
-
-    $( document ).on( 'mbc:comment:saved', function ( ev, data ) {
-        //Update Header icon
-        updateHistoryWithLoadedSegments();
-    } );
-
-    $( window ).on( 'segmentOpened', function ( e, data ) {
-        var fn = function () {
-            if ( MBC.wasAskedByCommentHash( data.segmentId ) ) {
-                openSegmentComment( $( UI.getSegmentById( data.segmentId ) ) );
-            }
-            checkOpenSegmentComment( data.segmentId );
-        };
-
-        if ( MBC.commentsLoaded ) {
-            fn();
-        } else {
-            setTimeout( fn, 1000 );
-        }
-    } );
-
-    // $( document ).on( 'split:segment:complete', function ( e, sid ) {
-    //     var segment = UI.Segment.find( sid );
-    //     initCommentLink( segment.el );
-    //     renderCommentIconLink( segment.el );
-    // } );
-
-    // $( document ).on( 'click', '.mbc-tag-link', function ( e ) {
-    //     $( '.mbc-comment-textarea-tagging' ).toggleClass('hide');
-    // } );
-
-    $( document ).on( 'ui:segment:focus', function ( e, sid ) {
-        if ( lastCommentHash && lastCommentHash.segmentId == sid ) {
-            openSegmentComment( UI.Segment.findEl( sid ) );
-            lastCommentHash = null;
-        }
-    } );
-
     return (function ( $, config, window, MBC, undefined ) {
 
         MBC.const = {
@@ -539,6 +398,145 @@ MBC.init = function() {
                 '' + // insertCommentHeader
                 '</div>',
         };
+
+        /**
+         * Close balloon if the user click on some dead area
+         * of the page.
+         */
+        $( document ).on( 'click', function ( e ) {
+            if ( $( e.target ).closest( 'section' ) == null ) {
+                closeBalloon();
+            }
+        } );
+
+        initConstants();
+        // XXX: there'a binding on 'section' are delegated to #outer in ui.events.js.
+        //      Since our DOM elements are children of `section` we must attach to #outer
+        //      to in order to prevent bubbling.
+        //
+        //      If a click event reaches #outer, we assume the user clicked outside
+        //      the section, so we close the balloon.
+        //
+        //
+        var delegate = '#outer';
+
+
+        // Click reached #outer , close the history balloon
+        $( delegate ).on( 'click', function () {
+            $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+        } );
+
+        $( window ).on( 'segmentsAdded', function ( e ) {
+            loadCommentData( function ( resp ) {
+                resetDatabase( resp );
+                refreshElements();
+            } );
+        } );
+
+        $( document ).on( 'getSegments_success', function ( e ) {
+            loadCommentData( function ( resp ) {
+                MBC.commentsLoaded = true;
+                resetDatabase( resp );
+                $( document ).trigger( 'mbc:ready' );
+            } );
+        } );
+
+        $( document ).on( 'mbc:ready', function ( ev ) {
+
+            $( '#mbc-history' ).remove();
+            $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
+            $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
+
+
+            getTeamUsers().then( function () {
+                refreshElements();
+                // open a comment if was asked by hash
+                var lastAsked = popLastCommentHash();
+                if ( lastAsked ) {
+                    openSegmentComment( lastAsked.segmentId );
+                }
+            } );
+            //New icon inserted in the header -> resize file name
+            APP.fitText( $( '.breadcrumbs' ), $( '#pname' ), 30 );
+        } );
+
+
+        $( document ).on( 'keydown', function ( e ) {
+            if ( e.which == '27' ) {
+                e.preventDefault();
+                SegmentActions.closeSegmentComment();
+                localStorage.setItem( MBC.localStorageCommentsClosed, true );
+            }
+        } );
+
+        $( document ).on( 'click', '.mbc-show-comment-btn', function ( e ) {
+            e.preventDefault();
+            e.stopPropagation();
+            $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+
+            var sid = $( e.target ).closest( 'div' ).data( 'id' ) + "";
+            SegmentActions.scrollToSegment( sid, SegmentActions.openSegmentComment );
+        } );
+
+
+        $( document ).on( 'sse:comment', function ( ev, message ) {
+            CommentsActions.updateCommentsFromSse( message.data );
+            $( document ).trigger( 'mbc:comment:new', message.data );
+        } );
+
+        $( document ).on( 'click', '#filterSwitch', function ( e ) {
+            $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+        } );
+
+        $( document ).on( 'click', '#mbc-history', function ( ev ) {
+            if ( $( '.mbc-history-balloon-outer' ).hasClass( 'mbc-visible' ) ) {
+                UI.closeAllMenus( ev );
+            } else {
+                UI.closeAllMenus( ev );
+                $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
+            }
+        } );
+
+        $( document ).on( 'mbc:comment:new', function ( ev, data ) {
+            updateHistoryWithLoadedSegments();
+        } );
+
+        $( document ).on( 'mbc:comment:saved', function ( ev, data ) {
+            //Update Header icon
+            updateHistoryWithLoadedSegments();
+        } );
+
+        $( window ).on( 'segmentOpened', function ( e, data ) {
+            var fn = function () {
+                if ( MBC.wasAskedByCommentHash( data.segmentId ) ) {
+                    openSegmentComment( $( UI.getSegmentById( data.segmentId ) ) );
+                }
+                checkOpenSegmentComment( data.segmentId );
+            };
+
+            if ( MBC.commentsLoaded ) {
+                fn();
+            } else {
+                setTimeout( fn, 1000 );
+            }
+        } );
+
+        // $( document ).on( 'split:segment:complete', function ( e, sid ) {
+        //     var segment = UI.Segment.find( sid );
+        //     initCommentLink( segment.el );
+        //     renderCommentIconLink( segment.el );
+        // } );
+
+        // $( document ).on( 'click', '.mbc-tag-link', function ( e ) {
+        //     $( '.mbc-comment-textarea-tagging' ).toggleClass('hide');
+        // } );
+
+        $( document ).on( 'ui:segment:focus', function ( e, sid ) {
+            if ( lastCommentHash && lastCommentHash.segmentId == sid ) {
+                openSegmentComment( UI.Segment.findEl( sid ) );
+                lastCommentHash = null;
+            }
+        } );
 
     })( jQuery, config, window, MBC );
 };
