@@ -759,6 +759,8 @@ class ProjectManager {
                 ];
             }
 
+            $this->_log( $this->projectStructure[ 'result' ][ 'errors' ] );
+
             //EXIT
             return false;
         }

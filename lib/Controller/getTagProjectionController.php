@@ -109,14 +109,15 @@ class getTagProjectionController extends ajaxController {
         $config[ 'suggestion' ]  = $Filter->fromLayer2ToLayer1( $this->suggestion );
 
         $result = $engine->getTagProjection( $config );
-        if( empty( $result->error ) ){
-            $this->result[ 'data' ][ 'translation' ] = $result->responseData;
-            $this->result[ 'code' ] = 0;
-            $this->logTagProjection();
-        } else {
+        if( !empty( $result->error ) ){
             $this->result[ 'code' ] = $result->error->code;
             $this->result[ 'errors' ] = $result->error;
-            $this->logTagProjection( $result->error );
+            $this->logTagProjection(
+                    [
+                            'request' => $config,
+                            'error' => $result->error
+                    ]
+            );
         }
 
         \Log::$fileName = $this->old_logFile;
