@@ -506,7 +506,7 @@ var UI = {
 		var where = (this.startSegmentId) ? 'center' : 'after';
 		var step = this.initSegNum;
 		$('#outer').addClass('loading');
-		var seg = (options.segmentToScroll) ? options.segmentToScroll : this.startSegmentId;
+		var seg = (options.segmentToOpen) ? options.segmentToOpen : this.startSegmentId;
 
 		return APP.doRequest({
 			data: {
@@ -547,26 +547,23 @@ var UI = {
 		if (typeof d.data.files !== 'undefined') {
 
 			this.renderFiles(d.data.files, where, UI.firstLoad);
-			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
+			if ((options.openCurrentSegmentAfter) && (!options.segmentToOpen)) {
                 var seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
-				this.gotoSegment(seg);
+                SegmentActions.openSegment(seg);
 			}
 
-			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
-                SegmentActions.scrollToSegment( options.segmentToScroll );
-                SegmentActions.openSegment(options.segmentToScroll);
-			} else if (options.segmentToOpen) {
+			if (options.segmentToOpen && UI.segmentIsLoaded(options.segmentToOpen)) {
                 SegmentActions.scrollToSegment( options.segmentToOpen );
                 SegmentActions.openSegment(options.segmentToOpen);
-            }
+			}
 
 			// if (options.applySearch) {
 			// 	$('mark.currSearchItem').removeClass('currSearchItem');
 			// 	SearchUtils.markSearchResults(options);
 			// 	if (SearchUtils.searchMode == 'normal') {
-			// 		$('section[id^="segment-' + options.segmentToScroll + '"] mark.searchMarker').first().addClass('currSearchItem');
+			// 		$('section[id^="segment-' + options.segmentToOpen + '"] mark.searchMarker').first().addClass('currSearchItem');
 			// 	} else {
-			// 		$('section[id^="segment-' + options.segmentToScroll + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
+			// 		$('section[id^="segment-' + options.segmentToOpen + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
 			// 	}
 			// }
 		}
@@ -667,11 +664,11 @@ var UI = {
 	},
 	renderUntranslatedOutOfView: function() {
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
-		var segmentToScroll = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
-        window.location.hash = segmentToScroll;
+		var segmentToOpen = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
+        window.location.hash = segmentToOpen;
         UI.unmountSegments();
 		this.render({
-            segmentToScroll: segmentToScroll
+            segmentToOpen: segmentToOpen
         });
 	},
 	reloadWarning: function() {
@@ -687,13 +684,9 @@ var UI = {
 			this.render();
 		}
 	},
-	pointToOpenSegment: function(quick) {
-        quick = quick || false;
-        this.gotoOpenSegment(quick);
-	},
 	removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
-		$('#' + segment.attr('id') + '-buttons').empty();
+		$('#' + segment.attr('id') + '-buttons').empty();segmentPointer
 		$('p.warnings', segment).empty();
 	},
 	renderFiles: function(files, where, starting) {
@@ -767,7 +760,7 @@ var UI = {
             UI.unmountSegments();
             this.render({
                 caller: 'link2file',
-                segmentToScroll: sid,
+                segmentToOpen: sid,
                 scrollToFile: true
             });
         }
@@ -1931,7 +1924,7 @@ var UI = {
                 UI.gotoNextSegment(); //Others functionality override this function
                 // SegmentActions.openSegment(UI.nextSegmentId);
             } else {
-                SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
+                SegmentActions.gotoNextUntranslatedSegment();
             }
         };
 

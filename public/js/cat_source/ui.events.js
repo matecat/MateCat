@@ -206,10 +206,6 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.openOptionsPanel();
 		});
-		$("#segmentPointer").click(function(e) {
-			e.preventDefault();
-			UI.pointToOpenSegment();
-		});
 
 		$(".replace").click(function(e) {
 			e.preventDefault();
@@ -286,9 +282,9 @@ $.extend(UI, {
 			if ( config.isReview ) {
                 UI.openNextTranslated();
             } else {
-                UI.gotoNextUntranslatedSegment();
+                SegmentActions.gotoNextUntranslatedSegment();
             }
-		})
+		});
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
@@ -338,7 +334,7 @@ $.extend(UI, {
 		});
 		$("#jobMenu").on('click', 'li.currSegment:not(.disabled)', function(e) {
 			e.preventDefault();
-			UI.pointToOpenSegment();
+			SegmentActions.scrollToCurrentSegment();
 		});
 
 		$("#jobNav .currseg").on('click', function(e) {

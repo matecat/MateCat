@@ -24,7 +24,7 @@ $.extend(UI, {
 
         this.undoStack = [];
         this.undoStackPosition = 0;
-        this.nextUntranslatedSegmentIdByServer = 0;
+        this.nextUntranslatedSegmentIdByServer = null;
         this.checkUpdatesEvery = 180000;
         this.goingToNext = false;
         this.setGlobalTagProjection();

@@ -3880,25 +3880,6 @@ body.archived .footer {
     display: none !important;
 }
 
-#segmentPointer {
-    position: fixed;
-    width: 20px;
-    height: 16px;
-    background: url(../../img/arrow-menucolor.png) 0 0 no-repeat;
-    display: none;
-    z-index: 9999;
-}
-
-#segmentPointer.down {
-    margin: 400px 0 0 -10px;
-    background-image: url(../../img/arrow-menucolor-down.png) !important;
-}
-
-#segmentPointer.up {
-    margin: -10px 0 0 -10px;
-    background-image: url(../../img/arrow-menucolor.png) !important;
-}
-
 #authentication {
     float: right;
     margin-left: 50px;

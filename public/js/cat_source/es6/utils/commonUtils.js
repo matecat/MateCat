@@ -146,7 +146,7 @@ const CommonUtils = {
             var currentSegment = SegmentStore.getCurrentSegment();
             if ( currentSegment.sid === this.parsedHash.segmentId ) return;
             if ( segment.length ) {
-                UI.gotoSegment( this.parsedHash.segmentId );
+                SegmentActions.openSegment( this.parsedHash.segmentId );
             } else {
                 if ($('section').length) {
                     UI.pointBackToSegment( this.parsedHash.segmentId );

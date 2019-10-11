@@ -136,9 +136,9 @@ let SearchUtils = {
             SegmentActions.addSearchResultToSegments(response.segments, this.searchParams);
             if (this.pendingRender) {
                 if (this.pendingRender.detectSegmentToScroll) {
-                    this.pendingRender.segmentToScroll = this.nextResultSegment();
+                    this.pendingRender.segmentToOpen = this.nextResultSegment();
                 }
-                let segment = SegmentStore.getSegmentByIdToJS(this.pendingRender.segmentToScroll);
+                let segment = SegmentStore.getSegmentByIdToJS(this.pendingRender.segmentToOpen);
                 if (segment) {
                     SegmentActions.openSegment(segment.sid);
                 } else {

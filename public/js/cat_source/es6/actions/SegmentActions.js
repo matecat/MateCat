@@ -126,7 +126,7 @@ var SegmentActions = {
             UI.unmountSegments();
             UI.render({
                 firstLoad: false,
-                segmentToScroll: sid
+                segmentToOpen: sid
             });
         }
     },
@@ -135,6 +135,9 @@ var SegmentActions = {
             actionType: SegmentConstants.CLOSE_SEGMENT,
         });
         this.closeIssuesPanel();
+    },
+    scrollToCurrentSegment() {
+        this.scrollToSegment(SegmentStore.getCurrentSegment().sid);
     },
     scrollToSegment: function (sid, callback) {
         const segment = SegmentStore.getSegmentByIdToJS(sid);
@@ -150,7 +153,7 @@ var SegmentActions = {
             UI.unmountSegments();
             UI.render({
                 firstLoad: false,
-                segmentToScroll: sid
+                segmentToOpen: sid
             }).done(()=> callback && setTimeout(()=>callback.apply(this, [sid]), 1000));
         }
     },
@@ -849,6 +852,21 @@ var SegmentActions = {
             actionType: SegmentConstants.CLOSE_COMMENTS,
             sid: sid
         });
+    },
+    gotoNextSegment() {
+        let next = SegmentStore.getNextSegment();
+        if ( next ) {
+            SegmentActions.openSegment(next.sid);
+        } else {
+            this.closeSegment();
+        }
+    },
+    gotoNextUntranslatedSegment() {
+        let next = SegmentStore.getNextUntranslatedSegmentId();
+        SegmentActions.openSegment(next);
+    },
+    setNextUntranslatedSegmentFromServer(sid) {
+        SegmentStore.nextUntranslatedFromServer = sid;
     }
 
 };

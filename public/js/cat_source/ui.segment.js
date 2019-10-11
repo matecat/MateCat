@@ -149,8 +149,7 @@
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 UI.render({
-                    segmentToScroll: UI.getSegmentId(UI.currentSegment),
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment),
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
                 });
                 UI.checkWarnings(false);
             });
@@ -175,9 +174,7 @@
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 UI.render({
-                    segmentToScroll: UI.getSegmentId(UI.currentSegment),
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment),
-                    // applySearch: UI.body.hasClass('searchActive')
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
                 });
                 UI.checkWarnings(false);
             });
@@ -216,55 +213,14 @@
             var next = (currentSegment) ?  SegmentStore.getNextSegment(currentSegment.sid, null, null) : null;
             this.nextSegmentId = (next) ? next.sid : null;
         },
-        gotoNextUntranslatedSegment: function() {
-            if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
-                if (!UI.nextUntranslatedSegmentId) {
-                    SegmentActions.closeSegment(UI.currentSegmentId);
-                } else {
-                    UI.reloadWarning();
-                }
-            } else {
-                SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
-            }
-        },
-
-        gotoOpenSegment: function(quick) {
-            quick = quick || false;
-
-            if (this.currentSegmentId) {
-                SegmentActions.scrollToSegment( this.currentSegmentId );
-            } else {
-                this.render({
-                    firstLoad: false,
-                    segmentToOpen: this.currentSegmentId
-                });
-            }
-            $(window).trigger({
-                type: "scrolledToOpenSegment",
-                segment: this.currentSegment
-            });
-        },
+        //Override by others plugin
         gotoNextSegment: function() {
-            var nextSeg =  SegmentStore.getNextSegment();
-            if ( nextSeg ) {
-                SegmentActions.openSegment(nextSeg.sid);
-            } else if ( UI.noMoreSegmentsAfter){
-                SegmentActions.openSegment(config.firstSegmentOfFiles[0].first_segment);
-            }
+            SegmentActions.gotoNextSegment();
         },
         gotoPreviousSegment: function() {
             var prevSeg = SegmentStore.getPrevSegment();
             if ( prevSeg ) {
                 SegmentActions.openSegment( prevSeg.sid );
-            }
-
-        },
-        gotoSegment: function(id) {
-            if ( !this.segmentIsLoaded(id) && CommonUtils.parsedHash.splittedSegmentId ) {
-                id = CommonUtils.parsedHash.splittedSegmentId ;
-            }
-            if ( id ) {
-                SegmentActions.openSegment(id);
             }
 
         },
@@ -374,6 +330,7 @@
             }
 
             this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
+            SegmentActions.setNextUntranslatedSegmentFromServer(d.nextSegmentId);
 
             var segment = SegmentStore.getSegmentByIdToJS(id_segment);
             if (config.alternativesEnabled && !segment.alternatives) {

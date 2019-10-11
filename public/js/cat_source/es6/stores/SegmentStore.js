@@ -41,7 +41,7 @@ import Immutable  from 'immutable';
 
 EventEmitter.prototype.setMaxListeners(0);
 
-var SegmentStore = assign({}, EventEmitter.prototype, {
+const SegmentStore = assign({}, EventEmitter.prototype, {
 
     _segments: Immutable.fromJS([]),
     _globalWarnings: {
@@ -65,6 +65,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         segments: null,
         params: null
     },
+    nextUntranslatedFromServer: null,
     /**
      * Update all
      */
@@ -602,6 +603,11 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
             }
         });
         return result;
+    },
+    getNextUntranslatedSegmentId() {
+        let current = this.getCurrentSegment();
+        let next = this.getNextSegment(current.sid, null, 8);
+        return ( next ) ? next.sid : this.nextUntranslatedFromServer;
     },
     getPrevSegment(sid, alsoMutedSegments) {
         sid = ( !sid) ? this.getCurrentSegment().sid : sid;
