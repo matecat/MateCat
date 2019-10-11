@@ -36,17 +36,17 @@ class S3FilesStorage extends AbstractFilesStorage {
     /**
      * @var Client
      */
-    private $s3Client;
+    protected $s3Client;
 
     /**
      * @var Client
      */
-    private static $CLIENT;
+    protected static $CLIENT;
 
     /**
      * @var string
      */
-    private static $FILES_STORAGE_BUCKET;
+    protected static $FILES_STORAGE_BUCKET;
 
 
     /**
@@ -111,7 +111,7 @@ class S3FilesStorage extends AbstractFilesStorage {
     /**
      * set $FILES_STORAGE_BUCKET
      */
-    private static function setFilesStorageBucket() {
+    protected static function setFilesStorageBucket() {
         if ( null === \INIT::$AWS_STORAGE_BASE_BUCKET ) {
             throw new DomainException( '$AWS_STORAGE_BASE_BUCKET param is missing in INIT.php.' );
         }
@@ -643,7 +643,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return bool
      */
-    private function tryToUploadAFile( $bucketName, $destination, $origPath ) {
+    protected function tryToUploadAFile( $bucketName, $destination, $origPath ) {
         try {
             $this->s3Client->uploadItem( [
                     'bucket' => $bucketName,
