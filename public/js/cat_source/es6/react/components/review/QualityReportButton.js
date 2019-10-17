@@ -39,7 +39,7 @@ class QualityReportButton extends React.Component {
         href={this.props.quality_report_href}
         target="_blank">
            {/* {label}*/}
-            <IconQR width={36} height={36}/>
+            <IconQR width={30} height={30}/>
         </a> ;
     }
 }

@@ -217,7 +217,7 @@
             <div class="footer-body">
                 <!-- job id -->
                 <div class="item">
-                    <p id="job_id">ID: <span tal:replace="jid">---</span></p>
+                    <p id="job_id">Job ID: <span tal:replace="jid">---</span></p>
                 </div>
 
                 <!-- to from -->
@@ -254,16 +254,16 @@
                 <div class="item">
                     <div class="statistics-core">
                         <div id="stat-eqwords">
-                            <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                             <a tal:condition="php: allow_link_to_analysis && !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">
-                                <span tal:condition="not: isCJK">Weighted words</span>
-                                <span tal:condition="isCJK">Characters</span>
+                                <span tal:condition="not: isCJK">Weighted words</span> :
+                                <span tal:condition="isCJK">Characters : </span>
                             </a>
                             <tal:block tal:condition="php: !allow_link_to_analysis && !empty(analysis_enabled)">
-                                <span tal:condition="not: isCJK">Weighted words</span>
-                                <span tal:condition="isCJK">Characters</span>
+                                <span tal:condition="not: isCJK">Weighted words</span> :
+                                <span tal:condition="isCJK">Characters : </span>
                             </tal:block>
                             <tal:block tal:condition="php: empty(analysis_enabled)">Weighted words</tal:block>
+                            <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </div>
                     </div>
 

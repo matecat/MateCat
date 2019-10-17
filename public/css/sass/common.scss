@@ -230,16 +230,18 @@ footer nav {
 }
 
 footer a, footer #stat-todo span {
-  color: #fff;
   text-shadow: none;
-  text-decoration: underline;
   font-weight: 100;
   cursor: pointer;
+  color: black
+}
+#stat-eqwords strong {
+  font-weight: bold;
 }
 
-footer a:hover, footer #stat-todo span:hover {
+footer a:hover {
   text-decoration: none;
-  color: #ffffff;
+  //color: #ffffff;
 }
 
 /*footer .wrapper

@@ -201,7 +201,7 @@ class FilterProjects extends React.Component {
             <section className="row sub-head">
                 <div className="ui grid">
 
-                    <div className="ten wide column">
+                    <div className="twelve wide column">
                         <div className="ui right labeled fluid input search-state-filters">
                             <SearchInput
                                 onChange={this.onChangeSearchInput.bind(this)}/>
@@ -214,7 +214,7 @@ class FilterProjects extends React.Component {
                         <a class="cta-create-team-text">Create New Team <i className="icon-settings icon"></i></a>
                     </div>*/}
 
-                    <div className="six wide column pad-right-0">
+                    <div className="four wide column pad-right-0">
                         {membersFilter}
                     </div>
 

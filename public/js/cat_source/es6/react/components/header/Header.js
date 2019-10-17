@@ -106,7 +106,7 @@ class Header extends React.Component {
 	getHeaderComponentToShow = () => {
 
 		if (this.props.showFilterProjects) {
-			return <div className="nine wide column">
+			return <div className="ten wide column">
 				<FilterProjects
 					selectedTeam={this.selectedTeam}
 				/>
@@ -125,7 +125,7 @@ class Header extends React.Component {
 		const {teams,selectedTeamId} = this.state;
 
 		const userIcon = getUserIcon();
-		let containerClass = "user-teams four";
+		let containerClass = "user-teams three";
 		const componentToShow = getHeaderComponentToShow();
 
 		if (showLinks) {

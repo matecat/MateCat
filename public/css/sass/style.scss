@@ -24,10 +24,10 @@ body.incomingMsg header {
 header .wrapper {
     width: 100%;
     background: #002b5c;
-    height: 77px;
+    height: 60px;
     display: grid;
     grid-template-columns: 170px auto auto 64px;
-    padding: 0 20px;
+    padding: 0 33px;
     align-content: center;
     box-sizing: border-box;
     top:0;
@@ -5043,7 +5043,7 @@ input#markAsCompleteButton[disabled] {
 
 /* Header/Footer Restyling */
 
-$icon-scale : 36px;
+$icon-scale : 30px;
 $matecat-blue: #002b5c;
 $light-gray: #f2f5f7;
 $medium-gray : #acb3bd;
@@ -5194,7 +5194,7 @@ header {
         grid-template-rows: $icon-scale;
         align-items:center;
         justify-content: right;
-        column-gap: 12px;
+        column-gap: 15px;
 
         &.qr-element {
             grid-template-columns: auto;
@@ -5231,7 +5231,7 @@ header {
 
             /* Bug fix for Semantic UI Dropdown hover */
             .dropdown-menu-overlay {
-                width: 36px;
+                width: 30px;
                 height: 80px;
             }
 
@@ -5322,7 +5322,7 @@ header {
         }
         #action-download {
             background-image: url("../../img/icons/icon-download.svg");
-            background-size: 36px;
+            background-size: 30px;
         }
         #action-QR,
         #quality-report-button {

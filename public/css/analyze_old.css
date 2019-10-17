@@ -1001,7 +1001,7 @@ top: 25%;
 #analyze header .wrapper {
 	width: 100%;
 	background: #002b5c;
-	height: 77px;
+	height: 60px;
 	display: grid;
 	grid-template-columns: 208px minmax(0, 48px) minmax(200px, max-content) auto 120px;
 	align-items: center;
