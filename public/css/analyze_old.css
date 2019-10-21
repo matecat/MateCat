@@ -1764,6 +1764,9 @@ footer a:hover {
 #analyze header #user-menu-dropdown .organization-name {
     display: none;
 }
+#analyze .user-menu-container{
+    padding-left: 10px;
+}
 
 #analyze header .sing-in-header {
     padding: 0;
