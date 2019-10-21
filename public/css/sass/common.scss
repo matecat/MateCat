@@ -82,6 +82,7 @@ ul {
     display: grid;
     position: relative;
     grid-column-gap: 24px;
+    //grid-template-columns: minmax(auto,440px) auto;
     grid-template-columns: minmax(auto,440px) minmax(auto,440px) auto;
     align-items: center;
     .info{
