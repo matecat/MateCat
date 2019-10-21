@@ -344,12 +344,12 @@ a:hover{text-decoration:none}
        float: left;
 
    width: auto !important;*/
-    width: 88px;
+    min-width: 88px;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
     font-size: 20px !important;
     cursor: pointer;
-    color: #fff;
+    color: #fff !important;
     -moz-box-shadow: 0 1px 2px #ccc;
     -webkit-box-shadow: 0 1px 2px #ccc;
     box-shadow: 0 1px 2px #ccc;
@@ -558,7 +558,7 @@ span.complete {
     -moz-transition: all 100ms ease-in;
     font-size: 20px !important;
     cursor: pointer;
-    color: #fff;
+    color: #fff !important;
     background: #12b4df;
     -moz-box-shadow: 0 1px 2px #ccc;
     -webkit-box-shadow: 0 1px 2px #ccc;
