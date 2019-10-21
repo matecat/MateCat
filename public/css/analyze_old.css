@@ -1345,7 +1345,6 @@ a:hover {
 .loadingbar {
     background: #fff;
     width: 100%;
-    z-index: 100;
     -webkit-transition: all 300ms ease-in;
     -moz-transition: all 300ms ease-in;
     overflow: hidden;
