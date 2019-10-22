@@ -77,6 +77,7 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
                     }
                 } );
             }
+            CommentsStore.db.refreshHistory();
         },
 
         getCommentsBySegment: function ( s ) {

@@ -20,6 +20,7 @@ const CommentsActions = {
                     comment: resp.data.entries[0],
                     sid: sid
                 });
+                $( document ).trigger( 'mbc:comment:saved', resp.data.entries[0] );
             }
         }).fail(()=>{
             // showGenericWarning();

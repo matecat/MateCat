@@ -215,14 +215,7 @@ MBC.init = function() {
             };
 
             return APP.doRequest( {
-                data: data,
-                success: function ( resp ) {
-                    if ( resp.errors.length ) {
-                        // showGenericWarning();
-                    } else {
-                        $( document ).trigger( 'mbc:comment:saved', resp.data.entries[0] );
-                    }
-                }
+                data: data
             } );
         };
 
@@ -478,12 +471,6 @@ MBC.init = function() {
             SegmentActions.scrollToSegment( sid, SegmentActions.openSegmentComment );
         } );
 
-
-        $( document ).on( 'sse:comment', function ( ev, message ) {
-            CommentsActions.updateCommentsFromSse( message.data );
-            $( document ).trigger( 'mbc:comment:new', message.data );
-        } );
-
         $( document ).on( 'click', '#filterSwitch', function ( e ) {
             $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
         } );
@@ -498,6 +485,7 @@ MBC.init = function() {
         } );
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
+            CommentsActions.updateCommentsFromSse( data );
             updateHistoryWithLoadedSegments();
         } );
 
@@ -521,15 +509,6 @@ MBC.init = function() {
             }
         } );
 
-        // $( document ).on( 'split:segment:complete', function ( e, sid ) {
-        //     var segment = UI.Segment.find( sid );
-        //     initCommentLink( segment.el );
-        //     renderCommentIconLink( segment.el );
-        // } );
-
-        // $( document ).on( 'click', '.mbc-tag-link', function ( e ) {
-        //     $( '.mbc-comment-textarea-tagging' ).toggleClass('hide');
-        // } );
 
         $( document ).on( 'ui:segment:focus', function ( e, sid ) {
             if ( lastCommentHash && lastCommentHash.segmentId == sid ) {
