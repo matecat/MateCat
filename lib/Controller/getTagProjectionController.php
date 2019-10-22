@@ -109,7 +109,10 @@ class getTagProjectionController extends ajaxController {
         $config[ 'suggestion' ]  = $Filter->fromLayer2ToLayer1( $this->suggestion );
 
         $result = $engine->getTagProjection( $config );
-        if( !empty( $result->error ) ){
+        if( empty( $result->error ) ){
+            $this->result[ 'data' ][ 'translation' ] = $result->responseData;
+            $this->result[ 'code' ] = 0;
+        } else {
             $this->result[ 'code' ] = $result->error->code;
             $this->result[ 'errors' ] = $result->error;
             $this->logTagProjection(
