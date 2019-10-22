@@ -356,9 +356,9 @@ section.opened .warnings {
     border: 0;
     margin-top: 10px;
     /*background: url(../../img/logo.png) 0px 2px no-repeat;*/
-    width: 160px;
-    height: 32px;
-    background-size: 160px 32px;
+    width: 180px;
+    height: 38px;
+    background-size: cover;
     margin-left: 13px;
     margin-right: 13px;
 }
@@ -5154,10 +5154,10 @@ header {
 
         .logo {
             margin:0;
-            width: 160px;
-            height: 32px;
             background: url(../../img/logo_matecat.png) 0 0 no-repeat;
-            background-size: 160px 32px;
+            width: 180px;
+            height: 38px;
+            background-size: cover;
             top:0;
             left:0;
         }

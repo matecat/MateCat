@@ -88,26 +88,6 @@ class OutsourceInfo extends React.Component {
                                  <img src="../../public/img/outsource-clients/testimonial-responsive-translation.png" />
                             </div>
                         </div>
-                        {/*<div className="customer-box-info">
-                            <div className="customer-text">
-                                The outsourcing option in Matecat is so straightforward.
-                                You choose your language pairs, upload the document, get the price and send it off to the PM. So easy!
-                            </div>
-                            <div className="customer-info">
-                                <div className="customer-photo">
-                                    <img className="ui circular image" src="../../public/img/outsource-clients/boss-example-client.jpg" />
-                                </div>
-                                <div className="customer-name">
-                                    Kevin Connor
-                                </div>
-                                <div className="customer-role">
-                                    - Freelance translator
-                                </div>
-                            </div>
-                            <div className="customer-corporate-logo">
-                               Kevin Connor
-                            </div>
-                        </div>*/}
                         <div className="customer-box-info">
                             <div className="customer-text">
                                 I always receive translations back, exactly as I want. Great service, well worth trying out.

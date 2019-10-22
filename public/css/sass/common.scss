@@ -57,9 +57,9 @@ ul {
   float: left;
   border: 0;
   background: url(../../img/logo_matecat.png) 0px 0px no-repeat;
-  width: 160px;
-  height: 32px;
-  background-size: 160px 32px;
+  width: 180px;
+  height: 38px;
+  background-size: cover;
   //margin-top: 5px;
   position: relative;
 
@@ -83,7 +83,7 @@ ul {
     position: relative;
     grid-column-gap: 24px;
     //grid-template-columns: minmax(auto,440px) auto;
-    grid-template-columns: minmax(auto,440px) minmax(auto,440px) auto;
+    grid-template-columns: minmax(auto,440px) auto;
     align-items: center;
     .info{
       display: grid;
