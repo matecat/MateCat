@@ -129,7 +129,7 @@ class SegmentCommentsContainer extends React.Component {
                 thread_id = comment.thread_id;
             } );
             // Thread is not resolved
-            if ( comments.length - 1 && !comments[comments.length - 1].thread_id ) {
+            if ( !_.isUndefined(comments.length - 1) && !comments[comments.length - 1].thread_id ) {
                 resolveButton = <a className="ui button mbc-comment-label mbc-comment-btn mbc-comment-resolve-btn pull-right"
                 onClick={()=>this.resolveThread()}
                 >Resolve</a>
