@@ -1,5 +1,5 @@
 import SegmentActions  from "../../../../actions/SegmentActions";
-import CatToolActions  from "../../../../actions/CatToolActions";
+// import CatToolActions  from "../../../../actions/CatToolActions";
 import SegmentStore  from "../../../../stores/SegmentStore";
 import TextUtils from "../../../../utils/textUtils";
 

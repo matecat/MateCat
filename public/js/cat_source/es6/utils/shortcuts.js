@@ -4,6 +4,14 @@ const Shortcuts = {
     cattol: {
             label: "Translate/Revise",
             events: {
+                "openShortcutsModal": {
+                    "label": "Open shortcuts window",
+                    "equivalent": "Open shortcuts window",
+                    "keystrokes": {
+                        "standard": "alt+h",
+                        "mac": "ctrl+h",
+                    }
+                },
                 "translate": {
                     "label": "Confirm translation",
                     "equivalent": "click on Translated",
@@ -81,7 +89,7 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "alt+k",
-                        "mac": "alt+k",
+                        "mac": "ctrl+alt+k",
                     }
                 },
                 "openSettings": {
@@ -161,15 +169,15 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "ctrl+alt+arrows-enter",
-                        "mac": "Meta+alt+arrows",
+                        "mac": "ctrl+alt+arrows-enter",
                     }
                 },
                 "navigateTabs": {
                     "label": "Navigate segments Tabs",
                     "equivalent": "",
                     "keystrokes": {
-                        "standard": "alt + s",
-                        "mac": "alt + s",
+                        "standard": "alt+s",
+                        "mac": "alt+s",
                     }
                 }
             }

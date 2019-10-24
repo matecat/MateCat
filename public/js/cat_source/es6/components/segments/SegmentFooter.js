@@ -313,7 +313,7 @@ class SegmentFooter extends React.Component {
     }
 
     handleShortcutsKeyDown(e) {
-        if ( this.props.segment.opened && e.altKey && e.key === 's' ) {
+        if ( this.props.segment.opened && e.altKey && e.code === 'KeyS' ) {
             this.getNextTab();
         }
     }
