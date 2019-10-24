@@ -5,16 +5,13 @@ $.extend(UI, {
 	bindShortcuts: function() {
 		$("body").removeClass('shortcutsDisabled');
 
-		$("body").on('keydown.shortcuts', null, Shortcuts.cattol.events.openShortcutsModal.keystrokes[this.shortCutskey], function(e) {
-            UI.openShortcutsModal();
-		});
-
-
         this.shortCutskey = "standard";
 		if (UI.isMac) {
             this.shortCutskey = "mac";
         }
-        $("body").on('keydown.shortcuts', null, Shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
+        $("body").on('keydown.shortcuts', null, Shortcuts.cattol.events.openShortcutsModal.keystrokes[this.shortCutskey], function(e) {
+            UI.openShortcutsModal();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             UI.copySource();
         }).on('keydown.shortcuts',null, Shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
