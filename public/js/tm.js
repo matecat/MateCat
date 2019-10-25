@@ -2193,7 +2193,7 @@
                 if ( primary ) {
                     SegmentActions.modifyTabVisibility( 'multiMatches', true );
                     $( 'section.loaded' ).removeClass( 'loaded' );
-                    SegmentActions.getContribution( UI.currentSegmentId);
+                    SegmentActions.getContribution( UI.currentSegmentId, true);
                 } else {
                     SegmentActions.modifyTabVisibility( 'multiMatches', false );
                 }

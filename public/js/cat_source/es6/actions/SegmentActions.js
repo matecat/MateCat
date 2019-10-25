@@ -649,8 +649,8 @@ var SegmentActions = {
         TranslationMatches.getContribution(sid, 2);
     },
 
-    getContribution: function (sid) {
-        TranslationMatches.getContribution(sid, 0);
+    getContribution: function (sid, force) {
+        TranslationMatches.getContribution(sid, 0, force);
     },
 
     getContributionsSuccess: function(data, sid) {

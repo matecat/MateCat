@@ -94,7 +94,7 @@ let TranslationMatches = {
         SegmentActions.addClassToSegment(segment_id, 'loaded');
     },
 
-    getContribution: function(segmentSid, next) {
+    getContribution: function(segmentSid, next, force) {
         if (!config.translation_matches_enabled){
             SegmentActions.addClassToSegment( UI.getSegmentId( segment ), 'loaded' ) ;
             this.segmentQA(segment);
@@ -121,7 +121,7 @@ let TranslationMatches = {
         var areSimilar = CommonUtils.levenshteinDistance(s1,s2)/Math.max(s1.length,s2.length)*100 < 50;
         var isEqual = (s1 == s2) && s1 !== '';
 
-        var callNewContributions = areSimilar || isEqual;
+        var callNewContributions = areSimilar || isEqual || force;
 
         if (currentSegment.contributions && currentSegment.contributions.matches.length > 0 && !callNewContributions) {
             return $.Deferred().resolve();
