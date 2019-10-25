@@ -247,6 +247,7 @@ class SegmentsContainer extends React.Component {
             let $segment= $('#segment-' + segment.get('sid'));
             if ( ($segment.length && $segment.hasClass('opened')) || ($segment.length === 0 && this.lastOpenedHeight) ) {
                 itemHeight = ($segment.length) ? $segment.outerHeight() + 20 :  this.lastOpenedHeight;
+                itemHeight = itemHeight - 23; //Add private resources div
                 this.lastOpenedHeight = itemHeight
             }
         }
