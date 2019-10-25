@@ -78,7 +78,7 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openIssuesPanel.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             var segment = SegmentStore.getCurrentSegment();
-            if (segment) {
+            if (segment && Review.enabled()) {
                 SegmentActions.openIssuesPanel({sid: segment.sid});
                 SegmentActions.scrollToSegment(segment.sid);
             }
