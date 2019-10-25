@@ -160,12 +160,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             return true;
         },
 
-        closeIssuesPanel : function() {
-            SegmentActions.closeIssuesPanel();
-            $('body').removeClass('side-tools-opened review-side-panel-opened review-extended-opened');
-            localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
-        },
-
         deleteIssue : function( issue, sid, dontShowMessage) {
             var message = '';
             if ( issue.target_text ) {

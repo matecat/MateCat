@@ -698,6 +698,8 @@ var SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
         });
+        $('body').removeClass('side-tools-opened review-side-panel-opened review-extended-opened');
+        localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
     },
 
     closeSegmentIssuePanel: function ( sid ) {

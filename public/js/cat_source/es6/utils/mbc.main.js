@@ -454,14 +454,6 @@ MBC.init = function() {
         } );
 
 
-        $( document ).on( 'keydown', function ( e ) {
-            if ( e.which == '27' ) {
-                e.preventDefault();
-                SegmentActions.closeSegmentComment();
-                localStorage.setItem( MBC.localStorageCommentsClosed, true );
-            }
-        } );
-
         $( document ).on( 'click', '.mbc-show-comment-btn', function ( e ) {
             e.preventDefault();
             e.stopPropagation();

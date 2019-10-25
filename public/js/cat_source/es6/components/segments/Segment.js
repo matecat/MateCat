@@ -46,6 +46,7 @@ class Segment extends React.Component {
         this.checkIfCanOpenSegment = this.checkIfCanOpenSegment.bind(this);
         this.closeRevisionPanel = this.closeRevisionPanel.bind(this);
         this.openRevisionPanel = this.openRevisionPanel.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
         this.secondPassLocked = ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number === 2 && config.revisionNumber !== 2);
@@ -424,11 +425,32 @@ class Segment extends React.Component {
         }
     }
 
+    handleKeyDown( event ) {
+        if ( event.code === 'Escape' ) {
+            if ( this.props.segment.opened && !this.props.segment.openComments &&
+                !this.props.segment.openIssues &&
+                !UI.body.hasClass('search-open') &&
+                !UI.tagMenuOpen ) {
+                if (!this.props.segment.openSplit) {
+                    SegmentActions.closeSegment(this.props.segment.sid);
+                } else {
+                    SegmentActions.closeSplitSegment();
+                }
+            } else if ( this.props.segment.openComments ) {
+                SegmentActions.closeSegmentComment();
+                localStorage.setItem( MBC.localStorageCommentsClosed, true );
+            } else if ( this.props.segment.openIssues ) {
+                SegmentActions.closeIssuesPanel();
+            }
+        }
+    }
+
     allowHTML(string) {
         return { __html: string };
     }
 
     componentDidMount() {
+        document.addEventListener('keydown', this.handleKeyDown);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
@@ -454,6 +476,7 @@ class Segment extends React.Component {
 
 
     componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyDown);
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);

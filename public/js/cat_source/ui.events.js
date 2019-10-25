@@ -223,27 +223,7 @@ $.extend(UI, {
 		});
 
 
-		$('html')
-            .on('keydown', function(e) {
-            var esc = 27 ;
-
-            // ESC should close the current segment only if `article` is not
-            // resized to let space to the tools on the sidebar.
-
-            var handleEscPressed = function() {
-                var segment = SegmentStore.getCurrentSegment();
-                if ( segment &&
-                    !segment.openComments &&
-					!segment.openIssues &&
-                    !UI.body.hasClass('search-open') &&
-                    !UI.tagMenuOpen ) {
-                        SegmentActions.closeSegment(UI.currentSegmentId);
-                    }
-            };
-
-            if ( e.which == esc ) handleEscPressed() ;
-
-        }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
+		$('html').on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             UI.runDownload();
 		}).on('click', '#previewDropdown .previewLink a', function(e) {
