@@ -9,7 +9,7 @@ $.extend(UI, {
             this.shortCutskey = "mac";
         }
         $("body").on('keydown.shortcuts', null, Shortcuts.cattol.events.openShortcutsModal.keystrokes[this.shortCutskey], function(e) {
-            UI.openShortcutsModal();
+            APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts');
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
             e.preventDefault();
             UI.copySource();
@@ -114,39 +114,33 @@ $.extend(UI, {
 		this.bindShortcuts();
 
 
-		$(window).on('mousedown', function(e) {
-			if ($(e.target).hasClass("editarea")) {
-				return true;
-			}
-            //when the cattool is not loaded because of the job is archived,
-            // saveSelection leads to a javascript error
-            //so, add a check to see if the cattool page is really created/loaded
-            if( $('body' ).hasClass( '.job_archived' ) || $('body' ).hasClass( '.job_cancelled' ) ){
-                return false;
-            }
-
-            $('.editor .targetarea .rangySelectionBoundary').addClass('focusOut');
-
-            $('.editor .search-source .rangySelectionBoundary.focusOut,' +
-                '.editor .search-target .rangySelectionBoundary.focusOut'
-            ).remove();
-
-            if ( UI.editarea && UI.editarea != '') {
-                var hasFocusBefore = UI.editarea.is(":focus");
-                setTimeout(function() {
-                    var hasFocusAfter = UI.editarea && UI.editarea.is(":focus");
-                    if(hasFocusBefore && hasFocusAfter){
-                        $('.editor .rangySelectionBoundary.focusOut').remove();
-						UI.editarea.get(0).normalize();
-                    }
-                }, 600);
-            }
-        });
+		// $(window).on('mousedown', function(e) {
+		// 	if ($(e.target).hasClass("editarea")) {
+		// 		return true;
+		// 	}
+        //
+        //     $('.editor .targetarea .rangySelectionBoundary').addClass('focusOut');
+        //
+        //     $('.editor .search-source .rangySelectionBoundary.focusOut,' +
+        //         '.editor .search-target .rangySelectionBoundary.focusOut'
+        //     ).remove();
+        //
+        //     if ( UI.editarea && UI.editarea != '') {
+        //         var hasFocusBefore = UI.editarea.is(":focus");
+        //         setTimeout(function() {
+        //             var hasFocusAfter = UI.editarea && UI.editarea.is(":focus");
+        //             if(hasFocusBefore && hasFocusAfter){
+        //                 $('.editor .rangySelectionBoundary.focusOut').remove();
+		// 				UI.editarea.get(0).normalize();
+        //             }
+        //         }, 600);
+        //     }
+        // });
 
 		window.onbeforeunload = function(e) {
 			return CommonUtils.goodbye(e);
 		};
-        //Header events
+        //Header/Footer events
 		$("#filterSwitch").bind('click', function(e) {
             SearchUtils.toggleSearch(e);
 		});
@@ -205,79 +199,55 @@ $.extend(UI, {
                 SegmentActions.gotoNextUntranslatedSegment();
             }
 		});
+        $("#point2seg").bind('mousedown', function(e) {
+            e.preventDefault();
+            CatToolActions.toggleQaIssues();
+        });
+        $("#navSwitcher").on('click', function(e) {
+            e.preventDefault();
+        });
 
-		$("#outer").on('click', 'a.percentuage', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-		}).on('mousedown', '.editToolbar .uppercase', function() {
-			UI.formatSelection('uppercase');
-		}).on('mousedown', '.editToolbar .lowercase', function() {
-			UI.formatSelection('lowercase');
-		}).on('mousedown', '.editToolbar .capitalize', function() {
-			UI.formatSelection('capitalize');
-		}).on('click', '.editor .source .locked,.editor .editarea .locked, ' +
+        $("#pname").on('click', function(e) {
+            UI.closeAllMenus(e);
+            e.preventDefault();
+            UI.toggleFileMenu();
+        });
+        $("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
+            e.preventDefault();
+            UI.renderAndScrollToSegment($(this).attr('data-segment'));
+        }).on('click', 'li.currSegment:not(.disabled)', function(e) {
+            e.preventDefault();
+            SegmentActions.scrollToCurrentSegment();
+        });
+        $("#jobNav .currseg").on('click', function(e) {
+            e.preventDefault();
+            var current = SegmentStore.getCurrentSegment();
+            if ( !current ) {
+                UI.unmountSegments();
+                UI.render({
+                    firstLoad: false
+                });
+            } else {
+                SegmentActions.scrollToSegment( current.original_sid );
+            }
+        });
+
+        //###################################################
+
+		$("#outer").on('click', '.editor .source .locked,.editor .editarea .locked, ' +
             '.editor .source .locked a,.editor .editarea .locked a', function(e) {
             e.preventDefault();
             e.stopPropagation();
             TagUtils.markSelectedTag( $( this ) );
-        }).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
-			return false;
         }).on('keydown', function(e) {
-            if((e.which == 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
+            if((e.which === 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
                 $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
                 e.preventDefault();
                 e.stopPropagation();
             }
 		});
 
-		$("#point2seg").bind('mousedown', function(e) {
-			e.preventDefault();
-			CatToolActions.toggleQaIssues();
-		});
-
-		$("#navSwitcher").on('click', function(e) {
-			e.preventDefault();
-		});
-
-		$("#pname").on('click', function(e) {
-			UI.closeAllMenus(e);
-			e.preventDefault();
-			UI.toggleFileMenu();
-		});
-
-		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
-			e.preventDefault();
-			if (UI.currentSegment) {
-                UI.saveSegment(UI.currentSegment);
-            }
-			UI.renderAndScrollToSegment($(this).attr('data-segment'));
-		});
-		$("#jobMenu").on('click', 'li.currSegment:not(.disabled)', function(e) {
-			e.preventDefault();
-			SegmentActions.scrollToCurrentSegment();
-		});
-
-		$("#jobNav .currseg").on('click', function(e) {
-			e.preventDefault();
-            var current = SegmentStore.getCurrentSegment();
-			if ( !current ) {
-				UI.unmountSegments();
-                UI.render({
-                    firstLoad: false
-                });
-			} else {
-                SegmentActions.scrollToSegment( current.original_sid );
-			}
-		});
-		this.initEnd = new Date();
-		this.initTime = this.initEnd - this.initStart;
-		if (this.debug) { console.log('Init time: ' + this.initTime); }
-
-    },
-
-    openShortcutsModal: function (  ) {
-        APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts');
-    },
+    }
 
 });
 

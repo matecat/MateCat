@@ -106,22 +106,20 @@ let EditArea = {
                     parentTag.remove();
                     e.preventDefault();
                 }
-
+                CursorUtils.restoreSelection();
                 setTimeout( function () {
                     // detect if selection ph is inside a monad tag
+                    CursorUtils.saveSelection();
                     if ( $( '.monad .rangySelectionBoundary', UI.editarea ).length ) {
-                        CursorUtils.saveSelection();
                         $( '.monad:has(.rangySelectionBoundary)', UI.editarea ).after( $( '.monad .rangySelectionBoundary', UI.editarea ) );
-                        CursorUtils.restoreSelection();
                         // move selboundary after the monad
                     }
                     // detect if selection ph is inside a monad tag
                     if ( $( '.monad .monad', UI.editarea ).length ) {
-                        CursorUtils.saveSelection();
                         $( '.monad:has(.monad)', UI.editarea ).after( $( '.monad .monad', UI.editarea ) );
-                        CursorUtils.restoreSelection();
                         // move selboundary after the monad
                     }
+                    CursorUtils.restoreSelection();
                 }, 50 );
             }
         }

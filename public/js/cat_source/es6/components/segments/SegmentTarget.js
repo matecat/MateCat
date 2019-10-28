@@ -247,9 +247,9 @@ class SegmentTarget extends React.Component {
                     {tagModeButton}
                     {tagCopyButton}
                     <ul className="editToolbar">
-                        <li className="uppercase" title="Uppercase"/>
-                        <li className="lowercase" title="Lowercase"/>
-                        <li className="capitalize" title="Capitalized"/>
+                        <li className="uppercase" title="Uppercase" onClick={()=>UI.formatSelection('uppercase')}/>
+                        <li className="lowercase" title="Lowercase" onClick={ ()=>UI.formatSelection('lowercase')}/>
+                        <li className="capitalize" title="Capitalized" onClick={()=>UI.formatSelection('capitalize')}/>
                     </ul>
                 </div>
             </div>;
