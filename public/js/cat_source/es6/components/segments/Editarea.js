@@ -55,15 +55,7 @@ class Editarea extends React.Component {
                 editAreaClasses: editAreaClasses.slice()
             });
             setTimeout(function() {
-                editAreaClasses.push.apply(editAreaClasses, ['highlighted2']);
-                self.setState({
-                    editAreaClasses: editAreaClasses.slice()
-                });
-            }, 300);
-            setTimeout(function() {
                 let index = editAreaClasses.indexOf('highlighted1');
-                editAreaClasses.splice(index, 1);
-                index = editAreaClasses.indexOf('highlighted2');
                 editAreaClasses.splice(index, 1);
                 self.setState({
                     editAreaClasses: editAreaClasses.slice()
@@ -370,7 +362,7 @@ class Editarea extends React.Component {
 
     componentDidMount() {
         this.$editArea = $(this.editAreaRef);
-        this.saveInUndoStack();
+        // this.saveInUndoStack();
         Speech2Text.enabled() && this.state.editAreaClasses.push( 'micActive' ) ;
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);

@@ -236,9 +236,14 @@ class SegmentsContainer extends React.Component {
 
     getSegmentHeight(index) {
         let segment = this.getSegmentByIndex(index);
+        let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
 
         if ( this.segmentsHeightsMap[segment.get('sid')] &&  this.segmentsHeightsMap[segment.get('sid')].segment.equals(segment)) {
-            return this.segmentsHeightsMap[segment.get('sid')].height;
+            let heightToAdd = 0;
+            if ( previousFileId !== segment.get('id_file')) {
+                heightToAdd = 43;
+            }
+            return this.segmentsHeightsMap[segment.get('sid')].height + heightToAdd ;
         }
 
         let itemHeight = 0;
@@ -270,11 +275,7 @@ class SegmentsContainer extends React.Component {
             target.html('');
             itemHeight = Math.max(sourceHeight + 10, targetHeight + 10, 87) ;
         }
-        let preiousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
-        //If is the first segment of a file add the file header
-        if ( preiousFileId !== segment.get('id_file')) {
-            itemHeight = itemHeight + 47;
-        }
+
         //Collection type
         if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
             itemHeight = itemHeight + 35;
@@ -287,6 +288,12 @@ class SegmentsContainer extends React.Component {
                 height : height
             };
         }
+
+        //If is the first segment of a file add the file header
+        if ( previousFileId !== segment.get('id_file')) {
+            height = height + 43;
+        }
+
         return height;
     }
 
