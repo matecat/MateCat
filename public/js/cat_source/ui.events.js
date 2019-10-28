@@ -197,9 +197,6 @@ $.extend(UI, {
         }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
-		}).on('click', '#checkConnection', function(e) {
-			e.preventDefault();
-			OfflineUtils.checkConnection( 'Click from Human Authorized' );
 		}).on('click', '#statistics .meter a, #statistics #stat-todo', function(e) {
 			e.preventDefault();
 			if ( config.isReview ) {

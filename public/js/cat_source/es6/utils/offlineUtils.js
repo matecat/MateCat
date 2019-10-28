@@ -97,11 +97,14 @@ const OfflineUtils = {
 
     activateOfflineCountdown: function ( message ) {
 
-        if ( !$( '.noConnection' ).length ) {
-            UI.body.append( '<div class="noConnection"></div><div class="noConnectionMsg"></div>' );
+        if ( !this.offline ) {
+            UI.body.find('.noConnection').remove();
+            return;
         }
-
-        $( '.noConnectionMsg' ).html( '<div class="noConnectionMsg">' + message + '<br />' +
+        if ( UI.body.find('.noConnection').length === 0 ) {
+            UI.body.append( '<div class="noConnection"></div>' );
+        }
+        $( '.noConnection' ).html( '<div class="noConnectionMsg">' + message + '<br />' +
             '<span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br />' +
             '<input type="button" id="checkConnection" value="Try to reconnect now" /></div>' );
 
@@ -113,14 +116,24 @@ const OfflineUtils = {
             $._data( $("body")[0] ).events = {}
         }, 300 );
 
-        this.removeOldConnectionNotification();
+        $( '.noConnection #checkConnection' ).on('click', function(e) {
+            OfflineUtils.checkConnection( 'Click from Human Authorized' );
+        });
 
-        //clear previous Interval and set a new one
-        this.currentConnectionCountdown = $( ".noConnectionMsg .countdown" ).countdown( () => {
-            console.log( 'offlineCountdownEnd' );
-            this.checkConnection( 'Clear countdown authorized' );
-            this.activateOfflineCountdown( 'Still no connection.' );
-        }, 30, " seconds" );
+
+        this.removeOldConnectionNotification();
+        let timeleft = 30;
+        let countdown = setInterval( () => {
+            if (timeleft === 0) {
+                this.checkConnection( 'Clear countdown authorized' );
+                this.activateOfflineCountdown( 'Still no connection.' );
+                clearInterval(countdown);
+                $( '.noConnection #checkConnection' ).off('click');
+            } else {
+                timeleft--;
+                $('.noConnectionMsg .countdown').text(timeleft + ' seconds');
+            }
+        }, 1000 );
 
     },
     checkConnection: function( message ) {
