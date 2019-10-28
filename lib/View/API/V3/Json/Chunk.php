@@ -120,16 +120,16 @@ class Chunk extends \API\V2\Json\Chunk {
             foreach( $this->getChunkReviews() as $index => $chunkReview ) {
 
                 list( $passfail, $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
-                        $this->revisionQualityVars( $chunk, $project, $chunkReview );
+                        static::revisionQualityVars( $chunk, $project, $chunkReview );
 
-                $result = $this->populateQualitySummarySection($result, $chunkReview->source_page,
+                $result = static::populateQualitySummarySection( $result, $chunkReview->source_page,
                         $chunk, $quality_overall, $reviseIssues, $score, $categories,
                         $total_issues_weight, $total_reviewed_words_count, $passfail,
                         $chunkReview->total_tte,
                         $is_pass
                 );
 
-                $result = $this->populateRevisePasswords( $chunkReview, $result );
+                $result = static::populateRevisePasswords( $chunkReview, $result );
 
             }
 
@@ -178,7 +178,7 @@ class Chunk extends \API\V2\Json\Chunk {
      *
      * @return mixed
      */
-    protected function populateRevisePasswords( ChunkReviewStruct $chunk_review, $result ){
+    protected static function populateRevisePasswords( ChunkReviewStruct $chunk_review, $result ){
 
         if ( !isset( $result['revise_passwords'] ) ) {
             $result['revise_passwords'] = [];
@@ -203,7 +203,7 @@ class Chunk extends \API\V2\Json\Chunk {
     /**
      * @param $result
      * @param $source_page
-     * @param $jStruct
+     * @param \Jobs_JobStruct $jStruct
      * @param $quality_overall
      * @param $reviseIssues
      * @param $score
@@ -217,7 +217,7 @@ class Chunk extends \API\V2\Json\Chunk {
      *
      * @return mixed
      */
-    protected function populateQualitySummarySection( $result, $source_page, $jStruct, $quality_overall, $reviseIssues, $score, $categories,
+    protected static function populateQualitySummarySection( $result, $source_page, $jStruct, $quality_overall, $reviseIssues, $score, $categories,
                                                          $total_issues_weight, $total_reviewed_words_count, $passfail, $total_tte, $is_pass ) {
 
         if ( !isset( $result['quality_summary'] ) ) {
@@ -322,7 +322,7 @@ class Chunk extends \API\V2\Json\Chunk {
      * @return array
      * @internal param $reviseIssues
      */
-    protected function revisionQualityVars( Chunks_ChunkStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
+    protected static function revisionQualityVars( Chunks_ChunkStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
         $reviseIssues = [];
 
         $qualityReportDao = new QualityReportDao();
