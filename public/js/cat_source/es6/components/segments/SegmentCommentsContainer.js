@@ -145,7 +145,7 @@ class SegmentCommentsContainer extends React.Component {
         }
         let loggedUser = !!(this.state.user) ;
             // Se utente anonimo aggiungere mbc-comment-anonymous-label a mbc-comment-username
-        htmlInsert = <div className="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix mbc-first-input">
+        htmlInsert = <div className="mbc-thread-wrap mbc-post-comment-wrap mbc-clearfix mbc-first-input" ref={(container)=>this.container = container}>
                                 {/*<div className="mbc-new-message-notification">*/}
                                    {/*<span className="mbc-new-message-icon mbc-new-message-arrowdown">&#8595;</span>*/}
                                    {/*<a className="mbc-new-message-link"/>*/}
@@ -158,7 +158,7 @@ class SegmentCommentsContainer extends React.Component {
                                         <a className="mbc-comment-link-btn mbc-login-link" onClick={()=>{$('#modal').trigger('openlogin');}}>
                                             Login to receive comments</a>
                                     ) : (null)}
-                                    <div ref={(input)=>this.commentInput=input} onKeyDown={(e)=>(e.key === 'Enter') && this.sendComment()}
+                                    <div ref={(input)=>this.commentInput=input} onKeyPress={(e)=>(e.key === 'Enter') && this.sendComment()}
                                          className="mbc-comment-input mbc-comment-textarea" contentEditable={true} data-placeholder="Write a comment..."/>
                                     <div>
                                         <a className="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide"

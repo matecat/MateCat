@@ -139,12 +139,12 @@ $.extend(UI, {
             }
         }, 100 );
 
-        $( document ).on( 'keydown', '.mc-resizable-textarea', resetTextArea );
-        $( document ).on( 'paste', '.mc-resizable-textarea', function () {
-            setTimeout( function ( el ) {
-                resetTextArea.call( el );
-            }, 100, this );
-        } );
+        // $( document ).on( 'keydown', '.mc-resizable-textarea', resetTextArea );
+        // $( document ).on( 'paste', '.mc-resizable-textarea', function () {
+        //     setTimeout( function ( el ) {
+        //         resetTextArea.call( el );
+        //     }, 100, this );
+        // } );
 
 
 
