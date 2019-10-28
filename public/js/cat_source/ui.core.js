@@ -765,15 +765,6 @@ var UI = {
             });
         }
 	},
-	addWord: function(word) {
-		APP.doRequest({
-			data: {
-				action: 'setSpellcheck',
-				slang: config.target_rfc,
-				word: word
-			}
-		});
-	},
 
     getTranslationMismatches: function (id_segment) {
         APP.doRequest({

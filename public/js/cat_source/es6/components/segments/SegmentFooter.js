@@ -429,7 +429,7 @@ class SegmentFooter extends React.Component {
                 </ul>
                 {containers}
                 <div className="addtmx-tr white-tx">
-                    <a className="open-popup-addtm-tr">Add private resources</a>
+                    <a className="open-popup-addtm-tr" onClick={()=>UI.openLanguageResourcesPanel()}>Add private resources</a>
                 </div>
             </div>
         )

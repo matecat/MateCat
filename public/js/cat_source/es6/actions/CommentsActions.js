@@ -11,7 +11,7 @@ const CommentsActions = {
         });
     },
     sendComment: function ( text, sid ) {
-        MBC.submitComment(text, sid).done((resp)=>{
+        return MBC.submitComment(text, sid).done((resp)=>{
             if ( resp.errors.length ) {
                 // showGenericWarning();
             } else {
@@ -22,9 +22,7 @@ const CommentsActions = {
                 });
                 $( document ).trigger( 'mbc:comment:saved', resp.data.entries[0] );
             }
-        }).fail(()=>{
-            // showGenericWarning();
-        })
+        });
     },
     resolveThread: function (  sid ) {
         MBC.resolveThread( sid).done((resp)=>{

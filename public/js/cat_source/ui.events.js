@@ -3,7 +3,6 @@
  */
 $.extend(UI, {
 	bindShortcuts: function() {
-		$("body").removeClass('shortcutsDisabled');
 
         this.shortCutskey = "standard";
 		if (UI.isMac) {
@@ -113,61 +112,13 @@ $.extend(UI, {
 
 	setEvents: function() {
 		this.bindShortcuts();
-        var resetTextArea = _.debounce( function () {
-            console.debug( 'resetting') ;
-            var $this = $(this);
-            var maxHeight = $this.data('maxheight');
-            var minHeight = $this.data('minheight');
 
-            var borderTopWidth = parseFloat( $this.css( "borderTopWidth" ) );
-            var borderBottomWidth = parseFloat( $this.css( "borderBottomWidth" ) );
-            var borders = borderTopWidth + borderBottomWidth;
-            var scrollHeightWithBorders = this.scrollHeight + borders;
-
-            while ( scrollHeightWithBorders > $this.outerHeight() && $this.height() < maxHeight ) {
-                $this.height( $this.height() + 10 );
-            }
-
-            while ( scrollHeightWithBorders <= $this.outerHeight() && $this.height() > minHeight ) {
-                $this.height( $this.height() - 10 );
-            }
-
-            if ( $this.height() >= maxHeight ) {
-                $this.css( "overflow-y", "auto" );
-            } else {
-                $this.css( "overflow-y", "hidden" );
-            }
-        }, 100 );
-
-        // $( document ).on( 'keydown', '.mc-resizable-textarea', resetTextArea );
-        // $( document ).on( 'paste', '.mc-resizable-textarea', function () {
-        //     setTimeout( function ( el ) {
-        //         resetTextArea.call( el );
-        //     }, 100, this );
-        // } );
-
-
-
-		$("body").on('click', '.open-popup-addtm-tr', function(e) {
-            e.preventDefault();
-            UI.openLanguageResourcesPanel();
-        }).on('click', '.modal .x-popup', function() {
-			if($('body').hasClass('shortcutsDisabled')) {
-				UI.bindShortcuts();
-			}
-		}).on('click', '#spellCheck .words', function(e) {
-			e.preventDefault();
-			UI.selectedMisspelledElement.replaceWith($(this).text());
-		}).on('click', '#spellCheck .add', function(e) {
-			e.preventDefault();
-			UI.addWord(UI.selectedMisspelledElement.text());
-		});
 
 		$(window).on('mousedown', function(e) {
 			if ($(e.target).hasClass("editarea")) {
 				return true;
 			}
-            //when the catoool is not loaded because of the job is archived,
+            //when the cattool is not loaded because of the job is archived,
             // saveSelection leads to a javascript error
             //so, add a check to see if the cattool page is really created/loaded
             if( $('body' ).hasClass( '.job_archived' ) || $('body' ).hasClass( '.job_cancelled' ) ){
@@ -195,18 +146,13 @@ $.extend(UI, {
 		window.onbeforeunload = function(e) {
 			return CommonUtils.goodbye(e);
 		};
-
+        //Header events
 		$("#filterSwitch").bind('click', function(e) {
             SearchUtils.toggleSearch(e);
 		});
 		$("#advancedOptions").bind('click', function(e) {
 			e.preventDefault();
 			UI.openOptionsPanel();
-		});
-
-		$(".replace").click(function(e) {
-			e.preventDefault();
-			UI.body.toggleClass('replace-box');
 		});
 
 		$("div.notification-box").mouseup(function() {

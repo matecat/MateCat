@@ -17,7 +17,8 @@ class SegmentCommentsContainer extends React.Component {
         this.state = {
             comments: CommentsStore.getCommentsBySegment( this.props.segment.original_sid ),
             user: CommentsStore.getUser(),
-            teamUsers: CommentsStore.getTeamUsers()
+            teamUsers: CommentsStore.getTeamUsers(),
+            sendCommentError: false
         };
         this.types = {sticky: 3, resolve: 2, comment: 1};
         this.updateComments = this.updateComments.bind(this);
@@ -33,8 +34,15 @@ class SegmentCommentsContainer extends React.Component {
 
     sendComment() {
         let text = $(this.commentInput).html();
-        (text.trim().length > 0 ) && CommentsActions.sendComment(text, this.props.segment.original_sid);
-        setTimeout(()=>this.commentInput.textContent = "");
+        if (text.trim().length > 0 ) {
+            CommentsActions.sendComment(text, this.props.segment.original_sid).fail(()=>{
+                this.setState({sendCommentError:true});
+            }).done(()=>{
+                this.setState({sendCommentError:false});
+                setTimeout(()=>this.commentInput.textContent = "");
+            });
+        }
+
 
     }
 
@@ -164,9 +172,12 @@ class SegmentCommentsContainer extends React.Component {
                                         <a className="ui primary tiny button mbc-comment-btn mbc-comment-send-btn hide"
                                            onClick={()=>this.sendComment()}>Comment</a>
                                     </div>
-                                    {/*<div className="mbc-ajax-message-wrap hide">*/}
-                                        {/*<span className="mbc-warnings">Oops, something went wrong. Please try again later.</span>*/}
-                                    {/*</div>*/}
+                                    {(this.state.sendCommentError) ? (
+                                        <div className="mbc-ajax-message-wrap">
+                                            <span className="mbc-warnings">Oops, something went wrong. Please try again later.</span>
+                                        </div>
+                                    ) : null}
+
                                     <div>
                                     </div>
                                 </div>
