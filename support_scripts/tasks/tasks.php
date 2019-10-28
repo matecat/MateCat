@@ -9,6 +9,7 @@ use CommandLineTasks\CopyFilesFromS3Task;
 use CommandLineTasks\CreateTeamMembershipTask;
 use CommandLineTasks\CreateTeamTask;
 use CommandLineTasks\DumpSchemaTask;
+use CommandLineTasks\FindElementInS3CacheTask;
 use CommandLineTasks\Outsource\AirbnbOutsourceToHTS;
 use CommandLineTasks\Outsource\MicrosoftOutsourceToHTS;
 use CommandLineTasks\OwnerFeatures\AssignFeatureTask;
@@ -28,7 +29,8 @@ $app->add( new DqfAttributesDumpTask() );
 $app->add( new MicrosoftOutsourceToHTS() );
 $app->add( new AirbnbOutsourceToHTS() );
 $app->add( new CopyFilesFromS3Task() );
-$app->add( new FixChunkReviewRecordCounts() ) ;
+$app->add( new FindElementInS3CacheTask('dsa') );
+$app->add( new FixChunkReviewRecordCounts() );
 
 
 $app->run();
