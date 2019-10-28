@@ -169,7 +169,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      *
      * @return string
      */
-    private function getCachePackageHashFolder( $hash, $lang ) {
+    public function getCachePackageHashFolder( $hash, $lang ) {
         $hashTree = self::composeCachePath( $hash );
 
         return self::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $hashTree[ 'firstLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'secondLevel' ] . DIRECTORY_SEPARATOR . $hashTree[ 'thirdLevel' ] .
