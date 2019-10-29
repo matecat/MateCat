@@ -18,6 +18,7 @@ let ManageActions = {
             actionType: ManageConstants.RENDER_PROJECTS,
             projects: projects,
             team: team,
+            teams: teams,
             hideSpinner: hideSpinner,
             filtering: false
         });

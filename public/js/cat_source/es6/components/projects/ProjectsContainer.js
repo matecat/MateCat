@@ -8,8 +8,8 @@ class ProjectsContainer extends React.Component {
             projects : [],
             more_projects: true,
             reloading_projects: false,
-            team: null,
-            teams: null,
+            team: this.props.team,
+            teams: this.props.teams,
             filtering: false
         };
         this.renderProjects = this.renderProjects.bind(this);
@@ -21,18 +21,19 @@ class ProjectsContainer extends React.Component {
     }
 
 
-    renderProjects(projects, team, hideSpinner, filtering) {
+    renderProjects(projects, team, teams, hideSpinner, filtering) {
         let more_projects = true;
         if (hideSpinner) {
             more_projects = this.state.more_projects
         }
         let teamState = (team)? team : this.state.team;
-        let filteringState = (filtering) ? filtering : this.state.filtering
+        let filteringState = (filtering) ? filtering : this.state.filtering;
         this.setState({
             projects: projects,
             more_projects: more_projects,
             reloading_projects: false,
             team: teamState,
+            teams: teams,
             filtering: filteringState
         });
     }

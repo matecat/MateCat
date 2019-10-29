@@ -18,6 +18,9 @@ class ProjectContainer extends React.Component {
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
         this.changeUser = this.changeUser.bind(this);
         this.hideProject = this.hideProject.bind(this);
+        this.projectTeam = this.props.teams.find((team)=>team.get('id')===this.props.project.get('id_team'));
+        this.dropdownUsersInitialized = false;
+        this.dropdownTeamsInitialized = false;
     }
 
     hideProject(project) {
@@ -28,7 +31,7 @@ class ProjectContainer extends React.Component {
 
     initDropdowns() {
         let self = this;
-        if (this.dropdownUsers) {
+        if (this.dropdownUsers && !this.dropdownUsersInitialized) {
             if (this.props.project.get('id_assignee') ) {
                 $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
                 this.dropdownUsers.classList.remove("project-not-assigned");
@@ -51,8 +54,9 @@ class ProjectContainer extends React.Component {
             } else {
                 this.dropdownUsers.classList.remove("disabled");
             }
+            this.dropdownUsersInitialized = true;
         }
-        if (this.dropdownTeams) {
+        if (this.dropdownTeams && !this.dropdownTeamsInitialized) {
             $(this.dropdownTeams).dropdown('set selected', this.props.project.get('id_team'));
             $(this.dropdownTeams).dropdown({
                 fullTextSearch: 'exact',
@@ -60,6 +64,7 @@ class ProjectContainer extends React.Component {
                     self.changeTeam(value);
                 }
             });
+            this.dropdownTeamsInitialized = true;
         }
 
 
@@ -87,10 +92,7 @@ class ProjectContainer extends React.Component {
 
     changeUser(value) {
         let user, idUser;
-        let team = this.props.team;
-        if (this.props.team.get('type') == 'personal') {
-            team = this.projectTeam;
-        }
+        let team = this.projectTeam;
         if (value === '-1') {
             user = -1;
             idUser = -1;
@@ -116,6 +118,9 @@ class ProjectContainer extends React.Component {
     changeTeam(value) {
         if ( this.props.project.get('id_team') !==  parseInt(value) ) {
             ManageActions.changeProjectTeam(value,  this.props.project);
+            this.projectTeam = this.props.teams.find( (team)=>parseInt(team.get('id'))===parseInt(value));
+            this.dropdownUsersInitialized = false;
+            this.forceUpdate();
         }
     }
 
@@ -373,12 +378,8 @@ class ProjectContainer extends React.Component {
     getDropDownUsers() {
        let result = '';
        var self = this;
-       self.projectTeam = this.props.team;
        if (this.props.team.get("type") == 'personal') {
            if (this.props.teams){
-               self.projectTeam = this.props.teams.find(function (team) {
-                   return team.get('id') == self.props.project.get('id_team');
-               });
                if (self.projectTeam && self.projectTeam.get('members')) {
                    result = this.createUserDropDown(self.projectTeam.get('members'));
                } else {

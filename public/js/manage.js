@@ -138,7 +138,9 @@ UI = {
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
                 getLastActivity: API.PROJECTS.getLastProjectActivityLogAction,
                 changeJobPasswordFn: API.JOB.changeJobPassword,
-                downloadTranslationFn : this.downloadTranslation
+                downloadTranslationFn : this.downloadTranslation,
+                teams: this.teams,
+                team: this.selectedTeam
             }), mountPoint);
         }
 

@@ -169,7 +169,7 @@ AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
             ProjectsStore.setProjects(action.projects);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), action.hideSpinner, action.filtering);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), Immutable.fromJS(action.teams), action.hideSpinner, action.filtering);
             break;
         case ManageConstants.RENDER_ALL_TEAM_PROJECTS:
             ProjectsStore.setProjects(action.projects);
