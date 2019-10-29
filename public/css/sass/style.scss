@@ -2406,16 +2406,8 @@ section .text .warning {
     font-weight: bold
 }
 
-.indent {
-    text-indent: -20000px;
-}
-
 .body .charleft {
     display: none;
-}
-
-section.status-new:not(.modified) .editarea {
-    text-indent: -20000px;
 }
 
 section.status-new.opened .editarea {
