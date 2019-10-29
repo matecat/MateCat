@@ -1002,31 +1002,6 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
             flex-flow: column nowrap;
 }
 
-.lxq-info-link {
-    text-align: center;
-    color: #0798bc;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-        -ms-flex-align: center;
-            align-items: center;
-    text-decoration: none;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-}
-
-.lxq-info-link::after {
-    content: url("../../img/rsz_user_guide.png");
-    display: inline-block;
-    width: 2rem;
-    height: 2rem;
-    margin-left: 0.5rem;
-    line-height: 2.8rem;
-}
-
 .lxq-info-link:hover {
     cursor: pointer;
 }
@@ -1088,22 +1063,6 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
             align-items: center;
     text-transform: uppercase;
     font-size: 0.9rem;
-}
-
-.lxq-history-balloon-header-link {
-    content: url("../../img/report-arrow.svg");
-    width: 1.5rem;
-    height: 1.5rem;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    padding: 0.1rem;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-        -ms-flex-align: center;
-            align-items: center;
-    margin-left: 0.3rem;
 }
  
 .lxq-history-balloon-body {
@@ -1326,7 +1285,6 @@ LEXIQA POPUP
 /*}*/
 
 /*.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon {*/
-    /*content: url("../img/lexiqa_icons_info.svg");*/
 /*}*/
 
 /*.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon,*/
