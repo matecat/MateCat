@@ -4,6 +4,7 @@ namespace LQA;
 
 use Chunks_ChunkStruct;
 use Constants;
+use DataAccess_IDaoStruct;
 
 class ChunkReviewDao extends \DataAccess_AbstractDao {
 
@@ -189,7 +190,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @param Chunks_ChunkStruct[] $chunksArray
      * @param   string             $default_condition
      *
-     * @return ChunkReviewStruct[]
+     * @return DataAccess_IDaoStruct[]|ChunkReviewStruct[]
      */
     protected function _findChunkReviews( Array $chunksArray, $default_condition = ' WHERE 1 = 1 ' ){
 
@@ -212,10 +213,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
-        $stmt->execute( $_parameters );
 
-        return $stmt->fetchAll();
+        return $this->setCacheTTL( 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */ )->_fetchObject( $stmt, new ChunkReviewStruct(), $_parameters );
 
     }
 
