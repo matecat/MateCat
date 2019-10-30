@@ -14,7 +14,7 @@ class QualitySummaryTable extends React.Component {
             if (cat.get('subcategories').size === 0) {
                 cat.get('severities').forEach((sev)=>{
                     if (this.severitiesNames.indexOf( sev.get('label') ) === -1 ) {
-                        this.severities.push(sev.toJS());
+                        this.severities.unshift(sev.toJS());
                         this.severitiesNames.push(sev.get('label'));
                     }
                 });
@@ -23,13 +23,14 @@ class QualitySummaryTable extends React.Component {
                 cat.get('subcategories').forEach((subCat)=>{
                     subCat.get('severities').forEach((sev)=>{
                         if (this.severitiesNames.indexOf(sev.get('label')) === -1 ) {
-                            this.severities.push(sev.toJS());
+                            this.severities.unshift(sev.toJS());
                             this.severitiesNames.push(sev.get('label'));
                         }
                     });
                 });
             }
         });
+        this.severities = _.orderBy(this.severities, ['penalty'],['asc']);
     }
     getIssuesForCategory(categoryId) {
         if (this.props.qualitySummary.size > 0 ) {
