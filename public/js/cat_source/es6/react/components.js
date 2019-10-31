@@ -71,4 +71,4 @@ window.TranslationIssuesSideButton = require('./components/review/TranslationIss
 
 window.SearchUtils = require('./components/header/cattol/search/searchUtils');
 
-
+window.LanguageSelector = require('./components/languageSelector/LanguageSelector').default;
