@@ -59,6 +59,7 @@ module.exports = function(grunt) {
 
     var es2015Preset = require('babel-preset-env');
     var reactPreset = require('babel-preset-react');
+    var babelstage2 = require('babel-preset-stage-2');
 
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
@@ -103,7 +104,7 @@ module.exports = function(grunt) {
             components: {
                 options: {
                     transform: [
-                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
