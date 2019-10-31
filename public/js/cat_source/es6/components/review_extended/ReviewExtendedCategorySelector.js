@@ -29,12 +29,13 @@ class ReviewExtendedCategorySelector extends React.Component{
         // subcategories. Don't print the select box if no severity is found.
         let select = null;
         let severities;
-
+        let classCatName = this.props.category.options.code;
         let containerClasses = classnames({
             "re-item": true,
             "re-category-item": true,
             "severity-buttons" : (this.props.category.severities.length > 0),
-            "active" : this.props.active
+            "active" : this.props.active,
+            classCatName: true
         });
         if ( this.props.category.severities.length > 3 ) {
             severities = this.props.category.severities.map((severity, i) =>{
@@ -68,16 +69,15 @@ class ReviewExtendedCategorySelector extends React.Component{
                     "right": ( i === this.props.category.severities.length - 1 || this.props.category.severities.length === 1),
                     "active": this.props.active && i === this.props.severityActiveIndex
                 });
-
+                let label = (this.props.category.severities.length === 1) ? severity.label : severity.label.substring(0,3);
                 return <button key={'value-' + severity.label}
                                onClick={this.onClick.bind(this, severity.label)}
-                               className={buttonClass}
-                               title={severity.label}>{severity.label.substring(0,3)}
+                               className={"ui " + buttonClass + " attached button"}
+                               title={severity.label}>{label}
                 </button>;
             });
 
             select = <div className="re-severities-buttons ui tiny buttons" ref={(input) => { this.selectRef = input;}}
-                          name="severities"
                           title="Select severities">
                 {severities}
             </div>;
