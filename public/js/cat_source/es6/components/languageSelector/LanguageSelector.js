@@ -34,6 +34,7 @@ class LanguageSelector extends React.Component {
 	onClose = () => {
 		this.props.onClose();
 	};
+	
 	onConfirm = () => {
 		const {selectedLanguages} = this.state;
 		this.props.onConfirm(selectedLanguages);
