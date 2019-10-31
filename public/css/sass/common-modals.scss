@@ -602,7 +602,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     overflow: visible;
     max-height: inherit;
     font-size: 24px;
-    background: #4D4D4D url(../img/logo-ico.png) 25px 13px no-repeat;
+    background: #4D4D4D url(../../img/logo-ico.png) 25px 13px no-repeat;
     padding: 10px 10px 7px 70px;
     background-size: 35px;
     color: #fff;
@@ -1334,7 +1334,7 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     }
     .matecat-modal-middle {
         padding: 10px 15px;
-        max-height: 430px;
+        max-height: 530px;
         overflow: auto;
         .shortcut-list {
             &:not(:first-of-type) {
@@ -1407,6 +1407,15 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                             &.\33 :after {
                                 content: "3";
                             }
+                            &.a:after {
+                                content: "A";
+                            }
+                            &.c:after {
+                                content: "C";
+                            }
+                            &.h:after {
+                                content: "H";
+                            }
                             &.i:after {
                                 content: "I";
                             }
@@ -1463,6 +1472,12 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                             }
                             &.home:after {
                                 content: "Home";
+                            }
+                            &.arrows:after {
+                                content: "Arrows";
+                            }
+                            &.arrows-enter:after {
+                                content: "Arrows/Enter";
                             }
                         }
                     }

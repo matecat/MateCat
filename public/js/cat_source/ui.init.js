@@ -2,6 +2,72 @@
 	Component: ui.init
  */
 $.extend(UI, {
+    render: function(options) {
+        options = options || {};
+        var seg = (options.segmentToOpen || false);
+        this.segmentToScrollAtRender = (seg) ? seg : false;
+
+        this.isSafari = (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0);
+        this.isChrome = (typeof window.chrome != 'undefined');
+        this.isFirefox = (typeof navigator.mozApps != 'undefined');
+
+        this.isMac = (navigator.platform == 'MacIntel') ? true : false;
+        this.body = $('body');
+        // this.firstLoad = (options.firstLoad || false);
+        this.initSegNum = 100; // number of segments initially loaded
+        this.moreSegNum = 25;
+        this.numOpenedSegments = 0;
+        this.maxMinutesBeforeRerendering = 60;
+        this.loadingMore = false;
+        this.noMoreSegmentsAfter = false;
+        this.noMoreSegmentsBefore = false;
+
+        this.undoStack = [];
+        this.undoStackPosition = 0;
+        this.nextUntranslatedSegmentIdByServer = null;
+        this.checkUpdatesEvery = 180000;
+        this.goingToNext = false;
+        this.setGlobalTagProjection();
+        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+        if(this.tagModesEnabled && !this.enableTagProjection) {
+            UI.body.addClass('tagModes');
+        } else {
+            UI.body.removeClass('tagModes');
+        }
+
+        /**
+         * Global Translation mismatches array definition.
+         */
+        this.translationMismatches = [];
+        /**
+         * Global Warnings array definition.
+         */
+        this.globalWarnings = [];
+
+        this.readonly = (this.body.hasClass('archived')) ? true : false;
+
+
+        this.setTagLockCustomizeCookie(true);
+        this.debug = false;
+        UI.detectStartSegment();
+        options.openCurrentSegmentAfter = !!((!seg) && (!this.firstLoad));
+
+
+        if ( UI.firstLoad ) {
+
+            this.lastUpdateRequested = new Date();
+
+            // setTimeout(function() {
+            // 	UI.getUpdates();
+            // }, UI.checkUpdatesEvery);
+
+        }
+
+        CatToolActions.renderSubHeader();
+        this.renderQualityReportButton();
+        return UI.getSegments(options);
+
+    },
     start: function () {
 
         // TODO: the following variables used to be set in UI.init() which is called
@@ -9,15 +75,13 @@ $.extend(UI, {
         // of SegmentFilter, see below.
         UI.firstLoad = true;
         UI.body = $('body');
-        UI.checkSegmentsArray = {} ;
         UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
         UI.checkCrossLanguageSettings();
-        UI.setShortcuts();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
         });
-        setBrowserHistoryBehavior();
+        CommonUtils.setBrowserHistoryBehavior();
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
@@ -37,13 +101,12 @@ $.extend(UI, {
             $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();
         }
-        NOTIFICATIONS.start();
-        UI.checkTagProximity =  _.debounce( UI.checkTagProximityFn, 500);
-        UI.updateSegmentTranslation =  _.debounce( UI.updateSegmentTranslationFn, 500);
+        CatToolActions.startNotifications();
+
+        UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
     },
 	init: function() {
 
-		this.registerFooterTabs();
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
 
@@ -53,31 +116,14 @@ $.extend(UI, {
 		this.numMatchesResults = 10;
 		this.editarea = '';
 		this.byButton = false;
-		this.blockGetMoreSegments = true;
-		this.noGlossary = false;
 		this.displayedMessages = [];
-		setTimeout(function() {
-			UI.blockGetMoreSegments = false;
-		}, 200);
-		this.loadCustomization();
-        $('html').trigger('init');
-        this.setTagMode();
-		this.detectFirstLast();
-		rangy.init();
-		this.savedSel = null;
-		this.savedSelActiveElement = null;
-		this.autoscrollCorrectionEnabled = true;
-        this.offline = false;
 
+        Customizations.loadCustomization();
+        $('html').trigger('init');
+		rangy.init();
 		if (SearchUtils.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
-		setTimeout(function() {
-			UI.autoscrollCorrectionEnabled = false;
-		}, 2000);
-		this.checkSegmentsArray = {};
 		this.warningStopped = false;
-		this.abortedOperations = [];
-        this.logEnabled = true;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.setTranslationTail = [];
@@ -99,7 +145,7 @@ $.extend(UI, {
 
         // SET EVENTS
 		this.setEvents();
-		this.checkQueryParams();
+		APP.checkQueryParams();
 
         UI.firstLoad = false;
 	},
@@ -107,58 +153,10 @@ $.extend(UI, {
         UI.unmountSegments();
         this.start();
     },
-    checkQueryParams: function () {
-        var action = APP.getParameterByName("action");
-        if (action) {
-            switch (action) {
-                case 'download':
-                    var interval = setTimeout(function () {
-                        $('#downloadProject').trigger('click');
-                        clearInterval(interval);
-                    }, 300);
-                    APP.removeParam('action');
-                    break;
-                case 'openComments':
-                    if ( MBC.enabled() ) {
-                        var interval = setInterval(function () {
-                            if ( $( '.mbc-history-balloon-outer' ) ) {
-                                $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
-                                clearInterval(interval);
-                            }
-                        }, 500);
-
-                    }
-                    APP.removeParam('action');
-                    break;
-                case 'warnings':
-                    var interval = setInterval(function () {
-                        if ( $( '#notifbox.warningbox' ) ) {
-                            $("#point2seg").trigger('mousedown');
-                            clearInterval(interval);
-                        }
-                    }, 500);
-                    APP.removeParam('action');
-                    break;
-            }
+    renderQualityReportButton: function() {
+        CatToolActions.renderQualityReportButton();
+        if ( config.secondRevisionsCount ) {
+            UI.reloadQualityReport();
         }
-
     },
-	/**
-	 * Register tabs in segment footer
-	 */
-	registerFooterTabs: function () {
-        SegmentActions.registerTab('concordances', true, false);
-
-        if ( config.translation_matches_enabled ) {
-            SegmentActions.registerTab('matches', true, true);
-        }
-
-        SegmentActions.registerTab('glossary', true, false);
-        SegmentActions.registerTab('alternatives', false, false);
-        // SegmentActions.registerTab('messages', false, false);
-        if ( ReviewSimple.enabled() ) {
-            UI.registerReviseTab();
-
-        }
-	}
 });

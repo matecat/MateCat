@@ -4,7 +4,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
     $.extend(ReviewExtended, {
 
         submitIssue: function (sid, data_array, diff) {
-            var fid = UI.getSegmentFileId(UI.getSegmentById(sid))
+            var fid = UI.getSegmentFileId(UI.getSegmentById(sid));
 
 
             var deferreds = _.map(data_array, function (data) {
@@ -33,36 +33,28 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         render: function ( options ) {
             var promise = (new $.Deferred() ).resolve();
             originalRender.call(this, options);
-            this.downOpts = {
-                offset: '100%',
-                context: $('#outer')
-            };
-            this.upOpts = {
-                offset: '-100%',
-                context: $('#outer')
-            };
             return promise;
         },
-        overrideButtonsForRevision: function () {
-            var div = $('<ul>' + UI.segmentButtons + '</ul>');
-            var className = "revise-button-" + ReviewExtended.number;
-            div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved').addClass(className);
-            var nextSegment = UI.currentSegment.next();
-            var nextSelector = this.getSelectorForNextSegment();
-            var goToNextApprovedButton = !nextSegment.is(nextSelector);
-            var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
-            div.find('.next-untranslated').parent().remove();
-            div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition').removeClass('primary').addClass('green');
-            div.find('.next-repetition-group').removeClass('next-repetition-group').addClass('next-review-repetition-group').removeClass('primary').addClass('green');
-            if (goToNextApprovedButton && !filtering) {
-                var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
-                    '-nexttranslated" href="#" class="btn next-unapproved ' + className + '" data-segmentid="segment-' +
-                    this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
-                    ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-                div.html(htmlButton + div.html());
-            }
-            UI.segmentButtons = div.html();
-        },
+        // overrideButtonsForRevision: function () {
+        //     var div = $('<ul>' + UI.segmentButtons + '</ul>');
+        //     var className = "revise-button-" + ReviewExtended.number;
+        //     div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved').addClass(className);
+        //     var nextSegment = UI.currentSegment.next();
+        //     var nextSelector = this.getSelectorForNextSegment();
+        //     var goToNextApprovedButton = !nextSegment.is(nextSelector);
+        //     var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
+        //     div.find('.next-untranslated').parent().remove();
+        //     div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition').removeClass('primary').addClass('green');
+        //     div.find('.next-repetition-group').removeClass('next-repetition-group').addClass('next-review-repetition-group').removeClass('primary').addClass('green');
+        //     if (goToNextApprovedButton && !filtering) {
+        //         var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
+        //             '-nexttranslated" href="#" class="btn next-unapproved ' + className + '" data-segmentid="segment-' +
+        //             this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
+        //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+        //         div.html(htmlButton + div.html());
+        //     }
+        //     UI.segmentButtons = div.html();
+        // },
         /**
          * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
          * @param editarea
@@ -72,17 +64,16 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             var segmentFid = UI.getSegmentFileId($(editarea));
             var currentSegment =  UI.getSegmentById(segmentId)
             var originalTranslation = currentSegment.find('.original-translation').html();
-            SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
+            // SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
         },
 
         submitIssues: function (sid, data, diff) {
             return ReviewExtended.submitIssue(sid, data, diff);
         },
 
-        getSegmentVersionsIssuesHandler(event) {
-            var sid = event.segment.absId;
-            var fid = UI.getSegmentFileId(event.segment.el);
-            UI.getSegmentVersionsIssues(sid, fid);
+        getSegmentVersionsIssuesHandler(sid) {
+            var segment = SegmentStore.getSegmentByIdToJS(sid);
+            UI.getSegmentVersionsIssues(segment.original_sid, segment.id_file);
         },
 
         getSegmentVersionsIssues: function (segmentId, fileId) {
@@ -142,18 +133,14 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
          * @returns {boolean}
          */
         segmentIsModified: function ( sid ) {
-            var segmentFid = UI.getSegmentFileId(UI.currentSegment);
-            var segment = SegmentStore.getSegmentByIdToJS(sid, segmentFid);
-            var versionTranslation = ( segment.versions[0] ) ? $('<div/>').html(UI.transformTagsWithHtmlAttribute(segment.versions[0].translation)).text() :
-                segment.translation;
-
-            return ( UI.currentSegment.hasClass('modified') && versionTranslation.trim() !== UI.getSegmentTarget(UI.currentSegment).trim() );
+            var segment = SegmentStore.getSegmentByIdToJS(sid);
+            return segment.modified;
         },
         submitComment : function(id_segment, id_issue, data) {
             return ReviewExtended.submitComment(id_segment, id_issue, data)
         },
         openIssuesPanel : function(data, openSegment) {
-            var segment = (data)? UI.Segment.findEl( data.sid ): data;
+            var segment = SegmentStore.getSegmentByIdToJS( data.sid );
 
             if (segment && !UI.evalOpenableSegment( segment )) {
                 return false;
@@ -164,30 +151,13 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             $('body').addClass('side-tools-opened review-side-panel-opened');
             window.dispatchEvent(new Event('resize'));
             if (data && openSegment) {
-                segment.find( UI.targetContainerSelector() ).click();
+                SegmentActions.openSegment(data.sid);
+                SegmentActions.scrollToSegment(data.sid);
                 window.setTimeout( function ( data ) {
-                    var el = UI.Segment.find( data.sid ).el;
-
-                    if ( UI.currentSegmentId != data.sid ) {
-                        UI.focusSegment( el );
-                    }
-
-                    UI.scrollSegment( el );
+                    SegmentActions.scrollToSegment( data.sid );
                 }, 500, data );
             }
-        },
-
-        closeIssuesPanel : function() {
-            hackIntercomButton( false );
-            SegmentActions.closeIssuesPanel();
-            $('body').removeClass('side-tools-opened review-side-panel-opened review-extended-opened');
-            localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
-            if ( UI.currentSegment ) {
-                setTimeout( function() {
-                    UI.scrollSegment( UI.currentSegment );
-                }, 100 );
-            }
-            window.dispatchEvent(new Event('resize'));
+            return true;
         },
 
         deleteIssue : function( issue, sid, dontShowMessage) {
@@ -227,7 +197,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             APP.doRequest( {
                 data: data,
                 error: function () {
-                    UI.failedConnection( data, 'setRevision' );
+                    OfflineUtils.failedConnection( data, 'setRevision' );
                 },
                 success: function ( d ) {
                     window.quality_report_btn_component.setState( {
@@ -250,38 +220,45 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             }
         },
 
-        clickOnApprovedButton: function ( e, button ) {
+        clickOnApprovedButton: function (button ) {
             // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
             // because of the event is triggered even on download button
-            e.preventDefault();
             var sid = UI.currentSegmentId;
+            var segment = SegmentStore.getSegmentByIdToJS(sid);
 
             //If is a splitted segment the user need to specify a issue before approve
-            var isSplit = sid.indexOf("-") !== -1;
+            var isSplit = segment.splitted;
             if (!isSplit && UI.segmentIsModified(sid) && ReviewExtended.issueRequiredOnSegmentChange) {
                 SegmentActions.showIssuesMessage(sid);
                 return;
             }
 
-            var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? false : true;
-            UI.tempDisablingReadonlyAlert = true;
+            var goToNextUnapproved = ($( button ).hasClass( 'next-unapproved' )) ? true : false;
             SegmentActions.removeClassToSegment( sid, 'modified' );
             UI.currentSegment.data( 'modified', false );
 
 
             $( '.sub-editor.review .error-type' ).removeClass( 'error' );
 
+            var afterApproveFn = function (  ) {
+                if ( goToNextUnapproved ) {
+                    if ( segment.revision_number > 1 ) {
+                        UI.openNextApproved();
+                    } else {
+                        UI.openNextTranslated();
+                    }
+                } else {
+                    UI.gotoNextSegment( sid );
+                }
+            };
+
             UI.setTimeToEdit(UI.currentSegment);
-            UI.changeStatus( button, 'approved', 0 );  // this does < setTranslation
+            UI.changeStatus( button, 'approved', 0,  afterApproveFn);  // this does < setTranslation
 
             var original = UI.currentSegment.find( '.original-translation' ).text();
 
 
-            if ( goToNextNotApproved ) {
-                UI.openNextTranslated();
-            } else {
-                UI.gotoNextSegment( sid );
-            }
+
 
             var data = {
                 action: 'setRevision',
@@ -296,13 +273,20 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             }
             UI.setRevision( data );
         },
-        getSelectorForNextSegment: function() {
-            if ( ReviewExtended.number === 1 ) {
-                return '.status-translated';
-            } else if ( ReviewExtended.number === 2 ){
-                return 'section.status-translated, section.status-approved.approved-step-1';
+        openNextApproved: function ( sid ) {
+            sid = sid || UI.currentSegmentId;
+            var nextApprovedSegment = SegmentStore.getNextSegment(sid, null, 9, 1);
+            var nextApprovedSegmentInPrevious = SegmentStore.getNextSegment(-1, null, 9, 1);
+            // find in next segments
+            if(nextApprovedSegment) {
+                SegmentActions.openSegment(nextApprovedSegment.sid);
+                // else find from the beginning of the currently loaded segments in all files
+            } else if ( this.noMoreSegmentsBefore && nextApprovedSegmentInPrevious) {
+                SegmentActions.openSegment(nextApprovedSegmentInPrevious.sid);
+            } else if ( !this.noMoreSegmentsBefore || !this.noMoreSegmentsAfter) { // find in not loaded segments or go to the next approved
+                SegmentActions.openSegment(UI.nextUntranslatedSegmentIdByServer);
             }
-        },
+        }
 
     });
 }

@@ -6,6 +6,7 @@ APP = {
         if (config.isLoggedIn) {
             var self = this;
             APP.USER.loadUserData().done(function ( ) {
+                TeamsActions.updateUser(APP.USER.STORE);
                 self.setTeamNameInMenu();
                 self.setUserImage();
             });
@@ -44,7 +45,7 @@ APP = {
         } ).on( 'click', '.modal[data-type=confirm_checkbox] .btn-cancel, .modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function ( e ) {
             e.preventDefault();
             APP.closePopup();
-            el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
+            var el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
             if ( $( el ).attr( 'data-callback' ) ) {
                 if ( typeof UI[$( el ).attr( 'data-callback' )] === 'function' ) {
                     var context = $( el ).attr( 'data-context' ) || '';
@@ -433,7 +434,7 @@ APP = {
                     .attr('disabled','disabled' )
                     .removeAttr('data-callback' )
                     .attr('data-callback-disabled', callback)
-                    .bind("click",UI.disableLink);
+                    .bind("click",APP.disableLink);
         };
 
         var enableOk = function ( context ) {
@@ -443,7 +444,7 @@ APP = {
                     .removeAttr('disabled')
                     .removeAttr('data-callback-disabled' )
                     .attr('data-callback', callback)
-                    .unbind('click', UI.disableLink);
+                    .unbind('click', APP.disableLink);
         };
 
         newPopup = renderPopup( conf );
@@ -774,7 +775,6 @@ APP = {
                             type: 'error'
                         };
                         APP.addNotification(notification);
-                        // UI.showMessage({msg: tokenData.message})
                     }
                     if (callback) {
                         callback();
@@ -822,9 +822,6 @@ APP = {
         // TODO: this should be relative to the current USER, find a
         // way to generate this at runtime.
         //
-        /*if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
-         UI.showDownloadCornerTip();
-         }*/
 
         if ( typeof window.googleDriveWindows == 'undefined' ) {
             window.googleDriveWindows = {};
@@ -979,7 +976,44 @@ APP = {
             expiration.setYear(new Date().getFullYear() + 1);
         }
         document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
-    }
+    },
+
+    checkQueryParams: function () {
+        var action = APP.getParameterByName("action");
+        if (action) {
+            switch (action) {
+                case 'download':
+                    var interval = setTimeout(function () {
+                        $('#downloadProject').trigger('click');
+                        clearInterval(interval);
+                    }, 300);
+                    APP.removeParam('action');
+                    break;
+                case 'openComments':
+                    if ( MBC.enabled() ) {
+                        var interval = setInterval(function () {
+                            if ( $( '.mbc-history-balloon-outer' ) ) {
+                                $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
+                                clearInterval(interval);
+                            }
+                        }, 500);
+
+                    }
+                    APP.removeParam('action');
+                    break;
+                case 'warnings':
+                    var interval = setInterval(function () {
+                        if ( $( '#notifbox.warningbox' ) ) {
+                            $("#point2seg").trigger('mousedown');
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                    APP.removeParam('action');
+                    break;
+            }
+        }
+
+    },
 
 
 };

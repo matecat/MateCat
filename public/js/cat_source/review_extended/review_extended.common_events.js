@@ -8,16 +8,12 @@ if (ReviewExtended.enabled()) {
         ReviewExtended.getSegmentsIssues();
     });
 
-    $( window ).on( 'segmentClosed', function ( e ) {
-        SegmentActions.closeSegmentIssuePanel(UI.getSegmentId(e.segment));
-    } );
-
-    $( window ).on( 'segmentOpened', function ( e ) {
-        var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) == 'true';
+    $( window ).on( 'segmentOpened', function ( e, data ) {
+        var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) === 'true';
         if (config.isReview && !panelClosed) {
-            SegmentActions.openIssuesPanel({sid:e.segment.absoluteId}, false)
+            SegmentActions.openIssuesPanel({sid: data.segmentId}, false)
         }
-        UI.getSegmentVersionsIssuesHandler(e);
+        UI.getSegmentVersionsIssuesHandler(data.segmentId);
     } );
 
     $(document).on('translation:change', function(e, data) {
@@ -25,18 +21,9 @@ if (ReviewExtended.enabled()) {
         UI.reloadQualityReport();
     });
 
-    $( document ).on( 'keydown', function ( e ) {
-        var esc = '27' ;
-        if ( e.which == esc ) {
-            if (!$('.modal').is(':visible')) {
-                UI.closeIssuesPanel();
-            }
-        }
-    });
-
     $(document).on('header-tool:open', function(e, data) {
         if ( data.name == 'search' ) {
-            UI.closeIssuesPanel();
+            SegmentActions.closeIssuesPanel();
         }
     });
 
