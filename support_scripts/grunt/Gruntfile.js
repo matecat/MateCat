@@ -94,7 +94,22 @@ module.exports = function(grunt) {
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
-                    }
+                    },
+                },
+                src: [
+                    basePath + 'cat_source/es6/react-libs.js'
+                ],
+                dest: buildPath + 'react.js'
+            },
+            libsDev: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    },
+                    watch: true,
                 },
                 src: [
                     basePath + 'cat_source/es6/react-libs.js'
@@ -108,7 +123,22 @@ module.exports = function(grunt) {
                     ],
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
-                    }
+                    },
+                },
+                src: [
+                    basePath + 'cat_source/es6/*.js'
+                ],
+                dest: buildPath + 'cat-react.js'
+            },
+            componentsDev: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset,babelstage2 ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    },
+                    watch: true,
                 },
                 src: [
                     basePath + 'cat_source/es6/*.js'
@@ -312,7 +342,7 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            react_libs: {
+            /*react_libs: {
                 files: [
                     basePath + 'cat_source/es6/react-libs.js'
                 ],
@@ -324,14 +354,14 @@ module.exports = function(grunt) {
             },
             react: {
                 files: [
-                    basePath + 'cat_source/es6/**/*.js'
+                    basePath + 'cat_source/es6/!**!/!*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {
                     interrupt: true,
                     livereload : true
                 }
-            },
+            },*/
             js: {
                 files: [
                     basePath + 'cat_source/*.js',
@@ -342,6 +372,16 @@ module.exports = function(grunt) {
                     basePath + 'advancedOptionsTab.js'
                 ],
                 tasks: ['concat:js'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            },
+            uploadjs: {
+                files: [
+                    basePath + 'new-project.js',
+                ],
+                tasks: ['concat:upload'],
                 options: {
                     interrupt: true,
                     livereload : true
@@ -560,6 +600,31 @@ module.exports = function(grunt) {
         'replace:version'
     ]);
 
+
+    /**
+     * bundleDev:js
+     *
+     * This task includes all the tasks required to build a final
+     * javascript. This is not done in development usually since it
+     * would recompile parts that are heavy and not frequently changed
+     * like libraries.
+     */
+    grunt.registerTask('bundleDev:js', [
+        'browserify:libsDev',
+        'browserify:componentsDev',
+        'browserify:qualityReport',
+        'concat:libs',
+        'concat:libs_upload',
+        'concat:semantic',
+        'concat:app',
+        'concat:common',
+        'concat:manage',
+        'concat:analyze',
+        'concat:analyze_new',
+        'concat:upload',
+        'replace:version'
+    ]);
+
     /**
      * development:js
      *
@@ -596,7 +661,7 @@ module.exports = function(grunt) {
      * just development bundles.
      */
     grunt.registerTask('development', [
-        'bundle:js',
+        'bundleDev:js',
         'sass',
         'replace:css'
     ]);
