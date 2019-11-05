@@ -7,10 +7,7 @@ class LanguageSelector extends React.Component {
 		this.state = {
 			selectedLanguages: null,
 			initialLanguages: null,
-
-			isShowingModal: false,
-			styleContainer:'',
-			onCloseCallback: false
+			querySearch: ''
 		};
 	}
 
@@ -31,42 +28,48 @@ class LanguageSelector extends React.Component {
 	}
 
 	render() {
-		const {languagesList,onClose, onConfirm} = this.props;
-		const {selectedLanguages} = this.state;
+		const {onQueryChange, onToggleLanguage, onConfirm} = this;
+		const {languagesList, onClose} = this.props;
+		const {selectedLanguages, querySearch} = this.state;
 		return <div id="language-modal-overlay">
-					<div id="language-modal" className="language-modal">
-						<div className="language-modal-content" >
-							<div className="language-modal-header">
-								{/*<span className="close-language-modal x-popup" />*/}
-							</div>
-							<div className="language-modal-body">
-								<h1>{selectedLanguages}</h1>
-								<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}/>
-								<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}/>
-								<button onClick={onClose}>close</button>
-								<button onClick={onConfirm}>confirm</button>
-							</div>
+            <div id="language-modal" className="language-modal">
+                <div className="language-modal-content" >
+                    <div className="language-modal-header">
+                        <h1>{selectedLanguages}: {querySearch}</h1>
+                    </div>
+                </div>
+                <div className="language-modal-body">
 
-						</div>
-					</div>
-				</div>
+			<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
+									querySearch={querySearch}
+									onDeleteLanguage={onToggleLanguage}
+									onQueryChange={onQueryChange}/>
+			<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}
+								  querySearch={querySearch}
+								  onToggleLanguage={onToggleLanguage}/>
+			<button onClick={onClose}>close</button>
+			<button onClick={onConfirm}>confirm</button>
+                </div>
+            </div>
+		</div>
 	}
 
 	onConfirm = () => {
 		//confirm must have 1 language selected
 		const {selectedLanguages} = this.state;
 		const {languagesList} = this.props;
-		const mappedSelectedLanguages = selectedLanguages.map(e=>{
-			return languagesList.filter(i=>i.code === e)[0]
+		const mappedSelectedLanguages = selectedLanguages.map(e => {
+			return languagesList.filter(i => i.code === e)[0]
 		});
 		this.props.onConfirm(mappedSelectedLanguages);
-	}
+	};
 
-	onClose = (event) => {
-		event.stopPropagation();
-		this.setState({
-			showingModal: false
-		})
+	onQueryChange = (querySearch) => {
+		this.setState({querySearch})
+	};
+
+	onToggleLanguage = (language) => {
+		//when add a language, restore query search.
 	}
 }
 

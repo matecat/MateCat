@@ -5,7 +5,6 @@ class LanguageSelectorSearch extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			query: '',
 			tags: []
 		}
 	}
@@ -26,20 +25,16 @@ class LanguageSelectorSearch extends React.Component {
 		this.setState({tags})
 	}
 
-	handleChangeInput = (query) => {
-		this.setState({query})
-	}
-
-
 	render() {
-		const {query, tags} = this.state;
+		const {onQueryChange,querySearch} = this.props;
+		const {tags} = this.state;
 		return <div>
 			<TagsInput
-				inputValue={query}
-				onChangeInput={this.handleChangeInput}
+				inputValue={querySearch}
+				onChangeInput={onQueryChange}
 				value={tags}
 				onChange={this.handleChange}/>
-			<p>search: {query}</p>
+			<p>search: {querySearch}</p>
 		</div>
 	}
 
@@ -48,7 +43,9 @@ class LanguageSelectorSearch extends React.Component {
 Header.defaultProps = {
 	selectedLanguages: false,
 	languagesList: true,
-	onSearch: true,
+	querySearch: true,
+	onDeleteLanguage: true,
+	onQueryChange: true,
 };
 
 export default LanguageSelectorSearch;
