@@ -28,7 +28,6 @@ class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
         $this->chunk_review->advancement_wc = $chunkReviewDao->recountAdvancementWords( $this->chunk, $this->chunk_review->source_page ) ;
         $this->chunk_review->total_tte = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page ) ;
 
-
         $this->updatePassFailResult( $project );
     }
 
