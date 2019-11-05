@@ -21,7 +21,7 @@ let SegmentFilterUtils = {
             'segment is no longer in the sample' ;
 
         return (function() {
-            if ( this.notification ) APP.removeNotification( SegmentFilterUtils.notification ) ;
+            if ( SegmentFilterUtils.notification ) APP.removeNotification( SegmentFilterUtils.notification ) ;
 
             SegmentFilterUtils.notification = APP.addNotification({
                 autoDismiss : false,
