@@ -105,6 +105,8 @@
             return doDirectScroll( segment, highlight, quick ) ; 
         } else if( $(segment.selector + '-1').length ) {
             return doDirectScroll( $(segment.selector + '-1'), highlight, quick ) ;
+        }else if( $('#segment-' + idSegment + '-1').length ) {
+            return doDirectScroll( $('#segment-' + idSegment + '-1'), highlight, quick ) ;
         }
         else if ( idSegment ){
             return tryToRenderAgain( idSegment, highlight, true ) ;
