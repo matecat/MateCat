@@ -46,6 +46,7 @@ module.exports = function(grunt) {
         cssBase + 'common.css',
         cssBase + 'upload-page.scss',
         cssBase + 'popup.css',
+        cssBase + 'sass/modals/*',
         cssBase + 'sass/notifications.scss'
     ];
 

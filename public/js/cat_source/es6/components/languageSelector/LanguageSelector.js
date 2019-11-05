@@ -28,11 +28,11 @@ class LanguageSelector extends React.Component {
 	}
 
 	render() {
-		const {onQueryChange, onToggleLanguage, onConfirm} = this;
+		const {onQueryChange, onToggleLanguage, onConfirm,preventDismiss} = this;
 		const {languagesList, onClose} = this.props;
 		const {selectedLanguages, querySearch} = this.state;
 		return <div id="matecat-modal-languages" className="matecat-modal" onClick={onClose}>
-					<div className="matecat-modal-content" >
+					<div className="matecat-modal-content" onClick={preventDismiss}>
 
 						<div className="matecat-modal-header">
 							<div className={"modal-logo"}/>
@@ -73,7 +73,9 @@ class LanguageSelector extends React.Component {
 					</div>
 				</div>
 	}
-
+	preventDismiss = (event) => {
+		event.stopPropagation();
+	}
 	onConfirm = () => {
 		//confirm must have 1 language selected
 		const {selectedLanguages} = this.state;

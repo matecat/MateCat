@@ -1,0 +1,15 @@
+#matecat-modal-languages {
+  .languages-columns {
+    max-height: calc(100% - 48px);
+    display: flex;
+    flex-direction: row;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    ul {
+      flex: 1;
+      overflow: visible;
+      max-height: 100%;
+    }
+  }
+}
