@@ -6,7 +6,8 @@ class LanguageSelector extends React.Component {
 		super(props);
 		this.state = {
 			selectedLanguages: null,
-			initialLanguages: null
+			initialLanguages: null,
+			querySearch: ''
 		};
 	}
 
@@ -27,14 +28,20 @@ class LanguageSelector extends React.Component {
 	}
 
 	render() {
-		const {languagesList,onClose} = this.props;
-		const {selectedLanguages} = this.state;
+		const {onQueryChange, onToggleLanguage, onConfirm} = this;
+		const {languagesList, onClose} = this.props;
+		const {selectedLanguages, querySearch} = this.state;
 		return <div>
-			<h1>{selectedLanguages}</h1>
-			<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}/>
-			<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}/>
+			<h1>{selectedLanguages}: {querySearch}</h1>
+			<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
+									querySearch={querySearch}
+									onDeleteLanguage={onToggleLanguage}
+									onQueryChange={onQueryChange}/>
+			<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}
+								  querySearch={querySearch}
+								  onToggleLanguage={onToggleLanguage}/>
 			<button onClick={onClose}>close</button>
-			<button onClick={this.onConfirm}>confirm</button>
+			<button onClick={onConfirm}>confirm</button>
 		</div>
 	}
 
@@ -42,10 +49,18 @@ class LanguageSelector extends React.Component {
 		//confirm must have 1 language selected
 		const {selectedLanguages} = this.state;
 		const {languagesList} = this.props;
-		const mappedSelectedLanguages = selectedLanguages.map(e=>{
-			return languagesList.filter(i=>i.code === e)[0]
+		const mappedSelectedLanguages = selectedLanguages.map(e => {
+			return languagesList.filter(i => i.code === e)[0]
 		});
 		this.props.onConfirm(mappedSelectedLanguages);
+	};
+
+	onQueryChange = (querySearch) => {
+		this.setState({querySearch})
+	};
+
+	onToggleLanguage = (language) => {
+		//when add a language, restore query search.
 	}
 }
 
