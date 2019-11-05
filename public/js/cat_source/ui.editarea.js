@@ -75,11 +75,17 @@ $.extend( UI, {
                 if(code == 8) { // backspace
                     var undeletableTag = !!(
                         ($( translation[sbIndex - 1] ).hasClass( 'locked' ) && ($( translation[sbIndex - 2] ).prop( "tagName" ) === 'BR')) ||
-                        (($( translation[sbIndex - 2] ).hasClass( "monad" ) || $( translation[sbIndex - 2] ).hasClass( "locked" )) && $( translation[sbIndex - 1] ).hasClass( 'undoCursorPlaceholder' )) ||
-                        ( $( translation[sbIndex - 1] ).hasClass( "marker" ) &&  $( translation[sbIndex - 2] ).hasClass( "marker" ) && translation.length -1 === sbIndex )
+                        (($( translation[sbIndex - 2] ).hasClass( "monad" ) || $( translation[sbIndex - 2] ).hasClass( "locked" )) && $( translation[sbIndex - 1] ).hasClass( 'undoCursorPlaceholder' ))
                     );
                     if(undeletableTag) {
                         selBound.prev().remove();
+                    }
+                    undeletableMonad = !!(
+                        ( $( translation[sbIndex - 1] ).hasClass( "marker" ) &&  $( translation[sbIndex - 2] ).hasClass( "marker" ) && translation.length -1 === sbIndex )
+                    );
+                    if(undeletableMonad) {
+                        selBound.prev().remove();
+                        e.preventDefault();
                     }
                 }
                 // insideTag management
