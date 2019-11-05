@@ -101,7 +101,8 @@ class Editarea extends React.Component {
     }
     onBlurEvent() {
         // Hide Edit Toolbar
-        $('.editor .editToolbar').removeClass('visible');
+        setTimeout(()=>$('.editor .editToolbar').removeClass('visible'), 500);
+
     }
     onClickEvent(event) {
         SegmentActions.closeTagsMenu();
