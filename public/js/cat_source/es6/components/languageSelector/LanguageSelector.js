@@ -31,27 +31,44 @@ class LanguageSelector extends React.Component {
 		const {onQueryChange, onToggleLanguage, onConfirm} = this;
 		const {languagesList, onClose} = this.props;
 		const {selectedLanguages, querySearch} = this.state;
-		return <div id="language-modal-overlay">
-            <div id="language-modal" className="language-modal">
-                <div className="language-modal-content" >
-                    <div className="language-modal-header">
-                        <h1>{selectedLanguages}: {querySearch}</h1>
-                    </div>
-                </div>
-                <div className="language-modal-body">
+		return <div id="matecat-modal-languages" className="matecat-modal" onClick={onClose}>
+					<div className="matecat-modal-content" >
 
-			<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
-									querySearch={querySearch}
-									onDeleteLanguage={onToggleLanguage}
-									onQueryChange={onQueryChange}/>
-			<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}
-								  querySearch={querySearch}
-								  onToggleLanguage={onToggleLanguage}/>
-			<button onClick={onClose}>close</button>
-			<button onClick={onConfirm}>confirm</button>
-                </div>
-            </div>
-		</div>
+						<div className="matecat-modal-header">
+							<span>{selectedLanguages}: {querySearch} </span>
+							<span className="close-matecat-modal x-popup" onClick={onClose}/>
+						</div>
+						<div className="matecat-modal-subheader">
+							<div >
+								<span>From:</span>
+							</div>
+							<div>
+								<span>To:</span>
+								<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
+														querySearch={querySearch}
+														onDeleteLanguage={onToggleLanguage}
+														onQueryChange={onQueryChange}/>
+							</div>
+						</div>
+						<div className="matecat-modal-body">
+
+							<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}
+												  querySearch={querySearch}
+												  onToggleLanguage={onToggleLanguage}/>
+
+						</div>
+
+						<div className="matecat-modal-footer">
+							<div className="ui one column grid right aligned">
+								<div className="column">
+									<button onClick={onClose}>close</button>
+									<button onClick={onConfirm}>confirm</button>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
 	}
 
 	onConfirm = () => {
