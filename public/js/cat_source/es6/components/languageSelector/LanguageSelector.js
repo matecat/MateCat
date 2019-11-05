@@ -64,8 +64,8 @@ class LanguageSelector extends React.Component {
 						<div className="matecat-modal-footer">
 							<div className="ui one column grid right aligned">
 								<div className="column">
-									<button onClick={onClose}>close</button>
-									<button onClick={onConfirm}>confirm</button>
+									<button className={"modal-btn gray"} onClick={onClose}>close</button>
+									<button className={"modal-btn blue"} onClick={onConfirm}>confirm</button>
 								</div>
 							</div>
 						</div>
