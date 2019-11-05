@@ -43,6 +43,7 @@ $(document).ready(function(){
             });
         }
     });
+    //todo remove after new modal implementation
     $("#chooseMultilang").click(function(e){
         e.preventDefault();
         APP.closePopup();

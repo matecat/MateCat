@@ -5,14 +5,16 @@ class LanguageSelector extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			selectedLanguages: null
+			selectedLanguages: null,
+			initialLanguages: null
 		};
 	}
 
 	componentDidMount() {
 		const {selectedLanguagesFromDropdown} = this.props;
 		this.setState({
-			selectedLanguages: selectedLanguagesFromDropdown
+			selectedLanguages: selectedLanguagesFromDropdown,
+			initialLanguages: selectedLanguagesFromDropdown
 		})
 
 	}
@@ -37,6 +39,7 @@ class LanguageSelector extends React.Component {
 	}
 
 	onConfirm = () => {
+		//confirm must have 1 language selected
 		const {selectedLanguages} = this.state;
 		const {languagesList} = this.props;
 		const mappedSelectedLanguages = selectedLanguages.map(e=>{

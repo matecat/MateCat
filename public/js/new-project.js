@@ -635,7 +635,6 @@ $.extend(UI.UPLOAD_PAGE, {
                             const str = data.map(e=> e.name).join(',');
                             const vals = data.map(e=> e.code).join(',');
                             direction = UI.checkMultilangRTL();
-                            console.log( UI.checkMultilangRTL())
                             var op = '<div id="extraTarget" class="item" data-selected="selected" data-direction="' + direction + '" data-value="' + vals + '">' + str + '</div>';
                             $('#extraTarget').remove();
                             $('#target-lang div.item').first().before(op);
@@ -647,7 +646,6 @@ $.extend(UI.UPLOAD_PAGE, {
                             $('.translate-box.target h2 .extra').remove();
                             $('.translate-box.target h2').append('<span class="extra">(' + $('.popup-languages li.on').length + ' languages)</span>');
                         }
-                        console.log('saved',data);
                         ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
                     }
                 }), $('#languageSelector')[0] );
