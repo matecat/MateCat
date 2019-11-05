@@ -6,7 +6,11 @@ class LanguageSelector extends React.Component {
 		super(props);
 		this.state = {
 			selectedLanguages: null,
-			initialLanguages: null
+			initialLanguages: null,
+
+			isShowingModal: false,
+			styleContainer:'',
+			onCloseCallback: false
 		};
 	}
 
@@ -27,15 +31,25 @@ class LanguageSelector extends React.Component {
 	}
 
 	render() {
-		const {languagesList,onClose} = this.props;
+		const {languagesList,onClose, onConfirm} = this.props;
 		const {selectedLanguages} = this.state;
-		return <div>
-			<h1>{selectedLanguages}</h1>
-			<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}/>
-			<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}/>
-			<button onClick={onClose}>close</button>
-			<button onClick={this.onConfirm}>confirm</button>
-		</div>
+		return <div id="language-modal-overlay">
+					<div id="language-modal" className="language-modal">
+						<div className="language-modal-content" >
+							<div className="language-modal-header">
+								{/*<span className="close-language-modal x-popup" />*/}
+							</div>
+							<div className="language-modal-body">
+								<h1>{selectedLanguages}</h1>
+								<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}/>
+								<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}/>
+								<button onClick={onClose}>close</button>
+								<button onClick={onConfirm}>confirm</button>
+							</div>
+
+						</div>
+					</div>
+				</div>
 	}
 
 	onConfirm = () => {
@@ -46,6 +60,13 @@ class LanguageSelector extends React.Component {
 			return languagesList.filter(i=>i.code === e)[0]
 		});
 		this.props.onConfirm(mappedSelectedLanguages);
+	}
+
+	onClose = (event) => {
+		event.stopPropagation();
+		this.setState({
+			showingModal: false
+		})
 	}
 }
 
