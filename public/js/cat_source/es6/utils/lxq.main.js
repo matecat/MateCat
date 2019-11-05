@@ -121,16 +121,11 @@ const LXQ = {
             },
             function ( err, result ) {
                 if ( !err ) {
-                    var noVisibleErrorsFound = false, source_val, target_val, ind;
+                    var noVisibleErrorsFound = false, source_val, target_val;
                     //myWindow.location =result.qaurl;
                     var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
                     source_val = segObj.decoded_source;
                     if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
-                        //do something here -- enable qa errors
-                        if ( (ind = LXQ.lexiqaData.segments.indexOf( id_segment )) < 0 ) {
-                            LXQ.lexiqaData.segments.push( id_segment );
-                            LXQ.updateWarningsUI();
-                        }
 
                         //highlight the segments
                         // source_val = $( ".source", segment ).html();
@@ -180,6 +175,11 @@ const LXQ = {
                             }
                         } );
                         LXQ.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
+                        //do something here -- enable qa errors
+                        if ( (LXQ.lexiqaData.segments.indexOf( id_segment )) < 0 ) {
+                            LXQ.lexiqaData.segments.push( id_segment );
+                            LXQ.updateWarningsUI();
+                        }
                         SegmentActions.addLexiqaHighlight(id_segment, highlights);
 
 
