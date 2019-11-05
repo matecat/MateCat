@@ -134,14 +134,7 @@ UI = {
     renderProjects: function (projects) {
         APP.beforeRenderProjects = new Date();
         if ( !this.ProjectsContainer ) {
-            var mountPoint = $("#manage-container")[0];
-            this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
-                getLastActivity: API.PROJECTS.getLastProjectActivityLogAction,
-                changeJobPasswordFn: API.JOB.changeJobPassword,
-                downloadTranslationFn : this.downloadTranslation,
-                teams: this.teams,
-                team: this.selectedTeam
-            }), mountPoint);
+            this.ProjectsContainer = ManageActions.initialRender(this.teams, this.selectedTeam);
         }
 
         ManageActions.renderProjects(projects, this.selectedTeam, this.teams);

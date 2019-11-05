@@ -1,11 +1,21 @@
 import AppDispatcher from '../dispatcher/AppDispatcher';
 import ManageConstants from '../constants/ManageConstants';
 import TeamConstants from '../constants/TeamConstants';
+import Immutable from 'immutable';
 
 
 let ManageActions = {
     /********* Projects *********/
-
+    initialRender: function(teams, selectedTeam) {
+        var mountPoint = $("#manage-container")[0];
+        return ReactDOM.render(React.createElement(ProjectsContainer, {
+            getLastActivity: API.PROJECTS.getLastProjectActivityLogAction,
+            changeJobPasswordFn: API.JOB.changeJobPassword,
+            downloadTranslationFn : UI.downloadTranslation,
+            teams: Immutable.fromJS(teams),
+            team: Immutable.fromJS(selectedTeam)
+        }), mountPoint);
+    },
     /** Render the list of projects
      * @param projects
      * @param team
