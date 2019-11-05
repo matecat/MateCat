@@ -1,6 +1,60 @@
+/* Language Selector Modal */
+
+$header-height: 47px;
+$subheader-height: 136px;
+$footer-height: 92px;
+
+$light-blue: #0abeec;
+$medium-blue: #3c92e8;
+$dark-blue: #051f49;
+$gray: #eff2f5;
+
+
 #matecat-modal-languages {
+
+  /* Modal */
+  .matecat-modal {
+
+  }
+
+  /* Modal Content */
+  .matecat-modal-content {
+    width: 90vw;
+    height: 90vh;
+    max-width: 90vw;
+    max-height:  90vh;
+  }
+
+  /* Modal Header */
+  .matecat-modal-header {
+    /*height:47px;*/
+  }
+
+  /* Modal Subheader */
+  .matecat-modal-subheader {
+    background: #fff;
+    border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+    height: $subheader-height;
+
+  }
+
+  /* Modal Body */
+  .matecat-modal-body {
+    overflow: auto;
+    height: 100%;
+    max-height: calc(100% - 275px);
+    padding: 24px 0 12px 24px;
+  }
+
+  /* Modal Footer */
+  .matecat-modal-footer {
+    overflow: auto;
+    height: $footer-height;
+  }
+
+  /* Columns */
   .languages-columns {
-    max-height: calc(100% - 48px);
+    /*max-height: calc(100% - 48px);*/
     display: flex;
     flex-direction: row;
     overflow-y: auto;
@@ -10,6 +64,42 @@
       flex: 1;
       overflow: visible;
       max-height: 100%;
+
+      li {
+          position: relative;
+          padding: 6px 12px;
+          margin: 2px 4px;
+          border-radius: 2px;
+          &:hover {
+            background: $gray;
+            color: $medium-blue;
+            padding-left: 26px;
+            &:before {
+              position: absolute;
+              left: 14px;
+              top: 10px;
+              content:"";
+              border-style: solid;
+              border-width: 5px 0 5px 5px;
+              border-color: transparent  transparent transparent $medium-blue;
+            }
+          }
+          &.selected {
+            background: $dark-blue;
+            color: #FFF;
+            &:after {
+              position: absolute;
+              right: -14px;
+              top: 10px;
+              content:"";
+              border-style: solid;
+              border-width: 5px 0 5px 5px;
+              border-color: transparent  transparent transparent $medium-blue;
+            }
+          }
+
+      }
     }
   }
+
 }
