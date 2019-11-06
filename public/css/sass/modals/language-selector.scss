@@ -33,9 +33,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    /*span.modal-title {
+      overflow: hidden;
+      padding: 0 8px 0 0;
+    }*/
+
     .close-matecat-modal {
       padding-bottom: 9px;
     }
+
   }
 
   /* Modal Subheader */
@@ -52,6 +58,11 @@
       justify-content: flex-start;
       align-items: center;
       padding: 4px 8px;
+
+      .first-column {
+        min-width: 48px;
+        text-align: left;
+      }
       .label {
         font-weight: bold;
         margin: 0px 8px 0 0;
@@ -59,12 +70,35 @@
 
       .language-search {
         width: 100%;
-        input {
-          width: 100%;
+        text-align: left;
+
+        input[type=text] {
+          -webkit-appearance: searchfield;
+          width: 95%;
           height: 64px;
           border-radius: 2px;
           border: 1px solid $medium-gray;
           padding: 8px 16px;
+        }
+
+        /* Tag chips */
+        .tag {
+          position: relative;
+          padding: 8px 16px;
+          text-transform: capitalize;
+          border-radius: 2px;
+          margin: 4px 8px;
+          min-width: 100px;
+          background: #fff;
+          color: #000;
+          border: 1px solid $medium-gray;
+
+          &:after {
+            position: absolute;
+            right: 15px;
+            content: "\00d7";
+            color: $light-blue;
+          }
         }
       }
     }
@@ -163,10 +197,6 @@
     }
   }
 
-
-
-  /* Tag chips */
-
   /* Buttons */
 
   .modal-btn {
@@ -181,6 +211,7 @@
 
     &.secondary {
       min-width: 100px;
+
     }
 
     &.blue {

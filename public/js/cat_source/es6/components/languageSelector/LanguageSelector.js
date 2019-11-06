@@ -35,16 +35,21 @@ class LanguageSelector extends React.Component {
 					<div className="matecat-modal-content" onClick={preventDismiss}>
 
 						<div className="matecat-modal-header">
-							<span>Multiple Languages | {selectedLanguages}: {querySearch}</span>
+							<span className={"modal-title"}>Multiple Languages | {selectedLanguages}: {querySearch}</span>
 							<span className="close-matecat-modal x-popup" onClick={onClose}/>
 						</div>
 						<div className="matecat-modal-subheader">
 							<div className={"language-from"}>
-								<span className={"label"}>From:</span>
-								<span>Italian</span>
+
+								<div className={"first-column"}>
+									<span className={"label"}>From:</span>
+								</div>
+								<div>
+									<span>Italian</span>
+								</div>
 							</div>
 							<div className={"language-to"}>
-								<div>
+								<div className={"first-column"}>
 									<span className={"label"}>To:</span>
 								</div>
 								<div className={"language-search"}>
