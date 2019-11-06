@@ -18,10 +18,10 @@ use LQA\ModelStruct;
 class ReviewUtils {
 
     /**
-     * @param $statsArray
-     * @param $chunkReviews
+     * @param array $statsArray
+     * @param array $chunkReviews
      *
-     * @return mixed
+     * @return array
      * @throws \Exception
      */
     public static function formatStats( $statsArray, $chunkReviews ) {
@@ -39,7 +39,7 @@ class ReviewUtils {
                 $model           = $revisionFactory->getChunkReviewModel( $chunkReview );
                 $model->recountAndUpdatePassFailResult( $project );
 
-                \Log::doJsonLog( "Negative advancement_wc found for project with ID: " . $project->id . ". WC recount done." );
+                \Log::doJsonLog( "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done." );
             }
 
             $statsArray[ 'revises' ][] = [
