@@ -38,19 +38,25 @@ class LanguageSelector extends React.Component {
 							<div className={"modal-logo"}/>
 							<div>
 								{/* todo: insert from language */}
-								<span>From: {selectedLanguages}: {querySearch}</span>
+								<span>{selectedLanguages}: {querySearch}</span>
 							</div>
 							<span className="close-matecat-modal x-popup" onClick={onClose}/>
 						</div>
 						<div className="matecat-modal-subheader">
-							<div >
-								<span>To:</span>
+							<div className={"language-from"}>
+								<div>From:</div>
+								<div>Italian</div>
 							</div>
-							<div>
-								<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
-														querySearch={querySearch}
-														onDeleteLanguage={onToggleLanguage}
-														onQueryChange={onQueryChange}/>
+							<div className={"language-to"}>
+								<div>
+									<span>To:</span>
+								</div>
+								<div>
+									<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
+															querySearch={querySearch}
+															onDeleteLanguage={onToggleLanguage}
+															onQueryChange={onQueryChange}/>
+								</div>
 							</div>
 						</div>
 						<div className="matecat-modal-body">
@@ -62,12 +68,15 @@ class LanguageSelector extends React.Component {
 						</div>
 
 						<div className="matecat-modal-footer">
-							<div className="ui one column grid right aligned">
-								<div className="column">
-									<button onClick={onClose}>close</button>
-									<button onClick={onConfirm}>confirm</button>
+								<div className="">
+									<span className={"uncheck-all"}>X</span>
+									<span className={"badge"}>3</span>
+									<span className={"status"}>LANGUAGE SELECTED</span>
 								</div>
-							</div>
+								<div className="">
+									<button className={"modal-btn secondary gray"} onClick={onClose}>close</button>
+									<button className={"modal-btn primary blue"} onClick={onConfirm}>confirm</button>
+								</div>
 						</div>
 
 					</div>
