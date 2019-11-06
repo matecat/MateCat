@@ -90,11 +90,7 @@ class LanguageSelector extends React.Component {
 	onConfirm = () => {
 		//confirm must have 1 language selected
 		const {selectedLanguages} = this.state;
-		const {languagesList} = this.props;
-		const mappedSelectedLanguages = selectedLanguages.map(e => {
-			return languagesList.filter(i => i.code === e)[0]
-		});
-		this.props.onConfirm(mappedSelectedLanguages);
+		this.props.onConfirm(selectedLanguages);
 	};
 
 	onQueryChange = (querySearch) => {
