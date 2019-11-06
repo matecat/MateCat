@@ -17,15 +17,21 @@ class TranslationVersions extends BaseFeature {
         // evaluate if the record is to be created, either the
         // status changed or the translation changed
         $user = $params[ 'user' ];
+
         /** @var \Translations_SegmentTranslationStruct $translation */
         $translation = $params[ 'translation' ];
+
         /** @var \Translations_SegmentTranslationStruct $old_translation */
         $old_translation  = $params[ 'old_translation' ];
+
         $source_page_code = $params[ 'source_page_code' ];
+
         /** @var \Chunks_ChunkStruct $chunk */
         $chunk = $params[ 'chunk' ];
+
         /** @var \FeatureSet $features */
         $features = $params[ 'features' ];
+
         /** @var \Projects_ProjectStruct $project */
         $project = $params[ 'project' ];
 
@@ -37,9 +43,11 @@ class TranslationVersions extends BaseFeature {
         $batchEventCreator->setProject( $project );
 
         // If propagated segments exist, start cycle here
-        if ( isset( $params[ 'propagation' ][ 'propagated_segments' ] ) ) {
-            foreach ( $params[ 'propagation' ][ 'propagated_segments' ] as $segmentTranslationBeforeChange ) {
+        if ( isset( $params[ 'propagation' ][ 'propagated_ids' ] ) and false === empty($params[ 'propagation' ][ 'propagated_ids' ] ) ) {
+            foreach ( $params[ 'propagation' ][ 'propagated_ids' ] as $segmentIdBeforeChange ) {
+
                 /** @var \Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
+                $segmentTranslationBeforeChange                    = (new \Translations_SegmentTranslationDao())->findBySegmentAndJob($segmentIdBeforeChange, $chunk->id);
                 $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
                 $propagatedSegmentAfterChange->translation         = $translation->translation;
                 $propagatedSegmentAfterChange->status              = $translation->status;

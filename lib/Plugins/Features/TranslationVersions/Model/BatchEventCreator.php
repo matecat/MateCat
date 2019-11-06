@@ -70,29 +70,7 @@ class BatchEventCreator {
      * @param SegmentTranslationEventModel $eventModel
      */
     public function addEventModel( SegmentTranslationEventModel $eventModel ) {
-        if ( false === $this->existsEventModel( $eventModel ) ) {
-            $this->_events[ $this->getEventModelIndex( $eventModel ) ] = $eventModel;
-        }
-    }
-
-    /**
-     * Segment hash is used as index to avoid event duplicates for propagated segments
-     *
-     * @param SegmentTranslationEventModel $eventModel
-     *
-     * @return bool
-     */
-    public function existsEventModel( SegmentTranslationEventModel $eventModel ) {
-        return isset( $this->_events[ $this->getEventModelIndex( $eventModel ) ] );
-    }
-
-    /**
-     * @param SegmentTranslationEventModel $eventModel
-     *
-     * @return string
-     */
-    private function getEventModelIndex( SegmentTranslationEventModel $eventModel ) {
-        return $eventModel->getTranslation()->segment_hash;
+        $this->_events[] = $eventModel;
     }
 
     /**
