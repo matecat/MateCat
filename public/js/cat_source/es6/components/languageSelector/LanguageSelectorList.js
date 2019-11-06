@@ -7,10 +7,12 @@ class LanguageSelectorList extends React.Component {
 	}
 
 	componentDidMount() {
+		document.addEventListener('keydown', this.navigateLanguagesList);
 
 	}
 
 	componentWillUnmount() {
+		document.removeEventListener('keydown', this.navigateLanguagesList);
 	}
 
 	componentDidUpdate(prevProps) {
@@ -22,6 +24,7 @@ class LanguageSelectorList extends React.Component {
 	}
 
 	render() {
+		let counterItem = -1;
 		const languages = this.getLanguagesInColumns();
 		const {querySearch} = this.props;
 		const {position} = this.state;
@@ -29,9 +32,10 @@ class LanguageSelectorList extends React.Component {
 			{languages.map((languagesColumn, key) => {
 				return (
 					<ul key={key} className={'dropdown__list'}>
-						{languagesColumn.map((e, key2) => {
-							return <li key={`${key}${key2}`}
-									   className={(querySearch && key2 === position) ? 'hover' : null}>{e.name}</li>
+						{languagesColumn.map((e) => {
+							counterItem++;
+							return <li key={`${counterItem}`}
+									   className={(querySearch && counterItem === position) ? 'hover' : null}>{e.name}</li>
 						})}
 					</ul>
 				);
@@ -56,6 +60,35 @@ class LanguageSelectorList extends React.Component {
 			return filteredLanguagesInColumns.concat(buildRangeArray(4 - filteredLanguagesInColumns.length).map(function () {
 				return [];
 			}));
+		}
+	}
+
+	navigateLanguagesList = (event) => {
+		const {getFilteredLanguages} = this;
+		const {position} = this.state;
+		const {querySearch} = this.props;
+		const keyCode = event.keyCode;
+		if (keyCode === 38 || keyCode === 40) {
+			event.preventDefault();
+		}
+
+		if (querySearch) {
+			const filteredLanguages = getFilteredLanguages();
+			if (keyCode === 38) {
+				// up key
+				if (position !== 0) {
+					this.setState({
+						position: position - 1
+					})
+				}
+			} else if (keyCode === 40) {
+				// down key
+				if (position + 1 < filteredLanguages.length) {
+					this.setState({
+						position: position + 1
+					})
+				}
+			}
 		}
 	}
 

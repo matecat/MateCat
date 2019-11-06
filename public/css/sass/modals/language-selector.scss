@@ -108,7 +108,7 @@
           margin: 2px 4px;
           border-radius: 2px;
           &:hover:not(.selected),
-          .hover:not(.selected) {
+          &.hover:not(.selected) {
             background: $light-gray;
             color: $medium-blue;
             padding-left: 26px;
