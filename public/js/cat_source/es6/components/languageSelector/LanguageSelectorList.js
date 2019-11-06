@@ -26,7 +26,8 @@ class LanguageSelectorList extends React.Component {
 	render() {
 		let counterItem = -1;
 		const languages = this.getLanguagesInColumns();
-		const {querySearch} = this.props;
+		const {onClickElement} = this;
+		const {querySearch,selectedLanguages} = this.props;
 		const {position} = this.state;
 		return <div className="languages-columns">
 			{languages.map((languagesColumn, key) => {
@@ -34,13 +35,26 @@ class LanguageSelectorList extends React.Component {
 					<ul key={key} className={'dropdown__list'}>
 						{languagesColumn.map((e) => {
 							counterItem++;
+							let elementClass = '';
+							if(selectedLanguages && selectedLanguages.map(e=>e.code).indexOf(e.code)>-1){
+								elementClass = 'selected'
+							}else if(querySearch && counterItem === position){
+								elementClass = 'hover'
+							}
 							return <li key={`${counterItem}`}
-									   className={(querySearch && counterItem === position) ? 'hover' : null}>{e.name}</li>
+									   className={elementClass}
+									   onClick={onClickElement(e)}
+							>{e.name}</li>
 						})}
 					</ul>
 				);
 			})}
 		</div>
+	}
+
+	onClickElement = (language) =>()=>{
+		const {onToggleLanguage} = this.props;
+		onToggleLanguage(language);
 	}
 
 	getFilteredLanguages = () => {

@@ -97,7 +97,17 @@ class LanguageSelector extends React.Component {
 	};
 
 	onToggleLanguage = (language) => {
-		console.log(language)
+		const {selectedLanguages} = this.state;
+		let newSelectedLanguages = [...selectedLanguages];
+		const indexSearch = selectedLanguages.map(e=>e.code).indexOf(language.code);
+		if(indexSearch>-1){
+			newSelectedLanguages.splice(indexSearch,1)
+		}else{
+			newSelectedLanguages.push(language);
+		}
+		this.setState({
+			selectedLanguages:newSelectedLanguages
+		})
 		//when add a language, restore query search.
 	}
 }
