@@ -62,7 +62,7 @@ class LanguageSelectorSearch extends React.Component {
 				renderTag={defaultRenderTag}
 				value={selectedLanguages ? selectedLanguages.map(e => e.name) : []}
 				onChange={this.handleChange}/>
-			<p>search: {querySearch}</p>
+			{/*<p>search: {querySearch}</p>*/}
 		</div>
 	}
 
@@ -73,12 +73,12 @@ class LanguageSelectorSearch extends React.Component {
 		let {tag, key, disabled, onRemove, classNameRemove, getTagDisplayValue, ...other} = props;
 		const highlight = (highlightDelete && key+1 === selectedLanguages.length)? 'highlightDelete': '';
 		return (
-			<span key={key} {...other} className={highlight}>
-      {getTagDisplayValue(tag)}
+			<span key={key} {...other} className={`tag ${highlight}`}>
+      			{getTagDisplayValue(tag)}
 				{!disabled &&
-				<a className={classNameRemove} onClick={(e) => removeLanguageWithIconTag(key)}/>
+				<a className={classNameRemove} onClick={(e) => removeLanguageWithIconTag(key)}> &times;</a>
 				}
-    </span>
+    		</span>
 		)
 	}
 }
