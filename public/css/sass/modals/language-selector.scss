@@ -66,16 +66,21 @@
       }
 
       .language-search {
-        width: 100%;
+
+        display: flex;
+        align-items: center;
+        width: 90%;
         text-align: left;
+        height: 64px;
+        border-radius: 2px;
+        border: 1px solid $medium-gray;
+        padding: 8px 16px;
 
         input[type=text] {
-          -webkit-appearance: searchfield;
-          width: 95%;
-          height: 64px;
-          border-radius: 2px;
-          border: 1px solid $medium-gray;
-          padding: 8px 16px;
+          border: none;
+          &:focus {
+            outline: none;
+          }
         }
 
         /* Tag chips */
@@ -122,27 +127,38 @@
     justify-content: space-between;
     align-items: center;
 
-    /* Badge */
-    .badge {
-      padding: 0.25rem 0.5rem;
-      background: $light-blue;
-      border-radius: 25px;
-      font-size: 0.9rem;
-      margin: 2px 4px;
-      color: #fff;
+    .selected-counter {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-column-gap: 4px;
+      align-items: center;
+      margin-left: 8px;
+
+      /* Icon */
+      .uncheck-all {
+        font-size: 20px;
+        color: $light-blue;
+      }
+
+      /* Badge */
+      .badge {
+        position: relative;
+        padding: 0.08rem 0.55rem;
+        background: $light-blue;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        margin: 0 4px;
+        color: #fff;
+      }
+
+      /* Label */
+      .label {
+        font-weight: bold;
+        color: $dark-gray;
+        text-transform: uppercase;
+      }
     }
 
-    .status {
-      font-weight: bold;
-      color: $dark-gray;
-      text-transform: uppercase;
-      padding: 0 4px
-    }
-
-    .uncheck-all {
-      color: $light-blue;
-      margin: 0 6px;
-    }
   }
 
   /* Columns */

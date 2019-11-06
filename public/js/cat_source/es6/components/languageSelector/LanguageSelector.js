@@ -35,7 +35,7 @@ class LanguageSelector extends React.Component {
 					<div className="matecat-modal-content" onClick={preventDismiss}>
 
 						<div className="matecat-modal-header">
-							<span className={"modal-title"}>Multiple Languages | {(selectedLanguages) ? selectedLanguages.map(e=><span>{e.name}</span>):null}: {querySearch}</span>
+							<span className={"modal-title"}>Multiple Languages</span>
 							<span className="close-matecat-modal x-popup" onClick={onClose}/>
 						</div>
 						<div className="matecat-modal-subheader">
@@ -70,10 +70,10 @@ class LanguageSelector extends React.Component {
 						</div>
 
 						<div className="matecat-modal-footer">
-								<div className="">
-									<span className={"uncheck-all"}>X</span>
+								<div className="selected-counter">
+									<span className={"uncheck-all"}>&times;</span>
 									<span className={"badge"}>3</span>
-									<span className={"status"}>LANGUAGE SELECTED</span>
+									<span className={"label"}>language selected</span>
 								</div>
 								<div className="">
 									<button className={"modal-btn secondary gray"} onClick={onClose}>close</button>
