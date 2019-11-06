@@ -22,7 +22,8 @@ class LanguageSelectorSearch extends React.Component {
 
 
 	handleChange = (tags) => {
-		this.setState({tags})
+		console.log('entra');
+		//this.setState({tags})
 	}
 
 	render() {
@@ -31,6 +32,7 @@ class LanguageSelectorSearch extends React.Component {
 		return <div>
 			<TagsInput
 				inputValue={querySearch}
+				addKeys={[]}
 				onChangeInput={onQueryChange}
 				value={tags}
 				onChange={this.handleChange}/>
