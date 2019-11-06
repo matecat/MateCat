@@ -35,23 +35,19 @@ class LanguageSelector extends React.Component {
 					<div className="matecat-modal-content" onClick={preventDismiss}>
 
 						<div className="matecat-modal-header">
-							<div className={"modal-logo"}/>
-							<div>
-								{/* todo: insert from language */}
-								<span>{selectedLanguages}: {querySearch}</span>
-							</div>
+							<span>Multiple Languages | {selectedLanguages}: {querySearch}</span>
 							<span className="close-matecat-modal x-popup" onClick={onClose}/>
 						</div>
 						<div className="matecat-modal-subheader">
 							<div className={"language-from"}>
-								<div>From:</div>
-								<div>Italian</div>
+								<span className={"label"}>From:</span>
+								<span>Italian</span>
 							</div>
 							<div className={"language-to"}>
 								<div>
-									<span>To:</span>
+									<span className={"label"}>To:</span>
 								</div>
-								<div>
+								<div className={"language-search"}>
 									<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
 															querySearch={querySearch}
 															onDeleteLanguage={onToggleLanguage}

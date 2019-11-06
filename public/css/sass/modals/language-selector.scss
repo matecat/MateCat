@@ -30,6 +30,12 @@
   /* Modal Header */
   .matecat-modal-header {
     /*height:47px;*/
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .close-matecat-modal {
+      padding-bottom: 9px;
+    }
   }
 
   /* Modal Subheader */
@@ -38,11 +44,29 @@
     border-bottom: 1px solid $medium-gray;
     height: $subheader-height;
     padding: 16px 16px 16px 32px;
+    width: 100%;
+
     .language-from,
     .language-to {
       display: flex;
       justify-content: flex-start;
       align-items: center;
+      padding: 4px 8px;
+      .label {
+        font-weight: bold;
+        margin: 0px 8px 0 0;
+      }
+
+      .language-search {
+        width: 100%;
+        input {
+          width: 100%;
+          height: 64px;
+          border-radius: 2px;
+          border: 1px solid $medium-gray;
+          padding: 8px 16px;
+        }
+      }
     }
   }
 
@@ -52,6 +76,7 @@
     height: 100%;
     max-height: calc(100% - 255px);
     padding: 0 4px 0 0;
+    border-radius: 0;
   }
 
   /* Modal Footer */
