@@ -66,9 +66,9 @@ class LanguageSelectorList extends React.Component {
 	navigateLanguagesList = (event) => {
 		const {getFilteredLanguages} = this;
 		const {position} = this.state;
-		const {querySearch} = this.props;
+		const {querySearch,onToggleLanguage,changeQuerySearch} = this.props;
 		const keyCode = event.keyCode;
-		if (keyCode === 38 || keyCode === 40) {
+		if (keyCode === 38 || keyCode === 40 || keyCode === 13) {
 			event.preventDefault();
 		}
 
@@ -88,6 +88,10 @@ class LanguageSelectorList extends React.Component {
 						position: position + 1
 					})
 				}
+			}else if (keyCode === 13 && filteredLanguages.length){
+				//enter with 1 language filtered
+				onToggleLanguage(filteredLanguages[position]);
+				changeQuerySearch('');
 			}
 		}
 	}
@@ -97,7 +101,8 @@ class LanguageSelectorList extends React.Component {
 Header.defaultProps = {
 	selectedLanguages: false,
 	languagesList: true,
-	onSelect: true,
+	onToggleLanguage: true,
+	changeQuerySearch: true,
 	querySearch: true,
 };
 

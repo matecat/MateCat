@@ -12,10 +12,10 @@ class LanguageSelector extends React.Component {
 	}
 
 	componentDidMount() {
-		const {selectedLanguagesFromDropdown} = this.props;
+		const {selectedLanguagesFromDropdown,languagesList} = this.props;
 		this.setState({
-			selectedLanguages: selectedLanguagesFromDropdown,
-			initialLanguages: selectedLanguagesFromDropdown
+			selectedLanguages: selectedLanguagesFromDropdown.map(e=>languagesList.filter(i=>i.code===e)[0]),
+			initialLanguages: selectedLanguagesFromDropdown.map(e=>languagesList.filter(i=>i.code===e)[0])
 		})
 
 	}
@@ -35,7 +35,7 @@ class LanguageSelector extends React.Component {
 					<div className="matecat-modal-content" onClick={preventDismiss}>
 
 						<div className="matecat-modal-header">
-							<span className={"modal-title"}>Multiple Languages | {selectedLanguages}: {querySearch}</span>
+							<span className={"modal-title"}>Multiple Languages | {(selectedLanguages) ? selectedLanguages.map(e=><span>{e.name}</span>):null}: {querySearch}</span>
 							<span className="close-matecat-modal x-popup" onClick={onClose}/>
 						</div>
 						<div className="matecat-modal-subheader">
@@ -64,6 +64,7 @@ class LanguageSelector extends React.Component {
 
 							<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}
 												  querySearch={querySearch}
+												  changeQuerySearch={onQueryChange}
 												  onToggleLanguage={onToggleLanguage}/>
 
 						</div>
@@ -101,6 +102,7 @@ class LanguageSelector extends React.Component {
 	};
 
 	onToggleLanguage = (language) => {
+		console.log(language)
 		//when add a language, restore query search.
 	}
 }
