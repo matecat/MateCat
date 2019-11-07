@@ -74,7 +74,7 @@ class LanguageSelector extends React.Component {
 
 				<div className="matecat-modal-footer">
 					<div className="selected-counter">
-						<span className={"uncheck-all"} onClick={onReset}>
+						{selectedLanguages && selectedLanguages.length > 0 ? <span className={"uncheck-all"} onClick={onReset}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="12"
@@ -106,7 +106,7 @@ class LanguageSelector extends React.Component {
 								> </rect>
 							  </g>
 							</svg>
-						</span>
+						</span> : null}
 						<span className={"badge"}>{selectedLanguages && selectedLanguages.length}</span>
 						<span className={"label"}>language selected</span>
 					</div>

@@ -119,6 +119,8 @@
     height: 100%;
     max-height: calc(100% - 119px);
     border-radius: 0;
+    display: flex;
+    flex-flow: column;
   }
 
   /* Modal Footer */
@@ -169,8 +171,6 @@
 
   /* Columns */
   .languages-columns {
-    /*max-height: calc(100% - 48px);*/
-    max-height: calc(100% - 133px);
     display: flex;
     flex-direction: row;
     overflow-y: auto;
