@@ -42,9 +42,25 @@ class LanguageSelectorList extends React.Component {
 								elementClass = 'hover'
 							}
 							return <li key={`${counterItem}`}
-									   className={elementClass}
+									   className={`lang-item ${elementClass}`}
 									   onClick={onClickElement(e)}
-							>{e.name}</li>
+							>{e.name}<span className={"check"}>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="16"
+											height="12"
+											viewBox="0 0 16 12"
+										>
+											<path fill="#FFF"
+												  fillRule="evenodd"
+												  stroke="none"
+												  strokeWidth="1"
+												  d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z"
+												  transform="translate(-266 -10) translate(266 8) translate(0 2)"
+											> </path>
+										</svg>
+									</span>
+							</li>
 						})}
 					</ul>
 				);
