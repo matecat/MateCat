@@ -12,10 +12,10 @@ class LanguageSelector extends React.Component {
 	}
 
 	componentDidMount() {
-		const {selectedLanguagesFromDropdown,languagesList} = this.props;
+		const {selectedLanguagesFromDropdown, languagesList} = this.props;
 		this.setState({
-			selectedLanguages: selectedLanguagesFromDropdown.map(e=>languagesList.filter(i=>i.code===e)[0]),
-			initialLanguages: selectedLanguagesFromDropdown.map(e=>languagesList.filter(i=>i.code===e)[0])
+			selectedLanguages: selectedLanguagesFromDropdown.map(e => languagesList.filter(i => i.code === e)[0]),
+			initialLanguages: selectedLanguagesFromDropdown.map(e => languagesList.filter(i => i.code === e)[0])
 		})
 
 	}
@@ -28,64 +28,68 @@ class LanguageSelector extends React.Component {
 	}
 
 	render() {
-		const {onQueryChange, onToggleLanguage, onConfirm,preventDismiss, onRestore} = this;
+		const {onQueryChange, onToggleLanguage, onConfirm, preventDismiss, onRestore} = this;
 		const {languagesList, onClose} = this.props;
 		const {selectedLanguages, querySearch} = this.state;
 		return <div id="matecat-modal-languages" className="matecat-modal" onClick={onClose}>
-					<div className="matecat-modal-content" onClick={preventDismiss}>
+			<div className="matecat-modal-content" onClick={preventDismiss}>
 
-						<div className="matecat-modal-header">
-							<span className={"modal-title"}>Multiple Languages</span>
-							<span className="close-matecat-modal x-popup" onClick={onClose}/>
-						</div>
+				<div className="matecat-modal-header">
+					<span className={"modal-title"}>Multiple Languages</span>
+					<span className="close-matecat-modal x-popup" onClick={onClose}/>
+				</div>
 
-						<div className="matecat-modal-body">
+				<div className="matecat-modal-body">
 
-							<div className="matecat-modal-subheader">
-								<div className={"language-from"}>
+					<div className="matecat-modal-subheader">
+						<div className={"language-from"}>
 
-									<div className={"first-column"}>
-										<span className={"label"}>From:</span>
-									</div>
-									<div>
-										<span>Italian</span>
-									</div>
-								</div>
-								<div className={"language-to"}>
-									<div className={"first-column"}>
-										<span className={"label"}>To:</span>
-									</div>
-									<div className={"language-search"}>
-										<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
-																querySearch={querySearch}
-																onDeleteLanguage={onToggleLanguage}
-																onQueryChange={onQueryChange}/>
-									</div>
-								</div>
+							<div className={"first-column"}>
+								<span className={"label"}>From:</span>
 							</div>
-
-							<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}
-												  querySearch={querySearch}
-												  changeQuerySearch={onQueryChange}
-												  onToggleLanguage={onToggleLanguage}/>
-
+							<div>
+								<span>Italian</span>
+							</div>
 						</div>
-
-						<div className="matecat-modal-footer">
-								<div className="selected-counter">
-									<span className={"uncheck-all"} onClick={onRestore}>&times;</span>
-									<span className={"badge"}>{selectedLanguages ? selectedLanguages.length : 1}</span>
-									<span className={"label"}>language selected</span>
-								</div>
-								<div className="">
-									<button className={"modal-btn secondary gray"} onClick={onRestore}>restore all</button>
-									<button className={"modal-btn primary blue"} onClick={onConfirm}>confirm</button>
-								</div>
+						<div className={"language-to"}>
+							<div className={"first-column"}>
+								<span className={"label"}>To:</span>
+							</div>
+							<div className={"language-search"}>
+								<LanguageSelectorSearch languagesList={languagesList}
+														selectedLanguages={selectedLanguages}
+														querySearch={querySearch}
+														onDeleteLanguage={onToggleLanguage}
+														onQueryChange={onQueryChange}/>
+							</div>
 						</div>
+					</div>
 
+					<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}
+										  querySearch={querySearch}
+										  changeQuerySearch={onQueryChange}
+										  onToggleLanguage={onToggleLanguage}/>
+
+				</div>
+
+				<div className="matecat-modal-footer">
+					<div className="selected-counter">
+						<span className={"uncheck-all"} onClick={() => {
+							this.setState({selectedLanguages: []})
+						}}>&times;</span>
+						<span className={"badge"}>{selectedLanguages && selectedLanguages.length}</span>
+						<span className={"label"}>language selected</span>
+					</div>
+					<div className="">
+						<button className={"modal-btn secondary gray"} onClick={onRestore}>Restore all</button>
+						<button className={"modal-btn primary blue"} onClick={onConfirm}>Confirm</button>
 					</div>
 				</div>
+
+			</div>
+		</div>
 	}
+
 	preventDismiss = (event) => {
 		event.stopPropagation();
 	}
@@ -102,14 +106,14 @@ class LanguageSelector extends React.Component {
 	onToggleLanguage = (language) => {
 		const {selectedLanguages} = this.state;
 		let newSelectedLanguages = [...selectedLanguages];
-		const indexSearch = selectedLanguages.map(e=>e.code).indexOf(language.code);
-		if(indexSearch>-1){
-			newSelectedLanguages.splice(indexSearch,1)
-		}else{
+		const indexSearch = selectedLanguages.map(e => e.code).indexOf(language.code);
+		if (indexSearch > -1) {
+			newSelectedLanguages.splice(indexSearch, 1)
+		} else {
 			newSelectedLanguages.push(language);
 		}
 		this.setState({
-			selectedLanguages:newSelectedLanguages
+			selectedLanguages: newSelectedLanguages
 		})
 		//when add a language, restore query search.
 	};
@@ -117,7 +121,7 @@ class LanguageSelector extends React.Component {
 	onRestore = () => {
 		const {initialLanguages} = this.state;
 		this.setState({
-			selectedLanguages:initialLanguages,
+			selectedLanguages: initialLanguages,
 			querySearch: ''
 		})
 	};

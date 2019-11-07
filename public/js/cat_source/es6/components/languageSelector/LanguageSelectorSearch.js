@@ -46,8 +46,8 @@ class LanguageSelectorSearch extends React.Component {
 		}
 
 	}
-	removeLanguageWithIconTag = (tagIndex) =>{
-		const {onDeleteLanguage,selectedLanguages} = this.props;
+	removeLanguageWithIconTag = (tagIndex) => {
+		const {onDeleteLanguage, selectedLanguages} = this.props;
 		onDeleteLanguage(selectedLanguages[tagIndex])
 	}
 
@@ -55,11 +55,12 @@ class LanguageSelectorSearch extends React.Component {
 		const {defaultRenderTag} = this;
 		const {onQueryChange, querySearch, selectedLanguages} = this.props;
 		return <TagsInput inputValue={querySearch}
-					addKeys={[]}
-					onChangeInput={onQueryChange}
-					renderTag={defaultRenderTag}
-					value={selectedLanguages ? selectedLanguages.map(e => e.name) : []}
-					onChange={this.handleChange}/>
+						  addKeys={[]}
+						  inputProps={{placeholder: 'Search...'}}
+						  onChangeInput={onQueryChange}
+						  renderTag={defaultRenderTag}
+						  value={selectedLanguages ? selectedLanguages.map(e => e.name) : []}
+						  onChange={this.handleChange}/>
 	}
 
 	defaultRenderTag = (props) => {
@@ -67,7 +68,7 @@ class LanguageSelectorSearch extends React.Component {
 		const {highlightDelete} = this.state;
 		const {selectedLanguages} = this.props;
 		let {tag, key, disabled, onRemove, classNameRemove, getTagDisplayValue, ...other} = props;
-		const highlight = (highlightDelete && key+1 === selectedLanguages.length)? 'highlightDelete': '';
+		const highlight = (highlightDelete && key + 1 === selectedLanguages.length) ? 'highlightDelete' : '';
 		return (
 			<span key={key} {...other} className={`tag ${highlight}`}>
       			{getTagDisplayValue(tag)}
