@@ -14,6 +14,8 @@ use ConversionHandler;
 use Exception;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use FilesStorage\FsFilesStorage;
+use FilesStorage\S3FilesStorage;
 use INIT;
 use Log;
 use RecursiveDirectoryIterator;
@@ -134,23 +136,42 @@ class Session {
         $response = [];
 
         foreach ( $this->session[ self::FILE_LIST ] as $fileId => $file ) {
-            $path = $this->getGDriveFilePath( $file );
 
             $fileName = $file[ self::FILE_NAME ];
 
-            if ( file_exists( $path ) !== false ) {
-                $fileSize = filesize( $path );
+            if(AbstractFilesStorage::isOnS3()){
+                $path = $this->getGDriveFilePathForS3( $file );
+                $s3Client = S3FilesStorage::getStaticS3Client();
+                $s3 = $s3Client->getItem( [
+                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                        'key' => $path
+                    ]
+                );
 
-                $fileExtension = pathinfo( $fileName, PATHINFO_EXTENSION );
-
+                $mime = include __DIR__.'/../../../Utils/Mime2Extension.php';
                 $response[ 'files' ][] = [
                         'fileId'        => $fileId,
                         'fileName'      => $fileName,
-                        'fileSize'      => $fileSize,
-                        'fileExtension' => $fileExtension
+                        'fileSize'      => $s3['ContentLength'],
+                        'fileExtension' => $mime[$s3['ContentType']][0]
                 ];
+
             } else {
-                unset( $this->session[ self::FILE_LIST ][ $fileId ] );
+                $path = $this->getGDriveFilePath( $file );
+                if ( file_exists( $path ) !== false ) {
+                    $fileSize = filesize( $path );
+
+                    $fileExtension = pathinfo( $fileName, PATHINFO_EXTENSION );
+
+                    $response[ 'files' ][] = [
+                            'fileId'        => $fileId,
+                            'fileName'      => $fileName,
+                            'fileSize'      => $fileSize,
+                            'fileExtension' => $fileExtension
+                    ];
+                } else {
+                    unset( $this->session[ self::FILE_LIST ][ $fileId ] );
+                }
             }
         }
 
@@ -303,7 +324,16 @@ class Session {
             $file      = $this->session[ self::FILE_LIST ][ $fileId ];
             $pathCache = $this->getCacheFileDir( $file );
 
-            $this->deleteDirectory( $pathCache );
+            if(S3FilesStorage::isOnS3()){
+                $s3Client = S3FilesStorage::getStaticS3Client();
+                $s3Client->deleteFolder( [
+                        'bucket' => S3FilesStorage::getFilesStorageBucket(),
+                        'key' => $pathCache
+                    ]
+                );
+            } else {
+                $this->deleteDirectory( $pathCache );
+            }
 
             unset( $this->session[ self::FILE_LIST ] [ $fileId ] );
 
@@ -321,6 +351,7 @@ class Session {
         foreach ( $this->session[ self::FILE_LIST ] as $singleFileId => $file ) {
             $this->removeFile( $singleFileId );
         }
+
         unset( $this->session[ self::FILE_LIST ] );
     }
 
@@ -349,7 +380,12 @@ class Session {
         return \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input( INPUT_COOKIE, 'upload_session' );
     }
 
-
+    /**
+     * @param        $file
+     * @param string $lang
+     *
+     * @return string
+     */
     private function getCacheFileDir( $file, $lang = '' ) {
         $sourceLang = $this->session[ \Constants::SESSION_ACTUAL_SOURCE_LANG ];
 
@@ -364,22 +400,45 @@ class Session {
 
         $cacheTree = implode( DIRECTORY_SEPARATOR, $cacheTreeAr );
 
-        $cacheFileDir = \INIT::$CACHE_REPOSITORY . DIRECTORY_SEPARATOR . $cacheTree . "|" . $sourceLang;
+        if(AbstractFilesStorage::isOnS3()){
+            return S3FilesStorage::CACHE_PACKAGE_FOLDER . DIRECTORY_SEPARATOR . $cacheTree . S3FilesStorage::OBJECTS_SAFE_DELIMITER . $sourceLang;
+        }
 
-        return $cacheFileDir;
+        return \INIT::$CACHE_REPOSITORY . DIRECTORY_SEPARATOR . $cacheTree . "|" . $sourceLang;
     }
 
-
+    /**
+     * @param $file
+     *
+     * @return string
+     */
     private function getGDriveFilePath( $file ) {
-        $fileName = $file[ self::FILE_NAME ];
 
+        $fileName = $file[ self::FILE_NAME ];
         $cacheFileDir = $this->getCacheFileDir( $file );
 
-        $path = $cacheFileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
-
-        return $path;
+        return $cacheFileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
     }
 
+    /**
+     * @param $file
+     *
+     * @return string
+     */
+    private function getGDriveFilePathForS3( $file ) {
+
+        $fileName = $file[ self::FILE_NAME ];
+        $cacheFileDir = $this->getCacheFileDir( $file );
+
+        return $cacheFileDir . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
+    }
+
+    /**
+     * @param $guid
+     * @param $source_lang
+     * @param $target_lang
+     * @param $seg_rule
+     */
     public function setConversionParams( $guid, $source_lang, $target_lang, $seg_rule ) {
         $this->guid        = $guid;
         $this->source_lang = $source_lang;
