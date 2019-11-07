@@ -31,7 +31,7 @@ class ReviewUtils {
         foreach ( $chunkReviews as $chunkReview ) {
 
             // check if the current advancement_wc corresponds to correct advancement word count
-            if ( $chunkReview->advancement_wc !== self::getCorrectAdvancementWC( $chunkReview ) ) {
+            if ( $chunkReview->advancement_wc !== self::getCorrectAdvancementWC( $chunkReview )  && ( mt_rand( 1, 100 ) % 10 ) === 0 ) {
 
                 /** @var \Projects_ProjectStruct $project */
                 $project         = $chunkReview->getChunk()->getProject();
@@ -40,8 +40,16 @@ class ReviewUtils {
                 $model->recountAndUpdatePassFailResult( $project );
 
                 $msg = "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done.";
+                $msgEmail = "<p>Wrong advancement word count found for project with ID: " . $project->id . ".</p>";
+                $msgEmail .= "<ul>";
+                $msgEmail .= "<li>ACTUAL SOURCE PAGE: ".$chunkReview->source_page."</li>";
+                $msgEmail .= "<li>ACTUAL ADVANCED WC: ".$chunkReview->advancement_wc."</li>";
+                $msgEmail .= "<li>CALCULATED WC: ".self::getCorrectAdvancementWC( $chunkReview )."</li>";
+                $msgEmail .= "</ul>";
+                $msgEmail .= "<p>--------------------------------</p>";
+                $msgEmail .= "<p>Recount done.</p>";
 
-                \Utils::sendErrMailReport( $msg );
+                \Utils::sendErrMailReport( $msgEmail );
                 \Log::doJsonLog( $msg );
             }
 
