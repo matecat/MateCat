@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ConnectedServices\GDrive ;
+namespace ConnectedServices\GDrive;
 
 use API\V2\KleinController;
 use Bootstrap;
@@ -13,7 +13,7 @@ class GDriveController extends KleinController {
 
     private $source_lang = Constants::DEFAULT_SOURCE_LANG;
     private $target_lang = Constants::DEFAULT_TARGET_LANG;
-    private $seg_rule = null;
+    private $seg_rule    = null;
 
     private $guid = null;
 
@@ -29,11 +29,11 @@ class GDriveController extends KleinController {
     /**
      * @var RemoteFileService
      */
-    private $gdriveConnectedService ;
+    private $gdriveConnectedService;
 
     public function open() {
 
-        $this->setIsAsyncReq( $this->request->param('isAsync') );
+        $this->setIsAsyncReq( $this->request->param( 'isAsync' ) );
 
         $this->correctSourceTargetLang();
 
@@ -44,12 +44,12 @@ class GDriveController extends KleinController {
     }
 
     private function initSessionService() {
-        $this->gdriveUserSession = new Session( $_SESSION ) ;
+        $this->gdriveUserSession = new Session( $_SESSION );
     }
 
     private function doImport() {
 
-        $state = json_decode( $this->request->param('state'), TRUE );
+        $state = json_decode( $this->request->param( 'state' ), true );
         \Log::doJsonLog( $state );
 
         // TODO: check why this is necessary here.
@@ -63,35 +63,35 @@ class GDriveController extends KleinController {
             $this->gdriveUserSession->clearFiles();
         }
 
-        $listOfIds = array();
+        $listOfIds = [];
 
-        if ( array_key_exists( 'ids', $state) ) {
-            $listOfIds = $state['ids'];
-        }
-        else if ( array_key_exists('exportIds', $state) ) {
-            $listOfIds = $state['exportIds'];
-        }
-        else {
-            throw new Exception( " no ids or export ids found ");
+        if ( array_key_exists( 'ids', $state ) ) {
+            $listOfIds = $state[ 'ids' ];
+        } else {
+            if ( array_key_exists( 'exportIds', $state ) ) {
+                $listOfIds = $state[ 'exportIds' ];
+            } else {
+                throw new Exception( " no ids or export ids found " );
+            }
         }
 
         $countIds = count( $listOfIds );
 
-        $this->gdriveUserSession->setConversionParams($this->guid, $this->source_lang, $this->target_lang, $this->seg_rule) ;
+        $this->gdriveUserSession->setConversionParams( $this->guid, $this->source_lang, $this->target_lang, $this->seg_rule );
 
-        for( $i = 0; $i < $countIds && $this->isImportingSuccessful === true; $i++ ) {
-            $this->gdriveUserSession->importFile( $listOfIds[$i] );
+        for ( $i = 0; $i < $countIds && $this->isImportingSuccessful === true; $i++ ) {
+            $this->gdriveUserSession->importFile( $listOfIds[ $i ] );
         }
     }
 
     private function correctSourceTargetLang() {
         if ( isset ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
-            if( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] != Constants::EMPTY_VAL ) {
-                $sourceLangHistory   = $_COOKIE[ Constants::COOKIE_SOURCE_LANG ];
-                $sourceLangAr        = explode( '||', urldecode( $sourceLangHistory ) );
+            if ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] != Constants::EMPTY_VAL ) {
+                $sourceLangHistory = $_COOKIE[ Constants::COOKIE_SOURCE_LANG ];
+                $sourceLangAr      = explode( '||', urldecode( $sourceLangHistory ) );
 
-                if(count( $sourceLangAr ) > 0) {
-                    $this->source_lang = $sourceLangAr[0];
+                if ( count( $sourceLangAr ) > 0 ) {
+                    $this->source_lang = $sourceLangAr[ 0 ];
                 }
             }
         } else {
@@ -99,12 +99,12 @@ class GDriveController extends KleinController {
         }
 
         if ( isset ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
-            if( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] != Constants::EMPTY_VAL ) {
-                $targetLangHistory   = $_COOKIE[ Constants::COOKIE_TARGET_LANG ];
-                $targetLangAr        = explode( '||', urldecode( $targetLangHistory ) );
+            if ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] != Constants::EMPTY_VAL ) {
+                $targetLangHistory = $_COOKIE[ Constants::COOKIE_TARGET_LANG ];
+                $targetLangAr      = explode( '||', urldecode( $targetLangHistory ) );
 
-                if (count( $targetLangAr ) > 0) {
-                    $this->target_lang = $targetLangAr[0];
+                if ( count( $targetLangAr ) > 0 ) {
+                    $this->target_lang = $targetLangAr[ 0 ];
                 }
             }
         } else {
@@ -115,7 +115,7 @@ class GDriveController extends KleinController {
     }
 
     private function finalize() {
-        if( $this->isAsyncReq ) {
+        if ( $this->isAsyncReq ) {
             $this->doResponse();
         } else {
             $this->doRedirect();
@@ -123,31 +123,31 @@ class GDriveController extends KleinController {
     }
 
     private function doRedirect() {
-        header("Location: /", true, 302);
+        header( "Location: /", true, 302 );
         exit;
     }
 
     private function doResponse() {
-        $this->response->json( array(
-            "success" => true
-        ));
+        $this->response->json( [
+                "success" => true
+        ] );
     }
 
     public function listImportedFiles() {
         $response = $this->gdriveUserSession->getFileStructureForJsonOutput();
-        $this->response->json($response);
+        $this->response->json( $response );
     }
 
     public function changeSourceLanguage() {
         $originalSourceLang = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-        $newSourceLang = $this->request->sourceLanguage;
+        $newSourceLang      = $this->request->sourceLanguage;
 
         $success = $this->gdriveUserSession->changeSourceLanguage( $newSourceLang, $originalSourceLang );
 
-        if( $success ) {
+        if ( $success ) {
             $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;
 
-            $ckSourceLang = filter_input(INPUT_COOKIE, Constants::COOKIE_SOURCE_LANG);
+            $ckSourceLang = filter_input( INPUT_COOKIE, Constants::COOKIE_SOURCE_LANG );
 
             if ( $ckSourceLang == null || $ckSourceLang === false || $ckSourceLang === Constants::EMPTY_VAL ) {
                 $ckSourceLang = '';
@@ -160,27 +160,27 @@ class GDriveController extends KleinController {
             $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $originalSourceLang;
         }
 
-        $response = array(
-            "success" => $success
-        );
+        $response = [
+                "success" => $success
+        ];
 
-        $this->response->json($response);
+        $this->response->json( $response );
     }
 
     public function deleteImportedFile() {
-        $fileId = $this->request->fileId;
+        $fileId  = $this->request->fileId;
         $success = false;
 
         if ( $fileId === 'all' ) {
-            $this->gdriveUserSession->removeAllFiles() ;
+            $this->gdriveUserSession->removeAllFiles();
             $success = true;
         } else {
             $success = $this->gdriveUserSession->removeFile( $fileId );
         }
 
-        $this->response->json( array(
-            "success" => $success
-        ));
+        $this->response->json( [
+                "success" => $success
+        ] );
     }
 
     protected function afterConstruct() {
@@ -189,7 +189,7 @@ class GDriveController extends KleinController {
     }
 
     private function setIsAsyncReq( $isAsyncReq ) {
-        if( $isAsyncReq === 'true' ) {
+        if ( $isAsyncReq === 'true' ) {
             $this->isAsyncReq = true;
         } else {
             $this->isAsyncReq = false;

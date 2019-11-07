@@ -81,7 +81,7 @@ class AnalyzeDecorator {
         $this->template->support_mail = INIT::$SUPPORT_MAIL;
 
         $this->template->split_enabled    = true;
-        $this->template->enable_outsource = true;
+        $this->template->enable_outsource = INIT::$ENABLE_OUTSOURCE;
 
         if ( array_key_exists( explode( '-', $project_data->target )[0], CatUtils::$cjk ) ) {
             $this->template->targetIsCJK = var_export( true, true ); //config.js -> editArea is a CJK lang?

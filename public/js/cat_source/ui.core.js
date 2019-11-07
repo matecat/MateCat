@@ -343,6 +343,8 @@ UI = {
     },
     continueCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
+        UI.unmountSegments();
+        $('#outer').addClass('loading');
         APP.doRequest({
             data: {
                 action: 'copyAllSource2Target',
@@ -358,6 +360,9 @@ UI = {
                     position: "bl"
                 };
                 APP.addNotification(notification);
+                UI.render({
+                    segmentToOpen: UI.currentSegmentId
+                });
             },
             success: function(d) {
                 if(d.errors.length) {
@@ -401,6 +406,10 @@ UI = {
 		}
 	},
 	createButtons: function() {
+
+	    if ( !UI.currentSegment ) {
+	        return false;
+        }
 
         var button_label = config.status_labels.TRANSLATED ;
         var label_first_letter = button_label[0];
@@ -824,11 +833,15 @@ UI = {
 			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
 			    var segToScrollElem = ( UI.getSegmentById(options.segmentToScroll).length > 0 ) ? UI.getSegmentById(options.segmentToScroll) : UI.getSegmentsSplit(options.segmentToScroll)[0];
 				this.scrollSegment(segToScrollElem, options.segmentToScroll, options.highlight );
-				UI.openSegment(segToScrollElem);
+                if ( segToScrollElem ) {
+                    UI.openSegment(segToScrollElem);
+                }
 			} else if (options.segmentToOpen) {
-                var segToScrollElem = UI.getSegmentById(options.segmentToOpen);
+                var segToScrollElem = ( UI.getSegmentById(options.segmentToOpen).length > 0 ) ? UI.getSegmentById(options.segmentToOpen) : UI.getSegmentsSplit(options.segmentToOpen)[0];
                 this.scrollSegment(segToScrollElem, options.segmentToOpen, options.highlight );
-                UI.openSegment(segToScrollElem);
+                if ( segToScrollElem ) {
+                    UI.openSegment(segToScrollElem);
+                }
             }
 
 			if (options.applySearch) {

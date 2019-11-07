@@ -152,8 +152,7 @@ class Header extends React.Component {
 									<li><a href="/outsourcing/">Outsource</a></li>
 									<li><a href="/open-source/">Opensource</a></li>
 									<li><a href="/support/">Contact us</a></li>
-									{/*<li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>*/}
-									<li><a href="/plugins/aligner/index"  target="_blank" className={"btn btn-primary"}>Aligner</a></li>
+                                    <li><a className="bigblue" href="/plugins/aligner/index#" target="_blank">Aligner</a></li>
 								</ul>
 							</div>
 

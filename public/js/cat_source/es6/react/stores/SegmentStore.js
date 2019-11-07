@@ -404,7 +404,7 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
         let self = this;
         _.forEach(this._segments, function (item, index) {
             self._segments[index] = self._segments[index].map(function (segment) {
-                if (segmentsArray.indexOf(segment.get('sid')) === -1) {
+                if (segmentsArray.indexOf(segment.get('original_sid')) === -1) {
                     return segment.set('muted', true);
                 }
                 return segment;

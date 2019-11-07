@@ -1356,11 +1356,7 @@ LXQ.init  = function () {
                         var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
                         source_val = segObj.decoded_source;
                         if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
-                            //do something here -- enable qa errors
-                            if ( (ind = LXQ.lexiqaData.segments.indexOf( id_segment )) < 0 ) {
-                                LXQ.lexiqaData.segments.push( id_segment );
-                                LXQ.updateWarningsUI();
-                            }
+
 
                             //highlight the segments
                             // source_val = $( ".source", segment ).html();
@@ -1411,6 +1407,11 @@ LXQ.init  = function () {
                             } );
                             //delete LXQ.lexiqaWarnings[id_segment];
                             LXQ.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
+                            //do something here -- enable qa errors
+                            if ( (ind = LXQ.lexiqaData.segments.indexOf( id_segment )) < 0 ) {
+                                LXQ.lexiqaData.segments.push( id_segment );
+                                LXQ.updateWarningsUI();
+                            }
                             QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(segment);
                             QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), segment ));
                             source_val = LXQ.cleanUpHighLighting( source_val );

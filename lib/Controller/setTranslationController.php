@@ -264,45 +264,6 @@ class setTranslationController extends ajaxController {
     }
 
     /**
-     * TODO remove when source change bug is found and fixed ( 2019-09-27 )
-     * @param $layer0FromPostInput
-     * @param $databaseRawSegment
-     *
-     * @throws Exception
-     */
-    protected function _checkSourceIntegrity( $layer0FromPostInput, $databaseRawSegment ){
-
-        if( ! $this->__postInput[ 'guess_tag_used' ] ){
-            return;
-        }
-
-        $layer0FromPostInput = $this->filter->fromLayer2ToLayer0( $layer0FromPostInput );
-
-        // handling &#13;
-        $databaseRawSegment = str_replace( "\r", '&#13;', $databaseRawSegment );
-
-        // handling &#10;
-        $databaseRawSegment = str_replace( "\n", '&#10;', $databaseRawSegment );
-
-        if ( $l0 = preg_match( '/&(quot;|apos;)/', $layer0FromPostInput ) && !preg_match( '/&(quot;|apos;)/', $databaseRawSegment ) ) {
-            if ( $l0 ) {
-                $layer0FromPostInput = str_replace( '&quot;', '"', $layer0FromPostInput );
-                $layer0FromPostInput = str_replace( '&apos;', "'", $layer0FromPostInput );
-            } else {
-                $databaseRawSegment = str_replace( '&quot;', '"', $databaseRawSegment );
-                $databaseRawSegment = str_replace( '&apos;', "'", $databaseRawSegment );
-            }
-        }
-
-        if ( trim( $layer0FromPostInput ) != trim( $databaseRawSegment ) ) {
-            Log::doJsonLog( [ 'Error' => 'Inconsistent segment source', 'code' => 409, 'post_values' => $_POST, 'segment_struct' => $this->segment ] );
-
-            // won't save translation something went wrong in the UI
-//            throw new ValidationError( "Inconsistent segment source", 409 );
-        }
-    }
-
-    /**
      * @return int|mixed
      * @throws Exception
      */
@@ -322,8 +283,6 @@ class setTranslationController extends ajaxController {
         $spaceHandler = new FromViewNBSPToSpaces();
         $__seg        = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
         $__tra        = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
-
-        $this->_checkSourceIntegrity( $__seg, $this->segment->segment );
 
         $check = new QA( $__seg, $__tra );
         $check->setFeatureSet( $this->featureSet );

@@ -59,7 +59,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         $this->_project      = $this->_chunk->getProject();
     }
 
-    public function evaluateChunkReviewTransition() {
+    public function performChunkReviewTransition() {
         $this->openTransaction();
 
         $finalRevisions = ( new SegmentTranslationEventDao() )->getFinalRevisionsForSegment(
@@ -186,7 +186,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
         $this->updateFinalRevisionFlag( $unsetFinalRevision );
 
-        // XXX TODO REfactor remove this recount
+        // Update QR and scores in transaction
         foreach ( $this->_chunkReviews as $chunkReview ) {
             $chunkReviewModel = new ChunkReviewModel( $chunkReview );
             $chunkReviewModel->updatePassFailResult( $this->_project );

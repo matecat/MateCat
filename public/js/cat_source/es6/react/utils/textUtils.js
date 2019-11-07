@@ -16,8 +16,6 @@ let TAGS_UTILS =  {
         //     }
         // }
 
-        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
-            .replace( config.crPlaceholderRegex, '<span class="monad marker softReturn' + config.crPlaceholderClass +'"><br /></span>' )
         _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
             .replace( config.crPlaceholderRegex, '<span class="monad marker softReturn' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
             .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
@@ -112,18 +110,26 @@ let TAGS_UTILS =  {
          */
         var phTagsObject = {};
         var diff;
-        source = source.replace( /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, group1, group2) {
-            if ( _.isUndefined(phTagsObject[group2]) ) {
+        source = source.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, group1, group2) {
+            if ( group2 && _.isUndefined(phTagsObject[group2]) ) {
                 phTagsObject[group2] = match;
             }
-            return '<' + Base64.encode(group2) +'> ';
+            if ( !_.isUndefined(group2) ) {
+                return '<'+ Base64.encode(group2) +'> ';
+            } else {
+                return match;
+            }
         });
 
-        target = target.replace( /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, gruop1, group2) {
-            if ( _.isUndefined(phTagsObject[group2]) ) {
+        target = target.replace( /&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk).*?id="(.*?)".*?\/&gt;/gi, function (match, gruop1, group2) {
+            if ( group2 && _.isUndefined(phTagsObject[group2]) ) {
                 phTagsObject[group2] = match;
             }
-            return '<'+ Base64.encode(group2) +'> ';
+            if ( !_.isUndefined(group2) ) {
+                return '<'+ Base64.encode(group2) +'> ';
+            } else {
+                return match;
+            }
         });
 
         diff   = dmp.diff_main(
