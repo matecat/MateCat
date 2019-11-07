@@ -54,16 +54,12 @@ class LanguageSelectorSearch extends React.Component {
 	render() {
 		const {defaultRenderTag} = this;
 		const {onQueryChange, querySearch, selectedLanguages} = this.props;
-		return <div>
-			<TagsInput
-				inputValue={querySearch}
-				addKeys={[]}
-				onChangeInput={onQueryChange}
-				renderTag={defaultRenderTag}
-				value={selectedLanguages ? selectedLanguages.map(e => e.name) : []}
-				onChange={this.handleChange}/>
-			{/*<p>search: {querySearch}</p>*/}
-		</div>
+		return <TagsInput inputValue={querySearch}
+					addKeys={[]}
+					onChangeInput={onQueryChange}
+					renderTag={defaultRenderTag}
+					value={selectedLanguages ? selectedLanguages.map(e => e.name) : []}
+					onChange={this.handleChange}/>
 	}
 
 	defaultRenderTag = (props) => {

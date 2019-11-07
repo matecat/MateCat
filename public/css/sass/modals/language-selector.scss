@@ -44,7 +44,7 @@
   .matecat-modal-subheader {
     background: #fff;
     border-bottom: 1px solid $medium-gray;
-    height: $subheader-height;
+    /*height: $subheader-height;*/
     padding: 16px 16px 16px 32px;
     width: 100%;
 
@@ -71,13 +71,13 @@
         align-items: center;
         width: 90%;
         text-align: left;
-        height: 64px;
         border-radius: 2px;
         border: 1px solid $medium-gray;
-        padding: 8px 16px;
+        padding: 8px 16px 16px 16px;
 
         input[type=text] {
           border: none;
+          margin: 8px 0 0 0;
           &:focus {
             outline: none;
           }
@@ -86,11 +86,11 @@
         /* Tag chips */
         .tag {
           position: relative;
-          padding: 8px 12px;
+          display: inline-block;
+          padding: 4px 8px;
           text-transform: capitalize;
           border-radius: 2px;
-          margin: 4px 8px 4px 0;
-          min-width: 100px;
+          margin: 8px 8px 0 0;
           background: #fff;
           color: #000;
           border: 1px solid $medium-gray;
@@ -102,13 +102,6 @@
             font-size: 20px;
             cursor: pointer;
           }
-
-          /*&:after {
-            position: absolute;
-            right: 15px;
-            content: "\00d7";
-            color: $light-blue;
-          }*/
         }
       }
     }
@@ -116,10 +109,9 @@
 
   /* Modal Body */
   .matecat-modal-body {
-    overflow: auto;
+    overflow: hidden;
     height: 100%;
-    max-height: calc(100% - 255px);
-    padding: 0 4px 0 0;
+    max-height: calc(100% - 119px);
     border-radius: 0;
   }
 
@@ -172,12 +164,14 @@
   /* Columns */
   .languages-columns {
     /*max-height: calc(100% - 48px);*/
+    max-height: calc(100% - 133px);
     display: flex;
     flex-direction: row;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     height: 100%;
     padding: 32px 16px 0 24px;
+    margin: 0 4px 0 0;
 
     ul {
       flex: 1;
@@ -188,7 +182,7 @@
         cursor: pointer;
         position: relative;
         padding: 6px 12px;
-        margin: 2px 4px;
+        margin: 4px;
         border-radius: 2px;
 
         &:hover:not(.selected),

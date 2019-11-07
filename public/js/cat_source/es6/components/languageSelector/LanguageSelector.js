@@ -38,29 +38,31 @@ class LanguageSelector extends React.Component {
 							<span className={"modal-title"}>Multiple Languages</span>
 							<span className="close-matecat-modal x-popup" onClick={onClose}/>
 						</div>
-						<div className="matecat-modal-subheader">
-							<div className={"language-from"}>
 
-								<div className={"first-column"}>
-									<span className={"label"}>From:</span>
-								</div>
-								<div>
-									<span>Italian</span>
-								</div>
-							</div>
-							<div className={"language-to"}>
-								<div className={"first-column"}>
-									<span className={"label"}>To:</span>
-								</div>
-								<div className={"language-search"}>
-									<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
-															querySearch={querySearch}
-															onDeleteLanguage={onToggleLanguage}
-															onQueryChange={onQueryChange}/>
-								</div>
-							</div>
-						</div>
 						<div className="matecat-modal-body">
+
+							<div className="matecat-modal-subheader">
+								<div className={"language-from"}>
+
+									<div className={"first-column"}>
+										<span className={"label"}>From:</span>
+									</div>
+									<div>
+										<span>Italian</span>
+									</div>
+								</div>
+								<div className={"language-to"}>
+									<div className={"first-column"}>
+										<span className={"label"}>To:</span>
+									</div>
+									<div className={"language-search"}>
+										<LanguageSelectorSearch languagesList={languagesList} selectedLanguages={selectedLanguages}
+																querySearch={querySearch}
+																onDeleteLanguage={onToggleLanguage}
+																onQueryChange={onQueryChange}/>
+									</div>
+								</div>
+							</div>
 
 							<LanguageSelectorList languagesList={languagesList} selectedLanguages={selectedLanguages}
 												  querySearch={querySearch}
