@@ -76,7 +76,39 @@ class LanguageSelector extends React.Component {
 					<div className="selected-counter">
 						<span className={"uncheck-all"} onClick={() => {
 							this.setState({selectedLanguages: []})
-						}}>&times;</span>
+						}}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="12"
+								height="12"
+								viewBox="0 0 12 12"
+							>
+							  <g
+								  fill="#00AEE4"
+								  fillRule="nonzero"
+								  stroke="#00AEE4"
+								  strokeWidth="1"
+								  transform="translate(-5 -5) translate(5 5)"
+							  >
+								<rect
+									width="13"
+									height="1"
+									x="-0.5"
+									y="5.5"
+									rx="0.5"
+									transform="rotate(45 6 6)"
+								> </rect>
+								<rect
+									width="13"
+									height="1"
+									x="-0.5"
+									y="5.5"
+									rx="0.5"
+									transform="rotate(-45 6 6)"
+								> </rect>
+							  </g>
+							</svg>
+						</span>
 						<span className={"badge"}>{selectedLanguages && selectedLanguages.length}</span>
 						<span className={"label"}>language selected</span>
 					</div>
