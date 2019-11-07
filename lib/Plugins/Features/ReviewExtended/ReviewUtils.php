@@ -30,8 +30,11 @@ class ReviewUtils {
         /** @var ChunkReviewStruct $chunkReview */
         foreach ( $chunkReviews as $chunkReview ) {
 
+            $advancementWcAsFloat        = floatval( $chunkReview->advancement_wc );
+            $correctAdvancementWCAsFloat = floatval( $correctAdvancementWC = self::getCorrectAdvancementWC( $chunkReview ) );
+
             // check if the current advancement_wc corresponds to correct advancement word count
-            if ( $chunkReview->advancement_wc !== self::getCorrectAdvancementWC( $chunkReview )  && ( mt_rand( 1, 100 ) % 10 ) === 0 ) {
+            if ( $advancementWcAsFloat !== $correctAdvancementWCAsFloat ) {
 
                 /** @var \Projects_ProjectStruct $project */
                 $project         = $chunkReview->getChunk()->getProject();
@@ -39,15 +42,17 @@ class ReviewUtils {
                 $model           = $revisionFactory->getChunkReviewModel( $chunkReview );
                 $model->recountAndUpdatePassFailResult( $project );
 
-                $msg = "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done.";
+                $msg      = "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done.";
                 $msgEmail = "<p>Wrong advancement word count found for project with ID: " . $project->id . ".</p>";
                 $msgEmail .= "<ul>";
-                $msgEmail .= "<li>ACTUAL SOURCE PAGE: ".$chunkReview->source_page."</li>";
-                $msgEmail .= "<li>ACTUAL ADVANCED WC: ".$chunkReview->advancement_wc."</li>";
-                $msgEmail .= "<li>CALCULATED WC: ".self::getCorrectAdvancementWC( $chunkReview )."</li>";
+                $msgEmail .= "<li>ACTUAL SOURCE PAGE: " . $chunkReview->source_page . "</li>";
+                $msgEmail .= "<li>ACTUAL ADVANCED WC: " . $advancementWcAsFloat . "</li>";
+                $msgEmail .= "<li>CALCULATED WC: " . $correctAdvancementWCAsFloat . "</li>";
                 $msgEmail .= "</ul>";
                 $msgEmail .= "<p>--------------------------------</p>";
                 $msgEmail .= "<p>Recount done.</p>";
+
+                $chunkReview->advancement_wc = $correctAdvancementWC;
 
                 \Utils::sendErrMailReport( $msgEmail );
                 \Log::doJsonLog( $msg );
@@ -89,12 +94,12 @@ class ReviewUtils {
      * @return int|null
      */
     public static function sourcePageToRevisionNumber( $number ) {
-        return ( ($number - 1) < 1 ) ? null : $number - 1;
+        return ( ( $number - 1 ) < 1 ) ? null : $number - 1;
     }
 
     /**
      * @param ModelStruct $lqaModel
-     * @param string $sourcePage
+     * @param string      $sourcePage
      *
      * @return array|mixed
      * @throws \Exception
