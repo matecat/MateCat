@@ -9,7 +9,11 @@
   $light-blue: #00AEE4;
   $medium-blue: #0055B8;
   $dark-blue: #002B5C;
-  $shadow-gray: #CDD4DE;
+
+  $placeholder-gray: #CDD4DE;
+  $btn-shadow-gray: #C5C5C5;
+  $btn-hover-blue: #12b4df;
+
   $light-gray: #F2F5F7 ;
   $medium-gray: #BBBBBB;
   $dark-gray: #706E6E;
@@ -70,18 +74,24 @@
 
         display: flex;
         align-items: center;
-        width: 90%;
+        width: 100%;
         text-align: left;
         border-radius: 2px;
         border: 1px solid $medium-gray;
         padding: 8px 16px 16px 16px;
 
+        &:hover {
+          border: 1px solid $dark-gray;
+          cursor: text;
+        }
+
         input[type=text] {
           border: none;
           margin: 8px 0 0 0;
+          padding: 6px 8px;
           font-size: 1.3rem;
           &::placeholder {
-            color: $shadow-gray;
+            color: $placeholder-gray;
             opacity: 1;
           }
           &:focus {
@@ -99,11 +109,13 @@
           padding: 4px 8px;
           text-transform: capitalize;
           border-radius: 2px;
-          margin: 8px 8px 0 0;
+          margin: 8px 4px 0 0;
           background: #fff;
           color: #000;
           border: 1px solid $medium-gray;
-
+          &:hover {
+            cursor: default;
+          }
           .react-tagsinput-remove {
             color: $light-blue;
             text-decoration: none;
@@ -153,7 +165,7 @@
 
       /* Badge */
       .badge {
-        padding: 0.35rem 0.55rem;
+        padding: 0.35rem 0.58rem;
         background: #00AEE4;
         border-radius: 25px;
         font-size: 0.9rem;
@@ -228,12 +240,20 @@
 
   .modal-btn {
     padding: 8px 16px;
-    text-transform: capitalize;
     border-radius: 2px;
     margin: 4px 8px;
+    cursor: pointer;
+
+
+    &:focus {
+      outline: none;
+    }
 
     &.primary {
       min-width: 128px;
+      -webkit-box-shadow: 0 2px 8px 0 $btn-shadow-gray;
+      -moz-box-shadow: 0 2px 8px 0 $btn-shadow-gray;
+      box-shadow: 0 2px 8px 0 $btn-shadow-gray;
     }
 
     &.secondary {
@@ -245,6 +265,10 @@
       background: $light-blue;
       border: 1px solid $light-blue;
       color: #fff;
+      &:hover {
+        background-color: $btn-hover-blue;
+        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+      }
     }
 
     &.gray {
