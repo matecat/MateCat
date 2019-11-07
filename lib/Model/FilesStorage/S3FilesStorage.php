@@ -26,6 +26,8 @@ use SimpleS3\Components\Encoders\UrlEncoder;
  */
 class S3FilesStorage extends AbstractFilesStorage {
 
+    const ORIGINAL_ZIP_PLACEHOLDER = "__originalZip";
+
     const CACHE_PACKAGE_FOLDER   = 'cache-package';
     const FILES_FOLDER           = 'files';
     const QUEUE_FOLDER           = 'queue-projects';

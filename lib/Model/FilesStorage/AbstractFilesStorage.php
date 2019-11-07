@@ -384,7 +384,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
         if ( $isFsOnS3 ) {
             $files = $s3Client->getItemsInABucket( [
                     'bucket' => S3FilesStorage::getFilesStorageBucket(),
-                    'prefix' => S3FilesStorage::ZIP_FOLDER . DIRECTORY_SEPARATOR . $zip_name
+                    'prefix' => S3FilesStorage::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . static::pathinfo_fix( $zip_name, PATHINFO_BASENAME )
             ] );
         } else {
             $files = scandir( \INIT::$ZIP_REPOSITORY . '/' . $zip_name );
@@ -399,6 +399,12 @@ abstract class AbstractFilesStorage implements IFilesStorage {
 
         if ( $zip_name == null && $zip_file == null ) {
             return false;
+        } elseif ( $isFsOnS3 ) {
+            $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
+            $params[ 'key' ]     = $zip_file;
+            $params[ 'save_as' ] = "/tmp/" . static::pathinfo_fix( $zip_file, PATHINFO_BASENAME );
+            $s3Client->downloadItem( $params );
+            return $params[ 'save_as' ];
         } else {
             return \INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file;
         }
