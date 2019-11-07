@@ -134,6 +134,7 @@ class Editarea extends React.Component {
     onKeyDownEvent(e) {
         this.keyPressed = true;
         EditArea.keydownEditAreaEventHandler.call(this.editAreaRef, e, ()=>{
+            SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true);
             this.props.sendTranslationWithoutUpdate();
             UI.registerQACheck();
         });
