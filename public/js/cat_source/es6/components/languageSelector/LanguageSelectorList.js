@@ -6,6 +6,9 @@ class LanguageSelectorList extends React.Component {
 		}
 	}
 
+	currentSelectedElementRef = null;
+	wrapperScrollRef = null;
+
 	componentDidMount() {
 		document.addEventListener('keydown', this.navigateLanguagesList);
 
@@ -16,6 +19,9 @@ class LanguageSelectorList extends React.Component {
 	}
 
 	componentDidUpdate(prevProps) {
+		const {scrollIfTagNavigationIsOverflow} = this;
+		scrollIfTagNavigationIsOverflow();
+
 		if (prevProps.querySearch !== this.props.querySearch) {
 			this.setState({
 				position: 0
@@ -27,21 +33,31 @@ class LanguageSelectorList extends React.Component {
 		let counterItem = -1;
 		const languages = this.getLanguagesInColumns();
 		const {onClickElement} = this;
-		const {querySearch,selectedLanguages} = this.props;
+		const {querySearch, selectedLanguages} = this.props;
 		const {position} = this.state;
-		return <div className="languages-columns">
+		this.currentSelectedElementRef = null;
+
+		return <div className="languages-columns" ref={(el) => {
+			this.wrapperScrollRef = el
+		}}>
 			{languages.map((languagesColumn, key) => {
 				return (
 					<ul key={key} className={'dropdown__list'}>
 						{languagesColumn.map((e) => {
 							counterItem++;
 							let elementClass = '';
-							if(selectedLanguages && selectedLanguages.map(e=>e.code).indexOf(e.code)>-1){
+							const isHover = (querySearch && counterItem === position);
+							if (selectedLanguages && selectedLanguages.map(e => e.code).indexOf(e.code) > -1) {
 								elementClass = 'selected'
-							}else if(querySearch && counterItem === position){
+							} else if (isHover) {
 								elementClass = 'hover'
 							}
 							return <li key={`${counterItem}`}
+									   ref={(el) => {
+										   if (isHover) {
+											   this.currentSelectedElementRef = el;
+										   }
+									   }}
 									   className={`lang-item ${elementClass}`}
 									   onClick={onClickElement(e)}
 							>{e.name}<span className={"check"}>
@@ -68,7 +84,7 @@ class LanguageSelectorList extends React.Component {
 		</div>
 	}
 
-	onClickElement = (language) =>()=>{
+	onClickElement = (language) => () => {
 		const {onToggleLanguage} = this.props;
 		onToggleLanguage(language);
 	}
@@ -92,13 +108,28 @@ class LanguageSelectorList extends React.Component {
 			}));
 		}
 	}
+	scrollIfTagNavigationIsOverflow = () =>{
+		const {currentSelectedElementRef, wrapperScrollRef} = this;
+
+		if(currentSelectedElementRef){
+			const relativePositionOfTag = currentSelectedElementRef.offsetTop-wrapperScrollRef.offsetTop+currentSelectedElementRef.clientHeight;
+			const bottomPositionOfWrapper = wrapperScrollRef.clientHeight+wrapperScrollRef.scrollTop;
+			if(relativePositionOfTag>bottomPositionOfWrapper){
+				//check if element is overflowBottom of parent
+				wrapperScrollRef.scrollTop = (relativePositionOfTag+10)-wrapperScrollRef.clientHeight
+			}else if(wrapperScrollRef.scrollTop >relativePositionOfTag-currentSelectedElementRef.clientHeight){
+				//check if element is overflowTop of parent
+				wrapperScrollRef.scrollTop = relativePositionOfTag-currentSelectedElementRef.clientHeight-10
+			}
+		}
+	}
 
 	navigateLanguagesList = (event) => {
 		const {getFilteredLanguages} = this;
 		const {position} = this.state;
-		const {querySearch,onToggleLanguage,changeQuerySearch} = this.props;
+		const {querySearch, onToggleLanguage, changeQuerySearch} = this.props;
 		const keyCode = event.keyCode;
-		if (keyCode === 38 || keyCode === 40 || keyCode === 13) {
+		if (keyCode === 38 || keyCode === 40) {
 			event.preventDefault();
 		}
 
@@ -118,7 +149,7 @@ class LanguageSelectorList extends React.Component {
 						position: position + 1
 					})
 				}
-			}else if (keyCode === 13 && filteredLanguages.length){
+			} else if (keyCode === 13 && filteredLanguages.length) {
 				//enter with 1 language filtered
 				onToggleLanguage(filteredLanguages[position]);
 				changeQuerySearch('');
