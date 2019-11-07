@@ -10,28 +10,39 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use Features\ReviewExtended\Model\ChunkReviewDao as ReviewExtendedChunkReviewDao;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;
 
 class ReviewUtils {
 
+    /**
+     * @param array $statsArray
+     * @param array $chunkReviews
+     *
+     * @return array
+     * @throws \Exception
+     */
     public static function formatStats( $statsArray, $chunkReviews ) {
         $statsArray [ 'revises' ] = [];
 
         /** @var ChunkReviewStruct $chunkReview */
         foreach ( $chunkReviews as $chunkReview ) {
 
-            // recount if advancement_wc < 0
-            if( $chunkReview->advancement_wc < 0 ){
+            // check if the current advancement_wc corresponds to correct advancement word count
+            if ( $chunkReview->advancement_wc !== self::getCorrectAdvancementWC( $chunkReview ) ) {
 
                 /** @var \Projects_ProjectStruct $project */
-                $project = $chunkReview->getChunk()->getProject();
+                $project         = $chunkReview->getChunk()->getProject();
                 $revisionFactory = \RevisionFactory::initFromProject( $project );
-                $model = $revisionFactory->getChunkReviewModel( $chunkReview ) ;
+                $model           = $revisionFactory->getChunkReviewModel( $chunkReview );
                 $model->recountAndUpdatePassFailResult( $project );
 
-                \Log::doJsonLog("Negative advancement_wc found for project with ID: ".$project->id.". WC recount done.");
+                $msg = "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done.";
+
+                \Utils::sendErrMailReport( $msg );
+                \Log::doJsonLog( $msg );
             }
 
             $statsArray[ 'revises' ][] = [
@@ -44,32 +55,42 @@ class ReviewUtils {
     }
 
     /**
+     * @param ChunkReviewStruct $chunkReview
      *
-     * @param $number
+     * @return int
+     */
+    private static function getCorrectAdvancementWC( ChunkReviewStruct $chunkReview ) {
+        $chunkReviewDao = new ReviewExtendedChunkReviewDao();
+
+        return $chunkReviewDao->recountAdvancementWords( $chunkReview->getChunk(), $chunkReview->source_page );
+    }
+
+    /**
+     *
+     * @param null $number
      *
      * @return int
      */
     public static function revisionNumberToSourcePage( $number = null ) {
-        if ( ! empty( $number ) ) {
-            return $number + 1;
-        }
-
-        return 1;
+        return ( !empty( $number ) ) ? $number + 1 : 1;
     }
 
     /**
-     * @param $number
+     * @param int $number
      *
      * @return int|null
      */
     public static function sourcePageToRevisionNumber( $number ) {
-        if ( $number - 1 < 1 ) {
-            return null;
-        }
-
-        return $number - 1;
+        return ( ($number - 1) < 1 ) ? null : $number - 1;
     }
 
+    /**
+     * @param ModelStruct $lqaModel
+     * @param string $sourcePage
+     *
+     * @return array|mixed
+     * @throws \Exception
+     */
     public static function filterLQAModelLimit( ModelStruct $lqaModel, $sourcePage ) {
         $limit = $lqaModel->getLimit();
 
@@ -78,9 +99,9 @@ class ReviewUtils {
              * Limit array index equals to $source_page -2.
              */
             return isset( $limit[ $sourcePage - 2 ] ) ? $limit[ $sourcePage - 2 ] : end( $limit );
-        } else {
-            return $limit;
         }
+
+        return $limit;
     }
 
     /**
@@ -96,5 +117,4 @@ class ReviewUtils {
 
         return $validRevisionNumbers;
     }
-
 }
