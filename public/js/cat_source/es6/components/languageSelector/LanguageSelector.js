@@ -28,7 +28,7 @@ class LanguageSelector extends React.Component {
 	}
 
 	render() {
-		const {onQueryChange, onToggleLanguage, onConfirm,preventDismiss} = this;
+		const {onQueryChange, onToggleLanguage, onConfirm,preventDismiss, onRestore} = this;
 		const {languagesList, onClose} = this.props;
 		const {selectedLanguages, querySearch} = this.state;
 		return <div id="matecat-modal-languages" className="matecat-modal" onClick={onClose}>
@@ -73,12 +73,12 @@ class LanguageSelector extends React.Component {
 
 						<div className="matecat-modal-footer">
 								<div className="selected-counter">
-									<span className={"uncheck-all"}>&times;</span>
+									<span className={"uncheck-all"} onClick={onRestore}>&times;</span>
 									<span className={"badge"}>{selectedLanguages ? selectedLanguages.length : 1}</span>
 									<span className={"label"}>language selected</span>
 								</div>
 								<div className="">
-									<button className={"modal-btn secondary gray"} onClick={onClose}>close</button>
+									<button className={"modal-btn secondary gray"} onClick={onRestore}>restore all</button>
 									<button className={"modal-btn primary blue"} onClick={onConfirm}>confirm</button>
 								</div>
 						</div>
@@ -112,7 +112,17 @@ class LanguageSelector extends React.Component {
 			selectedLanguages:newSelectedLanguages
 		})
 		//when add a language, restore query search.
-	}
+	};
+
+	onRestore = () => {
+		const {initialLanguages} = this.state;
+		this.setState({
+			selectedLanguages:initialLanguages,
+			querySearch: ''
+		})
+	};
+
+
 }
 
 Header.defaultProps = {
