@@ -123,6 +123,13 @@
             font-size: 20px;
             cursor: pointer;
           }
+          &.highlightDelete{
+            background: $light-blue;
+            color: #ffffff;
+            .react-tagsinput-remove {
+              color: #ffffff;
+            }
+          }
         }
       }
     }
