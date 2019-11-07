@@ -39,7 +39,10 @@ class ReviewUtils {
                 $model           = $revisionFactory->getChunkReviewModel( $chunkReview );
                 $model->recountAndUpdatePassFailResult( $project );
 
-                \Log::doJsonLog( "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done." );
+                $msg = "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done.";
+
+                \Utils::sendErrMailReport( $msg );
+                \Log::doJsonLog( $msg );
             }
 
             $statsArray[ 'revises' ][] = [
