@@ -2196,6 +2196,8 @@
                     SegmentActions.getContribution( UI.currentSegmentId, true);
                 } else {
                     SegmentActions.modifyTabVisibility( 'multiMatches', false );
+                    SegmentActions.activateTab( UI.currentSegmentId, 'matches' );
+                    SegmentActions.updateAllSegments();
                 }
             }
         },
