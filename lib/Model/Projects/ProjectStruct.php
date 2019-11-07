@@ -1,7 +1,9 @@
 <?php
 
 use DataAccess\ArrayAccessTrait;
+use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use FilesStorage\S3FilesStorage;
 use Teams\TeamDao;
 
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
@@ -220,10 +222,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * Most of the times only one zip per project is uploaded.
      * This method is a shortcut to access the zip file path.
      *
-     * @return string the original zip path.
+     * TODO Remove this from a struct object!!!
      *
+     * @return string the original zip path.
+     * @throws Exception
      */
     public function getFirstOriginalZipPath() {
+
         $fs = FilesStorageFactory::create();
         $jobs = $this->getJobs();
         $files = Files_FileDao::getByJobId($jobs[0]->id);
@@ -232,6 +237,16 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         $zipName = $zipName[0];
 
         $originalZipPath = $fs->getOriginalZipPath( $this->create_date, $this->id, $zipName );
+
+        if( AbstractFilesStorage::isOnS3() ){
+            $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
+            $params[ 'key' ]     = $originalZipPath;
+            $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $originalZipPath, PATHINFO_BASENAME );
+            $client              = $fs::getStaticS3Client();
+            $client->downloadItem( $params );
+            $originalZipPath = $params[ 'save_as' ];
+        }
+
         return $originalZipPath ;
     }
 
