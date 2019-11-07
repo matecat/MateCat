@@ -103,13 +103,19 @@
           background: #fff;
           color: #000;
           border: 1px solid $medium-gray;
-
           .react-tagsinput-remove {
             color: $light-blue;
             text-decoration: none;
             margin: 0 0 0 4px;
             font-size: 20px;
             cursor: pointer;
+          }
+          &.highlightDelete{
+            background: $light-blue;
+            color: #ffffff;
+            .react-tagsinput-remove {
+              color: #ffffff;
+            }
           }
         }
       }
