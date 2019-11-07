@@ -74,7 +74,7 @@ class LanguageSelector extends React.Component {
 						<div className="matecat-modal-footer">
 								<div className="selected-counter">
 									<span className={"uncheck-all"}>&times;</span>
-									<span className={"badge"}>3</span>
+									<span className={"badge"}>{selectedLanguages ? selectedLanguages.length : 1}</span>
 									<span className={"label"}>language selected</span>
 								</div>
 								<div className="">
