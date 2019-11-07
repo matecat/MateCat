@@ -28,7 +28,7 @@ class LanguageSelector extends React.Component {
 	}
 
 	render() {
-		const {onQueryChange, onToggleLanguage, onConfirm, preventDismiss, onRestore} = this;
+		const {onQueryChange, onToggleLanguage, onConfirm, preventDismiss, onRestore, onReset} = this;
 		const {languagesList, onClose} = this.props;
 		const {selectedLanguages, querySearch} = this.state;
 		return <div id="matecat-modal-languages" className="matecat-modal" onClick={onClose}>
@@ -74,9 +74,7 @@ class LanguageSelector extends React.Component {
 
 				<div className="matecat-modal-footer">
 					<div className="selected-counter">
-						<span className={"uncheck-all"} onClick={() => {
-							this.setState({selectedLanguages: []})
-						}}>
+						<span className={"uncheck-all"} onClick={onReset}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="12"
@@ -154,6 +152,12 @@ class LanguageSelector extends React.Component {
 		const {initialLanguages} = this.state;
 		this.setState({
 			selectedLanguages: initialLanguages,
+			querySearch: ''
+		})
+	};
+	onReset = () => {
+		this.setState({
+			selectedLanguages: [],
 			querySearch: ''
 		})
 	};
