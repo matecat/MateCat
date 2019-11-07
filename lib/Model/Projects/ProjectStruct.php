@@ -234,6 +234,11 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         $files = Files_FileDao::getByJobId($jobs[0]->id);
 
         $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[0]->filename );
+
+        if( AbstractFilesStorage::pathinfo_fix( $zipName[0], PATHINFO_EXTENSION ) != 'zip' ){
+            return null;
+        }
+
         $zipName = $zipName[0];
 
         $originalZipPath = $fs->getOriginalZipPath( $this->create_date, $this->id, $zipName );
