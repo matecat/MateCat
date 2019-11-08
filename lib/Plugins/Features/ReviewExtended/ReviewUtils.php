@@ -20,11 +20,12 @@ class ReviewUtils {
     /**
      * @param array $statsArray
      * @param array $chunkReviews
+     * @param null  $segmentId
      *
      * @return array
      * @throws \Exception
      */
-    public static function formatStats( $statsArray, $chunkReviews ) {
+    public static function formatStats( $statsArray, $chunkReviews, $segmentId = null ) {
         $statsArray [ 'revises' ] = [];
 
         /** @var ChunkReviewStruct $chunkReview */
@@ -44,7 +45,15 @@ class ReviewUtils {
 
                 $msg      = "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done.";
                 $msgEmail = "<p>Wrong advancement word count found for project with ID: " . $project->id . ".</p>";
+                $msgEmail .= "<p>--------------------------------</p>";
                 $msgEmail .= "<ul>";
+                $msgEmail .= "<li>PROJECT ID: " . $project->id . "</li>";
+                $msgEmail .= "<li>JOB ID: " . $chunkReview->getChunk()->id . "</li>";
+
+                if(null !== $segmentId) {
+                    $msgEmail .= "<li>SEGMENT ID: " . $segmentId . "</li>";
+                }
+
                 $msgEmail .= "<li>ACTUAL SOURCE PAGE: " . $chunkReview->source_page . "</li>";
                 $msgEmail .= "<li>ACTUAL ADVANCED WC: " . $advancementWcAsFloat . "</li>";
                 $msgEmail .= "<li>CALCULATED WC: " . $correctAdvancementWCAsFloat . "</li>";
