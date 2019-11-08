@@ -437,16 +437,16 @@
         },
         {
             "name": "matecat/simple-s3",
-            "version": "v1.5.4",
+            "version": "v1.5.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/simple-s3.git",
-                "reference": "478b240e22d639ab0352c264fd5ea650cc80e573"
+                "reference": "e509cf085b6c50b8009e7d956a2b5efd2db2bafb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/478b240e22d639ab0352c264fd5ea650cc80e573",
-                "reference": "478b240e22d639ab0352c264fd5ea650cc80e573",
+                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/e509cf085b6c50b8009e7d956a2b5efd2db2bafb",
+                "reference": "e509cf085b6c50b8009e7d956a2b5efd2db2bafb",
                 "shasum": ""
             },
             "require": {
@@ -482,14 +482,14 @@
                 }
             ],
             "description": "Simple S3 Client",
-            "homepage": "https://github.com/mauretto78/simple-s3",
+            "homepage": "https://github.com/matecat/simple-s3",
             "keywords": [
                 "aws",
                 "php",
                 "s3",
                 "sdk"
             ],
-            "time": "2019-11-07T09:18:50+00:00"
+            "time": "2019-11-07T16:40:54+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
