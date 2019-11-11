@@ -11,7 +11,8 @@ class Header extends React.Component {
         this.state = {
             teams: [],
             selectedTeamId : null,
-            user: this.props.user
+            user: this.props.user,
+            loggedUser: this.props.loggedUser
         };
         this.renderTeams = this.renderTeams.bind(this);
         this.updateTeams = this.updateTeams.bind(this);
@@ -64,12 +65,13 @@ class Header extends React.Component {
 
     updateUser(user) {
         this.setState({
-            user : user
+            user : user,
+            loggedUser: true
         });
     }
 
     getUserIcon() {
-        if (this.props.loggedUser ) {
+        if (this.state.loggedUser ) {
             if (this.state.user.metadata && this.state.user.metadata.gplus_picture) {
                 return <img onClick={this.openPreferencesModal.bind(this)}
                             className="ui mini circular image ui-user-top-image"
@@ -128,7 +130,7 @@ class Header extends React.Component {
                                 <TeamSelect
                                     isManage={this.props.showFilterProjects}
                                     showModals={this.props.showModals}
-                                    loggedUser={this.props.loggedUser}
+                                    loggedUser={this.state.loggedUser}
                                     showTeams={this.props.showTeams}
                                     changeTeam={this.props.changeTeam}
                                     teams={this.state.teams}
