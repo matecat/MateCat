@@ -328,7 +328,7 @@ UI.UPLOAD_PAGE = {};
 
 $.extend(UI.UPLOAD_PAGE, {
 	init: function () {
-        this.initDropdowns();
+
         this.checkLanguagesCookie();
         /**
          * LexiQA language Enable/Disable
@@ -353,7 +353,7 @@ $.extend(UI.UPLOAD_PAGE, {
     render: function () {
 
         var headerMountPoint = $("header")[0];
-
+        var self = this;
         if (config.isLoggedIn) {
             ReactDOM.render(React.createElement(Header, {
                 showFilterProjects: false,
@@ -363,6 +363,7 @@ $.extend(UI.UPLOAD_PAGE, {
             }), headerMountPoint);
             API.TEAM.getAllTeams().done(function (data) {
                 self.teams = data.teams;
+                self.initDropdowns();
                 TeamsActions.renderTeams(self.teams);
                 self.selectedTeam = APP.getLastTeamSelected(self.teams);
                 TeamsActions.selectTeam(self.selectedTeam);
