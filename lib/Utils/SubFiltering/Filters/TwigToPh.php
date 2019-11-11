@@ -24,7 +24,7 @@ class TwigToPh extends AbstractHandler {
      * @return string
      */
     public function transform( $segment ) {
-        preg_match_all( '/{[{%#][^<>]+?[}%#]}/', $segment, $html, PREG_SET_ORDER );
+        preg_match_all( '/{{[^<>]+?}}|{%[^<>]+?%}|{#[^<>]+?#}/', $segment, $html, PREG_SET_ORDER );
         foreach ( $html as $pos => $twig_variable ) {
             //check if inside twig variable there is a tag because in this case shouldn't replace the content with PH tag
             if( !strstr($twig_variable[0], Constants::GTPLACEHOLDER) ){

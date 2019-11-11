@@ -24,7 +24,12 @@ class TestHelper {
         TestHelper::$FIXTURES = new FixturesLoader();
     }
 
+    /**
+     * @throws Exception
+     */
     static function resetDb() {
+        TestHelper::$SCHEMA_HELPER->createDatabase() ;
+        TestHelper::$SCHEMA_HELPER->prepareSchemaTables();
         TestHelper::$SCHEMA_HELPER->resetAllTables();
         TestHelper::$FIXTURES->loadFixtures();
     }
