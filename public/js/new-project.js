@@ -607,9 +607,10 @@ $.extend(UI.UPLOAD_PAGE, {
 
         $("#add-multiple-lang").click(function(e) {
             e.preventDefault();
-            $(".popup-languages.slide").addClass('open').show().animate({ right: '0px' }, 400);
+
+            /*$(".popup-languages.slide").addClass('open').show().animate({ right: '0px' }, 400);*/
             var tlAr = $('#target-lang').dropdown('get value').split(',');
-            $('.popup-languages.slide .listlang li input').removeAttr('checked');
+            /*$('.popup-languages.slide .listlang li input').removeAttr('checked');
             $('.popup-languages.slide .listlang li').removeClass('on');
             $('.popup-languages.slide .listlang li input').prop('checked', false);
             $.each(tlAr, function() {
@@ -620,7 +621,34 @@ $.extend(UI.UPLOAD_PAGE, {
             });
             $('.popup-languages h1 .number').text( tlAr.length );
             $(".popup-outer.lang-slide").show();
-            $('body').addClass('side-popup');
+            $('body').addClass('side-popup');*/
+            ReactDOM.render(
+                React.createElement( LanguageSelector, {
+                    selectedLanguagesFromDropdown: tlAr,
+                    languagesList: config.languages_array,
+                    onClose: function () {
+                        ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+                    },
+                    onConfirm: function (data) {
+                        if(data){
+                            var direction ="ltr";
+                            const str = data.map(e=> e.name).join(',');
+                            const vals = data.map(e=> e.code).join(',');
+                            direction = UI.checkMultilangRTL();
+                            var op = '<div id="extraTarget" class="item" data-selected="selected" data-direction="' + direction + '" data-value="' + vals + '">' + str + '</div>';
+                            $('#extraTarget').remove();
+                            $('#target-lang div.item').first().before(op);
+                            setTimeout(function () {
+                                $('#target-lang').dropdown('set selected', vals);
+                            });
+
+
+                            $('.translate-box.target h2 .extra').remove();
+                            $('.translate-box.target h2').append('<span class="extra">(' + $('.popup-languages li.on').length + ' languages)</span>');
+                        }
+                        ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+                    }
+                }), $('#languageSelector')[0] );
         });
 
         $(".popup-outer.lang-slide, #cancelMultilang, #chooseMultilang").click(function(e) {

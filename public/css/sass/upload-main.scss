@@ -11,6 +11,7 @@
 @import 'common-main';
 @import 'popup';
 @import 'commons/tooltip';
+@import 'modals/language-selector';
 
 @import 'upload-page';
 .translate-box {
@@ -195,7 +196,7 @@
         text-align: left;
     }
     .tm-info-icon {
-        float: left;   
+        float: left;
     }
     .tm-info-title {
         line-height: 19px;
