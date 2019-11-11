@@ -733,7 +733,7 @@ color:#333;}
 	    z-index: 12;
 	    opacity: 0.4;
     }
-	
+
 	.mgmt-popup-outer {
 		z-index: 99999999999999;
 	}
@@ -1206,7 +1206,7 @@ text-align: right;
 {
 	font-size: 18px;
     }
-    .popup h1, .popup-tm h1, .popup-languages.slide h1, .slide-panel h1
+    .popup h1, .popup-tm h1, .slide-panel h1
     {
 	    overflow: visible;
 	    max-height: inherit;
@@ -1219,7 +1219,7 @@ text-align: right;
 	    margin: 0 !important;
 	    text-align: left;
     }
-    .popup-tm h1, .popup-languages.slide h1 {
+    .popup-tm h1 {
     	height: 60px;
     	padding: 10px 23px 7px 58px;
     }
@@ -1421,9 +1421,7 @@ float: none!important;
     .popup .btn-ok.right,
     .popup .btn-cancel.right,
     .popup-tm .btn-ok.right,
-    .popup-tm .btn-cancel.right,
-    .popup-languages.slide .btn-ok.right,
-    .popup-languages.slide .btn-cancel.right
+    .popup-tm .btn-cancel.right
     {
 	    float: right;
     }
@@ -3072,31 +3070,6 @@ font-weight: normal !important;
 	width: 30px;
 	float: left;
 	background-size: 25px!important;}
-
-
-@media only screen and (max-width : 1100px) {
-
-.popup-languages ul {
--webkit-column-count: 4;
-column-count: 4;
--moz-column-count: 4;
-}
-
-
-}
-
-@media only screen and (max-width : 900px) {
-
-.popup-languages ul {
--webkit-column-count: 3;
-column-count: 3;
--moz-column-count: 3;
-}
-
-
-
-}
-
 
 @media (max-height: 500px) {
     .register-modal

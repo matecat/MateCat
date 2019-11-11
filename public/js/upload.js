@@ -43,44 +43,6 @@ $(document).ready(function(){
             });
         }
     });
-    //todo remove after new modal implementation
-    $("#chooseMultilang").click(function(e){
-        e.preventDefault();
-        APP.closePopup();
-
-//        $('.popup-languages .close').click();
-        if ($('.popup-languages li.on').length) {
-            var str = '';
-            var vals = '';
-            var direction ="ltr";
-            $('.popup-languages li.on input').each(function(){
-                str += $(this).parent().find('label').text() + ',';
-                vals += $(this).val() + ',';
-            })
-            direction = UI.checkMultilangRTL();
-            str = str.substring(0, str.length - 1);
-            vals = vals.substring(0, vals.length - 1);
-            var op = '<div id="extraTarget" class="item" data-selected="selected" data-direction="' + direction + '" data-value="' + vals + '">' + str + '</div>';
-            $('#extraTarget').remove();
-            $('#target-lang div.item').first().before(op);
-            setTimeout(function () {
-                $('#target-lang').dropdown('set selected', vals);
-            });
-
-
-            $('.translate-box.target h2 .extra').remove();
-            $('.translate-box.target h2').append('<span class="extra">(' + $('.popup-languages li.on').length + ' languages)</span>');
-        }
-    });
-    $("#cancelMultilang").click(function(e){
-        e.preventDefault();
-        APP.closePopup();
-
-//        $('.popup-languages .close').click();
-        $('.popup-languages li.on').each(function(){
-            $(this).removeClass('on').find('input').removeAttr('checked');
-        });
-    });
 });
 
 
