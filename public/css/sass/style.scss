@@ -24,10 +24,10 @@ body.incomingMsg header {
 header .wrapper {
     width: 100%;
     background: #002b5c;
-    height: 77px;
+    height: 60px;
     display: grid;
     grid-template-columns: 170px auto auto 64px;
-    padding: 0 20px;
+    padding: 0 33px;
     align-content: center;
     box-sizing: border-box;
     top:0;
@@ -356,9 +356,9 @@ section.opened .warnings {
     border: 0;
     margin-top: 10px;
     /*background: url(../../img/logo.png) 0px 2px no-repeat;*/
-    width: 160px;
-    height: 32px;
-    background-size: 160px 32px;
+    width: 180px;
+    height: 38px;
+    background-size: cover;
     margin-left: 13px;
     margin-right: 13px;
 }
@@ -4577,7 +4577,7 @@ input#markAsCompleteButton[disabled] {
 
 /* Header/Footer Restyling */
 
-$icon-scale : 36px;
+$icon-scale : 30px;
 $matecat-blue: #002b5c;
 $light-gray: #f2f5f7;
 $medium-gray : #acb3bd;
@@ -4688,10 +4688,10 @@ header {
 
         .logo {
             margin:0;
-            width: 160px;
-            height: 32px;
-            background: url(../../img/white_logo.png) 0 0 no-repeat;
-            background-size: 160px 32px;
+            background: url(../../img/logo_matecat.png) 0 0 no-repeat;
+            width: 180px;
+            height: 38px;
+            background-size: cover;
             top:0;
             left:0;
         }
@@ -4723,11 +4723,12 @@ header {
 
     .action-menu {
         display: grid;
-        grid-template-columns: repeat(9, auto); /* Todo: */
+        /*grid-template-columns: repeat(9, auto);*/
+        grid-auto-flow: column;
         grid-template-rows: $icon-scale;
         align-items:center;
         justify-content: right;
-        column-gap: 12px;
+        column-gap: 15px;
 
         &.qr-element {
             grid-template-columns: auto;
@@ -4764,7 +4765,7 @@ header {
 
             /* Bug fix for Semantic UI Dropdown hover */
             .dropdown-menu-overlay {
-                width: 36px;
+                width: 30px;
                 height: 80px;
             }
 
@@ -4855,7 +4856,7 @@ header {
         }
         #action-download {
             background-image: url("../../img/icons/icon-download.svg");
-            background-size: 36px;
+            background-size: 30px;
         }
         #action-QR,
         #quality-report-button {

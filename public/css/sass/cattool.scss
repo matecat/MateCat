@@ -66,7 +66,6 @@ body.cattool {
 		  }
 
 		  #job_id {
-			  font-size: 12px !important;
 			  text-align:left;
 		  }
 
@@ -87,7 +86,11 @@ body.cattool {
 			font-size: 14px;
 
 		  span {
-			color: black;
+				color: black;
+			    text-decoration: underline;
+				&:hover {
+					text-decoration: none;
+				}
 		  }
 		}
 
@@ -98,12 +101,15 @@ body.cattool {
 
 		.statistics-core {
 		  font-size: 14px;
-		  color: #0055b8;
 		  font-weight: 200;
 
 		  a {
 			span {
-			  color: #0055b8;
+			  	color: black;
+				text-decoration: underline;
+				&:hover {
+					text-decoration: none;
+				}
 			}
 		  }
 		}

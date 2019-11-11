@@ -340,7 +340,6 @@
                         this.element_mask.parentNode.removeChild(this.element_mask);
                     }
                     this.closed = true;
-                    footer.style.height = '27px';
                 }
             }/* else {
                 throw new Error("Not inserted but closing?!");
@@ -435,7 +434,6 @@
                 footer.appendChild(this.element_mask);
             }
 
-            footer.style.height = '60px';
             footer.appendChild(this.element);
             this.inserted = true;
 

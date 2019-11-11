@@ -21,7 +21,8 @@
 
     .translation-options {
         display: grid;
-        grid-template-columns: repeat(8,auto);
+        grid-auto-flow: column;
+        /*grid-template-columns: repeat(8,auto);*/
         grid-column-gap: 8px;
     }
 }

@@ -2002,10 +2002,12 @@
             var lexiqaText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Any combination of the supported languages:</div>" +
                 "<ul>";
             acceptedLanguagesLXQ.forEach(function (elem) {
-                var name = config.languages_array.find(function (e) {
+                var lang = config.languages_array.find(function (e) {
                     return e.code === elem;
-                }).name;
-                lexiqaText = lexiqaText + "<li class='powerTip-options-tm-list'>" + name + "</li>";
+                });
+                if ( lang && lang.name ) {
+                    lexiqaText = lexiqaText + "<li class='powerTip-options-tm-list'>" + name + "</li>";
+                }
             });
             lexiqaText = lexiqaText + "</ul></div>";
 

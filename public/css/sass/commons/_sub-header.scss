@@ -29,16 +29,17 @@
 		background-color: #fff;
 		color: #002b5c;
 		font-weight: 500;
-		padding: 6px 16px;
+		padding: 3px 5px;
 		line-height: 1.21;
-		border-radius: 5px;
+		border-radius: 30px;
 		font-size: 14px;
-		min-width: 168px;
+		min-width: 170px;
 		float: left;
 		display: grid;
 		width: 168px;
-		grid-template-columns: auto 16px;
+		grid-template-columns: auto 23px;
 		align-items: center;
+		margin-top: 4px;
 
 		/*opacity:0.8;
 		&:hover, &.active {
@@ -50,7 +51,7 @@
 		}
 		.text{
 			display: grid;
-			grid-template-columns: 28px 80px;
+			grid-template-columns: 28px 100px;
 			align-items: center;
 			column-gap: 8px;
 			margin-right: 4px;
