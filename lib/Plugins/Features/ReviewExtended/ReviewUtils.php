@@ -11,13 +11,29 @@ namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;
 
 class ReviewUtils {
 
     public static function formatStats( $statsArray, $chunkReviews ) {
         $statsArray [ 'revises' ] = [];
+
+        /** @var ChunkReviewStruct $chunkReview */
         foreach ( $chunkReviews as $chunkReview ) {
+
+            // recount if advancement_wc < 0
+            if( $chunkReview->advancement_wc < 0 ){
+
+                /** @var \Projects_ProjectStruct $project */
+                $project = $chunkReview->getChunk()->getProject();
+                $revisionFactory = \RevisionFactory::initFromProject( $project );
+                $model = $revisionFactory->getChunkReviewModel( $chunkReview ) ;
+                $model->recountAndUpdatePassFailResult( $project );
+
+                \Log::doJsonLog("Negative advancement_wc found for project with ID: ".$project->id.". WC recount done.");
+            }
+
             $statsArray[ 'revises' ][] = [
                     'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunkReview->source_page ),
                     'advancement_wc'  => $chunkReview->advancement_wc

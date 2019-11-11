@@ -31,6 +31,7 @@ class Analysis_APIStatus extends Analysis_AbstractStatus {
             case 'NEW':
             case 'FAST_OK':
             case 'NOT_READY_FOR_ANALYSIS':
+            case 'BUSY':
                 $this->result[ 'status' ] = 'ANALYZING';
                 break;
             case 'EMPTY':

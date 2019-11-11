@@ -24,6 +24,7 @@ class BatchReviewProcessor {
     }
 
     public function process() {
+
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $this->_batchEventCreator->getChunk() );
 
         $project         = $chunkReviews[ 0 ]->getChunk()->getProject();
@@ -35,12 +36,9 @@ class BatchReviewProcessor {
 
             $segmentTranslationModel = $revisionFactory->getSegmentTranslationModel( $translationVector, $chunkReviews );
 
-            $segmentTranslationModel->evaluateChunkReviewTransition();
+            $segmentTranslationModel->performChunkReviewTransition();
+
         }
 
-        foreach ( $chunkReviews as $chunkReview ) {
-            $chunkReviewModel = $revisionFactory->getChunkReviewModel( $chunkReview );
-            $chunkReviewModel->updatePassFailResult( $this->_batchEventCreator->getProject() );
-        }
     }
 }

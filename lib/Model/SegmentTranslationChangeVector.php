@@ -70,7 +70,6 @@ class SegmentTranslationChangeVector {
      * In such case we need to make assumptions on the `source_page` variable because that's what we use
      * to decide where to move revised words and advancement words around.
      * @return mixed
-     * @throws \Exception
      */
     public function isBeingUpperReviewed() {
         return $this->old_translation->isReviewedStatus() &&

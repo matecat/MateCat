@@ -34,7 +34,7 @@ if ( ReviewSimple.enabled() ) {
                 source = UI.clenaupTextFromPleaceholders( source );
 
                 var target = $( editarea ).text();
-                var diffHTML = trackChangesHTML( source, htmlEncode( target ) );
+                var diffHTML = TextUtils.trackChangesHTML( source, TextUtils.htmlEncode( target ) );
 
                 $( '.sub-editor.review .track-changes p', $segment ).html( diffHTML );
             },
@@ -42,7 +42,7 @@ if ( ReviewSimple.enabled() ) {
                 APP.doRequest( {
                     data: data,
                     error: function () {
-                        UI.failedConnection( data, 'setRevision' );
+                        OfflineUtils.failedConnection( data, 'setRevision' );
                     },
                     success: function ( d ) {
 

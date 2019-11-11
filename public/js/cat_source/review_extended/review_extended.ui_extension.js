@@ -154,23 +154,10 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 SegmentActions.openSegment(data.sid);
                 SegmentActions.scrollToSegment(data.sid);
                 window.setTimeout( function ( data ) {
-                    UI.scrollSegment( data.sid );
+                    SegmentActions.scrollToSegment( data.sid );
                 }, 500, data );
             }
             return true;
-        },
-
-        closeIssuesPanel : function() {
-            hackIntercomButton( false );
-            SegmentActions.closeIssuesPanel();
-            $('body').removeClass('side-tools-opened review-side-panel-opened review-extended-opened');
-            localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
-            // if ( UI.currentSegment ) {
-            //     setTimeout( function() {
-            //         UI.scrollSegment( UI.currentSegmentId );
-            //     }, 100 );
-            // }
-            // window.dispatchEvent(new Event('resize'));
         },
 
         deleteIssue : function( issue, sid, dontShowMessage) {
@@ -210,7 +197,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             APP.doRequest( {
                 data: data,
                 error: function () {
-                    UI.failedConnection( data, 'setRevision' );
+                    OfflineUtils.failedConnection( data, 'setRevision' );
                 },
                 success: function ( d ) {
                     window.quality_report_btn_component.setState( {

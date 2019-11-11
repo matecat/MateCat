@@ -1,9 +1,7 @@
 /*
 	Component: ui.core
  */
-UI = null;
-
-UI = {
+var UI = {
     pee_error_level_map: {
         0: "",
         1: "edit_1",
@@ -63,8 +61,6 @@ UI = {
 		this.currentSegment      = $segment ;
 		this.currentFile         = $segment.closest("article");
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
-
-        this.evalCurrentSegmentTranslationAndSourceTags( $segment );
     },
 
     removeCacheObjects: function() {
@@ -76,19 +72,6 @@ UI = {
         this.currentFile = undefined;
         this.currentFileId = undefined;
 
-    },
-    /**
-     * shouldSegmentAutoPropagate
-     *
-     * Returns whether or not the segment should be propagated. Default is true.
-     *
-     * @returns {boolean}
-     */
-    shouldSegmentAutoPropagate : function( $segment, newStatus ) {
-        var segmentClassToFind = "status-" + newStatus.toLowerCase();
-        var statusChanged = !$segment.hasClass(segmentClassToFind);
-        var segmentModified = UI.currentSegmentTranslation.trim() !== UI.editarea.text().trim();
-        return statusChanged || segmentModified;
     },
 
     /**
@@ -105,69 +88,52 @@ UI = {
             segment_id      : segment_id,
             status          : status,
             byStatus        : byStatus,
-            noPropagation   : ! UI.shouldSegmentAutoPropagate( segment, status ),
+            propagation     : false,
             callback        : callback
         };
 
-        if ( byStatus || opts.noPropagation ) {
-            opts.noPropagation = true;
-            this.execChangeStatus(opts);// no propagation
-        } else {
+        // ask if the user wants propagation or this is valid only
+        // for this segment
 
-            // ask if the user wants propagation or this is valid only
-            // for this segment
+        if ( this.autopropagateConfirmNeeded() && !byStatus) {
 
-            if ( this.autopropagateConfirmNeeded() ) {
-
-                // var optionsStr = opts;
-                var props = {
-                    text: "There are other identical segments. <br><br>Would you " +
-                        "like to propagate the translation to all of them, " +
-                        "or keep this translation only for this segment?",
-                    successText: 'Only this segment',
-                    successCallback: function(){
-                            UI.preExecChangeStatus(opts);
-                            APP.ModalWindow.onCloseModal();
-                        },
-                    cancelText: 'Propagate to All',
-                    cancelCallback: function(){
-                            UI.execChangeStatus(opts);
-                            APP.ModalWindow.onCloseModal();
-                        },
-                    onClose: function(){
+            // var optionsStr = opts;
+            var props = {
+                text: "There are other identical segments. <br><br>Would you " +
+                    "like to propagate the translation to all of them, " +
+                    "or keep this translation only for this segment?",
+                successText: 'Only this segment',
+                successCallback: function(){
                         UI.preExecChangeStatus(opts);
-                    }
-                };
-                APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
-                // APP.confirm({
-                //     name: 'confirmAutopropagation',
-                //     cancelTxt: 'Propagate to All',
-                //     onCancel: 'execChangeStatus',
-                //     callback: 'preExecChangeStatus',
-                //     okTxt: 'Only this segment',
-                //     context: optionsStr,
-                //     msg: "There are other identical segments. <br><br>Would you " +
-                //          "like to propagate the translation to all of them, " +
-                //          "or keep this translation only for this segment?"
-                // });
-            } else {
-                this.execChangeStatus( opts ); // autopropagate
-            }
+                        APP.ModalWindow.onCloseModal();
+                    },
+                cancelText: 'Propagate to All',
+                cancelCallback: function(){
+                        opts.propagation = true;
+                        UI.execChangeStatus(opts);
+                        APP.ModalWindow.onCloseModal();
+                    },
+                onClose: function(){
+                    UI.preExecChangeStatus(opts);
+                }
+            };
+            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
+        } else {
+            this.execChangeStatus( opts ); // autopropagate
         }
-
 	},
 
     autopropagateConfirmNeeded: function () {
-        var segment = UI.currentSegment;
-        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim() && !config.isReview) { //segment not modified
+        var segment = SegmentStore.getCurrentSegment();
+        if( !segment.modified && !config.isReview) { //segment not modified
             return false;
         }
 
-        if(segment.attr('data-propagable') == 'true') {
+        if(segment.propagable) {
             if(config.isReview) {
                 return true;
             } else {
-                return !!segment.is('.status-translated, .status-approved, .status-rejected');
+                return segment.status !== "NEW" && segment.status !== "DRAFT";
             }
         }
         return false;
@@ -175,17 +141,17 @@ UI = {
     },
     preExecChangeStatus: function (optStr) {
         var opt = optStr;
-        opt.noPropagation = true;
+        opt.propagation = false;
         this.execChangeStatus(opt);
     },
     execChangeStatus: function (optStr) {
         var options = optStr;
 
-        var noPropagation = options.noPropagation;
+        var propagation   = options.propagation;
         var status        = options.status;
         var byStatus      = options.byStatus;
 
-        noPropagation = noPropagation || false;
+        ropagation = propagation || false;
 
         // $('.percentuage', segment.el).removeClass('visible');
         SegmentActions.hideSegmentHeader(options.segment_id);
@@ -195,7 +161,7 @@ UI = {
             status: status,
             caller: false,
             byStatus: byStatus,
-            propagate: !noPropagation
+            propagate: propagation
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
         UI.setSegmentModified( UI.getSegmentById(options.segment_id), false ) ;
@@ -241,8 +207,7 @@ UI = {
         UI.setSegmentModified(UI.currentSegment, true);
         this.segmentQA(UI.currentSegment );
         if (config.translation_matches_enabled) {
-            SegmentActions.setChoosenSuggestion(currentSegmentId, index);
-            UI.setChosenSuggestion(UI.currentSegmentId, 0);
+            SegmentActions.setChoosenSuggestion(UI.currentSegmentId, null);
         }
         $(this.currentSegment).trigger('copySourceToTarget');
 
@@ -423,7 +388,7 @@ UI = {
 		if (this.segmentToScrollAtRender) {
 			this.startSegmentId = this.segmentToScrollAtRender;
 		} else {
-			var hash = UI.parsedHash.segmentId;
+			var hash = CommonUtils.parsedHash.segmentId;
             config.last_opened_segment = UI.getLastSegmentFromLocalStorage();
             if (!config.last_opened_segment) {
                 config.last_opened_segment = config.first_job_segment;
@@ -512,7 +477,7 @@ UI = {
 				where: where
 			},
 			error: function() {
-				UI.failedConnection(0, 'getMoreSegments');
+				OfflineUtils.failedConnection(0, 'getMoreSegments');
 			},
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
@@ -525,29 +490,10 @@ UI = {
 			this.processErrors(d.errors, 'getMoreSegments');
 		var where = d.data.where;
         var section = $('section');
-		if ( d.data.files && Object.size(d.data.files) ) {
-			var firstSeg = section.first();
-			var lastSeg = section.last();
-
-			// var numsegToAdd = 0;
-			// $.each(d.data.files, function() {
-			// 	numsegToAdd = numsegToAdd + this.segments.length;
-			// });
+		if ( d.data.files && _.size(d.data.files) ) {
 
 			this.renderFiles(d.data.files, where, false);
 
-			// // if getting segments before, UI points to the segment triggering the event
-			// if ((where == 'before') && (numsegToAdd)) {
-			// 	this.scrollSegment($('#segment-' + this.segMoving), this.segMoving);
-			// }
-
-			// if (this.body.hasClass('searchActive')) {
-			// 	segLimit = (where == 'before') ? firstSeg : lastSeg;
-			// 	SearchUtils.markSearchResults({
-			// 		where: where,
-			// 		seg: segLimit
-			// 	});
-			// }
             $(window).trigger('segmentsAdded',{ resp : d.data.files });
 
 		}
@@ -567,7 +513,7 @@ UI = {
 		var where = (this.startSegmentId) ? 'center' : 'after';
 		var step = this.initSegNum;
 		$('#outer').addClass('loading');
-		var seg = (options.segmentToScroll) ? options.segmentToScroll : this.startSegmentId;
+		var seg = (options.segmentToOpen) ? options.segmentToOpen : this.startSegmentId;
 
 		return APP.doRequest({
 			data: {
@@ -580,7 +526,7 @@ UI = {
 				where: where
 			},
 			error: function() {
-				UI.failedConnection(0, 'getSegments');
+                OfflineUtils.failedConnection(0, 'getSegments');
 			},
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
@@ -599,9 +545,6 @@ UI = {
 
 		var where = d.data.where;
 
-        // Why here?? Investigate
-        UI.setGlobalTagProjection();
-
 		if (!this.startSegmentId){
             var firstFile = d.data.files[Object.keys(d.data.files)[0]];
             this.startSegmentId = firstFile.segments[0].sid;
@@ -611,26 +554,23 @@ UI = {
 		if (typeof d.data.files !== 'undefined') {
 
 			this.renderFiles(d.data.files, where, UI.firstLoad);
-			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
+			if ((options.openCurrentSegmentAfter) && (!options.segmentToOpen)) {
                 var seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
-				this.gotoSegment(seg);
+                SegmentActions.openSegment(seg);
 			}
 
-			if (options.segmentToScroll && UI.segmentIsLoaded(options.segmentToScroll)) {
-				this.scrollSegment(options.segmentToScroll );
-                SegmentActions.openSegment(options.segmentToScroll);
-			} else if (options.segmentToOpen) {
-                this.scrollSegment(options.segmentToOpen);
+			if (options.segmentToOpen && UI.segmentIsLoaded(options.segmentToOpen)) {
+                SegmentActions.scrollToSegment( options.segmentToOpen );
                 SegmentActions.openSegment(options.segmentToOpen);
-            }
+			}
 
 			// if (options.applySearch) {
 			// 	$('mark.currSearchItem').removeClass('currSearchItem');
 			// 	SearchUtils.markSearchResults(options);
 			// 	if (SearchUtils.searchMode == 'normal') {
-			// 		$('section[id^="segment-' + options.segmentToScroll + '"] mark.searchMarker').first().addClass('currSearchItem');
+			// 		$('section[id^="segment-' + options.segmentToOpen + '"] mark.searchMarker').first().addClass('currSearchItem');
 			// 	} else {
-			// 		$('section[id^="segment-' + options.segmentToScroll + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
+			// 		$('section[id^="segment-' + options.segmentToOpen + '"] .targetarea mark.searchMarker').first().addClass('currSearchItem');
 			// 	}
 			// }
 		}
@@ -657,7 +597,7 @@ UI = {
                     password: config.password
 				},
 				error: function() {
-					UI.failedConnection(0, 'getUpdatedTranslations');
+                    OfflineUtils.failedConnection(0, 'getUpdatedTranslations');
 				},
 				success: function(d) {
 					UI.lastUpdateRequested = new Date();
@@ -731,11 +671,11 @@ UI = {
 	},
 	renderUntranslatedOutOfView: function() {
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
-		var segmentToScroll = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
-        window.location.hash = segmentToScroll;
+		var segmentToOpen = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
+        window.location.hash = segmentToOpen;
         UI.unmountSegments();
 		this.render({
-            segmentToScroll: segmentToScroll
+            segmentToOpen: segmentToOpen
         });
 	},
 	reloadWarning: function() {
@@ -751,13 +691,9 @@ UI = {
 			this.render();
 		}
 	},
-	pointToOpenSegment: function(quick) {
-        quick = quick || false;
-        this.gotoOpenSegment(quick);
-	},
 	removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
-		$('#' + segment.attr('id') + '-buttons').empty();
+		$('#' + segment.attr('id') + '-buttons').empty();segmentPointer
 		$('p.warnings', segment).empty();
 	},
 	renderFiles: function(files, where, starting) {
@@ -816,9 +752,7 @@ UI = {
                     isReviewExtended: ReviewExtended.enabled(),
                     reviewType: Review.type,
                     enableTagProjection: UI.enableTagProjection,
-                    decodeTextFn: UI.decodeText,
                     tagModesEnabled: UI.tagModesEnabled,
-                    speech2textEnabledFn: Speech2Text.enabled,
                     startSegmentId: this.startSegmentId
                 }), mountPoint);
                 SegmentActions.renderSegments(segments, this.startSegmentId);
@@ -837,19 +771,10 @@ UI = {
             UI.unmountSegments();
             this.render({
                 caller: 'link2file',
-                segmentToScroll: sid,
+                segmentToOpen: sid,
                 scrollToFile: true
             });
         }
-	},
-	addWord: function(word) {
-		APP.doRequest({
-			data: {
-				action: 'setSpellcheck',
-				slang: config.target_rfc,
-				word: word
-			}
-		});
 	},
 
     getTranslationMismatches: function (id_segment) {
@@ -862,7 +787,7 @@ UI = {
             },
             context: id_segment,
             error: function(d) {
-                UI.failedConnection(this, 'getTranslationMismatches');
+                OfflineUtils.failedConnection(this, 'getTranslationMismatches');
             },
             success: function(d) {
                 if (d.errors.length) {
@@ -892,16 +817,16 @@ UI = {
          */
         var sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
-            if( this.translation == htmlEncode(UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+            if( this.translation == TextUtils.htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
                 sameContentIndex = ind;
             }
         });
         if(sameContentIndex != -1) d.data.editable.splice(sameContentIndex, 1);
 
-        sameContentIndex1 = -1;
+        let sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if( this.translation == htmlEncode(UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+            if( this.translation == TextUtils.htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
                 sameContentIndex1 = ind;
             }
         });
@@ -940,7 +865,7 @@ UI = {
          * Original string: &lt;ph id="mtc_1" equiv-text="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="/&gt;
          * New String:      &lt;ph id="mtc_2" equiv-text="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="/&gt;
          *
-         * After the dom rendering of the UI.dmp.diff_prettyHtml function
+         * After the dom rendering of the TextUtils.dmp.diff_prettyHtml function
          *
          *  <span contenteditable="false" class="locked style-tag ">
          *      <span contenteditable="false" class="locked locked-inside tag-html-container-open">&lt;ph id="mtc_</span>
@@ -1005,26 +930,8 @@ UI = {
 
     },
 
-    execDiff: function (mainStr, cfrStr) {
-        _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
-            .replace( config.crPlaceholderRegex, "\r" )
-            .replace( config.crlfPlaceholderRegex, "\r\n" )
-            .replace( config.tabPlaceholderRegex, "\t" )
-            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-        _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
-
-        //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
-        //used to detect initial and final spaces in html diff
-        _str  = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _str + String.fromCharCode( parseInt( 0x200B, 10 ) );
-        _edit = String.fromCharCode( parseInt( 0x200B, 10 ) ) + _edit + String.fromCharCode( parseInt( 0x200B, 10 ) );
-
-        diff_obj = UI.dmp.diff_main( _edit, _str );
-        UI.dmp.diff_cleanupEfficiency( diff_obj );
-        return diff_obj;
-    },
-
 	setDownloadStatus: function(stats) {
-        var t = translationStatus( stats );
+        var t = CommonUtils.getTranslationStatus( stats );
 
         $('.downloadtr-button')
             .removeClass("draft translated approved")
@@ -1169,8 +1076,8 @@ UI = {
 		return $('section.readonly:not(.ice-locked)').length;
 	},
     formatSelection: function(op) {
-        var str = getSelectionHtml();
-        var rangeInsert = insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
+        var str = CursorUtils.getSelectionHtml();
+        var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
         var newStr = '';
         var selection$ = $("<div/>").html(str);
         var rightString = selection$.html();
@@ -1180,9 +1087,9 @@ UI = {
             if(this.nodeName == '#text') {
 				d = this.data;
 				jump = ((!index)&&(!selection$));
-				capStr = toTitleCase(d);
+				capStr = CommonUtils.toTitleCase(d);
 				if(jump) {
-					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+					capStr = d.charAt(0) + CommonUtils.toTitleCase(d).slice(1);
 				}
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
@@ -1190,9 +1097,9 @@ UI = {
             else if(this.nodeName == 'LXQWARNING') {
                 d = this.childNodes[0].data;
                 jump = ((!index)&&(!selection$));
-				capStr = toTitleCase(d);
+				capStr = CommonUtils.toTitleCase(d);
 				if(jump) {
-					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+					capStr = d.charAt(0) + CommonUtils.toTitleCase(d).slice(1);
 				}
                 toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
@@ -1201,15 +1108,14 @@ UI = {
 				newStr += this.outerHTML;
 			}
 		});
-        // saveSelection();
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
-            replaceSelectedHtml(newStr, rangeInsert);
+            CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
             LXQ.reloadPowertip(this.currentSegment);
         }
         else {
-            replaceSelectedHtml(newStr, rangeInsert);
+            CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
         }
 
         $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
@@ -1239,7 +1145,7 @@ UI = {
         var tte = $('.timetoedit', $segment);
         this.editTime = this.editStop - this.editStart;
         this.totalTime = this.editTime + tte.data('raw-time-to-edit');
-        var editedTime = millisecondsToTime(this.totalTime);
+        var editedTime = CommonUtils.millisecondsToTime(this.totalTime);
         if (config.time_to_edit_enabled) {
             var editSec = $('.timetoedit .edit-sec', $segment);
             var editMin = $('.timetoedit .edit-min', $segment);
@@ -1361,8 +1267,6 @@ UI = {
             token: token
         };
 
-        if (UI.logEnabled) dataMix.logs = this.extractLogs();
-
         var mock = {
             ERRORS: {
                 categories: {
@@ -1386,7 +1290,7 @@ UI = {
             data: dataMix,
             error: function() {
                 UI.warningStopped = true;
-                UI.failedConnection(0, 'getWarning');
+                OfflineUtils.failedConnection(0, 'getWarning');
             },
             success: function(data) {//console.log('check warnings success');
                 UI.startWarning();
@@ -1408,13 +1312,8 @@ UI = {
                 }
 
                 $(document).trigger('getWarning:global:success', { resp : data }) ;
-                //If QaCheckGlossary Enabled
-                if (QaCheckGlossary.enabled() && data.data.glossary) {
-                    QaCheckGlossary.update(data.data.glossary);
-                }
-                if (QaCheckBlacklist.enabled() && data.data.blacklist) {
-                    QaCheckBlacklist.update(data.data.blacklist);
-                }
+
+                SegmentActions.updateGlossaryData(data.data);
 
             }
         });
@@ -1473,8 +1372,8 @@ UI = {
         segment_status = segment.status;
 
 		if( config.brPlaceholdEnabled ){
-			src_content = this.prepareTextToSend(segment.decoded_source);
-			trg_content = this.prepareTextToSend(segment.decoded_translation);
+			src_content = TagUtils.prepareTextToSend(segment.decoded_source);
+			trg_content = TagUtils.prepareTextToSend(segment.decoded_translation);
 		} else {
 			src_content = segment.decoded_source;
 			trg_content = segment.translation;
@@ -1492,16 +1391,14 @@ UI = {
                 segment_status: segment_status,
 			},
 			error: function() {
-				UI.failedConnection(0, 'getWarning');
+                OfflineUtils.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
 			    if (UI.editAreaEditing) return;
 			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info, d.details.tag_mismatch);
-                     // UI.markTagMismatch(d.details);
                 }else{
                     SegmentActions.setSegmentWarnings(segment.sid,{}, {});
-                    // UI.removeHighlightErrorsTags(UI.getSegmentById(segment.sid));
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: UI.getSegmentById( segment.sid )    }) ;
 			}
@@ -1510,6 +1407,14 @@ UI = {
 	},
 
     translationIsToSave : function( segment ) {
+        // add to setTranslation tail
+        var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
+        var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
+
+        return ( !alreadySet && !emptyTranslation );
+    },
+
+    translationIsToSaveBeforeClose : function( segment ) {
         // add to setTranslation tail
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
         var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
@@ -1553,14 +1458,14 @@ UI = {
 
         // If is offline and is in the tail I decrease the counter
         // else I execute the tail
-        if ( this.offline && config.offlineModeEnabled ) {
+        if ( OfflineUtils.offline && config.offlineModeEnabled ) {
             if ( saveTranslation ) {
-                this.decrementOfflineCacheRemaining();
-                options.callback = UI.incrementOfflineCacheRemaining;
-                this.failedConnection( options, 'setTranslation' );
+                OfflineUtils.decrementOfflineCacheRemaining();
+                options.callback = OfflineUtils.incrementOfflineCacheRemaining;
+                OfflineUtils.failedConnection( options, 'setTranslation' );
             }
-            this.changeStatusOffline( id_segment );
-            this.checkConnection( 'Set Translation check Authorized' );
+            OfflineUtils.changeStatusOffline( id_segment );
+            OfflineUtils.checkConnection( 'Set Translation check Authorized' );
         } else {
             if ( !this.executingSetTranslation )  {
                 return this.execSetTranslationTail();
@@ -1622,8 +1527,8 @@ UI = {
 		caller = (typeof caller == 'undefined') ? false : caller;
 
 		// Attention, to be modified when we will lock tags
-        translation = this.prepareTextToSend(segment.decoded_translation);
-        sourceSegment = this.prepareTextToSend(segment.segment);
+        translation = TagUtils.prepareTextToSend(segment.decoded_translation);
+        sourceSegment = TagUtils.prepareTextToSend(segment.segment);
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
@@ -1694,9 +1599,9 @@ UI = {
                     return false;
                 } else {
                     UI.addToSetTranslationTail(this[1]);
-                    UI.changeStatusOffline(this[0][0].id_segment);
-                    UI.failedConnection(this[0], 'setTranslation');
-                    UI.decrementOfflineCacheRemaining();
+                    OfflineUtils.changeStatusOffline(this[0][0].id_segment);
+                    OfflineUtils.failedConnection(this[0], 'setTranslation');
+                    OfflineUtils.decrementOfflineCacheRemaining();
                 }
             },
 			success: function( data ) {
@@ -1707,8 +1612,6 @@ UI = {
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
 
-                var record = MateCat.db.segments.by('sid', data.translation.sid);
-                MateCat.db.segments.update( _.extend(record, data.translation) );
                 data.translation.segment = segment;
                 $(document).trigger('translation:change', data.translation);
                 data.segment = segment;
@@ -1742,7 +1645,7 @@ UI = {
         var segments = SegmentStore.getSegmentsInSplit(sid);
         $.each(segments, function (index) {
             var segment = this;
-            totalTranslation += (selector === '.source') ? segment.segment : UI.prepareTextToSend(segment.translation);
+            totalTranslation += (selector === '.source') ? segment.segment : TagUtils.prepareTextToSend(segment.translation);
             if(index < (segments.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
         });
         return totalTranslation;
@@ -1817,32 +1720,6 @@ UI = {
 		});
 	},
 
-    log: function(operation, d) {
-        if(!UI.logEnabled) return false;
-        data = d;
-        var dd = new Date();
-        logValue = {
-            "data": data,
-            "stack": stackTrace()
-        };
-        UI.addInStorage('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue), 'log');
-    },
-
-    extractLogs: function() {
-        if(this.isPrivateSafari) return;
-        var pendingLogs = [];
-        inp = 'log';
-        $.each(localStorage, function(k,v) {
-            if(k.substring(0, inp.length) === inp) {
-                pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
-            }
-        });
-        logs = JSON.stringify(pendingLogs);
-        this.clearStorage('log');
-
-        return logs;
-    },
-
     targetContainerSelector : function() {
         return '.targetarea';
     },
@@ -1865,7 +1742,7 @@ UI = {
 			}
 			if ( codeInt === -1000 || codeInt === -101) {
 				console.log('ERROR '+ codeInt);
-                UI.startOfflineMode();
+                OfflineUtils.startOfflineMode();
 			}
 
             if ( codeInt <= -2000 && !_.isUndefined(this.message)) {
@@ -2040,7 +1917,7 @@ UI = {
                 UI.gotoNextSegment(); //Others functionality override this function
                 // SegmentActions.openSegment(UI.nextSegmentId);
             } else {
-                SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
+                SegmentActions.gotoNextUntranslatedSegment();
             }
         };
 
@@ -2114,6 +1991,25 @@ UI = {
     inputEditAreaEventHandler: function (e) {
         UI.currentSegment.trigger('modified');
     },
+    runDownload: function() {
+        var continueDownloadFunction ;
+
+        if( $('#downloadProject').hasClass('disabled') ) return false;
+
+        if ( config.isGDriveProject ) {
+            continueDownloadFunction = 'continueDownloadWithGoogleDrive';
+        }
+        else  {
+            continueDownloadFunction = 'continueDownload';
+        }
+
+        //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+        if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.ERROR && UI.globalWarnings.ERROR.total > 0 ) {
+            UI.showFixWarningsOnDownload(continueDownloadFunction);
+        } else {
+            UI[ continueDownloadFunction ]();
+        }
+    }
 };
 
 $(document).ready(function() {

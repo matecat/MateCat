@@ -1,32 +1,14 @@
 (function($, undefined) {
 
     $.extend(UI, {
-
-        getSegmentStatus: function (segment) {
-            return (segment.status)? segment.status.toLowerCase() : 'new';
-        },
-        /**
-         * Return che Suggestion, if exist, used by the current segment
-         * return json
+        /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Tag Proj start
          */
-        getCurrentSegmentContribution: function (segment) {
-            var currentSegment = (segment) ? segment: SegmentStore.getCurrentSegment();
-            var chosen_suggestion = ( currentSegment.contributions && currentSegment.contributions.matches.length > 0 ) ? currentSegment.contributions.matches[0] : undefined;
-            if (_.isUndefined(chosen_suggestion)) {
-                var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(currentSegment));
-                if (storedContributions) {
-                    chosen_suggestion = JSON.parse(storedContributions).matches[chosen_suggestion - 1];
-
-                }
-            }
-            return chosen_suggestion;
-        },
         setGlobalTagProjection: function () {
             UI.enableTagProjection = UI.checkTPEnabled();
         },
         /**
          * Tag Projection: check if is enable the Tag Projection
-         * @param file
          */
         checkTPEnabled: function () {
             return (this.checkTpCanActivate() && !!config.tag_projection_enabled);
@@ -46,24 +28,24 @@
             }
             return this.tpCanActivate;
         },
-        startSegmentTagProjection: function () {
+        startSegmentTagProjection: function (sid) {
             UI.getSegmentTagsProjection().done(function(response) {
-                if (response.errors && (response.errors.length || response.errors.code) ) {
+                if (response.errors && !!(response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     UI.disableTPOnSegment();
                     UI.copyTagProjectionInCurrentSegment();
-                    UI.autoFillTagsInTarget();
+                    SegmentActions.autoFillTagsInTarget(sid);
                 } else {
                     UI.setSegmentAsTagged();
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
-                    UI.autoFillTagsInTarget();
+                    SegmentActions.autoFillTagsInTarget(sid);
                 }
 
             }).fail(function () {
                 UI.setSegmentAsTagged();
                 UI.copyTagProjectionInCurrentSegment();
-                UI.autoFillTagsInTarget();
-                UI.startOfflineMode();
+                SegmentActions.autoFillTagsInTarget(sid);
+                OfflineUtils.startOfflineMode();
             }).always(function () {
                 UI.editarea.focus();
                 SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
@@ -76,18 +58,18 @@
          */
         getSegmentTagsProjection: function () {
             var source = UI.currentSegment.find('.source').data('original');
-            source = htmlDecode(source).replace(/&quot;/g, '\"');
-            source = htmlDecode(source);
+            source = TextUtils.htmlDecode(source).replace(/&quot;/g, '\"');
+            source = TextUtils.htmlDecode(source);
             //Retrieve the chosen suggestion if exist
             var suggestion;
-            var currentContribution = this.getCurrentSegmentContribution();
+            var currentContribution = SegmentStore.getSegmentChoosenContribution(UI.currentSegmentId);
             // Send the suggestion to Tag Projection only if is > 89% and is not MT
             if (!_.isUndefined(currentContribution) && currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
                 suggestion = currentContribution.translation;
             }
 
             //Before send process with this.postProcessEditarea
-            var target = UI.postProcessEditarea(UI.currentSegment, ".editarea");
+            var target = EditAreaUtils.postProcessEditarea(UI.currentSegment, ".editarea");
             return APP.doRequest({
                 data: {
                     action: 'getTagProjection',
@@ -97,7 +79,7 @@
                     target: target,
                     source_lang: config.source_rfc,
                     target_lang: config.target_rfc,
-                    sl: suggestion
+                    suggestion: suggestion
                 }
             });
 
@@ -129,8 +111,8 @@
             var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
             if (currentSegment && this.enableTagProjection) {
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
-                var segmentNoTags = UI.removeAllTags( segmentObj.segment );
-                var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment.segment ) && !currentSegment.tagged && segmentNoTags !== '';
+                var segmentNoTags = TagUtils.removeAllTags( currentSegment.segment );
+                var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment ) && !currentSegment.tagged && segmentNoTags !== '';
                 // If the segment has already be tagged
                 var isCurrentAlreadyTagged = currentSegment.tagged;
                 return ( tagProjectionEnabled && !isCurrentAlreadyTagged );
@@ -142,7 +124,7 @@
          */
         disableTPOnSegment: function (segmentObj) {
             var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
-            var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
+            var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
             if (this.enableTagProjection && tagProjectionEnabled) {
                 SegmentActions.setSegmentAsTagged(currentSegment.sid, currentSegment.id_file);
                 UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged');
@@ -167,8 +149,7 @@
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 UI.render({
-                    segmentToScroll: UI.getSegmentId(UI.currentSegment),
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment),
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
                 });
                 UI.checkWarnings(false);
             });
@@ -193,9 +174,7 @@
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
                 UI.render({
-                    segmentToScroll: UI.getSegmentId(UI.currentSegment),
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment),
-                    // applySearch: UI.body.hasClass('searchActive')
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
                 });
                 UI.checkWarnings(false);
             });
@@ -211,83 +190,18 @@
             }
             return returnArray;
         },
-        decodeText: function(segment, text) {
-            var decoded_text;
-            if (UI.enableTagProjection && !segment.tagged && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
-                && !UI.checkXliffTagsInText(segment.translation) && UI.removeAllTags(segment.segment) !== '' ) {
-                decoded_text = UI.removeAllTags(text);
-            } else {
-                decoded_text = text;
-            }
-            decoded_text = TagUtils.decodePlaceholdersToText(decoded_text || '');
-            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
-                decoded_text = TagUtils.transformTextForLockTags(decoded_text);
-            }
-            return decoded_text;
-        },
-        transformPlaceholdersAndTags: function(text) {
-            text = TagUtils.decodePlaceholdersToText(text || '');
-            if ( !(config.tagLockCustomizable && !this.tagLockEnabled) ) {
-                text = TagUtils.transformTextForLockTags(text);
-            }
-            return text;
-        },
-        getPercentuageClass: function(match) {
-            var percentageClass = "";
-            var m_parse = parseInt(match);
-
-            if (!isNaN(m_parse)) {
-                match = m_parse;
-            }
-
-            switch (true) {
-                case (match == 100):
-                    percentageClass = "per-green";
-                    break;
-                case (match == 101):
-                    percentageClass = "per-blue";
-                    break;
-                case(match > 0 && match <= 99):
-                    percentageClass = "per-orange";
-                    break;
-                case (match == "MT"):
-                    percentageClass = "per-yellow";
-                    break;
-                default :
-                    percentageClass = "";
-            }
-            return percentageClass;
-        },
-        getSegmentSource: function(seg) {
-            segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
-            return $('.source', segment).text();
-        },
-        getStatus: function(segment) {
-            status = ($(segment).hasClass('status-new') ? 'new' : $(segment).hasClass('status-draft') ? 'draft' : $(segment).hasClass('status-translated') ? 'translated' : $(segment).hasClass('status-approved') ? 'approved' : 'rejected');
-            return status;
-        },
-        getSegmentTarget: function(seg) {
-            var editarea = (typeof seg == 'undefined') ? this.editarea : $('.editarea', seg);
-            return editarea.text();
-        },
-        /**
-         * getNextSegment
-         *
-         * Returns the next segment.
-         *
+        /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Tag Proj end
          */
-        getNextSegment: function(segment, status) {
-            UI.evalNextSegment( segment, status) ;
-            return this.nextSegmentId ;
-        },
 
-        /**
+
+        /** TODO: Remove
          * evalNextSegment
          *
          * Evaluates the next segment and populates this.nextSegmentId ;
          *
          */
-        evalNextSegment: function( section, status ) {
+        evalNextSegment: function( ) {
             var currentSegment = SegmentStore.getCurrentSegment();
             var nextUntranslated = (currentSegment) ? SegmentStore.getNextSegment(currentSegment.sid, null, 8): null;
 
@@ -298,58 +212,15 @@
             }
             var next = (currentSegment) ?  SegmentStore.getNextSegment(currentSegment.sid, null, null) : null;
             this.nextSegmentId = (next) ? next.sid : null;
-            var prev = (currentSegment) ? SegmentStore.getPrevSegment(currentSegment.sid) : null;
-            this.previousSegmentId = ( prev ) ? prev.sid : null;
         },
-        gotoNextUntranslatedSegment: function() {
-            if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
-                if (!UI.nextUntranslatedSegmentId) {
-                    SegmentActions.closeSegment(UI.currentSegmentId);
-                } else {
-                    UI.reloadWarning();
-                }
-            } else {
-                SegmentActions.openSegment(UI.nextUntranslatedSegmentId);
-            }
-        },
-
-        gotoOpenSegment: function(quick) {
-            quick = quick || false;
-
-            if (this.currentSegmentId) {
-                UI.scrollSegment(this.currentSegmentId);
-            } else {
-                this.render({
-                    firstLoad: false,
-                    segmentToOpen: this.currentSegmentId
-                });
-            }
-            $(window).trigger({
-                type: "scrolledToOpenSegment",
-                segment: this.currentSegment
-            });
-        },
+        //Override by others plugin
         gotoNextSegment: function() {
-            var nextSeg =  SegmentStore.getNextSegment();
-            if ( nextSeg ) {
-                SegmentActions.openSegment(nextSeg.sid);
-            } else if ( UI.noMoreSegmentsAfter){
-                SegmentActions.openSegment(config.firstSegmentOfFiles[0].first_segment);
-            }
+            SegmentActions.gotoNextSegment();
         },
         gotoPreviousSegment: function() {
             var prevSeg = SegmentStore.getPrevSegment();
             if ( prevSeg ) {
                 SegmentActions.openSegment( prevSeg.sid );
-            }
-
-        },
-        gotoSegment: function(id) {
-            if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
-                id = UI.parsedHash.splittedSegmentId ;
-            }
-            if ( id ) {
-                SegmentActions.openSegment(id);
             }
 
         },
@@ -446,7 +317,7 @@
                 },
                 context: [reqArguments, id_segment],
                 error: function() {
-                    UI.failedConnection(this[0], 'setCurrentSegment');
+                    OfflineUtils.failedConnection(this[0], 'setCurrentSegment');
                 },
                 success: function(d) {
                     UI.setCurrentSegment_success(this[1], d);
@@ -459,7 +330,7 @@
             }
 
             this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
-            this.getNextSegment(this.currentSegment, 'untranslated');
+            SegmentActions.setNextUntranslatedSegmentFromServer(d.nextSegmentId);
 
             var segment = SegmentStore.getSegmentByIdToJS(id_segment);
             if (config.alternativesEnabled && !segment.alternatives) {
@@ -486,8 +357,6 @@
          * the segment as modified. When a segment is modified we set the class and we set
          * data. And we trigger an event.
          *
-         * Preferred way would be to use MateCat.db.segments to save this data, and have the
-         * UI redraw after this change. This would help transition to component based architecture.
          *
          * @param el
          */
@@ -513,11 +382,6 @@
         getSegmentById: function(id) {
             return $('#segment-' + id);
         },
-
-        getSegmentsSplit: function(id) {
-            return SegmentStore.getSegmentsSplitGroup(id);
-        },
-
         getEditAreaBySegmentId: function(id) {
             return $('#segment-' + id + ' .targetarea');
         },
@@ -525,6 +389,9 @@
         segmentIsLoaded: function(segmentId) {
             var segment = SegmentStore.getSegmentByIdToJS(segmentId);
             return segment || UI.getSegmentsSplit(segmentId).length > 0 ;
+        },
+        getSegmentsSplit: function(id) {
+            return SegmentStore.getSegmentsSplitGroup(id);
         },
         getContextBefore: function(segmentId) {
             var segmentBefore = SegmentStore.getPrevSegment(segmentId);
@@ -540,7 +407,7 @@
                     return this.getContextBefore(segmentBeforeId);
                 }
             } else {
-                return UI.prepareTextToSend(segmentBefore.segment);
+                return TagUtils.prepareTextToSend(segmentBefore.segment);
             }
         },
         getContextAfter: function(segmentId) {
@@ -558,7 +425,7 @@
                     return this.getContextAfter(segmentAfterId);
                 }
             } else   {
-                return UI.prepareTextToSend(segmentAfter.segment);
+                return TagUtils.prepareTextToSend(segmentAfter.segment);
             }
         },
         getIdBefore: function(segmentId) {
@@ -644,8 +511,24 @@
                 setTimeout(CatToolActions.reloadSegmentFilter, 500);
             }
         },
-        scrollSegment: function(idSegment) {
-            SegmentActions.scrollToSegment( idSegment );
+
+        /**
+         * Register tabs in segment footer
+         */
+        registerFooterTabs: function () {
+            SegmentActions.registerTab('concordances', true, false);
+
+            if ( config.translation_matches_enabled ) {
+                SegmentActions.registerTab('matches', true, true);
+            }
+
+            SegmentActions.registerTab('glossary', true, false);
+            SegmentActions.registerTab('alternatives', false, false);
+            // SegmentActions.registerTab('messages', false, false);
+            if ( ReviewSimple.enabled() ) {
+                UI.registerReviseTab();
+
+            }
         }
     });
 })(jQuery); 

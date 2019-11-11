@@ -491,9 +491,7 @@ footer #statistics {
 }
 
 .topMenu ::-webkit-scrollbar-thumb {
-
-  background: #ccc url(../../img/bgscrollbar.png) center center no-repeat;
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+	  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
 }
 
 /*end-scrollbar*/
@@ -1322,13 +1320,7 @@ form.add-TM-Form {
   color: black;
 }
 
-.popup .outer {
-  background: url(../../img/bg_login_button.gif) 0 0 repeat;
-  border-radius: 6px;
-  margin: 0 auto -10px auto;
-  width: 330px;
-  border: 1px solid #222;
-}
+
 
 .popup-confirm .btn-ok {
   /* TODO REVIEW  this rule breaks the popup button alignment in confirm change language after file conversion */
@@ -1336,15 +1328,12 @@ form.add-TM-Form {
   margin-left: 10px;
 }
 
-.popup .outer:hover {
-  background: url(../../img/bg_login_button_hover.gif) 0 0 repeat;
-}
-
-.popup .inner {
-  width: 45px;
-  border-right: 1px solid #003366;
-  border-radius: 0 0 0 6px;
-}
+.popup .inner
+{
+	width: 45px;
+	border-right: 1px solid #003366;
+	border-radius: 0 0 0 6px;
+    }
 
 .popup .login-button {
   width: 330px;
@@ -3586,29 +3575,11 @@ only screen and (in-resolution: 2dppx) {
   }
   /* Google Sheet */
 
-  /*.popup {background: #fff url(../img/borderfix.png) repeat-x!important;}*/
-
-  .fileinput-button {
+.fileinput-button {
 	background: #09beec;
   }
 
 }
-
-/*
-.tm-error-message, .tm-warning-message {
-background: #d65757 url(../img/error-symbol.png) 10px center no-repeat;
-color: #fff;
-padding: 10px 0;
-margin: 10px 0;
-float: left;
-font-weight: bold;
-width: 100%;
--moz-border-radius: 2px;
-border-radius: 2px;
-border: 1px solid #c45f5f;
-text-indent: 40px;
-display: none;
-}*/
 
 .active-tm-key-link {
   cursor: pointer;
@@ -4610,23 +4581,30 @@ body.side-popup {
   font-size: 18px;
 }
 
-#menu-site li a.bigred {
-  font-size: 18px !important;
-  border: none !important;
-  color: #fff !important;
-  border-radius: 4px;
-  background-color: #cf3d2b;
-  border-bottom: 2px solid #343434 !important;
-  padding: 10px;
-  font-weight: bold;
-  margin-left: 5px;
-  margin-top: 6px;
-  margin-right: 23px;
+#menu-site li a.bigblue {
+    font-size: 18px !important;
+    border: none !important;
+    color: #3aa9dd !important;
+    border-radius: 4px;
+    background-color: #fff;
+    //border-bottom: 2px solid #343434 !important;
+    padding: 7px;
+    font-weight: bold;
+    margin-left: 5px;
+    margin-top: 6px;
+    margin-right: 23px;
 }
 
 #menu-site li a.bigred:hover {
   background: #3aa9dd !important;
 }
+
+
+#menu-site li a.bigblue:hover {
+    background: #3aa9dd!important;
+    color: #fff !important;
+}
+
 
 #menu-site li a:hover {
   color: #3aa9dd;

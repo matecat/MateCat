@@ -102,18 +102,6 @@ p.button-aligned-right {
     content: "\f057";
 }
 
-.outer {
-    background: url(../../img/bg_login_button.gif) 0 0 repeat;
-    border-radius: 6px;
-    margin: 0 auto -10px auto;
-    width: 330px;
-    border: 1px solid #222;
-}
-.outer:hover
-        {
-        background: url(../../img/bg_login_button_hover.gif) 0 0 repeat;
-        }
-
 .inner
     {
     width: 45px;
@@ -1009,11 +997,6 @@ span.zone2 {
     margin: 2% 2.5% 2% 2%!important;
     width: 160px;
 }
-/*.pricebox .paybox {
-border-radius: 4px;
-background: url(../img/card.png) no-repeat 330px 37px;
-background-size: 170px;
-}*/
 
 .paybox{
     font-size: 13px !important;
