@@ -329,11 +329,19 @@ class SubFilteringTest extends AbstractTest {
 
     public function testTwigWithPercents(){
         $db_segment = 'Dear {{%%customer.first_name%%}}, This is %{%%agent.alias%%} with Airbnb.';
-        $expected = 'Dear &lt;ph id="mtc_1" equiv-text="base64:e3slJWN1c3RvbWVyLmZpcnN0X25hbWUlJX19"/&gt;, This is &lt;ph id="mtc_2" equiv-text="base64:JXslJWFnZW50LmFsaWFzJSV9"/&gt; with Airbnb.';
+        $segment_from_UI = 'Dear <ph id="mtc_1" equiv-text="base64:e3slJWN1c3RvbWVyLmZpcnN0X25hbWUlJX19"/>, This is <ph id="mtc_2" equiv-text="base64:JXslJWFnZW50LmFsaWFzJSV9"/> with Airbnb.';
+        $segment_to_UI = 'Dear &lt;ph id="mtc_1" equiv-text="base64:e3slJWN1c3RvbWVyLmZpcnN0X25hbWUlJX19"/&gt;, This is &lt;ph id="mtc_2" equiv-text="base64:JXslJWFnZW50LmFsaWFzJSV9"/&gt; with Airbnb.';
 
         $segmentL2 = $this->filter->fromLayer0ToLayer2( $db_segment );
 
-        $this->assertEquals( $expected, $segmentL2 );
+        $this->assertEquals( $segment_to_UI, $segmentL2 );
+
+        $this->assertEquals( $db_segment, $this->filter->fromLayer1ToLayer0( $segment_from_UI ) );
+
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segment_from_UI ) );
+
+        $this->assertEquals( $segment_from_UI, $this->filter->fromLayer0ToLayer1( $db_segment ) );
+
     }
 
 }
