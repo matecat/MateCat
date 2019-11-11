@@ -17,7 +17,12 @@ class TwigToPh extends AbstractHandler {
     /**
      * TestSet:
      * <code>
-     *   Dear {{customer.first_name}}, This is {{agent.alias}} with Airbnb.
+     *  Dear {{%%customer.first_name%%}}, This is {{ "now"|date(null, "Europe/Rome") }} with {%%agent.alias%%} Airbnb. {% for user in users %} e {%%ciao%%}
+     *  {# note: disabled template because we no longer use this
+     *          {% for user in users %}
+     *          ...
+     *          {% endfor %}
+     *  #}
      * </code>
      *
      * @param $segment
