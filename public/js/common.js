@@ -1,6 +1,7 @@
 APP = null;
 
 APP = {
+    teamStorageName: "defaultTeam",
     init: function () {
         this.setLoginEvents();
         if (config.isLoggedIn) {
