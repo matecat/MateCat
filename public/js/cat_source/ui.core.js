@@ -302,7 +302,7 @@ var UI = {
     createJobMenu: function() {
         var menu = '<nav id="jobMenu" class="topMenu">' +
             '<ul class="gotocurrentsegment">' +
-            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="javascript:void(0)">Go to current segment</a></li>' +
+            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a>Go to current segment</a><span>' +Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase() + '</span></li>' +
             '</ul>' +
             '<ul class="jobmenu-list">';
         $.each(config.firstSegmentOfFiles, function() {

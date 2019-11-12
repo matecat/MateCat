@@ -22,7 +22,7 @@ $.extend(UI, {
             SegmentActions.closeTagsMenu();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            SegmentActions.scrollToSegment(UI.currentSegmentId);
+            SegmentActions.scrollToCurrentSegment();
             SegmentActions.setFocusOnEditArea();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openPrevious.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
@@ -213,6 +213,7 @@ $.extend(UI, {
         }).on('click', 'li.currSegment:not(.disabled)', function(e) {
             e.preventDefault();
             SegmentActions.scrollToCurrentSegment();
+            SegmentActions.setFocusOnEditArea();
         });
         $("#jobNav .currseg").on('click', function(e) {
             e.preventDefault();
