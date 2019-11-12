@@ -126,7 +126,7 @@ class SegmentTranslationEventModel  {
         return (
                 $this->old_translation->translation != $this->translation->translation ||
                 $this->old_translation->status      != $this->translation->status ||
-                $this->source_page             != $this->getOriginSourcePage()
+                $this->source_page                  != $this->getOriginSourcePage()
         );
     }
 

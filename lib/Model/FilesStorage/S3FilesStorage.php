@@ -8,7 +8,6 @@ use INIT;
 use RedisHandler;
 use SimpleS3\Client;
 use SimpleS3\Components\Cache\RedisCache;
-use SimpleS3\Components\Encoders\UrlEncoder;
 
 /**
  * Class S3FilesStorage
@@ -25,6 +24,8 @@ use SimpleS3\Components\Encoders\UrlEncoder;
  * @package FilesStorage
  */
 class S3FilesStorage extends AbstractFilesStorage {
+
+    const ORIGINAL_ZIP_PLACEHOLDER = "__originalZip";
 
     const CACHE_PACKAGE_FOLDER   = 'cache-package';
     const FILES_FOLDER           = 'files';
@@ -286,15 +287,44 @@ class S3FilesStorage extends AbstractFilesStorage {
             $destItems[] = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . $folder . $this->getTheLastPartOfKey( $key );
         }
 
-        \Log::doJsonLog( 'project id ' . $idFile . ': copying files from cache package to project folder' );
-
-        return $this->s3Client->copyInBatch( [
+        $copied = $this->s3Client->copyInBatch( [
                 'source_bucket' => static::$FILES_STORAGE_BUCKET,
                 'files'         => [
                         'source' => $sourceItems,
                         'target' => $destItems,
                 ],
         ] );
+
+        \Log::doJsonLog( $this->getArrayMessageForLogs( $idFile, $datePath, $sourceItems, $destItems, $copied ) );
+
+        return $copied;
+    }
+
+    /**
+     * @param $idFile
+     * @param $datePath
+     * @param $sourceItems
+     * @param $destItems
+     * @param $copied
+     *
+     * @return array
+     */
+    private function getArrayMessageForLogs( $idFile, $datePath, $sourceItems, $destItems, $copied ) {
+        $log = [
+                'id_file'   => $idFile,
+                'date_path' => $datePath,
+                'files'     => [
+                        'source' => $sourceItems,
+                        'target' => $destItems,
+                ]
+        ];
+
+        $message = ( $copied === true ) ? 'Successfully copied files from cache package to files directory.' : 'Error during copying files from cache package to files directory.';
+
+        $log[ 'message' ] = $message;
+        $log[ 'copied' ]  = $copied;
+
+        return $log;
     }
 
     /**

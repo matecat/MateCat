@@ -84,34 +84,51 @@ class GDriveController extends KleinController {
         }
     }
 
+    /**
+     * This method takes the COOKIES and sets:
+     *
+     * - the source language
+     * - the target language from the latest used target languages, and sets a WRONG value
+     */
     private function correctSourceTargetLang() {
-        if ( isset ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
-            if ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] != Constants::EMPTY_VAL ) {
-                $sourceLangHistory = $_COOKIE[ Constants::COOKIE_SOURCE_LANG ];
-                $sourceLangAr      = explode( '||', urldecode( $sourceLangHistory ) );
-
-                if ( count( $sourceLangAr ) > 0 ) {
-                    $this->source_lang = $sourceLangAr[ 0 ];
-                }
-            }
-        } else {
-            setcookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
-        }
-
-        if ( isset ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
-            if ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] != Constants::EMPTY_VAL ) {
-                $targetLangHistory = $_COOKIE[ Constants::COOKIE_TARGET_LANG ];
-                $targetLangAr      = explode( '||', urldecode( $targetLangHistory ) );
-
-                if ( count( $targetLangAr ) > 0 ) {
-                    $this->target_lang = $targetLangAr[ 0 ];
-                }
-            }
-        } else {
-            setcookie( Constants::COOKIE_TARGET_LANG, Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
-        }
+        $this->setLanguageFromCookies('source');
+        $this->setLanguageFromCookies('target');
 
         $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
+    }
+
+    /**
+     * @param string $type
+     */
+    private function setLanguageFromCookies($type) {
+
+        switch ($type){
+            case 'source':
+            default:
+                $key = Constants::COOKIE_SOURCE_LANG;
+                $propName = 'source_lang';
+                break;
+
+            case 'target':
+                $key = Constants::COOKIE_TARGET_LANG;
+                $propName = 'target_lang';
+        }
+
+        if ( isset ( $_COOKIE[ $key ] ) ) {
+            if ( $_COOKIE[ $key ] != Constants::EMPTY_VAL ) {
+                $LangHistory = $_COOKIE[ $key ];
+                $LangAr      = explode( '||', urldecode( $LangHistory ) );
+                $countLangAr = count( $LangAr );
+
+                if ( $countLangAr > 0 ) {
+                    $lang = $LangAr[ $countLangAr - 2 ];
+                    $lang = explode(',', $lang);
+                    $this->{$propName} = end($lang);
+                }
+            }
+        } else {
+            setcookie( $key, Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
+        }
     }
 
     private function finalize() {
