@@ -671,7 +671,13 @@ class ProjectManager {
                     ];
                     //we can not write to disk!! Break project creation
                 }
-
+                // S3 EXCEPTIONS HERE
+                elseif ($e->getCode() == -200 ) {
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                            "code" => -200,
+                            "message" => $e->getMessage()
+                    ];
+                }
                 $this->__clearFailedProject( $e );
 
                 //EXIT
@@ -1992,7 +1998,7 @@ class ProjectManager {
 
             // check if the files were moved
             if (true !== $moved) {
-                throw new \Exception('The files couldn\'t be moved from cache to file folder. Please re-create the project.');
+                throw new \Exception('Project creation failed. Please refresh page and retry.', -200);
             }
 
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
