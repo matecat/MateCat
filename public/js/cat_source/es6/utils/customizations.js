@@ -1,6 +1,7 @@
 
 const Customizations = {
     custom: {},
+
     loadCustomization() {
         if (Cookies.get('user_customization')) {
             this.custom = $.parseJSON(Cookies.get('user_customization'));
