@@ -1983,12 +1983,17 @@ class ProjectManager {
                 }
             }
 
-            $fs->moveFromCacheToFileDir(
+            $moved = $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
                     $this->projectStructure[ 'source_language' ],
                     $fid,
                     $originalFileName
             );
+
+            // check if the file is moved
+            if (true !== $moved) {
+                throw new \Exception('The files couldn\'t be moved from cache to file folder. Please re-create the project.');
+            }
 
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
