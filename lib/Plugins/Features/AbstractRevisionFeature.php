@@ -18,6 +18,7 @@ use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
+use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
 use Jobs_JobStruct;
@@ -516,6 +517,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                         ]
                 ]
         ];
+
+        if ( AbstractFilesStorage::isOnS3() ){
+            unlink( $zip_file );
+        }
+
     }
 
     /**

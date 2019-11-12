@@ -93,7 +93,8 @@ class SegmentFooterTabConcordance extends React.Component {
         let array = [];
 
         if (data.matches.length) {
-            _.each(data.matches, function (item, index) {
+            let matches =  _.orderBy(data.matches, ['last_update_date'], ['desc']);
+            _.each(matches, function (item, index) {
                 if ((item.segment === '') || (item.translation === ''))
                     return;
                 let prime = (index < self.state.numDisplayContributionMatches) ? ' prime' : '';

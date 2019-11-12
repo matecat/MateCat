@@ -8,15 +8,14 @@
 
 namespace Features\TranslationVersions\Model;
 
-
 use Chunks_ChunkStruct;
-use Features\ProjectCompletion\Model\EventModel;
 use FeatureSet;
 use TransactionableTrait;
 
 class BatchEventCreator {
 
-    use TransactionableTrait ;
+    use TransactionableTrait;
+
     /**
      * @var SegmentTranslationEventModel[]
      */
@@ -25,36 +24,53 @@ class BatchEventCreator {
     /**
      * @var FeatureSet
      */
-    protected $_featureSet ;
+    protected $_featureSet;
 
     /**
      * @var Chunks_ChunkStruct
      */
-    protected   $_chunk;
+    protected $_chunk;
 
     /** @var \Projects_ProjectStruct */
     protected $_project;
 
-    public function  __construct( Chunks_ChunkStruct $chunkStruct ) {
-        $this->_chunk = $chunkStruct ;
+    /**
+     * BatchEventCreator constructor.
+     *
+     * @param Chunks_ChunkStruct $chunkStruct
+     */
+    public function __construct( Chunks_ChunkStruct $chunkStruct ) {
+        $this->_chunk = $chunkStruct;
     }
 
+    /**
+     * @return SegmentTranslationEventModel[]
+     */
     public function getEvents() {
-        return $this->_events ;
+        return $this->_events;
     }
 
+    /**
+     * @return SegmentTranslationEventModel[]
+     */
     public function getPersistedEvents() {
-        return array_filter( $this->_events, function( SegmentTranslationEventModel $event ) {
-            return $event->isPersisted() ;
-        }) ;
+        return array_filter( $this->_events, function ( SegmentTranslationEventModel $event ) {
+            return $event->isPersisted();
+        } );
     }
 
+    /**
+     * @param FeatureSet $featureSet
+     */
     public function setFeatureSet( FeatureSet $featureSet ) {
-        $this->_featureSet = $featureSet ;
+        $this->_featureSet = $featureSet;
     }
 
+    /**
+     * @param SegmentTranslationEventModel $eventModel
+     */
     public function addEventModel( SegmentTranslationEventModel $eventModel ) {
-        $this->_events [] = $eventModel ;
+        $this->_events[] = $eventModel;
     }
 
     /**
@@ -75,17 +91,20 @@ class BatchEventCreator {
         return $this;
     }
 
-
-
+    /**
+     * Save events
+     *
+     * @throws \Exceptions\ValidationError
+     */
     public function save() {
-        $this->openTransaction() ;
+        $this->openTransaction();
 
         foreach ( $this->_events as $event ) {
             $event->save();
         }
 
-        $this->_featureSet->run('batchEventCreationSaved', $this) ;
-        $this->commitTransaction() ;
+        $this->_featureSet->run( 'batchEventCreationSaved', $this );
+        $this->commitTransaction();
     }
 
     /**

@@ -14,6 +14,11 @@ use Teams\TeamDao;
 use Users_UserDao;
 use Users_UserStruct;
 
+/**
+ * Class ProjectModel
+ * @package Projects
+ *
+ */
 class ProjectModel {
 
     /**
@@ -38,6 +43,7 @@ class ProjectModel {
     }
 
     public function getBlacklist() {
+        //TODO This class  is a MODEL acting directly on the database records/tables applying some kind of logics. It must not operate on Files!!!
         // TODO: replace with check of file exitence, don't read whole file. 
         return BlacklistFromZip::getContent( $this->project_struct->getFirstOriginalZipPath() );
     }

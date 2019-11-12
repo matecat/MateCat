@@ -461,9 +461,6 @@ class TMSService {
 
         switch ( $this->output_type ) {
 
-            case 'translation':
-                $result = TMSServiceDao::getTranslationsForTMXExport( $jid, $jPassword );
-                break;
             case 'mt' :
                 $hideUnconfirmedRows = false;
                 $result = TMSServiceDao::getMTForTMXExport( $jid, $jPassword );
@@ -472,6 +469,7 @@ class TMSService {
                 $hideUnconfirmedRows = false;
                 $result = TMSServiceDao::getTMForTMXExport( $jid, $jPassword );
                 break;
+            case 'translation':
             default:
                 $result = TMSServiceDao::getTranslationsForTMXExport( $jid, $jPassword );
                 break;
