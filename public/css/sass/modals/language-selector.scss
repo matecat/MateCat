@@ -78,7 +78,7 @@
         text-align: left;
         border-radius: 2px;
         border: 1px solid $medium-gray;
-        padding: 8px 16px 16px 16px;
+        padding: 6px 16px;
 
         &:hover {
           border: 1px solid $dark-gray;
@@ -87,9 +87,8 @@
 
         input[type=text] {
           border: none;
-          margin: 8px 0 0 0;
+          margin: 0;
           padding: 6px 8px;
-          font-size: 1.3rem;
           &::placeholder {
             color: $placeholder-gray;
             opacity: 1;
@@ -102,6 +101,13 @@
         /* Tag chips */
         .react-tagsinput {
           width: 100%;
+          &>span{
+            display: inline-block;
+            &>*{
+              margin-top: 2px;
+              margin-bottom: 2px;
+            }
+          }
         }
         .tag {
           position: relative;
@@ -109,7 +115,7 @@
           padding: 4px 8px;
           text-transform: capitalize;
           border-radius: 2px;
-          margin: 8px 4px 0 0;
+          margin: 0 2px;
           background: #fff;
           color: #000;
           border: 1px solid $medium-gray;
@@ -120,7 +126,6 @@
             color: $light-blue;
             text-decoration: none;
             margin: 0 0 0 4px;
-            font-size: 20px;
             cursor: pointer;
           }
           &.highlightDelete{
