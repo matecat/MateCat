@@ -1990,7 +1990,7 @@ class ProjectManager {
                     $originalFileName
             );
 
-            // check if the file is moved
+            // check if the files were moved
             if (true !== $moved) {
                 throw new \Exception('The files couldn\'t be moved from cache to file folder. Please re-create the project.');
             }
