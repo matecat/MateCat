@@ -243,6 +243,9 @@ class SegmentsContainer extends React.Component {
             if ( previousFileId !== segment.get('id_file')) {
                 heightToAdd = 43;
             }
+            if ( index === this.state.segments.size - 1) {
+                heightToAdd = heightToAdd + 150;
+            }
             return this.segmentsHeightsMap[segment.get('sid')].height + heightToAdd ;
         }
 
@@ -292,6 +295,10 @@ class SegmentsContainer extends React.Component {
         //If is the first segment of a file add the file header
         if ( previousFileId !== segment.get('id_file')) {
             height = height + 43;
+        }
+
+        if ( index === this.state.segments.size - 1) {
+            height = height + 150;
         }
 
         return height;
