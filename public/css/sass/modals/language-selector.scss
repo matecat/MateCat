@@ -2,10 +2,6 @@
 
 #matecat-modal-languages {
 
-  $header-height: 47px;
-  $subheader-height: 136px;
-  $footer-height: 72px;
-
   $light-blue: #00AEE4;
   $medium-blue: #0055B8;
   $dark-blue: #002B5C;
@@ -21,7 +17,9 @@
 
   /* Modal */
   .matecat-modal {
-
+    button:focus{
+      border: 1px solid $light-blue
+    }
   }
 
   /* Modal Content */
@@ -78,7 +76,7 @@
         text-align: left;
         border-radius: 2px;
         border: 1px solid $medium-gray;
-        padding: 8px 16px 16px 16px;
+        padding: 6px 16px;
 
         &:hover {
           border: 1px solid $dark-gray;
@@ -87,9 +85,8 @@
 
         input[type=text] {
           border: none;
-          margin: 8px 0 0 0;
+          margin: 0;
           padding: 6px 8px;
-          font-size: 1.3rem;
           &::placeholder {
             color: $placeholder-gray;
             opacity: 1;
@@ -102,6 +99,13 @@
         /* Tag chips */
         .react-tagsinput {
           width: 100%;
+          &>span{
+            display: inline-block;
+            &>*{
+              margin-top: 2px;
+              margin-bottom: 2px;
+            }
+          }
         }
         .tag {
           position: relative;
@@ -109,7 +113,7 @@
           padding: 4px 8px;
           text-transform: capitalize;
           border-radius: 2px;
-          margin: 8px 4px 0 0;
+          margin: 0 2px;
           background: #fff;
           color: #000;
           border: 1px solid $medium-gray;
@@ -120,7 +124,6 @@
             color: $light-blue;
             text-decoration: none;
             margin: 0 0 0 4px;
-            font-size: 20px;
             cursor: pointer;
           }
           &.highlightDelete{
@@ -148,7 +151,7 @@
   /* Modal Footer */
   .matecat-modal-footer {
     overflow: auto;
-    height: $footer-height;
+    height: 72px;
     background: #FFF;
     border-top: 1px solid $medium-gray;
     padding: 8px 16px 8px 32px;
@@ -272,9 +275,13 @@
       background: $light-blue;
       border: 1px solid $light-blue;
       color: #fff;
-      &:hover {
+      &:hover{
         background-color: $btn-hover-blue;
         box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+      }
+      &:focus{
+        box-shadow: none;
+        border: 1px solid $dark-blue;
       }
     }
 
@@ -282,6 +289,9 @@
       background: #fff;
       color: #000;
       border: 1px solid $medium-gray;
+      &:focus{
+        border: 1px solid $light-blue;
+      }
     }
   }
 
