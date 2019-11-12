@@ -2,10 +2,6 @@
 
 #matecat-modal-languages {
 
-  $header-height: 47px;
-  $subheader-height: 136px;
-  $footer-height: 72px;
-
   $light-blue: #00AEE4;
   $medium-blue: #0055B8;
   $dark-blue: #002B5C;
@@ -21,7 +17,9 @@
 
   /* Modal */
   .matecat-modal {
-
+    button:focus{
+      border: 1px solid $light-blue
+    }
   }
 
   /* Modal Content */
@@ -153,7 +151,7 @@
   /* Modal Footer */
   .matecat-modal-footer {
     overflow: auto;
-    height: $footer-height;
+    height: 72px;
     background: #FFF;
     border-top: 1px solid $medium-gray;
     padding: 8px 16px 8px 32px;
@@ -277,9 +275,13 @@
       background: $light-blue;
       border: 1px solid $light-blue;
       color: #fff;
-      &:hover {
+      &:hover{
         background-color: $btn-hover-blue;
         box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+      }
+      &:focus{
+        box-shadow: none;
+        border: 1px solid $dark-blue;
       }
     }
 
@@ -287,6 +289,9 @@
       background: #fff;
       color: #000;
       border: 1px solid $medium-gray;
+      &:focus{
+        border: 1px solid $light-blue;
+      }
     }
   }
 
