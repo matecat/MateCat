@@ -591,11 +591,13 @@ $.extend(UI.UPLOAD_PAGE, {
             e.preventDefault();
 
             var tlAr = $('#target-lang').dropdown('get value').split(',');
+            var sourceLang = $('#source-lang').dropdown('get value');
 
             ReactDOM.render(
                 React.createElement( LanguageSelector, {
                     selectedLanguagesFromDropdown: tlAr,
                     languagesList: config.languages_array,
+                    fromLanguage: sourceLang,
                     onClose: function () {
                         ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
                     },

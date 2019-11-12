@@ -7,15 +7,17 @@ class LanguageSelector extends React.Component {
 		this.state = {
 			selectedLanguages: null,
 			initialLanguages: null,
+			fromLanguage: null,
 			querySearch: ''
 		};
 	}
 
 	componentDidMount() {
-		const {selectedLanguagesFromDropdown, languagesList} = this.props;
+		const {selectedLanguagesFromDropdown, languagesList,fromLanguage} = this.props;
 		document.addEventListener('keydown', this.pressEscKey);
 
 		this.setState({
+			fromLanguage: languagesList.filter(i => i.code === fromLanguage)[0],
 			selectedLanguages: selectedLanguagesFromDropdown.map(e => languagesList.filter(i => i.code === e)[0]),
 			initialLanguages: selectedLanguagesFromDropdown.map(e => languagesList.filter(i => i.code === e)[0])
 		})
@@ -33,7 +35,7 @@ class LanguageSelector extends React.Component {
 	render() {
 		const {onQueryChange, onToggleLanguage, onConfirm, preventDismiss, onRestore, onReset} = this;
 		const {languagesList, onClose} = this.props;
-		const {selectedLanguages, querySearch} = this.state;
+		const {selectedLanguages, querySearch,fromLanguage} = this.state;
 		return <div id="matecat-modal-languages" className="matecat-modal" onClick={onClose}>
 			<div className="matecat-modal-content" onClick={preventDismiss}>
 
@@ -51,7 +53,7 @@ class LanguageSelector extends React.Component {
 								<span className={"label"}>From:</span>
 							</div>
 							<div>
-								<span>Italian</span>
+								<span>{fromLanguage && fromLanguage.name}</span>
 							</div>
 						</div>
 						<div className={"language-to"}>
@@ -182,6 +184,7 @@ class LanguageSelector extends React.Component {
 
 Header.defaultProps = {
 	selectedLanguagesFromDropdown: false,
+	fromLanguage: true,
 	languagesList: true,
 	onClose: true,
 	onConfirm: true
