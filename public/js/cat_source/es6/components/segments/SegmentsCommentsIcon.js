@@ -7,6 +7,8 @@ import CommentsStore  from '../../stores/CommentsStore';
 import SegmentsActions  from '../../actions/SegmentActions';
 import CommentsConstants  from '../../constants/CommentsConstants';
 import MBC from '../../utils/mbc.main';
+import Shortcuts  from '../../utils/shortcuts';
+
 
 
 class SegmentsCommentsIcon extends React.Component {
@@ -67,7 +69,9 @@ class SegmentsCommentsIcon extends React.Component {
             </span>
             }
 
-            return <div className={rootClasses.join( ' ' )} title="Add comment" onClick={(e) => this.openComments(e)}>
+            return <div className={rootClasses.join( ' ' )}
+                        title={"Add comment (" + Shortcuts.cattol.events.openComments.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase() + ')'}
+                        onClick={(e) => this.openComments(e)}>
                 <span className="mbc-comment-icon icon-bubble2"/>
                 {html}
             </div>

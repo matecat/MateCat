@@ -3069,7 +3069,18 @@ font-weight: normal !important;
 	margin: 4px 8px 0px 7px;
 	width: 30px;
 	float: left;
-	background-size: 25px!important;}
+	background-size: 25px!important;
+}
+.currSegment span {
+  position: absolute;
+  top: 4px;
+  color: #757472;
+  visibility: hidden;
+  left: 200px;
+}
+.currSegment:hover span {
+  visibility: visible;
+}
 
 @media (max-height: 500px) {
     .register-modal

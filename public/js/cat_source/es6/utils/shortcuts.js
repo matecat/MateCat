@@ -1,6 +1,6 @@
 
 const Shortcuts = {
-
+    shortCutsKeyType: (navigator.platform === 'MacIntel') ? 'mac' : 'standard' ,
     cattol: {
             label: "Translate/Revise",
             events: {

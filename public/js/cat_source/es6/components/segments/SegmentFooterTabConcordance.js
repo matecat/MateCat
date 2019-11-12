@@ -253,7 +253,7 @@ class SegmentFooterTabConcordance extends React.Component {
                     </div>
                 </div>
                 <br className="clear"/>
-                {this.state.results.length > 0 ? extended : null}
+                {this.state.results.length > 3 ? extended : null}
             </div>
         )
     }

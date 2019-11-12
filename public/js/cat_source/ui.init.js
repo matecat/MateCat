@@ -11,7 +11,7 @@ $.extend(UI, {
         this.isChrome = (typeof window.chrome != 'undefined');
         this.isFirefox = (typeof navigator.mozApps != 'undefined');
 
-        this.isMac = (navigator.platform == 'MacIntel') ? true : false;
+        this.isMac = (navigator.platform === 'MacIntel');
         this.body = $('body');
         // this.firstLoad = (options.firstLoad || false);
         this.initSegNum = 100; // number of segments initially loaded
