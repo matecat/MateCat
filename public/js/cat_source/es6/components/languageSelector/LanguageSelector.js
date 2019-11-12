@@ -13,6 +13,8 @@ class LanguageSelector extends React.Component {
 
 	componentDidMount() {
 		const {selectedLanguagesFromDropdown, languagesList} = this.props;
+		document.addEventListener('keydown', this.pressEscKey);
+
 		this.setState({
 			selectedLanguages: selectedLanguagesFromDropdown.map(e => languagesList.filter(i => i.code === e)[0]),
 			initialLanguages: selectedLanguagesFromDropdown.map(e => languagesList.filter(i => i.code === e)[0])
@@ -21,6 +23,7 @@ class LanguageSelector extends React.Component {
 	}
 
 	componentWillUnmount() {
+		document.removeEventListener('keydown', this.pressEscKey);
 	}
 
 	componentDidUpdate() {
@@ -74,7 +77,8 @@ class LanguageSelector extends React.Component {
 
 				<div className="matecat-modal-footer">
 					<div className="selected-counter">
-						{selectedLanguages && selectedLanguages.length > 0 ? <span className={"uncheck-all"} onClick={onReset}>
+						{selectedLanguages && selectedLanguages.length > 0 ?
+							<span className={"uncheck-all"} onClick={onReset}>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								width="12"
@@ -161,6 +165,17 @@ class LanguageSelector extends React.Component {
 			querySearch: ''
 		})
 	};
+
+	pressEscKey = (event) => {
+		const {onClose} = this.props;
+		const keyCode = event.keyCode;
+
+		if (keyCode === 27) {
+			onClose()
+		}
+
+		//27
+	}
 
 
 }
