@@ -20,12 +20,12 @@ class ReviewUtils {
     /**
      * @param array $statsArray
      * @param array $chunkReviews
-     * @param null  $segmentId
+     * @param array $options
      *
      * @return array
      * @throws \Exception
      */
-    public static function formatStats( $statsArray, $chunkReviews, $segmentId = null ) {
+    public static function formatStats( $statsArray, $chunkReviews, $options = [] ) {
         $statsArray [ 'revises' ] = [];
 
         /** @var ChunkReviewStruct $chunkReview */
@@ -45,10 +45,13 @@ class ReviewUtils {
 
                 $chunkReview->advancement_wc = $correctAdvancementWC;
 
-                $htmlMessageForEmail = self::getHtmlMessageForEmail($project, $chunkReview, $advancementWcAsFloat, $correctAdvancementWCAsFloat, $segmentId);
-                $arrayMessageForLogs  = self::getArrayMessageForLogs($project, $chunkReview, $advancementWcAsFloat, $correctAdvancementWCAsFloat, $segmentId);
+                $segmentId = isset($options['segmentId']) ? $options['segmentId'] : null;
+                $requestUri = isset($options['requestUri']) ? $options['requestUri'] : null;
 
-                \Utils::sendErrMailReport( $htmlMessageForEmail );
+                $htmlMessageForEmail = self::getHtmlMessageForEmail($project, $chunkReview, $advancementWcAsFloat, $correctAdvancementWCAsFloat, $segmentId, $requestUri);
+                $arrayMessageForLogs  = self::getArrayMessageForLogs($project, $chunkReview, $advancementWcAsFloat, $correctAdvancementWCAsFloat, $segmentId, $requestUri);
+
+                //\Utils::sendErrMailReport( $htmlMessageForEmail );
                 \Log::doJsonLog( $arrayMessageForLogs );
             }
 
@@ -68,9 +71,11 @@ class ReviewUtils {
      * @param                   $correctAdvancementWCAsFloat
      * @param null              $segmentId
      *
+     * @param null              $requestUri
+     *
      * @return string
      */
-    private static function getHtmlMessageForEmail( $project, ChunkReviewStruct $chunkReview, $advancementWcAsFloat, $correctAdvancementWCAsFloat, $segmentId = null)
+    private static function getHtmlMessageForEmail( $project, ChunkReviewStruct $chunkReview, $advancementWcAsFloat, $correctAdvancementWCAsFloat, $segmentId = null, $requestUri = null)
     {
         $msgEmail = "<p>Wrong advancement word count found for project with ID: " . $project->id . ".</p>";
         $msgEmail .= "<p>--------------------------------</p>";
@@ -80,6 +85,10 @@ class ReviewUtils {
 
         if(null !== $segmentId) {
             $msgEmail .= "<li>SEGMENT ID: " . $segmentId . "</li>";
+        }
+
+        if(null !== $requestUri) {
+            $msgEmail .= "<li>REQUEST URI: " . $requestUri . "</li>";
         }
 
         $msgEmail .= "<li>ACTUAL SOURCE PAGE: " . $chunkReview->source_page . "</li>";
@@ -99,9 +108,11 @@ class ReviewUtils {
      * @param                   $correctAdvancementWCAsFloat
      * @param null              $segmentId
      *
+     * @param null              $requestUri
+     *
      * @return array
      */
-    private static function getArrayMessageForLogs( $project, ChunkReviewStruct $chunkReview, $advancementWcAsFloat, $correctAdvancementWCAsFloat, $segmentId = null)
+    private static function getArrayMessageForLogs( $project, ChunkReviewStruct $chunkReview, $advancementWcAsFloat, $correctAdvancementWCAsFloat, $segmentId = null, $requestUri = null)
     {
         $msgArray = [];
         $msgArray['message'] = "Wrong advancement word count found for project with ID: " . $project->id . ". Recount done.";
@@ -111,6 +122,10 @@ class ReviewUtils {
 
         if(null !== $segmentId) {
             $msgArray['payload']['SEGMENT_ID'] = $segmentId;
+        }
+
+        if(null !== $requestUri) {
+            $msgArray['payload']['REQUEST_RUI'] = $requestUri;
         }
 
         $msgArray['payload']['ACTUAL_SOURCE_PAGE'] = $chunkReview->source_page;

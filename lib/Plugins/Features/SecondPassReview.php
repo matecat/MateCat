@@ -103,7 +103,7 @@ class SecondPassReview extends BaseFeature {
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
         $segmentId    = ( isset( $options[ 'segmentId' ] ) ) ? $options[ 'segmentId' ] : null;
 
-        return ReviewUtils::formatStats( $inputStats, $chunkReviews, $segmentId );
+        return ReviewUtils::formatStats( $inputStats, $chunkReviews, [ 'segmentId' => $segmentId ] );
     }
 
     public function filterGetSegmentsResult( $data, Chunks_ChunkStruct $chunk ) {
