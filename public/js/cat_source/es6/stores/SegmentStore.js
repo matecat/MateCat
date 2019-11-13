@@ -565,6 +565,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
      * @param revisionNumber
      */
     getNextSegment(current_sid, current_fid, status, revisionNumber) {
+        let currentSegment = this.getCurrentSegment();
+        if ( !current_sid && !currentSegment) return null;
         current_sid = ( !current_sid) ? this.getCurrentSegment().sid : current_sid;
         let allStatus = {
             1: "APPROVED",
@@ -610,7 +612,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         return ( next ) ? next.sid : this.nextUntranslatedFromServer;
     },
     getPrevSegment(sid, alsoMutedSegments) {
-        sid = ( !sid) ? this.getCurrentSegment().sid : sid;
+        let currentSegment = this.getCurrentSegment();
+        if ( !sid && !currentSegment) return null;
+        sid = ( !sid ) ? this.getCurrentSegment().sid : sid;
         var index = this.getSegmentIndex(sid);
         let segment = (index > 0) ? this._segments.get(index-1).toJS() : null;
         if ( segment && !alsoMutedSegments && !segment.muted || !segment || segment && alsoMutedSegments) {
