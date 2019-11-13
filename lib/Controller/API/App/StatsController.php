@@ -55,7 +55,7 @@ class StatsController extends KleinController {
         $chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk ) ;
 
         $response = [
-            'stats' => ReviewUtils::formatStats( $job_stats, $chunk_reviews, [ 'requestUri' => $this->request->uri() ] )
+            'stats' => ReviewUtils::formatStats( $job_stats, $chunk_reviews )
         ];
 
         $this->featureSet = new FeatureSet();

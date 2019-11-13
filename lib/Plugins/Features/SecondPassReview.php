@@ -97,13 +97,19 @@ class SecondPassReview extends BaseFeature {
         return $sourcePage;
     }
 
+    /**
+     * @param $inputStats
+     * @param $options
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function filterStatsResponse( $inputStats, $options ) {
         /** @var Chunks_ChunkStruct $chunk */
         $chunk        = $options[ 'chunk' ];
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
-        $segmentId    = ( isset( $options[ 'segmentId' ] ) ) ? $options[ 'segmentId' ] : null;
 
-        return ReviewUtils::formatStats( $inputStats, $chunkReviews, [ 'segmentId' => $segmentId ] );
+        return ReviewUtils::formatStats( $inputStats, $chunkReviews );
     }
 
     public function filterGetSegmentsResult( $data, Chunks_ChunkStruct $chunk ) {
