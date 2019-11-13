@@ -339,6 +339,10 @@ class SegmentsContainer extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
     }
 
+    getSnapshotBeforeUpdate() {
+        $('#hiddenHtml section').css('display', 'block');
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
         return (!nextState.segments.equals(this.state.segments) ||
         nextState.splitGroup !== this.state.splitGroup ||
@@ -374,6 +378,7 @@ class SegmentsContainer extends React.Component {
             });
 
         }
+        $('#hiddenHtml section').css('display', 'none');
     }
 
     render() {
