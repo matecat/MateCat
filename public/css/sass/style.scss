@@ -3918,6 +3918,10 @@ body.rtl-target.tagModes.tagmode-default-extended .translation .monad.marker {
     direction: ltr;
 }
 
+.monad .marker-inside {
+    display: none;
+}
+
 .tagModeToggle,
 .autofillTag {
     padding: 4px 2px 0px 2px;

@@ -341,6 +341,7 @@ class SegmentsContainer extends React.Component {
 
     getSnapshotBeforeUpdate() {
         $('#hiddenHtml section').css('display', 'block');
+        return null;
     }
 
     shouldComponentUpdate(nextProps, nextState) {
