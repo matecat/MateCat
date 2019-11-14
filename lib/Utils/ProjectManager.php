@@ -1593,6 +1593,8 @@ class ProjectManager {
 
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
+        $this->features->run( 'postJobSplitted', $projectStructure );
+
     }
 
     /**
@@ -1607,7 +1609,6 @@ class ProjectManager {
 
         \Database::obtain()->begin();
         $this->_splitJob( $projectStructure );
-        $this->features->run( 'postJobSplitted', $projectStructure );
         $this->dbHandler->getConnection()->commit();
 
     }
