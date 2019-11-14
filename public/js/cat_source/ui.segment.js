@@ -217,6 +217,7 @@
         gotoNextSegment: function() {
             SegmentActions.gotoNextSegment();
         },
+
         gotoPreviousSegment: function() {
             var prevSeg = SegmentStore.getPrevSegment();
             if ( prevSeg ) {
