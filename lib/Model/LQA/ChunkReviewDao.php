@@ -145,6 +145,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
                 segment_translation_events ste on ste.id_segment = s.id 
                 AND ste.final_revision = 1      
                 AND ste.source_page = :source_page
+                AND ste.id_job = :id_job
         WHERE 
                 j.id = :id_job AND j.password = :password ";
 
