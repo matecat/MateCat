@@ -3,7 +3,7 @@
 namespace CommandLineTasks;
 
 use FilesStorage\S3FilesStorage;
-use SimpleS3\Components\Cache\RedisCache;
+use Matecat\SimpleS3\Components\Cache\RedisCache;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\Table;
