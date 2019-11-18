@@ -111,10 +111,10 @@ let SearchUtils = {
             });
         };
 		//Save the current segment to not lose the translation
-        var segment;
-        var segmentObj = SegmentStore.getSegmentByIdToJS(UI.currentSegmentId, UI.getSegmentFileId(UI.currentSegment));
-        var segmentIsToSave = (config.isReview && segmentObj.status.toLowerCase() === 'approved') || ( !config.isReview && segmentObj.status.toLowerCase() !== 'approved');
         try {
+            var segment;
+            var segmentObj = SegmentStore.getSegmentByIdToJS(UI.currentSegmentId, UI.getSegmentFileId(UI.currentSegment));
+            var segmentIsToSave = (config.isReview && segmentObj.status.toLowerCase() === 'approved') || ( !config.isReview && segmentObj.status.toLowerCase() !== 'approved');
             segment = UI.Segment.findAbsolute( UI.currentSegmentId );
             if ( UI.translationIsToSave( segment ) && UI.segmentIsModified(segment.id) && segmentIsToSave ) {
                 UI.saveSegment(UI.currentSegment).then(() => {
