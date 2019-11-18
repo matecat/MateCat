@@ -21,6 +21,14 @@ section {
     .readonly:hover .segment-add-inBulk{
         display: none;
     }
+    &:not(.editor):not(.muted):hover {
+        background: #d4d7dc;
+        color: #000;
+    }
+    &.segment-selected {
+        background: #c8cbd5 !important;
+        border: 1px solid #989898;
+    }
 }
 
 body.cattool {
