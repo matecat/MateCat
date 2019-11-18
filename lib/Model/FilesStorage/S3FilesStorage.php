@@ -5,9 +5,9 @@ namespace FilesStorage;
 use DirectoryIterator;
 use DomainException;
 use INIT;
+use Matecat\SimpleS3\Client;
+use Matecat\SimpleS3\Components\Cache\RedisCache;
 use RedisHandler;
-use SimpleS3\Client;
-use SimpleS3\Components\Cache\RedisCache;
 
 /**
  * Class S3FilesStorage
@@ -270,11 +270,25 @@ class S3FilesStorage extends AbstractFilesStorage {
         $datePath = $hashes[ 0 ];
         $hash     = $hashes[ 1 ];
 
-        $origPrefix  = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig';
-        $workPrefix  = $this->getCachePackageHashFolder( $hash, $lang ) . '/work';
+        $origPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/orig';
+        $workPrefix = $this->getCachePackageHashFolder( $hash, $lang ) . '/work';
+
+        // get records from S3 cache
         $origItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $origPrefix ] );
         $workItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $workPrefix ] );
         $sourceItems = array_merge( $origItems, $workItems );
+
+        // if $sourceItems is empty, try to get the records from S3, skipping the cache
+        if ( empty( $sourceItems ) ) {
+            $origItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $origPrefix, 'exclude-cache' => true ] );
+            $workItems   = $this->s3Client->getItemsInABucket( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'prefix' => $workPrefix, 'exclude-cache' => true ] );
+            $sourceItems = array_merge( $origItems, $workItems );
+        }
+
+        // if $sourceItems is still empty, return false and then throw an Exception
+        if ( empty( $sourceItems ) ) {
+            return false;
+        }
 
         $destItems = [];
         foreach ( $sourceItems as $key ) {

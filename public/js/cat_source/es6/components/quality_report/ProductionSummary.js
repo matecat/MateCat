@@ -51,14 +51,14 @@ class ProductionSummary extends React.Component {
         let approvedWords = stats.get('approved');
         let approvedWords2ndPass;
         let totalApprovedWord = 0;
-        if ( this.props.secondPassReviewEnabled && stats.has('reviews') && stats.get('reviews').get(1).get('advancement_wc') !== '0.00' ) {
+        if ( this.props.secondPassReviewEnabled && stats.has('reviews') && stats.get('reviews').get(1).get('advancement_wc') !== 0 ) {
             let approved = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 1});
             approvedWords = (approved) ? approved.get('advancement_wc') : approvedWords;
             let approved2ndPass = stats.get('reviews').find(( item ) => {return item.get('revision_number') === 2});
             approvedWords2ndPass = (approved2ndPass) ? approved2ndPass.get('advancement_wc') : null;
-            totalApprovedWord += parseFloat(approvedWords2ndPass);
+            totalApprovedWord += approvedWords2ndPass;
         }
-        totalApprovedWord += parseFloat(approvedWords);
+        totalApprovedWord += approvedWords;
         return <div className="qr-production shadow-1">
             <div className="qr-effort job-id">ID: {this.props.jobInfo.get('id')}</div>
             <div className="qr-effort source-to-target">

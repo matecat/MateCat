@@ -346,6 +346,7 @@ class Filter {
         $channel->addLast( new RemoveDangerousChars() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
+        $channel->addLast( new LtGtEncode() );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer0ToRawXliff', $channel );
 

@@ -20,10 +20,13 @@ use Jobs_JobDao;
 use Jobs_JobStruct;
 use Outsource\ConfirmationDao;
 use Projects_ProjectDao;
+use TransactionableTrait;
 use Users_UserStruct;
 use Utils;
 
 class TranslatorsModel {
+
+    use TransactionableTrait;
 
     /**
      * @var Users_UserStruct
@@ -50,6 +53,16 @@ class TranslatorsModel {
     protected $id_job;
     protected $email;
     protected $job_password;
+
+    /**
+     * @var \Projects_ProjectStruct
+     */
+    protected $project;
+
+    /**
+     * @var \FeatureSet
+     */
+    protected $featureSet;
 
     /**
      * Override the Job Password from Outside
@@ -125,6 +138,9 @@ class TranslatorsModel {
 
         $this->id_job       = $jStruct->id;
         $this->job_password = $jStruct->password;
+
+        $this->project = $this->jStruct->getProject( 60 * 60 );
+        $this->featureSet = $this->project->getFeatures();
 
     }
 
@@ -258,9 +274,14 @@ class TranslatorsModel {
             $newPassword = CatUtils::generate_password();
         }
 
+        $oldPassword = $this->jStruct->password;
+
+        $this->openTransaction();
         $jobDao = new Jobs_JobDao();
-        $jobDao->destroyCache( $this->jStruct );
         $jobDao->changePassword( $this->jStruct, $newPassword );
+        $jobDao->destroyCache( $this->jStruct );
+        $this->featureSet->run( 'job_password_changed', $this->jStruct, $oldPassword );
+        $this->commitTransaction();
 
     }
 

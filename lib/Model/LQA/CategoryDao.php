@@ -106,7 +106,7 @@ class CategoryDao extends \DataAccess_AbstractDao {
                 $out[ $row['id'] ]['subcategories'] = array();
 
                 $out[ $row['id'] ]['label'] = $row['label'];
-                $out[ $row['id'] ]['id'] = $row['id'];
+                $out[ $row['id'] ]['id'] = (int)$row['id'];
                 $out[ $row['id'] ]['options'] = json_decode( $row['options'] );
                 $out[ $row['id'] ]['severities'] = json_decode( $row['severities'], true );
 

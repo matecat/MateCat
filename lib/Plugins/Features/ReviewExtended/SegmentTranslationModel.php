@@ -82,10 +82,10 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
          * 1. we are moving up entering a reviewed state.
          * 2. we are moving up from a reviewed state to another reviewed state
          *
-         * 3. we are moving down exiting a reviwed state
+         * 3. we are moving down exiting a reviewed state
          * 4. we are moving down from a reviewed state to another
          *
-         * 5. we are not changing the reviwed state.
+         * 5. we are not changing the reviewed state.
          * 6. we are not changing the translated state.
          *
          */
@@ -94,7 +94,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         $originSourcePage      = $this->_model->getEventModel()->getOriginSourcePage();
         $destinationSourcePage = $this->_model->getEventModel()->getDestinationSourcePage();
 
-        // popuplate structs for current segment and propagations
+        // populate structs for current segment and propagations
         foreach ( $this->_chunkReviews as $chunkReview ) {
 
             if ( $this->_model->isEnteringReviewedState() && $destinationSourcePage == $chunkReview->source_page ) {
@@ -120,7 +120,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                 if ( $chunkReview->source_page == $originSourcePage ) {
                     $chunkReview->advancement_wc -= $this->advancementWordCount();
                 }
-            } // TODO: in the following two cases we shuold considere if the segment is changed or not.
+            } // TODO: in the following two cases we should consider if the segment is changed or not.
             elseif ( $this->_model->isBeingLowerReviewed() ) {
                 // whenever a revision is lower reviewed we expect the upper revisions to be invalidated.
                 // the reviewed words count is removed from the upper one and moved to the lower one.
@@ -306,12 +306,10 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
 
     protected function advancementWordCount() {
         if ( $this->_model->getEventModel()->getOldTranslation()->isICE() ) {
-            $wc = $this->_model->getSegmentStruct()->raw_word_count;
-        } else {
-            $wc = $this->_model->getOldTranslation()->eq_word_count;
+            return $this->_model->getSegmentStruct()->raw_word_count;
         }
 
-        return $wc;
+        return $this->_model->getOldTranslation()->eq_word_count;
     }
 
     /**

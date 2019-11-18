@@ -75,6 +75,7 @@ module.exports = keyMirror({
     OPEN_SEGMENT: null,
     CLOSE_SEGMENT: null,
     SCROLL_TO_SEGMENT: null,
+    SCROLL_TO_SELECTED_SEGMENT: null,
     OPEN_SIDE: null,
     CLOSE_SIDE: null,
     OPEN_COMMENTS: null,
@@ -91,5 +92,6 @@ module.exports = keyMirror({
     UNDO_TEXT: null,
     REDO_TEXT: null,
     FOCUS_EDITAREA: null,
-    FILL_TAGS_IN_TARGET: null
+    FILL_TAGS_IN_TARGET: null,
+    SELECT_SEGMENT: null
 });

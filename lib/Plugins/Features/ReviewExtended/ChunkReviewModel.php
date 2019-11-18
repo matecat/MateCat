@@ -9,8 +9,8 @@
 
 namespace Features\ReviewExtended;
 
+use Chunks_ChunkStruct;
 use Features\ReviewExtended\Model\ChunkReviewDao;
-use Features\SecondPassReview;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -25,9 +25,16 @@ class ChunkReviewModel implements IChunkReviewModel {
     protected $penalty_points;
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var Chunks_ChunkStruct
      */
     protected $chunk;
+
+    /**
+     * @return Chunks_ChunkStruct
+     */
+    public function getChunk(){
+        return $this->chunk;
+    }
 
     public function __construct( ChunkReviewStruct $chunk_review ) {
         $this->chunk_review = $chunk_review;
@@ -89,6 +96,7 @@ class ChunkReviewModel implements IChunkReviewModel {
      * @throws \Exception
      */
     public function updatePassFailResult( Projects_ProjectStruct $project ) {
+
         $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit() );
 
         $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, [

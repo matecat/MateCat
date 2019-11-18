@@ -10,6 +10,7 @@
 namespace AsyncTasks\Workers;
 
 
+use PDOException;
 use ProjectManager;
 use ProjectQueue\Queue;
 use RecursiveArrayObject;
@@ -24,6 +25,12 @@ class ProjectCreationWorker extends AbstractWorker {
 
     const PROJECT_HASH = 'project_queue:%u';
 
+    /**
+     * @param AbstractElement $queueElement
+     *
+     * @return mixed|void
+     * @throws EndQueueException
+     */
     public function process( AbstractElement $queueElement ) {
 
         /**
@@ -31,7 +38,13 @@ class ProjectCreationWorker extends AbstractWorker {
          */
         $this->_checkForReQueueEnd( $queueElement );
         $this->_checkDatabaseConnection();
-        $this->_createProject( $queueElement );
+
+        try {
+            $this->_createProject( $queueElement );
+        } catch( PDOException $e ){
+            throw new EndQueueException( $e );
+        }
+
         $this->_publishResults();
 
     }

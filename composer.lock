@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.114.1",
+            "version": "3.117.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "94d8df3d2de310df8475d76a729c88c6c1348be4"
+                "reference": "6951cd08326d939f1fd1097a490fccb9751a59d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/94d8df3d2de310df8475d76a729c88c6c1348be4",
-                "reference": "94d8df3d2de310df8475d76a729c88c6c1348be4",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6951cd08326d939f1fd1097a490fccb9751a59d7",
+                "reference": "6951cd08326d939f1fd1097a490fccb9751a59d7",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-11-06T23:05:00+00:00"
+            "time": "2019-11-14T19:27:06+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -437,16 +437,16 @@
         },
         {
             "name": "matecat/simple-s3",
-            "version": "v1.5.5",
+            "version": "v1.5.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/simple-s3.git",
-                "reference": "e509cf085b6c50b8009e7d956a2b5efd2db2bafb"
+                "reference": "62f409155dbcf42c34fed6abe566e8f6a4ab986e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/e509cf085b6c50b8009e7d956a2b5efd2db2bafb",
-                "reference": "e509cf085b6c50b8009e7d956a2b5efd2db2bafb",
+                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/62f409155dbcf42c34fed6abe566e8f6a4ab986e",
+                "reference": "62f409155dbcf42c34fed6abe566e8f6a4ab986e",
                 "shasum": ""
             },
             "require": {
@@ -467,7 +467,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "SimpleS3\\": "src/"
+                    "Matecat\\SimpleS3\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -489,7 +489,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-11-07T16:40:54+00:00"
+            "time": "2019-11-15T10:14:34+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1000,7 +1000,7 @@
         },
         {
             "name": "symfony/console",
-            "version": "v2.8.50",
+            "version": "v2.8.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
@@ -1118,7 +1118,7 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v2.8.50",
+            "version": "v2.8.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
@@ -2414,7 +2414,7 @@
         },
         {
             "name": "symfony/config",
-            "version": "v2.8.50",
+            "version": "v2.8.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
@@ -2471,7 +2471,7 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.8.50",
+            "version": "v2.8.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",

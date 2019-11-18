@@ -705,7 +705,7 @@ section {
     //height: 100%;
     /*-webkit-transition: all 100ms ease-in;*/
     /*transition: all 100ms ease-in;*/
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    box-shadow: 0 0 0 #e0e0e0, 0 0 0px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 /*projectbar*/
@@ -1324,11 +1324,6 @@ body section:not(.editor) {
 section:not(.editor) .text:first-child {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-}
-
-body.cattool section:not(.editor):not(.muted):hover {
-    background: #d4d7dc !important;
-    color: #000;
 }
 
 /*body.cattool .editor .text:hover {

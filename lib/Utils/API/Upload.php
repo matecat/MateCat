@@ -255,9 +255,9 @@ class Upload {
         return '_(' . $index . ')' . $ext;
     }
 
-    protected function upCountName( $name ) {
+    protected static function upCountName( $name ) {
         return preg_replace_callback(
-                '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ $this, 'upCountNameCallback' ], $name, 1
+                '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ '\Upload', 'upCountNameCallback' ], $name, 1
         );
     }
 
@@ -279,7 +279,7 @@ class Upload {
         $string = filter_var( $string, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ) );
 
         while ( is_file( $this->dirUpload . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
-            $string = $this->upCountName( $string );
+            $string = static::upCountName( $string );
         }
 
         return $string;

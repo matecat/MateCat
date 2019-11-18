@@ -132,6 +132,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         notes: segment.notes,
                         modified: false,
                         opened: false,
+                        selected: false,
                         id_file: segment.id_file,
                         originalSource: segment.segment,
                         firstOfSplit: (i===0),
@@ -150,6 +151,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.original_sid = segment.sid;
                 segment.modified = false;
                 segment.opened = false;
+                segment.selected = false;
                 segment.search = (inSearch) ? self.search.params : null;
                 segment.propagable = (segment.repetitions_in_chunk !== "1");
                 newSegments.push(this);
@@ -180,11 +182,56 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
 
     openSegment(sid) {
         var index = this.getSegmentIndex(sid);
-        this.closeSegments()
+        this.closeSegments();
         this._segments = this._segments.setIn([index, 'opened'], true);
+    },
+    selectNextSegment() {
+        let selectedSegment = this._segments.find((segment) => {
+            return segment.get('selected') === true
+        });
+        if ( !selectedSegment ) {
+            selectedSegment = this.getCurrentSegment();
+        } else {
+            selectedSegment = selectedSegment.toJS();
+        }
+        let next = this.getNextSegment(selectedSegment.sid);
+        if ( next ) {
+            var index = this.getSegmentIndex(next.sid);
+            this._segments = this._segments.map(segment => segment.set('selected', false));
+            this._segments = this._segments.setIn([index, 'selected'], true);
+            return next.sid;
+        }
+
+    },
+    selectPrevSegment() {
+        let selectedSegment = this._segments.find((segment) => {
+            return segment.get('selected') === true
+        });
+        if ( !selectedSegment ) {
+            selectedSegment = this.getCurrentSegment();
+        } else {
+            selectedSegment = selectedSegment.toJS();
+        }
+        let prev = this.getPrevSegment(selectedSegment.sid);
+        if ( prev ) {
+            var index = this.getSegmentIndex(prev.sid);
+            this._segments = this._segments.map(segment => segment.set('selected', false));
+            this._segments = this._segments.setIn([index, 'selected'], true);
+            return prev.sid;
+        }
+    },
+    getSelectedSegmentId( ) {
+        let selectedSegment = this._segments.find((segment) => {
+            return segment.get('selected') === true
+        });
+        if ( selectedSegment ) {
+            return selectedSegment.get('sid');
+        }
+        return null;
     },
     closeSegments() {
         this._segments = this._segments.map(segment => segment.set('opened', false));
+        this._segments = this._segments.map(segment => segment.set('selected', false));
     },
     removeSplit(oldSid, newSegments, fid, splitGroup) {
         var self = this;
@@ -748,6 +795,18 @@ AppDispatcher.register(function (action) {
             SegmentStore.openSegment(action.sid);
             SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
             // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
+            break;
+        case SegmentConstants.SELECT_SEGMENT:
+            let idToScroll;
+            if ( action.direction === 'next' ) {
+                idToScroll = SegmentStore.selectNextSegment(action.sid);
+            } else {
+                idToScroll = SegmentStore.selectPrevSegment(action.sid);
+            }
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            if ( idToScroll ) {
+                SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, idToScroll);
+            }
             break;
         case SegmentConstants.CLOSE_SEGMENT:
             SegmentStore.closeSegments(action.sid);

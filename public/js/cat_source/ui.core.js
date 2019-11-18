@@ -54,6 +54,10 @@ var UI = {
         $segment = $(editarea_or_segment).closest('section');
         segment = SegmentStore.getSegmentByIdToJS( UI.getSegmentId($segment) );
 
+        if ( !$segment.length ) {
+            return;
+        }
+
 		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
                                                       // seems to be the previous current segment
 

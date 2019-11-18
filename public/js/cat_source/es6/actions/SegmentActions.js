@@ -20,7 +20,7 @@ import OfflineUtils from "../utils/offlineUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
 
-var SegmentActions = {
+const SegmentActions = {
     /********* SEGMENTS *********/
     /**
      * @param segments
@@ -303,6 +303,26 @@ var SegmentActions = {
             matches: matches,
             type: type
         });
+    },
+    selectNextSegment: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SELECT_SEGMENT,
+            sid: sid,
+            direction: 'next'
+        });
+    },
+    selectPrevSegment: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SELECT_SEGMENT,
+            sid: sid,
+            direction: 'prev'
+        });
+    },
+    openSelectedSegment: function( ) {
+        let sid = SegmentStore.getSelectedSegmentId();
+        if ( sid ) {
+            this.openSegment( sid );
+        }
     },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
