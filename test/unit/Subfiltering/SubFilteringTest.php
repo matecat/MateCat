@@ -129,7 +129,7 @@ class SubFilteringTest extends AbstractTest {
         $tmpLayer2 = ( new LtGtDecode() )->transform( $segmentL2 );
         $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $tmpLayer2 ) );
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
-        $this->assertEquals( $segmentL1, $this->filtestHtmlInXML_2ter->fromLayer2ToLayer1( $tmpLayer2 ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $tmpLayer2 ) );
 
     }
 
@@ -181,7 +181,7 @@ class SubFilteringTest extends AbstractTest {
         $this->assertEquals($segmentL2, $expectedL2);
         $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
 
-        $string_from_UI = 'The energetically averaged emission sound level of the &lt;tag&gt; " pressure load cycling and bursting test stand##$_0D$####$_0D$##is &lt; 70 dB(A).';
+        $string_from_UI = 'The energetically averaged emission sound level of the pressure load cycling and bursting test stand##$_0D$####$_0D$##is &lt; 70 dB(A).';
 
         $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
@@ -325,6 +325,23 @@ class SubFilteringTest extends AbstractTest {
         $channel->addLast( new \SubFiltering\Filters\TwigToPh() );
         $seg_transformed = $channel->transform( $segment );
         $this->assertEquals( $expected, $seg_transformed );
+    }
+
+    public function testTwigWithPercents(){
+        $db_segment = 'Dear {{%%customer.first_name%%}}, This is %{%%agent.alias%%} with Airbnb.';
+        $segment_from_UI = 'Dear <ph id="mtc_1" equiv-text="base64:e3slJWN1c3RvbWVyLmZpcnN0X25hbWUlJX19"/>, This is <ph id="mtc_2" equiv-text="base64:JXslJWFnZW50LmFsaWFzJSV9"/> with Airbnb.';
+        $segment_to_UI = 'Dear &lt;ph id="mtc_1" equiv-text="base64:e3slJWN1c3RvbWVyLmZpcnN0X25hbWUlJX19"/&gt;, This is &lt;ph id="mtc_2" equiv-text="base64:JXslJWFnZW50LmFsaWFzJSV9"/&gt; with Airbnb.';
+
+        $segmentL2 = $this->filter->fromLayer0ToLayer2( $db_segment );
+
+        $this->assertEquals( $segment_to_UI, $segmentL2 );
+
+        $this->assertEquals( $db_segment, $this->filter->fromLayer1ToLayer0( $segment_from_UI ) );
+
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segment_from_UI ) );
+
+        $this->assertEquals( $segment_from_UI, $this->filter->fromLayer0ToLayer1( $db_segment ) );
+
     }
 
 }

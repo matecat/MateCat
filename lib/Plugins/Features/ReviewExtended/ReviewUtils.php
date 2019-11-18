@@ -6,7 +6,6 @@
  * Time: 12:30
  */
 
-
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
@@ -16,27 +15,21 @@ use LQA\ModelStruct;
 
 class ReviewUtils {
 
+    /**
+     * @param array $statsArray
+     * @param array $chunkReviews
+     *
+     * @return array
+     * @throws \Exception
+     */
     public static function formatStats( $statsArray, $chunkReviews ) {
         $statsArray [ 'revises' ] = [];
 
         /** @var ChunkReviewStruct $chunkReview */
         foreach ( $chunkReviews as $chunkReview ) {
-
-            // recount if advancement_wc < 0
-            if( $chunkReview->advancement_wc < 0 ){
-
-                /** @var \Projects_ProjectStruct $project */
-                $project = $chunkReview->getChunk()->getProject();
-                $revisionFactory = \RevisionFactory::initFromProject( $project );
-                $model = $revisionFactory->getChunkReviewModel( $chunkReview ) ;
-                $model->recountAndUpdatePassFailResult( $project );
-
-                \Log::doJsonLog("Negative advancement_wc found for project with ID: ".$project->id.". WC recount done.");
-            }
-
             $statsArray[ 'revises' ][] = [
                     'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunkReview->source_page ),
-                    'advancement_wc'  => $chunkReview->advancement_wc
+                    'advancement_wc'  => (float)$chunkReview->advancement_wc
             ];
         }
 
@@ -45,31 +38,30 @@ class ReviewUtils {
 
     /**
      *
-     * @param $number
+     * @param null $number
      *
      * @return int
      */
     public static function revisionNumberToSourcePage( $number = null ) {
-        if ( ! empty( $number ) ) {
-            return $number + 1;
-        }
-
-        return 1;
+        return ( !empty( $number ) ) ? $number + 1 : 1;
     }
 
     /**
-     * @param $number
+     * @param int $number
      *
      * @return int|null
      */
     public static function sourcePageToRevisionNumber( $number ) {
-        if ( $number - 1 < 1 ) {
-            return null;
-        }
-
-        return $number - 1;
+        return ( ( $number - 1 ) < 1 ) ? null : $number - 1;
     }
 
+    /**
+     * @param ModelStruct $lqaModel
+     * @param string      $sourcePage
+     *
+     * @return array|mixed
+     * @throws \Exception
+     */
     public static function filterLQAModelLimit( ModelStruct $lqaModel, $sourcePage ) {
         $limit = $lqaModel->getLimit();
 
@@ -78,9 +70,9 @@ class ReviewUtils {
              * Limit array index equals to $source_page -2.
              */
             return isset( $limit[ $sourcePage - 2 ] ) ? $limit[ $sourcePage - 2 ] : end( $limit );
-        } else {
-            return $limit;
         }
+
+        return $limit;
     }
 
     /**
@@ -96,5 +88,4 @@ class ReviewUtils {
 
         return $validRevisionNumbers;
     }
-
 }

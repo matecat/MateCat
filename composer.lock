@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.112.2",
+            "version": "3.117.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "0d7a3ecb5dca10d1872ee5106cb154cbef52cf1c"
+                "reference": "6951cd08326d939f1fd1097a490fccb9751a59d7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/0d7a3ecb5dca10d1872ee5106cb154cbef52cf1c",
-                "reference": "0d7a3ecb5dca10d1872ee5106cb154cbef52cf1c",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6951cd08326d939f1fd1097a490fccb9751a59d7",
+                "reference": "6951cd08326d939f1fd1097a490fccb9751a59d7",
                 "shasum": ""
             },
             "require": {
@@ -87,7 +87,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-09-17T18:07:57+00:00"
+            "time": "2019-11-14T19:27:06+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -193,27 +193,28 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "6.3.3",
+            "version": "6.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "407b0cb880ace85c9b63c5f9551db498cb2d50ba"
+                "reference": "0895c932405407fd3a7368b6910c09a24d26db11"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/407b0cb880ace85c9b63c5f9551db498cb2d50ba",
-                "reference": "407b0cb880ace85c9b63c5f9551db498cb2d50ba",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/0895c932405407fd3a7368b6910c09a24d26db11",
+                "reference": "0895c932405407fd3a7368b6910c09a24d26db11",
                 "shasum": ""
             },
             "require": {
+                "ext-json": "*",
                 "guzzlehttp/promises": "^1.0",
-                "guzzlehttp/psr7": "^1.4",
+                "guzzlehttp/psr7": "^1.6.1",
                 "php": ">=5.5"
             },
             "require-dev": {
                 "ext-curl": "*",
                 "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.4 || ^7.0",
-                "psr/log": "^1.0"
+                "psr/log": "^1.1"
             },
             "suggest": {
                 "psr/log": "Required for using the Log middleware"
@@ -225,12 +226,12 @@
                 }
             },
             "autoload": {
-                "files": [
-                    "src/functions_include.php"
-                ],
                 "psr-4": {
                     "GuzzleHttp\\": "src/"
-                }
+                },
+                "files": [
+                    "src/functions_include.php"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -254,7 +255,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2018-04-22T15:46:56+00:00"
+            "time": "2019-10-23T15:58:00+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -436,16 +437,16 @@
         },
         {
             "name": "matecat/simple-s3",
-            "version": "v1.5.3",
+            "version": "v1.5.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/simple-s3.git",
-                "reference": "ec410aefb274f3c4298580eead3c4a551fd2707c"
+                "reference": "62f409155dbcf42c34fed6abe566e8f6a4ab986e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/ec410aefb274f3c4298580eead3c4a551fd2707c",
-                "reference": "ec410aefb274f3c4298580eead3c4a551fd2707c",
+                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/62f409155dbcf42c34fed6abe566e8f6a4ab986e",
+                "reference": "62f409155dbcf42c34fed6abe566e8f6a4ab986e",
                 "shasum": ""
             },
             "require": {
@@ -466,7 +467,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "SimpleS3\\": "src/"
+                    "Matecat\\SimpleS3\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -481,27 +482,27 @@
                 }
             ],
             "description": "Simple S3 Client",
-            "homepage": "https://github.com/mauretto78/simple-s3",
+            "homepage": "https://github.com/matecat/simple-s3",
             "keywords": [
                 "aws",
                 "php",
                 "s3",
                 "sdk"
             ],
-            "time": "2019-07-01T09:47:31+00:00"
+            "time": "2019-11-15T10:14:34+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
-            "version": "v1.0.7",
+            "version": "v1.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/whole-text-finder.git",
-                "reference": "9bb5ede0033bca0a888633f4b303b157970be69d"
+                "reference": "9718ee69fbb2e91fc06504bcc2ab634cfdaf5370"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/9bb5ede0033bca0a888633f4b303b157970be69d",
-                "reference": "9bb5ede0033bca0a888633f4b303b157970be69d",
+                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/9718ee69fbb2e91fc06504bcc2ab634cfdaf5370",
+                "reference": "9718ee69fbb2e91fc06504bcc2ab634cfdaf5370",
                 "shasum": ""
             },
             "require": {
@@ -537,7 +538,7 @@
                 "search",
                 "text"
             ],
-            "time": "2019-09-13T10:50:28+00:00"
+            "time": "2019-10-14T13:30:41+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -912,16 +913,16 @@
         },
         {
             "name": "psr/log",
-            "version": "1.1.0",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd"
+                "reference": "446d54b4cb6bf489fc9d75f55843658e6f25d801"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
-                "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/446d54b4cb6bf489fc9d75f55843658e6f25d801",
+                "reference": "446d54b4cb6bf489fc9d75f55843658e6f25d801",
                 "shasum": ""
             },
             "require": {
@@ -930,7 +931,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -955,7 +956,7 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2018-11-20T15:27:04+00:00"
+            "time": "2019-11-01T11:05:21+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -999,7 +1000,7 @@
         },
         {
             "name": "symfony/console",
-            "version": "v2.8.50",
+            "version": "v2.8.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
@@ -1117,7 +1118,7 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v2.8.50",
+            "version": "v2.8.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
@@ -1340,16 +1341,16 @@
         },
         {
             "name": "onelogin/php-saml",
-            "version": "2.17.0",
+            "version": "2.17.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/onelogin/php-saml.git",
-                "reference": "2aaa5aaa9aa6d6887fbd15be0013dd7fac793fc9"
+                "reference": "aa7e0f24cf287d44f618f7634b8464a3b4645472"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/2aaa5aaa9aa6d6887fbd15be0013dd7fac793fc9",
-                "reference": "2aaa5aaa9aa6d6887fbd15be0013dd7fac793fc9",
+                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/aa7e0f24cf287d44f618f7634b8464a3b4645472",
+                "reference": "aa7e0f24cf287d44f618f7634b8464a3b4645472",
                 "shasum": ""
             },
             "require": {
@@ -1389,7 +1390,7 @@
                 "onelogin",
                 "saml"
             ],
-            "time": "2019-09-11T13:55:25+00:00"
+            "time": "2019-11-06T16:32:50+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -1539,22 +1540,22 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "1.8.1",
+            "version": "1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "1927e75f4ed19131ec9bcc3b002e07fb1173ee76"
+                "reference": "f6811d96d97bdf400077a0cc100ae56aa32b9203"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/1927e75f4ed19131ec9bcc3b002e07fb1173ee76",
-                "reference": "1927e75f4ed19131ec9bcc3b002e07fb1173ee76",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/f6811d96d97bdf400077a0cc100ae56aa32b9203",
+                "reference": "f6811d96d97bdf400077a0cc100ae56aa32b9203",
                 "shasum": ""
             },
             "require": {
                 "doctrine/instantiator": "^1.0.2",
                 "php": "^5.3|^7.0",
-                "phpdocumentor/reflection-docblock": "^2.0|^3.0.2|^4.0",
+                "phpdocumentor/reflection-docblock": "^2.0|^3.0.2|^4.0|^5.0",
                 "sebastian/comparator": "^1.1|^2.0|^3.0",
                 "sebastian/recursion-context": "^1.0|^2.0|^3.0"
             },
@@ -1598,7 +1599,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2019-06-13T12:50:23+00:00"
+            "time": "2019-10-03T11:07:50+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -2413,7 +2414,7 @@
         },
         {
             "name": "symfony/config",
-            "version": "v2.8.50",
+            "version": "v2.8.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
@@ -2470,7 +2471,7 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v2.8.50",
+            "version": "v2.8.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",

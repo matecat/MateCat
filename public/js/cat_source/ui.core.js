@@ -245,6 +245,8 @@ var UI = {
     },
     continueCopyAllSources: function () {
         this.consecutiveCopySourceNum = [];
+        UI.unmountSegments();
+        $('#outer').addClass('loading');
         APP.doRequest({
             data: {
                 action: 'copyAllSource2Target',
@@ -260,6 +262,9 @@ var UI = {
                     position: "bl"
                 };
                 APP.addNotification(notification);
+                UI.render({
+                    segmentToOpen: UI.currentSegmentId
+                });
             },
             success: function(d) {
                 if(d.errors.length) {

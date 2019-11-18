@@ -85,6 +85,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     protected $is_review;
 
+
+    protected $_sourcePage;
+
     /**
      *
      * @return array
@@ -275,6 +278,14 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public function setIsReview($is_review){
         $this->is_review = $is_review;
         return $this;
+    }
+
+    public function setSourcePage( $_revisionNumber ){
+        $this->_sourcePage = $_revisionNumber;
+    }
+
+    public function getSourcePage(){
+        return ( $this->is_review  && $this->_sourcePage > 2 ) ? $this->_sourcePage : 2;
     }
 
     public function getIsReview(){
