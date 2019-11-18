@@ -616,7 +616,7 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk ] );
+        $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );
     }

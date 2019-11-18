@@ -18,19 +18,19 @@
  */
 trait TransactionableTrait {
 
-    private $__transactionableStarted = false ;
+    private $__transactionStarted = false ;
 
     protected function openTransaction() {
         if ( ! Database::obtain()->getConnection()->inTransaction() ) {
             Database::obtain()->begin();
-            $this->__transactionableStarted = true ;
+            $this->__transactionStarted = true ;
         }
     }
 
     protected function commitTransaction() {
-        if ( $this->__transactionableStarted ) {
+        if ( $this->__transactionStarted ) {
             Database::obtain()->commit() ;
-            $this->__transactionableStarted = false;
+            $this->__transactionStarted = false;
         }
     }
 
@@ -38,9 +38,9 @@ trait TransactionableTrait {
      * TODO: not sure this is actually sane
      */
     protected function rollbackTransaction() {
-        if ( $this->__transactionableStarted ) {
+        if ( $this->__transactionStarted ) {
             Database::obtain()->rollback();
-            $this->__transactionableStarted = false;
+            $this->__transactionStarted = false;
         }
     }
 

@@ -11,11 +11,10 @@ namespace Features;
 use BasicFeatureStruct;
 use catController;
 use Chunks_ChunkStruct;
-use Constants;
 use Exceptions\NotFoundException;
 use Features;
-use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
+use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Features\SecondPassReview\Model\ChunkReviewModel;
 use Features\TranslationVersions\Model\SegmentTranslationEventDao;
 use Klein\Klein;
@@ -61,7 +60,7 @@ class SecondPassReview extends BaseFeature {
      * @throws \Exception
      */
     public function afterTMAnalysisCloseProject( $project_id, $_analyzed_report ) {
-        $project   = Projects_ProjectDao::findById( $project_id, 300 );
+        $project      = Projects_ProjectDao::findById( $project_id, 300 );
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviewsForList( $project->getChunks() );
         foreach ( $chunkReviews as $chunkReview ) {
             $model = new ChunkReviewModel( $chunkReview );
@@ -98,6 +97,13 @@ class SecondPassReview extends BaseFeature {
         return $sourcePage;
     }
 
+    /**
+     * @param $inputStats
+     * @param $options
+     *
+     * @return array
+     * @throws \Exception
+     */
     public function filterStatsResponse( $inputStats, $options ) {
         /** @var Chunks_ChunkStruct $chunk */
         $chunk        = $options[ 'chunk' ];

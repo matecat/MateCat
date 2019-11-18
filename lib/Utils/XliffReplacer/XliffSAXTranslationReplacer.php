@@ -66,6 +66,12 @@ class XliffSAXTranslationReplacer {
 
     }
 
+    /**
+     * @param string $originalXliffFilename
+     * @param null $outputFile
+     *
+     * @throws \Exception
+     */
     public function setFileDescriptors( $originalXliffFilename, $outputFile = null ){
 
         if ( is_resource( $outputFile ) ) {
@@ -79,25 +85,19 @@ class XliffSAXTranslationReplacer {
         $xmlLink    = $originalXliffFilename;
         $streamArgs = null;
 
+        // if Filestorage is on S3, download the file on a temp dir
         if ( AbstractFilesStorage::isOnS3() ) {
             $s3Client = S3FilesStorage::getStaticS3Client();
-            $xmlLink  = $s3Client->getPublicItemLink( ['bucket' => S3FilesStorage::getFilesStorageBucket(), 'key' => $originalXliffFilename] );
-
-            if ( false === INIT::$AWS_SSL_VERIFY ) {
-                $streamArgs =
-                        [
-                                'ssl' => [
-                                        'verify_peer'      => INIT::$AWS_SSL_VERIFY,
-                                        'verify_peer_name' => INIT::$AWS_SSL_VERIFY
-                                ]
-                        ];
-            }
+            $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
+            $params[ 'key' ]     = $originalXliffFilename;
+            $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $outputFile, PATHINFO_BASENAME );
+            $s3Client->downloadItem( $params );
+            $xmlLink = $params[ 'save_as' ];
         }
 
         if ( !( $this->originalFP = fopen( $xmlLink, "r", false, stream_context_create( $streamArgs ) ) ) ) {
             die( "could not open XML input" );
         }
-
     }
 
     public function __destruct() {
@@ -114,6 +114,11 @@ class XliffSAXTranslationReplacer {
         $this->sourceInTarget = $emptyTarget;
     }
 
+    /**
+     * @param FeatureSet|null $featureSet
+     *
+     * @throws \Exception
+     */
     public function replaceTranslation( FeatureSet $featureSet = null ) {
 
         if ( $featureSet == null ) {
@@ -199,11 +204,18 @@ class XliffSAXTranslationReplacer {
         //close parser
         xml_parser_free( $xml_parser );
 
+        // if Filestorage is on S3, delete the temporary file
+        if(AbstractFilesStorage::isOnS3()){
+            @unlink(stream_get_meta_data($this->originalFP)['uri']);
+        }
     }
 
-
-    /*
-       callback for tag open event
+    /**
+     * Callback for tag open event
+     *
+     * @param $parser
+     * @param $name
+     * @param $attr
      */
     protected function tagOpen( $parser, $name, $attr ) {
 

@@ -14,7 +14,6 @@ use ConversionHandler;
 use Exception;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
-use FilesStorage\FsFilesStorage;
 use FilesStorage\S3FilesStorage;
 use INIT;
 use Log;
@@ -94,27 +93,60 @@ class Session {
         return new self();
     }
 
+    /**
+     * @param $newSourceLang
+     * @param $originalSourceLang
+     *
+     * @return bool
+     * @throws \Exception
+     */
     public function changeSourceLanguage( $newSourceLang, $originalSourceLang ) {
         $fileList = $this->session[ self::FILE_LIST ];
         $success  = true;
+
         foreach ( $fileList as $fileId => $file ) {
+
             if ( $success ) {
+
                 $fileHash = $file[ self::FILE_HASH ];
 
                 if ( $newSourceLang !== $originalSourceLang ) {
 
                     $originalCacheFileDir = $this->getCacheFileDir( $file, $originalSourceLang );
-
                     $newCacheFileDir = $this->getCacheFileDir( $file, $newSourceLang );
 
-                    $renameDirSuccess = rename( $originalCacheFileDir, $newCacheFileDir );
+                    if(AbstractFilesStorage::isOnS3()){
 
-                    $uploadDir = $this->getUploadDir();
+                        // copy orig and cache folder
+                        $s3Client = S3FilesStorage::getStaticS3Client();
+                        $copyOrig = $s3Client->copyFolder([
+                                'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                                'source_folder' => $originalCacheFileDir.'/orig',
+                                'target_folder' => $newCacheFileDir.'/orig',
+                                'delete_source' => true,
+                        ]);
 
-                    $originalUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $originalSourceLang;
-                    $newUploadRefFile      = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $newSourceLang;
+                        $copyWork = $s3Client->copyFolder([
+                                'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
+                                'source_folder' => $originalCacheFileDir.'/work',
+                                'target_folder' => $newCacheFileDir.'/work',
+                                'delete_source' => true,
+                        ]);
 
-                    $renameFileRefSuccess = rename( $originalUploadRefFile, $newUploadRefFile );
+                        if($copyOrig and $copyWork){
+                            $renameDirSuccess = true;
+                            $renameFileRefSuccess = true;
+                        }
+                    } else {
+                        $renameDirSuccess = rename( $originalCacheFileDir, $newCacheFileDir );
+
+                        $uploadDir = $this->getUploadDir();
+
+                        $originalUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $originalSourceLang;
+                        $newUploadRefFile      = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $newSourceLang;
+
+                        $renameFileRefSuccess = rename( $originalUploadRefFile, $newUploadRefFile );
+                    }
 
                     if ( !$renameDirSuccess || !$renameFileRefSuccess ) {
                         Log::doJsonLog( 'Error when moving cache file dir to ' . $newCacheFileDir );
