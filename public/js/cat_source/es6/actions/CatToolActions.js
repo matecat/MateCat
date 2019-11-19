@@ -1,4 +1,4 @@
-import AppDispatcher from '../dispatcher/AppDispatcher';
+import AppDispatcher from '../stores/AppDispatcher';
 import CattolConstants from '../constants/CatToolConstants';
 import Notifications from '../sse/sse';
 import Review_QualityReportButton from '../components/review/QualityReportButton';

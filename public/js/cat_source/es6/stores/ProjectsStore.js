@@ -2,7 +2,7 @@
  * Projects Store
  */
 
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from './AppDispatcher';
 import {EventEmitter} from 'events';
 import ManageConstants  from '../constants/ManageConstants';
 import assign  from 'object-assign';

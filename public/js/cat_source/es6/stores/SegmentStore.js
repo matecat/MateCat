@@ -31,7 +31,7 @@
  }
  */
 
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from './AppDispatcher';
 import {EventEmitter} from 'events';
 import SegmentConstants  from '../constants/SegmentConstants';
 import assign  from 'object-assign';

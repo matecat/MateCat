@@ -9,7 +9,7 @@
  * TodoActions
  */
 
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from '../stores/AppDispatcher';
 import SegmentConstants  from '../constants/SegmentConstants';
 import SegmentStore  from '../stores/SegmentStore';
 import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
