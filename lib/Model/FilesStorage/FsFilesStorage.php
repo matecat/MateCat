@@ -233,6 +233,8 @@ class FsFilesStorage extends AbstractFilesStorage
             throw new \UnexpectedValueException( 'Internal Error: Failed to create/copy the file on disk from cache.', -13 );
         }
 
+        return (bool)$res;
+
     }
 
     /**
