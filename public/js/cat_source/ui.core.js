@@ -2,13 +2,10 @@
 	Component: ui.core
  */
 var UI = {
-    pee_error_level_map: {
-        0: "",
-        1: "edit_1",
-        2: "edit_2",
-        3: "edit_3"
-    },
-
+    /**
+     * Open file menu in Header
+     * @returns {boolean}
+     */
 	toggleFileMenu: function() {
         var jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
@@ -75,7 +72,6 @@ var UI = {
         this.currentSegment = undefined;
         this.currentFile = undefined;
         this.currentFileId = undefined;
-
     },
 
     /**
@@ -199,96 +195,8 @@ var UI = {
 
     },
 
-    copySource: function() {
-        var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
 
-        // Attention I use .text to obtain a entity conversion,
-        // by I ignore the quote conversion done before adding to the data-original
-        // I hope it still works.
 
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.currentSegment), UI.getSegmentFileId(this.currentSegment), source_val);
-        SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-        UI.setSegmentModified(UI.currentSegment, true);
-        this.segmentQA(UI.currentSegment );
-        if (config.translation_matches_enabled) {
-            SegmentActions.setChoosenSuggestion(UI.currentSegmentId, null);
-        }
-        $(this.currentSegment).trigger('copySourceToTarget');
-
-        if(!config.isReview) {
-            var alreadyCopied = false;
-            $.each(UI.consecutiveCopySourceNum, function (index) {
-                if(this == UI.currentSegmentId) alreadyCopied = true;
-            });
-            if(!alreadyCopied) {
-                this.consecutiveCopySourceNum.push(this.currentSegmentId);
-            }
-            if(this.consecutiveCopySourceNum.length > 2) {
-                this.copyAllSources();
-            }
-        }
-
-    },
-
-    copyAllSources: function() {
-        if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
-            var props = {
-                confirmCopyAllSources: UI.continueCopyAllSources.bind(this),
-                abortCopyAllSources: UI.abortCopyAllSources.bind(this)
-            };
-
-            APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
-        } else {
-            this.consecutiveCopySourceNum = [];
-        }
-
-    },
-    continueCopyAllSources: function () {
-        this.consecutiveCopySourceNum = [];
-        UI.unmountSegments();
-        $('#outer').addClass('loading');
-        APP.doRequest({
-            data: {
-                action: 'copyAllSource2Target',
-                id_job: config.id_job,
-                pass: config.password,
-                revision_number: config.revisionNumber
-            },
-            error: function() {
-                var notification = {
-                    title: 'Error',
-                    text: 'Error copying all sources to target. Try again!',
-                    type: 'error',
-                    position: "bl"
-                };
-                APP.addNotification(notification);
-                UI.render({
-                    segmentToOpen: UI.currentSegmentId
-                });
-            },
-            success: function(d) {
-                if(d.errors.length) {
-                    APP.closePopup();
-                    var notification = {
-                        title: 'Error',
-                        text: d.errors[0].message,
-                        type: 'error',
-                        position: "bl"
-                    };
-                    APP.addNotification(notification);
-                } else {
-                    UI.unmountSegments();
-                    UI.render({
-                        segmentToOpen: UI.currentSegmentId
-                    });
-                }
-
-            }
-        });
-    },
-    abortCopyAllSources: function () {
-        this.consecutiveCopySourceNum = [];
-    },
     setComingFrom: function () {
         var page = (config.isReview)? 'revise' : 'translate';
         Cookies.set('comingFrom' , page, { path: '/' });

@@ -281,7 +281,7 @@ class OutsourceModal extends React.Component {
             }
 
             renderNormalQuote( this.chunk );
-            // Intercom
+            // Event ga
             $(document).trigger('outsource-rendered', { quote_data : this.quoteResponse } );
         }
     }

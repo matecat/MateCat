@@ -19,6 +19,7 @@ import TextUtils from "../utils/textUtils";
 import OfflineUtils from "../utils/offlineUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
+import CopySourceModal from '../modals/CopySourceModal';
 
 const SegmentActions = {
     /********* SEGMENTS *********/
@@ -323,6 +324,95 @@ const SegmentActions = {
         if ( sid ) {
             this.openSegment( sid );
         }
+    },
+    copySourceToTarget: function(  ) {
+        let currentSegment = SegmentStore.getCurrentSegment();
+
+        if ( currentSegment ) {
+            let source = currentSegment.decoded_source;
+            let sid = currentSegment.sid;
+            SegmentActions.replaceEditAreaTextContent( sid, null, source );
+            SegmentActions.modifiedTranslation( sid, null, true );
+            UI.segmentQA( UI.currentSegment );
+
+            if ( config.translation_matches_enabled ) {
+                SegmentActions.setChoosenSuggestion( sid, null );
+            }
+
+            if ( !config.isReview ) {
+                var alreadyCopied = false;
+                $.each( SegmentStore.consecutiveCopySourceNum, function ( index ) {
+                    if ( this === sid ) alreadyCopied = true;
+                } );
+                if ( !alreadyCopied ) {
+                    SegmentStore.consecutiveCopySourceNum.push( this.currentSegmentId );
+                }
+                if ( SegmentStore.consecutiveCopySourceNum.length > 2 ) {
+                    this.copyAllSources();
+                }
+            }
+        }
+    },
+    copyAllSources: function() {
+        if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
+            var props = {
+                confirmCopyAllSources: SegmentActions.continueCopyAllSources.bind(this),
+                abortCopyAllSources: SegmentActions.abortCopyAllSources.bind(this)
+            };
+
+            APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
+        } else {
+            SegmentStore.consecutiveCopySourceNum = [];
+        }
+
+    },
+    continueCopyAllSources: function () {
+        SegmentStore.consecutiveCopySourceNum = [];
+
+        UI.unmountSegments(); //TODO
+        $('#outer').addClass('loading');
+
+        APP.doRequest({
+            data: {
+                action: 'copyAllSource2Target',
+                id_job: config.id_job,
+                pass: config.password,
+                revision_number: config.revisionNumber
+            },
+            error: function() {
+                var notification = {
+                    title: 'Error',
+                    text: 'Error copying all sources to target. Try again!',
+                    type: 'error',
+                    position: "bl"
+                };
+                APP.addNotification(notification);
+                UI.render({
+                    segmentToOpen: UI.currentSegmentId
+                });
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    APP.closePopup();
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error',
+                        position: "bl"
+                    };
+                    APP.addNotification(notification);
+                } else {
+                    UI.unmountSegments();
+                    UI.render({
+                        segmentToOpen: UI.currentSegmentId
+                    });
+                }
+
+            }
+        });
+    },
+    abortCopyAllSources: function () {
+        SegmentStore.consecutiveCopySourceNum = [];
     },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {

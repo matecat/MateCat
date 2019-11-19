@@ -97,7 +97,7 @@ class OutsourceVendor extends React.Component {
                         outsourceConfirmed: chunk.get('outsourced') === '1'
                     });
 
-                    // Intercom
+                    // Event ga
                     $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
 
                 } else {
