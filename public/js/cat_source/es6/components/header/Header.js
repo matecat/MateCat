@@ -101,6 +101,13 @@ class Header extends React.Component {
         }
     }
 
+    /**
+     * Used by plugins to add buttons to the home page
+     */
+    getMoreLinks() {
+        return null;
+    }
+
     render () {
         let self = this;
         let userIcon = this.getUserIcon();
@@ -145,7 +152,7 @@ class Header extends React.Component {
                                             <li><a href="https://www.matecat.com/about/">About</a></li>
                                             <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
                                             <li><a href="https://www.matecat.com/support/">Support</a></li>
-                                            {/*<li><a className="bigblue" href="/plugins/aligner/index#" target="_blank">Aligner</a></li>*/}
+                                            { this.getMoreLinks() }
                                         </ul>
 
                                     ) : ('')}
