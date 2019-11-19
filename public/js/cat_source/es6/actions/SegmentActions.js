@@ -9,7 +9,7 @@
  * TodoActions
  */
 
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from '../stores/AppDispatcher';
 import SegmentConstants  from '../constants/SegmentConstants';
 import SegmentStore  from '../stores/SegmentStore';
 import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
@@ -17,8 +17,10 @@ import TranslationMatches  from '../components/segments/utils/translationMatches
 import TagUtils from "../utils/tagUtils";
 import TextUtils from "../utils/textUtils";
 import OfflineUtils from "../utils/offlineUtils";
+import CommonUtils from "../utils/commonUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
+import CopySourceModal from '../components/modals/CopySourceModal';
 
 const SegmentActions = {
     /********* SEGMENTS *********/
@@ -207,6 +209,34 @@ const SegmentActions = {
         });
     },
 
+    propagateTranslation: function(segmentId, status) {
+        let segment = SegmentStore.getSegmentByIdToJS(segmentId);
+        if ( segment.splitted > 2 ) return false;
+
+        if( (status == 'translated') || (config.isReview && (status == 'approved'))){
+
+            let segmentsInPropagation = SegmentStore.getSegmentsInPropagation(segment.segment_hash, config.isReview);
+
+            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
+            $.each(segmentsInPropagation, function() {
+                // $('.editarea', $(this)).html( $('.editarea', segment).html() );
+                SegmentActions.replaceEditAreaTextContent(this.sid ,null , segment.translation);
+
+
+                //Tag Projection: disable it if enable
+                // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
+                SegmentActions.setSegmentAsTagged(this.sid);
+
+                // if status is not set to draft, the segment content is not displayed
+                SegmentActions.setStatus(segment.sid, null, status); // now the status, too, is propagated
+
+                SegmentActions.setSegmentPropagation(this.sid, null, true ,segment.sid);
+
+                LXQ.doLexiQA(this,this.sid,true,null);
+            });
+        }
+    },
+
     setSegmentPropagation: function (sid, fid, propagation, from) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_PROPAGATION,
@@ -323,6 +353,95 @@ const SegmentActions = {
         if ( sid ) {
             this.openSegment( sid );
         }
+    },
+    copySourceToTarget: function(  ) {
+        let currentSegment = SegmentStore.getCurrentSegment();
+
+        if ( currentSegment ) {
+            let source = currentSegment.decoded_source;
+            let sid = currentSegment.sid;
+            SegmentActions.replaceEditAreaTextContent( sid, null, source );
+            SegmentActions.modifiedTranslation( sid, null, true );
+            UI.segmentQA( UI.currentSegment );
+
+            if ( config.translation_matches_enabled ) {
+                SegmentActions.setChoosenSuggestion( sid, null );
+            }
+
+            if ( !config.isReview ) {
+                var alreadyCopied = false;
+                $.each( SegmentStore.consecutiveCopySourceNum, function ( index ) {
+                    if ( this === sid ) alreadyCopied = true;
+                } );
+                if ( !alreadyCopied ) {
+                    SegmentStore.consecutiveCopySourceNum.push( this.currentSegmentId );
+                }
+                if ( SegmentStore.consecutiveCopySourceNum.length > 2 ) {
+                    this.copyAllSources();
+                }
+            }
+        }
+    },
+    copyAllSources: function() {
+        if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
+            var props = {
+                confirmCopyAllSources: SegmentActions.continueCopyAllSources.bind(this),
+                abortCopyAllSources: SegmentActions.abortCopyAllSources.bind(this)
+            };
+
+            APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
+        } else {
+            SegmentStore.consecutiveCopySourceNum = [];
+        }
+
+    },
+    continueCopyAllSources: function () {
+        SegmentStore.consecutiveCopySourceNum = [];
+
+        UI.unmountSegments(); //TODO
+        $('#outer').addClass('loading');
+
+        APP.doRequest({
+            data: {
+                action: 'copyAllSource2Target',
+                id_job: config.id_job,
+                pass: config.password,
+                revision_number: config.revisionNumber
+            },
+            error: function() {
+                var notification = {
+                    title: 'Error',
+                    text: 'Error copying all sources to target. Try again!',
+                    type: 'error',
+                    position: "bl"
+                };
+                APP.addNotification(notification);
+                UI.render({
+                    segmentToOpen: UI.currentSegmentId
+                });
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    APP.closePopup();
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error',
+                        position: "bl"
+                    };
+                    APP.addNotification(notification);
+                } else {
+                    UI.unmountSegments();
+                    UI.render({
+                        segmentToOpen: UI.currentSegmentId
+                    });
+                }
+
+            }
+        });
+    },
+    abortCopyAllSources: function () {
+        SegmentStore.consecutiveCopySourceNum = [];
     },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
@@ -809,12 +928,12 @@ const SegmentActions = {
     setSegmentLocked( segment, fid, unlocked) {
         if (!unlocked) {
             //TODO: move this to SegmentActions
-            UI.removeFromStorage('unlocked-' + segment.sid);
+            CommonUtils.removeFromStorage('unlocked-' + segment.sid);
             if (segment.inBulk) {
                 this.toggleSegmentOnBulk(segment.sid, fid);
             }
         } else {
-            UI.addInStorage('unlocked-'+ segment.sid, true);
+            CommonUtils.addInStorage('unlocked-'+ segment.sid, true);
             SegmentActions.openSegment(segment.sid);
 
         }

@@ -31,7 +31,7 @@
  }
  */
 
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from './AppDispatcher';
 import {EventEmitter} from 'events';
 import SegmentConstants  from '../constants/SegmentConstants';
 import assign  from 'object-assign';
@@ -66,6 +66,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         params: null
     },
     nextUntranslatedFromServer: null,
+    consecutiveCopySourceNum: [],
     /**
      * Update all
      */
@@ -501,6 +502,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'enabled'], true);
     },
     setChoosenSuggestion: function(sid, sugIndex) {
+        sugIndex = (sugIndex) ? sugIndex : undefined;
         this._segments = this._segments.map((segment)=>segment.set('choosenSuggestionIndex', sugIndex));
     },
     filterGlobalWarning: function (type, sid) {
@@ -759,7 +761,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( currContrIndex ) {
             return seg.get('contributions').get('matches').get(currContrIndex-1).toJS();
         }
-        return null;
+        return;
     },
     isSidePanelOpen: function() {
         const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);

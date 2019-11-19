@@ -145,7 +145,7 @@ let SegmentFilterUtils = {
             config.id_job, password, $.param( data ) );
 
         return $.getJSON(path).pipe(function( data ) {
-            UI.clearStorage('SegmentFilter');
+            CommonUtils.clearStorage('SegmentFilter');
 
             SegmentActions.removeAllMutedSegments();
 

@@ -1,4 +1,4 @@
-import AppDispatcher from '../dispatcher/AppDispatcher';
+import AppDispatcher from '../stores/AppDispatcher';
 import QRApi from "../ajax_utils/quality_report/qrAjax";
 import QRConstants from "../constants/QualityReportConstants"
 let QualityReportActions =  {

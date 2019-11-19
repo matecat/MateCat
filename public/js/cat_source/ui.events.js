@@ -7,7 +7,7 @@ $.extend(UI, {
             APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts');
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copySource.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            UI.copySource();
+            SegmentActions.copySourceToTarget();
         }).on('keydown.shortcuts',null, Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             UI.openLanguageResourcesPanel();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openSearch.keystrokes[Shortcuts.shortCutsKeyType], function(e) {

@@ -75,7 +75,6 @@ $.extend(UI, {
         // of SegmentFilter, see below.
         UI.firstLoad = true;
         UI.body = $('body');
-        UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
         UI.checkCrossLanguageSettings();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
@@ -128,13 +127,6 @@ $.extend(UI, {
         this.recoverUnsavedSegmentsTimer = false;
         this.setTranslationTail = [];
         this.executingSetTranslation = false;
-        this.localStorageArray = [];
-        this.isPrivateSafari = (this.isSafari) && (!this.isLocalStorageNameSupported());
-        this.consecutiveCopySourceNum = [];
-        this.setComingFrom();
-        setInterval(function() {
-            UI.consecutiveCopySourceNum = [];
-        }, config.copySourceInterval*1000);
 
         if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
@@ -157,6 +149,18 @@ $.extend(UI, {
         CatToolActions.renderQualityReportButton();
         if ( config.secondRevisionsCount ) {
             UI.reloadQualityReport();
+        }
+    },
+    detectStartSegment: function() {
+        if (this.segmentToScrollAtRender) {
+            this.startSegmentId = this.segmentToScrollAtRender;
+        } else {
+            var hash = CommonUtils.parsedHash.segmentId;
+            config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage();
+            if (!config.last_opened_segment) {
+                config.last_opened_segment = config.first_job_segment;
+            }
+            this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
         }
     },
 });

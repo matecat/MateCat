@@ -1,4 +1,4 @@
-import InputField from "../../common/InputField";
+import InputField from "../common/InputField";
 
 class FilterSegments extends React.Component {
 

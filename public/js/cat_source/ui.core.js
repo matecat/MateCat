@@ -2,13 +2,10 @@
 	Component: ui.core
  */
 var UI = {
-    pee_error_level_map: {
-        0: "",
-        1: "edit_1",
-        2: "edit_2",
-        3: "edit_3"
-    },
-
+    /**
+     * Open file menu in Header
+     * @returns {boolean}
+     */
 	toggleFileMenu: function() {
         var jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
@@ -75,7 +72,6 @@ var UI = {
         this.currentSegment = undefined;
         this.currentFile = undefined;
         this.currentFileId = undefined;
-
     },
 
     /**
@@ -199,115 +195,6 @@ var UI = {
 
     },
 
-    copySource: function() {
-        var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
-
-        // Attention I use .text to obtain a entity conversion,
-        // by I ignore the quote conversion done before adding to the data-original
-        // I hope it still works.
-
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.currentSegment), UI.getSegmentFileId(this.currentSegment), source_val);
-        SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-        UI.setSegmentModified(UI.currentSegment, true);
-        this.segmentQA(UI.currentSegment );
-        if (config.translation_matches_enabled) {
-            SegmentActions.setChoosenSuggestion(UI.currentSegmentId, null);
-        }
-        $(this.currentSegment).trigger('copySourceToTarget');
-
-        if(!config.isReview) {
-            var alreadyCopied = false;
-            $.each(UI.consecutiveCopySourceNum, function (index) {
-                if(this == UI.currentSegmentId) alreadyCopied = true;
-            });
-            if(!alreadyCopied) {
-                this.consecutiveCopySourceNum.push(this.currentSegmentId);
-            }
-            if(this.consecutiveCopySourceNum.length > 2) {
-                this.copyAllSources();
-            }
-        }
-
-    },
-
-    copyAllSources: function() {
-        if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
-            var props = {
-                confirmCopyAllSources: UI.continueCopyAllSources.bind(this),
-                abortCopyAllSources: UI.abortCopyAllSources.bind(this)
-            };
-
-            APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
-        } else {
-            this.consecutiveCopySourceNum = [];
-        }
-
-    },
-    continueCopyAllSources: function () {
-        this.consecutiveCopySourceNum = [];
-        UI.unmountSegments();
-        $('#outer').addClass('loading');
-        APP.doRequest({
-            data: {
-                action: 'copyAllSource2Target',
-                id_job: config.id_job,
-                pass: config.password,
-                revision_number: config.revisionNumber
-            },
-            error: function() {
-                var notification = {
-                    title: 'Error',
-                    text: 'Error copying all sources to target. Try again!',
-                    type: 'error',
-                    position: "bl"
-                };
-                APP.addNotification(notification);
-                UI.render({
-                    segmentToOpen: UI.currentSegmentId
-                });
-            },
-            success: function(d) {
-                if(d.errors.length) {
-                    APP.closePopup();
-                    var notification = {
-                        title: 'Error',
-                        text: d.errors[0].message,
-                        type: 'error',
-                        position: "bl"
-                    };
-                    APP.addNotification(notification);
-                } else {
-                    UI.unmountSegments();
-                    UI.render({
-                        segmentToOpen: UI.currentSegmentId
-                    });
-                }
-
-            }
-        });
-    },
-    abortCopyAllSources: function () {
-        this.consecutiveCopySourceNum = [];
-    },
-    setComingFrom: function () {
-        var page = (config.isReview)? 'revise' : 'translate';
-        Cookies.set('comingFrom' , page, { path: '/' });
-    },
-
-    clearMarks: function (str) {
-        str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
-        str = str.replace(/<span data-id="[^"]+" class="unusedGlossaryTerm">(.*?)<\/span>/gi, "$1");
-        return str;
-    },
-
-	copyToNextIfSame: function(nextUntranslatedSegment) {
-		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
-			if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
-                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(nextUntranslatedSegment), UI.getSegmentFileId(nextUntranslatedSegment), this.editarea.text());
-			}
-		}
-	},
-
     createJobMenu: function() {
         var menu = '<nav id="jobMenu" class="topMenu">' +
             '<ul class="gotocurrentsegment">' +
@@ -315,100 +202,15 @@ var UI = {
             '</ul>' +
             '<ul class="jobmenu-list">';
         $.each(config.firstSegmentOfFiles, function() {
-            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("[...]" ).concat((this.file_name).substring(this.file_name.length-20))  + '</a></li>';
+            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + CommonUtils.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("[...]" ).concat((this.file_name).substring(this.file_name.length-20))  + '</a></li>';
         });
         menu += '</ul>' +
             '</nav>';
         this.body.append(menu);
     },
 
-    getIconClass: function (ext) {
-        c = (
-            (ext == 'doc') ||
-            (ext == 'dot') ||
-            (ext == 'docx') ||
-            (ext == 'dotx') ||
-            (ext == 'docm') ||
-            (ext == 'dotm') ||
-            (ext == 'odt') ||
-            (ext == 'sxw')
-        ) ? 'extdoc' :
-            (
-                (ext == 'pot') ||
-                (ext == 'pps') ||
-                (ext == 'ppt') ||
-                (ext == 'potm') ||
-                (ext == 'potx') ||
-                (ext == 'ppsm') ||
-                (ext == 'ppsx') ||
-                (ext == 'pptm') ||
-                (ext == 'pptx') ||
-                (ext == 'odp') ||
-                (ext == 'sxi')
-            ) ? 'extppt' :
-                (
-                    (ext == 'htm') ||
-                    (ext == 'html')
-                ) ? 'exthtm' :
-                    (ext == 'pdf') ? 'extpdf' :
-                        (
-                            (ext == 'xls') ||
-                            (ext == 'xlt') ||
-                            (ext == 'xlsm') ||
-                            (ext == 'xlsx') ||
-                            (ext == 'xltx') ||
-                            (ext == 'ods') ||
-                            (ext == 'sxc') ||
-                            (ext == 'csv')
-                        ) ? 'extxls' :
-                            (ext == 'txt') ? 'exttxt' :
-                                (ext == 'ttx') ? 'extttx' :
-                                    (ext == 'itd') ? 'extitd' :
-                                        (ext == 'xlf') ? 'extxlf' :
-                                            (ext == 'mif') ? 'extmif' :
-                                                (ext == 'idml') ? 'extidd' :
-                                                    (ext == 'xtg') ? 'extqxp' :
-                                                        (ext == 'xml') ? 'extxml' :
-                                                            (ext == 'rc') ? 'extrcc' :
-                                                                (ext == 'resx') ? 'extres' :
-                                                                    (ext == 'sgml') ? 'extsgl' :
-                                                                        (ext == 'sgm') ? 'extsgm' :
-                                                                            (ext == 'properties') ? 'extpro' :
-                                                                                'extxif';
-        return c;
-    },
 
-	detectFirstLast: function() {
-		var s = $('section');
-		this.firstSegment = s.first();
-		this.lastSegment = s.last();
-	},
-	detectRefSegId: function(where) {
-        return (where == 'after') ? SegmentStore.getLastSegmentId() : (where == 'before') ? SegmentStore.getFirstSegmentId() : '';
-	},
-	detectStartSegment: function() {
-		if (this.segmentToScrollAtRender) {
-			this.startSegmentId = this.segmentToScrollAtRender;
-		} else {
-			var hash = CommonUtils.parsedHash.segmentId;
-            config.last_opened_segment = UI.getLastSegmentFromLocalStorage();
-            if (!config.last_opened_segment) {
-                config.last_opened_segment = config.first_job_segment;
-            }
-			this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
-		}
-	},
-    getLastSegmentFromLocalStorage: function () {
-        return localStorage.getItem(UI.localStorageCurrentSegmentId);
-    },
-    setLastSegmentFromLocalStorage: function (segmentId) {
-        try {
-            localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
-        } catch (e) {
-            UI.clearStorage("currentSegmentId");
-            localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
-        }
-    },
+
     // fixHeaderHeightChange: function() {
     //     var headerHeight = $('header .wrapper').height();
     //     $('#outer').css('margin-top', headerHeight + 'px');
@@ -452,7 +254,7 @@ var UI = {
 
 		this.loadingMore = true;
 
-		var segId = this.detectRefSegId(where);
+		var segId = (where === 'after') ? SegmentStore.getLastSegmentId() : (where === 'before') ? SegmentStore.getFirstSegmentId() : '';
 
 		if (where == 'before') {
 			$("section").each(function() {
@@ -1134,7 +936,6 @@ var UI = {
 			$('.downloadtr-button').focus();
 			return false;
 		}
-		this.copyToNextIfSame(nextUntranslatedSegment);
 		this.byButton = true;
 	},
     setTimeToEdit: function($segment) {
@@ -1657,75 +1458,6 @@ var UI = {
         });
         return totalTranslation;
     },
-    addInStorage: function (key, val, operation) {
-        if(this.isPrivateSafari) {
-            item = {
-                key: key,
-                value: val
-            };
-            this.localStorageArray.push(item);
-        } else {
-            try {
-                localStorage.setItem(key, val);
-            } catch (e) {
-                UI.clearStorage(operation);
-                localStorage.setItem(key, val);
-            }
-        }
-    },
-    getFromStorage: function (key) {
-        if(this.isPrivateSafari) {
-            foundVal = 0;
-            $.each(this.localStorageArray, function (index) {
-                if(this.key == key) foundVal = this.value;
-            });
-            return foundVal || false;
-        } else {
-            return localStorage.getItem(key);
-        }
-    },
-    removeFromStorage: function (key) {
-        if(this.isPrivateSafari) {
-            foundVal = 0;
-            $.each(this.localStorageArray, function (index) {
-                if(this.key == key) foundIndex = index;
-            });
-            this.localStorageArray.splice(foundIndex, 1);
-        } else {
-            localStorage.removeItem(key);
-        }
-    },
-
-
-    isLocalStorageNameSupported: function () {
-        var testKey = 'test', storage = window.sessionStorage;
-        try {
-            storage.setItem(testKey, '1');
-            storage.removeItem(testKey);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    },
-
-
-    checkInStorage: function(what) {
-		var found = false;
-		$.each(localStorage, function(k) {
-			if(k.substring(0, what.length) === what) {
-				found = true;
-			}
-		});
-		return found;
-	},
-
-	clearStorage: function(what) {
-		$.each(localStorage, function(k) {
-			if(k.substring(0, what.length) === what) {
-				localStorage.removeItem(k);
-			}
-		});
-	},
 
     targetContainerSelector : function() {
         return '.targetarea';
@@ -1744,7 +1476,7 @@ var UI = {
 			if ( codeInt === -10 && operation !== 'getSegments' ) {
 				APP.alert({
 					msg: 'Job canceled or assigned to another translator',
-					callback: 'reloadPage'
+					callback: 'location.reload'
 				});
 			}
 			if ( codeInt === -1000 || codeInt === -101) {
@@ -1756,15 +1488,6 @@ var UI = {
 			    APP.alert({ msg: this.message }) ;
             }
 		});
-	},
-	reloadPage: function() {
-		console.log('reloadPage');
-		if(UI.body.hasClass('cattool')) location.reload();
-	},
-
-	someSegmentToSave: function() {
-		res = ($('section.modified').length) ? true : false;
-		return res;
 	},
 	setTranslation_success: function(d, options) {
         var id_segment = options.id_segment;
@@ -1786,7 +1509,8 @@ var UI = {
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
             if((!byStatus)&&(propagate)) {
-                this.beforePropagateTranslation(options.id_segment, status);
+                this.tempReqArguments = null;
+                SegmentActions.propagateTranslation(options.id_segment, status);
             }
         }
         this.resetRecoverUnsavedSegmentsTimer();
@@ -1809,43 +1533,6 @@ var UI = {
         this.recoverUnsavedSegmentsTimer = setTimeout(function() {
             UI.recoverUnsavedSetTranslations();
         }, 1000);
-    },
-
-
-    beforePropagateTranslation: function(segmentId, status) {
-        let segment = SegmentStore.getSegmentByIdToJS(segmentId);
-        if ( segment.splitted > 2 ) return false;
-        UI.propagateTranslation(segment, status);
-    },
-
-    propagateTranslation: function(segment, status) {
-        this.tempReqArguments = null;
-        if( (status == 'translated') || (config.isReview && (status == 'approved'))){
-
-            var segmentsInPropagation = SegmentStore.getSegmentsInPropagation(segment.segment_hash, config.isReview);
-            plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
-
-            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each(segmentsInPropagation, function() {
-                // $('.editarea', $(this)).html( $('.editarea', segment).html() );
-                SegmentActions.replaceEditAreaTextContent(this.sid ,null , segment.translation);
-
-
-                //Tag Projection: disable it if enable
-                // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
-                SegmentActions.setSegmentAsTagged(this.sid);
-
-                // if status is not set to draft, the segment content is not displayed
-                SegmentActions.setStatus(segment.sid, null, status); // now the status, too, is propagated
-
-                SegmentActions.setSegmentPropagation(this.sid, null, true ,segment.sid);
-
-                LXQ.doLexiQA(this,this.sid,true,null);
-            });
-
-            //unset actual segment as autoPropagated because now it is translated
-            $( segment ).data( 'autopropagated', false );
-        }
     },
     setTagLockCustomizeCookie: function (first) {
         if(first && !config.tagLockCustomizable) {

@@ -37,22 +37,21 @@ window.SegmentsContainer = require('./components/segments/SegmentsContainer').de
 /*
 Todo move this
  */
-window.ModalWindow = require('./modals/ModalWindowComponent').default;
-window.SuccessModal = require('./modals/SuccessModal').default;
-window.ConfirmRegister = require('./modals/ConfirmRegister').default;
-window.PreferencesModal = require('./modals/PreferencesModal').default;
-window.ResetPasswordModal = require('./modals/ResetPasswordModal').default;
-window.LoginModal = require('./modals/LoginModal').default;
-window.ForgotPasswordModal = require('./modals/ForgotPasswordModal').default;
-window.RegisterModal = require('./modals/RegisterModal').default;
-window.ConfirmMessageModal = require('./modals/ConfirmMessageModal').default;
-window.OutsourceModal = require('./modals/OutsourceModal').default;
-window.SplitJobModal = require('./modals/SplitJob').default;
-window.DQFModal = require('./modals/DQFModal').default;
-window.ShortCutsModal = require('./modals/ShortCutsModal').default;
-window.CopySourceModal = require('./modals/CopySourceModal').default;
-window.CreateTeamModal = require('./modals/CreateTeam').default;
-window.ModifyTeamModal = require('./modals/ModifyTeam').default;
+window.ModalWindow = require('./components/modals/ModalWindowComponent').default;
+window.SuccessModal = require('./components/modals/SuccessModal').default;
+window.ConfirmRegister = require('./components/modals/ConfirmRegister').default;
+window.PreferencesModal = require('./components/modals/PreferencesModal').default;
+window.ResetPasswordModal = require('./components/modals/ResetPasswordModal').default;
+window.LoginModal = require('./components/modals/LoginModal').default;
+window.ForgotPasswordModal = require('./components/modals/ForgotPasswordModal').default;
+window.RegisterModal = require('./components/modals/RegisterModal').default;
+window.ConfirmMessageModal = require('./components/modals/ConfirmMessageModal').default;
+window.OutsourceModal = require('./components/modals/OutsourceModal').default;
+window.SplitJobModal = require('./components/modals/SplitJob').default;
+window.DQFModal = require('./components/modals/DQFModal').default;
+window.ShortCutsModal = require('./components/modals/ShortCutsModal').default;
+window.CreateTeamModal = require('./components/modals/CreateTeam').default;
+window.ModifyTeamModal = require('./components/modals/ModifyTeam').default;
 /*****/
 
 

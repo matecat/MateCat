@@ -1,5 +1,5 @@
-import OutsourceConstants  from '../constants/OutsourceConstants';
-import OutsourceStore  from '../stores/OutsourceStore';
+import OutsourceConstants  from '../../constants/OutsourceConstants';
+import OutsourceStore  from '../../stores/OutsourceStore';
 
 class OutsourceModal extends React.Component {
 
@@ -281,7 +281,7 @@ class OutsourceModal extends React.Component {
             }
 
             renderNormalQuote( this.chunk );
-            // Intercom
+            // Event ga
             $(document).trigger('outsource-rendered', { quote_data : this.quoteResponse } );
         }
     }

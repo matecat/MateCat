@@ -151,7 +151,7 @@ class SegmentBody extends React.Component {
     }
     copySource(e) {
         e.preventDefault();
-        UI.copySource();
+        SegmentActions.copySourceToTarget( this.props.segment.sid);
     }
 
     componentDidMount() {
