@@ -209,37 +209,8 @@ var UI = {
         this.body.append(menu);
     },
 
-	detectFirstLast: function() {
-		var s = $('section');
-		this.firstSegment = s.first();
-		this.lastSegment = s.last();
-	},
-	detectRefSegId: function(where) {
-        return (where == 'after') ? SegmentStore.getLastSegmentId() : (where == 'before') ? SegmentStore.getFirstSegmentId() : '';
-	},
-	detectStartSegment: function() {
-		if (this.segmentToScrollAtRender) {
-			this.startSegmentId = this.segmentToScrollAtRender;
-		} else {
-			var hash = CommonUtils.parsedHash.segmentId;
-            config.last_opened_segment = UI.getLastSegmentFromLocalStorage();
-            if (!config.last_opened_segment) {
-                config.last_opened_segment = config.first_job_segment;
-            }
-			this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
-		}
-	},
-    getLastSegmentFromLocalStorage: function () {
-        return localStorage.getItem(UI.localStorageCurrentSegmentId);
-    },
-    setLastSegmentFromLocalStorage: function (segmentId) {
-        try {
-            localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
-        } catch (e) {
-            UI.clearStorage("currentSegmentId");
-            localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
-        }
-    },
+
+
     // fixHeaderHeightChange: function() {
     //     var headerHeight = $('header .wrapper').height();
     //     $('#outer').css('margin-top', headerHeight + 'px');
@@ -283,7 +254,7 @@ var UI = {
 
 		this.loadingMore = true;
 
-		var segId = this.detectRefSegId(where);
+		var segId = (where === 'after') ? SegmentStore.getLastSegmentId() : (where === 'before') ? SegmentStore.getFirstSegmentId() : '';
 
 		if (where == 'before') {
 			$("section").each(function() {
@@ -1487,75 +1458,6 @@ var UI = {
         });
         return totalTranslation;
     },
-    addInStorage: function (key, val, operation) {
-        if(this.isPrivateSafari) {
-            item = {
-                key: key,
-                value: val
-            };
-            this.localStorageArray.push(item);
-        } else {
-            try {
-                localStorage.setItem(key, val);
-            } catch (e) {
-                UI.clearStorage(operation);
-                localStorage.setItem(key, val);
-            }
-        }
-    },
-    getFromStorage: function (key) {
-        if(this.isPrivateSafari) {
-            foundVal = 0;
-            $.each(this.localStorageArray, function (index) {
-                if(this.key == key) foundVal = this.value;
-            });
-            return foundVal || false;
-        } else {
-            return localStorage.getItem(key);
-        }
-    },
-    removeFromStorage: function (key) {
-        if(this.isPrivateSafari) {
-            foundVal = 0;
-            $.each(this.localStorageArray, function (index) {
-                if(this.key == key) foundIndex = index;
-            });
-            this.localStorageArray.splice(foundIndex, 1);
-        } else {
-            localStorage.removeItem(key);
-        }
-    },
-
-
-    isLocalStorageNameSupported: function () {
-        var testKey = 'test', storage = window.sessionStorage;
-        try {
-            storage.setItem(testKey, '1');
-            storage.removeItem(testKey);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    },
-
-
-    checkInStorage: function(what) {
-		var found = false;
-		$.each(localStorage, function(k) {
-			if(k.substring(0, what.length) === what) {
-				found = true;
-			}
-		});
-		return found;
-	},
-
-	clearStorage: function(what) {
-		$.each(localStorage, function(k) {
-			if(k.substring(0, what.length) === what) {
-				localStorage.removeItem(k);
-			}
-		});
-	},
 
     targetContainerSelector : function() {
         return '.targetarea';
@@ -1574,7 +1476,7 @@ var UI = {
 			if ( codeInt === -10 && operation !== 'getSegments' ) {
 				APP.alert({
 					msg: 'Job canceled or assigned to another translator',
-					callback: 'reloadPage'
+					callback: 'location.reload'
 				});
 			}
 			if ( codeInt === -1000 || codeInt === -101) {
@@ -1586,15 +1488,6 @@ var UI = {
 			    APP.alert({ msg: this.message }) ;
             }
 		});
-	},
-	reloadPage: function() {
-		console.log('reloadPage');
-		if(UI.body.hasClass('cattool')) location.reload();
-	},
-
-	someSegmentToSave: function() {
-		res = ($('section.modified').length) ? true : false;
-		return res;
 	},
 	setTranslation_success: function(d, options) {
         var id_segment = options.id_segment;
@@ -1616,7 +1509,8 @@ var UI = {
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
             if((!byStatus)&&(propagate)) {
-                this.beforePropagateTranslation(options.id_segment, status);
+                this.tempReqArguments = null;
+                SegmentActions.propagateTranslation(options.id_segment, status);
             }
         }
         this.resetRecoverUnsavedSegmentsTimer();
@@ -1639,43 +1533,6 @@ var UI = {
         this.recoverUnsavedSegmentsTimer = setTimeout(function() {
             UI.recoverUnsavedSetTranslations();
         }, 1000);
-    },
-
-
-    beforePropagateTranslation: function(segmentId, status) {
-        let segment = SegmentStore.getSegmentByIdToJS(segmentId);
-        if ( segment.splitted > 2 ) return false;
-        UI.propagateTranslation(segment, status);
-    },
-
-    propagateTranslation: function(segment, status) {
-        this.tempReqArguments = null;
-        if( (status == 'translated') || (config.isReview && (status == 'approved'))){
-
-            var segmentsInPropagation = SegmentStore.getSegmentsInPropagation(segment.segment_hash, config.isReview);
-            plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
-
-            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each(segmentsInPropagation, function() {
-                // $('.editarea', $(this)).html( $('.editarea', segment).html() );
-                SegmentActions.replaceEditAreaTextContent(this.sid ,null , segment.translation);
-
-
-                //Tag Projection: disable it if enable
-                // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
-                SegmentActions.setSegmentAsTagged(this.sid);
-
-                // if status is not set to draft, the segment content is not displayed
-                SegmentActions.setStatus(segment.sid, null, status); // now the status, too, is propagated
-
-                SegmentActions.setSegmentPropagation(this.sid, null, true ,segment.sid);
-
-                LXQ.doLexiQA(this,this.sid,true,null);
-            });
-
-            //unset actual segment as autoPropagated because now it is translated
-            $( segment ).data( 'autopropagated', false );
-        }
     },
     setTagLockCustomizeCookie: function (first) {
         if(first && !config.tagLockCustomizable) {

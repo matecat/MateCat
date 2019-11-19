@@ -269,8 +269,8 @@
 
         isUnlockedSegment: function ( segment ) {
             // var readonly = UI.isReadonlySegment(segment) ;
-            // return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid));
-            return !_.isNull(UI.getFromStorage('unlocked-' + segment.sid));
+            // return (segment.ice_locked === "1" && !readonly) && !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid));
+            return !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid));
         },
         getStatusForAutoSave : function( segment ) {
             var status ;
@@ -308,7 +308,7 @@
         setCurrentSegment: function() {
             var reqArguments = arguments;
             var id_segment = this.currentSegmentId;
-            this.setLastSegmentFromLocalStorage(id_segment.toString());
+            CommonUtils.setLastSegmentFromLocalStorage(id_segment.toString());
             APP.doRequest({
                 data: {
                     action: 'setCurrentSegment',

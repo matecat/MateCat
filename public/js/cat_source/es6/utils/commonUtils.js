@@ -276,6 +276,86 @@ const CommonUtils = {
 
         }
     },
+
+    /**
+     * Local Storage manipulation
+      */
+    // localStorageCurrentSegmentId: (config) ? "currentSegmentId-"+config.id_job+config.password : null,
+    localStorageArray: [],
+    isSafari: (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0),
+    isPrivateSafari: (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) && (!this.isLocalStorageNameSupported()),
+    getLastSegmentFromLocalStorage: function () {
+        let localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
+        return localStorage.getItem(localStorageCurrentSegmentId);
+    },
+    setLastSegmentFromLocalStorage: function (segmentId) {
+        let localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
+        try {
+            localStorage.setItem(localStorageCurrentSegmentId, segmentId);
+        } catch (e) {
+            this.clearStorage("currentSegmentId");
+            localStorage.setItem(localStorageCurrentSegmentId, segmentId);
+        }
+    },
+    clearStorage: function(what) {
+        $.each(localStorage, function(k) {
+            if(k.substring(0, what.length) === what) {
+                localStorage.removeItem(k);
+            }
+        });
+    },
+
+    addInStorage: function (key, val, operation) {
+        if(this.isPrivateSafari) {
+            let item = {
+                key: key,
+                value: val
+            };
+            this.localStorageArray.push(item);
+        } else {
+            try {
+                localStorage.setItem(key, val);
+            } catch (e) {
+                CommonUtils.clearStorage(operation);
+                localStorage.setItem(key, val);
+            }
+        }
+    },
+    getFromStorage: function (key) {
+        if(this.isPrivateSafari) {
+            let foundVal = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key === key) foundVal = this.value;
+            });
+            return foundVal || false;
+        } else {
+            return localStorage.getItem(key);
+        }
+    },
+    removeFromStorage: function (key) {
+        if(this.isPrivateSafari) {
+            let foundIndex = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key == key) foundIndex = index;
+            });
+            this.localStorageArray.splice(foundIndex, 1);
+        } else {
+            localStorage.removeItem(key);
+        }
+    },
+
+
+    isLocalStorageNameSupported: function () {
+        var testKey = 'test', storage = window.localStorage;
+        try {
+            storage.setItem(testKey, '1');
+            storage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+    /******************************/
 };
 
     const ParsedHash = function( hash ) {
