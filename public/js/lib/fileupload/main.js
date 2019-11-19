@@ -891,60 +891,73 @@ function goodbye( e ) {
 }
 
 getIconClass = function ( ext ) {
-    c = (
-            (ext == 'doc') ||
-            (ext == 'dot') ||
-            (ext == 'docx') ||
-            (ext == 'dotx') ||
-            (ext == 'docm') ||
-            (ext == 'dotm') ||
-            (ext == 'odt') ||
-            (ext == 'sxw')
-    ) ? 'extdoc' :
-            (
-            (ext == 'pot') ||
-            (ext == 'pps') ||
-            (ext == 'ppt') ||
-            (ext == 'potm') ||
-            (ext == 'potx') ||
-            (ext == 'ppsm') ||
-            (ext == 'ppsx') ||
-            (ext == 'pptm') ||
-            (ext == 'pptx') ||
-            (ext == 'odp') ||
-            (ext == 'sxi')
-    ) ? 'extppt' :
-            (
-                    (ext == 'htm') ||
-                    (ext == 'html')
-            ) ? 'exthtm' :
-                    (ext == 'pdf') ? 'extpdf' :
-                            (
-            (ext == 'xls') ||
-            (ext == 'xlt') ||
-            (ext == 'xlsm') ||
-            (ext == 'xlsx') ||
-            (ext == 'xltx') ||
-            (ext == 'ods') ||
-            (ext == 'sxc') ||
-            (ext == 'csv')
-            ) ? 'extxls' :
-            (ext == 'txt') ? 'exttxt' :
-            (ext == 'ttx') ? 'extttx' :
-            (ext == 'itd') ? 'extitd' :
-            (ext == 'xlf') ? 'extxlf' :
-            (ext == 'mif') ? 'extmif' :
-            (ext == 'idml') ? 'extidd' :
-            (ext == 'xtg') ? 'extqxp' :
-            (ext == 'xml') ? 'extxml' :
-            (ext == 'rc') ? 'extrcc' :
-            (ext == 'resx') ? 'extres' :
-            (ext == 'sgml') ? 'extsgl' :
-            (ext == 'sgm') ? 'extsgm' :
-            (ext == 'properties') ? 'extpro' :
-            (ext == 'zip') ? 'extzip' :
-            'extxif';
-    return c;
+    switch ( ext ) {
+        case 'doc':
+        case 'dot':
+        case 'docx':
+        case 'dotx':
+        case 'docm':
+        case 'dotm':
+        case 'odt':
+        case 'sxw':
+            return 'extdoc';
+        case 'pot':
+        case 'pps':
+        case 'ppt':
+        case 'potm':
+        case 'potx':
+        case 'ppsm':
+        case 'ppsx':
+        case 'pptm':
+        case 'pptx':
+        case 'odp':
+        case 'sxi':
+            return 'extppt';
+        case 'htm':
+        case 'html':
+            return 'exthtm';
+        case 'pdf':
+            return 'extpdf';
+        case 'xls':
+        case 'xlt':
+        case 'xlsm':
+        case 'xlsx':
+        case 'xltx':
+        case 'ods':
+        case 'sxc':
+        case 'csv':
+            return 'extxls';
+        case  'txt':
+            return 'exttxt';
+        case  'ttx':
+            return  'extttx';
+        case  'itd':
+            return  'extitd';
+        case  'xlf':
+            return  'extxlf';
+        case  'mif':
+            return  'extmif';
+        case  'idml':
+            return  'extidd';
+        case  'xtg':
+            return  'extqxp';
+        case  'xml':
+            return  'extxml';
+        case  'rc':
+            return  'extrcc';
+        case  'resx':
+            return  'extres';
+        case  'sgml':
+            return  'extsgl';
+        case  'sgm':
+            return  'extsgm';
+        case  'properties':
+            return  'extpro';
+        default :
+            return 'extxif';
+
+
+    }
 }
 
 window.onbeforeunload = function ( e ) {

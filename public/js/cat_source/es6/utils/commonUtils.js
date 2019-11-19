@@ -205,10 +205,77 @@ const CommonUtils = {
             }
         }
 
+    },
+
+    getIconClass: function (ext) {
+        switch ( ext ) {
+            case 'doc':
+            case 'dot':
+            case 'docx':
+            case 'dotx':
+            case 'docm':
+            case 'dotm':
+            case 'odt':
+            case 'sxw':
+                return 'extdoc';
+            case 'pot':
+            case 'pps':
+            case 'ppt':
+            case 'potm':
+            case 'potx':
+            case 'ppsm':
+            case 'ppsx':
+            case 'pptm':
+            case 'pptx':
+            case 'odp':
+            case 'sxi':
+                return 'extppt';
+            case 'htm':
+            case 'html':
+                return 'exthtm';
+            case 'pdf':
+                return 'extpdf';
+            case 'xls':
+            case 'xlt':
+            case 'xlsm':
+            case 'xlsx':
+            case 'xltx':
+            case 'ods':
+            case 'sxc':
+            case 'csv':
+                return 'extxls';
+            case  'txt':
+                return 'exttxt';
+            case  'ttx':
+                return  'extttx';
+            case  'itd':
+                return  'extitd';
+            case  'xlf':
+                return  'extxlf';
+            case  'mif':
+                return  'extmif';
+            case  'idml':
+                return  'extidd';
+            case  'xtg':
+                return  'extqxp';
+            case  'xml':
+                return  'extxml';
+            case  'rc':
+                return  'extrcc';
+            case  'resx':
+                return  'extres';
+            case  'sgml':
+                return  'extsgl';
+            case  'sgm':
+                return  'extsgm';
+            case  'properties':
+                return  'extpro';
+            default :
+                return 'extxif';
 
 
-
-    }
+        }
+    },
 };
 
     const ParsedHash = function( hash ) {

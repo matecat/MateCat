@@ -195,27 +195,6 @@ var UI = {
 
     },
 
-
-
-    setComingFrom: function () {
-        var page = (config.isReview)? 'revise' : 'translate';
-        Cookies.set('comingFrom' , page, { path: '/' });
-    },
-
-    clearMarks: function (str) {
-        str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
-        str = str.replace(/<span data-id="[^"]+" class="unusedGlossaryTerm">(.*?)<\/span>/gi, "$1");
-        return str;
-    },
-
-	copyToNextIfSame: function(nextUntranslatedSegment) {
-		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
-			if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
-                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(nextUntranslatedSegment), UI.getSegmentFileId(nextUntranslatedSegment), this.editarea.text());
-			}
-		}
-	},
-
     createJobMenu: function() {
         var menu = '<nav id="jobMenu" class="topMenu">' +
             '<ul class="gotocurrentsegment">' +
@@ -223,67 +202,11 @@ var UI = {
             '</ul>' +
             '<ul class="jobmenu-list">';
         $.each(config.firstSegmentOfFiles, function() {
-            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("[...]" ).concat((this.file_name).substring(this.file_name.length-20))  + '</a></li>';
+            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + CommonUtils.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20).concat("[...]" ).concat((this.file_name).substring(this.file_name.length-20))  + '</a></li>';
         });
         menu += '</ul>' +
             '</nav>';
         this.body.append(menu);
-    },
-
-    getIconClass: function (ext) {
-        c = (
-            (ext == 'doc') ||
-            (ext == 'dot') ||
-            (ext == 'docx') ||
-            (ext == 'dotx') ||
-            (ext == 'docm') ||
-            (ext == 'dotm') ||
-            (ext == 'odt') ||
-            (ext == 'sxw')
-        ) ? 'extdoc' :
-            (
-                (ext == 'pot') ||
-                (ext == 'pps') ||
-                (ext == 'ppt') ||
-                (ext == 'potm') ||
-                (ext == 'potx') ||
-                (ext == 'ppsm') ||
-                (ext == 'ppsx') ||
-                (ext == 'pptm') ||
-                (ext == 'pptx') ||
-                (ext == 'odp') ||
-                (ext == 'sxi')
-            ) ? 'extppt' :
-                (
-                    (ext == 'htm') ||
-                    (ext == 'html')
-                ) ? 'exthtm' :
-                    (ext == 'pdf') ? 'extpdf' :
-                        (
-                            (ext == 'xls') ||
-                            (ext == 'xlt') ||
-                            (ext == 'xlsm') ||
-                            (ext == 'xlsx') ||
-                            (ext == 'xltx') ||
-                            (ext == 'ods') ||
-                            (ext == 'sxc') ||
-                            (ext == 'csv')
-                        ) ? 'extxls' :
-                            (ext == 'txt') ? 'exttxt' :
-                                (ext == 'ttx') ? 'extttx' :
-                                    (ext == 'itd') ? 'extitd' :
-                                        (ext == 'xlf') ? 'extxlf' :
-                                            (ext == 'mif') ? 'extmif' :
-                                                (ext == 'idml') ? 'extidd' :
-                                                    (ext == 'xtg') ? 'extqxp' :
-                                                        (ext == 'xml') ? 'extxml' :
-                                                            (ext == 'rc') ? 'extrcc' :
-                                                                (ext == 'resx') ? 'extres' :
-                                                                    (ext == 'sgml') ? 'extsgl' :
-                                                                        (ext == 'sgm') ? 'extsgm' :
-                                                                            (ext == 'properties') ? 'extpro' :
-                                                                                'extxif';
-        return c;
     },
 
 	detectFirstLast: function() {
@@ -1042,7 +965,6 @@ var UI = {
 			$('.downloadtr-button').focus();
 			return false;
 		}
-		this.copyToNextIfSame(nextUntranslatedSegment);
 		this.byButton = true;
 	},
     setTimeToEdit: function($segment) {

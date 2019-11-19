@@ -19,7 +19,7 @@ import TextUtils from "../utils/textUtils";
 import OfflineUtils from "../utils/offlineUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
-import CopySourceModal from '../modals/CopySourceModal';
+import CopySourceModal from '../components/modals/CopySourceModal';
 
 const SegmentActions = {
     /********* SEGMENTS *********/
