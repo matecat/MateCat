@@ -175,7 +175,7 @@ const CommonUtils = {
 
     goodbye(e) {
 
-        UI.clearStorage('contribution');
+        this.clearStorage('contribution');
         //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
         let say_goodbye = ( leave_message ) => {
 

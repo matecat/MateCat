@@ -28,7 +28,7 @@ let SSE = {
         } );
 
         $( document ).on( 'sse:bulk_segment_status_change', function ( ev, message ) {
-            UI.bulkChangeStatusCallback(message.data.segment_ids, message.data.status);
+            SegmentActions.bulkChangeStatusCallback(message.data.segment_ids, message.data.status);
         } );
         if (config.translation_matches_enabled) {
 

@@ -21,15 +21,11 @@ $.extend(UI, {
         this.loadingMore = false;
         this.noMoreSegmentsAfter = false;
         this.noMoreSegmentsBefore = false;
-
-        this.undoStack = [];
-        this.undoStackPosition = 0;
         this.nextUntranslatedSegmentIdByServer = null;
         this.checkUpdatesEvery = 180000;
         this.goingToNext = false;
-        this.setGlobalTagProjection();
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-        if(this.tagModesEnabled && !this.enableTagProjection) {
+        if(this.tagModesEnabled && !SegmentUtils.checkTPEnabled()) {
             UI.body.addClass('tagModes');
         } else {
             UI.body.removeClass('tagModes');
@@ -57,9 +53,9 @@ $.extend(UI, {
 
             this.lastUpdateRequested = new Date();
 
-            // setTimeout(function() {
-            // 	UI.getUpdates();
-            // }, UI.checkUpdatesEvery);
+            setTimeout(function() {
+            	UI.getUpdates();
+            }, UI.checkUpdatesEvery);
 
         }
 
@@ -162,5 +158,5 @@ $.extend(UI, {
             }
             this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
         }
-    },
+    }
 });

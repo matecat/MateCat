@@ -16,7 +16,7 @@ class SegmentFooterTabConflicts extends React.Component {
 
     chooseAlternative(text) {
         UI.editarea.focus();
-        UI.disableTPOnSegment(this.props.segment);
+        SegmentActions.disableTPOnSegment(this.props.segment);
         setTimeout(()=>{
             SegmentActions.replaceEditAreaTextContent( this.props.segment.sid, this.props.segment.id_file, text);
             SegmentActions.highlightEditarea( this.props.segment.sid );
@@ -38,7 +38,7 @@ class SegmentFooterTabConflicts extends React.Component {
             let transDecoded = this.translation;
             // Make the diff between the text with the same codification
 
-            [ mainStr, transDecoded, replacementsMap ] = UI._treatTagsAsBlock( mainStr, transDecoded, [] );
+            [ mainStr, transDecoded, replacementsMap ] = TagUtils._treatTagsAsBlock( mainStr, transDecoded, [] );
 
             let diff_obj = TextUtils.execDiff( mainStr, transDecoded );
 

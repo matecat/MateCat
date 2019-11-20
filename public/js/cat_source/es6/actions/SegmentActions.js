@@ -18,6 +18,7 @@ import TagUtils from "../utils/tagUtils";
 import TextUtils from "../utils/textUtils";
 import OfflineUtils from "../utils/offlineUtils";
 import CommonUtils from "../utils/commonUtils";
+import SegmentUtils from "../utils/segmentUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
 import CopySourceModal from '../components/modals/CopySourceModal';
@@ -180,7 +181,7 @@ const SegmentActions = {
     },
 
     setStatus: function (sid, fid, status) {
-        if ( sid && fid ) {
+        if ( sid ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.SET_SEGMENT_STATUS,
                 id: sid,
@@ -246,7 +247,17 @@ const SegmentActions = {
             from: from
         });
     },
-
+    /**
+     * Disable the Tag Projection, for example after clicking on the Translation Matches
+     */
+    disableTPOnSegment: function (segmentObj) {
+        var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
+        var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
+        if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
+            SegmentActions.setSegmentAsTagged(currentSegment.sid, currentSegment.id_file);
+            UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged');
+        }
+    },
     setSegmentAsTagged: function (sid, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_TAGGED,
@@ -458,7 +469,8 @@ const SegmentActions = {
             status: status,
             translation: translation
         });
-
+        let $segment = UI.getSegmentById(sid);
+        $segment.trigger('modified');
     },
     replaceEditAreaTextContent: function(sid, fid, text) {
         AppDispatcher.dispatch({
@@ -493,7 +505,7 @@ const SegmentActions = {
         });
     },
     showTagsMenu: function(sid) {
-        if ( !UI.checkCurrentSegmentTPEnabled() ) {
+        if ( !SegmentUtils.checkCurrentSegmentTPEnabled() ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_TAGS_MENU,
                 sid: sid,
@@ -525,6 +537,11 @@ const SegmentActions = {
             actionType: SegmentConstants.FILL_TAGS_IN_TARGET,
             sid: sid
         });
+    },
+    copyTagProjectionInCurrentSegment(sid, translation) {
+        if (!_.isUndefined(translation) && translation.length > 0) {
+            SegmentActions.replaceEditAreaTextContent( sid, null, translation );
+        }
     },
     /************ SPLIT ****************/
     openSplitSegment: function(sid) {
@@ -703,7 +720,11 @@ const SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'deleteGlossaryItem' );
             }).done(function ( data ) {
-                UI.footerMessage( 'A glossary item has been deleted', UI.getSegmentById(id) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: 'A glossary item has been deleted'
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
                     sid: sid,
@@ -718,12 +739,17 @@ const SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'addGlossaryItem' );
             }).done(function ( response ) {
+                let msg;
                 if ( response.data.created_tm_key ) {
-                    UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( sid ) );
+                    msg = 'A Private TM Key has been created for this job';
                 } else {
-                    let msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
-                    UI.footerMessage( msg, UI.getSegmentById( sid ) );
+                    msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
                 }
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: msg
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
                     sid: sid,
@@ -738,7 +764,11 @@ const SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'updateGlossaryItem' );
             }).done( function ( response ) {
-                UI.footerMessage( 'A glossary item has been updated', UI.getSegmentById( sid ) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: 'A glossary item has been updated'
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.CHANGE_GLOSSARY,
                     sid: sid,
@@ -911,6 +941,76 @@ const SegmentActions = {
         return UI.submitComment(sid, idIssue, data);
     },
 
+    showApproveAllModalWarnirng: function (  ) {
+        var props = {
+            text: "It was not possible to approve all segments. There are some segments that have not been translated.",
+            successText: "Ok",
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
+            }
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+    },
+    showTranslateAllModalWarnirng: function (  ) {
+        var props = {
+            text: "It was not possible to translate all segments.",
+            successText: "Ok",
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
+            }
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+    },
+    approveFilteredSegments: function(segmentsArray) {
+        if (segmentsArray.length >= 500) {
+            var subArray = segmentsArray.slice(0, 499);
+            var todoArray = segmentsArray.slice(500, segmentsArray.length-1);
+            return this.approveFilteredSegments(subArray).then( ( ) => {
+                return this.approveFilteredSegments(todoArray);
+            });
+        } else {
+            return API.SEGMENT.approveSegments(segmentsArray).then( ( response ) => {
+                this.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
+                setTimeout(UI.retrieveStatistics, 2000);
+            });
+        }
+    },
+    translateFilteredSegments: function(segmentsArray) {
+        if (segmentsArray.length >= 500) {
+            var subArray = segmentsArray.slice(0, 499);
+            var todoArray = segmentsArray.slice(499, segmentsArray.length);
+            return this.translateFilteredSegments(subArray).then((  ) => {
+                return this.translateFilteredSegments(todoArray);
+            });
+        } else {
+            return API.SEGMENT.translateSegments(segmentsArray).then( ( response ) => {
+                this.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
+                setTimeout(UI.retrieveStatistics, 2000);
+            });
+        }
+    },
+    checkUnchangebleSegments: function(response, status) {
+        if (response.unchangeble_segments.length > 0) {
+            if ( status ===  'APPROVED') {
+                this.showTranslateAllModalWarnirng();
+            } else {
+                this.showApproveAllModalWarnirng();
+            }
+        }
+    },
+    bulkChangeStatusCallback: function( segmentsArray, status) {
+        if (segmentsArray.length > 0) {
+            segmentsArray.forEach( ( item ) => {
+                var segment = SegmentStore.getSegmentByIdToJS(item);
+                if ( segment ) {
+                    SegmentActions.setStatus(item, segment.id_file, status);
+                    SegmentActions.modifiedTranslation(item, segment.id_file, false);
+                    SegmentActions.disableTPOnSegment( segment )
+                }
+            });
+            setTimeout(CatToolActions.reloadSegmentFilter, 500);
+        }
+    },
     toggleSegmentOnBulk: function (sid, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.TOGGLE_SEGMENT_ON_BULK,

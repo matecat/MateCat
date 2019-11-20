@@ -17,7 +17,7 @@ const TAGS_UTILS =  {
 
     decodeText(segment, text) {
         var decoded_text;
-        if (UI.enableTagProjection && !segment.tagged && ( segment.status.toLowerCase() === 'draft' || segment.status.toLowerCase() === 'new')
+        if ( SegmentUtils.checkTPEnabled() && !segment.tagged && ( segment.status.toLowerCase() === 'draft' || segment.status.toLowerCase() === 'new' )
             && !this.checkXliffTagsInText(segment.translation) && this.removeAllTags(segment.segment) !== '' ) {
             decoded_text = this.removeAllTags(text);
         } else {
@@ -596,7 +596,92 @@ const TAGS_UTILS =  {
     removeSelectedClassToTags: function (  ) {
         $('.targetarea .locked.selected').removeClass('selected');
         $('.editor .source .locked').removeClass('selected');
-    }
+    },
+
+    _treatTagsAsBlock: function ( mainStr, transDecoded, replacementsMap ) {
+
+        var placeholderPhRegEx = /(&lt;ph id="mtc_.*?\/&gt;)/g;
+        var reverseMapElements = {};
+
+        var listMainStr = mainStr.match( placeholderPhRegEx );
+
+        if( listMainStr === null ){
+            return [ mainStr, transDecoded, replacementsMap ];
+        }
+
+        /**
+         * UI.execDiff works at character level, when a tag differs only for a part of it in the source/translation it breaks the tag
+         * Ex:
+         *
+         * Those 2 tags differs only by their IDs
+         *
+         * Original string: &lt;ph id="mtc_1" equiv-text="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="/&gt;
+         * New String:      &lt;ph id="mtc_2" equiv-text="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="/&gt;
+         *
+         * After the dom rendering of the TextUtils.dmp.diff_prettyHtml function
+         *
+         *  <span contenteditable="false" class="locked style-tag ">
+         *      <span contenteditable="false" class="locked locked-inside tag-html-container-open">&lt;ph id="mtc_</span>
+         *
+         *      <!-- ###### the only diff is the ID of the tag ###### -->
+         *      <del class="diff">1</del>
+         *      <ins class="diff">2</ins>
+         *      <!-- ###### the only diff is the ID of the tag ###### -->
+         *
+         *      <span>" equiv-text="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ==</span>
+         *      <span contenteditable="false" class="locked locked-inside inside-attribute" data-original="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="></span>
+         *  </span>
+         *
+         *  When this happens, the function TagUtils.transformTextForLockTags fails to find the PH tag by regexp and do not lock the tags or lock it in a wrong way
+         *
+         *  So, transform the string in a single character ( Private Use Unicode char ) for the diff function, place it in a map and reinsert in the diff_obj after the UI.execDiff executed
+         *
+         * //U+E000..U+F8FF, 6,400 Private-Use Characters Unicode, should be impossible to have those in source/target
+         */
+        var charCodePlaceholder = 57344;
+
+        listMainStr.forEach( function( element ) {
+
+            var actualCharCode = String.fromCharCode( charCodePlaceholder );
+
+            /**
+             * override because we already have an element in the map, so the content is the same
+             * ( duplicated TAG, should be impossible but it's easy to cover the case ),
+             * use such character
+             */
+            if ( reverseMapElements[element] ) {
+                actualCharCode = reverseMapElements[element];
+            }
+
+            replacementsMap[actualCharCode] = element;
+            reverseMapElements[element] = actualCharCode; // fill the reverse map with the current element ( override if equal )
+            mainStr = mainStr.replace( element, actualCharCode );
+            charCodePlaceholder++;
+        } );
+
+        var listTransDecoded = transDecoded.match( placeholderPhRegEx );
+        listTransDecoded.forEach( function( element ) {
+
+            var actualCharCode = String.fromCharCode( charCodePlaceholder );
+
+            /**
+             * override because we already have an element in the map, so the content is the same
+             * ( tag is present in source and target )
+             * use such character
+             */
+            if ( reverseMapElements[element] ) {
+                actualCharCode = reverseMapElements[element];
+            }
+
+            replacementsMap[actualCharCode] = element;
+            reverseMapElements[element] = actualCharCode; // fill the reverse map with the current element ( override if equal )
+            transDecoded = transDecoded.replace( element, actualCharCode );
+            charCodePlaceholder++;
+        } );
+
+        return [ mainStr, transDecoded, replacementsMap ];
+
+    },
 
 };
 module.exports =  TAGS_UTILS;

@@ -37,6 +37,7 @@ import SegmentConstants  from '../constants/SegmentConstants';
 import assign  from 'object-assign';
 import TagUtils  from '../utils/tagUtils';
 import TextUtils  from '../utils/textUtils';
+import SegmentUtils  from '../utils/segmentUtils';
 import Immutable  from 'immutable';
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -71,7 +72,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
      * Update all
      */
     updateAll: function (segments, where) {
-        // console.time("Time: updateAll segments" + fid);
         if (this._segments.size > 0 && where === "before") {
             this._segments = this._segments.unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else if (this._segments.size > 0 && where === "after") {
@@ -145,7 +145,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             } else {
                 segment.decoded_translation = TagUtils.decodeText(segment, segment.translation);
                 segment.decoded_source = TagUtils.decodeText(segment, segment.segment);
-                segment.unlocked = UI.isUnlockedSegment(segment);
+                segment.unlocked = SegmentUtils.isUnlockedSegment(segment);
                 segment.warnings = {};
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
                 segment.edit_area_locked = false;
@@ -305,7 +305,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.map(segment => segment.set('decoded_translation', TagUtils.decodeText(segment.toJS(), segment.get('translation'))));
         this._segments = this._segments.map(segment => segment.set('decoded_source', TagUtils.decodeText(segment.toJS(), segment.get('segment'))));
     },
-    setSegmentAsTagged(sid, fid) {
+    setSegmentAsTagged(sid) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'tagged'], true);
@@ -589,7 +589,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning.bind(this, "LXQ"));
     },
     hasSegmentTagProjectionEnabled: function ( segment ) {
-        if (UI.enableTagProjection) {
+        if ( SegmentUtils.checkTPEnabled() ) {
             if ( (segment.status === "NEW" || segment.status === "DRAFT") && (TagUtils.checkXliffTagsInText(segment.segment) && (!TagUtils.checkXliffTagsInText(segment.translation))) ) {
                 return true;
             }
@@ -887,6 +887,9 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.MODIFY_TAB_VISIBILITY:
             SegmentStore.emitChange(action.actionType, action.tabName, action.visible);
+            break;
+        case SegmentConstants.SHOW_FOOTER_MESSAGE:
+            SegmentStore.emitChange(action.actionType, action.sid, action.message);
             break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);
