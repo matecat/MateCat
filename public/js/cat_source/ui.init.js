@@ -27,9 +27,8 @@ $.extend(UI, {
         this.nextUntranslatedSegmentIdByServer = null;
         this.checkUpdatesEvery = 180000;
         this.goingToNext = false;
-        this.setGlobalTagProjection();
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-        if(this.tagModesEnabled && !this.enableTagProjection) {
+        if(this.tagModesEnabled && !SegmentUtils.checkTPEnabled()) {
             UI.body.addClass('tagModes');
         } else {
             UI.body.removeClass('tagModes');

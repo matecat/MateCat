@@ -77,6 +77,7 @@ window.CursorUtils = require('./utils/cursorUtils');
 window.OfflineUtils = require('./utils/offlineUtils');
 window.Shortcuts = require('./utils/shortcuts');
 window.Customizations = require('./utils/customizations');
+window.SegmentUtils = require('./utils/segmentUtils');
 
 window.LXQ = require('./utils/lxq.main');
 window.MBC = require('./utils/mbc.main');

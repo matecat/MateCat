@@ -305,7 +305,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.map(segment => segment.set('decoded_translation', TagUtils.decodeText(segment.toJS(), segment.get('translation'))));
         this._segments = this._segments.map(segment => segment.set('decoded_source', TagUtils.decodeText(segment.toJS(), segment.get('segment'))));
     },
-    setSegmentAsTagged(sid, fid) {
+    setSegmentAsTagged(sid) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'tagged'], true);
@@ -589,7 +589,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning.bind(this, "LXQ"));
     },
     hasSegmentTagProjectionEnabled: function ( segment ) {
-        if (UI.enableTagProjection) {
+        if ( SegmentUtils.checkTPEnabled() ) {
             if ( (segment.status === "NEW" || segment.status === "DRAFT") && (TagUtils.checkXliffTagsInText(segment.segment) && (!TagUtils.checkXliffTagsInText(segment.translation))) ) {
                 return true;
             }

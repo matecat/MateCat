@@ -12,7 +12,7 @@ const Customizations = {
             this.saveCustomization();
         }
         //Tag Projection: the tag-mode is always extended
-        if (UI.enableTagProjection) {
+        if ( SegmentUtils.checkTPEnabled() ) {
             // Disable Tag Crunched Mode
             this.custom.extended_tagmode = true;
         }

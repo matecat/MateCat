@@ -1339,7 +1339,7 @@ var UI = {
             id_after: idAfter,
             by_status: byStatus,
             revision_number: config.revisionNumber,
-            guess_tag_used: !UI.checkCurrentSegmentTPEnabled(segment)
+            guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment)
         };
         if(isSplitted) {
             this.setStatus(segment.status);

@@ -17,7 +17,7 @@ const TAGS_UTILS =  {
 
     decodeText(segment, text) {
         var decoded_text;
-        if (UI.enableTagProjection && !segment.tagged && ( segment.status.toLowerCase() === 'draft' || segment.status.toLowerCase() === 'new')
+        if ( SegmentUtils.checkTPEnabled() && !segment.tagged && ( segment.status.toLowerCase() === 'draft' || segment.status.toLowerCase() === 'new' )
             && !this.checkXliffTagsInText(segment.translation) && this.removeAllTags(segment.segment) !== '' ) {
             decoded_text = this.removeAllTags(text);
         } else {

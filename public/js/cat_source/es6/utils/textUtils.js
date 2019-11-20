@@ -513,7 +513,15 @@ const TEXT_UTILS =  {
             return ((selContainer.hasClass('area')) || (selContainer.hasClass('source')));
         }
     },
-
+    clenaupTextFromPleaceholders : function(text) {
+        text = text
+            .replace( config.lfPlaceholderRegex, "\n" )
+            .replace( config.crPlaceholderRegex, "\r" )
+            .replace( config.crlfPlaceholderRegex, "\r\n" )
+            .replace( config.tabPlaceholderRegex, "\t" )
+            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+        return text;
+    },
 
 };
 module.exports =  TEXT_UTILS;

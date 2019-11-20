@@ -18,6 +18,7 @@ import TagUtils from "../utils/tagUtils";
 import TextUtils from "../utils/textUtils";
 import OfflineUtils from "../utils/offlineUtils";
 import CommonUtils from "../utils/commonUtils";
+import SegmentUtils from "../utils/segmentUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
 import CopySourceModal from '../components/modals/CopySourceModal';
@@ -246,7 +247,17 @@ const SegmentActions = {
             from: from
         });
     },
-
+    /**
+     * Disable the Tag Projection, for example after clicking on the Translation Matches
+     */
+    disableTPOnSegment: function (segmentObj) {
+        var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
+        var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
+        if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
+            SegmentActions.setSegmentAsTagged(currentSegment.sid, currentSegment.id_file);
+            UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged');
+        }
+    },
     setSegmentAsTagged: function (sid, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_TAGGED,
@@ -493,7 +504,7 @@ const SegmentActions = {
         });
     },
     showTagsMenu: function(sid) {
-        if ( !UI.checkCurrentSegmentTPEnabled() ) {
+        if ( !SegmentUtils.checkCurrentSegmentTPEnabled() ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_TAGS_MENU,
                 sid: sid,
@@ -525,6 +536,11 @@ const SegmentActions = {
             actionType: SegmentConstants.FILL_TAGS_IN_TARGET,
             sid: sid
         });
+    },
+    copyTagProjectionInCurrentSegment(sid, translation) {
+        if (!_.isUndefined(translation) && translation.length > 0) {
+            SegmentActions.replaceEditAreaTextContent( sid, null, translation );
+        }
     },
     /************ SPLIT ****************/
     openSplitSegment: function(sid) {
