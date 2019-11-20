@@ -72,7 +72,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
      * Update all
      */
     updateAll: function (segments, where) {
-        // console.time("Time: updateAll segments" + fid);
         if (this._segments.size > 0 && where === "before") {
             this._segments = this._segments.unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else if (this._segments.size > 0 && where === "after") {

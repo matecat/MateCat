@@ -196,9 +196,12 @@ const OfflineUtils = {
         $.each(this.abortedOperations, function() {
             var args = this.args;
             var operation = this.operation;
-            if(operation == 'getSegments') {
-                UI.reloadWarning();
-            } else if( operation == 'setRevision' ){
+            if(operation === 'getSegments') {
+                UI[operation]();
+            } else if( operation === 'setRevision' ){
+                UI[operation](args);
+            } else if( operation === 'getMoreSegments' ){
+                UI.loadingMore = false;
                 UI[operation](args);
             }
         });

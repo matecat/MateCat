@@ -38,7 +38,7 @@ class SegmentFooterTabConflicts extends React.Component {
             let transDecoded = this.translation;
             // Make the diff between the text with the same codification
 
-            [ mainStr, transDecoded, replacementsMap ] = UI._treatTagsAsBlock( mainStr, transDecoded, [] );
+            [ mainStr, transDecoded, replacementsMap ] = TagUtils._treatTagsAsBlock( mainStr, transDecoded, [] );
 
             let diff_obj = TextUtils.execDiff( mainStr, transDecoded );
 

@@ -21,9 +21,6 @@ $.extend(UI, {
         this.loadingMore = false;
         this.noMoreSegmentsAfter = false;
         this.noMoreSegmentsBefore = false;
-
-        this.undoStack = [];
-        this.undoStackPosition = 0;
         this.nextUntranslatedSegmentIdByServer = null;
         this.checkUpdatesEvery = 180000;
         this.goingToNext = false;

@@ -15,7 +15,7 @@ const SegmentUtils = {
             var elemST = config.source_rfc.split("-")[0] + "-" + config.target_rfc.split("-")[0];
             var elemTS = config.target_rfc.split("-")[0] + "-" + config.source_rfc.split("-")[0];
             var supportedPair = (typeof acceptedLanguages[elemST] !== 'undefined' || typeof acceptedLanguages[elemTS] !== 'undefined');
-            this.tpCanActivate = supportedPair > 0 &&
+            this.tpCanActivate = supportedPair &&
                 !config.isReview;
         }
         return this.tpCanActivate;

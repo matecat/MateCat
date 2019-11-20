@@ -94,7 +94,6 @@ class Segment extends React.Component {
             //end old cache
 
             UI.evalNextSegment();
-            UI.clearUndoStack();
 
             $('html').trigger('open'); // used by ui.review to open tab Revise in the footer next-unapproved
 
