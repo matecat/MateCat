@@ -133,11 +133,11 @@
             var next = (currentSegment) ?  SegmentStore.getNextSegment(currentSegment.sid, null, null) : null;
             this.nextSegmentId = (next) ? next.sid : null;
         },
-        //Override by others plugin
+        //Override by  plugin
         gotoNextSegment: function() {
             SegmentActions.gotoNextSegment();
         },
-
+        //Overridden by  plugin
         gotoPreviousSegment: function() {
             var prevSeg = SegmentStore.getPrevSegment();
             if ( prevSeg ) {
@@ -150,6 +150,8 @@
          * This function searches in the current UI first, then falls back
          * to invoke the server and eventually reload the page to the new
          * URL.
+         *
+         * Overridden by  plugin
          */
         openNextTranslated: function (sid) {
             sid = sid || UI.currentSegmentId;
@@ -178,20 +180,11 @@
                 }
             }
         },
-        renderAfterConfirm: function (nextId) {
-            this.render({
-                segmentToOpen: nextId
-            });
-        },
+        //Overridden by  plugin
         isReadonlySegment : function( segment ) {
             return ( segment.readonly == 'true' ||UI.body.hasClass('archived')) ;
         },
-
-        isUnlockedSegment: function ( segment ) {
-            // var readonly = UI.isReadonlySegment(segment) ;
-            // return (segment.ice_locked === "1" && !readonly) && !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid));
-            return !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid));
-        },
+        //Overridden by  plugin
         getStatusForAutoSave : function( segment ) {
             var status ;
             if (segment.hasClass('status-translated')) {
@@ -259,46 +252,6 @@
             }
             $('html').trigger('setCurrentSegment_success', [d, id_segment]);
         },
-        /**
-         * setStatus
-         *
-         * Set the status at UI level, with potential inconsistent state against what is saved server side.
-         * This is necessary for CSS but also for changeStatus function, which relies on this class to
-         * determine the status to assign to the setTranslation during the autosave.
-         *
-         * @param segment DOM element
-         * @param status
-         */
-        setStatus: function(segment, status) {
-            var fid = UI.getSegmentFileId(segment);
-            SegmentActions.setStatus(UI.getSegmentId(segment), fid, status);
-        },
-        /**
-         * This function is an attempt to centralize all distributed logic used to mark
-         * the segment as modified. When a segment is modified we set the class and we set
-         * data. And we trigger an event.
-         *
-         *
-         * @param el
-         */
-        setSegmentModified : function( el, isModified ) {
-            if ( typeof isModified == 'undefined' || !el || el.length === 0 ) {
-                return;
-            }
-
-            if ( isModified ) {
-                SegmentActions.modifiedTranslation(UI.getSegmentId( el ), UI.getSegmentFileId(el), true);
-                el.trigger('modified');
-            } else {
-                SegmentActions.modifiedTranslation(UI.getSegmentId( el ), UI.getSegmentFileId(el), false);
-                el.trigger('modified');
-            }
-        },
-
-        focusSegment: function(segment) {
-            SegmentActions.openSegment(UI.getSegmentId(segment));
-            $(document).trigger('ui:segment:focus', UI.getSegmentId( segment ) );
-        },
 
         getSegmentById: function(id) {
             return $('#segment-' + id);
@@ -364,77 +317,11 @@
             }
             return segmentAfter.original_sid;
         },
-        showApproveAllModalWarnirng: function (  ) {
-            var props = {
-                text: "It was not possible to approve all segments. There are some segments that have not been translated.",
-                successText: "Ok",
-                successCallback: function() {
-                    APP.ModalWindow.onCloseModal();
-                }
-            };
-            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
-        },
-        showTranslateAllModalWarnirng: function (  ) {
-            var props = {
-                text: "It was not possible to translate all segments.",
-                successText: "Ok",
-                successCallback: function() {
-                    APP.ModalWindow.onCloseModal();
-                }
-            };
-            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
-        },
-        approveFilteredSegments: function(segmentsArray) {
-            var self = this;
-            if (segmentsArray.length >= 500) {
-                var subArray = segmentsArray.slice(0, 499);
-                var todoArray = segmentsArray.slice(500, segmentsArray.length-1);
-                return this.approveFilteredSegments(subArray).then(function (  ) {
-                    return self.approveFilteredSegments(todoArray);
-                });
-            } else {
-                return API.SEGMENT.approveSegments(segmentsArray).then(function ( response ) {
-                    self.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
-                    setTimeout(UI.retrieveStatistics, 2000);
-                });
-            }
-        },
-        translateFilteredSegments: function(segmentsArray) {
-            var self = this;
-            if (segmentsArray.length >= 500) {
-                var subArray = segmentsArray.slice(0, 499);
-                var todoArray = segmentsArray.slice(499, segmentsArray.length);
-                return this.translateFilteredSegments(subArray).then(function (  ) {
-                    return self.translateFilteredSegments(todoArray);
-                });
-            } else {
-                return API.SEGMENT.translateSegments(segmentsArray).then(function ( response ) {
-                    self.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
-                    setTimeout(UI.retrieveStatistics, 2000);
-                });
-            }
-        },
-        checkUnchangebleSegments: function(response) {
-            if (response.unchangeble_segments.length > 0) {
-                UI.showTranslateAllModalWarnirng();
-            }
-        },
-        bulkChangeStatusCallback: function( segmentsArray, status) {
-            if (segmentsArray.length > 0) {
-                segmentsArray.forEach(function ( item ) {
-                    var segment = SegmentStore.getSegmentByIdToJS(item);
-                    if ( segment ) {
-                        SegmentActions.setStatus(item, segment.id_file, status);
-                        SegmentActions.modifiedTranslation(item, segment.id_file, false);
-                        SegmentActions.disableTPOnSegment( segment )
-                    }
-                });
-                setTimeout(CatToolActions.reloadSegmentFilter, 500);
-            }
-        },
 
         /**
          * Register tabs in segment footer
+         *
+         * Overridden by  plugin
          */
         registerFooterTabs: function () {
             SegmentActions.registerTab('concordances', true, false);

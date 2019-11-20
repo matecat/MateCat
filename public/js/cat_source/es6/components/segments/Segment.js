@@ -14,6 +14,7 @@ import SegmentFooter from './SegmentFooter';
 import IssuesContainer from './footer-tab-issues/SegmentFooterTabIssues';
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel';
 import TagUtils from '../../utils/tagUtils';
+import SegmentUtils from '../../utils/segmentUtils';
 import SegmentFilter from "../header/cattol/segment_filter/segment_filter";
 import Speech2Text from '../../utils/speech2text';
 
@@ -54,7 +55,7 @@ class Segment extends React.Component {
             segment_classes : [],
             autopropagated: this.props.segment.autopropagated_from != 0,
             showTranslationIssues: this.props.segment.showIssues,
-            unlocked: UI.isUnlockedSegment(this.props.segment),
+            unlocked: SegmentUtils.isUnlockedSegment(this.props.segment),
             readonly: readonly,
             inBulk: false,
             tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')

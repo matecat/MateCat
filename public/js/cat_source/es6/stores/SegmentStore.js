@@ -37,6 +37,7 @@ import SegmentConstants  from '../constants/SegmentConstants';
 import assign  from 'object-assign';
 import TagUtils  from '../utils/tagUtils';
 import TextUtils  from '../utils/textUtils';
+import SegmentUtils  from '../utils/segmentUtils';
 import Immutable  from 'immutable';
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -145,7 +146,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             } else {
                 segment.decoded_translation = TagUtils.decodeText(segment, segment.translation);
                 segment.decoded_source = TagUtils.decodeText(segment, segment.segment);
-                segment.unlocked = UI.isUnlockedSegment(segment);
+                segment.unlocked = SegmentUtils.isUnlockedSegment(segment);
                 segment.warnings = {};
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
                 segment.edit_area_locked = false;

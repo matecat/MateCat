@@ -164,7 +164,7 @@ var UI = {
             propagate: propagation
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
-        UI.setSegmentModified( UI.getSegmentById(options.segment_id), false ) ;
+        SegmentActions.modifiedTranslation(options.segment_id, null, false);
         if ( optStr.callback ) {
             optStr.callback();
         }
@@ -1342,7 +1342,7 @@ var UI = {
             guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment)
         };
         if(isSplitted) {
-            this.setStatus(segment.status);
+            SegmentActions.setStatus(segment.original_sid, null, status);
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(segment.original_sid, segment.sid, status).toString();
         }
         if(!propagate) {
@@ -1469,7 +1469,7 @@ var UI = {
 		if (d.errors.length) {
             this.processErrors(d.errors, 'setTranslation');
         } else if (d.data == 'OK') {
-			this.setStatus(segment, status);
+			SegmentActions.setStatus(id_segment, null, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
             SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending');
@@ -1564,7 +1564,6 @@ var UI = {
         //??
         $('.temp-highlight-tags').remove();
 
-        // UI.setSegmentModified( UI.currentSegment, false ) ;
         var goToNextUntranslated = ($( button ).hasClass( 'next-untranslated' )) ? true : false;
         SegmentActions.removeClassToSegment( sid, 'modified' );
         UI.currentSegment.data( 'modified', false );

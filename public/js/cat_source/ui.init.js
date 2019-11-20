@@ -161,5 +161,5 @@ $.extend(UI, {
             }
             this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
         }
-    },
+    }
 });

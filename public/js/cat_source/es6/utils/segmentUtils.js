@@ -1,5 +1,4 @@
-import SegmentStore from '../stores/SegmentStore';
-
+import _ from 'lodash';
 
 const SegmentUtils = {
 
@@ -43,6 +42,13 @@ const SegmentUtils = {
             return ( tagProjectionEnabled && !isCurrentAlreadyTagged );
         }
         return false;
+    },
+    //********** Tag Projection code end ******************/
+
+    isUnlockedSegment: function ( segment ) {
+        // var readonly = UI.isReadonlySegment(segment) ;
+        // return (segment.ice_locked === "1" && !readonly) && !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid));
+        return !_.isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid));
     },
 };
 

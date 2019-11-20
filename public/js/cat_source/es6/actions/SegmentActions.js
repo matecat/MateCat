@@ -181,7 +181,7 @@ const SegmentActions = {
     },
 
     setStatus: function (sid, fid, status) {
-        if ( sid && fid ) {
+        if ( sid ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.SET_SEGMENT_STATUS,
                 id: sid,
@@ -469,7 +469,8 @@ const SegmentActions = {
             status: status,
             translation: translation
         });
-
+        let $segment = UI.getSegmentById(sid);
+        $segment.trigger('modified');
     },
     replaceEditAreaTextContent: function(sid, fid, text) {
         AppDispatcher.dispatch({
@@ -940,6 +941,76 @@ const SegmentActions = {
         return UI.submitComment(sid, idIssue, data);
     },
 
+    showApproveAllModalWarnirng: function (  ) {
+        var props = {
+            text: "It was not possible to approve all segments. There are some segments that have not been translated.",
+            successText: "Ok",
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
+            }
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+    },
+    showTranslateAllModalWarnirng: function (  ) {
+        var props = {
+            text: "It was not possible to translate all segments.",
+            successText: "Ok",
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
+            }
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+    },
+    approveFilteredSegments: function(segmentsArray) {
+        if (segmentsArray.length >= 500) {
+            var subArray = segmentsArray.slice(0, 499);
+            var todoArray = segmentsArray.slice(500, segmentsArray.length-1);
+            return this.approveFilteredSegments(subArray).then( ( ) => {
+                return this.approveFilteredSegments(todoArray);
+            });
+        } else {
+            return API.SEGMENT.approveSegments(segmentsArray).then( ( response ) => {
+                this.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
+                setTimeout(UI.retrieveStatistics, 2000);
+            });
+        }
+    },
+    translateFilteredSegments: function(segmentsArray) {
+        if (segmentsArray.length >= 500) {
+            var subArray = segmentsArray.slice(0, 499);
+            var todoArray = segmentsArray.slice(499, segmentsArray.length);
+            return this.translateFilteredSegments(subArray).then((  ) => {
+                return this.translateFilteredSegments(todoArray);
+            });
+        } else {
+            return API.SEGMENT.translateSegments(segmentsArray).then( ( response ) => {
+                this.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
+                setTimeout(UI.retrieveStatistics, 2000);
+            });
+        }
+    },
+    checkUnchangebleSegments: function(response, status) {
+        if (response.unchangeble_segments.length > 0) {
+            if ( status ===  'APPROVED') {
+                this.showTranslateAllModalWarnirng();
+            } else {
+                this.showApproveAllModalWarnirng();
+            }
+        }
+    },
+    bulkChangeStatusCallback: function( segmentsArray, status) {
+        if (segmentsArray.length > 0) {
+            segmentsArray.forEach( ( item ) => {
+                var segment = SegmentStore.getSegmentByIdToJS(item);
+                if ( segment ) {
+                    SegmentActions.setStatus(item, segment.id_file, status);
+                    SegmentActions.modifiedTranslation(item, segment.id_file, false);
+                    SegmentActions.disableTPOnSegment( segment )
+                }
+            });
+            setTimeout(CatToolActions.reloadSegmentFilter, 500);
+        }
+    },
     toggleSegmentOnBulk: function (sid, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
