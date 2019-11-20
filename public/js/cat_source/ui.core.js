@@ -209,32 +209,11 @@ var UI = {
         this.body.append(menu);
     },
 
-
-
     // fixHeaderHeightChange: function() {
     //     var headerHeight = $('header .wrapper').height();
     //     $('#outer').css('margin-top', headerHeight + 'px');
     // },
 
-    nextUnloadedResultSegment: function() {
-		var found = '';
-		var last = this.getSegmentId($('section').last());
-		$.each(SearchUtils.searchResultsSegments, function() {
-			if ((!$('#segment-' + this).length) && (parseInt(this) > parseInt(last))) {
-				found = parseInt(this);
-				return false;
-			}
-		});
-		if (found === '') {
-			found = SearchUtils.searchResultsSegments[0];
-		}
-		return found;
-	},
-	footerMessage: function(msg, segment) {
-		$('.footer-message', segment).remove();
-		$('.submenu', segment).append('<li class="footer-message">' + msg + '</div>');
-		$('.footer-message', segment).fadeOut(6000);
-	},
 	getMoreSegments: function(where) {
 
 		if ((where == 'after') && (this.noMoreSegmentsAfter)) {

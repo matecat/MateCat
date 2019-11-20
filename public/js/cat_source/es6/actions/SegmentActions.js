@@ -703,7 +703,11 @@ const SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'deleteGlossaryItem' );
             }).done(function ( data ) {
-                UI.footerMessage( 'A glossary item has been deleted', UI.getSegmentById(id) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: 'A glossary item has been deleted'
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
                     sid: sid,
@@ -718,12 +722,17 @@ const SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'addGlossaryItem' );
             }).done(function ( response ) {
+                let msg;
                 if ( response.data.created_tm_key ) {
-                    UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( sid ) );
+                    msg = 'A Private TM Key has been created for this job';
                 } else {
-                    let msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
-                    UI.footerMessage( msg, UI.getSegmentById( sid ) );
+                    msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
                 }
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: msg
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
                     sid: sid,
@@ -738,7 +747,11 @@ const SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'updateGlossaryItem' );
             }).done( function ( response ) {
-                UI.footerMessage( 'A glossary item has been updated', UI.getSegmentById( sid ) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: 'A glossary item has been updated'
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.CHANGE_GLOSSARY,
                     sid: sid,

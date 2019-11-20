@@ -888,6 +888,9 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.MODIFY_TAB_VISIBILITY:
             SegmentStore.emitChange(action.actionType, action.tabName, action.visible);
             break;
+        case SegmentConstants.SHOW_FOOTER_MESSAGE:
+            SegmentStore.emitChange(action.actionType, action.sid, action.message);
+            break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
