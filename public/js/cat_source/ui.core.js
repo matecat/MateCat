@@ -396,23 +396,12 @@ var UI = {
 
 	updateSegments: function(segments) {
 		$.each(segments, function() {
-			seg = $('#segment-' + this.sid);
-			SegmentActions.replaceEditAreaTextContent(this.sid, UI.getSegmentFileId(seg), this.translation);
-			status = (this.status == 'DRAFT') ? 'draft' : (this.status == 'TRANSLATED') ? 'translated' : (this.status == 'APPROVED') ? 'approved' : (this.status == 'REJECTED') ? 'rejected' : '';
-			UI.setStatus(seg, status);
+			SegmentActions.replaceEditAreaTextContent(this.sid, null, this.translation);
+            SegmentActions.setStatus(this.sid, null, this.status.lowercase());
 		});
 	},
 
-	justSelecting: function(what) {
-		if (window.getSelection().isCollapsed)
-			return false;
-		var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
-		if (what == 'editarea') {
-			return ((selContainer.hasClass('editarea')) && (!selContainer.is(UI.editarea)));
-		} else if (what == 'readonly') {
-			return ((selContainer.hasClass('area')) || (selContainer.hasClass('source')));
-		}
-	},
+
 
     /**
      * removed the #outer div, taking care of extra cleaning needed, like unmounting
@@ -1598,8 +1587,10 @@ var UI = {
 
     },
 
+    // Project completion override this metod
     handleClickOnReadOnly : function(section) {
-        if ( UI.justSelecting('readonly') )   return;
+        if ( TextUtils.justSelecting('readonly') )   return;
+        clearTimeout(UI.selectingReadonly);
         if ( section.hasClass('ice-locked') || section.hasClass('ice-unlocked') ) {
             UI.selectingReadonly = setTimeout(function() {
                 APP.alert({ msg: UI.messageForClickOnIceMatch() });
@@ -1611,24 +1602,20 @@ var UI = {
             UI.readonlyClickDisplay() ;
         }, 200);
     },
-
     readonlyClickDisplay : function() {
         APP.alert({ msg: UI.messageForClickOnReadonly() });
     },
-
     messageForClickOnReadonly : function() {
         var msgArchived = 'Job has been archived and cannot be edited.' ;
         var msgOther = 'This part has not been assigned to you.' ;
         return (UI.body.hasClass('archived'))? msgArchived : msgOther ;
     },
-
     messageForClickOnIceMatch : function() {
         return  'Segment is locked (in-context exact match) and shouldn’t be edited. ' +
             'If you must edit it, click on the padlock icon to the left of the segment. ' +
             'The owner of the project will be notified of any edits.' ;
 
     },
-
     openOptionsPanel: function() {
         if ($(".popup-tm").hasClass('open') ) {
             return false;
@@ -1638,8 +1625,8 @@ var UI = {
         $(".popup-tm").addClass('open').show().animate({ right: '0px' }, 400);
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
-        // Cookies.set('tmpanel-open', 1, { path: '/' });
     },
+
     closeAllMenus: function (e, fromQA) {
         CatToolActions.closeSubHeader();
     },
@@ -1654,13 +1641,7 @@ var UI = {
             msg: 'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.'
         });
     },
-    /**
-     * Executes the replace all for segments if all the params are ok
-     * @returns {boolean}
-     */
-    execReplaceAll: function() {
-        SearchUtils.execReplaceAll();
-    },
+    // overridden by plugin
     inputEditAreaEventHandler: function (e) {
         UI.currentSegment.trigger('modified');
     },

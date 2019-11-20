@@ -503,6 +503,17 @@ const TEXT_UTILS =  {
         return diff_obj;
     },
 
+    justSelecting: function(what) {
+        if (window.getSelection().isCollapsed)
+            return false;
+        var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
+        if (what == 'editarea') {
+            return ((selContainer.hasClass('editarea')) && (!selContainer.is(UI.editarea)));
+        } else if (what == 'readonly') {
+            return ((selContainer.hasClass('area')) || (selContainer.hasClass('source')));
+        }
+    },
+
 
 };
 module.exports =  TEXT_UTILS;

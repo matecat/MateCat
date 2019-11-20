@@ -57,9 +57,9 @@ $.extend(UI, {
 
             this.lastUpdateRequested = new Date();
 
-            // setTimeout(function() {
-            // 	UI.getUpdates();
-            // }, UI.checkUpdatesEvery);
+            setTimeout(function() {
+            	UI.getUpdates();
+            }, UI.checkUpdatesEvery);
 
         }
 
