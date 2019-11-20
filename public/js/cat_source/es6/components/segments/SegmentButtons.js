@@ -60,7 +60,7 @@ class SegmentButton extends React.Component {
         let enableGoToNext = !_.isUndefined(nextSegment) && nextSegment.status !== "APPROVED";
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
-        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && nextSegment.revision_number === config.revisionNumber: enableGoToNext;
+        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && ( nextSegment.revision_number === config.revisionNumber || _.isNull(nextSegment.revision_number) )  : enableGoToNext;
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
