@@ -83,12 +83,12 @@ var UI = {
 	changeStatus: function(el, status, byStatus, callback) {
         var segment = $(el).closest("section");
         var segment_id = this.getSegmentId(segment);
-
+        var segObj = SegmentStore.getSegmentByIdToJS(segment_id);
         var opts = {
             segment_id      : segment_id,
             status          : status,
             byStatus        : byStatus,
-            propagation     : false,
+            propagation     : segObj.propagable,
             callback        : callback
         };
 
@@ -104,6 +104,7 @@ var UI = {
                     "or keep this translation only for this segment?",
                 successText: 'Only this segment',
                 successCallback: function(){
+                        opts.propagation = false;
                         UI.preExecChangeStatus(opts);
                         APP.ModalWindow.onCloseModal();
                     },
@@ -133,7 +134,7 @@ var UI = {
             if(config.isReview) {
                 return true;
             } else {
-                return segment.status !== "NEW" && segment.status !== "DRAFT";
+                return segment.status.toLowerCase() !== "new" && segment.status.toLocaleString() !== "draft";
             }
         }
         return false;
@@ -161,7 +162,7 @@ var UI = {
             status: status,
             caller: false,
             byStatus: byStatus,
-            propagate: propagation
+            propagate: propagation,
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
         SegmentActions.modifiedTranslation(options.segment_id, null, false);
@@ -1334,7 +1335,7 @@ var UI = {
 
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
-            if((!byStatus)&&(propagate)) {
+            if( propagate ) {
                 this.tempReqArguments = null;
                 SegmentActions.propagateTranslation(options.id_segment, status);
             }
