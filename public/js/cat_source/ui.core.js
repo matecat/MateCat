@@ -1332,7 +1332,7 @@ UI = {
     },
 
     chooseAlternative: function(w) {
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
+        this.copyAlternativeInEditarea( UI.transformTextForLockTags($('.sugg-target .realData', w ).html() ) );
         this.editarea.focus();
         SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         this.disableTPOnSegment();
