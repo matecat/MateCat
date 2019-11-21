@@ -46,13 +46,20 @@ class SegmentFooterTabConflicts extends React.Component {
             Object.keys( diff_obj ).forEach( ( element ) => {
                 if( replacementsMap[ diff_obj[ element ][ 1 ] ] ){
                     diff_obj[ element ][ 1 ] = replacementsMap[ diff_obj[ element ][ 1 ] ];
+                } else {
+                    Object.keys( replacementsMap ).forEach( (replaceElem) => {
+                        if ( diff_obj[ element ][ 1 ].indexOf(replaceElem) !== -1 ) {
+                            diff_obj[ element ][ 1 ] = diff_obj[ element ][ 1 ].replace(replaceElem, replacementsMap[replaceElem]);
+                        }
+                    });
                 }
             } );
 
             let translation = TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj));
+            let source = TagUtils.transformTextForLockTags(escapedSegment);
             html.push(<ul className="graysmall" data-item={(index + 1)} key={'editable' + index} onDoubleClick={()=>self.chooseAlternative(this.translation)}>
                         <li className="sugg-source">
-                            <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
+                            <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(source)}/>
                         </li>
                         <li className="b sugg-target">
                             {/*<span className="graysmall-message">{'CTRL' + (index + 1)}</span>*/}

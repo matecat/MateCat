@@ -57,10 +57,10 @@ class SegmentButton extends React.Component {
         const classDisable = (this.props.disabled) ? 'disabled' : '';
         let nextButton, currentButton;
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
-        let enableGoToNext = !_.isUndefined(nextSegment) && nextSegment.status === "APPROVED";
+        let enableGoToNext = !_.isUndefined(nextSegment) && nextSegment.status !== "APPROVED";
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
-        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && nextSegment.revision_number === config.revisionNumber: enableGoToNext;
+        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && ( nextSegment.revision_number === config.revisionNumber || _.isNull(nextSegment.revision_number) )  : enableGoToNext;
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}

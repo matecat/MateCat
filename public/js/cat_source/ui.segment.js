@@ -247,6 +247,7 @@
             SegmentActions.setNextUntranslatedSegmentFromServer(d.nextSegmentId);
 
             var segment = SegmentStore.getSegmentByIdToJS(id_segment);
+            if ( !segment ) return;
             if (config.alternativesEnabled && !segment.alternatives) {
                 this.getTranslationMismatches(id_segment);
             }
