@@ -38,6 +38,10 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             SegmentActions.openSelectedSegment();
+        }).on('keyup.shortcuts', null, 'cmd', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            SegmentActions.openSelectedSegment();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
