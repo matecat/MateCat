@@ -134,7 +134,7 @@ var UI = {
             if(config.isReview) {
                 return true;
             } else {
-                return segment.status !== "NEW" && segment.status !== "DRAFT";
+                return segment.status.toLowerCase() !== "new" && segment.status.toLocaleString() !== "draft";
             }
         }
         return false;
@@ -162,7 +162,7 @@ var UI = {
             status: status,
             caller: false,
             byStatus: byStatus,
-            propagate: propagation
+            propagate: propagation,
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
         SegmentActions.modifiedTranslation(options.segment_id, null, false);
