@@ -38,7 +38,7 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             SegmentActions.openSelectedSegment();
-        }).on('keyup.shortcuts', null, 'cmd', function(e) {
+        }).on('keyup.shortcuts', null, 'meta', function(e) {
             e.preventDefault();
             e.stopPropagation();
             SegmentActions.openSelectedSegment();
