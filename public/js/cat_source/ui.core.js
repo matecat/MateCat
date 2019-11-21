@@ -1276,6 +1276,12 @@ UI = {
             Object.keys( diff_obj ).forEach( ( element ) => {
                 if( replacementsMap[ diff_obj[ element ][ 1 ] ] ){
                     diff_obj[ element ][ 1 ] = replacementsMap[ diff_obj[ element ][ 1 ] ];
+                } else {
+                    Object.keys( replacementsMap ).forEach( (replaceElem) => {
+                        if ( diff_obj[ element ][ 1 ].indexOf(replaceElem) !== -1 ) {
+                            diff_obj[ element ][ 1 ] = diff_obj[ element ][ 1 ].replace(replaceElem, replacementsMap[replaceElem]);
+                        }
+                    });
                 }
             } );
 
@@ -1326,7 +1332,7 @@ UI = {
     },
 
     chooseAlternative: function(w) {
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
+        this.copyAlternativeInEditarea( UI.transformTextForLockTags($('.sugg-target .realData', w ).html() ) );
         this.editarea.focus();
         SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         this.disableTPOnSegment();
