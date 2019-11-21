@@ -229,7 +229,7 @@ const SegmentActions = {
                 SegmentActions.setSegmentAsTagged(this.sid);
 
                 // if status is not set to draft, the segment content is not displayed
-                SegmentActions.setStatus(segment.sid, null, status); // now the status, too, is propagated
+                SegmentActions.setStatus(this.sid, null, status); // now the status, too, is propagated
 
                 SegmentActions.setSegmentPropagation(this.sid, null, true ,segment.sid);
 
