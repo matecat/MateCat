@@ -1276,6 +1276,12 @@ UI = {
             Object.keys( diff_obj ).forEach( ( element ) => {
                 if( replacementsMap[ diff_obj[ element ][ 1 ] ] ){
                     diff_obj[ element ][ 1 ] = replacementsMap[ diff_obj[ element ][ 1 ] ];
+                } else {
+                    Object.keys( replacementsMap ).forEach( (replaceElem) => {
+                        if ( diff_obj[ element ][ 1 ].indexOf(replaceElem) !== -1 ) {
+                            diff_obj[ element ][ 1 ] = diff_obj[ element ][ 1 ].replace(replaceElem, replacementsMap[replaceElem]);
+                        }
+                    });
                 }
             } );
 
