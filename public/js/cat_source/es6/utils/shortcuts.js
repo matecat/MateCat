@@ -89,7 +89,7 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "alt+k",
-                        "mac": "ctrl+alt+k",
+                        "mac": "meta+k",
                     }
                 },
                 "openSettings": {
@@ -97,7 +97,7 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "ctrl+shift+l",
-                        "mac": "Meta+shift+l",
+                        "mac": "meta+shift+l",
                     }
                 },
                 "toggleTagDisplayMode": {
@@ -105,7 +105,7 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "ctrl+shift+s",
-                        "mac": "Meta+shift+s",
+                        "mac": "meta+shift+s",
                     }
                 },
                 "openComments": {
@@ -113,7 +113,7 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "ctrl+shift+c",
-                        "mac": "Meta+shift+c",
+                        "mac": "meta+shift+c",
                     }
                 },
                 "openIssuesPanel": {
@@ -121,7 +121,15 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "ctrl+shift+a",
-                        "mac": "Meta+shift+a",
+                        "mac": "meta+shift+a",
+                    }
+                },
+                "navigateIssues": {
+                    "label": "Navigate issues penel to add one",
+                    "equivalent": "",
+                    "keystrokes": {
+                        "standard": "ctrl+alt+arrows-enter",
+                        "mac": "ctrl+alt+arrows-enter",
                     }
                 },
                 "copyContribution1": {
@@ -162,14 +170,6 @@ const Shortcuts = {
                     "keystrokes": {
                         "standard": "alt+t",
                         "mac": "alt+t",
-                    }
-                },
-                "navigateIssues": {
-                    "label": "Navigate issues penel to add one",
-                    "equivalent": "",
-                    "keystrokes": {
-                        "standard": "ctrl+alt+arrows-enter",
-                        "mac": "ctrl+alt+arrows-enter",
                     }
                 },
                 "navigateTabs": {

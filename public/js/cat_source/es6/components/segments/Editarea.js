@@ -194,7 +194,7 @@ class Editarea extends React.Component {
         });
     }
     openConcordance(e) {
-        if (e.altKey && e.key === 'k') {
+        if ( (e.altKey && e.key === 'k') || (e.metaKey && e.key === 'k')) {
             e.preventDefault();
             var selection = window.getSelection();
             if ( selection.type === 'Range' ) { // something is selected
