@@ -185,10 +185,10 @@ Speech2Text.init  = function () {
 
                 if (!Speech2Text.isStopingRecognition) {
                     var html  = Speech2Text.linebreak(Speech2Text.finalTranscript)
-                        + Speech2Text.linebreak(Speech2Text.interimTranscript)
-                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), UI.getSegmentFileId(Speech2Text.targetElement), html);
-
-                    UI.setSegmentModified( Speech2Text.targetElement.closest('section'), true );
+                        + Speech2Text.linebreak(Speech2Text.interimTranscript);
+                    let sid = UI.getSegmentId(Speech2Text.targetElement);
+                    SegmentActions.replaceEditAreaTextContent(sid, UI.getSegmentFileId(Speech2Text.targetElement), html);
+                    SegmentActions.modifiedTranslation(sid, null, true);
                 }
             },
             linebreak: function (s) {

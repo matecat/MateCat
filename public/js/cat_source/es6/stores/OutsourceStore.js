@@ -1,4 +1,4 @@
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from './AppDispatcher';
 import {EventEmitter} from 'events';
 import OutsourceConstants  from '../constants/OutsourceConstants';
 import assign  from 'object-assign';

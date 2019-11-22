@@ -11,7 +11,7 @@ $.extend(UI, {
         this.isChrome = (typeof window.chrome != 'undefined');
         this.isFirefox = (typeof navigator.mozApps != 'undefined');
 
-        this.isMac = (navigator.platform == 'MacIntel') ? true : false;
+        this.isMac = (navigator.platform === 'MacIntel');
         this.body = $('body');
         // this.firstLoad = (options.firstLoad || false);
         this.initSegNum = 100; // number of segments initially loaded
@@ -21,15 +21,11 @@ $.extend(UI, {
         this.loadingMore = false;
         this.noMoreSegmentsAfter = false;
         this.noMoreSegmentsBefore = false;
-
-        this.undoStack = [];
-        this.undoStackPosition = 0;
         this.nextUntranslatedSegmentIdByServer = null;
         this.checkUpdatesEvery = 180000;
         this.goingToNext = false;
-        this.setGlobalTagProjection();
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-        if(this.tagModesEnabled && !this.enableTagProjection) {
+        if(this.tagModesEnabled && !SegmentUtils.checkTPEnabled()) {
             UI.body.addClass('tagModes');
         } else {
             UI.body.removeClass('tagModes');
@@ -57,9 +53,9 @@ $.extend(UI, {
 
             this.lastUpdateRequested = new Date();
 
-            // setTimeout(function() {
-            // 	UI.getUpdates();
-            // }, UI.checkUpdatesEvery);
+            setTimeout(function() {
+            	UI.getUpdates();
+            }, UI.checkUpdatesEvery);
 
         }
 
@@ -75,7 +71,6 @@ $.extend(UI, {
         // of SegmentFilter, see below.
         UI.firstLoad = true;
         UI.body = $('body');
-        UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
         UI.checkCrossLanguageSettings();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
@@ -128,13 +123,6 @@ $.extend(UI, {
         this.recoverUnsavedSegmentsTimer = false;
         this.setTranslationTail = [];
         this.executingSetTranslation = false;
-        this.localStorageArray = [];
-        this.isPrivateSafari = (this.isSafari) && (!this.isLocalStorageNameSupported());
-        this.consecutiveCopySourceNum = [];
-        this.setComingFrom();
-        setInterval(function() {
-            UI.consecutiveCopySourceNum = [];
-        }, config.copySourceInterval*1000);
 
         if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
@@ -162,4 +150,16 @@ $.extend(UI, {
             UI.reloadQualityReport();
         }
     },
+    detectStartSegment: function() {
+        if (this.segmentToScrollAtRender) {
+            this.startSegmentId = this.segmentToScrollAtRender;
+        } else {
+            var hash = CommonUtils.parsedHash.segmentId;
+            config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage();
+            if (!config.last_opened_segment) {
+                config.last_opened_segment = config.first_job_segment;
+            }
+            this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
+        }
+    }
 });

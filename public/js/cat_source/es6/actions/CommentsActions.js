@@ -1,4 +1,4 @@
-import AppDispatcher from '../dispatcher/AppDispatcher';
+import AppDispatcher from '../stores/AppDispatcher';
 import CommentsConstants from '../constants/CommentsConstants';
 import MBC from '../utils/mbc.main';
 const CommentsActions = {

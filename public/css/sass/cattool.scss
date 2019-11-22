@@ -237,10 +237,9 @@ Styles from other css files should be ported over time.
 	color: #000000;
   }
 
-  &:active {
-	background-color: #fff;
-	background-image: -webkit-linear-gradient(top, #fff, #f4f4f4);
-  }
+    &:active {
+        background-color: #fff;
+    }
 }
 
 

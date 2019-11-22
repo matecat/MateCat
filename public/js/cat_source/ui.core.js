@@ -2,13 +2,10 @@
 	Component: ui.core
  */
 var UI = {
-    pee_error_level_map: {
-        0: "",
-        1: "edit_1",
-        2: "edit_2",
-        3: "edit_3"
-    },
-
+    /**
+     * Open file menu in Header
+     * @returns {boolean}
+     */
 	toggleFileMenu: function() {
         var jobMenu = $('#jobMenu');
 		if (jobMenu.is(':animated')) {
@@ -54,6 +51,10 @@ var UI = {
         $segment = $(editarea_or_segment).closest('section');
         segment = SegmentStore.getSegmentByIdToJS( UI.getSegmentId($segment) );
 
+        if ( !$segment.length ) {
+            return;
+        }
+
 		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
                                                       // seems to be the previous current segment
 
@@ -71,7 +72,6 @@ var UI = {
         this.currentSegment = undefined;
         this.currentFile = undefined;
         this.currentFileId = undefined;
-
     },
 
     /**
@@ -83,12 +83,12 @@ var UI = {
 	changeStatus: function(el, status, byStatus, callback) {
         var segment = $(el).closest("section");
         var segment_id = this.getSegmentId(segment);
-
+        var segObj = SegmentStore.getSegmentByIdToJS(segment_id);
         var opts = {
             segment_id      : segment_id,
             status          : status,
             byStatus        : byStatus,
-            propagation     : false,
+            propagation     : segObj.propagable,
             callback        : callback
         };
 
@@ -104,6 +104,7 @@ var UI = {
                     "or keep this translation only for this segment?",
                 successText: 'Only this segment',
                 successCallback: function(){
+                        opts.propagation = false;
                         UI.preExecChangeStatus(opts);
                         APP.ModalWindow.onCloseModal();
                     },
@@ -133,7 +134,7 @@ var UI = {
             if(config.isReview) {
                 return true;
             } else {
-                return segment.status !== "NEW" && segment.status !== "DRAFT";
+                return segment.status.toLowerCase() !== "new" && segment.status.toLocaleString() !== "draft";
             }
         }
         return false;
@@ -161,10 +162,10 @@ var UI = {
             status: status,
             caller: false,
             byStatus: byStatus,
-            propagate: propagation
+            propagate: propagation,
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
-        UI.setSegmentModified( UI.getSegmentById(options.segment_id), false ) ;
+        SegmentActions.modifiedTranslation(options.segment_id, null, false);
         if ( optStr.callback ) {
             optStr.callback();
         }
@@ -195,119 +196,10 @@ var UI = {
 
     },
 
-    copySource: function() {
-        var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
-
-        // Attention I use .text to obtain a entity conversion,
-        // by I ignore the quote conversion done before adding to the data-original
-        // I hope it still works.
-
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.currentSegment), UI.getSegmentFileId(this.currentSegment), source_val);
-        SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-        UI.setSegmentModified(UI.currentSegment, true);
-        this.segmentQA(UI.currentSegment );
-        if (config.translation_matches_enabled) {
-            SegmentActions.setChoosenSuggestion(UI.currentSegmentId, null);
-        }
-        $(this.currentSegment).trigger('copySourceToTarget');
-
-        if(!config.isReview) {
-            var alreadyCopied = false;
-            $.each(UI.consecutiveCopySourceNum, function (index) {
-                if(this == UI.currentSegmentId) alreadyCopied = true;
-            });
-            if(!alreadyCopied) {
-                this.consecutiveCopySourceNum.push(this.currentSegmentId);
-            }
-            if(this.consecutiveCopySourceNum.length > 2) {
-                this.copyAllSources();
-            }
-        }
-
-    },
-
-    copyAllSources: function() {
-        if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
-            var props = {
-                confirmCopyAllSources: UI.continueCopyAllSources.bind(this),
-                abortCopyAllSources: UI.abortCopyAllSources.bind(this)
-            };
-
-            APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
-        } else {
-            this.consecutiveCopySourceNum = [];
-        }
-
-    },
-    continueCopyAllSources: function () {
-        this.consecutiveCopySourceNum = [];
-        UI.unmountSegments();
-        $('#outer').addClass('loading');
-        APP.doRequest({
-            data: {
-                action: 'copyAllSource2Target',
-                id_job: config.id_job,
-                pass: config.password,
-                revision_number: config.revisionNumber
-            },
-            error: function() {
-                var notification = {
-                    title: 'Error',
-                    text: 'Error copying all sources to target. Try again!',
-                    type: 'error',
-                    position: "bl"
-                };
-                APP.addNotification(notification);
-                UI.render({
-                    segmentToOpen: UI.currentSegmentId
-                });
-            },
-            success: function(d) {
-                if(d.errors.length) {
-                    APP.closePopup();
-                    var notification = {
-                        title: 'Error',
-                        text: d.errors[0].message,
-                        type: 'error',
-                        position: "bl"
-                    };
-                    APP.addNotification(notification);
-                } else {
-                    UI.unmountSegments();
-                    UI.render({
-                        segmentToOpen: UI.currentSegmentId
-                    });
-                }
-
-            }
-        });
-    },
-    abortCopyAllSources: function () {
-        this.consecutiveCopySourceNum = [];
-    },
-    setComingFrom: function () {
-        var page = (config.isReview)? 'revise' : 'translate';
-        Cookies.set('comingFrom' , page, { path: '/' });
-    },
-
-    clearMarks: function (str) {
-        str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
-        str = str.replace(/<span data-id="[^"]+" class="unusedGlossaryTerm">(.*?)<\/span>/gi, "$1");
-        return str;
-    },
-
-	copyToNextIfSame: function(nextUntranslatedSegment) {
-		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
-			if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
-                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(nextUntranslatedSegment), UI.getSegmentFileId(nextUntranslatedSegment), this.editarea.text());
-			}
-		}
-	},
-
     createJobMenu: function() {
         var menu = '<nav id="jobMenu" class="topMenu">' +
             '<ul class="gotocurrentsegment">' +
-            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="javascript:void(0)"><span class="label">Go to current segment</span></a></li>' +
+            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a>Go to current segment</a><span>' +Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase() + '</span></li>' +
             '<li class="firstSegment" ><a href="#"><span class="label">Go to first segment of the file</span></a></li>' +
             '</ul>' +
             '<div class="separator"></div>' +
@@ -318,124 +210,18 @@ var UI = {
         '</svg>';
 
         $.each(config.firstSegmentOfFiles, function() {
-            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20) + iconTick + '</a></li>';
+            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + CommonUtils.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20) + iconTick + '</a></li>';
         });
         menu += '</ul>' +
             '</nav>';
         this.body.append(menu);
     },
 
-    getIconClass: function (ext) {
-        c = (
-            (ext == 'doc') ||
-            (ext == 'dot') ||
-            (ext == 'docx') ||
-            (ext == 'dotx') ||
-            (ext == 'docm') ||
-            (ext == 'dotm') ||
-            (ext == 'odt') ||
-            (ext == 'sxw')
-        ) ? 'extdoc' :
-            (
-                (ext == 'pot') ||
-                (ext == 'pps') ||
-                (ext == 'ppt') ||
-                (ext == 'potm') ||
-                (ext == 'potx') ||
-                (ext == 'ppsm') ||
-                (ext == 'ppsx') ||
-                (ext == 'pptm') ||
-                (ext == 'pptx') ||
-                (ext == 'odp') ||
-                (ext == 'sxi')
-            ) ? 'extppt' :
-                (
-                    (ext == 'htm') ||
-                    (ext == 'html')
-                ) ? 'exthtm' :
-                    (ext == 'pdf') ? 'extpdf' :
-                        (
-                            (ext == 'xls') ||
-                            (ext == 'xlt') ||
-                            (ext == 'xlsm') ||
-                            (ext == 'xlsx') ||
-                            (ext == 'xltx') ||
-                            (ext == 'ods') ||
-                            (ext == 'sxc') ||
-                            (ext == 'csv')
-                        ) ? 'extxls' :
-                            (ext == 'txt') ? 'exttxt' :
-                                (ext == 'ttx') ? 'extttx' :
-                                    (ext == 'itd') ? 'extitd' :
-                                        (ext == 'xlf') ? 'extxlf' :
-                                            (ext == 'mif') ? 'extmif' :
-                                                (ext == 'idml') ? 'extidd' :
-                                                    (ext == 'xtg') ? 'extqxp' :
-                                                        (ext == 'xml') ? 'extxml' :
-                                                            (ext == 'rc') ? 'extrcc' :
-                                                                (ext == 'resx') ? 'extres' :
-                                                                    (ext == 'sgml') ? 'extsgl' :
-                                                                        (ext == 'sgm') ? 'extsgm' :
-                                                                            (ext == 'properties') ? 'extpro' :
-                                                                                'extxif';
-        return c;
-    },
-
-	detectFirstLast: function() {
-		var s = $('section');
-		this.firstSegment = s.first();
-		this.lastSegment = s.last();
-	},
-	detectRefSegId: function(where) {
-        return (where == 'after') ? SegmentStore.getLastSegmentId() : (where == 'before') ? SegmentStore.getFirstSegmentId() : '';
-	},
-	detectStartSegment: function() {
-		if (this.segmentToScrollAtRender) {
-			this.startSegmentId = this.segmentToScrollAtRender;
-		} else {
-			var hash = CommonUtils.parsedHash.segmentId;
-            config.last_opened_segment = UI.getLastSegmentFromLocalStorage();
-            if (!config.last_opened_segment) {
-                config.last_opened_segment = config.first_job_segment;
-            }
-			this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
-		}
-	},
-    getLastSegmentFromLocalStorage: function () {
-        return localStorage.getItem(UI.localStorageCurrentSegmentId);
-    },
-    setLastSegmentFromLocalStorage: function (segmentId) {
-        try {
-            localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
-        } catch (e) {
-            UI.clearStorage("currentSegmentId");
-            localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
-        }
-    },
     // fixHeaderHeightChange: function() {
     //     var headerHeight = $('header .wrapper').height();
     //     $('#outer').css('margin-top', headerHeight + 'px');
     // },
 
-    nextUnloadedResultSegment: function() {
-		var found = '';
-		var last = this.getSegmentId($('section').last());
-		$.each(SearchUtils.searchResultsSegments, function() {
-			if ((!$('#segment-' + this).length) && (parseInt(this) > parseInt(last))) {
-				found = parseInt(this);
-				return false;
-			}
-		});
-		if (found === '') {
-			found = SearchUtils.searchResultsSegments[0];
-		}
-		return found;
-	},
-	footerMessage: function(msg, segment) {
-		$('.footer-message', segment).remove();
-		$('.submenu', segment).append('<li class="footer-message">' + msg + '</div>');
-		$('.footer-message', segment).fadeOut(6000);
-	},
 	getMoreSegments: function(where) {
 
 		if ((where == 'after') && (this.noMoreSegmentsAfter)) {
@@ -455,7 +241,7 @@ var UI = {
 
 		this.loadingMore = true;
 
-		var segId = this.detectRefSegId(where);
+		var segId = (where === 'after') ? SegmentStore.getLastSegmentId() : (where === 'before') ? SegmentStore.getFirstSegmentId() : '';
 
 		if (where == 'before') {
 			$("section").each(function() {
@@ -482,7 +268,7 @@ var UI = {
 				where: where
 			},
 			error: function() {
-				OfflineUtils.failedConnection(0, 'getMoreSegments');
+				OfflineUtils.failedConnection(where,'getMoreSegments');
 			},
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
@@ -618,22 +404,9 @@ var UI = {
 
 	updateSegments: function(segments) {
 		$.each(segments, function() {
-			seg = $('#segment-' + this.sid);
-			SegmentActions.replaceEditAreaTextContent(this.sid, UI.getSegmentFileId(seg), this.translation);
-			status = (this.status == 'DRAFT') ? 'draft' : (this.status == 'TRANSLATED') ? 'translated' : (this.status == 'APPROVED') ? 'approved' : (this.status == 'REJECTED') ? 'rejected' : '';
-			UI.setStatus(seg, status);
+			SegmentActions.replaceEditAreaTextContent(this.sid, null, this.translation);
+            SegmentActions.setStatus(this.sid, null, this.status.lowercase());
 		});
-	},
-
-	justSelecting: function(what) {
-		if (window.getSelection().isCollapsed)
-			return false;
-		var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
-		if (what == 'editarea') {
-			return ((selContainer.hasClass('editarea')) && (!selContainer.is(UI.editarea)));
-		} else if (what == 'readonly') {
-			return ((selContainer.hasClass('area')) || (selContainer.hasClass('source')));
-		}
 	},
 
     /**
@@ -650,42 +423,6 @@ var UI = {
         $('#outer').empty();
     },
 
-    placeCaretAtEnd: function(el) {
-
-		 $(el).focus();
-		 if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
-			var range = document.createRange();
-			range.selectNodeContents(el);
-			range.collapse(false);
-			var sel = window.getSelection();
-			sel.removeAllRanges();
-			sel.addRange(range);
-		 } else if (typeof document.body.createTextRange != "undefined") {
-			var textRange = document.body.createTextRange();
-			textRange.moveToElementText(el);
-			textRange.collapse(false);
-			textRange.select();
-		 }
-
-	},
-	registerQACheck: function() {
-		clearTimeout(UI.pendingQACheck);
-		UI.pendingQACheck = setTimeout(function() {
-			UI.segmentQA(UI.currentSegment);
-		}, config.segmentQACheckInterval);
-	},
-	renderUntranslatedOutOfView: function() {
-		config.last_opened_segment = this.nextUntranslatedSegmentId;
-		var segmentToOpen = (this.nextUntranslatedSegmentId) ? this.nextUntranslatedSegmentId : this.nextSegmentId;
-        window.location.hash = segmentToOpen;
-        UI.unmountSegments();
-		this.render({
-            segmentToOpen: segmentToOpen
-        });
-	},
-	reloadWarning: function() {
-		this.renderUntranslatedOutOfView();
-	},
 	pointBackToSegment: function(segmentId) {
 		if (segmentId === '') {
 			this.startSegmentId = config.last_opened_segment;
@@ -695,11 +432,6 @@ var UI = {
             UI.unmountSegments();
 			this.render();
 		}
-	},
-	removeButtons: function(byButton) {
-		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
-		$('#' + segment.attr('id') + '-buttons').empty();segmentPointer
-		$('p.warnings', segment).empty();
 	},
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them
@@ -850,233 +582,6 @@ var UI = {
         }
     },
 
-    _treatTagsAsBlock: function ( mainStr, transDecoded, replacementsMap ) {
-
-        var placeholderPhRegEx = /(&lt;ph id="mtc_.*?\/&gt;)/g;
-        var reverseMapElements = {};
-
-        var listMainStr = mainStr.match( placeholderPhRegEx );
-
-        if( listMainStr === null ){
-            return [ mainStr, transDecoded, replacementsMap ];
-        }
-
-        /**
-         * UI.execDiff works at character level, when a tag differs only for a part of it in the source/translation it breaks the tag
-         * Ex:
-         *
-         * Those 2 tags differs only by their IDs
-         *
-         * Original string: &lt;ph id="mtc_1" equiv-text="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="/&gt;
-         * New String:      &lt;ph id="mtc_2" equiv-text="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="/&gt;
-         *
-         * After the dom rendering of the TextUtils.dmp.diff_prettyHtml function
-         *
-         *  <span contenteditable="false" class="locked style-tag ">
-         *      <span contenteditable="false" class="locked locked-inside tag-html-container-open">&lt;ph id="mtc_</span>
-         *
-         *      <!-- ###### the only diff is the ID of the tag ###### -->
-         *      <del class="diff">1</del>
-         *      <ins class="diff">2</ins>
-         *      <!-- ###### the only diff is the ID of the tag ###### -->
-         *
-         *      <span>" equiv-text="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ==</span>
-         *      <span contenteditable="false" class="locked locked-inside inside-attribute" data-original="base64:JXt1c2VyX2NvbnRleHQuZGltX2NpdHl8fQ=="></span>
-         *  </span>
-         *
-         *  When this happens, the function TagUtils.transformTextForLockTags fails to find the PH tag by regexp and do not lock the tags or lock it in a wrong way
-         *
-         *  So, transform the string in a single character ( Private Use Unicode char ) for the diff function, place it in a map and reinsert in the diff_obj after the UI.execDiff executed
-         *
-         * //U+E000..U+F8FF, 6,400 Private-Use Characters Unicode, should be impossible to have those in source/target
-         */
-        var charCodePlaceholder = 57344;
-
-        listMainStr.forEach( function( element ) {
-
-            var actualCharCode = String.fromCharCode( charCodePlaceholder );
-
-            /**
-             * override because we already have an element in the map, so the content is the same
-             * ( duplicated TAG, should be impossible but it's easy to cover the case ),
-             * use such character
-             */
-            if ( reverseMapElements[element] ) {
-                actualCharCode = reverseMapElements[element];
-            }
-
-            replacementsMap[actualCharCode] = element;
-            reverseMapElements[element] = actualCharCode; // fill the reverse map with the current element ( override if equal )
-            mainStr = mainStr.replace( element, actualCharCode );
-            charCodePlaceholder++;
-        } );
-
-        var listTransDecoded = transDecoded.match( placeholderPhRegEx );
-        listTransDecoded.forEach( function( element ) {
-
-            var actualCharCode = String.fromCharCode( charCodePlaceholder );
-
-            /**
-             * override because we already have an element in the map, so the content is the same
-             * ( tag is present in source and target )
-             * use such character
-             */
-            if ( reverseMapElements[element] ) {
-                actualCharCode = reverseMapElements[element];
-            }
-
-            replacementsMap[actualCharCode] = element;
-            reverseMapElements[element] = actualCharCode; // fill the reverse map with the current element ( override if equal )
-            transDecoded = transDecoded.replace( element, actualCharCode );
-            charCodePlaceholder++;
-        } );
-
-        return [ mainStr, transDecoded, replacementsMap ];
-
-    },
-
-	setDownloadStatus: function(stats) {
-        var t = CommonUtils.getTranslationStatus( stats );
-
-        $('.downloadtr-button')
-            .removeClass("draft translated approved")
-            .addClass(t);
-
-        var downloadable = (t === 'translated' || t.indexOf('approved') > -1 ) ;
-
-        var isGDriveFile = false;
-
-        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
-            isGDriveFile = true;
-        }
-
-        var label = '';
-
-        if ( downloadable ) {
-            if(isGDriveFile){
-                label = 'OPEN IN GOOGLE DRIVE';
-            } else {
-                label = 'DOWNLOAD TRANSLATION';
-            }
-        } else {
-            if(isGDriveFile){
-                label = 'PREVIEW IN GOOGLE DRIVE';
-            } else {
-                label = 'PREVIEW';
-            }
-        }
-
-        $('.downloadtr-button').removeClass("draft translated approved").addClass(t);
-
-        // var isDownload = (t == 'translated' || t == 'approved') ? 'true' : 'false';
-		$('#downloadProject').attr('value', label);
-        $('#previewDropdown').attr('data-download', downloadable);
-	},
-    retrieveStatistics: function () {
-        var path = sprintf(
-            APP.getRandomUrl() + 'api/app/jobs/%s/%s/stats',
-            config.id_job, config.password
-        );
-        $.ajax({
-            url: path,
-            xhrFields: { withCredentials: true },
-            type: 'get',
-        }).done( function( data ) {
-            if (data.stats){
-                UI.setProgress(data.stats);
-                UI.setDownloadStatus(data.stats);
-            }
-        });
-    },
-	setProgress: function(stats) {
-		var s = stats;
-		this.projectStats = stats;
-		m = $('footer .meter');
-        if( !s.ANALYSIS_COMPLETE ){
-            $('#statistics' ).hide();
-            $('#analyzing' ).show();
-        } else {
-            $('#statistics' ).show();
-            $('#analyzing' ).hide();
-        }
-
-		var t_perc = s.TRANSLATED_PERC;
-		var a_perc = s.APPROVED_PERC;
-		var d_perc = s.DRAFT_PERC;
-		var r_perc = s.REJECTED_PERC;
-
-		var t_perc_formatted = s.TRANSLATED_PERC_FORMATTED;
-		var a_perc_formatted = s.APPROVED_PERC_FORMATTED;
-		var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
-		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
-
-        var t_formatted = s.TODO_FORMATTED;
-        var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
-		// If second pass enabled
-		if ( config.secondRevisionsCount && s.revises ) {
-		    var reviewedWords = s.revises.find(function ( value ) {
-                return value.revision_number === 1;
-            });
-		    if ( reviewedWords ) {
-                var approvePerc = parseFloat(reviewedWords.advancement_wc)*100/s.TOTAL;
-                a_perc_formatted = _.round(approvePerc, 1);
-                a_perc = approvePerc;
-
-            }
-
-            var reviewWordsSecondPass = s.revises.find(function ( value ) {
-                return value.revision_number === 2;
-            });
-
-            if ( reviewWordsSecondPass ) {
-                var approvePerc2ndPass = parseFloat(reviewWordsSecondPass.advancement_wc)*100/s.TOTAL;
-                a_perc_2nd_formatted = _.round(approvePerc2ndPass, 1);
-                a_perc_2nd = approvePerc2ndPass;
-                revise_todo_formatted = (config.revisionNumber === 2) ? revise_todo_formatted + _.round(parseFloat(reviewedWords.advancement_wc)) : revise_todo_formatted;
-            }
-        }
-
-
-
-		var wph = s.WORDS_PER_HOUR;
-		var completion = s.ESTIMATED_COMPLETION;
-
-		if (typeof wph == 'undefined') {
-			$('#stat-wph').hide();
-		} else {
-			$('#stat-wph').show();
-		}
-		if (typeof completion == 'undefined') {
-			$('#stat-completion').hide();
-		} else {
-			$('#stat-completion').show();
-		}
-
-		this.progress_perc = s.PROGRESS_PERC_FORMATTED;
-        this.done_percentage = this.progress_perc;
-
-		$('.approved-bar', m).css('width', a_perc + '%').attr('title', 'Approved ' + a_perc_formatted + '%');
-		$('.translated-bar', m).css('width', t_perc + '%').attr('title', 'Translated ' + t_perc_formatted + '%');
-		$('.draft-bar', m).css('width', d_perc + '%').attr('title', 'Draft ' + d_perc_formatted + '%');
-		$('.rejected-bar', m).css('width', r_perc + '%').attr('title', 'Rejected ' + r_perc_formatted + '%');
-		if ( reviewWordsSecondPass ) {
-            $('.approved-bar-2nd-pass', m).css('width', a_perc_2nd + '%').attr('title', 'Approved ' + a_perc_2nd_formatted + '%');
-        }
-
-		$('#stat-progress').html(this.progress_perc);
-        if ( config.isReview ) {
-            $('#stat-todo strong').html(revise_todo_formatted);
-        } else {
-            $('#stat-todo strong').html(t_formatted);
-        }
-		$('#stat-wph strong').html(wph);
-		$('#stat-completion strong').html(completion);
-        $('#total-payable').html(s.TOTAL_FORMATTED);
-
-        $('.bg-loader',m).css('display', 'none');
-
-        $(document).trigger('setProgress:rendered', { stats : stats } );
-    },
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly:not(.ice-locked)').length;
 	},
@@ -1142,7 +647,6 @@ var UI = {
 			$('.downloadtr-button').focus();
 			return false;
 		}
-		this.copyToNextIfSame(nextUntranslatedSegment);
 		this.byButton = true;
 	},
     setTimeToEdit: function($segment) {
@@ -1165,7 +669,148 @@ var UI = {
             $('.qa-issues-container ').first().click()
         }, 300);
 	},
+    setDownloadStatus: function(stats) {
+        var t = CommonUtils.getTranslationStatus( stats );
 
+        $('.downloadtr-button')
+            .removeClass("draft translated approved")
+            .addClass(t);
+
+        var downloadable = (t === 'translated' || t.indexOf('approved') > -1 ) ;
+
+        var isGDriveFile = false;
+
+        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
+            isGDriveFile = true;
+        }
+
+        var label = '';
+
+        if ( downloadable ) {
+            if(isGDriveFile){
+                label = 'OPEN IN GOOGLE DRIVE';
+            } else {
+                label = 'DOWNLOAD TRANSLATION';
+            }
+        } else {
+            if(isGDriveFile){
+                label = 'PREVIEW IN GOOGLE DRIVE';
+            } else {
+                label = 'PREVIEW';
+            }
+        }
+
+        $('.downloadtr-button').removeClass("draft translated approved").addClass(t);
+
+        // var isDownload = (t == 'translated' || t == 'approved') ? 'true' : 'false';
+        $('#downloadProject').attr('value', label);
+        $('#previewDropdown').attr('data-download', downloadable);
+    },
+    retrieveStatistics: function () {
+        var path = sprintf(
+            APP.getRandomUrl() + 'api/app/jobs/%s/%s/stats',
+            config.id_job, config.password
+        );
+        $.ajax({
+            url: path,
+            xhrFields: { withCredentials: true },
+            type: 'get',
+        }).done( function( data ) {
+            if (data.stats){
+                UI.setProgress(data.stats);
+                UI.setDownloadStatus(data.stats);
+            }
+        });
+    },
+    setProgress: function(stats) {
+        var s = stats;
+        this.projectStats = stats;
+        m = $('footer .meter');
+        if( !s.ANALYSIS_COMPLETE ){
+            $('#statistics' ).hide();
+            $('#analyzing' ).show();
+        } else {
+            $('#statistics' ).show();
+            $('#analyzing' ).hide();
+        }
+
+        var t_perc = s.TRANSLATED_PERC;
+        var a_perc = s.APPROVED_PERC;
+        var d_perc = s.DRAFT_PERC;
+        var r_perc = s.REJECTED_PERC;
+
+        var t_perc_formatted = s.TRANSLATED_PERC_FORMATTED;
+        var a_perc_formatted = s.APPROVED_PERC_FORMATTED;
+        var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
+        var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
+
+        var t_formatted = s.TODO_FORMATTED;
+        var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
+        // If second pass enabled
+        if ( config.secondRevisionsCount && s.revises ) {
+            var reviewedWords = s.revises.find(function ( value ) {
+                return value.revision_number === 1;
+            });
+            if ( reviewedWords ) {
+                var approvePerc = parseFloat(reviewedWords.advancement_wc)*100/s.TOTAL;
+                a_perc_formatted = _.round(approvePerc, 1);
+                a_perc = approvePerc;
+
+            }
+
+            var reviewWordsSecondPass = s.revises.find(function ( value ) {
+                return value.revision_number === 2;
+            });
+
+            if ( reviewWordsSecondPass ) {
+                var approvePerc2ndPass = parseFloat(reviewWordsSecondPass.advancement_wc)*100/s.TOTAL;
+                a_perc_2nd_formatted = _.round(approvePerc2ndPass, 1);
+                a_perc_2nd = approvePerc2ndPass;
+                revise_todo_formatted = (config.revisionNumber === 2) ? revise_todo_formatted + _.round(parseFloat(reviewedWords.advancement_wc)) : revise_todo_formatted;
+            }
+        }
+
+
+
+        var wph = s.WORDS_PER_HOUR;
+        var completion = s.ESTIMATED_COMPLETION;
+
+        if (typeof wph == 'undefined') {
+            $('#stat-wph').hide();
+        } else {
+            $('#stat-wph').show();
+        }
+        if (typeof completion == 'undefined') {
+            $('#stat-completion').hide();
+        } else {
+            $('#stat-completion').show();
+        }
+
+        this.progress_perc = s.PROGRESS_PERC_FORMATTED;
+        this.done_percentage = this.progress_perc;
+
+        $('.approved-bar', m).css('width', a_perc + '%').attr('title', 'Approved ' + a_perc_formatted + '%');
+        $('.translated-bar', m).css('width', t_perc + '%').attr('title', 'Translated ' + t_perc_formatted + '%');
+        $('.draft-bar', m).css('width', d_perc + '%').attr('title', 'Draft ' + d_perc_formatted + '%');
+        $('.rejected-bar', m).css('width', r_perc + '%').attr('title', 'Rejected ' + r_perc_formatted + '%');
+        if ( reviewWordsSecondPass ) {
+            $('.approved-bar-2nd-pass', m).css('width', a_perc_2nd + '%').attr('title', 'Approved ' + a_perc_2nd_formatted + '%');
+        }
+
+        $('#stat-progress').html(this.progress_perc);
+        if ( config.isReview ) {
+            $('#stat-todo strong').html(revise_todo_formatted);
+        } else {
+            $('#stat-todo strong').html(t_formatted);
+        }
+        $('#stat-wph strong').html(wph);
+        $('#stat-completion strong').html(completion);
+        $('#total-payable').html(s.TOTAL_FORMATTED);
+
+        $('.bg-loader',m).css('display', 'none');
+
+        $(document).trigger('setProgress:rendered', { stats : stats } );
+    },
     disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
         $("#action-download").addClass('disabled' );
     },
@@ -1204,50 +849,36 @@ var UI = {
         APP.downloadFile(config.id_job, config.password, UI.reEnableDownloadButton.bind(this));
 
     },
-	fillWarnings: function(segment, warnings) {
-		//add Warnings to current Segment
-		var parentTag = segment.find('p.warnings').parent();
-		var actualWarnings = segment.find('p.warnings');
+    showFixWarningsOnDownload: function( continueDownloadFunction ) {
+        APP.confirm({
+            name: 'confirmDownload', // <-- this is the name of the function that gets invoked?
+            cancelTxt: 'Fix errors',
+            onCancel: 'goToFirstError',
+            callback: continueDownloadFunction,
+            okTxt: 'Download anyway',
+            msg: 'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.'
+        });
+    },
 
-		$.each(warnings, function(key, value) {
+    runDownload: function() {
+        var continueDownloadFunction ;
 
-            var warningMessage = '<p class="warnings">' + value.debug;
+        if( $('#downloadProject').hasClass('disabled') ) return false;
 
-            if(value.tip != "") {
-                warningMessage += '<span class="tip">' + value.tip + '</span>' ;
-            }
-            warningMessage += '</p>' ;
+        if ( config.isGDriveProject ) {
+            continueDownloadFunction = 'continueDownloadWithGoogleDrive';
+        }
+        else  {
+            continueDownloadFunction = 'continueDownload';
+        }
 
-            parentTag.before(actualWarnings).append( warningMessage );
-		});
-		actualWarnings.remove();
-
-	},
-	/**
-	 * Walk Warnings to fill right segment
-	 *
-	 * @returns {undefined}
-	 */
-	fillCurrentSegmentWarnings: function(segment, warningDetails, global) {
-		if ( !global ) {
-            UI.fillWarnings(segment, $.parseJSON(warningDetails.warnings));
-		}
-	},
-
-	compareArrays: function(i1, i2) {
-		$.each(i1, function(key,value) {
-			t = value;
-			$.each(i2, function(k,v) {
-				if(t == v) {
-					i1.splice(key, 1);
-					i2.splice(k, 1);
-					UI.compareArrays(i1, i2);
-					return false;
-				}
-			});
-		});
-		return i1;
-	},
+        //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+        if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.ERROR && UI.globalWarnings.ERROR.total > 0 ) {
+            UI.showFixWarningsOnDownload(continueDownloadFunction);
+        } else {
+            UI[ continueDownloadFunction ]();
+        }
+    },
 	startWarning: function() {
 		clearTimeout(UI.startWarningTimeout);
 		UI.startWarningTimeout = setTimeout(function() {
@@ -1348,11 +979,6 @@ var UI = {
             }
         });
 	},
-	showMessage: function(options) {
-
-        APP.showMessage(options);
-
-	},
 	checkVersion: function() {
 		if(this.version != config.build_number) {
             var notification = {
@@ -1365,6 +991,12 @@ var UI = {
             APP.addNotification(notification);
 		}
 	},
+    registerQACheck: function() {
+        clearTimeout(UI.pendingQACheck);
+        UI.pendingQACheck = setTimeout(function() {
+            UI.segmentQA(UI.currentSegment);
+        }, config.segmentQACheckInterval);
+    },
     segmentQA : function( $segment ) {
 	    if ( UI.tagMenuOpen ) return;
 
@@ -1568,10 +1200,10 @@ var UI = {
             id_after: idAfter,
             by_status: byStatus,
             revision_number: config.revisionNumber,
-            guess_tag_used: !UI.checkCurrentSegmentTPEnabled(segment)
+            guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment)
         };
         if(isSplitted) {
-            this.setStatus(segment.status);
+            SegmentActions.setStatus(segment.original_sid, null, status);
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(segment.original_sid, segment.sid, status).toString();
         }
         if(!propagate) {
@@ -1655,75 +1287,6 @@ var UI = {
         });
         return totalTranslation;
     },
-    addInStorage: function (key, val, operation) {
-        if(this.isPrivateSafari) {
-            item = {
-                key: key,
-                value: val
-            };
-            this.localStorageArray.push(item);
-        } else {
-            try {
-                localStorage.setItem(key, val);
-            } catch (e) {
-                UI.clearStorage(operation);
-                localStorage.setItem(key, val);
-            }
-        }
-    },
-    getFromStorage: function (key) {
-        if(this.isPrivateSafari) {
-            foundVal = 0;
-            $.each(this.localStorageArray, function (index) {
-                if(this.key == key) foundVal = this.value;
-            });
-            return foundVal || false;
-        } else {
-            return localStorage.getItem(key);
-        }
-    },
-    removeFromStorage: function (key) {
-        if(this.isPrivateSafari) {
-            foundVal = 0;
-            $.each(this.localStorageArray, function (index) {
-                if(this.key == key) foundIndex = index;
-            });
-            this.localStorageArray.splice(foundIndex, 1);
-        } else {
-            localStorage.removeItem(key);
-        }
-    },
-
-
-    isLocalStorageNameSupported: function () {
-        var testKey = 'test', storage = window.sessionStorage;
-        try {
-            storage.setItem(testKey, '1');
-            storage.removeItem(testKey);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    },
-
-
-    checkInStorage: function(what) {
-		var found = false;
-		$.each(localStorage, function(k) {
-			if(k.substring(0, what.length) === what) {
-				found = true;
-			}
-		});
-		return found;
-	},
-
-	clearStorage: function(what) {
-		$.each(localStorage, function(k) {
-			if(k.substring(0, what.length) === what) {
-				localStorage.removeItem(k);
-			}
-		});
-	},
 
     targetContainerSelector : function() {
         return '.targetarea';
@@ -1742,7 +1305,7 @@ var UI = {
 			if ( codeInt === -10 && operation !== 'getSegments' ) {
 				APP.alert({
 					msg: 'Job canceled or assigned to another translator',
-					callback: 'reloadPage'
+					callback: 'location.reload'
 				});
 			}
 			if ( codeInt === -1000 || codeInt === -101) {
@@ -1754,15 +1317,6 @@ var UI = {
 			    APP.alert({ msg: this.message }) ;
             }
 		});
-	},
-	reloadPage: function() {
-		console.log('reloadPage');
-		if(UI.body.hasClass('cattool')) location.reload();
-	},
-
-	someSegmentToSave: function() {
-		res = ($('section.modified').length) ? true : false;
-		return res;
 	},
 	setTranslation_success: function(d, options) {
         var id_segment = options.id_segment;
@@ -1776,15 +1330,16 @@ var UI = {
 		if (d.errors.length) {
             this.processErrors(d.errors, 'setTranslation');
         } else if (d.data == 'OK') {
-			this.setStatus(segment, status);
+			SegmentActions.setStatus(id_segment, null, status);
 			this.setDownloadStatus(d.stats);
 			this.setProgress(d.stats);
             SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending');
 
 			this.checkWarnings(false);
             $(segment).attr('data-version', d.version);
-            if((!byStatus)&&(propagate)) {
-                this.beforePropagateTranslation(options.id_segment, status);
+            if( propagate ) {
+                this.tempReqArguments = null;
+                SegmentActions.propagateTranslation(options.id_segment, status);
             }
         }
         this.resetRecoverUnsavedSegmentsTimer();
@@ -1808,48 +1363,11 @@ var UI = {
             UI.recoverUnsavedSetTranslations();
         }, 1000);
     },
-
-
-    beforePropagateTranslation: function(segmentId, status) {
-        let segment = SegmentStore.getSegmentByIdToJS(segmentId);
-        if ( segment.splitted > 2 ) return false;
-        UI.propagateTranslation(segment, status);
-    },
-
-    propagateTranslation: function(segment, status) {
-        this.tempReqArguments = null;
-        if( (status == 'translated') || (config.isReview && (status == 'approved'))){
-
-            var segmentsInPropagation = SegmentStore.getSegmentsInPropagation(segment.segment_hash, config.isReview);
-            plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
-
-            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each(segmentsInPropagation, function() {
-                // $('.editarea', $(this)).html( $('.editarea', segment).html() );
-                SegmentActions.replaceEditAreaTextContent(this.sid ,null , segment.translation);
-
-
-                //Tag Projection: disable it if enable
-                // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
-                SegmentActions.setSegmentAsTagged(this.sid);
-
-                // if status is not set to draft, the segment content is not displayed
-                SegmentActions.setStatus(segment.sid, null, status); // now the status, too, is propagated
-
-                SegmentActions.setSegmentPropagation(this.sid, null, true ,segment.sid);
-
-                LXQ.doLexiQA(this,this.sid,true,null);
-            });
-
-            //unset actual segment as autoPropagated because now it is translated
-            $( segment ).data( 'autopropagated', false );
-        }
-    },
     setTagLockCustomizeCookie: function (first) {
         if(first && !config.tagLockCustomizable) {
             UI.tagLockEnabled = true;
             return true;
-        };
+        }
         var cookieName = 'tagLockDisabled';
 
         if(typeof Cookies.get(cookieName + '-' + config.id_job) != 'undefined') {
@@ -1871,33 +1389,6 @@ var UI = {
         }
 
     },
-
-    storeClientInfo: function () {
-        clientInfo = {
-            xRes: window.screen.availWidth,
-            yRes: window.screen.availHeight
-        };
-        Cookies.set('client_info', JSON.stringify(clientInfo), { expires: 3650 });
-    },
-
-	clearUndoStack: function() {
-		this.undoStack = [];
-	},
-	updateJobMenu: function() {
-		$('#jobMenu li.current').removeClass('current');
-		$('#jobMenu li:not(.currSegment)').each(function() {
-			if ($(this).attr('data-file') == UI.currentFileId)
-				$(this).addClass('current');
-		});
-		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
-	},
-    isCJK: function () {
-        return config.targetIsCJK;
-    },
-    isKorean: function () {
-        var l = config.target_rfc;
-        return l == 'ko-KR';
-    },
     /**
      * After User click on Translated or T+>> Button
      * @param button
@@ -1907,7 +1398,6 @@ var UI = {
         //??
         $('.temp-highlight-tags').remove();
 
-        // UI.setSegmentModified( UI.currentSegment, false ) ;
         var goToNextUntranslated = ($( button ).hasClass( 'next-untranslated' )) ? true : false;
         SegmentActions.removeClassToSegment( sid, 'modified' );
         UI.currentSegment.data( 'modified', false );
@@ -1930,8 +1420,10 @@ var UI = {
 
     },
 
+    // Project completion override this metod
     handleClickOnReadOnly : function(section) {
-        if ( UI.justSelecting('readonly') )   return;
+        if ( TextUtils.justSelecting('readonly') )   return;
+        clearTimeout(UI.selectingReadonly);
         if ( section.hasClass('ice-locked') || section.hasClass('ice-unlocked') ) {
             UI.selectingReadonly = setTimeout(function() {
                 APP.alert({ msg: UI.messageForClickOnIceMatch() });
@@ -1943,24 +1435,20 @@ var UI = {
             UI.readonlyClickDisplay() ;
         }, 200);
     },
-
     readonlyClickDisplay : function() {
         APP.alert({ msg: UI.messageForClickOnReadonly() });
     },
-
     messageForClickOnReadonly : function() {
         var msgArchived = 'Job has been archived and cannot be edited.' ;
         var msgOther = 'This part has not been assigned to you.' ;
         return (UI.body.hasClass('archived'))? msgArchived : msgOther ;
     },
-
     messageForClickOnIceMatch : function() {
         return  'Segment is locked (in-context exact match) and shouldn’t be edited. ' +
             'If you must edit it, click on the padlock icon to the left of the segment. ' +
             'The owner of the project will be notified of any edits.' ;
 
     },
-
     openOptionsPanel: function() {
         if ($(".popup-tm").hasClass('open') ) {
             return false;
@@ -1970,55 +1458,18 @@ var UI = {
         $(".popup-tm").addClass('open').show().animate({ right: '0px' }, 400);
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
-        // Cookies.set('tmpanel-open', 1, { path: '/' });
     },
+
     closeAllMenus: function (e, fromQA) {
         CatToolActions.closeSubHeader();
     },
-
-    showFixWarningsOnDownload: function( continueDownloadFunction ) {
-        APP.confirm({
-            name: 'confirmDownload', // <-- this is the name of the function that gets invoked?
-            cancelTxt: 'Fix errors',
-            onCancel: 'goToFirstError',
-            callback: continueDownloadFunction,
-            okTxt: 'Download anyway',
-            msg: 'Unresolved issues may prevent downloading your translation. <br>Please fix the issues. <a style="color: #4183C4; font-weight: 700; text-decoration: underline;" href="https://www.matecat.com/support/advanced-features/understanding-fixing-tag-errors-tag-issues-matecat/" target="_blank">How to fix tags in MateCat </a> <br /><br /> If you continue downloading, part of the content may be untranslated - look for the string UNTRANSLATED_CONTENT in the downloaded files.'
-        });
-    },
-    /**
-     * Executes the replace all for segments if all the params are ok
-     * @returns {boolean}
-     */
-    execReplaceAll: function() {
-        SearchUtils.execReplaceAll();
-    },
+    // overridden by plugin
     inputEditAreaEventHandler: function (e) {
         UI.currentSegment.trigger('modified');
-    },
-    runDownload: function() {
-        var continueDownloadFunction ;
-
-        if( $('#downloadProject').hasClass('disabled') ) return false;
-
-        if ( config.isGDriveProject ) {
-            continueDownloadFunction = 'continueDownloadWithGoogleDrive';
-        }
-        else  {
-            continueDownloadFunction = 'continueDownload';
-        }
-
-        //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-        if ( $("#notifbox").hasClass("warningbox") && UI.globalWarnings.ERROR && UI.globalWarnings.ERROR.total > 0 ) {
-            UI.showFixWarningsOnDownload(continueDownloadFunction);
-        } else {
-            UI[ continueDownloadFunction ]();
-        }
     }
 };
 
 $(document).ready(function() {
-    console.time("Time: from start()");
     UI.start();
 });
 

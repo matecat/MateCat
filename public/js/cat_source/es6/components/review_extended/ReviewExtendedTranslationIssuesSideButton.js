@@ -1,5 +1,6 @@
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentConstants  from '../../constants/SegmentConstants';
+import Shortcuts  from '../../utils/shortcuts';
 
 class ReviewExtendedTranslationIssuesSideButton extends React.Component{
 
@@ -84,7 +85,8 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
                 </a>
             </div>);
         } else  if (config.isReview && !(this.props.segment.ice_locked == 1 &&  !this.props.segment.unlocked) ){
-            return (<div title="Show Issues" onClick={this.handleClick.bind(this)}>
+            return (<div title={"Show Issues (" + Shortcuts.cattol.events.openIssuesPanel.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase() +')'}
+                         onClick={this.handleClick.bind(this)}>
                 <a ref={(button)=> this.button=button} className={"revise-button " + openClass}>
                     <span className="icon-error_outline" />
                     {plus}

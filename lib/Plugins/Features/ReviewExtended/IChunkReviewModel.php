@@ -8,7 +8,15 @@
 
 namespace Features\ReviewExtended;
 
+use Chunks_ChunkStruct;
+
 interface IChunkReviewModel {
+
+    /**
+     * @return Chunks_ChunkStruct
+     */
+    public function getChunk();
+
     /**
      * adds penalty_points and updates pass fail result
      *

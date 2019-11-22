@@ -10,11 +10,15 @@ let EditArea = {
     },
     handleSoftReturn: function(e, modifiedTranslationCallback) {
         e.preventDefault();
-        var node = document.createElement("span");
-        var br = document.createElement("br");
+        let node = document.createElement("span");
+        let br = document.createElement("br");
+        let spanInside =  document.createElement("span");
         node.setAttribute('class', 'monad marker softReturn ' + config.crPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
+        spanInside.setAttribute('class', 'marker-inside');
+        spanInside.textContent = config.crPlaceholderClass;
         node.appendChild(br);
+        node.appendChild(spanInside);
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
@@ -23,11 +27,15 @@ let EditArea = {
     },
     handleReturn: function(e, modifiedTranslationCallback) {
         e.preventDefault();
-        var node = document.createElement("span");
-        var br = document.createElement("br");
+        let node = document.createElement("span");
+        let br = document.createElement("br");
+        let spanInside =  document.createElement("span");
         node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
+        spanInside.setAttribute('class', 'marker-inside');
+        spanInside.textContent = config.lfPlaceholderClass;
         node.appendChild(br);
+        node.appendChild(spanInside);
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
@@ -35,7 +43,7 @@ let EditArea = {
         });
     },
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
-        var code = e.which || e.keyCode;
+        let code = e.which || e.keyCode;
 
         if (e.shiftKey && e.key === 'Enter' && !e.ctrlKey) {
             e.preventDefault();
@@ -58,7 +66,7 @@ let EditArea = {
         if (e.ctrlKey || e.shiftKey || e.metaKey){
             return;
         }
-        var selection, range, r, rr, referenceNode;
+        let selection, range, r, rr, referenceNode;
 
         if ((code == 8) || (code == 46)) { // backspace e canc(mac)
             if ($('.selected', $(this)).length) {
@@ -76,20 +84,20 @@ let EditArea = {
             } else {
                 CursorUtils.saveSelection();
 
-                var parentTag = $( 'span.locked', UI.editarea ).has( '.rangySelectionBoundary' );
-                var isInsideTag = $( 'span.locked .rangySelectionBoundary , span.monad .rangySelectionBoundary', UI.editarea ).length;
+                let parentTag = $( 'span.locked', UI.editarea ).has( '.rangySelectionBoundary' );
+                let isInsideTag = $( 'span.locked .rangySelectionBoundary , span.monad .rangySelectionBoundary', UI.editarea ).length;
 
-                var sbIndex = 0;
-                var translation = $.parseHTML( UI.editarea.html() );
+                let sbIndex = 0;
+                let translation = $.parseHTML( UI.editarea.html() );
                 $.each( translation, function ( index ) {
                     if ( $( this ).hasClass( 'rangySelectionBoundary' ) ) sbIndex = index;
                 } );
 
-                var undeletableMonad = (($( translation[sbIndex - 1] ).hasClass( 'monad' )) && ($( translation[sbIndex - 2] ).prop( "tagName" ) == 'BR')) ? true : false;
-                var selBound = $( '.rangySelectionBoundary', UI.editarea );
+                let undeletableMonad = (($( translation[sbIndex - 1] ).hasClass( 'monad' )) && ($( translation[sbIndex - 2] ).prop( "tagName" ) == 'BR')) ? true : false;
+                let selBound = $( '.rangySelectionBoundary', UI.editarea );
                 if ( undeletableMonad ) $(selBound.prev()).remove();
                 if ( code == 8 ) { // backspace
-                    var undeletableTag = !!(
+                    let undeletableTag = !!(
                         ($( translation[sbIndex - 1] ).hasClass( 'locked' ) && ($( translation[sbIndex - 2] ).prop( "tagName" ) === 'BR')) ||
                         ( $( translation[sbIndex - 1] ).hasClass( "marker" ) &&  $( translation[sbIndex - 2] ).hasClass( "marker" ) && translation.length -1 === sbIndex )
                     );
@@ -127,7 +135,7 @@ let EditArea = {
         if (code == 9) { // tab
 
             e.preventDefault();
-            var node = document.createElement("span");
+            let node = document.createElement("span");
             node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
             node.setAttribute('contenteditable', 'false');
             node.textContent = TextUtils.htmlDecode("&#8677;");
@@ -232,7 +240,7 @@ let EditArea = {
         if ( !e.target.classList.contains('editarea') ) {
             return false;
         }
-        var clonedElem = e.target.cloneNode(true), txt;
+        let clonedElem = e.target.cloneNode(true), txt;
         if (e && e.clipboardData && e.clipboardData.getData) {
             if (/text\/html/.test(e.clipboardData.types)) {
                 txt = TextUtils.htmlEncode(e.clipboardData.getData('text/plain'));
@@ -245,7 +253,7 @@ let EditArea = {
             }
             txt = TagUtils.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
-            var newHtml = $(clonedElem).html();
+            let newHtml = $(clonedElem).html();
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.editarea), UI.getSegmentFileId(UI.editarea), newHtml);
             if (e.preventDefault) {
                 e.stopPropagation();
@@ -256,7 +264,7 @@ let EditArea = {
     },
     pasteEditAreaEventHandler: function (e) {
         $('#placeHolder').remove();
-        var node = document.createElement("span");
+        let node = document.createElement("span");
         node.setAttribute('id', 'placeHolder');
         TextUtils.removeSelectedText();
         TextUtils.insertNodeAtCursor(node);
@@ -267,7 +275,7 @@ let EditArea = {
     insertNbspAtCursor: function ( modifiedTranslationCallback ) {
         UI.editarea.find('.lastInserted').removeClass('lastInserted');
 
-        var node = document.createElement("span");
+        let node = document.createElement("span");
         node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.textContent = TextUtils.htmlDecode("&nbsp;");
@@ -295,7 +303,7 @@ let EditArea = {
      */
     postProcessEditarea: function(context, selector) {
         selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
-        var area = $( selector, context ).clone();
+        let area = $( selector, context ).clone();
         area = TagUtils.transformPlaceholdersHtml(area);
 
         area.find('span.space-marker').replaceWith(' ');

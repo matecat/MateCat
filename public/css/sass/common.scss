@@ -3383,7 +3383,16 @@ section.currSearchSegment mark.searchMarker {
   float: left;
   background-size: 25px !important;
 }
-
+.currSegment span {
+  position: absolute;
+  top: 4px;
+  color: #757472;
+  visibility: hidden;
+  left: 200px;
+}
+.currSegment:hover span {
+  visibility: visible;
+}
 
 @media only screen and (max-width: 1100px) {
 

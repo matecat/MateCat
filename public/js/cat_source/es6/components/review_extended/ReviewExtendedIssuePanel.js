@@ -105,8 +105,8 @@ class ReviewExtendedIssuePanel extends React.Component{
                     nested={false}
                     category={category}
                     sid={this.props.sid}
-                    active={this.state.enableArrows && this.state.categorySelectedId === category.id}
-                    severityActiveIndex={(this.state.enableArrows && this.state.categorySelectedId === category.id)? this.state.severityIndex : null}
+                    active={this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id)}
+                    severityActiveIndex={(this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id))? this.state.severityIndex : null}
                 />);
         }.bind(this));
 
@@ -136,8 +136,8 @@ class ReviewExtendedIssuePanel extends React.Component{
                             nested={true}
                             category={category}
                             sid={this.props.sid}
-                            active={this.state.enableArrows && this.state.categorySelectedId === category.id}
-                            severityActiveIndex={(this.state.enableArrows && this.state.categorySelectedId === category.id)? this.state.severityIndex : null}
+                            active={this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id)}
+                            severityActiveIndex={(this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id))? this.state.severityIndex : null}
                         />
                     );
                 } );
@@ -150,8 +150,8 @@ class ReviewExtendedIssuePanel extends React.Component{
                         nested={true}
                         category={category}
                         sid={this.props.sid}
-                        active={this.state.enableArrows && this.state.categorySelectedId === category.id}
-                        severityActiveIndex={(this.state.enableArrows && this.state.categorySelectedId === category.id)? this.state.severityIndex : null}
+                        active={this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id)}
+                        severityActiveIndex={(this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id))? this.state.severityIndex : null}
                     />
                 );
             }
@@ -214,15 +214,13 @@ class ReviewExtendedIssuePanel extends React.Component{
             });
         }
         else if ( this.state.enableArrows && e.code === "Enter" ){
-            this.sendIssue(this.issueCategoriesFlat[this.state.categorySelectedIndex], this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[this.state.severityIndex]);
+            this.sendIssue(this.issueCategoriesFlat[this.state.categorySelectedIndex], this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[this.state.severityIndex].label);
             setTimeout(()=>SegmentActions.setFocusOnEditArea(), 1000);
         }
     }
 
     handleShortcutsKeyUp(e) {
         if ( (!e.ctrlKey || !e.altKey) && this.state.enableArrows ) {
-            e.preventDefault();
-            e.stopPropagation();
             this.setState({
                 enableArrows: false,
                 categorySelectedIndex: 0,

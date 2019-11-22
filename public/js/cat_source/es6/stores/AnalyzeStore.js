@@ -2,7 +2,7 @@
  * Analyze Store
  */
 
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from './AppDispatcher';
 import {EventEmitter} from 'events';
 import AnalyzeConstants  from '../constants/AnalyzeConstants';
 import assign  from 'object-assign';

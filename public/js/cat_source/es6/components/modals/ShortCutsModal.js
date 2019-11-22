@@ -1,4 +1,4 @@
-import Shortcuts from '../utils/shortcuts';
+import Shortcuts from '../../utils/shortcuts';
 class ShortCutsModal extends React.Component {
 
 

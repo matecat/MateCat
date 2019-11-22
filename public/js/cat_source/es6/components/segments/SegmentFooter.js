@@ -101,6 +101,7 @@ class SegmentFooter extends React.Component {
         this.openTab = this.openTab.bind(this);
         this.addTabIndex = this.addTabIndex.bind(this);
         this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this);
+        this.showMessage = this.showMessage.bind(this);
         // this.setDefaultTabOpen = this.setDefaultTabOpen.bind(this);
     }
 
@@ -312,6 +313,16 @@ class SegmentFooter extends React.Component {
         this.changeTab( tabToOpen, true );
     }
 
+    showMessage(sid, message) {
+        this.setState({
+            showMessage: true,
+            message: message
+        });
+        setTimeout(()=>{
+            this.setState({showMessage:false, message:''});
+        }, 7000);
+    }
+
     handleShortcutsKeyDown(e) {
         if ( this.props.segment.opened && e.altKey && e.code === 'KeyS' ) {
             this.getNextTab();
@@ -324,6 +335,7 @@ class SegmentFooter extends React.Component {
         SegmentStore.addListener(SegmentConstants.OPEN_TAB, this.openTab);
         SegmentStore.addListener(SegmentConstants.ADD_TAB_INDEX, this.addTabIndex);
         SegmentStore.addListener(SegmentConstants.CLOSE_TABS, this.closeAllTabs);
+        SegmentStore.addListener(SegmentConstants.SHOW_FOOTER_MESSAGE, this.showMessage);
         // SegmentStore.addListener(SegmentConstants.SET_DEFAULT_TAB, this.setDefaultTabOpen);
     }
 
@@ -426,6 +438,9 @@ class SegmentFooter extends React.Component {
                  ref={(ref) => this.footerRef = ref}>
                 <ul className="submenu">
                     {labels}
+                    { this.state.showMessage ? (
+                        <li className="footer-message">{this.state.message}</li>
+                    ): null }
                 </ul>
                 {containers}
                 <div className="addtmx-tr white-tx">

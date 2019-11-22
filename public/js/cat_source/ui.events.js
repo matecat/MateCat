@@ -15,9 +15,9 @@ $.extend(UI, {
             UI.copySource();
         }).on('keydown.shortcuts',null, Shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
             UI.openLanguageResourcesPanel();
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openSearch.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             if((SearchUtils.searchEnabled)&&($('#action-search').length)) SearchUtils.toggleSearch(e);
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.redoInSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             // UI.redoInSegment(UI.currentSegment);
             SegmentActions.redoInSegment();
@@ -25,19 +25,23 @@ $.extend(UI, {
             e.preventDefault();
             SegmentActions.undoInSegment();
             SegmentActions.closeTagsMenu();
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            SegmentActions.scrollToSegment(UI.currentSegmentId);
+            SegmentActions.scrollToCurrentSegment();
             SegmentActions.setFocusOnEditArea();
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openPrevious.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openPrevious.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
-            UI.gotoPreviousSegment();
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openNext.keystrokes[this.shortCutskey], function(e) {
+            SegmentActions.selectPrevSegment();
+            // UI.gotoPreviousSegment();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openNext.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
-            UI.gotoNextSegment();
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
+            SegmentActions.selectNextSegment();
+            // UI.gotoNextSegment();
+        }).on('keyup.shortcuts', null, 'ctrl', function(e) {
+            SegmentActions.openSelectedSegment();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
@@ -51,7 +55,7 @@ $.extend(UI, {
                     UI.startSegmentTagProjection(UI.currentSegmentId);
                 }
             }
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
@@ -63,10 +67,10 @@ $.extend(UI, {
                     UI.startSegmentTagProjection(UI.currentSegmentId);
                 }
             }
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             Customizations.toggleTagsMode();
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openComments.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openComments.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             var segment = SegmentStore.getCurrentSegment();
             if (segment) {
@@ -74,30 +78,30 @@ $.extend(UI, {
                 SegmentActions.scrollToSegment(segment.sid);
                 CommentsActions.setFocusOnCurrentInput();
             }
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openIssuesPanel.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openIssuesPanel.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             var segment = SegmentStore.getCurrentSegment();
             if (segment && Review.enabled()) {
                 SegmentActions.openIssuesPanel({sid: segment.sid});
                 SegmentActions.scrollToSegment(segment.sid);
             }
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution1.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution2.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution2.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 2);
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution3.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.addNextTag.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
             var currentSegment = SegmentStore.getCurrentSegment();
             if ((UI.tagLockEnabled) && TagUtils.hasDataOriginalTags(currentSegment.segment)) {
                 SegmentActions.showTagsMenu(currentSegment.sid);
             }
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.splitSegment.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
             SegmentActions.openSplitSegment(UI.currentSegmentId);
@@ -156,7 +160,11 @@ $.extend(UI, {
 		});
 
 
-		$('html').on('click', '#previewDropdown .downloadTranslation a', function(e) {
+		$('html').on('keyup', function ( e ) {
+            if ( e.key === 'Meta' && navigator.platform === 'MacIntel' ) {
+                SegmentActions.openSelectedSegment();
+            }
+        }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             UI.runDownload();
 		}).on('click', '#action-download', function(e) {
@@ -214,6 +222,7 @@ $.extend(UI, {
         }).on('click', 'li.currSegment:not(.disabled)', function(e) {
             e.preventDefault();
             SegmentActions.scrollToCurrentSegment();
+            SegmentActions.setFocusOnEditArea();
         });
         $("#jobNav .currseg").on('click', function(e) {
             e.preventDefault();

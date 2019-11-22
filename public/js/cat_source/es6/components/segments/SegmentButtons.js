@@ -5,6 +5,7 @@
 import React  from 'react';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentFilter from "../header/cattol/segment_filter/segment_filter";
+import SegmentUtils from "../../utils/segmentUtils";
 
 class SegmentButton extends React.Component {
 
@@ -56,10 +57,10 @@ class SegmentButton extends React.Component {
         const classDisable = (this.props.disabled) ? 'disabled' : '';
         let nextButton, currentButton;
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
-        let enableGoToNext = !_.isUndefined(nextSegment) && nextSegment.status === "APPROVED";
+        let enableGoToNext = !_.isUndefined(nextSegment) && nextSegment.status !== "APPROVED";
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
-        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && nextSegment.revision_number === config.revisionNumber: enableGoToNext;
+        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && ( nextSegment.revision_number === config.revisionNumber || _.isNull(nextSegment.revision_number) )  : enableGoToNext;
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
@@ -118,7 +119,7 @@ class SegmentButton extends React.Component {
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
         let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" );
         //TODO Store TP Information in the SegmentsStore
-        this.currentSegmentTPEnabled = UI.checkCurrentSegmentTPEnabled(this.props.segment);
+        this.currentSegmentTPEnabled = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment);
         if (this.currentSegmentTPEnabled) {
             nextButton = "";
             currentButton = <li>

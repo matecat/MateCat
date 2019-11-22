@@ -101,6 +101,8 @@ const LXQ = {
 
         var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
 
+        if ( !segObj ) return;
+
         var sourcetext =  this.getSourceTextForQa(segObj.decoded_source);
         var translation = this.getTargetTextForQa(segment);
 

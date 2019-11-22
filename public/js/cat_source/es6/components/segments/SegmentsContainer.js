@@ -23,6 +23,7 @@ class SegmentsContainer extends React.Component {
             splitGroup: [],
             timeToEdit: config.time_to_edit_enabled,
             scrollTo: this.props.startSegmentId,
+            scrollToSelected: false,
             window: {
                 width: 0,
                 height: 0,
@@ -34,6 +35,7 @@ class SegmentsContainer extends React.Component {
         this.splitSegments = this.splitSegments.bind(this);
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.scrollToSegment = this.scrollToSegment.bind(this);
+        this.scrollToSelectedSegment = this.scrollToSelectedSegment.bind(this);
         this.openSide = this.openSide.bind(this);
         this.closeSide = this.closeSide.bind(this);
 
@@ -42,6 +44,8 @@ class SegmentsContainer extends React.Component {
         this.segmentsWithCollectionType = [];
 
         this.scrollContainer;
+        this.segmentContainerVisible = false;
+        this.index = this.props.startSegmentId;
     }
 
     splitSegments(segments, splitGroup) {
@@ -96,11 +100,18 @@ class SegmentsContainer extends React.Component {
     }
 
     scrollToSegment(sid) {
-        this.setState({scrollTo: sid});
+        this.lastScrolled = sid;
+        this.setState({scrollTo: sid, scrollToSelected: false});
+        setTimeout(()=>this.onScroll(), 500);
+    }
+
+    scrollToSelectedSegment(sid) {
+        this.setState({scrollTo: sid, scrollToSelected: true});
         setTimeout(()=>this.onScroll(), 500);
     }
 
     getIndexToScroll() {
+        let position = (this.state.scrollToSelected) ? 'auto' : 'start';
         if ( this.state.scrollTo && this.state.segments.size > 0 ) {
             const index = this.state.segments.findIndex( (segment, index) => {
                 if (this.state.scrollTo.toString().indexOf("-") === -1) {
@@ -109,12 +120,20 @@ class SegmentsContainer extends React.Component {
                     return segment.get('sid') === this.state.scrollTo;
                 }
             });
-            let scrollTo = ( index >= 2 ) ? index-2 : ( index === 0 ) ? 0 : index-1 ;
+
+            let scrollTo;
+            if ( this.state.scrollToSelected) {
+                scrollTo = ( this.state.scrollTo < this.lastScrolled ) ? index - 1  : index + 1;
+                scrollTo = ( index > this.state.segments.size - 2 || index === 0 ) ? index : scrollTo;
+                this.lastScrolled = this.state.scrollTo;
+                return { scrollTo: scrollTo, position: position }
+            }
+            scrollTo = ( index >= 2 ) ? index-2 : ( index === 0 ) ? 0 : index-1 ;
             scrollTo = ( index > this.state.segments.size - 8 ) ? index : scrollTo;
-            return { scrollTo: scrollTo, position: 'start' }
+            return { scrollTo: scrollTo, position: position }
         } else if ( this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
             const diff = this.state.segments.size - this.lastListSize;
-            return { scrollTo: this.lastUpdateObj.startIndex + diff, position: 'start' }
+            return { scrollTo: this.lastUpdateObj.startIndex + diff, position: position }
         }
         return { scrollTo: null, position: null }
     }
@@ -235,6 +254,9 @@ class SegmentsContainer extends React.Component {
     }
 
     getSegmentHeight(index) {
+        if ( !this.segmentContainerVisible ) {
+            $('#hiddenHtml section').css('display', 'block');
+        }
         let segment = this.getSegmentByIndex(index);
         let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
 
@@ -242,6 +264,9 @@ class SegmentsContainer extends React.Component {
             let heightToAdd = 0;
             if ( previousFileId !== segment.get('id_file')) {
                 heightToAdd = 43;
+            }
+            if ( index === this.state.segments.size - 1) {
+                heightToAdd = heightToAdd + 150;
             }
             return this.segmentsHeightsMap[segment.get('sid')].height + heightToAdd ;
         }
@@ -273,7 +298,7 @@ class SegmentsContainer extends React.Component {
 
             source.html('');
             target.html('');
-            itemHeight = Math.max(sourceHeight + 10, targetHeight + 10, 87) ;
+            itemHeight = Math.max(sourceHeight + 12, targetHeight + 12, 89) ;
         }
 
         //Collection type
@@ -291,7 +316,11 @@ class SegmentsContainer extends React.Component {
 
         //If is the first segment of a file add the file header
         if ( previousFileId !== segment.get('id_file')) {
-            height = height + 43;
+            height = height + 44;
+        }
+
+        if ( index === this.state.segments.size - 1) {
+            height = height + 150;
         }
 
         return height;
@@ -320,6 +349,7 @@ class SegmentsContainer extends React.Component {
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
         SegmentStore.addListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
+        SegmentStore.addListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
         SegmentStore.addListener(SegmentConstants.OPEN_SIDE, this.openSide);
         SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
     }
@@ -330,6 +360,9 @@ class SegmentsContainer extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
         SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
+        SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
+        SegmentStore.removeListener(SegmentConstants.OPEN_SIDE, this.openSide);
+        SegmentStore.removeListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -362,11 +395,14 @@ class SegmentsContainer extends React.Component {
         if ( this.state.scrollTo !== null && this.state.segments.size > 0 ) {
             setTimeout(()=>{
                 this.setState({
-                    scrollTo: null
+                    scrollTo: null,
+                    scrollToSelected: false
                 });
             });
 
         }
+        this.segmentContainerVisible = false;
+        $('#hiddenHtml section').css('display', 'none');
     }
 
     render() {

@@ -1,4 +1,4 @@
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from '../stores/AppDispatcher';
 import TeamConstants  from '../constants/TeamConstants';
 
 

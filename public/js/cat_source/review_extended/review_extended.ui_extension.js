@@ -269,7 +269,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             };
             // Lock the segment if it's approved in a second pass but was previously approved in first revision
             if ( ReviewExtended.number > 1 ) {
-                UI.removeFromStorage('unlocked-' + sid);
+                CommonUtils.removeFromStorage('unlocked-' + sid);
             }
             UI.setRevision( data );
         },

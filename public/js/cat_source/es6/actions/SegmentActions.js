@@ -9,7 +9,7 @@
  * TodoActions
  */
 
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from '../stores/AppDispatcher';
 import SegmentConstants  from '../constants/SegmentConstants';
 import SegmentStore  from '../stores/SegmentStore';
 import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
@@ -17,10 +17,13 @@ import TranslationMatches  from '../components/segments/utils/translationMatches
 import TagUtils from "../utils/tagUtils";
 import TextUtils from "../utils/textUtils";
 import OfflineUtils from "../utils/offlineUtils";
+import CommonUtils from "../utils/commonUtils";
+import SegmentUtils from "../utils/segmentUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
+import CopySourceModal from '../components/modals/CopySourceModal';
 
-var SegmentActions = {
+const SegmentActions = {
     /********* SEGMENTS *********/
     /**
      * @param segments
@@ -178,7 +181,7 @@ var SegmentActions = {
     },
 
     setStatus: function (sid, fid, status) {
-        if ( sid && fid ) {
+        if ( sid ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.SET_SEGMENT_STATUS,
                 id: sid,
@@ -207,6 +210,34 @@ var SegmentActions = {
         });
     },
 
+    propagateTranslation: function(segmentId, status) {
+        let segment = SegmentStore.getSegmentByIdToJS(segmentId);
+        if ( segment.splitted > 2 ) return false;
+
+        if( (status == 'translated') || (config.isReview && (status == 'approved'))){
+
+            let segmentsInPropagation = SegmentStore.getSegmentsInPropagation(segment.segment_hash, config.isReview);
+
+            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
+            $.each(segmentsInPropagation, function() {
+                // $('.editarea', $(this)).html( $('.editarea', segment).html() );
+                SegmentActions.replaceEditAreaTextContent(this.sid ,null , segment.translation);
+
+
+                //Tag Projection: disable it if enable
+                // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
+                SegmentActions.setSegmentAsTagged(this.sid);
+
+                // if status is not set to draft, the segment content is not displayed
+                SegmentActions.setStatus(this.sid, null, status); // now the status, too, is propagated
+
+                SegmentActions.setSegmentPropagation(this.sid, null, true ,segment.sid);
+
+                LXQ.doLexiQA(this,this.sid,true,null);
+            });
+        }
+    },
+
     setSegmentPropagation: function (sid, fid, propagation, from) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_PROPAGATION,
@@ -216,7 +247,17 @@ var SegmentActions = {
             from: from
         });
     },
-
+    /**
+     * Disable the Tag Projection, for example after clicking on the Translation Matches
+     */
+    disableTPOnSegment: function (segmentObj) {
+        var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
+        var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
+        if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
+            SegmentActions.setSegmentAsTagged(currentSegment.sid, currentSegment.id_file);
+            UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged');
+        }
+    },
     setSegmentAsTagged: function (sid, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_TAGGED,
@@ -304,6 +345,115 @@ var SegmentActions = {
             type: type
         });
     },
+    selectNextSegment: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SELECT_SEGMENT,
+            sid: sid,
+            direction: 'next'
+        });
+    },
+    selectPrevSegment: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SELECT_SEGMENT,
+            sid: sid,
+            direction: 'prev'
+        });
+    },
+    openSelectedSegment: function( ) {
+        let sid = SegmentStore.getSelectedSegmentId();
+        if ( sid ) {
+            this.openSegment( sid );
+        }
+    },
+    copySourceToTarget: function(  ) {
+        let currentSegment = SegmentStore.getCurrentSegment();
+
+        if ( currentSegment ) {
+            let source = currentSegment.decoded_source;
+            let sid = currentSegment.sid;
+            SegmentActions.replaceEditAreaTextContent( sid, null, source );
+            SegmentActions.modifiedTranslation( sid, null, true );
+            UI.segmentQA( UI.currentSegment );
+
+            if ( config.translation_matches_enabled ) {
+                SegmentActions.setChoosenSuggestion( sid, null );
+            }
+
+            if ( !config.isReview ) {
+                var alreadyCopied = false;
+                $.each( SegmentStore.consecutiveCopySourceNum, function ( index ) {
+                    if ( this === sid ) alreadyCopied = true;
+                } );
+                if ( !alreadyCopied ) {
+                    SegmentStore.consecutiveCopySourceNum.push( this.currentSegmentId );
+                }
+                if ( SegmentStore.consecutiveCopySourceNum.length > 2 ) {
+                    this.copyAllSources();
+                }
+            }
+        }
+    },
+    copyAllSources: function() {
+        if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
+            var props = {
+                confirmCopyAllSources: SegmentActions.continueCopyAllSources.bind(this),
+                abortCopyAllSources: SegmentActions.abortCopyAllSources.bind(this)
+            };
+
+            APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
+        } else {
+            SegmentStore.consecutiveCopySourceNum = [];
+        }
+
+    },
+    continueCopyAllSources: function () {
+        SegmentStore.consecutiveCopySourceNum = [];
+
+        UI.unmountSegments(); //TODO
+        $('#outer').addClass('loading');
+
+        APP.doRequest({
+            data: {
+                action: 'copyAllSource2Target',
+                id_job: config.id_job,
+                pass: config.password,
+                revision_number: config.revisionNumber
+            },
+            error: function() {
+                var notification = {
+                    title: 'Error',
+                    text: 'Error copying all sources to target. Try again!',
+                    type: 'error',
+                    position: "bl"
+                };
+                APP.addNotification(notification);
+                UI.render({
+                    segmentToOpen: UI.currentSegmentId
+                });
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    APP.closePopup();
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error',
+                        position: "bl"
+                    };
+                    APP.addNotification(notification);
+                } else {
+                    UI.unmountSegments();
+                    UI.render({
+                        segmentToOpen: UI.currentSegmentId
+                    });
+                }
+
+            }
+        });
+    },
+    abortCopyAllSources: function () {
+        SegmentStore.consecutiveCopySourceNum = [];
+    },
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({
@@ -319,7 +469,8 @@ var SegmentActions = {
             status: status,
             translation: translation
         });
-
+        let $segment = UI.getSegmentById(sid);
+        $segment.trigger('modified');
     },
     replaceEditAreaTextContent: function(sid, fid, text) {
         AppDispatcher.dispatch({
@@ -354,7 +505,7 @@ var SegmentActions = {
         });
     },
     showTagsMenu: function(sid) {
-        if ( !UI.checkCurrentSegmentTPEnabled() ) {
+        if ( !SegmentUtils.checkCurrentSegmentTPEnabled() ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_TAGS_MENU,
                 sid: sid,
@@ -386,6 +537,11 @@ var SegmentActions = {
             actionType: SegmentConstants.FILL_TAGS_IN_TARGET,
             sid: sid
         });
+    },
+    copyTagProjectionInCurrentSegment(sid, translation) {
+        if (!_.isUndefined(translation) && translation.length > 0) {
+            SegmentActions.replaceEditAreaTextContent( sid, null, translation );
+        }
     },
     /************ SPLIT ****************/
     openSplitSegment: function(sid) {
@@ -564,7 +720,11 @@ var SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'deleteGlossaryItem' );
             }).done(function ( data ) {
-                UI.footerMessage( 'A glossary item has been deleted', UI.getSegmentById(id) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: 'A glossary item has been deleted'
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
                     sid: sid,
@@ -579,12 +739,17 @@ var SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'addGlossaryItem' );
             }).done(function ( response ) {
+                let msg;
                 if ( response.data.created_tm_key ) {
-                    UI.footerMessage( 'A Private TM Key has been created for this job', UI.getSegmentById( sid ) );
+                    msg = 'A Private TM Key has been created for this job';
                 } else {
-                    let msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
-                    UI.footerMessage( msg, UI.getSegmentById( sid ) );
+                    msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
                 }
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: msg
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
                     sid: sid,
@@ -599,7 +764,11 @@ var SegmentActions = {
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'updateGlossaryItem' );
             }).done( function ( response ) {
-                UI.footerMessage( 'A glossary item has been updated', UI.getSegmentById( sid ) );
+                AppDispatcher.dispatch({
+                    actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+                    sid: sid,
+                    message: 'A glossary item has been updated'
+                });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.CHANGE_GLOSSARY,
                     sid: sid,
@@ -772,6 +941,76 @@ var SegmentActions = {
         return UI.submitComment(sid, idIssue, data);
     },
 
+    showApproveAllModalWarnirng: function (  ) {
+        var props = {
+            text: "It was not possible to approve all segments. There are some segments that have not been translated.",
+            successText: "Ok",
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
+            }
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+    },
+    showTranslateAllModalWarnirng: function (  ) {
+        var props = {
+            text: "It was not possible to translate all segments.",
+            successText: "Ok",
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
+            }
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
+    },
+    approveFilteredSegments: function(segmentsArray) {
+        if (segmentsArray.length >= 500) {
+            var subArray = segmentsArray.slice(0, 499);
+            var todoArray = segmentsArray.slice(500, segmentsArray.length-1);
+            return this.approveFilteredSegments(subArray).then( ( ) => {
+                return this.approveFilteredSegments(todoArray);
+            });
+        } else {
+            return API.SEGMENT.approveSegments(segmentsArray).then( ( response ) => {
+                this.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
+                setTimeout(UI.retrieveStatistics, 2000);
+            });
+        }
+    },
+    translateFilteredSegments: function(segmentsArray) {
+        if (segmentsArray.length >= 500) {
+            var subArray = segmentsArray.slice(0, 499);
+            var todoArray = segmentsArray.slice(499, segmentsArray.length);
+            return this.translateFilteredSegments(subArray).then((  ) => {
+                return this.translateFilteredSegments(todoArray);
+            });
+        } else {
+            return API.SEGMENT.translateSegments(segmentsArray).then( ( response ) => {
+                this.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
+                setTimeout(UI.retrieveStatistics, 2000);
+            });
+        }
+    },
+    checkUnchangebleSegments: function(response, status) {
+        if (response.unchangeble_segments.length > 0) {
+            if ( status ===  'APPROVED') {
+                this.showTranslateAllModalWarnirng();
+            } else {
+                this.showApproveAllModalWarnirng();
+            }
+        }
+    },
+    bulkChangeStatusCallback: function( segmentsArray, status) {
+        if (segmentsArray.length > 0) {
+            segmentsArray.forEach( ( item ) => {
+                var segment = SegmentStore.getSegmentByIdToJS(item);
+                if ( segment ) {
+                    SegmentActions.setStatus(item, segment.id_file, status);
+                    SegmentActions.modifiedTranslation(item, segment.id_file, false);
+                    SegmentActions.disableTPOnSegment( segment )
+                }
+            });
+            setTimeout(CatToolActions.reloadSegmentFilter, 500);
+        }
+    },
     toggleSegmentOnBulk: function (sid, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
@@ -789,12 +1028,12 @@ var SegmentActions = {
     setSegmentLocked( segment, fid, unlocked) {
         if (!unlocked) {
             //TODO: move this to SegmentActions
-            UI.removeFromStorage('unlocked-' + segment.sid);
+            CommonUtils.removeFromStorage('unlocked-' + segment.sid);
             if (segment.inBulk) {
                 this.toggleSegmentOnBulk(segment.sid, fid);
             }
         } else {
-            UI.addInStorage('unlocked-'+ segment.sid, true);
+            CommonUtils.addInStorage('unlocked-'+ segment.sid, true);
             SegmentActions.openSegment(segment.sid);
 
         }

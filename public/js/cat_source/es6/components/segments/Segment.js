@@ -14,6 +14,7 @@ import SegmentFooter from './SegmentFooter';
 import IssuesContainer from './footer-tab-issues/SegmentFooterTabIssues';
 import ReviewExtendedPanel from '../review_extended/ReviewExtendedPanel';
 import TagUtils from '../../utils/tagUtils';
+import SegmentUtils from '../../utils/segmentUtils';
 import SegmentFilter from "../header/cattol/segment_filter/segment_filter";
 import Speech2Text from '../../utils/speech2text';
 
@@ -54,7 +55,7 @@ class Segment extends React.Component {
             segment_classes : [],
             autopropagated: this.props.segment.autopropagated_from != 0,
             showTranslationIssues: this.props.segment.showIssues,
-            unlocked: UI.isUnlockedSegment(this.props.segment),
+            unlocked: SegmentUtils.isUnlockedSegment(this.props.segment),
             readonly: readonly,
             inBulk: false,
             tagProjectionEnabled: this.props.enableTagProjection && ( this.props.segment.status.toLowerCase() === 'draft' ||  this.props.segment.status.toLowerCase() === 'new')
@@ -67,6 +68,7 @@ class Segment extends React.Component {
     }
 
     openSegment() {
+        if ( !this.$section.length ) return;
         if (!this.checkIfCanOpenSegment()) {
             if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
                 alertNoTranslatedSegments();
@@ -75,42 +77,38 @@ class Segment extends React.Component {
             }
         } else {
             if ( this.props.segment.decoded_translation.length !== 0 ) {
-                UI.segmentQA($(this.section));
+                UI.segmentQA(this.$section);
             }
 
             // TODO Remove this block
             /**************************/
             //From EditAreaClick
             SegmentActions.closeTagsMenu();
-            TagUtils.removeHighlightCorrespondingTags($(this.section));
+            TagUtils.removeHighlightCorrespondingTags(this.$section);
             if (UI.warningStopped) {
                 UI.warningStopped = false;
                 UI.checkWarnings(false);
             }
             // start old cache
-            UI.cacheObjects($(this.section));
+            UI.cacheObjects(this.$section);
             //end old cache
 
             UI.evalNextSegment();
-            UI.clearUndoStack();
 
             $('html').trigger('open'); // used by ui.review to open tab Revise in the footer next-unapproved
 
             //Used by Segment Filter, Comments, Footer, Review extended
             $(document).trigger('segmentOpened', {segmentId: this.props.segment.original_sid});
 
-            Speech2Text.enabled() && Speech2Text.enableMicrophone($(this.section));
+            Speech2Text.enabled() && Speech2Text.enableMicrophone(this.$section);
             /************/
             UI.editStart = new Date();
-            SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
             SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
 
             //From EditAreaClick
             TagUtils.checkTagProximity();
 
             window.location.hash = this.props.segment.sid;
-            // setTimeout(() => {
-            // }, 300);
 
         }
     }
@@ -189,6 +187,10 @@ class Segment extends React.Component {
         }
         if ( this.props.segment.openSplit ) {
             classes.push('split-action');
+        }
+
+        if ( this.props.segment.selected ) {
+            classes.push('segment-selected');
         }
         // if ( this.props.segment.search && this.props.segment.search.current === this.props.segment.sid ) {
         //     classes.push('currSearchSegment');
@@ -421,6 +423,7 @@ class Segment extends React.Component {
             return;
         } else if ( !this.props.segment.opened ){
             this.openSegment();
+            SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
             TagUtils.removeSelectedClassToTags()
         }
     }
@@ -450,6 +453,7 @@ class Segment extends React.Component {
     }
 
     componentDidMount() {
+        this.$section = $(this.section);
         document.addEventListener('keydown', this.handleKeyDown);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
@@ -511,9 +515,12 @@ class Segment extends React.Component {
         if (!prevProps.segment.opened && this.props.segment.opened) {
             this.timeoutScroll = setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},200);
             setTimeout(()=>{UI.setCurrentSegment()},0);
+            if ( !this.props.segment.openComments && !this.props.segment.openIssues ) {
+                setTimeout(()=>SegmentActions.closeSideSegments());
+            }
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
             clearTimeout(this.timeoutScroll);
-            TagUtils.removeHighlightCorrespondingTags($(this.section));
+            TagUtils.removeHighlightCorrespondingTags(this.$section);
         }
         return null;
     }
@@ -526,6 +533,7 @@ class Segment extends React.Component {
         let showLockIcon = this.props.segment.ice_locked === '1' ||
             this.secondPassLocked;
         let segment_classes = this.checkSegmentClasses();
+
         let split_group = this.props.segment.split_group || [];
         let autoPropagable = (this.props.segment.repetitions_in_chunk !== "1");
         let originalId = this.props.segment.sid.split('-')[0];

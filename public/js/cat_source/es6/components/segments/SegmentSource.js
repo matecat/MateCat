@@ -163,7 +163,7 @@ class SegmentSource extends React.Component {
 
         this.afterRenderActions();
 
-        this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes.mac, this.openConcordance);
+        this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType], this.openConcordance);
     }
 
     componentWillUnmount() {

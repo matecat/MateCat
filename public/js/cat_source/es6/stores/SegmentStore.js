@@ -31,12 +31,13 @@
  }
  */
 
-import AppDispatcher  from '../dispatcher/AppDispatcher';
+import AppDispatcher  from './AppDispatcher';
 import {EventEmitter} from 'events';
 import SegmentConstants  from '../constants/SegmentConstants';
 import assign  from 'object-assign';
 import TagUtils  from '../utils/tagUtils';
 import TextUtils  from '../utils/textUtils';
+import SegmentUtils  from '../utils/segmentUtils';
 import Immutable  from 'immutable';
 
 EventEmitter.prototype.setMaxListeners(0);
@@ -66,11 +67,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         params: null
     },
     nextUntranslatedFromServer: null,
+    consecutiveCopySourceNum: [],
     /**
      * Update all
      */
     updateAll: function (segments, where) {
-        // console.time("Time: updateAll segments" + fid);
         if (this._segments.size > 0 && where === "before") {
             this._segments = this._segments.unshift(...Immutable.fromJS(this.normalizeSplittedSegments(segments)));
         } else if (this._segments.size > 0 && where === "after") {
@@ -132,6 +133,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         notes: segment.notes,
                         modified: false,
                         opened: false,
+                        selected: false,
                         id_file: segment.id_file,
                         originalSource: segment.segment,
                         firstOfSplit: (i===0),
@@ -143,13 +145,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             } else {
                 segment.decoded_translation = TagUtils.decodeText(segment, segment.translation);
                 segment.decoded_source = TagUtils.decodeText(segment, segment.segment);
-                segment.unlocked = UI.isUnlockedSegment(segment);
+                segment.unlocked = SegmentUtils.isUnlockedSegment(segment);
                 segment.warnings = {};
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
                 segment.edit_area_locked = false;
                 segment.original_sid = segment.sid;
                 segment.modified = false;
                 segment.opened = false;
+                segment.selected = false;
                 segment.search = (inSearch) ? self.search.params : null;
                 segment.propagable = (segment.repetitions_in_chunk !== "1");
                 newSegments.push(this);
@@ -180,11 +183,56 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
 
     openSegment(sid) {
         var index = this.getSegmentIndex(sid);
-        this.closeSegments()
+        this.closeSegments();
         this._segments = this._segments.setIn([index, 'opened'], true);
+    },
+    selectNextSegment() {
+        let selectedSegment = this._segments.find((segment) => {
+            return segment.get('selected') === true
+        });
+        if ( !selectedSegment ) {
+            selectedSegment = this.getCurrentSegment();
+        } else {
+            selectedSegment = selectedSegment.toJS();
+        }
+        let next = this.getNextSegment(selectedSegment.sid);
+        if ( next ) {
+            var index = this.getSegmentIndex(next.sid);
+            this._segments = this._segments.map(segment => segment.set('selected', false));
+            this._segments = this._segments.setIn([index, 'selected'], true);
+            return next.sid;
+        }
+
+    },
+    selectPrevSegment() {
+        let selectedSegment = this._segments.find((segment) => {
+            return segment.get('selected') === true
+        });
+        if ( !selectedSegment ) {
+            selectedSegment = this.getCurrentSegment();
+        } else {
+            selectedSegment = selectedSegment.toJS();
+        }
+        let prev = this.getPrevSegment(selectedSegment.sid);
+        if ( prev ) {
+            var index = this.getSegmentIndex(prev.sid);
+            this._segments = this._segments.map(segment => segment.set('selected', false));
+            this._segments = this._segments.setIn([index, 'selected'], true);
+            return prev.sid;
+        }
+    },
+    getSelectedSegmentId( ) {
+        let selectedSegment = this._segments.find((segment) => {
+            return segment.get('selected') === true
+        });
+        if ( selectedSegment ) {
+            return selectedSegment.get('sid');
+        }
+        return null;
     },
     closeSegments() {
         this._segments = this._segments.map(segment => segment.set('opened', false));
+        this._segments = this._segments.map(segment => segment.set('selected', false));
     },
     removeSplit(oldSid, newSegments, fid, splitGroup) {
         var self = this;
@@ -257,7 +305,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.map(segment => segment.set('decoded_translation', TagUtils.decodeText(segment.toJS(), segment.get('translation'))));
         this._segments = this._segments.map(segment => segment.set('decoded_source', TagUtils.decodeText(segment.toJS(), segment.get('segment'))));
     },
-    setSegmentAsTagged(sid, fid) {
+    setSegmentAsTagged(sid) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'tagged'], true);
@@ -454,6 +502,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._footerTabsConfig = this._footerTabsConfig.setIn([tabName, 'enabled'], true);
     },
     setChoosenSuggestion: function(sid, sugIndex) {
+        sugIndex = (sugIndex) ? sugIndex : undefined;
         this._segments = this._segments.map((segment)=>segment.set('choosenSuggestionIndex', sugIndex));
     },
     filterGlobalWarning: function (type, sid) {
@@ -540,7 +589,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning.bind(this, "LXQ"));
     },
     hasSegmentTagProjectionEnabled: function ( segment ) {
-        if (UI.enableTagProjection) {
+        if ( SegmentUtils.checkTPEnabled() ) {
             if ( (segment.status === "NEW" || segment.status === "DRAFT") && (TagUtils.checkXliffTagsInText(segment.segment) && (!TagUtils.checkXliffTagsInText(segment.translation))) ) {
                 return true;
             }
@@ -565,6 +614,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
      * @param revisionNumber
      */
     getNextSegment(current_sid, current_fid, status, revisionNumber) {
+        let currentSegment = this.getCurrentSegment();
+        if ( !current_sid && !currentSegment) return null;
         current_sid = ( !current_sid) ? this.getCurrentSegment().sid : current_sid;
         let allStatus = {
             1: "APPROVED",
@@ -610,7 +661,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         return ( next ) ? next.sid : this.nextUntranslatedFromServer;
     },
     getPrevSegment(sid, alsoMutedSegments) {
-        sid = ( !sid) ? this.getCurrentSegment().sid : sid;
+        let currentSegment = this.getCurrentSegment();
+        if ( !sid && !currentSegment) return null;
+        sid = ( !sid ) ? this.getCurrentSegment().sid : sid;
         var index = this.getSegmentIndex(sid);
         let segment = (index > 0) ? this._segments.get(index-1).toJS() : null;
         if ( segment && !alsoMutedSegments && !segment.muted || !segment || segment && alsoMutedSegments) {
@@ -708,7 +761,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( currContrIndex ) {
             return seg.get('contributions').get('matches').get(currContrIndex-1).toJS();
         }
-        return null;
+        return;
     },
     isSidePanelOpen: function() {
         const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);
@@ -744,6 +797,18 @@ AppDispatcher.register(function (action) {
             SegmentStore.openSegment(action.sid);
             SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
             // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
+            break;
+        case SegmentConstants.SELECT_SEGMENT:
+            let idToScroll;
+            if ( action.direction === 'next' ) {
+                idToScroll = SegmentStore.selectNextSegment(action.sid);
+            } else {
+                idToScroll = SegmentStore.selectPrevSegment(action.sid);
+            }
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            if ( idToScroll ) {
+                SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, idToScroll);
+            }
             break;
         case SegmentConstants.CLOSE_SEGMENT:
             SegmentStore.closeSegments(action.sid);
@@ -822,6 +887,9 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.MODIFY_TAB_VISIBILITY:
             SegmentStore.emitChange(action.actionType, action.tabName, action.visible);
+            break;
+        case SegmentConstants.SHOW_FOOTER_MESSAGE:
+            SegmentStore.emitChange(action.actionType, action.sid, action.message);
             break;
         case SegmentConstants.SET_CONTRIBUTIONS:
             SegmentStore.setContributionsToCache(action.sid, action.fid, action.matches, action.errors);

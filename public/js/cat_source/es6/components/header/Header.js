@@ -8,14 +8,19 @@ import IconUserLogout from "../icons/IconUserLogout";
 import ActionMenu from "./ActionMenu";
 
 class Header extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			teams: [],
-			selectedTeamId: null,
-			user: this.props.user
-		};
-	}
+    constructor(props) {
+        super(props);
+        this.state = {
+            teams: [],
+            selectedTeamId: null,
+            user: this.props.user,
+            loggedUser: this.props.loggedUser
+        };
+        this.renderTeams = this.renderTeams.bind(this);
+        this.updateTeams = this.updateTeams.bind(this);
+        this.chooseTeams = this.chooseTeams.bind(this);
+        this.updateUser = this.updateUser.bind(this);
+    }
 
 	componentDidMount = () => {
 		TeamsStore.addListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
@@ -80,12 +85,13 @@ class Header extends React.Component {
 
     updateUser = (user) => {
         this.setState({
-            user : user
+            user : user,
+            loggedUser: true
         });
         setTimeout(this.initProfileDropdown)
     }
 	getUserIcon = () => {
-		if (this.props.loggedUser) {
+		if ( this.state.loggedUser ) {
 			if (this.state.user.metadata && this.state.user.metadata.gplus_picture) {
 				return 	<div className={"ui dropdown"} ref={(dropdownProfile) => this.dropdownProfile = dropdownProfile} id={"profile-menu"}>
 							<img className="ui mini circular image ui-user-top-image"
@@ -125,11 +131,21 @@ class Header extends React.Component {
 		}
 	}
 
+    /**
+     * Used by plugins to add buttons to the home page
+     */
+    getMoreLinks() {
+        return null;
+    }
+
+    render () {
+        let self = this;
+        let userIcon = this.getUserIcon();
 
 	render = () => {
 		const {getHeaderComponentToShow, getUserIcon} = this;
-		const {showLinks, showJobInfo, showFilterProjects, showModals, loggedUser, showTeams, changeTeam, isQualityReport} = this.props;
-		const {teams,selectedTeamId} = this.state;
+		const {showLinks, showJobInfo, showFilterProjects, showModals, showTeams, changeTeam, isQualityReport} = this.props;
+		const {teams,selectedTeamId, loggedUser} = this.state;
 
 		const userIcon = getUserIcon();
 		let containerClass = "user-teams four";
@@ -161,6 +177,7 @@ class Header extends React.Component {
 									<li><a href="https://www.matecat.com/support/">Contact us</a></li>
 									{/*<li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>*/}
 									<li><a href="/plugins/aligner/index"  target="_blank" className={"btn btn-primary"}>Aligner</a></li>
+                                    { this.getMoreLinks() }
 								</ul>
 							</div>
 

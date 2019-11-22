@@ -1,5 +1,6 @@
 import TagUtils from '../../../utils/tagUtils';
 import TextUtils from '../../../utils/textUtils';
+import SegmentUtils from '../../../utils/segmentUtils';
 import CommonUtils from '../../../utils/commonUtils';
 import OfflineUtils from '../../../utils/offlineUtils';
 import Speech2Text from '../../../utils/speech2text';
@@ -66,13 +67,13 @@ let TranslationMatches = {
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
                  * the source with the text with tags, the segment is tagged
                  */
-                if (UI.checkCurrentSegmentTPEnabled(segmentObj)) {
+                if ( SegmentUtils.checkCurrentSegmentTPEnabled(segmentObj) ) {
                     var currentContribution = data.matches[0];
                     if (parseInt(match) !== 100) {
                         translation = currentContribution.translation;
                         translation = TagUtils.removeAllTags(translation);
                     } else {
-                        UI.disableTPOnSegment(segmentObj);
+                        SegmentActions.disableTPOnSegment(segmentObj);
                     }
                 }
 

@@ -134,9 +134,7 @@ class Editarea extends React.Component {
     onKeyDownEvent(e) {
         this.keyPressed = true;
         EditArea.keydownEditAreaEventHandler.call(this.editAreaRef, e, ()=>{
-            SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true);
-            this.props.sendTranslationWithoutUpdate();
-            UI.registerQACheck();
+            this.onInputEvent();
         });
         this.openConcordance(e);
     }
@@ -196,7 +194,7 @@ class Editarea extends React.Component {
         });
     }
     openConcordance(e) {
-        if (e.altKey && e.key === 'k') {
+        if ( (e.altKey && e.key === 'k') || (e.metaKey && e.key === 'k')) {
             e.preventDefault();
             var selection = window.getSelection();
             if ( selection.type === 'Range' ) { // something is selected

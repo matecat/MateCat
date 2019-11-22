@@ -31,7 +31,7 @@ if ( ReviewSimple.enabled() ) {
             trackChanges: function ( editarea ) {
                 var $segment = $( editarea ).closest( 'section' );
                 var source = $segment.find( '.original-translation' ).html();
-                source = UI.clenaupTextFromPleaceholders( source );
+                source = TextUtils.clenaupTextFromPleaceholders( source );
 
                 var target = $( editarea ).text();
                 var diffHTML = TextUtils.trackChangesHTML( source, TextUtils.htmlEncode( target ) );

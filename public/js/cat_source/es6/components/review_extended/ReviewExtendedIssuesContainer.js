@@ -1,5 +1,5 @@
 import ReviewExtendedIssue  from "./ReviewExtendedIssue";
-import WrapperLoader  from "../../common/WrapperLoader";
+import WrapperLoader  from "../common/WrapperLoader";
 import SegmentConstants  from '../../constants/SegmentConstants';
 class ReviewExtendedIssuesContainer extends React.Component {
 

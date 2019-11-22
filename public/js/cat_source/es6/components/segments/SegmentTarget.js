@@ -152,7 +152,7 @@ class SegmentTarget extends React.Component {
         var textAreaContainer = "";
         let issues = this.getAllIssues();
         if ( this.props.segment.edit_area_locked ) {
-            let currentTranslationVersion = this.props.segment.versions[0].translation;
+            let currentTranslationVersion = TagUtils.decodeText(this.props.segment, this.props.segment.versions[0].translation);
             textAreaContainer = <div className="segment-text-area-container" data-mount="segment_text_area_container">
                 <div className="textarea-container" onClick={this.onClickEvent.bind( this )} onMouseUp={this.selectIssueText.bind(this)}
                      ref={(div)=> this.issuesHighlightArea = div}>

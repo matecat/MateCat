@@ -4,46 +4,21 @@
         /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          Tag Proj start
          */
-        setGlobalTagProjection: function () {
-            UI.enableTagProjection = UI.checkTPEnabled();
-        },
-        /**
-         * Tag Projection: check if is enable the Tag Projection
-         */
-        checkTPEnabled: function () {
-            return (this.checkTpCanActivate() && !!config.tag_projection_enabled);
-        },
-        /**
-         * Tag Projection: check if is possible to enable tag projection:
-         * Condition: Languages it-IT en-GB en-US, not review
-         */
-        checkTpCanActivate: function () {
-            if (_.isUndefined(this.tpCanActivate)) {
-                var acceptedLanguages = config.tag_projection_languages;
-                var elemST = config.source_rfc.split("-")[0] + "-" + config.target_rfc.split("-")[0];
-                var elemTS = config.target_rfc.split("-")[0] + "-" + config.source_rfc.split("-")[0];
-                var supportedPair = (typeof acceptedLanguages[elemST] !== 'undefined' || typeof acceptedLanguages[elemTS] !== 'undefined');
-                this.tpCanActivate = supportedPair > 0 &&
-                    !config.isReview;
-            }
-            return this.tpCanActivate;
-        },
+
         startSegmentTagProjection: function (sid) {
             UI.getSegmentTagsProjection().done(function(response) {
                 if (response.errors && !!(response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
-                    UI.disableTPOnSegment();
-                    UI.copyTagProjectionInCurrentSegment();
+                    SegmentActions.disableTPOnSegment();
                     SegmentActions.autoFillTagsInTarget(sid);
                 } else {
-                    UI.setSegmentAsTagged();
-                    UI.copyTagProjectionInCurrentSegment(response.data.translation);
+                    SegmentActions.setSegmentAsTagged(sid);
+                    SegmentActions.copyTagProjectionInCurrentSegment(sid, response.data.translation);
                     SegmentActions.autoFillTagsInTarget(sid);
                 }
 
             }).fail(function () {
-                UI.setSegmentAsTagged();
-                UI.copyTagProjectionInCurrentSegment();
+                SegmentActions.setSegmentAsTagged(sid);
                 SegmentActions.autoFillTagsInTarget(sid);
                 OfflineUtils.startOfflineMode();
             }).always(function () {
@@ -84,52 +59,7 @@
             });
 
         },
-        /**
-         * Tag Projection: set the translation with tag projection to the current segment (source and editor)
-         * @param translation
-         */
-        copyTagProjectionInCurrentSegment: function (translation) {
-            // this.copySourcefromDataAttribute();
-            if (!_.isUndefined(translation) && translation.length > 0) {
-                SegmentActions.replaceEditAreaTextContent( UI.getSegmentId( this.editarea ), UI.getSegmentFileId( this.editarea ), translation );
-            }
-        },
-        /**
-         * Tag Projection: set a segment after tag projection is called, remove the class enableTP and set the data-tagprojection
-         * attribute to tagged (after click on Guess Tags button)
-         */
-        setSegmentAsTagged: function (segment) {
-            var currentSegment = (segment)? segment : UI.currentSegment;
-            SegmentActions.setSegmentAsTagged(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment));
-            // currentSegment.data('tagprojection', 'tagged');
-        },
-        /**
-         * Check if the  the Tag Projection in the current segment is enabled and still not tagged
-         * @returns {boolean}
-         */
-        checkCurrentSegmentTPEnabled: function (segmentObj) {
-            var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
-            if (currentSegment && this.enableTagProjection) {
-                // If the segment has tag projection enabled (has tags and has the enableTP class)
-                var segmentNoTags = TagUtils.removeAllTags( currentSegment.segment );
-                var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment ) && !currentSegment.tagged && segmentNoTags !== '';
-                // If the segment has already be tagged
-                var isCurrentAlreadyTagged = currentSegment.tagged;
-                return ( tagProjectionEnabled && !isCurrentAlreadyTagged );
-            }
-            return false;
-        },
-        /**
-         * Disable the Tag Projection, for example after clicking on the Translation Matches
-         */
-        disableTPOnSegment: function (segmentObj) {
-            var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
-            var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
-            if (this.enableTagProjection && tagProjectionEnabled) {
-                SegmentActions.setSegmentAsTagged(currentSegment.sid, currentSegment.id_file);
-                UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged');
-            }
-        },
+
         /**
          * Set the tag projection to true and reload file
          */
@@ -180,16 +110,6 @@
             });
 
         },
-        filterTagsWithTagProjection: function (array) {
-            var returnArray = array;
-            if (UI.enableTagProjection) {
-                returnArray = array.filter(function (value) {
-                    SegmentStore.getSegmentByIdToJS(value);
-                    return !UI.checkCurrentSegmentTPEnabled( SegmentStore.getSegmentByIdToJS(value) );
-                });
-            }
-            return returnArray;
-        },
         /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
          Tag Proj end
          */
@@ -213,10 +133,11 @@
             var next = (currentSegment) ?  SegmentStore.getNextSegment(currentSegment.sid, null, null) : null;
             this.nextSegmentId = (next) ? next.sid : null;
         },
-        //Override by others plugin
+        //Override by  plugin
         gotoNextSegment: function() {
             SegmentActions.gotoNextSegment();
         },
+        //Overridden by  plugin
         gotoPreviousSegment: function() {
             var prevSeg = SegmentStore.getPrevSegment();
             if ( prevSeg ) {
@@ -229,6 +150,8 @@
          * This function searches in the current UI first, then falls back
          * to invoke the server and eventually reload the page to the new
          * URL.
+         *
+         * Overridden by  plugin
          */
         openNextTranslated: function (sid) {
             sid = sid || UI.currentSegmentId;
@@ -257,20 +180,11 @@
                 }
             }
         },
-        renderAfterConfirm: function (nextId) {
-            this.render({
-                segmentToOpen: nextId
-            });
-        },
+        //Overridden by  plugin
         isReadonlySegment : function( segment ) {
             return ( segment.readonly == 'true' ||UI.body.hasClass('archived')) ;
         },
-
-        isUnlockedSegment: function ( segment ) {
-            // var readonly = UI.isReadonlySegment(segment) ;
-            // return (segment.ice_locked === "1" && !readonly) && !_.isNull(UI.getFromStorage('unlocked-' + segment.sid));
-            return !_.isNull(UI.getFromStorage('unlocked-' + segment.sid));
-        },
+        //Overridden by  plugin
         getStatusForAutoSave : function( segment ) {
             var status ;
             if (segment.hasClass('status-translated')) {
@@ -307,7 +221,7 @@
         setCurrentSegment: function() {
             var reqArguments = arguments;
             var id_segment = this.currentSegmentId;
-            this.setLastSegmentFromLocalStorage(id_segment.toString());
+            CommonUtils.setLastSegmentFromLocalStorage(id_segment.toString());
             APP.doRequest({
                 data: {
                     action: 'setCurrentSegment',
@@ -333,50 +247,11 @@
             SegmentActions.setNextUntranslatedSegmentFromServer(d.nextSegmentId);
 
             var segment = SegmentStore.getSegmentByIdToJS(id_segment);
+            if ( !segment ) return;
             if (config.alternativesEnabled && !segment.alternatives) {
                 this.getTranslationMismatches(id_segment);
             }
             $('html').trigger('setCurrentSegment_success', [d, id_segment]);
-        },
-        /**
-         * setStatus
-         *
-         * Set the status at UI level, with potential inconsistent state against what is saved server side.
-         * This is necessary for CSS but also for changeStatus function, which relies on this class to
-         * determine the status to assign to the setTranslation during the autosave.
-         *
-         * @param segment DOM element
-         * @param status
-         */
-        setStatus: function(segment, status) {
-            var fid = UI.getSegmentFileId(segment);
-            SegmentActions.setStatus(UI.getSegmentId(segment), fid, status);
-        },
-        /**
-         * This function is an attempt to centralize all distributed logic used to mark
-         * the segment as modified. When a segment is modified we set the class and we set
-         * data. And we trigger an event.
-         *
-         *
-         * @param el
-         */
-        setSegmentModified : function( el, isModified ) {
-            if ( typeof isModified == 'undefined' || !el || el.length === 0 ) {
-                return;
-            }
-
-            if ( isModified ) {
-                SegmentActions.modifiedTranslation(UI.getSegmentId( el ), UI.getSegmentFileId(el), true);
-                el.trigger('modified');
-            } else {
-                SegmentActions.modifiedTranslation(UI.getSegmentId( el ), UI.getSegmentFileId(el), false);
-                el.trigger('modified');
-            }
-        },
-
-        focusSegment: function(segment) {
-            SegmentActions.openSegment(UI.getSegmentId(segment));
-            $(document).trigger('ui:segment:focus', UI.getSegmentId( segment ) );
         },
 
         getSegmentById: function(id) {
@@ -443,77 +318,11 @@
             }
             return segmentAfter.original_sid;
         },
-        showApproveAllModalWarnirng: function (  ) {
-            var props = {
-                text: "It was not possible to approve all segments. There are some segments that have not been translated.",
-                successText: "Ok",
-                successCallback: function() {
-                    APP.ModalWindow.onCloseModal();
-                }
-            };
-            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
-        },
-        showTranslateAllModalWarnirng: function (  ) {
-            var props = {
-                text: "It was not possible to translate all segments.",
-                successText: "Ok",
-                successCallback: function() {
-                    APP.ModalWindow.onCloseModal();
-                }
-            };
-            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
-        },
-        approveFilteredSegments: function(segmentsArray) {
-            var self = this;
-            if (segmentsArray.length >= 500) {
-                var subArray = segmentsArray.slice(0, 499);
-                var todoArray = segmentsArray.slice(500, segmentsArray.length-1);
-                return this.approveFilteredSegments(subArray).then(function (  ) {
-                    return self.approveFilteredSegments(todoArray);
-                });
-            } else {
-                return API.SEGMENT.approveSegments(segmentsArray).then(function ( response ) {
-                    self.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
-                    setTimeout(UI.retrieveStatistics, 2000);
-                });
-            }
-        },
-        translateFilteredSegments: function(segmentsArray) {
-            var self = this;
-            if (segmentsArray.length >= 500) {
-                var subArray = segmentsArray.slice(0, 499);
-                var todoArray = segmentsArray.slice(499, segmentsArray.length);
-                return this.translateFilteredSegments(subArray).then(function (  ) {
-                    return self.translateFilteredSegments(todoArray);
-                });
-            } else {
-                return API.SEGMENT.translateSegments(segmentsArray).then(function ( response ) {
-                    self.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
-                    setTimeout(UI.retrieveStatistics, 2000);
-                });
-            }
-        },
-        checkUnchangebleSegments: function(response) {
-            if (response.unchangeble_segments.length > 0) {
-                UI.showTranslateAllModalWarnirng();
-            }
-        },
-        bulkChangeStatusCallback: function( segmentsArray, status) {
-            if (segmentsArray.length > 0) {
-                segmentsArray.forEach(function ( item ) {
-                    var segment = SegmentStore.getSegmentByIdToJS(item);
-                    if ( segment ) {
-                        SegmentActions.setStatus(item, segment.id_file, status);
-                        SegmentActions.modifiedTranslation(item, segment.id_file, false);
-                        UI.disableTPOnSegment( segment )
-                    }
-                });
-                setTimeout(CatToolActions.reloadSegmentFilter, 500);
-            }
-        },
 
         /**
          * Register tabs in segment footer
+         *
+         * Overridden by  plugin
          */
         registerFooterTabs: function () {
             SegmentActions.registerTab('concordances', true, false);

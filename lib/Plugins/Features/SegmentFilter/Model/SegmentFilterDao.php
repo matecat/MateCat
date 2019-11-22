@@ -510,7 +510,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                 GROUP BY segment_hash, CONCAT( id_job, '-', password )
                 HAVING COUNT( segment_hash ) > 1
             ) AS REPETITIONS ON REPETITIONS.hash = segment_translations.segment_hash AND FIND_IN_SET( id_segment, REPETITIONS.id )
-            ORDER BY id_segment
+            GROUP BY id_segment
         ";
 
         return $sql;

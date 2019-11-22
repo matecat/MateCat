@@ -8,15 +8,7 @@ Review = {
     type : config.reviewType
 };
 $.extend( UI, {
-    clenaupTextFromPleaceholders : function(text) {
-        text = text
-            .replace( config.lfPlaceholderRegex, "\n" )
-            .replace( config.crPlaceholderRegex, "\r" )
-            .replace( config.crlfPlaceholderRegex, "\r\n" )
-            .replace( config.tabPlaceholderRegex, "\t" )
-            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-        return text;
-    },
+
     evalOpenableSegment: function ( segment ) {
         if ( ! (
             segment.status === 'NEW' ||
@@ -102,12 +94,12 @@ if ( config.enableReview && config.isReview ) {
             trackChanges: function (editarea) {
                 var $segment = $(editarea).closest('section');
                 var source = EditAreaUtils.postProcessEditarea($segment, '.original-translation');
-                source = UI.clenaupTextFromPleaceholders( source );
+                source = TextUtils.clenaupTextFromPleaceholders( source );
                 //Fix for &amp in original-translation
                 source = source.replace(/&amp;/g, "&");
 
                 var target = EditAreaUtils.postProcessEditarea($segment, '.targetarea');
-                target = UI.clenaupTextFromPleaceholders( target );
+                target = TextUtils.clenaupTextFromPleaceholders( target );
                 var diffHTML = TextUtils.trackChangesHTML( TextUtils.htmlEncode(source), TextUtils.htmlEncode(target) );
                 diffHTML = TagUtils.transformTextForLockTags(diffHTML);
                 $('.sub-editor.review .track-changes p', $segment).html( diffHTML );

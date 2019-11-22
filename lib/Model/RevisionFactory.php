@@ -1,6 +1,9 @@
 <?php
 
+use API\V2\Validators\SegmentTranslationIssue;
 use Features\AbstractRevisionFeature;
+use Features\BaseFeature;
+use Features\SecondPassReview\Model\ChunkReviewModel;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
 
@@ -37,13 +40,13 @@ class RevisionFactory {
         return static::$INSTANCE;
     }
 
-    protected function __construct( \Features\BaseFeature $revisionFeature ) {
+    protected function __construct( BaseFeature $revisionFeature ) {
         $this->revision = $revisionFeature;
     }
 
-    public function getChunkReviewModel( \LQA\ChunkReviewStruct $chunkReviewStruct ) {
+    public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
         if ( $this->_isSecondPass() ) {
-            return new \Features\SecondPassReview\Model\ChunkReviewModel( $chunkReviewStruct );
+            return new ChunkReviewModel( $chunkReviewStruct );
         } else {
             return $this->revision->getChunkReviewModel( $chunkReviewStruct );
         }
@@ -66,7 +69,7 @@ class RevisionFactory {
      * @throws \Exception
      */
     public function getTranslationIssuesValidator( Request $request ) {
-        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new \API\V2\Validators\SegmentTranslationIssue( $request ) );
+        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssue( $request ) );
     }
 
     /**
