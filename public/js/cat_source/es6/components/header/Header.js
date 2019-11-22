@@ -138,10 +138,6 @@ class Header extends React.Component {
         return null;
     }
 
-    render () {
-        let self = this;
-        let userIcon = this.getUserIcon();
-
 	render = () => {
 		const {getHeaderComponentToShow, getUserIcon} = this;
 		const {showLinks, showJobInfo, showFilterProjects, showModals, showTeams, changeTeam, isQualityReport} = this.props;
