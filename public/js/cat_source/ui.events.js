@@ -35,12 +35,6 @@ $.extend(UI, {
             SegmentActions.selectNextSegment();
             // UI.gotoNextSegment();
         }).on('keyup.shortcuts', null, 'ctrl', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            SegmentActions.openSelectedSegment();
-        }).on('keydown.shortcuts', null, 'meta', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
             SegmentActions.openSelectedSegment();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
@@ -168,7 +162,11 @@ $.extend(UI, {
 		});
 
 
-		$('html').on('click', '#previewDropdown .downloadTranslation a', function(e) {
+		$('html').on('keyup', function ( e ) {
+            if ( e.key === 'Meta' && navigator.platform === 'MacIntel' ) {
+                SegmentActions.openSelectedSegment();
+            }
+        }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             UI.runDownload();
 		}).on('click', '#previewDropdown .previewLink a', function(e) {
