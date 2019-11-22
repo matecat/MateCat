@@ -47,6 +47,10 @@ var initEvents = function() {
 		e.preventDefault();
 		UI.logoutAction();
 	});
+	$(".user-menu-container").on('click', '#manage-item', function(e) {
+		e.preventDefault();
+		document.location.href = '/manage';
+	});
 	$('#profile-item').on('click', function (e) {
 		e.preventDefault();
 		e.stopPropagation();

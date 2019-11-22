@@ -90,6 +90,11 @@ class Header extends React.Component {
         });
         setTimeout(this.initProfileDropdown)
     }
+
+	openManage =  () => {
+		document.location.href = '/manage';
+	};
+
 	getUserIcon = () => {
 		if ( this.state.loggedUser ) {
 			if (this.state.user.metadata && this.state.user.metadata.gplus_picture) {
@@ -98,6 +103,7 @@ class Header extends React.Component {
 								 src={this.state.user.metadata.gplus_picture + "?sz=80"} title="Personal settings"
 								 alt="Profile picture"/>
 							<div className="menu">
+								<div className="item" data-value="Manage" id="manage-item" onClick={this.openManage.bind(this)}>My Projects</div>
 								<div className="item" data-value="profile" id="profile-item" onClick={this.openPreferencesModal.bind(this)}>Profile</div>
 								<div className="item" data-value="logout" id="logout-item" onClick={this.logoutUser.bind(this)}>Logout</div>
 							</div>
@@ -166,13 +172,12 @@ class Header extends React.Component {
 						{(showLinks) ? (
 							<div>
 								<ul id="menu-site">
-									<li><a href="https://www.matecat.com/about/">About</a></li>
-									<li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
-									<li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
-									<li><a href="https://www.matecat.com/open-source/">Opensource</a></li>
-									<li><a href="https://www.matecat.com/support/">Contact us</a></li>
-									{/*<li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>*/}
-									<li><a href="/plugins/aligner/index"  target="_blank" className={"btn btn-primary"}>Aligner</a></li>
+									<li><a href="/about/">About</a></li>
+									<li><a href="/benefits/">Benefits</a></li>
+									<li><a href="/outsourcing/">Outsource</a></li>
+									<li><a href="/open-source/">Opensource</a></li>
+									<li><a href="/support/">Contact us</a></li>
+									{/*<li><a href="/plugins/aligner/index"  target="_blank" className={"btn btn-primary"}>Aligner</a></li>*/}
                                     { this.getMoreLinks() }
 								</ul>
 							</div>
@@ -189,12 +194,12 @@ class Header extends React.Component {
 							selectedTeamId={selectedTeamId}
 						/>}
 						{!!isQualityReport && <ActionMenu />}
-						<div className={"separator"}></div>
-						{!!loggedUser && !showFilterProjects && <div title="Manage" id="action-manage">
-																	<a className={"action-submenu"} href={'/manage'}>
-																		<IconManage width={'36'} height={'36'} style={{float:'right'}} />
-																	</a>
-																</div>}
+						{/*<div className={"separator"}></div>*/}
+						{/*{!!loggedUser && !showFilterProjects && <div title="Manage" id="action-manage">*/}
+						{/*											<a className={"action-submenu"} href={'/manage'}>*/}
+						{/*												<IconManage width={'36'} height={'36'} style={{float:'right'}} />*/}
+						{/*											</a>*/}
+						{/*										</div>}*/}
 						{userIcon}
 					</div>
 
