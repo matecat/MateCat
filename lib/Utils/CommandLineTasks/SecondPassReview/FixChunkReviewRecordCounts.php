@@ -39,7 +39,7 @@ class FixChunkReviewRecordCounts extends Command
         foreach ( $allChunkReviews as $chunkReview ) {
             $model = $revisionFactory->getChunkReviewModel( $chunkReview ) ;
             $start = microtime(true) ;
-            $model->recountAndUpdatePassFailResult() ;
+            $model->recountAndUpdatePassFailResult( $project ) ;
             echo microtime(true ) - $start . "\n" ;
         }
     }
