@@ -285,7 +285,7 @@ p.translator_name {
 }
 
 
-.addrevision h4, 
+.addrevision h4,
 .addrevision span {
     display: inline-block;
     margin: 0;
@@ -370,7 +370,7 @@ p.translator_name {
     padding: 20px 1% 5px 1%;
 }
 
-.outsource.modal.loading .delivery_details, 
+.outsource.modal.loading .delivery_details,
 .outsource.modal.loading .displayprice,
 .outsource.modal.loading .euro,
 .outsource.modal.loading .addrevision .revision_delivery,
@@ -716,28 +716,28 @@ a.hide_translator {
 .outsourceto:not(.outsourced) .blink {
     -webkit-animation-name: blinker;
     -webkit-animation-duration: 0.4s;
-    -webkit-animation-timing-function: linear;  
+    -webkit-animation-timing-function: linear;
     -moz-animation-name: blinker;
     -moz-animation-duration: 0.4;
-    -moz-animation-timing-function: linear;   
+    -moz-animation-timing-function: linear;
     animation-name: blinker;
     animation-duration: 0.4;
     animation-timing-function: linear;
 }
 
-@-moz-keyframes blinker {  
+@-moz-keyframes blinker {
     0% {  background: transparent; }
     50% {  background: rgb(255, 255, 153);}
     100% {  background: transparent; }
 }
 
-@-webkit-keyframes blinker {  
+@-webkit-keyframes blinker {
     0% {  background: transparent; }
     50% {  background: rgb(255, 255, 153);}
     100% {  background: transparent; }
 }
 
-@keyframes blinker {  
+@keyframes blinker {
     0% {  background: transparent; }
     50% {  background: rgb(255, 255, 153);}
     100% {  background: transparent; }
@@ -753,9 +753,9 @@ a.hide_translator {
 }
 
 .pricebox .translator_info,
-.pricebox .tprice, 
+.pricebox .tprice,
 .pricebox .delivery,
-.pricebox .torder { 
+.pricebox .torder {
     float:left;
 }
 
@@ -856,7 +856,7 @@ a.hide_translator {
     margin-top: -10px;
 }
 
-.references, 
+.references,
 .paymentinfo {
     text-align: center;
     padding: 5px 0;
@@ -992,7 +992,7 @@ span.zone2 {
     padding: 5px 10px !important;
 }
 
-.uploadbtn.showprices  
+.uploadbtn.showprices
 {
     margin: 2% 2.5% 2% 2%!important;
     width: 160px;
@@ -1081,7 +1081,7 @@ background: #F6F6F6;
 
 
 table.chunks  th:last-child {
-width: 15%;	
+width: 15%;
 }
 
 table.chunks  tr:last-child {
@@ -1202,20 +1202,6 @@ cursor: pointer;
 }
 }
 
-.popup-languages.slide {
-    height: 100%!important;
-    width: 1100px;
-    margin: 0 auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-    position: fixed;
-    z-index: 10000000000000;
-    top: 0;
-    right: -1100px;
-    background: #fff;
-    box-shadow: -2px 5px 7px #7B7B7B;
-}
-
 .tooltip span {
     font-size: 15px;
     line-height: 20px;
@@ -1266,7 +1252,7 @@ a.tooltip.gray span:after {
     top: 120px;
     left: 435px;
     zoom: 0.9;
-    z-index: 99999999999999999999;    
+    z-index: 99999999999999999999;
     text-align: left;
     -moz-box-shadow: 0 0px 11px #888;
     -webkit-box-shadow: 0 0px 11px #888;
@@ -1698,7 +1684,7 @@ a.btn-cancel.in-popup.cancelForceDelivery:hover {
     margin-top: -8px;
 }
 
-.quoteNotAvailable .tprice {   
+.quoteNotAvailable .tprice {
     min-height: 109px;
 }
 

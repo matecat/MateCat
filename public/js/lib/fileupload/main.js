@@ -51,13 +51,6 @@ UI = {
     disableAnalyze: function () {
         disableAnalyze();
     },
-    checkMultilangRTL: function () {
-        var direction = "ltr";
-        $('.popup-languages li.on input').each(function(){
-            if($('#target-lang div[data-value="' + $(this).val() + '"]').attr('data-direction') == 'rtl') direction = "rtl";
-        });
-        return direction;
-    },
     conversionsAreToRestart: function () {
         var num = 0;
         $( '.template-download .name' ).each( function () {

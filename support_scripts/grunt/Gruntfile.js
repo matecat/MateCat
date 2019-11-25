@@ -46,6 +46,7 @@ module.exports = function(grunt) {
         cssBase + 'common.css',
         cssBase + 'upload-page.scss',
         cssBase + 'popup.css',
+        cssBase + 'sass/modals/*',
         cssBase + 'sass/notifications.scss'
     ];
 
@@ -59,7 +60,7 @@ module.exports = function(grunt) {
 
     var es2015Preset = require('babel-preset-env');
     var reactPreset = require('babel-preset-react');
-    const babelstage2 = require('babel-preset-stage-2');
+    var babelstage2 = require('babel-preset-stage-2');
 
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
@@ -315,7 +316,7 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            react_libs: {
+            /*react_libs: {
                 files: [
                     basePath + 'cat_source/es6/react-libs.js'
                 ],
@@ -327,14 +328,14 @@ module.exports = function(grunt) {
             },
             react: {
                 files: [
-                    basePath + 'cat_source/es6/**/*.js'
+                    basePath + 'cat_source/es6/!**!/!*.js'
                 ],
                 tasks: ['browserify:components'],
                 options: {
                     interrupt: true,
                     livereload : true
                 }
-            },
+            },*/
             js: {
                 files: [
                     basePath + 'cat_source/*.js',
@@ -345,6 +346,16 @@ module.exports = function(grunt) {
                     basePath + 'advancedOptionsTab.js'
                 ],
                 tasks: ['concat:js'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            },
+            uploadjs: {
+                files: [
+                    basePath + 'new-project.js',
+                ],
+                tasks: ['concat:upload'],
                 options: {
                     interrupt: true,
                     livereload : true
@@ -563,6 +574,31 @@ module.exports = function(grunt) {
         'replace:version'
     ]);
 
+
+    /**
+     * bundleDev:js
+     *
+     * This task includes all the tasks required to build a final
+     * javascript. This is not done in development usually since it
+     * would recompile parts that are heavy and not frequently changed
+     * like libraries.
+     */
+    grunt.registerTask('bundleDev:js', [
+        'browserify:libsDev',
+        'browserify:componentsDev',
+        'browserify:qualityReport',
+        'concat:libs',
+        'concat:libs_upload',
+        'concat:semantic',
+        'concat:app',
+        'concat:common',
+        'concat:manage',
+        'concat:analyze',
+        'concat:analyze_new',
+        'concat:upload',
+        'replace:version'
+    ]);
+
     /**
      * development:js
      *
@@ -599,7 +635,7 @@ module.exports = function(grunt) {
      * just development bundles.
      */
     grunt.registerTask('development', [
-        'bundle:js',
+        'bundleDev:js',
         'sass',
         'replace:css'
     ]);

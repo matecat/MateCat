@@ -29,6 +29,8 @@ window.ProjectsContainer = require('./components/projects/ProjectsContainer').de
 window.Header = require("./components/header/Header").default;
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
 
+window.LanguageSelector = require('./components/languageSelector/LanguageSelector').default;
+
 // ui.render
 window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
 
@@ -82,4 +84,3 @@ window.SegmentUtils = require('./utils/segmentUtils');
 window.LXQ = require('./utils/lxq.main');
 window.MBC = require('./utils/mbc.main');
 window.Speech2Text = require('./utils/speech2text');
-
