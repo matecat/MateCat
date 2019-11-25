@@ -538,7 +538,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadNpmTasks('grunt-notify');
+    // grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-jshint');
@@ -584,8 +584,8 @@ module.exports = function(grunt) {
      * like libraries.
      */
     grunt.registerTask('bundleDev:js', [
-        'browserify:libsDev',
-        'browserify:componentsDev',
+        'browserify:libs',
+        'browserify:components',
         'browserify:qualityReport',
         'concat:libs',
         'concat:libs_upload',

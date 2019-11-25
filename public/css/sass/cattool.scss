@@ -45,7 +45,7 @@ body.cattool {
 	  display: grid;
 	  position: relative;
 	  grid-column-gap: 10px;
-	  grid-template-columns: 72px minmax(80px, 420px) minmax(140px, 216px) minmax(172px, 0.3fr) minmax(116px, 0.2fr) minmax(316px, 0.4fr);
+	  grid-template-columns: 72px minmax(80px, 420px) minmax(140px, 350px) minmax(172px, 0.2fr) minmax(116px, 0.2fr) minmax(316px, 0.3fr);
 	  align-items: center;
 
 	  .item {
