@@ -58,6 +58,13 @@ var initEvents = function() {
 		return false;
 	});
 
+	$('#action-three-dots .shortcuts').on('click', function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+		UI.openShortcutsModal();
+		return false;
+	});
+
 	$(".action-menu").on('click', "#action-filter", function(e) {
 		e.preventDefault();
 		if (!SegmentFilter.open) {
