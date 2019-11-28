@@ -183,7 +183,10 @@ abstract class downloadController extends controller {
      * @param ZipContentObject[] $output_content
      * @param string             $outputFile
      *
+     * @param bool               $isOriginalFile
+     *
      * @return string The zip binary
+     * @throws Exception
      */
     protected static function composeZip( Array $output_content, $outputFile = null, $isOriginalFile = false ) {
         if ( empty( $outputFile ) ) {
@@ -198,7 +201,7 @@ abstract class downloadController extends controller {
         foreach ( $output_content as $f ) {
 
             //Php Zip bug, utf-8 not supported
-            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-=\$\:@§]/u', "_", $f->output_filename );
+            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-=\$\:@§#]/u', "_", $f->output_filename );
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
 

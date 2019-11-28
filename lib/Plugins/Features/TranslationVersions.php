@@ -43,11 +43,10 @@ class TranslationVersions extends BaseFeature {
         $batchEventCreator->setProject( $project );
 
         // If propagated segments exist, start cycle here
-        if ( isset( $params[ 'propagation' ][ 'propagated_ids' ] ) and false === empty($params[ 'propagation' ][ 'propagated_ids' ] ) ) {
-            foreach ( $params[ 'propagation' ][ 'propagated_ids' ] as $segmentIdBeforeChange ) {
+        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ] ) and false === empty($params[ 'propagation' ][ 'segments_for_propagation' ] ) ) {
+            foreach ( $params[ 'propagation' ][ 'segments_for_propagation' ] as $segmentTranslationBeforeChange ) {
 
                 /** @var \Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
-                $segmentTranslationBeforeChange                    = (new \Translations_SegmentTranslationDao())->findBySegmentAndJob($segmentIdBeforeChange, $chunk->id);
                 $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
                 $propagatedSegmentAfterChange->translation         = $translation->translation;
                 $propagatedSegmentAfterChange->status              = $translation->status;
