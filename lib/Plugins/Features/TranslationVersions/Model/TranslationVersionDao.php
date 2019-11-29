@@ -1,13 +1,22 @@
 <?php
 
-use Constants;
-use DataAccess\ShapelessConcreteStruct;
+namespace Features\TranslationVersions\Model;
 
-class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
+use Chunks_ChunkStruct;
+use DataAccess\ShapelessConcreteStruct;
+use DataAccess_AbstractDao;
+use DataAccess_IDaoStruct;
+use Database;
+use PDO;
+use Translations_SegmentTranslationStruct;
+use Features\TranslationVersions\Model\TranslationVersionStruct;
+use Utils;
+
+class TranslationVersionDao extends DataAccess_AbstractDao {
 
     const TABLE = 'segment_translation_versions';
 
-    protected static $primary_keys = ['id_job', 'id_segment', 'version_number'];
+    protected static $primary_keys = [ 'id_job', 'id_segment', 'version_number' ];
 
     protected function _buildResult( $array_result ) {
     }
@@ -17,21 +26,21 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public static function getVersionsForJob($id_job) {
+    public static function getVersionsForJob( $id_job ) {
         $sql = "SELECT * FROM segment_translation_versions " .
-            " WHERE id_job = :id_job " .
-            " ORDER BY creation_date DESC ";
+                " WHERE id_job = :id_job " .
+                " ORDER BY creation_date DESC ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql );
+        $stmt = $conn->prepare( $sql );
 
         $stmt->execute(
-            array( 'id_job' => $id_job )
+                [ 'id_job' => $id_job ]
         );
 
         $stmt->setFetchMode(
-            PDO::FETCH_CLASS,
-            'Translations_TranslationVersionStruct'
+                PDO::FETCH_CLASS,
+                TranslationVersionStruct::class
         );
 
         return $stmt->fetchAll();
@@ -46,12 +55,12 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute(
-                array( 'id_job' => $chunk->id )
+                [ 'id_job' => $chunk->id ]
         );
 
         $stmt->setFetchMode(
                 PDO::FETCH_CLASS,
-                'Translations_TranslationVersionStruct'
+                TranslationVersionStruct::class
         );
 
         return $stmt->fetchAll();
@@ -62,9 +71,9 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      * @param $id_segment
      * @param $version_number
      *
-     * @return null|Translations_TranslationVersionStruct
+     * @return null|TranslationVersionStruct
      */
-    public function getVersionNumberForTranslation($id_job, $id_segment, $version_number) {
+    public function getVersionNumberForTranslation( $id_job, $id_segment, $version_number ) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job AND id_segment = :id_segment " .
                 " AND version_number = :version_number ;";
@@ -73,14 +82,14 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute( [
-                'id_job' => $id_job,
-                'id_segment' => $id_segment,
+                'id_job'         => $id_job,
+                'id_segment'     => $id_segment,
                 'version_number' => $version_number
         ] );
 
         $stmt->setFetchMode(
                 PDO::FETCH_CLASS,
-                'Translations_TranslationVersionStruct'
+                TranslationVersionStruct::class
         );
 
         return $stmt->fetch();
@@ -90,29 +99,27 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      * @param $id_job
      * @param $id_segment
      *
-     * @return Translations_TranslationVersionStruct[]
+     * @return TranslationVersionStruct[]
      */
-    public static function getVersionsForTranslation($id_job, $id_segment) {
+    public static function getVersionsForTranslation( $id_job, $id_segment ) {
         $sql = "SELECT * FROM segment_translation_versions " .
-            " WHERE id_job = :id_job AND id_segment = :id_segment " .
-            " ORDER BY creation_date DESC ";
+                " WHERE id_job = :id_job AND id_segment = :id_segment " .
+                " ORDER BY creation_date DESC ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute(
-            array( 'id_job' => $id_job, 'id_segment' => $id_segment )
+                [ 'id_job' => $id_job, 'id_segment' => $id_segment ]
         );
 
         $stmt->setFetchMode(
-            PDO::FETCH_CLASS,
-            'Translations_TranslationVersionStruct'
+                PDO::FETCH_CLASS,
+                TranslationVersionStruct::class
         );
 
         return $stmt->fetchAll();
     }
-
-
 
 
     /**
@@ -121,7 +128,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public function getVersionsForRevision($id_job, $id_segment) {
+    public function getVersionsForRevision( $id_job, $id_segment ) {
 
         $sql = "SELECT * FROM (
 
@@ -217,7 +224,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
     ) t2
 
     ORDER BY version_number DESC
-    " ;
+    ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -240,7 +247,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         $db = Database::obtain()->getConnection();
 
-        $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1)." ?";
+        $prepare_str_segments_id = str_repeat( ' ?, ', count( $segments_id ) - 1 ) . " ?";
 
         $query = "SELECT 
 
@@ -281,9 +288,9 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
         ) AS ste ON stv.version_number = ste.version_number AND stv.id_segment = ste.id_segment";
 
-        $stmt = $db->prepare($query);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct');
-        $stmt->execute( array_merge($segments_id, [$job_id], $segments_id, [$job_id], $segments_id, [$job_id], [ $source_page ] ));
+        $stmt = $db->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $stmt->execute( array_merge( $segments_id, [ $job_id ], $segments_id, [ $job_id ], $segments_id, [ $job_id ], [ $source_page ] ) );
 
         $results = $stmt->fetchAll();
 
@@ -292,45 +299,39 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
 
     }
 
-    public function savePropagation($propagation, $id_segment, $job_data) {
+    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $id_segment, Chunks_ChunkStruct $job_data ) {
 
-        $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
-        $st_rejected   = Constants_TranslationStatus::STATUS_REJECTED;
-        $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
-        $st_new        = Constants_TranslationStatus::STATUS_NEW;
-        $st_draft      = Constants_TranslationStatus::STATUS_DRAFT;
-
-        $status_condition = ''; 
+        $status_condition = '';
 
         $where_condition = " WHERE " .
-            " id_job = :id_job AND " .
-            " segment_hash = :segment_hash AND " .
-            " id_segment != :id_segment AND " .
-            " id_segment BETWEEN :first_segment AND :last_segment " ;
+                " id_job = :id_job AND " .
+                " segment_hash = :segment_hash AND " .
+                " id_segment != :id_segment AND " .
+                " id_segment BETWEEN :first_segment AND :last_segment ";
 
-        $where_options = array(
-            'id_job'          => $job_data['id'],
-            'id_segment'      => $id_segment,
-            'first_segment'   => $job_data['job_first_segment'],
-            'last_segment'    => $job_data['job_last_segment'],
-            'segment_hash'    => $propagation['segment_hash'],
-        );
+        $where_options = [
+                'id_job'        => $job_data[ 'id' ],
+                'id_segment'    => $id_segment,
+                'first_segment' => $job_data[ 'job_first_segment' ],
+                'last_segment'  => $job_data[ 'job_last_segment' ],
+                'segment_hash'  => $propagation[ 'segment_hash' ],
+        ];
 
-        $this->insertVersionRecords(array(
-            'status_condition' => $status_condition,
-            'where_condition' => $where_condition,
-            'where_options' => $where_options,
-            'propagation' => $propagation
-        ));
+        $this->insertVersionRecords( [
+                'status_condition' => $status_condition,
+                'where_condition'  => $where_condition,
+                'where_options'    => $where_options,
+                'propagation'      => $propagation
+        ] );
 
-        $this->updateVersionNumberOnFutureUpdates(array(
-            'status_condition' => $status_condition,
-            'where_condition' => $where_condition,
-            'where_options' => $where_options
-        ));
+        $this->upCountVersionNumberOnPropagatedTranslations( [
+                'status_condition' => $status_condition,
+                'where_condition'  => $where_condition,
+                'where_options'    => $where_options
+        ] );
     }
 
-    public function saveVersion( Translations_TranslationVersionStruct $new_version ) {
+    public function saveVersion( TranslationVersionStruct $new_version ) {
         $sql = "INSERT INTO segment_translation_versions " .
                 " ( id_job, id_segment, translation, version_number, time_to_edit, old_status, new_status ) " .
                 " VALUES " .
@@ -350,35 +351,35 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         ] );
     }
 
-    public function updateVersion( Translations_TranslationVersionStruct $old_translation ) {
+    public function updateVersion( TranslationVersionStruct $old_translation ) {
         $sql = "UPDATE segment_translation_versions
                 SET translation = :translation, time_to_edit = :time_to_edit
                 WHERE id_job = :id_job AND id_segment = :id_segment
-                AND version_number = :version_number " ;
+                AND version_number = :version_number ";
 
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare($sql );
+        $stmt = $conn->prepare( $sql );
 
-        $stmt->execute( array(
+        $stmt->execute( [
                 'id_job'         => $old_translation->id_job,
-                'id_segment'     => $old_translation->id_segment ,
+                'id_segment'     => $old_translation->id_segment,
                 'translation'    => $old_translation->translation,
                 'version_number' => $old_translation->version_number,
                 'time_to_edit'   => $old_translation->time_to_edit
-        ));
+        ] );
 
-        return $stmt->rowCount() ;
+        return $stmt->rowCount();
     }
 
-    private function insertVersionRecords($params) {
-        $params = Utils::ensure_keys($params, array(
-            'status_condition', 'where_condition', 'where_options'
-        ));
+    private function insertVersionRecords( $params ) {
+        $params = Utils::ensure_keys( $params, [
+                'status_condition', 'where_condition', 'where_options'
+        ] );
 
-        $where_condition = $params['where_condition'];
-        $status_condition = $params['status_condition'];
-        $where_options = $params['where_options'];
-        $propagation = $params['propagation']; // TODO: check this, bug suspect
+        $where_condition  = $params[ 'where_condition' ];
+        $status_condition = $params[ 'status_condition' ];
+        $where_options    = $params[ 'where_options' ];
+        $propagation      = $params[ 'propagation' ]; // TODO: check this, bug suspect
 
         /**
          * This query makes and insert while reading from segment_translations.
@@ -386,33 +387,33 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
          */
 
         $insert_sql = "INSERT INTO segment_translation_versions " .
-            " ( " .
-            " id_job, id_segment, translation, version_number, propagated_from " .
-            " ) " .
-            " SELECT id_job, id_segment, translation, version_number, :propagated_from " .
-            " FROM segment_translations " .
-            " $where_condition " .
-            " $status_condition " ;
+                " ( " .
+                " id_job, id_segment, translation, version_number, propagated_from " .
+                " ) " .
+                " SELECT id_job, id_segment, translation, version_number, :propagated_from " .
+                " FROM segment_translations " .
+                " $where_condition " .
+                " $status_condition ";
 
-        $insert_options = array_merge( $where_options, array(
-            'propagated_from' => $propagation['autopropagated_from']
-        ));
+        $insert_options = array_merge( $where_options, [
+                'propagated_from' => $propagation[ 'autopropagated_from' ]
+        ] );
 
         $conn = Database::obtain()->getConnection();
 
         $insert = $conn->prepare( $insert_sql );
-        $insert->execute(  $insert_options );
+        $insert->execute( $insert_options );
 
     }
 
-    private function updateVersionNumberOnFutureUpdates($params) {
-        $params = Utils::ensure_keys($params, array(
-            'status_condition', 'where_condition', 'where_options'
-        ));
+    private function upCountVersionNumberOnPropagatedTranslations( $params ) {
+        $params = Utils::ensure_keys( $params, [
+                'status_condition', 'where_condition', 'where_options'
+        ] );
 
-        $where_condition = $params['where_condition'];
-        $status_condition = $params['status_condition'];
-        $where_options = $params['where_options'];
+        $where_condition  = $params[ 'where_condition' ];
+        $status_condition = $params[ 'status_condition' ];
+        $where_options    = $params[ 'where_options' ];
 
         /**
          * Update segment_translations to change the version number
@@ -424,13 +425,13 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
          */
 
         $update_sql = "UPDATE segment_translations " .
-            " SET version_number = version_number + 1  " .
-            " $where_condition " .
-            " $status_condition " ;
+                " SET version_number = version_number + 1  " .
+                " $where_condition " .
+                " $status_condition ";
 
-        $update_options = $where_options ;
+        $update_options = $where_options;
 
-        $conn = Database::obtain()->getConnection();
+        $conn   = Database::obtain()->getConnection();
         $update = $conn->prepare( $update_sql );
         $update->execute( $update_options );
     }

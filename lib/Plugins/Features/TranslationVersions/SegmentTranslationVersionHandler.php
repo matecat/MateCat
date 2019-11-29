@@ -2,75 +2,63 @@
 
 namespace Features\TranslationVersions;
 
-use Constants;
+use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
-use Database;
 use Exception;
 use Features;
 use Log;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use ReflectionException;
 use Translations_SegmentTranslationStruct;
-use Translations_TranslationVersionDao;
-use Translations_TranslationVersionStruct;
+use Features\TranslationVersions\Model\TranslationVersionDao;
+use Features\TranslationVersions\Model\TranslationVersionStruct;
+use Users_UserStruct;
 use Utils;
 
 /**
  * Class SegmentTranslationVersionHandler
  *
  */
-class SegmentTranslationVersionHandler {
-    public $db;
+class SegmentTranslationVersionHandler implements VersionHandlerInterface {
 
     /**
-     * @var Translations_TranslationVersionDao
+     * @var TranslationVersionDao
      */
     private $dao;
 
-    private $id_job ;
-    private $id_segment ;
-    private $project ;
-    private $feature_enalbed ;
+    private $id_job;
+
+    /**
+     * @var Chunks_ChunkStruct
+     */
+    private $chunkStruct;
+
+    private $id_segment;
+    private $uid;
 
 
-    public function __construct($id_job, $id_segment, $uid, $id_project) {
-        $this->id_job     = $id_job ;
-        $this->id_segment = $id_segment ;
-        $this->uid        = $uid ;
+    public function __construct( Chunks_ChunkStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
 
+        $this->chunkStruct = $chunkStruct;
+        $this->id_job      = $chunkStruct->id;
+        $this->id_segment  = $id_segment;
+        $this->uid         = $userStruct->uid;
+        $this->dao         = new TranslationVersionDao();
 
-        // TODO: refactor, why id_project should be null
-        if ( null !== $id_project ) {
-            $this->project = Projects_ProjectDao::findById( $id_project );
-
-            $this->feature_enalbed = $this->project->isFeatureEnabled(
-                    Features::TRANSLATION_VERSIONS
-            );
-        }
-
-        Log::doJsonLog( 'feature_enabled ' . var_export( $this->feature_enalbed, true ) );
     }
 
     /**
-     * @param $params
-     *
-     * @throws Exception
+     * @param Translations_SegmentTranslationStruct $propagation
      */
-    public function savePropagation( $params ) {
-        $params = Utils::ensure_keys( $params, [
-                'propagation', 'job_data'
-        ] );
+    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation ) {
 
-        if ( $this->feature_enalbed !== true ) {
-            return;
-        }
-
-        $this->prepareDao();
-
-        $this->dao->savePropagation(
-                $params[ 'propagation' ],
+        $this->dao->savePropagationVersions(
+                $propagation,
                 $this->id_segment,
-                $params[ 'job_data' ]
+                $this->chunkStruct
         );
+
     }
 
     /**
@@ -81,22 +69,14 @@ class SegmentTranslationVersionHandler {
      * @param Translations_SegmentTranslationStruct $old_translation
      *
      * @return bool|int
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function saveVersion(
             Translations_SegmentTranslationStruct $new_translation,
             Translations_SegmentTranslationStruct $old_translation
     ) {
 
-        /**
-         * This is where we decide if a new translation version is to be generated.
-         * This should be moved in a review_extended specific model.
-         * TODO: refactor.
-         *
-         */
-
         if (
-                !$this->feature_enalbed ||
                 empty( $old_translation ) ||
                 $this->translationIsEqual( $new_translation, $old_translation )
         ) {
@@ -105,9 +85,9 @@ class SegmentTranslationVersionHandler {
 
         // From now on, translations are treated as arrays and get attributes attached
         // just to be passed to version save. Create two arrays for the purpose.
-        $new_version = new Translations_TranslationVersionStruct( $old_translation->toArray() );
+        $new_version = new TranslationVersionStruct( $old_translation->toArray() );
 
-        // XXX: this is to be reviewed
+        // TODO: this is to be reviewed
         $new_version->is_review  = ( $old_translation->status == Constants_TranslationStatus::STATUS_APPROVED ) ? 1 : 0;
         $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ];
         $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ];
@@ -118,14 +98,11 @@ class SegmentTranslationVersionHandler {
          *
          * In any other case we expect the version record NOT to be there when we reach this point.
          *
-         * @param Translations_TranslationVersionStruct $version
+         * @param TranslationVersionStruct $version
          *
          * @return bool|int
          *
          */
-
-        $this->prepareDao();
-
         $version_record = $this->dao->getVersionNumberForTranslation(
                 $this->id_job, $this->id_segment, $new_version->version_number
         );
@@ -160,12 +137,6 @@ class SegmentTranslationVersionHandler {
         $new = html_entity_decode( $new_translation->translation, ENT_XML1 | ENT_QUOTES );
 
         return $new == $old;
-    }
-
-    private function prepareDao() {
-        $this->db               = Database::obtain();
-        $this->dao              = new Translations_TranslationVersionDao( $this->db );
-        $this->dao->source_page = $this->source_page;
     }
 
 }
