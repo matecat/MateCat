@@ -107,9 +107,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             WHERE jobs.id = ? AND jobs.password = ?
             AND st.status IN ( $statuses_placeholder )
 
-            AND ( st.match_type != 'ICE'
-                OR ( st.match_type = 'ICE' AND locked AND st.version_number > 0 )
-                OR ( st.match_type = 'ICE' AND not locked ) )
+            AND ( st.match_type != 'ICE' OR ( st.match_type = 'ICE' AND locked AND st.version_number > 0 AND time_to_edit != 0) OR ( st.match_type = 'ICE' AND not locked ) )
 
             AND st.id_segment
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
