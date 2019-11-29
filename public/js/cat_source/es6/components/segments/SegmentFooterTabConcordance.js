@@ -107,6 +107,7 @@ class SegmentFooterTabConcordance extends React.Component {
                 loading: false
             })
         }
+        setTimeout(()=>SegmentActions.recomputeSegment(this.props.id_segment));
     }
 
     processResults() {
@@ -172,6 +173,7 @@ class SegmentFooterTabConcordance extends React.Component {
         this.setState({
             extended: !this.state.extended
         });
+        setTimeout(()=>SegmentActions.recomputeSegment(this.props.id_segment));
     }
 
     componentDidMount() {

@@ -38,6 +38,7 @@ class SegmentsContainer extends React.Component {
         this.scrollToSelectedSegment = this.scrollToSelectedSegment.bind(this);
         this.openSide = this.openSide.bind(this);
         this.closeSide = this.closeSide.bind(this);
+        this.recomputeListSize = this.recomputeListSize.bind(this);
 
         this.lastScrollTop = 0;
         this.segmentsHeightsMap = {};
@@ -76,7 +77,6 @@ class SegmentsContainer extends React.Component {
             splitGroup: splitGroup,
             timeToEdit: config.time_to_edit_enabled,
         });
-
     }
 
     setLastSelectedSegment(sid) {
@@ -260,7 +260,7 @@ class SegmentsContainer extends React.Component {
         let segment = this.getSegmentByIndex(index);
         let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
 
-        if ( this.segmentsHeightsMap[segment.get('sid')] &&  this.segmentsHeightsMap[segment.get('sid')].segment.equals(segment)) {
+        if ( this.segmentsHeightsMap[segment.get('sid')] && this.segmentsHeightsMap[segment.get('sid')].height > 0 &&  this.segmentsHeightsMap[segment.get('sid')].segment.equals(segment)) {
             let heightToAdd = 0;
             if ( previousFileId !== segment.get('id_file')) {
                 heightToAdd = 43;
@@ -339,7 +339,14 @@ class SegmentsContainer extends React.Component {
         this.lastScrollTop = scrollTop;
     }
 
-
+    recomputeListSize(idFrom) {
+        const index = this.state.segments.findIndex( (segment, index) => {
+            return segment.get('sid') === idFrom;
+        });
+        this.listRef.recomputeSizes(index);
+        (this.segmentsHeightsMap[idFrom]) ? this.segmentsHeightsMap[idFrom].height = 0 : null;
+        this.forceUpdate();
+    }
 
     componentDidMount() {
         this.updateWindowDimensions();
@@ -352,6 +359,8 @@ class SegmentsContainer extends React.Component {
         SegmentStore.addListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
         SegmentStore.addListener(SegmentConstants.OPEN_SIDE, this.openSide);
         SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
+
+        SegmentStore.addListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
     }
 
     componentWillUnmount() {
@@ -363,6 +372,9 @@ class SegmentsContainer extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
         SegmentStore.removeListener(SegmentConstants.OPEN_SIDE, this.openSide);
         SegmentStore.removeListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
+
+        SegmentStore.removeListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
+
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -410,7 +422,7 @@ class SegmentsContainer extends React.Component {
         let items = this.getSegments();
         let width = this.state.window.width;
         return <VirtualList
-            ref={this.listRef}
+            ref={(list)=>this.listRef=list}
             width={width}
             height={this.state.window.height-106}
             style={{overflowX: 'hidden'}}
