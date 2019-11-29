@@ -3,17 +3,12 @@
  */
 $.extend(UI, {
 	bindShortcuts: function() {
-
-        this.shortCutskey = "standard";
-		if (UI.isMac) {
-            this.shortCutskey = "mac";
-        }
-        $("body").on('keydown.shortcuts', null, Shortcuts.cattol.events.openShortcutsModal.keystrokes[this.shortCutskey], function(e) {
+        $("body").on('keydown.shortcuts', null, Shortcuts.cattol.events.openShortcutsModal.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts');
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copySource.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            UI.copySource();
-        }).on('keydown.shortcuts',null, Shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
+            SegmentActions.copySourceToTarget();
+        }).on('keydown.shortcuts',null, Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             UI.openLanguageResourcesPanel();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openSearch.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             if((SearchUtils.searchEnabled)&&($('#action-search').length)) SearchUtils.toggleSearch(e);
@@ -21,7 +16,7 @@ $.extend(UI, {
             e.preventDefault();
             // UI.redoInSegment(UI.currentSegment);
             SegmentActions.redoInSegment();
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.undoInSegment.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.undoInSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.undoInSegment();
             SegmentActions.closeTagsMenu();
