@@ -94,5 +94,6 @@ module.exports = keyMirror({
     REDO_TEXT: null,
     FOCUS_EDITAREA: null,
     FILL_TAGS_IN_TARGET: null,
-    SELECT_SEGMENT: null
+    SELECT_SEGMENT: null,
+    RECOMPUTE_SIZE: null
 });

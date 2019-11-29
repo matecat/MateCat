@@ -134,6 +134,7 @@ class Editarea extends React.Component {
     onKeyDownEvent(e) {
         this.keyPressed = true;
         EditArea.keydownEditAreaEventHandler.call(this.editAreaRef, e, ()=>{
+            this.keyPressed = false;
             this.onInputEvent();
         });
         this.openConcordance(e);
