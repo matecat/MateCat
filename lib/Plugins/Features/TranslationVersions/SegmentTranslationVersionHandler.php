@@ -77,11 +77,12 @@ class SegmentTranslationVersionHandler {
      * Evaluates the need to save a new translation version to database.
      * If so, sets the new version number on $new_translation.
      *
-     * @param $old_translation
-     * @param $new_translation
-     * @param $page
+     * @param Translations_SegmentTranslationStruct $new_translation
+     * @param Translations_SegmentTranslationStruct $old_translation
+     *
+     * @return bool|int
+     * @throws \ReflectionException
      */
-
     public function saveVersion(
             Translations_SegmentTranslationStruct $new_translation,
             Translations_SegmentTranslationStruct $old_translation
