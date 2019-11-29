@@ -28,8 +28,8 @@ $app->add( new DumpSchemaTask() );
 $app->add( new DqfAttributesDumpTask() );
 $app->add( new MicrosoftOutsourceToHTS() );
 $app->add( new AirbnbOutsourceToHTS() );
-$app->add( new CopyFilesFromS3Task() );
-$app->add( new FindElementInS3CacheTask('dsa') );
+//$app->add( new CopyFilesFromS3Task() );
+//$app->add( new FindElementInS3CacheTask('dsa') );
 $app->add( new FixChunkReviewRecordCounts() );
 
 

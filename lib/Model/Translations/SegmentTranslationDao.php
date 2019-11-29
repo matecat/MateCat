@@ -750,7 +750,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         }
 
-        return [ 'totals' => $totals, 'propagated_ids' => $propagated_ids ];
+        return [ 'totals' => $totals, 'propagated_ids' => $propagated_ids, 'segments_for_propagation' => $segmentsForPropagation ];
     }
 
     public static function getLast10TranslatedSegmentIDs( $id_job ) {

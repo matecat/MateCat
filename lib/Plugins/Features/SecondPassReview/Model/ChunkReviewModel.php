@@ -13,6 +13,8 @@ use Features\ReviewExtended\Model\ChunkReviewDao ;
 class ChunkReviewModel extends \Features\ReviewExtended\ChunkReviewModel {
 
     /**
+     * Used only in AbstractRevisionFeature::postJobMerged and AbstractRevisionFeature::postJobSplitted
+     *
      * @param \Projects_ProjectStruct $project
      *
      * @throws \Exception
