@@ -254,7 +254,7 @@ class getSearchController extends ajaxController {
      * @return string|string[]|null
      */
     private function _getReplacedSegmentTranslation( $translation ) {
-        $replacedSegmentTranslation = WholeTextFinder::findAndReplace( $translation, $this->queryParams->_regexpEscapedTrg, $this->queryParams->replacement );
+        $replacedSegmentTranslation = WholeTextFinder::findAndReplace( $translation, $this->queryParams->target, $this->queryParams->replacement );
 
         return ( !empty( $replacedSegmentTranslation ) ) ? $replacedSegmentTranslation[ 'replacement' ] : $translation;
     }
