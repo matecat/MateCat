@@ -451,19 +451,6 @@ footer #statistics {
   line-height: 27px;
 }
 
-.topMenu {
-  position: fixed;
-  /*top: -1000px;*/
-  left: 135px;
-  width: 400px;
-  background: #fff;
-  z-index: 2;
-  text-align: left;
-  padding: 0;
-  font-size: 14px;
-  display: none;
-}
-
 .topMenu.open {
   max-height: 64%;
   overflow: auto;

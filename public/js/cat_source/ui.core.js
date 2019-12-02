@@ -200,7 +200,7 @@ var UI = {
         var menu = '<nav id="jobMenu" class="topMenu">' +
             '<ul class="gotocurrentsegment">' +
             '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a>Go to current segment</a><span>' +Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase() + '</span></li>' +
-            '<li class="firstSegment" ><a href="#"><span class="label">Go to first segment of the file</span></a></li>' +
+            '<li class="firstSegment" ><a><span class="label">Go to first segment of the file</span></a></li>' +
             '</ul>' +
             '<div class="separator"></div>' +
             '<ul class="jobmenu-list">';

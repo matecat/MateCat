@@ -5108,7 +5108,7 @@ header {
 }
 
 .topMenu {
-    width: 286px;
+    width: 315px;
     background: $light-gray;
     z-index: 2;
     text-align: left;
@@ -5116,7 +5116,8 @@ header {
     font-size: 14px;
     display: none;
     box-shadow: none;
-
+    left: 135px;
+    position: fixed;
     &.open {
         max-height: 64%;
         overflow: visible;
@@ -5154,7 +5155,7 @@ header {
 
     ul.gotocurrentsegment {
 
-        width: 284px;
+        width: 100%;
         line-height: 24px;
         font-size: 16px;
         position: relative;
@@ -5198,7 +5199,8 @@ header {
                 border-radius: 2px;
                 float:none !important;
                 font-size: 14px;
-
+                cursor: default;
+                pointer-events: none;
                 &:hover {
                     color: $light-blue;
                 }
