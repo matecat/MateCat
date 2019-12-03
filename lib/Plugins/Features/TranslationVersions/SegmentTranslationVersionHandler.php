@@ -4,17 +4,13 @@ namespace Features\TranslationVersions;
 
 use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
-use Exception;
 use Features;
-use Log;
-use Projects_ProjectDao;
+use Features\TranslationVersions\Model\TranslationVersionDao;
+use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Projects_ProjectStruct;
 use ReflectionException;
 use Translations_SegmentTranslationStruct;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Users_UserStruct;
-use Utils;
 
 /**
  * Class SegmentTranslationVersionHandler

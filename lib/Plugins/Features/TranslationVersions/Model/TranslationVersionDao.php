@@ -9,7 +9,6 @@ use DataAccess_IDaoStruct;
 use Database;
 use PDO;
 use Translations_SegmentTranslationStruct;
-use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Utils;
 
 class TranslationVersionDao extends DataAccess_AbstractDao {

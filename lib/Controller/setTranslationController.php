@@ -59,7 +59,7 @@ class setTranslationController extends ajaxController {
     protected $filter;
 
     /**
-     * @var SegmentTranslationVersionHandler
+     * @var SegmentTranslationVersionHandler|TranslationVersions\EmptySegmentTranslationVersionHandler
      */
     private $VersionsHandler;
     private $revisionNumber;
