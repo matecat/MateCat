@@ -38,7 +38,7 @@ class ReviewExtendedCategorySelector extends React.Component{
         // subcategories. Don't print the select box if no severity is found.
         let select = null;
         let severities;
-        let classCatName = this.props.category.options.code;
+        let classCatName = (this.props.category.options) ? this.props.category.options.code : this.props.category.label;
         let containerClass = (this.props.category.severities > 0) ? "" : "severity-buttons" ;
         if ( this.props.category.severities.length > 3 ) {
             severities = this.props.category.severities.map((severity, i) =>{
