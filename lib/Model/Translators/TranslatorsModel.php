@@ -129,9 +129,9 @@ class TranslatorsModel {
      * TranslatorsModel constructor.
      *
      * @param Jobs_JobStruct $jStruct
-     *
+     * @param float|int      $project_cache_TTL
      */
-    public function __construct( Jobs_JobStruct $jStruct ) {
+    public function __construct( Jobs_JobStruct $jStruct, $project_cache_TTL = 60 * 60 ) {
 
         //get the job
         $this->jStruct = $jStruct;
@@ -139,7 +139,7 @@ class TranslatorsModel {
         $this->id_job       = $jStruct->id;
         $this->job_password = $jStruct->password;
 
-        $this->project = $this->jStruct->getProject( 60 * 60 );
+        $this->project = $this->jStruct->getProject( $project_cache_TTL );
         $this->featureSet = $this->project->getFeatures();
 
     }

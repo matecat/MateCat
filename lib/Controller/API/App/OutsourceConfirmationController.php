@@ -32,7 +32,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
         }
 
         $jStruct = new \Jobs_JobStruct( [ 'id' => $params[ 'id_job' ], 'password' => $params[ 'password' ] ] );
-        $translatorModel = new TranslatorsModel( $jStruct );
+        $translatorModel = new TranslatorsModel( $jStruct, 0 );
         $jTranslatorStruct = $translatorModel->getTranslator();
 
         $confirmationStruct = new TranslatedConfirmationStruct( $payload );
