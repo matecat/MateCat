@@ -69,7 +69,7 @@ ul {
 }
 
 .normal-foo{
-  background-color: #f6f8fb;
+  background-color: $grey3;
   min-width: 992px;
   padding: 16px 64px;
   height: 77px;
@@ -4622,27 +4622,20 @@ body.side-popup {
 }
 
 #menu-site li a.bigblue {
-    font-size: 18px !important;
-    border: none !important;
-    color: #3aa9dd !important;
-    border-radius: 4px;
-    background-color: #fff;
-    //border-bottom: 2px solid #343434 !important;
-    padding: 7px;
-    font-weight: bold;
-    margin-left: 5px;
-    margin-top: 6px;
-    margin-right: 23px;
+  font-size: 17px !important;
+  border: none !important;
+  color: $darkBlue !important;
+  border-radius: 18px;
+  background-color: #fff;
+  padding: 4px 18px;
+  font-weight: bold;
+  margin-left: 5px;
+  margin-top: 6px;
+  margin-right: 23px;
 }
 
 #menu-site li a.bigred:hover {
-  background: #3aa9dd !important;
-}
-
-
-#menu-site li a.bigblue:hover {
-    background: #3aa9dd!important;
-    color: #fff !important;
+  color: $darkBlueHover !important;
 }
 
 
