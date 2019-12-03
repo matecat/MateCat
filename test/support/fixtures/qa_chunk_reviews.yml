@@ -10,3 +10,6 @@ cr1:
   force_pass_at: NULL
   reviewed_words_count: 0
   undo_data: NULL
+  advancement_wc: 0
+  total_tte: 0
+  avg_pee: 0

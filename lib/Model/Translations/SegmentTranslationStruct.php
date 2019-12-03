@@ -32,7 +32,7 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     }
 
     public function isICE() {
-        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE;
+        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && $this->locked;
     }
 
     public function isPostReviewedStatus() {

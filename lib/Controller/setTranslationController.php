@@ -5,6 +5,7 @@ use Contribution\Set;
 use Exceptions\ControllerReturnException;
 use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
+use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
 
@@ -57,7 +58,7 @@ class setTranslationController extends ajaxController {
     protected $filter;
 
     /**
-     * @var \Features\TranslationVersions\SegmentTranslationVersionHandler
+     * @var SegmentTranslationVersionHandler
      */
     private $VersionsHandler;
     private $revisionNumber;
@@ -616,7 +617,7 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk ] );
+        $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );
     }
@@ -789,7 +790,7 @@ class setTranslationController extends ajaxController {
 
     private function initVersionHandler() {
         if ( $this->project->isFeatureEnabled( 'translation_versions' ) ) {
-            $this->VersionsHandler = new \Features\TranslationVersions\SegmentTranslationVersionHandler(
+            $this->VersionsHandler = new SegmentTranslationVersionHandler(
                     $this->id_job,
                     $this->id_segment,
                     $this->user->uid,

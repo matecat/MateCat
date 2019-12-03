@@ -252,7 +252,7 @@ if ( ProjectCompletion.enabled() ) {
             type: 'DELETE',
             url: sprintf('/api/app/jobs/%s/%s/completion-events/%s', config.id_job, config.password, config.last_completion_event_id )
         }).done( function() {
-            UI.reloadPage();
+            location.reload();
         }).fail( function() {
             console.error('Error undoing completion event');
         });

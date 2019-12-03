@@ -451,19 +451,6 @@ footer #statistics {
   line-height: 27px;
 }
 
-.topMenu {
-  position: fixed;
-  /*top: -1000px;*/
-  left: 135px;
-  width: 400px;
-  background: #fff;
-  z-index: 2;
-  text-align: left;
-  padding: 0;
-  font-size: 14px;
-  display: none;
-}
-
 .topMenu.open {
   max-height: 64%;
   overflow: auto;
@@ -494,9 +481,7 @@ footer #statistics {
 }
 
 .topMenu ::-webkit-scrollbar-thumb {
-
-  background: #ccc url(../../img/bgscrollbar.png) center center no-repeat;
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+	  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
 }
 
 /*end-scrollbar*/
@@ -901,14 +886,6 @@ footer #statistics {
   width: 100%;
   color: #666;
 }
-
-
-/*
-.editing .popup-tm {
-    top:20px;
-
-}
-*/
 
 .onoffswitch {
   position: relative;
@@ -1333,13 +1310,7 @@ form.add-TM-Form {
   color: black;
 }
 
-.popup .outer {
-  background: url(../../img/bg_login_button.gif) 0 0 repeat;
-  border-radius: 6px;
-  margin: 0 auto -10px auto;
-  width: 330px;
-  border: 1px solid #222;
-}
+
 
 .popup-confirm .btn-ok {
   /* TODO REVIEW  this rule breaks the popup button alignment in confirm change language after file conversion */
@@ -1347,15 +1318,12 @@ form.add-TM-Form {
   margin-left: 10px;
 }
 
-.popup .outer:hover {
-  background: url(../../img/bg_login_button_hover.gif) 0 0 repeat;
-}
-
-.popup .inner {
-  width: 45px;
-  border-right: 1px solid #003366;
-  border-radius: 0 0 0 6px;
-}
+.popup .inner
+{
+	width: 45px;
+	border-right: 1px solid #003366;
+	border-radius: 0 0 0 6px;
+    }
 
 .popup .login-button {
   width: 330px;
@@ -3402,30 +3370,16 @@ section.currSearchSegment mark.searchMarker {
   float: left;
   background-size: 25px !important;
 }
-
-
-@media only screen and (max-width: 1100px) {
-
-  .popup-languages ul {
-	-webkit-column-count: 4;
-	column-count: 4;
-	-moz-column-count: 4;
-  }
-
-
+.currSegment span {
+  position: absolute;
+  top: 4px;
+  color: #757472;
+  visibility: hidden;
+  left: 200px;
 }
-
-@media only screen and (max-width: 900px) {
-
-  .popup-languages ul {
-	-webkit-column-count: 3;
-	column-count: 3;
-	-moz-column-count: 3;
-  }
-
-
+.currSegment:hover span {
+  visibility: visible;
 }
-
 
 @media (max-height: 500px) {
   .register-modal {
@@ -3597,29 +3551,11 @@ only screen and (in-resolution: 2dppx) {
   }
   /* Google Sheet */
 
-  /*.popup {background: #fff url(../img/borderfix.png) repeat-x!important;}*/
-
-  .fileinput-button {
+.fileinput-button {
 	background: #09beec;
   }
 
 }
-
-/*
-.tm-error-message, .tm-warning-message {
-background: #d65757 url(../img/error-symbol.png) 10px center no-repeat;
-color: #fff;
-padding: 10px 0;
-margin: 10px 0;
-float: left;
-font-weight: bold;
-width: 100%;
--moz-border-radius: 2px;
-border-radius: 2px;
-border: 1px solid #c45f5f;
-text-indent: 40px;
-display: none;
-}*/
 
 .active-tm-key-link {
   cursor: pointer;

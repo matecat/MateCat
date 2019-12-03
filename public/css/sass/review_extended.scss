@@ -51,7 +51,7 @@ h1, h2, h3, h4, h5, a, input {
                     }
                 }
                 .re-item {
-                    &:hover {
+                    &:hover, &.active {
                         background: #f2f4f7 !important;
                     }
                     .re-item-box {
@@ -136,13 +136,13 @@ h1, h2, h3, h4, h5, a, input {
                     .re-severities-buttons {
                         display: none;
                     }
-                    &.severity-buttons:hover {
+                    &.severity-buttons:hover, &.active {
                         .re-severities-buttons {
                             display: flex;
                             button {
                                 padding: 7px 10px;
                                 background-color: #f2f4f7;
-                                &:hover {
+                                &:hover, &.active {
                                     background-color: #CACBCD;
                                 }
                             }
@@ -381,12 +381,10 @@ section {
 
     .translation-issues-button {
         cursor: pointer;
-        padding: 10px 0;
-        width: 50px;
-    }
-
-    &:not(.opened) .translation-issues-button {
         padding: 5px 7px 5px;
+        width: 50px;
+        position: absolute;
+        top: 50px;
     }
 
     .translation-issues-button .revise-button {
@@ -405,9 +403,9 @@ section {
     }
 
     .revise-button-counter {
-        left: 30px;
+        left: 35px;
         position: absolute;
-        top: 55px;
+        top: 2px;
         background: #dc2e34;
         color: #fff;
         border: 1px solid #fff;
@@ -422,9 +420,6 @@ section {
         line-height: 1.5;
     }
 
-    &:not(.opened) .revise-button-counter {
-        top: 50px;
-    }
     .revise-button-2 {
         background: #BC6AC9;
     }

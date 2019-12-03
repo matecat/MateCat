@@ -1,16 +1,12 @@
 @import '_mixins';
 
 body.cattool {
-  background: #f2f4f7;
-  display: flex;
-  height: 100vh;
-  flex-direction: column;
-  overflow-y: hidden !important;
-  padding: unset;
-
-  .editing {
-	background: #f2f4f7;
-  }
+    background: #f2f4f7;
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    overflow-y: hidden !important;
+    padding: unset;
 
   /*header*/
   header {
@@ -38,7 +34,7 @@ body.cattool {
 	background-color: #fafafa;
 	padding: 0 12px 0 14px;
 	width: 100%;
-	position: relative;
+	position: fixed;
 	bottom: 0;
 	left: 0;
 	z-index: 2;
@@ -49,7 +45,7 @@ body.cattool {
 	  display: grid;
 	  position: relative;
 	  grid-column-gap: 10px;
-	  grid-template-columns: 72px minmax(80px, 420px) minmax(140px, 216px) minmax(172px, 0.3fr) minmax(116px, 0.2fr) minmax(316px, 0.4fr);
+	  grid-template-columns: minmax(80px, 120px) minmax(80px, 420px) minmax(140px, 350px) minmax(172px, 0.2fr) minmax(116px, 0.2fr) minmax(316px, 0.4fr);
 	  align-items: center;
 
 	  .item {
@@ -211,18 +207,18 @@ Styles from other css files should be ported over time.
 }
 
 .segment-side-buttons {
-  /* styles based on .sid line 376 style.css */
-  cursor: default;
-  display: block;
-  font-size: 12px;
-  height: inherit;
-  padding-bottom: 1px;
-  position: absolute;
-  text-align: center;
-  text-decoration: none;
-  right: -7%;
-  width: 7%;
-  top: 0;
+    /* styles based on .sid line 376 style.css */
+    cursor: default;
+    display: block;
+    font-size: 12px;
+    padding-bottom: 1px;
+    position: absolute;
+    text-align: center;
+    text-decoration: none;
+    right: -7%;
+    width: 7%;
+    top: 0;
+    height: 100%;
 }
 
 
@@ -241,10 +237,9 @@ Styles from other css files should be ported over time.
 	color: #000000;
   }
 
-  &:active {
-	background-color: #fff;
-	background-image: -webkit-linear-gradient(top, #fff, #f4f4f4);
-  }
+    &:active {
+        background-color: #fff;
+    }
 }
 
 

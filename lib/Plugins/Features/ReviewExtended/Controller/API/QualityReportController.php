@@ -13,6 +13,7 @@ use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
 use Chunks_ChunkStruct;
 use Features\ReviewExtended\ReviewUtils;
+use INIT;
 use Projects_ProjectStruct;
 use Features\ReviewExtended\Model\ArchivedQualityReportDao;
 use Features\ReviewExtended\Model\QualityReportModel;
@@ -71,7 +72,7 @@ class QualityReportController extends KleinController
         }
 
         if ( empty( $step ) ) {
-            $step = 10;
+            $step = 20;
         }
 
         $qrSegmentModel = new QualityReportSegmentModel( $this->chunk );
@@ -83,11 +84,35 @@ class QualityReportController extends KleinController
             $segments = $this->_formatSegments( $segments ) ;
 
             $this->response->json( [
-                    'files' =>$segments
+                    'files'  => $segments,
+                    '_links' => $this->_getPaginationLinks( $segments_id, $step, $filter )
             ] );
+
         } else {
             $this->response->json( ['files' =>[] ]);
         }
+
+    }
+
+    protected function _getPaginationLinks( array $segments_id, $step, array $filter = null ){
+
+        $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+
+        $links = [
+                "base" => INIT::$HTTPHOST,
+                "self" => $_SERVER[ 'REQUEST_URI' ],
+        ];
+
+        $filter_query = http_build_query( [ 'filter' => array_filter( $filter ) ] );
+        if( $this->chunk->job_last_segment > end( $segments_id ) ){
+            $links[ 'next' ] = $url[ 'path' ] . "?ref_segment=" . end( $segments_id ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query : null );
+        }
+
+        if(  $this->chunk->job_first_segment < reset( $segments_id ) ){
+            $links[ 'prev' ] = $url[ 'path' ] . "?ref_segment=" . ( reset( $segments_id ) - ( $step + 1 ) * 2 ) . ( $step != 20 ? "&step=" . $step : null ) . ( !empty( $filter_query ) ? "&" . $filter_query : null );
+        }
+
+        return $links;
 
     }
 

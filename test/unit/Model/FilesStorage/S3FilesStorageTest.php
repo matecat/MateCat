@@ -1,7 +1,7 @@
 <?php
 
 use FilesStorage\S3FilesStorage;
-use SimpleS3\Client;
+use Matecat\SimpleS3\Client;
 
 class S3FilesStorageTest extends PHPUnit_Framework_TestCase {
 

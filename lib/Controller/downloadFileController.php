@@ -6,7 +6,7 @@ use ConnectedServices\GDrive;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
-use SimpleS3\Client;
+use Matecat\SimpleS3\Client;
 use XliffReplacer\XliffReplacerFactory;
 
 set_time_limit( 180 );
