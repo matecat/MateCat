@@ -1167,11 +1167,11 @@ button.ui-button::-moz-focus-inner {
 }
 
 .cancel-btn {
-    background: #f26522;
+    background: $rebuttedRed;
 }
 
 .cancel-btn:hover {
-    background: #d1581c;
+    background: $rebuttedRedHover;
 }
 
 .translate-box a.tooltip {
@@ -1197,11 +1197,11 @@ button.ui-button::-moz-focus-inner {
 }
 
 .cancel-btn, #clear-all-files, #clear-all-gdrive, #delete-failed-conversions {
-    background: #f26522;
+    background: $rebuttedRed;
 }
 
 .cancel-btn:hover, #clear-all-files:hover, #clear-all-gdrive:hover, #delete-failed-conversions:hover {
-    background: #d1581c;
+    background: $rebuttedRedHover;
 }
 
 /* Fix for IE 6: */
@@ -1481,7 +1481,7 @@ button.ui-button::-moz-focus-inner {
     margin: 0px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
     .highlight {
-        color:#09beec;
+        color:$translatedBlue;
     }
 }
 
@@ -1501,7 +1501,7 @@ h2.payoff {
 /*button*/
 
 .uploadbtn {
-    background: #09beec;
+    background: $translatedBlue;
     font-weight: 100;
     padding: 8px 16px;
     width: auto !important;
@@ -1517,7 +1517,7 @@ h2.payoff {
 }
 
 .uploadbtn:hover {
-    background: #12b4df;
+    background: $translatedBlueHover;
     color: #ffffff;
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
@@ -1631,7 +1631,7 @@ h2.payoff {
     width: 200px;
     cursor: pointer;
     padding: 12px 0px 4px 0;
-    background: #09beec;
+    background: $translatedBlue;
     color: #fff;
     font-weight: bold;
     margin-bottom: 30px !important;
@@ -1665,7 +1665,7 @@ h2.payoff {
 }
 
 .fileinput-button:hover {
-    background-color: #12b4df;
+    background-color: $translatedBlueHover;
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -2349,7 +2349,7 @@ header {
 .popup .header input {
     float: right;
     margin: 1px 0px 0px 15px !important;
-    background: #09beec;
+    background: $translatedBlue;
     font-weight: bold;
     float: right;
     font-size: 14px;
@@ -2361,8 +2361,8 @@ header {
     padding: 3px 12px !important;
     min-width: 150px;
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(rgb(245, 245, 245)), to(rgb(211, 212, 213)));
-    background: -moz-linear-gradient(top, #09beec, #119ec4);
-    background: linear-gradient(top, #09beec, #119ec4);
+    background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
+    background: linear-gradient(top, $translatedBlue, #119ec4);
 }
 
 .translate-box h2 span.extra {

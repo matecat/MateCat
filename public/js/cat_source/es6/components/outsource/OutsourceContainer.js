@@ -105,7 +105,7 @@ class OutsourceContainer extends React.Component {
             {this.props.openOutsource ? (
                 <CSSTransition key={this.props.idJobLabel} classNames="transitionOutsource" timeout={{ enter: 500, exit: 300 }}>
                     <div className={"outsource-container chunk ui grid " + outsourceContainerClass} ref={(container)=>this.container=container}>
-                        <div className=" outsource-header sixteen wide column shadow-1">
+                        <div className=" outsource-header sixteen wide column">
                             {this.props.idJobLabel ? (
                                 <div className="job-id" title="Job Id">
                                     ID: {this.props.idJobLabel}

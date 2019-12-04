@@ -834,7 +834,7 @@ body.manage {
                 background-size: cover;
             }
             .description{
-                color: #afafaf;
+                color: $grey1;
                 font-weight: 100;
                 font-size: 12px;
                 text-align: left;
@@ -865,9 +865,9 @@ body.manage {
                 a{
                     margin: 0;
                     padding: 0;
-                    color: #788190;
+                    color: $grey1;
                     display: block;
-                    text-decoration: none;
+                    text-decoration: underline;
                     text-align: left;
                 }
             }

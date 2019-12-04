@@ -3,7 +3,7 @@
 body.analyze{
     min-width: 1024px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
-    background-color: #e4e6e8;
+    background-color: white;
     overflow: visible;
     header {
         z-index: 1001 !important;
@@ -40,7 +40,7 @@ body.analyze{
         }
 
         .project-header {
-            background: #f3f3f3;
+            background: $grey3;
             .left-analysis {
                 padding-top: 20px;
                 padding-left: 30px;
@@ -61,10 +61,13 @@ body.analyze{
                     left: -45px;
                     max-width: 100%;
                     min-width: 0;
-                    background-color: #d7d8dc;
+                    background-color: $grey2;
                     color: #000000;
                     border-radius: 0 2px 2px 0;
                     padding-right: 15px;
+                    &:after {
+                        border-right-color: $grey1 !important;
+                    }
                     .project-id, .project-name {
                         display: inline-block;
                         vertical-align: text-bottom;
@@ -105,13 +108,13 @@ body.analyze{
                             display: inline-block;
                             margin-bottom: 0;
                             span {
-                                color: #1fbd1f;
+                                color: $greenDefault;
                                 padding: 5px 2px 5px 0;
                                 margin-left: 4px;
                                 border-radius: 15px;
                             }
                             i {
-                                color: #1fbd1f;
+                                color: $greenDefault;
                                 position: relative;
                                 top: 2px;
                             }
@@ -135,7 +138,7 @@ body.analyze{
                             display: inline-block;
                             border-left: 1px solid black;
                             padding-left: 10px;
-                            color: #444444;
+                            color: black;
                             text-decoration: underline;
                             margin-left: 10px;
                             cursor: pointer;
@@ -156,9 +159,8 @@ body.analyze{
             .word-count {
                 .word-percent {
                     position: relative;
-                    background-color: #f2f4f1;
                     padding: 15px 15px 10px 20px;
-                    border: 1px solid #7eaf3e;
+                    border: 1px solid $greenDefault;
                     top: 27px;
                     font-size: 16px;
                     margin-bottom: 25px;
@@ -249,10 +251,10 @@ body.analyze{
 
         .project-top {
             padding: 45px 15px 15px;
-            background-color: #f3f3f3;
+            background-color: $grey3;
             margin: 0 -1rem 0;
             .compare-table {
-                background-color: #d7d8dc;
+                background-color: $grey2;
                 margin-bottom: 1px;
                 .updated-count {
                     background-color: #f9ffb5;
@@ -332,6 +334,9 @@ body.analyze{
                                 background-color: #ffffff;
                                 transition: 0.3s ease;
                                 cursor: pointer;
+                                border-bottom: 1px solid #d7d8dc;
+                                border-right: 1px solid #d7d8dc;
+                                border-left: 1px solid #d7d8dc;
                                 .job-details {
                                     font-size: 15px;
                                     float: right;
@@ -356,9 +361,10 @@ body.analyze{
                                 .ttw, .tsw, .tmw {
                                     text-align: right;
                                     padding-right: 15px;
-                                    color: #9c9898;
+                                    color: $grey1;
                                     padding-top: 0;
                                     padding-bottom: 0;
+                                    font-weight: bold;
                                     .cell-label {
                                         float: left;
                                         margin-left: 15px;
@@ -410,13 +416,13 @@ body.analyze{
                     width: 22%;
                     display: inline-block;
                     text-align: right;
-                    padding-top: 11px;
+                    padding-top: 12px;
                     .split, .merge {
                         font-family: Calibri, Arial, Helvetica, sans-serif;
                         padding: 5px 11px;
                         vertical-align: top;
                         font-size: 19px;
-                        border: 1px solid #09beec;
+                        border: 1px solid $translatedBlue;
                         border-radius: 2px;
                         box-shadow: none !important;
                         background-color: #ffffff !important;
@@ -425,23 +431,23 @@ body.analyze{
                         &:hover {
                             text-decoration: none;
                             box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                            border: 1px solid #09beec;
+                            border: 1px solid $translatedBlueHover;
                         }
                         &:focus {
                             box-shadow: none !important;
-                            background-color: #f2f2f2 !important;
+                            color: $translatedBlueActive !important;
                         }
                         &:active {
                             box-shadow: none !important;
-                            background-color: #f2f2f2 !important;
+                            color: $translatedBlueActive !important;
                         }
                     }
                     .split {
-                        padding: 5px 20px;
+                        padding: 4px 21px;
                     }
                     .merge {
                         margin: -3px 0 0;
-                        padding: 5px 14px;
+                        padding: 4px 21px;
                     }
                     .open-translate,
                     .open-revise {
@@ -449,7 +455,7 @@ body.analyze{
                         padding: 6px 15px;
                         vertical-align: top;
                         font-size: 20px;
-                        border: 1px solid #797979;
+                        //border: 1px solid #797979;
                         border-radius: 2px;
                         margin: -3px 0 0 0;
                     }
@@ -486,6 +492,7 @@ body.analyze{
                 z-index: 1;
                 h3 {
                     margin-bottom: 10px;
+                    color: $grey1;
                 }
                 .rounded {
                     width: 35px;
@@ -493,12 +500,13 @@ body.analyze{
                     margin: 0 auto;
                     line-height: 0;
                     border-radius: 17px;
-                    background: white;
+                    background: $grey2;
                     cursor: pointer;
-                    box-shadow: 0 0 0 #e0e0e0, 0 0 7px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+                    //box-shadow: 0 0 0 #e0e0e0, 0 0 7px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.3) !important;
                     transition: 0.3s ease;
                     &:hover {
                         box-shadow: none !important;
+                        background: $grey1;
                     }
                     i {
                         font-size: 30px;
@@ -507,6 +515,7 @@ body.analyze{
                         top: -3px;
                         position: relative;
                         transition: 0.3s ease;
+                        color: white;
                         &.open {
                             -webkit-transform: rotate(180deg);
                             -moz-transform: rotate(180deg);
@@ -521,7 +530,7 @@ body.analyze{
         }
         .job-id {
             display: inline-block;
-            color: #969696;
+            color: $grey1;
             font-size: 14px;
             position: relative;
             line-height: 35px;
@@ -579,7 +588,7 @@ body.analyze{
         }
         .project-body {
             margin-top: 0;
-            background-color: #d7d8dc;
+            background-color: $grey3;
             .job {
                 padding: 0 15px;
                 margin-top: 35px;
@@ -589,7 +598,7 @@ body.analyze{
                     padding: 0 0 !important;
                 }
                 .job-body {
-                    background-color: #f6f6f6;
+                    background-color: $grey2;
                     .chunks {
                         .chunk-container {
                             padding-top: 0;
@@ -622,7 +631,7 @@ body.analyze{
                                         position: relative;
                                         top: 1px;
                                         display: inline-block;
-                                        color: #969696;
+                                        color: $grey1;
                                         #raw-words {
                                             text-decoration: line-through;
                                         }
@@ -861,7 +870,7 @@ body.analyze{
         box-shadow: none !important;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
-        border-bottom: 1px solid #d7d8dc;
+        border-bottom: 1px solid $grey2;
         .single-analysis {
             line-height: 25px;
             .single {
@@ -872,7 +881,7 @@ body.analyze{
                 padding-bottom: 3px;
                 height: 60px;
                 vertical-align: text-top;
-                border: 1px solid #d7d8dc;
+                border: 1px solid $grey1;
                 border-bottom: none;
                 border-top: none;
                 text-align: center;
@@ -888,14 +897,14 @@ body.analyze{
         top: -1px;
         .single-analysis {
             .single {
-                border: 1px solid #d7d8dc;
+                border: 1px solid $grey1;
                 border-bottom: none;
                 text-align: right;
                 padding-right: 6px;
                 &.total {
                     width: 16.9%;
                     text-decoration: none;
-                    border-left: 1px solid #d7d8dc;
+                    border-left: 1px solid $grey1;
                 }
             }
         }
@@ -926,7 +935,7 @@ body.analyze{
             position: relative;
             top: 1px;
             cursor: pointer;
-            color: #969696;
+            color: $grey1;
             &:hover {
                 text-decoration: none;
             }
@@ -935,7 +944,7 @@ body.analyze{
             display: inline-block;
             position: relative;
             top: 1px;
-            color: #969696;
+            color: $grey1;
         }
         .single-analysis {
             .single {
@@ -967,7 +976,7 @@ body.analyze{
     .chunk-detail {
         padding-top: 0 !important;
         padding-bottom: 0 !important;
-        background-color: #d7d8dc;
+        background-color: $grey2;
         padding-left: 12px;
         z-index: 0;
         .left-box {
@@ -1199,7 +1208,7 @@ body.analyze{
                 background-size: cover;
             }
             .description{
-                color: #afafaf;
+                color: $grey1;
                 font-weight: 100;
                 font-size: 12px;
                 text-align: left;
@@ -1230,9 +1239,9 @@ body.analyze{
                 a{
                     margin: 0;
                     padding: 0;
-                    color: #788190;
+                    color: $grey1;
                     display: block;
-                    text-decoration: none;
+                    text-decoration: underline;
                     text-align: left;
                 }
             }

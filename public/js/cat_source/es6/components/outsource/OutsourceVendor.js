@@ -364,7 +364,7 @@ class OutsourceVendor extends React.Component {
                 </div>
             </div>
             {(this.state.outsource ? (
-                <div className="payment-details-box shadow-1">
+                <div className="payment-details-box">
                     <div className="translator-job-details">
                         { this.state.chunkQuote.get('t_name') !== '' ? (
                         <div className="translator-details-box">
@@ -485,10 +485,10 @@ class OutsourceVendor extends React.Component {
                             </div>
                             ) : (
                                 <div className="delivery-order need-it-faster-box">
-                                    <a className="need-it-faster-close shadow-1" onClick={this.needItFaster.bind(this)}>
+                                    <a className="need-it-faster-close" onClick={this.needItFaster.bind(this)}>
                                         <i className="icon-cancel3 icon need-it-faster-close-icon"/>
                                     </a>
-                                    <div className="delivery-box shadow-1">
+                                    <div className="delivery-box">
                                         <div className="ui form">
                                             <div className="fields">
                                                 <div className="field">
@@ -593,7 +593,7 @@ class OutsourceVendor extends React.Component {
 
                 </div>
             ) : (
-                <div className="payment-details-box shadow-1">
+                <div className="payment-details-box">
                     {this.getLoaderHtml()}
                 </div>
             ))}

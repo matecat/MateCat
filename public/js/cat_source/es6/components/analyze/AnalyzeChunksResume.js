@@ -112,7 +112,7 @@ class AnalyzeChunksResume extends React.Component {
 
                         let openOutsourceClass = (openOutsource) ? 'openOutsource' : '';
 
-                        return <div key={indexChunk} className={"chunk ui grid shadow-1 " + openOutsourceClass} onClick={self.showDetails.bind(self, chunk.jid)}>
+                        return <div key={indexChunk} className={"chunk ui grid " + openOutsourceClass} onClick={self.showDetails.bind(self, chunk.jid)}>
                             <div className="title-job">
                                 <div className="job-id" >{'Chunk ' + index}</div>
                             </div>
@@ -150,7 +150,7 @@ class AnalyzeChunksResume extends React.Component {
                     return <div key={indexJob} className="job ui grid">
                         <div className="chunks sixteen wide column">
 
-                            <div className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
+                            <div className="chunk ui grid" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
                                 <div className="title-job splitted">
                                     <div className="job-id" >ID: {self.props.jobsInfo[indexJob].jid}</div>
                                     <div className="source-target" >
@@ -187,7 +187,7 @@ class AnalyzeChunksResume extends React.Component {
 
                     return <div key={indexJob} className="job ui grid">
                         <div className="chunks sixteen wide column">
-                            <div className={"chunk ui grid shadow-1 " + openOutsourceClass} onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
+                            <div className={"chunk ui grid " + openOutsourceClass} onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
                                 <div className="title-job">
                                     <div className="job-id">ID: {self.props.jobsInfo[indexJob].jid}</div>
                                     <div className="source-target" >
@@ -240,7 +240,7 @@ class AnalyzeChunksResume extends React.Component {
             return this.props.project.get('jobs').map(function (jobInfo, indexJob) {
                 return <div key={jobInfo.get('id') + '-' + indexJob} className="job ui grid">
                     <div className="chunks sixteen wide column">
-                        <div className="chunk ui grid shadow-1">
+                        <div className="chunk ui grid">
                             <div className="title-job no-split">
                                 <div className="source-target" >
                                     <div className="source-box no-split">{jobInfo.get('sourceTxt')}</div>
@@ -323,7 +323,7 @@ class AnalyzeChunksResume extends React.Component {
         let html = this.getResumeJobs()
         return <div className="project-top ui grid">
             <div className="compare-table sixteen wide column">
-                <div className="header-compare-table ui grid shadow-1">
+                <div className="header-compare-table ui grid ">
                     <div className="title-job">
                         <h5/>
                         <p/>

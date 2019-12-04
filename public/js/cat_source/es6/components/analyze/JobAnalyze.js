@@ -78,7 +78,7 @@ class JobAnalyze extends React.Component {
 
     render() {
         return <div className="job ui grid">
-                    <div className="job-body sixteen wide column shadow-1">
+                    <div className="job-body sixteen wide column">
 
                         <div className="ui grid chunks">
                             <div className="chunk-container sixteen wide column">

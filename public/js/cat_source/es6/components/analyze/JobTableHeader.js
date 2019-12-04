@@ -21,7 +21,7 @@ class JobTableHeader extends React.Component {
     render() {
         let rates = this.props.rates;
         return <div className="ui grid job-table-header">
-            <div className="chunks-title-table sixteen wide column shadow-1 pad-right-10">
+            <div className="chunks-title-table sixteen wide column pad-right-10">
                 <div className="left-box">
 
                 </div>
@@ -43,7 +43,7 @@ class JobTableHeader extends React.Component {
 
             </div>
 
-            <div className="chunks-pay-table sixteen wide column shadow-1 pad-right-10">
+            <div className="chunks-pay-table sixteen wide column pad-right-10">
                 <div className="left-box">
 
                 </div>

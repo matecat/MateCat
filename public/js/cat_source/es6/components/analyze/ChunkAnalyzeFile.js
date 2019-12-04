@@ -52,7 +52,7 @@ class ChunkAnalyzeFile extends React.Component {
     render() {
         var file = this.props.file.toJS();
         this.checkWhatChanged();
-        return <div className="chunk-detail sixteen wide column shadow-1 pad-right-10">
+        return <div className="chunk-detail sixteen wide column pad-right-10">
             <div className="left-box">
                 <i className="icon-make-group icon"></i>
                 <div className="file-title-details">
