@@ -1,4 +1,7 @@
 <?php
+
+use Features\TranslationVersions\Model\TranslationVersionDao;
+use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Files\FilesJobDao;
 use Files\FilesJobStruct;
 use LQA\CategoryDao;
@@ -95,9 +98,9 @@ class FixturesLoader {
 
         foreach( $this->fixtures_map['segment_translation_versions'] as $name => &$record ) {
             $this->replaceTokens( $record ) ;
-            $struct = new Translations_TranslationVersionStruct( $record ) ;
+            $struct = new TranslationVersionStruct( $record ) ;
             $struct->creation_date = Utils::mysqlTimestamp( $record['creation_date'] ) ;
-            $insert = Translations_TranslationVersionDao::insertStruct( $struct ) ;
+            $insert = TranslationVersionDao::insertStruct( $struct ) ;
         }
     }
 

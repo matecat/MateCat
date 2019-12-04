@@ -5,6 +5,7 @@ namespace API\V2;
 use API\V2\Json\SegmentVersion as JsonFormatter;
 use API\V2\Validators\JobPasswordValidator;
 use API\V2\Validators\SegmentValidator;
+use Features\TranslationVersions\Model\TranslationVersionDao;
 
 
 class SegmentVersion extends KleinController {
@@ -16,7 +17,7 @@ class SegmentVersion extends KleinController {
 
     public function index() {
 
-        $results = \Translations_TranslationVersionDao::getVersionsForTranslation(
+        $results = TranslationVersionDao::getVersionsForTranslation(
                 $this->request->id_job,
                 $this->request->id_segment
         );

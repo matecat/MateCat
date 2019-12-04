@@ -1,6 +1,10 @@
 <?php
 
+use DataAccess\ArrayAccessTrait;
+
 class Segments_SegmentStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+
+    use ArrayAccessTrait;
 
     public $id;
     public $id_file;
@@ -31,39 +35,5 @@ class Segments_SegmentStruct extends DataAccess_AbstractDaoSilentStruct implemen
                 $id_job
         );
     }
-
-    /**
-     * @param mixed $offset
-     *
-     * @return bool
-     */
-    public function offsetExists( $offset ) {
-        return property_exists( $this, $offset );
-    }
-
-    /**
-     * @param mixed $offset
-     *
-     * @return mixed
-     */
-    public function offsetGet( $offset ) {
-        return $this->$offset;
-    }
-
-    /**
-     * @param mixed $offset
-     * @param mixed $value
-     */
-    public function offsetSet( $offset, $value ) {
-        $this->$offset = $value;
-    }
-
-    /**
-     * @param mixed $offset
-     */
-    public function offsetUnset( $offset ) {
-        $this->$offset = null;
-    }
-
 
 }

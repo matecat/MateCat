@@ -12,7 +12,7 @@ namespace API\V2;
 use API\V2\Json\SegmentVersion;
 use API\V2\Validators\JobPasswordValidator;
 use API\V2\Validators\SegmentTranslation;
-use Translations_TranslationVersionDao;
+use Features\TranslationVersions\Model\TranslationVersionDao;
 
 class ReviseTranslationIssuesController extends KleinController {
 
@@ -30,7 +30,7 @@ class ReviseTranslationIssuesController extends KleinController {
     }
 
     public function index() {
-        $records = ( new Translations_TranslationVersionDao() )->setCacheTTL( 0 )->getVersionsForRevision(
+        $records = ( new TranslationVersionDao() )->setCacheTTL( 0 )->getVersionsForRevision(
                 $this->request->id_job,
                 $this->request->id_segment
         );

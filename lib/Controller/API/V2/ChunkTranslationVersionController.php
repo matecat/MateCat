@@ -11,6 +11,7 @@ namespace API\V2;
 use API\V2\Json\SegmentVersion as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
 use Chunks_ChunkStruct;
+use Features\TranslationVersions\Model\TranslationVersionDao;
 
 
 class ChunkTranslationVersionController extends KleinController {
@@ -33,7 +34,7 @@ class ChunkTranslationVersionController extends KleinController {
 
     public function index() {
 
-        $results = \Translations_TranslationVersionDao::getVersionsForChunk( $this->chunk );
+        $results = TranslationVersionDao::getVersionsForChunk( $this->chunk );
 
         $this->featureSet->loadForProject( $this->chunk->getProject() );
 

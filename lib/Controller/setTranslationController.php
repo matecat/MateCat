@@ -5,6 +5,7 @@ use Contribution\Set;
 use Exceptions\ControllerReturnException;
 use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
+use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use SubFiltering\Filter;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -58,7 +59,7 @@ class setTranslationController extends ajaxController {
     protected $filter;
 
     /**
-     * @var SegmentTranslationVersionHandler
+     * @var SegmentTranslationVersionHandler|TranslationVersions\EmptySegmentTranslationVersionHandler
      */
     private $VersionsHandler;
     private $revisionNumber;
@@ -388,10 +389,15 @@ class setTranslationController extends ajaxController {
                 'logged_user' => $this->user
         ] );
 
-        //propagate translations
-        $TPropagation     = [];
+
         $propagationTotal = [
-                'propagated_ids' => []
+                'totals'                   => [
+                        'total'    => null,
+                        'countSeg' => null,
+                        'status'   => null
+                ],
+                'propagated_ids'           => [],
+                'segments_for_propagation' => []
         ];
 
         if ( $this->propagate && in_array( $this->status, [
@@ -401,6 +407,8 @@ class setTranslationController extends ajaxController {
                 ] )
         ) {
 
+            //propagate translations
+            $TPropagation                             = new Translations_SegmentTranslationStruct();
             $TPropagation[ 'status' ]                 = $this->status;
             $TPropagation[ 'id_job' ]                 = $this->id_job;
             $TPropagation[ 'translation' ]            = $translation;
@@ -411,19 +419,13 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
 
             try {
-                if ( $this->VersionsHandler != null ) {
-                    $this->VersionsHandler->savePropagation( [
-                            'propagation'     => $TPropagation,
-                            'old_translation' => $old_translation,
-                            'job_data'        => $this->chunk
-                    ] );
-                }
 
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                         $TPropagation,
                         $this->chunk,
                         $this->id_segment,
-                        $this->project
+                        $this->project,
+                        $this->VersionsHandler
                 );
 
             } catch ( Exception $e ) {
@@ -789,15 +791,7 @@ class setTranslationController extends ajaxController {
     }
 
     private function initVersionHandler() {
-        if ( $this->project->isFeatureEnabled( 'translation_versions' ) ) {
-            $this->VersionsHandler = new SegmentTranslationVersionHandler(
-                    $this->id_job,
-                    $this->id_segment,
-                    $this->user->uid,
-                    $this->chunk[ 'id_project' ],
-                    ReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
-            );
-        }
+        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->chunk, $this->id_segment, $this->user, $this->project );
     }
 
     /**
@@ -832,9 +826,6 @@ class setTranslationController extends ajaxController {
     private function __evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation,
                                             Translations_SegmentTranslationStruct $old_translation
     ) {
-        if ( $this->VersionsHandler == null ) {
-            return;
-        }
 
         $version_saved = $this->VersionsHandler->saveVersion( $new_translation, $old_translation );
 
