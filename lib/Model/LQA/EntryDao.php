@@ -208,15 +208,12 @@ class EntryDao extends \DataAccess_AbstractDao {
                 ]
         );
 
-        \Database::obtain()->begin();
-
         $stmt->execute( $values );
         $lastId = $conn->lastInsertId();
         /**
          * @deprecated do not use insert and find.
          */
         $record = self::findById( $lastId );
-        $conn->commit();
 
         return $record;
     }

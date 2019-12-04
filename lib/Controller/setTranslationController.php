@@ -391,11 +391,7 @@ class setTranslationController extends ajaxController {
 
 
         $propagationTotal = [
-                'totals'                   => [
-                        'total'    => null,
-                        'countSeg' => null,
-                        'status'   => null
-                ],
+                'totals'                   => [],
                 'propagated_ids'           => [],
                 'segments_for_propagation' => []
         ];
