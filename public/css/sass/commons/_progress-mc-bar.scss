@@ -46,19 +46,19 @@
 		    }
 		}
 		.translated-bar {
-			background-color: #09beec;
+			background-color: $translatedBlue;
 		}
 		.approved-bar {
-			background-color: #7cc576;
+			background-color: $approvedGreen;
 		}
 		.approved-bar-2nd-pass {
-			background-color: #BC6AC9;
+			background-color: $approved2Green;
 		}
 		.warning-bar {
-			background-color: red;
+			background-color: $rebuttedRed;
 		}
 		.draft-bar {
-			background-color: #d1d1d1;
+			background-color: $grey2;
 		}
 	}
 }

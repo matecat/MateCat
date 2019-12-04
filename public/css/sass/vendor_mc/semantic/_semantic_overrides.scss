@@ -41,25 +41,25 @@
 
 .ui.green.buttons .button,
 .ui.green.button {
-    background-color: #7eaf3e;
+    background-color: $greenDefault;
     transition: 0.3s ease;
 }
 
 .ui.green.buttons .button:hover,
 .ui.green.button:hover {
-    background-color: #85b742;
+    background-color: $greenDefaultHover;
     //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.green.buttons .button:focus,
 .ui.green.button:focus {
-    background-color: #85b742;
+    background-color: $greenDefaultHover;
     box-shadow: none !important;
 }
 
 .ui.green.buttons .button:active,
 .ui.green.button:active {
-    background-color: #85b742;
+    background-color: $greenDefaultHover;
     box-shadow: none !important;
     transition: none !important;
 }
@@ -75,24 +75,24 @@
 
 .ui.red.buttons .button,
 .ui.red.button {
-    background-color: #f26522;
+    background-color: $redDefault;
 }
 
 .ui.red.buttons .button:hover,
 .ui.red.button:hover {
-    background-color: #d1581c;
+    background-color: $redDefaultHover;
     //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.red.buttons .button:focus,
 .ui.red.button:focus {
-    background-color: #d1581c;
+    background-color: $redDefaultHover;
     box-shadow: none !important;
 }
 
 .ui.red.buttons .button:active,
 .ui.red.button:active {
-    background-color: #d1581c;
+    background-color: $redDefaultHover;
     box-shadow: none !important;
 }
 
@@ -100,7 +100,7 @@
 .ui.red.buttons .active.button:active,
 .ui.red.active.button,
 .ui.red.button .active.button:active {
-    background-color: #d1581c;
+    background-color: $redDefaultHover;
     box-shadow: none !important;
 }
 

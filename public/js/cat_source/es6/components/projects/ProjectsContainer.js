@@ -194,7 +194,7 @@ class ProjectsContainer extends React.Component {
 
         let spinner = '';
         if (this.state.more_projects && projects.size > 9) {
-            spinner = <div className="ui one column shadow-1 grid">
+            spinner = <div className="ui one column grid">
                 <div className="one column spinner" style={{height: "100px"}}>
                     <div className="ui active inverted dimmer">
                         <div className="ui medium text loader">Loading more projects</div>
@@ -202,7 +202,7 @@ class ProjectsContainer extends React.Component {
                 </div>
             </div>;
         } else if (projects.size > 9) {
-            spinner = <div className="ui one column shadow-1 grid" ref={(spinner) => this.spinner = spinner}>
+            spinner = <div className="ui one column grid" ref={(spinner) => this.spinner = spinner}>
                 <div className="one column spinner center aligned">
                         <div className="ui medium header">No more projects</div>
                 </div>

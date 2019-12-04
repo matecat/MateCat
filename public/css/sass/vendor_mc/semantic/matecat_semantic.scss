@@ -15,3 +15,13 @@
   text-decoration: inherit;
   text-transform: none;
 }
+
+a {
+    color: $linkBlue;
+    &:hover{
+        color: $linkBlueHover;
+    }
+    &:active {
+        color: $linkBlueActive;
+    }
+}

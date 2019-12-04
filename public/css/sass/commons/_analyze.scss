@@ -18,7 +18,7 @@ body.analyze{
 
     .project {
         .scroll {
-            background-color: #ffffff;
+            background-color: $grey2;
             width: 40px;
             height: 40px;
             position: fixed;
@@ -334,9 +334,9 @@ body.analyze{
                                 background-color: #ffffff;
                                 transition: 0.3s ease;
                                 cursor: pointer;
-                                border-bottom: 1px solid #d7d8dc;
-                                border-right: 1px solid #d7d8dc;
-                                border-left: 1px solid #d7d8dc;
+                                //border-bottom: 1px solid #d7d8dc;
+                                //border-right: 1px solid #d7d8dc;
+                                //border-left: 1px solid #d7d8dc;
                                 .job-details {
                                     font-size: 15px;
                                     float: right;

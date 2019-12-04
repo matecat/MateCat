@@ -36,11 +36,11 @@ class ProjectContainer extends React.Component {
                 $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
                 this.dropdownUsers.classList.remove("project-not-assigned");
                 this.dropdownUsers.classList.add("project-assignee");
-                this.dropdownUsers.classList.add("shadow-1");
+                // this.dropdownUsers.classList.add("shadow-1");
             } else {
                 $(this.dropdownUsers).dropdown('set selected', -1);
                 this.dropdownUsers.classList.remove("project-assignee");
-                this.dropdownUsers.classList.remove("shadow-1");
+                // this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
             $(this.dropdownUsers).dropdown({
@@ -402,7 +402,7 @@ class ProjectContainer extends React.Component {
                     {team.get('name')}
                 </div>
             });
-            result = <div className={"ui dropdown top right pointing project-team shadow-1 "}
+            result = <div className={"ui dropdown top right pointing project-team"}
                           ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
                         <span className="text">
                         </span>
@@ -512,7 +512,7 @@ class ProjectContainer extends React.Component {
         let inputClass = (this.state.inputSelected) ? 'selected' : '';
         let inputIcon = (this.state.inputNameChanged) ? <i className="icon-checkmark green icon" /> : <i className="icon-pencil icon" />;
 
-        return <div className="project ui column grid shadow-1" id={"project-" + this.props.project.get('id')}
+        return <div className="project ui column grid" id={"project-" + this.props.project.get('id')}
                     ref={(project) => this.project = project}>
 
                     <div className="sixteen wide column">
