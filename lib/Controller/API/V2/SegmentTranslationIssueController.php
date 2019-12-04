@@ -7,6 +7,8 @@ use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use API\V2\Validators\ChunkPasswordValidator;
 use Database;
 use Features\ReviewExtended\ReviewUtils;
+use Features\ReviewExtended\TranslationIssueModel;
+use Features\SecondPassReview;
 use LQA\EntryDao as EntryDao;
 use LQA\EntryStruct;
 use RevisionFactory;
@@ -100,6 +102,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     public function delete() {
+
+        Database::obtain()->begin();
         $model = $this->_getSegmentTranslationIssueModel(
                 $this->request->id_job,
                 $this->validator->getChunkReview()->password,
@@ -107,6 +111,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         );
 
         $model->delete();
+        Database::obtain()->commit();
+
         $this->response->code( 200 );
     }
 
@@ -115,7 +121,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @param $password
      * @param $issue
      *
-     * @return mixed 0|TranslationIssueModel
+     * @return TranslationIssueModel|SecondPassReview\TranslationIssueModel
      * @throws \Exception
      */
     protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {

@@ -1,5 +1,7 @@
 <?php
 
+use Features\TranslationVersions\Model\TranslationVersionDao;
+
 require 'lib/Controller/API/V2/SegmentVersion.php';
 require 'lib/Controller/API/V2/Validators/JobPasswordValidator.php';
 
@@ -77,11 +79,7 @@ class SegmentVersionTest extends IntegrationTest {
 
         $response = $test->getResponse();
 
-        $versions = \Translations_TranslationVersionDao::
-            getVersionsForTranslation(
-                $chunk->id,
-                $segment->id
-            );
+        $versions = TranslationVersionDao::getVersionsForTranslation( $chunk->id, $segment->id );
         $version = $versions[0];
 
         $expected = array(

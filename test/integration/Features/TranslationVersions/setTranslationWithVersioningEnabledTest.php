@@ -1,5 +1,7 @@
 <?php
 
+use Features\TranslationVersions\Model\TranslationVersionDao;
+
 class setTranslationWithVerioningEnabledTest extends IntegrationTest {
     private $test_data=array();
 
@@ -60,7 +62,7 @@ class setTranslationWithVerioningEnabledTest extends IntegrationTest {
 
         $translations = $chunk->getTranslations();
 
-        $versions = Translations_TranslationVersionDao::getVersionsForTranslation(
+        $versions = TranslationVersionDao::getVersionsForTranslation(
           $translations[0]->id_job, $translations[0]->id_segment
         );
 
@@ -115,7 +117,7 @@ class setTranslationWithVerioningEnabledTest extends IntegrationTest {
 
         $translations = $chunk->getTranslations();
 
-        $versions = Translations_TranslationVersionDao::getVersionsForTranslation(
+        $versions = TranslationVersionDao::getVersionsForTranslation(
           $translations[0]->id_job, $translations[0]->id_segment
         );
 
@@ -154,7 +156,7 @@ class setTranslationWithVerioningEnabledTest extends IntegrationTest {
 
         $translations = $chunk->getTranslations();
 
-        $versions = Translations_TranslationVersionDao::getVersionsForJob(
+        $versions = TranslationVersionDao::getVersionsForJob(
           $translations[0]->id_job
         );
 
@@ -211,7 +213,7 @@ class setTranslationWithVerioningEnabledTest extends IntegrationTest {
 
         $translations = $chunk->getTranslations();
 
-        $versions = Translations_TranslationVersionDao::getVersionsForJob(
+        $versions = TranslationVersionDao::getVersionsForJob(
           $translations[0]->id_job
         );
 
