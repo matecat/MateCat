@@ -55,6 +55,10 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ),
         ];
 
+        Database::obtain()->begin();
+
+        //TODO refactory validation systems and check if is needed to initialize  EntryStruct twice, here and in \Features\ReviewExtended\TranslationIssueModel line 84
+
         $struct = new EntryStruct( $data );
 
         $model = $this->_getSegmentTranslationIssueModel(
@@ -68,6 +72,8 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         }
 
         $struct = $model->save();
+
+        Database::obtain()->commit();
 
         $json     = new JsonFormatter();
         $rendered = $json->renderItem( $struct );
