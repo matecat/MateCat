@@ -2,16 +2,36 @@
 
 namespace Features;
 
+use Chunks_ChunkStruct;
 use Exceptions\ControllerReturnException;
 use Exceptions\ValidationError;
+use Features\TranslationVersions\EmptySegmentTranslationVersionHandler;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use Features\TranslationVersions\Model\SegmentTranslationEventModel;
+use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use Jobs_JobDao;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use Users_UserStruct;
 
 class TranslationVersions extends BaseFeature {
 
     const FEATURE_CODE = 'translation_versions';
+
+    public static function getVersionHandlerNewInstance( Chunks_ChunkStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct  ){
+
+        if ( $projectStruct->isFeatureEnabled( self::FEATURE_CODE ) ) {
+            return new SegmentTranslationVersionHandler(
+                    $chunkStruct,
+                    $id_segment,
+                    $userStruct,
+                    $projectStruct
+            );
+        }
+
+        return new EmptySegmentTranslationVersionHandler();
+
+    }
 
     public function preSetTranslationCommitted( $params ) {
         // evaluate if the record is to be created, either the
