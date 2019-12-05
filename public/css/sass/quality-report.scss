@@ -15,7 +15,7 @@ $color-yellow: #FFE600;
 body {
     font-family: Calibri, Arial, Helvetica, sans-serif;
     text-align: left;
-    background: #f2f4f7;
+    background: white;
     font-size: 16px;
     min-width: 1024px;
     overflow: auto;
@@ -126,7 +126,7 @@ header {
                 transition: 0.3s ease;
                 .qr-bg-head {
                     height: 258px;
-                    background: #E5E9F1;
+                    background: white;
                     position: absolute;
                     width: 100%;
                     z-index: -1;
@@ -156,7 +156,7 @@ header {
                     .qr-production-quality {
                         .qr-production {
                             display: flex;
-                            background: white;
+                            background: $grey3;
                             justify-content: space-between;
                             width: 100%;
                             padding-left: 15px;
@@ -214,10 +214,10 @@ header {
                                 }
 
                                 &.qr-pass {
-                                    background: rgba(0, 255, 0, 0.23);
+                                    background: $greenDefaultTransparent;
                                 }
                                 &.qr-fail {
-                                    background: rgba(255, 0, 0, 0.23);
+                                    background: $redDefaultTransparent;
                                 }
                                 &.qr-pass, &.qr-fail, &.qr-norevision {
                                     margin-right: -1px;
@@ -253,13 +253,15 @@ header {
                         }
                         .qr-quality {
                             margin-top: 20px;
+                            margin-bottom: 20px;
+                            border-bottom: 2px solid #DBDFE3;
                             position: relative;
                             z-index: 1;
                             .qr-head {
                                 display: flex;
                                 align-items: center;
                                 font-weight: 700;
-                                background: #f4f5f8;
+                                background: $grey2;
                                 .qr-title {
                                     text-align: center;
                                     text-transform: capitalize;
@@ -270,12 +272,14 @@ header {
                             }
                             .qr-body-list {
                                 display: flex;
-                                border-top: 1px solid #f2f4f7;
+                                border-top: 2px solid $grey2;
+                                border-left: 2px solid $grey2;
+                                border-right: 2px solid $grey2;
                                 &:first-child {
-                                    border: none;
+                                    //border: none;
                                 }
                                 .qr-element {
-                                    border-left: 1px solid #f2f4f7;
+                                    border-left: 1px solid $grey2;
                                     background: white;
                                     position: relative;
                                     z-index: -1;
@@ -290,7 +294,8 @@ header {
                             }
                             .qr-issue, .qr-issue-name {
                                 width: 56%;
-                                font-weight: 700;
+                                font-weight: 500;
+                                font-size: 15px;
                             }
                             .qr-severity, .severity {
                                 width: 16%;
@@ -298,7 +303,7 @@ header {
                             }
                             .qr-total-severity, .total-severity {
                                 width: 20%;
-                                background: #e4e4e4;
+                                background: $grey1;
                             }
                             .qr-total-severity {
                                 display: flex;
@@ -342,6 +347,10 @@ header {
                     }
                     .qr-header {
                         height: 70px;
+                        h3 {
+                            font-size: 22px;
+                            font-weight: bold;
+                        }
                         .filter-dropdown .dropdown{
                             font-size: 20px !important;
                             max-width: 190px;
@@ -353,7 +362,7 @@ header {
                         align-items: center;
                     }
                     .qr-segment-details-container {
-                        background: #E5E9F1;
+                        background: $grey2;
                         padding: 35px 15px 15px;
                         .qr-segments-summary {
                             h3{
@@ -402,29 +411,29 @@ header {
                                                 }
                                                 .status-translated {
                                                     font-size: 20px;
-                                                    color: #09beec;
+                                                    color: $translatedBlue;
                                                 }
                                                 .status-approved {
                                                     &.approved-r2 {
-                                                        color: #BC6AC9;
+                                                        color: $approved2Green;
                                                     }
                                                     font-size: 20px;
-                                                    color: #7eaf3e;
+                                                    color: $approvedGreen;
                                                 }
                                                 .status-draft {
                                                     font-size: 20px;
-                                                    color: #ccced2;
+                                                    color: $grey1;
                                                 }
                                                 .status-rejected {
                                                     font-size: 20px;
-                                                    color: #FB2A0D;
+                                                    color: $rebuttedRed;
                                                 }
                                             }
                                         }
                                         .qr-segment-body {
                                                 .segment-container {
                                                     display: flex;
-                                                    background: #f2f4f7;
+                                                    background: $grey3;
                                                     &.qr-issues {
                                                         .qr-text {
                                                             width: 80%;
@@ -485,17 +494,17 @@ header {
                                                     }
                                                     &.qr-translated {
                                                         b {
-                                                            color: #0abeec;
+                                                            color: $translatedBlue;
                                                         }
                                                     }
                                                     &.qr-revised {
                                                         b {
-                                                            color: #7cc576;
+                                                            color: $approvedGreen;
                                                         }
                                                     }
                                                     &.qr-revised-2ndpass {
                                                         b {
-                                                            color: #BC6AC9;
+                                                            color: $approved2Green;
                                                         }
                                                     }
                                                     &.rtl-lang {
@@ -528,7 +537,7 @@ header {
                                                                 padding: 3px 10px;
                                                                 margin-right: 5px;
                                                                 margin-top: 5px;
-                                                                background: #f2f4f7;
+                                                                background: $grey3;
 
                                                                 &.automated {
                                                                     padding: 0;
@@ -570,17 +579,17 @@ header {
                                                                         font-size: 16px;
                                                                         margin-bottom: 0;
                                                                         .re-revisor {
-                                                                            color: #00b76c;
+                                                                            color: $approvedGreen;
                                                                         }
                                                                         .re-revisor2 {
-                                                                            color: #BC6AC9;
+                                                                            color: $approved2Green;
                                                                         }
                                                                         .re-translator {
-                                                                            color: #0997bc;
+                                                                            color: $translatedBlue;
                                                                         }
                                                                         .re-comment-date{
                                                                             font-size: 13px;
-                                                                            color: lightslategray;
+                                                                            color: $grey1;
                                                                         }
                                                                     }
                                                                 }
@@ -614,7 +623,7 @@ header {
                                                 .segment-container {
                                                     box-shadow: none !important;
                                                     .segment-content {
-                                                        background: #f2f4f7;
+                                                        background: $grey3;
                                                         .qr-issues-list {
                                                             .qr-issue {
                                                                 background: #FFFFFF;
@@ -732,8 +741,8 @@ header {
         .not-filtered {
             .ui.basic.button {
                 &:hover {
-                    box-shadow: 0px 0px 0px 1px #09beec inset;
-                    color: #09beec !important;
+                    box-shadow: 0px 0px 0px 1px $translatedBlue inset;
+                    color: $translatedBlue !important;
                 }
                 &.disabled {
                     box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
@@ -788,19 +797,19 @@ header {
                 background: #FFFFFF
             }
             &.draft-color {
-                background: #E8E8E8;;
+                background: $grey1;
             }
             &.translated-color {
-                background: #09beec;
+                background: $translatedBlue;
             }
             &.approved-color {
-                background: #7cc576;
+                background: $approvedGreen;
             }
             &.rejected-color {
-                background: #dc2e34;
+                background: $rebuttedRed;
             }
             &.revision-color {
-                background: #7cc576;
+                background: $approvedGreen;
             }
             &.second-revision-color, &.approved-2ndpass-color {
                 background: #BC6AC9;
@@ -907,22 +916,22 @@ footer {
     margin: 30px 15px 15px;
     z-index: 1;
     .ui.active.inverted.dimmer {
-        background: #f4f5f8;
+        background: $grey2;
     }
 }
 
 .per-orange {
-    background: #FF9900 !important;
+    background: $orangeDefault !important;
     color: #fff !important
 }
 
 .per-blue {
-    background: #09beec !important;
+    background: $translatedBlue !important;
     color: #fff !important
 }
 
 .per-green {
-    background: #7cc576 !important;
+    background: $approvedGreen !important;
     color: #fff !important
 }
 
@@ -932,13 +941,13 @@ footer {
 }
 
 .per-red {
-    background: #ff0000 !important;
+    background: $redDefault !important;
     color: #fff !important
 }
 
 .per-gray {
     background: #aaa !important;
-    color: #333 !important
+    color: $grey1 !important
 }
 
 .ui.popup.bottom.right.qr-score-popup {

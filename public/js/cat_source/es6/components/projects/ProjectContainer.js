@@ -36,11 +36,9 @@ class ProjectContainer extends React.Component {
                 $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
                 this.dropdownUsers.classList.remove("project-not-assigned");
                 this.dropdownUsers.classList.add("project-assignee");
-                // this.dropdownUsers.classList.add("shadow-1");
             } else {
                 $(this.dropdownUsers).dropdown('set selected', -1);
                 this.dropdownUsers.classList.remove("project-assignee");
-                // this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
             $(this.dropdownUsers).dropdown({

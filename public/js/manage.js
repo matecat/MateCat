@@ -65,7 +65,8 @@ UI = {
 
             ReactDOM.render(React.createElement(Header ,{
                 user: APP.USER.STORE,
-                showFilterProjects: true
+                showFilterProjects: true,
+                loggedUser: true
             }), headerMountPoint);
 
             self.teams = data.teams;

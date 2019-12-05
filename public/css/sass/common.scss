@@ -198,7 +198,7 @@ a[class^='edit_'] {
 }
 
 a.edit_1:before {
-  color: #09beec;
+  color: $translatedBlue;
 }
 
 a.edit_2:before {
@@ -1350,11 +1350,11 @@ form.add-TM-Form {
 }
 
 .popup .x-popup:hover, .slide-panel .x-popup:hover, .x-popup2:hover {
-  color: red;
+  color: $darkBlueTransparent;
 }
 
 .x-popup:hover {
-  color: red;
+  color: $darkBlueTransparent;
 }
 
 .mgmt-panel .x-popup {
@@ -1364,7 +1364,7 @@ form.add-TM-Form {
 
 
 .uploadtm.disabled {
-  background: #09beec !important;
+  background: $translatedBlue !important;
 }
 
 
@@ -1385,7 +1385,7 @@ form.add-TM-Form {
 .uploadtm.disabled,
 .download-manage.btn-ok {
   color: #fff;
-  background: #09beec;
+  background: $translatedBlue;
   border: 1px solid #797979;
   font-weight: bold;
   text-decoration: none;
@@ -1465,9 +1465,9 @@ form.add-TM-Form {
 .popup .btn-cancel:hover,
 .slide-panel .btn-ok:hover,
 .slide-panel .btn-cancel:hover {
-  background-color: #08b3de;
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  border: 1px solid #797979;
+  background-color: $translatedBlueHover;
+  //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+  //border: 1px solid #797979;
 }
 
 .mgmt-panel-gl .btn-ok:active,
@@ -2200,7 +2200,7 @@ input.email-export-tmx {
 
 .btn-confirm-small {
   /* color: #fff; */
-  background: #09beec;
+  background: $translatedBlue;
   border: 1px solid #797979;
   font-weight: bold;
   text-decoration: none;
@@ -2218,9 +2218,9 @@ input.email-export-tmx {
 }
 
 .btn-confirm-small:hover {
-  background-color: #08b3de;
-  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  border: 1px solid #797979;
+  background-color: $translatedBlueHover;
+  //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+  //border: 1px solid #797979;
 }
 
 .btn-confirm-small .text:before {
@@ -2249,16 +2249,16 @@ input.email-export-tmx {
 
 .btn-confirm-medium {
   color: #fff;
-  background: #09beec;
+  background: $translatedBlue;
   border: 1px solid #848689;
   font-weight: bold;
   text-decoration: none;
   padding: 8px 18px;
   border-radius: 2px;
   font-size: 18px;
-  background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-  background: -moz-linear-gradient(top, #09beec, #119ec4);
-  background: linear-gradient(top, #09beec, #119ec4);
+  background: -webkit-gradient(linear, left top, left bottom, from($translatedBlue), to(#119ec4));
+  background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
+  background: linear-gradient(top, $translatedBlue, #119ec4);
   margin: 16px 0 16px 20px;
   display: inline-block;
   text-align: center;
@@ -2624,9 +2624,6 @@ tr.disabled td {
   cursor: pointer;
   border: 1px solid #666;
   border-left: none;
-  -moz-box-shadow: 0 1px 2px #ccc;
-  -webkit-box-shadow: 0 1px 2px #ccc;
-  box-shadow: 0 1px 2px #ccc;
   border-radius: 0 2px 2px 0;
   text-decoration: none;
   text-align: center;
@@ -2893,6 +2890,7 @@ td.action .btn {
   padding: 5px 20px 0 20px !important;
   box-sizing: content-box;
   text-align: center;
+  border: 1px solid #848689 !important;
 }
 
 td.action .btn:hover {
@@ -3551,7 +3549,7 @@ only screen and (in-resolution: 2dppx) {
   /* Google Sheet */
 
 .fileinput-button {
-	background: #09beec;
+	background: $translatedBlue;
   }
 
 }
@@ -5061,11 +5059,11 @@ span.share-popup-item-email {
 }
 
 .user-nolog.sing-in-header:hover {
-  border: 1px dashed #09BEEC !important;
+  border: 1px dashed $translatedBlue !important;
 }
 
 .user-nolog.sing-in-header:hover i {
-  color: #09beec;
+  color: $translatedBlue;
 }
 
 .team-name {

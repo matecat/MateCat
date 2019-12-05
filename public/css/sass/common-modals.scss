@@ -28,10 +28,10 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     text-decoration: underline;
     float: left;
     cursor: pointer;
-    color: #39699a;
+    color: $linkBlue;
     &:hover {
         text-decoration: none;
-        color: #1e70bf;
+        color: $linkBlueHover;
     }
 }
 
@@ -136,17 +136,17 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     font-size: 18px;
     line-height: 30px;
     margin-bottom: 30px;
-    background: #f4f4f4;
-    border-bottom: 1px solid #ccc;
-    padding: 20px 20px 20px 25px;
+    background-color: white;
+    //border-bottom: 1px solid #ccc;
+    padding: 35px 20px 20px 50px;
 }
 
 .preferences-modal .user-dqf ,
 .preferences-modal .user-gdrive {
-    border: 1px solid #ccc;
+    //border: 1px solid #ccc;
     padding: 10px 0 0 10px;
     border-radius: 4px;
-    background: #f8f6f6;
+    background: white;
     width: 100%;
     min-height: 40px;
     margin-bottom: 25px;
@@ -167,7 +167,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .preferences-modal .user-name strong {
-    font-size: 24px;
+    font-size: 22px;
 }
 
 .preferences-modal .avatar-user {
@@ -186,7 +186,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .preferences-modal .user-info-attributes {
-    padding: 20px 25px;
+    padding: 20px 50px;
 }
 
 .preferences-modal .user-info-form label {
@@ -210,7 +210,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
         border: 1px solid #ccc;
         padding: 15px;
         border-radius: 4px;
-        background: #f8f6f6;
+        background: $grey2;
         min-height: 40px;
         margin-bottom: 25px;
         margin-top: 10px;
@@ -218,7 +218,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             max-width: 100%;
             //color: #999 !important;
             //cursor: not-allowed;
-            //background: #f4f4f4;
+            //background: $grey2;
         }
         .dqf-message {
             float: right;
@@ -316,7 +316,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .user-info-form .grey-txt {
-    color: #666;
+    color: $grey1;
 }
 
 .user-gdrive > label {
@@ -327,6 +327,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     max-width: 75%;
     text-align: left;
     word-wrap: break-word;
+    color: $grey1;
 }
 
 .preferences-modal .user-gdrive > label {
@@ -439,7 +440,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .forgot-password {
     cursor: pointer;
     text-decoration: underline;
-    color: #39699a;
+    color: $linkBlue;
 }
 
 .preferences-modal input[type=text],
@@ -470,7 +471,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .dqf-modal input[disabled] {
     color: #999;
     cursor: not-allowed;
-    background: #f4f4f4;
+    background: $grey2;
 }
 
 .user-info-form input {
@@ -513,7 +514,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .preferences-modal input:disabled {
     color: #999;
     cursor: not-allowed;
-    background: #f4f4f4;
+    background: $grey2;
 }
 
 .preferences-modal .reset-password {
@@ -636,7 +637,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .matecat-modal-body {
     min-height: 50px;
     /*color: #000;*/
-    background-color: #fff;
+    background-color: $grey3;
     border-radius: 0 0 4px 4px;
     margin: 0 auto;
     overflow: hidden;
@@ -691,7 +692,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .preferences-modal h2 {
     margin: 0;
     padding: 0 0 0 15px;
-    font-size: 22px;
+    font-size: 20px;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
@@ -701,7 +702,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     font-size: 16px;
     margin-left: 66px;
     height: 20px;
-    margin-top: 4px;
+    margin-top: 12px;
 }
 
 /* The Close Button */
@@ -784,7 +785,7 @@ div#matecat-modal p {
 .onoffswitch-inner:before {
     content: "";
     padding-left: 10px;
-    background-color: #22c4ee;
+    background-color: $linkBlue;
     color: #FFFFFF;
 }
 
@@ -813,7 +814,7 @@ div#matecat-modal p {
 .onoffswitch-label-status-active {
     display: none;
     font-weight: bold;
-    color: #22c4ee;
+    color: $linkBlue;
 }
 
 .onoffswitch-label-status-inactive,
@@ -968,7 +969,7 @@ div#matecat-modal p {
     text-transform: none;
     line-height: 1;
     &:hover {
-        color: red;
+        color: $darkBlueTransparent;
     }
 
     /* Better Font Rendering =========== */
@@ -983,10 +984,6 @@ div#matecat-modal p {
     font-size: 16px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
 
-    .matecat-modal-top {
-        background-color: #ffffff;
-
-    }
     .matecat-modal-middle,
     .matecat-modal-bottom,
     .matecat-modal-top{
@@ -1004,6 +1001,9 @@ div#matecat-modal p {
                 max-height: 210px;
                 position: relative!important;
                 padding: 0;
+                .item {
+                    border-top: none !important
+                }
             }
             ::-webkit-scrollbar {
                 width: 10px;
@@ -1041,7 +1041,7 @@ div#matecat-modal p {
                         width: 40px !important;
                         max-width: 40px;
                         height: 40px;
-                        background-color: #f4f4f4;
+                        background-color: $grey2;
                         border-radius: 50%;
                         vertical-align: middle;
                         text-align: center;
@@ -1058,13 +1058,13 @@ div#matecat-modal p {
                     .content.email-user-invited {
                         font-weight: 100;
                         font-size: 14px;
-                        color: grey;
+                        color: $grey1;
                     }
                     .content.pending-msg,
                     .content.invite-sent-msg{
                         font-weight: 100;
                         font-size: 14px;
-                        color: grey;
+                        color: $grey1;
                         margin-top: 13px;
                     }
 
@@ -1138,8 +1138,8 @@ div#matecat-modal p {
         padding: 11px 22px;
         vertical-align: top;
         font-size: 18px;
-        border: 1px solid #797979;
         margin-right: 0px;
+        border-radius: 2px;
         &.primary.button {
             border-radius: 2px;
         }
@@ -1266,7 +1266,7 @@ div#matecat-modal p {
             .ui.divided.list {
                 max-height: 210px;
                 .item:first-child {
-                    //border-top: 1px solid rgba(34, 36, 38, 0.15);
+                    //border-top: none !important;
                 }
             }
         }
