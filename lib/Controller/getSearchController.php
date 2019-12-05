@@ -54,6 +54,7 @@ class getSearchController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
+        $this->readLoginInfo();
 
         $filterArgs = [
                 'function'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
@@ -363,6 +364,7 @@ class getSearchController extends ajaxController {
                     Constants_TranslationStatus::STATUS_REJECTED
             ] )
             ) {
+                $TPropagation                             = new Translations_SegmentTranslationStruct();
                 $TPropagation[ 'status' ]                 = $tRow[ 'status' ];
                 $TPropagation[ 'id_job' ]                 = $this->job;
                 $TPropagation[ 'translation' ]            = $tRow[ 'translation' ];
