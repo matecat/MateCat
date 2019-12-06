@@ -12,7 +12,7 @@ const TAGS_UTILS =  {
         $div.find('span.space-marker').replaceWith(' ');
         $div.find('span.rangySelectionBoundary').remove();
         $div = this.encodeTagsWithHtmlAttribute($div);
-        return $div.text();
+        return TextUtils.view2rawxliff( $div.text() );
     },
 
     decodeText(segment, text) {
