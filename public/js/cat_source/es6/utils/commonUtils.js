@@ -277,13 +277,24 @@ const CommonUtils = {
         }
     },
 
+    isLocalStorageNameSupported: function () {
+        var testKey = 'test', storage = window.localStorage;
+        try {
+            storage.setItem(testKey, '1');
+            storage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    },
+
     /**
      * Local Storage manipulation
       */
     // localStorageCurrentSegmentId: (config) ? "currentSegmentId-"+config.id_job+config.password : null,
     localStorageArray: [],
     isSafari: (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0),
-    isPrivateSafari: (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) && (!this.isLocalStorageNameSupported()),
+    isPrivateSafari: () => (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) && (!CommonUtils.isLocalStorageNameSupported()),
     getLastSegmentFromLocalStorage: function () {
         let localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
         return localStorage.getItem(localStorageCurrentSegmentId);
@@ -306,7 +317,7 @@ const CommonUtils = {
     },
 
     addInStorage: function (key, val, operation) {
-        if(this.isPrivateSafari) {
+        if(this.isPrivateSafari()) {
             let item = {
                 key: key,
                 value: val
@@ -322,7 +333,7 @@ const CommonUtils = {
         }
     },
     getFromStorage: function (key) {
-        if(this.isPrivateSafari) {
+        if(this.isPrivateSafari()) {
             let foundVal = 0;
             $.each(this.localStorageArray, function (index) {
                 if(this.key === key) foundVal = this.value;
@@ -333,7 +344,7 @@ const CommonUtils = {
         }
     },
     removeFromStorage: function (key) {
-        if(this.isPrivateSafari) {
+        if(this.isPrivateSafari()) {
             let foundIndex = 0;
             $.each(this.localStorageArray, function (index) {
                 if(this.key == key) foundIndex = index;
@@ -343,18 +354,6 @@ const CommonUtils = {
             localStorage.removeItem(key);
         }
     },
-
-
-    isLocalStorageNameSupported: function () {
-        var testKey = 'test', storage = window.localStorage;
-        try {
-            storage.setItem(testKey, '1');
-            storage.removeItem(testKey);
-            return true;
-        } catch (error) {
-            return false;
-        }
-    }
     /******************************/
 };
 

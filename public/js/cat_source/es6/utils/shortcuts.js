@@ -45,7 +45,7 @@ const Shortcuts = {
                     }
                 },
                 "gotoCurrent": {
-                    "label": "Go to current segment and focus on target",
+                    "label": "Go to current segment",
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "ctrl+shift+f",
@@ -96,16 +96,16 @@ const Shortcuts = {
                     "label": "Open Settings panel",
                     "equivalent": "",
                     "keystrokes": {
-                        "standard": "ctrl+shift+l",
-                        "mac": "meta+shift+l",
+                        "standard": "ctrl+shift+s",
+                        "mac": "meta+shift+s",
                     }
                 },
                 "toggleTagDisplayMode": {
                     "label": "Switch Tag Display Mode",
                     "equivalent": "",
                     "keystrokes": {
-                        "standard": "ctrl+shift+s",
-                        "mac": "meta+shift+s",
+                        "standard": "ctrl+shift+t",
+                        "mac": "meta+shift+t",
                     }
                 },
                 "openComments": {
@@ -125,7 +125,7 @@ const Shortcuts = {
                     }
                 },
                 "navigateIssues": {
-                    "label": "Navigate issues penel to add one",
+                    "label": "Navigate issues panel / Add issue",
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "ctrl+alt+arrows-enter",

@@ -1436,6 +1436,7 @@ button.ui-button::-moz-focus-inner {
     position: relative;
     padding: 24px;
     background: $grey3;
+    padding-top: 0px;
 }
 
 .wrapper-upload h1 {
@@ -1889,7 +1890,7 @@ a {
 
     position: relative;
     border: 1px dashed #ccc;
-    margin: 32px 72px;
+    margin: 18px 72px;
     min-height:200px;
     /*min-height: 270px;*/
     -moz-border-radius: 4px;

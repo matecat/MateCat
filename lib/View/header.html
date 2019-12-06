@@ -187,7 +187,7 @@
                         <a href="${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}">Translate</a>
                     </li>
                     <li class="item" title="Analysis" data-value="analisys" tal:condition="php: allow_link_to_analysis && !empty(analysis_enabled)">
-                        <a target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Volume analisys</a>
+                        <a target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Volume analysis</a>
                     </li>
                     <li class="item" title="Export XLIFF to target" data-value="target">
                         <a target="_blank" href="${basepath}utils/xliff-to-target">Export XLIFF to target</a>

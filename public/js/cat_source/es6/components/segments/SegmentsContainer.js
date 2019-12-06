@@ -238,13 +238,13 @@ class SegmentsContainer extends React.Component {
                     return 110;
                 else  if (index === 0 && comments.length > 0)
                     return 270;
-            } else if ( segment1.get('openComments') ) {
+            } else if ( segment1 && segment1.get('openComments') ) {
                 let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
                 if (comments.length === 0)
                     return 100;
                 else  if (comments.length > 0)
                     return 150;
-            } else if ( segment2.get('openComments') ) {
+            } else if ( segment2 && segment2.get('openComments') ) {
                 let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
                 if (comments.length > 0)
                     return 100;
@@ -447,13 +447,13 @@ class SegmentsContainer extends React.Component {
                             styleCopy.marginTop = '110px';
                         else  if (index === 0 && comments.length > 0)
                             styleCopy.marginTop = '270px';
-                    } else if ( segment1.get('openComments') ) {
+                    } else if ( segment1 && segment1.get('openComments') ) {
                         let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
                         if (comments.length === 0)
                             styleCopy.marginTop = '40px';
                         else  if (comments.length > 0)
                             styleCopy.marginTop = '100px';
-                    } else if ( segment2.get('openComments') ) {
+                    } else if ( segment2 && segment2.get('openComments') ) {
                         let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
                         if (comments.length === 0)
                             styleCopy.marginTop = '20px';

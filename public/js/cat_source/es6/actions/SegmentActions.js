@@ -57,7 +57,7 @@ const SegmentActions = {
                 } else {
                     UI.unmountSegments();
                     UI.render({
-                        segmentToOpen: UI.currentSegmentId.split('-')[0]
+                        segmentToOpen: sid.split('-')[0]
                     });
                 }
             })
