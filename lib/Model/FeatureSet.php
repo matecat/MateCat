@@ -374,7 +374,7 @@ class FeatureSet {
     }
 
     /**
-     * Warning Recursion, memory overflow if there are a lot of features
+     * Warning Recursion, memory overflow if there are a lot of features ( but this is impossible )
      *
      * @param BasicFeatureStruct[]
      *

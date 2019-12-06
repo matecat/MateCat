@@ -2,6 +2,7 @@
 
 namespace API\V2\Validators;
 
+use API\V2\Exceptions\AuthenticationError;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use ApiKeys_ApiKeyStruct;
@@ -61,6 +62,7 @@ class ProjectValidator extends Base {
 
     /**
      * @return mixed|void
+     * @throws AuthenticationError
      * @throws NotFoundException
      */
     protected function _validate() {

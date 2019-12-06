@@ -16,6 +16,11 @@ use RevisionFactory;
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 
     /**
+     * @var RevisionFactory
+     */
+    protected $revisionFactory;
+
+    /**
      * @var Validators\SegmentTranslationIssue
      */
     private $validator;
@@ -109,7 +114,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 $this->validator->getChunkReview()->password,
                 $this->validator->issue
         );
-
         $model->delete();
         Database::obtain()->commit();
 
@@ -122,14 +126,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @param $issue
      *
      * @return TranslationIssueModel|SecondPassReview\TranslationIssueModel
-     * @throws \Exception
      */
     protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {
-
-        return RevisionFactory::getInstance()
-                ->setFeatureSet( $this->featureSet )
-                ->getTranslationIssueModel( $id_job, $password, $issue );
-
+        return $this->revisionFactory->getTranslationIssueModel( $id_job, $password, $issue );
     }
 
     protected function afterConstruct() {
@@ -137,13 +136,11 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $jobValidator = new ChunkPasswordValidator( $this );
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
 
-            $this->project = $jobValidator->getChunk()->getProject();
-            $this->featureSet->loadForProject( $this->project );
+            $this->project         = $jobValidator->getChunk()->getProject();
+            $this->revisionFactory = RevisionFactory::initFromProject( $this->project );
 
             //enable dynamic loading ( Factory ) by callback hook on revision features
-            $this->validator = RevisionFactory::getInstance()
-                    ->setFeatureSet( $this->featureSet )
-                    ->getTranslationIssuesValidator( $this->request );
+            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this->request );
 
             $this->validator->validate();
 
