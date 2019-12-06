@@ -13,7 +13,7 @@ use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
 use LQA\EntryStruct;
 
-class SegmentTranslationIssue extends Base {
+class SegmentTranslationIssueValidator extends Base {
 
     /**
      * @var EntryStruct
@@ -25,19 +25,20 @@ class SegmentTranslationIssue extends Base {
     public $translation;
 
     /**
-     * @var \Segments_SegmentStruct
-     */
-    public $segment;
-
-    /**
-     * @var SegmentTranslation
-     */
-    private $parent_validator;
-
-    /**
      * @var ChunkReviewStruct
      */
     protected $chunk_review;
+
+    /**
+     * @param ChunkReviewStruct $chunkReviewStruct
+     *
+     * @return $this
+     */
+    public function setChunkReview( ChunkReviewStruct $chunkReviewStruct ) {
+        $this->chunk_review = $chunkReviewStruct;
+
+        return $this;
+    }
 
     /**
      * @return mixed|void
@@ -45,41 +46,19 @@ class SegmentTranslationIssue extends Base {
      * @throws Exception
      */
     public function _validate() {
-        // if method is delete we expect the password to be revise password.
-        // TODO: this should be changed because revision password should always be used
-
-        if ( $this->request->method( 'delete' ) ) {
-            $this->chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId( $this->request->password, $this->request->id_job );
-            if ( !$this->chunk_review ) {
-                throw new ValidationError( 'Revision record not found' );
-            }
-            $password = $this->chunk_review->password;
-        } else {
-            $this->chunk_review = ( new ChunkReviewDao() )->findChunkReviews(
-                    new Chunks_ChunkStruct( [ 'id' => $this->request->id_job, 'password' => $this->request->password ] )
-            )[ 0 ];
-            $password           = $this->request->password;
-        }
-
-        if ( is_null( $this->chunk_review ) ) {
-            throw new ValidationError( 'Revision record not found.' );
-        }
 
         //load validator for the segment translation
-        $this->parent_validator = new SegmentTranslation( $this->request );
-        $this->parent_validator->setPassword( $password );
-        $this->parent_validator->validate();
+        $validator = ( new SegmentTranslation( $this->request ) );
+        $validator->validate();
 
-        $this->translation = $this->parent_validator->translation;
-
-        $this->segment = $this->parent_validator->segment;
+        $this->translation = $validator->translation;
 
         if ( $this->request->id_issue ) {
             $this->__ensureIssueIsInScope();
         }
 
         if ( $this->request->method( 'post' ) && $this->request->revision_number ) {
-            $this->__ensureSegmentRevisionIsCompatibileWithIssueRevisionNumber();
+            $this->__ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber();
         } elseif ( $this->request->method( 'delete' ) ) {
             $this->__ensureRevisionPasswordAllowsDeleteForIssue();
         }
@@ -104,9 +83,9 @@ class SegmentTranslationIssue extends Base {
      * @throws Exception
      * @throws ValidationError
      */
-    protected function __ensureSegmentRevisionIsCompatibileWithIssueRevisionNumber() {
-        $latestSegmentEvent = ( new SegmentTranslationEventDao() )
-                ->getLatestEventForSegment( $this->chunk_review->id_job, $this->segment->id );
+    protected function __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber() {
+
+        $latestSegmentEvent = ( new SegmentTranslationEventDao() )->getLatestEventForSegment( $this->chunk_review->id_job, $this->translation->id_segment );
 
         if ( !$latestSegmentEvent && $this->translation->isICE() ) {
             throw new ValidationError( 'Cannot set issues on unmodified ICE.', -2000 );

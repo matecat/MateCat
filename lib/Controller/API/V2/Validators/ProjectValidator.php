@@ -87,7 +87,16 @@ class ProjectValidator extends Base {
         return $this->feature == null || $this->project->isFeatureEnabled( $this->feature );
     }
 
+    /**
+     * @return bool
+     * @throws AuthenticationError
+     */
     private function inProjectScope() {
+
+        if( !$this->api_record ){
+            throw new AuthenticationError( "Invalid API key", 401 );
+        }
+
         Log::doJsonLog( $this->api_record->getUser()->email );
         Log::doJsonLog( $this->project->id_customer );
 

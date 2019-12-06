@@ -1,6 +1,6 @@
 <?php
 
-use API\V2\Validators\SegmentTranslationIssue;
+use API\V2\Validators\SegmentTranslationIssueValidator;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
 use Features\ISegmentTranslationModel;
@@ -67,11 +67,11 @@ class RevisionFactory {
      *
      * @param Request $request
      *
-     * @return mixed
-     * @throws \Exception
+     * @return SegmentTranslationIssueValidator|\Features\ReviewImproved\Controller\API\V2\Validators\SegmentTranslationIssueValidator
+     * @throws Exception
      */
     public function getTranslationIssuesValidator( Request $request ) {
-        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssue( $request ) );
+        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssueValidator( $request ) );
     }
 
     /**
@@ -109,21 +109,22 @@ class RevisionFactory {
      * @throws Exception
      */
     public static function initFromProject( Projects_ProjectStruct $project ) {
-        foreach( $project->getFeatures() as $feature ){
+        foreach( $project->getFeaturesSet()->getFeaturesStructs() as $featureStruct ){
+            $feature = $featureStruct->toNewObject();
             if( $feature instanceof AbstractRevisionFeature ){ //only one revision type can be present
-                return static::getInstance( $feature )->setFeatureSet( $project->getFeatures() );
+                return static::getInstance( $feature )->setFeatureSet( $project->getFeaturesSet() );
             }
         }
         /**
          * This return should never happens if the review_extended plugin is load as mandatory
-         * When review_extended is not set as mandatory this factory should be never invoked
-         * When review_improved is load by initProject
+         * When the OLD revision is set, this factory should be never invoked
+         * When review_improved or review_extended is loaded by initProject we never reach this line
          */
         return static::getInstance(
                 new ReviewExtended(
                         new BasicFeatureStruct( [ 'feature_code' => ReviewExtended::FEATURE_CODE ] )
                 )
-        )->setFeatureSet( $project->getFeatures() );
+        )->setFeatureSet( $project->getFeaturesSet() );
     }
 
     /**

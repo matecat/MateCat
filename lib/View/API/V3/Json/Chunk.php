@@ -41,7 +41,7 @@ class Chunk extends \API\V2\Json\Chunk {
      */
     public function renderOne( Chunks_ChunkStruct $chunk ) {
         $project    = $chunk->getProject();
-        $featureSet = $project->getFeatures();
+        $featureSet = $project->getFeaturesSet();
 
         return [
                 'job' => [

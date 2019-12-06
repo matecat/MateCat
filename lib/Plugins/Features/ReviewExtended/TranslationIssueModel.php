@@ -48,7 +48,7 @@ class TranslationIssueModel {
     public function __construct( $id_job, $password, EntryStruct $issue ) {
         $this->issue = $issue;
 
-        $review = ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( new Chunks_ChunkStruct( [ 'id' => $id_job, 'password' => $password ] ) , $issue->source_page )[ 0 ];
+        $review = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );
 
         $this->chunk_review = $review;
         $this->chunk = $this->chunk_review->getChunk();

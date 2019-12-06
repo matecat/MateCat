@@ -171,7 +171,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             }
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeatures()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
             $createdRecords[] = $chunkReview;
         }
 
@@ -208,7 +208,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             }
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeatures()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
             $createdRecords[] = $chunkReview;
         }
 
@@ -339,6 +339,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     /**
      * @param TranslationVersions\Model\BatchEventCreator $eventCreator
      *
+     * @throws Exception
      * @internal param SegmentTranslationEventModel $event
      */
     public function batchEventCreationSaved( Features\TranslationVersions\Model\BatchEventCreator $eventCreator ) {

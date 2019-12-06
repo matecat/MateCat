@@ -102,9 +102,7 @@ class QualityReportModel {
 
     public function getChunkReviewModel() {
         if ( $this->chunk_review_model == null ) {
-            $this->chunk_review_model = RevisionFactory::initFromProject( $this->getProject() )
-                    ->setFeatureSet( $this->getProject()->getFeatures() )
-                    ->getChunkReviewModel( $this->getChunkReview() );
+            $this->chunk_review_model = RevisionFactory::initFromProject( $this->getProject() )->getChunkReviewModel( $this->getChunkReview() );
         }
 
         return $this->chunk_review_model;
