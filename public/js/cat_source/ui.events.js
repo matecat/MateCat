@@ -163,8 +163,10 @@ $.extend(UI, {
             e.preventDefault();
             UI.runDownload();
 		}).on('click', '#action-download', function(e) {
-            e.preventDefault();
-            UI.runDownload();
+		    if ( $(e.target).attr('id') === '#action-download' || $(e.target).hasClass('dropdown-menu-overlay') ) {
+                e.preventDefault();
+                UI.runDownload();
+            }
         }).on('click', '#previewDropdown .previewLink a', function(e) {
 			e.preventDefault();
 			UI.runDownload();
@@ -174,7 +176,7 @@ $.extend(UI, {
 		}).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             UI.runDownload();
-		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
+		}).on('mousedown', '.originalDownload, .sdlxliff, .omegat', function( e ){
             if( e.which == 1 ){ // left click
                 e.preventDefault();
                 var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
