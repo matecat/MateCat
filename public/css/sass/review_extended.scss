@@ -108,13 +108,13 @@ h1, h2, h3, h4, h5, a, input {
                                 padding: 5px 10px;
                                 margin-bottom: 0;
                                 .re-revisor {
-                                    color: #00b76c;
+                                    color: $approvedGreen;
                                 }
                                 .re-revisor2 {
-                                    color: #BC6AC9;
+                                    color: $approved2Green;
                                 }
                                 .re-translator {
-                                    color: #0997bc;
+                                    color: $translatedBlue;
                                 }
                                 .re-comment-date {
                                     color: lightslategray;
@@ -326,7 +326,7 @@ section {
             //padding: 2px;
             border: 1px solid #C6C6C6;
             margin-right: 10px;
-            color: #666 !important;
+            color: $grey1 !important;
 
             background: #fff url(../images/highlighter_icon.png) center center no-repeat;
             background-color: white;
@@ -374,7 +374,7 @@ section {
     .segment-side-buttons .revise-button {
         text-decoration: none !important;
         font-size: 28px;
-        color: #666;
+        color: $grey1;
         font-weight: bold;
     }
 
@@ -406,7 +406,7 @@ section {
         left: 35px;
         position: absolute;
         top: 2px;
-        background: #dc2e34;
+        background: $redDefault;
         color: #fff;
         border: 1px solid #fff;
         border-radius: 14px;
@@ -421,10 +421,10 @@ section {
     }
 
     .revise-button-2 {
-        background: #BC6AC9;
+        background: $approved2Green;
     }
     &.approved-step-2 .status {
-        background-color: #BC6AC9 !important;
+        background-color: $approved2Green !important;
     }
 }
 
@@ -456,6 +456,6 @@ body {
 
 //Download Button
 .downloadtr-button.approved-2ndpass {
-    background: #BC6AC9;
+    background: $approved2Green;
     color: #fff !important;
 }

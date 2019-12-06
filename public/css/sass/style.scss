@@ -427,10 +427,10 @@ section.opened .warnings {
 }
 
 .approved-bar {
-    background-color: #7cc576;
+    background-color: $approvedGreen;
 }
 .approved-bar-2nd-pass {
-    background-color: #BC6AC9;
+    background-color: $approved2Green;
 }
 
 .draft-bar {
@@ -442,7 +442,7 @@ section.opened .warnings {
 }
 
 .translated-bar {
-    background-color: #09beec;
+    background-color: $translatedBlue;
 }
 
 .rejected-background {
@@ -450,7 +450,7 @@ section.opened .warnings {
 }
 
 .approved-backgruond {
-    background-color: #7cc576;
+    background-color: $approvedGreen;
 }
 
 .rejected-foreground {
@@ -458,7 +458,7 @@ section.opened .warnings {
 }
 
 .approved-foreground {
-    color: #7cc576;
+    color: $approvedGreen;
 }
 
 .meter > a {
@@ -555,7 +555,7 @@ section.opened .warnings {
 }
 
 .pagination a:hover {
-    background: #09beec;
+    background: $translatedBlue;
 }
 
 .pagination a:active {
@@ -580,11 +580,6 @@ section.opened .warnings {
 .sid .txt {
     padding: 0px 3px;
     margin: 2px 0px 0 0px;
-    background: #f2f4f7;
-}
-
-.sid .txt {
-    background: #f2f4f7;
 }
 
 section.readonly .txt input {
@@ -616,7 +611,6 @@ section.segment-selected-inBulk .body .text:hover {
 
 
 p.split-shortcut {
-    background: #f2f4f7;
     padding: 1px 0px;
     width: 55px;
     margin: 0 auto;
@@ -667,11 +661,11 @@ p.split-shortcut {
 }
 
 section:hover .sid {
-    color: #6d6e71
+    color: $grey1
 }
 
 section.currSearchSegment .sid .txt {
-    background: #00c1e6;
+    background: $translatedBlue;
     color: white;
     margin-bottom: 5px;
 }
@@ -730,7 +724,8 @@ section {
     //height: 100%;
     /*-webkit-transition: all 100ms ease-in;*/
     /*transition: all 100ms ease-in;*/
-    box-shadow: 0 0 0 #e0e0e0, 0 0 0px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    //box-shadow: 0 0 0 #e0e0e0, 0 0 0px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    border: 2px solid $grey2;
 }
 
 /*projectbar*/
@@ -788,7 +783,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     margin: 0 0 0 5%;
     padding: 0;
     height: 43px;
-    color: #777;
+    color: $grey1;
     width: 88%;
     font-size: 14px;
 }
@@ -889,16 +884,15 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 .translated,
 .approved,
 .guesstags {
-    border: 1px solid #797979;
     color: #fff !important;
     font-weight: bold;
     text-decoration: none;
     padding: 8px 18px;
     border-radius: 2px;
     font-size: 18px;
-    background: #09beec;
-    background: -moz-linear-gradient(top, #09beec, #119ec4);
-    background: linear-gradient(top, #09beec, #119ec4);
+    background: $translatedBlue;
+    background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
+    background: linear-gradient(top, $translatedBlue, #119ec4);
     text-transform: uppercase;
     user-select: none;
 }
@@ -916,12 +910,12 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 }
 
 .approved {
-    background: #7cc576;
+    background: $approvedGreen;
 }
 
 /*.guesstags {
     background: #fff;
-    border:1px solid #09beec;
+    border:1px solid $translatedBlue;
 	font-weight: bold;
 	text-decoration: none;
 	padding: 8px 18px;
@@ -929,7 +923,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     border-radius: 2px;
 	font-size: 18px;
 	text-transform: uppercase;
-	color: #09beec !important;
+	color: $translatedBlue !important;
     -webkit-transition: all  100ms ease-in;
     -moz-transition: all  100ms ease-in;
     -moz-box-shadow: 0 1px 2px #ccc;
@@ -940,23 +934,22 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 	cursor: pointer;
 	-moz-box-shadow: 0 1px 2px #666;
 	background: #fff;
-	box-shadow: 0 0 0 3px #09beec;
-	-webkit-box-shadow: 0 0 0 2px #09beec;
+	box-shadow: 0 0 0 3px $translatedBlue;
+	-webkit-box-shadow: 0 0 0 2px $translatedBlue;
 	border-color: #fff;
 }
 .guesstags:active {
 	background: #F8F8F9;
-	border: 1px solid #09beec;
-	-moz-box-shadow: inset 0 1px 1px #09beec;
-	-webkit-box-shadow: inset 0 1px 1px #09beec;
-	color: #09beec;
+	border: 1px solid $translatedBlue;
+	-moz-box-shadow: inset 0 1px 1px $translatedBlue;
+	-webkit-box-shadow: inset 0 1px 1px $translatedBlue;
+	color: $translatedBlue;
 }*/
 
 .button-reject,
 .button-rebutted{
     border: 1px solid;
-    background: #b02429;
-    border: 1px solid #848689;
+    background: $rebuttedRed;
     color: #fff;
     font-weight: bold;
     text-decoration: none;
@@ -1027,9 +1020,9 @@ article .approved:hover,
 article .next-unapproved:hover,
 .search .btn:hover {
     cursor: pointer;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    box-shadow: 0 1px 2px #ccc;
-    border: 1px solid #000;
+    //-webkit-box-shadow: 0 1px 2px #ccc;
+    //box-shadow: 0 1px 2px #ccc;
+    //border: 1px solid #000;
 }
 
 article .translated:active,
@@ -1045,8 +1038,8 @@ article .approved:active {
 .translated:hover,
 .next-untranslated:hover,
 .guesstags:hover {
-    background-color: #08b3de;
-    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    background-color: $translatedBlueHover;
+    //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .draft:hover {
@@ -1068,8 +1061,7 @@ article .approved:active {
 .next-unapproved {
     width: 50px !important;
     height: 27px !important;
-    background: #09beec;
-    border: 1px solid #848689;
+    background: $translatedBlue;
     font-weight: bold;
     text-decoration: none;
     padding: 5px 2px 3px 2px;
@@ -1082,7 +1074,7 @@ article .approved:active {
 
 .approved,
 .next-unapproved {
-    background: #7cc576;
+    background: $approvedGreen;
     color: #fff !important;
 }
 
@@ -1135,7 +1127,7 @@ article .approved:active {
 }
 
 .topmenu-drop input.translated {
-    background: #09beec;
+    background: $translatedBlue;
     color: #fff !important;
 }
 
@@ -1192,7 +1184,6 @@ article .approved:active {
     cursor: pointer;
     min-height: 26px;
     display: block;
-    border: 1px solid #848689;
     text-decoration: none;
     -moz-border-radius: 2px;
     border-radius: 2px;
@@ -1330,20 +1321,11 @@ section .body > .text {
     box-shadow: none;
 }
 
-
-body.cattool {
-    background: #f2f4f7;
-    overflow-y: hidden !important;
-    padding: unset;
-}
-
-body.cattool.editing {
-    background: #f2f4f7;
-}
-
 body section:not(.editor) {
-    background: #dcdfe4;
+    background: $grey2;
     cursor: pointer;
+    border: none;
+    border-bottom: 2px solid $grey1 !important;
 }
 
 section:not(.editor) .text:first-child {
@@ -1465,9 +1447,9 @@ section.loaded .submenu {
     float: left;
     position: relative;
     width: auto !important;
-    background: #f2f4f7;
+    //background: #f2f4f7;
     z-index: 1;
-    border-bottom: 1px solid #cccccc;
+    border-bottom: 1px solid $grey2;
     cursor: pointer;
     user-select: none;
 }
@@ -1485,12 +1467,12 @@ body.noGlossary .tab-switcher-gl {
     -moz-transition: all 100ms ease-in;
     padding: 5px 20px;
     display: block;
-    color: #666;
+    color: $grey1;
     font-size: 16px;
     float: left;
     text-decoration: none;
-    border-right: 1px solid #ccc;
-    border-top: 1px solid #ccc;
+    border-right: 2px solid $grey2;
+    border-top: 2px solid $grey2;
 }
 
 .submenu .notification:hover {
@@ -1499,7 +1481,7 @@ body.noGlossary .tab-switcher-gl {
 
 .submenu a:hover {
     background: #f5f5f5;
-    color: #666;
+    color: $grey1;
     -moz-box-shadow: none;
     position: relative;
     -webkit-box-shadow: none;
@@ -1530,6 +1512,7 @@ body.noGlossary .tab-switcher-gl {
 .submenu li.active a {
     background: #fff !important;
     outline: none;
+    color: #000;
 }
 
 .submenu li.modified a {
@@ -1573,7 +1556,7 @@ body .footer.showMatches .sub-editor.open {
     color: #fff;
     padding: 3px 10px 7px 4px;
     font-size: 12px;
-    background: #09beec;
+    background: $translatedBlue;
     box-shadow: 0px 2px 4px 0px #868686;
     z-index: 2;
 }
@@ -1683,7 +1666,7 @@ body .footer.showMatches .sub-editor.open {
     font-size: 24px;
     width: 26px;
     margin: 21px 0 0 0;
-    color: #777;
+    color: $grey1;
     cursor: pointer;
 }
 
@@ -1705,7 +1688,7 @@ body .footer.showMatches .sub-editor.open {
     float: left;
     margin: 0 1.5% 0 1.5%;
     text-decoration: none;
-    color: #666;
+    color: $grey1;
     width: 50%;
     font-size: 80%;
     font-style: italic;
@@ -1901,13 +1884,13 @@ body .footer.showMatches .sub-editor.open {
     display: block;
     width: 14px;
     height: 14px;
-    border: 1px solid #666;
+    border: 1px solid $grey1;
     background-color: #eee;
     border-radius: 2px;
 }
 
 .custom-checkbox > .tr-check {
-    background-color: #09beec !important
+    background-color: $translatedBlue !important
 }
 
 .custom-checkbox > .dr-check {
@@ -1919,7 +1902,7 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .custom-checkbox > .ap-check {
-    background-color: #7cc576 !important
+    background-color: $approvedGreen !important
 }
 
 .custom-checkbox > .normal-check {
@@ -1927,9 +1910,9 @@ body .footer.showMatches .sub-editor.open {
 }
 
 .custom-checkbox:hover {
-    -moz-box-shadow: 0 1px 2px #ccc;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    box-shadow: 0 1px 2px #ccc;
+    -moz-box-shadow: 0 1px 2px $grey2;
+    -webkit-box-shadow: 0 1px 2px $grey2;
+    box-shadow: 0 1px 2px $grey2;
 }
 
 .custom-checkbox > .box > .tick {
@@ -2032,11 +2015,11 @@ section.editor .loader_on {
 .header {
     height: 20px;
     width: 100%;
-    color: #a7a9ac;
+    color: $grey1;
     font-size: 12px;
     float: left;
     text-align: left;
-    background: #f2f4f7;
+    background: $grey2;
     margin-bottom: 0px;
 }
 
@@ -2111,7 +2094,7 @@ section.editor .loader_on {
 section .header .context {
     display: none;
     float: left;
-    color: #666;
+    color: $grey1;
     text-decoration: none;
     margin: 3px 0 0 10px;
 }
@@ -2133,16 +2116,16 @@ section .header .context:hover {
     -moz-border-radius: 2px;
     border-radius: 2px;
     padding: 0 5px;
-    -moz-box-shadow: 0 1px 3px #ccc;
-    -webkit-box-shadow: 0 1px 3px #ccc;
+    -moz-box-shadow: 0 1px 3px $grey2;
+    -webkit-box-shadow: 0 1px 3px $grey2;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
 }
 
 .qa {
     background: #FFCC00;
-    -moz-box-shadow: 0 1px 3px #ccc;
-    -webkit-box-shadow: 0 1px 3px #ccc;
+    -moz-box-shadow: 0 1px 3px $grey2;
+    -webkit-box-shadow: 0 1px 3px $grey2;
     padding: 0 2px;
 }
 
@@ -2153,8 +2136,8 @@ section .text .warning {
     border: 1px solid #333;
     -moz-border-radius: 2px;
     border-radius: 2px;
-    -moz-box-shadow: 0 1px 3px #ccc;
-    -webkit-box-shadow: 0 1px 3px #ccc;
+    -moz-box-shadow: 0 1px 3px $grey2;
+    -webkit-box-shadow: 0 1px 3px $grey2;
     display: block;
     position: absolute;
     bottom: -30px;
@@ -2311,8 +2294,8 @@ body.archived section .status-container a.status:hover {
     outline: none;
     color: #000;
     border: 1px solid #dedede;
-    box-shadow: inset 0 1px 2px #ccc;
-    -webkit-box-shadow: inset 0 1px 2px #ccc;
+    box-shadow: inset 0 1px 2px $grey2;
+    -webkit-box-shadow: inset 0 1px 2px $grey2;
     /*font-variant-ligatures: none;*/
     cursor: text;
 }
@@ -2444,17 +2427,16 @@ body.rtl-target .editor .editarea span {
 
 .graysmall .edit-buttons button {
     color: #fff;
-    background: #09beec;
-    border: 1px solid #848689;
+    background: $translatedBlue;
     font-weight: bold;
     text-decoration: none;
     padding: 4px 9px;
     margin: 4px 3px;
     border-radius: 2px;
     font-size: 10px;
-    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-    background: -moz-linear-gradient(top, #09beec, #119ec4);
-    background: linear-gradient(top, #09beec, #119ec4);
+    background: -webkit-gradient(linear, left top, left bottom, from($translatedBlue), to(#119ec4));
+    background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
+    background: linear-gradient(top, $translatedBlue, #119ec4);
     cursor: pointer;
 }
 
@@ -2581,7 +2563,7 @@ body.rtl-target .editor .editarea span {
     margin-left: 30px;
     width: 60%;
     padding: 3px 0;
-    border-top: 1px dotted #ccc;
+    border-top: 1px dotted $grey2;
     font-style: italic;
     overflow: hidden;
 }
@@ -2618,7 +2600,7 @@ body.rtl-target .editor .editarea span {
 
 .trash {
     transition: all 0.1s linear;
-    color: #666;
+    color: $grey1;
     text-decoration: none;
     -o-transition: all 0.1s linear;
     -webkit-transition: all 0.1s linear;
@@ -2648,7 +2630,7 @@ body.rtl-target .editor .editarea span {
     display: none;
     position: absolute;
     bottom: 0px;
-    color: #666;
+    color: $grey1;
     width: 100%;
     float: left;
     margin: 0;
@@ -2674,7 +2656,7 @@ body.rtl-target .editor .editarea span {
 }*/
 
 .graysmall.notEditable {
-   /* background: #ccc;*/
+   /* background: $grey2;*/
 }
 
 .graysmall-details li {
@@ -2705,7 +2687,7 @@ body.rtl-target .editor .editarea span {
     margin-top: 2px;
     padding: 3px 0px 3px 0;
     text-align: left;
-    background: #ccc;
+    background: $grey2;
     border-top: 1px solid #999;
     border-bottom: 1px solid #999;
 }
@@ -2733,10 +2715,10 @@ body.rtl-target .editor .editarea span {
 .addsuggestion {
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid $grey2;
     background: #fff;
-    -moz-box-shadow: 0 1px 3px #ccc;
-    -webkit-box-shadow: 0 1px 3px #ccc;
+    -moz-box-shadow: 0 1px 3px $grey2;
+    -webkit-box-shadow: 0 1px 3px $grey2;
     position: relative;
     z-index: 9999999999999;
     -moz-border-radius: 2px;
@@ -2758,7 +2740,7 @@ body.rtl-target .editor .editarea span {
     border-radius: 2px;
     box-shadow: inset 0 1px 2px #888;
     padding: 5px 5px 6px 5px;
-    color: #666;
+    color: $grey1;
     font-size: 14px !important
 }
 
@@ -2777,7 +2759,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .addsuggestion {
-    border: 1px solid #ccc;
+    border: 1px solid $grey2;
     padding: 0px 6px;
     text-decoration: none;
     color: #939598;
@@ -2794,7 +2776,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .addsuggestion:hover {
-    border: 1px solid #666;
+    border: 1px solid $grey1;
     color: #333;
 }
 
@@ -2903,7 +2885,7 @@ section.readonly:hover .ice-locked-label {
     position: absolute;
     right: 0;
     height: 100%;
-    background: #ccced2;
+    background: $grey1;
     top: 0;
     border-bottom: 0;
     z-index: 0;
@@ -2932,16 +2914,16 @@ body.archived section .status-container a.status:hover {
 }
 
 section.status-translated .status {
-    background-color: #0abeec !important;
+    background-color: $translatedBlue !important;
 }
 
 section.status-approved .status {
-    background-color: #7cc576 !important;
+    background-color: $approvedGreen !important;
 }
 
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status {
-    background-color: #b02429 !important;
+    background-color: $rebuttedRed !important;
 }
 
 .message-offline-icons {
@@ -2971,7 +2953,7 @@ body[data-offline-mode="light-off"] .msg span,
 }
 
 section.editor.status-rejected .status {
-    background-color: #dc2e34 !important;
+    background-color: $rebuttedRed !important;
 }
 
 section.modified .status {
@@ -3040,10 +3022,10 @@ section.modified.editor .status {
 }
 .arrow-mcolor{display:block;width:20px;height:20px;background:url(../../img/arrow-menucolor.png) 0 0 no-repeat;position:absolute;margin:-8px 0 0 123px;background-size:10px 8px}
 .arrow{border:0 !important; }
-.approvedStatusMenu{border-right:9px solid #7cc576}
-.translatedStatusMenu{border-right:9px solid #09beec}
-.rejectedStatusMenu{border-right:9px solid #dc2e34}
-.draftStatusMenu{order-right: 9px solid #ccced2;}
+.approvedStatusMenu{border-right:9px solid $approvedGreen}
+.translatedStatusMenu{border-right:9px solid $translatedBlue}
+.rejectedStatusMenu{border-right:9px solid $rebuttedRed}
+.draftStatusMenu{order-right: 9px solid $grey1;}
 
 /* overlay box */
 .boxoverlay {
@@ -3076,7 +3058,7 @@ section.modified.editor .status {
 #box .h-editor {
     color: #fff;
     padding: 4px 0 0 0px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid $grey2;
     margin-bottom: 30px;
     background: #efefef
 }
@@ -3102,8 +3084,8 @@ section.modified.editor .status {
 #box li {
     padding: 10px;
     width: 10%;
-    border-right: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
+    border-right: 1px solid $grey2;
+    border-bottom: 1px solid $grey2;
     float: left;
     text-align: right;
     background: #efefef
@@ -3112,7 +3094,7 @@ section.modified.editor .status {
 #box .first {
     width: 40% !important;
     text-align: left !important;
-    border-left: 1px solid #ccc
+    border-left: 1px solid $grey2
 }
 
 .hide {
@@ -3131,17 +3113,17 @@ section.modified.editor .status {
     font-weight: 700}
 
 .per-orange {
-    background: #FF9900 !important;
+    background: $orangeDefault !important;
     color: #fff !important
 }
 
 .per-blue {
-    background: #09beec !important;
+    background: $translatedBlue !important;
     color: #fff !important
 }
 
 .per-green {
-    background: #7cc576 !important;
+    background: $approvedGreen !important;
     color: #fff !important
 }
 
@@ -3151,12 +3133,12 @@ section.modified.editor .status {
 }
 
 .per-red {
-    background: #ff0000 !important;
+    background: $redDefault !important;
     color: #fff !important
 }
 
 .per-gray {
-    background: #aaa !important;
+    background: $grey3 !important;
     color: #333 !important
 }
 
@@ -3247,7 +3229,7 @@ section.modified.editor .status {
 }
 
 .end-message-col1 p span, .end-message-col1 h3 span {
-    color: #09beec
+    color: $translatedBlue
 }
 
 .end-message-col2 input {
@@ -3535,7 +3517,7 @@ p.percent {
 }
 
 #spellCheck {
-    border-bottom: 1px dotted #ccc;
+    border-bottom: 1px dotted $grey2;
 }
 
 #spellCheck .label {
@@ -3561,7 +3543,7 @@ p.percent {
     color: #000;
     text-decoration: none;
     margin-top: 5px;
-    border-top: 1px dotted #ccc;
+    border-top: 1px dotted $grey2;
 }
 
 .save-warning {
@@ -3582,7 +3564,7 @@ section.modified .save-warning {
 }
 
 #advancedOptions .more-options:hover {
-    color: #ccc;
+    color: $grey2;
 }
 
 #advancedOptions .more-options:before {
@@ -3735,7 +3717,7 @@ del.diff {
 
 .space-marker,
 .nbsp-marker {
-    color: #CCC;
+    color: $grey2;
     position: relative;
     left: 4px;
     padding-right: 12px;
@@ -3749,7 +3731,7 @@ del.diff {
     background: url(../../img/dot.png) 0px 0px no-repeat;
     background-size: 6px;
     /*
-	color: #ccc;
+	color: $grey2;
 	position: relative;
 	padding-left: 4px;
 	margin-right: 4px;
@@ -3828,7 +3810,7 @@ section .toolbar .autofillTag {
     visibility: hidden;
     margin-top: -6px;
     padding-top: 4px;
-    color: #666;
+    color: $grey1;
 }
 
 .editToolbar.visible {
@@ -3920,7 +3902,7 @@ section .toolbar .autofillTag {
 }
 
 .editor.split-action .actions .split {
-    background: #09beec;
+    background: $translatedBlue;
 }
 
 .splitBar .buttons a {
@@ -3946,7 +3928,7 @@ body.rtl-target.tagModes.tagmode-default-extended .translation .monad.marker {
 .autofillTag {
     padding: 4px 2px 0px 2px;
     border: 1px solid #fff;
-    color: #666 !important;
+    color: $grey1 !important;
 }
 
 .autofillTag {
@@ -4282,7 +4264,7 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 
 .popup-addtm-tr input#key {
     width: 96%;
-    color: #ccc;
+    color: $grey2;
 }
 
 .popup-addtm-tr .btn-ok {
@@ -4499,18 +4481,18 @@ section .footer .tab.open {
     display: block;
     z-index: 0;
     position: relative;
-    border-top: 1px solid #cccccc;
-    top: -1px;
+    border-top: 2px solid $grey2;
+    top: -2px;
     min-height: 40px;
 }
 
 section .segment-side-buttons {
-    color: #6d6e71
+    color: $grey1
 }
 
 
 .blue-button {
-    background: #09beec;
+    background: $translatedBlue;
 }
 
 .red-button {
@@ -5039,9 +5021,9 @@ header {
             margin-left: 10px;
             background: none;
             background-color: transparent;
-            border: 2px solid #09beec;
+            border: 2px solid $translatedBlue;
             opacity: 0.8;
-            color: #09beec;
+            color: $translatedBlue;
             &:hover {
                 opacity: 1;
             }
@@ -5283,9 +5265,9 @@ header {
                #current_page{
                    padding: 0 4px;
                    a{
-                       color: #09beec;
+                       color: $translatedBlue;
                        padding: 2px 6px;
-                       border: 2px solid #09beec;
+                       border: 2px solid $translatedBlue;
                        border-radius: 25px;
                    }
                }

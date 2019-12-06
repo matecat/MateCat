@@ -79,22 +79,22 @@ section{
                 &.error-alert{
                     background: #FDEAE2;
                     .icon-column{
-                        background-color: #F9D7CA;
-                        color: #E1565A;
+                        background-color: $redDefaultTransparent;
+                        color: $redDefault;
                     }
                 }
                 &.warning-alert{
                     background: #FFF4E3;
                     .icon-column{
-                        background-color: #FDE6C8;
-                        color: #EA862C;
+                        background-color: $orangeDefaultTransparent;
+                        color: $orangeDefault;
                     }
                 }
                 &.info-alert{
-                    background: #F5F7F7;
+                    background: $grey3;
                     .icon-column{
-                        background-color: #F2F1F1;
-                        color: #9C9D9C;
+                        background-color: $grey2;
+                        color: $grey1;
                     }
                 }
                 .icon{

@@ -476,17 +476,18 @@ module.exports = function(grunt) {
                     cssBase + 'sass/legacy-misc.scss'
                 ],
                 dest: cssBase + 'build/legacy-misc.css'
-            },
-            distStyleOld: {
-                options : {
-                    sourceMap : true,
-                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
-                },
-                src: [
-                    cssBase + 'sass/style.scss'
-                ],
-                dest: cssBase + 'build/style.css'
             }
+            // ,
+            // distStyleOld: {
+            //     options : {
+            //         sourceMap : true,
+            //         includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+            //     },
+            //     src: [
+            //         cssBase + 'sass/style.scss'
+            //     ],
+            //     dest: cssBase + 'build/style.css'
+            // }
         },
         jshint: {
             options: {

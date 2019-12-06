@@ -233,7 +233,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
         font-size: 16px;
         margin-bottom: 15px;
         margin-left: 80%;
-        background-color: #09beec;
+        background-color: $translatedBlue;
         transition: 0.3s ease;
         color: #FFFFFF;
         text-shadow: none;
@@ -668,8 +668,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     text-align: center;
     max-width: 600px;
     min-width: 400px;
-    -webkit-box-shadow: 0 1px 20px #000;
-    box-shadow: 0 1px 20px #6f6e6e;
+    //-webkit-box-shadow: 0 1px 20px #000;
+    //box-shadow: 0 1px 20px #6f6e6e;
 }
 
 .matecat-modal-body h1 {
@@ -900,7 +900,7 @@ div#matecat-modal p {
 
 .matecat-modal-content .btn-confirm-medium {
     color: #fff;
-    background: #09beec;
+    background: $translatedBlue;
     border: 1px solid #848689;
     font-weight: bold;
     text-decoration: none;

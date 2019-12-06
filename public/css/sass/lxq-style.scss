@@ -73,7 +73,7 @@
  */
 .lxq-thread-wrap-resolved {
   background: rgba(124,197,118,.15);
-  border-bottom: 2px solid rgba(124,197,118,.6); /* #7cc576 */
+  border-bottom: 2px solid rgba(124,197,118,.6); /* $approvedGreen */
 }
 
 /*
@@ -265,7 +265,7 @@ a.lxq-new-message-link:hover {
 }
 
 .lxq-comment-resolved-label {
-  color: #7cc576; /* per-green line 2350 style.css */
+  color: $approvedGreen; /* per-green line 2350 style.css */
   font-size: 12px;
   font-weight: bold;
 }
@@ -325,9 +325,9 @@ a:active.lxq-comment-default-btn {
  */
 a.lxq-comment-send-btn:link,
 a.lxq-comment-send-btn:visited {
-  background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-  background: -webkit-linear-gradient(top,  #09beec,  #119ec4);
-  background: linear-gradient(top,  #09beec,  #119ec4);
+  background: -webkit-gradient(linear, left top, left bottom, from($translatedBlue), to(#119ec4));
+  background: -webkit-linear-gradient(top,  $translatedBlue,  #119ec4);
+  background: linear-gradient(top,  $translatedBlue,  #119ec4);
   border: 1px solid #848689;
   color: #fff;
 }
@@ -356,8 +356,8 @@ a.lxq-comment-resolve-btn:visited {
 
 a.lxq-comment-resolve-btn:hover,
 a.lxq-comment-resolve-btn:active {
-  background: #7cc576;
-  border: 1px solid #7cc576;
+  background: $approvedGreen;
+  border: 1px solid $approvedGreen;
   color: #fff;
 }
 

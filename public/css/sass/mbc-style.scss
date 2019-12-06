@@ -73,7 +73,7 @@
  */
 .mbc-thread-wrap-resolved {
   background: rgba(124,197,118,.15);
-  border-bottom: 2px solid rgba(124,197,118,.6); /* #7cc576 */
+  border-bottom: 2px solid rgba(124,197,118,.6); /* $approvedGreen */
 }
 
 /*
@@ -214,7 +214,7 @@ a.mbc-new-message-link:hover {
 }
 
 .tagging-item {
-    color: #09beec;
+    color: $translatedBlue;
 }
 
 .mbc-comment-textinput {
@@ -292,7 +292,7 @@ a.mbc-new-message-link:hover {
 }
 
 .mbc-comment-resolved-label {
-  color: #7cc576; /* per-green line 2350 style.css */
+  color: $approvedGreen; /* per-green line 2350 style.css */
   font-size: 12px;
   font-weight: bold;
 }
@@ -354,9 +354,9 @@ a:active.mbc-comment-default-btn {
  */
 a.mbc-comment-send-btn:link,
 a.mbc-comment-send-btn:visited {
-  background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-  background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-  background: linear-gradient(top,  #09beec,  #119ec4);
+  background: -webkit-gradient(linear, left top, left bottom, from($translatedBlue), to(#119ec4));
+  background: -moz-linear-gradient(top,  $translatedBlue,  #119ec4);
+  background: linear-gradient(top,  $translatedBlue,  #119ec4);
   border: 1px solid #848689;
   color: #fff;
 }
@@ -560,8 +560,8 @@ a.mbc-close-icon:hover {
  Invitation element unique properties
  */
 .mbc-comment-highlight-invite {
-  background: #1451CC;
-  color: #fff;
+  background: $darkBlue;
+  color: $grey3;
   position: absolute;
 }
 

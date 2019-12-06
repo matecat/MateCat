@@ -266,13 +266,13 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                                     background: #E8E8E8;;
                                 }
                                 &.translated-color {
-                                    background: #09beec;
+                                    background: $translatedBlue;
                                 }
                                 &.approved-color {
-                                    background: #7cc576;
+                                    background: $approvedGreen;
                                 }
                                 &.approved-2ndpass-color {
-                                    background: #BC6AC9;
+                                    background: $approved2Green;
                                 }
                                 &.rejected-color {
                                     background: #dc2e34;

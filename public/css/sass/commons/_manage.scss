@@ -218,12 +218,12 @@ body.manage {
                                 padding: 15px;
                                 cursor: pointer;
                                 a {
-                                    color: #09beec;
+                                    color: $translatedBlue;
                                 }
                                 i {
                                     float: right;
                                     font-size: 18px;
-                                    color: #09beec;
+                                    color: $translatedBlue;
                                 }
                                 &:hover {
                                     background-color: $grey3;
@@ -288,12 +288,12 @@ body.manage {
                                 padding: 15px;
                                 cursor: pointer;
                                 a {
-                                    color: #09beec;
+                                    color: $translatedBlue;
                                 }
                                 i {
                                     float: right;
                                     font-size: 18px;
-                                    color: #09beec;
+                                    color: $translatedBlue;
                                 }
                                 &:hover {
                                     background-color: $grey3;
@@ -367,6 +367,7 @@ body.manage {
                             background-color: #ffffff;
                             padding: 8px 15px;
                             &.outsource-container {
+                                border: 2px solid $grey2;
                             }
                             &.outsource-container.no-outsource {
                                 overflow: unset;

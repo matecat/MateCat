@@ -3,11 +3,11 @@
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today {
-    color: #09beec;
+    color: $translatedBlue;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current {
-    background: #09beec;
+    background: $translatedBlue;
     box-shadow: none;
     color: #ffffff;
 }
@@ -20,18 +20,18 @@
 
 .xdsoft_datetimepicker .xdsoft_calendar td:active {
     color: #ffffff !important;
-    background: #09beec !important;
+    background: $translatedBlue !important;
     box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td:focus {
     color: #ffffff !important;
-    background: #09beec !important;
+    background: $translatedBlue !important;
     box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .xdsoft_timepicker .xdsoft_time_box>div>div.xdsoft_current {
-    background: #09BEEC;
+    background: $translatedBlue;
     box-shadow: none;
 }
 
@@ -42,7 +42,7 @@
 }
 
 .xdsoft_datetimepicker .blue-gradient-button {
-    background: #09beec;
+    background: $translatedBlue;
     color: white;
     font-family: Calibri;
     border: 1px solid #797979 !important;
@@ -50,7 +50,7 @@
 }
 
 .xdsoft_datetimepicker .blue-gradient-button:hover {
-    background: #09beec;
+    background: $translatedBlue;
     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
     color: #fff;
     border: 1px solid #797979 !important;

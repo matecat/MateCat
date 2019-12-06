@@ -765,9 +765,6 @@ footer #statistics {
   line-height: 30px;
   border-radius: 0 0 4px 4px;
   color: #000 !important;
-  -webkit-box-shadow: 0 1px 20px #000;
-  box-shadow: 0 1px 20px #000;
-  background: #fff;
   /*margin: -200px 0 0 -250px;*/
   padding: 0 0px 20px 0px;
   /*position: fixed;*/
@@ -1386,7 +1383,7 @@ form.add-TM-Form {
 .download-manage.btn-ok {
   color: #fff;
   background: $translatedBlue;
-  border: 1px solid #797979;
+  //border: 1px solid #797979;
   font-weight: bold;
   text-decoration: none;
   padding: 8px 19px;
@@ -1443,11 +1440,12 @@ form.add-TM-Form {
 }
 
 .popup .btn-cancel, .btn-grey, .slide-panel .btn-cancel, .btn-grey {
-  color: #333;
-  background: #f6f6f6;
-  background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
-  background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
-  background: linear-gradient(top, #f6f6f6, #e2e3e5);
+  color: $grey2;
+  background: white;
+  border: 1px solid $grey2;
+  //background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
+  //background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
+  //background: linear-gradient(top, #f6f6f6, #e2e3e5);
 }
 
 .dont_show + label {
@@ -1476,9 +1474,9 @@ form.add-TM-Form {
 .popup .btn-cancel:active,
 .slide-panel .btn-ok:active,
 .slide-panel .btn-cancel:active {
-  -moz-box-shadow: inset 0 0 1px 1px #888;
-  -webkit-box-shadow: inset 0 0 1px 1px #888;
-  box-shadow: inset 0 0 1px 1px #888;
+  //-moz-box-shadow: inset 0 0 1px 1px #888;
+  //-webkit-box-shadow: inset 0 0 1px 1px #888;
+  //box-shadow: inset 0 0 1px 1px #888;
 }
 
 
@@ -1907,7 +1905,7 @@ td.uploadfile {
 
 .addtmxfile.btn-ok:hover,
 .addglossaryfile.btn-ok:hover {
-  background: #00A8D2;
+  background: $translatedBlue;
 }
 
 
@@ -2201,7 +2199,7 @@ input.email-export-tmx {
 .btn-confirm-small {
   /* color: #fff; */
   background: $translatedBlue;
-  border: 1px solid #797979;
+  //border: 1px solid #797979;
   font-weight: bold;
   text-decoration: none;
   border-radius: 2px;
