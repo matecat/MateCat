@@ -117,6 +117,7 @@ class Editarea extends React.Component {
 
     onInputEvent(e) {
         if (!this.keyPressed && !this.compositionsStart) {
+            this.props.sendTranslationWithoutUpdate();
             UI.registerQACheck();
             if ( !this.props.segment.modified ) {
                 this.modifiedTranslation();
