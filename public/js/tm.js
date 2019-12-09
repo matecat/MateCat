@@ -2006,7 +2006,7 @@
                     return e.code === elem;
                 });
                 if ( lang && lang.name ) {
-                    lexiqaText = lexiqaText + "<li class='powerTip-options-tm-list'>" + name + "</li>";
+                    lexiqaText = lexiqaText + "<li class='powerTip-options-tm-list'>" + lang.name + "</li>";
                 }
             });
             lexiqaText = lexiqaText + "</ul></div>";
