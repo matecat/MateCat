@@ -176,12 +176,13 @@ $.extend(UI, {
 		}).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             UI.runDownload();
-		}).on('mousedown', '.originalDownload, .sdlxliff, .omegat', function( e ){
+		}).on('mousedown', '.originalDownload, .sdlxliff', function( e ){
             if( e.which == 1 ){ // left click
                 e.preventDefault();
+                e.stopPropagation();
                 var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
                     id: 'iframeDownload_' + new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 ),
-                    src: $( e.currentTarget ).attr( 'href' )
+                    src: $( e.currentTarget ).attr( 'data-href' )
                 } );
                 $( "body" ).append( iFrameDownload );
 
