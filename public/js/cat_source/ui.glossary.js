@@ -155,7 +155,9 @@ if (true)
                 //find all glossary matches
                 var match = re.exec(cleanString);
                 //Check if glossary term break a marker EX: &lt;g id="3"&gt;
-                if ((glossaryTerm_escaped.toLocaleLowerCase() == 'lt' || glossaryTerm_escaped.toLocaleLowerCase() == 'gt') && UI.hasSourceOrTargetTags(segment)) {
+                var lowCaseTerm = glossaryTerm_escaped.toLocaleLowerCase();
+                var excludedTerms = ['l', 't', 'g', 'gt', 'lt'];
+                if ( excludedTerms.indexOf(lowCaseTerm) > -1 && UI.hasSourceOrTargetTags(segment) ) {
                     return;
                 }
                 while(match) {
