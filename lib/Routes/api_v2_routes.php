@@ -57,8 +57,8 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/segments/[:id_segment]/translation-issues', 'POST', 'API\V2\SegmentTranslationIssueController', 'create' );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]', 'DELETE', 'API\V2\SegmentTranslationIssueController', 'delete' );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]', 'POST', 'API\V2\SegmentTranslationIssueController', 'update' );
-    route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'POST', 'API\V2\TranslationIssueComment', 'create' );
-    route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'GET', 'API\V2\TranslationIssueComment', 'index' );
+    route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'POST', 'API\V2\SegmentTranslationIssueController', 'createComment' );
+    route( '/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'GET', 'API\V2\SegmentTranslationIssueController', 'getComments' );
 
     route( '/segments/status', 'POST', '\API\V2\JobStatusController', 'changeSegmentsStatus'  );
 

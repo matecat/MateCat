@@ -240,7 +240,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     isset( $options[ 'filter' ][ 'issue_category' ] ) &&
                     $options[ 'filter' ][ 'issue_category' ] == self::ISSUE_CATEGORY_ALL
             ) {
-                if ( $chunk->getProject()->getFeatures()->hasRevisionFeature() ) {
+                if ( $chunk->getProject()->getFeaturesSet()->hasRevisionFeature() ) {
                     $options_conditions_query .= " AND e.id_category IS NOT NULL " ;
                 }
                 else {

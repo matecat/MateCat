@@ -29,7 +29,7 @@ class SegmentFilterModel {
     public function __construct( \Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
         $this->chunk  = $chunk;
         $this->filter = $filter;
-        $this->chunk->getProject()->getFeatures()->filter('filterSegmentFilter', $filter, $chunk) ;
+        $this->chunk->getProject()->getFeaturesSet()->filter('filterSegmentFilter', $filter, $chunk) ;
     }
 
     /**
