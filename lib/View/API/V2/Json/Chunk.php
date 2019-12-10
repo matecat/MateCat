@@ -19,7 +19,7 @@ class Chunk extends Job {
      */
     public function renderOne( \Chunks_ChunkStruct $chunk ) {
         $project = $chunk->getProject();
-        $featureSet = $project->getFeatures();
+        $featureSet = $project->getFeaturesSet();
         return [
                 'job' => [
                         'id'     => (int)$chunk->id,

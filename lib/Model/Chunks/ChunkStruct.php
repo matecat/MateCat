@@ -43,14 +43,14 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
     public function getQualityOverall() {
 
         $project = $this->getProject();
-        $featureSet = $project->getFeatures();
+        $featureSet = $project->getFeaturesSet();
 
         return CatUtils::getQualityOverallFromJobStruct( $this, $project, $featureSet ) ;
     }
 
     public function getQualityInfo(){
         $project = $this->getProject();
-        $featureSet = $project->getFeatures();
+        $featureSet = $project->getFeaturesSet();
 
         $qClass = CatUtils::getQualityInfoOrChunkReviewStructFromJobStruct( $this, $featureSet );
 
