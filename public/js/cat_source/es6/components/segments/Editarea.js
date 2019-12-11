@@ -117,11 +117,7 @@ class Editarea extends React.Component {
 
     onInputEvent(e) {
         if (!this.keyPressed && !this.compositionsStart) {
-            this.props.sendTranslationWithoutUpdate();
             UI.registerQACheck();
-            if ( !this.props.segment.modified ) {
-                this.modifiedTranslation();
-            }
             UI.inputEditAreaEventHandler();
         }
     }
@@ -129,7 +125,6 @@ class Editarea extends React.Component {
     modifiedTranslation(translation) {
         let translationToSend = (translation) ? translation : this.editAreaRef.innerHTML;
         SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true, translationToSend);
-        UI.registerQACheck();
     }
 
     onKeyDownEvent(e) {
@@ -137,7 +132,12 @@ class Editarea extends React.Component {
         if (!this.compositionsStart) {
             EditArea.keydownEditAreaEventHandler.call( this.editAreaRef, e, () => {
                 this.keyPressed = false;
-                this.onInputEvent();
+                if ( !this.props.segment.modified ) {
+                    SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true);
+                }
+                this.props.sendTranslationWithoutUpdate();
+                this.saveInUndoStackDebounced();
+                this.onInputDebounced();
             } );
         }
         this.openConcordance(e);
@@ -226,7 +226,7 @@ class Editarea extends React.Component {
 
         this.undoRedoAction = true;
         this.cursorPosition = translation.position;
-        setTimeout(()=>this.modifiedTranslation(translation.text));
+        setTimeout(()=> this.modifiedTranslation(translation.text));
 
         // console.log("UNDO IN SEGMENT", translation);
         // console.log("UNDOSTACK = ", this.undoStack);
@@ -456,6 +456,9 @@ class Editarea extends React.Component {
                     onKeyUp={this.onKeyUpEvent.bind(this)}
                     onCopy={this.onCopyText.bind(this)}
                     onInput={()=>{
+                        if ( !this.props.segment.modified ) {
+                            SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true);
+                        }
                         this.props.sendTranslationWithoutUpdate();
                         this.saveInUndoStackDebounced();
                         this.onInputDebounced();

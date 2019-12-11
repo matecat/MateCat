@@ -40,26 +40,26 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                UI.clickOnApprovedButton($('.editor .next-unapproved:not(.disabled)'));
+                setTimeout(function () { UI.clickOnApprovedButton($('.editor .next-unapproved:not(.disabled)'))} );
             } else {
                 if ( $('.editor .next-untranslated:not(.disabled)').length > 0 ) {
-                    UI.clickOnTranslatedButton($('.editor .next-untranslated:not(.disabled)'));
+                    setTimeout(function () { UI.clickOnTranslatedButton($('.editor .next-untranslated:not(.disabled)'))});
                 } else if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    UI.clickOnTranslatedButton($('.editor .translated'));
+                    setTimeout(function () { UI.clickOnTranslatedButton($('.editor .translated'))});
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    UI.startSegmentTagProjection(UI.currentSegmentId);
+                    setTimeout(function () { UI.startSegmentTagProjection(UI.currentSegmentId)});
                 }
             }
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                UI.clickOnApprovedButton($('body.review .editor .approved:not(.disabled)'));
+                setTimeout(function () { UI.clickOnApprovedButton($('body.review .editor .approved:not(.disabled)'))});
             } else {
                 if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    UI.clickOnTranslatedButton($('.editor .translated'));
+                    setTimeout(function () {UI.clickOnTranslatedButton($('.editor .translated'))});
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    UI.startSegmentTagProjection(UI.currentSegmentId);
+                    setTimeout(function () {UI.startSegmentTagProjection(UI.currentSegmentId)});
                 }
             }
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[Shortcuts.shortCutsKeyType], function(e) {

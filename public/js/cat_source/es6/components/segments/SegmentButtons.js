@@ -16,28 +16,29 @@ class SegmentButton extends React.Component {
 
     clickOnTranslatedButton(event) {
         this.props.updateTranslation();
-        UI.clickOnTranslatedButton(event.currentTarget);
+        setTimeout(()=>UI.clickOnTranslatedButton(event.currentTarget));
     }
 
     clickOnApprovedButton(event) {
         this.props.updateTranslation();
-        UI.clickOnApprovedButton(event.target);
+        setTimeout(()=>UI.clickOnApprovedButton(event.target));
     }
 
     goToNextRepetition(event, status) {
         this.props.updateTranslation();
-        SegmentFilter.goToNextRepetition(event.currentTarget, status);
+        setTimeout(()=>SegmentFilter.goToNextRepetition(event.currentTarget, status));
     }
 
     goToNextRepetitionGroup(event, status) {
         this.props.updateTranslation();
-        SegmentFilter.goToNextRepetitionGroup(event.currentTarget, status);
+        setTimeout(()=>SegmentFilter.goToNextRepetitionGroup(event.currentTarget, status));
     }
 
     clickOnGuessTags(e) {
         e.preventDefault();
+        this.props.updateTranslation();
         $(e.target).addClass('disabled');
-        UI.startSegmentTagProjection(this.props.segment.sid);
+        setTimeout(()=>UI.startSegmentTagProjection(this.props.segment.sid));
         return false;
     }
 
