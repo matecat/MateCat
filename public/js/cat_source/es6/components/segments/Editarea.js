@@ -388,11 +388,11 @@ class Editarea extends React.Component {
         }
     }
     shouldComponentUpdate(nextProps, nextState) {
-        return (!Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
+        return ( !Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
             nextProps.locked !== this.props.locked || this.props.translation !== nextProps.translation ||
             nextProps.segment.modified !== this.props.segment.modified || nextProps.segment.opened !== this.props.segment.opened
             || nextProps.segment.muted !== this.props.segment.muted
-        ) && !this.editAreaIsEditing
+        ) && !this.editAreaIsEditing && !this.compositionsStart
     }
     getSnapshotBeforeUpdate(prevProps) {
         try {
