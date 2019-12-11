@@ -181,8 +181,7 @@ const Shortcuts = {
                     }
                 }
             }
-        },
-
+        }
 };
 
 module.exports = Shortcuts;

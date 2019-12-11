@@ -34,13 +34,15 @@ class ShortCutsModal extends React.Component {
                 </div>;
                 events.push( sh );
             });
-            let group = <div key={"events" + c} className="shortcut-list">
-                <h2>{elem.label}</h2>
-                <div className="shortcut-item-list">
-                    {events}
-                </div>
-            </div>;
-            html.push(group);
+            if (elem.label) {
+                let group = <div key={"events" + c} className="shortcut-list">
+                    <h2>{elem.label}</h2>
+                    <div className="shortcut-item-list">
+                        {events}
+                    </div>
+                </div>;
+                html.push(group);
+            }
         });
         return html;
     }
