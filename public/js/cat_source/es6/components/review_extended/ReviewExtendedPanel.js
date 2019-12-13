@@ -9,7 +9,7 @@ class ReviewExtendedPanel extends React.Component {
 		this.addIssueToApproveMessageType = 1;
 		this.addIssueToSelectedTextMessageType = 2;
 		this.state = {
-			versionNumber: this.props.segment.versions[0].version_number,
+			versionNumber: (this.props.segment.versions[0]) ? this.props.segment.versions[0].version_number: 0,
 			diffPatch: null,
 			newtranslation: this.props.segment.translation,
 			issueInCreation: false,
