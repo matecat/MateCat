@@ -11,6 +11,7 @@ import EditArea  from './utils/editarea';
 import TagUtils  from '../../utils/tagUtils';
 import Speech2Text from '../../utils/speech2text';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
+import TextUtils from "../../utils/textUtils";
 
 class Editarea extends React.Component {
 
@@ -169,6 +170,19 @@ class Editarea extends React.Component {
     }
     onPasteEvent(e) {
         EditArea.pasteEditAreaEventHandler(e.nativeEvent);
+        if (e && e.clipboardData && e.clipboardData.getData ) {
+            let txt;
+            if (/text\/html/.test(e.clipboardData.types)) {
+                txt = TextUtils.htmlEncode(e.clipboardData.getData('text/plain'));
+            }
+            else if (/text\/plain/.test(e.clipboardData.types)) {
+                txt = TextUtils.htmlEncode(e.clipboardData.getData('text/plain'));
+            }
+            this.pastedAction = {
+                length: txt.length
+            }
+        }
+
 		// this.emitTrackChanges();
     }
     onDragEvent(e) {
@@ -292,7 +306,11 @@ class Editarea extends React.Component {
 
     saveCursorPosition(containerEl) {
         let sel = window.getSelection && window.getSelection();
-        let start;
+        let start, pasteLength = 0;
+        if ( this.pastedAction ) {
+            pasteLength = this.pastedAction.length;
+            delete this.pastedAction;
+        }
         if (sel && sel.rangeCount > 0 && document.createRange) {
             let range = window.getSelection().getRangeAt(0);
             let preSelectionRange = range.cloneRange();
@@ -301,8 +319,8 @@ class Editarea extends React.Component {
             start = preSelectionRange.toString().length;
 
             return {
-                start: start,
-                end: start + range.toString().length
+                start: start + pasteLength,
+                end: start + range.toString().length + pasteLength
             }
         } else if (document.selection && document.body.createTextRange) {
             let selectedTextRange = document.selection.createRange();
@@ -312,8 +330,8 @@ class Editarea extends React.Component {
             start = preSelectionTextRange.text.length;
 
             return {
-                start: start,
-                end: start + selectedTextRange.text.length
+                start: start + pasteLength,
+                end: start + selectedTextRange.text.length + pasteLength
             }
         }
     }
