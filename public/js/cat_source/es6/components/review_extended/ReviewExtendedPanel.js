@@ -71,7 +71,7 @@ class ReviewExtendedPanel extends React.Component {
 
     static getDerivedStateFromProps(props, state) {
 		return {
-			versionNumber: props.segment.versions[0].version_number
+			versionNumber: (props.segment.versions[0]) ? props.segment.versions[0].version_number: 0
 		};
 	}
 
