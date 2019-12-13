@@ -2,6 +2,7 @@ body {
     margin: 0;
     padding: 0;
     overflow: visible;
+    min-height: 100%;
 }
 
 /* Interaction states
@@ -1541,6 +1542,15 @@ button.ui-button::-moz-focus-inner {
     }
 }
 
+.wrapper-bottom {
+    margin: 0 auto;
+    width: 94%;
+    min-width: 992px;
+    position: relative;
+    padding: 24px;
+    height: 200px;
+}
+
 h2 {
     margin: 0;
     padding: 0;
@@ -1562,7 +1572,7 @@ h2.payoff {
     padding: 8px 16px;
     width: auto !important;
     min-width: 200px;
-    margin: 20px 0px 8px 0px;
+    margin: -10px 0px 8px 0px;
     -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
     font-size: 26px !important;
@@ -1593,7 +1603,6 @@ h2.payoff {
 .uploadbtn-box {
     text-align: center;
     float: right;
-    margin: 16px 0;
 }
 
 .uploadbtn-box p {
