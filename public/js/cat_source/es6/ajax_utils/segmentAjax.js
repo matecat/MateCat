@@ -105,13 +105,14 @@ API.SEGMENT = {
         });
     },
 
-    getGlossaryMatch: function ( source ) {
+    getGlossaryMatch: function ( source, fromTarget ) {
         var data = {
             action: 'glossary',
             exec: 'get',
             segment: source,
             automatic: false,
             translation: null,
+            from_target: fromTarget,
             id_job: config.id_job,
             password: config.password
         };

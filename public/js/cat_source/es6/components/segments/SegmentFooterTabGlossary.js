@@ -53,10 +53,23 @@ class SegmentFooterTabGlossary extends React.Component {
                 this.setState({
                     loading: true
                 });
-                SegmentActions.searchGlossary(this.props.segment.sid,this.props.segment.fid,txt);
+                SegmentActions.searchGlossary(this.props.segment.sid,this.props.segment.fid,txt, false);
             } else if (txt && target){
                 this.setGlossaryItem();
             }
+        }
+    }
+
+    searchInTarget() {
+        let txt = this.target.textContent;
+        let target = this.source.textContent;
+        if (txt.length > 0 && !target) {
+            this.setState({
+                loading: true
+            });
+            SegmentActions.searchGlossary(this.props.segment.sid, this.props.segment.fid, txt, true);
+        } else if (txt && target){
+            this.setGlossaryItem();
         }
     }
 
@@ -145,10 +158,11 @@ class SegmentFooterTabGlossary extends React.Component {
             this.target.textContent = '';
 
         } else {
-            APP.alert({msg: 'Please insert a glossary term.'});
-            this.setState({
-                enableAddButton: false
-            });
+            this.searchInTarget();
+            // APP.alert({msg: 'Please insert a glossary term.'});
+            // this.setState({
+            //     enableAddButton: false
+            // });
         }
     }
 
@@ -265,6 +279,7 @@ class SegmentFooterTabGlossary extends React.Component {
         if ( prevState.openComment !== this.state.openComment && this.state.openComment ) {
             this.comment.focus();
         }
+        setTimeout(()=>SegmentActions.recomputeSegment(this.props.id_segment));
         // setTimeout(()=>this.setTotalMatchesInTab( this.props.segment.glossary), 0 );
     }
 
