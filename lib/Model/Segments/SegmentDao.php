@@ -774,7 +774,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             $bind_keys = [ 'id_segment' => $sid ];
 
         } else {
-
+            //TODO cache this query?
             /**
              * This query gets, for each hash with more than one translations available, the min id of the segments
              *

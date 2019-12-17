@@ -201,15 +201,7 @@ class catController extends viewController {
         /**
          * get first segment of every file
          */
-        $fileInfo     = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->jid );
-        $TotalPayable = array();
-        foreach ( $fileInfo as &$file ) {
-            $file[ 'file_name' ] = ZipArchiveExtended::getFileName( $file[ 'file_name' ] );
-
-            $TotalPayable[ $file[ 'id_file' ] ][ 'TOTAL_FORMATTED' ] = $file[ 'TOTAL_FORMATTED' ];
-        }
-        $this->firstSegmentOfFiles = json_encode( $fileInfo );
-        $this->fileCounter         = json_encode( $TotalPayable );
+        $this->firstSegmentOfFiles = json_encode( Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk ) );
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
