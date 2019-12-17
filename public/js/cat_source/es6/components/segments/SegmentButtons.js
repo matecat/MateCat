@@ -104,7 +104,7 @@ class SegmentButton extends React.Component {
 
             }
         }
-        return <ul className="buttons toggle" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
+        return <ul className="buttons" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
             {nextButton}
             {currentButton}
         </ul>
@@ -172,7 +172,7 @@ class SegmentButton extends React.Component {
             }
         }
 
-        return <ul className="buttons toggle" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
+        return <ul className="buttons" data-mount="main-buttons" id={"segment-" + this.props.segment.sid + "-buttons"}>
             {nextButton}
             {currentButton}
         </ul>

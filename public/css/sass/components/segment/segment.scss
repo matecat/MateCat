@@ -33,9 +33,15 @@ section {
 
 body.cattool {
     section {
-        &:not(.editor).segment-selected-inBulk :hover {
-            background: #edf4fd !important;
+        &:not(.editor) {
+            .buttons {
+                display: none;
+            }
+            &.segment-selected-inBulk :hover {
+                background: #edf4fd !important;
+            }
         }
+
         .editor.segment-selected-inBulk {
             background: #edf4fd;
             &:hover {
@@ -47,6 +53,13 @@ body.cattool {
 
 section{
     &.opened{
+        .buttons {
+            display: inline-block;
+            margin-right: 0;
+            text-align: right;
+            z-index: 0;
+            position: relative;
+        }
         .segment-body-content{
             .warnings-block{
                 display: inline-block;

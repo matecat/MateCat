@@ -1308,7 +1308,7 @@ section .body > .text {
     width: 100%;
     position: relative;
     float: left;
-    min-height: 87px;
+    min-height: 88px;
 }
 
 /*.text {
@@ -1325,7 +1325,7 @@ body section:not(.editor) {
     background: $grey2;
     cursor: pointer;
     border: none;
-    border-bottom: 2px solid $grey1 !important;
+    border-bottom: 1px solid $grey1 !important;
 }
 
 section:not(.editor) .text:first-child {
@@ -1369,12 +1369,17 @@ section.editor .body > .text {
 
 .graysmall {
     width: 100%;
-    background: #fff;
+    //background: #fff;
     float: left;
     position: relative;
     color: #666;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
+    border-bottom: 1px solid $grey2;
+}
+
+ul.suggestion-item.graysmall:last-child {
+    border-bottom: none;
 }
 
 /*
@@ -1455,7 +1460,8 @@ section.loaded .submenu {
 }
 
 .submenu li.active {
-    border-bottom: 1px solid white;
+    border-bottom: 1px solid #F2F4F7;
+    background-color: #F2F4F7;
 }
 
 body.noGlossary .tab-switcher-gl {
@@ -1510,7 +1516,7 @@ body.noGlossary .tab-switcher-gl {
 }
 
 .submenu li.active a {
-    background: #fff !important;
+    //background: #fff !important;
     outline: none;
     color: #000;
 }
@@ -1527,7 +1533,7 @@ body.noGlossary .tab-switcher-gl {
     display: none;
     float: left;
     width: 100%;
-    background: #ffffff !important;
+    background: #ffffff;
 }
 
 .sub-editor.open {
@@ -1629,6 +1635,7 @@ body .footer.showMatches .sub-editor.open {
     -webkit-box-shadow: inset 0 1px 2px #ddd;
     text-align: left;
     min-height: 20px;
+    background-color: #fff;
 }
 
 .sub-editor .gl-search .search-source,
@@ -2019,7 +2026,7 @@ section.editor .loader_on {
     font-size: 12px;
     float: left;
     text-align: left;
-    background: $grey2;
+    background: $grey2 !important;
     margin-bottom: 0px;
 }
 
@@ -2669,7 +2676,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .graysmall:hover {
-    background: #f2f4f7;
+    background: $grey2;
     cursor: default;
 }
 
@@ -2964,8 +2971,13 @@ section.modified .status {
 
 section.modified.editor .status {
     background-size: 200% !important;
-    height: 115%;
 }
+section.opened.editor .status {
+    height: 216px;
+    position: absolute;
+    z-index: 10;
+}
+
 
 .statusmenu {
     position: absolute;
@@ -4484,6 +4496,7 @@ section .footer .tab.open {
     border-top: 2px solid $grey2;
     top: -2px;
     min-height: 40px;
+    background-color: #F2F4F7;
 }
 
 section .segment-side-buttons {
@@ -4543,6 +4556,7 @@ section .segment-side-buttons {
     text-align: right;
     z-index: 0;
     position: relative;
+    background-color: $grey3;
 }
 
 .buttons li {

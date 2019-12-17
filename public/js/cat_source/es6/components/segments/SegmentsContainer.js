@@ -303,7 +303,7 @@ class SegmentsContainer extends React.Component {
 
         //Collection type
         if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
-            itemHeight = itemHeight + 35;
+            itemHeight = itemHeight + 42;
         }
         let height = itemHeight + commentsPadding;
 
@@ -316,7 +316,7 @@ class SegmentsContainer extends React.Component {
 
         //If is the first segment of a file add the file header
         if ( previousFileId !== segment.get('id_file')) {
-            height = height + 44;
+            height = height + 43;
         }
 
         if ( index === this.state.segments.size - 1) {
