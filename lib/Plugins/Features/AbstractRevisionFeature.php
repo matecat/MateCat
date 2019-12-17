@@ -348,6 +348,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
+     *
+     * /TODO move in review Improved???
      * project_completion_event_saved
      *
      * @param Chunks_ChunkStruct    $chunk
