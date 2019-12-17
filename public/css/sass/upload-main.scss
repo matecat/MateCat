@@ -20,7 +20,7 @@
     display: grid;
     justify-content: center;
 
-    .translation-options {
+    .translation-options, #additional-input-params {
         display: grid;
         grid-auto-flow: column;
         /*grid-template-columns: repeat(8,auto);*/

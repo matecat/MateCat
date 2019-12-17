@@ -46,7 +46,7 @@ class ReviewsController extends KleinController {
         $this->_appendValidators();
 
         // create a new chunk revision password
-        $records = RevisionFactory::initFromProject( $this->project )->getFeature()->createQaChunkReviewRecords(
+        $records = RevisionFactory::initFromProject( $this->project )->getRevisionFeature()->createQaChunkReviewRecords(
                 [ $this->chunk ],
                 $this->project,
                 [

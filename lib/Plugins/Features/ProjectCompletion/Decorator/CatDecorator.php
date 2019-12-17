@@ -29,7 +29,7 @@ class CatDecorator extends AbstractDecorator {
         $this->current_phase = $dao->currentPhase( $this->controller->getChunk() );
 
         $displayButton = true ;
-        $displayButton = $job->getProject()->getFeatures()->filter('filterProjectCompletionDisplayButton', $displayButton, $this);
+        $displayButton = $job->getProject()->getFeaturesSet()->filter('filterProjectCompletionDisplayButton', $displayButton, $this);
 
         if ( $displayButton ) {
             $this->template->project_completion_feature_enabled = true ;
@@ -90,7 +90,7 @@ class CatDecorator extends AbstractDecorator {
                     $this->stats['DRAFT'] == 0 && $this->stats['REJECTED'] == 0 ;
         }
 
-        $completable = $this->controller->getChunk()->getProject()->getFeatures()->filter('filterJobCompletable', $completable,
+        $completable = $this->controller->getChunk()->getProject()->getFeaturesSet()->filter('filterJobCompletable', $completable,
                 $this->controller->getChunk(),
                 $this->controller->getUser(),
                 catController::isRevision()

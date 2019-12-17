@@ -177,12 +177,11 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "alt+s",
-                        "mac": "alt+s",
+                        "mac": "meta+alt+s",
                     }
                 }
             }
-        },
-
+        }
 };
 
 module.exports = Shortcuts;

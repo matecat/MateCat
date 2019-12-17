@@ -31,7 +31,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
             throw new AuthorizationError( "Invalid Job" );
         }
 
-        $jStruct = new \Jobs_JobStruct( [ 'id' => $params[ 'id_job' ], 'password' => $params[ 'password' ] ] );
+        $jStruct = ( \Jobs_JobDao::getByIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
         $translatorModel = new TranslatorsModel( $jStruct, 0 );
         $jTranslatorStruct = $translatorModel->getTranslator();
 

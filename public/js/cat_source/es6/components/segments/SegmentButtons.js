@@ -16,28 +16,33 @@ class SegmentButton extends React.Component {
 
     clickOnTranslatedButton(event) {
         this.props.updateTranslation();
-        UI.clickOnTranslatedButton(event.currentTarget);
+        let target = event.currentTarget;
+        setTimeout(()=>UI.clickOnTranslatedButton(target));
     }
 
     clickOnApprovedButton(event) {
         this.props.updateTranslation();
-        UI.clickOnApprovedButton(event.target);
+        let target = event.target;
+        setTimeout(()=>UI.clickOnApprovedButton(target));
     }
 
     goToNextRepetition(event, status) {
         this.props.updateTranslation();
-        SegmentFilter.goToNextRepetition(event.currentTarget, status);
+        let target = event.currentTarget;
+        setTimeout(()=>SegmentFilter.goToNextRepetition(target, status));
     }
 
     goToNextRepetitionGroup(event, status) {
         this.props.updateTranslation();
-        SegmentFilter.goToNextRepetitionGroup(event.currentTarget, status);
+        let target = event.currentTarget;
+        setTimeout(()=>SegmentFilter.goToNextRepetitionGroup(target, status));
     }
 
     clickOnGuessTags(e) {
         e.preventDefault();
+        this.props.updateTranslation();
         $(e.target).addClass('disabled');
-        UI.startSegmentTagProjection(this.props.segment.sid);
+        setTimeout(()=>UI.startSegmentTagProjection(this.props.segment.sid));
         return false;
     }
 
@@ -57,10 +62,14 @@ class SegmentButton extends React.Component {
         const classDisable = (this.props.disabled) ? 'disabled' : '';
         let nextButton, currentButton;
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
-        let enableGoToNext = !_.isUndefined(nextSegment) && nextSegment.status !== "APPROVED";
+        let enableGoToNext = !_.isUndefined(nextSegment) ;
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
-        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && ( nextSegment.revision_number === config.revisionNumber || _.isNull(nextSegment.revision_number) )  : enableGoToNext;
+        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && (
+            nextSegment.revision_number === config.revisionNumber ||
+            _.isNull(nextSegment.revision_number) ||
+            ( nextSegment.revision_number === 2 && config.revisionNumber === 1)
+        )  : enableGoToNext;
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}

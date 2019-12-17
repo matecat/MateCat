@@ -285,7 +285,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             ];
         }
 
-        $emails = $this->_chunk->getProject()->getFeatures()->filter( 'filterRevisionChangeNotificationList', $emails );
+        $emails = $this->_chunk->getProject()->getFeaturesSet()->filter( 'filterRevisionChangeNotificationList', $emails );
         $url    = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
                 $this->_chunk->source, $this->_chunk->target, [
                         'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $revision->source_page ),

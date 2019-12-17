@@ -17,16 +17,12 @@ use Features\TranslationVersions\Model\TranslationVersionDao;
 class ReviseTranslationIssuesController extends KleinController {
 
     public function afterConstruct() {
-
         $validator = new JobPasswordValidator( $this );
         $validator->onSuccess( function () use ( $validator ) {
             $this->featureSet->loadForProject( $validator->getJob()->getProject() );
         } );
-
         $this->appendValidator( $validator );
-        $this->appendValidator(
-                ( new SegmentTranslation( $this->request ) )->setPassword( $this->request->password )
-        );
+        $this->appendValidator( new SegmentTranslation( $this->request ) );
     }
 
     public function index() {
@@ -36,7 +32,6 @@ class ReviseTranslationIssuesController extends KleinController {
         );
         $version_formatter = new SegmentVersion( $records, true, $this->featureSet );
         $this->response->json( [ 'versions' => $version_formatter->render() ] );
-
     }
 
 }

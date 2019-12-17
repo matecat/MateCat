@@ -40,6 +40,10 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
         return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && $this->locked;
     }
 
+    public function isPreTranslated(){
+        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && !$this->locked;
+    }
+
     public function isPostReviewedStatus() {
         return in_array( $this->status, Constants_TranslationStatus::$POST_REVISION_STATUSES );
     }

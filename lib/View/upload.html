@@ -313,9 +313,10 @@
                 <h2 class="resources" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
             </div>
         </div>
+        <div metal:use-macro="${additional_input_params_base_path}/upload_partials.html/additional_input_params" />
+
     </div>
 
-    <div metal:use-macro="${additional_input_params_base_path}/upload_partials.html/additional_input_params" />
 
     <div class="cl"></div>
 
@@ -335,6 +336,10 @@
 
     <div metal:use-macro="upload_partials.html/gdrive_files"/>
 
+
+
+</div>
+<div class="wrapper-bottom">
     <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
         <a class="supported-file-formats" href="#">${formats_number} file formats</a>
         <span style="float: right;">.</span>
@@ -352,16 +357,15 @@
         <span class="uploadloader"></span>
 
         <input name="" type="button" class="uploadbtn disabled"
-          tal:condition="not:volume_analysis_enabled" value="Translate" disabled="disabled"/>
+               tal:condition="not:volume_analysis_enabled" value="Translate" disabled="disabled"/>
 
         <input name="" type="button" class="uploadbtn disabled"
-          tal:condition="volume_analysis_enabled" value="Analyze" disabled="disabled"/>
+               tal:condition="volume_analysis_enabled" value="Analyze" disabled="disabled"/>
 
         <p class="enter">Press Enter</p>
     </div>
 
 </div>
-
 
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">

@@ -34,6 +34,7 @@ class SegmentTarget extends React.Component {
         this.showTagsMenu = this.showTagsMenu.bind(this);
         this.hideTagsMenu = this.hideTagsMenu.bind(this);
         this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this);
+        this.storeTranslation = this.storeTranslation.bind(this);
     }
 
     replaceTranslation(sid, translation) {
@@ -135,7 +136,11 @@ class SegmentTarget extends React.Component {
             SegmentActions.updateTranslation(sid, textToSend);
         }
     }
-
+    storeTranslation(sid) {
+        if ( sid === this.props.segment.sid ) {
+            this.sendTranslationWithoutUpdate();
+        }
+    }
     getAllIssues() {
         let issues = [];
         if ( this.props.segment.versions ) {
@@ -288,6 +293,7 @@ class SegmentTarget extends React.Component {
         SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.addListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
+        SegmentStore.addListener(SegmentConstants.STORE_TRANSLATION , this.storeTranslation);
         this.afterRenderActions();
 
     }
@@ -298,6 +304,8 @@ class SegmentTarget extends React.Component {
         SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.removeListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
+        SegmentStore.removeListener(SegmentConstants.STORE_TRANSLATION , this.storeTranslation);
+
     }
 
     componentDidUpdate() {

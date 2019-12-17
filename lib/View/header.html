@@ -65,13 +65,13 @@
                     </li>
 
                     <li tal:condition="not:isGDriveProject" class="item" data-value="original">
-                        <a class="originalDownload" title="Original" alt="Original" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all" target="_blank">
+                        <a class="originalDownload" title="Original" alt="Original" data-href="/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all" target="_blank">
                             Original
                         </a>
                     </li>
 
                     <li class="item" data-value="xlif" tal:condition="php: uses_matecat_filters == true || INIT::$DEPRECATE_LEGACY_XLIFFS == false">
-                        <a class="sdlxliff" title="Export XLIFF" alt="Export XLIFF" href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank">
+                        <a class="sdlxliff" title="Export XLIFF" alt="Export XLIFF" data-href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank">
                             Export XLIFF
                         </a>
                     </li>

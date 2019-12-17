@@ -40,26 +40,26 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                UI.clickOnApprovedButton($('.editor .next-unapproved:not(.disabled)'));
+                setTimeout(function () { UI.clickOnApprovedButton($('.editor .next-unapproved:not(.disabled)'))} );
             } else {
                 if ( $('.editor .next-untranslated:not(.disabled)').length > 0 ) {
-                    UI.clickOnTranslatedButton($('.editor .next-untranslated:not(.disabled)'));
+                    setTimeout(function () { UI.clickOnTranslatedButton($('.editor .next-untranslated:not(.disabled)'))});
                 } else if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    UI.clickOnTranslatedButton($('.editor .translated'));
+                    setTimeout(function () { UI.clickOnTranslatedButton($('.editor .translated'))});
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    UI.startSegmentTagProjection(UI.currentSegmentId);
+                    setTimeout(function () { UI.startSegmentTagProjection(UI.currentSegmentId)});
                 }
             }
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                UI.clickOnApprovedButton($('body.review .editor .approved:not(.disabled)'));
+                setTimeout(function () { UI.clickOnApprovedButton($('body.review .editor .approved:not(.disabled)'))});
             } else {
                 if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    UI.clickOnTranslatedButton($('.editor .translated'));
+                    setTimeout(function () {UI.clickOnTranslatedButton($('.editor .translated'))});
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    UI.startSegmentTagProjection(UI.currentSegmentId);
+                    setTimeout(function () {UI.startSegmentTagProjection(UI.currentSegmentId)});
                 }
             }
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
@@ -176,12 +176,13 @@ $.extend(UI, {
 		}).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             UI.runDownload();
-		}).on('mousedown', '.originalDownload, .sdlxliff, .omegat', function( e ){
+		}).on('mousedown', '.originalDownload, .sdlxliff', function( e ){
             if( e.which == 1 ){ // left click
                 e.preventDefault();
+                e.stopPropagation();
                 var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
                     id: 'iframeDownload_' + new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 ),
-                    src: $( e.currentTarget ).attr( 'href' )
+                    src: $( e.currentTarget ).attr( 'data-href' )
                 } );
                 $( "body" ).append( iFrameDownload );
 

@@ -17,7 +17,6 @@ use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\Model\QualityReportModel;
-use Features\ReviewExtended\ReviewUtils;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
@@ -35,15 +34,12 @@ use ZipArchive;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
 
-    protected $revisionInstance;
-
     protected static $dependencies = [
             Features::TRANSLATION_VERSIONS
     ];
 
     public function __construct( BasicFeatureStruct $feature ) {
         parent::__construct( $feature );
-        RevisionFactory::getInstance( $this );
     }
 
     /**
@@ -175,7 +171,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             }
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeatures()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
             $createdRecords[] = $chunkReview;
         }
 
@@ -212,7 +208,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             }
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeatures()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
             $createdRecords[] = $chunkReview;
         }
 
@@ -343,6 +339,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     /**
      * @param TranslationVersions\Model\BatchEventCreator $eventCreator
      *
+     * @throws Exception
      * @internal param SegmentTranslationEventModel $event
      */
     public function batchEventCreationSaved( Features\TranslationVersions\Model\BatchEventCreator $eventCreator ) {
@@ -351,6 +348,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
+     *
+     * /TODO move in review Improved???
      * project_completion_event_saved
      *
      * @param Chunks_ChunkStruct    $chunk

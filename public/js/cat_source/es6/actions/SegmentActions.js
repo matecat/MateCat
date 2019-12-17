@@ -704,10 +704,10 @@ const SegmentActions = {
 
     },
 
-    searchGlossary: function (sid, fid, text) {
+    searchGlossary: function (sid, fid, text, fromTarget) {
         text = TagUtils.removeAllTags(TextUtils.htmlEncode(text));
         text = text.replace(/\"/g, "");
-        API.SEGMENT.getGlossaryMatch(text)
+        API.SEGMENT.getGlossaryMatch(text, fromTarget)
             .done(response => {
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
@@ -882,6 +882,7 @@ const SegmentActions = {
             actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
             sid: sid
         });
+        localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
         this.scrollToSegment(sid);
     },
 
