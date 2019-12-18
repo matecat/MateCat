@@ -11,6 +11,7 @@ namespace Features;
 use BasicFeatureStruct;
 use catController;
 use Chunks_ChunkStruct;
+use Constants;
 use Exceptions\NotFoundException;
 use Features;
 use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
@@ -84,17 +85,6 @@ class SecondPassReview extends BaseFeature {
                 throw new NotFoundException( "This revision did not start yet: " . $controller->getRevisionNumber() );
             }
         }
-    }
-
-    public function filterSourcePage( $sourcePage ) {
-        $_from_url    = parse_url( @$_SERVER[ 'HTTP_REFERER' ] );
-        $chunk_review = $matches = null;
-        preg_match( '/revise([2-9])?\//s', $_from_url[ 'path' ], $matches );
-        if ( count( $matches ) > 1 ) {
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage( $matches[ 1 ] );
-        }
-
-        return $sourcePage;
     }
 
     /**
