@@ -171,12 +171,44 @@ class SegmentBody extends React.Component {
         }
         let copySourceShortcuts = (UI.isMac) ? Shortcuts.cattol.events.copySource.keystrokes.mac : Shortcuts.cattol.events.copySource.keystrokes.standard;
         return (
-            <React.Fragment>
+            <div className="text segment-body-content" ref={(body)=>this.segmentBody=body}>
+                <div className="wrap">
+                    <div className="outersource">
+                        <SegmentSource
+                            segment={this.props.segment}
+                            decodeTextFn={this.props.decodeTextFn}
+                            afterRenderOrUpdate={this.afterRenderOrUpdate}
+                            beforeRenderOrUpdate={this.beforeRenderOrUpdate}
+                        />
+                        <div className="copy" title="Copy source to target" onClick={(e)=>this.copySource(e)}>
+                            <a href="#"/>
+                            <p>{copySourceShortcuts.toUpperCase()}</p>
+                        </div>
+                        <SegmentTarget
+                            segment={this.props.segment}
+                            enableTagProjection={this.props.enableTagProjection}
+                            isReview={this.props.isReview}
+                            isReviewExtended={this.props.isReviewExtended}
+                            isReviewImproved={this.props.isReviewImproved}
+                            reviewType={this.props.reviewType}
+                            decodeTextFn={this.props.decodeTextFn}
+                            tagModesEnabled={this.props.tagModesEnabled}
+                            speech2textEnabledFn={this.props.speech2textEnabledFn}
+                            afterRenderOrUpdate={this.afterRenderOrUpdate}
+                            beforeRenderOrUpdate={this.beforeRenderOrUpdate}
+                            locked={this.props.locked}
+                            readonly={this.props.readonly}
+                            openSegment={this.props.openSegment}
+                            removeSelection={this.props.removeSelection}
+                        />
+
+                    </div>
+                </div>
                 <div className="status-container">
                     { this.isReviewExtended ?  (
                         <a href="#" className="status no-hover" onClick={this.openStatusSegmentMenu}
                         />
-                    ) : (
+                        ) : (
                         <a href="#" title={status_change_title}
                            className="status" id={"segment-"+ this.props.segment.sid + "-changestatus"}
                            onClick={this.openStatusSegmentMenu}
@@ -184,47 +216,12 @@ class SegmentBody extends React.Component {
                     )}
 
                 </div>
-                <div className="text segment-body-content" ref={(body)=>this.segmentBody=body}>
-                    <div className="wrap">
-                        <div className="outersource">
-                            <SegmentSource
-                                segment={this.props.segment}
-                                decodeTextFn={this.props.decodeTextFn}
-                                afterRenderOrUpdate={this.afterRenderOrUpdate}
-                                beforeRenderOrUpdate={this.beforeRenderOrUpdate}
-                            />
-                            <div className="copy" title="Copy source to target" onClick={(e)=>this.copySource(e)}>
-                                <a href="#"/>
-                                <p>{copySourceShortcuts.toUpperCase()}</p>
-                            </div>
-                            <SegmentTarget
-                                segment={this.props.segment}
-                                enableTagProjection={this.props.enableTagProjection}
-                                isReview={this.props.isReview}
-                                isReviewExtended={this.props.isReviewExtended}
-                                isReviewImproved={this.props.isReviewImproved}
-                                reviewType={this.props.reviewType}
-                                decodeTextFn={this.props.decodeTextFn}
-                                tagModesEnabled={this.props.tagModesEnabled}
-                                speech2textEnabledFn={this.props.speech2textEnabledFn}
-                                afterRenderOrUpdate={this.afterRenderOrUpdate}
-                                beforeRenderOrUpdate={this.beforeRenderOrUpdate}
-                                locked={this.props.locked}
-                                readonly={this.props.readonly}
-                                openSegment={this.props.openSegment}
-                                removeSelection={this.props.removeSelection}
-                            />
 
-                        </div>
-                    </div>
-
-
-                    {this.getStatusMenu()}
+                {this.getStatusMenu()}
 
 
 
             </div>
-            </React.Fragment>
         )
     }
 }
