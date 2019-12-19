@@ -493,6 +493,8 @@ body.analyze{
                 }
                 .outsource-translation {
                     display:flex;
+                    align-items: center;
+                    justify-content: center;
                     width: 32%;
                     flex-flow: column;
                     border-left: 1px solid #BBBBBB;
@@ -504,7 +506,13 @@ body.analyze{
                     }
                     span {
                         color: #000;
-                        font-size: 12px;
+                        font-size: 10px;
+                        display:flex;
+                        justify-content: center;
+                        align-items: end;
+                        svg {
+                            margin-left:2px;
+                        }
                     }
                 }
                 .split, .merge {
