@@ -262,8 +262,6 @@ class catController extends viewController {
                     $this->jid,
                     Utils::getSourcePage()
             );
-<<<<<<< Updated upstream
-=======
             $this->chunk = $chunkReviewStruct->getChunk();
             $this->password = $chunkReviewStruct->password;
             $this->review_password = $chunkReviewStruct->review_password;
@@ -271,7 +269,6 @@ class catController extends viewController {
             $this->password = $this->received_password;
             $this->review_password = $this->password;
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
->>>>>>> Stashed changes
         }
 
         $this->chunk =  $chunkReviewStruct->getChunk();
