@@ -271,9 +271,11 @@ class catController extends viewController {
                     $this->jid,
                     Utils::getSourcePage()
             );
-        }
 
-        $this->chunk =  $chunkReviewStruct->getChunk();
+            $this->chunk = $chunkReviewStruct->getChunk();
+        } else {
+            $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+        }
     }
 
     protected function _saveActivity(){
