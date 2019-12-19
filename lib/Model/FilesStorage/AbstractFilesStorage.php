@@ -181,6 +181,22 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
+     * @param string $haystack
+     * @param string $needle
+     *
+     * @return bool
+     */
+    public static function fileEndsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        if ($length == 0) {
+            return true;
+        }
+
+        return (substr($haystack, -$length) === $needle);
+    }
+
+    /**
      * @param $create_date
      *
      * @return string
