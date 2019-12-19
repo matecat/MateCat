@@ -704,13 +704,6 @@ class setTranslationController extends ajaxController {
         return $translation;
     }
 
-    private function _getSourcePageCode() {
-        $code = $this->isRevision() ? Constants::SOURCE_PAGE_REVISION :
-                Constants::SOURCE_PAGE_TRANSLATE;
-
-        return $this->featureSet->filter( 'filterSourcePageCode', $code );
-    }
-
     private function recountJobTotals( $old_status ) {
         $old_wStruct = new WordCount_Struct();
         $old_wStruct->setIdJob( $this->id_job );
