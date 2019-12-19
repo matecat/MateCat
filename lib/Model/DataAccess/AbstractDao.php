@@ -1,6 +1,7 @@
 <?php
 
 use Database;
+use Exceptions\ValidationError;
 
 /**
  * Created by PhpStorm.
@@ -445,14 +446,17 @@ abstract class DataAccess_AbstractDao {
      * Ensures the primary keys are populated on the struct.
      *
      * @throw \Exceptions\ValidationError
+     * @param DataAccess_AbstractDaoObjectStruct $struct
+     *
+     * @throws ValidationError
      */
 
-    protected static function ensurePrimaryKeyValues( $struct ) {
+    protected static function ensurePrimaryKeyValues( DataAccess_AbstractDaoObjectStruct $struct ) {
         $attrs = self::structKeys( $struct );
 
         foreach ( $attrs as $k => $v ) {
             if ( $v == null ) {
-                throw new \Exceptions\ValidationError( "pkey '$k' is null" );
+                throw new ValidationError( "pkey '$k' is null" );
             }
         }
     }
@@ -461,13 +465,16 @@ abstract class DataAccess_AbstractDao {
      * Returns an array of the specified attributes, plus the primary
      * keys specified by the current DAO.
      *
+     * @param DataAccess_AbstractDaoObjectStruct $struct
+     *
      * @return array the struct's primary keys
+     * @throws ReflectionException
      */
 
-    protected static function structKeys( $struct ) {
+    protected static function structKeys( DataAccess_AbstractDaoObjectStruct $struct ) {
         $keys = static::$primary_keys;
 
-        return $struct->attributes( $keys );
+        return $struct->toArray( $keys );
     }
 
     public static function updateFields( array $data = [], array $where = [] ){
@@ -487,7 +494,7 @@ abstract class DataAccess_AbstractDao {
     public static function updateStruct( DataAccess_IDaoStruct $struct, $options = [] ) {
         $struct->ensureValid();
 
-        $attrs = $struct->attributes();
+        $attrs = $struct->toArray();
 
         $fields = [];
 
