@@ -16,10 +16,13 @@ use Engines_Intento as Intento;
  */
 class catController extends viewController {
 
-    private   $cid         = "";
-    private   $jid         = "";
-    protected $password    = "";
-    private   $create_date = "";
+    protected $received_password;
+
+    private   $cid             = "";
+    private   $jid             = "";
+    protected $password        = "";
+    protected $review_password = "";
+    private   $create_date     = "";
 
     private $start_time = 0.00;
 
@@ -57,16 +60,6 @@ class catController extends viewController {
     private $mt_id;
 
     /**
-     * @var string
-     * Review password generally corresponds to job password.
-     * Translate and revise pages share the same password, exception
-     * made for scenarios in which the review page must be protected
-     * by second layer of authorization. In such cases, this variable
-     * holds a different password than the job's password.
-     */
-    private $review_password = "";
-
-    /**
      * @var WordCount_Struct
      */
     private $wStruct ;
@@ -90,10 +83,9 @@ class catController extends viewController {
 
         $getInput   = (object)filter_input_array( INPUT_GET, $filterArgs );
 
-        $this->jid             = $getInput->jid;
-        $this->password        = $getInput->password;
-        $this->review_password = $getInput->password;
-        $this->revision        = $getInput->revision ;
+        $this->jid               = $getInput->jid;
+        $this->received_password = $getInput->password;
+        $this->revision          = $getInput->revision;
 
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
 
@@ -263,14 +255,23 @@ class catController extends viewController {
      */
     private function findJobByIdPasswordAndSourcePage() {
         if ( self::isRevision() ) {
-
             /** @var ChunkReviewStruct $chunkReviewStruct */
             $chunkReviewStruct = $this->featureSet->filter(
                     'filter_review_password_to_job_password',
-                    $this->password,
+                    $this->received_password,
                     $this->jid,
                     Utils::getSourcePage()
             );
+<<<<<<< Updated upstream
+=======
+            $this->chunk = $chunkReviewStruct->getChunk();
+            $this->password = $chunkReviewStruct->password;
+            $this->review_password = $chunkReviewStruct->review_password;
+        } else {
+            $this->password = $this->received_password;
+            $this->review_password = $this->password;
+            $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+>>>>>>> Stashed changes
         }
 
         $this->chunk =  $chunkReviewStruct->getChunk();
