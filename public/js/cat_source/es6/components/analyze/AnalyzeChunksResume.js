@@ -88,6 +88,18 @@ class AnalyzeChunksResume extends React.Component {
                     onClick={this.openOutsourceModal.bind(this, index)}>Translate</div>;
     }
 
+    getOutsourceButton(chunk, index) {
+        return <div className={'outsource-translation'}>
+            <a onClick={this.openOutsourceModal.bind(this, index)}>Buy Translation</a>
+            <span>By Translated</span>
+        </div>;
+    }
+
+    getUrl(job, index) {
+        let chunk_id = (index)? job.get('id') + '-' + index : job.get('id');
+        return window.location.protocol + '//' + window.location.host +'/translate/'+ this.props.project.get('project_slug')+'/'+ job.get('source') +'-'+ job.get('target')+'/'+ chunk_id +'-'+ job.get('password') + (index?'#'+job.get('job_first_segment'):'')  ;
+    }
+
     getResumeJobs() {
         var self = this;
 
@@ -113,8 +125,12 @@ class AnalyzeChunksResume extends React.Component {
                         let openOutsourceClass = (openOutsource) ? 'openOutsource' : '';
 
                         return <div key={indexChunk} className={"chunk ui grid shadow-1 " + openOutsourceClass} onClick={self.showDetails.bind(self, chunk.jid)}>
-                            <div className="title-job">
+                            <div className="title-job splitted">
                                 <div className="job-id" >{'Chunk ' + index}</div>
+                                <div className={'translate-url'}>
+                                    <input type="text" readOnly value={self.getUrl(chunkJob)}/>
+                                    <button onClick={''}><i className="icon-link icon"/></button>
+                                </div>
                             </div>
                             <div className="titles-compare">
                                 <div className="title-total-words ttw">
@@ -130,7 +146,10 @@ class AnalyzeChunksResume extends React.Component {
                                 </div>
                             </div>
                             <div className="activity-icons">
-                                {self.getOpenButton(chunkJob.toJS(), chunk.jid + '-' + index)}
+                                <div className={'activity-button splitted'}>
+                                    {self.getOpenButton(chunkJob.toJS(), chunk.jid + '-' + index)}
+                                </div>
+                                {self.getOutsourceButton(chunkJob.toJS(), chunk.jid + '-' + index)}
                             </div>
                             <OutsourceContainer project={self.props.project}
                                                 job={chunkJob}
@@ -151,16 +170,18 @@ class AnalyzeChunksResume extends React.Component {
                         <div className="chunks sixteen wide column">
 
                             <div className="chunk ui grid shadow-1" onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid)}>
-                                <div className="title-job splitted">
-                                    <div className="job-id" >ID: {self.props.jobsInfo[indexJob].jid}</div>
-                                    <div className="source-target" >
-                                        <div className="source-box">{self.props.jobsInfo[indexJob].source}</div>
-                                        <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                                        <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
+                                <div className="title-job heading splitted">
+                                    <div className="job-info">
+                                        <div className="job-id" >ID: {self.props.jobsInfo[indexJob].jid}</div>
+                                        <div className="source-target" >
+                                            <div className="source-box">{self.props.jobsInfo[indexJob].source}</div>
+                                            <div className="in-to"><i className="icon-chevron-right icon"/></div>
+                                            <div className="target-box">{self.props.jobsInfo[indexJob].target}</div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="activity-icons">
+                                <div className="activity-icons splitted">
                                     <div className="merge ui blue basic button"
                                          onClick={self.openMergeModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-compress icon"/>Merge</div>
                                 </div>
@@ -189,11 +210,17 @@ class AnalyzeChunksResume extends React.Component {
                         <div className="chunks sixteen wide column">
                             <div className={"chunk ui grid shadow-1 " + openOutsourceClass} onClick={self.showDetails.bind(self, self.props.jobsInfo[indexJob].jid) }>
                                 <div className="title-job">
-                                    <div className="job-id">ID: {self.props.jobsInfo[indexJob].jid}</div>
-                                    <div className="source-target" >
-                                        <div className="source-box no-split">{self.props.jobsInfo[indexJob].source}</div>
-                                        <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                                        <div className="target-box no-split">{self.props.jobsInfo[indexJob].target}</div>
+                                    <div className="job-info">
+                                        <div className="job-id">ID: {self.props.jobsInfo[indexJob].jid}</div>
+                                        <div className="source-target" >
+                                            <div className="source-box no-split">{self.props.jobsInfo[indexJob].source}</div>
+                                            <div className="in-to"><i className="icon-chevron-right icon"/></div>
+                                            <div className="target-box no-split">{self.props.jobsInfo[indexJob].target}</div>
+                                        </div>
+                                    </div>
+                                    <div className={'translate-url'}>
+                                        <input type="text" readOnly value={self.getUrl(chunkJob)}/>
+                                        <button onClick={''}><i className="icon-link icon"/></button>
                                     </div>
                                 </div>
                                 <div className="titles-compare">
@@ -214,12 +241,17 @@ class AnalyzeChunksResume extends React.Component {
                                     </div>
                                 </div>
                                 <div className="activity-icons">
-                                    {(!config.jobAnalysis && config.splitEnabled) ? (
-                                        <div className={"split ui blue basic button " + buttonsClass + ' '}
-                                             onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
-                                    ) : (null)}
-                                    {self.getOpenButton(chunkJob.toJS(), self.props.jobsInfo[indexJob].jid)}
+                                    <div className="activity-button">
+                                        {(!config.jobAnalysis && config.splitEnabled) ? (
+                                            <div className={"split ui blue basic button " + buttonsClass + ' '}
+                                                 onClick={self.openSplitModal.bind(self, self.props.jobsInfo[indexJob].jid)}><i className="icon-expand icon"/>Split</div>
+
+                                        ) : (null)}
+                                        {self.getOpenButton(chunkJob.toJS(), self.props.jobsInfo[indexJob].jid)}
+                                    </div>
+                                    {self.getOutsourceButton(chunkJob.toJS(), self.props.jobsInfo[indexJob].jid)}
                                 </div>
+
                             </div>
                             <OutsourceContainer project={self.props.project}
                                                 job={chunkJob}
