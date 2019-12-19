@@ -105,10 +105,11 @@ UI = {
      * @returns {boolean}
      */
     shouldSegmentAutoPropagate : function( $segment, newStatus ) {
-        var segmentClassToFind = "status-" + newStatus.toLowerCase();
-        var statusChanged = !$segment.hasClass(segmentClassToFind);
+        var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment), UI.getSegmentFileId($segment));
+        var segmentStatus = UI.getSegmentStatus(segment);
+        var notAcceptedStatus = ['translated', 'approved'];
         var segmentModified = UI.currentSegmentTranslation.trim() !== UI.editarea.text().trim();
-        return statusChanged || segmentModified;
+        return ( !config.isReview && (segmentModified && notAcceptedStatus.indexOf(segmentStatus) === -1 ));
     },
 
     /**
@@ -136,24 +137,24 @@ UI = {
             // ask if the user wants propagation or this is valid only
             // for this segment
 
-            if ( this.autopropagateConfirmNeeded() ) {
-
-                var optionsStr = JSON.stringify(opts);
-
-                APP.confirm({
-                    name: 'confirmAutopropagation',
-                    cancelTxt: 'Propagate to All',
-                    onCancel: 'execChangeStatus',
-                    callback: 'preExecChangeStatus',
-                    okTxt: 'Only this segment',
-                    context: optionsStr,
-                    msg: "There are other identical segments. <br><br>Would you " +
-                         "like to propagate the translation to all of them, " +
-                         "or keep this translation only for this segment?"
-                });
-            } else {
+            // if ( this.autopropagateConfirmNeeded() ) {
+            //
+            //     var optionsStr = JSON.stringify(opts);
+            //
+            //     APP.confirm({
+            //         name: 'confirmAutopropagation',
+            //         cancelTxt: 'Propagate to All',
+            //         onCancel: 'execChangeStatus',
+            //         callback: 'preExecChangeStatus',
+            //         okTxt: 'Only this segment',
+            //         context: optionsStr,
+            //         msg: "There are other identical segments. <br><br>Would you " +
+            //              "like to propagate the translation to all of them, " +
+            //              "or keep this translation only for this segment?"
+            //     });
+            // } else {
                 this.execChangeStatus( JSON.stringify(opts) ); // autopropagate
-            }
+            // }
         }
 
 	},
