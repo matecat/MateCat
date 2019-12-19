@@ -69,24 +69,6 @@ class SecondPassReview extends BaseFeature {
         }
     }
 
-    public function catControllerChunkFound( catController $controller ) {
-        if ( !$controller->isRevision() ) {
-            return;
-        }
-
-        if ( $controller->getRevisionNumber() > 1 ) {
-            $chunk_review = ( new ChunkReviewDao() )->findByJobIdPasswordAndSourcePage(
-                    $controller->getChunk()->id,
-                    $controller->getChunk()->password,
-                    ReviewUtils::revisionNumberToSourcePage( $controller->getRevisionNumber() )
-            );
-
-            if ( empty( $chunk_review ) ) {
-                throw new NotFoundException( "This revision did not start yet: " . $controller->getRevisionNumber() );
-            }
-        }
-    }
-
     /**
      * @param $inputStats
      * @param $options

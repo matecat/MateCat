@@ -81,6 +81,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param int $id_job
      * @param int $source_page
      *
+     * @return ChunkReviewStruct
      * @throws NotFoundException
      */
     public function filter_review_password_to_job_password( $review_password, $id_job, $source_page ) {
@@ -90,7 +91,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             throw new NotFoundException( 'Review record was not found' );
         }
 
-        return $chunk_review->password;
+        return $chunk_review;
     }
 
     /**

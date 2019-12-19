@@ -4,6 +4,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
+use LQA\ChunkReviewStruct;
 use TmKeyManagement\UserKeysModel;
 use Engines_Intento as Intento;
 
@@ -270,7 +271,9 @@ class catController extends viewController {
      */
     private function findJobByIdPasswordAndSourcePage() {
         if ( self::isRevision() ) {
-            $this->password = $this->featureSet->filter(
+
+            /** @var ChunkReviewStruct $chunkReviewStruct */
+            $chunkReviewStruct = $this->featureSet->filter(
                     'filter_review_password_to_job_password',
                     $this->password,
                     $this->jid,
@@ -278,9 +281,7 @@ class catController extends viewController {
             );
         }
 
-        $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
-
-        $this->featureSet->run('catControllerChunkFound', $this);
+        $this->chunk =  $chunkReviewStruct->getChunk();
     }
 
     protected function _saveActivity(){
