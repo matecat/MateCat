@@ -83,9 +83,9 @@ var UI = {
      */
     shouldSegmentAutoPropagate : function( $segment, newStatus ) {
         var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment), UI.getSegmentFileId($segment));
-        var segmentStatus = UI.getSegmentStatus(segment);
+        var segmentStatus = segment.status;
         var notAcceptedStatus = ['translated', 'approved'];
-        var segmentModified = UI.currentSegmentTranslation.trim() !== UI.editarea.text().trim();
+        var segmentModified = segment.modified;
         return ( !config.isReview && (segmentModified && notAcceptedStatus.indexOf(segmentStatus) === -1 ));
     },
 
