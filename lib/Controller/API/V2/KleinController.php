@@ -13,6 +13,7 @@ use FeatureSet;
 use Users_UserDao;
 
 /**
+ * @property  int revision_number
  * @property  string password
  * @property  int id_job
  */

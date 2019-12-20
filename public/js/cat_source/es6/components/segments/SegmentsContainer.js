@@ -191,8 +191,6 @@ class SegmentsContainer extends React.Component {
                         <strong/> [<span className="source-lang">{config.source_rfc}</span>]] >
                         <strong/> [<span className="target-lang">{config.target_rfc}</span>]
                     </li>
-                    {/*<li className="wordcounter">Payable Words: <strong>{config.fileCounter[segment.id_file].TOTAL_FORMATTED}</strong>*/}
-                    {/*</li>*/}
                 </ul>
                 {collectionTypeSeparator}
                 {item}

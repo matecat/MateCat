@@ -71,7 +71,6 @@ class MultiCurlHandler {
     public function __construct() {
         $this->multi_handler = curl_multi_init();
 
-        Utils::getPHPVersion();
         if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
 //          curl_multi_setopt only for (PHP 5 >= 5.5.0) Default 10
 

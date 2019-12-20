@@ -152,9 +152,9 @@ class splitJobController extends ajaxController {
 
         $found = false;
         $jid   = $this->job_id;
-        $filteredJobs = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
+        $filteredJobs = array_values( array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
             return $jobStruct->id == $jid;
-        } );
+        } ) );
 
         if ( empty( $filteredJobs ) ) {
             throw new Exception( "Access denied", -10 );

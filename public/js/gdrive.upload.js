@@ -131,7 +131,7 @@ APP.addGDriveFile = function(exportIds) {
     '</div>';
     $(html).appendTo( $( 'body' ));
 
-    $.getJSON('/webhooks/gdrive/open?isAsync=true&state=' + encodedJson, function(response) {
+    $.getJSON('/webhooks/gdrive/open?isAsync=true&state=' + encodedJson + '&source=' + $('#source-lang').dropdown('get value') + '&target=' + $('#target-lang').dropdown('get value'), function(response) {
         $('.modal-gdrive').remove();
 
         if(response.success) {

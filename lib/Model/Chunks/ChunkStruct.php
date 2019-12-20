@@ -33,7 +33,7 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
         // I'm doing this to keep the concepts of Chunk and Job as
         // separated as possible even though they share the same
         // database table.
-        return new Jobs_JobStruct( $this->attributes() );
+        return new Jobs_JobStruct( $this->toArray() );
     }
 
     public function getIdentifier() {
