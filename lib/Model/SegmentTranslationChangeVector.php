@@ -103,6 +103,7 @@ class SegmentTranslationChangeVector {
 
     /**
      * @return bool
+     * @throws Exception
      */
     public function isEnteringReviewedState() {
         return (
@@ -122,11 +123,25 @@ class SegmentTranslationChangeVector {
      * This method returns true when we are changing and ICE 'APPROVED' to TRANSLATE
      *
      * @return bool
+     * @throws Exception
      */
     public function isModifyingICEFromTranslation() {
         return $this->old_translation->isICE() &&
                 $this->old_translation->isReviewedStatus() &&
                 $this->translation->isTranslationStatus() &&
+                $this->eventModel->getOriginSourcePage() == Constants::SOURCE_PAGE_REVISION &&
+                $this->old_translation->translation !== $this->translation->translation &&
+                $this->old_translation->version_number == 0 ;
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    public function isModifyingICEFromRevisionOne(){
+        return $this->old_translation->isICE() &&
+                $this->old_translation->isReviewedStatus() &&
+                $this->translation->isReviewedStatus() && // This is the trick, the segment is passing from approved to approved
                 $this->eventModel->getOriginSourcePage() == Constants::SOURCE_PAGE_REVISION &&
                 $this->old_translation->translation !== $this->translation->translation &&
                 $this->old_translation->version_number == 0 ;
@@ -194,6 +209,7 @@ class SegmentTranslationChangeVector {
 
     /**
      * @return bool
+     * @throws Exception
      */
     public function isEditingCurrentRevision() {
         return $this->eventModel->getDestinationSourcePage() == $this->eventModel->getOriginSourcePage() &&

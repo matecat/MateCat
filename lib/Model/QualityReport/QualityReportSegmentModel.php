@@ -26,7 +26,7 @@ use QualityReport_QualityReportSegmentStruct;
 use Revise_ReviseDAO;
 use Segments_SegmentDao;
 use SubFiltering\Filter;
-use Translations_TranslationVersionDao;
+use Features\TranslationVersions\Model\TranslationVersionDao;
 use ZipArchiveExtended;
 
 class QualityReportSegmentModel {
@@ -153,7 +153,7 @@ class QualityReportSegmentModel {
 
         if ( in_array( TranslationVersions::FEATURE_CODE, $codes ) ) {
 
-            $translationVersionDao = new Translations_TranslationVersionDao;
+            $translationVersionDao = new TranslationVersionDao;
             $last_translations     = $translationVersionDao->getLastRevieionsBySegmentsAndSourcePage(
                     $segments_id, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
             );

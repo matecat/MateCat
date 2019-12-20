@@ -11,6 +11,7 @@ namespace ConnectedServices\GDrive;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use ConversionHandler;
+use DirectoryIterator;
 use Exception;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
@@ -101,8 +102,10 @@ class Session {
      * @throws \Exception
      */
     public function changeSourceLanguage( $newSourceLang, $originalSourceLang ) {
-        $fileList = $this->session[ self::FILE_LIST ];
-        $success  = true;
+        $fileList  = $this->session[ self::FILE_LIST ];
+        $success   = true;
+
+        $this->renameTheFileMap($newSourceLang, $originalSourceLang);
 
         foreach ( $fileList as $fileId => $file ) {
 
@@ -117,20 +120,20 @@ class Session {
 
                     if(AbstractFilesStorage::isOnS3()){
 
-                        // copy orig and cache folder
+                        // copy orig and cache\INIT::$UPLOAD_REPOSITORY folder
                         $s3Client = S3FilesStorage::getStaticS3Client();
                         $copyOrig = $s3Client->copyFolder([
                                 'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
                                 'source_folder' => $originalCacheFileDir.'/orig',
                                 'target_folder' => $newCacheFileDir.'/orig',
-                                'delete_source' => true,
+                                'delete_source' => false,
                         ]);
 
                         $copyWork = $s3Client->copyFolder([
                                 'source_bucket' => \INIT::$AWS_STORAGE_BASE_BUCKET,
                                 'source_folder' => $originalCacheFileDir.'/work',
                                 'target_folder' => $newCacheFileDir.'/work',
-                                'delete_source' => true,
+                                'delete_source' => false,
                         ]);
 
                         if($copyOrig and $copyWork){
@@ -157,6 +160,37 @@ class Session {
         }
 
         return $success;
+    }
+
+    /**
+     * Rename the filemap in session folder stored on filesystem
+     *
+     * ----------------------------------------------------------------------
+     *
+     * Example:
+     *
+     * 2344e5918dcff468b4362d79cb16b0039c77d608|af-ZA ---> 2344e5918dcff468b4362d79cb16b0039c77d608|it-IT
+     *
+     * @param $originalSourceLang
+     * @param $newSourceLang
+     */
+    private function renameTheFileMap($newSourceLang, $originalSourceLang) {
+        $uploadDir = \INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session['upload_session'];
+
+        /** @var DirectoryIterator $item */
+        foreach (
+                $iterator = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator( $uploadDir, \RecursiveDirectoryIterator::SKIP_DOTS ),
+                        \RecursiveIteratorIterator::SELF_FIRST ) as $item
+        ) {
+            $originalSourceLangMarker = '|' . $originalSourceLang;
+            $newSourceLangMarker = '|' . $newSourceLang;
+
+            if(AbstractFilesStorage::fileEndsWith( $item->getBasename(), $originalSourceLangMarker )){
+                $newSourceLangFileMap = str_replace($originalSourceLangMarker, $newSourceLangMarker, $item->getBasename());
+                rename($item->getBasename(), $newSourceLangFileMap);
+            }
+        }
     }
 
     /**

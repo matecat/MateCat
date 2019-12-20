@@ -199,7 +199,7 @@ class EntryDao extends \DataAccess_AbstractDao {
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        $values = $struct->attributes(
+        $values = $struct->toArray(
                 [
                         'id_segment', 'id_job', 'id_category', 'severity',
                         'translation_version', 'start_node', 'start_offset',
@@ -208,15 +208,12 @@ class EntryDao extends \DataAccess_AbstractDao {
                 ]
         );
 
-        \Database::obtain()->begin();
-
         $stmt->execute( $values );
         $lastId = $conn->lastInsertId();
         /**
          * @deprecated do not use insert and find.
          */
         $record = self::findById( $lastId );
-        $conn->commit();
 
         return $record;
     }

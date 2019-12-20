@@ -167,13 +167,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      *
      */
     public function isFeatureEnabled( $feature_code ) {
-        return in_array($feature_code, $this->getFeatures()->getCodes() );
+        return in_array($feature_code, $this->getFeaturesSet()->getCodes() );
     }
 
     /**
      * @return FeatureSet
      */
-    public function getFeatures() {
+    public function getFeaturesSet() {
         return $this->cachable(__METHOD__, $this, function( Projects_ProjectStruct $project ) {
             $featureSet = new FeatureSet() ;
             $featureSet->loadForProject( $project ) ;
@@ -256,7 +256,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     public function hasFeature( $feature_code ) {
-        return in_array( $feature_code, $this->getFeatures()->getCodes() ) ;
+        return in_array( $feature_code, $this->getFeaturesSet()->getCodes() ) ;
     }
 
 }

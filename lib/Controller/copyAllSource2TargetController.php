@@ -103,7 +103,7 @@ class copyAllSource2TargetController extends ajaxController {
         $database->begin();
 
         $chunk    = Chunks_ChunkDao::getByJobID( $job_id )[ 0 ];
-        $features = $chunk->getProject()->getFeatures();
+        $features = $chunk->getProject()->getFeaturesSet();
 
         $batchEventCreator = new BatchEventCreator( $chunk );
         $batchEventCreator->setFeatureSet( $features );

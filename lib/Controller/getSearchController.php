@@ -1,11 +1,12 @@
 <?php
 
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\SegmentTranslationVersionHandler;
+use Features\TranslationVersions;
 use Matecat\Finder\WholeTextFinder;
 use Search\ReplaceEventStruct;
 use Search\SearchModel;
 use Search\SearchQueryParamsStruct;
+use SubFiltering\Filter;
 
 class getSearchController extends ajaxController {
 
@@ -25,7 +26,10 @@ class getSearchController extends ajaxController {
 
     private $queryParams = [];
 
-    protected $job_data = [];
+    /**
+     * @var Chunks_ChunkStruct
+     */
+    protected $job_data;
 
     /**
      * @var Database|IDatabase
@@ -50,6 +54,7 @@ class getSearchController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
+        $this->readLoginInfo();
 
         $filterArgs = [
                 'function'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
@@ -122,7 +127,7 @@ class getSearchController extends ajaxController {
         $srh_ttl    = ( isset( \INIT::$REPLACE_HISTORY_TTL ) and '' !== \INIT::$REPLACE_HISTORY_TTL ) ? \INIT::$REPLACE_HISTORY_TTL : 300;
         $this->srh  = Search_ReplaceHistoryFactory::create( $this->queryParams[ 'job' ], $srh_driver, $srh_ttl );
 
-        $filter            = \SubFiltering\Filter::getInstance( $this->featureSet );
+        $filter            = Filter::getInstance( $this->featureSet );
         $this->searchModel = new SearchModel( $this->queryParams, $filter );
     }
 
@@ -141,7 +146,7 @@ class getSearchController extends ajaxController {
         }
 
         //get Job Info
-        $this->job_data = Jobs_JobDao::getByIdAndPassword( (int)$this->job, $this->password );
+        $this->job_data = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
         $this->featureSet->loadForProject( $this->job_data->getProject() );
 
         switch ( $this->function ) {
@@ -254,7 +259,7 @@ class getSearchController extends ajaxController {
      * @return string|string[]|null
      */
     private function _getReplacedSegmentTranslation( $translation ) {
-        $replacedSegmentTranslation = WholeTextFinder::findAndReplace( $translation, $this->queryParams->_regexpEscapedTrg, $this->queryParams->replacement );
+        $replacedSegmentTranslation = WholeTextFinder::findAndReplace( $translation, $this->queryParams->target, $this->queryParams->replacement );
 
         return ( !empty( $replacedSegmentTranslation ) ) ? $replacedSegmentTranslation[ 'replacement' ] : $translation;
     }
@@ -348,15 +353,6 @@ class getSearchController extends ajaxController {
             $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( (int)$tRow[ 'id_segment' ], (int)$tRow[ 'id_job' ] );
             $segment         = ( new Segments_SegmentDao() )->getById( $tRow[ 'id_segment' ] );
 
-            if ( $project->isFeatureEnabled( 'translation_versions' ) ) {
-                $versionsHandler = new SegmentTranslationVersionHandler(
-                        (int)$this->job,
-                        $tRow[ 'id_segment' ],
-                        $this->user->uid,
-                        $project->id
-                );
-            }
-
             // Propagation
             $propagationTotal = [
                     'propagated_ids' => []
@@ -368,6 +364,7 @@ class getSearchController extends ajaxController {
                     Constants_TranslationStatus::STATUS_REJECTED
             ] )
             ) {
+                $TPropagation                             = new Translations_SegmentTranslationStruct();
                 $TPropagation[ 'status' ]                 = $tRow[ 'status' ];
                 $TPropagation[ 'id_job' ]                 = $this->job;
                 $TPropagation[ 'translation' ]            = $tRow[ 'translation' ];
@@ -377,19 +374,18 @@ class getSearchController extends ajaxController {
                 $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
                 try {
-                    if ( $versionsHandler != null ) {
-                        $versionsHandler->savePropagation( [
-                                'propagation'     => $TPropagation,
-                                'old_translation' => $old_translation,
-                                'job_data'        => $this->job_data
-                        ] );
-                    }
 
                     $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $this->job_data,
                             $this->id_segment,
                             $project,
+                            TranslationVersions::getVersionHandlerNewInstance(
+                                    $chunk,
+                                    $tRow[ 'id_segment' ],
+                                    $this->getUser(),
+                                    $project
+                            ),
                             false
                     );
 

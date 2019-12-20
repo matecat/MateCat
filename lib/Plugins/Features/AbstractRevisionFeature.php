@@ -17,7 +17,6 @@ use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\Model\ArchivedQualityReportModel;
 use Features\ReviewExtended\Model\QualityReportModel;
-use Features\ReviewExtended\ReviewUtils;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
@@ -35,15 +34,12 @@ use ZipArchive;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
 
-    protected $revisionInstance;
-
     protected static $dependencies = [
             Features::TRANSLATION_VERSIONS
     ];
 
     public function __construct( BasicFeatureStruct $feature ) {
         parent::__construct( $feature );
-        RevisionFactory::getInstance( $this );
     }
 
     /**
@@ -70,27 +66,32 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * filter_review_password
+     * filter_review_password_to_job_password
      *
      * If this method is reached it means that the project we are
      * working on has ReviewExtended feature enabled, and that we
-     * are in reivew mode.
+     * are in review mode.
      *
      * Assuming the provided password is a "review_password".
      * This review password is checked against the `qa_chunk_reviews`.
      * If not found, raise an exception.
      * If found, override the input password with job password.
      *
+     * @param string $review_password
+     * @param int $id_job
+     * @param int $source_page
+     *
+     * @return ChunkReviewStruct
+     * @throws NotFoundException
      */
-    public function filter_review_password_to_job_password( $review_password, $id_job ) {
-        $chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId(
-                $review_password, $id_job );
+    public function filter_review_password_to_job_password( $review_password, $id_job, $source_page ) {
+        $chunk_review = (new \LQA\ChunkReviewDao())->findByJobIdReviewPasswordAndSourcePage( $id_job, $review_password, $source_page );
 
         if ( !$chunk_review ) {
             throw new NotFoundException( 'Review record was not found' );
         }
 
-        return $chunk_review->password;
+        return $chunk_review;
     }
 
     /**
@@ -164,10 +165,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         foreach ( $chunks as $k => $chunk ) {
             $data = [
-                    'id_project'  => $id_project,
-                    'id_job'      => $chunk->id,
-                    'password'    => $chunk->password,
-                    'source_page' => $options[ 'source_page' ]
+                    'id_project'     => $id_project,
+                    'id_job'         => $chunk->id,
+                    'password'       => $chunk->password,
+                    'source_page'    => $options[ 'source_page' ]
             ];
 
             if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
@@ -175,7 +176,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             }
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeatures()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
             $createdRecords[] = $chunkReview;
         }
 
@@ -201,10 +202,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         foreach ( $chunksArray as $k => $chunk ) {
             $data = [
-                    'id_project'  => $project->id,
-                    'id_job'      => $chunk->id,
-                    'password'    => $chunk->password,
-                    'source_page' => $options[ 'source_page' ]
+                    'id_project'     => $project->id,
+                    'id_job'         => $chunk->id,
+                    'password'       => $chunk->password,
+                    'source_page'    => $options[ 'source_page' ]
             ];
 
             if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
@@ -212,7 +213,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
             }
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeatures()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
             $createdRecords[] = $chunkReview;
         }
 
@@ -343,6 +344,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     /**
      * @param TranslationVersions\Model\BatchEventCreator $eventCreator
      *
+     * @throws Exception
      * @internal param SegmentTranslationEventModel $event
      */
     public function batchEventCreationSaved( Features\TranslationVersions\Model\BatchEventCreator $eventCreator ) {
@@ -351,6 +353,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
+     *
+     * /TODO move in review Improved???
      * project_completion_event_saved
      *
      * @param Chunks_ChunkStruct    $chunk

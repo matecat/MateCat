@@ -8,6 +8,7 @@
 
 namespace Features\ReviewExtended\Model;
 
+use Exception;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use RevisionFactory;
 use SegmentTranslationChangeVector;
@@ -23,6 +24,9 @@ class BatchReviewProcessor {
         $this->_batchEventCreator = $eventCreator;
     }
 
+    /**
+     * @throws Exception
+     */
     public function process() {
 
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $this->_batchEventCreator->getChunk() );

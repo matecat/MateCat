@@ -6,4 +6,5 @@ Disallow: /manage/
 Disallow: /analyze/
 Disallow: /jobanalysis/
 Disallow: /editlog/
+Disallow: /wp-content/
 

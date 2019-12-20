@@ -54,7 +54,7 @@ class ChangeProjectPasswordController  extends ajaxController {
         $pDao->destroyCacheById( $this->id_project ) ;
         ( new Jobs_JobDao() )->destroyCacheByProjectId( $this->id_project );
 
-        $pStruct->getFeatures()->run('project_password_changed', $pStruct, $this->old_password );
+        $pStruct->getFeaturesSet()->run('project_password_changed', $pStruct, $this->old_password );
 
         $this->api_output[ 'status' ]       = 'OK';
         $this->api_output[ 'id_project' ]   = $this->id_project;

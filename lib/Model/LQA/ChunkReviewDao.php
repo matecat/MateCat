@@ -107,9 +107,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             WHERE jobs.id = ? AND jobs.password = ?
             AND st.status IN ( $statuses_placeholder )
 
-            AND ( st.match_type != 'ICE'
-                OR ( st.match_type = 'ICE' AND locked AND st.version_number > 0 )
-                OR ( st.match_type = 'ICE' AND not locked ) )
+            AND ( st.match_type != 'ICE' OR ( st.match_type = 'ICE' AND locked AND st.version_number > 0 AND time_to_edit != 0) OR ( st.match_type = 'ICE' AND not locked ) )
 
             AND st.id_segment
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
@@ -163,7 +161,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      *
      * @return ChunkReviewStruct[]
      */
-    public function findChunkReviews( Chunks_ChunkStruct $chunkStruct ){
+    public function findChunkReviews( Chunks_ChunkStruct $chunkStruct ) {
         return $this->_findChunkReviews( [ $chunkStruct ] );
     }
 
@@ -172,7 +170,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      *
      * @return ChunkReviewStruct[]
      */
-    public function findChunkReviewsForList( Array $chunkStructsArray ){
+    public function findChunkReviewsForList( Array $chunkStructsArray ) {
         return $this->_findChunkReviews( $chunkStructsArray );
     }
 
@@ -182,22 +180,23 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      *
      * @return ChunkReviewStruct[]
      */
-    public function findChunkReviewsForSourcePage( Chunks_ChunkStruct $chunkStruct, $source_page = Constants::SOURCE_PAGE_REVISION ){
+    public function findChunkReviewsForSourcePage( Chunks_ChunkStruct $chunkStruct, $source_page = Constants::SOURCE_PAGE_REVISION ) {
         $sql_condition = " WHERE source_page = $source_page ";
+
         return $this->_findChunkReviews( [ $chunkStruct ], $sql_condition );
     }
 
     /**
      * @param Chunks_ChunkStruct[] $chunksArray
-     * @param   string             $default_condition
+     * @param string               $default_condition
      *
      * @return DataAccess_IDaoStruct[]|ChunkReviewStruct[]
      */
-    protected function _findChunkReviews( Array $chunksArray, $default_condition = ' WHERE 1 = 1 ' ){
+    protected function _findChunkReviews( Array $chunksArray, $default_condition = ' WHERE 1 = 1 ' ) {
 
         $_conditions = [];
         $_parameters = [];
-        foreach( $chunksArray as $chunk ){
+        foreach ( $chunksArray as $chunk ) {
             $_conditions[] = " ( jobs.id = ? AND jobs.password = ? ) ";
             $_parameters[] = $chunk->id;
             $_parameters[] = $chunk->password;
@@ -306,6 +305,29 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @return ChunkReviewStruct
+     */
+    public function findByJobIdReviewPasswordAndSourcePage( $id_job, $review_password, $source_page ) {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
+                " WHERE review_password = :review_password " .
+                " AND id_job = :id_job " .
+                " AND source_page = :source_page ";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
+        $stmt->execute(
+                [
+                        'review_password'    => $review_password,
+                        'id_job'      => $id_job,
+                        'source_page' => $source_page
+                ]
+        );
+
+        return $stmt->fetch();
+    }
+
+    /**
      * @param $id_job
      * @param $password
      *
@@ -335,6 +357,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      *
      * @return ChunkReviewStruct
      * @throws \Exceptions\ValidationError
+     * @throws \ReflectionException
      * @internal param bool $setDefaults
      */
     public static function createRecord( $data ) {
@@ -343,28 +366,30 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $struct->ensureValid();
         $struct->setDefaults();
 
-        $attrs = $struct->attributes( [
+        $attrs = $struct->toArray( [
                 'id_project',
                 'id_job',
                 'password',
                 'review_password',
-                'source_page'
+                'source_page',
+                'advancement_wc',
+                'total_tte',
+                'avg_pee'
         ] );
 
         $sql = "INSERT INTO " . self::TABLE .
-                " ( id_project, id_job, password, review_password, source_page ) " .
+                " ( id_project, id_job, password, review_password, source_page, advancement_wc, total_tte, avg_pee ) " .
                 " VALUES " .
-                " ( :id_project, :id_job, :password, :review_password, :source_page ) ";
+                " ( :id_project, :id_job, :password, :review_password, :source_page, :advancement_wc, :total_tte, :avg_pee ) ";
 
         $conn = \Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $attrs );
 
-        $lastId = $conn->lastInsertId();
-        $record = self::findById( $lastId );
+        $struct->id = $conn->lastInsertId();
 
-        return $record;
+        return $struct;
     }
 
     public static function deleteByJobId( $id_job ) {

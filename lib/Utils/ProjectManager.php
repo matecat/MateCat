@@ -611,7 +611,7 @@ class ProjectManager {
 
                 if ( AbstractFilesStorage::isOnS3() ) {
                     if ( null === $cachedXliffFilePathName ) {
-                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', $_originalFileNames[ 0 ] ), -6 );
+                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)    ), -6 );
                     }
                 } else {
                     if ( !file_exists( $cachedXliffFilePathName ) ) {

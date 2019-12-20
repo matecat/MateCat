@@ -84,7 +84,7 @@ class ChunkController extends KleinController {
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
             $this->setProject( $Validator->getChunk()->getProject() );
-            $this->setFeatureSet( $this->project->getFeatures() );
+            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
         $this->appendValidator( $Validator );
     }

@@ -49,7 +49,7 @@ class ProjectCreationStatusController extends KleinController {
                 throw new AuthorizationError( 'Not Authorized.' );
             }
 
-            $featureSet = $project->getFeatures();
+            $featureSet = $project->getFeaturesSet();
             $result = $featureSet->filter('filterCreationStatus', $result, $project);
 
             if ( empty( $result ) ) {

@@ -10,6 +10,7 @@ namespace API\V2\Validators;
 
 
 use API\V2\Exceptions\NotFoundException;
+use Features\ReviewExtended\ReviewUtils;
 use LQA\ChunkReviewDao;
 
 class ChunkReviewPasswordValidator extends ChunkPasswordValidator {
@@ -18,14 +19,20 @@ class ChunkReviewPasswordValidator extends ChunkPasswordValidator {
 
     public function _validate() {
 
-        $this->chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId(
-                $this->request->password, $this->request->id_job ) ;
+        if($this->revision_number > 1){
+            $this->chunk_review = ( new \LQA\ChunkReviewDao() )->findByJobIdReviewPasswordAndSourcePage(
+                    $this->id_job,
+                    $this->password,
+                    ReviewUtils::revisionNumberToSourcePage( $this->revision_number )
+            );
 
-        if ( ! $this->chunk_review ) {
+            if ( ! $this->chunk_review ) {
+                throw new NotFoundException('Not Found', 404 );
+            }
+
+            $this->chunk = $this->chunk_review->getChunk() ;
+        } else {
             throw new NotFoundException('Not Found', 404 );
         }
-
-
-        $this->chunk = $this->chunk_review->getChunk() ;
     }
 }

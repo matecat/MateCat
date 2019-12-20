@@ -72,6 +72,21 @@ var UI = {
         this.currentSegment = undefined;
         this.currentFile = undefined;
         this.currentFileId = undefined;
+
+    },
+    /**
+     * shouldSegmentAutoPropagate
+     *
+     * Returns whether or not the segment should be propagated. Default is true.
+     *
+     * @returns {boolean}
+     */
+    shouldSegmentAutoPropagate : function( $segment, newStatus ) {
+        var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment), UI.getSegmentFileId($segment));
+        var segmentStatus = UI.getSegmentStatus(segment);
+        var notAcceptedStatus = ['translated', 'approved'];
+        var segmentModified = UI.currentSegmentTranslation.trim() !== UI.editarea.text().trim();
+        return ( !config.isReview && (segmentModified && notAcceptedStatus.indexOf(segmentStatus) === -1 ));
     },
 
     /**
@@ -88,9 +103,14 @@ var UI = {
             segment_id      : segment_id,
             status          : status,
             byStatus        : byStatus,
-            propagation     : segObj.propagable,
+            propagation     : UI.shouldSegmentAutoPropagate( segment, status ),
             callback        : callback
         };
+
+        if ( byStatus || opts.noPropagation ) {
+            opts.noPropagation = true;
+            this.execChangeStatus(JSON.stringify(opts)); // no propagation
+        } else {
 
         // ask if the user wants propagation or this is valid only
         // for this segment

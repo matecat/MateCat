@@ -8,10 +8,12 @@ use API\V2\Exceptions\AuthenticationError;
 use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
+use Exception;
 use FeatureSet;
 use Users_UserDao;
 
 /**
+ * @property  int revision_number
  * @property  string password
  * @property  int id_job
  */
@@ -99,6 +101,16 @@ abstract class KleinController implements IController {
         return $this->params;
     }
 
+    /**
+     * KleinController constructor.
+     *
+     * @param $request
+     * @param $response
+     * @param $service
+     * @param $app
+     *
+     * @throws AuthenticationError
+     */
     public function __construct( $request, $response, $service, $app ) {
 
         $this->startTimer();
@@ -117,16 +129,27 @@ abstract class KleinController implements IController {
         $this->authenticate();
     }
 
+    /**
+     * @throws AuthenticationError
+     */
     public function authenticate(){
         $this->validateAuth();
         $this->identifyUser();
         $this->afterConstruct();
     }
 
+    /**
+     * @throws Exception
+     */
     public function performValidations(){
         $this->validateRequest();
     }
 
+    /**
+     * @param $method
+     *
+     * @throws Exception
+     */
     public function respond( $method ) {
 
         $this->performValidations();
