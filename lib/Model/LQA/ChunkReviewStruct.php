@@ -13,11 +13,11 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $source_page ;
     public $is_pass ;
     public $force_pass_at ;
-    public $reviewed_words_count ;
+    public $reviewed_words_count = 0;
     public $undo_data ;
-    public $advancement_wc ;
-    public $total_tte ;
-    public $avg_pee ;
+    public $advancement_wc = 0;
+    public $total_tte = 0;
+    public $avg_pee = 0;
 
     /**
      * Sets default values for an empty struct

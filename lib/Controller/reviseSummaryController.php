@@ -6,6 +6,8 @@ use ActivityLog\ActivityLogStruct;
 /**
  * Description of catController
  *
+ * @Deprecated
+ *
  * @author antonio
  */
 class reviseSummaryController extends viewController {

@@ -223,11 +223,13 @@ abstract class viewController extends controller {
         return $this->authURL;
     }
 
+    /**
+     * @return bool
+     */
     public static function isRevision() {
-        //TODO: IMPROVE
-        $_from_url       = parse_url( $_SERVER[ 'REQUEST_URI' ] );
-        $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
-        return $is_revision_url;
+        $_from_url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+
+        return strpos( $_from_url[ 'path' ], "/revise" ) === 0;
     }
 
     protected function render404( $customTemplate = '404.html' ) {

@@ -82,7 +82,7 @@ class Chunks_ChunkCompletionUpdateDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Chunks_ChunkCompletionUpdateStruct');
 
-        $data = $struct->attributes(array(
+        $data = $struct->toArray(array(
             'id_project', 'id_job', 'password', 'job_first_segment', 'job_last_segment',
             'source', 'uid', 'is_review', 'last_translation_at'
         ));

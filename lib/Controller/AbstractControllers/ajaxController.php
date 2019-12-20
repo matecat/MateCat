@@ -70,24 +70,6 @@ abstract class ajaxController extends controller {
         return $is_revision_url;
     }
 
-    /**
-     * TODO: move this method to a Utils static class
-     *
-     * @param FeatureSet $featureSet
-     *
-     * @return mixed
-     */
-    public static function getRefererSourcePageCode( FeatureSet $featureSet ) {
-        if ( !static::isRevision() ) {
-            $sourcePage = Constants::SOURCE_PAGE_TRANSLATE ;
-        }
-        else {
-            $sourcePage = Constants::SOURCE_PAGE_REVISION ;
-        }
-
-        return $featureSet->filter('filterSourcePage', $sourcePage ) ;
-    }
-
     public function parseIDSegment() {
         @list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
     }

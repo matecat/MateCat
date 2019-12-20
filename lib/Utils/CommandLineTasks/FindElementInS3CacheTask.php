@@ -87,6 +87,9 @@ class FindElementInS3CacheTask extends Command {
      * @param InputInterface  $input
      * @param OutputInterface $output
      * @param string          $bucketName
+     *
+     * @throws \Predis\Connection\ConnectionException
+     * @throws \ReflectionException
      */
     private function askForDisplayingAndThenDeletingTheKeys( array $keysInPath, $keyPath, InputInterface $input, OutputInterface $output, $bucketName ) {
         if ( false === empty( $keysInPath ) ) {
@@ -94,32 +97,22 @@ class FindElementInS3CacheTask extends Command {
             $io     = new SymfonyStyle( $input, $output );
             $helper = $this->getHelper( 'question' );
 
-            // ask for displaying the key content
-            $question = new ConfirmationQuestion( '1. Do you want to display the content of key(s) present in <fg=yellow>' . $keyPath . '</> path in redis cache?', false );
-            if ( $helper->ask( $input, $output, $question ) ) {
-                foreach ( $keysInPath as $key ) {
-                    $output->writeln([
-                            '',
-                            '<info>==========================</>',
-                            $this->redisCache->get( $bucketName, $key ),
-                            '<info>==========================</>',
-                            '',
-                    ]);
-                }
-            } else {
-                $output->writeln([
-                        '',
-                ]);
-            }
-
             // ask for deleting keys from cache
-            $question = new ConfirmationQuestion( '2. Do you want to delete key(s) present in <fg=yellow>' . $keyPath . '</> path from redis cache?', false );
+            $question = new ConfirmationQuestion( 'Do you want to delete key(s) present in <fg=yellow>' . $keyPath . '</> path from redis cache AND from S3?', false );
             if ( false === $helper->ask( $input, $output, $question ) ) {
                 return;
             }
 
+            $s3Client = S3FilesStorage::getStaticS3Client();
+
             // remove all keys from the path
             foreach ( $keysInPath as $key ) {
+
+                $s3Client->deleteItem([
+                    'bucket' => $bucketName,
+                    'key' => $key,
+                ]);
+
                 $this->redisCache->remove( $bucketName, $key );
             }
 

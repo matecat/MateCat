@@ -1,6 +1,5 @@
 <?php
 
-
 namespace ConnectedServices\GDrive;
 
 use API\V2\KleinController;
@@ -31,22 +30,30 @@ class GDriveController extends KleinController {
      */
     private $gdriveConnectedService;
 
+    /**
+     * @throws Exception
+     */
     public function open() {
-
         $this->setIsAsyncReq( $this->request->param( 'isAsync' ) );
+        $this->source_lang = $this->request->param( 'source' );
+        $this->target_lang = $this->request->param( 'target' );
 
-        $this->correctSourceTargetLang();
+        $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
 
         $this->doImport();
-
         $this->finalize();
-
     }
 
+    /**
+     * @throws Exception
+     */
     private function initSessionService() {
-        $this->gdriveUserSession = new Session( $_SESSION );
+        $this->gdriveUserSession = new Session();
     }
 
+    /**
+     * @throws Exception
+     */
     private function doImport() {
 
         $state = json_decode( $this->request->param( 'state' ), true );
@@ -84,53 +91,6 @@ class GDriveController extends KleinController {
         }
     }
 
-    /**
-     * This method takes the COOKIES and sets:
-     *
-     * - the source language
-     * - the target language from the latest used target languages, and sets a WRONG value
-     */
-    private function correctSourceTargetLang() {
-        $this->setLanguageFromCookies('source');
-        $this->setLanguageFromCookies('target');
-
-        $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
-    }
-
-    /**
-     * @param string $type
-     */
-    private function setLanguageFromCookies($type) {
-
-        switch ($type){
-            case 'source':
-            default:
-                $key = Constants::COOKIE_SOURCE_LANG;
-                $propName = 'source_lang';
-                break;
-
-            case 'target':
-                $key = Constants::COOKIE_TARGET_LANG;
-                $propName = 'target_lang';
-        }
-
-        if ( isset ( $_COOKIE[ $key ] ) ) {
-            if ( $_COOKIE[ $key ] != Constants::EMPTY_VAL ) {
-                $LangHistory = $_COOKIE[ $key ];
-                $LangAr      = explode( '||', urldecode( $LangHistory ) );
-                $countLangAr = count( $LangAr );
-
-                if ( $countLangAr > 0 ) {
-                    $lang = $LangAr[ $countLangAr - 2 ];
-                    $lang = explode(',', $lang);
-                    $this->{$propName} = end($lang);
-                }
-            }
-        } else {
-            setcookie( $key, Constants::EMPTY_VAL, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
-        }
-    }
-
     private function finalize() {
         if ( $this->isAsyncReq ) {
             $this->doResponse();
@@ -158,30 +118,19 @@ class GDriveController extends KleinController {
     public function changeSourceLanguage() {
         $originalSourceLang = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
         $newSourceLang      = $this->request->sourceLanguage;
-
-        $success = $this->gdriveUserSession->changeSourceLanguage( $newSourceLang, $originalSourceLang );
+        $success            = $this->gdriveUserSession->changeSourceLanguage( $newSourceLang, $originalSourceLang );
 
         if ( $success ) {
             $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;
-
-            $ckSourceLang = filter_input( INPUT_COOKIE, Constants::COOKIE_SOURCE_LANG );
-
-            if ( $ckSourceLang == null || $ckSourceLang === false || $ckSourceLang === Constants::EMPTY_VAL ) {
-                $ckSourceLang = '';
-            }
-
-            $newCookieVal = $newSourceLang . '||' . $ckSourceLang;
-
-            setcookie( Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
+            $this->source_lang                                 = $newSourceLang;
         } else {
             $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $originalSourceLang;
+            $this->source_lang                                 = $originalSourceLang;
         }
 
-        $response = [
+        $this->response->json( [
                 "success" => $success
-        ];
-
-        $this->response->json( $response );
+        ] );
     }
 
     public function deleteImportedFile() {

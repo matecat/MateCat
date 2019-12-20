@@ -882,6 +882,7 @@ const SegmentActions = {
             actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
             sid: sid
         });
+        localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
         this.scrollToSegment(sid);
     },
 

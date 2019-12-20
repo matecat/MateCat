@@ -29,9 +29,10 @@ class ModelDao extends DataAccess_AbstractDao {
 
     /**
      * @param $data
+     *
      * @return ModelStruct
      * @throws \Exceptions\ValidationError
-     *
+     * @throws \ReflectionException
      * @deprecated remove the need for insert and select
      */
     public static function createRecord( $data ) {
@@ -48,9 +49,9 @@ class ModelDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( $struct->attributes(
-            array('label', 'pass_type', 'pass_options')
-        ));
+        $stmt->execute( $struct->toArray(
+                [ 'label', 'pass_type', 'pass_options' ]
+        ) );
 
         $lastId = $conn->lastInsertId();
 
@@ -66,7 +67,7 @@ class ModelDao extends DataAccess_AbstractDao {
      * @param       $json
      *
      * @return ModelStruct
-     *
+     * @throws \Exceptions\ValidationError
      */
     public static function createModelFromJsonDefinition( $json ) {
         $model_root = $json['model'];

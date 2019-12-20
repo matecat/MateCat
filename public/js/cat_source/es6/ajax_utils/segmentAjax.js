@@ -62,7 +62,7 @@ API.SEGMENT = {
     sendSegmentVersionIssue: function (idSegment, data) {
 
         var path = sprintf(APP.getRandomUrl() + 'api/v2/jobs/%s/%s/segments/%s/translation-issues',
-            config.id_job, config.password, idSegment);
+            config.id_job, config.review_password, idSegment);
         data.revision_number = config.revisionNumber;
         return $.ajax({
             data: data,

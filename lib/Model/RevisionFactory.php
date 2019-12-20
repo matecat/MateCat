@@ -1,21 +1,21 @@
 <?php
 
-use API\V2\Validators\SegmentTranslationIssue;
+use API\V2\Validators\SegmentTranslationIssueValidator;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
+use Features\ISegmentTranslationModel;
+use Features\ReviewExtended;
 use Features\SecondPassReview\Model\ChunkReviewModel;
+use Features\SecondPassReview\TranslationIssueModel;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
 
 /**
- * Created by PhpStorm.
- * User: fregini
- * Date: 25/02/2019
- * Time: 15:55
+ * Class RevisionFactory
  */
 class RevisionFactory {
 
-    /** @var  \Features\AbstractRevisionFeature */
+    /** @var  AbstractRevisionFeature */
     protected        $revision;
     protected static $INSTANCE;
 
@@ -56,20 +56,22 @@ class RevisionFactory {
      * @param SegmentTranslationChangeVector $translation
      * @param ChunkReviewStruct[]            $chunkReviews
      *
-     * @return \Features\ISegmentTranslationModel
+     * @return ISegmentTranslationModel
      */
     public function getSegmentTranslationModel( SegmentTranslationChangeVector $translation, array $chunkReviews ) {
         return $this->revision->getSegmentTranslationModel( $translation, $chunkReviews );
     }
 
     /**
-     * @param \Klein\Request $request
+     * This method use a filter because of external plugins
      *
-     * @return mixed
-     * @throws \Exception
+     * @param Request $request
+     *
+     * @return SegmentTranslationIssueValidator|\Features\ReviewImproved\Controller\API\V2\Validators\SegmentTranslationIssueValidator
+     * @throws Exception
      */
     public function getTranslationIssuesValidator( Request $request ) {
-        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssue( $request ) );
+        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssueValidator( $request ) );
     }
 
     /**
@@ -88,24 +90,47 @@ class RevisionFactory {
      * @param $password
      * @param $issue
      *
-     * @return mixed
+     * @return ReviewExtended\TranslationIssueModel|Features\SecondPassReview\TranslationIssueModel
      */
     public function getTranslationIssueModel( $id_job, $password, $issue ) {
         if ( $this->_isSecondPass() ) {
-            return new \Features\SecondPassReview\TranslationIssueModel( $id_job, $password, $issue );
+            return new TranslationIssueModel( $id_job, $password, $issue );
         } else {
             return $this->revision->getTranslationIssueModel( $id_job, $password, $issue );
         }
     }
 
+    /**
+     * This method is invoked to update the features before calling filters
+     * @see self::getTranslationIssuesValidator
+     * @param Projects_ProjectStruct $project
+     *
+     * @return static
+     * @throws Exception
+     */
     public static function initFromProject( Projects_ProjectStruct $project ) {
-        return static::getInstance()->setFeatureSet( $project->getFeatures() );
+        foreach( $project->getFeaturesSet()->getFeaturesStructs() as $featureStruct ){
+            $feature = $featureStruct->toNewObject();
+            if( $feature instanceof AbstractRevisionFeature ){ //only one revision type can be present
+                return static::getInstance( $feature )->setFeatureSet( $project->getFeaturesSet() );
+            }
+        }
+        /**
+         * This return should never happens if the review_extended plugin is load as mandatory
+         * When the OLD revision is set, this factory should be never invoked
+         * When review_improved or review_extended is loaded by initProject we never reach this line
+         */
+        return static::getInstance(
+                new ReviewExtended(
+                        new BasicFeatureStruct( [ 'feature_code' => ReviewExtended::FEATURE_CODE ] )
+                )
+        )->setFeatureSet( $project->getFeaturesSet() );
     }
 
     /**
-     * @return \Features\AbstractRevisionFeature|\Features\BaseFeature
+     * @return AbstractRevisionFeature
      */
-    public function getFeature() {
+    public function getRevisionFeature() {
         return $this->revision;
     }
 

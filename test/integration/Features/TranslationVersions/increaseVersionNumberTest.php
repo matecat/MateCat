@@ -110,10 +110,5 @@ class increaseVersionNumberTest extends IntegrationTest {
             $this->assertEquals(1, $translation->version_number, "On record number $key " );
         }
 
-        // $versions = Translations_TranslationVersionDao::getVersionsForJob(
-        //   $translations[0]->id_job
-        // );
-
-
     }
 }

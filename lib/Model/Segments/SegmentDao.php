@@ -240,7 +240,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     isset( $options[ 'filter' ][ 'issue_category' ] ) &&
                     $options[ 'filter' ][ 'issue_category' ] == self::ISSUE_CATEGORY_ALL
             ) {
-                if ( $chunk->getProject()->getFeatures()->hasRevisionFeature() ) {
+                if ( $chunk->getProject()->getFeaturesSet()->hasRevisionFeature() ) {
                     $options_conditions_query .= " AND e.id_category IS NOT NULL " ;
                 }
                 else {
@@ -774,7 +774,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
             $bind_keys = [ 'id_segment' => $sid ];
 
         } else {
-
+            //TODO cache this query?
             /**
              * This query gets, for each hash with more than one translations available, the min id of the segments
              *

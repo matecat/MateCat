@@ -61,7 +61,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $database->begin() ;
 
         $batchEventCreator = new BatchEventCreator( $chunk ) ;
-        $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeatures() ) ;
+        $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeaturesSet() ) ;
         $batchEventCreator->setProject( $chunk->getProject() );
 
         foreach ( $params[ 'segment_ids' ] as $segment_id ) {
