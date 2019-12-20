@@ -517,14 +517,14 @@ body.analyze{
                 }
                 .split, .merge {
                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                    padding: 8px 16px;
+                    padding: 5px 20px; //padding: 8px 16px;
                     vertical-align: top;
-                    font-size: 16px;
+                    font-size: 19px; //font-size: 16px;
                     border: 1px solid #09beec;
                     border-radius: 2px;
                     box-shadow: none !important;
                     background-color: #ffffff !important;
-                    font-weight: normal;
+                    font-weight: 700; //font-weight: normal;
                     /*margin-top: -3px;*/
                     &:hover {
                         text-decoration: none;
@@ -548,13 +548,13 @@ body.analyze{
                 .open-translate,
                 .open-revise {
                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                    padding: 8px 16px;
+                    padding: 6px 15px; // padding: 8px 16px;
                     vertical-align: top;
-                    font-size: 16px;
-                    border: none;
+                    font-size: 20px; //font-size: 16px;
+                    border: 1px solid #797979; //border: none;
                     border-radius: 2px;
                     /*margin: -3px 0 0 0;*/
-                    font-weight: normal;
+                    font-weight: 700; //font-weight: normal;
                 }
 
                 &.splitted {
