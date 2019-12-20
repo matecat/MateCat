@@ -34,7 +34,7 @@ class TeamProjectValidator extends Base {
      */
     public function _validate() {
 
-        if ( empty( $this->project ) ) {
+        if ( empty( $this->project ) || empty( $this->project->id )  ) {
             throw new NotFoundException( "Not Found", 404 );
         }
 

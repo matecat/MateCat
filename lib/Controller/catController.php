@@ -4,6 +4,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
+use LQA\ChunkReviewStruct;
 use TmKeyManagement\UserKeysModel;
 use Engines_Intento as Intento;
 
@@ -107,41 +108,14 @@ class catController extends viewController {
     }
 
     /**
-     * findJobByIdAndPassword
-     *
-     * Finds the current chunk by job id and password. if in revision then
-     * pass the control to a filter, to allow plugin to interact with the
-     * authorization process.
-     *
-     * Filters may restore the password to the actual password contained in
-     * `jobs` table, while the request may have come with a different password
-     * for the purpose of access control.
-     *
-     * This is done to avoid the rewrite of preexisting implementations.
+     * @return mixed|void
+     * @throws \Exception
      */
-    private function findJobByIdAndPassword() {
-        if ( self::isRevision() ) {
-
-            $this->password = $this->featureSet->filter(
-                    'filter_review_password_to_job_password',
-                    $this->password,
-                    $this->jid
-            );
-        }
-
-        $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
-
-        $this->featureSet->run('catControllerChunkFound', $this);
-    }
-
     public function doAction() {
-
         $this->featureSet->run('beginDoAction', $this);
 
         try {
-            // TODO: why is this check here and not in constructor? At least it should be moved in a specific
-            // function and not-found handled via exception.
-            $this->findJobByIdAndPassword();
+            $this->findJobByIdPasswordAndSourcePage();
             $this->featureSet->run('handleProjectType', $this);
         } catch( NotFoundException $e ){
             $this->job_not_found = true;
@@ -153,14 +127,11 @@ class catController extends viewController {
 
         if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_CANCELLED ) {
             $this->job_cancelled = true;
-
-            //stop execution
             return;
         }
 
         if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_ARCHIVED ) {
             $this->job_archived = true;
-            //stop execution
             return;
         }
 
@@ -201,15 +172,7 @@ class catController extends viewController {
         /**
          * get first segment of every file
          */
-        $fileInfo     = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->jid );
-        $TotalPayable = array();
-        foreach ( $fileInfo as &$file ) {
-            $file[ 'file_name' ] = ZipArchiveExtended::getFileName( $file[ 'file_name' ] );
-
-            $TotalPayable[ $file[ 'id_file' ] ][ 'TOTAL_FORMATTED' ] = $file[ 'TOTAL_FORMATTED' ];
-        }
-        $this->firstSegmentOfFiles = json_encode( $fileInfo );
-        $this->fileCounter         = json_encode( $TotalPayable );
+        $this->firstSegmentOfFiles = json_encode( Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk ) );
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -283,6 +246,36 @@ class catController extends viewController {
 
         $this->_saveActivity();
 
+    }
+
+    /**
+     * findJobByIdPasswordAndSourcePage
+     *
+     * Finds the current chunk by job id, password and source page. if in revision then
+     * pass the control to a filter, to allow plugin to interact with the
+     * authorization process.
+     *
+     * Filters may restore the password to the actual password contained in
+     * `jobs` table, while the request may have come with a different password
+     * for the purpose of access control.
+     *
+     * This is done to avoid the rewrite of preexisting implementations.
+     */
+    private function findJobByIdPasswordAndSourcePage() {
+        if ( self::isRevision() ) {
+
+            /** @var ChunkReviewStruct $chunkReviewStruct */
+            $chunkReviewStruct = $this->featureSet->filter(
+                    'filter_review_password_to_job_password',
+                    $this->password,
+                    $this->jid,
+                    Utils::getSourcePage()
+            );
+            $this->chunk = $chunkReviewStruct->getChunk();
+            $this->password = $chunkReviewStruct->password;
+        } else {
+            $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+        }
     }
 
     protected function _saveActivity(){

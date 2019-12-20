@@ -31,13 +31,16 @@ class WarningDao extends \DataAccess_AbstractDao {
         $placeholders = sprintf( "?%s", str_repeat(",?", $rowCount ) );
 
         $sql = "
-          SELECT COUNT(1) as count, jobs.id AS id_job, jobs.password, group_concat( st.id_segment ORDER BY id_segment ) as segment_list
-            FROM jobs
-              JOIN segment_translations st USE INDEX( id_job ) ON st.id_job = jobs.id AND st.id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-                WHERE st.warning = 1
-                AND id_project IN( $placeholders )
-                AND st.status IN( ?, ? )
-                GROUP BY id_job, password
+        SELECT 	COUNT( jobs.id ) as count,
+                jobs.id AS id_job,
+                jobs.password,
+                GROUP_CONCAT( st.id_segment ORDER BY id_segment ) as segment_list
+                    FROM segment_translations st
+                      JOIN jobs ON st.id_job = jobs.id AND st.id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+                        WHERE st.warning = 1
+                        AND id_project IN( $placeholders )
+                        AND st.status IN( ?, ? )
+                        GROUP BY id_job, password;
         ";
 
         $params = array_merge( $projectIds, $statuses );

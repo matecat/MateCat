@@ -35,6 +35,7 @@ class ChunkPasswordValidator extends Base {
 
     protected $id_job;
     protected $password;
+    protected $revision_number;
 
     public function __construct( KleinController $controller ) {
 
@@ -47,6 +48,9 @@ class ChunkPasswordValidator extends Base {
                 'password' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
+                'revision_number'     => [
+                        'filter' => FILTER_SANITIZE_NUMBER_INT
+                ],
         ];
 
         $postInput = (object)filter_var_array( $controller->getParams(), $filterArgs );
@@ -56,6 +60,11 @@ class ChunkPasswordValidator extends Base {
 
         $controller->id_job   = $this->id_job;
         $controller->password = $this->password;
+
+        if(false === empty($postInput->revision_number)){
+            $this->revision_number = $postInput->revision_number;
+            $controller->revision_number = $this->revision_number;
+        }
 
     }
 
