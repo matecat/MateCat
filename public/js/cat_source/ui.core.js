@@ -103,68 +103,65 @@ var UI = {
             segment_id      : segment_id,
             status          : status,
             byStatus        : byStatus,
-            propagation     : UI.shouldSegmentAutoPropagate( segment, status ),
+            propagation     : segObj.propagable && UI.shouldSegmentAutoPropagate( segment, status ),
             callback        : callback
         };
 
-        if ( byStatus || opts.noPropagation ) {
-            opts.noPropagation = true;
-            this.execChangeStatus(JSON.stringify(opts)); // no propagation
-        } else {
+        this.execChangeStatus( opts );
 
         // ask if the user wants propagation or this is valid only
         // for this segment
 
-        if ( this.autopropagateConfirmNeeded() && !byStatus) {
-
-            // var optionsStr = opts;
-            var props = {
-                text: "There are other identical segments. <br><br>Would you " +
-                    "like to propagate the translation to all of them, " +
-                    "or keep this translation only for this segment?",
-                successText: 'Only this segment',
-                successCallback: function(){
-                        opts.propagation = false;
-                        UI.preExecChangeStatus(opts);
-                        APP.ModalWindow.onCloseModal();
-                    },
-                cancelText: 'Propagate to All',
-                cancelCallback: function(){
-                        opts.propagation = true;
-                        UI.execChangeStatus(opts);
-                        APP.ModalWindow.onCloseModal();
-                    },
-                onClose: function(){
-                    UI.preExecChangeStatus(opts);
-                }
-            };
-            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
-        } else {
-            this.execChangeStatus( opts ); // autopropagate
-        }
+        // if ( this.autopropagateConfirmNeeded() && !byStatus) {
+        //
+        //     // var optionsStr = opts;
+        //     var props = {
+        //         text: "There are other identical segments. <br><br>Would you " +
+        //             "like to propagate the translation to all of them, " +
+        //             "or keep this translation only for this segment?",
+        //         successText: 'Only this segment',
+        //         successCallback: function(){
+        //                 opts.propagation = false;
+        //                 UI.preExecChangeStatus(opts);
+        //                 APP.ModalWindow.onCloseModal();
+        //             },
+        //         cancelText: 'Propagate to All',
+        //         cancelCallback: function(){
+        //                 opts.propagation = true;
+        //                 UI.execChangeStatus(opts);
+        //                 APP.ModalWindow.onCloseModal();
+        //             },
+        //         onClose: function(){
+        //             UI.preExecChangeStatus(opts);
+        //         }
+        //     };
+        //     APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
+        // } else {
+        //     this.execChangeStatus( opts ); // autopropagate
+        // }
 	},
 
-    autopropagateConfirmNeeded: function () {
-        var segment = SegmentStore.getCurrentSegment();
-        if( !segment.modified && !config.isReview) { //segment not modified
-            return false;
-        }
-
-        if(segment.propagable) {
-            if(config.isReview) {
-                return true;
-            } else {
-                return segment.status.toLowerCase() !== "new" && segment.status.toLocaleString() !== "draft";
-            }
-        }
-        return false;
-
-    },
-    preExecChangeStatus: function (optStr) {
-        var opt = optStr;
-        opt.propagation = false;
-        this.execChangeStatus(opt);
-    },
+    // autopropagateConfirmNeeded: function () {
+    //     var segment = SegmentStore.getCurrentSegment();
+    //     if( !segment.modified && !config.isReview) { //segment not modified
+    //         return false;
+    //     }
+    //
+    //     if(segment.propagable) {
+    //         if(config.isReview) {
+    //             return true;
+    //         } else {
+    //             return segment.status.toLowerCase() !== "new" && segment.status.toLocaleString() !== "draft";
+    //         }
+    //     }
+    //     return false;
+    //
+    // },
+    // preExecChangeStatus: function (optStr) {
+    //     var opt = optStr;
+    //     opt.propagation = false;
+    //     this.execChangeStatus(opt);
+    // },
     execChangeStatus: function (optStr) {
         var options = optStr;
 
