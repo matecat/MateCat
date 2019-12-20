@@ -47,10 +47,8 @@ class RemoteFileService extends AbstractRemoteFileService
         $oauthClient = GDrive::getClient() ;
         $oauthClient->setAccessToken( $token );
         $oauthClient->setAccessType( "offline" );
-        $gdriveService = new \Google_Service_Drive( $oauthClient );
 
-
-        return $gdriveService;
+        return new \Google_Service_Drive( $oauthClient );
     }
 
     public function updateFile( $remoteFile, $content ) {
