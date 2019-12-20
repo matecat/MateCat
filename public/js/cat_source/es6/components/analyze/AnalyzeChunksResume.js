@@ -19,7 +19,7 @@ class AnalyzeChunksResume extends React.Component {
 	}
 
 
-	showDetails = (e) => (idJob, evt) => {
+	showDetails = (idJob) => (evt) => {
 		if ($(evt.target).parents('.outsource-container').length === 0) {
 			evt.preventDefault();
 			evt.stopPropagation();
@@ -42,7 +42,7 @@ class AnalyzeChunksResume extends React.Component {
 		ModalsActions.openSplitJobModal(job, project, UI.reloadAnalysis);
 	}
 
-	openMergeModal = (id, e) => {
+	openMergeModal = (id) => (e) => {
 		e.stopPropagation();
 		e.preventDefault();
 		const {project} = this.props;
