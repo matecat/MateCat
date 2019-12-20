@@ -140,7 +140,7 @@ class TranslatorsModel {
         $this->job_password = $jStruct->password;
 
         $this->project = $this->jStruct->getProject( $project_cache_TTL );
-        $this->featureSet = $this->project->getFeatures();
+        $this->featureSet = $this->project->getFeaturesSet();
 
     }
 

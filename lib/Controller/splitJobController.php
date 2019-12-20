@@ -145,16 +145,16 @@ class splitJobController extends ajaxController {
             throw new Exception( "Wrong Password. Access denied", -10 );
         }
 
-        $this->project_struct->getFeatures()->run('checkSplitAccess', $jobList ) ;
+        $this->project_struct->getFeaturesSet()->run('checkSplitAccess', $jobList ) ;
     }
 
     protected function filterJobsById(  array $jobList  ){
 
         $found = false;
         $jid   = $this->job_id;
-        $filteredJobs = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
+        $filteredJobs = array_values( array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
             return $jobStruct->id == $jid;
-        } );
+        } ) );
 
         if ( empty( $filteredJobs ) ) {
             throw new Exception( "Access denied", -10 );

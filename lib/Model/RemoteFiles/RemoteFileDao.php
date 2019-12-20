@@ -2,9 +2,13 @@
 
 class RemoteFiles_RemoteFileDao extends DataAccess_AbstractDao {
     /**
-     * @param int       $id_file
-     * @param int       $id_job
-     * @param string    $remote_id
+     * @param int    $id_file
+     * @param int    $id_job
+     * @param string $remote_id
+     * @param        $connected_service_id
+     * @param int    $is_original
+     *
+     * @throws Exception
      */
     public static function insert( $id_file, $id_job, $remote_id, $connected_service_id, $is_original = 0 ) {
         $data = array();
@@ -32,8 +36,9 @@ class RemoteFiles_RemoteFileDao extends DataAccess_AbstractDao {
             "   AND is_original = 0 "
         );
 
-        $stmt->execute( array( 'id_job' => $id_job ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'RemoteFiles_RemoteFileStruct');
+        $stmt->execute( [ 'id_job' => $id_job ] );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, RemoteFiles_RemoteFileStruct::class );
+
         return $stmt->fetchAll();
     }
 

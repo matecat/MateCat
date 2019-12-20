@@ -171,7 +171,7 @@ class TranslationChildProject extends AbstractChildProject {
                 'matchRate'  => $translation->suggestion_match
         ] ;
 
-        $data = $this->chunk->getProject()->getFeatures()->filter(
+        $data = $this->chunk->getProject()->getFeaturesSet()->filter(
                 'filterDqfSegmentOriginAndMatchRate', $data, $translation, $this->chunk
         ) ;
 

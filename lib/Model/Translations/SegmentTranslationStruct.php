@@ -1,6 +1,11 @@
 <?php
 
+use DataAccess\ArrayAccessTrait;
+use Translations_SegmentTranslationValidator;
+
 class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+
+    use ArrayAccessTrait;
 
     public $id_segment;
     public $id_job;
@@ -32,7 +37,11 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
     }
 
     public function isICE() {
-        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE;
+        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && $this->locked;
+    }
+
+    public function isPreTranslated(){
+        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && !$this->locked;
     }
 
     public function isPostReviewedStatus() {
@@ -60,39 +69,6 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
         return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
             return Jobs_JobDao::getById( $id_job )[ 0 ];
         } );
-    }
-
-    /**
-     * @param mixed $offset
-     *
-     * @return bool
-     */
-    public function offsetExists( $offset ) {
-        return property_exists( $this, $offset );
-    }
-
-    /**
-     * @param mixed $offset
-     *
-     * @return mixed
-     */
-    public function offsetGet( $offset ) {
-        return $this->$offset;
-    }
-
-    /**
-     * @param mixed $offset
-     * @param mixed $value
-     */
-    public function offsetSet( $offset, $value ) {
-        $this->$offset = $value;
-    }
-
-    /**
-     * @param mixed $offset
-     */
-    public function offsetUnset( $offset ) {
-        $this->$offset = null;
     }
 
 }

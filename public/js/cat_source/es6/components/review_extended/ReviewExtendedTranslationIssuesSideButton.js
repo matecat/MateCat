@@ -79,7 +79,7 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
         let plus = config.isReview ? <span className="revise-button-counter">+</span> : null;
         if ( this.state.issues_count > 0 ) {
             return (<div title="Add Issues" onClick={this.handleClick.bind(this)}>
-                <a ref={(button)=> this.button=button} className={"revise-button has-object " + openClass}>
+                <a ref={(button)=> this.button=button} className={"revise-button has-object " + openClass} >
                     <span className="icon-error_outline" />
                     <span className="revise-button-counter">{this.state.issues_count}</span>
                 </a>

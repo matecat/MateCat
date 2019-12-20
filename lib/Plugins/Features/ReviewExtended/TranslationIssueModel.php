@@ -9,11 +9,13 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use Exceptions\ValidationError;
 use LQA\ChunkReviewDao;
 use LQA\EntryDao;
 use LQA\EntryStruct;
-use Translations_TranslationVersionDao;
-use Translations_TranslationVersionStruct;
+use Features\TranslationVersions\Model\TranslationVersionDao;
+use Features\TranslationVersions\Model\TranslationVersionStruct;
+use ReflectionException;
 use Utils;
 
 class TranslationIssueModel {
@@ -48,7 +50,7 @@ class TranslationIssueModel {
     public function __construct( $id_job, $password, EntryStruct $issue ) {
         $this->issue = $issue;
 
-        $review = ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( new Chunks_ChunkStruct( [ 'id' => $id_job, 'password' => $password ] ) , $issue->source_page )[ 0 ];
+        $review = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );
 
         $this->chunk_review = $review;
         $this->chunk = $this->chunk_review->getChunk();
@@ -70,12 +72,12 @@ class TranslationIssueModel {
      * Inserts the struct in database and updates review result
      *
      * @return EntryStruct
-     * @throws \Exceptions\ValidationError
-     * @throws \Exception
+     * @throws ValidationError
+     * @throws ReflectionException
      */
     public function save() {
         $this->setDefaultIssueValues();
-        $data = $this->issue->attributes();
+        $data = $this->issue->toArray();
 
         if ( !empty( $this->diff ) ) {
             $this->saveDiff();
@@ -108,7 +110,7 @@ class TranslationIssueModel {
         /**
          * in order to save diff we need to lookup for current version in segment_translations.
          */
-        $struct                 = new Translations_TranslationVersionStruct() ;
+        $struct                 = new TranslationVersionStruct() ;
         $struct->id_job         = $this->issue->id_job ;
         $struct->id_segment     = $this->issue->id_segment ;
         $struct->creation_date  = Utils::mysqlTimestamp( time() ) ;
@@ -116,17 +118,17 @@ class TranslationIssueModel {
         $struct->version_number = $this->issue->translation_version ;
         $struct->raw_diff       = $string_to_save ;
 
-        $version_record = ( new Translations_TranslationVersionDao())->getVersionNumberForTranslation(
+        $version_record = ( new TranslationVersionDao())->getVersionNumberForTranslation(
                 $struct->id_job, $struct->id_segment, $struct->version_number
         );
 
         if ( !$version_record ) {
-            $insert = Translations_TranslationVersionDao::insertStruct( $struct ) ;
+            $insert = TranslationVersionDao::insertStruct( $struct ) ;
         }
         else {
             // in case the record exists, we have to update it with the diff anyway
             $version_record->raw_diff = $string_to_save ;
-            $update = Translations_TranslationVersionDao::updateStruct( $version_record, ['fields' => ['raw_diff']]  );
+            $update = TranslationVersionDao::updateStruct( $version_record, ['fields' => ['raw_diff']]  );
         }
 
     }

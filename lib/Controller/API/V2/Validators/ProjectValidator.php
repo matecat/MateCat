@@ -2,6 +2,7 @@
 
 namespace API\V2\Validators;
 
+use API\V2\Exceptions\AuthenticationError;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use ApiKeys_ApiKeyStruct;
@@ -61,6 +62,7 @@ class ProjectValidator extends Base {
 
     /**
      * @return mixed|void
+     * @throws AuthenticationError
      * @throws NotFoundException
      */
     protected function _validate() {
@@ -85,7 +87,16 @@ class ProjectValidator extends Base {
         return $this->feature == null || $this->project->isFeatureEnabled( $this->feature );
     }
 
+    /**
+     * @return bool
+     * @throws AuthenticationError
+     */
     private function inProjectScope() {
+
+        if( !$this->api_record ){
+            throw new AuthenticationError( "Invalid API key", 401 );
+        }
+
         Log::doJsonLog( $this->api_record->getUser()->email );
         Log::doJsonLog( $this->project->id_customer );
 

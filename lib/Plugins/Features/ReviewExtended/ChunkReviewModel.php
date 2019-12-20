@@ -36,6 +36,11 @@ class ChunkReviewModel implements IChunkReviewModel {
         return $this->chunk;
     }
 
+    /**
+     * ChunkReviewModel constructor.
+     *
+     * @param ChunkReviewStruct $chunk_review
+     */
     public function __construct( ChunkReviewStruct $chunk_review ) {
         $this->chunk_review = $chunk_review;
         $this->chunk = $this->chunk_review->getChunk();
@@ -110,7 +115,7 @@ class ChunkReviewModel implements IChunkReviewModel {
                 ]
         );
 
-        $project->getFeatures()->run(
+        $project->getFeaturesSet()->run(
                 'chunkReviewUpdated', $this->chunk_review, $update_result, $this, $project
         );
 

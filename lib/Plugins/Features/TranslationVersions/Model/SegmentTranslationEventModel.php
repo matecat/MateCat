@@ -172,7 +172,6 @@ class SegmentTranslationEventModel  {
 
     /**
      * @return mixed
-     * @throws Exception
      */
     public function getOriginSourcePage() {
         if ( ! $this->getPriorEvent() ) {

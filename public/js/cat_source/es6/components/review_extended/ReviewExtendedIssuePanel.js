@@ -7,7 +7,7 @@ class ReviewExtendedIssuePanel extends React.Component{
         super( props );
         this.issueCategoriesFlat = JSON.parse( config.lqa_flat_categories );
         this.state = {
-            submitDisabled: true,
+            submitDisabled: false,
             categorySelectedIndex: 0,
             categorySelectedId: this.issueCategoriesFlat[0].id,
             enableArrows: false,
@@ -19,11 +19,13 @@ class ReviewExtendedIssuePanel extends React.Component{
         this.handleShortcutsKeyUp = this.handleShortcutsKeyUp.bind(this);
     }
     sendIssue(category, severity) {
+        if ( this.state.submitDisabled ) return;
         this.props.setCreationIssueLoader(true);
+        this.setState({
+            submitDisabled : true
+        });
         let data = [];
         let deferred = $.Deferred();
-        let self = this;
-
         let issue = {
             'id_category'         : category.id,
             'severity'            : severity,
@@ -47,30 +49,34 @@ class ReviewExtendedIssuePanel extends React.Component{
         if ( segment.status.toLowerCase() !== 'approved' || segment.revision_number !== ReviewExtended.number ) {
             segment.status = 'approved';
             API.SEGMENT.setTranslation( segment )
-                .done( function ( response ) {
+                .done(  ( response ) => {
                     issue.version = response.translation.version_number;
                     SegmentActions.setStatus(segment.sid, segment.id_file, segment.status);
                     SegmentActions.addClassToSegment(segment.sid , 'modified');
                     deferred.resolve();
                 } )
-                .fail( self.handleFail.bind( self ) );
+                .fail( this.handleFail.bind( this ) );
 
         } else {
             deferred.resolve();
         }
 		data.push(issue);
 
-		deferred.then(function () {
+		deferred.then( () => {
             SegmentActions.setStatus(segment.sid, segment.fid, segment.status);
             UI.currentSegment.data('modified', false);
-			SegmentActions.submitIssue(self.props.sid, data)
-				.done(function ( data ) {
-                    self.props.submitIssueCallback();
-                    setTimeout(function (  ) {
-                        SegmentActions.issueAdded(self.props.sid, data.issue.id);
+			SegmentActions.submitIssue(this.props.sid, data)
+				.done( ( data ) => {
+                    this.setState({
+                        submitDisabled : false
+                    });
+                    this.props.submitIssueCallback();
+                    this.props.setCreationIssueLoader(false);
+                    setTimeout( (  ) => {
+                        SegmentActions.issueAdded(this.props.sid, data.issue.id);
                     });
                 } )
-				.fail( (response) => self.handleFail(response.responseJSON) ) ;
+				.fail( (response) => this.handleFail(response.responseJSON) ) ;
 		});
 
     }

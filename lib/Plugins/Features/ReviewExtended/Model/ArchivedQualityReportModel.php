@@ -62,7 +62,7 @@ class ArchivedQualityReportModel {
         $result = $dao->archiveQualityReport( $this->archivedRecord );
 
         if ( $result ) {
-            $this->chunk->getProject()->getFeatures()->run('archivedQualityReportSaved', $this);
+            $this->chunk->getProject()->getFeaturesSet()->run('archivedQualityReportSaved', $this);
         }
     }
 
