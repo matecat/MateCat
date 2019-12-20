@@ -468,7 +468,7 @@ body.manage {
                             }
                             .outsource-job {
                                 display: inline-block;
-                                min-width: 34%;
+                                min-width: 30%;
                                 padding-left: 5px;
                                 .translated-outsourced {
                                     top: 1px;
@@ -658,6 +658,27 @@ body.manage {
                                 border: 1px solid #797979;
                                 border-radius: 2px;
                                 float: right;
+
+                                &.buy-translation {
+                                    display: flex;
+                                    align-items: center;
+                                    background: #fff;
+                                    color: #0099CC;
+                                    font-weight:normal;
+                                    padding: 4px 8px;
+                                    border: 1px solid #979797;
+                                    font-size: 14px;
+                                    span {
+                                        color:#000;
+                                        font-size: 12px;
+                                        margin-left:8px;
+                                    }
+                                    img {
+                                        margin-left:5px;
+                                        width: 20px;
+                                        height: 20px;
+                                    }
+                                }
                             }
                             .open-outsourced {
                                 font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -913,7 +934,7 @@ footer nav ul a:hover {
             width: 105%;
         }
         .outsource-job {
-            min-width: 24% !important;
+            min-width: 20% !important;
         }
     }
 
@@ -939,7 +960,7 @@ footer nav ul a:hover {
         }
     }
     .outsource-job {
-        min-width: 24% !important;
+        min-width: 20% !important;
     }
 }
 
@@ -954,7 +975,7 @@ footer nav ul a:hover {
         padding-top: 50px;
     }
     .outsource-job {
-        min-width: 24% !important;
+        min-width: 20% !important;
     }
 }
 
