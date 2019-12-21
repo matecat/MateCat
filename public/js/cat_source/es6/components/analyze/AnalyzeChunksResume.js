@@ -174,7 +174,7 @@ class AnalyzeChunksResume extends React.Component {
 								<div className="job-id">{'Chunk ' + index}</div>
 								<div className={'translate-url'}>
 									<input ref={(el) => this.jobLinkRef[jidChunk] = el} type="text" readOnly
-										   value={this.getUrl(chunkJob)}/>
+										   value={this.getUrl(chunkJob, index)}/>
 									<button onClick={copyJobLinkToClipboard(jidChunk)}><i
 										className="icon-link icon"/></button>
 								</div>
