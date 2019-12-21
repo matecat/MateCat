@@ -1279,6 +1279,10 @@ overflow: hidden;
 }
 }
 
+.ui.popup {
+    z-index:999;
+}
+
 
 .analyze footer {
 background: #6d6e71;

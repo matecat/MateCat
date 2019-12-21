@@ -175,8 +175,9 @@ class AnalyzeChunksResume extends React.Component {
 								<div className={'translate-url'}>
 									<input ref={(el) => this.jobLinkRef[jidChunk] = el} type="text" readOnly
 										   value={this.getUrl(chunkJob, index)}/>
-									<button onClick={copyJobLinkToClipboard(jidChunk)}><i
-										className="icon-link icon"/></button>
+									<button onClick={copyJobLinkToClipboard(jidChunk)} className={'ui icon button copy'}
+											data-content="Copied to Clipboard!" data-position="top center">
+										<i className="icon-link icon"/></button>
 								</div>
 							</div>
 							<div className="titles-compare">
@@ -276,7 +277,8 @@ class AnalyzeChunksResume extends React.Component {
 										<input type="text" readOnly value={this.getUrl(chunkJob)}
 											   ref={(el) => this.jobLinkRef[this.props.jobsInfo[indexJob].jid] = el}/>
 										<button
-											onClick={copyJobLinkToClipboard(this.props.jobsInfo[indexJob].jid)}>
+											onClick={copyJobLinkToClipboard(this.props.jobsInfo[indexJob].jid)} className={'ui icon button copy'}
+											data-content="Copied to Clipboard!" data-position="top center">
 											<i className="icon-link icon"/></button>
 									</div>
 								</div>
@@ -391,6 +393,11 @@ class AnalyzeChunksResume extends React.Component {
 				}, 400)
 			})
 		}
+
+		$('.ui.icon.button.copy').popup({
+			on: 'click',
+			hideOnScroll: true
+		});
 	}
 
 	componentWillUnmount() {
