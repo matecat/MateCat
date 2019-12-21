@@ -328,7 +328,7 @@ body.analyze{
                             text-overflow: ellipsis;
                             border-radius: 2px 0 0 2px;
                             border-right:none;
-                            min-width: 210px;
+                            min-width: 200px;
                             height: 24px;
                             width: 100%;
                         }
@@ -340,9 +340,9 @@ body.analyze{
                             text-decoration: none;
                             border-radius: 0 2px 2px 0;
                             height: 24px;
-                            width: 24px;
+                            min-width: 24px;
                             padding: 0;
-
+                            margin:0;
                             i {
                                 margin: 2px 0 0 0;
                             }
@@ -517,14 +517,14 @@ body.analyze{
                 }
                 .split, .merge {
                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                    padding: 8px 16px;
+                    padding: 5px 20px; //padding: 8px 16px;
                     vertical-align: top;
-                    font-size: 16px;
+                    font-size: 19px; //font-size: 16px;
                     border: 1px solid #09beec;
                     border-radius: 2px;
                     box-shadow: none !important;
                     background-color: #ffffff !important;
-                    font-weight: normal;
+                    font-weight: 700; //font-weight: normal;
                     /*margin-top: -3px;*/
                     &:hover {
                         text-decoration: none;
@@ -544,22 +544,24 @@ body.analyze{
                 .merge {
                     margin: -3px 0 0;
                     padding: 5px 14px;
+                    width: 59%;
                 }
                 .open-translate,
                 .open-revise {
                     font-family: Calibri, Arial, Helvetica, sans-serif;
-                    padding: 8px 16px;
+                    padding: 6px 15px; // padding: 8px 16px;
                     vertical-align: top;
-                    font-size: 16px;
-                    border: none;
+                    font-size: 20px; //font-size: 16px;
+                    border: 1px solid #797979; //border: none;
                     border-radius: 2px;
                     /*margin: -3px 0 0 0;*/
-                    font-weight: normal;
+                    font-weight: 700; //font-weight: normal;
                 }
 
                 &.splitted {
                     width: 20%;
                     justify-content: flex-end;
+                    padding: 0 8px;
                 }
 
                 @media only screen and (max-width: 1199px) {
@@ -569,10 +571,10 @@ body.analyze{
                         height: 34px;
                     }
                     .merge {
-                         padding: 8px 12px;
+                         padding: 5px 12px;
                     }
                     .split {
-                        padding: 8px 12px;
+                        padding: 5px 12px;
                         i {
                             margin: 0;
                         }
@@ -580,7 +582,7 @@ body.analyze{
 
                     .open-translate {
                         font-family: Calibri, Arial, Helvetica, sans-serif;
-                        padding: 8px 12px;
+                        padding: 5px 12px;
                     }
                 }
             }
@@ -1277,6 +1279,10 @@ overflow: hidden;
     opacity: 0;
     -webkit-transition: max-height .5s ease, padding 1s ease, opacity 1s ease;
 }
+}
+
+.ui.popup {
+    z-index:999;
 }
 
 

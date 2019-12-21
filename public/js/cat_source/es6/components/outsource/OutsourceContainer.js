@@ -140,21 +140,21 @@ class OutsourceContainer extends React.Component {
                                                             closeOutsource={this.props.onClickOutside}/>
                                     ) : (null)}
 
-                                    {(this.props.showOpenBox ) ? (
+                                    {/*{(this.props.showOpenBox ) ? (
                                         <OpenJobBox job={this.props.job}
                                                     url={this.props.url}
                                                     project={this.props.project}
                                                     outsourceJobId={this.props.outsourceJobId}
                                         />
-                                    ) : (null)}
+                                    ) : (null)}*/}
 
-                                    {( (this.props.showTranslatorBox || this.props.showOpenBox) && config.enable_outsource ) ? (
+                                    {/*{( (this.props.showTranslatorBox || this.props.showOpenBox) && config.enable_outsource ) ? (
                                         <div className="divider-or sixteen wide column">
                                             <div className="or">
                                                 or
                                             </div>
                                         </div>
-                                    ) : (null)}
+                                    ) : (null)}*/}
                                     {config.enable_outsource ? (
                                         <OutsourceVendor project={this.props.project}
                                                          job={this.props.job}
