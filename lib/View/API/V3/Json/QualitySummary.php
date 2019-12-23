@@ -11,6 +11,7 @@ namespace API\V3\Json;
 
 
 use Chunks_ChunkStruct;
+use Exception;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobStruct;
@@ -35,9 +36,10 @@ class QualitySummary {
     }
 
     /**
-     * @param ChunkReviewStruct[]    $chunkReviewList
+     * @param ChunkReviewStruct[] $chunkReviewList
      *
      * @return array
+     * @throws Exception
      */
     public function render( $chunkReviewList ) {
 

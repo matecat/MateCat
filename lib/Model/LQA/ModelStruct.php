@@ -35,7 +35,6 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
         return CategoryDao::getCategoriesByModel( $this );
     }
 
-
     /**
      * @return mixed
      * @throws Exception

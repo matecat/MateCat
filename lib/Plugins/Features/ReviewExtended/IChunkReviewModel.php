@@ -9,6 +9,7 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use LQA\ModelStruct;
 
 interface IChunkReviewModel {
 
