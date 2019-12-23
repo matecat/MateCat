@@ -314,6 +314,15 @@ body.analyze{
                     .translate-url {
                         display: inline-flex;
                         width: 100%;
+                        .copy {
+                            .icon {
+                                height: 100%;
+                                width: 100%;
+                                font-size: 18px;
+                                font-weight: 700;
+                                padding: 2px;
+                            }
+                        }
                         span {
                             display: flex;
                         }
