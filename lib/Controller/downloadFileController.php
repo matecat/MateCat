@@ -329,10 +329,10 @@ class downloadFileController extends downloadController {
                     $this->startRemoteFileService( $output_content );
 
                     if ( $this->openOriginalFiles ) {
-                        $this->outputResultForOriginalFiles();
+                        $this->outputResultForOriginalFiles(); //TODO remove download original from download File // Remove echo
                     } else {
-                        $this->updateRemoteFiles( $output_content );
-                        $this->outputResultForRemoteFiles();
+                        $this->updateRemoteFiles( $this->getOutputContentsWithZipFiles( $output_content ) );
+                        $this->outputResultForRemoteFiles(); //TODO Remove echo
                     }
 
                 } else {
@@ -388,8 +388,8 @@ class downloadFileController extends downloadController {
                                 "message" => "Download failed. Please, try again in 5 minutes. If it still fails, please, contact " . INIT::$SUPPORT_MAIL
                         ]
                 );
-                throw $e; // avoid sent Headers and empty file content with finalize method
 
+                throw $e; // avoid sent Headers and empty file content with finalize method
             }
 
         }
@@ -402,6 +402,19 @@ class downloadFileController extends downloadController {
 
         $this->_saveActivity();
 
+    }
+
+    /**
+     * @param array $convertResult
+     * @param int   $fileID
+     *
+     * @return bool
+     */
+    private function wasTheFileSuccessfullyConverted( $convertResult, $fileID ) {
+        $isSuccess = $convertResult[ $fileID ][ 'isSuccess' ];
+        $content   = $convertResult[ $fileID ] [ 'document_content' ];
+
+        return ( true === $isSuccess and null !== $content );
     }
 
     protected function _saveActivity() {
@@ -450,6 +463,9 @@ class downloadFileController extends downloadController {
         return $this->trereIsARemoteFile;
     }
 
+    /**
+     * @throws Exception
+     */
     private function outputResultForOriginalFiles() {
         $files = \RemoteFiles_RemoteFileDao::getOriginalsByJobId( $this->id_job );
 
@@ -457,6 +473,10 @@ class downloadFileController extends downloadController {
 
         foreach ( $files as $file ) {
             $gdriveFile = $this->remoteFileService->getFile( $file->remote_id );
+
+            if ( false === isset( $gdriveFile[ 'alternateLink' ] ) ) {
+                throw new Exception( 'alternateLink was not found for file with local ID ' . $file->id );
+            }
 
             $response[ 'urls' ][] = [
                     'localId'       => $file->id,
@@ -467,6 +487,9 @@ class downloadFileController extends downloadController {
         echo json_encode( $response );
     }
 
+    /**
+     * @throws Exception
+     */
     private function outputResultForRemoteFiles() {
         $response = [ 'urls' => [] ];
 
@@ -516,11 +539,15 @@ class downloadFileController extends downloadController {
         }
     }
 
-
+    /**
+     * @param ZipContentObject[] $output_content
+     *
+     * @throws Exception
+     */
     private function updateRemoteFiles( $output_content ) {
         foreach ( $output_content as $id_file => $output_file ) {
             $remoteFile                           = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->job->id );
-            $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file[ 'document_content' ] );
+            $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file->getContent() );
         }
     }
 
@@ -665,7 +692,7 @@ class downloadFileController extends downloadController {
 
         }
 
-        $newOutputContent = array_merge( $newOutputContent, $output_content );
+        $newOutputContent = $newOutputContent + $output_content;
 
         return $newOutputContent;
     }
@@ -682,13 +709,13 @@ class downloadFileController extends downloadController {
         $project = Projects_ProjectDao::findById( $this->job[ 'id_project' ] );
 
         // this is the filesystem path
-        $zipFile  = (new FilesStorage\FsFilesStorage())->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
+        $zipFile  = ( new FilesStorage\FsFilesStorage() )->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
         $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
 
         $isFsOnS3 = AbstractFilesStorage::isOnS3();
         if ( $isFsOnS3 and false === file_exists( $zipFile ) ) {
             // transfer zip file to tmp path
-            $fs = FilesStorageFactory::create();
+            $fs      = FilesStorageFactory::create();
             $zipPath = $fs->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
             $this->transferZipFromS3ToTmpDir( $zipPath, $tmpFName );
         } else {
@@ -765,10 +792,10 @@ class downloadFileController extends downloadController {
      */
     public function transferZipFromS3ToTmpDir( $zipPath, $tmpDir ) {
 
-        Log::doJsonLog("Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir);
+        Log::doJsonLog( "Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir );
 
         /** @var $s3Client Client */
-        $s3Client = S3FilesStorage::getStaticS3Client();
+        $s3Client            = S3FilesStorage::getStaticS3Client();
         $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
         $params[ 'key' ]     = $zipPath;
         $params[ 'save_as' ] = $tmpDir;

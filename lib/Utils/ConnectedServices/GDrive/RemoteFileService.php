@@ -77,10 +77,15 @@ class RemoteFileService extends AbstractRemoteFileService
         if ( $this->gdriveService->getClient()->isAccessTokenExpired() ) {
             // TODO: handle the case in which someone is asking for access to the file
             // but we are unable to refresh the token.
-            $authUrl = $this->gdriveService->getClient()->createAuthUrl();
+            $this->gdriveService->getClient()->createAuthUrl();
         }
     }
 
+    /**
+     * @param $remoteId
+     * @param $gdriveFile
+     * @param $content
+     */
     private function updateFileOnGDrive( $remoteId, $gdriveFile, $content ) {
         $mimeType =  GDrive\RemoteFileService::officeMimeFromGoogle( $gdriveFile->mimeType );
 
@@ -93,7 +98,7 @@ class RemoteFileService extends AbstractRemoteFileService
             'newRevision' => FALSE
         );
 
-        $upload = $this->gdriveService->files->update( $remoteId, $gdriveFile, $additionalParams );
+        $this->gdriveService->files->update( $remoteId, $gdriveFile, $additionalParams );
     }
 
     public function copyFile ( $originFileId, $copyTitle ) {
