@@ -724,6 +724,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         }
         return current;
     },
+    getCurrentSegmentId: function() {
+        let current = this.getCurrentSegment();
+        if ( current ) {
+            return current.sid;
+        }
+        return undefined;
+    },
     getSegmentsInPropagation(hash, isReview) {
         let reviewStatus = [
             "DRAFT",
