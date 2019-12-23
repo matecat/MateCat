@@ -92,6 +92,8 @@ class ChunkPasswordValidator extends Base {
             throw new NotFoundException( 'Revision record not found' );
         }
         $this->chunk = $this->chunkReview->getChunk();
+        $this->chunk->setIsReview( true );
+        $this->chunk->setSourcePage( $this->chunkReview->source_page );
     }
 
     /**
