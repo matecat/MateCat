@@ -134,7 +134,7 @@ class Chunk extends \API\V2\Json\Chunk {
             $result = QualitySummary::populateQualitySummarySection( $result, Constants::SOURCE_PAGE_REVISION,
                     $chunk, $quality_overall, $reviseIssues, $score, $categories,
                     $total_issues_weight, $total_reviewed_words_count, $passfail,
-                    0 );
+                    0, 0 );
         }
 
         /**

@@ -2,23 +2,28 @@
 
 namespace LQA;
 
+use PDO;
+use ReflectionException;
+
 class CategoryDao extends \DataAccess_AbstractDao {
     const TABLE = 'qa_categories' ;
 
-    protected function _buildResult( $array_result ) {
-
-    }
-
+    /**
+     * @param $id
+     *
+     * @return mixed
+     */
     public static function findById( $id ) {
         $sql = "SELECT * FROM qa_categories WHERE id = :id LIMIT 1" ;
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute(array('id' => $id));
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\CategoryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
         return $stmt->fetch();
     }
 
     /**
+     * @param $id_model
      * @param $id_parent
      *
      * @return mixed
@@ -28,16 +33,20 @@ class CategoryDao extends \DataAccess_AbstractDao {
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id_model' => $id_model, 'id_parent' => $id_parent ] );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\CategoryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
         return $stmt->fetchAll();
     }
 
     /**
      * @param $data
+     *
      * @return mixed
-     * @deprecated  This method uses insert and find, refactor it to remove this need.
+     * @throws ReflectionException
      */
     public static function createRecord( $data ) {
+
+        $categoryStruct = new CategoryStruct( $data );
+
         $sql = "INSERT INTO qa_categories " .
             " ( id_model, label, id_parent, severities, options ) " .
             " VALUES " .
