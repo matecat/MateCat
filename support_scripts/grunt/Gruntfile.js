@@ -96,7 +96,7 @@ module.exports = function(grunt) {
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
                     },
-                    watch: true,
+                    watch: true
                 },
                 src: [
                     basePath + 'cat_source/es6/react-libs.js'
@@ -111,7 +111,7 @@ module.exports = function(grunt) {
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
                     },
-                    watch: true,
+                    watch: true
                 },
                 src: [
                     basePath + 'cat_source/es6/*.js'
@@ -126,7 +126,7 @@ module.exports = function(grunt) {
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
                     },
-                    watch: true,
+                    watch: true
                 },
                 src: [
                     basePath + 'cat_source/es6/components/quality_report/*.js',
