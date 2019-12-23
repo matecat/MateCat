@@ -54,16 +54,22 @@ class QualitySummary {
 
     }
 
+    /**
+     * @param ChunkReviewStruct $chunkReview
+     *
+     * @return mixed
+     * @throws Exception
+     */
     protected function renderItem( ChunkReviewStruct $chunkReview ) {
 
-        list( $passFail, $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
+        list( $passFail, $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories, $model_version ) =
                 self::revisionQualityVars( $this->chunk, $this->project, $chunkReview );
 
         $result = self::populateQualitySummarySection( $chunkReview->source_page,
                 $this->chunk, $quality_overall, $reviseIssues, $score, $categories,
                 $total_issues_weight, $total_reviewed_words_count, $passFail,
                 $chunkReview->total_tte,
-                $is_pass
+                $is_pass, $model_version
         );
 
         return $result;
@@ -72,27 +78,29 @@ class QualitySummary {
 
 
     /**
-     * @param $result
-     * @param $source_page
-     * @param $jStruct
-     * @param $quality_overall
-     * @param $reviseIssues
-     * @param $score
-     * @param $categories
-     * @param $total_issues_weight
-     * @param $total_reviewed_words_count
-     * @param $passfail
+     * @param                $source_page
+     * @param Jobs_JobStruct $jStruct
+     * @param                $quality_overall
+     * @param                $reviseIssues
+     * @param                $score
+     * @param                $categories
+     * @param                $total_issues_weight
+     * @param                $total_reviewed_words_count
+     * @param                $passfail
      *
-     * @param $total_tte
-     * @param $is_pass
+     * @param                $total_tte
+     * @param                $is_pass
+     *
+     * @param                $model_version
      *
      * @return mixed
      */
     public static function populateQualitySummarySection( $source_page, Jobs_JobStruct $jStruct, $quality_overall, $reviseIssues, $score, $categories,
-                                                          $total_issues_weight, $total_reviewed_words_count, $passfail, $total_tte, $is_pass ) {
+                                                          $total_issues_weight, $total_reviewed_words_count, $passfail, $total_tte, $is_pass, $model_version ) {
 
         $result = [
                 'revision_number'            => ReviewUtils::sourcePageToRevisionNumber( $source_page ),
+                'model_version'              => ( $model_version ? (int)$model_version : null ),
                 'equivalent_class'           => $jStruct->getQualityInfo(),
                 'is_pass'                    => $is_pass,
                 'quality_overall'            => $quality_overall,
@@ -116,6 +124,7 @@ class QualitySummary {
      * @param                        $chunkReview
      *
      * @return array
+     * @throws Exception
      * @internal param $reviseIssues
      */
     protected static function revisionQualityVars( Chunks_ChunkStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
@@ -161,11 +170,11 @@ class QualitySummary {
 
         $model      = $project->getLqaModel();
         $categories = $model->getCategoriesAndSeverities();
-        $passfail   = [ 'type' => $model->pass_type, 'options' => [ 'limit' => $chunkReviewModel->getQALimit() ] ];
+        $passFail   = [ 'type' => $model->pass_type, 'options' => [ 'limit' => $chunkReviewModel->getQALimit( $model ) ] ];
 
         return [
-                $passfail,
-                $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories
+                $passFail,
+                $reviseIssues, $quality_overall, $is_pass, $score, $total_issues_weight, $total_reviewed_words_count, $categories, $model->hash
         ];
 
     }

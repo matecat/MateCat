@@ -47,7 +47,7 @@ interface IChunkReviewModel {
 
     public function getReviewedWordsCount();
 
-    public function getQALimit();
+    public function getQALimit( ModelStruct $lqa_model );
 
     /**
      *

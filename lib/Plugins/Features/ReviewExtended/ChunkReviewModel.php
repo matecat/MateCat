@@ -32,6 +32,11 @@ class ChunkReviewModel implements IChunkReviewModel {
     protected $chunk;
 
     /**
+     * @var ModelStruct
+     */
+    protected $lqa_model;
+
+    /**
      * @return Chunks_ChunkStruct
      */
     public function getChunk(){
@@ -104,7 +109,7 @@ class ChunkReviewModel implements IChunkReviewModel {
      */
     public function updatePassFailResult( Projects_ProjectStruct $project ) {
 
-        $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit() );
+        $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
 
         $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, [
                         'fields' => [
@@ -127,12 +132,12 @@ class ChunkReviewModel implements IChunkReviewModel {
     /**
      * Returns the proper limit for the current review stage.
      *
+     * @param ModelStruct $lqa_model
+     *
      * @return array|mixed
+     * @throws Exception
      */
-    public function getQALimit() {
-        $project   = Projects_ProjectDao::findById( $this->chunk_review->id_project );
-        $lqa_model = $project->getLqaModel();
-
+    public function getQALimit( ModelStruct $lqa_model ) {
         return ReviewUtils::filterLQAModelLimit( $lqa_model, $this->chunk_review->source_page );
     }
 
