@@ -35,37 +35,10 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             originalRender.call(this, options);
             return promise;
         },
-        // overrideButtonsForRevision: function () {
-        //     var div = $('<ul>' + UI.segmentButtons + '</ul>');
-        //     var className = "revise-button-" + ReviewExtended.number;
-        //     div.find('.translated').text('APPROVED').removeClass('translated').addClass('approved').addClass(className);
-        //     var nextSegment = UI.currentSegment.next();
-        //     var nextSelector = this.getSelectorForNextSegment();
-        //     var goToNextApprovedButton = !nextSegment.is(nextSelector);
-        //     var filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
-        //     div.find('.next-untranslated').parent().remove();
-        //     div.find('.next-repetition').removeClass('next-repetition').addClass('next-review-repetition').removeClass('primary').addClass('green');
-        //     div.find('.next-repetition-group').removeClass('next-repetition-group').addClass('next-review-repetition-group').removeClass('primary').addClass('green');
-        //     if (goToNextApprovedButton && !filtering) {
-        //         var htmlButton = '<li><a id="segment-' + this.currentSegmentId +
-        //             '-nexttranslated" href="#" class="btn next-unapproved ' + className + '" data-segmentid="segment-' +
-        //             this.currentSegmentId + '" title="Revise and go to next translated"> A+&gt;&gt;</a><p>' +
-        //             ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-        //         div.html(htmlButton + div.html());
-        //     }
-        //     UI.segmentButtons = div.html();
-        // },
         /**
          * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
-         * @param editarea
          */
-        trackChanges: function (editarea) {
-            var segmentId = UI.getSegmentId($(editarea));
-            var segmentFid = UI.getSegmentFileId($(editarea));
-            var currentSegment =  UI.getSegmentById(segmentId)
-            var originalTranslation = currentSegment.find('.original-translation').html();
-            // SegmentActions.updateTranslation(segmentFid, segmentId, $(editarea).html(), originalTranslation);
-        },
+        trackChanges: function () {},
 
         submitIssues: function (sid, data, diff) {
             return ReviewExtended.submitIssue(sid, data, diff);

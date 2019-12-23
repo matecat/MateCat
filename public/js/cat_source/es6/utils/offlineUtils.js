@@ -110,7 +110,6 @@ const OfflineUtils = {
 
         //remove focus from the edit area
         setTimeout( ()=> {
-            UI.editarea.blur();
             $('#checkConnection').focus();
             this._backupEvents = $._data( $("body")[0] ).events;
             $._data( $("body")[0] ).events = {}

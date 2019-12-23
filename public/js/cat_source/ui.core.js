@@ -55,24 +55,14 @@ var UI = {
             return;
         }
 
-		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
-                                                      // seems to be the previous current segment
-
 		this.currentSegmentId    = segment.sid ;
 		this.currentSegment      = $segment ;
-		this.currentFile         = $segment.closest("article");
-		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
     },
 
     removeCacheObjects: function() {
         this.editarea = "";
-        this.lastOpenedSegment = undefined;
         this.currentSegmentId = undefined;
-        this.lastOpenedSegmentId = undefined;
         this.currentSegment = undefined;
-        this.currentFile = undefined;
-        this.currentFileId = undefined;
-
     },
     /**
      * shouldSegmentAutoPropagate
@@ -1238,7 +1228,6 @@ var UI = {
                     var idSegment = this[0][0].id_segment;
                     SegmentActions.addClassToSegment(idSegment, 'setTranslationError');
                     var callback = function() {
-                        UI.lastOpenedSegment = null;
                         UI.reloadToSegment(idSegment);
                     };
                     var props = {

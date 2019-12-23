@@ -28,12 +28,13 @@ if ( ReviewSimple.enabled() ) {
                 SegmentActions.registerTab( 'review', true, true );
             },
 
-            trackChanges: function ( editarea ) {
-                var $segment = $( editarea ).closest( 'section' );
+            trackChanges: function ( ) {
+                var currentSegmentId = SegmentStore.getCurrentSegment();
+                var $segment = UI.getSegmentById(currentSegmentId).closest('section');
                 var source = $segment.find( '.original-translation' ).html();
                 source = TextUtils.clenaupTextFromPleaceholders( source );
 
-                var target = $( editarea ).text();
+                var target = $segment.find('.targetarea').text();
                 var diffHTML = TextUtils.trackChangesHTML( source, TextUtils.htmlEncode( target ) );
 
                 $( '.sub-editor.review .track-changes p', $segment ).html( diffHTML );
