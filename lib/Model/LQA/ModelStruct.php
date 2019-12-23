@@ -15,6 +15,8 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public $pass_type ;
     public $pass_options ;
 
+    public $hash;
+
     /**
      * Returns the serialized representation of categires and subcategories.
      *
@@ -34,7 +36,6 @@ class ModelStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAc
     public function getCategories() {
         return CategoryDao::getCategoriesByModel( $this );
     }
-
 
     /**
      * @return mixed

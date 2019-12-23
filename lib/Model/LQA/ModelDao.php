@@ -4,6 +4,8 @@ namespace LQA;
 
 use DataAccess_AbstractDao;
 use Database;
+use Exceptions\ValidationError;
+use ReflectionException;
 
 class ModelDao extends DataAccess_AbstractDao {
     const TABLE = "qa_models";
@@ -15,49 +17,69 @@ class ModelDao extends DataAccess_AbstractDao {
     protected function _buildResult( $array_result ) { }
 
     /**
-     * @param $id
-     * @return \LQA\ModelStruct
+     * @param           $id
+     * @param float|int $ttl
+     *
+     * @return ModelStruct
      */
-    public static function findById( $id ) {
+    public static function findById( $id, $ttl = 86400 ) {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_sql_get_model_by_id );
 
-        return $thisDao->setCacheTTL( 60*60*24*30 )->_fetchObject( $stmt, new ModelStruct(), [ 'id' => $id ] )[0];
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ModelStruct(), [ 'id' => $id ] )[0];
     }
 
     /**
      * @param $data
      *
      * @return ModelStruct
-     * @throws \Exceptions\ValidationError
-     * @throws \ReflectionException
-     * @deprecated remove the need for insert and select
+     * @throws ValidationError
+     * @throws ReflectionException
      */
     public static function createRecord( $data ) {
-        $sql = "INSERT INTO qa_models ( label, pass_type, pass_options ) " .
-            " VALUES ( :label, :pass_type, :pass_options ) ";
 
-        $struct = new ModelStruct( array(
-            'label' => @$data['label'] ,
-            'pass_type' => $data['passfail']['type'],
-            'pass_options' => json_encode( $data['passfail']['options'] )
-        ) );
+        $model_hash = static::_getModelHash( $data );
+
+        $sql = "INSERT INTO qa_models ( label, pass_type, pass_options, `hash` ) " .
+            " VALUES ( :label, :pass_type, :pass_options, :hash ) ";
+
+        $struct = new ModelStruct( [
+                'label'        => @$data[ 'label' ],
+                'pass_type'    => $data[ 'passfail' ][ 'type' ],
+                'pass_options' => json_encode( $data[ 'passfail' ][ 'options' ] ),
+                'hash'         => $model_hash
+        ] );
         $struct->ensureValid();
 
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $struct->toArray(
-                [ 'label', 'pass_type', 'pass_options' ]
+                [ 'label', 'pass_type', 'pass_options', 'hash' ]
         ) );
 
-        $lastId = $conn->lastInsertId();
+        $struct->id = $conn->lastInsertId();
+        return $struct ;
+    }
 
-        $record = self::findById( $lastId );
+    protected static function _getModelHash( $model_root ){
+        $h_string = '';
 
-        return $record ;
+        $h_string .= $model_root[ 'version' ];
+
+        foreach( $model_root[ 'categories' ] as $category ){
+            $h_string .= $category[ 'code' ];
+        }
+
+        foreach( $model_root[ 'severities' ] as $severity ){
+            $h_string .= $severity[ 'penalty' ];
+        }
+
+        $h_string .= $model_root[ 'passfail' ][ 'type' ] . implode( "", $model_root[ 'passfail' ][ 'options' ][ 'limit' ] );
+
+        return crc32( $h_string );
     }
 
     /**
@@ -67,7 +89,8 @@ class ModelDao extends DataAccess_AbstractDao {
      * @param       $json
      *
      * @return ModelStruct
-     * @throws \Exceptions\ValidationError
+     * @throws ValidationError
+     * @throws ReflectionException
      */
     public static function createModelFromJsonDefinition( $json ) {
         $model_root = $json['model'];
@@ -99,13 +122,13 @@ class ModelDao extends DataAccess_AbstractDao {
             }
         }
 
-        $category_record = CategoryDao::createRecord(array(
+        $category_record = CategoryDao::createRecord( [
                 'id_model'   => $model_id,
-                'label'      => $category['label'],
+                'label'      => $category[ 'label' ],
                 'options'    => ( empty( $options ) ? null : json_encode( $options ) ),
                 'id_parent'  => $parent_id,
-                'severities' => json_encode( $category['severities'] )
-        ));
+                'severities' => json_encode( $category[ 'severities' ] )
+        ] );
 
         if ( array_key_exists('subcategories', $category) && !empty( $category['subcategories'] ) ) {
             foreach( $category['subcategories'] as $sub ) {
