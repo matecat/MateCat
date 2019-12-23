@@ -92,6 +92,9 @@ class AnalyzeChunksResume extends React.Component {
 		e.stopPropagation();
 		this.jobLinkRef[jid].select();
 		this.jobLinkRef[jid].setSelectionRange(0, 99999);
+		setTimeout(() => {
+			$('.ui.icon.button.copy').popup('hide');
+		}, 3000)
 		document.execCommand("copy");
 	}
 
