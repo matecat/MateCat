@@ -79,9 +79,9 @@ if ( config.enableReview && config.isReview ) {
          * Only bind events for specific review type
          */
         $('html').on('afterFormatSelection', '.editor .editarea', function() {
-            UI.trackChanges(this);
+            UI.trackChanges();
         }).on('click', '.editor .outersource .copy', function(e) {
-            UI.trackChanges(UI.editarea);
+            UI.trackChanges();
         }).on('setCurrentSegment_success', function(e, d, id_segment) {
             UI.addOriginalTranslation(d, id_segment);
         });
@@ -91,8 +91,9 @@ if ( config.enableReview && config.isReview ) {
 
             alertNotTranslatedMessage : "This segment is not translated yet.<br /> Only translated segments can be revised.",
 
-            trackChanges: function (editarea) {
-                var $segment = $(editarea).closest('section');
+            trackChanges: function () {
+                var currentSegmentId = SegmentStore.getCurrentSegment();
+                var $segment = UI.getSegmentById(currentSegmentId).closest('section');
                 var source = EditAreaUtils.postProcessEditarea($segment, '.original-translation');
                 source = TextUtils.clenaupTextFromPleaceholders( source );
                 //Fix for &amp in original-translation

@@ -94,7 +94,7 @@ class SegmentFooterTabMatches extends React.Component {
     suggestionDblClick(match, index) {
         var self = this;
         var ulDataItem = '.editor .tab.matches ul[data-item=';
-        UI.editarea.focus();
+        SegmentActions.setFocusOnEditArea();
         SegmentActions.disableTPOnSegment(this.props.segment);
         setTimeout( () => {
             SegmentActions.setChoosenSuggestion(this.props.segment, index);

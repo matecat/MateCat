@@ -112,30 +112,6 @@ $.extend(UI, {
 	setEvents: function() {
 		this.bindShortcuts();
 
-
-		// $(window).on('mousedown', function(e) {
-		// 	if ($(e.target).hasClass("editarea")) {
-		// 		return true;
-		// 	}
-        //
-        //     $('.editor .targetarea .rangySelectionBoundary').addClass('focusOut');
-        //
-        //     $('.editor .search-source .rangySelectionBoundary.focusOut,' +
-        //         '.editor .search-target .rangySelectionBoundary.focusOut'
-        //     ).remove();
-        //
-        //     if ( UI.editarea && UI.editarea != '') {
-        //         var hasFocusBefore = UI.editarea.is(":focus");
-        //         setTimeout(function() {
-        //             var hasFocusAfter = UI.editarea && UI.editarea.is(":focus");
-        //             if(hasFocusBefore && hasFocusAfter){
-        //                 $('.editor .rangySelectionBoundary.focusOut').remove();
-		// 				UI.editarea.get(0).normalize();
-        //             }
-        //         }, 600);
-        //     }
-        // });
-
 		window.onbeforeunload = function(e) {
 			return CommonUtils.goodbye(e);
 		};

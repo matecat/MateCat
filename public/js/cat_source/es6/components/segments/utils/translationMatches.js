@@ -28,17 +28,6 @@ let TranslationMatches = {
                 segment.trigger('modified');
             }
         }
-
-        // a value of 0 for 'which' means the choice has been made by the
-        // program and not by the user
-
-        $(window).trigger({
-            type: "suggestionChosen",
-            segment: UI.currentSegment,
-            element: UI.editarea,
-            which: which,
-            translation: translation
-        });
     },
 
     renderContributions: function(data, sid) {

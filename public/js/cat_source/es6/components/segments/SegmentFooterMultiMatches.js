@@ -104,7 +104,7 @@ class SegmentFooterMultiMatches extends React.Component {
     }
 
     suggestionDblClick(match, index) {
-        UI.editarea.focus();
+        SegmentActions.setFocusOnEditArea();
         SegmentActions.disableTPOnSegment(this.props.segment);
         setTimeout( () => {
             SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, this.props.segment.fid, match.translationDecodedHtml);
