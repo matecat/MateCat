@@ -62,6 +62,7 @@ module.exports = function(grunt) {
     var reactPreset = require('babel-preset-react');
     var babelstage2 = require('babel-preset-stage-2');
 
+
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
         .toString(16).substring(1);
@@ -96,7 +97,7 @@ module.exports = function(grunt) {
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
                     },
-                    watch: true,
+                    watch: true
                 },
                 src: [
                     basePath + 'cat_source/es6/react-libs.js'
@@ -111,7 +112,7 @@ module.exports = function(grunt) {
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
                     },
-                    watch: true,
+                    watch: true
                 },
                 src: [
                     basePath + 'cat_source/es6/*.js'
@@ -126,7 +127,7 @@ module.exports = function(grunt) {
                     browserifyOptions: {
                         paths: [ __dirname + '/node_modules' ]
                     },
-                    watch: true,
+                    watch: true
                 },
                 src: [
                     basePath + 'cat_source/es6/components/quality_report/*.js',
