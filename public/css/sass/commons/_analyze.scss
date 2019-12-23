@@ -730,32 +730,6 @@ body.analyze{
                 }*/
             }
         }
-        .project-body {
-            margin-top: 0;
-            background-color: $grey3;
-            .job {
-                padding: 0 15px;
-                margin-top: 35px;
-                margin-bottom: 20px;
-                .job-header {
-                    background-color: #ffffff !important;
-                    padding: 0 0 !important;
-                }
-                .job-body {
-                    background-color: $grey2;
-                    .chunks {
-                        .chunk-container {
-                            padding-top: 0;
-                            .analysis {
-                                //padding-top: 60px;
-                                margin-top: 0;
-                                &.show-details {
-                                    .head-chunk, .job-table-header > div,
-                                    .chunk-analyze-container > div {
-                                        background-color: #eaebef !important;
-                }*/
-            }
-        }
     }
 
     .project-body {
