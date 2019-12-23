@@ -2,23 +2,28 @@
 
 namespace LQA;
 
+use PDO;
+use ReflectionException;
+
 class CategoryDao extends \DataAccess_AbstractDao {
     const TABLE = 'qa_categories' ;
 
-    protected function _buildResult( $array_result ) {
-
-    }
-
+    /**
+     * @param $id
+     *
+     * @return mixed
+     */
     public static function findById( $id ) {
         $sql = "SELECT * FROM qa_categories WHERE id = :id LIMIT 1" ;
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute(array('id' => $id));
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\CategoryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
         return $stmt->fetch();
     }
 
     /**
+     * @param $id_model
      * @param $id_parent
      *
      * @return mixed
@@ -28,16 +33,20 @@ class CategoryDao extends \DataAccess_AbstractDao {
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id_model' => $id_model, 'id_parent' => $id_parent ] );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\CategoryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
         return $stmt->fetchAll();
     }
 
     /**
      * @param $data
+     *
      * @return mixed
-     * @deprecated  This method uses insert and find, refactor it to remove this need.
+     * @throws ReflectionException
      */
     public static function createRecord( $data ) {
+
+        $categoryStruct = new CategoryStruct( $data );
+
         $sql = "INSERT INTO qa_categories " .
             " ( id_model, label, id_parent, severities, options ) " .
             " VALUES " .
@@ -45,32 +54,32 @@ class CategoryDao extends \DataAccess_AbstractDao {
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute(
-            array(
-                'id_model'   => $data['id_model'],
-                'label'      => $data['label'] ,
-                'id_parent'  => $data['id_parent'],
-                'options'    => $data['options'],
-                'severities' => $data['severities']
-            )
-        );
-        $lastId = $conn->lastInsertId();
-        $record = self::findById( $lastId );
-        return $record ;
+        $stmt->execute( $categoryStruct->toArray(
+                [
+                        'id_model',
+                        'label',
+                        'id_parent',
+                        'options',
+                        'severities',
+                ]
+        ) );
+
+        $categoryStruct->id = $conn->lastInsertId();
+        return $categoryStruct;
     }
 
     /**
      * @param ModelStruct $model
      *
-     * @return \LQA\CategoryStruct[]
+     * @return CategoryStruct[]
      */
-    public static function getCategoriesByModel( \LQA\ModelStruct $model ) {
+    public static function getCategoriesByModel( ModelStruct $model ) {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model " .
                 " ORDER BY COALESCE(id_parent, 0) ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\CategoryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
         $stmt->execute(
                 array(
                         'id_model' => $model->id
