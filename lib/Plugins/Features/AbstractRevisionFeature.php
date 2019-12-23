@@ -165,10 +165,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         foreach ( $chunks as $k => $chunk ) {
             $data = [
-                    'id_project'  => $id_project,
-                    'id_job'      => $chunk->id,
-                    'password'    => $chunk->password,
-                    'source_page' => $options[ 'source_page' ]
+                    'id_project'     => $id_project,
+                    'id_job'         => $chunk->id,
+                    'password'       => $chunk->password,
+                    'source_page'    => $options[ 'source_page' ]
             ];
 
             if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {
@@ -202,10 +202,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         foreach ( $chunksArray as $k => $chunk ) {
             $data = [
-                    'id_project'  => $project->id,
-                    'id_job'      => $chunk->id,
-                    'password'    => $chunk->password,
-                    'source_page' => $options[ 'source_page' ]
+                    'id_project'     => $project->id,
+                    'id_job'         => $chunk->id,
+                    'password'       => $chunk->password,
+                    'source_page'    => $options[ 'source_page' ]
             ];
 
             if ( $k == 0 && array_key_exists( 'first_record_password', $options ) != null ) {

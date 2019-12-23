@@ -9,11 +9,13 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use Exceptions\ValidationError;
 use LQA\ChunkReviewDao;
 use LQA\EntryDao;
 use LQA\EntryStruct;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
+use ReflectionException;
 use Utils;
 
 class TranslationIssueModel {
@@ -70,12 +72,12 @@ class TranslationIssueModel {
      * Inserts the struct in database and updates review result
      *
      * @return EntryStruct
-     * @throws \Exceptions\ValidationError
-     * @throws \Exception
+     * @throws ValidationError
+     * @throws ReflectionException
      */
     public function save() {
         $this->setDefaultIssueValues();
-        $data = $this->issue->attributes();
+        $data = $this->issue->toArray();
 
         if ( !empty( $this->diff ) ) {
             $this->saveDiff();

@@ -79,7 +79,7 @@ class CatDecorator extends \AbstractDecorator {
 
         if ( $this->isGDriveProject ) {
             $files = array_map(function( $item ) {
-                return $item->attributes(array('id'));
+                return $item->toArray( [ 'id' ] );
             }, RemoteFiles_RemoteFileDao::getByJobId( $this->job->id ) );
 
             $this->template->remoteFilesInJob = $files ;

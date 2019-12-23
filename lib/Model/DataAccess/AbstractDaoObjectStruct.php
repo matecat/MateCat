@@ -85,18 +85,6 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
     }
 
     /**
-     * @param $mask array
-     * @return array
-     * @see toArray
-     *
-     * @deprecates
-     *
-     */
-    public function attributes( $mask = null ) {
-        return $this->toArray( $mask );
-    }
-
-    /**
      * Checks if any error is present and if so throws an exception
      * with imploded error messages.
      *

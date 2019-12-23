@@ -13,8 +13,10 @@ use API\V2\KleinController;
 use API\V2\Validators\ProjectAccessValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use API\V2\Validators\TeamProjectValidator;
+use Exception;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use Projects_ProjectStruct;
 use RevisionFactory;
 
 class ReviewsController extends KleinController {
@@ -37,13 +39,9 @@ class ReviewsController extends KleinController {
     protected $latestChunkReview;
 
     /**
-     * @throws ValidationError
-     * @throws \Exception
+     * @throws Exception
      */
     public function createReview() {
-
-        // append validators
-        $this->_appendValidators();
 
         // create a new chunk revision password
         $records = RevisionFactory::initFromProject( $this->project )->getRevisionFeature()->createQaChunkReviewRecords(
@@ -64,32 +62,26 @@ class ReviewsController extends KleinController {
         );
     }
 
-    /**
-     * @throws ValidationError
-     */
-    private function _appendValidators() {
-        $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
-        $this->appendValidator( ( new ProjectAccessValidator( $this ) )->setProject( $this->project ) );
-        $this->validateRequest();
-    }
-
     protected function afterConstruct() {
+
         $Validator  = new ProjectPasswordValidator( $this );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setProject( $Validator->getProject() );
+            //add more specific validations, it's needed to append after the first validation run because we need the project struct
+            ( new TeamProjectValidator( $this ) )->setProject( $this->project )->validate();
+            ( new ProjectAccessValidator( $this ) )->setProject( $this->project )->validate();
         } );
         $this->appendValidator( $Validator );
 
     }
 
     /**
+     * add more specific validations
+     *
      * @throws ValidationError
-     * @throws \Exception
      */
-    protected function validateRequest() {
-
-        parent::validateRequest();
+    protected function afterValidate() {
 
         $post = $this->request->paramsPost();
 
