@@ -44,6 +44,11 @@ class RevisionFactory {
         $this->revision = $revisionFeature;
     }
 
+    /**
+     * @param ChunkReviewStruct $chunkReviewStruct
+     *
+     * @return ReviewExtended\IChunkReviewModel|ChunkReviewModel
+     */
     public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
         if ( $this->_isSecondPass() ) {
             return new ChunkReviewModel( $chunkReviewStruct );
@@ -101,12 +106,21 @@ class RevisionFactory {
     }
 
     /**
-     * This method is invoked to update the features before calling filters
-     * @see self::getTranslationIssuesValidator
+     * IMPORTANT
+     *
+     * This method is invoked to update/reset the features before invoking filter callbacks.
+     * This is needed because, by default, 'mandatory_plugins' section, in the configuration ini file,
+     * always load 'review_extended' or 'second_pass_review' ( which has 'review_extended' as dependency ) when the application bootstraps.
+     *
+     * If the old 'review_improved' feature is enabled for the project, a singleton instance every time would returns 'review_extended'
+     *
+     * This works because revision plugins are by default not forcedly injected on projects ( $forceOnProject == false ).
+     *
      * @param Projects_ProjectStruct $project
      *
      * @return static
      * @throws Exception
+     * @see RevisionFactory::getTranslationIssuesValidator
      */
     public static function initFromProject( Projects_ProjectStruct $project ) {
         foreach( $project->getFeaturesSet()->getFeaturesStructs() as $featureStruct ){

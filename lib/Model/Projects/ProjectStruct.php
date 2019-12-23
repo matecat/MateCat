@@ -4,6 +4,8 @@ use DataAccess\ArrayAccessTrait;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use LQA\ModelDao;
+use LQA\ModelStruct;
 use Teams\TeamDao;
 
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {

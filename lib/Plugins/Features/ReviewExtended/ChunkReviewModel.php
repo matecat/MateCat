@@ -10,8 +10,10 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use Exception;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use LQA\ModelStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 
@@ -153,8 +155,6 @@ class ChunkReviewModel implements IChunkReviewModel {
 
         $this->chunk_review->penalty_points       = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
         $this->chunk_review->reviewed_words_count = ChunkReviewDao::getReviewedWordsCountForChunk( $this->chunk );
-
-//        $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass( $this->chunk, $this->chunk_review->source_page ) ;
 
         $this->chunk_review->advancement_wc = $chunkReviewDao->recountAdvancementWords( $this->chunk, $this->chunk_review->source_page );
         $this->chunk_review->total_tte      = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page );
