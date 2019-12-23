@@ -665,16 +665,17 @@ body.manage {
                                     background: #fff;
                                     color: #0099CC;
                                     font-weight:normal;
-                                    padding: 4px 8px;
-                                    border: 1px solid #979797;
+                                    padding: 5px 8px;
+                                    border: none; // border: 1px solid #979797;
                                     font-size: 14px;
                                     span {
                                         color:#000;
                                         font-size: 12px;
-                                        margin-left:8px;
+                                        margin-left:4px;
+                                        line-height: 1.6;
                                     }
                                     img {
-                                        margin-left:5px;
+                                        margin-left:3px;
                                         width: 20px;
                                         height: 20px;
                                     }
