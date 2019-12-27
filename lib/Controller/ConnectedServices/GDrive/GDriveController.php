@@ -110,11 +110,17 @@ class GDriveController extends KleinController {
         ] );
     }
 
+    /**
+     * @throws Exception
+     */
     public function listImportedFiles() {
         $response = $this->gdriveUserSession->getFileStructureForJsonOutput();
         $this->response->json( $response );
     }
 
+    /**
+     * @throws Exception
+     */
     public function changeSourceLanguage() {
         $originalSourceLang = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
         $newSourceLang      = $this->request->sourceLanguage;
@@ -133,6 +139,9 @@ class GDriveController extends KleinController {
         ] );
     }
 
+    /**
+     * @throws \Exception
+     */
     public function deleteImportedFile() {
         $fileId  = $this->request->fileId;
         $success = false;
@@ -149,6 +158,9 @@ class GDriveController extends KleinController {
         ] );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function afterConstruct() {
         Bootstrap::sessionStart();
         $this->initSessionService();

@@ -34,7 +34,7 @@ class RemoteFileService extends AbstractRemoteFileService
     }
 
     /**
-     * @param $token json_encoded string
+     * @param string $token
      * @return \Google_Service_Drive
      */
     public static function getService ( $token ) {
@@ -45,7 +45,6 @@ class RemoteFileService extends AbstractRemoteFileService
 
         $oauthClient = GoogleClientFactory::create();
         $oauthClient->setAccessToken( $token );
-        $oauthClient->setAccessType( "offline" );
 
         return new \Google_Service_Drive( $oauthClient );
     }
@@ -155,7 +154,4 @@ class RemoteFileService extends AbstractRemoteFileService
 
         return null;
     }
-
-
-
 }

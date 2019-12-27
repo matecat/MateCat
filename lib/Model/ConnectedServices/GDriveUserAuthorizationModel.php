@@ -8,6 +8,7 @@
 
 namespace ConnectedServices;
 
+use ConnectedServices\GDrive\GoogleClientFactory;
 use Google_Service_Oauth2;
 use Utils;
 
@@ -95,7 +96,7 @@ class GDriveUserAuthorizationModel {
      * @param $code
      */
     private function __collectProperties( $code ) {
-        $gdriveClient = GoogleClientFactory::create( \INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $gdriveClient = GoogleClientFactory::create();
         $gdriveClient->authenticate($code);
         $this->token = $gdriveClient->getAccessToken();
 

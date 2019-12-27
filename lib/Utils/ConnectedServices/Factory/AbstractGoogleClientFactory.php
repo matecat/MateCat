@@ -32,6 +32,8 @@ abstract class AbstractGoogleClientFactory {
         $client->setRedirectUri( $redirectUri );
         $client->setScopes( static::$OAUTH_SCOPES );
         $client->setAccessType( "offline" );
+        $client->setApprovalPrompt('force');
+        $client->setIncludeGrantedScopes(true);
         $client->setPrompt( "consent" );
 
         return $client;
