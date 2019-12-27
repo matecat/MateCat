@@ -36,6 +36,8 @@ class GDriveUserAuthorizationModel {
      * `is_default` flag from the other ones is removed.
      *
      * @param $code
+     *
+     * @throws \Exceptions\ValidationError
      */
     public function updateOrCreateRecordByCode( $code ) {
         $this->__collectProperties( $code );
@@ -61,6 +63,8 @@ class GDriveUserAuthorizationModel {
 
     /**
      * @param ConnectedServiceStruct $service
+     *
+     * @throws \Exception
      */
     private function __updateService(ConnectedServiceStruct $service ) {
         $dao = new ConnectedServiceDao() ;
@@ -87,8 +91,11 @@ class GDriveUserAuthorizationModel {
         return $dao->findById( $lastId ) ;
     }
 
+    /**
+     * @param $code
+     */
     private function __collectProperties( $code ) {
-        $gdriveClient = GDrive::getClient();
+        $gdriveClient = GoogleClientFactory::create( \INIT::$HTTPHOST . "/gdrive/oauth/response" );
         $gdriveClient->authenticate($code);
         $this->token = $gdriveClient->getAccessToken();
 

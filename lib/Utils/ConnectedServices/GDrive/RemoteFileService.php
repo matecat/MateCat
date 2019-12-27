@@ -9,7 +9,6 @@
 namespace ConnectedServices\GDrive;
 
 use ConnectedServices\AbstractRemoteFileService;
-use ConnectedServices\GDrive;
 use Exception;
 use Log;
 
@@ -44,7 +43,7 @@ class RemoteFileService extends AbstractRemoteFileService
             $token = json_encode( $token ) ;
         }
 
-        $oauthClient = GDrive::getClient() ;
+        $oauthClient = GoogleClientFactory::create();
         $oauthClient->setAccessToken( $token );
         $oauthClient->setAccessType( "offline" );
 
@@ -87,7 +86,7 @@ class RemoteFileService extends AbstractRemoteFileService
      * @param $content
      */
     private function updateFileOnGDrive( $remoteId, $gdriveFile, $content ) {
-        $mimeType =  GDrive\RemoteFileService::officeMimeFromGoogle( $gdriveFile->mimeType );
+        $mimeType =  self::officeMimeFromGoogle( $gdriveFile->mimeType );
 
         $gdriveFile->setMimeType( $mimeType );
 
@@ -114,7 +113,11 @@ class RemoteFileService extends AbstractRemoteFileService
         return null;
     }
 
-
+    /**
+     * @param $googleMime
+     *
+     * @return string
+     */
     public static function officeMimeFromGoogle ( $googleMime ) {
         switch( $googleMime ) {
             case self::MIME_GOOGLE_DOCS:
@@ -130,6 +133,11 @@ class RemoteFileService extends AbstractRemoteFileService
         return $googleMime;
     }
 
+    /**
+     * @param $googleMime
+     *
+     * @return string|null
+     */
     public static function officeExtensionFromMime ( $googleMime ) {
         switch( $googleMime ) {
             case self::MIME_GOOGLE_DOCS:
