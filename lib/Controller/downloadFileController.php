@@ -472,15 +472,15 @@ class downloadFileController extends downloadController {
         $response = [ 'urls' => [] ];
 
         foreach ( $files as $file ) {
-            $gdriveFile = $this->remoteFileService->getFile( $file->remote_id );
+            $gdriveFile = $this->remoteFileService->getFileLink( $file->remote_id );
 
-            if ( false === isset( $gdriveFile[ 'alternateLink' ] ) ) {
+            if ( null !== $gdriveFile->getWebViewLink() and '' !== $gdriveFile->getWebViewLink() ) {
                 throw new Exception( 'alternateLink was not found for file with local ID ' . $file->id );
             }
 
             $response[ 'urls' ][] = [
                     'localId'       => $file->id,
-                    'alternateLink' => $gdriveFile[ 'alternateLink' ]
+                    'alternateLink' => $gdriveFile->getWebViewLink()
             ];
         }
 
