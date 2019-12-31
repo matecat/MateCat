@@ -368,7 +368,7 @@ class createProjectController extends ajaxController {
         }
 
         $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
-
+        
         Queue::sendProject( $projectStructure );
 
         $this->__clearSessionFiles();

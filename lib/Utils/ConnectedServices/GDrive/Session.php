@@ -598,9 +598,9 @@ class Session {
         }
 
         $urlPermission = new \Google_Service_Drive_Permission();
-        $urlPermission->setEmailAddress( $this->user->email );
         $urlPermission->setType( 'anyone' );
         $urlPermission->setRole( 'reader' );
+        //$urlPermission->setEmailAddress( $this->__getUser()->getEmail() );
         //$urlPermission->setWithLink( true ); setWithLink() was removed
 
         return $this->getService()->permissions->create( $fileId, $urlPermission );

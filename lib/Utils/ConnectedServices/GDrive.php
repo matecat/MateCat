@@ -41,12 +41,10 @@ class GDrive {
             // TODO: check if the slash in refresh token creates some issue with the refreshToken call
             // return self::accessTokenToJsonString( $access_token ) ;
             return $access_token;
-
-        } else {
-            return false;
         }
-    }
 
+        return false;
+    }
 
     /**
      * Enforce token to be passed passed around as json_string, to favour encryption and storage.

@@ -2,7 +2,9 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\GDrive;
+use ConnectedServices\GDriveTokenVerifyModel;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
@@ -519,7 +521,7 @@ class downloadFileController extends downloadController {
         // find the proper remote file by id_job and file_id
         $remoteFile = RemoteFiles_RemoteFileDao::getByFileAndJob( $firstFileId, $this->job->id );
 
-        $dao              = new \ConnectedServices\ConnectedServiceDao();
+        $dao              = new ConnectedServiceDao();
         $connectedService = $dao->findById( $remoteFile->connected_service_id );
 
         if ( !$connectedService || $connectedService->disabled_at ) {
@@ -527,12 +529,11 @@ class downloadFileController extends downloadController {
             throw new Exception( 'Connected service missing or disabled' );
         }
 
-        $verifier = new \ConnectedServices\GDriveTokenVerifyModel( $connectedService );
+        $verifier  = new GDriveTokenVerifyModel( $connectedService );
+        $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
         if ( $verifier->validOrRefreshed() ) {
-            $this->remoteFileService = new GDrive\RemoteFileService(
-                    $connectedService->getDecryptedOauthAccessToken()
-            );
+            $this->remoteFileService = new GDrive\RemoteFileService( $raw_token );
         } else {
             // TODO: check how this exception is handled
             throw new Exception( 'Unable to refresh token for service' );
