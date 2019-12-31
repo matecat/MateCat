@@ -25,6 +25,7 @@ class GDrive {
      * @param $raw_token
      *
      * @return mixed
+     * @throws \Exception
      */
     public static function getsNewToken( $raw_token ) {
         $client = GoogleClientFactory::create();
@@ -38,8 +39,6 @@ class GDrive {
             $client->refreshToken( $refresh_token );
             $access_token = $client->getAccessToken();
 
-            // TODO: check if the slash in refresh token creates some issue with the refreshToken call
-            // return self::accessTokenToJsonString( $access_token ) ;
             return $access_token;
         }
 

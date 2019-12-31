@@ -30,6 +30,8 @@ class RemoteFileService extends AbstractRemoteFileService {
      * RemoteFileService constructor.
      *
      * @param $raw_token
+     *
+     * @throws Exception
      */
     public function __construct( $raw_token ) {
         $this->raw_token     = $raw_token;
@@ -40,6 +42,7 @@ class RemoteFileService extends AbstractRemoteFileService {
      * @param string $token
      *
      * @return \Google_Service_Drive
+     * @throws Exception
      */
     public static function getService( $token ) {
 
@@ -62,7 +65,7 @@ class RemoteFileService extends AbstractRemoteFileService {
     public function updateFile( $remoteFile, $content ) {
 
         try {
-            $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id );
+            $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id, [ "fields" => "webViewLink" ] );
             $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $content );
 
             return $gdriveFile;
@@ -100,18 +103,21 @@ class RemoteFileService extends AbstractRemoteFileService {
      * @param string $content
      */
     private function updateFileOnGDrive( $remoteId, \Google_Service_Drive_DriveFile $gdriveFile, $content ) {
-        $mimeType = self::officeMimeFromGoogle( $gdriveFile->mimeType );
 
-        $gdriveFile->setMimeType( $mimeType );
+        $newGDriveFileInstance = new \Google_Service_Drive_DriveFile();
+        $newGDriveFileInstance->setDriveId($remoteId);
+        $newGDriveFileInstance->setMimeType(self::officeMimeFromGoogle( $gdriveFile->mimeType ));
+        $newGDriveFileInstance->setName($gdriveFile->getName());
+        $newGDriveFileInstance->setDescription($gdriveFile->getDescription());
+        $newGDriveFileInstance->setKind($gdriveFile->getKind());
 
         $additionalParams = [
-                'mimeType'    => $mimeType,
+                'mimeType'    => $gdriveFile->mimeType,
                 'data'        => $content,
                 'uploadType'  => 'media',
-                'newRevision' => false
         ];
 
-        $this->gdriveService->files->update( $remoteId, $gdriveFile, $additionalParams );
+        $this->gdriveService->files->update( $remoteId, $newGDriveFileInstance, $additionalParams );
     }
 
     /**
