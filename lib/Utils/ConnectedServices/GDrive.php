@@ -39,6 +39,15 @@ class GDrive {
             $client->refreshToken( $refresh_token );
             $access_token = $client->getAccessToken();
 
+            //
+            // 2019-01-02
+            // -------------------------
+            // Google Api V3 return $access_token as an array, so we need to encode it to JSON string
+            //
+            if(is_array($access_token)) {
+                $access_token = json_encode($access_token, true);
+            }
+
             return $access_token;
         }
 
