@@ -8,6 +8,7 @@
 
 namespace Features\TranslationVersions\Model;
 
+use DataAccess\ShapelessConcreteStruct;
 use PDO;
 
 class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
@@ -116,5 +117,29 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
         }
 
         return null;
+    }
+
+    /**
+     * @param array $id_segment_list
+     *
+     * @return \DataAccess_IDaoStruct[]
+     */
+    public function getTteForSegments( $id_segment_list ) {
+        $in  = str_repeat('?,', count($id_segment_list) - 1) . '?';
+        $sql = "
+            SELECT 
+                    id_segment, 
+                    SUM( time_to_edit ) AS tte, 
+                    source_page
+                FROM
+                    segment_translation_events
+                WHERE
+                    id_segment IN ( $in )
+                GROUP BY id_segment, source_page
+                ORDER BY id_segment, source_page
+        ";
+        $stmt = $this->_getStatementForCache( $sql );
+
+        return @$this->_fetchObject( $stmt, new ShapelessConcreteStruct, $id_segment_list );
     }
 }
