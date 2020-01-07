@@ -84,8 +84,8 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @return ChunkReviewStruct
      * @throws NotFoundException
      */
-    public function filter_review_password_to_job_password( $review_password, $id_job, $source_page ) {
-        $chunk_review = (new \LQA\ChunkReviewDao())->findByJobIdReviewPasswordAndSourcePage( $id_job, $review_password, $source_page );
+    public function filter_review_password_to_job_password( ChunkReviewStruct $chunkReviewStruct, $source_page ) {
+        $chunk_review = (new \LQA\ChunkReviewDao())->findByJobIdReviewPasswordAndSourcePage( $chunkReviewStruct->id_job, $chunkReviewStruct->review_password, $source_page );
 
         if ( !$chunk_review ) {
             throw new NotFoundException( 'Review record was not found' );
