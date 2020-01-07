@@ -487,7 +487,7 @@ class createProjectController extends ajaxController {
 
         if ( $this->userIsLogged ) {
             $gdriveSession = new GDrive\Session();
-            $gdriveSession->clearFiles();
+            $gdriveSession->clearFileListFromSession();
         }
     }
 

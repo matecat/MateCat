@@ -402,7 +402,7 @@ class Session {
         return new RemoteFileService( $this->token );
     }
 
-    public function clearFiles() {
+    public function clearFileListFromSession() {
         unset( $this->session[ self::FILE_LIST ] );
     }
 
@@ -583,7 +583,6 @@ class Session {
         \RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id, $this->serviceStruct->id );
 
         $this->grantFileAccessByUrl( $copiedFile->id );
-
     }
 
     /**
@@ -622,17 +621,19 @@ class Session {
             $service = $this->getService();
 
             // get meta and mimetype
-            $meta     = $service->files->get( $fileId );
-            $mime     = RemoteFileService::officeMimeFromGoogle( $meta->mimeType );
+            $meta = $service->files->get( $fileId );
+            $mime = RemoteFileService::officeMimeFromGoogle( $meta->mimeType );
 
             // get filename
-            $fileName = $this->sanetizeFileName( $meta->getName() );
+            $fileName       = $this->sanetizeFileName( $meta->getName() );
             $file_extension = RemoteFileService::officeExtensionFromMime( $mime );
 
+            // add the extension to filename
             if ( substr( $fileName, -5 ) !== $file_extension ) {
                 $fileName .= $file_extension;
             }
 
+            // export the file
             /** @var Response $file */
             $file = $service->files->export( $fileId, $mime, [ 'alt' => 'media' ] );
 
@@ -711,6 +712,4 @@ class Session {
 
         return $conversionHandler->getResult();
     }
-
-
 }
