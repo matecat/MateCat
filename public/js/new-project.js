@@ -357,6 +357,7 @@ $.extend(UI.UPLOAD_PAGE, {
                 loggedUser: false,
                 showLinks: true
             }), headerMountPoint);
+            this.initDropdowns();
         }
     },
 
