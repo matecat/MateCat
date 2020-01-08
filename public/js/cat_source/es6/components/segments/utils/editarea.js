@@ -251,6 +251,9 @@ let EditArea = {
             else {
                 txt = "";
             }
+            txt = txt.replace(/\n/g, '##$_0A$##');
+            txt = txt.replace(/\t/g, '##$_09$##');
+            txt = TagUtils.decodePlaceholdersToText(txt);
             txt = TagUtils.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
             let newHtml = $(clonedElem).html();
