@@ -399,6 +399,10 @@ class ProjectManager {
 
     }
 
+    /**
+     * @return bool|void
+     * @throws \Exception
+     */
     public function createProject() {
 
         try {
@@ -428,7 +432,6 @@ class ProjectManager {
         if ( $this->projectStructure[ 'result' ][ 'errors' ]->count() ) {
             return false;
         }
-
 
         $this->__createProjectRecord();
         $this->saveMetadata();
@@ -753,9 +756,13 @@ class ProjectManager {
                         "message" => "Internal Error. Xliff Import: Error parsing. ( {$e->getMessage()} )"
                 ];
             } elseif ( $e->getCode() == 400 ) {
+
+                $message = ( null !== $e->getPrevious() ) ? $e->getPrevious()->getMessage() . " in {$e->getMessage()}" : $e->getMessage();
+
                 //invalid Trans-unit value found empty ID
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(), "message" => $e->getPrevious()->getMessage() . " in {$e->getMessage()}"
+                        "code" => $e->getCode(),
+                        "message" => $message,
                 ];
             } else {
 

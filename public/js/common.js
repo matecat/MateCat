@@ -770,7 +770,7 @@ APP = {
                      *      error_message = Object {code: 0, message: "Download Complete."}
                      *
                      */
-                    tokenData = $.parseJSON(token);
+                    var tokenData = $.parseJSON(token);
                     if(parseInt(tokenData.code) < 0) {
                         var notification = {
                             title: 'Error',
@@ -836,8 +836,15 @@ APP = {
         }
         var driveUpdateDone = function(data) {
             if( !data.urls || data.urls.length === 0 ) {
-                APP.alert({msg: "MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and grant Google Drive privileges to MateCat."});
-
+                var props = {
+                    text:"MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and" +
+                        " grant Google Drive privileges to MateCat.",
+                    successText: "Ok",
+                    successCallback: function() {
+                        APP.ModalWindow.onCloseModal();
+                    }
+                };
+                APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Download fail");
                 return;
             }
 
@@ -847,7 +854,7 @@ APP = {
                 winName = 'window' + item.localId ;
                 if (UI.isSafari) {
                     windowReference.location = item.alternateLink;
-                } else if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && typeof window.googleDriveWindows[ winName ] != 'null' && window.googleDriveWindows[ winName ].location != null ) {
+                } else if ( window.googleDriveWindows[ winName ] && !window.googleDriveWindows[ winName ].closed && window.googleDriveWindows[ winName ].location != null ) {
                     window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
                     window.googleDriveWindows[ winName ].focus();
                 } else {
@@ -856,10 +863,10 @@ APP = {
                 }
             });
         };
-
+        var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
         $.ajax({
             cache: false,
-            url: APP.downloadFileURL( openOriginalFiles, jobId, pass ),
+            url: APP.downloadFileURL( openOriginalFiles, jobId, pass, downloadToken ),
             dataType: 'json'
         })
             .done( driveUpdateDone )
@@ -867,15 +874,36 @@ APP = {
                 if (callback){
                     callback();
                 }
+            })
+            .fail(function ( error ) {
+                var cookie = Cookies.get(downloadToken);
+                if (cookie) {
+                    var notification = {
+                        title: 'Error',
+                        text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact ' + config.support_mail,
+                        type: 'error'
+                    };
+                    APP.addNotification(notification);
+                    var props = {
+                        text: tokenData.message,
+                        successText: "Ok",
+                        successCallback: function() {
+                            APP.ModalWindow.onCloseModal();
+                        }
+                    };
+                    APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Download fail");
+                    Cookies.delete(downloadToken);
+                }
             });
     },
 
-    downloadFileURL : function( openOriginalFiles, idJob, pass ) {
-        return sprintf( '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
+    downloadFileURL : function( openOriginalFiles, idJob, pass, downloadToken ) {
+        return sprintf( '%s?action=downloadFile&id_job=%s&password=%s&original=%s&downloadToken=%s',
             config.basepath,
             idJob,
             pass,
-            openOriginalFiles
+            openOriginalFiles,
+            downloadToken
         );
     },
 

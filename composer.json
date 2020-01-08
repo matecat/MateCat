@@ -5,7 +5,7 @@
         "onelogin/php-saml": "^2.13"
     },
     "require": {
-        "google/apiclient": "1.1.7",
+        "google/apiclient": "^2.4",
         "klein/klein": "^2.1",
         "matecat/simple-s3": "^1.5",
         "matecat/whole-text-finder": "^1.0",
