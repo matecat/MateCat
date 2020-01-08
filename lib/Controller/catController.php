@@ -258,8 +258,11 @@ class catController extends viewController {
             /** @var ChunkReviewStruct $chunkReviewStruct */
             $chunkReviewStruct = $this->featureSet->filter(
                     'filter_review_password_to_job_password',
-                    $this->received_password,
-                    $this->jid,
+                    new ChunkReviewStruct( [
+                            'password'        => $this->received_password,
+                            'review_password' => $this->received_password,
+                            'id_job'          => $this->jid
+                    ] ),
                     Utils::getSourcePage()
             );
             $this->chunk = $chunkReviewStruct->getChunk();
@@ -271,7 +274,6 @@ class catController extends viewController {
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
         }
 
-        $this->chunk =  $chunkReviewStruct->getChunk();
     }
 
     protected function _saveActivity(){

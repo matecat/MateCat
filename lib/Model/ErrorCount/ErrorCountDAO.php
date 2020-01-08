@@ -28,16 +28,16 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
         $bind_values      = [];
 
         $query = "SELECT id, password,
-                                revision_stats_typing_min,
-                                revision_stats_translations_min,
-                                revision_stats_terminology_min,
-                                revision_stats_language_quality_min,
-                                revision_stats_style_min,
-                                revision_stats_typing_maj,
-                                revision_stats_translations_maj,
-                                revision_stats_terminology_maj,
-                                revision_stats_language_quality_maj,
-                                revision_stats_style_maj
+                                revision_stats_typing_min as typing_min,
+                                revision_stats_translations_min as translation_min,
+                                revision_stats_terminology_min as terminology_min,
+                                revision_stats_language_quality_min as language_min,
+                                revision_stats_style_min as style_min,
+                                revision_stats_typing_maj as typing_maj,
+                                revision_stats_translations_maj as translation_maj,
+                                revision_stats_terminology_maj as terminology_maj,
+                                revision_stats_language_quality_maj as language_maj,
+                                revision_stats_style_maj as style_maj
                              FROM " . self::TABLE . " WHERE %s ";
 
         if ( $obj->getIdJob() !== null ) {
@@ -102,22 +102,20 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
         $this->_validatePrimaryKey( $obj );
 
         $query = "UPDATE " . self::TABLE . " SET 
-                revision_stats_typing_min = ?, 
-                revision_stats_typing_maj = ?, 
-                revision_stats_translations_min = ?, 
-                revision_stats_translations_maj = ?, 
-                revision_stats_terminology_min = ?, 
-                revision_stats_terminology_maj = ?, 
-                revision_stats_language_quality_min = ?, 
-                revision_stats_language_quality_maj = ?, 
-                revision_stats_style_min = ?, 
-                revision_stats_style_maj = ?
+                revision_stats_typing_min = revision_stats_typing_min + ?, 
+                revision_stats_typing_maj = revision_stats_typing_maj + ?, 
+                revision_stats_translations_min = revision_stats_translations_min + ?, 
+                revision_stats_translations_maj = revision_stats_translations_maj + ?, 
+                revision_stats_terminology_min = revision_stats_terminology_min + ?, 
+                revision_stats_terminology_maj = revision_stats_terminology_maj + ?, 
+                revision_stats_language_quality_min = revision_stats_language_quality_min + ?, 
+                revision_stats_language_quality_maj = revision_stats_language_quality_maj + ?, 
+                revision_stats_style_min = revision_stats_style_min + ?, 
+                revision_stats_style_maj = revision_stats_style_maj + ?
          WHERE id = ? AND password = ?
          ";
 
         $bind_values   = [];
-        $bind_values[] = (int)$obj->getIdJob();
-        $bind_values[] = $obj->getJobPassword();
         $bind_values[] = $obj->getTypingMin();
         $bind_values[] = $obj->getTypingMaj();
         $bind_values[] = $obj->getTranslationMin();
@@ -128,6 +126,8 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
         $bind_values[] = $obj->getLanguageMaj();
         $bind_values[] = $obj->getStyleMin();
         $bind_values[] = $obj->getStyleMaj();
+        $bind_values[] = (int)$obj->getIdJob();
+        $bind_values[] = $obj->getJobPassword();
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( $bind_values );

@@ -3,6 +3,7 @@
 
 namespace ConnectedServices ;
 
+use ConnectedServices\GDrive\GDriveLogger;
 use Google_Client;
 use INIT;
 
@@ -41,6 +42,12 @@ class GDrive {
         $client->setScopes(static::$OAUTH_SCOPES);
         $client->setAccessType("offline");
         $client->setPrompt("consent");
+
+        $logger = new GDriveLogger($client);
+        $logger->setLevel(GDriveLogger::INFO);
+
+        // INJECT THE LOGGER
+        $client->setLogger($logger);
 
         return $client ;
     }
