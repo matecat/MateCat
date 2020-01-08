@@ -330,6 +330,9 @@ $.extend( UI, {
             else {
                 txt = "";
             }
+            txt = txt.replace(/\n/g, '##$_0A$##');
+            txt = txt.replace(/\t/g, '##$_09$##');
+            txt = UI.decodePlaceholdersToText(txt);
             txt = UI.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
             var newHtml = $(clonedElem).html();
