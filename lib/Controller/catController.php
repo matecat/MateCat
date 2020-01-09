@@ -252,14 +252,19 @@ class catController extends viewController {
      * for the purpose of access control.
      *
      * This is done to avoid the rewrite of preexisting implementations.
+     *
+     * @throws \Exception
      */
     private function findJobByIdPasswordAndSourcePage() {
         if ( self::isRevision() ) {
             /** @var ChunkReviewStruct $chunkReviewStruct */
             $chunkReviewStruct = $this->featureSet->filter(
                     'filter_review_password_to_job_password',
-                    $this->received_password,
-                    $this->jid,
+                    new ChunkReviewStruct( [
+                            'password'        => $this->received_password,
+                            'review_password' => $this->received_password,
+                            'id_job'          => $this->jid
+                    ] ),
                     Utils::getSourcePage()
             );
             $this->chunk = $chunkReviewStruct->getChunk();
@@ -270,7 +275,6 @@ class catController extends viewController {
             $this->review_password = $this->password;
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
         }
-
     }
 
     protected function _saveActivity(){

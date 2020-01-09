@@ -31,15 +31,14 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
 
     public $is_default ;
 
-    // TODO ------- start duplicated code, find a way to remove duplication
     /**
      * Returns the decoded access token.
      *
-     * @param null $field
-     *
+     * @return bool|string
      */
     public function getDecryptedOauthAccessToken() {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+
         return $oauthTokenEncryption->decrypt( $this->oauth_access_token );
     }
 
