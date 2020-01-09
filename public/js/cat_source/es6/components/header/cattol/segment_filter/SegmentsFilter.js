@@ -302,6 +302,11 @@ class SegmentsFilter extends React.Component {
 
     componentDidUpdate() {
         this.initDropDown();
+        if (this.props.active) {
+            $('#action-filter').addClass('open');
+        } else {
+            $( '#action-filter' ).removeClass( 'open' );
+        }
     }
 
     componentWillUnmount() {

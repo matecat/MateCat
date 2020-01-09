@@ -667,26 +667,19 @@ article .mbc-comment-balloon-outer {
   position: relative;
   text-align: center;
   width: 45px;
+  &.open svg {
+      opacity: 1;
+  }
+  &.mbc-history-balloon-icon-has-no-comments {
+      opacity: 0.4;
+      cursor: default;
+      pointer-events: none;
+  }
 }
 
 #mbc-history:hover {
   /* #filterSwitch:hover line 86 style.css */
   color:#ccc;
-}
-
-/*
- No comments icon in header
- */
-.mbc-history-balloon-icon-has-no-comments {
-  color: #777; /* style.css line 40 #notifbox */
-}
-
-/*
- Comments icon in header
- */
-.mbc-history-balloon-icon-has-comment .icon-bubble2{
-  color: #fff; /* style.css line 40 #notifbox */
-  opacity: .9;
 }
 
 /*

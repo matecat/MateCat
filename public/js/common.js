@@ -1021,6 +1021,7 @@ APP = {
                         var interval = setInterval(function () {
                             if ( $( '.mbc-history-balloon-outer' ) ) {
                                 $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
+                                $( '#mbc-history' ).addClass( 'open' );
                                 clearInterval(interval);
                             }
                         }, 500);
