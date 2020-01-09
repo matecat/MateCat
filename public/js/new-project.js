@@ -330,6 +330,7 @@ $.extend(UI.UPLOAD_PAGE, {
 	init: function () {
         this.initDropdowns();
         this.checkLanguagesCookie();
+        this.checkGDriveEvents();
         /**
          * LexiQA language Enable/Disable
          */
@@ -436,6 +437,13 @@ $.extend(UI.UPLOAD_PAGE, {
 
         APP.displayCurrentTargetLang();
         APP.displayCurrentSourceLang();
+    },
+
+    checkGDriveEvents: function () {
+        var cookie = Cookies.get('gdrive_files_to_be_listed');
+        if (cookie) {
+            APP.tryListGDriveFiles();
+        }
     },
 
     selectTm: function (value, span) {

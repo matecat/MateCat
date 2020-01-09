@@ -1,5 +1,7 @@
 <?php
 
+use ConnectedServices\Google\GoogleClientFactory;
+
 /**
  * Class OauthClient.<br/>
  * This class has the responsibility to create a valid Google_Client object
@@ -8,10 +10,19 @@
  */
 class OauthClient {
 
+    /**
+     * @var self
+     */
 	private static $instance;
 
+    /**
+     * @var Google_Client
+     */
 	private $client;
 
+    /**
+     * @return OauthClient
+     */
 	public static function getInstance(){
 		if(self::$instance == null){
 			self::$instance = new OauthClient();
@@ -19,15 +30,16 @@ class OauthClient {
 		return self::$instance;
 	}
 
+    /**
+     * OauthClient constructor.
+     */
 	private function __construct(){
-		$this->client = new Google_Client();
-		$this->client->setApplicationName(INIT::$OAUTH_CLIENT_APP_NAME);
-		$this->client->setClientId(INIT::$OAUTH_CLIENT_ID);
-		$this->client->setClientSecret(INIT::$OAUTH_CLIENT_SECRET);
-		$this->client->setRedirectUri(INIT::$OAUTH_REDIRECT_URL);
-		$this->client->setScopes(INIT::$OAUTH_SCOPES);
+		$this->client = GoogleClientFactory::create();
 	}
 
+    /**
+     * @return Google_Client
+     */
 	public function getClient(){
 		return $this->client;
 	}
