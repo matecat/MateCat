@@ -171,6 +171,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $check = new \PostProcess( $this->_matches[ 0 ][ 'raw_segment' ], $suggestion );
             $check->setFeatureSet( $this->featureSet );
+            $check->setSourceSegLang( $queueElement->params->source );
+            $check->setTargetSegLang( $queueElement->params->target );
             $check->realignMTSpaces();
 
             //this should every time be ok because MT preserve tags, but we use the check on the errors

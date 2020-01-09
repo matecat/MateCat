@@ -288,6 +288,8 @@ class setTranslationController extends ajaxController {
 
         $check = new QA( $__seg, $__tra );
         $check->setFeatureSet( $this->featureSet );
+        $check->setSourceSegLang( $this->chunk->source);
+        $check->setTargetSegLang( $this->chunk->target);
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
