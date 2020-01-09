@@ -176,8 +176,8 @@ const Shortcuts = {
                     "label": "Navigate segments Tabs",
                     "equivalent": "",
                     "keystrokes": {
-                        "standard": "alt+s",
-                        "mac": "meta+alt+s",
+                        "standard": "alt+a",
+                        "mac": "meta+alt+a",
                     }
                 }
             }
