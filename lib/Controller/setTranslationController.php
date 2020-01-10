@@ -282,17 +282,13 @@ class setTranslationController extends ajaxController {
 
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
-        $spaceHandler = new FromViewNBSPToSpaces();
-        $__seg        = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
-        $__tra        = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
-
-        $check = new QA( $__seg, $__tra );
+        $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
         $check->setFeatureSet( $this->featureSet );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
             $err_json    = $check->getWarningsJSON();
-            $translation = $this->filter->fromLayer1ToLayer0( $__tra );
+            $translation = $this->filter->fromLayer1ToLayer0( $this->__postInput[ 'translation' ] );
         } else {
             $err_json    = '';
             $translation = $this->filter->fromLayer1ToLayer0( $check->getTrgNormalized() );

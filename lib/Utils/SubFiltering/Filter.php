@@ -183,11 +183,11 @@ class Filter {
      */
     public function fromLayer2ToLayer1( $segment ) {
         $channel = new Pipeline();
+        $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new LtGtDoubleDecode() ); //fix eventually broken HTML
         $channel->addLast( new PlaceHoldXliffTags() );
         $channel->addLast( new FromLayer2TorawXML() );
-        $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */
@@ -286,6 +286,7 @@ class Filter {
     public function fromLayer1ToLayer0( $segment ) {
 
         $channel = new Pipeline();
+        $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new PlaceHoldXliffTags() );
