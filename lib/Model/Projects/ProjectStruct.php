@@ -215,7 +215,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      *
      * @return ModelStruct
      */
-    public function getLqaModel( $ttl = 60*60*24 ) {
+    public function getLqaModel( $ttl = 86400 ) {
         return $this->cachable( __METHOD__, $this->id_qa_model, function ( $id_qa_model ) use ( $ttl ) {
             return ModelDao::findById( $id_qa_model, $ttl );
         } );
