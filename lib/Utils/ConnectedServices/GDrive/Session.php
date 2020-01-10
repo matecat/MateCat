@@ -617,54 +617,48 @@ class Session {
             throw new Exception( 'conversion params not set' );
         }
 
-        try {
-            $service = $this->getService();
+        $service = $this->getService();
 
-            // get meta and mimetype
-            $meta = $service->files->get( $fileId );
-            $mime = RemoteFileService::officeMimeFromGoogle( $meta->mimeType );
+        // get meta and mimetype
+        $meta = $service->files->get( $fileId );
+        $mime = RemoteFileService::officeMimeFromGoogle( $meta->mimeType );
 
-            // get filename
-            $fileName       = $this->sanetizeFileName( $meta->getName() );
-            $file_extension = RemoteFileService::officeExtensionFromMime( $mime );
+        // get filename
+        $fileName       = $this->sanetizeFileName( $meta->getName() );
+        $file_extension = RemoteFileService::officeExtensionFromMime( $mime );
 
-            // add the extension to filename
-            if ( substr( $fileName, -5 ) !== $file_extension ) {
-                $fileName .= $file_extension;
+        // add the extension to filename
+        if ( substr( $fileName, -5 ) !== $file_extension ) {
+            $fileName .= $file_extension;
+        }
+
+        // export the file
+        /** @var Response $file */
+        $file = $service->files->export( $fileId, $mime, [ 'alt' => 'media' ] );
+
+        if ( $file->getStatusCode() === 200 ) {
+            $directory = Utils::uploadDirFromSessionCookie( $this->guid );
+
+            if ( !is_dir( $directory ) ) {
+                mkdir( $directory, 0755, true );
             }
 
-            // export the file
-            /** @var Response $file */
-            $file = $service->files->export( $fileId, $mime, [ 'alt' => 'media' ] );
+            $filePath = Utils::uploadDirFromSessionCookie( $this->guid, $fileName );
 
-            if ( $file->getStatusCode() === 200 ) {
-                $directory = Utils::uploadDirFromSessionCookie( $this->guid );
+            $size    = $file->getBody()->getSize();
+            $content = $file->getBody()->read( $size );
+            $saved   = file_put_contents( $filePath, $content );
 
-                if ( !is_dir( $directory ) ) {
-                    mkdir( $directory, 0755, true );
-                }
+            if ( $saved !== false ) {
+                $fileHash = sha1_file( $filePath );
 
-                $filePath = Utils::uploadDirFromSessionCookie( $this->guid, $fileName );
-
-                $size    = $file->getBody()->getSize();
-                $content = $file->getBody()->read( $size );
-                $saved   = file_put_contents( $filePath, $content );
-
-                if ( $saved !== false ) {
-                    $fileHash = sha1_file( $filePath );
-
-                    $this->addFiles( $fileId, $fileName, $fileHash );
-                    $this->doConversion( $fileName );
-                } else {
-                    throw new Exception( 'Error when saving file.' );
-                }
+                $this->addFiles( $fileId, $fileName, $fileHash );
+                $this->doConversion( $fileName );
             } else {
-                throw new Exception( 'Error when downloading file.' );
+                throw new Exception( 'Error when saving file.' );
             }
-        } catch ( Exception $e ) {
-            \Log::doJsonLog( $e->getMessage() );
-
-            return false;
+        } else {
+            throw new Exception( 'Error when downloading file.' );
         }
     }
 

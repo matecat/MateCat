@@ -24,6 +24,11 @@ class GDriveController extends KleinController {
     private $gdriveUserSession;
 
     /**
+     * @var array
+     */
+    private $error;
+
+    /**
      * @throws Exception
      */
     public function open() {
@@ -114,8 +119,48 @@ class GDriveController extends KleinController {
         $this->gdriveUserSession->setConversionParams( $this->guid, $this->source_lang, $this->target_lang, $this->seg_rule );
 
         for ( $i = 0; $i < count( $listOfIds ) && $this->isImportingSuccessful === true; $i++ ) {
-            $this->gdriveUserSession->importFile( $listOfIds[ $i ] );
+            try {
+                $this->gdriveUserSession->importFile( $listOfIds[ $i ] );
+            } catch (\Exception $e){
+                $this->isImportingSuccessful = false;
+                $this->error = [
+                        'code' => $e->getCode(),
+                        'class' => get_class($e),
+                        'msg' => $this->getExceptionMessage($e)
+                ];
+                break;
+            }
         }
+    }
+
+    /**
+     * @param Exception $e
+     *
+     * @return string
+     */
+    private function getExceptionMessage(\Exception $e){
+        $rawMessage = $e->getMessage();
+
+        // parse Google APIs errors
+        if($e instanceof \Google_Service_Exception and $jsonDecodedMessage = json_decode($rawMessage, true)) {
+            if (isset($jsonDecodedMessage['error']['message'])) {
+                return $jsonDecodedMessage['error']['message'];
+            }
+
+            if (isset($jsonDecodedMessage['error']['errors'])) {
+                $arrayMsg = [];
+
+                foreach ($jsonDecodedMessage['error']['errors'] as $error){
+                    $arrayMsg[] = $error['message'];
+                }
+
+                return implode(',', $arrayMsg);
+            }
+
+            return $jsonDecodedMessage;
+        }
+
+        return $rawMessage;
     }
 
     private function finalize() {
@@ -136,7 +181,10 @@ class GDriveController extends KleinController {
 
     private function doResponse() {
         $this->response->json( [
-                "success" => true
+                "success" => $this->isImportingSuccessful,
+                "error_msg" => isset($this->error['msg']) ? $this->error['msg'] : null,
+                "error_class" => isset($this->error['class']) ? $this->error['class'] : null,
+                "error_code" => isset($this->error['code']) ? $this->error['code'] : null,
         ] );
     }
 
