@@ -52,6 +52,8 @@ class FilterSegments extends React.Component {
         if ( type === 'status' && value === 'APPROVED-2') {
             filter.revision_number = 2;
             filter[type] = 'APPROVED';
+        } if ( type === 'status' && value === 'APPROVED') {
+            filter.revision_number = 1;
         } else {
             filter.revision_number = null;
         }
@@ -66,6 +68,7 @@ class FilterSegments extends React.Component {
     resetStatusFilter() {
         let filter = jQuery.extend({}, this.state.filter);
         filter.status = "";
+        filter.revision_number = null;
         $(this.statusDropdown).dropdown('restore defaults');
         this.setState({
             filter: filter
