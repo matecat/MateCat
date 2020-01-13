@@ -50,8 +50,14 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             $join_data = [] ;
         }
 
+        //
+        // Note 2020-01-13
+        // --------------------------------
+        // We added a UNION to this query to include also the unmodified ICE segments translation in R1
+        //
         $sql = "
-        SELECT st.id_segment AS id
+            select * from ( 
+	SELECT st.id_segment AS id
           FROM
            segment_translations st
            JOIN jobs ON jobs.id = st.id_job
@@ -61,11 +67,19 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                AND st.id_segment
                BETWEEN :job_first_segment AND :job_last_segment
                AND st.status = :status
-
-          $join_events
-
-           ORDER BY st.id_segment
-           ";
+           ".$join_events."
+		UNION 
+        SELECT st.id_segment AS id
+          FROM
+           segment_translations st
+           JOIN jobs ON jobs.id = st.id_job
+               AND jobs.id = :id_job
+               AND jobs.password = :password
+               AND st.id_segment
+               BETWEEN :job_first_segment AND :job_last_segment
+               AND st.status = :status
+               AND version_number = 0 AND match_type = 'ICE' AND translation_date IS NULL 
+ ) as E1 ORDER BY E1.id";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
