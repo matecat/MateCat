@@ -10,8 +10,10 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use Exception;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use LQA\ModelStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 
@@ -28,6 +30,11 @@ class ChunkReviewModel implements IChunkReviewModel {
      * @var Chunks_ChunkStruct
      */
     protected $chunk;
+
+    /**
+     * @var ModelStruct
+     */
+    protected $lqa_model;
 
     /**
      * @return Chunks_ChunkStruct
@@ -102,7 +109,7 @@ class ChunkReviewModel implements IChunkReviewModel {
      */
     public function updatePassFailResult( Projects_ProjectStruct $project ) {
 
-        $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit() );
+        $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
 
         $update_result = ChunkReviewDao::updateStruct( $this->chunk_review, [
                         'fields' => [
@@ -125,12 +132,12 @@ class ChunkReviewModel implements IChunkReviewModel {
     /**
      * Returns the proper limit for the current review stage.
      *
+     * @param ModelStruct $lqa_model
+     *
      * @return array|mixed
+     * @throws Exception
      */
-    public function getQALimit() {
-        $project   = Projects_ProjectDao::findById( $this->chunk_review->id_project );
-        $lqa_model = $project->getLqaModel();
-
+    public function getQALimit( ModelStruct $lqa_model ) {
         return ReviewUtils::filterLQAModelLimit( $lqa_model, $this->chunk_review->source_page );
     }
 
@@ -148,8 +155,6 @@ class ChunkReviewModel implements IChunkReviewModel {
 
         $this->chunk_review->penalty_points       = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
         $this->chunk_review->reviewed_words_count = ChunkReviewDao::getReviewedWordsCountForChunk( $this->chunk );
-
-//        $this->chunk_review->reviewed_words_count = $chunkReviewDao->getReviewedWordsCountForSecondPass( $this->chunk, $this->chunk_review->source_page ) ;
 
         $this->chunk_review->advancement_wc = $chunkReviewDao->recountAdvancementWords( $this->chunk, $this->chunk_review->source_page );
         $this->chunk_review->total_tte      = $chunkReviewDao->countTimeToEdit( $this->chunk, $this->chunk_review->source_page );

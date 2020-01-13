@@ -125,6 +125,7 @@ MBC.init = function() {
             $( '.mbc-history-balloon-has-comment' ).remove();
             $( '.mbc-history-balloon-has-no-comments' ).show();
             $( '.mbc-comment-highlight-history' ).removeClass( 'mbc-visible' );
+            $( '#mbc-history' ).removeClass( 'open' );
         };
 
         var renderHistoryWithComments = function () {
@@ -438,6 +439,7 @@ MBC.init = function() {
         // Click reached #outer , close the history balloon
         $( delegate ).on( 'click', function () {
             $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+            $( '#mbc-history' ).removeClass( 'open' );
         } );
 
         $( window ).on( 'segmentsAdded', function ( e ) {
@@ -479,6 +481,7 @@ MBC.init = function() {
             e.preventDefault();
             e.stopPropagation();
             $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+            $( '#mbc-history' ).removeClass( 'open' );
 
             var sid = $( e.target ).closest( 'div' ).data( 'id' ) + "";
             SegmentActions.scrollToSegment( sid, SegmentActions.openSegmentComment );
@@ -486,6 +489,7 @@ MBC.init = function() {
 
         $( document ).on( 'click', '#action-search', function ( e ) {
             $( '.mbc-history-balloon-outer' ).removeClass( 'mbc-visible' );
+            $( '#mbc-history' ).removeClass( 'open' );
         } );
 
         $( document ).on( 'click', '#mbc-history', function ( ev ) {
@@ -494,6 +498,7 @@ MBC.init = function() {
             } else {
                 UI.closeAllMenus( ev );
                 $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
+                $( '#mbc-history' ).addClass( 'open' );
             }
         } );
 

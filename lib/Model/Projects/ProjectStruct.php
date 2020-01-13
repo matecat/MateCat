@@ -4,6 +4,8 @@ use DataAccess\ArrayAccessTrait;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use LQA\ModelDao;
+use LQA\ModelStruct;
 use Teams\TeamDao;
 
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
@@ -209,13 +211,14 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @return \LQA\ModelStruct
+     * @param float|int $ttl
      *
+     * @return ModelStruct
      */
-    public function getLqaModel() {
-        return $this->cachable(__METHOD__, $this->id_qa_model, function($id_qa_model) {
-            return \LQA\ModelDao::findById( $id_qa_model ) ;
-        });
+    public function getLqaModel( $ttl = 86400 ) {
+        return $this->cachable( __METHOD__, $this->id_qa_model, function ( $id_qa_model ) use ( $ttl ) {
+            return ModelDao::findById( $id_qa_model, $ttl );
+        } );
     }
 
     /**

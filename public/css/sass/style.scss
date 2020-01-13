@@ -93,10 +93,6 @@ header .wrapper {
     text-decoration: none;
 }
 
-#notifbox.notific a {
-    display: none !important;
-}
-
 #filterSwitch, #advancedOptions {
     text-align: center;
     width: 45px;
@@ -1078,11 +1074,6 @@ article .approved:active {
     color: #fff !important;
 }
 
-.downloadtr-button.approved {
-    width: auto !important;
-    text-transform: uppercase;
-}
-
 .draft, .header-menu .wrapper-dropdown-5 {
     background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#d3d4d5));
     background: -moz-linear-gradient(top, #f5f5f5, #d3d4d5);
@@ -1105,10 +1096,6 @@ article .approved:active {
     border: none !important;
     box-shadow: none;
     cursor: pointer;
-}
-
-.downloadtr-button.translated {
-    color: #666 !important;
 }
 
 .topmenu-drop input {
@@ -3215,12 +3202,6 @@ section.opened.editor .status {
     width: 320px
 }
 
-.downloadtr-button span {
-    font-size: 14px
-}
-
-
-
 .end-message-col1 {
     float: left;
     margin: 0;
@@ -4753,7 +4734,16 @@ header {
             margin:0;
             border-radius: 2px;
             cursor: pointer;
-
+            &.disabled {
+                opacity: 0.4 !important;
+                cursor: default !important;
+                &:hover {
+                    opacity: 0.4 !important;
+                }
+                a {
+                    display: none !important;
+                }
+            }
             &:hover,
             &.active {
                 opacity: 1;
@@ -4853,6 +4843,9 @@ header {
         #action-download {
             background-image: url("../../img/icons/icon-download.svg");
             background-size: 30px;
+            &.job-completed {
+                background-image: url("../../img/icons/icon-download-complete.svg");
+            }
         }
         #action-QR,
         #quality-report-button {
@@ -4944,6 +4937,9 @@ header {
                     opacity:1;
                 }
             }
+            &.open svg {
+                opacity: 1;
+            }
 
             .badge {
                 position: absolute;
@@ -5004,7 +5000,7 @@ header {
             }
         }
         #action-filter {
-            &.active {
+            &.active, &.open {
                 opacity: 1;
                 #filter {
                     fill:#fff;

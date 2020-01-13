@@ -33,9 +33,9 @@ class CatDecorator extends \AbstractDecorator {
          * TODO: remove this lqa_categories here, this serialization work should be done
          * on the client starting from raw category records.
          */
-        $this->template->lqa_categories = $model->getSerializedCategories();
+        $this->template->lqa_categories = (null !== $model ) ? $model->getSerializedCategories() : null;
 
-        $this->template->lqa_flat_categories  = $this->getCategoriesAsJson( $model );
+        $this->template->lqa_flat_categories  = (null !== $model ) ? $this->getCategoriesAsJson( $model ) : '';
         $this->template->review_type          = 'extended';
         $this->template->review_extended      = true;
         $this->template->project_type         = null;
@@ -65,6 +65,11 @@ class CatDecorator extends \AbstractDecorator {
 
     }
 
+    /**
+     * @param ModelStruct $model
+     *
+     * @return false|string
+     */
     private function getCategoriesAsJson( ModelStruct $model ) {
         $categories = $model->getCategories();
         $out        = [];

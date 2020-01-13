@@ -125,16 +125,16 @@ class Chunk extends \API\V2\Json\Chunk {
                 $result = static::populateRevisePasswords( $chunkReview, $result );
             }
 
-        } else {
+        } else { //OLD
             $qualityInfoArray = CatUtils::getQualityInfoFromJobStruct( $chunk, $featureSet );
 
             list( $passfail, $reviseIssues, $quality_overall, $score, $total_issues_weight, $total_reviewed_words_count, $categories ) =
                     $this->legacyRevisionQualityVars( $chunk, $featureSet, $jobStats, $qualityInfoArray );
 
-            $result = QualitySummary::populateQualitySummarySection( $result, Constants::SOURCE_PAGE_REVISION,
-                    $chunk, $quality_overall, $reviseIssues, $score, $categories,
+            $result[ 'quality_summary' ][] = QualitySummary::populateQualitySummarySection( Constants::SOURCE_PAGE_REVISION, $chunk,
+                    $quality_overall, $reviseIssues, $score, $categories,
                     $total_issues_weight, $total_reviewed_words_count, $passfail,
-                    0 );
+                    0, 0 );
         }
 
         /**

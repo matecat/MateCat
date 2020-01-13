@@ -1123,10 +1123,10 @@ input.email-export-tmx {
   width: 20px;
   height: 20px;
   float: right;
-  margin-top: 35px;
+  margin-top: 3px;
   display: none;
   position: absolute;
-  right: 260px;
+  right: 233px;
   background-size: 20px 20px;
 }
 
@@ -3724,7 +3724,6 @@ a.resume-project:after,
 .tab-switcher-al a:before,
 .text .alternatives:before,
 .autofillTag:before,
-input.downloadtr-button:before,
 header .filter:before,
 .editToolbar .uppercase:after,
 .editToolbar .lowercase:after,
@@ -4752,24 +4751,6 @@ table.activitylog th .th-inner:after {
 .th-inner span {
   font-family: calibri, Arial, Helvetica, sans-serif;
   font-weight: bold;
-}
-
-.backbtn {
-  background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#d3d4d5));
-  background: -moz-linear-gradient(top, #f5f5f5, #d3d4d5);
-  background: linear-gradient(top, #f5f5f5, #d3d4d5);
-  color: #333;
-  text-decoration: none;
-}
-
-.downloadtr-button.backbtn {
-  float: right;
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: 5px;
-  padding: 8px 16px!important;
-  min-width: 110px;
-  background: #FFF;
 }
 
 

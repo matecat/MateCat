@@ -9,6 +9,7 @@
 namespace Features\ReviewExtended;
 
 use Chunks_ChunkStruct;
+use LQA\ModelStruct;
 
 interface IChunkReviewModel {
 
@@ -46,7 +47,7 @@ interface IChunkReviewModel {
 
     public function getReviewedWordsCount();
 
-    public function getQALimit();
+    public function getQALimit( ModelStruct $lqa_model );
 
     /**
      *

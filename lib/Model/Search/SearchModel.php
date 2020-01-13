@@ -162,7 +162,7 @@ class SearchModel {
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $matches      = WholeTextFinder::find( $occurrence[ 'text' ], $searchTerm, true, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
+                $matches      = WholeTextFinder::find( $occurrence[ 'text' ], $searchTerm, false, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
                 $matchesCount = count( $matches );
 
                 if ( $matchesCount > 0 and $matches[ 0 ][ 0 ] !== '' ) {

@@ -679,10 +679,6 @@ var UI = {
     setDownloadStatus: function(stats) {
         var t = CommonUtils.getTranslationStatus( stats );
 
-        $('.downloadtr-button')
-            .removeClass("draft translated approved")
-            .addClass(t);
-
         var downloadable = (t === 'translated' || t.indexOf('approved') > -1 ) ;
 
         var isGDriveFile = false;
@@ -695,23 +691,23 @@ var UI = {
 
         if ( downloadable ) {
             if(isGDriveFile){
-                label = 'OPEN IN GOOGLE DRIVE';
+                label = 'Open in Google Drive';
             } else {
-                label = 'DOWNLOAD TRANSLATION';
+                label = 'Download Translation';
             }
+            $('#action-download').addClass('job-completed');
         } else {
             if(isGDriveFile){
-                label = 'PREVIEW IN GOOGLE DRIVE';
+                label = 'Preview in Google Drive';
             } else {
-                label = 'PREVIEW';
+                label = 'Draft';
             }
+            $('#action-download').removeClass('job-completed');
         }
 
-        $('.downloadtr-button').removeClass("draft translated approved").addClass(t);
 
-        // var isDownload = (t == 'translated' || t == 'approved') ? 'true' : 'false';
-        $('#downloadProject').attr('value', label);
-        $('#previewDropdown').attr('data-download', downloadable);
+        $('#action-download .downloadTranslation a').text(label);
+        $('#action-download .previewLink a').text(label);
     },
     retrieveStatistics: function () {
         var path = sprintf(

@@ -114,7 +114,7 @@ class SubHeaderContainer extends React.Component {
             }
 
         } else {
-            $('#notifbox').attr('class', 'notific action-submenu')
+            $('#notifbox').attr('class', 'notific disabled action-submenu')
                 .attr("title", "Well done, no errors found!")
                 .find('.numbererror')
                 .text('')

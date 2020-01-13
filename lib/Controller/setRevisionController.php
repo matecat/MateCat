@@ -202,6 +202,9 @@ class setRevisionController extends ajaxController {
                         $this->reviseClass
                 );
 
+                /**
+                 * @var $jobQA Revise_JobQA
+                 */
                 list( $jobQA, $this->reviseClass ) = $this->featureSet->filter( "overrideReviseJobQA", [ $jobQA, $this->reviseClass ], $this->id_job,
                         $this->password_job,
                         $wStruct->getTotal() );
