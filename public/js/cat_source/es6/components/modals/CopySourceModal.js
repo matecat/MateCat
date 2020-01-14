@@ -51,8 +51,8 @@ class CopySourceModal extends React.Component {
 
             <div className="buttons-popup-container">
                 <label>Copy source to target for:</label>
-                <button className="btn-cancel" onClick={this.copyAllSources.bind(this)}>ALL new segments</button>
-                <button className="btn-ok" onClick={this.copySegmentOnly.bind(this)}>This segment only</button>
+                <a className="btn-cancel" onClick={this.copyAllSources.bind(this)}>ALL new segments</a>
+                <a className="btn-ok" onClick={this.copySegmentOnly.bind(this)}>This segment only</a>
                 <div className="notes-action"><b>Note</b>: This action cannot be undone.</div>
             </div>
             <div className="boxed">
