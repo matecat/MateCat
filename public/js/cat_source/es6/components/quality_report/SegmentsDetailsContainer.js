@@ -58,7 +58,7 @@ class SegmentsDetails extends React.Component {
         this.props.files && this.props.files.keySeq().forEach(( key, index ) => {
             totalSegments = totalSegments + this.props.files.get(key).get('segments').size;
         });
-        return <div className="qr-segment-details-container">
+        return <div className="qr-segment-details-container shadow-2">
             <div className="qr-segments-summary">
                 <div className="qr-filter-container">
                     <h3>Segment details</h3>

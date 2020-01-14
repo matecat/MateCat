@@ -15,7 +15,7 @@ $color-yellow: #FFE600;
 body {
     font-family: Calibri, Arial, Helvetica, sans-serif;
     text-align: left;
-    background: white;
+    background: $grey5;
     font-size: 16px;
     min-width: 1024px;
     overflow: auto;
@@ -126,7 +126,7 @@ header {
                 transition: 0.3s ease;
                 .qr-bg-head {
                     height: 258px;
-                    background: white;
+                    background: $grey5;
                     position: absolute;
                     width: 100%;
                     z-index: -1;
@@ -254,14 +254,14 @@ header {
                         .qr-quality {
                             margin-top: 20px;
                             margin-bottom: 20px;
-                            border-bottom: 2px solid #DBDFE3;
+                            border-bottom: 2px solid $grey4;
                             position: relative;
                             z-index: 1;
                             .qr-head {
                                 display: flex;
                                 align-items: center;
                                 font-weight: 700;
-                                background: $grey2;
+                                background: $grey4;
                                 .qr-title {
                                     text-align: center;
                                     text-transform: capitalize;
@@ -272,14 +272,14 @@ header {
                             }
                             .qr-body-list {
                                 display: flex;
-                                border-top: 2px solid $grey2;
-                                border-left: 2px solid $grey2;
-                                border-right: 2px solid $grey2;
+                                border-top: 2px solid $grey4;
+                                border-left: 2px solid $grey4;
+                                border-right: 2px solid $grey4;
                                 &:first-child {
                                     //border: none;
                                 }
                                 .qr-element {
-                                    border-left: 1px solid $grey2;
+                                    border-left: 1px solid $grey4;
                                     background: white;
                                     position: relative;
                                     z-index: -1;
@@ -362,7 +362,7 @@ header {
                         align-items: center;
                     }
                     .qr-segment-details-container {
-                        background: $grey2;
+                        background: $grey4;
                         padding: 35px 15px 15px;
                         .qr-segments-summary {
                             h3{
@@ -431,6 +431,9 @@ header {
                                             }
                                         }
                                         .qr-segment-body {
+                                            border-bottom: 1px solid $grey2;
+                                            border-left: 1px solid $grey2;
+                                            border-right: 1px solid $grey2;
                                                 .segment-container {
                                                     display: flex;
                                                     background: $grey3;
@@ -451,7 +454,7 @@ header {
 
                                                     .qr-segment-title {
                                                         width: 20%;
-                                                        background: none;
+                                                        background: $grey5;
                                                         justify-content: space-between;
 
                                                         button {
@@ -515,7 +518,7 @@ header {
                                                     }
                                                     .qr-text {
                                                         width: 66%;
-                                                        background: #FFFFFF;
+                                                        background: $white;
                                                         margin-right: 1px;
                                                         display: inline-block;
                                                         color: #5f5f5f;
@@ -537,7 +540,7 @@ header {
                                                                 padding: 3px 10px;
                                                                 margin-right: 5px;
                                                                 margin-top: 5px;
-                                                                background: $grey3;
+                                                                background: $grey4;
 
                                                                 &.automated {
                                                                     padding: 0;
@@ -545,7 +548,7 @@ header {
                                                                     .box-icon {
                                                                         display: flex;
                                                                         padding: 5px 3px 5px 5px;
-                                                                        background: #e8e9ef;
+                                                                        background: $grey5;
                                                                         margin-right: 6px;
                                                                     }
                                                                 }
@@ -623,7 +626,7 @@ header {
                                                 .segment-container {
                                                     box-shadow: none !important;
                                                     .segment-content {
-                                                        background: $grey3;
+                                                        background: $grey5;
                                                         .qr-issues-list {
                                                             .qr-issue {
                                                                 background: #FFFFFF;
@@ -636,10 +639,10 @@ header {
                                                     &.shadow-1 {
                                                         position: relative;
                                                         .segment-content {
-                                                            background: #FFFFFF;
+                                                            background: $white;
                                                         }
                                                         .qr-segment-title {
-                                                            background: #e8e9ef;
+                                                            background: $grey4;
                                                         }
                                                     }
                                                 }
@@ -700,6 +703,9 @@ header {
     .filter-dropdown {
         display: flex;
         align-items: center;
+        .dropdown {
+            background: $white !important;
+        }
         &:nth-child(2){
             margin-left: 15px;
         }

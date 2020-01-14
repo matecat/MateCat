@@ -22,7 +22,7 @@ section {
         display: none;
     }
     &:not(.editor):not(.muted):hover {
-        background: #d4d7dc;
+        background: $grey4;
         color: #000;
     }
     &.segment-selected {

@@ -159,7 +159,7 @@ class QualitySummaryTable extends React.Component {
         } else {
             htmlBody = this.getBody();
         }
-        return <div className="qr-quality">
+        return <div className="qr-quality shadow-2">
             {htmlHead}
             {htmlBody}
         </div>

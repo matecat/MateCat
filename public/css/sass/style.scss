@@ -1361,7 +1361,7 @@ section.editor .body > .text {
     color: #666;
     -webkit-transition: all 100ms ease-in;
     transition: all 100ms ease-in;
-    border-bottom: 1px solid $grey2;
+    //border-bottom: 1px solid $grey2;
 }
 
 ul.suggestion-item.graysmall:last-child {
@@ -4537,7 +4537,7 @@ section .segment-side-buttons {
     text-align: right;
     z-index: 0;
     position: relative;
-    background-color: $grey3;
+    //background-color: $grey3;
 }
 
 .buttons li {

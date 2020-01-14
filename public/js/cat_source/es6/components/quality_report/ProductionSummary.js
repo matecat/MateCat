@@ -59,7 +59,7 @@ class ProductionSummary extends React.Component {
             totalApprovedWord += approvedWords2ndPass;
         }
         totalApprovedWord += approvedWords;
-        return <div className="qr-production">
+        return <div className="qr-production shadow-2">
             <div className="qr-effort job-id">ID: {this.props.jobInfo.get('id')}</div>
             <div className="qr-effort source-to-target">
                 <div className="qr-source"><b>{this.props.jobInfo.get('sourceTxt')}</b></div>

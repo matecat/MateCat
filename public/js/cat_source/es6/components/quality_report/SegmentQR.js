@@ -269,37 +269,37 @@ class SegmentQR extends React.Component {
         });
 
         let segmentBodyClass = classnames({
-            "qr-segment-body ": true,
+            "qr-segment-body": true,
             "qr-diff-on": (this.state.translateDiffOn || this.state.reviseDiffOn || this.state.revise2DiffOn),
         });
         let suggestionClasses = classnames({
             "segment-container": true,
             "qr-suggestion": true,
-            // "shadow-1" : (this.state.translateDiffOn || (this.state.reviseDiffOn && !this.target) || (this.state.revise2DiffOn && !this.revise && !this.target)),
+            "shadow-1" : (this.state.translateDiffOn || (this.state.reviseDiffOn && !this.target) || (this.state.revise2DiffOn && !this.revise && !this.target)),
             "rtl-lang" : config.target_rtl
         });
         let translateClasses = classnames({
             "segment-container": true,
             "qr-translated": true,
-            // "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn ||  (this.state.revise2DiffOn && !this.revise )),
+            "shadow-1" : (this.state.translateDiffOn || this.state.reviseDiffOn ||  (this.state.revise2DiffOn && !this.revise )),
             "rtl-lang" : config.target_rtl
         });
         let revisedClasses = classnames({
             "segment-container": true,
             "qr-revised": true,
-            // "shadow-1" : (this.state.reviseDiffOn || this.state.revise2DiffOn),
+            "shadow-1" : (this.state.reviseDiffOn || this.state.revise2DiffOn),
             "rtl-lang" : config.target_rtl
         });
         let revised2Classes = classnames({
             "segment-container": true,
             "qr-revised": true,
             "qr-revised-2ndpass": true,
-            // "shadow-1" : (this.state.revise2DiffOn),
+            "shadow-1" : (this.state.revise2DiffOn),
             "rtl-lang" : config.target_rtl
         });
         return <div className="qr-single-segment">
 
-            <div className="qr-segment-head">
+            <div className="qr-segment-head shadow-1">
                 <div className="segment-id">{this.props.segment.get("sid")}</div>
                 <div className="segment-production-container">
 
