@@ -668,9 +668,12 @@ body.manage {
                                     padding: 5px 8px;
                                     border: none; // border: 1px solid #979797;
                                     font-size: 14px;
-                                    text-decoration: underline;
-                                    &:hover {
+                                    .buy-translation-span:hover {
                                         text-decoration: none;
+                                    }
+                                    .buy-translation-span {
+                                        text-decoration: underline;
+                                        font-size: 14px;
                                     }
                                     span {
                                         color:#000;

@@ -521,7 +521,7 @@ class ProjectContainer extends React.Component {
                             <div className="nine wide column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column project-title">
-                                        <div className="ui ribbon label shadow-1">
+                                        <div className="ui ribbon label">
                                             <div className="project-id" title="Project id">
                                                 {"(" + this.props.project.get('id') + ")"}
                                             </div>

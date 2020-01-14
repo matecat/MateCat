@@ -267,7 +267,7 @@ class AnalyzeHeader extends React.Component {
         return <div className="project-header ui grid">
             <div className="left-analysis nine wide column">
                 <h1>Volume Analysis</h1>
-                <div className="ui ribbon label shadow-1">
+                <div className="ui ribbon label">
                     <div className="project-name" title="Project name"> {projectName} </div>
                 </div>
                 {this.moreProjectInfo()}
