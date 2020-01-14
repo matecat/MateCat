@@ -180,7 +180,7 @@ h1, h2, h3, h4, h5, a, input {
             }
         }
         .re-created {
-            background: #E5E9F1;
+            background: $grey3;
             padding: 10px 10px 10px;
             margin-bottom: 0;
             .issues {
@@ -264,7 +264,7 @@ article {
 
 .re-wrapper.thereAreIssues .re-open-view.re-issues {
     top: -1px;
-    border-top: 12px solid #e5e9f1;
+    border-top: 12px solid $grey3;
 }
 
 section {

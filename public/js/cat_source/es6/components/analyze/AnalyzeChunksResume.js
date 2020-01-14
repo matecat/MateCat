@@ -459,9 +459,11 @@ class AnalyzeChunksResume extends React.Component {
 			{(!this.props.jobsAnalysis.isEmpty()) ? (
 				<div className="analyze-report"
 					 onClick={this.openAnalysisReport}>
-					<h3>{showHideText}</h3>
-					<div className="rounded">
-						<i className={"icon-sort-down icon " + iconClass}/>
+					<div>
+						<h3>{showHideText}</h3>
+						<div className="rounded">
+							<i className={"icon-sort-down icon " + iconClass}/>
+						</div>
 					</div>
 				</div>
 			) : (null)}

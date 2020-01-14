@@ -104,8 +104,8 @@ class OutsourceContainer extends React.Component {
         return <TransitionGroup>
             {this.props.openOutsource ? (
                 <CSSTransition key={this.props.idJobLabel} classNames="transitionOutsource" timeout={{ enter: 500, exit: 300 }}>
-                    <div className={"outsource-container chunk ui grid " + outsourceContainerClass} ref={(container)=>this.container=container}>
-                        <div className=" outsource-header sixteen wide column">
+                    <div className={"outsource-container chunk ui grid shadow-1 " + outsourceContainerClass} ref={(container)=>this.container=container}>
+                        <div className=" outsource-header sixteen wide column ">
                             {this.props.idJobLabel ? (
                                 <div className="job-id" title="Job Id">
                                     ID: {this.props.idJobLabel}

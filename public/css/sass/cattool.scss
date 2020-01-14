@@ -6,6 +6,7 @@ body.cattool {
     flex-direction: column;
 	overflow-y: hidden !important;
 	padding: unset;
+	background-color: $grey5;
 
   /*header*/
   header {
@@ -30,7 +31,7 @@ body.cattool {
 
   .stats-foo {
 	height: 44px;
-	background-color: $grey3;
+	background-color: $white;
 	padding: 0 12px 0 14px;
 	width: 100%;
 	position: fixed;

@@ -633,7 +633,7 @@ class JobContainer extends React.Component {
         return <div className="sixteen wide column chunk-container">
                 <div className="ui grid" ref={(container) => this.container = container}>
                     {!this.state.openOutsource ? (
-                    <div className="chunk wide column pad-right-10" ref={(chunkRow)=> this.chunkRow = chunkRow}>
+                    <div className="chunk wide column pad-right-10 shadow-1" ref={(chunkRow)=> this.chunkRow = chunkRow}>
                         <div className="job-id" title="Job Id">
                             ID: {idJobLabel}
                         </div>

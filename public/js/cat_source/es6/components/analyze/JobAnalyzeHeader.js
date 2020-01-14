@@ -33,7 +33,7 @@ class JobAnalyzeHeader extends React.Component {
 
     render() {
         this.calculateWords();
-        return <div className="head-chunk sixteen wide column pad-right-10">
+        return <div className="head-chunk sixteen wide column pad-right-10 shadow-1">
                     <div className="source-target">
                         <div className="source-box">{this.props.jobInfo.source}</div>
                         <div className="in-to">

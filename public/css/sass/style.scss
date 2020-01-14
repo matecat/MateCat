@@ -430,7 +430,7 @@ section.opened .warnings {
 }
 
 .draft-bar {
-    background-color: #d0d1d1;
+    background-color: $grey4;
 }
 
 .rejected-bar {
@@ -721,7 +721,7 @@ section {
     /*-webkit-transition: all 100ms ease-in;*/
     /*transition: all 100ms ease-in;*/
     //box-shadow: 0 0 0 #e0e0e0, 0 0 0px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-    border: 2px solid $grey2;
+    //border: 1px solid $grey4;
 }
 
 /*projectbar*/
@@ -1309,10 +1309,9 @@ section .body > .text {
 }
 
 body section:not(.editor) {
-    background: $grey2;
+    background: $grey3;
     cursor: pointer;
-    border: none;
-    border-bottom: 1px solid $grey1 !important;
+    border: 1px solid $grey2 !important;
 }
 
 section:not(.editor) .text:first-child {
@@ -1439,16 +1438,16 @@ section.loaded .submenu {
     float: left;
     position: relative;
     width: auto !important;
-    //background: #f2f4f7;
+    background: $grey4;
     z-index: 1;
-    border-bottom: 1px solid $grey2;
+    border-bottom: 1px solid $grey3;
     cursor: pointer;
     user-select: none;
 }
 
 .submenu li.active {
-    border-bottom: 1px solid #F2F4F7;
-    background-color: #F2F4F7;
+    border-bottom: 1px solid white;
+    background-color: $white;
 }
 
 body.noGlossary .tab-switcher-gl {
@@ -1464,8 +1463,8 @@ body.noGlossary .tab-switcher-gl {
     font-size: 16px;
     float: left;
     text-decoration: none;
-    border-right: 2px solid $grey2;
-    border-top: 2px solid $grey2;
+    border-right: 2px solid $grey3;
+    border-top: 2px solid $grey3;
 }
 
 .submenu .notification:hover {
@@ -2013,7 +2012,7 @@ section.editor .loader_on {
     font-size: 12px;
     float: left;
     text-align: left;
-    background: $grey2 !important;
+    background: $grey4 !important;
     margin-bottom: 0px;
 }
 
@@ -2664,7 +2663,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .graysmall:hover {
-    background: $grey2;
+    background: $grey5;
     cursor: default;
 }
 
@@ -4475,10 +4474,10 @@ section .footer .tab.open {
     display: block;
     z-index: 0;
     position: relative;
-    border-top: 2px solid $grey2;
+    border-top: 2px solid $grey3;
     top: -2px;
     min-height: 40px;
-    background-color: #F2F4F7;
+    background-color:$white;
 }
 
 section .segment-side-buttons {
