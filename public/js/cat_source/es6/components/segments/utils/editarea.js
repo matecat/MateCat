@@ -13,7 +13,7 @@ let EditArea = {
         let node = document.createElement("span");
         let br = document.createElement("br");
         let spanInside =  document.createElement("span");
-        node.setAttribute('class', 'monad marker softReturn ' + config.crPlaceholderClass);
+        node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         spanInside.setAttribute('class', 'marker-inside');
         spanInside.textContent = config.crPlaceholderClass;
@@ -30,7 +30,7 @@ let EditArea = {
         let node = document.createElement("span");
         let br = document.createElement("br");
         let spanInside =  document.createElement("span");
-        node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
+        node.setAttribute('class', 'monad marker hardReturn ' + config.crPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         spanInside.setAttribute('class', 'marker-inside');
         spanInside.textContent = config.lfPlaceholderClass;
@@ -251,10 +251,10 @@ let EditArea = {
             else {
                 txt = "";
             }
-            txt = txt.replace(/\n/g, config.lfPlaceholder);
             txt = txt.replace(/\r\n/g, config.crlfPlaceholder);
-            txt = txt.replace(/\t/g, config.tabPlaceholder);
+            txt = txt.replace(/\n/g, config.lfPlaceholder);
             txt = txt.replace(/\r/g, config.crPlaceholder );
+            txt = txt.replace(/\t/g, config.tabPlaceholder);
             txt = TagUtils.decodePlaceholdersToText(txt);
             txt = TagUtils.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);

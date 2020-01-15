@@ -3837,6 +3837,25 @@ section .toolbar .autofillTag {
     text-align: unset;
 }
 
+.editarea span.hardReturn,
+.source span.hardReturn,
+.sugg-target span.hardReturn,
+.sugg-source span.hardReturn, /*to be tested*/
+.track-changes span.hardReturn
+{
+    display: inline !important;
+    margin-left: 6px;
+    padding: 1px 2px 3px 40px;
+    background-image: url(../../img/hard-return.png);
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: center left;
+    width: 20px;
+    position: relative;
+    direction: ltr;
+    text-align: unset;
+}
+
 .editarea br.soft {
     display: block;
     margin: -10px 0px 3px 40px;
