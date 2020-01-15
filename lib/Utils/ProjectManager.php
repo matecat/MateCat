@@ -511,7 +511,6 @@ class ProjectManager {
         }
         //TMX Management
 
-
         /*
             loop through all input files to
             2)convert, in case, non standard XLIFF files to a format that Matecat understands
@@ -680,6 +679,17 @@ class ProjectManager {
                             "code" => -200,
                             "message" => $e->getMessage()
                     ];
+                } else if ($e->getCode() == 0 ) {
+
+                    // check for 'Invalid copy source encoding' error
+                    $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
+
+                    if (strpos($e->getMessage(), $copyErrorMsg) !== false) {
+                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                "code" => -200,
+                                "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
+                        ];
+                    }
                 }
                 $this->__clearFailedProject( $e );
 

@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.132.1",
+            "version": "3.132.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "b12a8adb23793baa2b69f8078d05ee59e816f1ec"
+                "reference": "276241cf558f883b639ecdefd0e9912f0df20b8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/b12a8adb23793baa2b69f8078d05ee59e816f1ec",
-                "reference": "b12a8adb23793baa2b69f8078d05ee59e816f1ec",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/276241cf558f883b639ecdefd0e9912f0df20b8e",
+                "reference": "276241cf558f883b639ecdefd0e9912f0df20b8e",
                 "shasum": ""
             },
             "require": {
@@ -88,7 +88,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2020-01-08T19:14:13+00:00"
+            "time": "2020-01-14T19:16:27+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -591,16 +591,16 @@
         },
         {
             "name": "matecat/simple-s3",
-            "version": "v1.5.9",
+            "version": "v1.5.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/simple-s3.git",
-                "reference": "f2ae03e4dc9fa67d5d26f1020b2c3f20dbccc411"
+                "reference": "299860ad9d4644e33053467dc6428420a7c8eb32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/f2ae03e4dc9fa67d5d26f1020b2c3f20dbccc411",
-                "reference": "f2ae03e4dc9fa67d5d26f1020b2c3f20dbccc411",
+                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/299860ad9d4644e33053467dc6428420a7c8eb32",
+                "reference": "299860ad9d4644e33053467dc6428420a7c8eb32",
                 "shasum": ""
             },
             "require": {
@@ -643,7 +643,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2019-12-16T13:45:17+00:00"
+            "time": "2020-01-15T15:15:23+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
