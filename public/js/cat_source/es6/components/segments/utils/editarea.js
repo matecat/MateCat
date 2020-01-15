@@ -251,8 +251,10 @@ let EditArea = {
             else {
                 txt = "";
             }
-            txt = txt.replace(/\n/g, '##$_0A$##');
-            txt = txt.replace(/\t/g, '##$_09$##');
+            txt = txt.replace(/\n/g, config.lfPlaceholder);
+            txt = txt.replace(/\r\n/g, config.crlfPlaceholder);
+            txt = txt.replace(/\t/g, config.tabPlaceholder);
+            txt = txt.replace(/\r/g, config.crPlaceholder );
             txt = TagUtils.decodePlaceholdersToText(txt);
             txt = TagUtils.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
