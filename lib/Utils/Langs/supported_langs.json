@@ -800,7 +800,7 @@
             "isocode":"ha",
             "enabled":true,
             "rtl":false,
-            "rfc3066code":"ha-NG"
+            "rfc3066code":"ha-NE"
         }
     ,
         {
@@ -2134,8 +2134,8 @@
             "isocode":"ta",
             "enabled":true,
             "rtl":false,
-            "languageRegionCode":"ta-IN",
-            "rfc3066code":"ta-IN"
+            "languageRegionCode":"ta-LK",
+            "rfc3066code":"ta-LK"
         }
     ,
         {
