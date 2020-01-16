@@ -22,7 +22,7 @@ let EditArea = {
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call();
+            modifiedTranslationCallback.call(null, node.outerHTML);
         });
     },
     handleReturn: function(e, modifiedTranslationCallback) {
@@ -30,16 +30,16 @@ let EditArea = {
         let node = document.createElement("span");
         let br = document.createElement("br");
         let spanInside =  document.createElement("span");
-        node.setAttribute('class', 'monad marker hardReturn ' + config.crPlaceholderClass);
+        node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         spanInside.setAttribute('class', 'marker-inside');
-        spanInside.textContent = config.crPlaceholderClass;
+        spanInside.textContent = config.lfPlaceholderClass;
         node.appendChild(br);
         node.appendChild(spanInside);
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call();
+            modifiedTranslationCallback.call(null, node.outerHTML);
         });
     },
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
@@ -251,10 +251,10 @@ let EditArea = {
             else {
                 txt = "";
             }
+            txt = txt.replace(/\r\n/g, config.lfPlaceholder);
             txt = txt.replace(/\n/g, config.lfPlaceholder);
-            txt = txt.replace(/\r/g, config.crPlaceholder );
+            txt = txt.replace(/\r/g, config.lfPlaceholder );
             txt = txt.replace(/\t/g, config.tabPlaceholder);
-            txt = txt.replace(/\r\n/g, config.crlfPlaceholder);
             txt = TagUtils.decodePlaceholdersToText(txt);
             txt = TagUtils.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
@@ -287,7 +287,7 @@ let EditArea = {
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call();
+            modifiedTranslationCallback.call(null, node.outerHTML);
         });
     },
 
