@@ -133,9 +133,7 @@ class Editarea extends React.Component {
         if (!this.compositionsStart) {
             EditArea.keydownEditAreaEventHandler.call( this.editAreaRef, e, (textAdded) => {
                 this.keyPressed = false;
-                this.pastedAction = {
-                    length: textAdded.length
-                };
+
                 if ( !this.props.segment.modified ) {
                     SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true);
                 }
