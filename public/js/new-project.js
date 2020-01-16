@@ -381,20 +381,6 @@ $.extend(UI.UPLOAD_PAGE, {
             }
         });
 
-        $('#add-tmx-option').on('click', function () {
-            UI.openLanguageResourcesPanel('tm');
-        });
-
-        $('#target-lang').dropdown({
-            selectOnKeydown: false,
-            fullTextSearch: 'exact',
-        });
-
-        $('#source-lang').dropdown({
-            selectOnKeydown: false,
-            fullTextSearch: 'exact',
-        });
-
         $('#project-subject').dropdown({
             selectOnKeydown: false,
             fullTextSearch: 'exact'
