@@ -22,7 +22,7 @@ let EditArea = {
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call(null, node.outerHTML);
+            modifiedTranslationCallback.call();
         });
     },
     handleReturn: function(e, modifiedTranslationCallback) {
@@ -39,7 +39,20 @@ let EditArea = {
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call(null, node.outerHTML);
+            modifiedTranslationCallback.call();
+        });
+    },
+    insertNbspAtCursor: function ( modifiedTranslationCallback ) {
+        UI.editarea.find('.lastInserted').removeClass('lastInserted');
+
+        let node = document.createElement("span");
+        node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.textContent = TextUtils.htmlDecode("&nbsp;");
+        TextUtils.insertNodeAtCursor(node);
+        EditArea.unnestMarkers();
+        setTimeout(()=>{
+            modifiedTranslationCallback.call();
         });
     },
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
@@ -275,20 +288,6 @@ let EditArea = {
         TextUtils.insertNodeAtCursor(node);
         this.handleEditAreaPaste(e);
         UI.registerQACheck();
-    },
-
-    insertNbspAtCursor: function ( modifiedTranslationCallback ) {
-        UI.editarea.find('.lastInserted').removeClass('lastInserted');
-
-        let node = document.createElement("span");
-        node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
-        node.setAttribute('contenteditable', 'false');
-        node.textContent = TextUtils.htmlDecode("&nbsp;");
-        TextUtils.insertNodeAtCursor(node);
-        EditArea.unnestMarkers();
-        setTimeout(()=>{
-            modifiedTranslationCallback.call(null, node.outerHTML);
-        });
     },
 
     unnestMarkers: function() {
