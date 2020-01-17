@@ -12,47 +12,49 @@ let EditArea = {
         e.preventDefault();
         let node = document.createElement("span");
         let br = document.createElement("br");
-        let spanInside =  document.createElement("span");
         node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
-        spanInside.setAttribute('class', 'marker-inside');
-        spanInside.textContent = config.lfPlaceholderClass;
         node.appendChild(br);
-        node.appendChild(spanInside);
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call();
+            modifiedTranslationCallback.call(e, 1);
         });
     },
     handleReturn: function(e, modifiedTranslationCallback) {
         e.preventDefault();
         let node = document.createElement("span");
         let br = document.createElement("br");
-        let spanInside =  document.createElement("span");
         node.setAttribute('class', 'monad marker softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
-        spanInside.setAttribute('class', 'marker-inside');
-        spanInside.textContent = config.lfPlaceholderClass;
         node.appendChild(br);
-        node.appendChild(spanInside);
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call();
+            modifiedTranslationCallback.call(e, 1);
         });
     },
-    insertNbspAtCursor: function ( modifiedTranslationCallback ) {
-        UI.editarea.find('.lastInserted').removeClass('lastInserted');
-
+    insertNbspAtCursor: function (e, modifiedTranslationCallback ) {
+        e.preventDefault();
         let node = document.createElement("span");
-        node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
+        node.setAttribute('class', 'marker monad nbsp-marker ' + config.nbspPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
-        node.textContent = TextUtils.htmlDecode("&nbsp;");
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call();
+            modifiedTranslationCallback.call(e, 1);
+        });
+    },
+    insertTabCursor: function (e, modifiedTranslationCallback ) {
+        e.preventDefault();
+        let node = document.createElement("span");
+        node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.textContent = TextUtils.htmlDecode("&#8677;");
+        TextUtils.insertNodeAtCursor(node);
+        EditArea.unnestMarkers();
+        setTimeout(()=>{
+            modifiedTranslationCallback.call(e, 1);
         });
     },
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
@@ -70,8 +72,7 @@ let EditArea = {
             }
         }
         if ( e.altKey && e.key === " " || e.ctrlKey && e.shiftKey && e.key === " ") {
-            e.preventDefault();
-            EditArea.insertNbspAtCursor(modifiedTranslationCallback);
+            EditArea.insertNbspAtCursor(e, modifiedTranslationCallback);
             return;
         }
 
@@ -147,13 +148,7 @@ let EditArea = {
 
         if (code == 9) { // tab
 
-            e.preventDefault();
-            let node = document.createElement("span");
-            node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
-            node.setAttribute('contenteditable', 'false');
-            node.textContent = TextUtils.htmlDecode("&#8677;");
-            TextUtils.insertNodeAtCursor(node);
-            EditArea.unnestMarkers();
+            EditArea.insertTabCursor(e, modifiedTranslationCallback);
         }
         if (code == 37) { // left arrow
             selection = window.getSelection();

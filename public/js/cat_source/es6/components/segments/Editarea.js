@@ -133,7 +133,11 @@ class Editarea extends React.Component {
         if (!this.compositionsStart) {
             EditArea.keydownEditAreaEventHandler.call( this.editAreaRef, e, (textAdded) => {
                 this.keyPressed = false;
-
+                if ( textAdded ) {
+                    this.pastedAction = {
+                        length: textAdded
+                    }
+                }
                 if ( !this.props.segment.modified ) {
                     SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true);
                 }
@@ -310,14 +314,17 @@ class Editarea extends React.Component {
         let start, pasteLength = 0;
         if ( this.pastedAction ) {
             pasteLength = this.pastedAction.length;
-            delete this.pastedAction;
+            // delete this.pastedAction;
         }
         if (sel && sel.rangeCount > 0 && document.createRange) {
             let range = window.getSelection().getRangeAt(0);
             let preSelectionRange = range.cloneRange();
             preSelectionRange.selectNodeContents(containerEl);
             preSelectionRange.setEnd(range.startContainer, range.startOffset);
-            start = preSelectionRange.toString().length;
+            let tabCode = TextUtils.htmlDecode("&#8677;");
+            let regExp = new RegExp(tabCode, 'g');
+            let selectionText = preSelectionRange.toString().replace(regExp, '');
+            start = selectionText.length;
 
             return {
                 start: start + pasteLength,
@@ -337,13 +344,18 @@ class Editarea extends React.Component {
         }
     }
     restoreCursorPosition(containerEl, savedSel) {
+        if ( this.pastedAction ) {
+            delete this.pastedAction;
+        }
         if (window.getSelection && document.createRange) {
             var charIndex = 0, range = document.createRange();
             range.setStart(containerEl, 0);
             range.collapse(true);
             var nodeStack = [containerEl], node, foundStart = false, stop = false;
             while (!stop && (node = nodeStack.pop())) {
-                if (node.nodeType === 3) {
+                if ( node.className && node.className.indexOf('marker') && savedSel.start - charIndex === 1 && savedSel.end - charIndex === 1 ) {
+                    charIndex++;
+                } else if ( node.nodeType === 3 ) {
                     var nextCharIndex = charIndex + node.length;
                     if (!foundStart && savedSel.start >= charIndex && savedSel.start <= nextCharIndex ) {
                         range.setStart(node, savedSel.start - charIndex);
