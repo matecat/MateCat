@@ -1,10 +1,11 @@
 
 .progress-bar {
 	height: 20px;
-	margin-top: 6px;
+	margin-top: -20px;
 	float: left;
 	min-width: 115px;
 	border-radius: 10px;
+	margin-bottom: 10px;
 	.progr {
 		background-color: inherit;
 	    //min-width: 120px;

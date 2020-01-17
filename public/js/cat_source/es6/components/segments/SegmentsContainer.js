@@ -425,7 +425,7 @@ class SegmentsContainer extends React.Component {
             height={this.state.window.height-106}
             style={{overflowX: 'hidden'}}
             estimatedItemSize={80}
-            overscanCount={5}
+            overscanCount={10}
             itemCount={items.length}
             itemSize={(index)=>this.getSegmentHeight(index)}
             scrollToAlignment={scrollToObject.position}
