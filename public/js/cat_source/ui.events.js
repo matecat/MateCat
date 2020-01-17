@@ -190,7 +190,7 @@ $.extend(UI, {
             e.preventDefault();
             UI.toggleFileMenu();
         });
-        $("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
+        $("#jobMenu").on('click', '.jobmenu-list li', function(e) {
             e.preventDefault();
             UI.renderAndScrollToSegment($(this).attr('data-segment'));
         }).on('click', 'li.currSegment:not(.disabled)', function(e) {

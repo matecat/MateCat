@@ -5170,11 +5170,16 @@ header {
         line-height: 24px;
         font-size: 16px;
         position: relative;
-
+        .firstSegment {
+            height: 35px;
+            line-height: 35px;
+            padding-left: 11px;
+        }
         .currSegment {
             a {
                 background: $white;
                 padding: 8px 16px;
+                cursor: pointer;
                 &::before {
                     color: $medium-gray;
                     font-size: 16px;
