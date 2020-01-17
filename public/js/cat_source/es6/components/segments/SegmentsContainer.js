@@ -328,7 +328,7 @@ class SegmentsContainer extends React.Component {
         let scrollTop = this.scrollContainer.scrollTop();
         let scrollBottom = this.scrollContainer.prop('scrollHeight') - (scrollTop + this.scrollContainer.height());
         this.scrollDirectionTop = (scrollTop < this.lastScrollTop);
-        if ( scrollBottom < 500 && !this.scrollDirectionTop) {
+        if ( scrollBottom < 700 && !this.scrollDirectionTop) {
             UI.getMoreSegments('after');
         } else if( scrollTop < 500 && this.scrollDirectionTop) {
             UI.getMoreSegments('before');

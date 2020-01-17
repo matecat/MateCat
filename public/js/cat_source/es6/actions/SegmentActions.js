@@ -144,7 +144,7 @@ const SegmentActions = {
     },
     scrollToSegment: function (sid, callback) {
         const segment = SegmentStore.getSegmentByIdToJS(sid);
-        if ( segment ) {
+        if ( segment && SegmentStore.segmentScrollableToCenter(sid)) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.SCROLL_TO_SEGMENT,
                 sid: sid,

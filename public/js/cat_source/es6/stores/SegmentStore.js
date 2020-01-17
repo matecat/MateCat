@@ -678,6 +678,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         return (segment) ? segment.toJS() : null;
     },
 
+    segmentScrollableToCenter(sid) {
+        //If a segment is in the last 5 segment loaded in the UI is scrollable
+        let index = this.getSegmentIndex(sid);
+        return index !== -1 && this._segments.size - 5 > index;
+    },
+
     getSegmentsSplitGroup(sid) {
         let segments = this._segments.filter(function (seg) {
             return seg.get('original_sid') == sid;
