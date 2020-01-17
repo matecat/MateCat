@@ -16,14 +16,6 @@ class CtrlCharsPlaceHoldToAscii extends AbstractHandler {
 
     public function transform( $segment ) {
 
-        //normal control characters should not be sent by the client
-        $segment = str_replace(
-                [
-                        "\r", "\n", "\t",
-                        "&#0A;", "&#0D;", "&#09;"
-                ], "", $segment
-        );
-
         //Replace br placeholders
         $segment = str_replace( Constants::crlfPlaceholder, "\r\n", $segment );
         $segment = str_replace( Constants::lfPlaceholder, "\n", $segment );
