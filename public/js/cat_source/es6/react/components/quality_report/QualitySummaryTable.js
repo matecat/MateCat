@@ -30,7 +30,7 @@ class QualitySummaryTable extends React.Component {
                 });
             }
         });
-        this.severities = _.orderBy(this.severities, ['penalty'],['asc']);
+        this.severities = _.orderBy(this.severities, ['dqf_id'],['asc']);
     }
     getIssuesForCategory(categoryId) {
         if (this.props.qualitySummary.size > 0 ) {
