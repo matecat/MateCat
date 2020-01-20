@@ -193,11 +193,29 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 Constants_TranslationStatus::$REVISION_STATUSES
         );
 
-
+        //
+        // Note 2020-01-14
+        // --------------------------------
+        // We added a UNION to this query to include also the unmodified ICE segments translation in R1
+        //
         if ( isset( $options[ 'filter' ][ 'status' ] ) && in_array( $options[ 'filter' ][ 'status' ], $statuses ) ) {
             $options_conditions_query              .= " AND st.status = :status ";
             $options_conditions_values[ 'status' ] = $options[ 'filter' ][ 'status' ];
 
+            $union_ice = "UNION
+                (SELECT distinct(s.id) AS __sid
+                    FROM segments s
+                    JOIN segment_translations st ON s.id = st.id_segment
+                    JOIN jobs j ON j.id = st.id_job
+                    AND j.id = :id_job
+                    AND j.password = :password
+                    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                    AND st.status = :status
+                    AND st.version_number = 0 AND st.match_type = 'ICE' AND st.translation_date IS NULL 
+                    ORDER BY __sid DESC
+                LIMIT %u)";
+        } else {
+            $union_ice = "";
         }
 
         if (
@@ -288,7 +306,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $queryAfter = "
                 SELECT * FROM (
-                    SELECT distinct(s.id) AS __sid
+                    (SELECT distinct(s.id) AS __sid
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
                     JOIN jobs j ON j.id = st.id_job
@@ -300,12 +318,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         AND s.id > :ref_segment
                         AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                         %s
-                    LIMIT %u
+                    LIMIT %u)
+                    $union_ice
                 ) AS TT1";
 
         $queryBefore = "
-                SELECT * from(
-                    SELECT distinct(s.id) AS __sid
+                SELECT * FROM (
+                    (SELECT distinct(s.id) AS __sid
                     FROM segments s
                     JOIN segment_translations st ON s.id = st.id_segment
                     JOIN jobs j ON j.id = st.id_job
@@ -318,7 +337,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                         %s
                     ORDER BY __sid DESC
-                    LIMIT %u
+                    LIMIT %u)
+                    $union_ice
                 ) as TT2";
 
         /*
@@ -328,7 +348,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
          */
         $queryCenter = "
                   SELECT * FROM ( 
-                        SELECT DISTINCT(s.id) AS __sid
+                        (SELECT DISTINCT(s.id) AS __sid
                         FROM segments s
                         JOIN segment_translations st ON s.id = st.id_segment
                         JOIN jobs j ON j.id = st.id_job
@@ -339,7 +359,8 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                             AND s.show_in_cattool = 1
                             AND s.id >= :ref_segment
                             %s
-                        LIMIT %u 
+                        LIMIT %u )
+                        $union_ice
                   ) AS TT1
                   UNION
                   SELECT * FROM (
@@ -359,13 +380,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         switch ( $where ) {
             case 'after':
-                $subQuery = sprintf( $queryAfter, $options_join_query, $options_conditions_query, $step );
+                $subQuery = sprintf( $queryAfter, $options_join_query, $options_conditions_query, (int)( $step / 2 ), (int)( $step / 2 ) );
                 break;
             case 'before':
-                $subQuery = sprintf( $queryBefore, $options_join_query, $options_conditions_query, $step );
+                $subQuery = sprintf( $queryBefore, $options_join_query, $options_conditions_query, (int)( $step / 2 ), (int)( $step / 2 ) );
                 break;
             case 'center':
-                $subQuery = sprintf( $queryCenter, $options_join_query, $options_conditions_query, (int)( $step / 2 ), $options_join_query, $options_conditions_query, (int)( $step / 2 ) );
+                $subQuery = sprintf( $queryCenter, $options_join_query, $options_conditions_query, (int)( $step / 2 ), (int)( $step / 2 ), $options_join_query, $options_conditions_query, (int)( $step / 2 ) );
                 break;
             default:
                 throw new Exception( "No direction selected" );

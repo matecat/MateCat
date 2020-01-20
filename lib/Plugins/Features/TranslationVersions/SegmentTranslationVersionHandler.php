@@ -23,6 +23,9 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
      */
     private $dao;
 
+    /**
+     * @var int
+     */
     private $id_job;
 
     /**
@@ -30,10 +33,24 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
      */
     private $chunkStruct;
 
+    /**
+     * @var int
+     */
     private $id_segment;
+
+    /**
+     * @var int
+     */
     private $uid;
 
-
+    /**
+     * SegmentTranslationVersionHandler constructor.
+     *
+     * @param Chunks_ChunkStruct     $chunkStruct
+     * @param                        $id_segment
+     * @param Users_UserStruct       $userStruct
+     * @param Projects_ProjectStruct $projectStruct
+     */
     public function __construct( Chunks_ChunkStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
 
         $this->chunkStruct = $chunkStruct;
@@ -48,13 +65,32 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
      * @param Translations_SegmentTranslationStruct $propagation
      */
     public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation ) {
-
         $this->dao->savePropagationVersions(
                 $propagation,
                 $this->id_segment,
                 $this->chunkStruct
         );
+    }
 
+    /**
+     * @param Translations_SegmentTranslationStruct $new_translation
+     * @param Translations_SegmentTranslationStruct $old_translation
+     *
+     * @throws ReflectionException
+     */
+    public function evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
+
+        $version_saved = $this->saveVersion( $new_translation, $old_translation );
+
+        if ( $version_saved ) {
+            $new_translation->version_number = $old_translation->version_number + 1;
+        } else {
+            $new_translation->version_number = $old_translation->version_number;
+        }
+
+        if ( $new_translation->version_number == null ) {
+            $new_translation->version_number = 0;
+        }
     }
 
     /**
@@ -67,7 +103,7 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
      * @return bool|int
      * @throws ReflectionException
      */
-    public function saveVersion(
+    private function saveVersion(
             Translations_SegmentTranslationStruct $new_translation,
             Translations_SegmentTranslationStruct $old_translation
     ) {
@@ -125,14 +161,10 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
      *
      * @return bool
      */
-    private function translationIsEqual(
-            Translations_SegmentTranslationStruct $new_translation,
-            Translations_SegmentTranslationStruct $old_translation
-    ) {
+    private function translationIsEqual( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
         $old = html_entity_decode( $old_translation->translation, ENT_XML1 | ENT_QUOTES );
         $new = html_entity_decode( $new_translation->translation, ENT_XML1 | ENT_QUOTES );
 
         return $new == $old;
     }
-
 }

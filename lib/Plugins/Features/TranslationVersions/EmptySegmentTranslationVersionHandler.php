@@ -30,11 +30,7 @@ class EmptySegmentTranslationVersionHandler implements VersionHandlerInterface {
      *
      * @return bool
      */
-    public function saveVersion(
-            Translations_SegmentTranslationStruct $new_translation,
-            Translations_SegmentTranslationStruct $old_translation
-    ) {
+    public function evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
         return false;
     }
-
 }

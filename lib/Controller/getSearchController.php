@@ -413,6 +413,10 @@ class getSearchController extends ajaxController {
             $new_translation->version_number         = $old_translation->version_number;
             $new_translation->translation_date       = date( "Y-m-d H:i:s" );
 
+            // Save version
+            $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->id_segment, $this->user, $project );
+            $versionsHandler->evaluateVersionSave( $new_translation, $old_translation );
+
             // preSetTranslationCommitted
             $this->featureSet->run( 'preSetTranslationCommitted', [
                     'translation'       => $new_translation,

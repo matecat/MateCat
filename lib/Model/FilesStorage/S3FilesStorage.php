@@ -301,17 +301,28 @@ class S3FilesStorage extends AbstractFilesStorage {
             $destItems[] = self::FILES_FOLDER . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile . $folder . $this->getTheLastPartOfKey( $key );
         }
 
-        $copied = $this->s3Client->copyInBatch( [
-                'source_bucket' => static::$FILES_STORAGE_BUCKET,
-                'files'         => [
-                        'source' => $sourceItems,
-                        'target' => $destItems,
-                ],
-        ] );
+        try {
+            $copied = $this->s3Client->copyInBatch( [
+                    'source_bucket' => static::$FILES_STORAGE_BUCKET,
+                    'files'         => [
+                            'source' => $sourceItems,
+                            'target' => $destItems,
+                    ],
+            ] );
 
-        \Log::doJsonLog( $this->getArrayMessageForLogs( $idFile, $datePath, $sourceItems, $destItems, $copied ) );
+            \Log::doJsonLog( $this->getArrayMessageForLogs( $idFile, $datePath, $sourceItems, $destItems, $copied ) );
 
-        return $copied;
+            return $copied;
+        } catch (\Exception $e) {
+            foreach ($sourceItems as $key => $item){
+                $this->s3Client->deleteItem([
+                        'bucket' => static::$FILES_STORAGE_BUCKET,
+                        'key' => $item,
+                ]);
+            }
+
+            throw $e;
+        }
     }
 
     /**

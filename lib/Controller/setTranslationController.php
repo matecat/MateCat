@@ -3,12 +3,10 @@
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
 use Exceptions\ControllerReturnException;
-use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use SubFiltering\Filter;
-use SubFiltering\Filters\FromViewNBSPToSpaces;
 
 class setTranslationController extends ajaxController {
 
@@ -282,17 +280,13 @@ class setTranslationController extends ajaxController {
 
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
-        $spaceHandler = new FromViewNBSPToSpaces();
-        $__seg        = $spaceHandler->transform( $this->__postInput[ 'segment' ] );
-        $__tra        = $spaceHandler->transform( $this->__postInput[ 'translation' ] );
-
-        $check = new QA( $__seg, $__tra );
+        $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
         $check->setFeatureSet( $this->featureSet );
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {
             $err_json    = $check->getWarningsJSON();
-            $translation = $this->filter->fromLayer1ToLayer0( $__tra );
+            $translation = $this->filter->fromLayer1ToLayer0( $this->__postInput[ 'translation' ] );
         } else {
             $err_json    = '';
             $translation = $this->filter->fromLayer1ToLayer0( $check->getTrgNormalized() );
@@ -349,9 +343,7 @@ class setTranslationController extends ajaxController {
         $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
-
-        // TODO: move this into a feature callback
-        $this->__evaluateVersionSave( $new_translation, $old_translation );
+        $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -548,7 +540,7 @@ class setTranslationController extends ajaxController {
                 'chunk'             => $this->chunk,
                 'segment'           => $this->segment,
                 'user'              => $this->user,
-                'source_page_code'  => ReviewUtils::revisionNumberToSourcePage($this->revisionNumber),
+                'source_page_code'  => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber ),
                 'controller_result' => & $this->result,
                 'features'          => $this->featureSet,
                 'project'           => $project
@@ -574,7 +566,7 @@ class setTranslationController extends ajaxController {
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
-                    'source_page_code' => ReviewUtils::revisionNumberToSourcePage($this->revisionNumber)
+                    'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->revisionNumber )
             ] );
 
         } catch ( Exception $e ) {
@@ -809,23 +801,6 @@ class setTranslationController extends ajaxController {
             $msg                        = "Status change not allowed with identical translation on segment {$old_translation->id_segment}.";
             $this->result[ 'errors' ][] = [ "code" => -2000, "message" => $msg ];
             throw new ControllerReturnException( $msg, -1 );
-        }
-    }
-
-    private function __evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation,
-                                            Translations_SegmentTranslationStruct $old_translation
-    ) {
-
-        $version_saved = $this->VersionsHandler->saveVersion( $new_translation, $old_translation );
-
-        if ( $version_saved ) {
-            $new_translation->version_number = $old_translation->version_number + 1;
-        } else {
-            $new_translation->version_number = $old_translation->version_number;
-        }
-
-        if ( $new_translation->version_number == null ) {
-            $new_translation->version_number = 0;
         }
     }
 
