@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.132.5",
+            "version": "3.133.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "276241cf558f883b639ecdefd0e9912f0df20b8e"
+                "reference": "49ee9aad9b7918feb5a0eab79e0f7c08a9696fe0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/276241cf558f883b639ecdefd0e9912f0df20b8e",
-                "reference": "276241cf558f883b639ecdefd0e9912f0df20b8e",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/49ee9aad9b7918feb5a0eab79e0f7c08a9696fe0",
+                "reference": "49ee9aad9b7918feb5a0eab79e0f7c08a9696fe0",
                 "shasum": ""
             },
             "require": {
@@ -88,7 +88,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2020-01-14T19:16:27+00:00"
+            "time": "2020-01-17T19:15:02+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -258,23 +258,23 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.121",
+            "version": "v0.123",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "a33fd9ed19fe4e27f2ccebbf45646f38e7cb95af"
+                "reference": "a8c3c7563729ecb98a9ed66f675366527bcbad4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/a33fd9ed19fe4e27f2ccebbf45646f38e7cb95af",
-                "reference": "a33fd9ed19fe4e27f2ccebbf45646f38e7cb95af",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/a8c3c7563729ecb98a9ed66f675366527bcbad4d",
+                "reference": "a8c3c7563729ecb98a9ed66f675366527bcbad4d",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.8"
+                "phpunit/phpunit": "^4.8|^5"
             },
             "type": "library",
             "autoload": {
@@ -291,7 +291,7 @@
             "keywords": [
                 "google"
             ],
-            "time": "2019-11-03T00:23:34+00:00"
+            "time": "2020-01-19T00:24:13+00:00"
         },
         {
             "name": "google/auth",
@@ -591,16 +591,16 @@
         },
         {
             "name": "matecat/simple-s3",
-            "version": "v1.5.10",
+            "version": "v1.5.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/simple-s3.git",
-                "reference": "299860ad9d4644e33053467dc6428420a7c8eb32"
+                "reference": "468da1db1e62f66e1ba2cdb13c7032565f30eefe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/299860ad9d4644e33053467dc6428420a7c8eb32",
-                "reference": "299860ad9d4644e33053467dc6428420a7c8eb32",
+                "url": "https://api.github.com/repos/matecat/simple-s3/zipball/468da1db1e62f66e1ba2cdb13c7032565f30eefe",
+                "reference": "468da1db1e62f66e1ba2cdb13c7032565f30eefe",
                 "shasum": ""
             },
             "require": {
@@ -643,7 +643,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2020-01-15T15:15:23+00:00"
+            "time": "2020-01-17T13:42:03+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
