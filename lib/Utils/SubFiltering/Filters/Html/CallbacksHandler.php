@@ -13,12 +13,12 @@ trait CallbacksHandler {
 
     abstract protected function _finalizeHTMLTag( $buffer );
 
-    abstract protected function _finalizeTag( $buffer );
-
     abstract protected function _fixWrongBuffer( $buffer );
 
     abstract protected function _isTagValid( $buffer );
 
     abstract protected function _finalizePlainText( $buffer );
+
+    abstract protected function _finalizeScriptTag( $buffer );
 
 }

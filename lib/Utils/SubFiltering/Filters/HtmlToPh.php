@@ -76,6 +76,15 @@ class HtmlToPh extends AbstractHandler {
     }
 
     /**
+     * @param $buffer
+     *
+     * @return string
+     */
+    protected function _finalizeScriptTag( $buffer ){
+        return $this->_finalizeTag( $buffer );
+    }
+
+    /**
      * This is meant to cover the case when strip_tags fails because of a string like these
      *
      * " test 3<4 and test 2>5 " <-- becomes --> " test 35 "
