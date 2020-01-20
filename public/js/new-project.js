@@ -568,8 +568,16 @@ $.extend(UI.UPLOAD_PAGE, {
                 success: function(d){
 
                     if( typeof d.errors != 'undefined' && d.errors.length ) {
+                        var message =  this.message;
+                        if ( d.errors.length > 0 ) {
+                            var error = d.errors[0];
+                            if ( error.code === -230 ) { //Not a valid S3 object name
+                                message = "Sorry, file name too long. Try shortening it and try again.";
+                            }
+
+                        }
                         //normal error management
-                        $('.error-message').find('p').text(this.message);
+                        $('.error-message').find('p').text(message);
                         $('.error-message').show();
                         $('.uploadbtn').attr('value', 'Analyze');
                         $('body').removeClass('creating');

@@ -367,8 +367,17 @@ class createProjectController extends ajaxController {
             return -1;
         }
 
-        $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
-        
+        try {
+            $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+        } catch ( Exception $e ){
+            $this->result[ 'errors' ][] = [
+                    "code" => -230, // S3 EXCEPTIONS HERE
+                    "message" => $e->getMessage()
+            ];
+
+            return -1;
+        }
+
         Queue::sendProject( $projectStructure );
 
         $this->__clearSessionFiles();
