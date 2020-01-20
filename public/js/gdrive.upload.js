@@ -133,10 +133,16 @@ APP.addGDriveFile = function(exportIds) {
 
     $.getJSON('/webhooks/gdrive/open?isAsync=true&state=' + encodedJson + '&source=' + $('#source-lang').dropdown('get value') + '&target=' + $('#target-lang').dropdown('get value'), function(response) {
         $('.modal-gdrive').remove();
-
+        $('.error-message').hide();
         if(response.success) {
             APP.tryListGDriveFiles();
         } else {
+            var message = "There was an error retrieving the file from Google Drive. Try again and if the error persists contact the Support.";
+            if ( response.error_class === "Google_Service_Exception" ) {
+                message = "There was an error retrieving the file from Google Drive: " + response.error_msg;
+            }
+            $('.error-message').find('p').text(message);
+            $('.error-message').show();
             console.error('Error when processing request: ' + response);
         }
     });

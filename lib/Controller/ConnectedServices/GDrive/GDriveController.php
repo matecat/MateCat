@@ -24,12 +24,17 @@ class GDriveController extends KleinController {
     private $gdriveUserSession;
 
     /**
+     * @var array
+     */
+    private $error;
+
+    /**
      * @throws Exception
      */
     public function open() {
         $this->setIsAsyncReq( $this->request->param( 'isAsync' ) );
-        $this->source_lang = $this->request->param( 'source' );
-        $this->target_lang = $this->request->param( 'target' );
+        $this->source_lang = $this->getSource();
+        $this->target_lang = $this->getTarget();
 
         $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
 
@@ -37,7 +42,43 @@ class GDriveController extends KleinController {
         $this->finalize();
     }
 
-    //https://dev.matecat.com/webhooks/gdrive/open?state=%7B%22exportIds%22:%5B%221XetJOhXJLUSGX8Jslj3NozkT_3o4kznit4LbjmuWIQ4%22%5D,%22action%22:%22open%22,%22userId%22:%22114613229066836367499%22%7D
+    /**
+     * @return string
+     */
+    private function getSource() {
+        if ( null !== $this->request->param( 'source' ) ) {
+            return $this->request->param( 'source' );
+        }
+
+        if ( isset( $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] ) and null !== $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] ) {
+            return $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
+        }
+
+        if ( isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) {
+            $cookieSource = explode('||', $_COOKIE[ Constants::COOKIE_SOURCE_LANG ]);
+
+            return $cookieSource[0];
+        }
+
+        return Constants::DEFAULT_SOURCE_LANG;
+    }
+
+    /**
+     * @return string
+     */
+    private function getTarget() {
+        if ( null !== $this->request->param( 'target' ) ) {
+            return $this->request->param( 'target' );
+        }
+
+        if ( isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) and null !== $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) {
+            $cookieTarget = explode('||', $_COOKIE[ Constants::COOKIE_TARGET_LANG ]);
+
+            return $cookieTarget[0];
+        }
+
+        return Constants::DEFAULT_TARGET_LANG;
+    }
 
     /**
      * @throws Exception
@@ -78,8 +119,48 @@ class GDriveController extends KleinController {
         $this->gdriveUserSession->setConversionParams( $this->guid, $this->source_lang, $this->target_lang, $this->seg_rule );
 
         for ( $i = 0; $i < count( $listOfIds ) && $this->isImportingSuccessful === true; $i++ ) {
-            $this->gdriveUserSession->importFile( $listOfIds[ $i ] );
+            try {
+                $this->gdriveUserSession->importFile( $listOfIds[ $i ] );
+            } catch (\Exception $e){
+                $this->isImportingSuccessful = false;
+                $this->error = [
+                        'code' => $e->getCode(),
+                        'class' => get_class($e),
+                        'msg' => $this->getExceptionMessage($e)
+                ];
+                break;
+            }
         }
+    }
+
+    /**
+     * @param Exception $e
+     *
+     * @return string
+     */
+    private function getExceptionMessage(\Exception $e){
+        $rawMessage = $e->getMessage();
+
+        // parse Google APIs errors
+        if($e instanceof \Google_Service_Exception and $jsonDecodedMessage = json_decode($rawMessage, true)) {
+            if (isset($jsonDecodedMessage['error']['message'])) {
+                return $jsonDecodedMessage['error']['message'];
+            }
+
+            if (isset($jsonDecodedMessage['error']['errors'])) {
+                $arrayMsg = [];
+
+                foreach ($jsonDecodedMessage['error']['errors'] as $error){
+                    $arrayMsg[] = $error['message'];
+                }
+
+                return implode(',', $arrayMsg);
+            }
+
+            return $jsonDecodedMessage;
+        }
+
+        return $rawMessage;
     }
 
     private function finalize() {
@@ -100,7 +181,10 @@ class GDriveController extends KleinController {
 
     private function doResponse() {
         $this->response->json( [
-                "success" => true
+                "success" => $this->isImportingSuccessful,
+                "error_msg" => isset($this->error['msg']) ? $this->error['msg'] : null,
+                "error_class" => isset($this->error['class']) ? $this->error['class'] : null,
+                "error_code" => isset($this->error['code']) ? $this->error['code'] : null,
         ] );
     }
 
