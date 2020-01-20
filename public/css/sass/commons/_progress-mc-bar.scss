@@ -1,11 +1,22 @@
+#manage-container .progress-bar {
+	height: 20px;
+	top: 15px;
+	float: left;
+	min-width: 115px;
+	border-radius: 10px;
+	/* margin-bottom: 10px; */
+	padding-top: 7px;
+}
 
-.progress-bar {
+.analyze .progress-bar {
 	height: 20px;
 	margin-top: -20px;
 	float: left;
 	min-width: 115px;
 	border-radius: 10px;
 	margin-bottom: 10px;
+}
+.progress-bar {
 	.progr {
 		background-color: inherit;
 	    //min-width: 120px;
