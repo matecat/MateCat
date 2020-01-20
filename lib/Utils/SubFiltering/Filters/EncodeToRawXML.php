@@ -16,25 +16,16 @@ class EncodeToRawXML extends AbstractHandler {
 
     public function transform( $segment ) {
 
-        //placehold for all XML entities
-        $segment = preg_replace( '/&(lt;|gt;|amp;|quot;|apos;)/', '##_ent_$1_##', $segment );
-
-        // handling &#10; (new lien feed)
+        // handling &#10; (line feed)
         // prevent to convert it to \n
-        $segment = preg_replace( '/&(#10;|#x0A;|\n)/', '##_ent_0A_##', $segment );
+        $segment = preg_replace( '/&(#10;|#x0A;)|\n/', '##_ent_0A_##', $segment );
 
         // handling &#13; (carriage return)
         // prevent to convert it to \r
-        $segment = preg_replace( '/&(#13;|#x0D;|\r)/', '##_ent_0D_##', $segment );
+        $segment = preg_replace( '/&(#13;|#x0D;)|\r/', '##_ent_0D_##', $segment );
 
-        //decode all html entities found and re-encode in the right way
-        $segment = htmlspecialchars(
-                html_entity_decode( $segment, ENT_NOQUOTES, 'UTF-8' ),
-                ENT_NOQUOTES | ENT_XML1, 'UTF-8', false
-        );
-
-        //restore entities
-        $segment = preg_replace( '/##_ent_(lt;|gt;|amp;|quot;|apos;)_##/', '&$1', $segment );
+        //allow double encoding
+        $segment = htmlspecialchars( $segment, ENT_NOQUOTES | ENT_XML1, 'UTF-8', true );
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s',  [ 'CatUtils', 'htmlentitiesFromUnicode' ], $segment );

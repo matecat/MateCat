@@ -11,12 +11,11 @@ namespace SubFiltering\Filters;
 
 use SubFiltering\Commons\AbstractHandler;
 use SubFiltering\Commons\Constants;
+use SubFiltering\Filters\Html\CallbacksHandler;
+use SubFiltering\Filters\Html\HtmlParser;
 
 /**
  * Class HtmlToPh
- *
- * Based on the code https://github.com/ericnorris/striptags
- * Rewritten/Improved and Changed for PHP
  *
  * @author domenico domenico@translated.net / ostico@gmail.com
  * @package SubFiltering
@@ -24,170 +23,52 @@ use SubFiltering\Commons\Constants;
  */
 class HtmlToPh extends AbstractHandler {
 
-    const STATE_PLAINTEXT = 0;
-    const STATE_HTML      = 1;
-    const STATE_COMMENT   = 2;
-    const STATE_JS_CSS    = 3;
+    use CallbacksHandler;
 
-    public function transform( $segment ) {
+    /**
+     * @param $buffer
+     *
+     * @return mixed
+     */
+    protected function _finalizePlainText( $buffer ) {
+        return $buffer;
+    }
 
-        $originalSplit = preg_split( '//u', $segment, -1, PREG_SPLIT_NO_EMPTY );
-        $strippedSplit = preg_split( '//u', str_replace( [ "<", ">" ], "", $segment ), -1, PREG_SPLIT_NO_EMPTY );
+    /**
+     * @param $buffer
+     *
+     * @return string
+     */
+    protected function _finalizeHTMLTag( $buffer ){
 
-        if ( $originalSplit == $strippedSplit ) {
-            return $segment;
-        }
+        //decode attributes by locking <,> first
+        //because a html tag has it's attributes encoded and here we get lt and gt decoded but not other parts of the string
+        // Ex:
+        // incoming string : <a href="/users/settings?test=123&amp;amp;ciccio=1" target="_blank">
+        // this should be:   <a href="/users/settings?test=123&amp;ciccio=1" target="_blank"> with only one ampersand encoding
+        //
+        $buffer = str_replace( [ '<', '>' ], [ '#_lt_#', '#_gt_#' ], $buffer );
+        $buffer = html_entity_decode( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8' );
+        $buffer = str_replace( [ '#_lt_#', '#_gt_#' ], [ '<', '>' ], $buffer );
 
-        $state         = static::STATE_PLAINTEXT;
-        $buffer        = '';
-        $depth         = 0;
-        $in_quote_char = '';
-        $output        = '';
-
-        foreach( $originalSplit as $idx => $char ) {
-
-            if ( $state == static::STATE_PLAINTEXT ) {
-                switch ( $char ) {
-                    case '<':
-                        $state      = static::STATE_HTML;
-                        $buffer .= $char;
-                        break;
-
-                    default:
-                        $output .= $char;
-                        break;
-                }
-            } elseif ( $state == static::STATE_HTML ) {
-                switch ( $char ) {
-                    case '<':
-                        // ignore '<' if inside a quote
-                        if ( $in_quote_char ) {
-                            break;
-                        }
-
-                        // we're seeing a nested '<'
-                        $depth++;
-                        break;
-
-                    case '>':
-                        // ignore '>' if inside a quote
-                        if ( $in_quote_char ) {
-                            break;
-                        }
-
-                        // something like this is happening: '<<>>'
-                        if ( $depth ) {
-                            $depth--;
-
-                            break;
-                        }
-
-                        if( in_array( substr( $buffer, 0, 6 ), [ '<scrip', '<style' ] ) ){
-                            $buffer .= $char;
-                            $state         = static::STATE_JS_CSS;
-                            break;
-                        }
-
-                        // this is closing the tag in tag_buffer
-                        $in_quote_char = '';
-                        $state         = static::STATE_PLAINTEXT;
-                        $buffer    .= '>';
-
-                        if ( $this->isTagValid( $buffer ) ){
-                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
-                        } else {
-                            $output .= $this->_fixWrongBuffer( $buffer );
-                        }
-
-                        $buffer = '';
-                        break;
-
-                    case '"':
-                    case '\'':
-                        // catch both single and double quotes
-
-                        if ( $char == $in_quote_char ) {
-                            $in_quote_char = '';
-                        } else {
-                            $in_quote_char = ( !empty( $in_quote_char ) ? $in_quote_char : $char );
-                        }
-
-                        $buffer .= $char;
-                        break;
-
-                    case '-':
-                        if ( $buffer == '<!-' ) {
-                            $state = static::STATE_COMMENT;
-                        }
-
-                        $buffer .= $char;
-                        break;
-
-                    case ' ': //0x20, is a space
-                    case '\n':
-                        if ( $buffer === '<' ) {
-                            $state      = static::STATE_PLAINTEXT; // but we work in XML text, so encode it
-                            $output     .= $this->_fixWrongBuffer( '< ' );
-                            $buffer = '';
-
-                            break;
-                        }
-
-                        $buffer .= $char;
-                        break;
-
-                    default:
-                        $buffer .= $char;
-                        break;
-                }
-            } elseif ( $state == static::STATE_COMMENT ) {
-                switch ( $char ) {
-                    case '>':
-                        $buffer .= $char;
-
-                        if ( substr( $buffer, -3 ) == '-->' ) {
-                            // close the comment
-                            $state = static::STATE_PLAINTEXT;
-                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
-                            $buffer = '';
-                        }
-
-                        break;
-
-                    default:
-                        $buffer .= $char;
-                        break;
-                }
-            } elseif ( $state == static::STATE_JS_CSS ) {
-                switch ( $char ) {
-                    case '>':
-                        $buffer .= $char;
-
-                        if ( in_array( substr( $buffer, -6 ), [ 'cript>', 'style>' ] ) ) {
-                            // close the comment
-                            $state = static::STATE_PLAINTEXT;
-                            $output .= '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
-                            $buffer = '';
-                        }
-
-                        break;
-
-                    default:
-                        $buffer .= $char;
-                        break;
-                }
-            }
-        }
-
-        //HTML Partial, add wrong HTML to preserve string content
-        if( !empty( $buffer ) ){
-            $output .= $this->_fixWrongBuffer( $buffer );
-        }
-
-        return $output;
+        return $this->_finalizeTag( $buffer );
 
     }
 
+    /**
+     * @param $buffer
+     *
+     * @return string
+     */
+    protected function _finalizeTag( $buffer ){
+        return '<ph id="__mtc_' . $this->getPipeline()->getNextId() . '" equiv-text="base64:' . base64_encode( htmlentities( $buffer, ENT_NOQUOTES | 16 /* ENT_XML1 */ ) ) . '"/>';
+    }
+
+    /**
+     * @param $buffer
+     *
+     * @return mixed
+     */
     protected function _fixWrongBuffer( $buffer ){
         $buffer = str_replace( "<", "&lt;", $buffer );
         $buffer = str_replace( ">", "&gt;", $buffer );
@@ -205,7 +86,7 @@ class HtmlToPh extends AbstractHandler {
      *
      * @return bool
      */
-    protected function isTagValid( $buffer ) {
+    protected function _isTagValid( $buffer ) {
 
         /*
          * accept tags start with:
@@ -233,6 +114,19 @@ class HtmlToPh extends AbstractHandler {
         }
 
         return false;
+
+    }
+
+    /**
+     * @param $segment
+     *
+     * @return string
+     */
+    public function transform( $segment ) {
+
+        $parser = new HtmlParser();
+        $parser->registerCallbacksHandler( $this );
+        return $parser->transform( $segment );
 
     }
 
