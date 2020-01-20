@@ -149,9 +149,11 @@ class getWarningController extends ajaxController {
             return;
         }
 
+        $qa = new QAGlobalWarning( $result, $tMismatch );
+
         $this->result = array_merge(
                 $this->result,
-                ( new QAGlobalWarning( $result, $tMismatch ) )->render(),
+                $qa->render(),
                 Utils::getGlobalMessage()
         );
 

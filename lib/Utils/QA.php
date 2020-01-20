@@ -1412,7 +1412,7 @@ class QA {
 
         // check for PH correspondence
         foreach ( $source_tags as $key => $source_tag ) {
-            if ( $source_tag !== $target_tags[ $key ] ) {
+            if ( isset($target_tags[ $key ]) and $source_tag !== $target_tags[ $key ] ) {
                 $this->_addError( self::ERR_TAG_MISMATCH );
             }
         }
@@ -1425,13 +1425,6 @@ class QA {
         $target_tags = $target_tags[ 0 ];
         if ( ( count( $source_tags ) != count( $target_tags ) ) ) {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
-
-//            Log::doJsonLog($this->source_seg);
-//            Log::doJsonLog($this->target_seg);
-//            Log::hexDump($this->source_seg);
-//            Log::hexDump($this->target_seg);
-//            Log::doJsonLog($source_tags);
-//            Log::doJsonLog($target_tags);
 
             for ( $i = 0; $i < $num; $i++ ) {
                 $this->_addError( self::ERR_BOUNDARY_HEAD );
@@ -1809,9 +1802,8 @@ class QA {
      *
      * @param $srcNodeContent
      * @param $trgNodeContent
-     * @param $trgTagReference
      */
-    protected function _checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference ) {
+    protected function _checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent ) {
 
         //backup and check start string
         $_srcNodeContent = $srcNodeContent;
@@ -2095,5 +2087,3 @@ class QA {
     }
 
 }
-
-?>
