@@ -282,6 +282,8 @@ class setTranslationController extends ajaxController {
         // QA here stands for Quality Assurance
         $check = new QA( $this->__postInput[ 'segment' ], $this->__postInput[ 'translation' ] );
         $check->setFeatureSet( $this->featureSet );
+        $check->setSourceSegLang( $this->chunk->source);
+        $check->setTargetSegLang( $this->chunk->target);
         $check->performConsistencyCheck();
 
         if ( $check->thereAreWarnings() ) {

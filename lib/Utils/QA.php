@@ -136,6 +136,16 @@ class QA {
     protected $target_seg;
 
     /**
+     * @var string
+     */
+    protected $source_seg_lang;
+
+    /**
+     * @var string
+     */
+    protected $target_seg_lang;
+
+    /**
      * Class Reference of DOMDocument Source created from raw string
      *
      * @var DOMDocument
@@ -435,6 +445,9 @@ class QA {
 //        }
 
         switch ( $errCode ) {
+            case self::ERR_NONE:
+                return;
+
             case self::ERR_COUNT:
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
@@ -860,6 +873,34 @@ class QA {
 
         $this->_resetDOMMaps();
 
+    }
+
+    /**
+     * @return string
+     */
+    public function getSourceSegLang() {
+        return $this->source_seg_lang;
+    }
+
+    /**
+     * @param string $source_seg_lang
+     */
+    public function setSourceSegLang( $source_seg_lang ) {
+        $this->source_seg_lang = $source_seg_lang;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTargetSegLang() {
+        return $this->target_seg_lang;
+    }
+
+    /**
+     * @param string $target_seg_lang
+     */
+    public function setTargetSegLang( $target_seg_lang ) {
+        $this->target_seg_lang = $target_seg_lang;
     }
 
     /**
@@ -1583,7 +1624,6 @@ class QA {
 //            Log::doJsonLog($diffArray);
             }
         }
-
     }
 
     /**
@@ -1719,6 +1759,22 @@ class QA {
 
     /**
      * Check for number of tags in NodeList of Segment
+     * -------------------------------------------------
+     * NOTE 09/01/2020
+     * -------------------------------------------------
+     * In order to perform a consistency check on smartcounts [Airbnb plugin], we have added two _addError() calls.
+     *
+     * The first one by default adds a NONE error (if Airbnb is active, _addError() will perform the consistency check), the second one is triggered only if $srcNodeCount and
+     * $trgNodeCount are different.
+     *
+     * Indeed this check is not valid to assure consistency check on smartcounts.
+     *
+     * Consider this example. The source is english, the target is arabic. You need to translate all 6 possible plural forms:
+     *
+     * [source:en-US] - House |||| Houses
+     * [target:ar-SA] - XXXX |||| XXXX |||| XXXX |||| XXXX |||| XXXX |||| XXXX
+     *
+     * _addError() function now calculates and checks the right number of possible plural forms for target language.
      *
      * @param int $srcNodeCount
      * @param int $trgNodeCount
@@ -1727,6 +1783,8 @@ class QA {
      * @throws \Exception
      */
     protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount ) {
+
+        $this->_addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_NONE, $this ) );
 
         if ( $srcNodeCount != $trgNodeCount ) {
             $this->_addError( $this->getFeatureSet()->filter( 'checkTagMismatch', self::ERR_COUNT, $this ) );
