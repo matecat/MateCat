@@ -486,12 +486,13 @@ const TEXT_UTILS =  {
     },
 
     execDiff: function (mainStr, cfrStr) {
-        let _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
-            .replace( config.crPlaceholderRegex, "\r" )
-            .replace( config.crlfPlaceholderRegex, "\r\n" )
-            .replace( config.tabPlaceholderRegex, "\t" )
-            .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-        let _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
+        let _str = cfrStr;
+        // let _str = cfrStr.replace( config.lfPlaceholderRegex, "\n" )
+        //     .replace( config.crPlaceholderRegex, "\r" )
+        //     .replace( config.crlfPlaceholderRegex, "\r\n" )
+        //     .replace( config.tabPlaceholderRegex, "\t" )
+        //     .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+         let _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
 
         //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
         //used to detect initial and final spaces in html diff

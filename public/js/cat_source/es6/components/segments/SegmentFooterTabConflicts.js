@@ -55,8 +55,8 @@ class SegmentFooterTabConflicts extends React.Component {
                 }
             } );
 
-            let translation = TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj));
-            let source = TagUtils.transformTextForLockTags(escapedSegment);
+            let translation = TagUtils.decodePlaceholdersToText(TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)));
+            let source = TagUtils.decodePlaceholdersToText(TagUtils.transformTextForLockTags(escapedSegment));
             html.push(<ul className="graysmall" data-item={(index + 1)} key={'editable' + index} onDoubleClick={()=>self.chooseAlternative(this.translation)}>
                         <li className="sugg-source">
                             <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(source)}/>
