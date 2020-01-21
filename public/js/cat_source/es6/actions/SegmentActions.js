@@ -345,6 +345,10 @@ const SegmentActions = {
             type: type
         });
     },
+    selectNextSegmentDebounced:  _.debounce(() => {
+        SegmentActions.selectNextSegment();
+    }, 100),
+
     selectNextSegment: function(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SELECT_SEGMENT,
@@ -352,6 +356,9 @@ const SegmentActions = {
             direction: 'next'
         });
     },
+    selectPrevSegmentDebounced:  _.debounce(() => {
+        SegmentActions.selectPrevSegment();
+    }, 100),
     selectPrevSegment: function(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SELECT_SEGMENT,

@@ -27,12 +27,12 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openPrevious.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
-            SegmentActions.selectPrevSegment();
+            SegmentActions.selectPrevSegmentDebounced();
             // UI.gotoPreviousSegment();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openNext.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
-            SegmentActions.selectNextSegment();
+            SegmentActions.selectNextSegmentDebounced();
             // UI.gotoNextSegment();
         }).on('keyup.shortcuts', null, 'ctrl', function(e) {
             SegmentActions.openSelectedSegment();
