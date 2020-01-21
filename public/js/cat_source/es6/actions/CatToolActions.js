@@ -4,8 +4,11 @@ import Notifications from '../sse/sse';
 import Review_QualityReportButton from '../components/review/QualityReportButton';
 import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer';
 import SegmentFilter from "../components/header/cattol/segment_filter/segment_filter";
+import AnalyzeConstants from "../constants/AnalyzeConstants";
 
 let CatToolActions = {
+
+    popupInfoUserMenu: () =>  'infoUserMenu-' + config.userMail,
 
     openQaIssues: function () {
         AppDispatcher.dispatch({
@@ -94,6 +97,21 @@ let CatToolActions = {
                 }),
             $('#header-bars-wrapper')[0]
         );
+    },
+
+    showHeaderTooltip: function (  ) {
+        var closedPopup = localStorage.getItem(this.popupInfoUserMenu());
+
+        if ( config.is_cattool )  {
+            UI.showProfilePopUp(!closedPopup);
+        } else if (!closedPopup) {
+            AppDispatcher.dispatch({
+                actionType: CattolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP
+            });
+        }
+    },
+    setPopupUserMenuCookie: function (  ) {
+        CommonUtils.addInStorage(this.popupInfoUserMenu(), true, 'infoUserMenu');
     }
 };
 

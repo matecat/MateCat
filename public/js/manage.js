@@ -88,7 +88,9 @@ UI = {
                 });
             });
         });
-
+        setTimeout( function (  ) {
+            CatToolActions.showHeaderTooltip();
+        }, 2000);
     },
 
     reloadProjects: function () {

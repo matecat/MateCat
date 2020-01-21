@@ -23,6 +23,12 @@ $.extend(UI, {
 
 		initEvents();
 
+		if ( config.isLoggedIn ) {
+			setTimeout( function (  ) {
+				CatToolActions.showHeaderTooltip();
+			}, 2000);
+		}
+
 	},
 	logoutAction: function() {
 		$.post('/api/app/user/logout', function(data) {
@@ -32,7 +38,67 @@ $.extend(UI, {
 				window.location.reload();
 			}
 		});
-	}
+	},
+	showProfilePopUp: function ( openProfileTooltip ) {
+		if ( openProfileTooltip ) {
+			var self = this;
+			var tooltipTex = "<h4 class='header'>User Menu</h4>" +
+				"<div class='content'>" +
+				"<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>" +
+				"<a class='close-popup-teams'>Next</a>" +
+				"</div>";
+			$('header .user-menu-container').popup({
+				on: 'click',
+				onHidden: function (  ) {
+					$('header .user-menu-container').popup('destroy');
+					CatToolActions.setPopupUserMenuCookie();
+					return true;
+				},
+				html: tooltipTex,
+				closable: false,
+				onCreate: function() {
+					$('.close-popup-teams').on('click', function () {
+						$('header .user-menu-container').popup('hide');
+						self.openPopupThreePoints()
+					})
+				},
+				className: {
+					popup: 'ui popup user-menu-tooltip'
+				}
+			}).popup("show");
+		} else {
+			this.openPopupThreePoints()
+		}
+	},
+	openPopupThreePoints: function (  ) {
+		var closedPopup = localStorage.getItem('infoThreeDotsMenu-'+config.userMail);
+		if ( !closedPopup ) {
+			var self = this;
+			var tooltipTex = "<h4 class='header'>New Menu</h4>" +
+				"<div class='content'>" +
+				"<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>" +
+				"<a class='close-popup-teams'>Got it!</a>" +
+				"</div>";
+			$( '#action-three-dots' ).popup( {
+				on: 'click',
+				onHidden: function () {
+					$( '#action-three-dots' ).popup('destroy');
+					CommonUtils.addInStorage('infoThreeDotsMenu-'+config.userMail, true, 'infoThreeDotsMenu');
+					return true;
+				},
+				html: tooltipTex,
+				closable: false,
+				onCreate: function () {
+					$( '.close-popup-teams' ).on( 'click', function () {
+						$( '#action-three-dots' ).popup( 'hide' );
+					} );
+				},
+				className: {
+					popup: 'ui popup three-dots-menu-tooltip'
+				}
+			} ).popup( "show" );
+		}
+	},
 });
 
 var initEvents = function() {

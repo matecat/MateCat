@@ -305,6 +305,32 @@ header {
     }
 }
 
+.user-menu-tooltip {
+    right: 30px !important;
+
+    h4.header {
+        box-shadow: none !important;
+        background: transparent;
+        text-decoration: none;
+        border-bottom: none;
+        color: black;
+    }
+
+    .content p {
+        font-size: 15px;
+        text-align: left;
+    }
+
+    a.close-popup-teams {
+        float: right;
+        cursor: pointer;
+        text-decoration: underline;
+        &:hover {
+            text-decoration: none;
+        }
+    }
+}
+
 .user-teams {
     //padding-right: 52px !important;
     display: grid !important;

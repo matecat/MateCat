@@ -275,3 +275,39 @@ Styles from other css files should be ported over time.
 	display: none !important;
   }
 }
+
+//Remove
+.ui.popup{
+	&.user-menu-tooltip {
+		right: 42px !important;
+	}
+	&.user-menu-tooltip, &.three-dots-menu-tooltip {
+		h4.header {
+			box-shadow: none !important;
+			background: transparent !important;
+			text-decoration: none;
+			border-bottom: none;
+			color: black;
+		}
+		.content {
+			width: auto;
+			background-color: transparent !important;
+			border: none;
+			padding: unset;
+		}
+		.content p {
+			font-size: 15px;
+			text-align: left !important;
+			background-color: transparent !important;
+		}
+
+		a.close-popup-teams {
+			float: right;
+			cursor: pointer;
+			text-decoration: underline;
+			&:hover {
+				text-decoration: none;
+			}
+		}
+	}
+}

@@ -43,6 +43,9 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.RELOAD_SEGMENT_FILTER:
             CatToolStore.emitChange(CatToolConstants.RELOAD_SEGMENT_FILTER);
             break;
+        case CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP:
+            CatToolStore.emitChange(CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP);
+            break;
     }
 });
 module.exports = CatToolStore;

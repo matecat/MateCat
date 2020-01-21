@@ -351,6 +351,9 @@ $.extend(UI.UPLOAD_PAGE, {
                 self.selectedTeam = APP.getLastTeamSelected(self.teams);
                 TeamsActions.selectTeam(self.selectedTeam);
             });
+            setTimeout( function (  ) {
+                CatToolActions.showHeaderTooltip();
+            }, 2000);
         } else {
             ReactDOM.render(React.createElement(Header, {
                 showSubHeader: false,

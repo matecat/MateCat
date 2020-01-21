@@ -2,7 +2,9 @@ import TeamSelect from "./TeamsSelect";
 import ProjectInfo from "./HeaderProjectInfo";
 import FilterProjects from "./manage/FilterProjects"
 import TeamConstants from "../../constants/TeamConstants";
+import CatToolConstants from "../../constants/CatToolConstants";
 import TeamsStore from "../../stores/TeamsStore";
+import CatToolStore from "../../stores/CatToolStore";
 import IconManage from "../icons/IconManage";
 import IconUserLogout from "../icons/IconUserLogout";
 import ActionMenu from "./ActionMenu";
@@ -20,6 +22,8 @@ class Header extends React.Component {
         this.updateTeams = this.updateTeams.bind(this);
         this.chooseTeams = this.chooseTeams.bind(this);
         this.updateUser = this.updateUser.bind(this);
+        this.initProfileDropdown = this.initProfileDropdown.bind(this);
+		this.showPopup = true;
     }
 
 	componentDidMount = () => {
@@ -27,6 +31,7 @@ class Header extends React.Component {
 		TeamsStore.addListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
 		TeamsStore.addListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
         TeamsStore.addListener(TeamConstants.UPDATE_USER, this.updateUser);
+		CatToolStore.addListener(CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP , this.initMyProjectsPopup);
 		this.initProfileDropdown();
 	}
 
@@ -34,6 +39,8 @@ class Header extends React.Component {
 		TeamsStore.removeListener(TeamConstants.RENDER_TEAMS, this.renderTeams);
 		TeamsStore.removeListener(TeamConstants.UPDATE_TEAMS, this.updateTeams);
 		TeamsStore.removeListener(TeamConstants.CHOOSE_TEAM, this.chooseTeams);
+		TeamsStore.removeListener(TeamConstants.UPDATE_USER, this.updateUser);
+		CatToolStore.removeListener(CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP , this.initMyProjectsPopup);
 	}
 
 	componentDidUpdate() {
@@ -119,8 +126,40 @@ class Header extends React.Component {
 			</div>
 
 		}
-	}
+	};
 
+	initMyProjectsPopup = () => {
+		if ( this.showPopup ) {
+			let tooltipTex = "<h4 class='header'>User Menu</h4>" +
+				"<div class='content'>" +
+				"<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>" +
+				"<a class='close-popup-teams'>Got it!</a>" +
+				"</div>";
+			$( this.dropdownProfile ).popup( {
+				on: 'click',
+				onHidden: () => this.removePopup(),
+				html: tooltipTex,
+				closable: false,
+				onCreate: () => this.onCreatePopup(),
+				className: {
+					popup: 'ui popup user-menu-tooltip'
+				}
+			} ).popup( "show" );
+			this.showPopup = false;
+		}
+	};
+
+	removePopup = () => {
+		$(this.dropdownProfile).popup('destroy');
+		CatToolActions.setPopupUserMenuCookie();
+		return true;
+	};
+
+	onCreatePopup = () => {
+		$('.close-popup-teams').on('click', () => {
+			$(this.dropdownProfile).popup('hide');
+		})
+	};
 
 	getHeaderComponentToShow = () => {
 
