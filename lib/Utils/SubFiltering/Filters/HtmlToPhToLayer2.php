@@ -9,6 +9,8 @@
 
 namespace SubFiltering\Filters;
 
+use SubFiltering\Filters\Html\CallbacksHandler;
+
 /**
  * Class HtmlToPh
  *
@@ -20,6 +22,8 @@ namespace SubFiltering\Filters;
  *
  */
 class HtmlToPhToLayer2 extends HtmlToPh {
+
+    use CallbacksHandler;
 
     protected function _fixWrongBuffer( $buffer ){
         $buffer = str_replace( "<", "&amp;lt;", $buffer );
