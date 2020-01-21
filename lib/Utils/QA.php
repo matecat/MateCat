@@ -1485,13 +1485,6 @@ class QA {
         if ( ( count( $source_tags ) != count( $target_tags ) ) ) {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
-//            Log::doJsonLog($this->source_seg);
-//            Log::doJsonLog($this->target_seg);
-//            Log::hexDump($this->source_seg);
-//            Log::hexDump($this->target_seg);
-//            Log::doJsonLog($source_tags);
-//            Log::doJsonLog($target_tags);
-
             for ( $i = 0; $i < $num; $i++ ) {
                 $this->_addError( self::ERR_BOUNDARY_HEAD );
             }
@@ -1885,9 +1878,8 @@ class QA {
      *
      * @param $srcNodeContent
      * @param $trgNodeContent
-     * @param $trgTagReference
      */
-    protected function _checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent, $trgTagReference ) {
+    protected function _checkTailWhiteSpaces( $srcNodeContent, $trgNodeContent ) {
 
         //backup and check start string
         $_srcNodeContent = $srcNodeContent;
@@ -2171,5 +2163,3 @@ class QA {
     }
 
 }
-
-?>
