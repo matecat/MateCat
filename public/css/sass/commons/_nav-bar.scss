@@ -314,11 +314,13 @@ header {
         text-decoration: none;
         border-bottom: none;
         color: black;
+        margin-bottom: 10px !important;
     }
 
     .content p {
         font-size: 15px;
         text-align: left;
+        min-width: 180px;
     }
 
     a.close-popup-teams {

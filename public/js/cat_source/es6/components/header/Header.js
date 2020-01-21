@@ -130,9 +130,9 @@ class Header extends React.Component {
 
 	initMyProjectsPopup = () => {
 		if ( this.showPopup ) {
-			let tooltipTex = "<h4 class='header'>User Menu</h4>" +
+			var tooltipTex = "<h4 class='header'>Manage your projects</h4>" +
 				"<div class='content'>" +
-				"<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>" +
+				"<p>Click here, then \"My projects\" to retrieve and manage all the projects you have created in MateCat.</p>" +
 				"<a class='close-popup-teams'>Got it!</a>" +
 				"</div>";
 			$( this.dropdownProfile ).popup( {

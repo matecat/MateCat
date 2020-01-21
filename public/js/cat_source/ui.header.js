@@ -42,9 +42,9 @@ $.extend(UI, {
 	showProfilePopUp: function ( openProfileTooltip ) {
 		if ( openProfileTooltip ) {
 			var self = this;
-			var tooltipTex = "<h4 class='header'>User Menu</h4>" +
+			var tooltipTex = "<h4 class='header'>Manage your projects</h4>" +
 				"<div class='content'>" +
-				"<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>" +
+				"<p>Click here, then \"My projects\" to retrieve and manage all the projects you have created in MateCat.</p>" +
 				"<a class='close-popup-teams'>Next</a>" +
 				"</div>";
 			$('header .user-menu-container').popup({
@@ -74,9 +74,13 @@ $.extend(UI, {
 		var closedPopup = localStorage.getItem('infoThreeDotsMenu-'+config.userMail);
 		if ( !closedPopup ) {
 			var self = this;
-			var tooltipTex = "<h4 class='header'>New Menu</h4>" +
+			var tooltipTex = "<h4 class='header'>Easier tool navigation</h4>" +
 				"<div class='content'>" +
-				"<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>" +
+				"<p>Click here to navigate to:</br>" +
+                "- Translate/Revise mode</br>" +
+                "- Volume analysis</br>" +
+                "- XLIFF-to-target converter</br>" +
+                "- Shortcut guide</p>" +
 				"<a class='close-popup-teams'>Got it!</a>" +
 				"</div>";
 			$( '#action-three-dots' ).popup( {
