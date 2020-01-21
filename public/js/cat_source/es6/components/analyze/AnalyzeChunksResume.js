@@ -252,7 +252,7 @@ class AnalyzeChunksResume extends React.Component {
 						tmpJobAnalysis.get('totals').first().get('standard_word_count').get(1) : 0;
 
 					let chunkJob = this.props.project.get('jobs').find((job) => {
-						return job.get('id') == this.props.jobsInfo[indexJob].jid;
+						return job.get('id') == this.props.jobsInfo[indexJob].jid && job.get('password') === password;
 					});
 
 					let openOutsource = (this.state.openOutsource && this.state.outsourceJobId === this.props.jobsInfo[indexJob].jid);
