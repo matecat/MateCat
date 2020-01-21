@@ -2,6 +2,8 @@
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
+use SubFiltering\Commons\Pipeline;
+use SubFiltering\Filters\SprintfToPH;
 use Translations\WarningDao;
 
 class getWarningController extends ajaxController {

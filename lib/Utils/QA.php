@@ -940,6 +940,10 @@ class QA {
         return $this->target_seg;
     }
 
+    public function getDomMaps(){
+        return [ $this->srcDomMap, $this->trgDomMap ];
+    }
+
     /**
      * After initialization by Constructor, the dom is parsed and map structures are built
      *
