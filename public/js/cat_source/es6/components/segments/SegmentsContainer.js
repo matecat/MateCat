@@ -470,6 +470,8 @@ class SegmentsContainer extends React.Component {
     }
 }
 
+let defaultScroll = VirtualList.prototype.scrollTo;
+
 VirtualList.prototype.scrollTo = function (value) {
     console.log("VirtualList.prototype.scrollTo:"  + value);
     function scrollTo(element, direction, to, duration) {
@@ -482,10 +484,15 @@ VirtualList.prototype.scrollTo = function (value) {
             scrollTo(element, direction, to, duration - 5);
         }, 5);
     }
-    const scrollDirection = this.props.scrollDirection === void 0 ? 'vertical' : this.props.scrollDirection;
-    if (scrollDirection === 'vertical') {
-        scrollTo(this.rootNode, 'scrollTop', value, 15);
-    } else scrollTo(this.rootNode, 'scrollLeft', value, 15);
+    if ( this.animateScroll ) {
+        const scrollDirection = this.props.scrollDirection === void 0 ? 'vertical' : this.props.scrollDirection;
+        if ( scrollDirection === 'vertical' ) {
+            scrollTo( this.rootNode, 'scrollTop', value, 15 );
+        } else scrollTo( this.rootNode, 'scrollLeft', value, 15 );
+    } else {
+        defaultScroll.call(this, value);
+    }
+    this.animateScroll = true;
 };
 
 SegmentsContainer.propTypes = {
