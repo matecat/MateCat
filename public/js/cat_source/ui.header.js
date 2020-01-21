@@ -74,7 +74,7 @@ $.extend(UI, {
 		var closedPopup = localStorage.getItem('infoThreeDotsMenu-'+config.userMail);
 		if ( !closedPopup ) {
 			var self = this;
-			var tooltipTex = "<h4 class='header'>Easier tool navigation</h4>" +
+			var tooltipTex = "<h4 class='header'>Easier tool navigation and new shortcuts</h4>" +
 				"<div class='content'>" +
 				"<p>Click here to navigate to:</br>" +
                 "- Translate/Revise mode</br>" +

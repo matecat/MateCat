@@ -281,6 +281,9 @@ Styles from other css files should be ported over time.
 	&.user-menu-tooltip {
 		right: 42px !important;
 	}
+	&.three-dots-menu-tooltip {
+		min-width: 300px;
+	}
 	&.user-menu-tooltip, &.three-dots-menu-tooltip {
 		h4.header {
 			box-shadow: none !important;
@@ -290,7 +293,7 @@ Styles from other css files should be ported over time.
 			color: black;
 		}
 		.content {
-			width: auto;
+			width: 100%;
 			background-color: transparent !important;
 			border: none;
 			padding: unset;
