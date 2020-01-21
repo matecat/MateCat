@@ -1094,8 +1094,33 @@ class QA {
                 //count occurrences of this tag name when needed, also transport id reference.
                 @$srcDomElements[ $element->tagName ][] = $elementID;
 
-                //reverse Lookup, from id to tag name
-                @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
+                // reverse Lookup, from id to tag name
+                //
+                // Note 2020-01-21
+                // -------------------------------------------------
+                //
+                // If the element is a PH, we extract the decoded content and us it as key for refID map.
+                //
+                // In this way, _checkTagMismatch() method is capable to recognize PH content differences.
+                //
+                // Example:
+                //
+                // SOURCE                                                              | TARGET
+                // --------------------------------------------------------------------+------------------------------------------------
+                // Your average weekly price with a (mtc_1)%1$sdiscount is (mtc_2)%2$s | (mtc_1)%{time_left}您的平均每週優惠價為(mtc_2)%2$s
+                //
+                // Source and target PH content does not match, _checkTagMismatch() will throw an error.
+                //
+                if($element->tagName === 'ph'){
+                    $innerHTML = $plainRef['innerHTML'];
+                    $regex = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
+                    preg_match_all( $regex, $innerHTML, $html, PREG_SET_ORDER );
+                    $html = base64_decode($html[0][1]);
+
+                    @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
+                } else {
+                    @$srcDomElements[ 'refID' ][ $elementID ] = $element->tagName;
+                }
 
                 if ( $element->hasChildNodes() ) {
                     $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
@@ -1448,13 +1473,6 @@ class QA {
 
             for ( $i = 0; $i < $num; $i++ ) {
                 $this->_addError( self::ERR_BOUNDARY_TAIL );
-            }
-        }
-
-        // check for PH correspondence
-        foreach ( $source_tags as $key => $source_tag ) {
-            if ( $source_tag !== $target_tags[ $key ] ) {
-                $this->_addError( self::ERR_TAG_MISMATCH );
             }
         }
 
