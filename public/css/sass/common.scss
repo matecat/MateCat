@@ -452,7 +452,7 @@ footer #statistics {
 
 .topMenu.open {
   max-height: 64%;
-  overflow: auto;
+  overflow-y: scroll;
   top: 48px !important;
   display: block;
   box-shadow: 0 0 4px #cecccc;
