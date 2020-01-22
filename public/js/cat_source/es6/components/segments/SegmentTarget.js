@@ -129,8 +129,8 @@ class SegmentTarget extends React.Component {
         }
     }
 
-    sendTranslationWithoutUpdate() {
-        if (this.editArea && this.props.segment.modified ) {
+    sendTranslationWithoutUpdate(force) {
+        if (this.editArea && ( this.props.segment.modified || force ) ) {
             let textToSend = this.editArea.editAreaRef.innerHTML;
             let sid = this.props.segment.sid;
             SegmentActions.updateTranslation(sid, textToSend);
