@@ -176,11 +176,11 @@ class getSearchController extends ajaxController {
 
         if ( !empty( $this->source ) and !empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'coupled';
-            $this->queryParams[ 'src' ] = $this->source;
+            $this->queryParams[ 'src' ] = html_entity_decode($this->source); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
             $this->queryParams[ 'trg' ] = $this->target;
         } elseif ( !empty( $this->source ) ) {
             $this->queryParams[ 'key' ] = 'source';
-            $this->queryParams[ 'src' ] = $this->source;
+            $this->queryParams[ 'src' ] = html_entity_decode($this->source); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
         } elseif ( !empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'target';
             $this->queryParams[ 'trg' ] = $this->target;

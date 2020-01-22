@@ -17,16 +17,6 @@ class RestoreXliffTagsForView extends AbstractHandler {
 
     public function transform( $segment ) {
 
-        // handling &#10;
-        if (strpos($segment, '&#10;') !== false) {
-            $segment = str_replace('&#10;', '##$_0A$##', $segment);
-        }
-
-        // handling &#13;
-        if (strpos($segment, '&#13;') !== false) {
-            $segment = str_replace('&#13;', '##$_0D$##', $segment);
-        }
-
         $segment = preg_replace_callback( '/' . Constants::LTPLACEHOLDER . '(.*?)' . Constants::GTPLACEHOLDER . '/u',
                 function ( $matches ) {
                     $_match = base64_decode( $matches[ 1 ] );

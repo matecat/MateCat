@@ -232,6 +232,24 @@ class SubFilteringTest extends AbstractTest {
 
     }
 
+    public function test_3_HandlingNBSP(){
+
+        $segment = $expectedL1 = '5 tips for creating a great   guide';
+        $segment_to_UI = $string_from_UI = '5 tips for creating a great ' . CatUtils::nbspPlaceholder . ' guide';
+
+        $segmentL1 = $this->filter->fromLayer0ToLayer1( $segment );
+        $segmentL2 = $this->filter->fromLayer0ToLayer2( $segment );
+
+        $this->assertEquals( $segmentL1, $expectedL1 );
+        $this->assertEquals( $segmentL2, $segment_to_UI );
+        $this->assertEquals( $segment, $this->filter->fromLayer1ToLayer0( $segmentL1 ) );
+
+        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $string_from_UI ) );
+
+    }
+
     /**
      * @throws \Exception
      */
