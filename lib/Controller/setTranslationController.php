@@ -8,6 +8,7 @@ use Features\TranslationVersions;
 use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use SubFiltering\Commons\Pipeline;
 use SubFiltering\Filter;
+use SubFiltering\Filters\FromViewNBSPToSpaces;
 use SubFiltering\Filters\PhCounter;
 use SubFiltering\Filters\SprintfToPH;
 
@@ -302,6 +303,7 @@ class setTranslationController extends ajaxController {
             $pipeline->getNextId();
         }
 
+        $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
         $pipeline->addLast( new SprintfToPH() );
 
         $check = new QA( $this->__postInput[ 'segment' ], $pipeline->transform( $this->__postInput[ 'translation' ] ) );
