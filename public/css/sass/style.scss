@@ -5131,7 +5131,7 @@ header {
     position: fixed;
     &.open {
         max-height: 64%;
-        overflow: visible;
+        overflow-y: auto;
         top: 64px !important;
         display: block;
         box-shadow: 0px 1px 12px #999;
