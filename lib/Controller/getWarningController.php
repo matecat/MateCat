@@ -2,6 +2,8 @@
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
+use SubFiltering\Commons\Pipeline;
+use SubFiltering\Filters\SprintfToPH;
 use Translations\WarningDao;
 
 class getWarningController extends ajaxController {
@@ -149,9 +151,11 @@ class getWarningController extends ajaxController {
             return;
         }
 
+        $qa = new QAGlobalWarning( $result, $tMismatch );
+
         $this->result = array_merge(
                 $this->result,
-                ( new QAGlobalWarning( $result, $tMismatch ) )->render(),
+                $qa->render(),
                 Utils::getGlobalMessage()
         );
 
