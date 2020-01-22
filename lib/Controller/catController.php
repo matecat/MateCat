@@ -312,7 +312,7 @@ class catController extends viewController {
         if( $this->job_cancelled ) parent::makeTemplate( 'job_cancelled.html' );
         if( $this->job_archived ) parent::makeTemplate( 'job_archived.html' );
 
-        $this->template->jid         = $this->jid;
+        $this->template->jid = $this->jid;
 
         $this->template->id_team = null;
 
