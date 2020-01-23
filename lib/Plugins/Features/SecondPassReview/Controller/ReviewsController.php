@@ -85,17 +85,21 @@ class ReviewsController extends KleinController {
 
         $post = $this->request->paramsPost();
 
-        if ( !isset( $post[ 'id_job' ] ) ) {
-            throw new ValidationError( 'id_job param is not provided' );
+        $requiredParams = [
+                'id_job',
+                'password',
+                'revision_number',
+        ];
+
+        foreach ($requiredParams as $requiredParam){
+            if ( !isset( $post[ $requiredParam ] ) ) {
+                throw new ValidationError( $requiredParam . ' param is not provided' );
+            }
         }
 
-        if ( !isset( $post[ 'revision_number' ] ) ) {
-            throw new ValidationError( 'revision_number is not provided' );
-        }
-
-        $this->latestChunkReview = ( new ChunkReviewDao() )->findLatestRevisionByIdJob( $post[ 'id_job' ] );
-        if ( $this->latestChunkReview->id_project != $this->project->id ) {
-            throw new ValidationError( "Job id is not in projects list" );
+        $this->latestChunkReview = ( new ChunkReviewDao() )->findByJobIdPasswordAndSourcePage( $post[ 'id_job' ],$post[ 'password' ],$post[ 'revision_number' ] );
+        if ( $this->latestChunkReview->id_project != $this->project->id and $this->latestChunkReview->password != $this->project->password ) {
+            throw new ValidationError( "Job id / password combination is not in projects list" );
         }
 
         $this->nextSourcePage = $post[ 'revision_number' ] + 1;

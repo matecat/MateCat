@@ -156,7 +156,7 @@ class Analysis_AnalysisModel {
                     $this->jobs[ $p_jdata[ 'jid' ] ][ 'splitted' ] = '';
                 }
 
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'jid' ]    = $p_jdata[ 'jid' ];
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'jid' ]    = (int)$p_jdata[ 'jid' ];
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'source' ] = $source;
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'target' ] = $target;
 
@@ -179,7 +179,7 @@ class Analysis_AnalysisModel {
             //initialize the job/chunk bucket
             if ( !isset( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ] ) ) {
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ]                   = array();
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jid' ]          = $p_jdata[ 'jid' ];
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jid' ]          = (int)$p_jdata[ 'jid' ];
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'source' ]       = $source;
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'target' ]       = $target;
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jpassword' ]    = $password;

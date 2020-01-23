@@ -238,6 +238,7 @@ class QA {
     const ERR_SPACE_MISMATCH_TEXT = 1101;
 
     const ERR_SYMBOL_MISMATCH = 1200;
+
     /**
      * Human Readable error map.
      * Created accordly with Error constants
@@ -940,7 +941,7 @@ class QA {
         return $this->target_seg;
     }
 
-    public function getDomMaps(){
+    public function getDomMaps() {
         return [ $this->srcDomMap, $this->trgDomMap ];
     }
 
@@ -1115,11 +1116,11 @@ class QA {
                 //
                 // Source and target PH content does not match, _checkTagMismatch() will throw an error.
                 //
-                if($element->tagName === 'ph'){
-                    $innerHTML = $plainRef['innerHTML'];
-                    $regex = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
+                if ( $element->tagName === 'ph' ) {
+                    $innerHTML = $plainRef[ 'innerHTML' ];
+                    $regex     = "<ph id\s*=\s*[\"']mtc_[0-9]+[\"'] equiv-text\s*=\s*[\"']base64:([^\"']+)[\"']\s*/>";
                     preg_match_all( $regex, $innerHTML, $html, PREG_SET_ORDER );
-                    $html = base64_decode($html[0][1]);
+                    $html = base64_decode( $html[ 0 ][ 1 ] );
 
                     @$srcDomElements[ 'refID' ][ $html ] = $element->tagName;
                 } else {
@@ -2165,5 +2166,4 @@ class QA {
         }
 
     }
-
 }
