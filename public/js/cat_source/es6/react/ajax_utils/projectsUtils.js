@@ -153,9 +153,10 @@ API.PROJECTS = {
         });
     },
     
-    getSecondPassReview: function ( idProject, passwordProject, idJob ) {
+    getSecondPassReview: function ( idProject, passwordProject, idJob, passwordJob ) {
         var data = {
             id_job: idJob,
+            password: passwordJob,
             revision_number: 2
         };
         return $.ajax({
