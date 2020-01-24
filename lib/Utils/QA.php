@@ -239,9 +239,11 @@ class QA {
 
     const ERR_SYMBOL_MISMATCH = 1200;
 
+    const SMART_COUNT_PLURAL_MISMATCH = 2000;
+
     /**
      * Human Readable error map.
-     * Created accordly with Error constants
+     * Created accordingly with Error constants
      *
      * <pre>
      * array (
@@ -331,6 +333,8 @@ class QA {
          * 25 => 'Star sign mismatch',
          */
             1200 => 'Symbol mismatch',
+
+            2000 => 'Smart count plural forms mismatch',
     ];
 
     protected $_tipMap = [
@@ -468,12 +472,14 @@ class QA {
                 break;
             case self::ERR_UNCLOSED_X_TAG:
             case self::ERR_UNCLOSED_G_TAG:
+            case self::SMART_COUNT_PLURAL_MISMATCH:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
                         'tip'     => $this->_getTipValue( $errCode )
                 ] );
                 break;
+
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
