@@ -325,7 +325,7 @@ class SegmentFooter extends React.Component {
         if ( this.props.segment.opened ) {
             if ( UI.isMac && e.ctrlKey && e.altKey && e.code === 'KeyS' ) {
                 this.getNextTab();
-            } else if (  e.altKey && e.code === 'KeyS' ) {
+            } else if ( !UI.isMac && e.altKey && e.code === 'KeyS' ) {
                 this.getNextTab();
             }
 
