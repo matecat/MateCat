@@ -30,9 +30,8 @@ body.cattool {
   }
 
   .stats-foo {
-	height: 44px;
+	//height: 44px;
 	background-color: $white;
-	padding: 0 12px 0 14px;
 	width: 100%;
 	position: fixed;
 	bottom: 0;
@@ -42,11 +41,13 @@ body.cattool {
 	min-width:1024px;
 
 	.footer-body {
-	  display: grid;
-	  position: relative;
-	  grid-column-gap: 10px;
-	  grid-template-columns: minmax(80px, 120px) minmax(80px, 420px) minmax(140px, 350px) minmax(172px, 0.2fr) minmax(116px, 0.2fr) minmax(316px, 0.4fr);
-	  align-items: center;
+		display: grid;
+		position: relative;
+		grid-column-gap: 10px;
+		grid-template-columns: minmax(80px, 120px) minmax(80px, 420px) minmax(140px, 350px) minmax(172px, 0.2fr) minmax(116px, 0.2fr) minmax(316px, 0.4fr);
+		align-items: center;
+		padding: 0 12px 0 14px;
+		height: 44px;
 
 	  .item {
 		font-size: 14px;

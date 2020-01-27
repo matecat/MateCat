@@ -379,7 +379,7 @@
 
             var el = doc.createElement('div');
             el.className = 'cookiebanner';
-            el.style.position = 'fixed';
+            el.style.position = 'relative';
             el.style.left = 0;
             el.style.right = 0;
             el.style.height = this.options.height;
