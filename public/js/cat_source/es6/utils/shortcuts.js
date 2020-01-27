@@ -177,7 +177,7 @@ const Shortcuts = {
                     "equivalent": "",
                     "keystrokes": {
                         "standard": "alt+s",
-                        "mac": "alt+s",
+                        "mac": "ctrl+alt+s",
                     }
                 }
             }
