@@ -72,18 +72,26 @@ class SegmentHeader extends React.PureComponent {
         var percentageHtml = '';
         if (this.state.autopropagated) {
             autopropagated = <span className="repetition">Autopropagated</span>;
-        } else if (this.state.visible && this.state.percentage != '') {
+        } else if ( this.props.repetition ) {
+            autopropagated = <span className="repetition">Repetition</span>;
+        }
+        else if (this.state.visible && this.state.percentage != '') {
             percentageHtml = <h2 title={"Created by " + this.state.createdBy}
                                  className={" visible percentuage " + this.state.classname}>{this.state.percentage}</h2>;
 
         }
 
-        return (
+        return (this.props.segmentOpened) ? (
             <div className="header toggle" id={"segment-" + this.props.sid + "-header"}>
                 {autopropagated}
                 {percentageHtml}
             </div>
-        )
+        ) : ( this.state.autopropagated || this.props.repetition ) ?
+            (
+                <div className={'header header-closed'}>
+                    {autopropagated}
+                </div>
+            ) : null;
     }
 }
 

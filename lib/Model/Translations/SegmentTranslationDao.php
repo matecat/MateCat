@@ -84,21 +84,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     protected function getSegmentsForPropagation( $params, $status = Constants_TranslationStatus::STATUS_TRANSLATED ) {
 
-        /**
-         * We want that a propagation acts only on NEW, DRAFT and REBUTTED segments
-         * so we have to set an additional status when the requested status to propagate is TRANSLATE.
-         */
-        $additional_status = '';
-        if ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
-";
-        }
 
         $selectSegmentsToPropagate = " SELECT * FROM segment_translations " .
                 " WHERE id_job = :id_job " .
                 " AND segment_hash = :segment_hash " .
                 " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
-                " AND id_segment <> :id_segment $additional_status; ";
+                " AND id_segment <> :id_segment ; ";
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare( $selectSegmentsToPropagate );
@@ -667,15 +658,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         }
 
         /**
-         * We want that a propagation acts only on NEW, DRAFT and REBUTTED segments
-         * so we have to set an additional status when the requested status to propagate is TRANSLATE.
-         */
-        $additional_status = '';
-        if ( $segmentTranslationStruct[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "' ";
-        }
-
-        /**
          * Sum the word count grouped by status, so that we can later update the count on jobs table.
          * We only count segments with status different than the current, because we don't need to update
          * the count for the same status.
@@ -691,8 +673,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
            AND segment_translations.segment_hash = :segment_hash
            AND id_segment BETWEEN :job_first_segment AND :job_last_segment
            AND id_segment != :id_segment
-           AND status != :status
-           $additional_status
+           -- AND status != :status
            GROUP BY status
     ";
 
@@ -706,7 +687,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     'job_first_segment' => $chunkStruct[ 'job_first_segment' ],
                     'job_last_segment'  => $chunkStruct[ 'job_last_segment' ],
                     'id_segment'        => $_idSegment,
-                    'status'            => $segmentTranslationStruct[ 'status' ]
+                    //'status'            => $segmentTranslationStruct[ 'status' ]
             ] );
 
             $propagationTotal[ 'totals' ] = $stmt->fetchAll();

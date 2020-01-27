@@ -2029,6 +2029,14 @@ section.editor .loader_on {
     z-index: 12;
 }
 
+.header.header-closed {
+    background: transparent !important;
+    position: absolute;
+    span {
+        z-index: 1;
+    }
+}
+
 .close {
     width: 14px;
     height: 14px;
@@ -2152,6 +2160,7 @@ section.editor {
     //height: 100%;
     width: 89%;
     margin-left: 4.5%;
+    //height: 100%;
 }
 
 section.editor .sid {
@@ -4556,7 +4565,7 @@ section .segment-side-buttons {
     text-align: right;
     z-index: 0;
     position: relative;
-    //background-color: $grey3;
+    margin-top: -2px;
 }
 
 .buttons li {

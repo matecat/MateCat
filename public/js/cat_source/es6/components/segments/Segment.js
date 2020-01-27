@@ -180,7 +180,7 @@ class Segment extends React.Component {
             classes.push('opened');
             classes.push('shadow-1');
         }
-        if (this.props.segment.modified) {
+        if (this.props.segment.modified || this.props.segment.autopropagated_from !== "0") {
             classes.push('modified');
         }
         if ( this.props.sideOpen ) {
@@ -627,7 +627,11 @@ class Segment extends React.Component {
                 {job_marker}
 
                 <div className="body">
-                    <SegmentHeader sid={this.props.segment.sid} autopropagated={this.state.autopropagated}/>
+                    <SegmentHeader
+                        sid={this.props.segment.sid}
+                        autopropagated={this.state.autopropagated}
+                        segmentOpened={this.props.segment.opened}
+                        repetition={autoPropagable}/>
                     <SegmentBody
                         segment={this.props.segment}
                         readonly={this.state.readonly}

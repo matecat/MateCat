@@ -220,20 +220,24 @@ const SegmentActions = {
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
             $.each(segmentsInPropagation, function() {
-                // $('.editarea', $(this)).html( $('.editarea', segment).html() );
-                SegmentActions.replaceEditAreaTextContent(this.sid ,null , segment.translation);
+                if ( this.sid !== segmentId ) {
+                    // $('.editarea', $(this)).html( $('.editarea', segment).html() );
+                    SegmentActions.replaceEditAreaTextContent( this.sid, null, segment.translation );
 
 
-                //Tag Projection: disable it if enable
-                // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
-                SegmentActions.setSegmentAsTagged(this.sid);
+                    //Tag Projection: disable it if enable
+                    // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
+                    SegmentActions.setSegmentAsTagged( this.sid );
 
-                // if status is not set to draft, the segment content is not displayed
-                SegmentActions.setStatus(this.sid, null, status); // now the status, too, is propagated
+                    // if status is not set to draft, the segment content is not displayed
+                    SegmentActions.setStatus( this.sid, null, status ); // now the status, too, is propagated
 
-                SegmentActions.setSegmentPropagation(this.sid, null, true ,segment.sid);
+                    SegmentActions.setSegmentPropagation( this.sid, null, true, segment.sid );
 
-                LXQ.doLexiQA(this,this.sid,true,null);
+                    LXQ.doLexiQA( this, this.sid, true, null );
+                } else {
+                    SegmentActions.setSegmentPropagation( this.sid, null, false );
+                }
             });
         }
     },

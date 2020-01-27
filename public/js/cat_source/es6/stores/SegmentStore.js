@@ -428,7 +428,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     setAlternatives: function (sid, alternatives) {
         const index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments = this._segments.setIn([index, 'alternatives'], Immutable.fromJS(alternatives));
+        if ( _.isUndefined(alternatives) ) {
+            this._segments = this._segments.deleteIn([index, 'alternatives']);
+        } else {
+            this._segments = this._segments.setIn([index, 'alternatives'], Immutable.fromJS(alternatives));
+        }
     },
     deleteContribution: function(sid, matchId) {
         const index = this.getSegmentIndex(sid);

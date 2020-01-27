@@ -71,95 +71,94 @@ var UI = {
      *
      * @returns {boolean}
      */
-    shouldSegmentAutoPropagate : function( $segment, newStatus ) {
+    shouldSegmentAutoPropagate : function( $segment, status ) {
         var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment), UI.getSegmentFileId($segment));
         var segmentStatus = segment.status.toLowerCase();
-        var notAcceptedStatus = ['translated', 'approved'];
+        var segmentAutopropagated = segment.autopropagated_from !== "0";
+        var statusAcceptedNotModified = ['new', 'draft'];
         var segmentModified = segment.modified;
-        return ( !config.isReview && (segmentModified && notAcceptedStatus.indexOf(segmentStatus) === -1 ));
+        return segmentModified || ( statusAcceptedNotModified.indexOf(segmentStatus) !== -1 ) || ( !segmentModified && status.toLowerCase() !== segmentStatus );
     },
 
     /**
      *
      * @param el
      * @param status
-     * @param byStatus
+     * @param callback
      */
-	changeStatus: function(el, status, byStatus, callback) {
+	changeStatus: function(el, status, callback) {
         var segment = $(el).closest("section");
         var segment_id = this.getSegmentId(segment);
         var segObj = SegmentStore.getSegmentByIdToJS(segment_id);
         var opts = {
             segment_id      : segment_id,
             status          : status,
-            byStatus        : byStatus,
             propagation     : segObj.propagable && UI.shouldSegmentAutoPropagate( segment, status ),
             callback        : callback
         };
 
-        this.execChangeStatus( opts );
-
         // ask if the user wants propagation or this is valid only
         // for this segment
 
-        // if ( this.autopropagateConfirmNeeded() && !byStatus) {
-        //
-        //     // var optionsStr = opts;
-        //     var props = {
-        //         text: "There are other identical segments. <br><br>Would you " +
-        //             "like to propagate the translation to all of them, " +
-        //             "or keep this translation only for this segment?",
-        //         successText: 'Only this segment',
-        //         successCallback: function(){
-        //                 opts.propagation = false;
-        //                 UI.preExecChangeStatus(opts);
-        //                 APP.ModalWindow.onCloseModal();
-        //             },
-        //         cancelText: 'Propagate to All',
-        //         cancelCallback: function(){
-        //                 opts.propagation = true;
-        //                 UI.execChangeStatus(opts);
-        //                 APP.ModalWindow.onCloseModal();
-        //             },
-        //         onClose: function(){
-        //             UI.preExecChangeStatus(opts);
-        //         }
-        //     };
-        //     APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
-        // } else {
-        //     this.execChangeStatus( opts ); // autopropagate
-        // }
+        if ( this.autopropagateConfirmNeeded( opts.propagation ) ) {
+
+            var text = ( !_.isUndefined(segObj.alternatives) ) ? "There are other identical segments with <b>translation conflicts</b>. <br><br>Would you " +
+                "like to propagate the translation and the status to all of them, " +
+                "or keep this translation only for this segment?"
+                : "There are other identical segments. <br><br>Would you " +
+                "like to propagate the translation and the status to all of them, " +
+                "or keep this translation only for this segment?";
+            // var optionsStr = opts;
+            var props = {
+                text: text,
+                successText: 'Only this segment',
+                successCallback: function(){
+                        opts.propagation = false;
+                        UI.preExecChangeStatus(opts);
+                        APP.ModalWindow.onCloseModal();
+                    },
+                cancelText: 'Propagate to All',
+                cancelCallback: function(){
+                        opts.propagation = true;
+                        UI.execChangeStatus(opts);
+                        APP.ModalWindow.onCloseModal();
+                    },
+                onClose: function(){
+                    UI.preExecChangeStatus(opts);
+                }
+            };
+            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
+        } else {
+            this.execChangeStatus( opts ); // autopropagate
+        }
 	},
 
-    // autopropagateConfirmNeeded: function () {
-    //     var segment = SegmentStore.getCurrentSegment();
-    //     if( !segment.modified && !config.isReview) { //segment not modified
-    //         return false;
-    //     }
-    //
-    //     if(segment.propagable) {
-    //         if(config.isReview) {
-    //             return true;
-    //         } else {
-    //             return segment.status.toLowerCase() !== "new" && segment.status.toLocaleString() !== "draft";
-    //         }
-    //     }
-    //     return false;
-    //
-    // },
-    // preExecChangeStatus: function (optStr) {
-    //     var opt = optStr;
-    //     opt.propagation = false;
-    //     this.execChangeStatus(opt);
-    // },
+    autopropagateConfirmNeeded: function (propagation) {
+        var segment = SegmentStore.getCurrentSegment();
+        var segmentModified = segment.modified;
+        var segmentStatus = segment.status.toLowerCase();
+        var segmentAutopropagated = segment.autopropagated_from !== "0";
+        var statusNotConfirmationNeeded = ['new', 'draft'];
+        if( propagation ) {
+            if(config.isReview) {
+                return ( !segmentModified && segmentStatus !== 'translated') || segmentModified || !_.isUndefined(segment.alternatives);
+            } else {
+                return  ( segmentModified && !segmentAutopropagated && statusNotConfirmationNeeded.indexOf(segmentStatus) === -1) || ( segmentModified && segmentAutopropagated )  ;
+            }
+        }
+        return false;
+
+    },
+    preExecChangeStatus: function (optStr) {
+        var opt = optStr;
+        opt.propagation = false;
+        this.execChangeStatus(opt);
+    },
     execChangeStatus: function (optStr) {
         var options = optStr;
 
         var propagation   = options.propagation;
         var status        = options.status;
-        var byStatus      = options.byStatus;
-
-        ropagation = propagation || false;
 
         // $('.percentuage', segment.el).removeClass('visible');
         SegmentActions.hideSegmentHeader(options.segment_id);
@@ -168,7 +167,6 @@ var UI = {
             id_segment: options.segment_id,
             status: status,
             caller: false,
-            byStatus: byStatus,
             propagate: propagation,
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
@@ -1068,7 +1066,6 @@ var UI = {
         var status = options.status;
         var caller = options.caller || false;
         var callback = options.callback || false;
-        var byStatus = options.byStatus || false;
         var propagate = options.propagate || false;
 
         var segment = SegmentStore.getSegmentByIdToJS( id_segment );
@@ -1084,7 +1081,6 @@ var UI = {
             status: status,
             caller: caller,
             callback: callback,
-            byStatus: byStatus,
             propagate: propagate
         };
         //Check if the traslation is not already in the tail
@@ -1132,7 +1128,6 @@ var UI = {
                 this.status   = item.status;
                 this.caller   = item.caller;
                 this.callback = item.callback;
-                this.byStatus = item.byStatus;
                 this.propagate = item.propagate;
             }
         });
@@ -1150,7 +1145,6 @@ var UI = {
         var status = options.status;
         var caller = options.caller;
         var callback = options.callback;
-        var byStatus = options.byStatus;
         var propagate = options.propagate;
         var sourceSegment;
         this.executingSetTranslation = true;
@@ -1201,7 +1195,7 @@ var UI = {
             id_before: idBefore,
             context_after: contextAfter,
             id_after: idAfter,
-            by_status: byStatus,
+            by_status: false,
             revision_number: config.revisionNumber,
             guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment)
         };
@@ -1325,7 +1319,6 @@ var UI = {
         var status = options.status;
         var caller = options.caller || false;
         var callback = options.callback;
-        var byStatus = options.byStatus;
         var propagate = options.propagate;
         var segment = $('#segment-' + id_segment);
 
@@ -1342,6 +1335,19 @@ var UI = {
             if( propagate ) {
                 this.tempReqArguments = null;
                 SegmentActions.propagateTranslation(options.id_segment, status);
+                var notification = {
+                    title: 'Segment propagated',
+                    text: "The segment translation has been propagated to the other repetitions.",
+                    type: 'info',
+                    autoDismiss: true,
+                    timer: 15000,
+                    position: "bl",
+                };
+                APP.addNotification(notification);
+                SegmentActions.setAlternatives(options.id_segment, undefined);
+                SegmentActions.modifyTabVisibility('alternatives', false);
+            } else {
+                SegmentActions.setSegmentPropagation(options.id_segment, null, false);
             }
         }
         this.resetRecoverUnsavedSegmentsTimer();
@@ -1418,7 +1424,7 @@ var UI = {
             }
         };
 
-        UI.changeStatus(button, 'translated', 0, afterTranslateFn);
+        UI.changeStatus(button, 'translated', afterTranslateFn);
 
     },
 

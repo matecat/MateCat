@@ -188,7 +188,7 @@ class SegmentsContainer extends React.Component {
                         <h2 title={segment.filename}>{segment.filename}</h2>
                     </li>
                     <li style={{textAlign:'center', textIndent:'-20px'}}>
-                        <strong/> [<span className="source-lang">{config.source_rfc}</span>]] >
+                        <strong/> [<span className="source-lang">{config.source_rfc}</span>] >
                         <strong/> [<span className="target-lang">{config.target_rfc}</span>]
                     </li>
                 </ul>
