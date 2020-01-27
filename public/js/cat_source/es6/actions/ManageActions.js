@@ -340,7 +340,7 @@ let ManageActions = {
     },
 
     getSecondPassReview: function(idProject, passwordProject, idJob, passwordJob) {
-        return API.PROJECTS.getSecondPassReview(idProject, passwordProject, idJob).then( function ( data ) {
+        return API.PROJECTS.getSecondPassReview(idProject, passwordProject, idJob, passwordJob).then( function ( data ) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.ADD_SECOND_PASS,
                 idProject: idProject,

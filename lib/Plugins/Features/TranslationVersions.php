@@ -55,7 +55,12 @@ class TranslationVersions extends BaseFeature {
         /** @var \Projects_ProjectStruct $project */
         $project = $params[ 'project' ];
 
-        $sourceEvent = new SegmentTranslationEventModel( $old_translation, $translation, $user, $source_page_code );
+        $sourceEvent = new SegmentTranslationEventModel(
+                $old_translation,
+                $translation,
+                $user,
+                $source_page_code
+        );
 
         $batchEventCreator = new BatchEventCreator( $chunk );
         $batchEventCreator->setFeatureSet( $features );
@@ -63,6 +68,8 @@ class TranslationVersions extends BaseFeature {
         $batchEventCreator->setProject( $project );
 
         // If propagated segments exist, start cycle here
+        // @TODO COMPLETE REFACTORY IS NEEDED HERE!!!!!
+        // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
         if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ] ) and false === empty($params[ 'propagation' ][ 'segments_for_propagation' ] ) ) {
             foreach ( $params[ 'propagation' ][ 'segments_for_propagation' ] as $segmentTranslationBeforeChange ) {
 
