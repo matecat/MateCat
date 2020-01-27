@@ -100,7 +100,7 @@ if ( ReviewSimple.enabled() ) {
                     }
                 };
 
-                UI.changeStatus( button, 'approved', 0, afterApproveFn );  // this does < setTranslation
+                UI.changeStatus( button, 'approved', afterApproveFn );  // this does < setTranslation
 
                 var original = UI.currentSegment.find( '.original-translation' ).text();
 

@@ -231,13 +231,15 @@ const SegmentActions = {
 
                     // if status is not set to draft, the segment content is not displayed
                     SegmentActions.setStatus( this.sid, null, status ); // now the status, too, is propagated
-
+                    SegmentActions.modifiedTranslation( this.sid, null, false );
                     SegmentActions.setSegmentPropagation( this.sid, null, true, segment.sid );
 
                     LXQ.doLexiQA( this, this.sid, true, null );
                 } else {
                     SegmentActions.setSegmentPropagation( this.sid, null, false );
                 }
+                SegmentActions.setAlternatives(this.sid, undefined);
+                // SegmentActions.modifyTabVisibility('alternatives', false);
             });
         }
     },
