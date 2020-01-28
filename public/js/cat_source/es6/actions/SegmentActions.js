@@ -101,6 +101,12 @@ const SegmentActions = {
             actionType: SegmentConstants.REMOVE_SEARCH_RESULTS
         });
     },
+    setProgress: function(stats) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_PROGRESS,
+            stats: stats
+        });
+    },
     /********** Segment **********/
     setOpenSegment: function (sid, fid) {
         AppDispatcher.dispatch({

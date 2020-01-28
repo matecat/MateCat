@@ -730,6 +730,8 @@ var UI = {
     setProgress: function(stats) {
         var s = stats;
         this.projectStats = stats;
+        SegmentActions.setProgress(stats);
+
         m = $('footer .meter');
         if( !s.ANALYSIS_COMPLETE ){
             $('#statistics' ).hide();
