@@ -29,8 +29,8 @@ if ( ReviewSimple.enabled() ) {
             },
 
             trackChanges: function ( ) {
-                var currentSegmentId = SegmentStore.getCurrentSegment();
-                var $segment = UI.getSegmentById(currentSegmentId).closest('section');
+                var currentSegment = SegmentStore.getCurrentSegment();
+                var $segment = UI.getSegmentById(currentSegment.sid).closest('section');
                 var source = $segment.find( '.original-translation' ).html();
                 source = TextUtils.clenaupTextFromPleaceholders( source );
 
@@ -100,7 +100,7 @@ if ( ReviewSimple.enabled() ) {
                     }
                 };
 
-                UI.changeStatus( button, 'approved', 0, afterApproveFn );  // this does < setTranslation
+                UI.changeStatus( button, 'approved', afterApproveFn );  // this does < setTranslation
 
                 var original = UI.currentSegment.find( '.original-translation' ).text();
 

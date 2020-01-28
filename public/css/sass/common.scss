@@ -71,8 +71,7 @@ ul {
 .normal-foo{
   background-color: $grey4;
   min-width: 992px;
-  padding: 16px 64px;
-  height: 77px;
+
   width: 100%;
   position: fixed;
   bottom: 0;
@@ -82,6 +81,8 @@ ul {
     display: grid;
     position: relative;
     grid-column-gap: 24px;
+    padding: 16px 64px;
+    height: 77px;
     //grid-template-columns: minmax(auto,440px) auto;
     grid-template-columns: minmax(auto,440px) auto;
     align-items: center;
@@ -3862,6 +3863,7 @@ header .filter:before {
 
 .tab-switcher-al a:before {
   font-size: 14px;
+  color: $orangeDefault;
 }
 
 .currSegment a:before {

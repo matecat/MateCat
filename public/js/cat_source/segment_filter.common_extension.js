@@ -23,13 +23,7 @@ if ( SegmentFilter.enabled() )
         if ( !nextFiltered ) {
             return ;
         }
-        if ( segment ) {
-            original_gotoNextSegment.apply(undefined, arguments);
-        } else if (segment && index === 0) {
-            original_gotoPreviousSegment.apply(undefined, arguments);
-        } else if ( nextFiltered ) {
-            UI.render({ segmentToOpen: nextFiltered });
-        }
+        SegmentActions.openSegment(segment.sid);
     };
 
     var gotoPreviousSegment = function() {
@@ -42,13 +36,7 @@ if ( SegmentFilter.enabled() )
             return ;
         }
 
-        if ( segment && index !== 0 ) {
-            original_gotoPreviousSegment.apply(undefined, arguments);
-        } else if (segment && index === 0) {
-            original_gotoNextSegment.apply(undefined, arguments);
-        } else if ( nextFiltered ) {
-            UI.render({ segmentToOpen: nextFiltered });
-        }
+        SegmentActions.openSegment(segment.sid);
     };
 
     var gotoNextTranslatedSegment = function(sid) {

@@ -267,7 +267,7 @@ section.opened .warnings {
 }
 
 .alternatives a {
-    color: #D65959 !important;
+    color: $black !important;
 }
 
 .mismatch .warnings {
@@ -1511,10 +1511,6 @@ body.noGlossary .tab-switcher-gl {
     color: red;
 }
 
-.tab-switcher-al a {
-    color: #D65959 !important;
-}
-
 .sub-editor {
     display: none;
     float: left;
@@ -2550,8 +2546,14 @@ body.rtl-target .editor .editarea span {
 }
 
 .graysmall li.goto {
-    width: 10px !important;
+    width: 33px !important;
     padding: 15px !important;
+    //font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
+    &:hover {
+        text-decoration: none;
+    }
 }
 
 .graysmall li.details {

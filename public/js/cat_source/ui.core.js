@@ -77,7 +77,8 @@ var UI = {
         var segmentAutopropagated = segment.autopropagated_from !== "0";
         var statusAcceptedNotModified = ['new', 'draft'];
         var segmentModified = segment.modified;
-        return segmentModified || ( statusAcceptedNotModified.indexOf(segmentStatus) !== -1 ) || ( !segmentModified && status.toLowerCase() !== segmentStatus );
+        return segmentModified || ( statusAcceptedNotModified.indexOf(segmentStatus) !== -1 ) || ( !segmentModified && status.toLowerCase() !== segmentStatus ) ||
+            ( !segmentModified && status.toLowerCase() === segmentStatus && segmentStatus === 'approved' && config.revisionNumber !== segment.revision_number ); // from R1 to R2 and reverse
     },
 
     /**
@@ -137,13 +138,16 @@ var UI = {
         var segment = SegmentStore.getCurrentSegment();
         var segmentModified = segment.modified;
         var segmentStatus = segment.status.toLowerCase();
-        var segmentAutopropagated = segment.autopropagated_from !== "0";
+        // var segmentAutopropagated = segment.autopropagated_from !== "0";
         var statusNotConfirmationNeeded = ['new', 'draft'];
         if( propagation ) {
             if(config.isReview) {
-                return ( !segmentModified && segmentStatus !== 'translated') || segmentModified || !_.isUndefined(segment.alternatives);
+                // return  segmentModified || !_.isUndefined(segment.alternatives) || ( segmentStatus === 'approved' && config.revisionNumber !== segment.revision_number) ;
+                return  ( segmentModified || !_.isUndefined(segment.alternatives) ) ;
             } else {
-                return  ( segmentModified && !segmentAutopropagated && statusNotConfirmationNeeded.indexOf(segmentStatus) === -1) || ( segmentModified && segmentAutopropagated )  ;
+                // return  ( segmentModified && !segmentAutopropagated && statusNotConfirmationNeeded.indexOf(segmentStatus) === -1) || ( segmentModified && segmentAutopropagated ) || !_.isUndefined(segment.alternatives)  ;
+                return statusNotConfirmationNeeded.indexOf(segmentStatus) === -1  &&
+                    ( segmentModified || !_.isUndefined(segment.alternatives) );
             }
         }
         return false;
@@ -726,6 +730,8 @@ var UI = {
     setProgress: function(stats) {
         var s = stats;
         this.projectStats = stats;
+        SegmentActions.setProgress(stats);
+
         m = $('footer .meter');
         if( !s.ANALYSIS_COMPLETE ){
             $('#statistics' ).hide();
@@ -1344,8 +1350,6 @@ var UI = {
                     position: "bl",
                 };
                 APP.addNotification(notification);
-                SegmentActions.setAlternatives(options.id_segment, undefined);
-                SegmentActions.modifyTabVisibility('alternatives', false);
             } else {
                 SegmentActions.setSegmentPropagation(options.id_segment, null, false);
             }

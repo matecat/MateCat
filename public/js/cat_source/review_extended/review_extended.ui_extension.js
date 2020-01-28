@@ -226,7 +226,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             };
 
             UI.setTimeToEdit(UI.currentSegment);
-            UI.changeStatus( button, 'approved', 0,  afterApproveFn);  // this does < setTranslation
+            UI.changeStatus( button, 'approved', afterApproveFn);  // this does < setTranslation
 
             var original = UI.currentSegment.find( '.original-translation' ).text();
 

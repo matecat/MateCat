@@ -42,7 +42,7 @@ class SegmentBody extends React.Component {
     }
 
     changeStatus(status) {
-        UI.changeStatus(this.segmentBody, status, 1);
+        UI.changeStatus(this.segmentBody, status);
         this.setState({
             showStatusMenu: false
         });

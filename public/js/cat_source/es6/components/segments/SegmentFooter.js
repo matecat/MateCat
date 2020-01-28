@@ -274,9 +274,7 @@ class SegmentFooter extends React.Component {
     }
 
     changeTab(tabName, forceOpen) {
-        if (event) {
-            event.preventDefault();
-        }
+
         forceOpen = forceOpen ? forceOpen : false;
         let tabs = jQuery.extend(true, {}, this.state.tabs);
         let tab = jQuery.extend(true, {}, tabs[tabName]);
@@ -324,8 +322,13 @@ class SegmentFooter extends React.Component {
     }
 
     handleShortcutsKeyDown(e) {
-        if ( this.props.segment.opened && e.altKey && e.code === 'KeyS' ) {
-            this.getNextTab();
+        if ( this.props.segment.opened ) {
+            if ( UI.isMac && e.ctrlKey && e.altKey && e.code === 'KeyS' ) {
+                this.getNextTab();
+            } else if ( !UI.isMac && e.altKey && e.code === 'KeyS' ) {
+                this.getNextTab();
+            }
+
         }
     }
     componentDidMount() {

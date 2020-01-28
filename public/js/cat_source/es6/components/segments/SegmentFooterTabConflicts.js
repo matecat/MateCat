@@ -67,7 +67,7 @@ class SegmentFooterTabConflicts extends React.Component {
                             <span className="realData hide" dangerouslySetInnerHTML={self.allowHTML(this.translation)}/>
                         </li>
                         <li className="goto">
-                            <a data-goto={this.involved_id[0]} onClick={()=>SegmentActions.openSegment(this.involved_id[0])}>View</a>
+                            <a data-goto={this.involved_id[0]} onClick={()=>SegmentActions.openSegment(this.involved_id[0])}>Go to</a>
                         </li>
                     </ul>);
         });
@@ -86,7 +86,7 @@ class SegmentFooterTabConflicts extends React.Component {
                     <span className="realData hide" dangerouslySetInnerHTML={self.allowHTML(this.translation)}/>
                 </li>
                 <li className="goto">
-                    <a data-goto={this.involved_id[0]} onClick={()=>SegmentActions.openSegment(this.involved_id[0])}>View</a>
+                    <a data-goto={this.involved_id[0]} onClick={()=>SegmentActions.openSegment(this.involved_id[0])}>Go to</a>
                 </li>
             </ul>);
         });

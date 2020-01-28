@@ -6,12 +6,23 @@ import React  from 'react';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentFilter from "../header/cattol/segment_filter/segment_filter";
 import SegmentUtils from "../../utils/segmentUtils";
+import SegmentConstants from "../../constants/SegmentConstants";
 
 class SegmentButton extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            progress: undefined
+        };
+        this.updateProgress = this.updateProgress.bind(this);
 
+    }
+
+    updateProgress(stats) {
+        this.setState({
+           progress: stats
+        });
     }
 
     clickOnTranslatedButton(event) {
@@ -62,14 +73,20 @@ class SegmentButton extends React.Component {
         const classDisable = (this.props.disabled) ? 'disabled' : '';
         let nextButton, currentButton;
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
-        let enableGoToNext = !_.isUndefined(nextSegment) ;
+
+        let revisionCompleted = false;
+        if ( ReviewExtended.enabled() && this.state.progress ) {
+            revisionCompleted = ( config.revisionNumber === 1 ) ? this.state.progress.revision1Completed : this.state.progress.revision2Completed
+        } else if ( this.state.progress ) {
+            revisionCompleted = this.state.progress.revisionCompleted;
+        }
+        let enableGoToNext = !_.isUndefined(nextSegment) && !revisionCompleted;
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
-        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && (
+        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && !_.isNull(nextSegment.revision_number) && (
             nextSegment.revision_number === config.revisionNumber ||
-            _.isNull(nextSegment.revision_number) ||
             ( nextSegment.revision_number === 2 && config.revisionNumber === 1)
-        )  : enableGoToNext;
+        )  : enableGoToNext && nextSegment.status.toLowerCase() === 'approved';
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
@@ -126,7 +143,8 @@ class SegmentButton extends React.Component {
         let nextButton, currentButton;
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
-        let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" );
+        let translationCompleted = ( this.state.progress && this.state.progress.translationCompleted );
+        let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" ) && !translationCompleted;
         //TODO Store TP Information in the SegmentsStore
         this.currentSegmentTPEnabled = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment);
         if (this.currentSegmentTPEnabled) {
@@ -194,6 +212,15 @@ class SegmentButton extends React.Component {
                       className={'translated ' +classDisable } > {config.status_labels.TRANSLATED} </a><p>
             {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
         </p></li>;
+    }
+
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.SET_PROGRESS, this.updateProgress);
+    }
+
+
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.SET_PROGRESS, this.updateProgress);
     }
 
     render() {
