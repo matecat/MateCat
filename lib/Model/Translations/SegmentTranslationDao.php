@@ -654,7 +654,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
-            $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
+            $sum_sql = " SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
         }
 
         /**
@@ -664,7 +664,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          *
          */
         $queryTotals = "
-           SELECT $sum_sql as total, COUNT(id_segment) as countSeg, status
+           SELECT $sum_sql as total, sum(1) as countSeg, segment_translations.*
 
            FROM segment_translations
               INNER JOIN  segments
@@ -673,8 +673,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
            AND segment_translations.segment_hash = :segment_hash
            AND id_segment BETWEEN :job_first_segment AND :job_last_segment
            AND id_segment != :id_segment
-           -- AND status != :status
-           GROUP BY status
+           GROUP BY id_segment with rollup
     ";
 
         try {
@@ -687,10 +686,16 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     'job_first_segment' => $chunkStruct[ 'job_first_segment' ],
                     'job_last_segment'  => $chunkStruct[ 'job_last_segment' ],
                     'id_segment'        => $_idSegment,
-                    //'status'            => $segmentTranslationStruct[ 'status' ]
             ] );
 
-            $propagationTotal[ 'totals' ] = $stmt->fetchAll();
+            $totals = $stmt->fetchAll();
+            $lastRow = end($totals);
+
+            $propagationTotal[ 'totals' ]['total'] = $lastRow['total'];
+            $propagationTotal[ 'totals' ]['countSeg'] = $lastRow['countSeg'];
+            $propagationTotal[ 'totals' ]['status'] = $lastRow['status'];
+
+            unset( $totals[ count($totals) - 1 ] );
 
         } catch ( PDOException $e ) {
             throw new Exception( "Error in counting total words for propagation: " . $e->getCode() . ": " . $e->getMessage()
@@ -700,28 +705,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         if ( !empty( $propagationTotal[ 'totals' ] ) ) {
 
-            $dao = new Translations_SegmentTranslationDao();
-            try {
-
-                $propagationTotal[ 'segments_for_propagation' ] = $segmentsForPropagation = $dao->getSegmentsForPropagation( [
-                        'id_segment'        => $_idSegment,
-                        'job_first_segment' => $chunkStruct[ 'job_first_segment' ],
-                        'job_last_segment'  => $chunkStruct[ 'job_last_segment' ],
-                        'segment_hash'      => $segmentTranslationStruct[ 'segment_hash' ],
-                        'id_job'            => $segmentTranslationStruct[ 'id_job' ]
-                ], $segmentTranslationStruct[ 'status' ] );
-            } catch ( PDOException $e ) {
-                throw new Exception(
-                        sprintf( "Error in querying segments for propagation: %s: %s ", $e->getCode(), $e->getMessage() ),
-                        -$e->getCode()
-                );
-            }
-
+            $propagationTotal[ 'segments_for_propagation' ] = $totals;
 
             if ( true === $execute_update and !empty( $propagationTotal[ 'segments_for_propagation' ] ) ) {
 
-                $propagationTotal[ 'propagated_ids' ] = array_map( function ( Translations_SegmentTranslationStruct $translation ) {
-                    return $translation->id_segment;
+                $propagationTotal[ 'propagated_ids' ] = array_map( function ( $translation ) {
+                    return $translation['id_segment'];
                 }, $propagationTotal[ 'segments_for_propagation' ] );
 
                 try {
@@ -737,12 +726,30 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     }
 
                     $place_holders_fields = implode( ",", $place_holders_fields );
-                    $place_holders_id     = implode( ',', array_fill( 0, count( $propagationTotal[ 'propagated_ids' ] ), '?' ) );
+
+                    $propagation = [];
+
+                    if($segmentTranslationStruct->match_type !== 'ICE'){ // remove ICE
+                        foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
+                            if ( $segment['match_type'] !== 'ICE' and $segment['locked'] == 0 and $segment['id_segment'] !== null) {
+                                $propagation[ 'propagated_ids' ][] = $segment['id_segment'];
+                            }
+                        }
+                    } else { // keep ICE with the corresponding hash
+                        foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
+                            if ( $segment['match_type'] === 'ICE' and $segment['locked'] === 1 and $segment['segment_hash'] === $segmentTranslationStruct->segment_hash and $segment['id_segment']
+                                    !== null ) {
+                                $propagation[ 'propagated_ids' ][] = $segment['id_segment'];
+                            }
+                        }
+                    }
+
+                    $place_holders_id = implode( ',', array_fill( 0, count( $propagation[ 'propagated_ids' ] ), '?' ) );
 
                     $values = array_merge(
                             $field_values,
                             [ $segmentTranslationStruct[ 'id_job' ] ],
-                            $propagationTotal[ 'propagated_ids' ]
+                            $propagation[ 'propagated_ids' ]
                     );
 
                     $propagationSql = "

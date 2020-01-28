@@ -12,6 +12,7 @@ use Features\TranslationVersions\SegmentTranslationVersionHandler;
 use Jobs_JobDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
 
 class TranslationVersions extends BaseFeature {
@@ -72,6 +73,8 @@ class TranslationVersions extends BaseFeature {
         // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
         if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ] ) and false === empty($params[ 'propagation' ][ 'segments_for_propagation' ] ) ) {
             foreach ( $params[ 'propagation' ][ 'segments_for_propagation' ] as $segmentTranslationBeforeChange ) {
+
+                $segmentTranslationBeforeChange = new Translations_SegmentTranslationStruct($segmentTranslationBeforeChange);
 
                 /** @var \Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
                 $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;

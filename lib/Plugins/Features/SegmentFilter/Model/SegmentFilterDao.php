@@ -293,6 +293,9 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             case 'ice':
                 $sql = self::getSqlForIce( $where, $source_page );
                 break;
+            case 'modified_ice':
+                $sql = self::getSqlForModifiedIce( $where, $source_page );
+                break;
             case 'repetitions':
                 $sql = self::getSqlForRepetition( $where, $source_page );
                 break;
@@ -515,6 +518,8 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            BETWEEN :job_first_segment AND :job_last_segment
 
            AND st.match_type = 'ICE'
+           AND locked = 1
+           AND version_number = 0
 
            $ste_join
 
@@ -525,6 +530,35 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
 
         return $sql;
     }
+
+    public static function getSqlForModifiedIce( $where, $source_page ) {
+        $ste_join = self::segmentTranslationEventsJoin( $source_page ) ;
+
+        $sql = "
+          SELECT st.id_segment AS id
+          FROM
+           segment_translations st JOIN jobs
+           ON jobs.id = st.id_job
+           AND jobs.id = :id_job
+           AND jobs.password = :password
+           AND st.id_segment
+           BETWEEN :job_first_segment AND :job_last_segment
+
+           AND st.match_type = 'ICE'
+           AND locked = 1
+           AND version_number > 0
+
+           $ste_join
+
+           WHERE 1
+           $where->sql
+           ORDER BY st.id_segment
+        ";
+
+        return $sql;
+    }
+
+
 
     public static function getSqlForRepetition( $where, $source_page ) {
 

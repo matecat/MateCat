@@ -523,12 +523,11 @@ class setTranslationController extends ajaxController {
 
         $file_stats = [];
 
-        $this->result[ 'stats' ]      = $job_stats;
-        $this->result[ 'file_stats' ] = $file_stats;
-        $this->result[ 'code' ]       = 1;
-        $this->result[ 'data' ]       = "OK";
-        $this->result[ 'version' ]    = date_create( $new_translation[ 'translation_date' ] )->getTimestamp();
-
+        $this->result[ 'stats' ]       = $job_stats;
+        $this->result[ 'file_stats' ]  = $file_stats;
+        $this->result[ 'code' ]        = 1;
+        $this->result[ 'data' ]        = "OK";
+        $this->result[ 'version' ]     = date_create( $new_translation[ 'translation_date' ] )->getTimestamp();
         $this->result[ 'translation' ] = $this->getTranslationObject( $new_translation );
 
         /* FIXME: added for code compatibility with front-end. Remove. */
@@ -560,6 +559,28 @@ class setTranslationController extends ajaxController {
 
         }
 
+        $propagationReport = [];
+        $iceCount          = 0;
+        $propagatedCount   = 0;
+
+        if ( count( $propagationTotal[ 'segments_for_propagation' ] ) > 0 ) {
+            foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
+                if ( $segment['match_type'] === 'ICE' and $segment['locked'] == 1 ) {
+                    $propagationReport[ 'ice' ][] = $segment['id_segment'];
+                    $iceCount++;
+                    unset( $propagationTotal[ 'segments_for_propagation' ][ $key ] );
+                } else {
+                    $propagationReport[ 'propagated' ][] = $segment['id_segment'];
+                    $propagatedCount++;
+                }
+            }
+
+            $propagationReport[ 'total' ] = $iceCount + $propagatedCount;
+        }
+
+        $this->result[ 'propagation_report' ] = $propagationReport;
+        $propagationTotal[ 'propagated_ids' ] = $propagationReport[ 'propagated' ];
+        $propagationTotal[ 'totals' ]         = $propagationReport[ 'total' ];
 
         $this->featureSet->run( 'preSetTranslationCommitted', [
                 'translation'       => $new_translation,
