@@ -63,12 +63,14 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
 
     /**
      * @param Translations_SegmentTranslationStruct $propagation
+     * @param                                       $propagated_ids
      */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation ) {
+    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $propagated_ids ) {
         $this->dao->savePropagationVersions(
                 $propagation,
                 $this->id_segment,
-                $this->chunkStruct
+                $this->chunkStruct,
+                $propagated_ids
         );
     }
 

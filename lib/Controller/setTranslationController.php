@@ -433,6 +433,7 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
             $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
+            $TPropagation[ 'match_type' ]             = $old_translation['match_type'];
 
             try {
 
