@@ -216,36 +216,31 @@ const SegmentActions = {
         });
     },
 
-    propagateTranslation: function(segmentId, status) {
+    propagateTranslation: function(segmentId, propagatedSegments, status) {
         let segment = SegmentStore.getSegmentByIdToJS(segmentId);
         if ( segment.splitted > 2 ) return false;
 
         if( (status == 'translated') || (config.isReview && (status == 'approved'))){
 
-            let segmentsInPropagation = SegmentStore.getSegmentsInPropagation(segment.segment_hash, config.isReview);
-
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each(segmentsInPropagation, function() {
-                if ( this.sid !== segmentId ) {
-                    // $('.editarea', $(this)).html( $('.editarea', segment).html() );
-                    SegmentActions.replaceEditAreaTextContent( this.sid, null, segment.translation );
+            _.forEach(propagatedSegments, function(sid) {
+                if ( sid !== segmentId ) {
 
+                    SegmentActions.replaceEditAreaTextContent( sid, null, segment.translation );
 
                     //Tag Projection: disable it if enable
-                    // UI.disableTPOnSegment(UI.getSegmentById(this.sid));
-                    SegmentActions.setSegmentAsTagged( this.sid );
+                    SegmentActions.setSegmentAsTagged( sid );
 
                     // if status is not set to draft, the segment content is not displayed
-                    SegmentActions.setStatus( this.sid, null, status ); // now the status, too, is propagated
-                    SegmentActions.modifiedTranslation( this.sid, null, false );
-                    SegmentActions.setSegmentPropagation( this.sid, null, true, segment.sid );
+                    SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
+                    SegmentActions.modifiedTranslation( sid, null, false );
+                    SegmentActions.setSegmentPropagation( sid, null, true, segment.sid );
 
-                    LXQ.doLexiQA( this, this.sid, true, null );
+                    LXQ.doLexiQA( this, sid, true, null );
                 } else {
-                    SegmentActions.setSegmentPropagation( this.sid, null, false );
+                    SegmentActions.setSegmentPropagation( sid, null, false );
                 }
-                SegmentActions.setAlternatives(this.sid, undefined);
-                // SegmentActions.modifyTabVisibility('alternatives', false);
+                SegmentActions.setAlternatives(sid, undefined);
             });
         }
     },

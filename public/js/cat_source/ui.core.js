@@ -1320,33 +1320,33 @@ var UI = {
             }
 		});
 	},
-	setTranslation_success: function(d, options) {
+	setTranslation_success: function(response, options) {
         var id_segment = options.id_segment;
         var status = options.status;
-        var caller = options.caller || false;
-        var callback = options.callback;
         var propagate = options.propagate;
         var segment = $('#segment-' + id_segment);
 
-		if (d.errors.length) {
-            this.processErrors(d.errors, 'setTranslation');
-        } else if (d.data == 'OK') {
+		if (response.errors.length) {
+            this.processErrors(response.errors, 'setTranslation');
+        } else if (response.data == 'OK') {
 			SegmentActions.setStatus(id_segment, null, status);
-			this.setDownloadStatus(d.stats);
-			this.setProgress(d.stats);
+			this.setDownloadStatus(response.stats);
+			this.setProgress(response.stats);
             SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending');
 
 			this.checkWarnings(false);
-            $(segment).attr('data-version', d.version);
+            $(segment).attr('data-version', response.version);
             if( propagate ) {
                 this.tempReqArguments = null;
-                SegmentActions.propagateTranslation(options.id_segment, status);
+                SegmentActions.propagateTranslation(options.id_segment, response.propagation_report.propagated, status);
+
+
                 var notification = {
                     title: 'Segment propagated',
                     text: "The segment translation has been propagated to the other repetitions.",
                     type: 'info',
                     autoDismiss: true,
-                    timer: 15000,
+                    timer: 10000,
                     position: "bl",
                 };
                 APP.addNotification(notification);
