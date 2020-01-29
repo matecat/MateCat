@@ -1339,14 +1339,20 @@ var UI = {
             if( propagate ) {
                 this.tempReqArguments = null;
                 SegmentActions.propagateTranslation(options.id_segment, response.propagation_report.propagated, status);
-
+                var text = "The segment translation has been propagated to the other repetitions.";
+                if ( response.propagation_report.ice && response.propagation_report.ice.length > 0 ) {
+                    text = "The segment translation has been propagated to the other repetitions.</br> Repetitions in locked segments have been excluded from the propagation.";
+                } else if ( response.propagation_report.ice && response.propagation_report.not_ice.length > 0 ) {
+                    text = "The segment translation has been propagated to the other repetitions in locked segments. </br> Repetitions in non-locked segments have been excluded from the propagation."
+                }
 
                 var notification = {
                     title: 'Segment propagated',
-                    text: "The segment translation has been propagated to the other repetitions.",
+                    text: text,
                     type: 'info',
                     autoDismiss: true,
                     timer: 10000,
+                    allowHtml: true,
                     position: "bl",
                 };
                 APP.addNotification(notification);
