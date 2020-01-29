@@ -388,7 +388,17 @@ class Bootstrap {
             self::$CONFIG['ENV'] = getenv( 'ENV' );
         }
 
-        return self::$CONFIG[ self::$CONFIG['ENV'] ];
+        $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
+
+        // check if outsource is disabled by environment
+        $enable_outsource = getenv( 'ENABLE_OUTSOURCE' );
+
+        if ( $enable_outsource == "false" ) {
+                self::$CONFIG["ENABLE_OUTSOURCE"] = false;
+                Log::doJsonLog("DISABLED OUTSOURCE");
+        }
+
+        return $env;
     }
 
     /**
