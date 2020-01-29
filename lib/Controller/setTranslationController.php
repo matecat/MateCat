@@ -559,23 +559,52 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $propagationReport = [];
-        $iceCount          = 0;
-        $propagatedCount   = 0;
+        $propagationReport   = [];
+        $iceCount            = 0;
+        $propagatedCount     = 0;
+        $propagatedIceCount  = 0;
+        $notMatchingIceCount = 0;
 
         if ( count( $propagationTotal[ 'segments_for_propagation' ] ) > 0 ) {
-            foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
-                if ( $segment['match_type'] === 'ICE' and $segment['locked'] == 1 ) {
-                    $propagationReport[ 'ice' ][] = $segment['id_segment'];
-                    $iceCount++;
-                    unset( $propagationTotal[ 'segments_for_propagation' ][ $key ] );
-                } else {
-                    $propagationReport[ 'propagated' ][] = $segment['id_segment'];
-                    $propagatedCount++;
+
+
+            if ( $translationStruct->match_type !== 'ICE' ) { // remove ICE
+                foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
+                    if ( $segment[ 'match_type' ] === 'ICE' and $segment[ 'locked' ] == 1 ) {
+                        $propagationReport[ 'ice' ][] = $segment[ 'id_segment' ];
+                        $iceCount++;
+                        unset( $propagationTotal[ 'segments_for_propagation' ][ $key ] );
+                    } else {
+                        $propagationReport[ 'propagated' ][] = $segment[ 'id_segment' ];
+                        $propagatedCount++;
+                    }
+                }
+            } else { // keep ICE with the corresponding hash
+                foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
+                    if ( $segment[ 'match_type' ] === 'ICE' and $segment[ 'locked' ] === 1 and $segment[ 'segment_hash' ] === $translationStruct->segment_hash and $segment[ 'id_segment' ]
+                            !== null ) {
+                        $propagationReport[ 'propagated_ice' ][] = $segment[ 'id_segment' ];
+                        $propagatedIceCount++;
+                    } else {
+                        $propagationReport[ 'not_matching_ice' ][] = $segment[ 'id_segment' ];
+                        $notMatchingIceCount++;
+                        unset( $propagationTotal[ 'segments_for_propagation' ][ $key ] );
+                    }
                 }
             }
 
-            $propagationReport[ 'total' ] = $iceCount + $propagatedCount;
+//            foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
+//                if ( $segment['match_type'] === 'ICE' and $segment['locked'] == 1 ) {
+//                    $propagationReport[ 'ice' ][] = $segment['id_segment'];
+//                    $iceCount++;
+//                    unset( $propagationTotal[ 'segments_for_propagation' ][ $key ] );
+//                } else {
+//                    $propagationReport[ 'propagated' ][] = $segment['id_segment'];
+//                    $propagatedCount++;
+//                }
+//            }
+
+            $propagationReport[ 'total' ] = $iceCount + $propagatedCount + $propagatedIceCount + $notMatchingIceCount;
         }
 
         $this->result[ 'propagation_report' ] = $propagationReport;

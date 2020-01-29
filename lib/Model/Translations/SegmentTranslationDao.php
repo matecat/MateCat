@@ -731,7 +731,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
                     if($segmentTranslationStruct->match_type !== 'ICE'){ // remove ICE
                         foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
-                            if ( $segment['match_type'] !== 'ICE' and $segment['locked'] == 0 and $segment['id_segment'] !== null) {
+                            if ( $segment['match_type'] !== 'ICE' and $segment['locked'] == 0 and $segment['id_segment'] !== null) { // not ICE
+                                $propagation[ 'propagated_ids' ][] = $segment['id_segment'];
+                            }
+
+                            if ( $segment['match_type'] === 'ICE' and $segment['locked'] == 0 and $segment['id_segment'] !== null) { // unlocked ICE
                                 $propagation[ 'propagated_ids' ][] = $segment['id_segment'];
                             }
                         }
@@ -762,7 +766,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
                     $stmt->execute( $values );
 
-                    //update related versions
+                    // update related versions
                     $versionHandler->savePropagationVersions( $segmentTranslationStruct );
 
                 } catch ( PDOException $e ) {
