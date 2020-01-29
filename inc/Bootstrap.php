@@ -394,7 +394,7 @@ class Bootstrap {
         $enable_outsource = getenv( 'ENABLE_OUTSOURCE' );
 
         if ( $enable_outsource == "false" ) {
-                self::$CONFIG["ENABLE_OUTSOURCE"] = false;
+                $env["ENABLE_OUTSOURCE"] = false;
                 Log::doJsonLog("DISABLED OUTSOURCE");
         }
 
