@@ -8,6 +8,7 @@ class SegmentsFilter extends React.Component {
         this.moreFilters = [
             {value: 'ice', label: 'ICE'},
             {value: 'unlocked', label: 'Not ICE'},
+            {value: 'modified_ice', label: 'Modified ICE'},
             {value: 'repetitions', label: 'Repetitions'},
             {value: 'mt', label: 'MT'},
             {value: 'matches', label: '100% Matches'},
