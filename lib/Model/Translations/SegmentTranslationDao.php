@@ -741,7 +741,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                         }
                     } else { // keep ICE with the corresponding hash
                         foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
-                            if ( $segment['match_type'] === 'ICE' and $segment['locked'] === 1 and $segment['segment_hash'] === $segmentTranslationStruct->segment_hash and $segment['id_segment']
+                            if ( $segment['match_type'] === 'ICE' and $segment['locked'] == 1 and $segment['segment_hash'] === $segmentTranslationStruct->segment_hash and $segment['id_segment']
                                     !== null ) {
                                 $propagation[ 'propagated_ids' ][] = $segment['id_segment'];
                             }
@@ -750,30 +750,36 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
                     $place_holders_id = implode( ',', array_fill( 0, count( $propagation[ 'propagated_ids' ] ), '?' ) );
 
-                    $values = array_merge(
-                            $field_values,
-                            [ $segmentTranslationStruct[ 'id_job' ] ]
-                    );
 
-                    if(isset($propagation[ 'propagated_ids' ]) and false === empty($propagation[ 'propagated_ids' ])){
+
+                    if( false === empty($place_holders_id) ){
                         $values = array_merge(
-                                $values,
-                                $propagation[ 'propagated_ids' ]
+                                $field_values,
+                                [ $segmentTranslationStruct[ 'id_job' ] ]
                         );
-                    }
 
-                    $propagationSql = "
+                        if(isset($propagation[ 'propagated_ids' ]) and false === empty($propagation[ 'propagated_ids' ])){
+                            $values = array_merge(
+                                    $values,
+                                    $propagation[ 'propagated_ids' ]
+                            );
+                        }
+
+                        $propagationSql = "
                           UPDATE segment_translations SET $place_holders_fields
                           WHERE id_job = ? AND id_segment IN ( $place_holders_id )
                     ";
 
-                    $pdo  = $db->getConnection();
-                    $stmt = $pdo->prepare( $propagationSql );
+                        $pdo  = $db->getConnection();
+                        $stmt = $pdo->prepare( $propagationSql );
 
-                    $stmt->execute( $values );
+                        $stmt->execute( $values );
 
-                    // update related versions
-                    $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagation[ 'propagated_ids' ] );
+                        // update related versions
+                        $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagation[ 'propagated_ids' ] );
+                    }
+
+
 
                 } catch ( PDOException $e ) {
                     throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
