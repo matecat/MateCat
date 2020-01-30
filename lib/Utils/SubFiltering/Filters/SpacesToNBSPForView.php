@@ -20,9 +20,15 @@ class SpacesToNBSPForView extends AbstractHandler {
         $segment = preg_replace( '/[ ]{2}/', "&nbsp; ", $segment );
         $segment = preg_replace( '/[ ]$/', "&nbsp;", $segment );
 
-        $segment = str_replace(
-                [ '&#10;', '&#13;', ' ' /* NBSP in ascii value */ ],
+        $segment = str_ireplace(
                 [
+                        '&#10;', '&#13;', ' ' /* NBSP in ascii value */,
+                        '&#0A;', '&#0C;', '&#nbsp;'
+                ],
+                [
+                        CatUtils::lfPlaceholder,
+                        CatUtils::crPlaceholder,
+                        CatUtils::nbspPlaceholder,
                         CatUtils::lfPlaceholder,
                         CatUtils::crPlaceholder,
                         CatUtils::nbspPlaceholder

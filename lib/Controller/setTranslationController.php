@@ -189,7 +189,7 @@ class setTranslationController extends ajaxController {
         }
 
 
-        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ) );
+        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
             Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
@@ -306,7 +306,7 @@ class setTranslationController extends ajaxController {
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
         $pipeline->addLast( new SprintfToPH() );
 
-        $check = new QA( $this->__postInput[ 'segment' ], $pipeline->transform( $this->__postInput[ 'translation' ] ) );
+        $check = new QA( $pipeline->transform( $this->__postInput[ 'segment' ] ), $pipeline->transform( $this->__postInput[ 'translation' ] ) );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
