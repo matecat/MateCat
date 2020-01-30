@@ -45,13 +45,9 @@ let TranslationMatches = {
 
             var match = data.matches[0].match;
 
-            var segment_id = segmentObj.sid;
-
             if (editareaLength === 0) {
 
                 SegmentActions.setChoosenSuggestion(segmentObj.sid, 1);
-
-                // translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
 
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
                  * the source with the text with tags, the segment is tagged
@@ -81,7 +77,7 @@ let TranslationMatches = {
             $('.draft', segment).removeAttr('disabled');
         }
 
-        SegmentActions.addClassToSegment(segment_id, 'loaded');
+        SegmentActions.addClassToSegment(sid, 'loaded');
     },
 
     getContribution: function(segmentSid, next, force) {

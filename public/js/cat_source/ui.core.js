@@ -1336,32 +1336,42 @@ var UI = {
 
 			this.checkWarnings(false);
             $(segment).attr('data-version', response.version);
-            if( propagate ) {
-                this.tempReqArguments = null;
-                SegmentActions.propagateTranslation(options.id_segment, response.propagation_report.propagated, status);
-                var text = "The segment translation has been propagated to the other repetitions.";
-                if ( response.propagation_report.not_propagated_ice && response.propagation_report.not_propagated_ice.length > 0 ) {
-                    text = "The segment translation <bold>has been propagated to the other repetitions</bold>.</br> Repetitions in <bold>locked segments have been excluded</bold> from the propagation.";
-                } else if ( response.propagation_report.propagated_ice && response.propagation_report.propagated_ice.length > 0 ) {
-                    text = "The segment translation has been propagated to the other repetitions in locked segments. </br> Repetitions in <bold>non-locked segments have been excluded</bold> from the" +
-                        " propagation."
-                }
 
-                var notification = {
-                    title: 'Segment propagated',
-                    text: text,
-                    type: 'info',
-                    autoDismiss: true,
-                    timer: 10000,
-                    allowHtml: true,
-                    position: "bl",
-                };
-                APP.addNotification(notification);
-            } else {
-                SegmentActions.setSegmentPropagation(options.id_segment, null, false);
-            }
+            this.tempReqArguments = null;
+
+            UI.checkSegmentsPropagation(propagate, id_segment, response.propagation, status);
         }
         this.resetRecoverUnsavedSegmentsTimer();
+    },
+    checkSegmentsPropagation: function(propagate, id_segment, propagationData, status) {
+        if( propagate ) {
+            if ( propagationData.propagated_ids && propagationData.propagated_ids.length > 0 ) {
+                SegmentActions.propagateTranslation( id_segment, propagationData.propagated_ids, status );
+            }
+
+            var text = "The segment translation has been propagated to the other repetitions.";
+            if ( propagationData.segments_for_propagation.not_propagated &&
+                propagationData.segments_for_propagation.not_propagated.ice.id && propagationData.segments_for_propagation.not_propagated.ice.id.length > 0 ) {
+                text = "The segment translation <bold>has been propagated to the other repetitions</bold>.</br> Repetitions in <bold>locked segments have been excluded</bold> from the propagation.";
+            } else if ( propagationData.segments_for_propagation.not_propagated &&
+                propagationData.segments_for_propagation.not_propagated.not_ice.id && propagationData.segments_for_propagation.not_propagated.not_ice.id.length > 0 ) {
+                text = "The segment translation has been propagated to the other repetitions in locked segments. </br> Repetitions in <bold>non-locked segments have been excluded</bold> from the" +
+                    " propagation."
+            }
+
+            var notification = {
+                title: 'Segment propagated',
+                text: text,
+                type: 'info',
+                autoDismiss: true,
+                timer: 10000,
+                allowHtml: true,
+                position: "bl",
+            };
+            APP.addNotification(notification);
+        } else {
+            SegmentActions.setSegmentPropagation(id_segment, null, false);
+        }
     },
     recoverUnsavedSetTranslations: function() {
         $.each(UI.unsavedSegmentsToRecover, function (index) {
