@@ -752,14 +752,20 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
                     $values = array_merge(
                             $field_values,
-                            [ $segmentTranslationStruct[ 'id_job' ] ],
-                            $propagation[ 'propagated_ids' ]
+                            [ $segmentTranslationStruct[ 'id_job' ] ]
                     );
 
+                    if(isset($propagation[ 'propagated_ids' ]) and false === empty($propagation[ 'propagated_ids' ])){
+                        $values = array_merge(
+                                $values,
+                                $propagation[ 'propagated_ids' ]
+                        );
+                    }
+
                     $propagationSql = "
-                  UPDATE segment_translations SET $place_holders_fields
-                  WHERE id_job = ? AND id_segment IN ( $place_holders_id )
-            ";
+                          UPDATE segment_translations SET $place_holders_fields
+                          WHERE id_job = ? AND id_segment IN ( $place_holders_id )
+                    ";
 
                     $pdo  = $db->getConnection();
                     $stmt = $pdo->prepare( $propagationSql );
@@ -767,7 +773,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     $stmt->execute( $values );
 
                     // update related versions
-                    $versionHandler->savePropagationVersions( $segmentTranslationStruct );
+                    $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagation[ 'propagated_ids' ] );
 
                 } catch ( PDOException $e ) {
                     throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
