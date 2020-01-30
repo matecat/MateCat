@@ -576,6 +576,7 @@ section.opened .warnings {
 .sid .txt {
     padding: 0px 3px;
     margin: 2px 0px 0 0px;
+    background: $grey5;
 }
 
 section.readonly .txt input {
@@ -2161,6 +2162,7 @@ section.editor {
 
 section.editor .sid {
     color: black;
+    left: -5%;
 }
 
 .source {
