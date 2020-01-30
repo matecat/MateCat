@@ -101,7 +101,7 @@ class setSegmentSplitController extends ajaxController {
         $translationStruct->id_job     = $this->id_job;
 
         $Filter = Filter::getInstance( $this->featureSet );
-        list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->segment ) );
+        list( $this->segment, $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->segment, '', $Filter );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
         $pieces                                  = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths ) - 1 : 1 );

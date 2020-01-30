@@ -102,7 +102,7 @@ class setRevisionController extends ajaxController {
 
         $Filter = \SubFiltering\Filter::getInstance( $this->featureSet );
 
-        list( $original_translation, $none ) = CatUtils::parseSegmentSplit( $Filter->fromLayer2ToLayer0( $this->_postInput[ 'original' ] ), ' ' );
+        list( $original_translation, $none ) = CatUtils::parseSegmentSplit( $this->_postInput[ 'original' ], '', $Filter );
 
         //add check for job status archived.
         if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {

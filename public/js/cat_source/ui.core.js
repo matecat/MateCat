@@ -1042,7 +1042,7 @@ var UI = {
 			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info, d.details.tag_mismatch);
                 }else{
-                    SegmentActions.setSegmentWarnings(segment.sid,{}, {});
+                    SegmentActions.setSegmentWarnings(segment.absoluteId,{}, {});
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: UI.getSegmentById( segment.sid )    }) ;
 			}
