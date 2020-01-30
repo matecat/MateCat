@@ -249,38 +249,43 @@ UI = {
     },
     closeSegment: function(segment, byButton, operation) {
         if ( typeof segment !== 'undefined' ) {
-            segment.find('.editarea').attr('contenteditable', 'false');
-            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'opened editor split-action');
+            var segmentObj = SegmentStore.getSegmentByIdToJS(UI.getSegmentId(segment), UI.getSegmentFileId(segment));
 
-            $(window).trigger({
-                type: "segmentClosed",
-                segment: segment
-            });
+            if ( segmentObj ) {
+                segment.find('.editarea').attr('contenteditable', 'false');
+                SegmentActions.removeClassToSegment( UI.getSegmentId( segment ), 'opened editor split-action' );
+
+                $( window ).trigger( {
+                    type: "segmentClosed",
+                    segment: segment
+                } );
 
 
-            var saveBehaviour = true;
-            if (operation != 'noSave') {
-                if ((operation == 'translated') || (operation == 'save'))
-                    saveBehaviour = false;
+                var saveBehaviour = true;
+                if ( operation != 'noSave' ) {
+                    if ( (operation == 'translated') || (operation == 'save') )
+                        saveBehaviour = false;
+                }
+
+                if ( (segment.data( 'modified' )) && (saveBehaviour) && (!config.isReview) && UI.getStatus( segment ) !== 'approved' ) {
+                    this.saveSegment( segment );
+                }
+                this.deActivateSegment( byButton, segment );
+                this.removeGlossaryMarksFormSource( segment );
+
+                $( 'span.locked.mismatch', segment ).removeClass( 'mismatch' );
+
+                // close split segment
+                $( '.sid .actions .split' ).removeClass( 'cancel' );
+                source = $( segment ).find( '.source' );
+                $( source ).removeAttr( 'style' );
+
+                $( '.split-shortcut' ).html( 'CTRL + S' );
+                $( '.splitBar, .splitArea' ).remove();
+                $( '.sid .actions' ).hide();
+                // end split segment
             }
 
-            if ((segment.data('modified')) && (saveBehaviour) && (!config.isReview) && UI.getStatus(segment) !== 'approved') {
-                this.saveSegment(segment);
-            }
-            this.deActivateSegment(byButton, segment);
-            this.removeGlossaryMarksFormSource(segment);
-
-            $('span.locked.mismatch', segment).removeClass('mismatch');
-
-            // close split segment
-            $('.sid .actions .split').removeClass('cancel');
-            source = $(segment).find('.source');
-            $(source).removeAttr('style');
-
-            $('.split-shortcut').html('CTRL + S');
-            $('.splitBar, .splitArea').remove();
-            $('.sid .actions').hide();
-            // end split segment
 
         }
         return true;
@@ -1844,7 +1849,7 @@ UI = {
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info);
                     UI.markTagMismatch(d.details);
                 }else{
-                    SegmentActions.setSegmentWarnings(segment.id,{});
+                    SegmentActions.setSegmentWarnings(segment.absoluteId,{});
                     UI.removeHighlightErrorsTags(UI.getSegmentById(segment.id));
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
