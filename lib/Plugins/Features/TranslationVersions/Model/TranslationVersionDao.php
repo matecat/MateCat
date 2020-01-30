@@ -301,13 +301,6 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
     public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $id_segment, Chunks_ChunkStruct $job_data, $propagated_ids ) {
 
         $status_condition = '';
-
-//        $where_condition = " WHERE " .
-//                " id_job = :id_job AND " .
-//                " segment_hash = :segment_hash AND " .
-//                " id_segment != :id_segment AND " .
-//                " id_segment BETWEEN :first_segment AND :last_segment ";
-
         $propagated_ids_placeholder = [];
 
         for ( $i = 1; $i <= count( $propagated_ids ); $i++ ) {
@@ -333,7 +326,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
                 'status_condition' => $status_condition,
                 'where_condition'  => $where_condition,
                 'where_options'    => $where_options,
-                'propagation'      => $propagation
+                'propagation'      => $propagation,
         ] );
 
         $this->upCountVersionNumberOnPropagatedTranslations( [
@@ -477,7 +470,14 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
                 " $where_condition " .
                 " $status_condition ";
 
-        $update_options = $where_options;
+        $update_options = [];
+        $update_options['id_job'] = $where_options['id_job'];
+        $update_options['id_segment'] = $where_options['id_segment'];
+        $update_options['segment_hash'] = $where_options['segment_hash'];
+
+        for ($i=1; $i<=count($where_options['propagated_ids']);$i++) {
+            $update_options['propagated_id_'.$i] = $where_options['propagated_ids'][($i-1)];
+        }
 
         $conn   = Database::obtain()->getConnection();
         $update = $conn->prepare( $update_sql );
