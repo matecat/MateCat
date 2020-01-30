@@ -1042,7 +1042,7 @@ var UI = {
 			    if(d.details && d.details.id_segment){
                     SegmentActions.setSegmentWarnings(d.details.id_segment,d.details.issues_info, d.details.tag_mismatch);
                 }else{
-                    SegmentActions.setSegmentWarnings(segment.sid,{}, {});
+                    SegmentActions.setSegmentWarnings(segment.original_sid, {}, {});
                 }
                 $(document).trigger('getWarning:local:success', { resp : d, segment: UI.getSegmentById( segment.sid )    }) ;
 			}
@@ -1339,14 +1339,21 @@ var UI = {
             if( propagate ) {
                 this.tempReqArguments = null;
                 SegmentActions.propagateTranslation(options.id_segment, response.propagation_report.propagated, status);
-
+                var text = "The segment translation has been propagated to the other repetitions.";
+                if ( response.propagation_report.not_propagated_ice && response.propagation_report.not_propagated_ice.length > 0 ) {
+                    text = "The segment translation <bold>has been propagated to the other repetitions</bold>.</br> Repetitions in <bold>locked segments have been excluded</bold> from the propagation.";
+                } else if ( response.propagation_report.propagated_ice && response.propagation_report.propagated_ice.length > 0 ) {
+                    text = "The segment translation has been propagated to the other repetitions in locked segments. </br> Repetitions in <bold>non-locked segments have been excluded</bold> from the" +
+                        " propagation."
+                }
 
                 var notification = {
                     title: 'Segment propagated',
-                    text: "The segment translation has been propagated to the other repetitions.",
+                    text: text,
                     type: 'info',
                     autoDismiss: true,
                     timer: 10000,
+                    allowHtml: true,
                     position: "bl",
                 };
                 APP.addNotification(notification);

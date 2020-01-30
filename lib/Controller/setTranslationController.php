@@ -189,7 +189,7 @@ class setTranslationController extends ajaxController {
         }
 
 
-        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->filter->fromLayer2ToLayer0( $this->__postInput[ 'translation' ] ) );
+        list( $__translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( $this->__postInput[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
             Log::doJsonLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
@@ -306,7 +306,7 @@ class setTranslationController extends ajaxController {
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
         $pipeline->addLast( new SprintfToPH() );
 
-        $check = new QA( $this->__postInput[ 'segment' ], $pipeline->transform( $this->__postInput[ 'translation' ] ) );
+        $check = new QA( $pipeline->transform( $this->__postInput[ 'segment' ] ), $pipeline->transform( $this->__postInput[ 'translation' ] ) );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
         $check->setTargetSegLang( $this->chunk->target );
@@ -560,46 +560,6 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $propagationReport   = [];
-        $iceCount            = 0;
-        $propagatedCount     = 0;
-        $propagatedIceCount  = 0;
-        $notMatchingIceCount = 0;
-
-        if ( count( $propagationTotal[ 'segments_for_propagation' ] ) > 0 ) {
-
-            if ( $translationStruct->match_type !== 'ICE' ) { // remove ICE
-                foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
-                    if ( $segment[ 'match_type' ] === 'ICE' and $segment[ 'locked' ] == 1 ) {
-                        $propagationReport[ 'ice' ][] = $segment[ 'id_segment' ];
-                        $iceCount++;
-                        unset( $propagationTotal[ 'segments_for_propagation' ][ $key ] );
-                    } else {
-                        $propagationReport[ 'propagated' ][] = $segment[ 'id_segment' ];
-                        $propagatedCount++;
-                    }
-                }
-            } else { // keep ICE with the corresponding hash
-                foreach ( $propagationTotal[ 'segments_for_propagation' ] as $key => $segment ) {
-                    if ( $segment[ 'match_type' ] === 'ICE' and $segment[ 'locked' ] == 1 and $segment[ 'segment_hash' ] === $translationStruct->segment_hash and $segment[ 'id_segment' ]
-                            !== null ) {
-                        $propagationReport[ 'propagated_ice' ][] = $segment[ 'id_segment' ];
-                        $propagatedIceCount++;
-                    } else {
-                        $propagationReport[ 'not_matching_ice' ][] = $segment[ 'id_segment' ];
-                        $notMatchingIceCount++;
-                        unset( $propagationTotal[ 'segments_for_propagation' ][ $key ] );
-                    }
-                }
-            }
-
-            $propagationReport[ 'total' ] = $iceCount + $propagatedCount + $propagatedIceCount + $notMatchingIceCount;
-        }
-
-        $this->result[ 'propagation_report' ] = $propagationReport;
-        $propagationTotal[ 'propagated_ids' ] = $propagationReport[ 'propagated' ];
-        $propagationTotal[ 'totals' ]         = $propagationReport[ 'total' ];
-
         $this->featureSet->run( 'preSetTranslationCommitted', [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,
@@ -629,7 +589,7 @@ class setTranslationController extends ajaxController {
             $this->featureSet->run( 'setTranslationCommitted', [
                     'translation'      => $new_translation,
                     'old_translation'  => $old_translation,
-                    'propagated_ids'   => $propagationTotal[ 'propagated_ids' ],
+                    'propagated_ids'   => $propagationTotal['segments_for_propagation'][ 'propagated_ids' ],
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
@@ -644,7 +604,7 @@ class setTranslationController extends ajaxController {
             $this->result = $this->featureSet->filter( 'filterSetTranslationResult', $this->result, [
                     'translation'     => $new_translation,
                     'old_translation' => $old_translation,
-                    'propagated_ids'  => $propagationTotal[ 'propagated_ids' ],
+                    'propagated_ids'  => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ],
                     'chunk'           => $this->chunk,
                     'segment'         => $this->segment
             ] );
@@ -674,6 +634,7 @@ class setTranslationController extends ajaxController {
 
         }
 
+        $this->result[ 'propagation' ] = (new \API\V2\Json\Propagation($propagationTotal))->render();
         $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );

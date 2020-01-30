@@ -124,8 +124,9 @@ abstract class viewController extends controller {
             $this->setTemplateVars();
             $this->featureSet->run( 'appendDecorators', $this, $this->template );
             $this->setTemplateFinalVars();
-        } catch ( Exception $ignore ){}
-
+        } catch ( Exception $ignore ){
+            Log::doJsonLog( $ignore );
+        }
 
         ob_get_contents();
         ob_get_clean();

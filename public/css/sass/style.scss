@@ -576,6 +576,7 @@ section.opened .warnings {
 .sid .txt {
     padding: 0px 3px;
     margin: 2px 0px 0 0px;
+    background: $grey5;
 }
 
 section.readonly .txt input {
@@ -2006,23 +2007,20 @@ section.editor .loader_on {
     width: 100%;
     color: $grey1;
     font-size: 12px;
-    float: left;
-    text-align: left;
     background: $grey4 !important;
     margin-bottom: 0px;
 }
 
 .header .repetition {
-    float: left;
-    margin: 0px 0 0 0px;
+    margin: 0 auto;
     text-transform: uppercase;
     color: #FFF;
-    font-size: 11px;
-    background: #999;
-    padding: 0px 8px;
-    left: 47%;
-    position: absolute;
+    font-size: 12px;
+    background: $grey2;
+    padding: 4px 8px;
+    position: relative;
     z-index: 12;
+    max-width: 102px;
 }
 
 .header.header-closed {
@@ -2030,6 +2028,9 @@ section.editor .loader_on {
     position: absolute;
     span {
         z-index: 1;
+        padding: 2px 6px;
+        font-size: 11px;
+        top: -2px;
     }
 }
 
@@ -2161,6 +2162,7 @@ section.editor {
 
 section.editor .sid {
     color: black;
+    left: -5%;
 }
 
 .source {
@@ -4564,7 +4566,6 @@ section .segment-side-buttons {
 .editor .toggle {
     display: inline-block;
     margin-right: 0;
-    text-align: right;
     z-index: 0;
     position: relative;
     margin-top: -2px;

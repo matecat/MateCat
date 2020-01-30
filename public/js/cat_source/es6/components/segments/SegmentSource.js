@@ -220,8 +220,8 @@ class SegmentSource extends React.Component {
                          dangerouslySetInnerHTML={this.allowHTML(sourceHtml)}/>
                     <div className="splitBar">
                         <div className="buttons">
-                            <a className="cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
-                            <a className = {"done btn-ok pull-right" } onClick={()=>this.splitSegment()}> Confirm </a>
+                            <a className="ui button cancel-button cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
+                            <a className = {"ui primary button done btn-ok pull-right" } onClick={()=>this.splitSegment()}> Confirm </a>
                         </div>
                         <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
                         </div>
@@ -234,8 +234,8 @@ class SegmentSource extends React.Component {
                          dangerouslySetInnerHTML={this.allowHTML(TagUtils.transformPlaceholdersAndTags(this.props.segment.segment))}/>
                     <div className="splitBar">
                         <div className="buttons">
-                            <a className="cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
-                            <a className = {"done btn-ok pull-right disabled" } onClick={()=>this.splitSegment()}> Confirm </a>
+                            <a className="ui button cancel-button cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
+                            <a className = {"ui primary button done btn-ok pull-right disabled" } onClick={()=>this.splitSegment()}> Confirm </a>
                         </div>
                         <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
                         </div>

@@ -247,6 +247,7 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new FromViewNBSPToSpaces() );
+        $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new PlaceHoldXliffTags() );

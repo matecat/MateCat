@@ -71,10 +71,22 @@ class TranslationVersions extends BaseFeature {
         // If propagated segments exist, start cycle here
         // @TODO COMPLETE REFACTORY IS NEEDED HERE!!!!!
         // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
-        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ] ) and false === empty($params[ 'propagation' ][ 'segments_for_propagation' ] ) ) {
-            foreach ( $params[ 'propagation' ][ 'segments_for_propagation' ] as $segmentTranslationBeforeChange ) {
+        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) and false === empty($params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) ) {
 
-                $segmentTranslationBeforeChange = new Translations_SegmentTranslationStruct($segmentTranslationBeforeChange);
+            $a = $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ];
+
+            $ppp = [];
+
+            if ( isset($a['not_ice']) ) {
+                $ppp = array_merge($ppp, $a['not_ice']['object']);
+            }
+
+            if ( isset($a['ice']) ) {
+                $ppp = array_merge($ppp, $a['ice']['object']);
+            }
+
+
+            foreach ( $ppp as $segmentTranslationBeforeChange ) {
 
                 /** @var \Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
                 $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
