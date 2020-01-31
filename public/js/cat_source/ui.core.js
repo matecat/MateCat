@@ -1359,7 +1359,7 @@ var UI = {
                 title: 'Segment propagated',
                 text: text,
                 type: 'info',
-                autoDismiss: false,
+                autoDismiss: true,
                 timer: 10000,
                 allowHtml: true,
                 position: "bl",

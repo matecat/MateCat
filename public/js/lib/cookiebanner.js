@@ -222,7 +222,7 @@
                 // autorun: true,
                 cookie: 'cookiebanner-accepted',
                 closeText: '&#10006;',
-                cookiePath: '/',
+                cookiePath: '/; samesite=Strict',
                 debug: false,
                 expires: Infinity,
                 zindex: 255,
