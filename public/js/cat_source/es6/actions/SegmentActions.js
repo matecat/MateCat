@@ -220,29 +220,27 @@ const SegmentActions = {
         let segment = SegmentStore.getSegmentByIdToJS(segmentId);
         if ( segment.splitted > 2 ) return false;
 
-        if( (status == 'translated') || (config.isReview && (status == 'approved'))){
 
-            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            _.forEach(propagatedSegments, function(sid) {
-                if ( sid !== segmentId ) {
+        //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
+        _.forEach(propagatedSegments, function(sid) {
+            if ( sid !== segmentId ) {
 
-                    SegmentActions.replaceEditAreaTextContent( sid, null, segment.translation );
+                SegmentActions.replaceEditAreaTextContent( sid, null, segment.translation );
 
-                    //Tag Projection: disable it if enable
-                    SegmentActions.setSegmentAsTagged( sid );
+                //Tag Projection: disable it if enable
+                SegmentActions.setSegmentAsTagged( sid );
 
-                    // if status is not set to draft, the segment content is not displayed
-                    SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
-                    SegmentActions.modifiedTranslation( sid, null, false );
-                    SegmentActions.setSegmentPropagation( sid, null, true, segment.sid );
+                // if status is not set to draft, the segment content is not displayed
+                SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
+                SegmentActions.modifiedTranslation( sid, null, false );
+                SegmentActions.setSegmentPropagation( sid, null, true, segment.sid );
 
-                    LXQ.doLexiQA( this, sid, true, null );
-                } else {
-                    SegmentActions.setSegmentPropagation( sid, null, false );
-                }
-                SegmentActions.setAlternatives(sid, undefined);
-            });
-        }
+                LXQ.doLexiQA( this, sid, true, null );
+            }
+            SegmentActions.setAlternatives(sid, undefined);
+        });
+        SegmentActions.setSegmentPropagation( segmentId, null, false );
+        SegmentActions.setAlternatives(segmentId, undefined);
     },
 
     setSegmentPropagation: function (sid, fid, propagation, from) {

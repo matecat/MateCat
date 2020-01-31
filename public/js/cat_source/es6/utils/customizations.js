@@ -7,7 +7,7 @@ const Customizations = {
             this.custom = $.parseJSON(Cookies.get('user_customization'));
         } else {
             this.custom = {
-                "extended_tagmode": false
+                "extended_tagmode": true
             };
             this.saveCustomization();
         }
