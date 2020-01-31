@@ -58,6 +58,7 @@ class PropagationAnalyser {
             }
         } else { // keep only ICE with the corresponding hash
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslationArray ) {
+
                 $segmentTranslation = new Translations_SegmentTranslationStruct( $segmentTranslationArray );
 
                 if ( $this->detectMatchingIce( $parentSegmentTranslation, $segmentTranslation ) ) {
