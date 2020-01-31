@@ -138,14 +138,11 @@ var UI = {
         var segment = SegmentStore.getCurrentSegment();
         var segmentModified = segment.modified;
         var segmentStatus = segment.status.toLowerCase();
-        // var segmentAutopropagated = segment.autopropagated_from !== "0";
         var statusNotConfirmationNeeded = ['new', 'draft'];
         if( propagation ) {
             if(config.isReview) {
-                // return  segmentModified || !_.isUndefined(segment.alternatives) || ( segmentStatus === 'approved' && config.revisionNumber !== segment.revision_number) ;
                 return  ( segmentModified || !_.isUndefined(segment.alternatives) ) ;
             } else {
-                // return  ( segmentModified && !segmentAutopropagated && statusNotConfirmationNeeded.indexOf(segmentStatus) === -1) || ( segmentModified && segmentAutopropagated ) || !_.isUndefined(segment.alternatives)  ;
                 return statusNotConfirmationNeeded.indexOf(segmentStatus) === -1  &&
                     ( segmentModified || !_.isUndefined(segment.alternatives) );
             }
@@ -164,7 +161,6 @@ var UI = {
         var propagation   = options.propagation;
         var status        = options.status;
 
-        // $('.percentuage', segment.el).removeClass('visible');
         SegmentActions.hideSegmentHeader(options.segment_id);
 
         this.setTranslation({
@@ -1352,10 +1348,10 @@ var UI = {
             var text = "The segment translation has been propagated to the other repetitions.";
             if ( propagationData.segments_for_propagation.not_propagated &&
                 propagationData.segments_for_propagation.not_propagated.ice.id && propagationData.segments_for_propagation.not_propagated.ice.id.length > 0 ) {
-                text = "The segment translation <bold>has been propagated to the other repetitions</bold>.</br> Repetitions in <bold>locked segments have been excluded</bold> from the propagation.";
+                text = "The segment translation has been <b>propagated to the other repetitions</b>.</br> Repetitions in <b>locked segments have been excluded</b> from the propagation.";
             } else if ( propagationData.segments_for_propagation.not_propagated &&
                 propagationData.segments_for_propagation.not_propagated.not_ice.id && propagationData.segments_for_propagation.not_propagated.not_ice.id.length > 0 ) {
-                text = "The segment translation has been propagated to the other repetitions in locked segments. </br> Repetitions in <bold>non-locked segments have been excluded</bold> from the" +
+                text = "The segment translation has been <b>propagated to the other repetitions in locked segments</b>. </br> Repetitions in <b>non-locked segments have been excluded</b> from the" +
                     " propagation."
             }
 
@@ -1363,7 +1359,7 @@ var UI = {
                 title: 'Segment propagated',
                 text: text,
                 type: 'info',
-                autoDismiss: true,
+                autoDismiss: false,
                 timer: 10000,
                 allowHtml: true,
                 position: "bl",
