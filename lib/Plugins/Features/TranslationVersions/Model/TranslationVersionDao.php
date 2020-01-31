@@ -421,30 +421,35 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
             ];
         }
 
-        $insert_sql = "INSERT INTO segment_translation_versions " .
-                " ( " .
-                " id_job, id_segment, translation, version_number, propagated_from " .
-                " ) VALUES ";
+        $chunk_size = 200;
+        $chunks = array_chunk($insert_value_map, $chunk_size, true);
 
-        $insert_placeholders = [];
-        $insert_values       = [];
+        for ( $k = 0; $k < count( $chunks ); $k++ ) {
 
-        for ( $i = 1; $i <= count( $insert_value_map ); $i++ ) {
-            $insert_placeholders[] = "(:id_job_" . $i . ", :id_segment_" . $i . ", :translation_" . $i . ", :version_number_" . $i . ", :propagated_from_" . $i . ")";
+            $insert_sql = "INSERT INTO segment_translation_versions " .
+                    " ( " .
+                    " id_job, id_segment, translation, version_number, propagated_from " .
+                    " ) VALUES ";
 
-            $current_value                            = $insert_value_map[ ( $i - 1 ) ];
-            $insert_values[ 'id_job_' . $i ]          = $current_value[ 0 ];
-            $insert_values[ 'id_segment_' . $i ]      = $current_value[ 1 ];
-            $insert_values[ 'translation_' . $i ]     = $current_value[ 2 ];
-            $insert_values[ 'version_number_' . $i ]  = $current_value[ 3 ];
-            $insert_values[ 'propagated_from_' . $i ] = $propagation[ 'autopropagated_from' ];
+            $insert_placeholders = [];
+            $insert_values       = [];
+
+            foreach ($chunks[$k] as $key => $chunk){
+                $insert_placeholders[] = "(:id_job_" . $key . ", :id_segment_" . $key . ", :translation_" . $key . ", :version_number_" . $key . ", :propagated_from_" . $key . ")";
+
+                $current_value                            = $insert_value_map[ ( $key ) ];
+                $insert_values[ 'id_job_' . $key ]          = $current_value[ 0 ];
+                $insert_values[ 'id_segment_' . $key ]      = $current_value[ 1 ];
+                $insert_values[ 'translation_' . $key ]     = $current_value[ 2 ];
+                $insert_values[ 'version_number_' . $key ]  = $current_value[ 3 ];
+                $insert_values[ 'propagated_from_' . $key ] = $propagation[ 'autopropagated_from' ];
+            }
+
+            $insert_sql .= implode( ',', $insert_placeholders );
+
+            $insert = $conn->prepare( $insert_sql );
+            $insert->execute( $insert_values );
         }
-
-        $insert_sql .= implode( ',', $insert_placeholders );
-
-        $insert = $conn->prepare( $insert_sql );
-        $insert->execute( $insert_values );
-
     }
 
     private function upCountVersionNumberOnPropagatedTranslations( $params ) {
