@@ -28,47 +28,35 @@ class PropagationAnalyser {
 
     /**
      * @param Translations_SegmentTranslationStruct $parentSegmentTranslation
-     * @param array                                 $arrayOfSegmentTranslationToPropagate
+     * @param Translations_SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
-     * @return array
+     * @return \Propagation_PropagationTotalStruct
      */
     public function analyse( Translations_SegmentTranslationStruct $parentSegmentTranslation, $arrayOfSegmentTranslationToPropagate ) {
 
-        $propagation                                  = [];
-        $propagation[ 'propagated' ][ 'ice' ]         = [];
-        $propagation[ 'propagated' ][ 'not_ice' ]     = [];
-        $propagation[ 'not_propagated' ][ 'ice' ]     = [];
-        $propagation[ 'not_propagated' ][ 'not_ice' ] = [];
+        $propagation = new \Propagation_PropagationTotalStruct();
 
         if ( $parentSegmentTranslation->match_type !== 'ICE' ) { // remove ICE
-            foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslationArray ) {
-
-                $segmentTranslation = new Translations_SegmentTranslationStruct( $segmentTranslationArray );
+            foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
 
                 if ( $this->detectIce( $segmentTranslation ) ) {
-                    $propagation[ 'not_propagated' ][ 'ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
-                    $propagation[ 'not_propagated' ][ 'ice' ][ 'object' ][] = $segmentTranslation;
+                    $propagation->addNotPropagatedIce($segmentTranslation);
                     $this->notPropagatedIceCount++;
                 } else {
-                    $propagation[ 'propagated' ][ 'not_ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
-                    $propagation[ 'propagated' ][ 'not_ice' ][ 'object' ][] = $segmentTranslation;
-                    $propagation[ 'propagated_ids' ][]                      = $segmentTranslation->id_segment;
+                    $propagation->addPropagatedNotIce($segmentTranslation);
+                    $propagation->addPropagatedId($segmentTranslation->id_segment);
                     $this->propagatedCount++;
                 }
             }
         } else { // keep only ICE with the corresponding hash
-            foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslationArray ) {
-
-                $segmentTranslation = new Translations_SegmentTranslationStruct( $segmentTranslationArray );
+            foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
 
                 if ( $this->detectMatchingIce( $parentSegmentTranslation, $segmentTranslation ) ) {
-                    $propagation[ 'propagated' ][ 'ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
-                    $propagation[ 'propagated' ][ 'ice' ][ 'object' ][] = $segmentTranslation;
-                    $propagation[ 'propagated_ids' ][]                  = $segmentTranslation->id_segment;
+                    $propagation->addPropagatedIce($segmentTranslation);
+                    $propagation->addPropagatedId($segmentTranslation->id_segment);
                     $this->propagatedIceCount++;
                 } else {
-                    $propagation[ 'not_propagated' ][ 'not_ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
-                    $propagation[ 'not_propagated' ][ 'not_ice' ][ 'object' ][] = $segmentTranslation;
+                    $propagation->addNotPropagatedNotIce($segmentTranslation);
                     $this->notPropagatedCount++;
                 }
             }

@@ -634,7 +634,7 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $this->result[ 'propagation' ] = (new \API\V2\Json\Propagation($propagationTotal))->render();
+        $this->result[ 'propagation' ] = $propagationTotal;
         $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );
