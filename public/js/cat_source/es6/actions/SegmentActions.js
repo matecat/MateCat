@@ -1039,6 +1039,14 @@ const SegmentActions = {
     },
 
     setSegmentLocked( segment, fid, unlocked) {
+
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_UNLOCKED_SEGMENT,
+            fid: fid,
+            sid: segment.sid,
+            unlocked: unlocked
+        }, );
+
         if (!unlocked) {
             //TODO: move this to SegmentActions
             CommonUtils.removeFromStorage('unlocked-' + segment.sid);
@@ -1050,12 +1058,6 @@ const SegmentActions = {
             SegmentActions.openSegment(segment.sid);
 
         }
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.SET_UNLOCKED_SEGMENT,
-            fid: fid,
-            sid: segment.sid,
-            unlocked: unlocked
-        }, );
     },
 
     setBulkSelectionInterval(from, to, fid) {

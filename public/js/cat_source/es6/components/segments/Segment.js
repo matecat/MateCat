@@ -375,7 +375,7 @@ class Segment extends React.Component {
     }
 
     openRevisionPanel(data) {
-        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) && !(this.props.segment.ice_locked == 1 &&  !this.props.segment.unlocked) ) {
+        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) && ( this.props.segment.ice_locked == 0 || ( this.props.segment.ice_locked == 1 && this.props.segment.unlocked ) ) ) {
             this.setState( {
                 showRevisionPanel: true,
                 showTranslationIssues: false,
@@ -557,7 +557,7 @@ class Segment extends React.Component {
         }
 
         let translationIssues = this.getTranslationIssues();
-
+        let locked = !this.props.segment.unlocked && (this.props.segment.ice_locked === '1' || this.secondPassLocked);
         return (
             <section
                 ref={(section)=>this.section=section}
@@ -639,7 +639,7 @@ class Segment extends React.Component {
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
-                        locked={!this.props.segment.unlocked && (this.props.segment.ice_locked === '1' || this.secondPassLocked) }
+                        locked={ locked }
                         removeSelection={this.removeSelection.bind(this)}
                         openSegment={this.openSegment}
                         isReview={this.props.isReview}
@@ -655,7 +655,7 @@ class Segment extends React.Component {
                         <div className="edit-distance">Edit Distance: {this.props.segment.edit_distance}</div>
                     ) : (null)}
 
-                    {config.isReview && this.props.reviewType === this.reviewExtendedFooter ? (
+                    {config.isReview && this.props.reviewType === this.reviewExtendedFooter  ? (
                         <IssuesContainer
                             segment={this.props.segment}
                             sid={this.props.segment.sid}
@@ -685,7 +685,7 @@ class Segment extends React.Component {
                     {config.comments_enabled && this.props.segment.openComments && this.props.segment.opened ? (
                         <SegmentCommentsContainer {...this.props} />
                     ) : (null)}
-                    {this.props.isReviewExtended && this.state.showRevisionPanel && this.props.segment.opened  ? (
+                    {this.props.isReviewExtended && this.state.showRevisionPanel && this.props.segment.opened && !locked  ? (
                         <div className="review-balloon-container">
                             {!this.props.segment.versions ? (
                                 (null)

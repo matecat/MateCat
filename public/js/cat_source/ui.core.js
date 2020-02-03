@@ -450,7 +450,7 @@ var UI = {
 			var articleToAdd = !$( '#file' ).length;
 			if (articleToAdd) {
 				newFile += '<article id="file" class="loading mbc-commenting-closed">' +
-                        '   <div class="article-segments-container article-segments-container"></div>' +
+                        '   <div class="article-segments-container"></div>' +
                         '</article>';
 			}
 

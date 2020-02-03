@@ -2219,7 +2219,7 @@ section.readonly {
     background: transparent;
 }
 
-section.ice-locked .text {
+section.ice-locked:not(.segment-selected) .text {
     cursor: no-drop !important;
     background-color: #f2f4f7 !important;
 }
@@ -2271,8 +2271,8 @@ body.archived section {
     background: transparent;
 }
 
-section.readonly .text,
-body.archived section .text {
+section.readonly,
+body.archived section {
     background: #f2f4f7;
     color: #a4a6a9;
     cursor: not-allowed;
