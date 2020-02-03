@@ -23,7 +23,7 @@ class OutsourceContainer extends React.Component {
         var timezoneToShow = Cookies.get( "matecat_timezone" );
         if ( !timezoneToShow) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-            Cookies.set( "matecat_timezone" , timezoneToShow);
+            Cookies.set( "matecat_timezone" , timezoneToShow, {secure: true});
         }
     }
 
