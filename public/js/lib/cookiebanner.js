@@ -77,7 +77,7 @@
                     break;
                 }
             }
-            doc.cookie = encodeURIComponent(key) + '=' + encodeURIComponent(val) + expires + (domain ? '; domain=' + domain : '') + (path ? '; path=' + path : '') + (secure ? '; secure' : '');
+            doc.cookie = encodeURIComponent(key) + '=' + encodeURIComponent(val) + expires + (domain ? '; domain=' + domain : '') + (path ? '; path=' + path : '') + ('; secure');
             return true;
         },
         has: function (key) {
@@ -222,7 +222,7 @@
                 // autorun: true,
                 cookie: 'cookiebanner-accepted',
                 closeText: '&#10006;',
-                cookiePath: '/',
+                cookiePath: '/; samesite=Strict',
                 debug: false,
                 expires: Infinity,
                 zindex: 255,

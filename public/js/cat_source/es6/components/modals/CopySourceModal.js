@@ -24,13 +24,13 @@ class CopySourceModal extends React.Component {
             Cookies.set('source_copied_to_target-' + config.id_job +"-" + config.password,
                 '0',
                 //expiration: 1 day
-                { expires: 30 });
+                { expires: 30, secure: true });
         }
         else {
             Cookies.set('source_copied_to_target-' + config.id_job +"-" + config.password,
                 null,
                 //set expiration date before the current date to delete the cookie
-                {expires: new Date(1)});
+                {expires: new Date(1), secure: true});
         }
     }
 

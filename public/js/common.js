@@ -686,7 +686,7 @@ APP = {
                         allowHtml: true,
                         closeCallback: function () {
                             var expireDate = new Date(elem.expire);
-                            Cookies.set('msg-' + elem.token, '', {expires: expireDate});
+                            Cookies.set('msg-' + elem.token, '', {expires: expireDate, secure: true });
                         }
                     };
                     APP.addNotification(notification);
@@ -784,7 +784,7 @@ APP = {
                     }
 
                     window.clearInterval( downloadTimer );
-                    Cookies.set( downloadToken, null, { path: '/', expires: -1 });
+                    Cookies.set( downloadToken, null, { path: '/', expires: -1, secure: true  });
                     iFrameDownload.remove();
                 }
 
