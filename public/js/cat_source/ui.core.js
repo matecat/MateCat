@@ -973,7 +973,7 @@ var UI = {
                     allowHtml: true,
                     closeCallback: function () {
                         var expireDate = new Date(elem.expire);
-                        Cookies.set('msg-' + elem.token, '', {expires: expireDate});
+                        Cookies.set('msg-' + elem.token, '', {expires: expireDate, secure: true });
                     }
                 };
                 APP.addNotification(notification);
@@ -1406,11 +1406,11 @@ var UI = {
                     this.tagLockEnabled = true;
                 }
             } else {
-                Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled,  { expires: 30 });
+                Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled,  { expires: 30, secure: true  });
             }
 
         } else {
-            Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled , { expires: 30 });
+            Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled , { expires: 30, secure: true  });
         }
 
     },
