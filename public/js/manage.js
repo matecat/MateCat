@@ -169,9 +169,6 @@ UI = {
     openJobSettings: function (job, prName) {
         var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
         window.open(url, '_blank');
-        setTimeout(function () {
-            Cookies.set('tmpanel-open', 0, { path: '/' });
-        }, 2000);
     },
     /**
      * Open the tm panel for the job
@@ -179,9 +176,6 @@ UI = {
     openJobTMPanel: function (job, prName) {
         var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
         window.open(url, '_blank');
-        setTimeout(function () {
-            Cookies.set('tmpanel-open', 0, { path: '/' });
-        }, 2000);
     },
 
 

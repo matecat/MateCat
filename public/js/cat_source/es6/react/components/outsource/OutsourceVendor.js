@@ -115,7 +115,7 @@ class OutsourceVendor extends React.Component {
         if (!_.isUndefined(currency) && !_.isNull(currency) && currency !== "null") {
             return currency;
         } else {
-            Cookies.set( "matecat_currency", 'EUR');
+            Cookies.set( "matecat_currency", 'EUR', { secure: true });
             return 'EUR';
         }
     }
@@ -140,7 +140,7 @@ class OutsourceVendor extends React.Component {
     }
 
     changeTimezone(value) {
-        Cookies.set( "matecat_timezone" , value);
+        Cookies.set( "matecat_timezone" , value, { secure: true });
         this.setState({
             timezone: value
         });
@@ -156,14 +156,14 @@ class OutsourceVendor extends React.Component {
                     self.setState({
                         changeRates: rates
                     });
-                    Cookies.set( "matecat_changeRates",  response.data  , { expires: 1 });
+                    Cookies.set( "matecat_changeRates",  response.data  , { expires: 1, secure: true });
                 }
             });
         }
     }
 
     onCurrencyChange(value) {
-        Cookies.set("matecat_currency", value);
+        Cookies.set("matecat_currency", value, { secure: true });
         let quote = this.state.chunkQuote.set('currency', value);
         this.setState({
             chunkQuote: quote
