@@ -225,16 +225,10 @@ const SegmentActions = {
             if ( sid !== segmentId && SegmentStore.getSegmentByIdToJS(sid)) {
 
                 SegmentActions.replaceEditAreaTextContent( sid, null, segment.translation );
-
                 //Tag Projection: disable it if enable
                 SegmentActions.setSegmentAsTagged( sid );
-
-                // if status is not set to draft, the segment content is not displayed
                 SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
-                SegmentActions.modifiedTranslation( sid, null, false );
                 SegmentActions.setSegmentPropagation( sid, null, true, segment.sid );
-
-                LXQ.doLexiQA( this, sid, true, null );
             }
             SegmentActions.setAlternatives(sid, undefined);
         }
