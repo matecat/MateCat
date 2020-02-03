@@ -5,26 +5,27 @@ namespace API\V2\Json;
 class Propagation {
 
     /**
-     * @var array
+     * @var \Propagation_PropagationTotalStruct
      */
-    private $data;
+    private $propagation_PropagationTotalStruct;
 
     /**
      * Propagation constructor.
      *
-     * @param array $data
+     * @param \Propagation_PropagationTotalStruct $propagation_PropagationTotalStruct
      */
-    public function __construct( $data ) {
-        $this->data = $data;
+    public function __construct( \Propagation_PropagationTotalStruct $propagation_PropagationTotalStruct ) {
+        $this->propagation_PropagationTotalStruct = $propagation_PropagationTotalStruct;
     }
 
     /**
      * @return array
      */
     public function render() {
-
-        unset( $this->data[ 'segments_for_propagation' ][ 'propagated_ids' ] );
-
-        return $this->data;
+        return [
+             'totals' => $this->propagation_PropagationTotalStruct->getTotals(),
+             'propagated_ids' => $this->propagation_PropagationTotalStruct->getPropagatedIds(),
+             'segments_for_propagation' => $this->propagation_PropagationTotalStruct->getSegmentsForPropagation(),
+        ];
     }
 }

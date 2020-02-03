@@ -1,5 +1,6 @@
 <?php
 
+use Autopropagation\PropagationAnalyser;
 use Features\TranslationVersions\VersionHandlerInterface;
 use Search\ReplaceEventStruct;
 
@@ -639,16 +640,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $execute_update = true
     ) {
 
-        $propagationTotal = [
-                'totals'                   => [
-                        'total'    => null,
-                        'countSeg' => null,
-                        'status'   => null
-                ],
-                'propagated_ids'           => [],
-                'segments_for_propagation' => []
-        ];
-
         $db = Database::obtain();
 
         if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
@@ -688,18 +679,62 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     'id_segment'        => $_idSegment,
             ] );
 
-            $totals = $stmt->fetchAll();
-            $lastRow = end($totals);
+            $recordNum          = 0;
+            $_recordIteratorIdx = 1;
+            $lastRow            = null;
+            $totals             = $stmt->fetchAll( PDO::FETCH_FUNC, function () use ( $stmt, &$recordNum, &$_recordIteratorIdx, &$lastRow ) {
 
-            $propagationTotal[ 'totals' ]['total'] = $lastRow['total'];
-            $propagationTotal[ 'totals' ]['countSeg'] = $lastRow['countSeg'];
-            $propagationTotal[ 'totals' ]['status'] = $lastRow['status'];
+                $args = func_get_args();
 
-            unset( $totals[ count($totals) - 1 ] );
+                if ( empty( $recordNum ) ) {
+                    $recordNum = $stmt->rowCount();
+                }
 
-            $propagationTotal[ 'segments_for_propagation' ] = (new \Autopropagation\PropagationAnalyser())->analyse($segmentTranslationStruct, $totals);
-            $propagationTotal[ 'propagated_ids' ] = $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ];
+                if ( $recordNum == $_recordIteratorIdx ) {
+                    $lastRow = $args;
+                } else {
+                    $_recordIteratorIdx++;
 
+                    $raw_values = array_slice( $args, 2 );
+
+                    $array_values = [
+                            'id_segment'            => $raw_values[ 0 ],
+                            'id_job'                => $raw_values[ 1 ],
+                            'segment_hash'          => $raw_values[ 2 ],
+                            'autopropagated_from'   => $raw_values[ 3 ],
+                            'status'                => $raw_values[ 4 ],
+                            'translation'           => $raw_values[ 5 ],
+                            'translation_date'      => $raw_values[ 6 ],
+                            'time_to_edit'          => $raw_values[ 7 ],
+                            'match_type'            => $raw_values[ 8 ],
+                            'context_hash'          => $raw_values[ 9 ],
+                            'eq_word_count'         => $raw_values[ 10 ],
+                            'standard_word_count'   => $raw_values[ 11 ],
+                            'suggestions_array'     => $raw_values[ 12 ],
+                            'suggestion'            => $raw_values[ 13 ],
+                            'suggestion_match'      => $raw_values[ 14 ],
+                            'suggestion_source'     => $raw_values[ 15 ],
+                            'suggestion_position'   => $raw_values[ 16 ],
+                            'mt_qe'                 => $raw_values[ 17 ],
+                            'tm_analysis_status'    => $raw_values[ 18 ],
+                            'locked'                => $raw_values[ 19 ],
+                            'warning'               => $raw_values[ 20 ],
+                            'serialized_error_list' => $raw_values[ 21 ],
+                            'version_number'        => $raw_values[ 22 ],
+                    ];
+
+                    return new Translations_SegmentTranslationStruct( $array_values );
+                }
+            } );
+
+            array_pop( $totals );
+
+            $propagationTotal = ( new PropagationAnalyser() )->analyse( $segmentTranslationStruct, $totals );
+            $propagationTotal->setTotals( [
+                    'total'    => $lastRow[ 0 ],
+                    'countSeg' => $lastRow[ 1 ],
+                    'status'   => $lastRow[ 2 ],
+            ] );
 
         } catch ( PDOException $e ) {
             throw new Exception( "Error in counting total words for propagation: " . $e->getCode() . ": " . $e->getMessage()
@@ -707,9 +742,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     -$e->getCode() );
         }
 
-        if ( !empty( $propagationTotal[ 'totals' ] ) ) {
+        if ( !empty( $propagationTotal->getTotals() ) ) {
 
-            if ( true === $execute_update and !empty( $propagationTotal[ 'segments_for_propagation' ] ) ) {
+            if ( true === $execute_update and !empty( $propagationTotal->getSegmentsForPropagation() ) ) {
 
                 try {
 
@@ -724,18 +759,18 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     }
 
                     $place_holders_fields = implode( ",", $place_holders_fields );
-                    $place_holders_id = implode( ',', array_fill( 0, count( $propagationTotal['segments_for_propagation'][ 'propagated_ids' ] ), '?' ) );
+                    $place_holders_id     = implode( ',', array_fill( 0, count( $propagationTotal->getPropagatedIds() ), '?' ) );
 
-                    if( false === empty($place_holders_id) ) {
+                    if ( false === empty( $place_holders_id ) ) {
                         $values = array_merge(
                                 $field_values,
                                 [ $segmentTranslationStruct[ 'id_job' ] ]
                         );
 
-                        if ( isset( $propagationTotal['segments_for_propagation'][ 'propagated_ids' ] ) and false === empty( $propagationTotal['segments_for_propagation'][ 'propagated_ids' ] ) ) {
+                        if ( false === empty( $propagationTotal->getPropagatedIds() ) ) {
                             $values = array_merge(
                                     $values,
-                                    $propagationTotal['segments_for_propagation'][ 'propagated_ids' ]
+                                    $propagationTotal->getPropagatedIds()
                             );
                         }
 
@@ -750,7 +785,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                         $stmt->execute( $values );
 
                         // update related versions
-                        $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagationTotal['segments_for_propagation'][ 'propagated_ids' ] );
+                        $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagationTotal->getPropagatedIds() );
                     }
                 } catch ( PDOException $e ) {
                     throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
@@ -759,14 +794,14 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                             . "\n"
                             . var_export( $segmentTranslationStruct, true )
                             . "\n"
-                            . var_export( $propagationTotal['segments_for_propagation'][ 'propagated_ids' ], true )
+                            . var_export( $propagationTotal->getPropagatedIds(), true )
                             . "\n",
                             -$e->getCode() );
                 }
             }
         }
 
-        return $propagationTotal;
+        return ( new \API\V2\Json\Propagation( $propagationTotal ) )->render();
 
     }
 
