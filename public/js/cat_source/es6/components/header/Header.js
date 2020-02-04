@@ -117,8 +117,16 @@ class Header extends React.Component {
 						</div>
 
 			}
-			return <div className="ui user label"
-						onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
+			return <div className={"ui dropdown"} ref={(dropdownProfile) => this.dropdownProfile = dropdownProfile} id={"profile-menu"}>
+				<div className="ui user circular image ui-user-top-image" title="Personal settings">{config.userShortName}</div>
+				<div className="menu">
+					<div className="item" data-value="Manage" id="manage-item" onClick={this.openManage.bind(this)}>My Projects</div>
+					<div className="item" data-value="profile" id="profile-item" onClick={this.openPreferencesModal.bind(this)}>Profile</div>
+					<div className="item" data-value="logout" id="logout-item" onClick={this.logoutUser.bind(this)}>Logout</div>
+				</div>
+			</div>
+				// <div className="ui user label"
+				// 		onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
 		} else {
 			return <div className="ui user-nolog label" onClick={this.openLoginModal.bind(this)} title="Login">
 				{/*<i className="icon-user22"/>*/}
