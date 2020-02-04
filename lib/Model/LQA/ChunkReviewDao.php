@@ -284,7 +284,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     /**
      * @return ChunkReviewStruct
      */
-    public function findByJobIdPasswordAndSourcePage( $id_job, $password, $source_page ) {
+    public function findLastReviewByJobIdPasswordAndSourcePage( $id_job, $password, $source_page ) {
         $sql = "SELECT * FROM qa_chunk_reviews " .
                 " WHERE password = :password " .
                 " AND id_job = :id_job " .
@@ -331,17 +331,50 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @param $id_job
      * @param $password
      *
-     * @return bool
+     * @return ChunkReviewStruct[]
      */
-    public static function exists( $id_job, $password ) {
+    public static function findByJobIdAndPassword( $id_job, $password ) {
 
-        $thisDao = new self();
         $conn    = \Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( " SELECT id FROM " . self::TABLE . " WHERE id_job = :id_job and password = :password " );
+        $stmt    = $conn->prepare( " 
+            SELECT * FROM " . self::TABLE . " 
+            WHERE id_job = :id_job 
+            and password = :password 
+         " );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
         $stmt->execute( [
                 'id_job'   => $id_job,
                 'password' => $password,
         ] );
+
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     *
+     * @return bool
+     */
+    public function exists( $id_job, $password, $source_page = null ) {
+
+        $params = [
+                'id_job'   => $id_job,
+                'password' => $password,
+        ];
+
+        $query = " SELECT id FROM " . self::TABLE . " WHERE id_job = :id_job and password = :password ";
+
+        if ($source_page) {
+            $params['source_page'] = $source_page;
+            $query .= " AND source_page=:source_page";
+        }
+
+        $conn    = \Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( $query );
+
+
+        $stmt->execute($params );
 
         $row = $stmt->fetch( \PDO::FETCH_ASSOC );
 
