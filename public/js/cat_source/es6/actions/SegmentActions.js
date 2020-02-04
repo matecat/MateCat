@@ -220,25 +220,19 @@ const SegmentActions = {
         let segment = SegmentStore.getSegmentByIdToJS(segmentId);
         if ( segment.splitted > 2 ) return false;
 
-
-        //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-        _.forEach(propagatedSegments, function(sid) {
-            if ( sid !== segmentId ) {
+        for (var i = 0, len = propagatedSegments.length; i < len; i++) {
+            var sid = propagatedSegments[i];
+            if ( sid !== segmentId && SegmentStore.getSegmentByIdToJS(sid)) {
 
                 SegmentActions.replaceEditAreaTextContent( sid, null, segment.translation );
-
                 //Tag Projection: disable it if enable
                 SegmentActions.setSegmentAsTagged( sid );
-
-                // if status is not set to draft, the segment content is not displayed
                 SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
-                SegmentActions.modifiedTranslation( sid, null, false );
                 SegmentActions.setSegmentPropagation( sid, null, true, segment.sid );
-
-                LXQ.doLexiQA( this, sid, true, null );
             }
             SegmentActions.setAlternatives(sid, undefined);
-        });
+        }
+
         SegmentActions.setSegmentPropagation( segmentId, null, false );
         SegmentActions.setAlternatives(segmentId, undefined);
     },
@@ -1045,6 +1039,14 @@ const SegmentActions = {
     },
 
     setSegmentLocked( segment, fid, unlocked) {
+
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_UNLOCKED_SEGMENT,
+            fid: fid,
+            sid: segment.sid,
+            unlocked: unlocked
+        }, );
+
         if (!unlocked) {
             //TODO: move this to SegmentActions
             CommonUtils.removeFromStorage('unlocked-' + segment.sid);
@@ -1056,12 +1058,6 @@ const SegmentActions = {
             SegmentActions.openSegment(segment.sid);
 
         }
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.SET_UNLOCKED_SEGMENT,
-            fid: fid,
-            sid: segment.sid,
-            unlocked: unlocked
-        }, );
     },
 
     setBulkSelectionInterval(from, to, fid) {
