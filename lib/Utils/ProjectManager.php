@@ -542,14 +542,21 @@ class ProjectManager {
                     $this->getSingleS3QueueFile( $fileName );
                 }
 
-                //calculate hash + add the fileName, if i load 3 equal files with the same content
+                // calculate hash + add the fileName, if i load 3 equal files with the same content
                 // they will be squashed to the last one
                 $sha1 = sha1_file( $filePathName );
 
-                //make a cache package (with work/ only, emtpy orig/)
-                $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                // make a cache package (with work/ only, empty orig/)
+                try {
+                    $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                } catch ( \Exception $e ){
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                            "code" => -230,
+                            "message" => $e->getMessage()
+                    ];
+                }
 
-                //put reference to cache in upload dir to link cache to session
+                // put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
                         $this->projectStructure[ 'source_language' ],
@@ -575,7 +582,8 @@ class ProjectManager {
             $this->_log( $e );
             //Zip file Handling
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code" => $e->getCode(), "message" => $e->getMessage()
+                    "code" => $e->getCode(),
+                    "message" => $e->getMessage()
             ];
         }
 
@@ -1548,7 +1556,7 @@ class ProjectManager {
                     ->setDeliveryDate( $jTranslatorStruct->delivery_date )
                     ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
                     ->setEmail( $jTranslatorStruct->email )
-                    ->setNewJobPassword( CatUtils::generate_password() );
+                    ->setNewJobPassword( Utils::randomString() );
 
             $translatorModel->update();
 
@@ -2573,7 +2581,7 @@ class ProjectManager {
     }
 
     public function generatePassword( $length = 12 ) {
-        return CatUtils::generate_password( $length );
+        return Utils::randomString( $length );
     }
 
     /**

@@ -94,16 +94,16 @@ class Signup {
     private function __updatePersistedUser() {
         $this->user->pass = Utils::encryptPass( $this->params['password'], $this->user->salt ) ;
 
-        $this->user->confirmation_token = Utils::randomString() ;
+        $this->user->confirmation_token = Utils::randomString( 15, true ) ;
         $this->user->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
     }
 
     private function __prepareNewUser() {
         $this->user->create_date = Utils::mysqlTimestamp( time() );
-        $this->user->salt = Utils::randomString() ;
+        $this->user->salt = Utils::randomString( 15, true ) ;
         $this->user->pass = Utils::encryptPass( $this->params['password'], $this->user->salt ) ;
 
-        $this->user->confirmation_token = Utils::randomString() ;
+        $this->user->confirmation_token = Utils::randomString( 15, true ) ;
         $this->user->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
     }
 

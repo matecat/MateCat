@@ -271,7 +271,7 @@ class TranslatorsModel {
     public function changeJobPassword( $newPassword = null ) {
 
         if ( empty( $newPassword ) ) {
-            $newPassword = CatUtils::generate_password();
+            $newPassword = Utils::randomString();
         }
 
         $oldPassword = $this->jStruct->password;

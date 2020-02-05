@@ -2,6 +2,8 @@
 
 namespace LQA ;
 
+use Utils;
+
 class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
 
     public $id ;
@@ -24,7 +26,7 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
      */
     public function setDefaults() {
         if ( $this->review_password == null ) {
-            $this->review_password = \CatUtils::generate_password( 12 );
+            $this->review_password = Utils::randomString();
         }
     }
     /**
