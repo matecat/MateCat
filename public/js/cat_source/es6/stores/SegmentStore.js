@@ -626,8 +626,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
      * 7 TRANSLATED
      * 8 UNTRANSLATED | is draft or new
      * @param revisionNumber
+     * @param autopropagated
      */
-    getNextSegment(current_sid, current_fid, status, revisionNumber) {
+    getNextSegment(current_sid, current_fid, status, revisionNumber, autopropagated ) {
         let currentSegment = this.getCurrentSegment();
         if ( !current_sid && !currentSegment) return null;
         current_sid = ( !current_sid) ? this.getCurrentSegment().sid : current_sid;
@@ -647,15 +648,15 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments.forEach((segment, key) => {
             if (_.isUndefined(result)) {
                 if ( currentFind || current_sid === -1) {
-                    if ( status === 8 && (segment.get( 'status' ) === allStatus[2] || segment.get( 'status' ) === allStatus[4]) && !segment.get('muted') ) {
+                    if ( status === 8 && ( (segment.get( 'status' ) === allStatus[2] || segment.get( 'status' ) === allStatus[4]) || ( autopropagated && segment.get('status') === allStatus[7] && segment.get('autopropagated_from') != 0 )) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     } else if ( status === 9 && revisionNumber ) { // Second pass
-                        if ( (segment.get('status') === allStatus[1] || segment.get('status') === allStatus[7]) && segment.get('revision_number') === revisionNumber ) {
+                        if ( (segment.get('status') === allStatus[1] || segment.get('status') === allStatus[7] || ( autopropagated && segment.get('status') === allStatus[1] && segment.get('autopropagated_from') != 0 )) && segment.get('revision_number') === revisionNumber ) {
                             result = segment.toJS();
                             return false;
                         }
-                    } else if ( ((status && segment.get( 'status' ) === allStatus[status]) || !status) && !segment.get('muted') ) {
+                    } else if ( ((status && segment.get( 'status' ) === allStatus[status]) || ( autopropagated && segment.get('status') === allStatus[1] && segment.get('autopropagated_from') != 0 ) || !status) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     }
@@ -671,7 +672,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     },
     getNextUntranslatedSegmentId() {
         let current = this.getCurrentSegment();
-        let next = this.getNextSegment(current.sid, null, 8);
+        let next = this.getNextSegment(current.sid, null, 8, null, true);
         return ( next ) ? next.sid : this.nextUntranslatedFromServer;
     },
     getPrevSegment(sid, alsoMutedSegments) {

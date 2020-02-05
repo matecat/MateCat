@@ -154,8 +154,8 @@
          */
         openNextTranslated: function (sid) {
             sid = sid || UI.currentSegmentId;
-            var nextTranslatedSegment = SegmentStore.getNextSegment(sid, null, 7);
-            var nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(-1, null, 7);
+            var nextTranslatedSegment = SegmentStore.getNextSegment(sid, null, 7, null, true);
+            var nextTranslatedSegmentInPrevious = SegmentStore.getNextSegment(-1, null, 7, null, true);
             // find in next segments
             if(nextTranslatedSegment) {
                 SegmentActions.openSegment(nextTranslatedSegment.sid);
