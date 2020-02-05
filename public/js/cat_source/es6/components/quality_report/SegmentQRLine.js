@@ -43,7 +43,7 @@ class SegmentQRLine extends React.Component {
                     <div className={ this.props.segment.get("suggestion_source") === "MT" ? ('per-yellow'): null}>
                         <b>{this.props.segment.get("suggestion_source")}</b>
                     </div>
-                    {this.props.segment.get("suggestion_source") !== "MT" ? (
+                    {this.props.segment.get("suggestion_source") && this.props.segment.get("suggestion_source") !== "MT" ? (
                         <div className={"tm-percent " + suggestionMatchClass}>{suggestionMatch}%</div>
                     ) : null}
 
