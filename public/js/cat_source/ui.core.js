@@ -395,7 +395,7 @@ UI = {
     },
     setComingFrom: function () {
         var page = (config.isReview)? 'revise' : 'translate';
-        Cookies.set('comingFrom' , page, { path: '/' });
+        Cookies.set('comingFrom' , page, { path: '/', secure: true  });
     },
 
     clearMarks: function (str) {
@@ -1779,7 +1779,7 @@ UI = {
                     allowHtml: true,
                     closeCallback: function () {
                         var expireDate = new Date(elem.expire);
-                        Cookies.set('msg-' + elem.token, '', {expires: expireDate});
+                        Cookies.set('msg-' + elem.token, '', {expires: expireDate, secure: true });
                     }
                 };
                 APP.addNotification(notification);
@@ -2362,11 +2362,11 @@ UI = {
                     this.tagLockEnabled = true;
                 }
             } else {
-                Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled,  { expires: 30 });
+                Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled,  { expires: 30, secure: true  });
             }
 
         } else {
-            Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled , { expires: 30 });
+            Cookies.set(cookieName + '-' + config.id_job, !this.tagLockEnabled , { expires: 30, secure: true  });
         }
 
     },
@@ -2405,14 +2405,6 @@ UI = {
             Waypoint.destroyAll();
             this.settedWaypoints = false;
         }
-    },
-
-    storeClientInfo: function () {
-        clientInfo = {
-            xRes: window.screen.availWidth,
-            yRes: window.screen.availHeight
-        };
-        Cookies.set('client_info', JSON.stringify(clientInfo), { expires: 3650 });
     },
 
 	browserScrollPositionRestoreCorrection: function() {

@@ -18,7 +18,7 @@ $.extend(UI, {
 		}
 	},
 	saveCustomization: function() {
-        Cookies.set('user_customization', JSON.stringify(this.custom), { expires: 3650 });
+        Cookies.set('user_customization', JSON.stringify(this.custom), { expires: 3650, secure: true  });
 	},
 	setShortcuts: function() {
         UI.shortcuts =  {

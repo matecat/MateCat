@@ -158,9 +158,9 @@ class SegmentFooterTabConcordance extends React.Component {
 
     toggleExtendend() {
         if (this.state.extended) {
-            Cookies.set('segment_footer_extendend_concordance', false, {expires: 3650});
+            Cookies.set('segment_footer_extendend_concordance', false, {expires: 3650, secure:true});
         } else {
-            Cookies.set('segment_footer_extendend_concordance', true, {expires: 3650});
+            Cookies.set('segment_footer_extendend_concordance', true, {expires: 3650, secure: true});
         }
         this.setState({
             extended: !this.state.extended
