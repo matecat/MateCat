@@ -480,10 +480,10 @@ class setTranslationController extends ajaxController {
             $newValues   = [];
             $newValues[] = $counter->getUpdatedValues( $old_count );
 
-            foreach ( $propagationTotal[ 'totals' ] as $__pos => $old_value ) {
+            if ( false == empty($propagationTotal[ 'totals' ]) ) {
                 $counter->setOldStatus( $old_status );
                 $counter->setNewStatus( $this->status );
-                $newValues[] = $counter->getUpdatedValues( $old_value );
+                $newValues[] = $counter->getUpdatedValues( $propagationTotal[ 'totals' ]['total'] );
             }
 
             try {
