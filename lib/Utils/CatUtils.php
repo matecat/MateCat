@@ -477,32 +477,6 @@ class CatUtils {
     }
 
     /**
-     * Generate 128bit password with real uniqueness over single process instance
-     *   N.B. Concurrent requests can collide ( Ex: fork )
-     *
-     * Minimum Password Length 12 Characters
-     *
-     * @param int $length
-     *
-     * @return bool|string
-     */
-    public static function generate_password( $length = 12 ) {
-
-        $_pwd = md5( uniqid( '', true ) );
-        $pwd  = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
-
-        if ( $length > 12 ) {
-            while ( strlen( $pwd ) < $length ) {
-                $pwd .= self::generate_password();
-            }
-            $pwd = substr( $pwd, 0, $length );
-        }
-
-        return $pwd;
-
-    }
-
-    /**
      *
      * This function works only on unix machines. For BSD based change parameter of command file to Uppercase I
      * <pre>

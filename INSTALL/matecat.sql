@@ -1199,7 +1199,7 @@ CREATE TABLE `users` (
   `uid` bigint(20) NOT NULL AUTO_INCREMENT,
   `email` varchar(50) NOT NULL,
   `salt` varchar(50) DEFAULT NULL,
-  `pass` varchar(50) DEFAULT NULL,
+  `pass` varchar(255) DEFAULT NULL,
   `create_date` datetime NOT NULL,
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
@@ -1247,7 +1247,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-29 18:47:43
+-- Dump completed on 2020-02-05 15:48:05
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1436,4 +1436,4 @@ INSERT INTO `phinxlog` VALUES (20191220115633,'2019-12-20 13:01:16','2019-12-20 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-29 18:47:43
+-- Dump completed on 2020-02-05 15:48:05

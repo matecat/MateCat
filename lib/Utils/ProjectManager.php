@@ -1548,7 +1548,7 @@ class ProjectManager {
                     ->setDeliveryDate( $jTranslatorStruct->delivery_date )
                     ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
                     ->setEmail( $jTranslatorStruct->email )
-                    ->setNewJobPassword( CatUtils::generate_password() );
+                    ->setNewJobPassword( Utils::randomString() );
 
             $translatorModel->update();
 
@@ -2573,7 +2573,7 @@ class ProjectManager {
     }
 
     public function generatePassword( $length = 12 ) {
-        return CatUtils::generate_password( $length );
+        return Utils::randomString( $length );
     }
 
     /**
