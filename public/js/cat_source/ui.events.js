@@ -40,7 +40,11 @@ $.extend(UI, {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                setTimeout(function () { UI.clickOnApprovedButton($('.editor .next-unapproved:not(.disabled)'))} );
+                if ( $('.editor .next-unapproved:not(.disabled)').length > 0 ) {
+                    setTimeout( function () { UI.clickOnApprovedButton( $( '.editor .next-unapproved:not(.disabled)' ) )} );
+                } else {
+                    setTimeout(function () { UI.clickOnApprovedButton($('.editor .approved'))});
+                }
             } else {
                 if ( $('.editor .next-untranslated:not(.disabled)').length > 0 ) {
                     setTimeout(function () { UI.clickOnTranslatedButton($('.editor .next-untranslated:not(.disabled)'))});

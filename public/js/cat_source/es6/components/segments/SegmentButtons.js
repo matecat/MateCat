@@ -80,7 +80,7 @@ class SegmentButton extends React.Component {
         } else if ( this.state.progress ) {
             revisionCompleted = this.state.progress.revisionCompleted;
         }
-        let enableGoToNext = !_.isUndefined(nextSegment) && !revisionCompleted;
+        let enableGoToNext = !_.isUndefined(nextSegment) && !revisionCompleted && nextSegment.autopropagated_from ==0;
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
         enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && !_.isNull(nextSegment.revision_number) && (
@@ -144,7 +144,7 @@ class SegmentButton extends React.Component {
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
         let translationCompleted = ( this.state.progress && this.state.progress.translationCompleted );
-        let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" ) && !translationCompleted;
+        let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" && nextSegment.autopropagated_from ==0 ) && !translationCompleted;
         //TODO Store TP Information in the SegmentsStore
         this.currentSegmentTPEnabled = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment);
         if (this.currentSegmentTPEnabled) {
