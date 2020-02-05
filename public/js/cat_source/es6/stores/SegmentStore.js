@@ -652,11 +652,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         result = segment.toJS();
                         return false;
                     } else if ( status === 9 && revisionNumber ) { // Second pass
-                        if ( (segment.get('status') === allStatus[1] || segment.get('status') === allStatus[7] || ( autopropagated && segment.get('status') === allStatus[1] && segment.get('autopropagated_from') != 0 )) && segment.get('revision_number') === revisionNumber ) {
+                        if ( ( (segment.get('status') === allStatus[1] || segment.get('status') === allStatus[7] ) && segment.get('revision_number') === revisionNumber )
+                            || ( autopropagated && segment.get('status') === allStatus[1] && segment.get('autopropagated_from') != 0 && segment.get('revision_number') !== revisionNumber) ){
                             result = segment.toJS();
                             return false;
                         }
-                    } else if ( ((status && segment.get( 'status' ) === allStatus[status]) || ( autopropagated && segment.get('status') === allStatus[1] && segment.get('autopropagated_from') != 0 ) || !status) && !segment.get('muted') ) {
+                    } else if ( ((status && segment.get( 'status' ) === allStatus[status]) || !status) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     }

@@ -248,8 +248,8 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
         },
         openNextApproved: function ( sid ) {
             sid = sid || UI.currentSegmentId;
-            var nextApprovedSegment = SegmentStore.getNextSegment(sid, null, 9, 1);
-            var nextApprovedSegmentInPrevious = SegmentStore.getNextSegment(-1, null, 9, 1);
+            var nextApprovedSegment = SegmentStore.getNextSegment(sid, null, 9, 1, true);
+            var nextApprovedSegmentInPrevious = SegmentStore.getNextSegment(-1, null, 9, 1, true);
             // find in next segments
             if(nextApprovedSegment) {
                 SegmentActions.openSegment(nextApprovedSegment.sid);
