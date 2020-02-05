@@ -229,6 +229,7 @@ const SegmentActions = {
                 SegmentActions.setSegmentAsTagged( sid );
                 SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
                 SegmentActions.setSegmentPropagation( sid, null, true, segment.sid );
+                SegmentActions.modifiedTranslation( sid, null, false );
             }
             SegmentActions.setAlternatives(sid, undefined);
         }
