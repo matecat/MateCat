@@ -157,11 +157,41 @@ class S3FilesStorage extends AbstractFilesStorage {
             return true;
         }
 
-        $xliffDestination = $this->getXliffDestination( $prefix, $xliffPath, static::$FILES_STORAGE_BUCKET, $originalPath );
-        $this->tryToUploadAFile( static::$FILES_STORAGE_BUCKET, $xliffDestination, $xliffPath );
-        unlink( $xliffPath );
+        // We need to execute uploadItem in a try/catch block because $origDestination string can be safe but $xliffDestination can be not
+        //
+        // Example: حديث_أمني_ريف_حلب_الغربي.docx (OK) -----> حديث_أمني_ريف_حلب_الغربي.doxs.xliff (TOO LONG)
+        //
+        try {
+            $xliffDestination = $this->getXliffDestination( $prefix, $xliffPath, static::$FILES_STORAGE_BUCKET, $originalPath );
 
-        return true;
+            $this->s3Client->uploadItem( [
+                    'bucket' => static::$FILES_STORAGE_BUCKET,
+                    'key'    => $xliffDestination,
+                    'source' => $xliffPath
+            ] );
+
+            \Log::doJsonLog( 'Successfully uploaded file ' . $xliffDestination . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
+
+            unlink( $xliffPath );
+
+            return true;
+
+        // If $xliffDestination is too long, delete $origDestination item
+        } catch (\Exception $e){
+
+            $raw_file_path   = explode( DIRECTORY_SEPARATOR, $originalPath );
+            $file_name       = array_pop( $raw_file_path );
+            $origDestination = $prefix . DIRECTORY_SEPARATOR . 'orig' . DIRECTORY_SEPARATOR . $file_name;
+
+            $this->s3Client->deleteItem([
+                    'bucket' => static::$FILES_STORAGE_BUCKET,
+                    'key' => $origDestination,
+            ]);
+
+            \Log::doJsonLog( 'Deleting original cache file ' . $origDestination . ' from ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
+
+            throw $e;
+        }
     }
 
     /**
@@ -199,7 +229,13 @@ class S3FilesStorage extends AbstractFilesStorage {
         $file_name       = array_pop( $raw_file_path );
         $origDestination = $prefix . DIRECTORY_SEPARATOR . 'orig' . DIRECTORY_SEPARATOR . $file_name;
 
-        $this->tryToUploadAFile( $bucketName, $origDestination, $originalPath );
+        $this->s3Client->uploadItem( [
+                'bucket' => $bucketName,
+                'key'    => $origDestination,
+                'source' => $originalPath
+        ] );
+
+        \Log::doJsonLog( 'Successfully uploaded file ' . $origDestination . ' into ' . $bucketName . ' bucket.' );
 
         $file_extension = '.sdlxliff';
 
@@ -689,29 +725,6 @@ class S3FilesStorage extends AbstractFilesStorage {
         $explode = explode( DIRECTORY_SEPARATOR, $key );
 
         return end( $explode );
-    }
-
-    /**
-     * @param $bucketName
-     * @param $destination
-     * @param $origPath
-     *
-     * @return bool
-     */
-    protected function tryToUploadAFile( $bucketName, $destination, $origPath ) {
-        try {
-            $this->s3Client->uploadItem( [
-                    'bucket' => $bucketName,
-                    'key'    => $destination,
-                    'source' => $origPath
-            ] );
-
-            \Log::doJsonLog( 'Successfully uploaded file ' . $destination . ' into ' . $bucketName . ' bucket.' );
-        } catch ( \Exception $e ) {
-            \Log::doJsonLog( 'Error in uploading a file ' . $destination . ' into ' . $bucketName . ' bucket. ERROR: ' . $e->getMessage() );
-
-            return false;
-        }
     }
 
     /**

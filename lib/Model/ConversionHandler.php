@@ -166,19 +166,30 @@ class ConversionHandler {
                    (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
                  */
                 //save in cache
-                $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
+                try {
+                    $res_insert = $fs->makeCachePackage( $sha1, $this->source_lang, $file_path, $cachedXliffPath );
 
-                if ( !$res_insert ) {
-                    //custom error message passed directly to javascript client and displayed as is
-                    $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have MateCat running in multiple tabs. Please close all other MateCat tabs in your browser.";
-                    $this->result[ 'code' ]          = -103;
-                    $this->result[ 'errors' ][]      = [
-                            "code"    => -103,
-                            "message" => $convertResult[ 'errorMessage' ],
-                            'debug'   => AbstractFilesStorage::basename_fix( $this->file_name )
+                    if ( !$res_insert ) {
+                        //custom error message passed directly to javascript client and displayed as is
+                        $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have MateCat running in multiple tabs. Please close all other MateCat tabs in your browser.";
+                        $this->result[ 'code' ]          = -103;
+                        $this->result[ 'errors' ][]      = [
+                                "code"    => -103,
+                                "message" => $convertResult[ 'errorMessage' ],
+                                'debug'   => AbstractFilesStorage::basename_fix( $this->file_name )
+                        ];
+
+                        unset( $cachedXliffPath );
+
+                        return false;
+                    }
+
+                } catch (\Exception $e){
+                    $this->result[ 'code' ]     = -230; // S3 Exception
+                    $this->result[ 'errors' ][] = [
+                            "code"    => -230,
+                            "message" => 'Sorry, file name too long. Try shortening it and try again.'
                     ];
-
-                    unset( $cachedXliffPath );
 
                     return false;
                 }
