@@ -16,7 +16,6 @@ use API\V2\Validators\TeamProjectValidator;
 use Exception;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
-use Projects_ProjectStruct;
 use RevisionFactory;
 
 class ReviewsController extends KleinController {
@@ -91,24 +90,36 @@ class ReviewsController extends KleinController {
                 'revision_number',
         ];
 
-        foreach ($requiredParams as $requiredParam){
+        foreach ( $requiredParams as $requiredParam ) {
             if ( !isset( $post[ $requiredParam ] ) ) {
                 throw new ValidationError( $requiredParam . ' param is not provided' );
             }
         }
 
-        $this->latestChunkReview = ( new ChunkReviewDao() )->findByJobIdPasswordAndSourcePage( $post[ 'id_job' ],$post[ 'password' ],$post[ 'revision_number' ] );
-        if ( $this->latestChunkReview->id_project != $this->project->id and $this->latestChunkReview->password != $this->project->password ) {
+        $id_job          = $post[ 'id_job' ];
+        $password        = $post[ 'password' ];
+        $revision_number = $post[ 'revision_number' ];
+
+        $chunkReviewDao = new ChunkReviewDao();
+
+        // check if the $revision_number exists
+        if ( false === $chunkReviewDao->exists( $id_job, $password, $revision_number ) ) {
+            throw new ValidationError( $revision_number . " revision link does not exists." );
+        }
+
+        // check if the $revision_number + 1 exists
+        if ( true === $chunkReviewDao->exists( $id_job, $password, ( $revision_number + 1 ) ) ) {
+            throw new ValidationError( ( $revision_number + 1 ) . " revision link already exists." );
+        }
+
+        $this->nextSourcePage    = $revision_number + 1;
+        $this->latestChunkReview = $chunkReviewDao->findLastReviewByJobIdPasswordAndSourcePage( $id_job, $password, $revision_number );
+
+        if ( $this->latestChunkReview->id_project != $this->project->id ) {
             throw new ValidationError( "Job id / password combination is not in projects list" );
         }
 
-        $this->nextSourcePage = $post[ 'revision_number' ] + 1;
-        if ( $this->latestChunkReview->source_page + 1 != $this->nextSourcePage ) {
-            throw new ValidationError( "This revision number is not allowed" );
-        }
-
         $this->chunk = $this->latestChunkReview->getChunk();
-
     }
 
     public function setProject( $project ) {

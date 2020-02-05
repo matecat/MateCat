@@ -40,7 +40,7 @@ class changePasswordController extends ajaxController {
             $new_pwd    = $this->old_password;
             $actual_pwd = $this->password;
         } else {
-            $new_pwd    = CatUtils::generate_password();
+            $new_pwd    = Utils::randomString( 15, true );
             $actual_pwd = $this->password;
         }
 

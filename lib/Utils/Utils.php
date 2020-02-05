@@ -195,17 +195,44 @@ class Utils {
         return [ 'messages' => $retString ];
     }
 
-
     public static function encryptPass( $clear_pass, $salt ) {
-        return sha1( $clear_pass . $salt );
+        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+        return password_hash( $pepperedPass, PASSWORD_DEFAULT );
     }
 
-    public static function randomString( $maxlength = 15 ) {
+    public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ){
+        if( sha1( $clear_pass . $salt ) == $db_hashed_pass ){ //TODO: old implementation, remove in a next future when hopefully all people will be migrated to password_hash
+            return sha1( $clear_pass . $salt );
+        } else {
+            $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+            return password_verify( $pepperedPass, $db_hashed_pass );
+        }
+    }
 
-        $_pwd = base64_encode( md5( uniqid( '', true ) ) ); //we want more characters not only [0-9a-f]
+    /**
+     * Generate 128bit password with real uniqueness over single process instance
+     *   N.B. Concurrent requests can collide ( Ex: fork )
+     *
+     * Minimum Password Length 12 Characters
+     *
+     * WARNING: the obtained random string MUST NOT be used for security purposes
+     *
+     * @param int  $maxlength
+     * @param bool $more_entropy
+     *
+     * @return bool|string
+     */
+    public static function randomString( $maxlength = 12, $more_entropy = false ) {
+
+        $_pwd = md5( uniqid( '', true ) );
+
+        if( $more_entropy ){
+            $_pwd = base64_encode( $_pwd ); //we want more characters not only [0-9a-f]
+        }
+
         $pwd  = substr( $_pwd, 0, 6 ) . substr( $_pwd, -8, 6 ); //exclude last 2 char2 because they can be == sign
 
-        if ( $maxlength > 15 ) {
+        if ( $maxlength > 12 ) {
             while ( strlen( $pwd ) < $maxlength ) {
                 $pwd .= self::randomString();
             }
