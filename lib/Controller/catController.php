@@ -33,10 +33,6 @@ class catController extends viewController {
     private $job_archived  = false;
     private $job_cancelled = false;
 
-    private $first_job_segment   = 0;
-    private $firstSegmentOfFiles = '[]';
-    private $fileCounter         = '[]';
-
     private $qa_data = '[]';
 
     private $qa_overall = '';
@@ -160,11 +156,6 @@ class catController extends viewController {
 
         $this->wStruct = CatUtils::getWStructFromJobArray( $this->chunk, $this->project );
         $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
-
-        /**
-         * get first segment of every file
-         */
-        $this->firstSegmentOfFiles = json_encode( Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk ) );
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -321,8 +312,6 @@ class catController extends viewController {
             $this->template->pid                 = null;
             $this->template->source_code         = null;
             $this->template->target_code         = null;
-            $this->template->firstSegmentOfFiles = 0;
-            $this->template->fileCounter         = 0;
 
             $this->template->jobOwnerIsMe        = false;
             $this->template->support_mail        = INIT::$SUPPORT_MAIL;
@@ -378,8 +367,6 @@ class catController extends viewController {
             $this->template->pid                 = $this->pid;
             $this->template->source_code         = $this->source_code;
             $this->template->target_code         = $this->target_code;
-            $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
-            $this->template->fileCounter         = $this->fileCounter;
         }
 
         if ( !empty( $this->project->id_team ) ) {
@@ -403,12 +390,7 @@ class catController extends viewController {
 
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
 
-        $this->template->first_job_segment   = json_decode($this->firstSegmentOfFiles)[0]->first_segment;
-        $this->template->last_job_segment    = $this->chunk->job_last_segment ;
-
         $this->template->owner_email         = $this->job_owner;
-
-
 
         $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
