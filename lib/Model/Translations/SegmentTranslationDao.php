@@ -511,6 +511,43 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_job
+     * @param $password
+     * @param $source_page
+     *
+     * @return Translations_SegmentTranslationStruct[]
+     */
+    public static function getSegmentTranslationIdsModifiedByRevisor( $id_job, $password, $source_page ) {
+
+        $conn = Database::obtain()->getConnection();
+
+        $query = "SELECT
+        st.id_segment 
+    FROM
+        segment_translations st
+    JOIN segment_translation_versions stv ON stv.id_segment = st.id_segment
+    JOIN segment_translation_events ste ON ste.id_segment = st.id_segment AND ste.version_number != st.version_number
+    JOIN jobs j ON j.id = st.id_job
+    WHERE
+        j.id = :id_job
+        and j.password = :password
+AND st.status = 'APPROVED'
+AND st.translation != stv.translation
+AND ste.source_page = :source_page
+    GROUP BY st.id_segment;";
+
+        $stmt = $conn->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct' );
+        $stmt->execute( [
+                'id_job'      => $id_job,
+                'password'    => $password,
+                'source_page' => $source_page,
+        ] );
+
+        return $stmt->fetchAll();
+    }
+
+    /**
      * @param Jobs_JobStruct $jStruct
      *
      * @return array
