@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
@@ -1199,7 +1199,7 @@ CREATE TABLE `users` (
   `uid` bigint(20) NOT NULL AUTO_INCREMENT,
   `email` varchar(50) NOT NULL,
   `salt` varchar(50) DEFAULT NULL,
-  `pass` varchar(50) DEFAULT NULL,
+  `pass` varchar(255) DEFAULT NULL,
   `create_date` datetime NOT NULL,
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
@@ -1247,7 +1247,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-22 11:58:09
+-- Dump completed on 2020-02-05 17:51:05
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1315,7 +1315,7 @@ GRANT DROP ON `matecat`.`jobs_stats` TO 'PEEWorker'@'%' IDENTIFIED BY 'matecat02
 
 USE `matecat`;
 
--- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
@@ -1425,6 +1425,7 @@ INSERT INTO `phinxlog` VALUES (20190719095651,'2019-09-09 18:16:45','2019-09-09 
 INSERT INTO `phinxlog` VALUES (20190723092053,'2019-09-09 18:16:45','2019-09-09 18:16:45');
 INSERT INTO `phinxlog` VALUES (20190812091652,'2019-08-26 17:16:32','2019-08-26 17:16:32');
 INSERT INTO `phinxlog` VALUES (20191220115633,'2019-12-20 13:01:16','2019-12-20 13:01:16');
+INSERT INTO `phinxlog` VALUES (20200205155333,'2020-02-05 15:54:14','2020-02-05 15:54:14');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1436,4 +1437,4 @@ INSERT INTO `phinxlog` VALUES (20191220115633,'2019-12-20 13:01:16','2019-12-20 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-22 11:58:09
+-- Dump completed on 2020-02-05 17:51:05

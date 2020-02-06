@@ -89,12 +89,15 @@ class CatUtils {
     /**
      * Perform a computation on the string to find the length of the strings separated by the placeholder
      *
-     * @param $segment
-     * @param $separateWithChar
+     * @param        $segment
+     * @param string $separateWithChar
+     *
+     * @param Filter $Filter
      *
      * @return array
+     * @throws Exception
      */
-    public static function parseSegmentSplit( $segment, $separateWithChar = '' ) {
+    public static function parseSegmentSplit( $segment, $separateWithChar, Filter $Filter ) {
         $split_chunks    = explode( self::splitPlaceHolder, $segment );
         $chunk_positions = [];
 
@@ -105,6 +108,8 @@ class CatUtils {
                 if ( strlen( $chunk ) == 0 ) {
                     break;
                 } //remove eventually present null string
+
+                $chunk = $Filter->fromLayer2ToLayer0( $chunk );
 
                 //WARNING We count length in NO MULTIBYTE mode
                 $separator_len = strlen( $separateWithChar );
@@ -468,32 +473,6 @@ class CatUtils {
         }
 
         return $res;
-
-    }
-
-    /**
-     * Generate 128bit password with real uniqueness over single process instance
-     *   N.B. Concurrent requests can collide ( Ex: fork )
-     *
-     * Minimum Password Length 12 Characters
-     *
-     * @param int $length
-     *
-     * @return bool|string
-     */
-    public static function generate_password( $length = 12 ) {
-
-        $_pwd = md5( uniqid( '', true ) );
-        $pwd  = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
-
-        if ( $length > 12 ) {
-            while ( strlen( $pwd ) < $length ) {
-                $pwd .= self::generate_password();
-            }
-            $pwd = substr( $pwd, 0, $length );
-        }
-
-        return $pwd;
 
     }
 

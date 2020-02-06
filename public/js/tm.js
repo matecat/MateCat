@@ -1242,7 +1242,6 @@
             $( ".popup-tm").removeClass('open').animate({right: '-1100px' }, 400);
             $(".outer-tm").hide();
             $('body').removeClass('side-popup');
-            Cookies.set('tmpanel-open', 0, { path: '/' });
             if((!APP.isCattool)&&(!checkAnalyzability('closing tmx panel'))) {
                 disableAnalyze();
                 if(!checkAnalyzabilityTimer) var checkAnalyzabilityTimer = window.setInterval( function () {
@@ -1317,7 +1316,7 @@
                         window.clearInterval( downloadTimer );
                         elem.removeClass( 'disabled' );
                         tr.find('.uploadloader').hide();
-                        Cookies.set( downloadToken, null, {path: '/', expires: -1} );
+                        Cookies.set( downloadToken, null, {path: '/', expires: -1, secure: true } );
                         errorMsg = $( '#' + iFrameID ).contents().find( 'body' ).text();
                         errorKey = $( tr ).attr( 'data-key' );
                         if ( errorMsg != '' ) {

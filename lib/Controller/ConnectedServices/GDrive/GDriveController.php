@@ -100,7 +100,7 @@ class GDriveController extends KleinController {
             $this->guid = $_SESSION[ "upload_session" ];
         } else {
             $this->guid = Utils::createToken();
-            setcookie( "upload_session", $this->guid, time() + 86400, '/', \INIT::$COOKIE_DOMAIN );
+            setcookie( "upload_session", $this->guid, time() + 86400, '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
             $_SESSION[ "upload_session" ] = $this->guid;
 
             $this->gdriveUserSession->clearFileListFromSession();
@@ -173,7 +173,7 @@ class GDriveController extends KleinController {
 
     private function doRedirect() {
         // set a cookie to allow the frontend to call list endpoint
-        setcookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ], time() + 86400, '/', \INIT::$COOKIE_DOMAIN );
+        setcookie( $this->gdriveListCookieName, $_SESSION[ "upload_session" ], time() + 86400, '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
 
         header( "Location: /", true, 302 );
         exit;

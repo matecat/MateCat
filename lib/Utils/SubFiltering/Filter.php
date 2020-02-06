@@ -18,6 +18,7 @@ use SubFiltering\Filters\FromViewNBSPToSpaces;
 use SubFiltering\Filters\HtmlPlainTextDecoder;
 use SubFiltering\Filters\HtmlToPh;
 use SubFiltering\Filters\LtGtDecode;
+use SubFiltering\Filters\LtGtDoubleDecode;
 use SubFiltering\Filters\LtGtDoubleEncode;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\MateCatCustomPHToStandardPH;
@@ -246,6 +247,7 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new FromViewNBSPToSpaces() );
+        $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );
         $channel->addLast( new SubFilteredPhToHtml() );
         $channel->addLast( new PlaceHoldXliffTags() );
@@ -278,7 +280,6 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
-        $channel->addLast( new EncodeToRawXML() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */

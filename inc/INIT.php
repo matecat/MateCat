@@ -32,6 +32,7 @@ class INIT {
     public static $HTTPHOST;
     public static $CLI_HTTP_HOST;
     public static $COOKIE_DOMAIN;
+    public static $PHP_SESSION_NAME        = 'PHPSESSID';
     public static $AJAX_DOMAINS            = 100;
     public static $PROTOCOL;
     public static $DEBUG                   = true;

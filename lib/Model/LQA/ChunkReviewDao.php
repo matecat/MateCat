@@ -71,16 +71,17 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @return int
      */
     public static function getPenaltyPointsForChunk( Chunks_ChunkStruct $chunk ) {
-        $sql = "SELECT SUM(penalty_points) FROM qa_entries e
-            JOIN segment_translations st
-            ON st.version_number = e.translation_version
-            AND st.id_segment = e.id_segment
+
+        $sql = "SELECT SUM(penalty_points)
+            FROM segment_translations st
             JOIN jobs on jobs.id = st.id_job
-            WHERE jobs.id = :id_job AND jobs.password = :password
-              AND e.deleted_at IS NULL
+            JOIN qa_entries e ON st.version_number = e.translation_version AND st.id_segment = e.id_segment AND st.id_job = e.id_job
+            WHERE jobs.id = :id_job
+            AND jobs.password = :password
+            AND e.deleted_at IS NULL
             AND st.id_segment
               BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-             ";
+            ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
