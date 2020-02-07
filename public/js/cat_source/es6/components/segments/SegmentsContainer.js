@@ -9,6 +9,7 @@ import SegmentStore from '../../stores/SegmentStore';
 import CommentsStore from '../../stores/CommentsStore';
 import Segment from './Segment';
 import SegmentConstants from '../../constants/SegmentConstants';
+import CatToolConstants from '../../constants/CatToolConstants';
 import Speech2Text from '../../utils/speech2text';
 import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
@@ -28,7 +29,8 @@ class SegmentsContainer extends React.Component {
                 width: 0,
                 height: 0,
             },
-            sideOpen: false
+            sideOpen: false,
+            files: undefined
         };
         this.renderSegments = this.renderSegments.bind(this);
         this.updateAllSegments = this.updateAllSegments.bind(this);
@@ -39,6 +41,7 @@ class SegmentsContainer extends React.Component {
         this.openSide = this.openSide.bind(this);
         this.closeSide = this.closeSide.bind(this);
         this.recomputeListSize = this.recomputeListSize.bind(this);
+        this.storeJobInfo = this.storeJobInfo.bind(this);
 
         this.lastScrollTop = 0;
         this.segmentsHeightsMap = {};
@@ -180,8 +183,10 @@ class SegmentsContainer extends React.Component {
             setLastSelectedSegment={this.setLastSelectedSegment.bind(this)}
             setBulkSelection={this.setBulkSelection.bind(this)}
             sideOpen={this.state.sideOpen}
+            files={this.state.files}
         />;
         if ( segment.id_file !== currentFileId ) {
+            let file = (!!this.state.files)? _.find(this.state.files, (file) => file.id == segment.id_file): false;
             return <React.Fragment>
                 <ul className="projectbar" data-job={"job-"+ segment.id_file}>
                     <li className="filename">
@@ -191,6 +196,11 @@ class SegmentsContainer extends React.Component {
                         <strong/> [<span className="source-lang">{config.source_rfc}</span>] >
                         <strong/> [<span className="target-lang">{config.target_rfc}</span>]
                     </li>
+                    { file ? (
+                        <li className="wordcounter">Payable Words: <strong>{file.weighted_words}</strong>
+                        </li>
+                    ):null}
+
                 </ul>
                 {collectionTypeSeparator}
                 {item}
@@ -346,6 +356,12 @@ class SegmentsContainer extends React.Component {
         this.forceUpdate();
     }
 
+    storeJobInfo(files) {
+        this.setState({
+            files: files
+        })
+    }
+
     componentDidMount() {
         this.updateWindowDimensions();
         this.scrollContainer = $(".article-segments-container > div");
@@ -359,6 +375,7 @@ class SegmentsContainer extends React.Component {
         SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
 
         SegmentStore.addListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
+        CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
     }
 
     componentWillUnmount() {
@@ -372,6 +389,7 @@ class SegmentsContainer extends React.Component {
         SegmentStore.removeListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
 
         SegmentStore.removeListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
+        CatToolStore.removeListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
 
     }
 

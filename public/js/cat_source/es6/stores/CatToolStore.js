@@ -11,7 +11,13 @@ EventEmitter.prototype.setMaxListeners(0);
 
 
 let CatToolStore = assign({}, EventEmitter.prototype, {
-
+    files: null,
+    storeFilesInfo: function(files) {
+        this.files = files
+    },
+    getJobFilesInfo: function() {
+        return this.files;
+    },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     }
@@ -45,6 +51,10 @@ AppDispatcher.register(function(action) {
             break;
         case CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP:
             CatToolStore.emitChange(CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP);
+            break;
+        case CatToolConstants.STORE_FILES_INFO:
+            CatToolStore.storeFilesInfo(action.files);
+            CatToolStore.emitChange(CatToolConstants.STORE_FILES_INFO, action.files);
             break;
     }
 });

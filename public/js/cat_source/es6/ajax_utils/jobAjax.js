@@ -83,5 +83,13 @@ API.JOB = {
             url : APP.getRandomUrl() + "api/v2/jobs/" + job.id +"/" + job.password + "/translator"
         });
     },
+    getJobFilesInfo: function (idJob, password) {
+        return $.ajax({
+            async: true,
+            type: "GET",
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v3/jobs/" + idJob +"/" + password + "/files"
+        });
+    },
 
 };

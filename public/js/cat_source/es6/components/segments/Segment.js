@@ -544,14 +544,6 @@ class Segment extends React.Component {
             this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2];
         }
 
-        let start_job_marker = this.props.segment.sid === config.first_job_segment;
-        let end_job_marker = this.props.segment.sid === config.last_job_segment;
-        if (start_job_marker) {
-            job_marker = <span className={"start-job-marker"}/>;
-        } else if ( end_job_marker) {
-            job_marker = <span className={"end-job-marker"}/>;
-        }
-
         if (this.props.timeToEdit) {
             timeToEdit = <span className="edit-min">{this.segment_edit_min}</span> + 'm' + <span className="edit-sec">{this.segment_edit_sec}</span> + 's';
         }
