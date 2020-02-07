@@ -30,7 +30,7 @@ class SegmentsContainer extends React.Component {
                 height: 0,
             },
             sideOpen: false,
-            files: undefined
+            files: CatToolStore.getJobFilesInfo()
         };
         this.renderSegments = this.renderSegments.bind(this);
         this.updateAllSegments = this.updateAllSegments.bind(this);
