@@ -201,27 +201,6 @@ var UI = {
 
     },
 
-    createJobMenu: function() {
-        var menu = '<nav id="jobMenu" class="topMenu">' +
-            '<ul class="gotocurrentsegment">' +
-            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a>Go to current segment</a><span>' +Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase() + '</span></li>' +
-            '<li class="firstSegment" ><span class="label">Go to first segment of the file:</span></li>' +
-            '</ul>' +
-            '<div class="separator"></div>' +
-            '<ul class="jobmenu-list">';
-
-        var iconTick = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12">' +
-        '<path fill="#FFF" fillRule="evenodd" stroke="none" strokeWidth="1" d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z" transform="translate(-266 -10) translate(266 8) translate(0 2)" />' +
-        '</svg>';
-
-        $.each(config.firstSegmentOfFiles, function() {
-            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + CommonUtils.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20) + iconTick + '</a></li>';
-        });
-        menu += '</ul>' +
-            '</nav>';
-        this.body.append(menu);
-    },
-
     // fixHeaderHeightChange: function() {
     //     var headerHeight = $('header .wrapper').height();
     //     $('#outer').css('margin-top', headerHeight + 'px');

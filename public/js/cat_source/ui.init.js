@@ -126,7 +126,6 @@ $.extend(UI, {
 
         if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
-		this.createJobMenu();
 		this.checkVersion();
         this.initTM();
 		this.initAdvanceOptions();
@@ -135,10 +134,10 @@ $.extend(UI, {
 		this.setEvents();
 		APP.checkQueryParams();
 
-        UI.firstLoad = false;
-
         // Temporary js for header action menu
-		UI.initHeader();
+        UI.initHeader();
+
+        UI.firstLoad = false;
 	},
     restart: function () {
         UI.unmountSegments();
@@ -154,10 +153,11 @@ $.extend(UI, {
         if (this.segmentToScrollAtRender) {
             this.startSegmentId = this.segmentToScrollAtRender;
         } else {
+            var files = CatToolStore.getJobFilesInfo();
             var hash = CommonUtils.parsedHash.segmentId;
             config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage();
             if (!config.last_opened_segment) {
-                config.last_opened_segment = config.first_job_segment;
+                config.last_opened_segment = files.first_job_segment;
             }
             this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
         }

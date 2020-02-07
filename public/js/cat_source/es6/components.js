@@ -24,6 +24,7 @@ window.CommentsActions = require('./actions/CommentsActions');
 window.ProjectsStore = require('./stores/ProjectsStore');
 window.TeamsStore = require('./stores/TeamsStore');
 window.SegmentStore = require('./stores/SegmentStore');
+window.CatToolStore = require('./stores/CatToolStore');
 
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 window.Header = require("./components/header/Header").default;

@@ -194,14 +194,6 @@ $.extend(UI, {
             e.preventDefault();
             UI.toggleFileMenu();
         });
-        $("#jobMenu").on('click', '.jobmenu-list li', function(e) {
-            e.preventDefault();
-            UI.renderAndScrollToSegment($(this).attr('data-segment'));
-        }).on('click', 'li.currSegment:not(.disabled)', function(e) {
-            e.preventDefault();
-            SegmentActions.scrollToCurrentSegment();
-            SegmentActions.setFocusOnEditArea();
-        });
         $("#jobNav .currseg").on('click', function(e) {
             e.preventDefault();
             var current = SegmentStore.getCurrentSegment();
