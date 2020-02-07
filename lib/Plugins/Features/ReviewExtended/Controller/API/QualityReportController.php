@@ -156,7 +156,7 @@ class QualityReportController extends KleinController {
                 }
 
                 // Time to edit array
-                $tte = $this->getTteArrayForSegment( $ttlArray, $outputArray [ $k0 ] [ 'segments' ] [ $k1 ][ 'sid' ] );
+                $tte = $this->getTteArrayForSegment( $ttlArray, $segment->sid );
 
                 $outputArray [ $k0 ] [ 'segments' ] [ $k1 ]                                = $file[ 'segments' ] [ $k1 ]->toArray();
                 $outputArray [ $k0 ] [ 'segments' ] [ $k1 ] [ 'time_to_edit' ]             = $tte[ 'total' ];
