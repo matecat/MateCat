@@ -158,7 +158,7 @@ const SegmentActions = {
                 sid: sid,
             });
             if (callback) {
-                callback.apply(this, [sid]);
+                setTimeout(()=>callback.apply(this, [sid]));
             }
         } else {
             UI.unmountSegments();
