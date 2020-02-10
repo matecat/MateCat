@@ -129,7 +129,16 @@ $.extend(UI, {
 
 			initEvents();
 			UI.detectStartSegment();
+			var segment = SegmentStore.getCurrentSegment();
+			if ( segment ) {
+				UI.updateJobMenu(segment);
+			}
 		});
+	},
+	updateJobMenu: function(segment) {
+		var fileId = segment.id_file;
+		$("#jobMenu .jobmenu-list li").removeClass('current');
+		$("#jobMenu .jobmenu-list li[data-file=" + fileId +"]").addClass('current');
 	},
 });
 
