@@ -674,7 +674,7 @@ class Segment extends React.Component {
                     </div>
                 </div>
                 <div className="segment-side-container">
-                    {config.comments_enabled && this.props.segment.openComments && this.props.segment.opened ? (
+                    {config.comments_enabled && this.props.segment.openComments ? (
                         <SegmentCommentsContainer {...this.props} />
                     ) : (null)}
                     {this.props.isReviewExtended && this.state.showRevisionPanel && this.props.segment.opened && !locked  ? (
