@@ -8,7 +8,6 @@ use Chunks_ChunkCompletionEventStruct;
 use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Constants;
-use Contribution\ContributionSetStruct;
 use Database;
 use Exception;
 use Exceptions\NotFoundException;
@@ -40,29 +39,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     public function __construct( BasicFeatureStruct $feature ) {
         parent::__construct( $feature );
-    }
-
-    /**
-     * In ReviewExtended, UI forces the `propagation` parameter to false to avoid prompt and autopropagation of
-     * revision status changes.
-     *
-     * This param must be reset to default value `true` when contribution is evaluted, otherwise the
-     * TM won't receive UPDATE when a segment is updated.
-     *
-     * XXX: not sure this was the best way to solve this problem.
-     *
-     * @param ContributionSetStruct  $contributionStruct
-     * @param Projects_ProjectStruct $project
-     *
-     * @return ContributionSetStruct
-     */
-    public function filterContributionStructOnSetTranslation( ContributionSetStruct $contributionStruct, Projects_ProjectStruct $project ) {
-
-        if ( $contributionStruct->fromRevision ) {
-            $contributionStruct->propagationRequest = true;
-        }
-
-        return $contributionStruct;
     }
 
     /**

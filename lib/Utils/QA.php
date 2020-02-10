@@ -239,7 +239,10 @@ class QA {
 
     const ERR_SYMBOL_MISMATCH = 1200;
 
+    const ERR_EX_BX_NESTED_IN_G = 1300;
+
     const SMART_COUNT_PLURAL_MISMATCH = 2000;
+    const SMART_COUNT_MISMATCH = 2001;
 
     /**
      * Human Readable error map.
@@ -334,7 +337,10 @@ class QA {
          */
             1200 => 'Symbol mismatch',
 
+            1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
+
             2000 => 'Smart count plural forms mismatch',
+            2001 => '%smartcount tag count mismatch',
     ];
 
     protected $_tipMap = [
@@ -470,6 +476,13 @@ class QA {
                         'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ] );
                 break;
+            case self::ERR_EX_BX_NESTED_IN_G:
+                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_NESTED_IN_G,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
+                ] );
+                break;
             case self::ERR_UNCLOSED_X_TAG:
             case self::ERR_UNCLOSED_G_TAG:
             case self::SMART_COUNT_PLURAL_MISMATCH:
@@ -477,6 +490,13 @@ class QA {
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
                         'tip'     => $this->_getTipValue( $errCode )
+                ] );
+                break;
+            case self::SMART_COUNT_MISMATCH:
+                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ self::SMART_COUNT_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::SMART_COUNT_MISMATCH )
                 ] );
                 break;
 
@@ -1324,7 +1344,7 @@ class QA {
      * Perform all integrity check and comparisons on source and target string
      *
      * @return errObject[]
-     *
+     * @throws Exception
      */
     public function performConsistencyCheck() {
 
@@ -1336,6 +1356,7 @@ class QA {
 
         $this->_checkTagsBoundary();
         $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
+        $this->_checkBxAndExInsideG();
         $this->_checkTagPositions();
         $this->_checkNewLineConsistency();
         $this->_checkSymbolConsistency();
@@ -1349,6 +1370,7 @@ class QA {
      * Perform integrity check only for tag mismatch
      *
      * @return errObject[]
+     * @throws Exception
      */
     public function performTagCheckOnly() {
 
@@ -1359,6 +1381,7 @@ class QA {
         }
 
         $this->_checkTagMismatch();
+        $this->_checkBxAndExInsideG();
 
         // all checks completed
         return $this->getErrors();
@@ -1740,6 +1763,27 @@ class QA {
             $this->_checkTailCRNL( $srcNodeContent, $trgNodeContent );
         }
 
+    }
+
+    /**
+     * Perform a check for <bx> and/or <ex> tag(s) inside a <g> tag
+     */
+    protected function _checkBxAndExInsideG() {
+
+        $regex = '/<g id ?= ?[\"|\']*.[\"|\']?>(.*?)<\/g>/ui';
+
+        // find <g>...</g>
+        preg_match_all( $regex, $this->target_seg, $matches_trg );
+
+        foreach ($matches_trg[1] as $match) {
+
+            // check
+            preg_match_all('/<(ex|bx) id ?= ?["\']{1}.*["\']{1} ?\/>/ui', $match, $matches_exBx);
+
+            if( count($matches_exBx[0]) > 0 ){
+                $this->_addError( self::ERR_EX_BX_NESTED_IN_G );
+            }
+        }
     }
 
     /**
