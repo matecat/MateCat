@@ -1,4 +1,4 @@
-import SegmentStore  from '../stores/SegmentStore';
+// import SegmentStore  from '../stores/SegmentStore';
 import TextUtils from './textUtils';
 
 const TAGS_UTILS =  {
@@ -460,9 +460,15 @@ const TAGS_UTILS =  {
 
     hasSourceOrTargetTags: function ( sid ) {
         let regExp = this.getXliffRegExpression();
-        let segment = SegmentStore.getSegmentByIdToJS(sid);
-        let sourceTags = segment.segment.match( regExp );
-        return sourceTags && sourceTags.length > 0 ;
+
+        try {
+            let segment = SegmentStore.getSegmentByIdToJS(sid);
+            let sourceTags = segment.segment.match( regExp );
+            return sourceTags && sourceTags.length > 0 ;
+        } catch(error) {
+            return false
+        }
+
     },
 
     /**
