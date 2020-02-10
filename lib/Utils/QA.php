@@ -1344,7 +1344,7 @@ class QA {
      * Perform all integrity check and comparisons on source and target string
      *
      * @return errObject[]
-     *
+     * @throws Exception
      */
     public function performConsistencyCheck() {
 
@@ -1370,6 +1370,7 @@ class QA {
      * Perform integrity check only for tag mismatch
      *
      * @return errObject[]
+     * @throws Exception
      */
     public function performTagCheckOnly() {
 

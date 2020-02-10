@@ -229,6 +229,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'newseg' ]         = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
         $parameters[ 'newtra' ]         = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
         $parameters[ 'langpair' ]       = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'prop' ]           = $_config[ 'prop' ];
         $parameters[ 'de' ]             = $_config[ 'email' ];
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
