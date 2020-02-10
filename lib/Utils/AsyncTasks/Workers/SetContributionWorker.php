@@ -11,7 +11,9 @@ namespace AsyncTasks\Workers;
 
 use Contribution\ContributionSetStruct;
 use Engine;
+use Engines_EngineInterface;
 use Exception;
+use Exceptions\ValidationError;
 use INIT;
 use Jobs_JobStruct;
 use TaskRunner\Commons\AbstractElement;
@@ -31,14 +33,14 @@ class SetContributionWorker extends AbstractWorker {
     const REDIS_PROPAGATED_ID_KEY = "j:%s:s:%s";
 
     /**
-     * @var \Engines_EngineInterface
+     * @var Engines_EngineInterface
      */
     protected $_engine;
 
     /**
      * This method is for testing purpose. Set a dependency injection
      *
-     * @param \Engines_EngineInterface $_tms
+     * @param Engines_EngineInterface $_tms
      */
     public function setEngine( $_tms ){
         $this->_engine = $_tms;
@@ -50,8 +52,8 @@ class SetContributionWorker extends AbstractWorker {
      * @return null
      * @throws EndQueueException
      * @throws ReQueueException
-     * @throws \Exception
-     * @throws \Exceptions\ValidationError
+     * @throws Exception
+     * @throws ValidationError
      */
     public function process( AbstractElement $queueElement ) {
 
@@ -72,8 +74,8 @@ class SetContributionWorker extends AbstractWorker {
      * @param ContributionSetStruct $contributionStruct
      *
      * @throws ReQueueException
-     * @throws \Exception
-     * @throws \Exceptions\ValidationError
+     * @throws Exception
+     * @throws ValidationError
      */
     protected function _execContribution( ContributionSetStruct $contributionStruct ){
 
@@ -95,29 +97,29 @@ class SetContributionWorker extends AbstractWorker {
 
         $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
-        $redisSetKey = sprintf( static::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
-        $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
+//        $redisSetKey = sprintf( static::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
+//        $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
 
         try {
 
-            if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
+//            if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
                 $this->_update( $config, $contributionStruct );
-                $this->_doLog( "Key UPDATE: $redisSetKey, " . var_export( $isANewSet, true ) );
-            } else {
-                $this->_set( $config, $contributionStruct );
-                $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
-            }
+                $this->_doLog( "Key UPDATE -- Job: $contributionStruct->id_job, Segment: $contributionStruct->id_segment " );
+//            } else {
+//                $this->_set( $config, $contributionStruct );
+//                $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
+//            }
 
-            $this->_queueHandler->getRedisClient()->expire(
-                    $redisSetKey,
-                    60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
-            ); //TTL 3 months, the time for job archivability
+//            $this->_queueHandler->getRedisClient()->expire(
+//                    $redisSetKey,
+//                    60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
+//            ); //TTL 3 months, the time for job archivability
 
         } catch( ReQueueException $e ){
             $this->_doLog( $e->getMessage() );
-            if( $e->getCode() == self::ERR_SET_FAILED || $isANewSet ){
-                $this->_queueHandler->getRedisClient()->del( [ $redisSetKey ] );
-            }
+//            if( $e->getCode() == self::ERR_SET_FAILED || $isANewSet ){
+//                $this->_queueHandler->getRedisClient()->del( [ $redisSetKey ] );
+//            }
             throw $e;
         }
 
@@ -129,8 +131,8 @@ class SetContributionWorker extends AbstractWorker {
      *
      * @param ContributionSetStruct $contributionStruct
      *
-     * @throws \Exception
-     * @throws \Exceptions\ValidationError
+     * @throws Exception
+     * @throws ValidationError
      */
     protected function _loadEngine( ContributionSetStruct $contributionStruct ){
 
@@ -146,7 +148,7 @@ class SetContributionWorker extends AbstractWorker {
      * @param ContributionSetStruct $contributionStruct
      *
      * @throws ReQueueException
-     * @throws \Exceptions\ValidationError
+     * @throws ValidationError
      */
     protected function _set( Array $config, ContributionSetStruct $contributionStruct ){
 
@@ -167,6 +169,13 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
+    /**
+     * @param array                 $config
+     * @param ContributionSetStruct $contributionStruct
+     *
+     * @throws ReQueueException
+     * @throws ValidationError
+     */
     protected function _update( Array $config, ContributionSetStruct $contributionStruct ){
 
         // update the contribution for every key in the job belonging to the user
@@ -174,6 +183,7 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'translation' ]    = $contributionStruct->oldTranslation;
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
+        $config[ 'prop' ]           = json_encode( $contributionStruct->getProp() );
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
@@ -186,6 +196,13 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
+    /**
+     * @param ContributionSetStruct $contributionStruct
+     * @param Jobs_JobStruct        $jobStruct
+     *
+     * @return array
+     * @throws Exception
+     */
     protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ){
 
         if ( $contributionStruct->fromRevision ) {

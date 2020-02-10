@@ -17,8 +17,21 @@ class setTranslationController extends ajaxController {
     protected $__postInput = [];
 
     /**
-     * Set as true the propagation default
      * @var bool
+     *
+     * This parameter is not used by the application, but we use it to for information integrity
+     *
+     * User choice for propagation.
+     *
+     * Propagate is false IF:
+     * - the segment has not repetitions
+     * - the segment has some one or more repetitions and the user choose to not propagate it
+     * - the segment is already autopropagated ( marked as autopropagated_from ) and it hasn't been changed
+     *
+     * Propagate is true ( vice versa ) IF:
+     * - the segment has one or more repetitions and it's status is NEW/DRAFT
+     * - the segment has one or more repetitions and the user choose to propagate it
+     * - the segment has one or more repetitions, it is not modified, it doesn't have translation conflicts and a change status is requested
      */
     protected $propagate = true;
 
@@ -912,6 +925,22 @@ class setTranslationController extends ajaxController {
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
+
+        /*
+         * This parameter is not used by the application, but we use it to for information integrity
+         *
+         * User choice for propagation.
+         *
+         * Propagate is false IF:
+         * - the segment has not repetitions
+         * - the segment has some one or more repetitions and the user choose to not propagate it
+         * - the segment is already autopropagated ( marked as autopropagated_from ) and it hasn't been changed
+         *
+         * Propagate is true ( vice versa ) IF:
+         * - the segment has one or more repetitions and it's status is NEW/DRAFT
+         * - the segment has one or more repetitions and the user choose to propagate it
+         * - the segment has one or more repetitions, it is not modified, it doesn't have translation conflicts and a change status is requested
+         */
         $contributionStruct->propagationRequest   = $this->propagate;
         $contributionStruct->id_mt                = $this->chunk->id_mt_engine;
 
