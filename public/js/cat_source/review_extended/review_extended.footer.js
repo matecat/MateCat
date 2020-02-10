@@ -16,14 +16,6 @@ if ( ReviewExtendedFooter.enabled() ) {
         render: function ( options ) {
             var promise = (new $.Deferred() ).resolve();
             originalRender.call(this, options);
-            this.downOpts = {
-                offset: '100%',
-                context: $('#outer')
-            };
-            this.upOpts = {
-                offset: '-40%',
-                context: $('#outer')
-            };
             return promise;
         },
 

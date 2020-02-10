@@ -433,6 +433,7 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
             $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
+            $TPropagation[ 'match_type' ]             = $old_translation['match_type'];
 
             try {
 
@@ -479,10 +480,10 @@ class setTranslationController extends ajaxController {
             $newValues   = [];
             $newValues[] = $counter->getUpdatedValues( $old_count );
 
-            foreach ( $propagationTotal[ 'totals' ] as $__pos => $old_value ) {
-                $counter->setOldStatus( $old_value[ 'status' ] );
+            if ( false == empty($propagationTotal[ 'totals' ]) ) {
+                $counter->setOldStatus( $old_status );
                 $counter->setNewStatus( $this->status );
-                $newValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
+                $newValues[] = $counter->getUpdatedValues( $propagationTotal[ 'totals' ]['total'] );
             }
 
             try {
@@ -523,12 +524,11 @@ class setTranslationController extends ajaxController {
 
         $file_stats = [];
 
-        $this->result[ 'stats' ]      = $job_stats;
-        $this->result[ 'file_stats' ] = $file_stats;
-        $this->result[ 'code' ]       = 1;
-        $this->result[ 'data' ]       = "OK";
-        $this->result[ 'version' ]    = date_create( $new_translation[ 'translation_date' ] )->getTimestamp();
-
+        $this->result[ 'stats' ]       = $job_stats;
+        $this->result[ 'file_stats' ]  = $file_stats;
+        $this->result[ 'code' ]        = 1;
+        $this->result[ 'data' ]        = "OK";
+        $this->result[ 'version' ]     = date_create( $new_translation[ 'translation_date' ] )->getTimestamp();
         $this->result[ 'translation' ] = $this->getTranslationObject( $new_translation );
 
         /* FIXME: added for code compatibility with front-end. Remove. */
@@ -560,7 +560,6 @@ class setTranslationController extends ajaxController {
 
         }
 
-
         $this->featureSet->run( 'preSetTranslationCommitted', [
                 'translation'       => $new_translation,
                 'old_translation'   => $old_translation,
@@ -590,7 +589,7 @@ class setTranslationController extends ajaxController {
             $this->featureSet->run( 'setTranslationCommitted', [
                     'translation'      => $new_translation,
                     'old_translation'  => $old_translation,
-                    'propagated_ids'   => $propagationTotal[ 'propagated_ids' ],
+                    'propagated_ids'   => $propagationTotal['segments_for_propagation'][ 'propagated_ids' ],
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
@@ -605,7 +604,7 @@ class setTranslationController extends ajaxController {
             $this->result = $this->featureSet->filter( 'filterSetTranslationResult', $this->result, [
                     'translation'     => $new_translation,
                     'old_translation' => $old_translation,
-                    'propagated_ids'  => $propagationTotal[ 'propagated_ids' ],
+                    'propagated_ids'  => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ],
                     'chunk'           => $this->chunk,
                     'segment'         => $this->segment
             ] );
@@ -635,6 +634,7 @@ class setTranslationController extends ajaxController {
 
         }
 
+        $this->result[ 'propagation' ] = $propagationTotal;
         $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );

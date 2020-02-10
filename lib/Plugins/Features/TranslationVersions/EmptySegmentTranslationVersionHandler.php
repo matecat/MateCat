@@ -16,8 +16,9 @@ class EmptySegmentTranslationVersionHandler implements VersionHandlerInterface {
 
     /**
      * @param Translations_SegmentTranslationStruct $propagation
+     * @param                                       $propagated_ids
      */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation ) {}
+    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $propagated_ids ) {}
 
     /**
      * Evaluates the need to save a new translation version to database.

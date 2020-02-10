@@ -18,7 +18,7 @@ class TranslationVersions extends BaseFeature {
 
     const FEATURE_CODE = 'translation_versions';
 
-    public static function getVersionHandlerNewInstance( Chunks_ChunkStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct  ){
+    public static function getVersionHandlerNewInstance( Chunks_ChunkStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
 
         if ( $projectStruct->isFeatureEnabled( self::FEATURE_CODE ) ) {
             return new SegmentTranslationVersionHandler(
@@ -42,7 +42,7 @@ class TranslationVersions extends BaseFeature {
         $translation = $params[ 'translation' ];
 
         /** @var \Translations_SegmentTranslationStruct $old_translation */
-        $old_translation  = $params[ 'old_translation' ];
+        $old_translation = $params[ 'old_translation' ];
 
         $source_page_code = $params[ 'source_page_code' ];
 
@@ -70,8 +70,20 @@ class TranslationVersions extends BaseFeature {
         // If propagated segments exist, start cycle here
         // @TODO COMPLETE REFACTORY IS NEEDED HERE!!!!!
         // There is no logic here, the version_number is simply got from $segmentTranslationBeforeChange and saved as is in translation events
-        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ] ) and false === empty($params[ 'propagation' ][ 'segments_for_propagation' ] ) ) {
-            foreach ( $params[ 'propagation' ][ 'segments_for_propagation' ] as $segmentTranslationBeforeChange ) {
+        if ( isset( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) and false === empty( $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ] ) ) {
+
+            $segments_for_propagation = $params[ 'propagation' ][ 'segments_for_propagation' ][ 'propagated' ];
+            $segmentTranslations      = [];
+
+            if ( false === empty( $segments_for_propagation[ 'not_ice' ] ) ) {
+                $segmentTranslations = array_merge( $segmentTranslations, $segments_for_propagation[ 'not_ice' ][ 'object' ] );
+            }
+
+            if ( false === empty( $segments_for_propagation[ 'ice' ] ) ) {
+                $segmentTranslations = array_merge( $segmentTranslations, $segments_for_propagation[ 'ice' ][ 'object' ] );
+            }
+
+            foreach ( $segmentTranslations as $segmentTranslationBeforeChange ) {
 
                 /** @var \Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
                 $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;

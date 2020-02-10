@@ -1,11 +1,13 @@
 APP = null;
 
 APP = {
+    teamStorageName: "defaultTeam",
     init: function () {
         this.setLoginEvents();
         if (config.isLoggedIn) {
             var self = this;
             APP.USER.loadUserData().done(function ( ) {
+                TeamsActions.updateUser(APP.USER.STORE);
                 self.setTeamNameInMenu();
                 self.setUserImage();
             });
@@ -44,7 +46,7 @@ APP = {
         } ).on( 'click', '.modal[data-type=confirm_checkbox] .btn-cancel, .modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function ( e ) {
             e.preventDefault();
             APP.closePopup();
-            el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
+            var el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
             if ( $( el ).attr( 'data-callback' ) ) {
                 if ( typeof UI[$( el ).attr( 'data-callback' )] === 'function' ) {
                     var context = $( el ).attr( 'data-context' ) || '';
@@ -162,7 +164,7 @@ APP = {
 			setup.beforeSend = req.beforeSend;
 
 		return $.ajax(setup);
-	}, 
+	},
     appendTime: function() {
         var t = new Date();
         return '&time=' + t.getTime();
@@ -433,7 +435,7 @@ APP = {
                     .attr('disabled','disabled' )
                     .removeAttr('data-callback' )
                     .attr('data-callback-disabled', callback)
-                    .bind("click",UI.disableLink);
+                    .bind("click",APP.disableLink);
         };
 
         var enableOk = function ( context ) {
@@ -443,7 +445,7 @@ APP = {
                     .removeAttr('disabled')
                     .removeAttr('data-callback-disabled' )
                     .attr('data-callback', callback)
-                    .unbind('click', UI.disableLink);
+                    .unbind('click', APP.disableLink);
         };
 
         newPopup = renderPopup( conf );
@@ -568,7 +570,7 @@ APP = {
                 $(".notifications-wrapper")[0]
             );
         }
-        
+
         return APP.notificationBox.addNotification(notification);
     },
     removeNotification: function (notification) {
@@ -711,18 +713,20 @@ APP = {
     },
 
     getLastTeamSelected: function (teams) {
-        if (localStorage.getItem(this.teamStorageName)) {
-            var lastId = localStorage.getItem(this.teamStorageName);
-            var team = teams.find(function (t, i) {
-                return parseInt(t.id) === parseInt(lastId);
-            });
-            if (team) {
-                return team;
+        if (config.isLoggedIn) {
+            if (localStorage.getItem(this.teamStorageName)) {
+                var lastId = localStorage.getItem(this.teamStorageName);
+                var team = teams.find(function (t, i) {
+                    return parseInt(t.id) === parseInt(lastId);
+                });
+                if (team) {
+                    return team;
+                } else {
+                    return teams[0];
+                }
             } else {
                 return teams[0];
             }
-        } else {
-            return teams[0];
         }
     },
 
@@ -774,7 +778,6 @@ APP = {
                             type: 'error'
                         };
                         APP.addNotification(notification);
-                        // UI.showMessage({msg: tokenData.message})
                     }
                     if (callback) {
                         callback();
@@ -822,9 +825,6 @@ APP = {
         // TODO: this should be relative to the current USER, find a
         // way to generate this at runtime.
         //
-        /*if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
-         UI.showDownloadCornerTip();
-         }*/
 
         if ( typeof window.googleDriveWindows == 'undefined' ) {
             window.googleDriveWindows = {};
@@ -910,7 +910,8 @@ APP = {
     setTeamNameInMenu: function () {
         if (APP.USER.STORE.teams) {
             var team = this.getLastTeamSelected(APP.USER.STORE.teams);
-            $('.user-menu-container .organization-name').text(team.name);
+            $('.user-menu-container .organization-name').text(team.name); //??
+            $('.user-menu-container .organization-name').text(team.name); //??
         } else {
             var self = this;
             APP.USER.loadUserData().done(function (  ) {
@@ -925,12 +926,7 @@ APP = {
             var urlImage = APP.USER.STORE.metadata.gplus_picture;
             var html = '<img class="ui-user-top-image-general user-menu-preferences" src="' + urlImage + '"/>';
             $('.user-menu-container .user-menu-preferences').replaceWith(html);
-            $('.user-menu-preferences').on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                $('#modal').trigger('openpreferences');
-                return false;
-            });
+            /*$('.user-menu-preferences').on('click', function (e) {*/
         } else {
             setTimeout(this.setUserImage.bind(this), 500);
         }
@@ -1007,7 +1003,45 @@ APP = {
             expiration.setYear(new Date().getFullYear() + 1);
         }
         document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
-    }
+    },
+
+    checkQueryParams: function () {
+        var action = APP.getParameterByName("action");
+        if (action) {
+            switch (action) {
+                case 'download':
+                    var interval = setTimeout(function () {
+                        $('#downloadProject').trigger('click');
+                        clearInterval(interval);
+                    }, 300);
+                    APP.removeParam('action');
+                    break;
+                case 'openComments':
+                    if ( MBC.enabled() ) {
+                        var interval = setInterval(function () {
+                            if ( $( '.mbc-history-balloon-outer' ) ) {
+                                $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
+                                $( '#mbc-history' ).addClass( 'open' );
+                                clearInterval(interval);
+                            }
+                        }, 500);
+
+                    }
+                    APP.removeParam('action');
+                    break;
+                case 'warnings':
+                    var interval = setInterval(function () {
+                        if ( $( '#notifbox.warningbox' ) ) {
+                            $("#point2seg").trigger('mousedown');
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                    APP.removeParam('action');
+                    break;
+            }
+        }
+
+    },
 
 
 };

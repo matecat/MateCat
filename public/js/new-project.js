@@ -45,16 +45,6 @@ APP.createTMKey = function () {
 
 };
 
-function closeMLPanel() {
-    $( ".popup-languages.slide").removeClass('open').animate({right: '-1100px'}, 400);
-    $(".popup-outer.lang-slide").hide();
-    $('body').removeClass('side-popup');
-
-    APP.checkForLexiQALangs();
-    APP.checkForTagProjectionLangs();
-    APP.checkForSpeechToText();
-}
-
 
 /**
  * ajax call to clear the uploaded files when an user refresh the home page
@@ -87,21 +77,13 @@ APP.displayCurrentTargetLang = function() {
     if (currentLangs.indexOf(',') === -1) {
         $('#target-lang').dropdown('set selected', localStorage.getItem( 'currentTargetLang' ));
     } else {
-        var labels = '';
-        if ($('#target-lang div.item[data-value="'+ currentLangs +'"]').length === 0) {
-            currentLangs.split(',').forEach(function (item) {
-                var elem = $('.popup-languages li input[value="'+ item +'"]');
-                labels += elem.parent().find('label').attr('for') + ',';
-                // elem.
-            });
-            direction = UI.checkMultilangRTL();
-            labels = labels.substring(0, labels.length - 1);
-            var op = '<div id="extraTarget" class="item active selected" data-selected="selected" data-direction="' + direction + '" data-value="' + currentLangs + '">' + labels + '</div>';
-            $('#extraTarget').remove();
-            $('#target-lang div.item').first().before(op);
-        }
+        currentLangs = currentLangs.split(',').map(e=>config.languages_array.filter(i=>i.code===e)[0])
+        var direction = 'ltr'; // todo: this not work. Check rtl from array
+		var op = '<div id="extraTarget" class="item active selected" data-selected="selected" data-direction="' + direction + '" data-value="' + currentLangs.map(e=>e.code) + '">' + currentLangs.map(e=>e.name) + '</div>';
+		$('#extraTarget').remove();
+		$('#target-lang div.item').first().before(op);
         setTimeout(function () {
-            $('#target-lang').dropdown('set selected', currentLangs);
+            $('#target-lang').dropdown('set selected', currentLangs.map(e=>e.code));
         });
 
 
@@ -328,7 +310,7 @@ UI.UPLOAD_PAGE = {};
 
 $.extend(UI.UPLOAD_PAGE, {
 	init: function () {
-        this.initDropdowns();
+
         this.checkLanguagesCookie();
         this.checkGDriveEvents();
         /**
@@ -354,7 +336,7 @@ $.extend(UI.UPLOAD_PAGE, {
     render: function () {
 
         var headerMountPoint = $("header")[0];
-
+        var self = this;
         if (config.isLoggedIn) {
             ReactDOM.render(React.createElement(Header, {
                 showFilterProjects: false,
@@ -364,10 +346,14 @@ $.extend(UI.UPLOAD_PAGE, {
             }), headerMountPoint);
             API.TEAM.getAllTeams().done(function (data) {
                 self.teams = data.teams;
+                self.initDropdowns();
                 TeamsActions.renderTeams(self.teams);
                 self.selectedTeam = APP.getLastTeamSelected(self.teams);
                 TeamsActions.selectTeam(self.selectedTeam);
             });
+            setTimeout( function (  ) {
+                CatToolActions.showHeaderTooltip();
+            }, 2000);
         } else {
             ReactDOM.render(React.createElement(Header, {
                 showSubHeader: false,
@@ -375,6 +361,7 @@ $.extend(UI.UPLOAD_PAGE, {
                 loggedUser: false,
                 showLinks: true
             }), headerMountPoint);
+            this.initDropdowns();
         }
     },
 
@@ -401,20 +388,27 @@ $.extend(UI.UPLOAD_PAGE, {
             UI.openLanguageResourcesPanel('tm');
         });
 
-        $('#target-lang').dropdown({
-            selectOnKeydown: false,
-            fullTextSearch: 'exact',
-        });
-
-        $('#source-lang').dropdown({
-            selectOnKeydown: false,
-            fullTextSearch: 'exact',
-        });
-
         $('#project-subject').dropdown({
             selectOnKeydown: false,
             fullTextSearch: 'exact'
         });
+
+        $('#project-team').dropdown({
+            selectOnKeydown: false,
+            fullTextSearch: 'exact',
+            onChange: function (value) {
+                APP.setTeamInStorage(value);
+            }
+        });
+
+        var selectedTeam = APP.getLastTeamSelected(APP.USER.STORE.teams);
+        if ( selectedTeam ) {
+            $('#project-team').dropdown('set selected', selectedTeam.id);
+        } else {
+            $('#project-team').dropdown('set selected', $('#project-team .menu .item:first-child').data('value'));
+        }
+
+
         $('#project-subject').dropdown('set selected', 'general');
 
 
@@ -528,7 +522,8 @@ $.extend(UI.UPLOAD_PAGE, {
     getSelectedTeam: function () {
         var selectedTeamId;
         if (config.isLoggedIn) {
-            selectedTeamId = $('.team-dd').val();
+            //selectedTeamId = $('.team-dd').val();
+            selectedTeamId = $('#project-team').dropdown('get value');
         }
         return selectedTeamId;
     },
@@ -623,44 +618,37 @@ $.extend(UI.UPLOAD_PAGE, {
 
         $("#add-multiple-lang").click(function(e) {
             e.preventDefault();
-            $(".popup-languages.slide").addClass('open').show().animate({ right: '0px' }, 400);
+
             var tlAr = $('#target-lang').dropdown('get value').split(',');
-            $('.popup-languages.slide .listlang li input').removeAttr('checked');
-            $('.popup-languages.slide .listlang li').removeClass('on');
-            $('.popup-languages.slide .listlang li input').prop('checked', false);
-            $.each(tlAr, function() {
-                var ll = $('.popup-languages.slide .listlang li #' + this);
-                ll.parent().addClass('on');
-                ll.attr('checked','true');
-                ll.prop('checked', true);
-            });
-            $('.popup-languages h1 .number').text( tlAr.length );
-            $(".popup-outer.lang-slide").show();
-            $('body').addClass('side-popup');
-        });
+            var sourceLang = $('#source-lang').dropdown('get value');
 
-        $(".popup-outer.lang-slide, #cancelMultilang, #chooseMultilang").click(function(e) {
-            closeMLPanel();
-        });
+            ReactDOM.render(
+                React.createElement( LanguageSelector, {
+                    selectedLanguagesFromDropdown: tlAr,
+                    languagesList: config.languages_array,
+                    fromLanguage: sourceLang,
+                    onClose: function () {
+                        ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+                    },
+                    onConfirm: function (data) {
+                        if(data){
+                            const str = data.map(e=> e.name).join(',');
+                            const vals = data.map(e=> e.code).join(',');
+                            var direction = 'ltr'; // todo: this not work. Check rtl from array
+                            var op = '<div id="extraTarget" class="item" data-selected="selected" data-direction="' + direction + '" data-value="' + vals + '">' + str + '</div>';
+                            $('#extraTarget').remove();
+                            $('#target-lang div.item').first().before(op);
+                            setTimeout(function () {
+                                $('#target-lang').dropdown('set selected', vals);
+                            });
 
-        $(".popup-languages .listlang li label").click(function(e) {
-            $(this).parent().toggleClass('on');
-            var c = $(this).parent().find('input');
-            if(c.is(':checked')) {
-                c.prop("checked", false);
-            } else {
-                c.prop("checked", true);
-            }
-            $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
-        });
-        $(".popup-languages .listlang li input").click(function(e) {
-            $(this).parent().toggleClass('on');
-            $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
-        });
 
-        $(".close").click(function(e) {
-            $("div.popup-languages").hide();
-            $("div.grayed").hide();
+                            $('.translate-box.target h2 .extra').remove();
+                            $('.translate-box.target h2').append(`<span class="extra">(${vals.length} languages)</span>`);
+                        }
+                        ReactDOM.unmountComponentAtNode($('#languageSelector')[0])
+                    }
+                }), $('#languageSelector')[0] );
         });
 
         $("#disable_tms_engine").change(function(e){
@@ -703,9 +691,6 @@ $.extend(UI.UPLOAD_PAGE, {
         }
     },
     targetLanguageChangedCallback: function () {
-        $('.popup-languages li.on').each(function(){
-            $(this).removeClass('on').find('input').removeAttr('checked');
-        });
         $('.translate-box.target h2 .extra').remove();
         if( UI.checkTMXLangFailure() ){
             UI.delTMXLangFailure();

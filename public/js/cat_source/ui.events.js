@@ -3,86 +3,107 @@
  */
 $.extend(UI, {
 	bindShortcuts: function() {
-		$("body").removeClass('shortcutsDisabled');
-
-		$("body").on('keydown.shortcuts', null, "alt+h", function(e) {
-            UI.openShortcutsModal();
-		});
-
-
-        this.shortCutskey = "standard";
-		if (UI.isMac) {
-            this.shortCutskey = "mac";
-        }
-        $("body").on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copySource.keystrokes[this.shortCutskey], function(e) {
+        $("body").on('keydown.shortcuts', null, Shortcuts.cattol.events.openShortcutsModal.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
+            APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts');
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copySource.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            UI.copySource();
-        }).on('keydown.shortcuts',null, UI.shortcuts.cattol.events.openSettings.keystrokes[this.shortCutskey], function(e) {
+            SegmentActions.copySourceToTarget();
+        }).on('keydown.shortcuts',null, Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             UI.openLanguageResourcesPanel();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openSearch.keystrokes[this.shortCutskey], function(e) {
-            if((SearchUtils.searchEnabled)&&($('#filterSwitch').length)) SearchUtils.toggleSearch(e);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.redoInSegment.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openSearch.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
+            if((SearchUtils.searchEnabled)&&($('#action-search').length)) SearchUtils.toggleSearch(e);
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.redoInSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            UI.redoInSegment(UI.currentSegment);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.undoInSegment.keystrokes[this.shortCutskey], function(e) {
+            // UI.redoInSegment(UI.currentSegment);
+            SegmentActions.redoInSegment();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.undoInSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            UI.undoInSegment(UI.currentSegment);
-            UI.closeTagAutocompletePanel();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.gotoCurrent.keystrokes[this.shortCutskey], function(e) {
+            SegmentActions.undoInSegment();
+            SegmentActions.closeTagsMenu();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            UI.pointToOpenSegment();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openPrevious.keystrokes[this.shortCutskey], function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            UI.gotoPreviousSegment();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.openNext.keystrokes[this.shortCutskey], function(e) {
+            SegmentActions.scrollToCurrentSegment();
+            SegmentActions.setFocusOnEditArea();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openPrevious.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
-            UI.gotoNextSegment();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate_nextUntranslated.keystrokes[this.shortCutskey], function(e) {
+            SegmentActions.selectPrevSegmentDebounced();
+            // UI.gotoPreviousSegment();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openNext.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            SegmentActions.selectNextSegmentDebounced();
+            // UI.gotoNextSegment();
+        }).on('keyup.shortcuts', null, 'ctrl', function(e) {
+            SegmentActions.openSelectedSegment();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                UI.clickOnApprovedButton(e, UI.currentSegment.find('.next-unapproved'));
+                if ( $('.editor .next-unapproved:not(.disabled)').length > 0 ) {
+                    setTimeout( function () { UI.clickOnApprovedButton( $( '.editor .next-unapproved:not(.disabled)' ) )} );
+                } else {
+                    setTimeout(function () { UI.clickOnApprovedButton($('.editor .approved'))});
+                }
             } else {
                 if ( $('.editor .next-untranslated:not(.disabled)').length > 0 ) {
-                    $('.editor .next-untranslated:not(.disabled)').click();
+                    setTimeout(function () { UI.clickOnTranslatedButton($('.editor .next-untranslated:not(.disabled)'))});
                 } else if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    $('.editor .translated').click();
+                    setTimeout(function () { UI.clickOnTranslatedButton($('.editor .translated'))});
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    $('.editor .guesstags').click();
+                    setTimeout(function () { UI.startSegmentTagProjection(UI.currentSegmentId)});
                 }
             }
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.translate.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
             if ( config.isReview ) {
-                $('body.review .editor .approved:not(.disabled)').click();
+                setTimeout(function () { UI.clickOnApprovedButton($('body.review .editor .approved:not(.disabled)'))});
             } else {
                 if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    $('.editor .translated').click();
+                    setTimeout(function () {UI.clickOnTranslatedButton($('.editor .translated'))});
                 } else if ( $('.editor .guesstags').length > 0 ) {
-                    $('.editor .guesstags').click();
+                    setTimeout(function () {UI.startSegmentTagProjection(UI.currentSegmentId)});
                 }
             }
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
-            UI.toggleTagsMode();
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution1.keystrokes[this.shortCutskey], function(e) {
+            Customizations.toggleTagsMode();
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openComments.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
+            e.preventDefault();
+            var segment = SegmentStore.getCurrentSegment();
+            if (segment) {
+                SegmentActions.openSegmentComment(segment.sid);
+                SegmentActions.scrollToSegment(segment.sid);
+                CommentsActions.setFocusOnCurrentInput();
+            }
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.openIssuesPanel.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
+            e.preventDefault();
+            var segment = SegmentStore.getCurrentSegment();
+            if (segment && Review.enabled()) {
+                SegmentActions.openIssuesPanel({sid: segment.sid});
+                SegmentActions.scrollToSegment(segment.sid);
+            }
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution1.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution2.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution2.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 2);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.copyContribution3.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution3.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
-        }).on('keydown.shortcuts', null, UI.shortcuts.cattol.events.addNextTag.keystrokes[this.shortCutskey], function(e) {
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.addNextTag.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if ((UI.tagLockEnabled) && UI.hasDataOriginalTags(UI.currentSegment)) {
-                SegmentActions.showTagsMenu(UI.getSegmentId(UI.currentSegment));
+            var currentSegment = SegmentStore.getCurrentSegment();
+            if ((UI.tagLockEnabled) && TagUtils.hasDataOriginalTags(currentSegment.segment)) {
+                SegmentActions.showTagsMenu(currentSegment.sid);
             }
+        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            SegmentActions.openSplitSegment(UI.currentSegmentId);
         }).on('keydown.shortcuts', null, "ctrl+u", function(e) {
             // to prevent the underline shortcut
             e.preventDefault();
@@ -91,148 +112,14 @@ $.extend(UI, {
             e.preventDefault();
         });
 	},
-	unbindShortcuts: function() {
-		$("body").off(".shortcuts").addClass('shortcutsDisabled');
-	},
+
 	setEvents: function() {
 		this.bindShortcuts();
-		this.setEditAreaEvents();
-        var resetTextArea = _.debounce( function () {
-            console.debug( 'resetting') ;
-            var $this = $(this);
-            var maxHeight = $this.data('maxheight');
-            var minHeight = $this.data('minheight');
-
-            var borderTopWidth = parseFloat( $this.css( "borderTopWidth" ) );
-            var borderBottomWidth = parseFloat( $this.css( "borderBottomWidth" ) );
-            var borders = borderTopWidth + borderBottomWidth;
-            var scrollHeightWithBorders = this.scrollHeight + borders;
-
-            while ( scrollHeightWithBorders > $this.outerHeight() && $this.height() < maxHeight ) {
-                $this.height( $this.height() + 10 );
-            }
-
-            while ( scrollHeightWithBorders <= $this.outerHeight() && $this.height() > minHeight ) {
-                $this.height( $this.height() - 10 );
-            }
-
-            if ( $this.height() >= maxHeight ) {
-                $this.css( "overflow-y", "auto" );
-            } else {
-                $this.css( "overflow-y", "hidden" );
-            }
-        }, 100 );
-
-        $( document ).on( 'keydown', '.mc-resizable-textarea', resetTextArea );
-        $( document ).on( 'paste', '.mc-resizable-textarea', function () {
-            setTimeout( function ( el ) {
-                resetTextArea.call( el );
-            }, 100, this );
-        } );
-
-        $(document).on('segment:status:change', function(e, segment, options) {
-            var status = options.status ;
-            var next = UI.getNextSegment( segment.el, 'untranslated' );
-
-            if ( ! next ) {
-                $(window).trigger({
-                    type: "allTranslated"
-                });
-            }
-        });
-
-		$("body").on('click', '.tagModeToggle', function(e) {
-            e.preventDefault();
-            UI.toggleTagsMode();
-            if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
-		} );
-
-		$("body").on('click', '.autofillTag', function(e){
-			e.preventDefault();
-			UI.autoFillTagsInTarget();
-
-		}).on('click', '.tagLockCustomize', function(e) {
-			e.preventDefault();
-			if (UI.tagLockEnabled) {
-				UI.disableTagMark();
-			} else {
-				UI.enableTagMark();
-			}
-			UI.setTagLockCustomizeCookie(false);
-		}).on('click', '.open-popup-addtm-tr', function(e) {
-            e.preventDefault();
-            UI.openLanguageResourcesPanel();
-        }).on('click', '.modal .x-popup', function() {
-			if($('body').hasClass('shortcutsDisabled')) {
-				UI.bindShortcuts();
-			}
-		}).on('click', '#spellCheck .words', function(e) {
-			e.preventDefault();
-			UI.selectedMisspelledElement.replaceWith($(this).text());
-		}).on('click', '#spellCheck .add', function(e) {
-			e.preventDefault();
-			UI.addWord(UI.selectedMisspelledElement.text());
-		}).on('click', '.reloadPage', function() {
-			location.reload(true);
-		});
-
-		$(window).on('mousedown', function(e) {
-			if ($(e.target).hasClass("editarea")) {
-				return true;
-			}
-            //when the catoool is not loaded because of the job is archived,
-            // saveSelection leads to a javascript error
-            //so, add a check to see if the cattool page is really created/loaded
-            if( $('body' ).hasClass( '.job_archived' ) || $('body' ).hasClass( '.job_cancelled' ) ){
-                return false;
-            }
-			/*Show the cursor position to paste the glossary item (Ex: check dbclick)
-			 We have to know the old cursor position when clicking for example
-			 on a glossary item to paste the text in the correct position
-			 */
-
-            if(!$('.editor .targetarea .rangySelectionBoundary.focusOut').length) {
-                saveSelection();
-            }
-
-            $('.editor .targetarea .rangySelectionBoundary').addClass('focusOut');
-
-            $('.editor .search-source .rangySelectionBoundary.focusOut,' +
-                '.editor .search-target .rangySelectionBoundary.focusOut'
-            ).remove();
-
-            if ( UI.editarea && UI.editarea != '') {
-                var hasFocusBefore = UI.editarea.is(":focus");
-                setTimeout(function() {
-                    var hasFocusAfter = UI.editarea && UI.editarea.is(":focus");
-                    if(hasFocusBefore && hasFocusAfter){
-                        $('.editor .rangySelectionBoundary.focusOut').remove();
-						UI.editarea.get(0).normalize();
-                    }
-                }, 600);
-            }
-        });
 
 		window.onbeforeunload = function(e) {
-			goodbye(e);
+			return CommonUtils.goodbye(e);
 		};
-
-		$("#filterSwitch").bind('click', function(e) {
-            SearchUtils.toggleSearch(e);
-		});
-		$("#advancedOptions").bind('click', function(e) {
-			e.preventDefault();
-			UI.openOptionsPanel();
-		});
-		$("#segmentPointer").click(function(e) {
-			e.preventDefault();
-			UI.pointToOpenSegment();
-		});
-
-		$(".replace").click(function(e) {
-			e.preventDefault();
-			UI.body.toggleClass('replace-box');
-		});
+        //Header/Footer events
 
 		$("div.notification-box").mouseup(function() {
 			return false;
@@ -243,92 +130,39 @@ $.extend(UI, {
 			$("#search").toggle();
 		});
 
-		//overlay
-
-		$("#outer").on('click', 'a.sid', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			return false;
-		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
-			sel = window.getSelection();
-			UI.someUserSelection = (sel.type == 'Range') ? true : false;
-		}).on('dblclick', 'section.readonly', function() {
-			clearTimeout(UI.selectingReadonly);
-		}).on('dblclick', '.alternatives .graysmall', function(e) {
-            if ($(e.target).closest('li').hasClass('goto')) {
-                return;
-            }
-			UI.chooseAlternative($(this));
-        });
-
 		$("form#fileDownload").bind('submit', function(e) {
 			e.preventDefault();
 		});
 
 
-        // This is where we decide if a segment is to close or not.
-        // Beware that closeSegment is also called on openSegment
-        // ( other segments are closed when a new one is opened ).
-        //
-        $('#outer').click(function(e) {
-
-             var close = function() {
-                UI.setEditingSegment( null );
-                UI.closeSegment(UI.currentSegment, 1);
-            };
-            if( !UI.tagMenuOpen && UI.currentSegment ) {
-                UI.removeSelectedClassToTags();
-                UI.removeHighlightCorrespondingTags(UI.currentSegment);
+		$('html').on('keyup', function ( e ) {
+            if ( e.key === 'Meta' && navigator.platform === 'MacIntel' ) {
+                SegmentActions.openSelectedSegment();
             }
-            if ( $(e.target).parents('body') ) return ; // detatched from DOM
-            if ( eventFromReact(e) ) return;
-
-            if ( $(e.target).closest('section .sid').length ) close()  ;
-            if ( $(e.target).closest('section .segment-side-buttons').length ) close();
-
-            if ( !$(e.target).closest('section').length ) close();
-        });
-
-		$('html').on('click', 'section .actions', function(e){
-            e.stopPropagation();
-        }).on('keydown', function(e) {
-            var esc = 27 ;
-
-            // ESC should close the current segment only if `article` is not
-            // resized to let space to the tools on the sidebar.
-
-            var handleEscPressed = function() {
-                if ( UI.body.hasClass('editing') &&
-                    !UI.body.hasClass('side-tools-opened') &&
-					!UI.body.hasClass("side-popup" ) &&
-                    !UI.body.hasClass('search-open') &&
-                    !UI.tagMenuOpen ) {
-                        UI.setEditingSegment( null );
-                        UI.closeSegment(UI.currentSegment, 1);
-                        UI.closeTagAutocompletePanel();
-                    }
-            }
-
-            if ( e.which == esc ) handleEscPressed() ;
-
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
-            runDownload();
-		}).on('click', '#previewDropdown .previewLink a', function(e) {
+            UI.runDownload();
+		}).on('click', '#action-download', function(e) {
+		    if ( $(e.target).attr('id') === '#action-download' || $(e.target).hasClass('dropdown-menu-overlay') ) {
+                e.preventDefault();
+                UI.runDownload();
+            }
+        }).on('click', '#previewDropdown .previewLink a', function(e) {
 			e.preventDefault();
-			runDownload();
+			UI.runDownload();
 		}).on('click', '#previewDropdown a.tmx', function(e) {
 			e.preventDefault();
 			window.open($(this).attr('href'));
 		}).on('click', '#downloadProject', function(e) {
             e.preventDefault();
-            runDownload();
-		}).on('mousedown', '.header-menu .originalDownload, .header-menu .sdlxliff, .header-menu .omegat', function( e ){
+            UI.runDownload();
+		}).on('mousedown', '.originalDownload, .sdlxliff', function( e ){
             if( e.which == 1 ){ // left click
                 e.preventDefault();
+                e.stopPropagation();
                 var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
                     id: 'iframeDownload_' + new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 ),
-                    src: $( e.currentTarget ).attr( 'href' )
+                    src: $( e.currentTarget ).attr( 'data-href' )
                 } );
                 $( "body" ).append( iFrameDownload );
 
@@ -339,146 +173,56 @@ $.extend(UI, {
         }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
-		}).on('click', '#checkConnection', function(e) {
-			e.preventDefault();
-			UI.checkConnection( 'Click from Human Authorized' );
-		}).on('click', '#statistics .meter a, #statistics #stat-todo', function(e) {
+		}).on('click', '#statistics .meter a, #stat-todo', function(e) {
 			e.preventDefault();
 			if ( config.isReview ) {
                 UI.openNextTranslated();
             } else {
-                UI.gotoNextUntranslatedSegment();
+                SegmentActions.gotoNextUntranslatedSegment();
             }
-		}).on('click', 'mark.inGlossary', function ( e ) {
-            var $segment = $( e.currentTarget ).closest("section");
-		    UI.openSegmentGlossaryTab($segment);
+		});
+        $("#point2seg").bind('mousedown', function(e) {
+            e.preventDefault();
+            CatToolActions.toggleQaIssues();
+        });
+        $("#navSwitcher").on('click', function(e) {
+            e.preventDefault();
         });
 
-		$("#outer").on('click', 'a.percentuage', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-		}).on('mousedown', '.editToolbar .uppercase', function() {
-			UI.formatSelection('uppercase');
-		}).on('mousedown', '.editToolbar .lowercase', function() {
-			UI.formatSelection('lowercase');
-		}).on('mousedown', '.editToolbar .capitalize', function() {
-			UI.formatSelection('capitalize');
-		}).on('mouseup', '.editToolbar li', function() {
-			restoreSelection();
-        }).on('click', '.editor .source .locked,.editor .editarea .locked, ' +
+        $(".file-list").on('click', function(e) {
+            UI.closeAllMenus(e);
+            e.preventDefault();
+            UI.toggleFileMenu();
+        });
+        $("#jobNav .currseg").on('click', function(e) {
+            e.preventDefault();
+            var current = SegmentStore.getCurrentSegment();
+            if ( !current ) {
+                UI.unmountSegments();
+                UI.render({
+                    firstLoad: false
+                });
+            } else {
+                SegmentActions.scrollToSegment( current.original_sid );
+            }
+        });
+
+        //###################################################
+
+		$("#outer").on('click', '.editor .source .locked,.editor .editarea .locked, ' +
             '.editor .source .locked a,.editor .editarea .locked a', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.markSelectedTag($(this));
-		}).on('click', 'a.translated, a.next-untranslated', function(e) {
             e.preventDefault();
-            UI.clickOnTranslatedButton(this);
-        }).on('click', 'a.next-repetition', function(e) {
-            e.preventDefault();
-            SegmentFilter.goToNextRepetition(this, 'translated');
-		}).on('click', 'a.next-repetition-group', function(e) {
-            e.preventDefault();
-            SegmentFilter.goToNextRepetitionGroup(this, 'translated');
-		}).on('click', 'a.guesstags', function(e) {
-			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
-			// in the current segment
-			e.preventDefault();
-			$(e.target).addClass('disabled');
-			UI.startSegmentTagProjection();
-			return false;
-		}).on('click', '.editor .outersource .copy', function(e) {
-			e.preventDefault();
-			UI.copySource();
-		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
-			return false;
+            e.stopPropagation();
+            TagUtils.markSelectedTag( $( this ) );
         }).on('keydown', function(e) {
-            if((e.which == 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
+            if((e.which === 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
                 $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
                 e.preventDefault();
                 e.stopPropagation();
             }
 		});
 
-		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), $(this).attr('data-goto'), true);
-			SegmentActions.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
-		});
-
-		$("#point2seg").bind('mousedown', function(e) {
-			e.preventDefault();
-			if (UI.currentSegment  && (!config.isReview) && UI.getStatus(UI.currentSegment) !== 'approved') {
-                UI.saveSegment(UI.currentSegment);
-            }
-			CatToolActions.toggleQaIssues();
-		});
-
-		$("#navSwitcher").on('click', function(e) {
-			e.preventDefault();
-		});
-
-		$("#pname").on('click', function(e) {
-			UI.closeAllMenus(e);
-			e.preventDefault();
-			UI.toggleFileMenu();
-		});
-
-		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
-			e.preventDefault();
-			if (UI.currentSegment) {
-                UI.saveSegment(UI.currentSegment);
-            }
-			UI.renderAndScrollToSegment($(this).attr('data-segment'));
-		});
-		$("#jobMenu").on('click', 'li.currSegment:not(.disabled)', function(e) {
-			e.preventDefault();
-			UI.pointToOpenSegment();
-		});
-
-		$("#jobNav .currseg").on('click', function(e) {
-			e.preventDefault();
-
-			if (!($('#segment-' + UI.currentSegmentId).length)) {
-				UI.unmountSegments();
-                UI.render({
-                    firstLoad: false
-                });
-			} else {
-				UI.scrollSegment(UI.currentSegment);
-			}
-		});
-		
-		//search
-
-        if (!this.segmentToScrollAtRender)
-            UI.gotoSegment(this.startSegmentId);
-
-		this.initEnd = new Date();
-		this.initTime = this.initEnd - this.initStart;
-		if (this.debug) { console.log('Init time: ' + this.initTime); }
-
-    },
-
-    openShortcutsModal: function (  ) {
-        var props = {
-            shortcuts: UI.shortcuts
-        };
-        APP.ModalWindow.showModalComponent(ShortCutsModal, props, 'Shortcuts');
-    },
-
-});
-
-$(document).ready(function() {
-    var revision_number = (config.revisionNumber) ? config.revisionNumber : '1';
-    var qrParam = (config.secondRevisionsCount) ? '?revision_type=' + revision_number : '' ;
-	window.quality_report_btn_component = ReactDOM.render(
-		React.createElement( Review_QualityReportButton, {
-			vote                : config.overall_quality_class,
-			quality_report_href : config.quality_report_href + qrParam
-		}), $('#quality-report-button')[0] );
-	if ( config.secondRevisionsCount ) {
-        UI.reloadQualityReport();
     }
+
 });
 

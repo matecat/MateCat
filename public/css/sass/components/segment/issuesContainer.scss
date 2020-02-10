@@ -172,7 +172,7 @@ section.readonly .issues-container {
                                     }
                                     &.re-message {
                                         i {
-                                            color: #7cc576;
+                                            color: $approvedGreen;
                                         }
                                         &:hover {
                                             i {
@@ -204,13 +204,13 @@ section.readonly .issues-container {
                                 .re-comment {
                                     margin-bottom: 0;
                                     .re-revisor {
-                                        color: #00b76c;
+                                        color: $approvedGreen;
                                     }
                                     .re-revisor2 {
-                                        color: #BC6AC9;
+                                        color: $approved2Green;
                                     }
                                     .re-translator {
-                                        color: #0997bc;
+                                        color: $translatedBlue;
                                     }
                                     .re-comment-date{
                                         font-size: 13px;
@@ -231,8 +231,8 @@ section.readonly .issues-container {
             }
             &.add-issue-segment {
                 .category, .category-selected .severity {
-                    border: 1px solid #7cc576 !important;
-                    box-shadow: inset 0 0 3px #7cc576;
+                    border: 1px solid $approvedGreen !important;
+                    box-shadow: inset 0 0 3px $approvedGreen;
                 }
             }
         }

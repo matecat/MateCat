@@ -6,8 +6,10 @@
  * Time: 18:00
  */
 
-route( '/api/v3/jobs/[:id_job]/[:password]', 'GET', '\API\V3\ChunkController', 'show' );
-route( '/api/v3/jobs/[:id_job]/[:password]/quality-report/segments', 'GET',
-        'Features\ReviewExtended\Controller\API\QualityReportController', 'segments' );
+$klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
+    route( '', 'GET', '\API\V3\ChunkController', 'show' ); //this do not show some info like teams and translators
+    route( '/quality-report/segments', 'GET', 'Features\ReviewExtended\Controller\API\QualityReportController', 'segments' );
+    route( '/files', 'GET', '\API\V3\FileInfoController', 'getInfo' );
+} );
 
 route( '/api/v3/word-count/raw', 'POST', '\API\V3\CountWordController', 'rawWords' );
