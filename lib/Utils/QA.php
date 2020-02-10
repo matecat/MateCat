@@ -242,6 +242,7 @@ class QA {
     const ERR_EX_BX_NESTED_IN_G = 1300;
 
     const SMART_COUNT_PLURAL_MISMATCH = 2000;
+    const SMART_COUNT_MISMATCH = 2001;
 
     /**
      * Human Readable error map.
@@ -339,6 +340,7 @@ class QA {
             1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
 
             2000 => 'Smart count plural forms mismatch',
+            2001 => '%smartcount tag count mismatch',
     ];
 
     protected $_tipMap = [
@@ -488,6 +490,13 @@ class QA {
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
                         'tip'     => $this->_getTipValue( $errCode )
+                ] );
+                break;
+            case self::SMART_COUNT_MISMATCH:
+                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                        'outcome' => $errCode,
+                        'debug'   => $this->_errorMap[ self::SMART_COUNT_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::SMART_COUNT_MISMATCH )
                 ] );
                 break;
 
