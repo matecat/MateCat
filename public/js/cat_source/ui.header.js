@@ -128,6 +128,7 @@ $.extend(UI, {
 			UI.body.append(menu);
 
 			initEvents();
+			UI.detectStartSegment();
 		});
 	},
 });

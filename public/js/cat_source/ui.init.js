@@ -45,7 +45,7 @@ $.extend(UI, {
 
         this.setTagLockCustomizeCookie(true);
         this.debug = false;
-        UI.detectStartSegment();
+
         options.openCurrentSegmentAfter = !!((!seg) && (!this.firstLoad));
 
 
