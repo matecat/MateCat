@@ -353,7 +353,7 @@ class Editarea extends React.Component {
             range.collapse(true);
             var nodeStack = [containerEl], node, foundStart = false, stop = false;
             while (!stop && (node = nodeStack.pop())) {
-                if ( node.className && node.className.indexOf('marker') && savedSel.start - charIndex === 1 && savedSel.end - charIndex === 1 ) {
+                if ( node.className && node.className.indexOf('marker') !== -1 && savedSel.start - charIndex === 1 && savedSel.end - charIndex === 1 ) {
                     charIndex++;
                 } else if ( node.nodeType === 3 ) {
                     var nextCharIndex = charIndex + node.length;
