@@ -1356,7 +1356,7 @@ class QA {
 
         $this->_checkTagsBoundary();
         $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
-        $this->_checkBxAndTxInsideG();
+        $this->_checkBxAndExInsideG();
         $this->_checkTagPositions();
         $this->_checkNewLineConsistency();
         $this->_checkSymbolConsistency();
@@ -1380,7 +1380,7 @@ class QA {
         }
 
         $this->_checkTagMismatch();
-        $this->_checkBxAndTxInsideG();
+        $this->_checkBxAndExInsideG();
 
         // all checks completed
         return $this->getErrors();
@@ -1767,7 +1767,7 @@ class QA {
     /**
      * Perform a check for <bx> and/or <ex> tag(s) inside a <g> tag
      */
-    protected function _checkBxAndTxInsideG() {
+    protected function _checkBxAndExInsideG() {
 
         $regex = '/<g id ?= ?[\"|\']*.[\"|\']?>(.*?)<\/g>/ui';
 
