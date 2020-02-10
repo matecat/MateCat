@@ -75,7 +75,7 @@ class JobMenu extends React.Component {
             {this.getMoreLinks()}
             <div className="divider"/>
             <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
-            <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
+            {/*<a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>*/}
             {downloadButton}
             <div className="divider"/>
             <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
@@ -91,7 +91,7 @@ class JobMenu extends React.Component {
                 {this.getReviseMenuLink()}
                 {this.getMoreLinks()}
                 <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
-                <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
+                {/*<a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>*/}
                 {downloadButton}
                 <div className="divider"/>
                 <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
@@ -107,7 +107,7 @@ class JobMenu extends React.Component {
                 {this.getReviseMenuLink()}
                 {this.getMoreLinks()}
                 <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
-                <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
+                {/*<a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>*/}
                 {downloadButton}
                 <div className="divider"/>
                 <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
