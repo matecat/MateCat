@@ -123,8 +123,7 @@ const SegmentActions = {
             //Check first if the segment is in the view
             let $segment = (segment.splitted && sid.indexOf('-') === -1) ? UI.getSegmentById(sid + "-1") : UI.getSegmentById(sid);
             if ( $segment.length === 0 ) {
-                this.scrollToSegment(sid);
-                setTimeout(()=>this.openSegment(sid));
+                this.scrollToSegment(sid, this.openSegment);
                 return;
             }
             AppDispatcher.dispatch({
