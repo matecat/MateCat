@@ -100,12 +100,7 @@ class SegmentButton extends React.Component {
                     </p>
                 </li>) :
             (null);
-        currentButton = <li><a id={'segment-' + this.props.segment.sid + '-button-translated'}
-                               data-segmentid={'segment-' + this.props.segment.sid}
-                               onClick={(event)=>this.clickOnApprovedButton(event)}
-                               className={'approved ' + classDisable + " " + className} > {config.status_labels.APPROVED} </a><p>
-            {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
-        </p></li>;
+        currentButton = this.getReviewButton();
 
         if (filtering) {
             nextButton = null;
@@ -212,6 +207,18 @@ class SegmentButton extends React.Component {
                       className={'translated ' +classDisable } > {config.status_labels.TRANSLATED} </a><p>
             {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
         </p></li>;
+    }
+
+    getReviewButton() {
+        const classDisable = (this.props.disabled) ? 'disabled' : '';
+        const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
+
+        return <li><a id={'segment-' + this.props.segment.sid + '-button-translated'}
+               data-segmentid={'segment-' + this.props.segment.sid}
+               onClick={(event)=>this.clickOnApprovedButton(event)}
+               className={'approved ' + classDisable + " " + className} > {config.status_labels.APPROVED} </a><p>
+            {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
+        </p></li>
     }
 
     componentDidMount() {
