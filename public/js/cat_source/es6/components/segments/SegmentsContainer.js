@@ -134,6 +134,15 @@ class SegmentsContainer extends React.Component {
             }
             scrollTo = ( index >= 2 ) ? index-2 : ( index === 0 ) ? 0 : index-1 ;
             scrollTo = ( index > this.state.segments.size - 8 ) ? index : scrollTo;
+            if ( scrollTo > 0 || scrollTo < this.state.segments.size - 8 ) { //if the opened segments is too big for the view dont show the previous
+                let scrollToHeight = this.getSegmentHeight(index);
+                let segmentBefore1 = this.getSegmentHeight(index-1);
+                let segmentBefore2 = ( scrollTo > 1) ? this.getSegmentHeight(index-2) : 0;
+                let totalHeight = segmentBefore1 + segmentBefore2 + scrollToHeight;
+                if ( totalHeight > this.state.window.height ) {
+                    return { scrollTo: index, position: position }
+                }
+            }
             return { scrollTo: scrollTo, position: position }
         } else if ( this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
             const diff = this.state.segments.size - this.lastListSize;
