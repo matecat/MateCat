@@ -80,13 +80,16 @@ class SegmentButton extends React.Component {
         } else if ( this.state.progress ) {
             revisionCompleted = this.state.progress.revisionCompleted;
         }
-        let enableGoToNext = !_.isUndefined(nextSegment) && !revisionCompleted && nextSegment.autopropagated_from ==0;
+        let enableGoToNext = !_.isUndefined(nextSegment) && !revisionCompleted && nextSegment.autopropagated_from ==0 && (nextSegment.ice_locked == 1 && !nextSegment.unlocked);
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
-        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext && !_.isNull(nextSegment.revision_number) && (
-            nextSegment.revision_number === config.revisionNumber ||
-            ( nextSegment.revision_number === 2 && config.revisionNumber === 1)
-        )  : enableGoToNext && nextSegment.status.toLowerCase() === 'approved';
+        enableGoToNext = ReviewExtended.enabled() ? enableGoToNext &&
+            (
+                (!_.isNull(nextSegment.revision_number) && (nextSegment.revision_number === config.revisionNumber || ( nextSegment.revision_number === 2 && config.revisionNumber === 1) ) ) //Not Same Rev
+                || (nextSegment.ice_locked == 1 && !nextSegment.unlocked) // Ice Locked
+            )
+            :
+            enableGoToNext && nextSegment.status.toLowerCase() === 'approved'; // Review Simple
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
@@ -139,7 +142,7 @@ class SegmentButton extends React.Component {
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
         let translationCompleted = ( this.state.progress && this.state.progress.translationCompleted );
-        let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" && nextSegment.autopropagated_from ==0 ) && !translationCompleted;
+        let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" && nextSegment.autopropagated_from ==0 ) && !translationCompleted  && (nextSegment.ice_locked == 1 && !nextSegment.unlocked);
         //TODO Store TP Information in the SegmentsStore
         this.currentSegmentTPEnabled = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment);
         if (this.currentSegmentTPEnabled) {
