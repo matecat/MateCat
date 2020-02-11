@@ -76,7 +76,7 @@ class SegmentFooterTabConflicts extends React.Component {
             let diff_obj = TextUtils.execDiff(mainStr, this.translation);
             let translation = TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj));
 
-            html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.editable.length + 1)} key={'not-editable' + index}  onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
+            html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.editable.length + 1)} key={'not-editable' + index1}  onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
                 <li className="sugg-source">
                     <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
                 </li>
