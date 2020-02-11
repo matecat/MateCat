@@ -51,7 +51,7 @@ var UI = {
         $segment = $(editarea_or_segment).closest('section');
         segment = SegmentStore.getSegmentByIdToJS( UI.getSegmentId($segment) );
 
-        if ( !$segment.length ) {
+        if ( !$segment.length || !segment ) {
             return;
         }
 
@@ -334,10 +334,10 @@ var UI = {
                 SegmentActions.openSegment(seg);
 			}
 
-			if (options.segmentToOpen && UI.segmentIsLoaded(options.segmentToOpen)) {
-                SegmentActions.scrollToSegment( options.segmentToOpen );
-                SegmentActions.openSegment(options.segmentToOpen);
-			}
+			// if (options.segmentToOpen && UI.segmentIsLoaded(options.segmentToOpen)) {
+            //     SegmentActions.scrollToSegment( options.segmentToOpen );
+            //     SegmentActions.openSegment(options.segmentToOpen);
+			// }
 
 			// if (options.applySearch) {
 			// 	$('mark.currSearchItem').removeClass('currSearchItem');

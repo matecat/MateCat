@@ -115,15 +115,15 @@ let CatToolActions = {
     setPopupUserMenuCookie: function (  ) {
         CommonUtils.addInStorage(this.popupInfoUserMenu(), true, 'infoUserMenu');
     },
-    storeFilesInfo: function (files) {
+    storeFilesInfo: function (data) {
         AppDispatcher.dispatch({
             actionType: CattolConstants.STORE_FILES_INFO,
-            files: files
+            files: data.files
         });
 
-        config.first_job_segment = files.first_job_segment;
-        config.last_job_segment = files.last_job_segment;
-        config.firstSegmentOfFiles = files;
+        config.first_job_segment = data.first_segment;
+        config.last_job_segment = data.last_segment;
+        config.firstSegmentOfFiles = data.files;
     }
 };
 
