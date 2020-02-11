@@ -106,7 +106,7 @@ $.extend(UI, {
 	},
 	createJobMenu: function() {
 		API.JOB.getJobFilesInfo(config.id_job, config.password).done(function (response) {
-			CatToolActions.storeFilesInfo(response.files);
+			CatToolActions.storeFilesInfo(response);
 			var menu = '<nav id="jobMenu" class="topMenu">' +
 				'<ul class="gotocurrentsegment">' +
 				'<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a>Go to current segment</a><span>' +Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase() + '</span></li>' +

@@ -64,7 +64,6 @@ $.extend(UI, {
             }, UI.checkUpdatesEvery);
 
         }
-
         CatToolActions.renderSubHeader();
         this.renderQualityReportButton();
         return UI.getSegments(options);
@@ -103,11 +102,11 @@ $.extend(UI, {
             LXQ.initPopup();
         }
         CatToolActions.startNotifications();
-
+        // Temporary js for header action menu
+        UI.initHeader();
         UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
     },
 	init: function() {
-
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
 
@@ -139,9 +138,6 @@ $.extend(UI, {
         // SET EVENTS
 		this.setEvents();
 		APP.checkQueryParams();
-
-        // Temporary js for header action menu
-        UI.initHeader();
 
         UI.firstLoad = false;
 	},
