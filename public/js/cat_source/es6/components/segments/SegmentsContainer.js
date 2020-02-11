@@ -74,6 +74,7 @@ class SegmentsContainer extends React.Component {
     }
 
     renderSegments(segments) {
+        // VirtualList.prototype.animateScroll = false;
         let splitGroup =  [];
         this.setState({
             segments: segments,
@@ -488,30 +489,30 @@ class SegmentsContainer extends React.Component {
     }
 }
 
-let defaultScroll = VirtualList.prototype.scrollTo;
+// let defaultScroll = VirtualList.prototype.scrollTo;
 
-VirtualList.prototype.scrollTo = function (value) {
-    console.log("VirtualList.prototype.scrollTo:"  + value);
-    function scrollTo(element, direction, to, duration) {
-        if (duration <= 0) return;
-        const difference = to - element[direction];
-        const perTick = difference / duration * 5;
-        setTimeout(function () {
-            element[direction] = element[direction] + perTick;
-            if (element[direction] === to) return;
-            scrollTo(element, direction, to, duration - 5);
-        }, 5);
-    }
-    if ( this.animateScroll ) {
-        const scrollDirection = this.props.scrollDirection === void 0 ? 'vertical' : this.props.scrollDirection;
-        if ( scrollDirection === 'vertical' ) {
-            scrollTo( this.rootNode, 'scrollTop', value, 15 );
-        } else scrollTo( this.rootNode, 'scrollLeft', value, 15 );
-    } else {
-        defaultScroll.call(this, value);
-    }
-    this.animateScroll = true;
-};
+// VirtualList.prototype.scrollTo = function (value) {
+//     console.log("VirtualList.prototype.scrollTo:"  + value);
+//     function scrollTo(element, direction, to, duration) {
+//         if (duration <= 0) return;
+//         const difference = to - element[direction];
+//         const perTick = difference / duration * 5;
+//         setTimeout(function () {
+//             element[direction] = element[direction] + perTick;
+//             if (element[direction] === to) return;
+//             scrollTo(element, direction, to, duration - 5);
+//         }, 5);
+//     }
+//     if ( VirtualList.prototype.scrollTo.animateScroll ) {
+//         const scrollDirection = this.props.scrollDirection === void 0 ? 'vertical' : this.props.scrollDirection;
+//         if ( scrollDirection === 'vertical' ) {
+//             scrollTo( this.rootNode, 'scrollTop', value, 15 );
+//         } else scrollTo( this.rootNode, 'scrollLeft', value, 15 );
+//     } else {
+//         defaultScroll.call(this, value);
+//     }
+//     VirtualList.prototype.scrollTo.animateScroll = true;
+// };
 
 SegmentsContainer.propTypes = {
     segments: PropTypes.array,
