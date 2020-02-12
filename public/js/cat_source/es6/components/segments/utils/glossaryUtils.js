@@ -199,23 +199,11 @@ let GlossaryUtils = {
 
     copyGlossaryItemInEditarea: function ( translation , segment) {
         // var range = window.getSelection().getRangeAt( 0 );
+        var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="glossary-placeholder"></span>');
+        CursorUtils.replaceSelectedHtml(translation, rangeInsert);
         var clonedElem = $( '.editor .editarea').clone();
-        var nodeInsert = clonedElem.find( '.focusOut' );
-        if ( nodeInsert.length === 0) {
-            clonedElem.append(translation);
-        } else {
-            nodeInsert = nodeInsert.first();
-            nodeInsert.before( translation + '<span class="tempCopyGlossaryPlaceholder"></span>' ).remove();
-        }
-        SegmentActions.highlightEditarea(segment.sid);
+        SegmentActions.modifiedTranslation(segment.sid, null, true);
         SegmentActions.replaceEditAreaTextContent(segment.sid, null, clonedElem.html());
-        setTimeout(function (  ) {
-
-            var tempCopyGlossPlaceholder = UI.editarea.find( '.tempCopyGlossaryPlaceholder' );
-            // var node = tempCopyGlossPlaceholder[0];
-            // TextUtils.setCursorAfterNode( range, node );
-            tempCopyGlossPlaceholder.remove();
-        });
     }
 };
 
