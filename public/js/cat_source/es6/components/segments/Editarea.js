@@ -135,7 +135,8 @@ class Editarea extends React.Component {
                 this.keyPressed = false;
                 if ( textAdded ) {
                     this.pastedAction = {
-                        length: textAdded
+                        length: textAdded,
+                        textAdded: true
                     }
                 }
                 if ( !this.props.segment.modified ) {
@@ -420,7 +421,7 @@ class Editarea extends React.Component {
     }
     shouldComponentUpdate(nextProps, nextState) {
         return ( !Immutable.fromJS(nextState.editAreaClasses).equals(Immutable.fromJS(this.state.editAreaClasses)) ||
-            nextProps.locked !== this.props.locked || ( this.props.translation !== nextProps.translation && _.isUndefined(this.pastedAction) ) ||
+            nextProps.locked !== this.props.locked || ( this.props.translation !== nextProps.translation && (_.isUndefined(this.pastedAction) || _.isUndefined(this.pastedAction.textAdded) ) ) ||
             nextProps.segment.modified !== this.props.segment.modified || nextProps.segment.opened !== this.props.segment.opened
             || nextProps.segment.muted !== this.props.segment.muted
         ) && !this.editAreaIsEditing && !this.compositionsStart
