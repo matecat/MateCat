@@ -81,6 +81,11 @@
                             Export Job TMX
                         </a>
                     </li>
+                    <li class="item" data-value="omegat" tal:condition="php: INIT::$ENABLE_OMEGAT_DOWNLOAD !== false">
+                        <a class="omegat" title="Export OMEGAT" alt="Export OMEGAT" href="/?action=downloadFile&id_job=${jid}&password=${password}&id_file=&download_type=omegat&forceXliff=1">
+                            Export OmegaT
+                        </a>
+                    </li>
                 </ul>
             </div>
 

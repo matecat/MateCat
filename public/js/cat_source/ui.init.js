@@ -48,6 +48,9 @@ $.extend(UI, {
 
         options.openCurrentSegmentAfter = !!((!seg) && (!this.firstLoad));
 
+        var hash = CommonUtils.parsedHash.segmentId;
+        config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage();
+        this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
 
         if ( UI.firstLoad ) {
 

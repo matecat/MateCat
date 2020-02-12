@@ -131,6 +131,7 @@ const SegmentActions = {
                 actionType: SegmentConstants.OPEN_SEGMENT,
                 sid: sid
             });
+            UI.updateJobMenu(segment);
         } else {
             UI.unmountSegments();
             UI.render({
@@ -138,6 +139,7 @@ const SegmentActions = {
                 segmentToOpen: sid
             });
         }
+
     },
     closeSegment: function ( sid, fid ) {
         AppDispatcher.dispatch({
@@ -156,7 +158,7 @@ const SegmentActions = {
                 sid: sid,
             });
             if (callback) {
-                callback.apply(this, [sid]);
+                setTimeout(()=>callback.apply(this, [sid]));
             }
         } else {
             UI.unmountSegments();
