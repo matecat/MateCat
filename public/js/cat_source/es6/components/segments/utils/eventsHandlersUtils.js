@@ -27,10 +27,13 @@ const EnventHandlers =  {
             let cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             let text = TextUtils.htmlEncode(cloneTag.text());
-            e.dataTransfer.setData('text/plain', TagUtils.transformTextForLockTags(text).trim());
-            e.dataTransfer.setData('text/html', TagUtils.transformTextForLockTags(text).trim());
+            text = TagUtils.transformTextForLockTags(text).trim();
+            e.dataTransfer.clearData();
+            e.dataTransfer.setData('text/plain', text);
+            e.dataTransfer.setData('text/html', text);
         } else if (elem.hasClass('locked')) {
             let text = TextUtils.htmlEncode(elem.text());
+            e.dataTransfer.clearData();
             e.dataTransfer.setData('text/plain', TagUtils.transformTextForLockTags(text).trim());
             e.dataTransfer.setData('text/html', TagUtils.transformTextForLockTags(text).trim());
         }

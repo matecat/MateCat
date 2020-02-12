@@ -144,7 +144,7 @@ class SegmentButton extends React.Component {
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         let nextSegment = SegmentStore.getNextSegment(this.props.segment.sid, this.props.segment.fid);
         let translationCompleted = ( this.state.progress && this.state.progress.translationCompleted );
-        let enableGoToNext = !_.isUndefined(nextSegment) && ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" && nextSegment.autopropagated_from ==0 ) && !translationCompleted  && (nextSegment.ice_locked == 1 && !nextSegment.unlocked);
+        let enableGoToNext = !_.isUndefined(nextSegment) && !translationCompleted && ( ( nextSegment.status !== "NEW" && nextSegment.status !== "DRAFT" && nextSegment.autopropagated_from ==0 )   ||  (nextSegment.ice_locked == 1 && !nextSegment.unlocked) );
         //TODO Store TP Information in the SegmentsStore
         this.currentSegmentTPEnabled = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment);
         if (this.currentSegmentTPEnabled) {
