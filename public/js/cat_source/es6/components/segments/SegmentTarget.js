@@ -153,6 +153,12 @@ class SegmentTarget extends React.Component {
         return issues;
     }
 
+    formatSelection(action) {
+        UI.formatSelection(action);
+        SegmentActions.modifiedTranslation(this.props.segment.sid, null, true);
+        this.sendTranslationWithoutUpdate();
+    }
+
     getTargetArea(translation) {
         var textAreaContainer = "";
         let issues = this.getAllIssues();
@@ -252,9 +258,9 @@ class SegmentTarget extends React.Component {
                     {tagModeButton}
                     {tagCopyButton}
                     <ul className="editToolbar">
-                        <li className="uppercase" title="Uppercase" onMouseDown={()=>UI.formatSelection('uppercase')}/>
-                        <li className="lowercase" title="Lowercase" onMouseDown={ ()=>UI.formatSelection('lowercase')}/>
-                        <li className="capitalize" title="Capitalized" onMouseDown={()=>UI.formatSelection('capitalize')}/>
+                        <li className="uppercase" title="Uppercase" onMouseDown={()=>this.formatSelection('uppercase')}/>
+                        <li className="lowercase" title="Lowercase" onMouseDown={ ()=>this.formatSelection('lowercase')}/>
+                        <li className="capitalize" title="Capitalized" onMouseDown={()=>this.formatSelection('capitalize')}/>
                     </ul>
                 </div>
             </div>;
