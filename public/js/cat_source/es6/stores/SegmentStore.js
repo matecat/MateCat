@@ -495,8 +495,17 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.map((segment)=>segment.set('openComments', false));
         this._segments = this._segments.setIn([index, 'openComments'], true);
     },
-    closeSegmentComments: function() {
-        this._segments = this._segments.map((segment)=>segment.set('openComments', false));
+    closeSegmentComments: function(sid) {
+        if ( sid ) {
+            const index = this.getSegmentIndex(sid);
+            try {
+                this._segments = this._segments.setIn([index, 'openComments'], false);
+            } catch ( e ) {
+                console.log("closeSegmentComments fail");
+            }
+        } else {
+            this._segments = this._segments.map((segment)=>segment.set('openComments', false));
+        }
     },
 
     setConfigTabs: function (tabName, visible, open) {
@@ -1045,6 +1054,15 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.CLOSE_ISSUES_PANEL:
             SegmentStore.closeSegmentIssuePanel();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(action.actionType);
+            if ( !SegmentStore.isSidePanelOpen() ) {
+                SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
+            }
+            break;
+        case SegmentConstants.CLOSE_SIDE:
+            SegmentStore.closeSegmentIssuePanel();
+            SegmentStore.closeSegmentComments(action.sid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(action.actionType);
             if ( !SegmentStore.isSidePanelOpen() ) {
