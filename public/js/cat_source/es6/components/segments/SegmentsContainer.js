@@ -197,8 +197,9 @@ class SegmentsContainer extends React.Component {
         />;
         if ( segment.id_file !== currentFileId ) {
             let file = (!!this.state.files)? _.find(this.state.files, (file) => file.id == segment.id_file): false;
+            let classes = (this.state.sideOpen) ? 'slide-right' : '';
             return <React.Fragment>
-                <ul className="projectbar" data-job={"job-"+ segment.id_file}>
+                <ul className={"projectbar " + classes} data-job={"job-"+ segment.id_file}>
                     <li className="filename">
                         <h2 title={segment.filename}>{segment.filename}</h2>
                     </li>
@@ -231,7 +232,8 @@ class SegmentsContainer extends React.Component {
             let collectionType = this.getCollectionType(segment);
             let collectionTypeSeparator;
             if (collectionType && collectionsTypeArray.indexOf(collectionType) === -1) {
-                collectionTypeSeparator = <div className="collection-type-separator" key={collectionType+segment.sid+ (Math.random()*10)}>
+                let classes = (this.state.sideOpen) ? 'slide-right' : '';
+                collectionTypeSeparator = <div className={"collection-type-separator " + classes} key={collectionType+segment.sid+ (Math.random()*10)}>
                     Collection Name: <b>{collectionType}</b></div>;
                 collectionsTypeArray.push(collectionType);
                 if ( this.segmentsWithCollectionType.indexOf(segment.sid) === -1 ) {
