@@ -137,11 +137,15 @@ class SegmentsContainer extends React.Component {
             if ( scrollTo > 0 || scrollTo < this.state.segments.size - 8 ) { //if the opened segments is too big for the view dont show the previous
                 let scrollToHeight = this.getSegmentHeight(index);
                 let segmentBefore1 = this.getSegmentHeight(index-1);
-                let segmentBefore2 = ( scrollTo > 1) ? this.getSegmentHeight(index-2) : 0;
+                let segmentBefore2 = ( scrollTo > 0) ? this.getSegmentHeight(index-2) : 0;
                 let totalHeight = segmentBefore1 + segmentBefore2 + scrollToHeight;
-                if ( totalHeight > this.state.window.height ) {
+                if ( totalHeight > this.state.window.height - 50 ) {
+                    if ( scrollToHeight + segmentBefore1 < this.state.window.height + 50 ) {
+                        return { scrollTo: index - 1, position: position }
+                    }
                     return { scrollTo: index, position: position }
                 }
+
             }
             return { scrollTo: scrollTo, position: position }
         } else if ( this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
@@ -278,6 +282,9 @@ class SegmentsContainer extends React.Component {
             $('#hiddenHtml section').css('display', 'block');
         }
         let segment = this.getSegmentByIndex(index);
+        if ( !segment ) {
+            return 0;
+        }
         let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
 
         if ( this.segmentsHeightsMap[segment.get('sid')] && this.segmentsHeightsMap[segment.get('sid')].height > 0 &&  this.segmentsHeightsMap[segment.get('sid')].segment.equals(segment)) {
