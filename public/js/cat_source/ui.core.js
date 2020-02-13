@@ -791,6 +791,10 @@ var UI = {
 
         $('.bg-loader',m).css('display', 'none');
 
+        if ( s.APPROVED_PERC > 10 ) {
+            $('#quality-report-button').attr('data-revised', true);
+        }
+
         $(document).trigger('setProgress:rendered', { stats : stats } );
     },
     disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
