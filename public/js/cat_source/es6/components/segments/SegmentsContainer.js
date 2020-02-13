@@ -137,7 +137,7 @@ class SegmentsContainer extends React.Component {
             if ( scrollTo > 0 || scrollTo < this.state.segments.size - 8 ) { //if the opened segments is too big for the view dont show the previous
                 let scrollToHeight = this.getSegmentHeight(index);
                 let segmentBefore1 = this.getSegmentHeight(index-1);
-                let segmentBefore2 = ( scrollTo > 0) ? this.getSegmentHeight(index-2) : 0;
+                let segmentBefore2 = this.getSegmentHeight(index-2);
                 let totalHeight = segmentBefore1 + segmentBefore2 + scrollToHeight;
                 if ( totalHeight > this.state.window.height - 50 ) {
                     if ( scrollToHeight + segmentBefore1 < this.state.window.height + 50 ) {
