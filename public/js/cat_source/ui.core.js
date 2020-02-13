@@ -1343,10 +1343,11 @@ var UI = {
                 text: text,
                 type: 'info',
                 autoDismiss: true,
-                timer: 10000,
+                timer: 5000,
                 allowHtml: true,
                 position: "bl",
             };
+            APP.removeAllNotifications()
             APP.addNotification(notification);
         } else {
             SegmentActions.setSegmentPropagation(id_segment, null, false);
