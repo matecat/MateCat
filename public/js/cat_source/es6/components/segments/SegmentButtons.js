@@ -80,13 +80,15 @@ class SegmentButton extends React.Component {
         } else if ( this.state.progress ) {
             revisionCompleted = this.state.progress.revisionCompleted;
         }
-        let enableGoToNext = !_.isUndefined(nextSegment) && !revisionCompleted &&
+        let enableGoToNext = !_.isUndefined(nextSegment) && !revisionCompleted && (
             ( ( nextSegment.status.toLowerCase() === 'approved' && nextSegment.autopropagated_from == 0 ) || //Approved and propagation confirmed
-                (nextSegment.ice_locked == 1 && !nextSegment.unlocked) ); //Ice
+                (nextSegment.ice_locked == 1 && !nextSegment.unlocked) )  ||  //Ice
+            ( nextSegment.status === "NEW" || nextSegment.status === "DRAFT") );
         const filtering = (SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open);
         const className = ReviewExtended.enabled() ? "revise-button-" + ReviewExtended.number : '';
         enableGoToNext = ReviewExtended.enabled() ? enableGoToNext &&
             (
+                _.isNull(nextSegment.revision_number) ||
                 (!_.isNull(nextSegment.revision_number) && (nextSegment.revision_number === config.revisionNumber || ( nextSegment.revision_number === 2 && config.revisionNumber === 1) ) ) //Not Same Rev
                 || (nextSegment.ice_locked == 1 && !nextSegment.unlocked) // Ice Locked
             )
