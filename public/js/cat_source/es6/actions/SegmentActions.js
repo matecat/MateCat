@@ -121,6 +121,10 @@ const SegmentActions = {
 
         if ( segment ) {
             //Check first if the segment is in the view
+            if ( UI.isReadonlySegment(segment) ) {
+                UI.readonlyClickDisplay();
+                return;
+            }
             let $segment = (segment.splitted && sid.indexOf('-') === -1) ? UI.getSegmentById(sid + "-1") : UI.getSegmentById(sid);
             if ( $segment.length === 0 ) {
                 this.scrollToSegment(sid, this.openSegment);

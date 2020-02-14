@@ -39,6 +39,10 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
+            var segment = SegmentStore.getCurrentSegment();
+            if ( !segment || UI.isReadonlySegment(segment)) {
+                return;
+            }
             if ( config.isReview ) {
                 if ( $('.editor .next-unapproved:not(.disabled)').length > 0 ) {
                     setTimeout( function () { UI.clickOnApprovedButton( $( '.editor .next-unapproved:not(.disabled)' ) )} );
@@ -57,6 +61,9 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
+            if ( !segment || UI.isReadonlySegment(segment)) {
+                return;
+            }
             if ( config.isReview ) {
                 setTimeout(function () { UI.clickOnApprovedButton($('body.review .editor .approved:not(.disabled)'))});
             } else {
