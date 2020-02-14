@@ -493,7 +493,7 @@ class QA {
                 ] );
                 break;
             case self::SMART_COUNT_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::WARNING ][] = errObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ self::SMART_COUNT_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::SMART_COUNT_MISMATCH )
