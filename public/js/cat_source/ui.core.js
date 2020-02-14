@@ -171,6 +171,7 @@ var UI = {
             status: status,
             caller: false,
             propagate: propagation,
+            autoPropagation: options.autoPropagation
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
         SegmentActions.modifiedTranslation(options.segment_id, null, false);
@@ -1069,7 +1070,8 @@ var UI = {
             status: status,
             caller: caller,
             callback: callback,
-            propagate: propagate
+            propagate: propagate,
+            autoPropagation: options.autoPropagation
         };
         //Check if the traslation is not already in the tail
         var saveTranslation = this.translationIsToSave( segment );
@@ -1321,7 +1323,7 @@ var UI = {
 
             this.tempReqArguments = null;
 
-            UI.checkSegmentsPropagation(propagate, options.autoPropagate, id_segment, response.propagation, status);
+            UI.checkSegmentsPropagation(propagate, options.autoPropagation, id_segment, response.propagation, status);
         }
         this.resetRecoverUnsavedSegmentsTimer();
     },
