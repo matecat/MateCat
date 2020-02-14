@@ -61,6 +61,7 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
+            var segment = SegmentStore.getCurrentSegment();
             if ( !segment || UI.isReadonlySegment(segment)) {
                 return;
             }
