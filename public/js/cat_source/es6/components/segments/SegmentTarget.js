@@ -82,8 +82,6 @@ class SegmentTarget extends React.Component {
     onClickEvent(event) {
         if (this.props.readonly) {
             UI.handleClickOnReadOnly($(event.currentTarget).closest('section'));
-        } else {
-            this.props.openSegment();
         }
     }
 
