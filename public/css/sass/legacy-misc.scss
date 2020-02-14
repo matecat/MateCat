@@ -5,16 +5,15 @@
 }
 
 header {
-    background-color: #4D4D4D;
     top: 0;
     left: 0;
     text-align: left;
     width: 100%;
     position: fixed;
     z-index: 999999999;
-    border-bottom: 1px solid #5F5F5F;
-    padding: 4px 0 5px 0;
-    height: 38px;
+    /*border-bottom: 1px solid #5F5F5F;
+    padding: 4px 0 5px 0;*/
+    height: 77px; /* was 38px for previous header*/
     margin-top: 0;
 }
 
@@ -64,10 +63,6 @@ h3 {
 
 .tablestats.continue {
     margin-bottom: 4px !important;
-}
-
-.logo {
-    margin-top: 6px !important;
 }
 
 .error-symbol {

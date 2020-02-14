@@ -222,7 +222,7 @@
                 // autorun: true,
                 cookie: 'cookiebanner-accepted',
                 closeText: '&#10006;',
-                cookiePath: '/',
+                cookiePath: '/; samesite=Strict',
                 debug: false,
                 expires: Infinity,
                 zindex: 255,
@@ -340,7 +340,6 @@
                         this.element_mask.parentNode.removeChild(this.element_mask);
                     }
                     this.closed = true;
-                    footer.style.height = '27px';
                 }
             }/* else {
                 throw new Error("Not inserted but closing?!");
@@ -380,7 +379,7 @@
 
             var el = doc.createElement('div');
             el.className = 'cookiebanner';
-            el.style.position = 'fixed';
+            el.style.position = 'relative';
             el.style.left = 0;
             el.style.right = 0;
             el.style.height = this.options.height;
@@ -435,7 +434,6 @@
                 footer.appendChild(this.element_mask);
             }
 
-            footer.style.height = '60px';
             footer.appendChild(this.element);
             this.inserted = true;
 

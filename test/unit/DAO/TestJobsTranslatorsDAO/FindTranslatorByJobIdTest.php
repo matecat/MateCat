@@ -40,7 +40,7 @@ class FindTranslatorByJobIdTest extends AbstractTest {
 
         //reserve a project id from the sequence
         $this->project[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
-        $this->project[ 'ppassword' ]  = CatUtils::generate_password( 12 );
+        $this->project[ 'ppassword' ]  = Utils::randomString();
 
         $hash = strtoupper( hash( 'ripemd128', uniqid( "", true ) . md5( uniqid( "", true ) ) ) );
         $guid = '{' . substr( $hash, 0, 8 ) . '-' . substr( $hash, 8, 4 ) . '-' . substr( $hash, 12, 4 ) . '-' . substr( $hash, 16, 4 ) . '-' . substr( $hash, 20, 12 ) . '}';

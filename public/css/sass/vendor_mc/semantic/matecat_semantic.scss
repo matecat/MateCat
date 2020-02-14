@@ -1,7 +1,7 @@
 
 @import "../../../../../support_scripts/grunt/semantic/dist/semantic";
+@import "../../commons/colors";
 @import "semantic_overrides";
-
 
 @font-face {
   font-family: 'Icons';
@@ -14,4 +14,14 @@
   font-variant: normal;
   text-decoration: inherit;
   text-transform: none;
+}
+
+a {
+    color: $linkBlue;
+    &:hover{
+        color: $linkBlueHover;
+    }
+    &:active {
+        color: $linkBlueActive;
+    }
 }

@@ -237,7 +237,7 @@ class createProjectController extends ajaxController {
             }
         }
 
-        setcookie( \Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
+        setcookie( \Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
 
         // SET TARGET COOKIE
 
@@ -269,7 +269,7 @@ class createProjectController extends ajaxController {
             }
         }
 
-        setcookie( \Constants::COOKIE_TARGET_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/', \INIT::$COOKIE_DOMAIN );
+        setcookie( \Constants::COOKIE_TARGET_LANG, $newCookieVal, time() + ( 86400 * 365 ), '/; samesite=None', \INIT::$COOKIE_DOMAIN, true );
 
         //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 

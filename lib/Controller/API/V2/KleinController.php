@@ -273,8 +273,9 @@ abstract class KleinController implements IController {
                 $this->downloadToken,
                 $cookieContent,
                 time() + 3600            // expires in 1 hour
-                , "/",
-                \INIT::$COOKIE_DOMAIN
+                , '/; samesite=None',
+                \INIT::$COOKIE_DOMAIN,
+                true
         );
 
         $this->downloadToken = null;

@@ -43,8 +43,8 @@ if ( true )
                 UI.setLanguageTooltipLXQ();
             }
             //Check Tag Projection
-            if (UI.checkTpCanActivate()) {
-                (UI.checkTPEnabled()) ? tagProjectionCheck.attr('checked', true) : tagProjectionCheck.attr('checked', false);
+            if (SegmentUtils.checkTpCanActivate()) {
+                (SegmentUtils.checkTPEnabled()) ? tagProjectionCheck.attr('checked', true) : tagProjectionCheck.attr('checked', false);
                 tagProjectionCheck.on('change', this.toggleTagProjectionOption.bind(this));
             } else {
                 var tpContainer= $('.options-box.tagp');

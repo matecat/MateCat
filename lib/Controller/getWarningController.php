@@ -55,13 +55,6 @@ class getWarningController extends ajaxController {
         if ( empty( $this->__postInput->segment_status ) ) {
             $this->__postInput->segment_status = 'draft';
         }
-
-        if ( !empty( $this->__postInput->logs ) && $this->__postInput->logs != '[]' ) { //FIXME remove client implementation and logging
-            Log::$fileName = 'clientLog.log';
-            Log::doJsonLog( json_decode( $this->__postInput->logs ) );
-            Log::$fileName = 'log.txt';
-        }
-
     }
 
     /**

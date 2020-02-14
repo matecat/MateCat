@@ -13,7 +13,7 @@ APP.USER.STORE = {} ;
         return $.ajax({
             url: APP.getRandomUrl() + 'api/app/user',
             dataType: 'json',
-            async: false,
+            async: true,
             xhrFields: { withCredentials: true }
         }).done(function( data ) {
             APP.USER.STORE = data ;

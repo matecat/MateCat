@@ -1,5 +1,6 @@
 <?php
 
+use Autopropagation\PropagationAnalyser;
 use Features\TranslationVersions\VersionHandlerInterface;
 use Search\ReplaceEventStruct;
 
@@ -84,21 +85,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     protected function getSegmentsForPropagation( $params, $status = Constants_TranslationStatus::STATUS_TRANSLATED ) {
 
-        /**
-         * We want that a propagation acts only on NEW, DRAFT and REBUTTED segments
-         * so we have to set an additional status when the requested status to propagate is TRANSLATE.
-         */
-        $additional_status = '';
-        if ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "'
-";
-        }
 
         $selectSegmentsToPropagate = " SELECT * FROM segment_translations " .
                 " WHERE id_job = :id_job " .
                 " AND segment_hash = :segment_hash " .
                 " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
-                " AND id_segment <> :id_segment $additional_status; ";
+                " AND id_segment <> :id_segment ; ";
 
         $conn = $this->database->getConnection();
         $stmt = $conn->prepare( $selectSegmentsToPropagate );
@@ -648,31 +640,12 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             $execute_update = true
     ) {
 
-        $propagationTotal = [
-                'totals'                   => [
-                        'total'    => null,
-                        'countSeg' => null,
-                        'status'   => null
-                ],
-                'propagated_ids'           => [],
-                'segments_for_propagation' => []
-        ];
-
         $db = Database::obtain();
 
         if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
-            $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
-        }
-
-        /**
-         * We want that a propagation acts only on NEW, DRAFT and REBUTTED segments
-         * so we have to set an additional status when the requested status to propagate is TRANSLATE.
-         */
-        $additional_status = '';
-        if ( $segmentTranslationStruct[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            $additional_status = "AND status != '" . Constants_TranslationStatus::STATUS_APPROVED . "' ";
+            $sum_sql = " SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
         }
 
         /**
@@ -682,7 +655,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
          *
          */
         $queryTotals = "
-           SELECT $sum_sql as total, COUNT(id_segment) as countSeg, status
+           SELECT $sum_sql as total, sum(1) as countSeg, segment_translations.*
 
            FROM segment_translations
               INNER JOIN  segments
@@ -691,9 +664,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
            AND segment_translations.segment_hash = :segment_hash
            AND id_segment BETWEEN :job_first_segment AND :job_last_segment
            AND id_segment != :id_segment
-           AND status != :status
-           $additional_status
-           GROUP BY status
+           GROUP BY id_segment with rollup
     ";
 
         try {
@@ -706,10 +677,64 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     'job_first_segment' => $chunkStruct[ 'job_first_segment' ],
                     'job_last_segment'  => $chunkStruct[ 'job_last_segment' ],
                     'id_segment'        => $_idSegment,
-                    'status'            => $segmentTranslationStruct[ 'status' ]
             ] );
 
-            $propagationTotal[ 'totals' ] = $stmt->fetchAll();
+            $recordNum          = 0;
+            $_recordIteratorIdx = 1;
+            $lastRow            = null;
+            $totals             = $stmt->fetchAll( PDO::FETCH_FUNC, function () use ( $stmt, &$recordNum, &$_recordIteratorIdx, &$lastRow ) {
+
+                $args = func_get_args();
+
+                if ( empty( $recordNum ) ) {
+                    $recordNum = $stmt->rowCount();
+                }
+
+                if ( $recordNum == $_recordIteratorIdx ) {
+                    $lastRow = $args;
+                } else {
+                    $_recordIteratorIdx++;
+
+                    $raw_values = array_slice( $args, 2 );
+
+                    $array_values = [
+                            'id_segment'            => $raw_values[ 0 ],
+                            'id_job'                => $raw_values[ 1 ],
+                            'segment_hash'          => $raw_values[ 2 ],
+                            'autopropagated_from'   => $raw_values[ 3 ],
+                            'status'                => $raw_values[ 4 ],
+                            'translation'           => $raw_values[ 5 ],
+                            'translation_date'      => $raw_values[ 6 ],
+                            'time_to_edit'          => $raw_values[ 7 ],
+                            'match_type'            => $raw_values[ 8 ],
+                            'context_hash'          => $raw_values[ 9 ],
+                            'eq_word_count'         => $raw_values[ 10 ],
+                            'standard_word_count'   => $raw_values[ 11 ],
+                            'suggestions_array'     => $raw_values[ 12 ],
+                            'suggestion'            => $raw_values[ 13 ],
+                            'suggestion_match'      => $raw_values[ 14 ],
+                            'suggestion_source'     => $raw_values[ 15 ],
+                            'suggestion_position'   => $raw_values[ 16 ],
+                            'mt_qe'                 => $raw_values[ 17 ],
+                            'tm_analysis_status'    => $raw_values[ 18 ],
+                            'locked'                => $raw_values[ 19 ],
+                            'warning'               => $raw_values[ 20 ],
+                            'serialized_error_list' => $raw_values[ 21 ],
+                            'version_number'        => $raw_values[ 22 ],
+                    ];
+
+                    return new Translations_SegmentTranslationStruct( $array_values );
+                }
+            } );
+
+            array_pop( $totals );
+
+            $propagationTotal = ( new PropagationAnalyser() )->analyse( $segmentTranslationStruct, $totals );
+            $propagationTotal->setTotals( [
+                    'total'    => $lastRow[ 0 ],
+                    'countSeg' => $lastRow[ 1 ],
+                    'status'   => $lastRow[ 2 ],
+            ] );
 
         } catch ( PDOException $e ) {
             throw new Exception( "Error in counting total words for propagation: " . $e->getCode() . ": " . $e->getMessage()
@@ -717,31 +742,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     -$e->getCode() );
         }
 
-        if ( !empty( $propagationTotal[ 'totals' ] ) ) {
+        if ( !empty( $propagationTotal->getTotals() ) ) {
 
-            $dao = new Translations_SegmentTranslationDao();
-            try {
-
-                $propagationTotal[ 'segments_for_propagation' ] = $segmentsForPropagation = $dao->getSegmentsForPropagation( [
-                        'id_segment'        => $_idSegment,
-                        'job_first_segment' => $chunkStruct[ 'job_first_segment' ],
-                        'job_last_segment'  => $chunkStruct[ 'job_last_segment' ],
-                        'segment_hash'      => $segmentTranslationStruct[ 'segment_hash' ],
-                        'id_job'            => $segmentTranslationStruct[ 'id_job' ]
-                ], $segmentTranslationStruct[ 'status' ] );
-            } catch ( PDOException $e ) {
-                throw new Exception(
-                        sprintf( "Error in querying segments for propagation: %s: %s ", $e->getCode(), $e->getMessage() ),
-                        -$e->getCode()
-                );
-            }
-
-
-            if ( true === $execute_update and !empty( $propagationTotal[ 'segments_for_propagation' ] ) ) {
-
-                $propagationTotal[ 'propagated_ids' ] = array_map( function ( Translations_SegmentTranslationStruct $translation ) {
-                    return $translation->id_segment;
-                }, $propagationTotal[ 'segments_for_propagation' ] );
+            if ( true === $execute_update and !empty( $propagationTotal->getSegmentsForPropagation() ) ) {
 
                 try {
 
@@ -756,27 +759,34 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     }
 
                     $place_holders_fields = implode( ",", $place_holders_fields );
-                    $place_holders_id     = implode( ',', array_fill( 0, count( $propagationTotal[ 'propagated_ids' ] ), '?' ) );
+                    $place_holders_id     = implode( ',', array_fill( 0, count( $propagationTotal->getPropagatedIds() ), '?' ) );
 
-                    $values = array_merge(
-                            $field_values,
-                            [ $segmentTranslationStruct[ 'id_job' ] ],
-                            $propagationTotal[ 'propagated_ids' ]
-                    );
+                    if ( false === empty( $place_holders_id ) ) {
+                        $values = array_merge(
+                                $field_values,
+                                [ $segmentTranslationStruct[ 'id_job' ] ]
+                        );
 
-                    $propagationSql = "
-                  UPDATE segment_translations SET $place_holders_fields
-                  WHERE id_job = ? AND id_segment IN ( $place_holders_id )
-            ";
+                        if ( false === empty( $propagationTotal->getPropagatedIds() ) ) {
+                            $values = array_merge(
+                                    $values,
+                                    $propagationTotal->getPropagatedIds()
+                            );
+                        }
 
-                    $pdo  = $db->getConnection();
-                    $stmt = $pdo->prepare( $propagationSql );
+                        $propagationSql = "
+                          UPDATE segment_translations SET $place_holders_fields
+                          WHERE id_job = ? AND id_segment IN ( $place_holders_id )
+                    ";
 
-                    $stmt->execute( $values );
+                        $pdo  = $db->getConnection();
+                        $stmt = $pdo->prepare( $propagationSql );
 
-                    //update related versions
-                    $versionHandler->savePropagationVersions( $segmentTranslationStruct );
+                        $stmt->execute( $values );
 
+                        // update related versions
+                        $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagationTotal->getPropagatedIds() );
+                    }
                 } catch ( PDOException $e ) {
                     throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
                             . "\n" .
@@ -784,16 +794,14 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                             . "\n"
                             . var_export( $segmentTranslationStruct, true )
                             . "\n"
-                            . var_export( $propagationTotal[ 'propagated_ids' ], true )
+                            . var_export( $propagationTotal->getPropagatedIds(), true )
                             . "\n",
                             -$e->getCode() );
                 }
-
             }
-
         }
 
-        return $propagationTotal;
+        return ( new \API\V2\Json\Propagation( $propagationTotal ) )->render();
 
     }
 
