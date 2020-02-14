@@ -115,12 +115,14 @@ var UI = {
                 successText: 'Only this segment',
                 successCallback: function(){
                         opts.propagation = false;
+                        opts.autoPropagation = false;
                         UI.preExecChangeStatus(opts);
                         APP.ModalWindow.onCloseModal();
                     },
                 cancelText: 'Propagate to All',
                 cancelCallback: function(){
                         opts.propagation = true;
+                        opts.autoPropagation = false;
                         UI.execChangeStatus(opts);
                         APP.ModalWindow.onCloseModal();
                     },
@@ -130,6 +132,7 @@ var UI = {
             };
             APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
         } else {
+            opts.autoPropagation = true;
             this.execChangeStatus( opts ); // autopropagate
         }
 	},
@@ -1318,16 +1321,18 @@ var UI = {
 
             this.tempReqArguments = null;
 
-            UI.checkSegmentsPropagation(propagate, id_segment, response.propagation, status);
+            UI.checkSegmentsPropagation(propagate, options.autoPropagate, id_segment, response.propagation, status);
         }
         this.resetRecoverUnsavedSegmentsTimer();
     },
-    checkSegmentsPropagation: function(propagate, id_segment, propagationData, status) {
+    checkSegmentsPropagation: function(propagate, autoPropagate, id_segment, propagationData, status) {
         if( propagate ) {
             if ( propagationData.propagated_ids && propagationData.propagated_ids.length > 0 ) {
                 SegmentActions.propagateTranslation( id_segment, propagationData.propagated_ids, status );
             }
-
+            if ( autoPropagate ) {
+                return;
+            }
             var text = "The segment translation has been propagated to the other repetitions.";
             if ( propagationData.segments_for_propagation.not_propagated &&
                 propagationData.segments_for_propagation.not_propagated.ice.id && propagationData.segments_for_propagation.not_propagated.ice.id.length > 0 ) {
@@ -1347,7 +1352,7 @@ var UI = {
                 allowHtml: true,
                 position: "bl",
             };
-            APP.removeAllNotifications()
+            APP.removeAllNotifications();
             APP.addNotification(notification);
         } else {
             SegmentActions.setSegmentPropagation(id_segment, null, false);
