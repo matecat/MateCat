@@ -12,6 +12,7 @@ use Chunks_ChunkStruct;
 use Constants;
 use Database;
 use Exceptions\ControllerReturnException;
+use LQA\ChunkReviewStruct;
 use PDO;
 
 class ChunkReviewDao extends \LQA\ChunkReviewDao {
@@ -152,4 +153,25 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         return $result[0] == null ? 0 : $result[0];
     }
 
+
+    public function atomicUpdate( ChunkReviewStruct $chunkReviewStruct  ) {
+
+        $sql = "UPDATE 
+        qa_chunk_reviews
+        SET 
+        penalty_points = penalty_points + :penalty_points,
+        reviewed_words_count = reviewed_words_count + :reviewed_words_count,
+        advancement_wc = advancement_wc + :advancement_wc,
+        total_tte = total_tte + :total_tte
+     
+        WHERE id = :id";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute([
+                'id'  => $chunkReviewStruct->id
+        ]);
+
+        return $stmt->rowCount();
+    }
 }

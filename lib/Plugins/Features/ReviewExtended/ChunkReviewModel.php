@@ -130,6 +130,24 @@ class ChunkReviewModel implements IChunkReviewModel {
     }
 
     /**
+     * @param Projects_ProjectStruct $project
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function atomicUpdatePassFailResult( Projects_ProjectStruct $project ) {
+
+        $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
+        $update_result = (new ChunkReviewDao())->atomicUpdate( $this->chunk_review  );
+
+        $project->getFeaturesSet()->run( // ???????
+                'chunkReviewUpdated', $this->chunk_review, $update_result, $this, $project
+        );
+
+        return $update_result;
+    }
+
+    /**
      * Returns the proper limit for the current review stage.
      *
      * @param ModelStruct $lqa_model

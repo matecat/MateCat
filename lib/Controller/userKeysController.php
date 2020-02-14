@@ -136,7 +136,7 @@ class userKeysController extends ajaxController {
                     $userMemoryKeys = $mkDao->disable( $memoryKeyToUpdate );
                     break;
                 case 'update':
-                    $userMemoryKeys = $mkDao->update( $memoryKeyToUpdate );
+                    $userMemoryKeys = $mkDao->atomicUpdate( $memoryKeyToUpdate );
                     break;
                 case 'newKey':
                     $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );

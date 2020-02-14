@@ -127,7 +127,7 @@ class CrudEngineTest extends AbstractTest {
     /**
      * It updates the struct of an engine checking the righteousness through the field 'name'.
      * @group  regression
-     * @covers EnginesModel_EngineDAO::update
+     * @covers EnginesModel_EngineDAO::atomicUpdate
      */
     public function test_update_the_struct_of_constructed_engine_check_by_name() {
 
@@ -155,7 +155,7 @@ class CrudEngineTest extends AbstractTest {
         $this->assertEquals( [ 0 => [ 'name' => "DeepLingo En/Fr iwslt" ] ], $this->database_instance->getConnection()->query( $sql_engine )->fetchAll( PDO::FETCH_ASSOC ) );
 
         //change the real record
-        $this->engine_DAO->update( $this->engine_struct_param );
+        $this->engine_DAO->atomicUpdate( $this->engine_struct_param );
 
 //        $this->flusher->flushdb();
         $this->assertEquals( [ 0 => [ 'name' => "NONE" ] ], $this->database_instance->getConnection()->query( $sql_engine )->fetchAll( PDO::FETCH_ASSOC ) );
@@ -166,15 +166,15 @@ class CrudEngineTest extends AbstractTest {
     /**
      * It doesn't update the struct of an engine because the
      * @throws Exception @group regression
-     * @covers EnginesModel_EngineDAO::update
+     * @covers EnginesModel_EngineDAO::atomicUpdate
      */
     public function test_update_the_struct_of_engine_with_wrong_uid_avoiding_any_update() {
 
         $this->engine_struct_param->uid++;
-        $this->engine_DAO->update( $this->engine_struct_param );
+        $this->engine_DAO->atomicUpdate( $this->engine_struct_param );
 
         //update on the same object is null
-        $this->assertNull( $this->engine_DAO->update( $this->engine_struct_param ) );
+        $this->assertNull( $this->engine_DAO->atomicUpdate( $this->engine_struct_param ) );
 
         $sql_engine = "SELECT * FROM " . INIT::$DB_DATABASE . ".`engines` WHERE id='" . $this->engine_id . "' and uid='" . $this->user_id . "'";
 
