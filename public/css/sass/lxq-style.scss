@@ -73,7 +73,7 @@
  */
 .lxq-thread-wrap-resolved {
   background: rgba(124,197,118,.15);
-  border-bottom: 2px solid rgba(124,197,118,.6); /* #7cc576 */
+  border-bottom: 2px solid rgba(124,197,118,.6); /* $approvedGreen */
 }
 
 /*
@@ -265,7 +265,7 @@ a.lxq-new-message-link:hover {
 }
 
 .lxq-comment-resolved-label {
-  color: #7cc576; /* per-green line 2350 style.css */
+  color: $approvedGreen; /* per-green line 2350 style.css */
   font-size: 12px;
   font-weight: bold;
 }
@@ -325,9 +325,9 @@ a:active.lxq-comment-default-btn {
  */
 a.lxq-comment-send-btn:link,
 a.lxq-comment-send-btn:visited {
-  background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-  background: -webkit-linear-gradient(top,  #09beec,  #119ec4);
-  background: linear-gradient(top,  #09beec,  #119ec4);
+  background: -webkit-gradient(linear, left top, left bottom, from($translatedBlue), to(#119ec4));
+  background: -webkit-linear-gradient(top,  $translatedBlue,  #119ec4);
+  background: linear-gradient(top,  $translatedBlue,  #119ec4);
   border: 1px solid #848689;
   color: #fff;
 }
@@ -356,8 +356,8 @@ a.lxq-comment-resolve-btn:visited {
 
 a.lxq-comment-resolve-btn:hover,
 a.lxq-comment-resolve-btn:active {
-  background: #7cc576;
-  border: 1px solid #7cc576;
+  background: $approvedGreen;
+  border: 1px solid $approvedGreen;
   color: #fff;
 }
 
@@ -1002,31 +1002,6 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
             flex-flow: column nowrap;
 }
 
-.lxq-info-link {
-    text-align: center;
-    color: #0798bc;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-        -ms-flex-align: center;
-            align-items: center;
-    text-decoration: none;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-}
-
-.lxq-info-link::after {
-    content: url("../../img/rsz_user_guide.png");
-    display: inline-block;
-    width: 2rem;
-    height: 2rem;
-    margin-left: 0.5rem;
-    line-height: 2.8rem;
-}
-
 .lxq-info-link:hover {
     cursor: pointer;
 }
@@ -1088,22 +1063,6 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
             align-items: center;
     text-transform: uppercase;
     font-size: 0.9rem;
-}
-
-.lxq-history-balloon-header-link {
-    content: url("../../img/report-arrow.svg");
-    width: 1.5rem;
-    height: 1.5rem;
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    padding: 0.1rem;
-    -webkit-box-align: center;
-    -webkit-align-items: center;
-        -ms-flex-align: center;
-            align-items: center;
-    margin-left: 0.3rem;
 }
  
 .lxq-history-balloon-body {
@@ -1326,7 +1285,6 @@ LEXIQA POPUP
 /*}*/
 
 /*.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon {*/
-    /*content: url("../img/lexiqa_icons_info.svg");*/
 /*}*/
 
 /*.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon,*/

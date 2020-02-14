@@ -100,7 +100,6 @@ class SegmentTranslationEventModel  {
             return ;
         }
 
-
         $this->current_event                 = new SegmentTranslationEventStruct() ;
         $this->current_event->id_job         = $this->translation['id_job'] ;
         $this->current_event->id_segment     = $this->translation['id_segment'] ;

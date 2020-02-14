@@ -104,7 +104,7 @@
         var password = config.review_password ? config.review_password : config.password ;
         $.post( sprintf('/api/app/dqf/jobs/%s/%s/assign', id_job, password ), {})
             .done( function( data ) {
-                UI.reloadPage();
+                location.reload();
             });
     }
 

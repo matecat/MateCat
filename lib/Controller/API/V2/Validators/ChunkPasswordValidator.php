@@ -13,9 +13,7 @@
 
 namespace API\V2\Validators;
 
-use API\V2\Exceptions\ValidationError;
 use API\V2\KleinController;
-use Chunks_ChunkDao;
 use Chunks_ChunkStruct;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
@@ -42,13 +40,13 @@ class ChunkPasswordValidator extends Base {
         parent::__construct( $controller->getRequest() );
 
         $filterArgs = [
-                'id_job'   => [
+                'id_job'          => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
-                'password' => [
+                'password'        => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
-                'revision_number'     => [
+                'revision_number' => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
                 ],
         ];
@@ -61,8 +59,8 @@ class ChunkPasswordValidator extends Base {
         $controller->id_job   = $this->id_job;
         $controller->password = $this->password;
 
-        if(false === empty($postInput->revision_number)){
-            $this->revision_number = $postInput->revision_number;
+        if ( false === empty( $postInput->revision_number ) ) {
+            $this->revision_number       = $postInput->revision_number;
             $controller->revision_number = $this->revision_number;
         }
 
@@ -101,7 +99,7 @@ class ChunkPasswordValidator extends Base {
      */
     protected function getChunkFromTranslatePassword() {
         $this->chunk = Jobs_JobDao::getByIdAndPassword( $this->request->id_job, $this->request->password, 0, new Chunks_ChunkStruct );
-        if( !empty( $this->chunk ) ){
+        if ( !empty( $this->chunk ) ) {
             $this->chunkReview = @( new ChunkReviewDao() )->findChunkReviews( $this->chunk )[ 0 ];
         }
     }
@@ -114,7 +112,7 @@ class ChunkPasswordValidator extends Base {
         return $this->id_job;
     }
 
-    public function getChunkReview(){
+    public function getChunkReview() {
         return $this->chunkReview;
     }
 

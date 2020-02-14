@@ -54,15 +54,15 @@
                 box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
             }
             &.translated-all-bulked {
-                border: 1px solid #09beec;
-                color: #09beec;
+                border: 1px solid $translatedBlue;
+                color: $translatedBlue;
             }
             &.approved-all-bulked {
-                border: 1px solid #7cc576;
-                color: #7cc576;
+                border: 1px solid $approvedGreen;
+                color: $approvedGreen;
                 &.approved-2nd-pass {
-                    border: 1px solid #BC6AC9;
-                    color: #BC6AC9;
+                    border: 1px solid $approved2Green;
+                    color: $approved2Green;
                 }
             }
             i {

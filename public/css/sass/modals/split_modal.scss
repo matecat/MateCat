@@ -7,7 +7,7 @@
         padding: 0 0 0 0;
         left: 0;
         top: 0;
-        background: #f1f1f1;
+        background: $grey3;
         border-radius: 0 0 4px 4px;
         text-align: left;
         border: 1px solid #666;
@@ -20,7 +20,7 @@
         .popup-split-job-id {
             font-weight: 100;
             font-size: 16px;
-            color: #696969;
+            color: $grey1;
             margin-right: 5px;
         }
     }
@@ -44,8 +44,9 @@
     }
     .splitbtn-cont {
         overflow: hidden;
-        font-size: 20px;
-        color: #666;
+        font-size: 18px;
+        color: $grey1;
+        font-weight: bold;
     }
     .jobcontainer.splitted .splitbtn-cont {
         display: none;
@@ -57,7 +58,7 @@
     .nosplit {
         float: right;
         font-size: 20px;
-        color: #666;
+        color: $grey1;
         display: none;
         margin: 45px 140px 0 0;
     }
@@ -74,7 +75,7 @@
             //padding: 11px 22px;
             vertical-align: top;
             //font-size: 18px;
-            border: 1px solid #797979;
+            //border: 1px solid #797979;
             border-radius: 2px;
             float: right;
         }
@@ -82,13 +83,15 @@
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             //font-size: 18px;
             margin-top: 0;
-            border: 1px solid #797979;
+            border: 1px solid $grey1;
             border-radius: 2px;
             //padding: 11px 22px;
-            background-color: #f6f6f6;
+            background-color: #fff;
             margin-right: 15px;
+            color: $grey1;
             &:hover {
-                box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                background-color: $grey3;
+                //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
             }
             &:focus {
                 box-shadow: none;
@@ -139,11 +142,13 @@
             width: auto;
             height: 37px;
             padding: 4px;
-            color: #666;
+            color: $grey1;
             font-size: 18px;
-            border: 1px solid #ccc;
+            border: 1px solid $grey1;
             box-sizing: border-box;
             display: inline-block;
+            background: white;
+            border-radius: 6px;
         }
 
     }
@@ -176,7 +181,7 @@
         cursor: default;
         -moz-box-shadow: none;
         -webkit-box-shadow: none;
-        border: 1px solid #666;
+        border: 1px solid $grey1;
         background: #ccc;
     }
 
@@ -200,7 +205,7 @@
         border-radius: 2px;
         text-align: left;
         font-size: 18px;
-        border: 1px solid #666;
+        border: 1px solid $grey1;
     }
     .split-box3 .input, .split-box2 .input {
         font-size: 16px;
@@ -232,7 +237,7 @@
         background-size: 13px 11px;
         box-sizing: content-box;
         border: 1px solid #ccc;
-        border-radius: 2px;
+        border-radius: 6px;
         box-shadow: inset 0 1px 3px #ddd;
     }
 
@@ -247,7 +252,7 @@
         width: 99%;
         border-radius: 0px;
         background: #ffffff;
-        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+        //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
     }
 
     .split-box3 .jobs li.void {
@@ -330,12 +335,16 @@
 
     .total .wordsum {
         font-size: 20px;
-        color: #000;
+        color: $grey1;
         text-align: right;
         margin-right: 15px;
         margin-top: 10px;
         padding: 0;
         line-height: 13px;
+        font-weight: bold;
+        span {
+            color: black;
+        }
     }
 
 
@@ -344,7 +353,7 @@
         cursor: default;
         -moz-box-shadow: none;
         -webkit-box-shadow: none;
-        border: 1px solid #666;
+        border: 1px solid $grey1;
         background: #ccc !important;
     }
 

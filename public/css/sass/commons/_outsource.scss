@@ -1,5 +1,5 @@
 .after-open-outsource {
-    border-left: 2px solid #09beec;
+    border-left: 2px solid $translatedBlue;
     padding-left: 13px !important;
 }
 .outsource-container {
@@ -7,9 +7,9 @@
     margin-top: 30px !important;
     margin-bottom: 30px !important;
     width: 107%;
-    margin-left: -2% !important;
-    margin-right: -2% !important;
-    box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
+    margin-left: -3.0% !important;
+    //margin-right: -2% !important;
+    //box-shadow: 0 1px 20px rgba(0, 0, 0, 0.67);
     overflow: hidden;
     .outsource-header {
         padding: 5px 35px 5px 40px !important;
@@ -56,7 +56,7 @@
     }
 
     &.showOutsource.transitionOutsource-enter.transitionOutsource-enter-active {
-        height: 536px;
+        height: 505px;
         -webkit-transition: all .3s ease;
     }
 
@@ -65,7 +65,7 @@
         -webkit-transition: all .3s ease;
     }
 
-    &.transitionOutsource-leave.transitionOutsource-leave-active {
+    &.transitionOutsource-exit.transitionOutsource-exit-active {
         height: 0 !important;
         margin: 0 !important;
         -webkit-transition: all .3s ease;
@@ -218,7 +218,6 @@
                                 .send-job {
                                     font-family: Calibri, Arial, Helvetica, sans-serif;
                                     font-size: 16px;
-                                    border: 1px solid #797979;
                                     border-radius: 2px;
                                     padding: 10px 17px;
                                     margin: 0;
@@ -261,7 +260,7 @@
         }
     }
     .open-job-box {
-        background-color: #d7d8dc;
+        background-color: $grey2;
         padding: 35px 30px 25px 40px;
         width: 100%;
         cursor: auto;
@@ -291,7 +290,7 @@
             .button {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 font-size: 16px;
-                border: 1px solid #797979;
+                //border: 1px solid #797979;
                 border-radius: 2px;
                 padding: 9px 15px;
                 margin: 0;
@@ -323,7 +322,7 @@
     }
 
     .background-outsource-vendor {
-        background: #f1f3f2;
+        background: $grey3;
         width: 100%;
         padding-bottom: 15px;
         padding-top: 15px;
@@ -486,7 +485,7 @@
                 }
                 .revision-box {
                     padding: 4px 0px;
-                    background-color: #e4e6e8;
+                    background-color: $grey2;
                     margin-bottom: 10px;
                     height: 28px;
                     .add-revision {
@@ -602,12 +601,14 @@
                             position: relative;
                             top: 2px;
                             font-size: 15px;
+                            background: $grey2;
                             color: #000000;
                         }
                     }
                     .delivery-box {
                         padding: 14px 15px;
                         text-align: left;
+                        border: 1px solid $grey2;
                         .fields {
                             .field {
                                 label {
@@ -653,7 +654,7 @@
                                     padding: 9px 11px;
                                     vertical-align: top;
                                     font-size: 18px;
-                                    border: 1px solid #09beec;
+                                    border: 1px solid $translatedBlue;
                                     border-radius: 2px;
                                     box-shadow: none !important;
                                     background-color: #ffffff !important;
@@ -661,12 +662,13 @@
                                     margin-top: 33px;
                                     &:hover {
                                         text-decoration: none;
-                                        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                                        border: 1px solid #09beec;
+                                        //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                        border: 1px solid $translatedBlue;
+                                        background-color: $grey3;
                                     }
                                     &:focus {
                                         box-shadow: none !important;
-                                        background-color: #f2f2f2 !important;
+                                        background-color: $grey3 !important;
                                     }
                                 }
                             }
@@ -690,7 +692,7 @@
                     width: 18%;
                     min-width: 199px;
                     .order-box {
-                        background-color: #daeddf;
+                        background-color: #a7d7916b;
                         height: 70px;
                         text-align: center;
                         margin-bottom: 5px;
@@ -765,7 +767,7 @@
                                 cursor: pointer;
                                 transition: 0.3s ease;
                                 &.active {
-                                    background: #7eaf3e;
+                                    background: $greenDefault;
                                 }
                             }
                         }
@@ -907,7 +909,7 @@
                                             position: relative;
                                             top: 1px;
                                             &.online-item {
-                                                background-color: #09beec;
+                                                background-color: $translatedBlue;
                                             }
                                             &.offline-item {
                                                 background-color: gray;
@@ -932,7 +934,7 @@
             .reduced-boxes {
                 .container-reduced {
                     padding: 0 10px;
-                    width: 82%;
+                    width: 81%;
                     display: inline-block;
                     vertical-align: top;
                     .job-menu, .open-translate {
@@ -986,6 +988,11 @@
                         text-align: right;
                         position: relative;
                         top: -15px;
+                        .need-it-faster-box {
+                            .delivery-box {
+                                border: 1px solid $grey2;
+                            }
+                        }
                         .delivery-box {
                             display: inline-block;
                             font-size: 18px;
@@ -1054,7 +1061,7 @@
                     width: 18%;
                     min-width: 200px;
                     .order-box {
-                        background-color: #daeddf;
+                        background-color: #a7d7916b;
                         padding: 25px 5px 15px;
                         margin-bottom: 5px;
                         .outsource-price {
@@ -1088,7 +1095,6 @@
                             padding: 10px 22px;
                             vertical-align: top;
                             font-size: 16px;
-                            border: 1px solid #797979;
                             border-radius: 2px;
                             margin: 0px;
                         }
@@ -1193,7 +1199,6 @@
             font-family: Calibri, Arial, Helvetica, sans-serif;
             padding: 10px;
             margin: 0;
-            border: 1px solid #797979;
             font-size: 18px;
             border-radius: 2px;
             width: 100%;
@@ -1204,7 +1209,6 @@
             padding: 11px 0 !important;
             vertical-align: top;
             font-size: 16px;
-            border: 1px solid #797979;
             border-radius: 2px;
             width: 100%;
             float: right;

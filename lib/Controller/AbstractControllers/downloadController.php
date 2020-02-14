@@ -116,8 +116,9 @@ abstract class downloadController extends controller {
                             "message" => "Download complete."
                     ] ) : json_encode( $tokenContent ) ),
                     time() + 600            // expires in 5 minutes
-                    , '/',
-                    \INIT::$COOKIE_DOMAIN
+                    , '/; samesite=None',
+                    \INIT::$COOKIE_DOMAIN,
+                    true
             );
             $this->downloadToken = null;
         }

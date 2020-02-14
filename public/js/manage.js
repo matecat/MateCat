@@ -65,7 +65,8 @@ UI = {
 
             ReactDOM.render(React.createElement(Header ,{
                 user: APP.USER.STORE,
-                showFilterProjects: true
+                showFilterProjects: true,
+                loggedUser: true
             }), headerMountPoint);
 
             self.teams = data.teams;
@@ -87,7 +88,9 @@ UI = {
                 });
             });
         });
-
+        setTimeout( function (  ) {
+            CatToolActions.showHeaderTooltip();
+        }, 2000);
     },
 
     reloadProjects: function () {
@@ -134,12 +137,7 @@ UI = {
     renderProjects: function (projects) {
         APP.beforeRenderProjects = new Date();
         if ( !this.ProjectsContainer ) {
-            var mountPoint = $("#manage-container")[0];
-            this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
-                getLastActivity: API.PROJECTS.getLastProjectActivityLogAction,
-                changeJobPasswordFn: API.JOB.changeJobPassword,
-                downloadTranslationFn : this.downloadTranslation
-            }), mountPoint);
+            this.ProjectsContainer = ManageActions.initialRender(this.teams, this.selectedTeam);
         }
 
         ManageActions.renderProjects(projects, this.selectedTeam, this.teams);

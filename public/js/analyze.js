@@ -86,27 +86,6 @@ UI = {
             }, UI.pollingTime );
         }
     },
-    /*TODO
-     Scroll to job
-     */
-    checkQueryParams: function () {
-        var jobId = APP.getParameterByName("jobid");
-        var open = APP.getParameterByName("open");
-        var job$ = $('div[data-jid=' + jobId + ']');
-        var interval;
-        if (jobId && open && job$ ) {
-            switch (open) {
-                case 'analysis':
-                    console.log('Open Analysis ' + jobId);
-                    job$[0].scrollIntoView( true );
-                    setTimeout(function () {
-                        $('div[data-jid=' + jobId + '] .uploadbtn.translate').trigger('click');
-                    }, 500);
-                    break;
-            }
-        }
-
-    },
     parseVolumeAnalysisData: function (volumeAnalysisData) {
         UI.volumeAnalysis = volumeAnalysisData.data;
     },

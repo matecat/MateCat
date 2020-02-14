@@ -29,6 +29,7 @@ class glossaryController extends ajaxController {
      * @var Jobs_JobStruct
      */
     private $jobData;
+    private $fromtarget;
 
     public function __construct() {
 
@@ -41,6 +42,7 @@ class glossaryController extends ajaxController {
                 'segment'        => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'newsegment'     => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'translation'    => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'from_target'    => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'newtranslation' => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'comment'        => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'automatic'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
@@ -58,6 +60,7 @@ class glossaryController extends ajaxController {
         $this->segment        = $__postInput[ 'segment' ];
         $this->newsegment     = $__postInput[ 'newsegment' ];
         $this->translation    = $__postInput[ 'translation' ];
+        $this->fromtarget     = $__postInput[ 'from_target' ];
         $this->newtranslation = $__postInput[ 'newtranslation' ];
         $this->comment        = $__postInput[ 'comment' ];
         $this->automatic      = $__postInput[ 'automatic' ];
@@ -91,10 +94,14 @@ class glossaryController extends ajaxController {
             $config[ 'tnote' ]       = $this->comment;
 
             // job related
-            $config[ 'id_user' ]     = array() ; 
-            $config[ 'source' ]      = $this->jobData[ 'source' ];
-            $config[ 'target' ]      = $this->jobData[ 'target' ];
-
+            $config[ 'id_user' ]     = array() ;
+            if ( $this->fromtarget ) { //Search by target
+                $config[ 'source' ] = $this->jobData[ 'target' ];
+                $config[ 'target' ] = $this->jobData[ 'source' ];
+            } else {
+                $config[ 'source' ] = $this->jobData[ 'source' ];
+                $config[ 'target' ] = $this->jobData[ 'target' ];
+            }
             $config[ 'isGlossary' ]  = true;
             $config[ 'get_mt' ]      = null;
             $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
@@ -208,6 +215,14 @@ class glossaryController extends ajaxController {
                     $uid);
 
             $TMS_RESULT[$k][0]['created_by'] = $TMS_RESULT[$k][0]['last_updated_by'];
+            if ( $this->fromtarget ) { //Search by target
+                $source = $TMS_RESULT[$k][0]['segment'];
+                $rawsource = $TMS_RESULT[$k][0]['raw_segment'];
+                $TMS_RESULT[$k][0]['segment'] = $TMS_RESULT[$k][0]['translation'];
+                $TMS_RESULT[$k][0]['translation'] = $source;
+                $TMS_RESULT[$k][0]['raw_segment'] = $TMS_RESULT[$k][0]['raw_translation'];
+                $TMS_RESULT[$k][0]['raw_translation'] = $rawsource;
+            }
         }
         $this->result[ 'data' ][ 'matches' ] = $TMS_RESULT;
 

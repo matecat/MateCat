@@ -32,8 +32,8 @@ $dao = new ApiKeys_ApiKeyDao( Database::obtain() );
 
 $values = array(
   'uid' => $user->uid, 
-  'api_key' => Utils::randomString( 20 ),
-  'api_secret' => Utils::randomString( 20 ),
+  'api_key' => Utils::randomString( 20, true ),
+  'api_secret' => Utils::randomString( 20, true ),
   'enabled' => true
 );
 

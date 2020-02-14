@@ -83,7 +83,7 @@ class Bootstrap {
         INIT::$TASK_RUNNER_CONFIG              = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
 
         try {
-            Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );
+            Log::$uniqID = ( isset( $_COOKIE[ INIT::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ INIT::$PHP_SESSION_NAME ], 0 , 13 ) : uniqid() );
             WorkerClient::init();
             Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         } catch( \Exception $e ){
@@ -130,7 +130,7 @@ class Bootstrap {
         } else {
             //try creating the file and the fetch it
             //generate pass
-            $secret = self::generate_password( 512 );
+            $secret = Utils::randomString( 512, true );
             //put file
             file_put_contents( INIT::$AUTHSECRET_PATH, $secret );
             //if put succeed
@@ -279,10 +279,7 @@ class Bootstrap {
 
                 if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
 
-                    var_dump($error);
-                    die();
-
-                    //json_rersponse
+                    //json_response
                     if ( INIT::$PRINT_ERRORS ) {
                         echo json_encode( array(
                                 "errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array()
@@ -304,22 +301,6 @@ class Bootstrap {
 
                 break;
         }
-
-    }
-
-    protected static function generate_password( $length = 12 ) {
-
-        $_pwd = md5( uniqid( '', true ) );
-        $pwd  = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
-
-        if ( $length > 12 ) {
-            while ( strlen( $pwd ) < $length ) {
-                $pwd .= self::generate_password();
-            }
-            $pwd = substr( $pwd, 0, $length );
-        }
-
-        return $pwd;
 
     }
 
@@ -388,7 +369,17 @@ class Bootstrap {
             self::$CONFIG['ENV'] = getenv( 'ENV' );
         }
 
-        return self::$CONFIG[ self::$CONFIG['ENV'] ];
+        $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
+
+        // check if outsource is disabled by environment
+        $enable_outsource = getenv( 'ENABLE_OUTSOURCE' );
+
+        if ( $enable_outsource == "false" ) {
+                $env["ENABLE_OUTSOURCE"] = false;
+                Log::doJsonLog("DISABLED OUTSOURCE");
+        }
+
+        return $env;
     }
 
     /**
@@ -438,7 +429,9 @@ class Bootstrap {
             }
 
             INIT::$PROTOCOL = $localProto;
+            ini_set( 'session.name', INIT::$PHP_SESSION_NAME );
             ini_set( 'session.cookie_domain', '.' . INIT::$COOKIE_DOMAIN );
+            ini_set( 'session.cookie_secure', true );
 
         }
 

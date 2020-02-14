@@ -1,0 +1,302 @@
+/* Language Selector Modal */
+
+#matecat-modal-languages {
+
+  $light-blue: $translatedBlue;
+  $medium-blue: $linkBlue;
+  $dark-blue: $darkBlue;
+
+  $placeholder-gray: #CDD4DE;
+  $btn-shadow-gray: $grey1;
+  $btn-hover-blue: $translatedBlueHover;
+
+  $light-gray: $grey3 ;
+  $medium-gray: $grey2;
+  $dark-gray: $grey1;
+
+
+  /* Modal */
+  .matecat-modal {
+    button:focus{
+      border: 1px solid $translatedBlue
+    }
+  }
+
+  /* Modal Content */
+  .matecat-modal-content {
+    width: 90vw;
+    height: 90vh;
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+
+  /* Modal Header */
+  .matecat-modal-header {
+    /*height:47px;*/
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .close-matecat-modal {
+      padding-bottom: 9px;
+    }
+
+  }
+
+  /* Modal Subheader */
+  .matecat-modal-subheader {
+    background: #fff;
+    border-bottom: 1px solid $medium-gray;
+    /*height: $subheader-height;*/
+    padding: 16px 16px 16px 32px;
+    width: 100%;
+
+    .language-from,
+    .language-to {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 4px 8px;
+
+      .first-column {
+        min-width: 48px;
+        text-align: left;
+      }
+
+      .label {
+        font-weight: bold;
+        margin: 0px 8px 0 0;
+      }
+
+      .language-search {
+
+        display: flex;
+        align-items: center;
+        width: 100%;
+        text-align: left;
+        border-radius: 2px;
+        border: 1px solid $medium-gray;
+        padding: 6px 16px;
+
+        &:hover {
+          border: 1px solid $dark-gray;
+          cursor: text;
+        }
+
+        input[type=text] {
+          border: none;
+          margin: 0;
+          padding: 6px 8px;
+          &::placeholder {
+            color: $placeholder-gray;
+            opacity: 1;
+          }
+          &:focus {
+            outline: none;
+          }
+        }
+
+        /* Tag chips */
+        .react-tagsinput {
+          width: 100%;
+          &>span{
+            display: inline-block;
+            &>*{
+              margin-top: 2px;
+              margin-bottom: 2px;
+            }
+          }
+        }
+        .tag {
+          position: relative;
+          display: inline-block;
+          padding: 4px 8px;
+          text-transform: capitalize;
+          border-radius: 2px;
+          margin: 0 2px;
+          background: #fff;
+          color: #000;
+          border: 1px solid $medium-gray;
+          &:hover {
+            cursor: default;
+          }
+          .react-tagsinput-remove {
+            color: $light-blue;
+            text-decoration: none;
+            margin: 0 0 0 4px;
+            cursor: pointer;
+          }
+          &.highlightDelete{
+            background: $light-blue;
+            color: #ffffff;
+            .react-tagsinput-remove {
+              color: #ffffff;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /* Modal Body */
+  .matecat-modal-body {
+    overflow: hidden;
+    height: 100%;
+    max-height: calc(100% - 119px);
+    border-radius: 0;
+    display: flex;
+    flex-flow: column;
+  }
+
+  /* Modal Footer */
+  .matecat-modal-footer {
+    overflow: auto;
+    height: 72px;
+    background: #FFF;
+    border-top: 1px solid $medium-gray;
+    padding: 8px 16px 8px 32px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .selected-counter {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-column-gap: 8px;
+      align-items: center;
+      margin-left: 8px;
+
+      /* Icon */
+      .uncheck-all {
+        color: $light-blue;
+        cursor: pointer;
+      }
+
+      /* Badge */
+      .badge {
+        padding: 0.35rem 0.58rem;
+        background: $translatedBlue;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        color: #fff;
+        line-height: 1;
+
+      }
+
+      /* Label */
+      .label {
+        font-weight: bold;
+        color: $dark-gray;
+        text-transform: uppercase;
+      }
+    }
+
+  }
+
+  /* Columns */
+  .languages-columns {
+    display: flex;
+    flex-direction: row;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    padding: 0 16px 0 24px;
+    margin: 32px 4px 0 0;
+
+    ul {
+      flex: 1;
+      overflow: visible;
+      max-height: 100%;
+
+      li.lang-item {
+        display: grid;
+        grid-template-columns: auto 17px;
+        cursor: pointer;
+        position: relative;
+        padding: 8px 12px;
+        margin: 4px;
+        border-radius: 2px;
+
+        &.selected {
+          background: $dark-blue;
+          color: #FFF;
+        }
+        &:not(.selected) .check {
+          display: none;
+        }
+
+        &:hover:not(.selected),
+        &.hover:not(.selected) {
+          background: $light-gray;
+          color: $medium-blue;
+          padding-left: 26px;
+
+          &:before {
+            position: absolute;
+            left: 14px;
+            top: 12px;
+            content: "";
+            border-style: solid;
+            border-width: 5px 0 5px 5px;
+            border-color: transparent transparent transparent $medium-blue;
+          }
+        }
+      }
+    }
+  }
+
+  /* Buttons */
+
+  .modal-btn {
+    padding: 8px 16px;
+    border-radius: 2px;
+    margin: 4px 8px;
+    cursor: pointer;
+
+
+    &:focus {
+      outline: none;
+    }
+
+    &.primary {
+      min-width: 128px;
+      //-webkit-box-shadow: 0 2px 8px 0 $btn-shadow-gray;
+      //-moz-box-shadow: 0 2px 8px 0 $btn-shadow-gray;
+      //box-shadow: 0 2px 8px 0 $btn-shadow-gray;
+    }
+
+    &.secondary {
+      min-width: 100px;
+
+    }
+
+    &.blue {
+      background: $light-blue;
+      border: 1px solid $light-blue;
+      color: #fff;
+      &:hover{
+        background-color: $btn-hover-blue;
+        //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+      }
+      &:focus{
+        box-shadow: none;
+        border: 1px solid $dark-blue;
+      }
+    }
+
+    &.gray {
+      background: #fff;
+      color: #000;
+      border: 1px solid $medium-gray;
+      &:focus{
+        border: 1px solid $light-blue;
+      }
+      &:hover{
+        background-color: $grey3;
+      }
+    }
+  }
+
+
+}

@@ -111,9 +111,27 @@ UI = {
 
         this.checkQueryParams();
 
-        this.setTeamHeader();
+        // this.setTeamHeader();
 
-        // this.getProjectInfo();
+		var self = this;
+		var headerMountPoint = $("header")[0];
+		ReactDOM.render(React.createElement(Header,{
+			loggedUser: config.isLoggedIn,
+			showSubHeader: false,
+			showModals: false,
+			changeTeam: false,
+			user: APP.USER.STORE
+		}), headerMountPoint);
+
+		// $.ajax({
+		// 	url: APP.getRandomUrl() + 'api/app/user',
+		// 	dataType: 'json',
+		// 	async: true,
+		// 	xhrFields: { withCredentials: true }
+		// }).done(function( data ) {
+		// 	// self.setTeamHeader();
+		// });
+
 	},
 
 	getProjectInfo: function () {
