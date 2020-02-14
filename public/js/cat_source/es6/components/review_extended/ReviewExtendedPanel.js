@@ -6,6 +6,7 @@ class ReviewExtendedPanel extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.removeMessageType = 0;
 		this.addIssueToApproveMessageType = 1;
 		this.addIssueToSelectedTextMessageType = 2;
 		this.state = {
@@ -62,7 +63,13 @@ class ReviewExtendedPanel extends React.Component {
                     showAddIssueToSelectedTextMessage: true
                 });
 				break;
-        }
+			case this.removeMessageType:
+					this.setState({
+						showAddIssueMessage: false,
+						showAddIssueToSelectedTextMessage: false
+					});
+					break;
+			}
     }
 
     closePanel() {
