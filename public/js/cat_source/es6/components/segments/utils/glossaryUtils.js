@@ -198,12 +198,14 @@ let GlossaryUtils = {
     },
 
     copyGlossaryItemInEditarea: function ( translation , segment) {
-        // var range = window.getSelection().getRangeAt( 0 );
-        var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="glossary-placeholder"></span>');
-        CursorUtils.replaceSelectedHtml(translation, rangeInsert);
-        var clonedElem = $( '.editor .editarea').clone();
-        SegmentActions.modifiedTranslation(segment.sid, null, true);
-        SegmentActions.replaceEditAreaTextContent(segment.sid, null, clonedElem.html());
+        var range = window.getSelection();
+        if ( range && $(range.getRangeAt( 0 ).endContainer).closest('div').hasClass('editarea') ) {
+            var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="glossary-placeholder"></span>');
+            CursorUtils.replaceSelectedHtml(translation, rangeInsert);
+            var clonedElem = $( '.editor .editarea').clone();
+            SegmentActions.modifiedTranslation(segment.sid, null, true);
+            SegmentActions.replaceEditAreaTextContent(segment.sid, null, clonedElem.html());
+        }
     }
 };
 
