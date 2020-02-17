@@ -1046,8 +1046,7 @@ var UI = {
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
         var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
 
-        return ( !alreadySet && !emptyTranslation &&
-            (segment.modified || ( segment.status === config.status_labels.NEW.toUpperCase() || segment.status === config.status_labels.DRAFT.toUpperCase() || config.isReview) ));
+        return ( !alreadySet && !emptyTranslation && segment.modified && ( segment.status === config.status_labels.NEW.toUpperCase() || segment.status === config.status_labels.DRAFT.toUpperCase() ) );
     },
 
     setTranslation: function(options) {
