@@ -893,24 +893,24 @@ var UI = {
             token: token
         };
 
-        var mock = {
-            ERRORS: {
-                categories: {
-                    'TAG': ['23853','23854','23855','23856','23857'],
-                }
-            },
-            WARNINGS: {
-                categories: {
-                    'TAG': ['23857','23858','23859'],
-                    'GLOSSARY': ['23860','23863','23864','23866',],
-                    'MISMATCH': ['23860','23863','23864','23866',]
-                }
-            },
-            INFO: {
-                categories: {
-                }
-            }
-        };
+        // var mock = {
+        //     ERRORS: {
+        //         categories: {
+        //             'TAG': ['23853','23854','23855','23856','23857'],
+        //         }
+        //     },
+        //     WARNINGS: {
+        //         categories: {
+        //             'TAG': ['23857','23858','23859'],
+        //             'GLOSSARY': ['23860','23863','23864','23866',],
+        //             'MISMATCH': ['23860','23863','23864','23866',]
+        //         }
+        //     },
+        //     INFO: {
+        //         categories: {
+        //         }
+        //     }
+        // };
 
         APP.doRequest({
             data: dataMix,
