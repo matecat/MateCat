@@ -104,9 +104,8 @@ let SearchUtils = {
             });
         };
 		//Save the current segment to not lose the translation
-        var segment;
         try {
-            segment = UI.Segment.findAbsolute( UI.currentSegmentId );
+            let segment = SegmentStore.getSegmentByIdToJS(UI.currentSegmentId);
             if ( UI.translationIsToSaveBeforeClose( segment ) ) {
                 UI.saveSegment(UI.currentSegment).then(() => {
                     makeSearchFn()

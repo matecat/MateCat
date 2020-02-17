@@ -150,6 +150,18 @@ const SegmentActions = {
         });
         this.closeIssuesPanel();
     },
+    saveSegmentBeforeClose: function (segment) {
+        if ( UI.translationIsToSaveBeforeClose( segment ) ) {
+            return UI.setTranslation({
+                id_segment: segment.sid,
+                status: (segment.status.toLowerCase() === 'new') ? 'draft' : segment.status ,
+                caller: 'autosave'
+            });
+        } else {
+            let promise = new Promise();
+            return primise.resolve();
+        }
+    },
     scrollToCurrentSegment() {
         this.scrollToSegment(SegmentStore.getCurrentSegment().sid);
     },
