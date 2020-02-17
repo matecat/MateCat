@@ -158,8 +158,9 @@ const SegmentActions = {
                 caller: 'autosave'
             });
         } else {
-            let promise = new Promise();
-            return primise.resolve();
+            var deferred = $.Deferred();
+            deferred.resolve();
+            return deferred.promise();
         }
     },
     scrollToCurrentSegment() {
