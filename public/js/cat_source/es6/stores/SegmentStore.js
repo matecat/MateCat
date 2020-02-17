@@ -523,9 +523,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
             let index = this.getSegmentIndex(sid);
-            if ( index === -1 ) return;
-            let segment = this._segments.get(index);
-            return segment.get('tagged');
+            if ( index !== -1 ) {
+                let segment = this._segments.get(index);
+                return segment.get('tagged');
+            }
         }
 
         return sid > -1
