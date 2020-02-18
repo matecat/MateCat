@@ -163,13 +163,16 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         reviewed_words_count = reviewed_words_count + :reviewed_words_count,
         advancement_wc = advancement_wc + :advancement_wc,
         total_tte = total_tte + :total_tte
-     
         WHERE id = :id";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute([
-                'id'  => $chunkReviewStruct->id
+                'id'  => $chunkReviewStruct->id,
+                'penalty_points'  => $chunkReviewStruct->penalty_points,
+                'reviewed_words_count'  => $chunkReviewStruct->reviewed_words_count,
+                'advancement_wc'  => $chunkReviewStruct->advancement_wc,
+                'total_tte'  => $chunkReviewStruct->total_tte,
         ]);
 
         return $stmt->rowCount();
