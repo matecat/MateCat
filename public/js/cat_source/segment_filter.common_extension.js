@@ -19,24 +19,22 @@ if ( SegmentFilter.enabled() )
         var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf( '' + UI.currentSegmentId );
         var nextFiltered = ( index !== list.length - 1 ) ? list[ index + 1 ] : list[0];
-        var segment = SegmentStore.getSegmentByIdToJS(nextFiltered);
         if ( !nextFiltered ) {
             return ;
         }
-        SegmentActions.openSegment(segment.sid);
+        SegmentActions.openSegment(nextFiltered);
     };
 
     var gotoPreviousSegment = function() {
         var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
         var index = list.indexOf( '' + UI.currentSegmentId );
         var nextFiltered = (index !== 0 ) ? list[ index - 1 ] : list[list.length - 1 ];
-        var segment = SegmentStore.getSegmentByIdToJS(nextFiltered);
 
         if ( !nextFiltered ) {
             return ;
         }
 
-        SegmentActions.openSegment(segment.sid);
+        SegmentActions.openSegment(nextFiltered);
     };
 
     var gotoNextTranslatedSegment = function(sid) {

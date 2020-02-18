@@ -17,6 +17,7 @@ class ModalComponent extends React.Component {
 
     componentDidMount() {
         $("body").addClass("side-popup");
+        document.activeElement.blur()
     }
 
     componentWillUnmount() {

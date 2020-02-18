@@ -502,8 +502,8 @@ MBC.init = function() {
             }
         } );
 
-        $( document ).on( 'mbc:comment:new', function ( ev, data ) {
-            CommentsActions.updateCommentsFromSse( data );
+        $( document ).on( 'sse:comment', function ( ev, message ) {
+            CommentsActions.updateCommentsFromSse( message.data );
             updateHistoryWithLoadedSegments();
             setTimeout(refreshBadgeHeaderIcon);
         } );

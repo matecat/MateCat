@@ -74,6 +74,7 @@ class SegmentsContainer extends React.Component {
     }
 
     renderSegments(segments) {
+        // VirtualList.prototype.animateScroll = false;
         let splitGroup =  [];
         this.setState({
             segments: segments,
@@ -133,6 +134,19 @@ class SegmentsContainer extends React.Component {
             }
             scrollTo = ( index >= 2 ) ? index-2 : ( index === 0 ) ? 0 : index-1 ;
             scrollTo = ( index > this.state.segments.size - 8 ) ? index : scrollTo;
+            if ( scrollTo > 0 || scrollTo < this.state.segments.size - 8 ) { //if the opened segments is too big for the view dont show the previous
+                let scrollToHeight = this.getSegmentHeight(index);
+                let segmentBefore1 = this.getSegmentHeight(index-1);
+                let segmentBefore2 = this.getSegmentHeight(index-2);
+                let totalHeight = segmentBefore1 + segmentBefore2 + scrollToHeight;
+                if ( totalHeight > this.state.window.height - 50 ) {
+                    if ( scrollToHeight + segmentBefore1 < this.state.window.height + 50 ) {
+                        return { scrollTo: index - 1, position: position }
+                    }
+                    return { scrollTo: index, position: position }
+                }
+
+            }
             return { scrollTo: scrollTo, position: position }
         } else if ( this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
             const diff = this.state.segments.size - this.lastListSize;
@@ -187,8 +201,9 @@ class SegmentsContainer extends React.Component {
         />;
         if ( segment.id_file !== currentFileId ) {
             let file = (!!this.state.files)? _.find(this.state.files, (file) => file.id == segment.id_file): false;
+            let classes = (this.state.sideOpen) ? 'slide-right' : '';
             return <React.Fragment>
-                <ul className="projectbar" data-job={"job-"+ segment.id_file}>
+                <ul className={"projectbar " + classes} data-job={"job-"+ segment.id_file}>
                     <li className="filename">
                         <h2 title={segment.filename}>{segment.filename}</h2>
                     </li>
@@ -221,7 +236,8 @@ class SegmentsContainer extends React.Component {
             let collectionType = this.getCollectionType(segment);
             let collectionTypeSeparator;
             if (collectionType && collectionsTypeArray.indexOf(collectionType) === -1) {
-                collectionTypeSeparator = <div className="collection-type-separator" key={collectionType+segment.sid+ (Math.random()*10)}>
+                let classes = (this.state.sideOpen) ? 'slide-right' : '';
+                collectionTypeSeparator = <div className={"collection-type-separator " + classes} key={collectionType+segment.sid+ (Math.random()*10)}>
                     Collection Name: <b>{collectionType}</b></div>;
                 collectionsTypeArray.push(collectionType);
                 if ( this.segmentsWithCollectionType.indexOf(segment.sid) === -1 ) {
@@ -266,6 +282,9 @@ class SegmentsContainer extends React.Component {
             $('#hiddenHtml section').css('display', 'block');
         }
         let segment = this.getSegmentByIndex(index);
+        if ( !segment ) {
+            return 0;
+        }
         let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
 
         if ( this.segmentsHeightsMap[segment.get('sid')] && this.segmentsHeightsMap[segment.get('sid')].height > 0 &&  this.segmentsHeightsMap[segment.get('sid')].segment.equals(segment)) {
@@ -488,30 +507,30 @@ class SegmentsContainer extends React.Component {
     }
 }
 
-let defaultScroll = VirtualList.prototype.scrollTo;
+// let defaultScroll = VirtualList.prototype.scrollTo;
 
-VirtualList.prototype.scrollTo = function (value) {
-    console.log("VirtualList.prototype.scrollTo:"  + value);
-    function scrollTo(element, direction, to, duration) {
-        if (duration <= 0) return;
-        const difference = to - element[direction];
-        const perTick = difference / duration * 5;
-        setTimeout(function () {
-            element[direction] = element[direction] + perTick;
-            if (element[direction] === to) return;
-            scrollTo(element, direction, to, duration - 5);
-        }, 5);
-    }
-    if ( this.animateScroll ) {
-        const scrollDirection = this.props.scrollDirection === void 0 ? 'vertical' : this.props.scrollDirection;
-        if ( scrollDirection === 'vertical' ) {
-            scrollTo( this.rootNode, 'scrollTop', value, 15 );
-        } else scrollTo( this.rootNode, 'scrollLeft', value, 15 );
-    } else {
-        defaultScroll.call(this, value);
-    }
-    this.animateScroll = true;
-};
+// VirtualList.prototype.scrollTo = function (value) {
+//     console.log("VirtualList.prototype.scrollTo:"  + value);
+//     function scrollTo(element, direction, to, duration) {
+//         if (duration <= 0) return;
+//         const difference = to - element[direction];
+//         const perTick = difference / duration * 5;
+//         setTimeout(function () {
+//             element[direction] = element[direction] + perTick;
+//             if (element[direction] === to) return;
+//             scrollTo(element, direction, to, duration - 5);
+//         }, 5);
+//     }
+//     if ( VirtualList.prototype.scrollTo.animateScroll ) {
+//         const scrollDirection = this.props.scrollDirection === void 0 ? 'vertical' : this.props.scrollDirection;
+//         if ( scrollDirection === 'vertical' ) {
+//             scrollTo( this.rootNode, 'scrollTop', value, 15 );
+//         } else scrollTo( this.rootNode, 'scrollLeft', value, 15 );
+//     } else {
+//         defaultScroll.call(this, value);
+//     }
+//     VirtualList.prototype.scrollTo.animateScroll = true;
+// };
 
 SegmentsContainer.propTypes = {
     segments: PropTypes.array,

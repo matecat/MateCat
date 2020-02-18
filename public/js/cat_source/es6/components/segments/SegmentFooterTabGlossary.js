@@ -171,7 +171,7 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     copyItemInEditArea(translation) {
-        GlossaryUtils.copyGlossaryItemInEditarea(TagUtils.decodePlaceholdersToText(translation, true), this.props.segment)
+        GlossaryUtils.copyGlossaryItemInEditarea(TagUtils.decodePlaceholdersToText(translation, true), this.props.segment);
     }
     onPasteEvent(e) {
         // cancel paste
@@ -231,7 +231,7 @@ class SegmentFooterTabGlossary extends React.Component {
                             <span id={self.props.id_segment + '-tm-' + match.id + '-source'} className="suggestion_source"
                                   dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText( leftTxt, true ))}/>
                         </li>
-                        <li className="b sugg-target" onDoubleClick={()=>self.copyItemInEditArea(rightTxt)}>
+                        <li className="b sugg-target" onMouseDown={()=>self.copyItemInEditArea(rightTxt)}>
                             <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className="translation"
                                   data-original={TagUtils.decodePlaceholdersToText( rightTxt, true )}
                                   dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText(rightTxt, true))}
