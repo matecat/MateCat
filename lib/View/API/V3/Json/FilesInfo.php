@@ -15,17 +15,19 @@ use DataAccess_IDaoStruct;
 class FilesInfo {
 
     /**
-     * @param DataAccess_IDaoStruct[] $filesStructList
+     * @param      $filesStructList
+     * @param null $job_first_segment
+     * @param null $job_last_segment
      *
      * @return array
      */
-    public function render( $filesStructList ) {
+    public function render( $filesStructList, $job_first_segment = null, $job_last_segment = null ) {
 
         $result            = [];
         $result[ 'files' ] = [];
 
-        $result[ 'first_segment' ] = reset( $filesStructList )->first_segment;
-        $result[ 'last_segment' ]  = end( $filesStructList )->last_segment;
+        $result[ 'first_segment' ] = ($job_first_segment) ? $job_first_segment : reset( $filesStructList )->first_segment;
+        $result[ 'last_segment' ]  = ($job_last_segment) ? $job_last_segment : end( $filesStructList )->last_segment;
 
         foreach ( $filesStructList as $fileInfo ) {
             $result[ 'files' ][] = [
