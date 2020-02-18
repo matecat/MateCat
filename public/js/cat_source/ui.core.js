@@ -115,12 +115,14 @@ var UI = {
                 successText: 'Only this segment',
                 successCallback: function(){
                         opts.propagation = false;
+                        opts.autoPropagation = false;
                         UI.preExecChangeStatus(opts);
                         APP.ModalWindow.onCloseModal();
                     },
                 cancelText: 'Propagate to All',
                 cancelCallback: function(){
                         opts.propagation = true;
+                        opts.autoPropagation = false;
                         UI.execChangeStatus(opts);
                         APP.ModalWindow.onCloseModal();
                     },
@@ -130,6 +132,7 @@ var UI = {
             };
             APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
         } else {
+            opts.autoPropagation = true;
             this.execChangeStatus( opts ); // autopropagate
         }
 	},
@@ -168,6 +171,7 @@ var UI = {
             status: status,
             caller: false,
             propagate: propagation,
+            autoPropagation: options.autoPropagation
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
         SegmentActions.modifiedTranslation(options.segment_id, null, false);
@@ -889,24 +893,24 @@ var UI = {
             token: token
         };
 
-        var mock = {
-            ERRORS: {
-                categories: {
-                    'TAG': ['23853','23854','23855','23856','23857'],
-                }
-            },
-            WARNINGS: {
-                categories: {
-                    'TAG': ['23857','23858','23859'],
-                    'GLOSSARY': ['23860','23863','23864','23866',],
-                    'MISMATCH': ['23860','23863','23864','23866',]
-                }
-            },
-            INFO: {
-                categories: {
-                }
-            }
-        };
+        // var mock = {
+        //     ERRORS: {
+        //         categories: {
+        //             'TAG': ['23853','23854','23855','23856','23857'],
+        //         }
+        //     },
+        //     WARNINGS: {
+        //         categories: {
+        //             'TAG': ['23857','23858','23859'],
+        //             'GLOSSARY': ['23860','23863','23864','23866',],
+        //             'MISMATCH': ['23860','23863','23864','23866',]
+        //         }
+        //     },
+        //     INFO: {
+        //         categories: {
+        //         }
+        //     }
+        // };
 
         APP.doRequest({
             data: dataMix,
@@ -1042,8 +1046,7 @@ var UI = {
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
         var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
 
-        return ( !alreadySet && !emptyTranslation &&
-            (segment.modified || ( segment.status === config.status_labels.NEW.toUpperCase() || segment.status === config.status_labels.DRAFT.toUpperCase() || config.isReview) ));
+        return ( !alreadySet && !emptyTranslation && segment.modified && ( segment.status === config.status_labels.NEW.toUpperCase() || segment.status === config.status_labels.DRAFT.toUpperCase() ) );
     },
 
     setTranslation: function(options) {
@@ -1066,7 +1069,8 @@ var UI = {
             status: status,
             caller: caller,
             callback: callback,
-            propagate: propagate
+            propagate: propagate,
+            autoPropagation: options.autoPropagation
         };
         //Check if the traslation is not already in the tail
         var saveTranslation = this.translationIsToSave( segment );
@@ -1318,16 +1322,18 @@ var UI = {
 
             this.tempReqArguments = null;
 
-            UI.checkSegmentsPropagation(propagate, id_segment, response.propagation, status);
+            UI.checkSegmentsPropagation(propagate, options.autoPropagation, id_segment, response.propagation, status);
         }
         this.resetRecoverUnsavedSegmentsTimer();
     },
-    checkSegmentsPropagation: function(propagate, id_segment, propagationData, status) {
+    checkSegmentsPropagation: function(propagate, autoPropagate, id_segment, propagationData, status) {
         if( propagate ) {
             if ( propagationData.propagated_ids && propagationData.propagated_ids.length > 0 ) {
                 SegmentActions.propagateTranslation( id_segment, propagationData.propagated_ids, status );
             }
-
+            if ( autoPropagate ) {
+                return;
+            }
             var text = "The segment translation has been propagated to the other repetitions.";
             if ( propagationData.segments_for_propagation.not_propagated &&
                 propagationData.segments_for_propagation.not_propagated.ice.id && propagationData.segments_for_propagation.not_propagated.ice.id.length > 0 ) {
@@ -1347,7 +1353,7 @@ var UI = {
                 allowHtml: true,
                 position: "bl",
             };
-            APP.removeAllNotifications()
+            APP.removeAllNotifications();
             APP.addNotification(notification);
         } else {
             SegmentActions.setSegmentPropagation(id_segment, null, false);

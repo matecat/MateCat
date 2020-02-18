@@ -520,7 +520,10 @@ class Segment extends React.Component {
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
             clearTimeout(this.timeoutScroll);
             TagUtils.removeHighlightCorrespondingTags(this.$section);
-            setTimeout(()=>SegmentActions.closeSegmentComment(this.props.segment.sid));
+            setTimeout(()=>{
+                SegmentActions.closeSegmentComment(this.props.segment.sid);
+                SegmentActions.saveSegmentBeforeClose(this.props.segment);
+            });
         }
         return null;
     }
