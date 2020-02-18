@@ -638,7 +638,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
      * @param revisionNumber
      * @param autopropagated
      */
-    getNextSegment(current_sid, current_fid, status, revisionNumber, autopropagated ) {
+    getNextSegment(current_sid, current_fid, status, revisionNumber, autopropagated = false ) {
         let currentSegment = this.getCurrentSegment();
         if ( !current_sid && !currentSegment) return null;
         current_sid = ( !current_sid) ? this.getCurrentSegment().sid : current_sid;
@@ -660,16 +660,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 if ( currentFind || current_sid === -1) {
                     if ( segment.get('readonly') === 'true' ) {
                         return false;
-                    } else if ( status === 8 && ( (segment.get( 'status' ) === allStatus[2] || segment.get( 'status' ) === allStatus[4]) || ( autopropagated && segment.get('status') === allStatus[7] && segment.get('autopropagated_from') != 0 )) && !segment.get('muted') ) {
+                    } else if ( status === 8 && ( (segment.get( 'status' ).toUpperCase() === allStatus[2] || segment.get( 'status' ).toUpperCase() === allStatus[4]) || ( autopropagated && segment.get('status').toUpperCase() === allStatus[7] && segment.get('autopropagated_from') != 0 )) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     } else if ( status === 9 && revisionNumber ) { // Second pass
-                        if ( ( (segment.get('status') === allStatus[1] || segment.get('status') === allStatus[7] ) && segment.get('revision_number') === revisionNumber )
-                            || ( autopropagated && segment.get('status') === allStatus[1] && segment.get('autopropagated_from') != 0 && segment.get('revision_number') !== revisionNumber) ){
+                        if ( ( (segment.get('status').toUpperCase() === allStatus[1] || segment.get('status').toUpperCase() === allStatus[7] ) && segment.get('revision_number') === revisionNumber )
+                            || ( autopropagated && segment.get('status').toUpperCase() === allStatus[1] && segment.get('autopropagated_from') != 0 && segment.get('revision_number') !== revisionNumber) ){
                             result = segment.toJS();
                             return false;
                         }
-                    } else if ( ((status && segment.get( 'status' ) === allStatus[status]) || !status) && !segment.get('muted') ) {
+                    } else if ( ((status && segment.get( 'status' ).toUpperCase() === allStatus[status]) || !status) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     }
