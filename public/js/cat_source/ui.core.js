@@ -277,7 +277,7 @@ var UI = {
 
 		}
 
-		if ( d.data.files.length === 0 ) {
+		if ( d.data.files.length === 0 || SegmentStore.getLastSegmentId() === config.last_job_segment) {
 			if (where == 'after')
 				this.noMoreSegmentsAfter = true;
 			if (where == 'before')
