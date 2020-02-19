@@ -36,6 +36,7 @@ class ChunkReviewTransitionDao_UnitOfWork implements IUnitOfWork
             $this->conn->beginTransaction();
 
             $this->updatePassFailResult();
+            $this->updateFinalRevisionFlag();
             $this->deleteIssues();
 
             $this->conn->commit();
@@ -60,34 +61,44 @@ class ChunkReviewTransitionDao_UnitOfWork implements IUnitOfWork
         }
     }
 
-    /**
-     * Unset the final_revision flag from any revision we removed reviwed_words.
-     * Apply final_revision flag to the current event.
-     *
-     * If the current event is a revision, ensure the source_page is included in the
-     * unset list.
-     *
-     * @param $unsetFinalRevision
-     *
-     * @throws \Exception
-     */
-    private function updateFinalRevisionFlag( $unsetFinalRevision ) {
-        $eventStruct = $this->_model->getEventModel()->getCurrentEvent();
+    private function updateFinalRevisionFlag()
+    {
+        $eventStruct = $this->model->getChangeVector()->getEventModel()->getCurrentEvent();
         $is_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE;
 
-        if ( $is_revision ) {
-            $unsetFinalRevision = array_merge( $unsetFinalRevision, [ $eventStruct->source_page ] );
-        }
-
-        if ( !empty( $unsetFinalRevision ) ) {
-            ( new SegmentTranslationEventDao() )->unsetFinalRevisionFlag(
-                    $this->_chunk->id, [ $this->_model->getSegmentStruct()->id ], $unsetFinalRevision
-            );
-        }
-
-        $eventStruct->final_revision = $is_revision;
-        SegmentTranslationEventDao::updateStruct( $eventStruct, [ 'fields' => [ 'final_revision' ] ] );
+//        if ( $is_revision ) {
+//            $unsetFinalRevision = array_merge( $unsetFinalRevision, [ $eventStruct->source_page ] );
+//        }
     }
+
+//    /**
+//     * Unset the final_revision flag from any revision we removed reviwed_words.
+//     * Apply final_revision flag to the current event.
+//     *
+//     * If the current event is a revision, ensure the source_page is included in the
+//     * unset list.
+//     *
+//     * @param $unsetFinalRevision
+//     *
+//     * @throws \Exception
+//     */
+//    private function updateFinalRevisionFlag( $unsetFinalRevision ) {
+//        $eventStruct = $this->_model->getEventModel()->getCurrentEvent();
+//        $is_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE;
+//
+//        if ( $is_revision ) {
+//            $unsetFinalRevision = array_merge( $unsetFinalRevision, [ $eventStruct->source_page ] );
+//        }
+//
+//        if ( !empty( $unsetFinalRevision ) ) {
+//            ( new SegmentTranslationEventDao() )->unsetFinalRevisionFlag(
+//                    $this->_chunk->id, [ $this->_model->getSegmentStruct()->id ], $unsetFinalRevision
+//            );
+//        }
+//
+//        $eventStruct->final_revision = $is_revision;
+//        SegmentTranslationEventDao::updateStruct( $eventStruct, [ 'fields' => [ 'final_revision' ] ] );
+//    }
 
     /**
      * Delete all issues

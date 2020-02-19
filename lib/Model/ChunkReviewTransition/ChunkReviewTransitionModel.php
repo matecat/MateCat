@@ -3,6 +3,11 @@
 class ChunkReviewTransitionDao_ChunkReviewTransitionModel {
 
     /**
+     * @var SegmentTranslationChangeVector
+     */
+    private $changeVector;
+
+    /**
      * @var \LQA\ChunkReviewStruct[]
      */
     private $chunk_reviews;
@@ -11,6 +16,22 @@ class ChunkReviewTransitionDao_ChunkReviewTransitionModel {
      * @var \LQA\EntryWithCategoryStruct[]
      */
     private $issues_to_delete;
+
+    /**
+     * ChunkReviewTransitionDao_ChunkReviewTransitionModel constructor.
+     *
+     * @param SegmentTranslationChangeVector $changeVector
+     */
+    public function __construct(SegmentTranslationChangeVector $changeVector) {
+        $this->changeVector = $changeVector;
+    }
+
+    /**
+     * @return SegmentTranslationChangeVector
+     */
+    public function getChangeVector() {
+        return $this->changeVector;
+    }
 
     /**
      * @return \LQA\ChunkReviewStruct[]
