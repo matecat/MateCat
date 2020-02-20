@@ -121,7 +121,6 @@ let CatToolActions = {
             files: data.files
         });
 
-        config.first_job_segment = data.first_segment;
         config.last_job_segment = data.last_segment;
         config.firstSegmentOfFiles = data.files;
     }

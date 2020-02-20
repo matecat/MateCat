@@ -52,6 +52,7 @@ $.extend(UI, {
         } else {
             var hash = CommonUtils.parsedHash.segmentId;
             config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage();
+            config.last_opened_segment = (config.last_opened_segment) ? config.last_opened_segment : config.first_job_segment;
             this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
         }
 
