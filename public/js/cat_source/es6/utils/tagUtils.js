@@ -1,4 +1,4 @@
-import SegmentStore  from '../stores/SegmentStore';
+// import SegmentStore  from '../stores/SegmentStore';
 import TextUtils from './textUtils';
 
 const TAGS_UTILS =  {
@@ -460,9 +460,15 @@ const TAGS_UTILS =  {
 
     hasSourceOrTargetTags: function ( sid ) {
         let regExp = this.getXliffRegExpression();
-        let segment = SegmentStore.getSegmentByIdToJS(sid);
-        let sourceTags = segment.segment.match( regExp );
-        return sourceTags && sourceTags.length > 0 ;
+
+        try {
+            let segment = SegmentStore.getSegmentByIdToJS(sid);
+            let sourceTags = segment.segment.match( regExp );
+            return sourceTags && sourceTags.length > 0 ;
+        } catch(error) {
+            return false
+        }
+
     },
 
     /**
@@ -660,25 +666,28 @@ const TAGS_UTILS =  {
         } );
 
         var listTransDecoded = transDecoded.match( placeholderPhRegEx );
-        listTransDecoded.forEach( function( element ) {
+        if ( listTransDecoded ) {
 
-            var actualCharCode = String.fromCharCode( charCodePlaceholder );
 
-            /**
-             * override because we already have an element in the map, so the content is the same
-             * ( tag is present in source and target )
-             * use such character
-             */
-            if ( reverseMapElements[element] ) {
-                actualCharCode = reverseMapElements[element];
-            }
+            listTransDecoded.forEach( function ( element ) {
 
-            replacementsMap[actualCharCode] = element;
-            reverseMapElements[element] = actualCharCode; // fill the reverse map with the current element ( override if equal )
-            transDecoded = transDecoded.replace( element, actualCharCode );
-            charCodePlaceholder++;
-        } );
+                var actualCharCode = String.fromCharCode( charCodePlaceholder );
 
+                /**
+                 * override because we already have an element in the map, so the content is the same
+                 * ( tag is present in source and target )
+                 * use such character
+                 */
+                if ( reverseMapElements[element] ) {
+                    actualCharCode = reverseMapElements[element];
+                }
+
+                replacementsMap[actualCharCode] = element;
+                reverseMapElements[element] = actualCharCode; // fill the reverse map with the current element ( override if equal )
+                transDecoded = transDecoded.replace( element, actualCharCode );
+                charCodePlaceholder++;
+            } );
+        }
         return [ mainStr, transDecoded, replacementsMap ];
 
     },

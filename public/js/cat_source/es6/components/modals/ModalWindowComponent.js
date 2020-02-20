@@ -45,10 +45,14 @@ class ModalWindowComponent extends React.Component {
         return { __html: string };
     }
 
+    componentDidMount() {
+        $(this.modalRef).focus();
+    }
+
     render() {
         return <div> {
             this.state.isShowingModal &&
-            <ModalContainerComponent onClose={this.onCloseModal.bind(this)}
+            <ModalContainerComponent onClose={this.onCloseModal.bind(this)} ref={(modal)=>this.modalRef=modal}
                                      title={this.state.title} styleContainer={this.state.styleContainer}>
                 <this.state.component {...this.state.compProps}/>
             </ModalContainerComponent>

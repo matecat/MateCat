@@ -567,18 +567,28 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $thisDao = new self();
         $thisDao->getDatabaseHandler();
 
-        $query = "SELECT DISTINCT id_file, MIN(segments.id) AS first_segment, filename AS file_name
-                FROM segments 
-                JOIN files ON segments.id_file = files.id
-                WHERE id_project = :id_project
-                AND segments.show_in_cattool = 1 
-                GROUP BY id_file;
+        $query = "SELECT 
+                id_file,
+                MIN( segments.id ) AS first_segment, 
+                MAX( segments.id ) AS last_segment,
+                filename AS file_name, 
+                SUM( IF( st.match_type = 'ICE' OR st.eq_word_count IS NULL, raw_word_count, st.eq_word_count ) ) AS weighted_words,
+                SUM( raw_word_count ) AS raw_words
+        FROM files_job
+        JOIN files ON files_job.id_file = files.id
+        JOIN jobs ON jobs.id = files_job.id_job
+        JOIN segments USING( id_file )
+        JOIN segment_translations st ON id_segment = segments.id AND st.id_job = jobs.id
+        WHERE files_job.id_job = :id_job
+        AND segments.show_in_cattool = 1 
+        GROUP BY id_file
+        ORDER BY first_segment;
         ";
 
         $stmt = $thisDao->getDatabaseHandler()->getConnection()->prepare( $query );
 
         return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
-                'id_project'             => $chunkStruct->id_project
+                'id_job'             => $chunkStruct->id
         ] );
 
     }

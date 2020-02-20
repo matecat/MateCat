@@ -12,17 +12,17 @@ const TEXT_UTILS =  {
         var phTagsObject = {};
         var diff;
         source = source.replace( /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, group1, group2) {
-            if ( _.isUndefined(phTagsObject[group2]) ) {
-                phTagsObject[group2] = match;
+            if ( _.isUndefined(phTagsObject[match]) ) {
+                phTagsObject[match] = match;
             }
-            return '<' + Base64.encode(group2) +'> ';
+            return '<' + Base64.encode(match) +'>';
         });
 
         target = target.replace( /&lt;(\/)*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;/gi, function (match, gruop1, group2) {
-            if ( _.isUndefined(phTagsObject[group2]) ) {
-                phTagsObject[group2] = match;
+            if ( _.isUndefined(phTagsObject[match]) ) {
+                phTagsObject[match] = match;
             }
-            return '<'+ Base64.encode(group2) +'> ';
+            return '<'+ Base64.encode(match) +'>';
         });
 
         diff   = dmp.diff_main(

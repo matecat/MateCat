@@ -45,9 +45,16 @@ $.extend(UI, {
 
         this.setTagLockCustomizeCookie(true);
         this.debug = false;
-        UI.detectStartSegment();
-        options.openCurrentSegmentAfter = !!((!seg) && (!this.firstLoad));
 
+        options.openCurrentSegmentAfter = !!((!seg) && (!this.firstLoad));
+        if (this.segmentToScrollAtRender) {
+            this.startSegmentId = this.segmentToScrollAtRender;
+        } else {
+            var hash = CommonUtils.parsedHash.segmentId;
+            config.last_opened_segment = CommonUtils.getLastSegmentFromLocalStorage();
+            config.last_opened_segment = (config.last_opened_segment) ? config.last_opened_segment : config.first_job_segment;
+            this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
+        }
 
         if ( UI.firstLoad ) {
 
@@ -58,7 +65,6 @@ $.extend(UI, {
             }, UI.checkUpdatesEvery);
 
         }
-
         CatToolActions.renderSubHeader();
         this.renderQualityReportButton();
         return UI.getSegments(options);
@@ -97,11 +103,11 @@ $.extend(UI, {
             LXQ.initPopup();
         }
         CatToolActions.startNotifications();
-
+        // Temporary js for header action menu
+        UI.initHeader();
         UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
     },
 	init: function() {
-
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
 
@@ -126,7 +132,6 @@ $.extend(UI, {
 
         if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
-		this.createJobMenu();
 		this.checkVersion();
         this.initTM();
 		this.initAdvanceOptions();
@@ -136,9 +141,6 @@ $.extend(UI, {
 		APP.checkQueryParams();
 
         UI.firstLoad = false;
-
-        // Temporary js for header action menu
-		UI.initHeader();
 	},
     restart: function () {
         UI.unmountSegments();

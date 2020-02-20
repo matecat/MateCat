@@ -121,16 +121,20 @@ const SegmentActions = {
 
         if ( segment ) {
             //Check first if the segment is in the view
+            if ( UI.isReadonlySegment(segment) ) {
+                UI.readonlyClickDisplay();
+                return;
+            }
             let $segment = (segment.splitted && sid.indexOf('-') === -1) ? UI.getSegmentById(sid + "-1") : UI.getSegmentById(sid);
             if ( $segment.length === 0 ) {
-                this.scrollToSegment(sid);
-                setTimeout(()=>this.openSegment(sid));
+                this.scrollToSegment(sid, this.openSegment);
                 return;
             }
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_SEGMENT,
                 sid: sid
             });
+            UI.updateJobMenu(segment);
         } else {
             UI.unmountSegments();
             UI.render({
@@ -138,6 +142,7 @@ const SegmentActions = {
                 segmentToOpen: sid
             });
         }
+
     },
     closeSegment: function ( sid, fid ) {
         AppDispatcher.dispatch({
@@ -145,18 +150,31 @@ const SegmentActions = {
         });
         this.closeIssuesPanel();
     },
+    saveSegmentBeforeClose: function (segment) {
+        if ( UI.translationIsToSaveBeforeClose( segment ) ) {
+            return UI.setTranslation({
+                id_segment: segment.sid,
+                status: (segment.status.toLowerCase() === 'new') ? 'draft' : segment.status ,
+                caller: 'autosave'
+            });
+        } else {
+            var deferred = $.Deferred();
+            deferred.resolve();
+            return deferred.promise();
+        }
+    },
     scrollToCurrentSegment() {
         this.scrollToSegment(SegmentStore.getCurrentSegment().sid);
     },
     scrollToSegment: function (sid, callback) {
         const segment = SegmentStore.getSegmentByIdToJS(sid);
-        if ( segment && (SegmentStore.segmentScrollableToCenter(sid) || UI.noMoreSegmentsAfter || SegmentStore._segments.size < UI.moreSegNum) ) {
+        if ( segment && (SegmentStore.segmentScrollableToCenter(sid) || UI.noMoreSegmentsAfter || config.last_job_segment == sid || SegmentStore._segments.size < UI.moreSegNum || SegmentStore.getLastSegmentId() === config.last_job_segment) ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.SCROLL_TO_SEGMENT,
                 sid: sid,
             });
             if (callback) {
-                callback.apply(this, [sid]);
+                setTimeout(()=>callback.apply(this, [sid]));
             }
         } else {
             UI.unmountSegments();

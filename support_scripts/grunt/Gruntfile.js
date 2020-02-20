@@ -26,7 +26,6 @@ module.exports = function(grunt) {
     var cssWatchFiles = [
         cssBase + 'sass/variables.scss',
         cssBase + 'common.css',
-        cssBase + 'style.css',
         cssBase + 'mbc-style.css',
         cssBase + 'segment-notes.css',
         cssBase + 'project-completion-feature.css',
@@ -175,6 +174,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.events.js',
                     basePath + 'cat_source/ui.header.js',
                     basePath + 'cat_source/es6/ajax_utils/segmentAjax.js',
+                    basePath + 'cat_source/es6/ajax_utils/jobAjax.js',
 
                     // basePath + 'cat_source/ui.review.js',
                     //basePath + 'cat_source/sse.js',

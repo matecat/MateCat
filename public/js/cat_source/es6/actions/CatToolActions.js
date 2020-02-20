@@ -10,6 +10,8 @@ let CatToolActions = {
 
     popupInfoUserMenu: () =>  'infoUserMenu-' + config.userMail,
 
+
+
     openQaIssues: function () {
         AppDispatcher.dispatch({
             actionType: CattolConstants.SHOW_CONTAINER,
@@ -112,6 +114,15 @@ let CatToolActions = {
     },
     setPopupUserMenuCookie: function (  ) {
         CommonUtils.addInStorage(this.popupInfoUserMenu(), true, 'infoUserMenu');
+    },
+    storeFilesInfo: function (data) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.STORE_FILES_INFO,
+            files: data.files
+        });
+
+        config.last_job_segment = data.last_segment;
+        config.firstSegmentOfFiles = data.files;
     }
 };
 

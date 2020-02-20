@@ -61,7 +61,7 @@ class AnalyzeChunksResume extends React.Component {
 	}
 
 	getTranslateUrl = (job, index) => {
-		let chunk_id = (index) ? job.get('id') + '-' + index : job.get('id');
+		let chunk_id = (index) ? index : job.get('id');
 		return '/translate/' + this.props.project.get('project_slug') + '/' + job.get('source') + '-' + job.get('target') + '/' + chunk_id + '-' + job.get('password') + (index ? '#' + job.get('job_first_segment') : '');
 	}
 
@@ -199,7 +199,7 @@ class AnalyzeChunksResume extends React.Component {
 							<div className="activity-icons">
 								<div className={'activity-button splitted'}>
 									{/*{self.getOpenButton(chunkJob.toJS(), chunk.jid + '-' + index)}*/}
-									{this.getDirectOpenButton(chunkJob, index)}
+									{this.getDirectOpenButton(chunkJob, chunk.jid + '-' + index)}
 								</div>
 								{this.getOutsourceButton(chunkJob.toJS(), chunk.jid + '-' + index)}
 							</div>
@@ -312,7 +312,7 @@ class AnalyzeChunksResume extends React.Component {
 
 										) : (null)}
 										{/*{this.getOpenButton(chunkJob.toJS(), this.props.jobsInfo[indexJob].jid)}*/}
-										{this.getDirectOpenButton(chunkJob, this.props.jobsInfo[indexJob].jid)}
+										{this.getDirectOpenButton(chunkJob)}
 									</div>
 									{this.getOutsourceButton(chunkJob.toJS(), this.props.jobsInfo[indexJob].jid)}
 								</div>

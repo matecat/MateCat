@@ -198,24 +198,14 @@ let GlossaryUtils = {
     },
 
     copyGlossaryItemInEditarea: function ( translation , segment) {
-        // var range = window.getSelection().getRangeAt( 0 );
-        var clonedElem = $( '.editor .editarea').clone();
-        var nodeInsert = clonedElem.find( '.focusOut' );
-        if ( nodeInsert.length === 0) {
-            clonedElem.append(translation);
-        } else {
-            nodeInsert = nodeInsert.first();
-            nodeInsert.before( translation + '<span class="tempCopyGlossaryPlaceholder"></span>' ).remove();
+        var range = window.getSelection();
+        if ( range && $(range.getRangeAt( 0 ).endContainer).closest('div').hasClass('editarea') ) {
+            var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="glossary-placeholder"></span>');
+            CursorUtils.replaceSelectedHtml(translation, rangeInsert);
+            var clonedElem = $( '.editor .editarea').clone();
+            SegmentActions.modifiedTranslation(segment.sid, null, true);
+            SegmentActions.replaceEditAreaTextContent(segment.sid, null, clonedElem.html());
         }
-        SegmentActions.highlightEditarea(segment.sid);
-        SegmentActions.replaceEditAreaTextContent(segment.sid, null, clonedElem.html());
-        setTimeout(function (  ) {
-
-            var tempCopyGlossPlaceholder = UI.editarea.find( '.tempCopyGlossaryPlaceholder' );
-            // var node = tempCopyGlossPlaceholder[0];
-            // TextUtils.setCursorAfterNode( range, node );
-            tempCopyGlossPlaceholder.remove();
-        });
     }
 };
 

@@ -9,5 +9,6 @@ module.exports = keyMirror({
     SET_SEARCH_RESULTS: null,
     CLOSE_SEARCH: null,
     RELOAD_SEGMENT_FILTER: null,
-    SHOW_PROFILE_MESSAGE_TOOLTIP: null
+    SHOW_PROFILE_MESSAGE_TOOLTIP: null,
+    STORE_FILES_INFO: null
 });

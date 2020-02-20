@@ -4,7 +4,7 @@ body {
     min-width: 1150px;
     font-family: calibri, Arial, Helvetica, sans-serif;
     text-align: center;
-    background: #f0f0f0;
+    background: #fff !important;
     overflow: visible;
 }
 
@@ -130,7 +130,7 @@ a:hover{text-decoration:none}
 		border-radius: 15px;-moz-box-shadow: 0 1px 1px #888;
 		-webkit-box-shadow: 0 1px 1px #888;
 		box-shadow: 0 1px 1px #888;border:1px solid #ccc}
-.body{background:#f0f0f0;margin:0px 0 0px 0;border-top:1px solid #ababac;padding:0px 0 100px 0;}
+.body{margin:0px 0 0px 0;border-top:1px solid #ababac;padding:0px 0 100px 0;}
 .cl{clear:both}
 .box {
     position: relative
@@ -281,8 +281,6 @@ a:hover{text-decoration:none}
 .last {
     float: right !important;
 }
-
-\
 .error-count {
     color: #FF0000;
     font-size: 16px
@@ -305,7 +303,6 @@ a:hover{text-decoration:none}
 }
 
 .body {
-    background: #f0f0f0;
     margin: 0px 0 0px 0;
     border-top: 1px solid #ababac;
     padding: 0px 0 100px 0;
@@ -1122,7 +1119,7 @@ a:hover {
 
 
 .error-count {
-    display: none;
+    display: none !important;
     margin-right: 15px !important;
     font-size: 20px;
     text-align: right;
@@ -1856,4 +1853,8 @@ footer a:hover {
 
 #action-manage:hover {
     opacity: 1;
+}
+
+.modal.popup-split .popup {
+    min-width: 675px;
 }

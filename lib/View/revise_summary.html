@@ -6,7 +6,7 @@
     <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
     <link href="../../public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-    <link href="../../public/css/build/style.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+    <link href="../../public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link href="../../public/css/build/quality_report.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
@@ -19,7 +19,6 @@
             source_rtl: ${source_rtl | string:false},
             target_rtl: ${target_rtl | string:false},
             searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
-            first_job_segment: '${first_job_segment}',
             project_type: '${project_type}',
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},

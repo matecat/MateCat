@@ -29,7 +29,7 @@
 
         <div class="breadcrumbs file-list" title="File list">
             <div class="icon-container">
-                <span id="project-badge"><span tal:replace="php:count(json_decode(firstSegmentOfFiles))">---</span></span>
+                <span id="project-badge"><span></span></span>
                 <img src="/public/img/icons/icon-folder.svg" alt=""/>
             </div>
             <p id="pname-container">
@@ -70,6 +70,12 @@
                         </a>
                     </li>
 
+                    <li tal:condition="true:isGDriveProject" class="item"  >
+                        <a class="originalsGDrive" title="Original in Google Drive" alt="Original in Google Drive" href="javascript:void(0)" >
+                            Original in Google Drive
+                        </a>
+                    </li>
+
                     <li class="item" data-value="xlif" tal:condition="php: uses_matecat_filters == true || INIT::$DEPRECATE_LEGACY_XLIFFS == false">
                         <a class="sdlxliff" title="Export XLIFF" alt="Export XLIFF" data-href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank">
                             Export XLIFF
@@ -79,6 +85,11 @@
                     <li class="item" data-value="tmx">
                         <a class="tmx" title="Export job TMX for QA" alt="Export job TMX for QA" href="/TMX/${jid}/${password}" target="_blank">
                             Export Job TMX
+                        </a>
+                    </li>
+                    <li class="item" data-value="omegat" tal:condition="php: INIT::$ENABLE_OMEGAT_DOWNLOAD !== false">
+                        <a class="omegat" title="Export OMEGAT" alt="Export OMEGAT" href="/?action=downloadFile&id_job=${jid}&password=${password}&id_file=&download_type=omegat&forceXliff=1">
+                            Export OmegaT
                         </a>
                     </li>
                 </ul>

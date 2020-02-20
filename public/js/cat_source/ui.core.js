@@ -51,7 +51,7 @@ var UI = {
         $segment = $(editarea_or_segment).closest('section');
         segment = SegmentStore.getSegmentByIdToJS( UI.getSegmentId($segment) );
 
-        if ( !$segment.length ) {
+        if ( !$segment.length || !segment ) {
             return;
         }
 
@@ -115,12 +115,14 @@ var UI = {
                 successText: 'Only this segment',
                 successCallback: function(){
                         opts.propagation = false;
+                        opts.autoPropagation = false;
                         UI.preExecChangeStatus(opts);
                         APP.ModalWindow.onCloseModal();
                     },
                 cancelText: 'Propagate to All',
                 cancelCallback: function(){
                         opts.propagation = true;
+                        opts.autoPropagation = false;
                         UI.execChangeStatus(opts);
                         APP.ModalWindow.onCloseModal();
                     },
@@ -130,6 +132,7 @@ var UI = {
             };
             APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required ");
         } else {
+            opts.autoPropagation = true;
             this.execChangeStatus( opts ); // autopropagate
         }
 	},
@@ -168,6 +171,7 @@ var UI = {
             status: status,
             caller: false,
             propagate: propagation,
+            autoPropagation: options.autoPropagation
         });
         SegmentActions.removeClassToSegment(options.segment_id, 'saved');
         SegmentActions.modifiedTranslation(options.segment_id, null, false);
@@ -199,27 +203,6 @@ var UI = {
             return false;
         }
 
-    },
-
-    createJobMenu: function() {
-        var menu = '<nav id="jobMenu" class="topMenu">' +
-            '<ul class="gotocurrentsegment">' +
-            '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a>Go to current segment</a><span>' +Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase() + '</span></li>' +
-            '<li class="firstSegment" ><span class="label">Go to first segment of the file:</span></li>' +
-            '</ul>' +
-            '<div class="separator"></div>' +
-            '<ul class="jobmenu-list">';
-
-        var iconTick = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12">' +
-        '<path fill="#FFF" fillRule="evenodd" stroke="none" strokeWidth="1" d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z" transform="translate(-266 -10) translate(266 8) translate(0 2)" />' +
-        '</svg>';
-
-        $.each(config.firstSegmentOfFiles, function() {
-            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + CommonUtils.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name.substring(0,20) + iconTick + '</a></li>';
-        });
-        menu += '</ul>' +
-            '</nav>';
-        this.body.append(menu);
     },
 
     // fixHeaderHeightChange: function() {
@@ -294,7 +277,7 @@ var UI = {
 
 		}
 
-		if ( d.data.files.length === 0 ) {
+		if ( d.data.files.length === 0 || SegmentStore.getLastSegmentId() === config.last_job_segment) {
 			if (where == 'after')
 				this.noMoreSegmentsAfter = true;
 			if (where == 'before')
@@ -355,10 +338,10 @@ var UI = {
                 SegmentActions.openSegment(seg);
 			}
 
-			if (options.segmentToOpen && UI.segmentIsLoaded(options.segmentToOpen)) {
-                SegmentActions.scrollToSegment( options.segmentToOpen );
-                SegmentActions.openSegment(options.segmentToOpen);
-			}
+			// if (options.segmentToOpen && UI.segmentIsLoaded(options.segmentToOpen)) {
+            //     SegmentActions.scrollToSegment( options.segmentToOpen );
+            //     SegmentActions.openSegment(options.segmentToOpen);
+			// }
 
 			// if (options.applySearch) {
 			// 	$('mark.currSearchItem').removeClass('currSearchItem');
@@ -812,6 +795,10 @@ var UI = {
 
         $('.bg-loader',m).css('display', 'none');
 
+        if ( s.APPROVED_PERC > 10 ) {
+            $('#quality-report-button').attr('data-revised', true);
+        }
+
         $(document).trigger('setProgress:rendered', { stats : stats } );
     },
     disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
@@ -906,24 +893,24 @@ var UI = {
             token: token
         };
 
-        var mock = {
-            ERRORS: {
-                categories: {
-                    'TAG': ['23853','23854','23855','23856','23857'],
-                }
-            },
-            WARNINGS: {
-                categories: {
-                    'TAG': ['23857','23858','23859'],
-                    'GLOSSARY': ['23860','23863','23864','23866',],
-                    'MISMATCH': ['23860','23863','23864','23866',]
-                }
-            },
-            INFO: {
-                categories: {
-                }
-            }
-        };
+        // var mock = {
+        //     ERRORS: {
+        //         categories: {
+        //             'TAG': ['23853','23854','23855','23856','23857'],
+        //         }
+        //     },
+        //     WARNINGS: {
+        //         categories: {
+        //             'TAG': ['23857','23858','23859'],
+        //             'GLOSSARY': ['23860','23863','23864','23866',],
+        //             'MISMATCH': ['23860','23863','23864','23866',]
+        //         }
+        //     },
+        //     INFO: {
+        //         categories: {
+        //         }
+        //     }
+        // };
 
         APP.doRequest({
             data: dataMix,
@@ -1059,8 +1046,7 @@ var UI = {
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
         var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
 
-        return ( !alreadySet && !emptyTranslation &&
-            (segment.modified || ( segment.status === config.status_labels.NEW.toUpperCase() || segment.status === config.status_labels.DRAFT.toUpperCase() || config.isReview) ));
+        return ( !alreadySet && !emptyTranslation && segment.modified && ( segment.status === config.status_labels.NEW.toUpperCase() || segment.status === config.status_labels.DRAFT.toUpperCase() ) );
     },
 
     setTranslation: function(options) {
@@ -1083,7 +1069,8 @@ var UI = {
             status: status,
             caller: caller,
             callback: callback,
-            propagate: propagate
+            propagate: propagate,
+            autoPropagation: options.autoPropagation
         };
         //Check if the traslation is not already in the tail
         var saveTranslation = this.translationIsToSave( segment );
@@ -1335,16 +1322,18 @@ var UI = {
 
             this.tempReqArguments = null;
 
-            UI.checkSegmentsPropagation(propagate, id_segment, response.propagation, status);
+            UI.checkSegmentsPropagation(propagate, options.autoPropagation, id_segment, response.propagation, status);
         }
         this.resetRecoverUnsavedSegmentsTimer();
     },
-    checkSegmentsPropagation: function(propagate, id_segment, propagationData, status) {
+    checkSegmentsPropagation: function(propagate, autoPropagate, id_segment, propagationData, status) {
         if( propagate ) {
             if ( propagationData.propagated_ids && propagationData.propagated_ids.length > 0 ) {
                 SegmentActions.propagateTranslation( id_segment, propagationData.propagated_ids, status );
             }
-
+            if ( autoPropagate ) {
+                return;
+            }
             var text = "The segment translation has been propagated to the other repetitions.";
             if ( propagationData.segments_for_propagation.not_propagated &&
                 propagationData.segments_for_propagation.not_propagated.ice.id && propagationData.segments_for_propagation.not_propagated.ice.id.length > 0 ) {
@@ -1360,10 +1349,11 @@ var UI = {
                 text: text,
                 type: 'info',
                 autoDismiss: true,
-                timer: 10000,
+                timer: 5000,
                 allowHtml: true,
                 position: "bl",
             };
+            APP.removeAllNotifications();
             APP.addNotification(notification);
         } else {
             SegmentActions.setSegmentPropagation(id_segment, null, false);
