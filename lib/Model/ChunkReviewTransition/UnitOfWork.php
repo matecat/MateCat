@@ -1,40 +1,45 @@
 <?php
 
+namespace ChunkReviewTransition;
+
+use Constants;
+use Database;
 use Features\ReviewExtended\ChunkReviewModel;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
+use IUnitOfWork;
 use LQA\EntryCommentDao;
 use LQA\EntryDao;
+use PDOException;
 
-class ChunkReviewTransition_UnitOfWork implements IUnitOfWork
-{
+class UnitOfWork implements IUnitOfWork {
     /**
      * @var PDO
      */
     private $conn;
 
     /**
-     * @var ChunkReviewTransition_ChunkReviewTransitionModel
+     * @var ChunkReviewTransitionModel
      */
     private $model;
 
     /**
      * ChunkReviewTransitionDao_UnitOfWork constructor.
      *
-     * @param ChunkReviewTransition_ChunkReviewTransitionModel $model
+     * @param ChunkReviewTransitionModel $model
      */
-    public function __construct( ChunkReviewTransition_ChunkReviewTransitionModel $model) {
+    public function __construct( ChunkReviewTransitionModel $model ) {
         $this->conn  = Database::obtain()->getConnection();
         $this->model = $model;
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function commit() {
 
         try {
 
-            if ( ! $this->conn->inTransaction() ) {
+            if ( !$this->conn->inTransaction() ) {
                 $this->conn->beginTransaction();
             }
 
@@ -43,10 +48,10 @@ class ChunkReviewTransition_UnitOfWork implements IUnitOfWork
             $this->deleteIssues();
 
             $this->conn->commit();
-        } catch (PDOException $e){
+        } catch ( PDOException $e ) {
             $this->rollback();
 
-            \Log::doJsonLog('ChunkReviewTransition UnitOfWork transaction failed: ' . $e->getMessage());
+            \Log::doJsonLog( 'ChunkReviewTransition UnitOfWork transaction failed: ' . $e->getMessage() );
         }
 
         $this->clearAll();
@@ -55,20 +60,19 @@ class ChunkReviewTransition_UnitOfWork implements IUnitOfWork
     /**
      * Update chunk review counters
      *
-     * @throws Exception
+     * @throws \Exception
      */
     private function updatePassFailResult() {
-        foreach ($this->model->getChunkReviews() as $chunkReview){
+        foreach ( $this->model->getChunkReviews() as $chunkReview ) {
             $chunkReviewModel = new ChunkReviewModel( $chunkReview );
             $chunkReviewModel->atomicUpdatePassFailResult( $chunkReview->getChunk()->getProject() );
         }
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
-    private function updateFinalRevisionFlag()
-    {
+    private function updateFinalRevisionFlag() {
         $eventStruct = $this->model->getChangeVector()->getEventModel()->getCurrentEvent();
         $is_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE;
 
@@ -101,6 +105,6 @@ class ChunkReviewTransition_UnitOfWork implements IUnitOfWork
     }
 
     public function clearAll() {
-        $this->model = new self($this->model);
+        $this->model = new self( $this->model );
     }
 }

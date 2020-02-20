@@ -1,6 +1,10 @@
 <?php
 
-class ChunkReviewTransition_ChunkReviewTransitionModel {
+namespace ChunkReviewTransition;
+
+use SegmentTranslationChangeVector;
+
+class ChunkReviewTransitionModel {
 
     /**
      * @var SegmentTranslationChangeVector
