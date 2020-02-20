@@ -15,7 +15,7 @@ class SegmentQRLine extends React.Component {
         let minutes = Math.floor( time / 60);
         let seconds = parseInt(time - minutes * 60);
         if (hours > 0 ) {
-            return str_pad_left(hours,'0',2)+''+str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
+            return str_pad_left(hours,'0',2)+'h'+str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
         } else if (minutes > 0) {
             return str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
         } else {
@@ -67,30 +67,37 @@ class SegmentQRLine extends React.Component {
                 </div>
             ) : null}
 
-            { this.props.showIceMatchInfo ?  (
+            { this.props.showIceMatchInfo && this.props.segment.get('ice_locked') === '1'  ?  (
                 <div className="segment-content qr-spec">
                     {this.props.segment.get('ice_locked') === '1' ? (
                         <div>
                             <b>ICE Match</b>
+                            {this.props.segment.get('ice_modified') ? (
+                                <div>(Modified)</div>
+                            ) : null}
                         </div>
                     ) :  null}
-                    {this.props.segment.get('ice_modified') ? (
-                        <div>(Modified)</div>
-                    ) : null}
-                </div>
-            ) : null }
 
-            { this.props.tte  ?  (
-                <div className="segment-content qr-spec">
-                    <div>TTE:
-                    </div>
+                    { this.props.tte  ?  (
+                        <div className={'tte-container'}>
+                            <b>TTE:</b>
+                            <div>
+                                <div>{this.getTimeToEdit(this.props.tte)}"</div>
+                            </div>
+                        </div>
+                    ) : null }
+                </div>
+            ) : this.props.tte  ?  (
+                <div className="segment-content qr-spec tte">
+                    <b>TTE:</b>
                     <div>
-                        <b>{this.getTimeToEdit(this.props.tte)}"</b>
+                        <div>{this.getTimeToEdit(this.props.tte)}"</div>
                     </div>
                 </div>
             ) : null }
 
-            { !this.props.showIceMatchInfo && !this.props.showSuggestionSource && !this.props.showSegmentWords ?  (
+
+            { !(this.props.showIceMatchInfo && this.props.segment.get('ice_locked') === '1') && !this.props.showSuggestionSource && !this.props.showSegmentWords && !this.props.tte ?  (
                 <div className="segment-content qr-spec"/>
             ) : null }
 
