@@ -404,6 +404,7 @@ class catController extends viewController {
         $load_time                   = $end_time - $this->start_time;
         $this->template->load_time   = $load_time;
 
+        $this->template->first_job_segment   = $this->chunk->job_first_segment;
         $this->template->tms_enabled = var_export( (bool) $this->chunk->id_tms , true );
         $this->template->mt_enabled  = var_export( (bool) $this->chunk->id_mt_engine , true );
 

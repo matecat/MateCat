@@ -2275,7 +2275,7 @@ section.readonly,
 body.archived section {
     background: #f2f4f7;
     color: #a4a6a9;
-    cursor: not-allowed;
+    cursor: not-allowed !important;
 }
 section.readonly .status-container a.status:hover,
 body.archived section .status-container a.status:hover {
@@ -4997,6 +4997,7 @@ header {
                 margin-top: 5px;
                 border-radius: 3px;
                 right: -136px;
+                z-index: 2;
                 .mbc-triangle-top {
                     border-left: 6px solid transparent;
                     border-right: 6px solid transparent;
