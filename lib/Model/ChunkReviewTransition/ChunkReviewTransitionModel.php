@@ -1,11 +1,16 @@
 <?php
 
-class ChunkReviewTransitionDao_ChunkReviewTransitionModel {
+class ChunkReviewTransition_ChunkReviewTransitionModel {
 
     /**
      * @var SegmentTranslationChangeVector
      */
     private $changeVector;
+
+    /**
+     * @var array
+     */
+    private $unsetFinalRevision;
 
     /**
      * @var \LQA\ChunkReviewStruct[]
@@ -22,7 +27,7 @@ class ChunkReviewTransitionDao_ChunkReviewTransitionModel {
      *
      * @param SegmentTranslationChangeVector $changeVector
      */
-    public function __construct(SegmentTranslationChangeVector $changeVector) {
+    public function __construct( SegmentTranslationChangeVector $changeVector ) {
         $this->changeVector = $changeVector;
     }
 
@@ -31,6 +36,20 @@ class ChunkReviewTransitionDao_ChunkReviewTransitionModel {
      */
     public function getChangeVector() {
         return $this->changeVector;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUnsetFinalRevision() {
+        return $this->unsetFinalRevision;
+    }
+
+    /**
+     * @param array $unsetFinalRevision
+     */
+    public function setUnsetFinalRevision( $unsetFinalRevision ) {
+        $this->unsetFinalRevision = $unsetFinalRevision;
     }
 
     /**
@@ -44,8 +63,8 @@ class ChunkReviewTransitionDao_ChunkReviewTransitionModel {
      * @param \LQA\ChunkReviewStruct $chunk_review
      */
     public function addChunkReview( \LQA\ChunkReviewStruct $chunk_review ) {
-        if ( false === array_key_exists($chunk_review->id, $this->chunk_reviews) ) {
-            $this->chunk_reviews[$chunk_review->id] = $chunk_review;
+        if ( false === isset( $this->chunk_reviews[ $chunk_review->id ] ) ) {
+            $this->chunk_reviews[ $chunk_review->id ] = $chunk_review;
         }
     }
 
@@ -60,8 +79,8 @@ class ChunkReviewTransitionDao_ChunkReviewTransitionModel {
      * @param \LQA\EntryWithCategoryStruct $issue
      */
     public function addIssueToDelete( \LQA\EntryWithCategoryStruct $issue ) {
-        if ( false === array_key_exists($issue->id, $this->issues_to_delete) ) {
-            $this->issues_to_delete[$issue->id] = $issue;
+        if ( false === isset( $this->issues_to_delete[ $issue->id ] ) ) {
+            $this->issues_to_delete[ $issue->id ] = $issue;
         }
     }
 }

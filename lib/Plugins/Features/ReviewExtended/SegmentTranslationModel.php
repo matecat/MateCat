@@ -8,6 +8,8 @@
 
 namespace Features\ReviewExtended;
 
+use ChunkReviewTransition_ChunkReviewTransitionModel;
+use ChunkReviewTransition_UnitOfWork;
 use Chunks_ChunkStruct;
 use Constants;
 use Features\ISegmentTranslationModel;
@@ -60,7 +62,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
     }
 
     public function performChunkReviewTransition() {
-        $this->openTransaction();
+        //$this->openTransaction();
 
         $finalRevisions = ( new SegmentTranslationEventDao() )->getFinalRevisionsForSegment(
                 $this->_chunk->id, $this->_model->getSegmentStruct()->id
@@ -93,6 +95,8 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         $unsetFinalRevision    = [];
         $originSourcePage      = $this->_model->getEventModel()->getOriginSourcePage();
         $destinationSourcePage = $this->_model->getEventModel()->getDestinationSourcePage();
+
+        $reviewTransitionModel = new ChunkReviewTransition_ChunkReviewTransitionModel($this->_model);
 
         // populate structs for current segment and propagations
         foreach ( $this->_chunkReviews as $chunkReview ) {
@@ -189,17 +193,14 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
                 }
 
             }
+
+            $reviewTransitionModel->addChunkReview($chunkReview);
         }
 
-        $this->updateFinalRevisionFlag( $unsetFinalRevision );
-
-        // Update QR and scores in transaction
-        foreach ( $this->_chunkReviews as $chunkReview ) {
-            $chunkReviewModel = new ChunkReviewModel( $chunkReview );
-            $chunkReviewModel->updatePassFailResult( $this->_project );
-        }
-
-        $this->commitTransaction();
+        // UnitOfWork takes care of persisting the transition
+        $reviewTransitionModel->setUnsetFinalRevision($unsetFinalRevision);
+        $uow = new ChunkReviewTransition_UnitOfWork($reviewTransitionModel);
+        $uow->commit();
 
         // Send email
         if ( $this->_model->getEventModel()->isPropagationSource() && $this->_model->isBeingLowerReviewedOrTranslated() ) {

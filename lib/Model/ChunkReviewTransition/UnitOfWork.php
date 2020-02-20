@@ -5,7 +5,7 @@ use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use LQA\EntryCommentDao;
 use LQA\EntryDao;
 
-class ChunkReviewTransitionDao_UnitOfWork implements IUnitOfWork
+class ChunkReviewTransition_UnitOfWork implements IUnitOfWork
 {
     /**
      * @var PDO
@@ -13,16 +13,16 @@ class ChunkReviewTransitionDao_UnitOfWork implements IUnitOfWork
     private $conn;
 
     /**
-     * @var ChunkReviewTransitionDao_ChunkReviewTransitionModel
+     * @var ChunkReviewTransition_ChunkReviewTransitionModel
      */
     private $model;
 
     /**
      * ChunkReviewTransitionDao_UnitOfWork constructor.
      *
-     * @param ChunkReviewTransitionDao_ChunkReviewTransitionModel $model
+     * @param ChunkReviewTransition_ChunkReviewTransitionModel $model
      */
-    public function __construct( ChunkReviewTransitionDao_ChunkReviewTransitionModel $model) {
+    public function __construct( ChunkReviewTransition_ChunkReviewTransitionModel $model) {
         $this->conn  = Database::obtain()->getConnection();
         $this->model = $model;
     }
@@ -33,7 +33,10 @@ class ChunkReviewTransitionDao_UnitOfWork implements IUnitOfWork
     public function commit() {
 
         try {
-            $this->conn->beginTransaction();
+
+            if ( ! $this->conn->inTransaction() ) {
+                $this->conn->beginTransaction();
+            }
 
             $this->updatePassFailResult();
             $this->updateFinalRevisionFlag();
@@ -61,44 +64,27 @@ class ChunkReviewTransitionDao_UnitOfWork implements IUnitOfWork
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function updateFinalRevisionFlag()
     {
         $eventStruct = $this->model->getChangeVector()->getEventModel()->getCurrentEvent();
         $is_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE;
 
-//        if ( $is_revision ) {
-//            $unsetFinalRevision = array_merge( $unsetFinalRevision, [ $eventStruct->source_page ] );
-//        }
-    }
+        if ( $is_revision ) {
+            $unsetFinalRevision = array_merge( $this->model->getUnsetFinalRevision(), [ $eventStruct->source_page ] );
+        }
 
-//    /**
-//     * Unset the final_revision flag from any revision we removed reviwed_words.
-//     * Apply final_revision flag to the current event.
-//     *
-//     * If the current event is a revision, ensure the source_page is included in the
-//     * unset list.
-//     *
-//     * @param $unsetFinalRevision
-//     *
-//     * @throws \Exception
-//     */
-//    private function updateFinalRevisionFlag( $unsetFinalRevision ) {
-//        $eventStruct = $this->_model->getEventModel()->getCurrentEvent();
-//        $is_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE;
-//
-//        if ( $is_revision ) {
-//            $unsetFinalRevision = array_merge( $unsetFinalRevision, [ $eventStruct->source_page ] );
-//        }
-//
-//        if ( !empty( $unsetFinalRevision ) ) {
-//            ( new SegmentTranslationEventDao() )->unsetFinalRevisionFlag(
-//                    $this->_chunk->id, [ $this->_model->getSegmentStruct()->id ], $unsetFinalRevision
-//            );
-//        }
-//
-//        $eventStruct->final_revision = $is_revision;
-//        SegmentTranslationEventDao::updateStruct( $eventStruct, [ 'fields' => [ 'final_revision' ] ] );
-//    }
+        if ( !empty( $unsetFinalRevision ) ) {
+            ( new SegmentTranslationEventDao() )->unsetFinalRevisionFlag(
+                    $this->model->getChangeVector()->getChunk()->id, [ $this->model->getChangeVector()->getSegmentStruct()->id ], $unsetFinalRevision
+            );
+        }
+
+        $eventStruct->final_revision = $is_revision;
+        SegmentTranslationEventDao::updateStruct( $eventStruct, [ 'fields' => [ 'final_revision' ] ] );
+    }
 
     /**
      * Delete all issues
@@ -115,6 +101,6 @@ class ChunkReviewTransitionDao_UnitOfWork implements IUnitOfWork
     }
 
     public function clearAll() {
-        $this->model = new ChunkReviewTransitionDao_ChunkReviewTransitionModel();
+        $this->model = new self($this->model);
     }
 }
