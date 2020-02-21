@@ -50,7 +50,7 @@ class SegmentQRLine extends React.Component {
                 </div>
             ) : null}
 
-            { this.props.showIceMatchInfo ?  (
+            { this.props.showIceMatchInfo && !this.props.showIsPretranslated ?  (
                 <div className="segment-content qr-spec">
                     {this.props.segment.get('ice_locked') === '1' ? (
                         <div>
@@ -61,10 +61,15 @@ class SegmentQRLine extends React.Component {
                         <div>(Modified)</div>
                     ) : null}
                 </div>
-            ) : (
-                null
-                ) }
-            { !this.props.showIceMatchInfo && !this.props.showSuggestionSource && !this.props.showSegmentWords ?  (
+            ) : null }
+            { this.props.showIsPretranslated ?  (
+                <div className="segment-content qr-spec">
+                        <div>
+                            <b>Pre-Translated</b>
+                        </div>
+                </div>
+            ) : null }
+            { !this.props.showIceMatchInfo && !this.props.showSuggestionSource && !this.props.showSegmentWords && !this.props.showIsPretranslated ?  (
                 <div className="segment-content qr-spec"/>
             ) : (null) }
 
