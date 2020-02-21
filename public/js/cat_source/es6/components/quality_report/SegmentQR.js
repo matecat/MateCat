@@ -346,6 +346,8 @@ class SegmentQR extends React.Component {
                                     diffActive={this.state.translateDiffOn}
                                     showIceMatchInfo={true}
                                     tte={this.props.segment.get('time_to_edit_translation')}
+                                    showIsPretranslated={this.props.segment.get('is_pre_translated')}
+
 
                     />
 

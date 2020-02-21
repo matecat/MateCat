@@ -96,8 +96,14 @@ class SegmentQRLine extends React.Component {
                 </div>
             ) : null }
 
-
-            { !(this.props.showIceMatchInfo && this.props.segment.get('ice_locked') === '1') && !this.props.showSuggestionSource && !this.props.showSegmentWords && !this.props.tte ?  (
+            { this.props.showIsPretranslated ?  (
+                <div className="segment-content qr-spec">
+                    <div>
+                        <b>Pre-Translated</b>
+                    </div>
+                </div>
+            ) : null }
+            { (!(this.props.showIceMatchInfo && this.props.segment.get('ice_locked') === '1' ) ) && !this.props.showSuggestionSource && !this.props.showSegmentWords && !this.props.tte && !this.props.showIsPretranslated ?  (
                 <div className="segment-content qr-spec"/>
             ) : null }
 
