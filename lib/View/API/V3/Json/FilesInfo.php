@@ -15,7 +15,9 @@ use DataAccess_IDaoStruct;
 class FilesInfo {
 
     /**
-     * @param DataAccess_IDaoStruct[] $filesStructList
+     * @param      $filesStructList
+     * @param null $job_first_segment
+     * @param null $job_last_segment
      *
      * @return array
      */
