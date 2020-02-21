@@ -191,12 +191,30 @@ class QualityReportSegmentModel {
             $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
 
             // If the segment is pre-translated (maybe from a previously XLIFF file)
-            // populate 'last_translation' and 'suggestion' from 'translation' and
+
+            // If the segment is TRANSLATED
+            // 'last_translation' and 'suggestion' from 'translation' and
             // set is_pre_translated to true
-            if( null === $seg->last_translation and '' === $seg->suggestion and ( $seg->status === \Constants_TranslationStatus::STATUS_TRANSLATED or $seg->status ===
-                            \Constants_TranslationStatus::STATUS_APPROVED  ) ){
+            if( null === $seg->last_translation and '' === $seg->suggestion and $seg->status === \Constants_TranslationStatus::STATUS_TRANSLATED ){
                 $seg->suggestion  = $Filter->fromLayer0ToLayer2( $seg->translation );
                 $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
+                $seg->is_pre_translated = true;
+            }
+
+            // If the segment was APPROVED
+            // check if exists a version 0 'translation' (which means that the segment was modified); if not then use the current 'translation'
+            if( null === $seg->last_translation and '' === $seg->suggestion and $seg->status === \Constants_TranslationStatus::STATUS_APPROVED ){
+
+                $first_version = (new TranslationVersionDao())->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
+
+                if($first_version){
+                    $translation = $first_version->translation;
+                } else {
+                    $translation = $seg->translation;
+                }
+
+                $seg->suggestion  = $Filter->fromLayer0ToLayer2( $translation );
+                $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
                 $seg->is_pre_translated = true;
             }
 
