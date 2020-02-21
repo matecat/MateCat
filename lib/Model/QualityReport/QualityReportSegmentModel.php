@@ -191,9 +191,11 @@ class QualityReportSegmentModel {
             $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
 
             // If the segment is pre-translated (maybe from a previously XLIFF file)
+            // populate 'last_translation' and 'suggestion' from 'translation' and
+            // set is_pre_translated to true
             if( null === $seg->last_translation and '' === $seg->suggestion and $seg->status === 'TRANSLATED' ){
                 $seg->suggestion  = $Filter->fromLayer0ToLayer2( $seg->translation );
-                $seg->last_translation = $seg->translation;
+                $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
                 $seg->is_pre_translated = true;
             }
 
