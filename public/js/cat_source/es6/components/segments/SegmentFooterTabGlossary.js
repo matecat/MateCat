@@ -187,74 +187,76 @@ class SegmentFooterTabGlossary extends React.Component {
 
             let self = this;
             $.each( this.props.segment.glossary, function ( name, value ) {
-                let match = value[0];
-                if ( (match.segment === '') || (match.translation === '') )
-                    return;
-                let cb = match.created_by;
-                let disabled = (match.id == '0') ? true : false;
-                let sourceNoteEmpty = (_.isUndefined(match.source_note) || match.source_note === '');
-                let targetNoteEmpty = (_.isUndefined(match.target_note) || match.target_note === '');
+                $.each( value, function (index, match) {
+                    // let match = value[0];
+                    if ( (match.segment === '') || (match.translation === '') )
+                        return;
+                    let cb = match.created_by;
+                    let disabled = (match.id == '0') ? true : false;
+                    let sourceNoteEmpty = (_.isUndefined(match.source_note) || match.source_note === '');
+                    let targetNoteEmpty = (_.isUndefined(match.target_note) || match.target_note === '');
 
-                if ( sourceNoteEmpty && targetNoteEmpty ) {
-                    match.comment = '';
-                }
-                else if ( !targetNoteEmpty ) {
-                    match.comment = match.target_note;
-                }
-                else if ( !sourceNoteEmpty ) {
-                    match.comment = match.source_note;
-                }
+                    if ( sourceNoteEmpty && targetNoteEmpty ) {
+                        match.comment = '';
+                    }
+                    else if ( !targetNoteEmpty ) {
+                        match.comment = match.target_note;
+                    }
+                    else if ( !sourceNoteEmpty ) {
+                        match.comment = match.source_note;
+                    }
 
-                let leftTxt = match.segment;
-                let rightTxt = match.translation;
-                let commentOriginal = match.comment;
-                if (commentOriginal) {
-                    commentOriginal = commentOriginal.replace(/\#\{/gi, "<mark>");
-                    commentOriginal = commentOriginal.replace(/\}\#/gi, "</mark>");
-                }
+                    let leftTxt = match.segment;
+                    let rightTxt = match.translation;
+                    let commentOriginal = match.comment;
+                    if (commentOriginal) {
+                        commentOriginal = commentOriginal.replace(/\#\{/gi, "<mark>");
+                        commentOriginal = commentOriginal.replace(/\}\#/gi, "</mark>");
+                    }
 
-                let addCommentHtml = "";
+                    let addCommentHtml = "";
                     {/*<div className="glossary-add-comment">*/}
-                            {/*<a href="#" onClick={self.openAddCommentExistingMatch.bind(self, name)}>Add a Comment</a>*/}
-                            {/*<div className="input gl-comment" contentEditable="true" style={{display: 'none'}}*/}
-                                 {/*onKeyPress={self.updateGlossaryItem.bind(self, name)}/>*/}
-                        {/*</div>;*/}
+                    {/*<a href="#" onClick={self.openAddCommentExistingMatch.bind(self, name)}>Add a Comment</a>*/}
+                    {/*<div className="input gl-comment" contentEditable="true" style={{display: 'none'}}*/}
+                    {/*onKeyPress={self.updateGlossaryItem.bind(self, name)}/>*/}
+                    {/*</div>;*/}
 
-                let html = <div key={name} ref={(match)=>self.matches[name] = match}>
-                    <div className="glossary-item"><span>{name}</span></div>
-                    <ul className="graysmall" data-id={match.id}>
-                        <li className="sugg-source">
-                            <div id={self.props.id_segment + '-tm-' + match.id + '-edit'} className="switch-editing icon-edit" title="Edit"
-                                 onClick={self.editExistingMatch.bind(self, name)}/>
-                            { disabled ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'} className="trash" title="delete this row"
-                                                 onClick={self.deleteMatch.bind(self, name, match.id)}/>}
-                            <span id={self.props.id_segment + '-tm-' + match.id + '-source'} className="suggestion_source"
-                                  dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText( leftTxt, true ))}/>
-                        </li>
-                        <li className="b sugg-target" onMouseDown={()=>self.copyItemInEditArea(rightTxt)}>
+                    let html = <div key={name} ref={(match)=>self.matches[name] = match}>
+                        <div className="glossary-item"><span>{name}</span></div>
+                        <ul className="graysmall" data-id={match.id}>
+                            <li className="sugg-source">
+                                <div id={self.props.id_segment + '-tm-' + match.id + '-edit'} className="switch-editing icon-edit" title="Edit"
+                                     onClick={self.editExistingMatch.bind(self, name)}/>
+                                { disabled ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'} className="trash" title="delete this row"
+                                                        onClick={self.deleteMatch.bind(self, name, match.id)}/>}
+                                <span id={self.props.id_segment + '-tm-' + match.id + '-source'} className="suggestion_source"
+                                      dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText( leftTxt, true ))}/>
+                            </li>
+                            <li className="b sugg-target" onMouseDown={()=>self.copyItemInEditArea(rightTxt)}>
                             <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className="translation"
                                   data-original={TagUtils.decodePlaceholdersToText( rightTxt, true )}
                                   dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText(rightTxt, true))}
                                   onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
-                        </li>
-                        <li className="details">
-                            { ( !match.comment || match.comment === '') ? addCommentHtml :
-                                <div className="comment"
-                                    data-original={TagUtils.decodePlaceholdersToText( commentOriginal, true )}
-                                     dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText(commentOriginal, true ))}
-                                     // onKeyPress={self.updateGlossaryItem.bind(self, name)}
-                                />
-                            }
-                            <ul className="graysmall-details">
-                                <li>{match.last_update_date}</li>
-                                <li className="graydesc">Source:
-                                    <span className="bold"> {cb}</span>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>;
-                htmlResults.push(html);
+                            </li>
+                            <li className="details">
+                                { ( !match.comment || match.comment === '') ? addCommentHtml :
+                                    <div className="comment"
+                                         data-original={TagUtils.decodePlaceholdersToText( commentOriginal, true )}
+                                         dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText(commentOriginal, true ))}
+                                        // onKeyPress={self.updateGlossaryItem.bind(self, name)}
+                                    />
+                                }
+                                <ul className="graysmall-details">
+                                    <li>{match.last_update_date}</li>
+                                    <li className="graydesc">Source:
+                                        <span className="bold"> {cb}</span>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>;
+                    htmlResults.push(html);
+                } );
             } );
         }
         return htmlResults;
