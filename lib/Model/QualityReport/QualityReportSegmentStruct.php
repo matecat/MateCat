@@ -76,6 +76,8 @@ class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObj
 
     public $source_page ;
 
+    public $is_pre_translated = false;
+
     /**
      * @return float
      */

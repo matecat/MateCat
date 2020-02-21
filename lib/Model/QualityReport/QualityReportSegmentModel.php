@@ -119,9 +119,15 @@ class QualityReportSegmentModel {
         }
     }
 
-    public function getSegmentsForQR( $segments_id ) {
+    /**
+     * @param array $segment_ids
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getSegmentsForQR( array $segment_ids ) {
         $segmentsDao = new Segments_SegmentDao;
-        $data        = $segmentsDao->getSegmentsForQr( $segments_id, $this->chunk->id, $this->chunk->password );
+        $data        = $segmentsDao->getSegmentsForQr( $segment_ids, $this->chunk->id, $this->chunk->password );
 
         $featureSet = new FeatureSet();
 
@@ -129,7 +135,7 @@ class QualityReportSegmentModel {
         $issue_comments     = [];
 
         if ( $featureSet->hasRevisionFeature() ) {
-            $issues = QualityReportDao::getIssuesBySegments( $segments_id, $this->chunk->id );
+            $issues = QualityReportDao::getIssuesBySegments( $segment_ids, $this->chunk->id );
             if ( !empty( $issues )) {
                 $issue_comments = ( new EntryCommentDao() )->fetchCommentsGroupedByIssueIds(
                         array_map( function( $issue ) {
@@ -140,13 +146,13 @@ class QualityReportSegmentModel {
 
         } else {
             $reviseDao          = new Revise_ReviseDAO();
-            $segments_revisions = $reviseDao->readBySegments( $segments_id, $this->chunk->id );
+            $segments_revisions = $reviseDao->readBySegments( $segment_ids, $this->chunk->id );
             $issues             = $this->makeIssuesDataUniform( $segments_revisions );
 
         }
 
         $commentsDao  = new \Comments_CommentDao;
-        $comments     = $commentsDao->getThreadsBySegments( $segments_id, $this->chunk->id );
+        $comments     = $commentsDao->getThreadsBySegments( $segment_ids, $this->chunk->id );
         $codes        = $featureSet->getCodes();
 
         $last_revisions = [] ;
@@ -154,18 +160,18 @@ class QualityReportSegmentModel {
         if ( in_array( TranslationVersions::FEATURE_CODE, $codes ) ) {
 
             $translationVersionDao = new TranslationVersionDao;
-            $last_translations     = $translationVersionDao->getLastRevieionsBySegmentsAndSourcePage(
-                    $segments_id, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
+            $last_translations     = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
+                    $segment_ids, $this->chunk->id, Constants::SOURCE_PAGE_TRANSLATE
             );
 
             foreach( $this->_getChunkReviews() as $chunkReview ) {
-                $last_revisions [ $chunkReview->source_page ] = $translationVersionDao->getLastRevieionsBySegmentsAndSourcePage(
-                        $segments_id, $this->chunk->id, $chunkReview->source_page
+                $last_revisions [ $chunkReview->source_page ] = $translationVersionDao->getLastRevisionsBySegmentsAndSourcePage(
+                        $segment_ids, $this->chunk->id, $chunkReview->source_page
                 );
             }
 
         } else {
-            $last_translations = $this->makeSegmentsVersionsUniform( $segments_id );
+            $last_translations = $this->makeSegmentsVersionsUniform( $segment_ids );
         }
 
         $Filter = Filter::getInstance( $featureSet );
@@ -183,6 +189,13 @@ class QualityReportSegmentModel {
             $this->_assignIssues( $seg, $issues, $issue_comments ) ;
             $this->_assignComments( $seg, $comments ) ;
             $this->_populateLastTranslationAndRevision( $seg, $Filter, $last_translations, $last_revisions, $codes );
+
+            // If the segment is pre-translated (maybe from a previously XLIFF file)
+            if( null === $seg->last_translation and '' === $seg->suggestion and $seg->status === 'TRANSLATED' ){
+                $seg->suggestion  = $Filter->fromLayer0ToLayer2( $seg->translation );
+                $seg->last_translation = $seg->translation;
+                $seg->is_pre_translated = true;
+            }
 
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
             $seg->pee_translation_suggestion = $seg->getPEEBwtTranslationSuggestion();
