@@ -519,8 +519,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public function getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page ) {
 
-        $conn = Database::obtain()->getConnection();
-
         $query = "
             select ste.id_segment, j.id, count(distinct qa.id) as q_count
             from segment_translation_events ste  
@@ -556,7 +554,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             and ste.source_page = :source_page
             group by ste.id_segment;";
 
-        $stmt = $conn->prepare( $query );
+        $stmt = $this->_getStatementForCache( $query );
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
         $stmt->execute( [
                 'id_job'      => $id_job,
