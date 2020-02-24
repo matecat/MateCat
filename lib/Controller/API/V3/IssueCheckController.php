@@ -3,15 +3,18 @@
 namespace API\V3;
 
 use API\V2\KleinController;
-use LQA\EntryDao;
+use DomainException;
+use Teams\MembershipDao;
+use Translations_SegmentTranslationDao;
 
 class IssueCheckController extends KleinController {
 
     public function segments() {
 
         $result = [
-                'total_issue_count' => 0,
-                'modified_segments' => [
+                'modified_segments_count' => 0,
+                'issue_count'             => 0,
+                'modified_segments'       => [
                         'with_issues'    => [],
                         'without_issues' => [],
                 ]
@@ -20,22 +23,19 @@ class IssueCheckController extends KleinController {
         // params
         $id_job      = $this->request->param( 'id_job' );
         $password    = $this->request->param( 'password' );
-        $source_page = $this->request->param( 'source_page' );
+        $source_page = $this->request->param( 'source_page', 2 );
 
-        $issueCount                    = EntryDao::getCountByIdJobAndSourcePage( $id_job, $source_page );
-        $result[ 'total_issue_count' ] = $issueCount[ 'count' ];
+        $modifiedSegments = (new Translations_SegmentTranslationDao())->setCacheTTL( 60 * 5 )->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job,
+                        $password, $source_page );
 
-        // get all modified segment translations by revisor
-        $segmentTranslationIds = \Translations_SegmentTranslationDao::getSegmentTranslationIdsModifiedByRevisor( $id_job, $password, $source_page );
+        $result[ 'modified_segments_count' ] = count( $modifiedSegments );
 
-        // loop segment translations
-        foreach ( $segmentTranslationIds as $segmentTranslationId ) {
-            $entries = EntryDao::findByIdSegmentAndSourcePage( $segmentTranslationId->id_segment, $id_job, $source_page );
-
-            if ( count( $entries ) > 0 ) {
-                $result[ 'modified_segments' ][ 'with_issues' ][] = $segmentTranslationId->id_segment;
+        foreach ( $modifiedSegments as $modifiedSegment ) {
+            if ( $modifiedSegment[ 'q_count' ] > 0 ) {
+                $result[ 'modified_segments' ][ 'with_issues' ][] = $modifiedSegment[ 'id_segment' ];
+                $result[ 'issue_count' ]                          = $result[ 'issue_count' ] + $modifiedSegment[ 'q_count' ];
             } else {
-                $result[ 'modified_segments' ][ 'without_issues' ][] = $segmentTranslationId->id_segment;
+                $result[ 'modified_segments' ][ 'without_issues' ][] = $modifiedSegment[ 'id_segment' ];
             }
         }
 
