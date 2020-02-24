@@ -221,7 +221,7 @@ class SegmentFooterTabGlossary extends React.Component {
                     {/*onKeyPress={self.updateGlossaryItem.bind(self, name)}/>*/}
                     {/*</div>;*/}
 
-                    let html = <div key={name} ref={(match)=>self.matches[name] = match}>
+                    let html = <div key={name+"-"+index} ref={(match)=>self.matches[name] = match}>
                         <div className="glossary-item"><span>{name}</span></div>
                         <ul className="graysmall" data-id={match.id}>
                             <li className="sugg-source">
