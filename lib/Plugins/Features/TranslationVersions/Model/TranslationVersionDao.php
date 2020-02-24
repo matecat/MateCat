@@ -242,7 +242,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public function getLastRevieionsBySegmentsAndSourcePage( $segments_id, $job_id, $source_page ) {
+    public function getLastRevisionsBySegmentsAndSourcePage( $segments_id, $job_id, $source_page ) {
 
         $db = Database::obtain()->getConnection();
 
