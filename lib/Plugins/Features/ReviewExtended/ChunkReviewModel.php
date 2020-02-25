@@ -140,7 +140,7 @@ class ChunkReviewModel implements IChunkReviewModel {
         $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
         $update_result = (new ChunkReviewDao())->atomicUpdate( $this->chunk_review  );
 
-        $project->getFeaturesSet()->run( // ???????
+        $project->getFeaturesSet()->run(
                 'chunkReviewUpdated', $this->chunk_review, $update_result, $this, $project
         );
 

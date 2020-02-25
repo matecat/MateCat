@@ -12,6 +12,7 @@ use LQA\EntryDao;
 use PDOException;
 
 class UnitOfWork implements IUnitOfWork {
+
     /**
      * @var PDO
      */
