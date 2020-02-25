@@ -105,11 +105,11 @@ class CattoolFooter extends React.Component {
                         ) : (
                             this.state.stats && this.state.stats.ANALYSIS_COMPLETE ? (
                             <React.Fragment>
-                                <a href="#" className="approved-bar" style={{width:this.state.stats.a_perc + '%'}} title={this.state.stats.a_perc_formatted}/>
-                                <a href="#" className="approved-bar-2nd-pass" style={{width:this.state.stats.a_perc_2nd+ '%'}} title={this.state.stats.a_perc_2nd_formatted}/>
-                                <a href="#" className="translated-bar" style={{width:this.state.stats.t_perc+ '%'}} title={this.state.stats.t_perc_formatted}/>
-                                <a href="#" className="rejected-bar" style={{width:this.state.stats.r_perc+ '%'}} title={this.state.stats.r_perc_formatted}/>
-                                <a href="#" className="draft-bar" style={{width:this.state.stats.d_perc+ '%'}} title={this.state.stats.d_perc_formatted}/>
+                                <a href="#" className="approved-bar" style={{width:this.state.stats.a_perc + '%'}} title={"Approved " + this.state.stats.a_perc_formatted}/>
+                                <a href="#" className="approved-bar-2nd-pass" style={{width:this.state.stats.a_perc_2nd+ '%'}} title={"2nd Approved " + this.state.stats.a_perc_2nd_formatted}/>
+                                <a href="#" className="translated-bar" style={{width:this.state.stats.t_perc+ '%'}} title={"Translated "+this.state.stats.t_perc_formatted}/>
+                                <a href="#" className="rejected-bar" style={{width:this.state.stats.r_perc+ '%'}} title={"Rejected " + this.state.stats.r_perc_formatted}/>
+                                <a href="#" className="draft-bar" style={{width:this.state.stats.d_perc+ '%'}} title={"Draft " + this.state.stats.d_perc_formatted}/>
                             </React.Fragment>
                                 ) : null
                             )}
