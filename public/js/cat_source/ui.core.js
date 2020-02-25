@@ -1199,7 +1199,7 @@ var UI = {
         } else if (response.data == 'OK') {
 			SegmentActions.setStatus(id_segment, null, status);
 			this.setDownloadStatus(response.stats);
-			CatToolActions.updateFooterStatistics(response.stats);
+			CatToolActions.setProgress(response.stats);
             SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending');
 
 			this.checkWarnings(false);
