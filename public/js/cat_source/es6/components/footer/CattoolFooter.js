@@ -36,7 +36,8 @@ class CattoolFooter extends React.Component {
             });
             if ( reviewedWords ) {
                 let approvePerc = parseFloat(reviewedWords.advancement_wc)*100/s.TOTAL;
-                a_perc_formatted = _.round(approvePerc, 1);
+                approvePerc = (approvePerc > s.APPROVED_PERC) ? s.APPROVED_PERC : approvePerc;
+                a_perc_formatted = approvePerc < 0 ? 0 : _.round(approvePerc, 1);
                 a_perc = approvePerc;
 
             }
@@ -47,7 +48,8 @@ class CattoolFooter extends React.Component {
 
             if ( reviewWordsSecondPass ) {
                 let approvePerc2ndPass = parseFloat(reviewWordsSecondPass.advancement_wc)*100/s.TOTAL;
-                a_perc_2nd_formatted = _.round(approvePerc2ndPass, 1);
+                approvePerc2ndPass = (approvePerc2ndPass > s.APPROVED_PERC) ? s.APPROVED_PERC : approvePerc2ndPass;
+                a_perc_2nd_formatted = approvePerc2ndPass < 0 ? 0 :_.round(approvePerc2ndPass, 1);
                 a_perc_2nd = approvePerc2ndPass;
                 revise_todo_formatted = (config.revisionNumber === 2) ? revise_todo_formatted + _.round(parseFloat(reviewedWords.advancement_wc)) : revise_todo_formatted;
             }
