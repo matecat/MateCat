@@ -14,10 +14,7 @@ class IssueCheckController extends KleinController {
         $result = [
                 'modified_segments_count' => 0,
                 'issue_count'             => 0,
-                'modified_segments'       => [
-                        'with_issues'    => [],
-                        'without_issues' => [],
-                ]
+                'modified_segments'       => []
         ];
 
         // params
@@ -31,12 +28,13 @@ class IssueCheckController extends KleinController {
         $result[ 'modified_segments_count' ] = count( $modifiedSegments );
 
         foreach ( $modifiedSegments as $modifiedSegment ) {
-            if ( $modifiedSegment[ 'q_count' ] > 0 ) {
-                $result[ 'modified_segments' ][ 'with_issues' ][] = $modifiedSegment[ 'id_segment' ];
-                $result[ 'issue_count' ]                          = $result[ 'issue_count' ] + $modifiedSegment[ 'q_count' ];
-            } else {
-                $result[ 'modified_segments' ][ 'without_issues' ][] = $modifiedSegment[ 'id_segment' ];
-            }
+
+            $result[ 'modified_segments' ][] = [
+                    'id_segment' => (int)$modifiedSegment[ 'id_segment' ],
+                    'issue_count' => (int)$modifiedSegment[ 'q_count' ],
+            ];
+
+            $result[ 'issue_count' ] = $result[ 'issue_count' ] + $modifiedSegment[ 'q_count' ];
         }
 
         $this->response->json( $result );
