@@ -3,8 +3,6 @@
 namespace API\V3;
 
 use API\V2\KleinController;
-use DomainException;
-use Teams\MembershipDao;
 use Translations_SegmentTranslationDao;
 
 class IssueCheckController extends KleinController {
@@ -30,11 +28,11 @@ class IssueCheckController extends KleinController {
         foreach ( $modifiedSegments as $modifiedSegment ) {
 
             $result[ 'modified_segments' ][] = [
-                    'id_segment' => (int)$modifiedSegment[ 'id_segment' ],
-                    'issue_count' => (int)$modifiedSegment[ 'q_count' ],
+                    'id_segment' => (int)$modifiedSegment->id_segment,
+                    'issue_count' => (int)$modifiedSegment->q_count,
             ];
 
-            $result[ 'issue_count' ] = $result[ 'issue_count' ] + $modifiedSegment[ 'q_count' ];
+            $result[ 'issue_count' ] = $result[ 'issue_count' ] + $modifiedSegment->q_count;
         }
 
         $this->response->json( $result );

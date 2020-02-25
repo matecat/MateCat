@@ -1,5 +1,6 @@
 <?php
 
+use DataAccess\ShapelessConcreteStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
 use Search\ReplaceEventStruct;
 
@@ -515,7 +516,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param $password
      * @param $source_page
      *
-     * @return array
+     * @return DataAccess_IDaoStruct[]
      */
     public function getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page ) {
 
@@ -555,14 +556,15 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             group by ste.id_segment;";
 
         $stmt = $this->_getStatementForCache( $query );
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
-        $stmt->execute( [
-                'id_job'      => $id_job,
-                'password'    => $password,
-                'source_page' => $source_page,
-        ] );
 
-        return $stmt->fetchAll();
+        return $this->_fetchObject( $stmt,
+                new ShapelessConcreteStruct(),
+                [
+                        'id_job'      => $id_job,
+                        'password'    => $password,
+                        'source_page' => $source_page,
+                ]
+        );
     }
 
     /**
