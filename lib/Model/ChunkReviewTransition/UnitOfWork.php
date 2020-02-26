@@ -4,14 +4,17 @@ namespace ChunkReviewTransition;
 
 use Constants;
 use Database;
-use Features\ReviewExtended\ChunkReviewModel;
+use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use IUnitOfWork;
 use LQA\EntryCommentDao;
 use LQA\EntryDao;
 use PDOException;
+use TransactionableTrait;
 
 class UnitOfWork implements IUnitOfWork {
+
+    use TransactionableTrait;
 
     /**
      * @var PDO
@@ -19,18 +22,18 @@ class UnitOfWork implements IUnitOfWork {
     private $conn;
 
     /**
-     * @var ChunkReviewTransitionModel
+     * @var ChunkReviewTransitionModel[]
      */
-    private $model;
+    private $models;
 
     /**
      * ChunkReviewTransitionDao_UnitOfWork constructor.
      *
-     * @param ChunkReviewTransitionModel $model
+     * @param ChunkReviewTransitionModel[] $models
      */
-    public function __construct( ChunkReviewTransitionModel $model ) {
-        $this->conn  = Database::obtain()->getConnection();
-        $this->model = $model;
+    public function __construct( $models = [] ) {
+        $this->conn   = Database::obtain()->getConnection();
+        $this->models = $models;
     }
 
     /**
@@ -39,51 +42,83 @@ class UnitOfWork implements IUnitOfWork {
     public function commit() {
 
         try {
+            // commit the updates in a transaction
+            $this->openTransaction();
+            $this->updatePassFailAndCounts();
 
-            if ( !$this->conn->inTransaction() ) {
-                $this->conn->beginTransaction();
+            foreach ( $this->models as $model ) {
+                $this->updateFinalRevisionFlag( $model );
+                $this->deleteIssues( $model );
             }
 
-            $this->updatePassFailResult();
-            $this->updateFinalRevisionFlag();
-            $this->deleteIssues();
+            $this->commitTransaction();
 
-            $this->conn->commit();
+            // run chunkReviewUpdated
+            foreach ( $this->models as $model ) {
+                foreach ( $model->getChunkReviews() as $chunkReview ) {
+                    $project = $chunkReview->getChunk()->getProject();
+                    $project->getFeaturesSet()->run( 'chunkReviewUpdated', $chunkReview, true );
+                }
+            }
+
         } catch ( PDOException $e ) {
             $this->rollback();
 
             \Log::doJsonLog( 'ChunkReviewTransition UnitOfWork transaction failed: ' . $e->getMessage() );
+
+            $this->clearAll();
+
+            return false;
         }
 
         $this->clearAll();
+
+        return true;
     }
 
     /**
-     * Update chunk review counters
+     * Update chunk review is_pass and counters
      *
      * @throws \Exception
      */
-    private function updatePassFailResult() {
-        foreach ( $this->model->getChunkReviews() as $chunkReview ) {
-            $chunkReviewModel = new ChunkReviewModel( $chunkReview );
-            $chunkReviewModel->atomicUpdatePassFailResult( $chunkReview->getChunk()->getProject() );
+    private function updatePassFailAndCounts() {
+
+        $data = [];
+
+        foreach ( $this->models as $model ) {
+            foreach ( $model->getChunkReviews() as $chunkReview ) {
+                $data[ $chunkReview->id ][ 'is_pass' ]              = $chunkReview->is_pass;
+                $data[ $chunkReview->id ][ 'penalty_points' ]       = $data[ $chunkReview->id ][ 'penalty_points' ] + $chunkReview->penalty_points;
+                $data[ $chunkReview->id ][ 'reviewed_words_count' ] = $data[ $chunkReview->id ][ 'reviewed_words_count' ] + $chunkReview->reviewed_words_count;
+                $data[ $chunkReview->id ][ 'advancement_wc' ]       = $data[ $chunkReview->id ][ 'advancement_wc' ] + $chunkReview->advancement_wc;
+                $data[ $chunkReview->id ][ 'total_tte' ]            = $data[ $chunkReview->id ][ 'total_tte' ] + $chunkReview->total_tte;
+            }
+        }
+
+        $chunkReviewDao = new ChunkReviewDao();
+
+        // just one UPDATE for each ChunkReview
+        foreach ( $data as $id => $datum ) {
+            $chunkReviewDao->passFailCountsAtomicUpdate( $id, $datum );
         }
     }
 
     /**
+     * @param ChunkReviewTransitionModel $model
+     *
      * @throws \Exception
      */
-    private function updateFinalRevisionFlag() {
-        $eventStruct = $this->model->getChangeVector()->getEventModel()->getCurrentEvent();
+    private function updateFinalRevisionFlag( ChunkReviewTransitionModel $model ) {
+        $eventStruct = $model->getChangeVector()->getEventModel()->getCurrentEvent();
         $is_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE;
 
         if ( $is_revision ) {
-            $unsetFinalRevision = array_merge( $this->model->getUnsetFinalRevision(), [ $eventStruct->source_page ] );
+            $unsetFinalRevision = array_merge( $model->getUnsetFinalRevision(), [ $eventStruct->source_page ] );
         }
 
         if ( !empty( $unsetFinalRevision ) ) {
             ( new SegmentTranslationEventDao() )->unsetFinalRevisionFlag(
-                    $this->model->getChangeVector()->getChunk()->id, [ $this->model->getChangeVector()->getSegmentStruct()->id ], $unsetFinalRevision
+                    $model->getChangeVector()->getChunk()->id, [ $model->getChangeVector()->getSegmentStruct()->id ], $unsetFinalRevision
             );
         }
 
@@ -93,19 +128,21 @@ class UnitOfWork implements IUnitOfWork {
 
     /**
      * Delete all issues
+     *
+     * @param ChunkReviewTransitionModel $model
      */
-    private function deleteIssues() {
-        foreach ( $this->model->getIssuesToDelete() as $issue ) {
+    private function deleteIssues( ChunkReviewTransitionModel $model ) {
+        foreach ( $model->getIssuesToDelete() as $issue ) {
             $issue->addComments( ( new EntryCommentDao() )->findByIssueId( $issue->id ) );
             EntryDao::deleteEntry( $issue );
         }
     }
 
     public function rollback() {
-        $this->conn->rollBack();
+        $this->rollbackTransaction();
     }
 
     public function clearAll() {
-        $this->model = new self( $this->model );
+        $this->models = new self( $this->models );
     }
 }

@@ -123,25 +123,7 @@ class ChunkReviewModel implements IChunkReviewModel {
         );
 
         $project->getFeaturesSet()->run(
-                'chunkReviewUpdated', $this->chunk_review, $update_result, $this, $project
-        );
-
-        return $update_result;
-    }
-
-    /**
-     * @param Projects_ProjectStruct $project
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function atomicUpdatePassFailResult( Projects_ProjectStruct $project ) {
-
-        $this->chunk_review->is_pass = ( $this->getScore() <= $this->getQALimit( $project->getLqaModel() ) );
-        $update_result = (new ChunkReviewDao())->atomicUpdate( $this->chunk_review  );
-
-        $project->getFeaturesSet()->run(
-                'chunkReviewUpdated', $this->chunk_review, $update_result, $this, $project
+            'chunkReviewUpdated', $this->chunk_review, $update_result
         );
 
         return $update_result;

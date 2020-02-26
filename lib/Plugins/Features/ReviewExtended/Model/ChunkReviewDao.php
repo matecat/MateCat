@@ -153,12 +153,18 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         return $result[0] == null ? 0 : $result[0];
     }
 
-
-    public function atomicUpdate( ChunkReviewStruct $chunkReviewStruct  ) {
+    /**
+     * @param int   $id
+     * @param array $data
+     *
+     * @return int|void
+     */
+    public function passFailCountsAtomicUpdate( $id, $data = []  ) {
 
         $sql = "UPDATE 
         qa_chunk_reviews
         SET 
+        is_pass = :is_pass,
         penalty_points = penalty_points + :penalty_points,
         reviewed_words_count = reviewed_words_count + :reviewed_words_count,
         advancement_wc = advancement_wc + :advancement_wc,
@@ -168,11 +174,12 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute([
-                'id'  => $chunkReviewStruct->id,
-                'penalty_points'  => $chunkReviewStruct->penalty_points,
-                'reviewed_words_count'  => $chunkReviewStruct->reviewed_words_count,
-                'advancement_wc'  => $chunkReviewStruct->advancement_wc,
-                'total_tte'  => $chunkReviewStruct->total_tte,
+                'id'  => $id,
+                'is_pass'  => $data['is_pass'],
+                'penalty_points'  => $data['penalty_points'],
+                'reviewed_words_count'  => $data['reviewed_words_count'],
+                'advancement_wc'  => $data['advancement_wc'],
+                'total_tte'  => $data['total_tte'],
         ]);
 
         return $stmt->rowCount();
