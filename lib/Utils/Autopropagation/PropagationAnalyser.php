@@ -36,7 +36,7 @@ class PropagationAnalyser {
 
         $propagation = new \Propagation_PropagationTotalStruct();
 
-        if ( $parentSegmentTranslation->match_type !== 'ICE' ) { // remove ICE
+        if ( $parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1 ) { // remove ICE
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
 
                 if ( $this->detectIce( $segmentTranslation ) ) {
