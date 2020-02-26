@@ -238,8 +238,10 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             $reviewTransitionModel->addChunkReview( $chunkReview );
         }
 
-        foreach ( $this->_issuesDeletionList as $issueToDelete ) {
-            $reviewTransitionModel->addIssueToDelete( $issueToDelete );
+        foreach ( $this->_issuesDeletionList as $issuesToDelete ) {
+            foreach ($issuesToDelete as $issueToDelete){
+                $reviewTransitionModel->addIssueToDelete( $issueToDelete );
+            }
         }
 
         $reviewTransitionModel->setUnsetFinalRevision( $unsetFinalRevision );

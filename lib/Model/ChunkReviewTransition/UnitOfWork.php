@@ -8,7 +8,7 @@ use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use IUnitOfWork;
-use LQA\EntryCommentDao;
+use LQA\EntryCommentStruct;
 use LQA\EntryDao;
 use PDOException;
 use TransactionableTrait;
@@ -57,8 +57,8 @@ class UnitOfWork implements IUnitOfWork {
             // run chunkReviewUpdated
             foreach ( $this->models as $model ) {
                 foreach ( $model->getChunkReviews() as $chunkReview ) {
-                    $project = $chunkReview->getChunk()->getProject();
-                    $chunkReviewModel     = new ChunkReviewModel( $chunkReview );
+                    $project          = $chunkReview->getChunk()->getProject();
+                    $chunkReviewModel = new ChunkReviewModel( $chunkReview );
                     $project->getFeaturesSet()->run( 'chunkReviewUpdated', $chunkReview, true, $chunkReviewModel, $project );
                 }
             }
@@ -135,7 +135,9 @@ class UnitOfWork implements IUnitOfWork {
      */
     private function deleteIssues( ChunkReviewTransitionModel $model ) {
         foreach ( $model->getIssuesToDelete() as $issue ) {
-            $issue->addComments( ( new EntryCommentDao() )->findByIssueId( $issue->id ) );
+//            $issue->addComments( ( new EntryCommentDao() )->findByIssueId( $issue->id ) );
+
+            $issue->addComments( ( new EntryCommentStruct() )->getEntriesById($issue->id) );
             EntryDao::deleteEntry( $issue );
         }
     }
