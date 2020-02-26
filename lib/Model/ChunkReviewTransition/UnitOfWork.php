@@ -135,8 +135,6 @@ class UnitOfWork implements IUnitOfWork {
      */
     private function deleteIssues( ChunkReviewTransitionModel $model ) {
         foreach ( $model->getIssuesToDelete() as $issue ) {
-//            $issue->addComments( ( new EntryCommentDao() )->findByIssueId( $issue->id ) );
-
             $issue->addComments( ( new EntryCommentStruct() )->getEntriesById($issue->id) );
             EntryDao::deleteEntry( $issue );
         }
