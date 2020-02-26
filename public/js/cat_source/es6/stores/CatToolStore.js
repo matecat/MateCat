@@ -22,8 +22,8 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
     setProgress: function (stats) {
         stats.translationCompleted = stats.TODO === 0;
         stats.revisionCompleted = stats.TRANSLATED === 0;
-        stats.revision1Completed = stats.revises && stats.revises.length > 0 && stats.revises[0].advancement_wc === stats.TOTAL;
-        stats.revision2Completed = stats.revises && stats.revises.length > 1 && stats.revises[1].advancement_wc === stats.TOTAL;
+        stats.revision1Completed = stats.revises && stats.revises.length > 0 && _.round(stats.revises[0].advancement_wc) === stats.TOTAL;
+        stats.revision2Completed = stats.revises && stats.revises.length > 1 && _.round(stats.revises[1].advancement_wc) === stats.TOTAL;
 
         this._projectProgess = stats;
     },
