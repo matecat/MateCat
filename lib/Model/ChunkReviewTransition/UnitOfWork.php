@@ -4,6 +4,7 @@ namespace ChunkReviewTransition;
 
 use Constants;
 use Database;
+use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use IUnitOfWork;
@@ -57,7 +58,8 @@ class UnitOfWork implements IUnitOfWork {
             foreach ( $this->models as $model ) {
                 foreach ( $model->getChunkReviews() as $chunkReview ) {
                     $project = $chunkReview->getChunk()->getProject();
-                    $project->getFeaturesSet()->run( 'chunkReviewUpdated', $chunkReview, true );
+                    $chunkReviewModel     = new ChunkReviewModel( $chunkReview );
+                    $project->getFeaturesSet()->run( 'chunkReviewUpdated', $chunkReview, true, $chunkReviewModel, $project );
                 }
             }
 

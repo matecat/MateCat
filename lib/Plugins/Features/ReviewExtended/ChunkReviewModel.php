@@ -123,7 +123,7 @@ class ChunkReviewModel implements IChunkReviewModel {
         );
 
         $project->getFeaturesSet()->run(
-            'chunkReviewUpdated', $this->chunk_review, $update_result
+            'chunkReviewUpdated', $this->chunk_review, $update_result, $this, $project
         );
 
         return $update_result;
