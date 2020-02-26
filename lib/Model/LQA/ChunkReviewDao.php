@@ -162,8 +162,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      *
      * @return ChunkReviewStruct[]
      */
-    public function findChunkReviews( Chunks_ChunkStruct $chunkStruct ) {
-        return $this->_findChunkReviews( [ $chunkStruct ] );
+    public function findChunkReviews( Chunks_ChunkStruct $chunkStruct, $ttl = null ) {
+        return $this->_findChunkReviews( [ $chunkStruct ], null, $ttl );
     }
 
     /**
@@ -193,7 +193,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]|ChunkReviewStruct[]
      */
-    protected function _findChunkReviews( Array $chunksArray, $default_condition = ' WHERE 1 = 1 ' ) {
+    protected function _findChunkReviews( Array $chunksArray, $default_condition = ' WHERE 1 = 1 ' , $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */) {
 
         $_conditions = [];
         $_parameters = [];
@@ -215,7 +215,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        return $this->setCacheTTL( 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */ )->_fetchObject( $stmt, new ChunkReviewStruct(), $_parameters );
+        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ChunkReviewStruct(), $_parameters );
 
     }
 
