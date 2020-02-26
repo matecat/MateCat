@@ -70,6 +70,12 @@
                         </a>
                     </li>
 
+                    <li tal:condition="true:isGDriveProject" class="item"  >
+                        <a class="originalsGDrive" title="Original in Google Drive" alt="Original in Google Drive" href="javascript:void(0)" >
+                            Original in Google Drive
+                        </a>
+                    </li>
+
                     <li class="item" data-value="xlif" tal:condition="php: uses_matecat_filters == true || INIT::$DEPRECATE_LEGACY_XLIFFS == false">
                         <a class="sdlxliff" title="Export XLIFF" alt="Export XLIFF" data-href="/SDLXLIFF/${jid}/${password}/${jid}.zip" target="_blank">
                             Export XLIFF

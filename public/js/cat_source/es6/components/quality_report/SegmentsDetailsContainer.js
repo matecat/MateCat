@@ -12,8 +12,10 @@ class SegmentsDetails extends React.Component {
     getFiles() {
         let files = [];
         if ( this.props.files ) {
-            this.props.files.keySeq().forEach(( key, index ) => {
-                let file = <FileDetails key={key} file={this.props.files.get(key)} urls={this.props.urls} secondPassReviewEnabled={this.props.secondPassReviewEnabled}/>
+            let keys = this.props.files.keySeq().toJS();
+            keys = keys.sort();
+            keys.forEach(( key, index ) => {
+                let file = <FileDetails key={key} file={this.props.files.get(key)} urls={this.props.urls} secondPassReviewEnabled={this.props.secondPassReviewEnabled}/>;
                 files.push(file);
                 this.lastSegment = this.props.files.get(key).get('segments').last().get('sid');
             });

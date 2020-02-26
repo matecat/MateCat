@@ -33,7 +33,7 @@ class SegmentCommentsContainer extends React.Component {
     }
 
     sendComment() {
-        let text = $(this.commentInput).text();
+        let text = $(this.commentInput).html();
         if (this.commentInput.textContent.trim().length > 0 ) {
             CommentsActions.sendComment(text, this.props.segment.original_sid).fail(()=>{
                 this.setState({sendCommentError:true});

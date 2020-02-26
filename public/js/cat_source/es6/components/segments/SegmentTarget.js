@@ -82,8 +82,6 @@ class SegmentTarget extends React.Component {
     onClickEvent(event) {
         if (this.props.readonly) {
             UI.handleClickOnReadOnly($(event.currentTarget).closest('section'));
-        } else {
-            this.props.openSegment();
         }
     }
 
@@ -100,6 +98,9 @@ class SegmentTarget extends React.Component {
             });
         } else {
             this.props.removeSelection();
+            setTimeout(()=> {
+                SegmentActions.showIssuesMessage(this.props.segment.sid, 0);
+            });
         }
     }
 
@@ -113,6 +114,8 @@ class SegmentTarget extends React.Component {
         event.preventDefault();
         if ( !this.props.segment.edit_area_locked ) {
             this.sendTranslationUpdate();
+        } else {
+            SegmentActions.showIssuesMessage(this.props.segment.sid, 0);
         }
         SegmentActions.lockEditArea(this.props.segment.sid, this.props.segment.fid);
     }
@@ -151,6 +154,12 @@ class SegmentTarget extends React.Component {
             } );
         }
         return issues;
+    }
+
+    formatSelection(action) {
+        UI.formatSelection(action);
+        SegmentActions.modifiedTranslation(this.props.segment.sid, null, true);
+        this.sendTranslationWithoutUpdate();
     }
 
     getTargetArea(translation) {
@@ -252,9 +261,9 @@ class SegmentTarget extends React.Component {
                     {tagModeButton}
                     {tagCopyButton}
                     <ul className="editToolbar">
-                        <li className="uppercase" title="Uppercase" onMouseDown={()=>UI.formatSelection('uppercase')}/>
-                        <li className="lowercase" title="Lowercase" onMouseDown={ ()=>UI.formatSelection('lowercase')}/>
-                        <li className="capitalize" title="Capitalized" onMouseDown={()=>UI.formatSelection('capitalize')}/>
+                        <li className="uppercase" title="Uppercase" onMouseDown={()=>this.formatSelection('uppercase')}/>
+                        <li className="lowercase" title="Lowercase" onMouseDown={ ()=>this.formatSelection('lowercase')}/>
+                        <li className="capitalize" title="Capitalized" onMouseDown={()=>this.formatSelection('capitalize')}/>
                     </ul>
                 </div>
             </div>;

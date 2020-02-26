@@ -77,18 +77,18 @@ class QualityReportController extends KleinController {
 
         $qrSegmentModel = new QualityReportSegmentModel( $this->chunk );
         $options        = [ 'filter' => $filter ];
-        $segments_id    = $qrSegmentModel->getSegmentsIdForQR( $step, $ref_segment, $where, $options );
-        if ( count( $segments_id ) > 0 ) {
+        $segments_ids   = $qrSegmentModel->getSegmentsIdForQR( $step, $ref_segment, $where, $options );
+        if ( count( $segments_ids ) > 0 ) {
 
             $segmentTranslationEventDao = new SegmentTranslationEventDao();
-            $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_id );
-            $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_id );
+            $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids );
+            $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids );
 
             $segments = $this->_formatSegments( $segments, $ttlArray );
 
             $this->response->json( [
                     'files'  => $segments,
-                    '_links' => $this->_getPaginationLinks( $segments_id, $step, $filter )
+                    '_links' => $this->_getPaginationLinks( $segments_ids, $step, $filter )
             ] );
 
         } else {

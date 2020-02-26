@@ -8,7 +8,7 @@
     <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/analyze_old.css?build=${build_number}"/>
     <link href="${basepath}public/css/build/semantic.css?build=${build_number}" rel="stylesheet" type="text/css" />
-    <link href="${basepath}public/css/build/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/build/app.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
     <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/semantic.js?build=${build_number}"></script>
@@ -31,7 +31,7 @@
             </a>
         </div> <!-- .logo-menu -->
 
-        <div class="profile-menu">
+<!--        <div class="profile-menu">-->
 <!--            <div class="column-separator"></div>-->
 <!--            <div tal:condition="isLoggedIn" title="Manage" id="action-manage">-->
 <!--                <a href="/manage" class="action-submenu" >-->
@@ -80,8 +80,8 @@
 <!--                    </svg>-->
 <!--                </a>-->
 <!--            </div>-->
-            <div metal:use-macro="common.html/login_includes" />
-        </div> <!-- .profile-menu -->
+<!--            <div metal:use-macro="common.html/login_includes" />-->
+<!--        </div> &lt;!&ndash; .profile-menu &ndash;&gt;-->
 
     </div>
 </header>

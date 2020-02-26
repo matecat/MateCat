@@ -6,6 +6,23 @@ class SegmentQRLine extends React.Component {
     allowHTML(string) {
         return { __html: string };
     }
+    getTimeToEdit(tte) {
+        let str_pad_left = function(string,pad,length) {
+            return (new Array(length+1).join(pad)+string).slice(-length);
+        };
+        let time = parseInt(tte/1000);
+        let hours = Math.floor(time / 3600);
+        let minutes = Math.floor( time / 60);
+        let seconds = parseInt(time - minutes * 60);
+        if (hours > 0 ) {
+            return str_pad_left(hours,'0',2)+'h'+str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
+        } else if (minutes > 0) {
+            return str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
+        } else {
+            return str_pad_left(seconds,'0',2)+"''";
+        }
+
+    }
     render () {
         let suggestionMatch, suggestionMatchClass;
         if ( this.props.showSuggestionSource ) {
@@ -50,23 +67,46 @@ class SegmentQRLine extends React.Component {
                 </div>
             ) : null}
 
-            { this.props.showIceMatchInfo ?  (
+            { this.props.showIceMatchInfo && this.props.segment.get('ice_locked') === '1'  ?  (
                 <div className="segment-content qr-spec">
                     {this.props.segment.get('ice_locked') === '1' ? (
                         <div>
                             <b>ICE Match</b>
+                            {this.props.segment.get('ice_modified') ? (
+                                <div>(Modified)</div>
+                            ) : null}
                         </div>
                     ) :  null}
-                    {this.props.segment.get('ice_modified') ? (
-                        <div>(Modified)</div>
-                    ) : null}
+
+                    { this.props.tte  ?  (
+                        <div className={'tte-container'}>
+                            <b>TTE:</b>
+                            <div>
+                                <div>{this.getTimeToEdit(this.props.tte)}"</div>
+                            </div>
+                        </div>
+                    ) : null }
                 </div>
-            ) : (
-                null
-                ) }
-            { !this.props.showIceMatchInfo && !this.props.showSuggestionSource && !this.props.showSegmentWords ?  (
+            ) : this.props.tte  ?  (
+                <div className="segment-content qr-spec tte">
+                    <b>TTE:</b>
+                    <div>
+                        <div>{this.getTimeToEdit(this.props.tte)}"</div>
+                    </div>
+                </div>
+            ) : null }
+
+            { this.props.showIsPretranslated ?  (
+                <div className="segment-content qr-spec">
+                    <div>
+                        <b>Pre-Translated</b>
+                    </div>
+                </div>
+            ) : null }
+            { (!(this.props.showIceMatchInfo && this.props.segment.get('ice_locked') === '1' ) ) && !this.props.showSuggestionSource && !this.props.showSegmentWords && !this.props.tte && !this.props.showIsPretranslated ?  (
                 <div className="segment-content qr-spec"/>
-            ) : (null) }
+            ) : null }
+
 
         </div>
     }

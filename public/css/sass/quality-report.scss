@@ -450,6 +450,10 @@ header {
                                                         align-items: center;
                                                         padding: 10px 0.78571429em;
                                                         margin-top: 1px;
+                                                        .tte {
+                                                            max-width: 110px;
+                                                            font-weight: bold;
+                                                        }
                                                     }
 
                                                     .qr-segment-title {

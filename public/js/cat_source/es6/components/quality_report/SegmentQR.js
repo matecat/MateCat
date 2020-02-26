@@ -199,23 +199,23 @@ class SegmentQR extends React.Component {
             return str_pad_left(seconds,'0',2)+"''";
         }
     }
-    getTimeToEdit() {
-        let str_pad_left = function(string,pad,length) {
-            return (new Array(length+1).join(pad)+string).slice(-length);
-        };
-        let time = parseInt(this.props.segment.get("time_to_edit")/1000);
-        let hours = Math.floor(time / 3600);
-        let minutes = Math.floor( time / 60);
-        let seconds = parseInt(time - minutes * 60);
-        if (hours > 0 ) {
-            return str_pad_left(hours,'0',2)+''+str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
-        } else if (minutes > 0) {
-            return str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
-        } else {
-            return str_pad_left(seconds,'0',2)+"''";
-        }
-
-    }
+    // getTimeToEdit() {
+    //     let str_pad_left = function(string,pad,length) {
+    //         return (new Array(length+1).join(pad)+string).slice(-length);
+    //     };
+    //     let time = parseInt(this.props.segment.get("time_to_edit")/1000);
+    //     let hours = Math.floor(time / 3600);
+    //     let minutes = Math.floor( time / 60);
+    //     let seconds = parseInt(time - minutes * 60);
+    //     if (hours > 0 ) {
+    //         return str_pad_left(hours,'0',2)+''+str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
+    //     } else if (minutes > 0) {
+    //         return str_pad_left(minutes,'0',2)+"'"+str_pad_left(seconds,'0',2)+"''";
+    //     } else {
+    //         return str_pad_left(seconds,'0',2)+"''";
+    //     }
+    //
+    // }
     getDiffPatch(source, text) {
         return TextUtils.getDiffHtml(source, text);
     }
@@ -305,7 +305,7 @@ class SegmentQR extends React.Component {
 
                     <div className="segment-production">
                         <div className="production word-speed">Secs/Word: <b>{this.getWordsSpeed()}</b></div>
-                        <div className="production time-edit">Time to edit: <b>{this.getTimeToEdit()}</b></div>
+                        {/*<div className="production time-edit">Time to edit: <b>{this.getTimeToEdit()}</b></div>*/}
                         <div className="production pee">PEE: <b>{this.props.segment.get("pee")}%</b></div>
                     </div>
                 </div>
@@ -345,6 +345,9 @@ class SegmentQR extends React.Component {
                                     onClickDiff={this.showTranslateDiff.bind(this)}
                                     diffActive={this.state.translateDiffOn}
                                     showIceMatchInfo={true}
+                                    tte={this.props.segment.get('time_to_edit_translation')}
+                                    showIsPretranslated={this.props.segment.get('is_pre_translated')}
+
 
                     />
 
@@ -359,6 +362,7 @@ class SegmentQR extends React.Component {
                                     onClickDiff={this.showReviseDiff.bind(this)}
                                     diffActive={this.state.reviseDiffOn}
                                     showIceMatchInfo={_.isNull(target)}
+                                    tte={this.props.segment.get('time_to_edit_revise')}
 
                     />
 
@@ -374,6 +378,7 @@ class SegmentQR extends React.Component {
                                     onClickDiff={this.showRevise2Diff.bind(this)}
                                     diffActive={this.state.revise2DiffOn}
                                     showIceMatchInfo={_.isNull(target) && _.isNull(revise)}
+                                    tte={this.props.segment.get('time_to_edit_revise_2')}
 
                     />
                 ) : null}

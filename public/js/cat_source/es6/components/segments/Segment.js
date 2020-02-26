@@ -390,15 +390,13 @@ class Segment extends React.Component {
         }
     }
     removeSelection() {
-        if ( this.state.selectedTextObj ) {
-            var selection = document.getSelection();
-            if ( this.section.contains( selection.anchorNode ) ) {
-                selection.removeAllRanges();
-            }
-            this.setState( {
-                selectedTextObj: null
-            } );
+        var selection = document.getSelection();
+        if ( this.section.contains( selection.anchorNode ) ) {
+            selection.removeAllRanges();
         }
+        this.setState( {
+            selectedTextObj: null
+        } );
     }
     /*
     Is possible to close the single segmentIssue panel passing the id or all segments issue panel
@@ -522,6 +520,10 @@ class Segment extends React.Component {
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
             clearTimeout(this.timeoutScroll);
             TagUtils.removeHighlightCorrespondingTags(this.$section);
+            setTimeout(()=>{
+                SegmentActions.closeSegmentComment(this.props.segment.sid);
+                SegmentActions.saveSegmentBeforeClose(this.props.segment);
+            });
         }
         return null;
     }

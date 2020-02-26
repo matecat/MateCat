@@ -1309,13 +1309,13 @@ section .body > .text {
     box-shadow: none;
 }
 
-body section:not(.editor) {
+body #file section:not(.editor) {
     background: $grey3;
     cursor: pointer;
     border: 1px solid $grey2 !important;
 }
 
-section:not(.editor) .text:first-child {
+#file section:not(.editor) .text:first-child {
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
 }
@@ -1329,7 +1329,7 @@ section:not(.editor) .text:first-child {
     border-top: none;
 }*/
 
-section.editor .body > .text {
+#file section.editor .body > .text {
     overflow: visible;
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -2275,7 +2275,7 @@ section.readonly,
 body.archived section {
     background: #f2f4f7;
     color: #a4a6a9;
-    cursor: not-allowed;
+    cursor: not-allowed !important;
 }
 section.readonly .status-container a.status:hover,
 body.archived section .status-container a.status:hover {
@@ -2697,6 +2697,10 @@ body.rtl-target .editor .editarea span {
     background: $grey2;
     border-top: 1px solid #999;
     border-bottom: 1px solid #999;
+}
+
+.glossary .sugg-target {
+  cursor: pointer;
 }
 
 .sub-editor.glossary .glossary-item span {
@@ -4993,6 +4997,7 @@ header {
                 margin-top: 5px;
                 border-radius: 3px;
                 right: -136px;
+                z-index: 2;
                 .mbc-triangle-top {
                     border-left: 6px solid transparent;
                     border-right: 6px solid transparent;

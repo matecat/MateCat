@@ -26,7 +26,6 @@ module.exports = function(grunt) {
     var cssWatchFiles = [
         cssBase + 'sass/variables.scss',
         cssBase + 'common.css',
-        cssBase + 'style.css',
         cssBase + 'mbc-style.css',
         cssBase + 'segment-notes.css',
         cssBase + 'project-completion-feature.css',

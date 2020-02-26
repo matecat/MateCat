@@ -495,8 +495,17 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.map((segment)=>segment.set('openComments', false));
         this._segments = this._segments.setIn([index, 'openComments'], true);
     },
-    closeSegmentComments: function() {
-        this._segments = this._segments.map((segment)=>segment.set('openComments', false));
+    closeSegmentComments: function(sid) {
+        if ( sid ) {
+            const index = this.getSegmentIndex(sid);
+            try {
+                this._segments = this._segments.setIn([index, 'openComments'], false);
+            } catch ( e ) {
+                console.log("closeSegmentComments fail");
+            }
+        } else {
+            this._segments = this._segments.map((segment)=>segment.set('openComments', false));
+        }
     },
 
     setConfigTabs: function (tabName, visible, open) {
@@ -514,9 +523,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     filterGlobalWarning: function (type, sid) {
         if (type === "TAGS") {
             let index = this.getSegmentIndex(sid);
-            if ( index === -1 ) return;
-            let segment = this._segments.get(index);
-            return segment.get('tagged');
+            if ( index !== -1 ) {
+                let segment = this._segments.get(index);
+                return segment.get('tagged');
+            }
         }
 
         return sid > -1
@@ -628,7 +638,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
      * @param revisionNumber
      * @param autopropagated
      */
-    getNextSegment(current_sid, current_fid, status, revisionNumber, autopropagated ) {
+    getNextSegment(current_sid, current_fid, status, revisionNumber, autopropagated = false ) {
         let currentSegment = this.getCurrentSegment();
         if ( !current_sid && !currentSegment) return null;
         current_sid = ( !current_sid) ? this.getCurrentSegment().sid : current_sid;
@@ -648,16 +658,18 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments.forEach((segment, key) => {
             if (_.isUndefined(result)) {
                 if ( currentFind || current_sid === -1) {
-                    if ( status === 8 && ( (segment.get( 'status' ) === allStatus[2] || segment.get( 'status' ) === allStatus[4]) || ( autopropagated && segment.get('status') === allStatus[7] && segment.get('autopropagated_from') != 0 )) && !segment.get('muted') ) {
+                    if ( segment.get('readonly') === 'true' ) {
+                        return false;
+                    } else if ( status === 8 && ( (segment.get( 'status' ).toUpperCase() === allStatus[2] || segment.get( 'status' ).toUpperCase() === allStatus[4]) || ( autopropagated && segment.get('status').toUpperCase() === allStatus[7] && segment.get('autopropagated_from') != 0 )) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     } else if ( status === 9 && revisionNumber ) { // Second pass
-                        if ( ( (segment.get('status') === allStatus[1] || segment.get('status') === allStatus[7] ) && segment.get('revision_number') === revisionNumber )
-                            || ( autopropagated && segment.get('status') === allStatus[1] && segment.get('autopropagated_from') != 0 && segment.get('revision_number') !== revisionNumber) ){
+                        if ( ( (segment.get('status').toUpperCase() === allStatus[1] || segment.get('status').toUpperCase() === allStatus[7] ) && segment.get('revision_number') === revisionNumber )
+                            || ( autopropagated && segment.get('status').toUpperCase() === allStatus[1] && segment.get('autopropagated_from') != 0 && segment.get('revision_number') !== revisionNumber) ){
                             result = segment.toJS();
                             return false;
                         }
-                    } else if ( ((status && segment.get( 'status' ) === allStatus[status]) || !status) && !segment.get('muted') ) {
+                    } else if ( ((status && segment.get( 'status' ).toUpperCase() === allStatus[status]) || !status) && !segment.get('muted') ) {
                         result = segment.toJS();
                         return false;
                     }
@@ -1045,6 +1057,15 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.CLOSE_ISSUES_PANEL:
             SegmentStore.closeSegmentIssuePanel();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(action.actionType);
+            if ( !SegmentStore.isSidePanelOpen() ) {
+                SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
+            }
+            break;
+        case SegmentConstants.CLOSE_SIDE:
+            SegmentStore.closeSegmentIssuePanel();
+            SegmentStore.closeSegmentComments(action.sid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(action.actionType);
             if ( !SegmentStore.isSidePanelOpen() ) {
