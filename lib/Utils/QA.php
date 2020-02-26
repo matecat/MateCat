@@ -2163,11 +2163,22 @@ class QA {
 
         foreach ( $symbols as $sym ) {
 
-            $symbolOccurrencesInSource = mb_substr_count( strip_tags( $this->source_seg ), $sym );
-            $symbolOccurrencesInTarget = mb_substr_count( strip_tags( $this->target_seg ), $sym );
+            // find all real &amp; (excluding all &amp; with an entity, like &amp;&apos;)
+            if($sym === '&amp;'){
+                $this->source_seg = str_replace('&amp;amp;','&amp;', $this->source_seg); // &amp; are escaped as &amp;amp;
+                $this->target_seg = str_replace('&amp;amp;','&amp;', $this->target_seg);
+                $regex = '/&amp;(?!(\#[1-9]\d{1,3}|[A-Za-z][0-9A-Za-z]+);)/iu';
+            } else {
+                $regex = '/'.$sym.'/iu';
+            }
 
-            for ( $i = 0; $i < abs( $symbolOccurrencesInSource - $symbolOccurrencesInTarget ); $i++ ) {
+            preg_match_all($regex, strip_tags( $this->source_seg ), $symbolOccurrencesInSource);
+            preg_match_all($regex, strip_tags( $this->target_seg ), $symbolOccurrencesInTarget);
 
+            $symbolOccurrencesInSourceCount = count($symbolOccurrencesInSource[0]);
+            $symbolOccurrencesInTargetCount = count($symbolOccurrencesInTarget[0]);
+
+            for ( $i = 0; $i < abs( $symbolOccurrencesInSourceCount - $symbolOccurrencesInTargetCount ); $i++ ) {
                 switch ( $sym ) {
                     case '€':
                         $this->_addError( self::ERR_EUROSIGN_MISMATCH );
@@ -2194,9 +2205,7 @@ class QA {
                         $this->_addError( self::ERR_STARSIGN_MISMATCH );
                         break;
                 }
-
             }
-
         }
 
         //remove placeholders and symbols from source and target and search for special symbols mismatch
