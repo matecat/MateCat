@@ -160,7 +160,18 @@ let CatToolActions = {
         if ( stats.APPROVED_PERC > 10 ) {
             $('#quality-report-button').attr('data-revised', true);
         }
+        setTimeout(()=>this.checkOpenFeedbackModal());
     },
+    checkOpenFeedbackModal: function ( ) {
+        if ( config.isReview ) {
+            let stats = CatToolStore.get
+            let key = "feedback" + config.id_job + "-" + config.password + "-" + config.revisionNumber;
+            let storageValue = CommonUtils.getFromStorage(key);
+            if ( !storageValue ) {
+
+            }
+        }
+    }
 };
 
 module.exports = CatToolActions;
