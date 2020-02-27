@@ -210,8 +210,10 @@ class QualityReportSegmentModel {
 
                 if($first_version){
                     $translation = $first_version->translation;
+                    $version_number = $first_version->version_number;
                 } else {
                     $translation = $seg->translation;
+                    $version_number = 0;
                 }
 
                 if('' === $seg->suggestion){
@@ -219,7 +221,12 @@ class QualityReportSegmentModel {
                     $seg->is_pre_translated = true;
                 }
 
-                $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
+                foreach( $this->_getChunkReviews() as $chunkReview ) {
+                    $seg->last_revisions [ $chunkReview->source_page ] = [
+                            'revision_number' => $version_number,
+                            'translation' => $translation
+                    ];
+                }
             }
 
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
