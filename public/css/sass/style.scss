@@ -4754,7 +4754,7 @@ header {
             background: transparent;
         }
 
-        .action-submenu {
+        .action-submenu, #quality-report {
 
             position: relative;
             display: grid;
@@ -4888,6 +4888,10 @@ header {
                 display: grid;
                 background: transparent;
                 border:none !important;
+                opacity: unset;
+            }
+            #quality-report svg {
+                position: absolute;
             }
         }
 

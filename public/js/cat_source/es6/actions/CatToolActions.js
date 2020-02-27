@@ -7,6 +7,7 @@ import SegmentFilter from "../components/header/cattol/segment_filter/segment_fi
 import AnalyzeConstants from "../constants/AnalyzeConstants";
 import SegmentConstants from "../constants/SegmentConstants";
 import Footer from "../components/footer/Footer";
+import RevisionFeedbackModal from "../components/modals/RevisionFeedbackModal";
 
 let CatToolActions = {
 
@@ -160,17 +161,16 @@ let CatToolActions = {
         if ( stats.APPROVED_PERC > 10 ) {
             $('#quality-report-button').attr('data-revised', true);
         }
-        setTimeout(()=>this.checkOpenFeedbackModal());
     },
-    checkOpenFeedbackModal: function ( ) {
-        if ( config.isReview ) {
-            let stats = CatToolStore.get
-            let key = "feedback" + config.id_job + "-" + config.password + "-" + config.revisionNumber;
-            let storageValue = CommonUtils.getFromStorage(key);
-            if ( !storageValue ) {
-
+    openFeedbackModal: function () {
+        var props = {
+            text: "Lascia un Feedback.",
+            successText: "Ok",
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
             }
-        }
+        };
+        APP.ModalWindow.showModalComponent(RevisionFeedbackModal, props, "Feedback Submission");
     }
 };
 
