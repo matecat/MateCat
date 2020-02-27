@@ -287,7 +287,9 @@ class SegmentsContainer extends React.Component {
         }
         let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
 
-        if ( this.segmentsHeightsMap[segment.get('sid')] && this.segmentsHeightsMap[segment.get('sid')].height > 0 &&  this.segmentsHeightsMap[segment.get('sid')].segment.equals(segment)) {
+        let calculatedHeight = this.segmentsHeightsMap[segment.get('sid')];
+
+        if ( calculatedHeight && calculatedHeight.height > 0 &&  calculatedHeight.segment.equals(segment)) {
             let heightToAdd = 0;
             if ( previousFileId !== segment.get('id_file')) {
                 heightToAdd = 43;
@@ -295,7 +297,7 @@ class SegmentsContainer extends React.Component {
             if ( index === this.state.segments.size - 1) {
                 heightToAdd = heightToAdd + 150;
             }
-            return this.segmentsHeightsMap[segment.get('sid')].height + heightToAdd ;
+            return calculatedHeight.height + heightToAdd ;
         }
 
         let itemHeight = 0;
