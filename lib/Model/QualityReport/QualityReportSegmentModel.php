@@ -222,7 +222,7 @@ class QualityReportSegmentModel {
                 }
 
                 foreach( $this->_getChunkReviews() as $chunkReview ) {
-                    $seg->last_revisions [ $chunkReview->source_page ] = [
+                    $seg->last_revisions [] = [
                             'revision_number' => $version_number,
                             'translation' => $translation
                     ];
