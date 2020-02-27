@@ -429,7 +429,7 @@ class setTranslationController extends ajaxController {
                 'segments_for_propagation' => []
         ];
 
-        if ( $old_translation->translation !== $new_translation->translation && $this->propagate && in_array( $this->status, [
+        if ( $this->propagate && in_array( $this->status, [
                         Constants_TranslationStatus::STATUS_TRANSLATED,
                         Constants_TranslationStatus::STATUS_APPROVED,
                         Constants_TranslationStatus::STATUS_REJECTED
