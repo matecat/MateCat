@@ -210,10 +210,8 @@ class QualityReportSegmentModel {
 
                 if($first_version){
                     $translation = $first_version->translation;
-                    $version_number = $first_version->version_number;
                 } else {
                     $translation = $seg->translation;
-                    $version_number = 0;
                 }
 
                 if('' === $seg->suggestion){
@@ -221,9 +219,9 @@ class QualityReportSegmentModel {
                     $seg->is_pre_translated = true;
                 }
 
-                foreach( $this->_getChunkReviews() as $chunkReview ) {
+                for ($i = 1; $i <= count($this->_getChunkReviews()); $i++ ) {
                     $seg->last_revisions [] = [
-                            'revision_number' => $version_number,
+                            'revision_number' => $i,
                             'translation' => $translation
                     ];
                 }
