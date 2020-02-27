@@ -147,8 +147,6 @@ class QualityReportSegmentModel {
         } else {
             $reviseDao          = new Revise_ReviseDAO();
             $segments_revisions = $reviseDao->readBySegments( $segment_ids, $this->chunk->id );
-            $issues             = $this->makeIssuesDataUniform( $segments_revisions );
-
         }
 
         $commentsDao  = new \Comments_CommentDao;
@@ -195,15 +193,18 @@ class QualityReportSegmentModel {
             // If the segment is TRANSLATED
             // 'last_translation' and 'suggestion' from 'translation' and
             // set is_pre_translated to true
-            if( null === $seg->last_translation and '' === $seg->suggestion and $seg->status === \Constants_TranslationStatus::STATUS_TRANSLATED ){
-                $seg->suggestion  = $Filter->fromLayer0ToLayer2( $seg->translation );
+            if( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_TRANSLATED ){
                 $seg->last_translation = $Filter->fromLayer0ToLayer2( $seg->translation );
-                $seg->is_pre_translated = true;
+
+                if('' === $seg->suggestion){
+                    $seg->suggestion  = $Filter->fromLayer0ToLayer2( $seg->translation );
+                    $seg->is_pre_translated = true;
+                }
             }
 
             // If the segment was APPROVED
             // check if exists a version 0 'translation' (which means that the segment was modified); if not then use the current 'translation'
-            if( null === $seg->last_translation and '' === $seg->suggestion and $seg->status === \Constants_TranslationStatus::STATUS_APPROVED ){
+            if( null === $seg->last_translation and $seg->status === \Constants_TranslationStatus::STATUS_APPROVED ){
 
                 $first_version = (new TranslationVersionDao())->getVersionNumberForTranslation( $this->chunk->id, $seg->sid, 0 );
 
@@ -213,9 +214,12 @@ class QualityReportSegmentModel {
                     $translation = $seg->translation;
                 }
 
-                $seg->suggestion  = $Filter->fromLayer0ToLayer2( $translation );
+                if('' === $seg->suggestion){
+                    $seg->suggestion  = $Filter->fromLayer0ToLayer2( $translation );
+                    $seg->is_pre_translated = true;
+                }
+
                 $seg->last_translation = $Filter->fromLayer0ToLayer2( $translation );
-                $seg->is_pre_translated = true;
             }
 
             $seg->pee_translation_revise     = $seg->getPEEBwtTranslationRevise();
