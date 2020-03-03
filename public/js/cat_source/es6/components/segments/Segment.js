@@ -114,12 +114,12 @@ class Segment extends React.Component {
     }
 
     openSegmentFromAction(sid) {
-        let self = this;
         sid = sid + "";
+        clearTimeout(this.openSegmentTimeOut);
         if ( (sid === this.props.segment.sid || (this.props.segment.original_sid === sid && this.props.segment.firstOfSplit))
             && !this.props.segment.opened ) {
-            setTimeout(function () {
-                self.openSegment();
+            this.openSegmentTimeOut = setTimeout( () => {
+                this.openSegment();
             });
         }
     }
@@ -521,8 +521,9 @@ class Segment extends React.Component {
             clearTimeout(this.timeoutScroll);
             TagUtils.removeHighlightCorrespondingTags(this.$section);
             setTimeout(()=>{
-                SegmentActions.closeSegmentComment(this.props.segment.sid);
-                SegmentActions.saveSegmentBeforeClose(this.props.segment);
+                if ( this.props.segment.openComments ) {
+                    SegmentActions.closeSegmentComment(this.props.segment.sid);
+                }                SegmentActions.saveSegmentBeforeClose(this.props.segment);
             });
         }
         return null;
