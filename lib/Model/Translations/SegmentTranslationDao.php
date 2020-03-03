@@ -1,6 +1,7 @@
 <?php
 
 use Autopropagation\PropagationAnalyser;
+use DataAccess\ShapelessConcreteStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
 use Search\ReplaceEventStruct;
 
@@ -500,6 +501,62 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
         return $stmt->fetchAll();
 
+    }
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @param $source_page
+     *
+     * @return DataAccess_IDaoStruct[]
+     */
+    public function getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page ) {
+
+        $query = "
+            select ste.id_segment, j.id, count(distinct qa.id) as q_count
+            from segment_translation_events ste  
+            
+            left join qa_entries qa ON ( qa.id_job, qa.id_segment ) = ( ste.id_job ,ste.id_segment )
+            join jobs j ON j.id = ste.id_job
+            join segment_translations  st on st.id_segment = ste.id_segment and st.id_job = ste.id_job
+            join segment_translation_versions  stv on stv.id_segment = ste.id_segment and stv.id_job = ste.id_job
+            
+            join (select ste.id_segment, max(ste.version_number) as max_v
+            from segment_translation_events  ste 
+            join jobs j ON j.id = ste.id_job
+            where j.id = :id_job and j.password = :password
+             
+            and ste.status = 'TRANSLATED'
+            group by ste.id_segment) as tra
+            on tra.id_segment = ste.id_segment
+            
+            join (select ste.id_segment, max(ste.version_number) as max_v
+            from segment_translation_events  ste 
+            join jobs j ON j.id = ste.id_job
+            where j.id = :id_job and j.password = :password
+            
+            and ste.status = 'APPROVED'
+            group by ste.id_segment) as r1
+            on r1.id_segment = ste.id_segment
+            
+            where j.id = :id_job and j.password = :password
+            
+            and r1.max_v != tra.max_v
+            and st.translation != stv.translation
+            and qa.deleted_at is null
+            and ste.source_page = :source_page
+            group by ste.id_segment;";
+
+        $stmt = $this->_getStatementForCache( $query );
+
+        return $this->_fetchObject( $stmt,
+                new ShapelessConcreteStruct(),
+                [
+                        'id_job'      => $id_job,
+                        'password'    => $password,
+                        'source_page' => $source_page,
+                ]
+        );
     }
 
     /**
