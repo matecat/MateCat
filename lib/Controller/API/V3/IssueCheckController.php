@@ -20,8 +20,9 @@ class IssueCheckController extends KleinController {
         $password    = $this->request->param( 'password' );
         $source_page = $this->request->param( 'source_page', 2 );
 
-        $modifiedSegments = (new Translations_SegmentTranslationDao())->setCacheTTL( 60 * 5 )->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job,
-                        $password, $source_page );
+        $modifiedSegments = (new Translations_SegmentTranslationDao())
+                ->setCacheTTL( 60 * 5 )
+                ->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page );
 
         $result[ 'modified_segments_count' ] = count( $modifiedSegments );
 
@@ -32,7 +33,7 @@ class IssueCheckController extends KleinController {
                     'issue_count' => (int)$modifiedSegment->q_count,
             ];
 
-            $result[ 'issue_count' ] = $result[ 'issue_count' ] + $modifiedSegment->q_count;
+            $result[ 'issue_count' ] = (int)$result[ 'issue_count' ] + (int)$modifiedSegment->q_count;
         }
 
         $this->response->json( $result );
