@@ -10,7 +10,7 @@
     }
 }
 
-section {
+#file section {
     &:not(.readonly):not(.muted):hover .segment-add-inBulk {
         display: block;
     }
@@ -32,7 +32,7 @@ section {
 }
 
 body.cattool {
-    section {
+    #file section {
         &:not(.editor) {
             .buttons {
                 display: none;
