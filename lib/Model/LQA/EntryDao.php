@@ -95,12 +95,14 @@ class EntryDao extends \DataAccess_AbstractDao {
      */
     public static function findAllBySegmentId( $id_segment, $source_page = null ) {
 
-        $data                  = [ 'id_segment' => $id_segment ];
+        $sql = "SELECT * FROM qa_entries WHERE qa_entries.deleted_at IS NULL AND id_segment = :id_segment ";
+
+        $data = [ 'id_segment' => $id_segment ];
         if ( !is_null( $source_page ) ) {
             $data[ 'source_page' ] = $source_page;
+            $sql                   .= " AND source_page = :source_page ";
         }
 
-        $sql = "SELECT * FROM qa_entries WHERE qa_entries.deleted_at IS NULL AND id_segment = :id_segment ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -156,6 +158,27 @@ class EntryDao extends \DataAccess_AbstractDao {
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryStruct' );
 
         return $stmt->fetchAll();
+    }
+
+    public static function getCountByIdJobAndSourcePage( $id_job, $source_page ) {
+        $sql = "SELECT count(qa_entries.id) as count  " .
+                " FROM qa_entries " .
+                " WHERE id_job = :id_job " .
+                " AND qa_entries.deleted_at IS NULL " .
+                " AND source_page = :source_page " ;
+
+        $opts = [
+                'id_job'      => $id_job,
+                'source_page' => $source_page
+        ];
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( $opts );
+
+        $stmt->setFetchMode( \PDO::FETCH_ASSOC );
+
+        return $stmt->fetch();
     }
 
     /**

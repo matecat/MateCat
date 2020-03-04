@@ -8,6 +8,7 @@ use ConnectedServices\GDriveTokenVerifyModel;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
+use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
 use XliffReplacer\XliffReplacerFactory;
 
@@ -81,10 +82,16 @@ class downloadFileController extends downloadController {
 
     public function doAction() {
 
-        //get Job Info, we need only a row of jobs ( split )
+        // get Job Info, we need only a row of jobs ( split )
         $jobData = $this->job = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
-        //check for Password correctness
+        // if no job was found, check if the provided password is a password_review
+        if ( empty( $jobData ) ) {
+            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, (int)$this->id_job );
+            $jobData = $this->job = $chunkReviewStruct->getChunk();
+        }
+
+        // check for Password correctness
         if ( empty( $jobData ) ) {
             $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
             Log::doJsonLog( $msg );
