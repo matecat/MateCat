@@ -429,7 +429,7 @@ class setTranslationController extends ajaxController {
                 'segments_for_propagation' => []
         ];
 
-        if ( $this->propagate && in_array( $this->status, [
+        if ( $old_translation->translation !== $new_translation->translation && $this->propagate && in_array( $this->status, [
                         Constants_TranslationStatus::STATUS_TRANSLATED,
                         Constants_TranslationStatus::STATUS_APPROVED,
                         Constants_TranslationStatus::STATUS_REJECTED
@@ -448,6 +448,8 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
             $TPropagation[ 'match_type' ]             = $old_translation['match_type'];
 
+            $persistPropagatedVersions = $new_translation->translation !== $old_translation->translation;
+
             try {
 
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
@@ -455,7 +457,8 @@ class setTranslationController extends ajaxController {
                         $this->chunk,
                         $this->id_segment,
                         $this->project,
-                        $this->VersionsHandler
+                        $this->VersionsHandler,
+                        $persistPropagatedVersions
                 );
 
             } catch ( Exception $e ) {
