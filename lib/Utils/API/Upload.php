@@ -272,9 +272,7 @@ class Upload {
      */
     public function fixFileName( $stringName, $upCount = true ) {
 
-        $string = preg_replace( '/[^#\pL0-9,\.\-\=_&()\'\"\+\x1A]/u', '', $stringName ); //strips odd chars and preserve preceding placeholder
-        $string = preg_replace( '/[^#\pL0-9,\.\-=_&()\'\"\+\x1A§]/u', '', $string ); //strips odd chars and preserve preceding placeholder
-        $string = filter_var( $string, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ) );
+        $string = filter_var( $stringName, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ) );
 
         while ( is_file( $this->dirUpload . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
             $string = static::upCountName( $string );
