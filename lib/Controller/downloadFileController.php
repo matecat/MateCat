@@ -726,7 +726,6 @@ class downloadFileController extends downloadController {
         $zip = new ZipArchiveExtended();
         if ( $zip->open( $tmpFName ) ) {
 
-
             $zip->createTree();
 
             //rebuild the real name of files in the zip archive
@@ -751,13 +750,11 @@ class downloadFileController extends downloadController {
                 // and if matches we can substitute them with the converted ones
                 foreach ( $newInternalZipFiles as $index => $newInternalZipFile ) {
 
-                    $_tmpRealZipFilePath = str_replace( [ " ", " " ], "_", $realZipFilePath );
-
                     if ( $this->forceXliff ) {
                         $declaredOutputFileName = preg_replace( '/\.xlf|\.xliff|\.sdlxliff$/', '', $newInternalZipFile->output_filename );
-                        $isTheSameFile          = ( $declaredOutputFileName == $_tmpRealZipFilePath );
+                        $isTheSameFile          = ( $declaredOutputFileName == $realZipFilePath );
                     } else {
-                        $isTheSameFile = ( $newInternalZipFile->output_filename == $_tmpRealZipFilePath );
+                        $isTheSameFile = ( $newInternalZipFile->output_filename == $realZipFilePath );
                     }
 
                     if ( $isTheSameFile ) {
