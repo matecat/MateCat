@@ -1,6 +1,6 @@
 import React  from 'react';
-import SegmentConstants  from '../../../constants/SegmentConstants';
-import SegmentStore  from '../../../stores/SegmentStore';
+import SegmentConstants  from '../../../../constants/SegmentConstants';
+import SegmentStore  from '../../../../stores/SegmentStore';
 
 class BulkSelectionBar extends React.Component {
 

@@ -604,14 +604,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     updateLexiqaWarnings: function(warnings){
         this._globalWarnings.lexiqa = warnings.filter(this.filterGlobalWarning.bind(this, "LXQ"));
     },
-    setProgress: function (stats) {
-        stats.translationCompleted = stats.TODO === 0;
-        stats.revisionCompleted = stats.TRANSLATED === 0;
-        stats.revision1Completed = stats.revises && stats.revises.length > 0 && stats.revises[0].advancement_wc === stats.TOTAL;
-        stats.revision2Completed = stats.revises && stats.revises.length > 1 && stats.revises[1].advancement_wc === stats.TOTAL;
-
-        this._projectProgess = stats;
-    },
     hasSegmentTagProjectionEnabled: function ( segment ) {
         if ( SegmentUtils.checkTPEnabled() ) {
             if ( (segment.status === "NEW" || segment.status === "DRAFT") && (TagUtils.checkXliffTagsInText(segment.segment) && (!TagUtils.checkXliffTagsInText(segment.translation))) ) {
@@ -1113,10 +1105,6 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.REMOVE_SEARCH_RESULTS:
             SegmentStore.removeSearchResults();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
-            break;
-        case SegmentConstants.SET_PROGRESS:
-            SegmentStore.setProgress(action.stats);
-            SegmentStore.emitChange(SegmentConstants.SET_PROGRESS, SegmentStore._projectProgess);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
