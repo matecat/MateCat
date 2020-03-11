@@ -92,7 +92,7 @@ class ErrorCount_ErrorCountDAO extends DataAccess_AbstractDao {
      * @return ErrorCount_Struct|null
      * @throws Exception
      */
-    public function update( DataAccess_IDaoStruct $obj ) {
+    public function atomicUpdate( DataAccess_IDaoStruct $obj ) {
 
         /**
          * @var $obj ErrorCount_Struct

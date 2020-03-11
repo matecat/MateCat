@@ -569,7 +569,7 @@ class setTranslationController extends ajaxController {
                     'statuses' => $this->split_statuses
             ];
             $translationDao                          = new TranslationsSplit_SplitDAO( Database::obtain() );
-            $result                                  = $translationDao->update( $translationStruct );
+            $result                                  = $translationDao->atomicUpdate( $translationStruct );
 
         }
 
