@@ -18,6 +18,7 @@ use Log;
 use PDO;
 use PDOException;
 use Projects_MetadataDao;
+use Projects_ProjectDao;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\ContextList;
@@ -376,11 +377,16 @@ class FastAnalysis extends AbstractDaemon {
 
     protected function _updateProject( $pid, $status ) {
 
-        self::_TimeStampMsg( "*** Project $pid: Changing status..." );
-
-        \Projects_ProjectDao::changeProjectStatus( $pid, $status );
-
-        self::_TimeStampMsg( "*** Project $pid: $status" );
+        Database::obtain()->begin();
+        $project = Projects_ProjectDao::findById( $pid );
+        if( $project->status_analysis != ProjectStatus::STATUS_DONE ){ // avoid concurrency between fast and tm daemons ( they set DONE when complete )
+            self::_TimeStampMsg( "*** Project $pid: Changing status..." );
+            Projects_ProjectDao::changeProjectStatus( $pid, $status );
+            self::_TimeStampMsg( "*** Project $pid: $status" );
+        } else {
+            self::_TimeStampMsg( "*** Project $pid: TM Analysis already completed. Skip update..." );
+        }
+        Database::obtain()->commit();
 
     }
 
