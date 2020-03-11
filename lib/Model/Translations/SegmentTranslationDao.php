@@ -52,15 +52,15 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function updateLastTranslationDateByIdList( $segmentIdList, $date ) {
 
-        if( false === empty($segmentIdList) ){
+        if( false === empty($segmentIdList) ) {
             $places = rtrim( str_repeat( " ?,", count( $segmentIdList ) ), "," );
 
-            $conn  = Database::obtain()->getConnection();
-            $query = "UPDATE segment_translations SET translation_date = ? WHERE id_segment IN( $places )";
-            $stmt  = $conn->prepare( $query );
-
-        $values = array_merge( [ $date ], $segmentIdList );
-        $stmt->execute( $values );
+            $conn   = Database::obtain()->getConnection();
+            $query  = "UPDATE segment_translations SET translation_date = ? WHERE id_segment IN( $places )";
+            $stmt   = $conn->prepare( $query );
+            $values = array_merge( [ $date ], $segmentIdList );
+            $stmt->execute( $values );
+        }
     }
 
     /**
