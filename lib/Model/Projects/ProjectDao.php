@@ -201,7 +201,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param     $id
      * @param int $ttl
      *
-     * @return Projects_ProjectStruct
+     * @return DataAccess_IDaoStruct|Projects_ProjectStruct
      */
     public static function findById( $id, $ttl = 0 ) {
 

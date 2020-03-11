@@ -188,7 +188,7 @@ class XliffSAXTranslationReplacer {
                 $this->currentBuffer = str_replace( "&", self::$INTERNAL_TAG_PLACEHOLDER . 'amp' . self::$INTERNAL_TAG_PLACEHOLDER, $this->currentBuffer );
             }
 
-            //get lenght of chunk
+            //get length of chunk
             $this->len = strlen( $this->currentBuffer );
 
             //parse chunk of text
@@ -618,6 +618,11 @@ class XliffSAXTranslationReplacer {
         }
 
         if ( $seg[ 'mrk_id' ] !== null && $seg[ 'mrk_id' ] != '' ) {
+
+            if($this->target_lang === 'ja-JP'){
+                $seg[ 'mrk_succ_tags' ] = ltrim($seg[ 'mrk_succ_tags' ]);
+            }
+
             $translation = "<mrk mid=\"" . $seg[ 'mrk_id' ] . "\" mtype=\"seg\">" . $seg[ 'mrk_prev_tags' ] . $translation . $seg[ 'mrk_succ_tags' ] . "</mrk>";
         }
 
