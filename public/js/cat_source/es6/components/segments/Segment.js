@@ -114,12 +114,12 @@ class Segment extends React.Component {
     }
 
     openSegmentFromAction(sid) {
-        let self = this;
         sid = sid + "";
+        clearTimeout(this.openSegmentTimeOut);
         if ( (sid === this.props.segment.sid || (this.props.segment.original_sid === sid && this.props.segment.firstOfSplit))
             && !this.props.segment.opened ) {
-            setTimeout(function () {
-                self.openSegment();
+            this.openSegmentTimeOut = setTimeout( () => {
+                this.openSegment();
             });
         }
     }

@@ -47,14 +47,16 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function updateLastTranslationDateByIdList( $segmentIdList, $date ) {
 
-        $places = rtrim( str_repeat( " ?,", count( $segmentIdList ) ), "," );
+        if( false === empty($segmentIdList) ){
+            $places = rtrim( str_repeat( " ?,", count( $segmentIdList ) ), "," );
 
-        $conn  = Database::obtain()->getConnection();
-        $query = "UPDATE segment_translations SET translation_date = ? WHERE id_segment IN( $places )";
-        $stmt  = $conn->prepare( $query );
+            $conn  = Database::obtain()->getConnection();
+            $query = "UPDATE segment_translations SET translation_date = ? WHERE id_segment IN( $places )";
+            $stmt  = $conn->prepare( $query );
 
-        $values = array_merge( [ $date ], $segmentIdList );
-        $stmt->execute( $values );
+            $values = array_merge( [ $date ], $segmentIdList );
+            $stmt->execute( $values );
+        }
 
     }
 
@@ -616,6 +618,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      *
      * @param VersionHandlerInterface               $versionHandler
      * @param bool                                  $execute_update
+     * @param bool                                  $persistPropagatedVersions
      *
      * <code>
      *      $propagationTotal = [
@@ -637,7 +640,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             Chunks_ChunkStruct $chunkStruct, $_idSegment,
             Projects_ProjectStruct $project,
             VersionHandlerInterface $versionHandler,
-            $execute_update = true
+            $execute_update = true,
+            $persistPropagatedVersions = true
     ) {
 
         $db = Database::obtain();
@@ -784,8 +788,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
                         $stmt->execute( $values );
 
-                        // update related versions
-                        $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagationTotal->getPropagatedIds() );
+                        // update related versions only if the parent translation has changed
+                        if($persistPropagatedVersions){
+                            $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagationTotal->getPropagatedIds() );
+                        }
                     }
                 } catch ( PDOException $e ) {
                     throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
