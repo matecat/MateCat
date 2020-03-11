@@ -138,7 +138,7 @@ class loadTMXController extends ajaxController {
 
                         if ( empty( $userMemoryKey[0]->tm_key->name ) && !empty( $userMemoryKey ) ) {
                             $userMemoryKey[0]->tm_key->name = $fileInfo->name;
-                            $mkDao->update( $userMemoryKey[0] );
+                            $mkDao->atomicUpdate( $userMemoryKey[0] );
                         }
 
                     }

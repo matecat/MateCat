@@ -211,7 +211,7 @@ class setRevisionController extends ajaxController {
 
 
                 if ( $errorCountStruct->thereAreDifferences() ) {
-                    $errorCountDao->update( $errorCountStruct );
+                    $errorCountDao->atomicUpdate( $errorCountStruct );
                     $jobQA->cleanErrorCache();
                 }
 

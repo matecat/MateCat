@@ -86,7 +86,7 @@ abstract class DataAccess_AbstractDao {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
-    public function update( DataAccess_IDaoStruct $obj ) {
+    public function atomicUpdate( DataAccess_IDaoStruct $obj ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 

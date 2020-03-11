@@ -356,7 +356,7 @@ var UI = {
 		$('#outer').removeClass('loading loadingBefore');
 
 		this.loadingMore = false;
-        this.retrieveStatistics();
+        CatToolActions.updateFooterStatistics();
         $(document).trigger('getSegments_success');
 
 	},
@@ -442,10 +442,6 @@ var UI = {
                 $('#outer').append('   <div id="hiddenHtml" style="width: 100%; visibility: hidden; overflow-y: scroll;box-sizing: content-box;">' + self.getSegmentStructure()  + '</div>' );
             }
 			segments = segments.concat(this.segments);
-
-            /* Todo: change */
-            $('#footer-source-lang').text(this.source);
-            $('#footer-target-lang').text(this.target);
 
 		});
         UI.renderSegments(segments, false, where);
@@ -689,117 +685,6 @@ var UI = {
 
         $('#action-download .downloadTranslation a').text(label);
         $('#action-download .previewLink a').text(label);
-    },
-    retrieveStatistics: function () {
-        var path = sprintf(
-            APP.getRandomUrl() + 'api/app/jobs/%s/%s/stats',
-            config.id_job, config.password
-        );
-        $.ajax({
-            url: path,
-            xhrFields: { withCredentials: true },
-            type: 'get',
-        }).done( function( data ) {
-            if (data.stats){
-                UI.setProgress(data.stats);
-                UI.setDownloadStatus(data.stats);
-            }
-        });
-    },
-    setProgress: function(stats) {
-        var s = stats;
-        this.projectStats = stats;
-        SegmentActions.setProgress(stats);
-
-        m = $('footer .meter');
-        if( !s.ANALYSIS_COMPLETE ){
-            $('#statistics' ).hide();
-            $('#analyzing' ).show();
-        } else {
-            $('#statistics' ).show();
-            $('#analyzing' ).hide();
-        }
-
-        var t_perc = s.TRANSLATED_PERC;
-        var a_perc = s.APPROVED_PERC;
-        var d_perc = s.DRAFT_PERC;
-        var r_perc = s.REJECTED_PERC;
-
-        var t_perc_formatted = s.TRANSLATED_PERC_FORMATTED;
-        var a_perc_formatted = s.APPROVED_PERC_FORMATTED;
-        var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
-        var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
-
-        var t_formatted = s.TODO_FORMATTED;
-        var revise_todo_formatted = Math.round(s.TRANSLATED + s.DRAFT);
-        // If second pass enabled
-        if ( config.secondRevisionsCount && s.revises ) {
-            var reviewedWords = s.revises.find(function ( value ) {
-                return value.revision_number === 1;
-            });
-            if ( reviewedWords ) {
-                var approvePerc = parseFloat(reviewedWords.advancement_wc)*100/s.TOTAL;
-                a_perc_formatted = _.round(approvePerc, 1);
-                a_perc = approvePerc;
-
-            }
-
-            var reviewWordsSecondPass = s.revises.find(function ( value ) {
-                return value.revision_number === 2;
-            });
-
-            if ( reviewWordsSecondPass ) {
-                var approvePerc2ndPass = parseFloat(reviewWordsSecondPass.advancement_wc)*100/s.TOTAL;
-                a_perc_2nd_formatted = _.round(approvePerc2ndPass, 1);
-                a_perc_2nd = approvePerc2ndPass;
-                revise_todo_formatted = (config.revisionNumber === 2) ? revise_todo_formatted + _.round(parseFloat(reviewedWords.advancement_wc)) : revise_todo_formatted;
-            }
-        }
-
-
-
-        var wph = s.WORDS_PER_HOUR;
-        var completion = s.ESTIMATED_COMPLETION;
-
-        if (typeof wph == 'undefined') {
-            $('#stat-wph').hide();
-        } else {
-            $('#stat-wph').show();
-        }
-        if (typeof completion == 'undefined') {
-            $('#stat-completion').hide();
-        } else {
-            $('#stat-completion').show();
-        }
-
-        this.progress_perc = s.PROGRESS_PERC_FORMATTED;
-        this.done_percentage = this.progress_perc;
-
-        $('.approved-bar', m).css('width', a_perc + '%').attr('title', 'Approved ' + a_perc_formatted + '%');
-        $('.translated-bar', m).css('width', t_perc + '%').attr('title', 'Translated ' + t_perc_formatted + '%');
-        $('.draft-bar', m).css('width', d_perc + '%').attr('title', 'Draft ' + d_perc_formatted + '%');
-        $('.rejected-bar', m).css('width', r_perc + '%').attr('title', 'Rejected ' + r_perc_formatted + '%');
-        if ( reviewWordsSecondPass ) {
-            $('.approved-bar-2nd-pass', m).css('width', a_perc_2nd + '%').attr('title', 'Approved ' + a_perc_2nd_formatted + '%');
-        }
-
-        $('#stat-progress').html(this.progress_perc);
-        if ( config.isReview ) {
-            $('#stat-todo strong').html(revise_todo_formatted);
-        } else {
-            $('#stat-todo strong').html(t_formatted);
-        }
-        $('#stat-wph strong').html(wph);
-        $('#stat-completion strong').html(completion);
-        $('#total-payable').html(s.TOTAL_FORMATTED);
-
-        $('.bg-loader',m).css('display', 'none');
-
-        if ( s.APPROVED_PERC > 10 ) {
-            $('#quality-report-button').attr('data-revised', true);
-        }
-
-        $(document).trigger('setProgress:rendered', { stats : stats } );
     },
     disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
         $("#action-download").addClass('disabled' );
@@ -1314,7 +1199,7 @@ var UI = {
         } else if (response.data == 'OK') {
 			SegmentActions.setStatus(id_segment, null, status);
 			this.setDownloadStatus(response.stats);
-			this.setProgress(response.stats);
+			CatToolActions.setProgress(response.stats);
             SegmentActions.removeClassToSegment(options.id_segment, 'setTranslationPending');
 
 			this.checkWarnings(false);
