@@ -31,6 +31,7 @@ class ProjectOptionsSanitizer {
             'en-US',
             'en-AU',
             'en-CA',
+            'en-IN',
             'en-IE',
             'en-NZ',
             'en-SG',
