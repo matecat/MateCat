@@ -503,12 +503,13 @@ const SegmentActions = {
         let $segment = UI.getSegmentById(sid);
         $segment.trigger('modified');
     },
-    replaceEditAreaTextContent: function(sid, fid, text) {
+    replaceEditAreaTextContent: function(sid, fid, text, pastedLength) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_TRANSLATION,
             id: sid,
             fid: fid,
-            translation: text
+            translation: text,
+            pastedLength: pastedLength
         });
     },
 

@@ -33,6 +33,7 @@ class Editarea extends React.Component {
         this.redoInUndoStack = this.redoInUndoStack.bind(this);
         this.undoInUndoStack = this.undoInUndoStack.bind(this);
         this.setFocusInEditArea = this.setFocusInEditArea.bind(this);
+        this.updateCursorPosition = this.updateCursorPosition.bind(this);
 
         this.onInputDebounced = _.debounce(this.onInputEvent, 500);
         this.saveInUndoStackDebounced = _.debounce(this.saveInUndoStack, 200);
@@ -272,6 +273,13 @@ class Editarea extends React.Component {
         // console.log("UNDOPOSITION = ", this.undoStackPosition);
     }
 
+    updateCursorPosition(sid, length) {
+        if (this.props.segment.sid == sid) {
+            this.pastedAction = {
+                length: length
+            }
+        }
+    }
     saveInUndoStack() {
         if ( !this.props.segment.opened || this.editAreaRef.innerHTML === "") return;
 
@@ -405,6 +413,7 @@ class Editarea extends React.Component {
         SegmentStore.addListener(SegmentConstants.UNDO_TEXT, this.undoInUndoStack);
         SegmentStore.addListener(SegmentConstants.REDO_TEXT, this.redoInUndoStack);
         SegmentStore.addListener(SegmentConstants.FOCUS_EDITAREA, this.setFocusInEditArea);
+        SegmentStore.addListener(SegmentConstants.UPDATE_CURSOR, this.updateCursorPosition);
 
     }
     componentWillUnmount() {
@@ -413,6 +422,8 @@ class Editarea extends React.Component {
         SegmentStore.removeListener(SegmentConstants.UNDO_TEXT, this.undoInUndoStack);
         SegmentStore.removeListener(SegmentConstants.REDO_TEXT, this.redoInUndoStack);
         SegmentStore.removeListener(SegmentConstants.FOCUS_EDITAREA, this.setFocusInEditArea);
+        SegmentStore.removeListener(SegmentConstants.UPDATE_CURSOR, this.updateCursorPosition);
+
         if ( this.props.segment.modified ) {
             let textToSend = this.editAreaRef.innerHTML ;
             let sid = this.props.segment.sid;
