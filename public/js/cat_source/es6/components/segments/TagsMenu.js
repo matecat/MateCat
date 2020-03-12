@@ -273,7 +273,8 @@ class TagsMenu extends React.Component {
         SegmentActions.closeTagsMenu();
         $('.tag-autocomplete-endcursor').remove();
 
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+        let cleanTag = TextUtils.htmlEncode(TagUtils.cleanTextFromPlaceholdersSpan(tag));
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html(), cleanTag.trim().length);
         setTimeout(function () {
             UI.segmentQA(UI.currentSegment);
             TagUtils.checkTagProximity();
