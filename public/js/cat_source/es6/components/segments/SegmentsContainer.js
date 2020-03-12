@@ -179,6 +179,7 @@ class SegmentsContainer extends React.Component {
     getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
         let isReviewExtended = !!(this.props.isReviewExtended);
 
+        let segmentHeight = (!segment.opened && this.segmentsHeightsMap[segment.sid]) ? this.segmentsHeightsMap[segment.sid].height : this.lastOpenedHeight;
 
         let item = <Segment
             key={segment.sid}
@@ -198,6 +199,7 @@ class SegmentsContainer extends React.Component {
             setBulkSelection={this.setBulkSelection.bind(this)}
             sideOpen={this.state.sideOpen}
             files={this.state.files}
+            height={segmentHeight}
         />;
         if ( segment.id_file !== currentFileId ) {
             let file = (!!this.state.files)? _.find(this.state.files, (file) => file.id == segment.id_file): false;

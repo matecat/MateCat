@@ -506,6 +506,7 @@ class Segment extends React.Component {
             nextState.showRevisionPanel !== this.state.showRevisionPanel ||
             nextState.selectedTextObj !== this.state.selectedTextObj ||
             nextProps.sideOpen !== this.props.sideOpen ||
+            nextProps.height !== this.props.height ||
             nextState.showActions !== this.state.showActions
         );
     }
@@ -641,6 +642,7 @@ class Segment extends React.Component {
                         isReviewExtended={this.props.isReviewExtended}
                         reviewType={this.props.reviewType}
                         isReviewImproved={this.props.isReviewImproved}
+                        height={this.props.height}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

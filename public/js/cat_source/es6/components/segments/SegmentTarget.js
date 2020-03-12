@@ -244,6 +244,7 @@ class SegmentTarget extends React.Component {
                 { this.state.showTagsMenu ? (
 
                     <TagsMenu segment={this.props.segment}
+                              height={this.props.height}
                     />
 
                 ): null}
