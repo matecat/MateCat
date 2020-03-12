@@ -890,6 +890,9 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
             let trans = SegmentStore.replaceTranslation(action.id, action.translation);
+            if ( action.pastedLength ) {
+                SegmentStore.emitChange(SegmentConstants.UPDATE_CURSOR, action.id, action.pastedLength);
+            }
             SegmentStore.emitChange(action.actionType, action.id, trans);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
