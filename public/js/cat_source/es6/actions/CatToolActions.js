@@ -171,6 +171,9 @@ let CatToolActions = {
             }
         };
         APP.ModalWindow.showModalComponent(RevisionFeedbackModal, props, "Feedback Submission");
+    },
+    sendRevisionFeedback: function (text) {
+        API.JOB.sendRevisionFeedback(config.id_job, config.revisionNumber, config.review_password, text)
     }
 };
 

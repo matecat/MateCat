@@ -53,7 +53,7 @@ class QualityReportButton extends React.Component {
     render() {
         let classes,label,menu;
         if ( this.state.progress && config.isReview ) {
-            if ( ( config.revisionNumber === 1 && this.state.progress.revision1Completed ) || ( config.revisionNumber === 2 && this.state.progress.revision2Completed ) ){
+            if ( ( config.revisionNumber === 1 ) || ( config.revisionNumber === 2  ) ){
                 classes = classnames({
                     'ui simple pointing top center floating dropdown': true
                 });
