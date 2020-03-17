@@ -499,7 +499,10 @@ class setTranslationController extends ajaxController {
             if ( false == empty($propagationTotal[ 'totals' ]) ) {
                 $counter->setOldStatus( $old_status );
                 $counter->setNewStatus( $this->status );
-                $newValues[] = $counter->getUpdatedValues( $propagationTotal[ 'totals' ]['total'] );
+
+                $propagatedSegmentsCount = ( $propagationTotal[ 'totals' ]['propagated_ice_total'] + $propagationTotal[ 'totals' ]['propagated_total'] );
+
+                $newValues[] = $counter->getUpdatedValues( $propagatedSegmentsCount );
             }
 
             try {
