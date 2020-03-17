@@ -1,7 +1,9 @@
 <?php
 
-class CreateTableFeedbacks extends AbstractMatecatMigration {
+use Phinx\Migration\AbstractMigration;
 
+class CreateTableFeedbacks extends AbstractMigration
+{
     public $sql_up = <<<EOF
             CREATE TABLE `revision_feedbacks` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -16,6 +18,7 @@ class CreateTableFeedbacks extends AbstractMatecatMigration {
 ;
 EOF;
 
-    public $sql_down = "DROP TABLE revision_feedbacks";
-
+    public $sql_down = <<<EOF
+      DROP TABLE `revision_feedbacks`;
+EOF;
 }
