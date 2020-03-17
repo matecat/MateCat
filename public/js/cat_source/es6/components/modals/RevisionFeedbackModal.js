@@ -14,7 +14,7 @@ class RevisionFeedbackModal extends React.Component {
         this.setState({
             sending: true
         });
-        CatToolActions.sendRevisionFeedback().done(() => APP.ModalWindow.onCloseModal());
+        CatToolActions.sendRevisionFeedback(this.textarea.value).done(() => APP.ModalWindow.onCloseModal());
     }
 
     render() {
