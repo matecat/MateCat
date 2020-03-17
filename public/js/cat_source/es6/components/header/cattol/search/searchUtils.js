@@ -300,9 +300,9 @@ let SearchUtils = {
 	        let txt = params.source ? params.source : params.target ;
 
             let regTxt = txt.replace(/(\W)/gi, "\\$1");
-            regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
+            // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
-            reg = new RegExp('(' + TextUtils.htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            reg = new RegExp('(' + TextUtils.htmlEncode(regTxt)+ ')', "g" + ignoreCase);
 
             if (params['exact-match'] ) {
                 reg = new RegExp('\\b(' + TextUtils.htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')\\b', "g" + ignoreCase);
