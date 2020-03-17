@@ -315,15 +315,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function updateSegmentStatusBySegmentId( $id_job, $id_segment, $status ) {
-        $sql  = "UPDATE segment_translations SET status = :status WHERE id_job = :id_job AND id_segment = :id_segment ";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [ 'id_job' => $id_job, 'id_segment' => $id_segment, 'status' => $status ] );
-
-        return $stmt->rowCount();
-    }
-
     public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
 
         $where_values = [];
@@ -846,7 +837,6 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         }
 
         return ( new PropagationApi( $propagationTotal ) )->render();
-
     }
 
     /**
