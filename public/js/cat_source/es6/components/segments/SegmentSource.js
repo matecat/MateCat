@@ -107,10 +107,10 @@ class SegmentSource extends React.Component {
 
     markSource() {
         let source = this.props.segment.decoded_source;
+        source = this.markSearch(source);
         source = this.markGlossary(source);
         source = this.markQaCheckGlossary(source);
         source = this.markLexiqa(source);
-        source = this.markSearch(source);
         return source;
     }
 

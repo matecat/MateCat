@@ -1,5 +1,6 @@
 <?php
 
+use API\V2\Json\Propagation as PropagationApi;
 use Autopropagation\PropagationAnalyser;
 use Features\TranslationVersions\VersionHandlerInterface;
 use Search\ReplaceEventStruct;
@@ -47,7 +48,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function updateLastTranslationDateByIdList( $segmentIdList, $date ) {
 
-        if( false === empty($segmentIdList) ){
+        if ( false === empty( $segmentIdList ) ) {
             $places = rtrim( str_repeat( " ?,", count( $segmentIdList ) ), "," );
 
             $conn  = Database::obtain()->getConnection();
@@ -733,11 +734,16 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
             array_pop( $totals );
 
-            $propagationTotal = ( new PropagationAnalyser() )->analyse( $segmentTranslationStruct, $totals );
+            $propagationAnalyser = new PropagationAnalyser();
+            $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $totals );
             $propagationTotal->setTotals( [
-                    'total'    => $lastRow[ 0 ],
-                    'countSeg' => $lastRow[ 1 ],
-                    'status'   => $lastRow[ 2 ],
+                    'propagated_ice_total'     => $propagationAnalyser->getPropagatedIceCount(),
+                    'not_propagated_total'     => $propagationAnalyser->getNotPropagatedCount(),
+                    'propagated_total'         => $propagationAnalyser->getPropagatedCount(),
+                    'not_propagated_ice_total' => $propagationAnalyser->getNotPropagatedIceCount(),
+                    'total'                    => $lastRow[ 0 ],
+                    'countSeg'                 => $lastRow[ 1 ],
+                    'status'                   => $lastRow[ 2 ],
             ] );
 
         } catch ( PDOException $e ) {
@@ -789,7 +795,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                         $stmt->execute( $values );
 
                         // update related versions only if the parent translation has changed
-                        if($persistPropagatedVersions){
+                        if ( $persistPropagatedVersions ) {
                             $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagationTotal->getPropagatedIds() );
                         }
                     }
@@ -807,7 +813,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             }
         }
 
-        return ( new \API\V2\Json\Propagation( $propagationTotal ) )->render();
+        return ( new PropagationApi( $propagationTotal ) )->render();
 
     }
 

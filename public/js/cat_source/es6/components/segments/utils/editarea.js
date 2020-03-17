@@ -39,6 +39,7 @@ let EditArea = {
         let node = document.createElement("span");
         node.setAttribute('class', 'marker monad nbsp-marker ' + config.nbspPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
+        node.innerHTML = "&nbsp;";
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
