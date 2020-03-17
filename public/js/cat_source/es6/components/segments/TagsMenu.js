@@ -82,7 +82,7 @@ class TagsMenu extends React.Component {
             }
         }
         if ( (window.innerHeight - offsetParent.top - y) < (this.menuHeight) ) {
-            y = y - this.menuHeight;
+            y = y ;
         } else {
             y = y + 20;
         }
