@@ -1,6 +1,6 @@
 <?php
 
-use API\V2\Json\Propagation;
+use API\V2\Json\Propagation as PropagationApi;
 use Autopropagation\PropagationAnalyser;
 use DataAccess\ShapelessConcreteStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
@@ -52,7 +52,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function updateLastTranslationDateByIdList( $segmentIdList, $date ) {
 
-        if( false === empty($segmentIdList) ) {
+        if ( false === empty( $segmentIdList ) ) {
             $places = rtrim( str_repeat( " ?,", count( $segmentIdList ) ), "," );
 
             $conn   = Database::obtain()->getConnection();
@@ -87,6 +87,21 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct' );
 
         return $stmt->fetch();
+    }
+
+    protected function getSegmentsForPropagation( $params, $status = Constants_TranslationStatus::STATUS_TRANSLATED ) {
+        $selectSegmentsToPropagate = " SELECT * FROM segment_translations " .
+                " WHERE id_job = :id_job " .
+                " AND segment_hash = :segment_hash " .
+                " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
+                " AND id_segment <> :id_segment ; ";
+
+        $conn = $this->database->getConnection();
+        $stmt = $conn->prepare( $selectSegmentsToPropagate );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct' );
+        $stmt->execute( $params );
+
+        return $stmt->fetchAll();
     }
 
     /**
@@ -287,15 +302,28 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
-    /**
-     * @param Chunks_ChunkStruct $chunk
-     * @param                    $segments_ids
-     * @param                    $status
-     * @param                    $source_page
-     *
-     * @return array
-     * @throws Exception
-     */
+    public static function getSegmentsWithIssues( $job_id, $segments_ids ) {
+        $where_values = $segments_ids;
+
+        $sql  = "SELECT * FROM segment_translations WHERE id_segment IN (" . str_repeat( '?,', count( $segments_ids ) - 1 ) . '?' . ") AND id_job = ?";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $where_values[] = $job_id;
+        $stmt->execute( $where_values );
+
+        return $stmt->fetchAll();
+    }
+
+    public static function updateSegmentStatusBySegmentId( $id_job, $id_segment, $status ) {
+        $sql  = "UPDATE segment_translations SET status = :status WHERE id_job = :id_job AND id_segment = :id_segment ";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [ 'id_job' => $id_job, 'id_segment' => $id_segment, 'status' => $status ] );
+
+        return $stmt->rowCount();
+    }
+
     public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
 
         $where_values = [];
@@ -615,6 +643,38 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * Copies the segments.segment field into segment_translations.translation
+     * and sets the segment status to <b>DRAFT</b>.
+     * This operation is made only for the segments in <b>NEW</b> status
+     *
+     * @param Jobs_JobStruct $jStruct
+     *
+     * @return
+     */
+    public static function copyAllSourceToTargetForJob( Jobs_JobStruct $jStruct ) {
+
+        $query = "UPDATE segment_translations st
+                    JOIN segments s ON st.id_segment = s.id
+                    JOIN jobs j ON st.id_job = j.id
+                      SET st.translation = s.segment, st.status = 'DRAFT', st.translation_date = now()
+                    WHERE st.status = 'NEW'
+                    AND j.id = :job_id
+                    AND j.password = :password
+                    AND st.id_segment between :job_first_segment and :job_last_segment";
+
+        $db   = Database::obtain();
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->execute( [
+                'job_id'            => $jStruct->id,
+                'password'          => $jStruct->password,
+                'job_first_segment' => $jStruct->job_first_segment,
+                'job_last_segment'  => $jStruct->job_last_segment
+        ] );
+
+        return $stmt->rowCount();
+    }
+
+    /**
      * This function propagates the translation to every identical sources in the chunk/job
      *
      * @param Translations_SegmentTranslationStruct $segmentTranslationStruct
@@ -738,11 +798,16 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
             array_pop( $totals );
 
-            $propagationTotal = ( new PropagationAnalyser() )->analyse( $segmentTranslationStruct, $totals );
+            $propagationAnalyser = new PropagationAnalyser();
+            $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $totals );
             $propagationTotal->setTotals( [
-                    'total'    => $lastRow[ 0 ],
-                    'countSeg' => $lastRow[ 1 ],
-                    'status'   => $lastRow[ 2 ],
+                    'propagated_ice_total'     => $propagationAnalyser->getPropagatedIceCount(),
+                    'not_propagated_total'     => $propagationAnalyser->getNotPropagatedCount(),
+                    'propagated_total'         => $propagationAnalyser->getPropagatedCount(),
+                    'not_propagated_ice_total' => $propagationAnalyser->getNotPropagatedIceCount(),
+                    'total'                    => $lastRow[ 0 ],
+                    'countSeg'                 => $lastRow[ 1 ],
+                    'status'                   => $lastRow[ 2 ],
             ] );
 
         } catch ( PDOException $e ) {
@@ -794,7 +859,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                         $stmt->execute( $values );
 
                         // update related versions only if the parent translation has changed
-                        if($persistPropagatedVersions){
+                        if ( $persistPropagatedVersions ) {
                             $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagationTotal->getPropagatedIds() );
                         }
                     }
@@ -812,7 +877,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
             }
         }
 
-        return ( new Propagation( $propagationTotal ) )->render();
+        return ( new PropagationApi( $propagationTotal ) )->render();
+
     }
 
     /**

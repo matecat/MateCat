@@ -27,6 +27,34 @@ class PropagationAnalyser {
     private $notPropagatedCount = 0;
 
     /**
+     * @return int
+     */
+    public function getPropagatedIceCount() {
+        return $this->propagatedIceCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNotPropagatedIceCount() {
+        return $this->notPropagatedIceCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPropagatedCount() {
+        return $this->propagatedCount;
+    }
+
+    /**
+     * @return int
+     */
+    public function getNotPropagatedCount() {
+        return $this->notPropagatedCount;
+    }
+
+    /**
      * @param Translations_SegmentTranslationStruct $parentSegmentTranslation
      * @param Translations_SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
