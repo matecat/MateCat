@@ -470,7 +470,6 @@ class setTranslationController extends ajaxController {
                 return $e->getCode();
 
             }
-
         }
 
         $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
@@ -500,7 +499,7 @@ class setTranslationController extends ajaxController {
                 $counter->setOldStatus( $old_status );
                 $counter->setNewStatus( $this->status );
 
-                $propagatedSegmentsCount = ( $propagationTotal[ 'totals' ]['propagated_ice_total'] + $propagationTotal[ 'totals' ]['propagated_total'] );
+                $propagatedSegmentsCount = count($propagationTotal['propagated_ids']);
 
                 $newValues[] = $counter->getUpdatedValues( $propagatedSegmentsCount );
             }
