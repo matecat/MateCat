@@ -87,6 +87,7 @@ class Propagation_PropagationTotalStruct implements DataAccess_IDaoStruct {
     public function addPropagatedIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
         $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
         $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'object' ][] = $segmentTranslation;
+        $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'eq_word_count' ][] = $segmentTranslation->eq_word_count;
     }
 
     /**
@@ -103,6 +104,7 @@ class Propagation_PropagationTotalStruct implements DataAccess_IDaoStruct {
     public function addPropagatedNotIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
         $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
         $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'object' ][] = $segmentTranslation;
+        $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'eq_word_count' ][] = $segmentTranslation->eq_word_count;
     }
 
     /**
