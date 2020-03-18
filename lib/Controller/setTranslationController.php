@@ -499,7 +499,18 @@ class setTranslationController extends ajaxController {
                 $counter->setOldStatus( $old_status );
                 $counter->setNewStatus( $this->status );
 
-                $propagatedSegmentsCount = count($propagationTotal['propagated_ids']);
+                $propagatedNotIceEqWordCount = 0;
+                foreach ($propagationTotal['segments_for_propagation'][ 'propagated' ][ 'not_ice' ][ 'eq_word_count' ] as $item){
+                    $propagatedNotIceEqWordCount = $propagatedNotIceEqWordCount + round($item);
+                }
+
+                $propagatedIceEqWordCount = 0;
+                foreach ($propagationTotal['segments_for_propagation'][ 'propagated' ][ 'ice' ][ 'eq_word_count' ] as $item){
+                    $propagatedIceEqWordCount = $propagatedIceEqWordCount + round($item);
+                }
+
+
+                $propagatedSegmentsCount = (int)$propagatedIceEqWordCount + (int)$propagatedNotIceEqWordCount;
 
                 $newValues[] = $counter->getUpdatedValues( $propagatedSegmentsCount );
             }
