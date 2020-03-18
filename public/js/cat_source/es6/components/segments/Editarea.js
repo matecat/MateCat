@@ -135,10 +135,7 @@ class Editarea extends React.Component {
             EditArea.keydownEditAreaEventHandler.call( this.editAreaRef, e, (textAdded) => {
                 this.keyPressed = false;
                 if ( textAdded ) {
-                    this.pastedAction = {
-                        length: textAdded,
-                        textAdded: true
-                    }
+                    this.moveCursor = textAdded;
                 }
                 if ( !this.props.segment.modified ) {
                     SegmentActions.modifiedTranslation( this.props.segment.sid , this.props.segment.id_file, true);
@@ -322,9 +319,8 @@ class Editarea extends React.Component {
     saveCursorPosition(containerEl) {
         let sel = window.getSelection && window.getSelection();
         let start, pasteLength = 0;
-        if ( this.pastedAction ) {
-            pasteLength = this.pastedAction.length;
-            // delete this.pastedAction;
+        if ( this.pastedAction || this.moveCursor) {
+            pasteLength = (this.pastedAction) ? this.pastedAction.length : this.moveCursor;
         }
         if (sel && sel.rangeCount > 0 && document.createRange) {
             let range = window.getSelection().getRangeAt(0);
@@ -354,8 +350,9 @@ class Editarea extends React.Component {
         }
     }
     restoreCursorPosition(containerEl, savedSel) {
-        if ( this.pastedAction ) {
+        if ( this.pastedAction || this.moveCursor) {
             delete this.pastedAction;
+            delete this.moveCursor;
         }
         if (window.getSelection && document.createRange) {
             var charIndex = 0, range = document.createRange();
