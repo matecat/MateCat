@@ -15,12 +15,18 @@ class Propagation_PropagationTotalStruct implements DataAccess_IDaoStruct {
     /**
      * @var array
      */
+    private $propagated_ids_to_update_version;
+
+    /**
+     * @var array
+     */
     private $segments_for_propagation;
 
     public function __construct() {
-        $this->totals                   = [];
-        $this->propagated_ids           = [];
-        $this->segments_for_propagation = [
+        $this->totals                           = [];
+        $this->propagated_ids                   = [];
+        $this->propagated_ids_to_update_version = [];
+        $this->segments_for_propagation         = [
                 'propagated'     => [
                         'ice'     => [],
                         'not_ice' => [],
@@ -56,21 +62,28 @@ class Propagation_PropagationTotalStruct implements DataAccess_IDaoStruct {
     }
 
     /**
-     * @param array $propagated_ids
+     * @param int $id_segment
      */
-    public function setPropagatedIds( $propagated_ids ) {
-        foreach ($propagated_ids as $propagated_id){
-            $this->addPropagatedId($propagated_id);
+    public function addPropagatedId( $id_segment ) {
+        if ( false === in_array( $id_segment, $this->propagated_ids ) ) {
+            $this->propagated_ids[]                               = $id_segment;
+            $this->segments_for_propagation[ 'propagated_ids' ][] = $id_segment;
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getPropagatedIdsToUpdateVersion() {
+        return $this->propagated_ids_to_update_version;
     }
 
     /**
      * @param int $id_segment
      */
-    public function addPropagatedId( $id_segment ) {
-        if ( false === in_array( $id_segment, $this->propagated_ids ) ) {
-            $this->propagated_ids[] = $id_segment;
-            $this->segments_for_propagation[ 'propagated_ids' ][] = $id_segment;
+    public function addPropagatedIdToUpdateVersion( $id_segment ) {
+        if ( false === in_array( $id_segment, $this->propagated_ids_to_update_version ) ) {
+            $this->propagated_ids_to_update_version[] = $id_segment;
         }
     }
 
@@ -85,8 +98,8 @@ class Propagation_PropagationTotalStruct implements DataAccess_IDaoStruct {
      * @param Translations_SegmentTranslationStruct $segmentTranslation
      */
     public function addPropagatedIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
-        $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
-        $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'object' ][] = $segmentTranslation;
+        $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'id' ][]            = $segmentTranslation->id_segment;
+        $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'object' ][]        = $segmentTranslation;
         $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'eq_word_count' ][] = $segmentTranslation->eq_word_count;
     }
 
@@ -102,8 +115,8 @@ class Propagation_PropagationTotalStruct implements DataAccess_IDaoStruct {
      * @param Translations_SegmentTranslationStruct $segmentTranslation
      */
     public function addPropagatedNotIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
-        $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
-        $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'object' ][] = $segmentTranslation;
+        $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'id' ][]            = $segmentTranslation->id_segment;
+        $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'object' ][]        = $segmentTranslation;
         $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'eq_word_count' ][] = $segmentTranslation->eq_word_count;
     }
 

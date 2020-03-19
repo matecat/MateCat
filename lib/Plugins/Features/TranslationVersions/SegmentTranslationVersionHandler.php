@@ -78,6 +78,7 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
      * @param Translations_SegmentTranslationStruct $new_translation
      * @param Translations_SegmentTranslationStruct $old_translation
      *
+     * @return bool|int|mixed
      * @throws ReflectionException
      */
     public function evaluateVersionSave( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
@@ -114,7 +115,7 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
 
         if (
                 empty( $old_translation ) ||
-                $this->translationIsEqual( $new_translation, $old_translation )
+                \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation )
         ) {
             return false;
         }
@@ -140,7 +141,9 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
          *
          */
         $version_record = $this->dao->getVersionNumberForTranslation(
-                $this->id_job, $this->id_segment, $new_version->version_number
+                $this->id_job,
+                $this->id_segment,
+                $new_version->version_number
         );
 
         if ( $version_record ) {
@@ -148,27 +151,5 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
         }
 
         return $this->dao->saveVersion( $new_version );
-    }
-
-    /**
-     * translationIsEqual
-     *
-     * This function needs to handle a special case. When old translation has been saved from a pre-translated XLIFF,
-     * encoding is different than the one receiveed from the UI. Quotes are different for instance.
-     *
-     * So we compare the decoded version of the two strings. Should always work.
-     *
-     * TODO: this may give false negatives when string changes but decoded version doesn't
-     *
-     * @param $new_translation
-     * @param $old_translation
-     *
-     * @return bool
-     */
-    private function translationIsEqual( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
-        $old = html_entity_decode( $old_translation->translation, ENT_XML1 | ENT_QUOTES );
-        $new = html_entity_decode( $new_translation->translation, ENT_XML1 | ENT_QUOTES );
-
-        return $new == $old;
     }
 }

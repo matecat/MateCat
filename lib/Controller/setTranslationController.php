@@ -363,7 +363,6 @@ class setTranslationController extends ajaxController {
         $new_translation->warning             = $check->thereAreWarnings();
         $new_translation->translation_date    = date( "Y-m-d H:i:s" );
 
-
         $this->_validateSegmentTranslationChange( $new_translation, $old_translation );
 
         /**
@@ -385,7 +384,7 @@ class setTranslationController extends ajaxController {
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
         // if evaluateVersionSave() return true it means that it was persisted a new version of the parent segment
-        $versionWasSaved = $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
+        $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
 
         /**
          * when the status of the translation changes, the auto propagation flag
@@ -436,9 +435,6 @@ class setTranslationController extends ajaxController {
                         Constants_TranslationStatus::STATUS_REJECTED
                 ] )
         ) {
-            // if was saved a new version for the parent segment, then save new version also for child segments
-            $persistVersionsForPropagatedSegments = $versionWasSaved;
-
             //propagate translations
             $TPropagation                             = new Translations_SegmentTranslationStruct();
             $TPropagation[ 'status' ]                 = $this->status;
@@ -458,8 +454,7 @@ class setTranslationController extends ajaxController {
                         $this->id_segment,
                         $this->project,
                         $this->VersionsHandler,
-                        true,
-                        $persistVersionsForPropagatedSegments
+                        true
                 );
 
             } catch ( Exception $e ) {
