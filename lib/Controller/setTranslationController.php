@@ -349,19 +349,22 @@ class setTranslationController extends ajaxController {
 
         $old_translation = $this->_getOldTranslation();
 
-        $new_translation               = new Translations_SegmentTranslationStruct();
-        $new_translation->id_segment   = $this->id_segment;
-        $new_translation->id_job       = $this->id_job;
-        $new_translation->status       = $this->status;
-        $new_translation->time_to_edit = $this->time_to_edit;
-        $new_translation->segment_hash = $this->segment->segment_hash;
-
+        $new_translation                         = new Translations_SegmentTranslationStruct();
+        $new_translation->id_segment             = $this->id_segment;
+        $new_translation->id_job                 = $this->id_job;
+        $new_translation->status                 = $this->status;
+        $new_translation->segment_hash           = $this->segment->segment_hash;
         $new_translation->translation            = $translation;
         $new_translation->serialized_errors_list = $err_json;
+        $new_translation->suggestion_position    = $this->chosen_suggestion_index;
+        $new_translation->warning                = $check->thereAreWarnings();
+        $new_translation->translation_date       = date( "Y-m-d H:i:s" );
 
-        $new_translation->suggestion_position = $this->chosen_suggestion_index;
-        $new_translation->warning             = $check->thereAreWarnings();
-        $new_translation->translation_date    = date( "Y-m-d H:i:s" );
+        // time_to_edit should be increased only if the translation was changed
+        $new_translation->time_to_edit = 0;
+        if ( false === \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+            $new_translation->time_to_edit = $this->time_to_edit;
+        }
 
         $this->_validateSegmentTranslationChange( $new_translation, $old_translation );
 
@@ -445,7 +448,7 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
             $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
-            $TPropagation[ 'match_type' ]             = $old_translation['match_type'];
+            $TPropagation[ 'match_type' ]             = $old_translation[ 'match_type' ];
 
             try {
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
@@ -491,17 +494,17 @@ class setTranslationController extends ajaxController {
             $newValues   = [];
             $newValues[] = $counter->getUpdatedValues( $old_count );
 
-            if ( false == empty($propagationTotal[ 'totals' ]) ) {
+            if ( false == empty( $propagationTotal[ 'totals' ] ) ) {
                 $counter->setOldStatus( $old_status );
                 $counter->setNewStatus( $this->status );
 
                 $propagatedNotIceEqWordCount = 0;
-                foreach ($propagationTotal['segments_for_propagation'][ 'propagated' ][ 'not_ice' ][ 'eq_word_count' ] as $item){
+                foreach ( $propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'not_ice' ][ 'eq_word_count' ] as $item ) {
                     $propagatedNotIceEqWordCount = $propagatedNotIceEqWordCount + (float)$item;
                 }
 
                 $propagatedIceEqWordCount = 0;
-                foreach ($propagationTotal['segments_for_propagation'][ 'propagated' ][ 'ice' ][ 'eq_word_count' ] as $item){
+                foreach ( $propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'ice' ][ 'eq_word_count' ] as $item ) {
                     $propagatedIceEqWordCount = $propagatedIceEqWordCount + (float)$item;
                 }
 
@@ -528,7 +531,13 @@ class setTranslationController extends ajaxController {
         //update total time to edit
         try {
             if ( !self::isRevision() ) {
-                Jobs_JobDao::updateTotalTimeToEdit( $this->chunk, $this->time_to_edit );
+
+                $tte = 0;
+                if ( false === \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+                    $tte = $this->time_to_edit;
+                }
+
+                Jobs_JobDao::updateTotalTimeToEdit( $this->chunk, $tte );
             }
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -101, "message" => "database errors" ];
@@ -613,7 +622,7 @@ class setTranslationController extends ajaxController {
             $this->featureSet->run( 'setTranslationCommitted', [
                     'translation'      => $new_translation,
                     'old_translation'  => $old_translation,
-                    'propagated_ids'   => $propagationTotal['segments_for_propagation'][ 'propagated_ids' ],
+                    'propagated_ids'   => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ],
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
@@ -659,7 +668,7 @@ class setTranslationController extends ajaxController {
         }
 
         $this->result[ 'propagation' ] = $propagationTotal;
-        $this->result[ 'stats' ] = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
+        $this->result[ 'stats' ]       = $this->featureSet->filter( 'filterStatsResponse', $this->result[ 'stats' ], [ 'chunk' => $this->chunk, 'segmentId' => $this->id_segment ] );
 
         $this->evalSetContribution( $new_translation, $old_translation );
     }
@@ -952,8 +961,8 @@ class setTranslationController extends ajaxController {
          * - the segment has one or more repetitions and the user choose to propagate it
          * - the segment has one or more repetitions, it is not modified, it doesn't have translation conflicts and a change status is requested
          */
-        $contributionStruct->propagationRequest   = $this->propagate;
-        $contributionStruct->id_mt                = $this->chunk->id_mt_engine;
+        $contributionStruct->propagationRequest = $this->propagate;
+        $contributionStruct->id_mt              = $this->chunk->id_mt_engine;
 
         $contributionStruct->context_after  = $this->context_after;
         $contributionStruct->context_before = $this->context_before;
