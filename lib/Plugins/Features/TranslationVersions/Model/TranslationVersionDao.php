@@ -300,7 +300,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
     public function savePropagationVersions( Translations_SegmentTranslationStruct $propagation, $id_segment, Chunks_ChunkStruct $job_data, $propagated_ids ) {
 
-        $status_condition = '';
+        $status_condition           = '';
         $propagated_ids_placeholder = [];
 
         for ( $i = 1; $i <= count( $propagated_ids ); $i++ ) {
@@ -319,7 +319,8 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
                 'id_job'         => $job_data[ 'id' ],
                 'id_segment'     => $id_segment,
                 'propagated_ids' => $propagated_ids,
-                'segment_hash'   => $propagation[ 'segment_hash' ],
+                'segment_hash'   => $propagation->segment_hash,
+
         ];
 
         $this->insertVersionRecords( [
@@ -399,16 +400,18 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
         unset( $where_options[ 'propagated_ids' ] );
 
-        $select_options = array_merge( $where_options, [
-                'propagated_from' => $propagation[ 'autopropagated_from' ]
-        ], $select_ids_map );
+        $select_options = array_merge(
+                $where_options,
+                [ 'propagated_from' => $propagation[ 'autopropagated_from' ] ],
+                $select_ids_map
+        );
 
         $conn = Database::obtain()->getConnection();
 
-        $insert = $conn->prepare( $select_sql );
-        $insert->execute( $select_options );
+        $select = $conn->prepare( $select_sql );
+        $select->execute( $select_options );
 
-        $propagated_segments = $insert->fetchAll();
+        $propagated_segments = $select->fetchAll();
 
         $insert_value_map = [];
 
@@ -422,7 +425,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
         }
 
         $chunk_size = 200;
-        $chunks = array_chunk($insert_value_map, $chunk_size, true);
+        $chunks     = array_chunk( $insert_value_map, $chunk_size, true );
 
         for ( $k = 0; $k < count( $chunks ); $k++ ) {
 
@@ -434,10 +437,10 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
             $insert_placeholders = [];
             $insert_values       = [];
 
-            foreach ($chunks[$k] as $key => $chunk){
+            foreach ( $chunks[ $k ] as $key => $chunk ) {
                 $insert_placeholders[] = "(:id_job_" . $key . ", :id_segment_" . $key . ", :translation_" . $key . ", :version_number_" . $key . ", :propagated_from_" . $key . ")";
 
-                $current_value                            = $insert_value_map[ ( $key ) ];
+                $current_value                              = $insert_value_map[ ( $key ) ];
                 $insert_values[ 'id_job_' . $key ]          = $current_value[ 0 ];
                 $insert_values[ 'id_segment_' . $key ]      = $current_value[ 1 ];
                 $insert_values[ 'translation_' . $key ]     = $current_value[ 2 ];
@@ -447,8 +450,8 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
 
             $insert_sql .= implode( ',', $insert_placeholders );
 
-            $insert = $conn->prepare( $insert_sql );
-            $insert->execute( $insert_values );
+            $select = $conn->prepare( $insert_sql );
+            $select->execute( $insert_values );
         }
     }
 
@@ -475,13 +478,13 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
                 " $where_condition " .
                 " $status_condition ";
 
-        $update_options = [];
-        $update_options['id_job'] = $where_options['id_job'];
-        $update_options['id_segment'] = $where_options['id_segment'];
-        $update_options['segment_hash'] = $where_options['segment_hash'];
+        $update_options                   = [];
+        $update_options[ 'id_job' ]       = $where_options[ 'id_job' ];
+        $update_options[ 'id_segment' ]   = $where_options[ 'id_segment' ];
+        $update_options[ 'segment_hash' ] = $where_options[ 'segment_hash' ];
 
-        for ($i=1; $i<=count($where_options['propagated_ids']);$i++) {
-            $update_options['propagated_id_'.$i] = $where_options['propagated_ids'][($i-1)];
+        for ( $i = 1; $i <= count( $where_options[ 'propagated_ids' ] ); $i++ ) {
+            $update_options[ 'propagated_id_' . $i ] = $where_options[ 'propagated_ids' ][ ( $i - 1 ) ];
         }
 
         $conn   = Database::obtain()->getConnection();

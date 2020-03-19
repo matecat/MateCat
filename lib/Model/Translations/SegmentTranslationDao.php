@@ -662,11 +662,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      */
     public static function propagateTranslation(
             Translations_SegmentTranslationStruct $segmentTranslationStruct,
-            Chunks_ChunkStruct $chunkStruct, $_idSegment,
+            Chunks_ChunkStruct $chunkStruct,
+            $_idSegment,
             Projects_ProjectStruct $project,
             VersionHandlerInterface $versionHandler,
-            $execute_update = true,
-            $persistPropagatedVersions = true
+            $execute_update = true
     ) {
         $db = Database::obtain();
 
@@ -707,10 +707,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                     'id_segment'        => $_idSegment,
             ] );
 
-            $recordNum          = 0;
-            $_recordIteratorIdx = 1;
-            $lastRow            = null;
-            $totals             = $stmt->fetchAll( PDO::FETCH_FUNC, function () use ( $stmt, &$recordNum, &$_recordIteratorIdx, &$lastRow ) {
+            $recordNum                            = 0;
+            $_recordIteratorIdx                   = 1;
+            $lastRow                              = null;
+            $arrayOfSegmentTranslationToPropagate = $stmt->fetchAll( PDO::FETCH_FUNC, function () use ( $stmt, &$recordNum, &$_recordIteratorIdx, &$lastRow ) {
 
                 $args = func_get_args();
 
@@ -755,10 +755,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                 }
             } );
 
-            array_pop( $totals );
+            array_pop( $arrayOfSegmentTranslationToPropagate );
 
             $propagationAnalyser = new PropagationAnalyser();
-            $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $totals );
+            $propagationTotal    = $propagationAnalyser->analyse( $segmentTranslationStruct, $arrayOfSegmentTranslationToPropagate );
             $propagationTotal->setTotals( [
                     'propagated_ice_total'     => $propagationAnalyser->getPropagatedIceCount(),
                     'not_propagated_total'     => $propagationAnalyser->getNotPropagatedCount(),
@@ -808,9 +808,9 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                         }
 
                         $propagationSql = "
-                          UPDATE segment_translations SET $place_holders_fields
-                          WHERE id_job = ? AND id_segment IN ( $place_holders_id )
-                    ";
+                            UPDATE segment_translations SET $place_holders_fields
+                            WHERE id_job = ? AND id_segment IN ( $place_holders_id )
+                        ";
 
                         $pdo  = $db->getConnection();
                         $stmt = $pdo->prepare( $propagationSql );
@@ -818,8 +818,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                         $stmt->execute( $values );
 
                         // update related versions only if the parent translation has changed
-                        if ( $persistPropagatedVersions ) {
-                            $versionHandler->savePropagationVersions( $segmentTranslationStruct, $propagationTotal->getPropagatedIds() );
+                        if ( false === empty( $propagationTotal->getPropagatedIdsToUpdateVersion() ) ) {
+                            $versionHandler->savePropagationVersions(
+                                    $segmentTranslationStruct,
+                                    $propagationTotal->getPropagatedIdsToUpdateVersion()
+                            );
                         }
                     }
                 } catch ( PDOException $e ) {

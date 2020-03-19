@@ -363,7 +363,6 @@ class setTranslationController extends ajaxController {
         $new_translation->warning             = $check->thereAreWarnings();
         $new_translation->translation_date    = date( "Y-m-d H:i:s" );
 
-
         $this->_validateSegmentTranslationChange( $new_translation, $old_translation );
 
         /**
@@ -384,6 +383,7 @@ class setTranslationController extends ajaxController {
         $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
+        // if evaluateVersionSave() return true it means that it was persisted a new version of the parent segment
         $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
 
         /**
@@ -435,7 +435,6 @@ class setTranslationController extends ajaxController {
                         Constants_TranslationStatus::STATUS_REJECTED
                 ] )
         ) {
-
             //propagate translations
             $TPropagation                             = new Translations_SegmentTranslationStruct();
             $TPropagation[ 'status' ]                 = $this->status;
@@ -448,17 +447,14 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
             $TPropagation[ 'match_type' ]             = $old_translation['match_type'];
 
-            $persistPropagatedVersions = $new_translation->translation !== $old_translation->translation;
-
             try {
-
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                         $TPropagation,
                         $this->chunk,
                         $this->id_segment,
                         $this->project,
                         $this->VersionsHandler,
-                        $persistPropagatedVersions
+                        true
                 );
 
             } catch ( Exception $e ) {
@@ -470,7 +466,6 @@ class setTranslationController extends ajaxController {
                 return $e->getCode();
 
             }
-
         }
 
         $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
@@ -500,7 +495,17 @@ class setTranslationController extends ajaxController {
                 $counter->setOldStatus( $old_status );
                 $counter->setNewStatus( $this->status );
 
-                $propagatedSegmentsCount = ( $propagationTotal[ 'totals' ]['propagated_ice_total'] + $propagationTotal[ 'totals' ]['propagated_total'] );
+                $propagatedNotIceEqWordCount = 0;
+                foreach ($propagationTotal['segments_for_propagation'][ 'propagated' ][ 'not_ice' ][ 'eq_word_count' ] as $item){
+                    $propagatedNotIceEqWordCount = $propagatedNotIceEqWordCount + (float)$item;
+                }
+
+                $propagatedIceEqWordCount = 0;
+                foreach ($propagationTotal['segments_for_propagation'][ 'propagated' ][ 'ice' ][ 'eq_word_count' ] as $item){
+                    $propagatedIceEqWordCount = $propagatedIceEqWordCount + (float)$item;
+                }
+
+                $propagatedSegmentsCount = $propagatedIceEqWordCount + $propagatedNotIceEqWordCount;
 
                 $newValues[] = $counter->getUpdatedValues( $propagatedSegmentsCount );
             }
