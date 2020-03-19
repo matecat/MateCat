@@ -93,6 +93,8 @@ class SegmentTranslationVersionHandler implements VersionHandlerInterface {
         if ( $new_translation->version_number == null ) {
             $new_translation->version_number = 0;
         }
+
+        return $version_saved;
     }
 
     /**
