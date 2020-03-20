@@ -226,7 +226,7 @@ class HtmlParser {
         }
 
         //string ends with plain text, so no state change is triggered at the end of string
-        if ( !empty( $plain_text_buffer ) ) {
+        if ( '' !==  $plain_text_buffer and null !== $plain_text_buffer  ) {
             $output .= $this->_finalizePlainText( $plain_text_buffer );
         }
 
