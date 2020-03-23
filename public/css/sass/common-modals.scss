@@ -1117,6 +1117,20 @@ div#matecat-modal p {
         }
     }
 
+    .matecat-modal-text {
+        padding: 10px 10px;
+        font-size: 17px;
+    }
+    .matecat-modal-textarea {
+        padding: 10px 10px;
+        resize: none;
+        textarea {
+            padding: 10px;
+            border: 1px solid grey;
+            border-radius: 4px;
+        }
+    }
+
     .check-conditions {
         margin-left: 5px;
     }
@@ -1341,7 +1355,7 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
 
 .shortcuts-modal {
     .matecat-modal-top {
-        padding: 10px 25px;
+        padding: 15px 25px;
     }
     .matecat-modal-middle {
         padding: 10px 15px;
@@ -1498,7 +1512,7 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
         }
     }
     .matecat-modal-bottom {
-        padding: 10px 25px;
+        padding: 15px 25px;
     }
 }
 

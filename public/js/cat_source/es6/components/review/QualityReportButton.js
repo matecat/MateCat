@@ -38,7 +38,7 @@ class QualityReportButton extends React.Component {
     openFeedbackModal = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        CatToolActions.openFeedbackModal();
+        CatToolActions.openFeedbackModal(this.state.feedback);
     };
 
     componentDidMount() {

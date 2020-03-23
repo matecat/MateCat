@@ -356,6 +356,32 @@ header {
                             max-width: 190px;
                         }
                     }
+                    .qr-feedback-container {
+                        min-height: 73px;
+                        position: relative;
+                        margin-bottom: 20px;
+                        .qr-feedback {
+                            .qr-head {
+                                padding: 10px 20px;
+                                background: $grey4;
+                                .label.revision-color {
+                                    float: left;
+
+                                    margin-right: 10px;
+                                    margin-top: 5px;
+                                    &.revision-1 {
+                                        background: #2FB177;
+                                    }
+                                    &.revision-2 {
+                                        background: #9352C1;
+                                    }
+                                }
+                            }
+                            p {
+                                padding: 17px;
+                            }
+                        }
+                    }
                     .qr-filter-container, .qr-header {
                         display: flex;
                         justify-content: space-between;
