@@ -1462,8 +1462,6 @@ class ProjectManager {
 
         $reverse_count = [ 'eq_word_count' => 0, 'raw_word_count' => 0 ];
 
-        $standard_analysis_wc = round( $projectStructure[ 'standard_analysis_wc' ] / 2 );
-
         foreach ( $rows as $row ) {
 
             if ( !array_key_exists( $chunk, $counter ) ) {
@@ -1512,6 +1510,9 @@ class ProjectManager {
         if ( count( $counter ) < 2 ) {
             throw new Exception( 'The requested number of words for the first chunk is too large. I cannot create 2 chunks.', -7 );
         }
+
+        $chunk = Jobs_JobDao::getByIdAndPassword($projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ]);
+        $row_totals[ 'standard_analysis_count' ] = $chunk->standard_analysis_wc;
 
         $result = array_merge( $row_totals->getArrayCopy(), [ 'chunks' => $counter ] );
 
@@ -1572,7 +1573,7 @@ class ProjectManager {
         $num_split                     = count( $projectStructure[ 'split_result' ][ 'chunks' ] );
         $total_raw_wc                  = $jobToSplit[ 'total_raw_wc' ];
         $splitted_total_raw_wc         = round( $total_raw_wc / $num_split );
-        $splitted_standard_analysis_wc = round( $projectStructure[ 'standard_analysis_wc' ] / $num_split );
+        $splitted_standard_analysis_wc = round( $projectStructure[ 'split_result' ]['standard_analysis_count'] / $num_split );
 
         $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $splitted_standard_analysis_wc, $splitted_total_raw_wc );
 
