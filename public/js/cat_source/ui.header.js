@@ -142,7 +142,7 @@ $.extend(UI, {
 	},
 	renderQualityReportButton: function() {
 		CatToolActions.renderQualityReportButton();
-		if ( config.secondRevisionsCount ) {
+		if ( config.isReview ) {
 			UI.reloadQualityReport();
 		}
 	},
@@ -162,7 +162,8 @@ $.extend(UI, {
 
 				window.quality_report_btn_component.setState({
 					is_pass : review.is_pass,
-					score : review.score
+					score : review.score,
+					feedback: review.feedback
 				});
 			});
 	}

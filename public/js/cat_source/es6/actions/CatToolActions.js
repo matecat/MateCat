@@ -162,10 +162,10 @@ let CatToolActions = {
             $('#quality-report-button').attr('data-revised', true);
         }
     },
-    openFeedbackModal: function () {
+    openFeedbackModal: function (feedback) {
         var props = {
             text: "Lascia un Feedback.",
-            successText: "Ok",
+            feedback: feedback,
             successCallback: function() {
                 APP.ModalWindow.onCloseModal();
             }
@@ -173,7 +173,8 @@ let CatToolActions = {
         APP.ModalWindow.showModalComponent(RevisionFeedbackModal, props, "Feedback Submission");
     },
     sendRevisionFeedback: function (text) {
-        API.JOB.sendRevisionFeedback(config.id_job, config.revisionNumber, config.review_password, text)
+        return API.JOB.sendRevisionFeedback(config.id_job, config.revisionNumber, config.review_password, text);
+
     }
 };
 
