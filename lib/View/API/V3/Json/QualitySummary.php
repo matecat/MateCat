@@ -100,7 +100,7 @@ class QualitySummary {
                                                           $total_issues_weight, $total_reviewed_words_count, $passfail, $total_tte, $is_pass, $model_version ) {
 
         $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $source_page );
-        $feedback = (new Revise_FeedbackDAO())->getFeedback($jStruct->id, $jStruct->password, $revisionNumber);
+        $feedback = (new Revise_FeedbackDAO())->getFeedback($jStruct->id, $revisionNumber);
 
         $result = [
                 'revision_number'            => $revisionNumber,

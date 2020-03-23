@@ -41,17 +41,15 @@ class Revise_FeedbackDAO extends DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct
      */
-    public function getFeedback( $id_job, $password, $revision_number ) {
+    public function getFeedback( $id_job, $revision_number ) {
         $query = "SELECT feedback FROM  " . self::TABLE . " 
                 WHERE
                 id_job = :id_job AND
-                password = :password AND 
                 revision_number = :revision_number
             ";
 
         $values = [
                 'id_job'          => $id_job,
-                'password'        => $password,
                 'revision_number' => $revision_number
         ];
 
