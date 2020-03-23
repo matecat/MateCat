@@ -1675,6 +1675,11 @@ class ProjectManager {
         $first_job[ 'job_first_segment' ] = $job_first_segment; // redundant
         $first_job[ 'job_last_segment' ]  = $job_last_segment;
 
+        //get the min and
+        $countSplittedJobs = count($jobStructs);
+        $total_raw_wc = $first_job['total_raw_wc'];
+        $standard_analysis_wc = $first_job['standard_analysis_wc'];
+
         //merge TM keys: preserve only owner's keys
         $tm_keys = [];
         foreach ( $jobStructs as $chunk_info ) {
@@ -1725,7 +1730,7 @@ class ProjectManager {
 
         $jobDao = new Jobs_JobDao();
 
-        $jobDao->updateStdWcAndTotalWc( $first_job[ 'id' ], 23, 32432);
+        $jobDao->updateStdWcAndTotalWc( $first_job[ 'id' ], ($standard_analysis_wc*$countSplittedJobs), ($total_raw_wc*$countSplittedJobs));
 
         $this->dbHandler->getConnection()->commit();
 
