@@ -157,7 +157,8 @@ class ProjectManager {
                             'sanitize_project_options'     => true,
                             'file_segments_count'          => [],
                             'due_date'                     => null,
-                            'target_language_mt_engine_id' => []
+                            'target_language_mt_engine_id' => [],
+                            'standard_analysis_wc'         => 0
                     ] );
 
         }
@@ -1239,27 +1240,28 @@ class ProjectManager {
 
             }
 
+
             $this->_log( $projectStructure[ 'private_tm_key' ] );
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
-            $newJob                    = new Jobs_JobStruct();
-            $newJob->password          = $password;
-            $newJob->id_project        = $projectStructure[ 'id_project' ];
-            $newJob->id_translator     = is_null( $projectStructure[ 'private_tm_user' ] ) ? "" : $projectStructure[ 'private_tm_user' ];
-            $newJob->source            = $projectStructure[ 'source_language' ];
-            $newJob->target            = $target;
-            $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
-            $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
-            $newJob->create_date       = date( "Y-m-d H:i:s" );
-            $newJob->subject           = $projectStructure[ 'job_subject' ];
-            $newJob->owner             = $projectStructure[ 'owner' ];
-            $newJob->job_first_segment = $this->min_max_segments_id[ 'job_first_segment' ];
-            $newJob->job_last_segment  = $this->min_max_segments_id[ 'job_last_segment' ];
-            $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
-            $newJob->payable_rates     = $payableRates;
-            $newJob->total_raw_wc      = $this->files_word_count;
-            $newJob->only_private_tm   = $projectStructure[ 'only_private' ];
+            $newJob                       = new Jobs_JobStruct();
+            $newJob->password             = $password;
+            $newJob->id_project           = $projectStructure[ 'id_project' ];
+            $newJob->id_translator        = is_null( $projectStructure[ 'private_tm_user' ] ) ? "" : $projectStructure[ 'private_tm_user' ];
+            $newJob->source               = $projectStructure[ 'source_language' ];
+            $newJob->target               = $target;
+            $newJob->id_tms               = $projectStructure[ 'tms_engine' ];
+            $newJob->id_mt_engine         = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
+            $newJob->create_date          = date( "Y-m-d H:i:s" );
+            $newJob->subject              = $projectStructure[ 'job_subject' ];
+            $newJob->owner                = $projectStructure[ 'owner' ];
+            $newJob->job_first_segment    = $this->min_max_segments_id[ 'job_first_segment' ];
+            $newJob->job_last_segment     = $this->min_max_segments_id[ 'job_last_segment' ];
+            $newJob->tm_keys              = $projectStructure[ 'tm_keys' ];
+            $newJob->payable_rates        = $payableRates;
+            $newJob->total_raw_wc         = $this->files_word_count;
+            $newJob->only_private_tm      = $projectStructure[ 'only_private' ];
 
             $this->features->run( "beforeInsertJobStruct", $newJob, $projectStructure, [
                             'total_project_segments' => $this->total_segments,
@@ -1676,9 +1678,9 @@ class ProjectManager {
         $first_job[ 'job_last_segment' ]  = $job_last_segment;
 
         //get the min and
-        $countSplittedJobs = count($jobStructs);
-        $total_raw_wc = $first_job['total_raw_wc'];
-        $standard_analysis_wc = $first_job['standard_analysis_wc'];
+        $countSplittedJobs    = count( $jobStructs );
+        $total_raw_wc         = $first_job[ 'total_raw_wc' ];
+        $standard_analysis_wc = $first_job[ 'standard_analysis_wc' ];
 
         //merge TM keys: preserve only owner's keys
         $tm_keys = [];
@@ -1730,7 +1732,7 @@ class ProjectManager {
 
         $jobDao = new Jobs_JobDao();
 
-        $jobDao->updateStdWcAndTotalWc( $first_job[ 'id' ], ($standard_analysis_wc*$countSplittedJobs), ($total_raw_wc*$countSplittedJobs));
+        $jobDao->updateStdWcAndTotalWc( $first_job[ 'id' ], ( $standard_analysis_wc * $countSplittedJobs ), ( $total_raw_wc * $countSplittedJobs ) );
 
         $this->dbHandler->getConnection()->commit();
 
