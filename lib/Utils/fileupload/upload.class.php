@@ -213,9 +213,6 @@ class UploadHandler {
 
         $file_name = trim( $this->my_basename( $name ), ".\x00..\x20" );
 
-        //remove spaces
-        $file_name = str_replace( [ " ", " " ], "_", $file_name );
-
         if ( $this->options[ 'discard_aborted_uploads' ] ) {
             while ( is_file( $this->options[ 'upload_dir' ] . $file_name ) ) {
                 $file_name = $this->upcount_name( $file_name );

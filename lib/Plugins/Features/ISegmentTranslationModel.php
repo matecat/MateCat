@@ -10,5 +10,5 @@
 namespace Features;
 
 interface ISegmentTranslationModel {
-    public function performChunkReviewTransition();
+    public function getChunkReviewTransitionModel();
 }

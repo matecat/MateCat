@@ -8,6 +8,7 @@
 
 namespace Features\ReviewExtended\Model;
 
+use ChunkReviewTransition\UnitOfWork;
 use Exception;
 use Features\TranslationVersions\Model\BatchEventCreator;
 use RevisionFactory;
@@ -29,20 +30,27 @@ class BatchReviewProcessor {
      */
     public function process() {
 
-        $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $this->_batchEventCreator->getChunk() );
-
+        $chunkReviews    = ( new ChunkReviewDao() )->findChunkReviews( $this->_batchEventCreator->getChunk() );
         $project         = $chunkReviews[ 0 ]->getChunk()->getProject();
         $revisionFactory = RevisionFactory::initFromProject( $project );
 
+        $chunkReviewTransitionModels = [];
+        $segmentTranslationModels    = [];
+
         foreach ( $this->_batchEventCreator->getPersistedEvents() as $event ) {
-
-            $translationVector = new SegmentTranslationChangeVector( $event );
-
-            $segmentTranslationModel = $revisionFactory->getSegmentTranslationModel( $translationVector, $chunkReviews );
-
-            $segmentTranslationModel->performChunkReviewTransition();
-
+            $translationVector             = new SegmentTranslationChangeVector( $event );
+            $segmentTranslationModel       = $revisionFactory->getSegmentTranslationModel( $translationVector, $chunkReviews );
+            $chunkReviewTransitionModels[] = $segmentTranslationModel->getChunkReviewTransitionModel();
+            $segmentTranslationModels[]    = $segmentTranslationModel;
         }
 
+        // uow
+        $uow = new UnitOfWork( $chunkReviewTransitionModels );
+        if($uow->commit()){
+            // send notification emails
+            foreach ( $segmentTranslationModels as $segmentTranslationModel ) {
+                $segmentTranslationModel->sendNotificationEmail();
+            }
+        }
     }
 }

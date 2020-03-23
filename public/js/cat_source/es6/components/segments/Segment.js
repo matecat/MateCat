@@ -114,12 +114,12 @@ class Segment extends React.Component {
     }
 
     openSegmentFromAction(sid) {
-        let self = this;
         sid = sid + "";
+        clearTimeout(this.openSegmentTimeOut);
         if ( (sid === this.props.segment.sid || (this.props.segment.original_sid === sid && this.props.segment.firstOfSplit))
             && !this.props.segment.opened ) {
-            setTimeout(function () {
-                self.openSegment();
+            this.openSegmentTimeOut = setTimeout( () => {
+                this.openSegment();
             });
         }
     }
@@ -506,6 +506,7 @@ class Segment extends React.Component {
             nextState.showRevisionPanel !== this.state.showRevisionPanel ||
             nextState.selectedTextObj !== this.state.selectedTextObj ||
             nextProps.sideOpen !== this.props.sideOpen ||
+            nextProps.height !== this.props.height ||
             nextState.showActions !== this.state.showActions
         );
     }
@@ -514,14 +515,18 @@ class Segment extends React.Component {
         if (!prevProps.segment.opened && this.props.segment.opened) {
             this.timeoutScroll = setTimeout(()=>{SegmentActions.scrollToSegment(this.props.segment.sid)},200);
             setTimeout(()=>{UI.setCurrentSegment()},0);
-            if ( !this.props.segment.openComments && !this.props.segment.openIssues ) {
-                setTimeout(()=>SegmentActions.closeSideSegments());
-            }
+            setTimeout(()=>{
+                if ( !this.props.segment.openComments && !this.props.segment.openIssues ) {
+                    SegmentActions.closeSideSegments();
+                }
+            });
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
             clearTimeout(this.timeoutScroll);
             TagUtils.removeHighlightCorrespondingTags(this.$section);
             setTimeout(()=>{
-                SegmentActions.closeSegmentComment(this.props.segment.sid);
+                if ( this.props.segment.openComments ) {
+                    SegmentActions.closeSegmentComment(this.props.segment.sid);
+                }
                 SegmentActions.saveSegmentBeforeClose(this.props.segment);
             });
         }
@@ -640,6 +645,7 @@ class Segment extends React.Component {
                         isReviewExtended={this.props.isReviewExtended}
                         reviewType={this.props.reviewType}
                         isReviewImproved={this.props.isReviewImproved}
+                        height={this.props.height}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

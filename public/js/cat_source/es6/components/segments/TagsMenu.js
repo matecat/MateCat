@@ -21,7 +21,8 @@ class TagsMenu extends React.Component {
         let addedTags = _.filter(uniqueSourceTags, function ( item ) {
             return missingTags.indexOf(item.replace(/&quot;/g, '"')) === -1 ;
         });
-        this.menuHeight = $('.editor .targetarea').outerHeight() *150/100;
+        this.menuHeight = this.props.height *150/100;
+        this.menuHeight = this.menuHeight > 500 ? 500 : this.menuHeight;
         this.menuWidth = 270;
         this.state = {
             selectedItem: 0,
@@ -80,12 +81,12 @@ class TagsMenu extends React.Component {
                 }
             }
         }
-        if ( (window.innerHeight - offsetParent.top - y) < (this.menuHeight + 200) ) {
-            y = y - this.menuHeight;
+        if ( (window.innerHeight - offsetParent.top - y) < (this.menuHeight) ) {
+            y = y ;
         } else {
             y = y + 20;
         }
-        if ( (window.innerWidth - offsetParent.left - x) < (this.menuWidth + 100) ) {
+        if ( (window.innerWidth - offsetParent.left - x) < (this.menuWidth) ) {
             x = x - this.menuWidth + 20;
         }
         return { x: x, y: y };
@@ -273,7 +274,8 @@ class TagsMenu extends React.Component {
         SegmentActions.closeTagsMenu();
         $('.tag-autocomplete-endcursor').remove();
 
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+        let cleanTag = TextUtils.htmlEncode(TagUtils.cleanTextFromPlaceholdersSpan(tag));
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html(), cleanTag.trim().length);
         setTimeout(function () {
             UI.segmentQA(UI.currentSegment);
             TagUtils.checkTagProximity();
@@ -416,7 +418,7 @@ class TagsMenu extends React.Component {
         let style = {
             position: "absolute",
             zIndex: 2,
-            maxHeight: "150%",
+            maxHeight: this.menuHeight + 'px',
             overflowY: "auto",
             top: this.state.coord.y,
             left: this.state.coord.x

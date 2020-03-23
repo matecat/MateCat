@@ -65,7 +65,7 @@ class CattoolFooter extends React.Component {
         stats.r_perc = r_perc;
         stats.a_perc_2nd_formatted = a_perc_2nd_formatted;
         stats.a_perc_2nd = a_perc_2nd;
-        stats.revise_todo_formatted = revise_todo_formatted;
+        stats.revise_todo_formatted = revise_todo_formatted >= 0 ? revise_todo_formatted : 0 ;
 
 
         this.setState({
