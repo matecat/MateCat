@@ -176,11 +176,11 @@ class getSearchController extends ajaxController {
 
         if ( !empty( $this->source ) and !empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'coupled';
-            $this->queryParams[ 'src' ] = html_entity_decode($this->source); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
+            $this->queryParams[ 'src' ] = html_entity_decode( $this->source ); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
             $this->queryParams[ 'trg' ] = $this->target;
         } elseif ( !empty( $this->source ) ) {
             $this->queryParams[ 'key' ] = 'source';
-            $this->queryParams[ 'src' ] = html_entity_decode($this->source); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
+            $this->queryParams[ 'src' ] = html_entity_decode( $this->source ); // source strings are not escaped as html entites in DB. Example: &lt; must be decoded to <
         } elseif ( !empty( $this->target ) ) {
             $this->queryParams[ 'key' ] = 'target';
             $this->queryParams[ 'trg' ] = $this->target;
@@ -341,8 +341,9 @@ class getSearchController extends ajaxController {
      * @throws Exception
      */
     private function _updateSegments( $search_results ) {
-        $chunk   = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
-        $project = Projects_ProjectDao::findByJobId( (int)$this->job );
+        $chunk           = Chunks_ChunkDao::getByIdAndPassword( (int)$this->job, $this->password );
+        $project         = Projects_ProjectDao::findByJobId( (int)$this->job );
+        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->id_segment, $this->user, $project );
 
         // loop all segments to replace
         foreach ( $search_results as $key => $tRow ) {
@@ -374,19 +375,13 @@ class getSearchController extends ajaxController {
                 $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
                 try {
-
                     $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $this->job_data,
                             $this->id_segment,
                             $project,
-                            TranslationVersions::getVersionHandlerNewInstance(
-                                    $chunk,
-                                    $tRow[ 'id_segment' ],
-                                    $this->getUser(),
-                                    $project
-                            ),
-                            false
+                            $versionsHandler,
+                            true
                     );
 
                 } catch ( Exception $e ) {
@@ -410,11 +405,16 @@ class getSearchController extends ajaxController {
             $new_translation->serialized_errors_list = $old_translation->serialized_errors_list;
             $new_translation->suggestion_position    = $old_translation->suggestion_position;
             $new_translation->warning                = $old_translation->warning;
-            $new_translation->version_number         = $old_translation->version_number;
             $new_translation->translation_date       = date( "Y-m-d H:i:s" );
 
+            $version_number = $old_translation->version_number;
+            if ( false === \Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+                $version_number++;
+            }
+
+            $new_translation->version_number = $version_number;
+
             // Save version
-            $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->id_segment, $this->user, $project );
             $versionsHandler->evaluateVersionSave( $new_translation, $old_translation );
 
             // preSetTranslationCommitted
