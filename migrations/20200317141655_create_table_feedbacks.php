@@ -12,7 +12,7 @@ class CreateTableFeedbacks extends AbstractMatecatMigration {
           PRIMARY KEY (`id`),
           UNIQUE KEY `job_unique_key` (`id_job`,`password`,`revision_number`)
         ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
-    )' ];
+    ' ];
 
     public $sql_down = [ 'DROP TABLE `revision_feedbacks`' ];
 }
