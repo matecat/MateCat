@@ -123,7 +123,7 @@ let CatToolActions = {
 
         config.last_job_segment = data.last_segment;
         config.firstSegmentOfFiles = data.files;
-    }
+    }s
 };
 
 module.exports = CatToolActions;
