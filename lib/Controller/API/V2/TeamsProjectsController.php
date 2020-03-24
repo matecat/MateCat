@@ -96,34 +96,89 @@ class TeamsProjectsController extends KleinController {
         $this->response->json( [ 'projects' => $projects ] );
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exception
+     */
     public function getAll() {
 
+        $id_team = $this->request->param( 'id_team' );
+        $page    = $this->request->param( 'page' ) ? $this->request->param( 'page' ) : 1;
+        $step    = $this->request->param( 'step' ) ? $this->request->param( 'step' ) : 20;
+
         $this->featureSet->loadFromUserEmail( $this->user->email );
-
-        $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], 60 );
-
-        $https = $this->request->server()->get('HTTPS');
-        $baseUrl = isset($https) && $https != 'off' ? 'https' : 'http' . $this->request->server()->get('SERVER_NAME');
-
-        $_links      = [
-                "base" => $baseUrl,
-                "next" => "/api/v2/teams/".$this->params[ 'id_team' ]."/projects",
-                "prev" => "/api/v2/teams/".$this->params[ 'id_team' ]."/projects",
-                "self" => "/api/v2/teams/".$this->params[ 'id_team' ]."/projects"
-        ];
-        $limit       = 20;
-        $total       = 120;
-        $total_pages = ceil( $total / $limit );
+        $projectsList = \Projects_ProjectDao::findByTeamId( $id_team, $step, $this->getOffset($page, $step) ,60 );
 
         $projectsList = ( new Project( $projectsList ) )->render();
-        $this->response->json( [
-                '_links'      => $_links,
-                'limit'       => $limit,
-                'total'       => $total,
-                'total_pages' => $total_pages,
-                'projects'    => $projectsList
-        ] );
 
+        $totals      = \Projects_ProjectDao::getTotalCountByTeamId( $id_team, 0 );
+        $total_pages = $this->getTotalPages( $step, $totals );
+
+        if ( $page > $total_pages ) {
+            throw new NotFoundException( $page . " too high, maximum value is " . $total_pages, 404 );
+        }
+
+        $this->response->json( [
+                '_links'   => $this->_getPaginationLinks( $page, $totals, $step ),
+                'projects' => $projectsList
+        ] );
+    }
+
+    /**
+     * @param int $page
+     * @param int $totals
+     * @param int $step
+     *
+     * @return array
+     */
+    private function _getPaginationLinks( $page, $totals, $step = 20 ) {
+
+        $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+
+        $links = [
+                "base"        => \INIT::$HTTPHOST,
+                "self"        => $_SERVER[ 'REQUEST_URI' ],
+                "page"        => (int)$page,
+                "step"        => (int)$step,
+                "totals"      => (int)$totals,
+                "total_pages" => $total_pages = $this->getTotalPages( $step, $totals ),
+        ];
+
+        if ( $page < $total_pages ) {
+            $links[ 'next' ] = $url[ 'path' ] . "?page=" . ( $page + 1 ) . ( $step != 20 ? "&step=" . $step : null );
+        }
+
+        if ( $page > 1 ) {
+            $links[ 'prev' ] = $url[ 'path' ] . "?page=" . ( $page - 1 ) . ( $step != 20 ? "&step=" . $step : null );
+        }
+
+        return $links;
+    }
+
+    /**
+     * @param int $page
+     * @param int $step
+     *
+     * @return int
+     */
+    private function getOffset($page, $step){
+
+        if($page === 1){
+            return 0;
+        }
+
+        return $step * ($page-1);
+    }
+
+    /**
+     * @param int $step
+     * @param int $totals
+     *
+     * @return int
+     */
+    private function getTotalPages( $step, $totals ) {
+        return (int)$total_pages = ceil( (int)$totals / (int)$step );
     }
 
     public function setTeam( $team ) {

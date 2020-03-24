@@ -148,17 +148,27 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $id_team
+     * @param int $id_team
+     * @param int $limit
+     * @param int $offset
      * @param int $ttl
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function findByTeamId( $id_team, $ttl = 0 ) {
+    public static function findByTeamId( $id_team, $limit, $offset, $ttl = 0 ) {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( self::$_sql_get_projects_for_team );
+        $stmt    = $conn->prepare( self::$_sql_get_projects_for_team . " LIMIT " . $limit . " OFFSET " . $offset );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_team' => $id_team ] );
+    }
+
+    public static function getTotalCountByTeamId( $id_team, $ttl = 0 ) {
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( "SELECT count(id) as totals FROM projects WHERE id_team = :id_team " );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_team' => $id_team ] )[ 0 ][ 'totals' ];
     }
 
     /**
