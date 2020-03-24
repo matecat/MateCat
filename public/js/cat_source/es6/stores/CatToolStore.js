@@ -13,6 +13,7 @@ EventEmitter.prototype.setMaxListeners(0);
 
 let CatToolStore = assign({}, EventEmitter.prototype, {
     files: null,
+    qr: null,
     storeFilesInfo: function(files) {
         this.files = files
     },
@@ -26,6 +27,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
         stats.revision2Completed = stats.revises && stats.revises.length > 1 && _.round(stats.revises[1].advancement_wc) === stats.TOTAL;
 
         this._projectProgess = stats;
+    },
+    updateQR: function (qr) {
+        this.qr = qr;
+    },
+    getQR: function(revisionNumber) {
+        return _.filter(this.qr.chunk.reviews, (rev)=>rev.revision_number === revisionNumber);
     },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
@@ -68,6 +75,9 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.SET_PROGRESS:
             CatToolStore.setProgress(action.stats);
             CatToolStore.emitChange(CatToolConstants.SET_PROGRESS, CatToolStore._projectProgess);
+            break;
+        case CatToolConstants.UPDATE_QR:
+            CatToolStore.updateQR(action.qr);
             break;
     }
 });

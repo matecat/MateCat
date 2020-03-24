@@ -161,20 +161,61 @@ let CatToolActions = {
         if ( stats.APPROVED_PERC > 10 ) {
             $('#quality-report-button').attr('data-revised', true);
         }
+        let reviseCount = (config.isReview) ?_.filter(stats.revises, (rev) => rev.revision_number === config.revisionNumber ) : null;
+        if ( config.isReview && reviseCount && reviseCount[0].advancement_wc >= stats.TOTAL ) {
+            let revise = CatToolStore.getQR(config.revisionNumber);
+            if (revise && !revise[0].feedback ) {
+                var notification = {
+                    title: 'Leave a feedback',
+                    text: "Kudos, you have completed the job! Please remember to leave some feedback for the translator. " +
+                        "<a id='leaveFeedback' style='cursor: pointer'> Click here. </a>",
+                    allowHtml: true,
+                    timer: 6000,
+                    type: 'warning',
+                    closeCallback: ()=>{
+                        $('#leaveFeedback').off('click');
+                    },
+                    openCallback: ()=>{
+                        $('#leaveFeedback').bind('click','#leaveFeedback', () => {
+                            APP.removeAllNotifications();
+                            CatToolActions.openFeedbackModal("", config.revisionNumber);
+                        });
+                    }
+                };
+
+                APP.addNotification(notification);
+            }
+        }
     },
-    openFeedbackModal: function (feedback) {
+    openFeedbackModal: function (feedback, revisionNumber) {
         var props = {
             text: "Lascia un Feedback.",
             feedback: feedback,
+            revisionNumber: revisionNumber,
             successCallback: function() {
                 APP.ModalWindow.onCloseModal();
             }
         };
-        APP.ModalWindow.showModalComponent(RevisionFeedbackModal, props, "Feedback Submission");
+        APP.ModalWindow.showModalComponent(RevisionFeedbackModal, props, "Feedback submission");
     },
     sendRevisionFeedback: function (text) {
         return API.JOB.sendRevisionFeedback(config.id_job, config.revisionNumber, config.review_password, text);
 
+    },
+    updateQualityReport: function (qr) {
+        var revNumber = (config.revisionNumber) ?  config.revisionNumber : 1;
+        var review = qr.chunk.reviews.find(function ( value ) {
+            return value.revision_number === revNumber;
+        }) ;
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.UPDATE_QR,
+            qr: qr
+        });
+        window.quality_report_btn_component.setState({
+            is_pass : review.is_pass,
+            score : review.score,
+            feedback: review.feedback
+        });
     }
 };
 

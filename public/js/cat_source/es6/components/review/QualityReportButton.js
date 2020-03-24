@@ -38,7 +38,7 @@ class QualityReportButton extends React.Component {
     openFeedbackModal = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        CatToolActions.openFeedbackModal(this.state.feedback);
+        CatToolActions.openFeedbackModal(this.state.feedback, config.revisionNumber);
     };
 
     componentDidMount() {
@@ -57,8 +57,13 @@ class QualityReportButton extends React.Component {
                 classes = classnames({
                     'ui simple pointing top center floating dropdown': true
                 });
-                label = "Feedback R" + config.revisionNumber;
+                label = "Write feedback (R" + config.revisionNumber + ")";
                 menu = <ul className="menu" id="qualityReportMenu">
+                    <li className="item">
+                        <a title="Open QR" onClick={()=>window.open(this.props.quality_report_href, '_blank')}>
+                            Open QR
+                        </a>
+                    </li>
                     <li className="item">
                         <a title="Revision Feedback" onClick={(e) => this.openFeedbackModal(e)}>
                             {label}
