@@ -158,17 +158,31 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     public static function findByTeamId( $id_team, $limit, $offset, $ttl = 0 ) {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( self::$_sql_get_projects_for_team . " LIMIT " . $limit . " OFFSET " . $offset );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_team' => $id_team ] );
+        $stmt    = $conn->prepare( self::$_sql_get_projects_for_team . " LIMIT " . (int)$limit . " OFFSET " . (int)$offset );
+        $values = [
+                'id_team' => (int)$id_team,
+        ];
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), $values );
     }
 
+    /**
+     * @param     $id_team
+     * @param int $ttl
+     *
+     * @return mixed
+     */
     public static function getTotalCountByTeamId( $id_team, $ttl = 0 ) {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( "SELECT count(id) as totals FROM projects WHERE id_team = :id_team " );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_team' => $id_team ] )[ 0 ][ 'totals' ];
+        $query = "SELECT count(id) as totals FROM projects WHERE id_team = :id_team ";
+        $stmt  = $conn->prepare( $query );
+
+        $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_team' => $id_team ] );
+
+        return ( isset( $results[ 0 ] ) ) ? $results[ 0 ][ 'totals' ] : 0;
     }
 
     /**
