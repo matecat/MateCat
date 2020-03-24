@@ -15,7 +15,6 @@ use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectExistsInTeamValidator;
 use API\V2\Validators\TeamAccessValidator;
 use API\V2\Validators\TeamProjectValidator;
-use FeatureSet;
 use ManageUtils;
 use Projects\ProjectModel;
 use Teams\TeamStruct;
@@ -31,20 +30,20 @@ class TeamsProjectsController extends KleinController {
 
         $this->_appendSingleProjectTeamValidators()->validateRequest();
 
-        $acceptedFields = array( 'id_assignee', 'name', 'id_team' );
+        $acceptedFields = [ 'id_assignee', 'name', 'id_team' ];
 
-        $projectModel   = new ProjectModel( $this->project );
-        $projectModel->setUser( $this->user ) ;
+        $projectModel = new ProjectModel( $this->project );
+        $projectModel->setUser( $this->user );
 
         foreach ( $acceptedFields as $field ) {
-            if ( array_key_exists($field, $this->params ) ) {
+            if ( array_key_exists( $field, $this->params ) ) {
                 $projectModel->prepareUpdate( $field, $this->params[ $field ] );
             }
         }
 
         $updatedStruct = $projectModel->update();
         $formatted     = new Project();
-        $this->response->json( array( 'project' => $formatted->renderItem( $updatedStruct ) ) );
+        $this->response->json( [ 'project' => $formatted->renderItem( $updatedStruct ) ] );
 
     }
 
@@ -57,17 +56,18 @@ class TeamsProjectsController extends KleinController {
     /**
      * @return $this
      */
-    protected function _appendSingleProjectTeamValidators(){
+    protected function _appendSingleProjectTeamValidators() {
         $this->project = \Projects_ProjectDao::findById( $this->request->id_project ); //check login and auth before request the project info
         $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
         $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
+
         return $this;
     }
 
-    public function get(){
+    public function get() {
         $this->_appendSingleProjectTeamValidators()->validateRequest();
-        $formatted     = new Project();
-        $this->response->json( array( 'project' => $formatted->renderItem( $this->project ) ) );
+        $formatted = new Project();
+        $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
     public function getByName() {
@@ -89,25 +89,44 @@ class TeamsProjectsController extends KleinController {
                 $this->team, $assignee,
                 $no_assignee );
 
-        if( empty( $projects ) ){
+        if ( empty( $projects ) ) {
             throw new NotFoundException( "Project not found", 404 );
         }
 
         $this->response->json( [ 'projects' => $projects ] );
     }
 
-    public function getAll(){
+    public function getAll() {
 
-        $this->featureSet->loadFromUserEmail( $this->user->email ) ;
+        $this->featureSet->loadFromUserEmail( $this->user->email );
 
         $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], 60 );
 
-        $projectsList     = ( new Project( $projectsList ) )->render();
-        $this->response->json( array( 'projects' => $projectsList ) );
+        $https = $this->request->server()->get('HTTPS');
+        $baseUrl = isset($https) && $https != 'off' ? 'https' : 'http' . $this->request->server()->get('SERVER_NAME');
+
+        $_links      = [
+                "base" => $baseUrl,
+                "next" => "/api/v2/teams/".$this->params[ 'id_team' ]."/projects",
+                "prev" => "/api/v2/teams/".$this->params[ 'id_team' ]."/projects",
+                "self" => "/api/v2/teams/".$this->params[ 'id_team' ]."/projects"
+        ];
+        $limit       = 20;
+        $total       = 120;
+        $total_pages = ceil( $total / $limit );
+
+        $projectsList = ( new Project( $projectsList ) )->render();
+        $this->response->json( [
+                '_links'      => $_links,
+                'limit'       => $limit,
+                'total'       => $total,
+                'total_pages' => $total_pages,
+                'projects'    => $projectsList
+        ] );
 
     }
 
-    public function setTeam($team){
+    public function setTeam( $team ) {
         $this->team = $team;
     }
 
