@@ -166,7 +166,7 @@ let CatToolActions = {
             let revise = CatToolStore.getQR(config.revisionNumber);
             if (revise && !revise[0].feedback ) {
                 var notification = {
-                    title: 'Leave a feedback',
+                    title: 'Leave your feedback',
                     text: "Kudos, you have completed the job! Please remember to leave some feedback for the translator. " +
                         "<a id='leaveFeedback' style='cursor: pointer'> Click here. </a>",
                     allowHtml: true,
