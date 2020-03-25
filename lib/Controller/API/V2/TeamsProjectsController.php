@@ -15,6 +15,7 @@ use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectExistsInTeamValidator;
 use API\V2\Validators\TeamAccessValidator;
 use API\V2\Validators\TeamProjectValidator;
+use FeatureSet;
 use ManageUtils;
 use Projects\ProjectModel;
 use Teams\TeamStruct;
@@ -30,20 +31,20 @@ class TeamsProjectsController extends KleinController {
 
         $this->_appendSingleProjectTeamValidators()->validateRequest();
 
-        $acceptedFields = [ 'id_assignee', 'name', 'id_team' ];
+        $acceptedFields = array( 'id_assignee', 'name', 'id_team' );
 
-        $projectModel = new ProjectModel( $this->project );
-        $projectModel->setUser( $this->user );
+        $projectModel   = new ProjectModel( $this->project );
+        $projectModel->setUser( $this->user ) ;
 
         foreach ( $acceptedFields as $field ) {
-            if ( array_key_exists( $field, $this->params ) ) {
+            if ( array_key_exists($field, $this->params ) ) {
                 $projectModel->prepareUpdate( $field, $this->params[ $field ] );
             }
         }
 
         $updatedStruct = $projectModel->update();
         $formatted     = new Project();
-        $this->response->json( [ 'project' => $formatted->renderItem( $updatedStruct ) ] );
+        $this->response->json( array( 'project' => $formatted->renderItem( $updatedStruct ) ) );
 
     }
 
@@ -56,18 +57,17 @@ class TeamsProjectsController extends KleinController {
     /**
      * @return $this
      */
-    protected function _appendSingleProjectTeamValidators() {
+    protected function _appendSingleProjectTeamValidators(){
         $this->project = \Projects_ProjectDao::findById( $this->request->id_project ); //check login and auth before request the project info
         $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
         $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
-
         return $this;
     }
 
-    public function get() {
+    public function get(){
         $this->_appendSingleProjectTeamValidators()->validateRequest();
-        $formatted = new Project();
-        $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
+        $formatted     = new Project();
+        $this->response->json( array( 'project' => $formatted->renderItem( $this->project ) ) );
     }
 
     public function getByName() {
@@ -89,99 +89,25 @@ class TeamsProjectsController extends KleinController {
                 $this->team, $assignee,
                 $no_assignee );
 
-        if ( empty( $projects ) ) {
+        if( empty( $projects ) ){
             throw new NotFoundException( "Project not found", 404 );
         }
 
         $this->response->json( [ 'projects' => $projects ] );
     }
 
-    /**
-     * @throws NotFoundException
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exception
-     */
-    public function getAll() {
+    public function getAll(){
 
-        $id_team = $this->request->param( 'id_team' );
-        $page    = $this->request->param( 'page' ) ? $this->request->param( 'page' ) : 1;
-        $step    = $this->request->param( 'step' ) ? $this->request->param( 'step' ) : 20;
+        $this->featureSet->loadFromUserEmail( $this->user->email ) ;
 
-        $this->featureSet->loadFromUserEmail( $this->user->email );
-        $projectsList = \Projects_ProjectDao::findByTeamId( $id_team, $step, $this->getOffset($page, $step) ,60 );
+        $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
 
-        $projectsList = ( new Project( $projectsList ) )->render();
+        $projectsList     = ( new Project( $projectsList ) )->render();
+        $this->response->json( array( 'projects' => $projectsList ) );
 
-        $totals      = \Projects_ProjectDao::getTotalCountByTeamId( $id_team, 60 );
-        $total_pages = $this->getTotalPages( $step, $totals );
-
-        if ( $page > $total_pages ) {
-            throw new NotFoundException( $page . " too high, maximum value is " . $total_pages, 404 );
-        }
-
-        $this->response->json( [
-                '_links'   => $this->_getPaginationLinks( $page, $totals, $step ),
-                'projects' => $projectsList
-        ] );
     }
 
-    /**
-     * @param int $page
-     * @param int $totals
-     * @param int $step
-     *
-     * @return array
-     */
-    private function _getPaginationLinks( $page, $totals, $step = 20 ) {
-
-        $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
-
-        $links = [
-                "base"        => \INIT::$HTTPHOST,
-                "self"        => $_SERVER[ 'REQUEST_URI' ],
-                "page"        => (int)$page,
-                "step"        => (int)$step,
-                "totals"      => (int)$totals,
-                "total_pages" => $total_pages = $this->getTotalPages( $step, $totals ),
-        ];
-
-        if ( $page < $total_pages ) {
-            $links[ 'next' ] = $url[ 'path' ] . "?page=" . ( $page + 1 ) . ( $step != 20 ? "&step=" . $step : null );
-        }
-
-        if ( $page > 1 ) {
-            $links[ 'prev' ] = $url[ 'path' ] . "?page=" . ( $page - 1 ) . ( $step != 20 ? "&step=" . $step : null );
-        }
-
-        return $links;
-    }
-
-    /**
-     * @param int $page
-     * @param int $step
-     *
-     * @return int
-     */
-    private function getOffset($page, $step){
-
-        if($page === 1){
-            return 0;
-        }
-
-        return $step * ($page-1);
-    }
-
-    /**
-     * @param int $step
-     * @param int $totals
-     *
-     * @return int
-     */
-    private function getTotalPages( $step, $totals ) {
-        return (int)$total_pages = ceil( (int)$totals / (int)$step );
-    }
-
-    public function setTeam( $team ) {
+    public function setTeam($team){
         $this->team = $team;
     }
 

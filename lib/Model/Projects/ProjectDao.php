@@ -148,21 +148,43 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param int $id_team
-     * @param int $limit
-     * @param int $offset
-     * @param int $ttl
+     * @param int   $id_team
+     * @param int   $ttl
+     * @param array $filter
      *
      * @return DataAccess_IDaoStruct[]
      */
-    public static function findByTeamId( $id_team, $limit, $offset, $ttl = 0 ) {
+    public static function findByTeamId( $id_team, $filter = [], $ttl = 0 ) {
+
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
 
-        $stmt    = $conn->prepare( self::$_sql_get_projects_for_team . " LIMIT " . (int)$limit . " OFFSET " . (int)$offset );
+        $limit      = ( isset( $filter[ 'limit' ] ) ) ? $filter[ 'limit' ] : null;
+        $offset     = ( isset( $filter[ 'offset' ] ) ) ? $filter[ 'offset' ] : null;
+        $searchId   = ( isset( $filter[ 'search' ][ 'id' ] ) ) ? $filter[ 'search' ][ 'id' ] : null;
+        $searchName = ( isset( $filter[ 'search' ][ 'name' ] ) ) ? $filter[ 'search' ][ 'name' ] : null;
+
+        $query = self::$_sql_get_projects_for_team;
+
         $values = [
-                'id_team' => (int)$id_team,
+            'id_team' => (int)$id_team,
         ];
+
+        if ( $searchId ) {
+            $query .= ' AND id = :id ';
+            $values['id'] = $searchId;
+        }
+
+        if ( $searchName ) {
+            $query .= ' AND name = :name ';
+            $values['name'] = $searchName;
+        }
+
+        if ( $limit and $offset ) {
+            $query .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+        }
+
+        $stmt   = $conn->prepare( $query );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), $values );
     }
@@ -173,14 +195,32 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return mixed
      */
-    public static function getTotalCountByTeamId( $id_team, $ttl = 0 ) {
+    public static function getTotalCountByTeamId( $id_team, $filter = [], $ttl = 0 ) {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
 
+        $searchId   = ( isset( $filter[ 'search' ][ 'id' ] ) ) ? $filter[ 'search' ][ 'id' ] : null;
+        $searchName = ( isset( $filter[ 'search' ][ 'name' ] ) ) ? $filter[ 'search' ][ 'name' ] : null;
+
         $query = "SELECT count(id) as totals FROM projects WHERE id_team = :id_team ";
+
+        $values = [
+                'id_team' => (int)$id_team,
+        ];
+
+        if ( $searchId ) {
+            $query .= ' AND id = :id ';
+            $values['id'] = $searchId;
+        }
+
+        if ( $searchName ) {
+            $query .= ' AND name = :name ';
+            $values['name'] = $searchName;
+        }
+
         $stmt  = $conn->prepare( $query );
 
-        $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_team' => $id_team ] );
+        $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $values );
 
         return ( isset( $results[ 0 ] ) ) ? $results[ 0 ][ 'totals' ] : 0;
     }
