@@ -168,10 +168,11 @@ let CatToolActions = {
                 var notification = {
                     title: 'Leave your feedback',
                     text: "Kudos, you have completed the job! Please remember to leave some feedback for the translator. " +
-                        "<a id='leaveFeedback' style='cursor: pointer'> Click here. </a>",
+                        "<a id='leaveFeedback' style='cursor: pointer'> Write feedback. </a>",
                     allowHtml: true,
                     timer: 6000,
                     type: 'warning',
+                    position: "tc",
                     closeCallback: ()=>{
                         $('#leaveFeedback').off('click');
                     },

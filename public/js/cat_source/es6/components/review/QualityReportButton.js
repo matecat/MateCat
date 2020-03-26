@@ -51,13 +51,13 @@ class QualityReportButton extends React.Component {
     }
 
     render() {
-        let classes,label,menu;
+        let classes,label,menu, alert;
         if ( this.state.progress && config.isReview ) {
             if ( ( config.revisionNumber === 1 ) || ( config.revisionNumber === 2  ) ){
                 classes = classnames({
                     'ui simple pointing top center floating dropdown': true
                 });
-                label = "Write feedback (R" + config.revisionNumber + ")";
+                label = (!this.state.feedback ) ? "Write feedback (R" + config.revisionNumber + ")": "Edit feedback (R" + config.revisionNumber + ")";
                 menu = <ul className="menu" id="qualityReportMenu">
                     <li className="item">
                         <a title="Open QR" onClick={()=>window.open(this.props.quality_report_href, '_blank')}>
@@ -69,7 +69,10 @@ class QualityReportButton extends React.Component {
                             {label}
                         </a>
                     </li>
-                </ul>
+                </ul>;
+                if ( !this.state.feedback ) {
+                    alert = <div className="feedback-alert"/>
+                }
             }
         }
 
@@ -78,6 +81,7 @@ class QualityReportButton extends React.Component {
         data-vote={this.getVote()} 
         onClick={()=>window.open(this.props.quality_report_href, '_blank')}>
             <IconQR width={30} height={30}/>
+            {alert}
             <div className="dropdown-menu-overlay"/>
             {menu}
         </div> ;
