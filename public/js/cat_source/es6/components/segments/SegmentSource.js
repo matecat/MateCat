@@ -136,7 +136,8 @@ class SegmentSource extends React.Component {
     }
 
     markLexiqa(source) {
-        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source) {
+        let searchEnabled = this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.source;
+        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
             source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
         }
         return source;
