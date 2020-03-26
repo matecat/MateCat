@@ -1770,20 +1770,26 @@ class QA {
      */
     protected function _checkBxAndExInsideG() {
 
-        $regex = '/<g id ?= ?[\"|\']*.[\"|\']?>(.*?)<\/g>/ui';
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
 
-        // find <g>...</g>
-        preg_match_all( $regex, $this->target_seg, $matches_trg );
+        @$dom->loadHTML($this->target_seg);
+        $g = $dom->getElementsByTagName ( 'g' );
 
-        foreach ($matches_trg[1] as $match) {
+        for ($i=0;$i<$g->length;$i++){
+            /** @var DOMElement $node */
+            $node = $g->item($i);
 
-            // check
-            preg_match_all('/<(ex|bx) id ?= ?["\']{1}.*["\']{1} ?\/>/ui', $match, $matches_exBx);
+            for ($k=0;$k<$node->childNodes->length;$k++){
+                $nodeName = $node->childNodes->item($k)->nodeName;
 
-            if( count($matches_exBx[0]) > 0 ){
-                $this->_addError( self::ERR_EX_BX_NESTED_IN_G );
+                if( $nodeName === 'ex' or $nodeName === 'bx' ){
+                    $this->_addError( self::ERR_EX_BX_NESTED_IN_G );
+                }
             }
         }
+
+        libxml_clear_errors();
     }
 
     /**
