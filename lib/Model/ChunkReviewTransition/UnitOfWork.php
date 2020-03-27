@@ -88,6 +88,7 @@ class UnitOfWork implements IUnitOfWork {
 
         $data = [];
 
+        // $data will contain an array of DIFF values used to update qa_chunk_review table
         foreach ( $this->models as $model ) {
             foreach ( $model->getChunkReviews() as $chunkReview ) {
                 $data[ $chunkReview->id ][ 'penalty_points' ]       = $data[ $chunkReview->id ][ 'penalty_points' ] + $chunkReview->penalty_points;
@@ -102,7 +103,8 @@ class UnitOfWork implements IUnitOfWork {
         // just one UPDATE for each ChunkReview
         foreach ( $data as $id => $datum ) {
 
-            // calculate here is_pass
+            // calculate here 'is_pass'
+            // by adding $datum[ 'reviewed_words_count' ] and $datum[ 'penalty_points' ] to current values
             $chunkReview                       = $chunkReviewDao->findById( $id );
             $lqaModelLimit                     = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
             $chunkReview->reviewed_words_count += $datum[ 'reviewed_words_count' ];
