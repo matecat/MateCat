@@ -6,10 +6,13 @@ use Constants;
 use Database;
 use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
+use Features\ReviewExtended\ReviewUtils;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use IUnitOfWork;
+use LQA\ChunkReviewStruct;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;
+use LQA\ModelStruct;
 use PDOException;
 use TransactionableTrait;
 
@@ -103,6 +106,19 @@ class UnitOfWork implements IUnitOfWork {
         foreach ( $data as $id => $datum ) {
             $chunkReviewDao->passFailCountsAtomicUpdate( $id, $datum );
         }
+    }
+
+    /**
+     * @param ChunkReviewStruct $chunkReview
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    private function isPass(ChunkReviewStruct $chunkReview) {
+        $score = ($chunkReview->reviewed_words_count == 0) ? 0 : $chunkReview->penalty_points / $chunkReview->reviewed_words_count * 1000;
+        $lqaModelLimit = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
+
+        return $score <= $lqaModelLimit;
     }
 
     /**

@@ -233,8 +233,8 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
 
         foreach ( $chunkReviews as $chunkReview ) {
-            $chunkReviewModel     = new ChunkReviewModel( $chunkReview );
-            $chunkReview->is_pass = ( $chunkReviewModel->getScore() <= $chunkReviewModel->getQALimit( $this->_project->getLqaModel() ) );
+            //$chunkReviewModel     = new ChunkReviewModel( $chunkReview );
+            //$chunkReview->is_pass = ( $chunkReviewModel->getScore() <= $chunkReviewModel->getQALimit( $this->_project->getLqaModel() ) );
             $reviewTransitionModel->addChunkReview( $chunkReview );
         }
 
