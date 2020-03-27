@@ -95,7 +95,6 @@ class SegmentTranslationEventModel  {
             throw new ValidationError('Setting translated state from revision is not allowed.', -2000 );
         }
 
-
         if ( !$this->_saveRequired() ) {
             return ;
         }

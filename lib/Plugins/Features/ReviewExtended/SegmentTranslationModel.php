@@ -120,12 +120,12 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         for ( $i = 0; $i < count( $this->_chunkReviews ); $i++ ) {
 
             // build a new ChunkReviewStruct
-            $chunkReview              = new ChunkReviewStruct();
-            $chunkReview->id          = $this->_chunkReviews[ $i ]->id;
-            $chunkReview->id_project  = $this->_chunkReviews[ $i ]->id_project;
-            $chunkReview->id_job      = $this->_chunkReviews[ $i ]->id_job;
-            $chunkReview->password    = $this->_chunkReviews[ $i ]->password;
-            $chunkReview->source_page = $this->_chunkReviews[ $i ]->source_page;
+            $chunkReview                       = new ChunkReviewStruct();
+            $chunkReview->id                   = $this->_chunkReviews[ $i ]->id;
+            $chunkReview->id_project           = $this->_chunkReviews[ $i ]->id_project;
+            $chunkReview->id_job               = $this->_chunkReviews[ $i ]->id_job;
+            $chunkReview->password             = $this->_chunkReviews[ $i ]->password;
+            $chunkReview->source_page          = $this->_chunkReviews[ $i ]->source_page;
 
             if ( $this->_model->isEnteringReviewedState() && $destinationSourcePage == $chunkReview->source_page ) {
                 // expect the first chunk review record to be the final
@@ -233,13 +233,11 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
 
         foreach ( $chunkReviews as $chunkReview ) {
-            //$chunkReviewModel     = new ChunkReviewModel( $chunkReview );
-            //$chunkReview->is_pass = ( $chunkReviewModel->getScore() <= $chunkReviewModel->getQALimit( $this->_project->getLqaModel() ) );
             $reviewTransitionModel->addChunkReview( $chunkReview );
         }
 
         foreach ( $this->_issuesDeletionList as $issuesToDelete ) {
-            foreach ($issuesToDelete as $issueToDelete){
+            foreach ( $issuesToDelete as $issueToDelete ) {
                 $reviewTransitionModel->addIssueToDelete( $issueToDelete );
             }
         }

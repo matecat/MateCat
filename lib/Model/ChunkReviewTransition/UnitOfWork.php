@@ -9,10 +9,8 @@ use Features\ReviewExtended\Model\ChunkReviewDao;
 use Features\ReviewExtended\ReviewUtils;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use IUnitOfWork;
-use LQA\ChunkReviewStruct;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;
-use LQA\ModelStruct;
 use PDOException;
 use TransactionableTrait;
 
@@ -92,7 +90,6 @@ class UnitOfWork implements IUnitOfWork {
 
         foreach ( $this->models as $model ) {
             foreach ( $model->getChunkReviews() as $chunkReview ) {
-                $data[ $chunkReview->id ][ 'is_pass' ]              = $chunkReview->is_pass;
                 $data[ $chunkReview->id ][ 'penalty_points' ]       = $data[ $chunkReview->id ][ 'penalty_points' ] + $chunkReview->penalty_points;
                 $data[ $chunkReview->id ][ 'reviewed_words_count' ] = $data[ $chunkReview->id ][ 'reviewed_words_count' ] + $chunkReview->reviewed_words_count;
                 $data[ $chunkReview->id ][ 'advancement_wc' ]       = $data[ $chunkReview->id ][ 'advancement_wc' ] + $chunkReview->advancement_wc;
@@ -104,21 +101,17 @@ class UnitOfWork implements IUnitOfWork {
 
         // just one UPDATE for each ChunkReview
         foreach ( $data as $id => $datum ) {
+
+            // calculate here is_pass
+            $chunkReview                       = $chunkReviewDao->findById( $id );
+            $lqaModelLimit                     = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
+            $chunkReview->reviewed_words_count += $datum[ 'reviewed_words_count' ];
+            $chunkReview->penalty_points       += $datum[ 'penalty_points' ];
+            $score                             = ( $chunkReview->reviewed_words_count == 0 ) ? 0 : $chunkReview->penalty_points / $chunkReview->reviewed_words_count * 1000;
+            $datum[ 'is_pass' ]                = ( $score <= $lqaModelLimit );
+
             $chunkReviewDao->passFailCountsAtomicUpdate( $id, $datum );
         }
-    }
-
-    /**
-     * @param ChunkReviewStruct $chunkReview
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    private function isPass(ChunkReviewStruct $chunkReview) {
-        $score = ($chunkReview->reviewed_words_count == 0) ? 0 : $chunkReview->penalty_points / $chunkReview->reviewed_words_count * 1000;
-        $lqaModelLimit = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
-
-        return $score <= $lqaModelLimit;
     }
 
     /**
@@ -151,7 +144,7 @@ class UnitOfWork implements IUnitOfWork {
      */
     private function deleteIssues( ChunkReviewTransitionModel $model ) {
         foreach ( $model->getIssuesToDelete() as $issue ) {
-            $issue->addComments( ( new EntryCommentStruct() )->getEntriesById($issue->id) );
+            $issue->addComments( ( new EntryCommentStruct() )->getEntriesById( $issue->id ) );
             EntryDao::deleteEntry( $issue );
         }
     }
