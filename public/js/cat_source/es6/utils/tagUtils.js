@@ -418,24 +418,22 @@ const TAGS_UTILS =  {
     },
     // TAG MISMATCH
     markTagMismatch: function(tag_mismatch, sid) {
-
+        console.log("markTagMismatch---------------> ", sid);
         if( !_.isUndefined(tag_mismatch.source) && tag_mismatch.source.length > 0 ) {
-            $.each(tag_mismatch.source, function(index) {
-                $('#segment-' + sid + ' .source span.locked:not(.temp)').filter(function() {
-                    let clone = $(this).clone();
-                    clone.find('.inside-attribute').remove();
-                    return TextUtils.htmlEncode(clone.text()) === tag_mismatch.source[index];
-                }).last().addClass('temp');
-            });
+            $('#segment-' + sid + ' .source span.locked.style-tag:not(.temp)').filter(function() {
+                let clone = $(this).clone();
+                clone.find('.inside-attribute').remove();
+                let tag = TextUtils.htmlEncode(clone.text())
+                return  tag_mismatch.source.indexOf(tag) !== -1;
+            }).last().addClass('temp');
         }
         if( !_.isUndefined(tag_mismatch.target) && tag_mismatch.target.length > 0 ) {
-            $.each(tag_mismatch.target, function(index) {
-                $('#segment-' + sid + ' .editarea span.locked:not(.temp)').filter(function() {
-                    let clone = $(this).clone();
-                    clone.find('.inside-attribute').remove();
-                    return TextUtils.htmlEncode(clone.text()) === tag_mismatch.target[index];
-                }).last().addClass('temp');
-            });
+            $('#segment-' + sid + ' .editarea span.locked.style-tag:not(.temp)').filter(function() {
+                let clone = $(this).clone();
+                clone.find('.inside-attribute').remove();
+                let tag = TextUtils.htmlEncode(clone.text())
+                return  tag_mismatch.target.indexOf(tag) !== -1;
+            }).last().addClass('temp');
         }
         // ??
         $('#segment-' + sid + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
@@ -444,7 +442,7 @@ const TAGS_UTILS =  {
 
         $('#segment-' + sid + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' );
         if( !_.isUndefined(tag_mismatch.order) && tag_mismatch.order.length > 0 ) {
-            $( '#segment-' + sid + ' .editarea .locked:not(.mismatch)' ).filter( function () {
+            $( '#segment-' + sid + ' .editarea .locked.style-tag:not(.mismatch)' ).filter( function () {
                 let clone = $( this ).clone();
                 clone.find( '.inside-attribute' ).remove();
                 return TextUtils.htmlEncode(clone.text()) === tag_mismatch.order[0];
