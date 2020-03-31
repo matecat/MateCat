@@ -369,7 +369,7 @@ class MMTServiceApi {
         $headers = ["X-HTTP-Method-Override: $method"];
 
         if ($multipart) {
-            array_push($headers, 'Content-Type: multipart/form-data; charset=utf-8');
+            array_push($headers, 'Content-Type: multipart/form-data');
         } else {
             array_push($headers, 'Content-Type: application/x-www-form-urlencoded; charset=utf-8');
             if ($params)

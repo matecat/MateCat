@@ -386,7 +386,6 @@ class setTranslationController extends ajaxController {
         $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
-        // if evaluateVersionSave() return true it means that it was persisted a new version of the parent segment
         $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
 
         /**
@@ -449,6 +448,8 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
             $TPropagation[ 'match_type' ]             = $old_translation[ 'match_type' ];
+
+            $persistPropagatedVersions = $new_translation->translation !== $old_translation->translation;
 
             try {
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
