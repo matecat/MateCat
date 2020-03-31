@@ -73,7 +73,7 @@ class ProjectOptionsSanitizer {
             'sv-SE',
             'de-CH',
             'tl-PH',
-            'ta-IN',
+            'ta-LK',
             'th-TH',
             'tr-TR',
             'uk-UA',
