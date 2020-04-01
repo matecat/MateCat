@@ -51,8 +51,10 @@ class SegmentSource extends React.Component {
 
     }
 
-    afterRenderActions() {
-        this.props.afterRenderOrUpdate(this.props.segment.segment);
+    afterRenderActions(prevProps) {
+        let tagMismatchChanged = (!_.isUndefined(prevProps) &&
+            prevProps.segImmutable.get('tagMismatch')) ? !this.props.segImmutable.get('tagMismatch').equals(prevProps.segImmutable.get('tagMismatch')): true;
+        this.props.afterRenderOrUpdate(this.props.segment.segment, tagMismatchChanged);
         let self = this;
         if ( this.splitContainer ) {
             $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function(e) {
@@ -178,11 +180,11 @@ class SegmentSource extends React.Component {
         return null;
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
         if ( QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary &&  this.props.segment.qaCheckGlossary.length ) {
             $(this.source).find('.unusedGlossaryTerm').each((index, item)=>QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
         }
-        this.afterRenderActions()
+        this.afterRenderActions(prevProps)
     }
 
     allowHTML(string) {
