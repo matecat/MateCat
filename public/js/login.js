@@ -73,12 +73,12 @@ $.extend(APP, {
         });
 
         //Link footer
-        $('.user-menu-preferences').on('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            $('#modal').trigger('openpreferences');
-            return false;
-        });
+        // $('.user-menu-preferences').on('click', function (e) {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        //     $('#modal').trigger('openpreferences');
+        //     return false;
+        // });
 
         $('.open-login-modal').click(function(e){
             e.preventDefault();
