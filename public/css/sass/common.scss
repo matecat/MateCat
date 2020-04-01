@@ -4973,21 +4973,21 @@ span.share-popup-item-email {
 }
 
 /******** USER LABEL *********/
-.ui.user.label {
+div.ui-user-top-image {
   -webkit-box-align: center;
   -webkit-align-items: center;
   -ms-flex-align: center;
   align-items: center;
-  background: center/cover #9c9c9c;
+  /* background: center/cover #9c9c9c; */
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  color: #fff;
+  color: #0099CC;
   display: -webkit-inline-box;
   display: -webkit-inline-flex;
   display: -ms-inline-flexbox;
-  display: inline-flex;
+  display: inline-flex !important;
   -webkit-box-pack: center;
   -webkit-justify-content: center;
   -ms-flex-pack: center;
@@ -4996,13 +4996,15 @@ span.share-popup-item-email {
   vertical-align: top;
   float: right;
   font-size: 14px;
-  font-weight: bold;
   height: 36px;
   width: 36px;
   margin-left: 10px;
+  margin-right: 10px;
   text-decoration: none;
-  cursor: pointer;
   transition: 0.3s ease;
+  cursor: pointer;
+  background-color: transparent;
+  border: 2px solid #0099CC;
 }
 
 .ui.user.label:hover {

@@ -424,7 +424,12 @@ class TagsMenu extends React.Component {
             left: this.state.coord.x
         };
 
-        let tags = this.getItemsMenuHtml();
+        let tags ;
+        try {
+            tags = this.getItemsMenuHtml()
+        } catch ( e ) {
+            console.error("Not supported tags");
+        }
         return <div className="tags-auto-complete-menu" style={style}
                     ref={(menu)=>{this.menu=menu;}}>
                     {tags}
