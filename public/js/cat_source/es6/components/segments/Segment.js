@@ -630,6 +630,7 @@ class Segment extends React.Component {
                         repetition={autoPropagable}/>
                     <SegmentBody
                         segment={this.props.segment}
+                        segImmutable={this.props.segImmutable}
                         readonly={this.state.readonly}
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
