@@ -64,9 +64,16 @@ class RemoteFileService extends AbstractRemoteFileService {
      */
     public function updateFile( $remoteFile, $content ) {
 
+        $optParams = [
+                'fields' => 'capabilities, webViewLink',
+        ];
+
         try {
-            $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id, [ "fields" => "webViewLink" ] );
-            $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $content );
+            $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id, $optParams );
+            $capabilities = $gdriveFile->getCapabilities();
+            $parents      = $gdriveFile->getParents();
+
+            $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $content, $capabilities->canAddMyDriveParent, $parents );
 
             return $gdriveFile;
         } catch ( Exception $e ) {
@@ -83,7 +90,12 @@ class RemoteFileService extends AbstractRemoteFileService {
      * @return \Google_Service_Drive_DriveFile
      */
     public function getFileLink( $remote_id ) {
-        return $this->gdriveService->files->get( $remote_id, [ "fields" => "webViewLink" ] );
+
+        $optParams = [
+                'fields' => 'capabilities, webViewLink',
+        ];
+
+        return $this->gdriveService->files->get( $remote_id, $optParams );
     }
 
     /**
@@ -98,26 +110,37 @@ class RemoteFileService extends AbstractRemoteFileService {
     }
 
     /**
-     * @param string $remoteId
+     * @param string                          $remoteId
      * @param \Google_Service_Drive_DriveFile $gdriveFile
-     * @param string $content
+     * @param string                          $content
+     * @param bool                            $canAddMyDriveParent
+     * @param array                           $parents
      */
-    private function updateFileOnGDrive( $remoteId, \Google_Service_Drive_DriveFile $gdriveFile, $content ) {
+    private function updateFileOnGDrive( $remoteId, \Google_Service_Drive_DriveFile $gdriveFile, $content, $canAddMyDriveParent, $parents ) {
 
         $newGDriveFileInstance = new \Google_Service_Drive_DriveFile();
-        $newGDriveFileInstance->setDriveId($remoteId);
-        $newGDriveFileInstance->setMimeType(self::officeMimeFromGoogle( $gdriveFile->mimeType ));
-        $newGDriveFileInstance->setName($gdriveFile->getName());
-        $newGDriveFileInstance->setDescription($gdriveFile->getDescription());
-        $newGDriveFileInstance->setKind($gdriveFile->getKind());
+        $newGDriveFileInstance->setDriveId( $remoteId );
+        $newGDriveFileInstance->setMimeType( self::officeMimeFromGoogle( $gdriveFile->mimeType ) );
+        $newGDriveFileInstance->setName( $gdriveFile->getName() );
+        $newGDriveFileInstance->setDescription( $gdriveFile->getDescription() );
+        $newGDriveFileInstance->setKind( $gdriveFile->getKind() );
 
-        $additionalParams = [
-                'mimeType'    => $gdriveFile->mimeType,
-                'data'        => $content,
-                'uploadType'  => 'media',
+        $optParams = [
+                'mimeType'            => $gdriveFile->mimeType,
+                'data'                => $content,
+                'uploadType'          => 'media',
         ];
 
-        $this->gdriveService->files->update( $remoteId, $newGDriveFileInstance, $additionalParams );
+        // According to:
+        // https://developers.google.com/drive/api/v3/multi-parenting
+        // call update() with the addParents field set to the new parent folder's ID
+        // and the enforceSingleParent set to true, to add a parent folder for the file.
+        if(true === $canAddMyDriveParent and false === empty($parents)){
+            $optParams['enforceSingleParent'] = true;
+            $optParams['addParents'] = $parents[0]; // the ID of the first parent
+        }
+
+        $this->gdriveService->files->update( $remoteId, $newGDriveFileInstance, $optParams );
     }
 
     /**
@@ -130,8 +153,15 @@ class RemoteFileService extends AbstractRemoteFileService {
         $copiedFile = new \Google_Service_Drive_DriveFile();
         $copiedFile->setName( $copyTitle );
 
+        // According to:
+        // https://developers.google.com/drive/api/v3/multi-parenting
+        // call copy() with 'enforceSingleParent' field set to true to create a file in a single parent
+        $optParams = [
+            'enforceSingleParent' => true,
+        ];
+
         try {
-            return $this->gdriveService->files->copy( $originFileId, $copiedFile );
+            return $this->gdriveService->files->copy( $originFileId, $copiedFile, $optParams );
         } catch ( Exception $e ) {
             print "An error occurred: " . $e->getMessage();
         }
