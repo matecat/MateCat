@@ -3,6 +3,7 @@
 namespace AsyncTasks\Workers;
 
 use Database;
+use Engine;
 use Stomp;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -25,6 +26,7 @@ class GlossaryWorker extends AbstractWorker {
      * @param AbstractElement $queueElement
      *
      * @return mixed|void
+     * @throws \Exception
      */
     public function process( AbstractElement $queueElement ) {
 
@@ -36,7 +38,7 @@ class GlossaryWorker extends AbstractWorker {
             throw new \InvalidArgumentException( $action . ' is not an allowed action. ' );
         }
 
-        $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode($payload) );
+        $this->_doLog( 'GLOSSARY: ' . $action . ' action was executed with payload ' . json_encode( $payload ) );
 
         $this->{$action}( $payload );
     }
@@ -53,13 +55,12 @@ class GlossaryWorker extends AbstractWorker {
         $message = [];
 
         $tm_keys    = $payload[ 'tm_keys' ];
+        $user       = $this->getUser( $payload[ 'user' ] );
+        $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
+        $_TMS       = $this->getEngine( $featureSet );
         $userRole   = $payload[ 'userRole' ];
-        $user       = $payload[ 'user' ];
-        $featureSet = $payload[ 'featureSet' ];
-        $_TMS       = $payload[ '_TMS' ];
         $id_match   = $payload[ 'id_match' ];
         $config     = $payload[ 'config' ];
-
 
         //get TM keys with read grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $user->uid, $userRole );
@@ -92,7 +93,7 @@ class GlossaryWorker extends AbstractWorker {
         $message[ 'code' ] = $set_successful;
         $message[ 'data' ] = ( $set_successful ? 'OK' : null );
 
-        $this->publishMessage( $message );
+        $this->publishMessage( 'glossary_delete', $message );
     }
 
     /**
@@ -106,11 +107,11 @@ class GlossaryWorker extends AbstractWorker {
 
         $message = [];
 
+        $user         = $this->getUser( $payload[ 'user' ] );
+        $featureSet   = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
+        $_TMS         = $this->getEngine( $featureSet );
         $tm_keys      = $payload[ 'tm_keys' ];
         $userRole     = $payload[ 'userRole' ];
-        $user         = $payload[ 'user' ];
-        $featureSet   = $payload[ 'featureSet' ];
-        $_TMS         = $payload[ '_TMS' ];
         $jobData      = $payload[ 'jobData' ];
         $config       = $payload[ 'config' ];
         $automatic    = $payload[ 'automatic' ];
@@ -192,7 +193,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $message[ 'data' ][ 'matches' ] = $TMS_RESULT;
 
-        $this->publishMessage( $message );
+        $this->publishMessage( 'glossary_get', $message );
     }
 
     /**
@@ -207,12 +208,13 @@ class GlossaryWorker extends AbstractWorker {
         $message             = [];
         $message[ 'errors' ] = [];
 
+        $user         = $this->getUser( $payload[ 'user' ] );
+        $featureSet   = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
+        $_TMS         = $this->getEngine( $featureSet );
         $tm_keys      = $payload[ 'tm_keys' ];
         $userRole     = $payload[ 'userRole' ];
-        $user         = $payload[ 'user' ];
-        $featureSet   = $payload[ 'featureSet' ];
-        $_TMS         = $payload[ '_TMS' ];
         $jobData      = $payload[ 'jobData' ];
+        $tmProps      = $payload[ 'tmProps' ];
         $config       = $payload[ 'config' ];
         $id_job       = $payload[ 'id_job' ];
         $password     = $payload[ 'password' ];
@@ -261,7 +263,6 @@ class GlossaryWorker extends AbstractWorker {
 
             //put the key in the user keiring
             if ( $userIsLogged ) {
-
                 $newMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
                 $newMemoryKey->tm_key = $new_key;
                 $newMemoryKey->uid    = $user->uid;
@@ -275,7 +276,7 @@ class GlossaryWorker extends AbstractWorker {
         $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
         $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
 
-        $config[ 'prop' ] = $jobData->getTMProps();
+        $config[ 'prop' ] = $tmProps;
         $featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $user );
         $config[ 'prop' ] = json_encode( $config[ 'prop' ] );
 
@@ -324,7 +325,7 @@ class GlossaryWorker extends AbstractWorker {
             $message[ 'errors' ][] = [ "code" => -1, "message" => "We got an error, please try again." ];
         }
 
-        $this->publishMessage( $message );
+        $this->publishMessage( 'glossary_set', $message );
     }
 
     /**
@@ -338,12 +339,12 @@ class GlossaryWorker extends AbstractWorker {
 
         $message = [];
 
+        $user       = $this->getUser( $payload[ 'user' ] );
+        $featureSet = $this->getFeatureSetFromString( $payload[ 'featuresString' ] );
+        $_TMS       = $this->getEngine( $featureSet );
         $tm_keys    = $payload[ 'tm_keys' ];
         $userRole   = $payload[ 'userRole' ];
-        $user       = $payload[ 'user' ];
-        $featureSet = $payload[ 'featureSet' ];
-        $_TMS       = $payload[ '_TMS' ];
-        $jobData    = $payload[ 'jobData' ];
+        $tmProps    = $payload[ 'tmProps' ];
         $config     = $payload[ 'config' ];
 
         //get TM keys with read grants
@@ -352,14 +353,13 @@ class GlossaryWorker extends AbstractWorker {
         $config[ 'segment' ]     = htmlspecialchars( $config[ 'segment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
         $config[ 'translation' ] = htmlspecialchars( $config[ 'translation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
 
-        $config[ 'prop' ] = $jobData->getTMProps();
+        $config[ 'prop' ] = $tmProps;
         $featureSet->filter( 'filterGlossaryOnSetTranslation', $config[ 'prop' ], $user );
         $config[ 'prop' ] = json_encode( $config[ 'prop' ] );
 
         if ( $config[ 'newsegment' ] && $config[ 'newtranslation' ] ) {
             $config[ 'newsegment' ]     = htmlspecialchars( $config[ 'newsegment' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
             $config[ 'newtranslation' ] = htmlspecialchars( $config[ 'newtranslation' ], ENT_XML1 | ENT_QUOTES, 'UTF-8', false ); //no XML sanitization is needed because those requests are plain text from UI
-
         }
 
         //prepare the error report
@@ -374,7 +374,6 @@ class GlossaryWorker extends AbstractWorker {
                 $TMS_RESULT          = $_TMS->updateGlossary( $config );
                 $set_code[]          = $TMS_RESULT;
             }
-
         }
 
         $set_successful = true;
@@ -393,19 +392,25 @@ class GlossaryWorker extends AbstractWorker {
             $message[ 'data' ][ 'matches' ] = $TMS_GET_RESULT;
         }
 
-        $this->publishMessage( $message );
+        $this->publishMessage( 'glossary_update', $message );
     }
 
     /**
-     * @param $message
+     * @param string $type
+     * @param array  $message
      *
      * @throws \StompException
      */
-    private function publishMessage( $message ) {
+    private function publishMessage( $type, array $message ) {
 
-        if(is_array($message)){
-            $message = json_encode($message);
-        }
+        $_object = [
+                '_type' => $type,
+                'data'  => [
+                    'payload' => $message,
+                ]
+        ];
+
+        $message = json_encode( $_object );
 
         $stomp = new Stomp( \INIT::$QUEUE_BROKER_ADDRESS );
         $stomp->connect();
@@ -415,5 +420,45 @@ class GlossaryWorker extends AbstractWorker {
         );
 
         $this->_doLog( $message );
+    }
+
+    /**
+     * @param $featuresString
+     *
+     * @return \FeatureSet
+     * @throws \Exception
+     */
+    private function getFeatureSetFromString( $featuresString ) {
+        $featureSet = new \FeatureSet();
+        $featureSet->loadFromString( $featuresString );
+
+        return $featureSet;
+    }
+
+    /**
+     * @param \FeatureSet $featureSet
+     *
+     * @return \Engines_AbstractEngine
+     * @throws \Exception
+     */
+    private function getEngine( \FeatureSet $featureSet ) {
+        $_TMS = Engine::getInstance( 1 );
+        $_TMS->setFeatureSet( $featureSet );
+
+        return $_TMS;
+    }
+
+    /**
+     * @param $array
+     *
+     * @return \Users_UserStruct
+     */
+    private function getUser( $array ) {
+        return new \Users_UserStruct( [
+                'uid'         => $array[ 'uid' ],
+                'email'       => $array[ 'email' ],
+                '$first_name' => $array[ 'first_name' ],
+                'last_name'   => $array[ 'last_name' ],
+        ] );
     }
 }

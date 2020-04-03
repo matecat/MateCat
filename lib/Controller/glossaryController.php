@@ -34,6 +34,8 @@ class glossaryController extends ajaxController {
     private $jobData;
     private $fromtarget;
 
+    private $projectFeaturesString;
+
     public function __construct() {
 
         parent::__construct();
@@ -75,6 +77,7 @@ class glossaryController extends ajaxController {
         //get Job Info, we need only a row of jobs ( split )
         $this->jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
         $this->featureSet->loadForProject( $this->jobData->getProject() );
+        $this->projectFeaturesString = $this->jobData->getProject()->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
 
         /**
          * For future reminder
@@ -158,17 +161,17 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'get',
                 'payload' => [
-                        'tm_keys'      => $this->jobData[ 'tm_keys' ],
-                        'userRole'     => $this->userRole,
-                        'user'         => $this->user,
-                        'featureSet'   => $this->featureSet,
-                        '_TMS'         => $this->_TMS,
-                        'jobData'      => $this->jobData,
-                        'config'       => $config,
-                        'automatic'    => $this->automatic,
-                        'segment'      => $this->segment,
-                        'userIsLogged' => $this->userIsLogged,
-                        'fromtarget'   => $this->fromtarget,
+                        'tm_keys'        => $this->jobData[ 'tm_keys' ],
+                        'userRole'       => $this->userRole,
+                        'user'           => $this->user->toArray(),
+                        'featuresString' => $this->projectFeaturesString,
+                        'jobData'        => $this->jobData->toArray(),
+                        'tmProps'        => $this->jobData->getTMProps(),
+                        'config'         => $config,
+                        'automatic'      => $this->automatic,
+                        'segment'        => $this->segment,
+                        'userIsLogged'   => $this->userIsLogged,
+                        'fromtarget'     => $this->fromtarget,
                 ],
         ];
 
@@ -187,16 +190,16 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'set',
                 'payload' => [
-                        'tm_keys'      => $this->jobData[ 'tm_keys' ],
-                        'userRole'     => $this->userRole,
-                        'user'         => $this->user,
-                        'featureSet'   => $this->featureSet,
-                        '_TMS'         => $this->_TMS,
-                        'jobData'      => $this->jobData,
-                        'config'       => $config,
-                        'id_job'       => $this->id_job,
-                        'password'     => $this->password,
-                        'userIsLogged' => $this->userIsLogged,
+                        'tm_keys'        => $this->jobData[ 'tm_keys' ],
+                        'userRole'       => $this->userRole,
+                        'user'           => $this->user->toArray(),
+                        'featuresString' => $this->projectFeaturesString,
+                        'jobData'        => $this->jobData->toArray(),
+                        'tmProps'        => $this->jobData->getTMProps(),
+                        'config'         => $config,
+                        'id_job'         => $this->id_job,
+                        'password'       => $this->password,
+                        'userIsLogged'   => $this->userIsLogged,
                 ],
         ];
 
@@ -215,13 +218,14 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'update',
                 'payload' => [
-                        'tm_keys'    => $this->jobData[ 'tm_keys' ],
-                        'userRole'   => $this->userRole,
-                        'user'       => $this->user,
-                        'featureSet' => $this->featureSet,
-                        '_TMS'       => $this->_TMS,
-                        'jobData'    => $this->jobData,
-                        'config'     => $config,
+                        'tm_keys'        => $this->jobData[ 'tm_keys' ],
+                        'userRole'       => $this->userRole,
+                        'user'           => $this->user->toArray(),
+                        'featuresString' => $this->projectFeaturesString,
+                        'featureSet'     => $this->featureSet,
+                        'jobData'        => $this->jobData->toArray(),
+                        'tmProps'        => $this->jobData->getTMProps(),
+                        'config'         => $config,
                 ],
         ];
 
@@ -240,13 +244,12 @@ class glossaryController extends ajaxController {
         $params = [
                 'action'  => 'delete',
                 'payload' => [
-                        'tm_keys'    => $this->jobData[ 'tm_keys' ],
-                        'userRole'   => $this->userRole,
-                        'user'       => $this->user,
-                        'featureSet' => $this->featureSet,
-                        '_TMS'       => $this->_TMS,
-                        'id_match'   => $this->id_match,
-                        'config'     => $config,
+                        'tm_keys'        => $this->jobData[ 'tm_keys' ],
+                        'userRole'       => $this->userRole,
+                        'user'           => $this->user->toArray(),
+                        'featuresString' => $this->projectFeaturesString,
+                        'id_match'       => $this->id_match,
+                        'config'         => $config,
                 ],
         ];
 
