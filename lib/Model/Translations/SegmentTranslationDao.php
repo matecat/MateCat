@@ -295,6 +295,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     public static function getUnchangebleStatus( Chunks_ChunkStruct $chunk, $segments_ids, $status, $source_page ) {
+
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
         $and_ste      = '';
@@ -353,18 +354,19 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                       translation IS NULL OR
                       translation = ''
                     ) AND st.id_segment IN ( $segments_ids_placeholders )
-
+                    AND st.id_job = ?
+                    GROUP BY st.id_segment
                     ";
 
         $where_values = array_merge( $where_values, $segments_ids );
+        $where_values[] = $chunk->id;
         $stmt         = $conn->prepare( $sql );
+
         $stmt->execute( $where_values );
 
         return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
             return (int)$id_segment;
         } );
-
-
     }
 
     public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, $is_revision ) {
