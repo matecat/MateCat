@@ -53,7 +53,7 @@ class FileInfoController extends KleinController {
          * get info for every file
          */
         $fileInfo = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk );
-        $this->response->json( ( new FilesInfo() )->render( $fileInfo ) );
+        $this->response->json( ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment ) );
 
     }
 

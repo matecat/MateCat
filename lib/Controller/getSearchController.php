@@ -359,7 +359,7 @@ class getSearchController extends ajaxController {
                     'propagated_ids' => []
             ];
 
-            if ( in_array( $old_translation->status, [
+            if ( $old_translation->translation !== $tRow[ 'translation' ] && in_array( $old_translation->status, [
                     Constants_TranslationStatus::STATUS_TRANSLATED,
                     Constants_TranslationStatus::STATUS_APPROVED,
                     Constants_TranslationStatus::STATUS_REJECTED

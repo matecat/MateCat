@@ -14,6 +14,7 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
         $stmt->execute( array( $id_issue ) );
+
         return $stmt->fetchAll();
     }
 

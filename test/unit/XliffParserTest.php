@@ -112,8 +112,28 @@ class XliffParserTest extends AbstractTest {
         $xliff = [];
         $refMethod->invokeArgs( new Xliff_Parser(), [ &$xliff, 0, 0, $x ] );
         $this->assertEmpty( $xliff[ 'files' ][ 0 ][ 'trans-units' ][ 0 ][ 'target' ][ 'raw-content' ] );
+    }
 
+    public function testEmojiInSource(){
 
+        $x = "<trans-unit id=\"NFDBB2FA9-tu519\" xml:space=\"preserve\">
+<source xml:lang=\"ru-RU\"><g id=\"1\">&#128076;&#127995;</g></source>
+<seg-source><mrk mid=\"0\" mtype=\"seg\"><g id=\"1\">&#128076;&#127995;</g></mrk></seg-source>
+<target xml:lang=\"sk-SK\"></target>
+<group mtc:name=\"x-matecat-word-count\"><count-group name=\"NFDBB2FA9-tu519\"><count count-type=\"x-matecat-raw\">1</count><count count-type=\"x-matecat-weighted\">0</count></count-group></group>
+</trans-unit>
+";
+
+        $refMethod = new ReflectionMethod( 'Xliff_Parser', 'getSource' );
+        $refMethod->setAccessible(true);
+
+        $xliff = [];
+        $refMethod->invokeArgs( new Xliff_Parser(), [ &$xliff, 0, 0, $x ] );
+
+        $this->assertNotEmpty( $xliff[ 'files' ][ 0 ][ 'trans-units' ][ 0 ][ 'source' ][ 'raw-content' ] );
+
+        //the emoticons are not displayed in the IDE but they are present
+        $this->assertEquals(  '<g id="1">👌🏻</g>', $xliff[ 'files' ][ 0 ][ 'trans-units' ][ 0 ][ 'source' ][ 'raw-content' ] );
     }
 
     public function testEmptyNotSelfClosedTargetTagWithAltTrans(){

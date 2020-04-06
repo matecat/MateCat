@@ -106,6 +106,7 @@ $.extend(UI, {
         // Temporary js for header action menu
         UI.initHeader();
         UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
+        CatToolActions.renderFooter();
     },
 	init: function() {
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;

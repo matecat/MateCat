@@ -4,9 +4,10 @@
  */
 import React  from 'react';
 import SegmentStore  from '../../stores/SegmentStore';
+import CatToolStore  from '../../stores/CatToolStore';
 import SegmentFilter from "../header/cattol/segment_filter/segment_filter";
 import SegmentUtils from "../../utils/segmentUtils";
-import SegmentConstants from "../../constants/SegmentConstants";
+import CattoolConstants from "../../constants/CatToolConstants";
 
 class SegmentButton extends React.Component {
 
@@ -229,12 +230,12 @@ class SegmentButton extends React.Component {
     }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.SET_PROGRESS, this.updateProgress);
+        CatToolStore.addListener(CattoolConstants.SET_PROGRESS, this.updateProgress);
     }
 
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.SET_PROGRESS, this.updateProgress);
+        CatToolStore.removeListener(CattoolConstants.SET_PROGRESS, this.updateProgress);
     }
 
     render() {
