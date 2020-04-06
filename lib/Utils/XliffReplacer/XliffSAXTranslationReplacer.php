@@ -479,7 +479,18 @@ class XliffSAXTranslationReplacer {
                 $this->postProcAndFlush( $this->outputFP, $tag );
             }
 
-
+        }
+        //
+        // <note/> handling
+        // ------------------------------------------------
+        // this will transform <note/> to <note></note> in the target file
+        //
+        // we need it because if a file contains <note/> in the final node, the file writing won't be completed
+        elseif($this->CDATABuffer === '<note/>' and $this->bufferIsActive === true) {
+            $this->postProcAndFlush( $this->outputFP, '<note/>' );
+            $this->bufferIsActive = false;
+            $this->CDATABuffer = '';
+            $this->isEmpty = false;
         } else {
             //ok, nothing to be done; reset flag for next coming tag
             $this->isEmpty = false;
