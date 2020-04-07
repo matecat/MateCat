@@ -759,7 +759,7 @@ var UI = {
 
 
         var wph = s.WORDS_PER_HOUR;
-        var completion = s.ESTIMATED_COMPLETION;
+        var completion = (s.ESTIMATED_COMPLETION === "0d 0h 00m") ? "Done" : s.ESTIMATED_COMPLETION;
 
         if (typeof wph == 'undefined') {
             $('#stat-wph').hide();
