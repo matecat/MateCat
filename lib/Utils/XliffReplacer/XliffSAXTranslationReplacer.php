@@ -493,7 +493,7 @@ class XliffSAXTranslationReplacer {
     }
 
     protected function getWordCountGroup( $raw_word_count, $eq_word_count ){
-        return "\n<group mtc:name=\"x-matecat-word-count\"><count-group name=\"$this->currentId\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group></group>";
+        return "\n<count-group name=\"$this->currentId\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group>";
     }
 
     /**
