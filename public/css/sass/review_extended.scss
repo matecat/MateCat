@@ -18,6 +18,15 @@ h1, h2, h3, h4, h5, a, input {
                 background: $notification-error;
                 color: #fff;
                 padding: 5px 10px;
+                a {
+                    color: #fff;
+                    font-weight: bolder;
+                    cursor: pointer;
+                    &:hover {
+                        color: #fff;
+                        text-decoration: underline;
+                    }
+                }
             }
         }
         .re-warning-selected-text-issue {
