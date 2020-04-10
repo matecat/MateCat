@@ -4,7 +4,7 @@ ReviewExtended = {
         return Review.type === 'extended' ;
     },
     type : config.reviewType,
-    issueRequiredOnSegmentChange: false,
+    issueRequiredOnSegmentChange: true,
     localStoragePanelClosed: "issuePanelClosed-"+config.id_job+config.password,
     number: config.revisionNumber,
     getSegmentsIssues: function (  ) {

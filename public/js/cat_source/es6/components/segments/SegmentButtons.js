@@ -33,9 +33,14 @@ class SegmentButton extends React.Component {
     }
 
     clickOnApprovedButton(event) {
-        this.props.updateTranslation();
-        let target = event.target;
-        setTimeout(()=>UI.clickOnApprovedButton(target));
+        let issues = this.getCurrentVersionIssues();
+        if ( config.isReview && !this.props.segment.splitted && this.props.segment.modified && issues.length === 0) {
+            SegmentActions.showIssuesMessage(this.props.segment.sid, 1);
+        } else {
+            this.props.updateTranslation();
+            let target = event.target;
+            setTimeout( () => UI.clickOnApprovedButton( target ) );
+        }
     }
 
     goToNextRepetition(event, status) {
@@ -68,6 +73,18 @@ class SegmentButton extends React.Component {
             html = this.getTranslateButtons()
         }
         return html;
+    }
+
+    getCurrentVersionIssues() {
+        let issues = [];
+        if ( this.props.segment.versions && this.props.segment.versions.length > 0 ) {
+            _.forEach(this.props.segment.versions, (version) => {
+                if ( version.issues && version.issues.length > 0 && version.issues[0].revision_number === this.props.segment.revision_number) {
+                    issues = issues.concat( version.issues );
+                }
+            });
+        }
+        return issues;
     }
 
     getReviewButtons(){

@@ -199,13 +199,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             var sid = UI.currentSegmentId;
             var segment = SegmentStore.getSegmentByIdToJS(sid);
 
-            //If is a splitted segment the user need to specify a issue before approve
-            var isSplit = segment.splitted;
-            if (!isSplit && UI.segmentIsModified(sid) && ReviewExtended.issueRequiredOnSegmentChange) {
-                SegmentActions.showIssuesMessage(sid);
-                return;
-            }
-
             var goToNextUnapproved = ($( button ).hasClass( 'next-unapproved' )) ? true : false;
             SegmentActions.removeClassToSegment( sid, 'modified' );
             UI.currentSegment.data( 'modified', false );
