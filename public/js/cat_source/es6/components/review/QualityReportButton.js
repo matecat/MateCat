@@ -70,7 +70,7 @@ class QualityReportButton extends React.Component {
                         </a>
                     </li>
                 </ul>;
-                if ( !this.state.feedback ) {
+                if ( !this.state.feedback && this.state.progress ) {
                     alert = <div className="feedback-alert"/>
                 }
             }

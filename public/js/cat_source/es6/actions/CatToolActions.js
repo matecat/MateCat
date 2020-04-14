@@ -157,7 +157,9 @@ let CatToolActions = {
         });
         //TODO move it
         UI.projectStats = stats;
-        //TODO move it
+        this.checkQualityReport(stats)
+    },
+    checkQualityReport: function(stats) {
         if ( stats.APPROVED_PERC > 10 ) {
             $('#quality-report-button').attr('data-revised', true);
         }
@@ -185,7 +187,10 @@ let CatToolActions = {
                 // };
                 //
                 // APP.addNotification(notification);
-                CatToolActions.openFeedbackModal("", config.revisionNumber);
+                const isModalClosed = CommonUtils.getFromSessionStorage("feedback-modal");
+                if ( !isModalClosed ) {
+                    CatToolActions.openFeedbackModal("", config.revisionNumber);
+                }
             }
         }
     },
@@ -194,6 +199,9 @@ let CatToolActions = {
             feedback: feedback,
             revisionNumber: revisionNumber,
             overlay: true,
+            onCloseCallback: function() {
+                CommonUtils.addInSessionStorage("feedback-modal", 1, "feedback-modal");
+            },
             successCallback: function() {
                 APP.ModalWindow.onCloseModal();
             }
