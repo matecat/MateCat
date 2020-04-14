@@ -21,7 +21,7 @@ class ModalWindowComponent extends React.Component {
     }
 
     onCloseModal() {
-        if ( this.state.compProps.onCloseCallback) {
+        if ( this.state.compProps && this.state.compProps.onCloseCallback) {
             this.state.compProps.onCloseCallback();
         }
         this.setState({
@@ -54,20 +54,21 @@ class ModalWindowComponent extends React.Component {
     }
 
     render() {
-        return <div> {
-            this.state.isShowingModal && _.isUndefined(this.state.compProps.overlay ) &&
-            <ModalContainerComponent onClose={this.onCloseModal.bind(this)} ref={(modal)=>this.modalRef=modal}
-                                     title={this.state.title} styleContainer={this.state.styleContainer}>
-                <this.state.component {...this.state.compProps}/>
-            </ModalContainerComponent>
-        }
-        {
-            this.state.isShowingModal &&  !_.isUndefined(this.state.compProps.overlay ) && this.state.compProps.overlay &&
-            <ModalOverlayComponent onClose={this.onCloseModal.bind(this)} ref={(modal)=>this.modalRef=modal}
-                                     title={this.state.title} styleContainer={this.state.styleContainer}>
-                <this.state.component {...this.state.compProps}/>
-            </ModalOverlayComponent>
-        }
+        return <div>
+            {( this.state.isShowingModal && this.state.compProps  && this.state.compProps.overlay ) ?
+                <ModalOverlayComponent onClose={this.onCloseModal.bind(this)} ref={(modal)=>this.modalRef=modal}
+                                        title={this.state.title} styleContainer={this.state.styleContainer}>
+                    <this.state.component {...this.state.compProps}/>
+                </ModalOverlayComponent>
+
+            : ( this.state.isShowingModal ) ?
+
+                    <ModalContainerComponent onClose={this.onCloseModal.bind( this )} ref={( modal ) => this.modalRef = modal}
+                                             title={this.state.title} styleContainer={this.state.styleContainer}>
+                        <this.state.component {...this.state.compProps}/>
+                    </ModalContainerComponent> : null
+
+            }
         </div>;
     }
 }
