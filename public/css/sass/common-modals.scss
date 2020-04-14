@@ -684,16 +684,61 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     display: block;
     z-index: 13;
     position: fixed;
-    left: 0;
-    bottom: 35px;
+    left: 6px;
+    bottom: 48px;
     top: unset;
-    width: 430px;
-    height: 420px;
+    width: 325px;
+    height: 342px;
     overflow: auto;
     background-color: unset;
-    .matecat-modal-content {
-        box-shadow: 0 0 0 #e0e0e0, 0px 0px 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+    .modal-logo {
+        width: 34px;
     }
+    .matecat-modal-content {
+        width: 320px;
+        min-width: unset;
+        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important
+    }
+    .matecat-modal-header {
+        text-align: left;
+        min-height: 32px;
+        border-radius: 4px 4px 0 0;
+        overflow: visible;
+        max-height: inherit;
+        background: #002b5c;
+        padding: 6px 10px 3px 24px;
+        background-size: 31px;
+        color: #fff;
+        margin: 0 !important;
+        display: grid;
+        grid-template-columns: 35px 1fr 24px;
+        position: relative;
+        grid-column-gap: 16px;
+        h2 {
+            font-size: 21px;
+        }
+    }
+    .matecat-modal-body {
+        h1 {
+            font-size: 1.7rem;
+        }
+        .matecat-modal-textarea {
+            padding: 0;
+        }
+        .matecat-modal-middle {
+            padding: 0 20px;
+        }
+        .matecat-modal-top, .matecat-modal-bottom {
+            padding: 15px 17px;
+        }
+        .ui.button {
+            font-size: 15px;
+        }
+        .ui.button.cancel-button {
+            //margin-right: 45px;
+        }
+    }
+
 }
 
 .preferences-modal {

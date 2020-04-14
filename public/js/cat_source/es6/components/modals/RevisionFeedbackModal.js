@@ -52,7 +52,7 @@ class RevisionFeedbackModal extends React.Component {
 
     render() {
         let sendLabel = ( this.props.feedback ) ? "Modify" : "Submit";
-        return <div className="shortcuts-modal">
+        return <div className="feedback-modal">
             <div className="matecat-modal-top">
                 <h1>Leave your feedback</h1>
             </div>
