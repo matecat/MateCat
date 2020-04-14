@@ -571,7 +571,6 @@ class Session {
         $remoteFile      = $listRemoteFiles[ 0 ];
 
         $gdriveFile = $this->service->files->get( $remoteFile->remote_id );
-
         $fileTitle = $gdriveFile->getName();
 
         $job                 = \Jobs_JobDao::getById( $id_job )[ 0 ];
@@ -633,8 +632,11 @@ class Session {
         }
 
         // export the file
+        $optParams = [
+                'alt' => 'media'
+        ];
         /** @var Response $file */
-        $file = $service->files->export( $fileId, $mime, [ 'alt' => 'media' ] );
+        $file = $service->files->export( $fileId, $mime, $optParams );
 
         if ( $file->getStatusCode() === 200 ) {
             $directory = Utils::uploadDirFromSessionCookie( $this->guid );

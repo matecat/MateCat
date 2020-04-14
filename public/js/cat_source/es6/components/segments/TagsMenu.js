@@ -234,7 +234,7 @@ class TagsMenu extends React.Component {
                 this.openTagAutocompletePanel();
             }
             TextUtils.setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
-            CursorUtils.saveSelection();
+            // CursorUtils.saveSelection();
         } catch ( e ) {
             console.log(e);
         }
@@ -248,7 +248,7 @@ class TagsMenu extends React.Component {
             }
         }
         let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(TextUtils.htmlEncode(this.state.filter)) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
-        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\/span>)(<span.*?<\\/span>)(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
+        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\/span>)(<span.*?<\\/span>)*(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
 
         editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
         editareaClone.find('.tag-autocomplete-endcursor').after(editareaClone.find('.tag-autocomplete-endcursor').html());
@@ -424,7 +424,12 @@ class TagsMenu extends React.Component {
             left: this.state.coord.x
         };
 
-        let tags = this.getItemsMenuHtml();
+        let tags ;
+        try {
+            tags = this.getItemsMenuHtml()
+        } catch ( e ) {
+            console.error("Not supported tags");
+        }
         return <div className="tags-auto-complete-menu" style={style}
                     ref={(menu)=>{this.menu=menu;}}>
                     {tags}

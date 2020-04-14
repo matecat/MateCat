@@ -81,7 +81,7 @@ class QualityReportController extends KleinController {
         if ( count( $segments_ids ) > 0 ) {
 
             $segmentTranslationEventDao = new SegmentTranslationEventDao();
-            $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids );
+            $ttlArray                   = $segmentTranslationEventDao->setCacheTTL( 60 * 5 )->getTteForSegments( $segments_ids, $this->chunk->id );
             $segments                   = $qrSegmentModel->getSegmentsForQR( $segments_ids );
 
             $segments = $this->_formatSegments( $segments, $ttlArray );
