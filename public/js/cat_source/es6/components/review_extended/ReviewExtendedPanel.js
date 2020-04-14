@@ -52,9 +52,6 @@ class ReviewExtendedPanel extends React.Component {
                         showAddIssueMessage: true,
                         showAddIssueToSelectedTextMessage: false
                     });
-                    setTimeout(()=>{
-                        SegmentActions.openIssuesPanel({ sid: sid }, false);
-                    });
                 }
                 break;
 			case this.addIssueToSelectedTextMessageType:

@@ -35,7 +35,8 @@ class SegmentButton extends React.Component {
     clickOnApprovedButton(event) {
         let issues = this.getCurrentVersionIssues();
         if ( config.isReview && !this.props.segment.splitted && this.props.segment.modified && issues.length === 0) {
-            SegmentActions.showIssuesMessage(this.props.segment.sid, 1);
+            SegmentActions.openIssuesPanel({ sid: this.props.segment.sid }, true);
+            setTimeout(()=> SegmentActions.showIssuesMessage(this.props.segment.sid, 1));
         } else {
             this.props.updateTranslation();
             let target = event.target;
