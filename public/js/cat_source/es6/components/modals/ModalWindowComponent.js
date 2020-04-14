@@ -55,7 +55,7 @@ class ModalWindowComponent extends React.Component {
 
     render() {
         return <div> {
-            this.state.isShowingModal && !this.state.compProps.overlay &&
+            this.state.isShowingModal && _.isUndefined(this.state.compProps.overlay ) &&
             <ModalContainerComponent onClose={this.onCloseModal.bind(this)} ref={(modal)=>this.modalRef=modal}
                                      title={this.state.title} styleContainer={this.state.styleContainer}>
                 <this.state.component {...this.state.compProps}/>
