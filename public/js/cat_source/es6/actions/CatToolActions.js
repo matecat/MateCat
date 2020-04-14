@@ -165,34 +165,35 @@ let CatToolActions = {
         if ( config.isReview && reviseCount && reviseCount[0].advancement_wc >= stats.TOTAL ) {
             let revise = CatToolStore.getQR(config.revisionNumber);
             if (revise && !revise[0].feedback ) {
-                var notification = {
-                    title: 'Leave your feedback',
-                    text: "Kudos, you have completed the job! Please remember to leave some feedback for the translator. " +
-                        "<a id='leaveFeedback' style='cursor: pointer'> Write feedback. </a>",
-                    allowHtml: true,
-                    timer: 6000,
-                    type: 'warning',
-                    position: "tc",
-                    closeCallback: ()=>{
-                        $('#leaveFeedback').off('click');
-                    },
-                    openCallback: ()=>{
-                        $('#leaveFeedback').bind('click','#leaveFeedback', () => {
-                            APP.removeAllNotifications();
-                            CatToolActions.openFeedbackModal("", config.revisionNumber);
-                        });
-                    }
-                };
-
-                APP.addNotification(notification);
+                // var notification = {
+                //     title: 'Leave your feedback',
+                //     text: "Kudos, you have completed the job! Please remember to leave some feedback for the translator. " +
+                //         "<a id='leaveFeedback' style='cursor: pointer'> Write feedback. </a>",
+                //     allowHtml: true,
+                //     timer: 6000,
+                //     type: 'warning',
+                //     position: "tc",
+                //     closeCallback: ()=>{
+                //         $('#leaveFeedback').off('click');
+                //     },
+                //     openCallback: ()=>{
+                //         $('#leaveFeedback').bind('click','#leaveFeedback', () => {
+                //             APP.removeAllNotifications();
+                //             CatToolActions.openFeedbackModal("", config.revisionNumber);
+                //         });
+                //     }
+                // };
+                //
+                // APP.addNotification(notification);
+                CatToolActions.openFeedbackModal("", config.revisionNumber);
             }
         }
     },
     openFeedbackModal: function (feedback, revisionNumber) {
         var props = {
-            text: "Lascia un Feedback.",
             feedback: feedback,
             revisionNumber: revisionNumber,
+            overlay: true,
             successCallback: function() {
                 APP.ModalWindow.onCloseModal();
             }

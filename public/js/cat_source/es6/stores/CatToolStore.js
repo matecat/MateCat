@@ -32,7 +32,10 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
         this.qr = qr;
     },
     getQR: function(revisionNumber) {
-        return _.filter(this.qr.chunk.reviews, (rev)=>rev.revision_number === revisionNumber);
+        if ( this.qr ) {
+            return _.filter(this.qr.chunk.reviews, (rev)=>rev.revision_number === revisionNumber);
+        }
+        return null
     },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);

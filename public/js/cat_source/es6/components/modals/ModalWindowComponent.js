@@ -1,4 +1,6 @@
 import ModalContainerComponent  from './ModalContainerComponent';
+import ModalOverlayComponent  from './ModalOverlayComponent';
+import PropTypes from "prop-types";
 
 class ModalWindowComponent extends React.Component {
 
@@ -8,7 +10,9 @@ class ModalWindowComponent extends React.Component {
         this.state = {
             isShowingModal: false,
             component: '',
-            compProps: {},
+            compProps: {
+                overlay: false
+            },
             title: '',
             styleContainer:'',
             onCloseCallback: false
@@ -51,14 +55,22 @@ class ModalWindowComponent extends React.Component {
 
     render() {
         return <div> {
-            this.state.isShowingModal &&
+            this.state.isShowingModal && !this.state.compProps.overlay &&
             <ModalContainerComponent onClose={this.onCloseModal.bind(this)} ref={(modal)=>this.modalRef=modal}
                                      title={this.state.title} styleContainer={this.state.styleContainer}>
                 <this.state.component {...this.state.compProps}/>
             </ModalContainerComponent>
+        }
+        {
+            this.state.isShowingModal && this.state.compProps.overlay &&
+            <ModalOverlayComponent onClose={this.onCloseModal.bind(this)} ref={(modal)=>this.modalRef=modal}
+                                     title={this.state.title} styleContainer={this.state.styleContainer}>
+                <this.state.component {...this.state.compProps}/>
+            </ModalOverlayComponent>
         }
         </div>;
     }
 }
 
 export default ModalWindowComponent ;
+
