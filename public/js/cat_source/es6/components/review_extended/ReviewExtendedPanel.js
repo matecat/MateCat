@@ -112,8 +112,8 @@ class ReviewExtendedPanel extends React.Component {
 			/>
             {this.state.showAddIssueMessage ? (
 				<div className="re-warning-not-added-issue">
-					<p>In order to Approve the segment you need to add an Issue from the Error list.<br/>
-					View shortcuts <a onClick={()=>APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')}>here</a>.</p>
+					<p>In order to Approve the segment you need to add an Issue from the list below.<br/>
+						<a onClick={()=>APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')}>View shortcuts here</a>.</p>
 				</div>
             ) : (null)}
 
