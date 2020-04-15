@@ -193,11 +193,30 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             }
         },
 
+        getCurrentVersionIssues(segment) {
+            let issues = [];
+            if ( segment.versions && segment.versions.length > 0 ) {
+                _.forEach(segment.versions, (version) => {
+                    if ( version.issues && version.issues.length > 0 && version.issues[0].revision_number === segment.revision_number) {
+                        issues = issues.concat( version.issues );
+                    }
+                });
+            }
+            return issues;
+        },
+
         clickOnApprovedButton: function (button ) {
             // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
             // because of the event is triggered even on download button
             var sid = UI.currentSegmentId;
             var segment = SegmentStore.getSegmentByIdToJS(sid);
+
+            let issues = this.getCurrentVersionIssues(segment);
+            if ( config.isReview && !segment.splitted && segment.modified && issues.length === 0) {
+                SegmentActions.openIssuesPanel({ sid: segment.sid }, true);
+                setTimeout(()=> SegmentActions.showIssuesMessage(segment.sid, 1));
+                return;
+            }
 
             var goToNextUnapproved = ($( button ).hasClass( 'next-unapproved' )) ? true : false;
             SegmentActions.removeClassToSegment( sid, 'modified' );

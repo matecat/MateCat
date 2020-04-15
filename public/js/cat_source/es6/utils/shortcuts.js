@@ -126,7 +126,10 @@ const Shortcuts = {
                 },
                 "navigateIssues": {
                     "label": "Navigate issues panel / Add issue",
-                    "equivalent": "",
+                    "equivalent": {
+                        "standard": "Ctrl + Alt + Arrows/Enter",
+                        "mac": "Ctrl + Alt + Arrows/Enter",
+                    },
                     "keystrokes": {
                         "standard": "ctrl+alt+arrows-enter",
                         "mac": "ctrl+alt+arrows-enter",

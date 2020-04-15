@@ -1,6 +1,8 @@
 import ReviewExtendedIssuesContainer  from './ReviewExtendedIssuesContainer';
 import ReviewExtendedIssuePanel  from './ReviewExtendedIssuePanel';
 import SegmentConstants  from '../../constants/SegmentConstants';
+import Shortcuts  from '../../utils/shortcuts';
+
 
 class ReviewExtendedPanel extends React.Component {
 
@@ -110,7 +112,8 @@ class ReviewExtendedPanel extends React.Component {
             {this.state.showAddIssueMessage ? (
 				<div className="re-warning-not-added-issue">
 					<p>In order to Approve the segment you need to add an Issue from the list below.<br/>
-						<a onClick={()=>APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')}>View shortcuts here</a>.</p>
+						<a onClick={()=>APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')}>{'Shortcut: ' +
+						Shortcuts.cattol.events.navigateIssues.equivalent[Shortcuts.shortCutsKeyType]}</a>.</p>
 				</div>
             ) : (null)}
 
