@@ -1,6 +1,6 @@
 import React  from 'react';
-import SegmentConstants  from '../../../constants/SegmentConstants';
-import SegmentStore  from '../../../stores/SegmentStore';
+import SegmentConstants  from '../../../../constants/SegmentConstants';
+import SegmentStore  from '../../../../stores/SegmentStore';
 
 class BulkSelectionBar extends React.Component {
 
@@ -86,7 +86,7 @@ class BulkSelectionBar extends React.Component {
                 this.onClickBack();
             });
         }
-        SegmentActions.closeSegment(UI.currentSegmentId);
+        // SegmentActions.closeSegment(UI.currentSegmentId);
     }
 
     componentDidMount() {

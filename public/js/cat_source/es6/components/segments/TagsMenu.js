@@ -21,7 +21,8 @@ class TagsMenu extends React.Component {
         let addedTags = _.filter(uniqueSourceTags, function ( item ) {
             return missingTags.indexOf(item.replace(/&quot;/g, '"')) === -1 ;
         });
-        this.menuHeight = $('.editor .targetarea').outerHeight() *150/100;
+        this.menuHeight = this.props.height *150/100;
+        this.menuHeight = this.menuHeight > 500 ? 500 : this.menuHeight;
         this.menuWidth = 270;
         this.state = {
             selectedItem: 0,
@@ -80,12 +81,12 @@ class TagsMenu extends React.Component {
                 }
             }
         }
-        if ( (window.innerHeight - offsetParent.top - y) < (this.menuHeight + 200) ) {
-            y = y - this.menuHeight;
+        if ( (window.innerHeight - offsetParent.top - y) < (this.menuHeight) ) {
+            y = y ;
         } else {
             y = y + 20;
         }
-        if ( (window.innerWidth - offsetParent.left - x) < (this.menuWidth + 100) ) {
+        if ( (window.innerWidth - offsetParent.left - x) < (this.menuWidth) ) {
             x = x - this.menuWidth + 20;
         }
         return { x: x, y: y };
@@ -233,7 +234,7 @@ class TagsMenu extends React.Component {
                 this.openTagAutocompletePanel();
             }
             TextUtils.setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
-            CursorUtils.saveSelection();
+            // CursorUtils.saveSelection();
         } catch ( e ) {
             console.log(e);
         }
@@ -247,7 +248,7 @@ class TagsMenu extends React.Component {
             }
         }
         let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(TextUtils.htmlEncode(this.state.filter)) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
-        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\/span>)(<span.*?<\\/span>)(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
+        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\/span>)(<span.*?<\\/span>)*(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
 
         editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
         editareaClone.find('.tag-autocomplete-endcursor').after(editareaClone.find('.tag-autocomplete-endcursor').html());
@@ -273,7 +274,8 @@ class TagsMenu extends React.Component {
         SegmentActions.closeTagsMenu();
         $('.tag-autocomplete-endcursor').remove();
 
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html());
+        let cleanTag = TextUtils.htmlEncode(TagUtils.cleanTextFromPlaceholdersSpan(tag));
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), editareaClone.html(), cleanTag.trim().length);
         setTimeout(function () {
             UI.segmentQA(UI.currentSegment);
             TagUtils.checkTagProximity();
@@ -416,13 +418,18 @@ class TagsMenu extends React.Component {
         let style = {
             position: "absolute",
             zIndex: 2,
-            maxHeight: "150%",
+            maxHeight: this.menuHeight + 'px',
             overflowY: "auto",
             top: this.state.coord.y,
             left: this.state.coord.x
         };
 
-        let tags = this.getItemsMenuHtml();
+        let tags ;
+        try {
+            tags = this.getItemsMenuHtml()
+        } catch ( e ) {
+            console.error("Not supported tags");
+        }
         return <div className="tags-auto-complete-menu" style={style}
                     ref={(menu)=>{this.menu=menu;}}>
                     {tags}

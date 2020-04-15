@@ -100,7 +100,7 @@ class TeamsProjectsController extends KleinController {
 
         $this->featureSet->loadFromUserEmail( $this->user->email ) ;
 
-        $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], 60 );
+        $projectsList = \Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
 
         $projectsList     = ( new Project( $projectsList ) )->render();
         $this->response->json( array( 'projects' => $projectsList ) );

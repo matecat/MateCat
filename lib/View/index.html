@@ -40,6 +40,9 @@
                 tms_enabled: ${tms_enabled | string:true},
                 mt_enabled: ${mt_enabled | string:true},
                 id_job: '${jid}',
+                id_project: '${pid}',
+                allow_link_to_analysis: '${allow_link_to_analysis}',
+                analysis_enabled: '${analysis_enabled}',
                 get job_id() {
                   console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
                   return this.id_job ;
@@ -210,83 +213,7 @@
 
         <div class="notifications-wrapper"></div>
 
-        <footer class="stats-foo">
-            <div class="footer-body">
-                <!-- job id -->
-                <div class="item">
-                    <p id="job_id">Job ID: <span tal:replace="jid">---</span></p>
-                </div>
-
-                <!-- to from -->
-                <div class="item language">
-                    <p>
-                        <!--<span id="footer-source-lang" tal:content="languages_array_obj"></span>-->
-                        <tal:block tal:repeat="lang languages_array_obj">
-                            <span tal:condition="php: lang['code'] == source_code"  id="footer-source-lang" tal:content="lang/name"></span>
-                        </tal:block>
-                        <tal:block tal:repeat="lang languages_array_obj">
-                            <tal:block tal:condition="php: lang['code'] == target_code" >
-                                <span class="to-arrow"> &#8594; </span>
-                                <span id="footer-target-lang" tal:content="lang/name"></span>
-                            </tal:block>
-                        </tal:block>
-                        <!--<span id="footer-target-lang" tal:content="target_code"></span>-->
-                    </p>
-                </div>
-
-                <!-- progress -->
-                <div class="progress-bar" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                     <div class="meter" style="width:100%;position:relative;">
-                         <div class="bg-loader"></div>
-                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
-                         <a href="#"  class="approved-bar-2nd-pass"/>
-                         <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
-                         <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
-                         <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
-                     </div>
-                    <div class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</div>
-                </div>
-
-                <!-- weighted words -->
-                <div class="item">
-                    <div class="statistics-core">
-                        <div id="stat-eqwords">
-                            <a tal:condition="php: allow_link_to_analysis && !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">
-                                <span tal:condition="not: isCJK">Weighted words</span> :
-                                <span tal:condition="isCJK">Characters : </span>
-                            </a>
-                            <tal:block tal:condition="php: !allow_link_to_analysis && !empty(analysis_enabled)">
-                                <span tal:condition="not: isCJK">Weighted words</span> :
-                                <span tal:condition="isCJK">Characters : </span>
-                            </tal:block>
-                            <tal:block tal:condition="php: empty(analysis_enabled)">Weighted words</tal:block>
-                            <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- to do segments -->
-                <div class="item">
-                    <div id="stat-todo"><span>To-do</span> : <strong>--</strong></div>
-                </div>
-
-                <!-- speed stats -->
-                <div class="statistics-details">
-                    <div id="stat-wph" title="Based on last 10 segments performance">Speed:
-                        <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h
-                    </div>
-                    <div id="stat-completion">Completed in:
-                        <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong>
-                    </div>
-                </div>
-
-                <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
-                    <p class="progress">Calculating word count...</p>
-                </div>
-
-            </div> <!-- .wrapper -->
-        </footer>
+        <footer class="stats-foo"/>
 
         <div metal:use-macro="tm.html/tm_panel"></div>
 

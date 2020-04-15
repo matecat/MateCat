@@ -101,12 +101,7 @@ const SegmentActions = {
             actionType: SegmentConstants.REMOVE_SEARCH_RESULTS
         });
     },
-    setProgress: function(stats) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.SET_PROGRESS,
-            stats: stats
-        });
-    },
+
     /********** Segment **********/
     setOpenSegment: function (sid, fid) {
         AppDispatcher.dispatch({
@@ -503,12 +498,13 @@ const SegmentActions = {
         let $segment = UI.getSegmentById(sid);
         $segment.trigger('modified');
     },
-    replaceEditAreaTextContent: function(sid, fid, text) {
+    replaceEditAreaTextContent: function(sid, fid, text, pastedLength) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_TRANSLATION,
             id: sid,
             fid: fid,
-            translation: text
+            translation: text,
+            pastedLength: pastedLength
         });
     },
 
@@ -1003,7 +999,7 @@ const SegmentActions = {
         } else {
             return API.SEGMENT.approveSegments(segmentsArray).then( ( response ) => {
                 this.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
-                setTimeout(UI.retrieveStatistics, 2000);
+                setTimeout(CatToolActions.updateFooterStatistics(), 2000);
             });
         }
     },
@@ -1017,7 +1013,7 @@ const SegmentActions = {
         } else {
             return API.SEGMENT.translateSegments(segmentsArray).then( ( response ) => {
                 this.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
-                setTimeout(UI.retrieveStatistics, 2000);
+                setTimeout(CatToolActions.updateFooterStatistics(), 2000);
             });
         }
     },

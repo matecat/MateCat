@@ -1068,7 +1068,7 @@ DROP TABLE IF EXISTS `show_clients`;
 /*!50001 DROP VIEW IF EXISTS `show_clients`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `show_clients` AS SELECT 
+/*!50001 CREATE VIEW `show_clients` AS SELECT
  1 AS `host_short`,
  1 AS `users`,
  1 AS `COUNT(*)`*/;
@@ -1247,7 +1247,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-02-10 11:42:39
+-- Dump completed on 2020-03-11 14:03:34
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1437,4 +1437,5 @@ INSERT INTO `phinxlog` VALUES (20200205155333,'2020-02-05 15:54:14','2020-02-05 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-02-10 11:42:39
+-- Dump completed on 2020-03-11 14:03:34
+

@@ -148,7 +148,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @return bool|void
      * @throws Exception
      */
-    public function update( TmKeyManagement_MemoryKeyStruct $obj ) {
+    public function atomicUpdate( TmKeyManagement_MemoryKeyStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );

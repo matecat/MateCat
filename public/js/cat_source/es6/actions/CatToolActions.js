@@ -5,6 +5,8 @@ import Review_QualityReportButton from '../components/review/QualityReportButton
 import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer';
 import SegmentFilter from "../components/header/cattol/segment_filter/segment_filter";
 import AnalyzeConstants from "../constants/AnalyzeConstants";
+import SegmentConstants from "../constants/SegmentConstants";
+import Footer from "../components/footer/Footer";
 
 let CatToolActions = {
 
@@ -123,7 +125,42 @@ let CatToolActions = {
 
         config.last_job_segment = data.last_segment;
         config.firstSegmentOfFiles = data.files;
-    }
+    },
+    renderFooter: function() {
+        var mountPoint = $("footer.stats-foo")[0];
+        ReactDOM.render(React.createElement(Footer, {
+            cattool: true,
+            idProject: config.id_project,
+            idJob: config.job_id,
+            password: config.password,
+            source: config.source_rfc,
+            target: config.target_rfc,
+            isReview: config.isReview,
+            isCJK: config.isCJK,
+            languagesArray: config.languages_array
+        }), mountPoint);
+    },
+    updateFooterStatistics: function () {
+        API.JOB.retrieveStatistics(config.id_job, config.password)
+        .done( function( data ) {
+            if (data.stats){
+                CatToolActions.setProgress(data.stats);
+                UI.setDownloadStatus(data.stats);
+            }
+        });
+    },
+    setProgress: function(stats) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.SET_PROGRESS,
+            stats: stats
+        });
+        //TODO move it
+        UI.projectStats = stats;
+        //TODO move it
+        if ( stats.APPROVED_PERC > 10 ) {
+            $('#quality-report-button').attr('data-revised', true);
+        }
+    },
 };
 
 module.exports = CatToolActions;

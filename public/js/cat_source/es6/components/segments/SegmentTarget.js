@@ -75,8 +75,10 @@ class SegmentTarget extends React.Component {
         this.props.beforeRenderOrUpdate(this.props.segment.translation);
     }
 
-    afterRenderActions() {
-        this.props.afterRenderOrUpdate(this.props.segment.translation);
+    afterRenderActions(prevProps) {
+        let tagMismatchChanged = (!_.isUndefined(prevProps) &&
+            prevProps.segImmutable.get('tagMismatch') ) ? !this.props.segImmutable.get('tagMismatch').equals(prevProps.segImmutable.get('tagMismatch')): true;
+        this.props.afterRenderOrUpdate(this.props.segment.translation, tagMismatchChanged);
     }
 
     onClickEvent(event) {
@@ -244,6 +246,7 @@ class SegmentTarget extends React.Component {
                 { this.state.showTagsMenu ? (
 
                     <TagsMenu segment={this.props.segment}
+                              height={this.props.height}
                     />
 
                 ): null}
@@ -317,8 +320,8 @@ class SegmentTarget extends React.Component {
 
     }
 
-    componentDidUpdate() {
-        this.afterRenderActions();
+    componentDidUpdate(prevProps) {
+        this.afterRenderActions(prevProps);
         if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
             $(this.target).find('.blacklistItem').each((index, item)=>QaBlacklist.powerTipFn(item, this.props.segment.qaCheckGlossary));
         }

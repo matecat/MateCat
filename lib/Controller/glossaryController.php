@@ -89,7 +89,7 @@ class glossaryController extends ajaxController {
             $config = $this->_TMS->getConfigStruct();
 
             // segment related
-            $config[ 'segment' ]     = $this->segment;
+            $config[ 'segment' ]     = strip_tags(html_entity_decode($this->segment));
             $config[ 'translation' ] = $this->translation;
             $config[ 'tnote' ]       = $this->comment;
 

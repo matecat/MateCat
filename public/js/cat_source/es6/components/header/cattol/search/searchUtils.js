@@ -289,6 +289,8 @@ let SearchUtils = {
     },
     markText: function(text, params, isSource, sid) {
 	    let reg;
+        var LTPLACEHOLDER = "##LESSTHAN##";
+        var GTPLACEHOLDER = "##GREATERTHAN##";
         let searchMarker = 'searchMarker';
         let ignoreCase = (params['match-case']) ? '' : 'i';
         if ( this.searchMode === 'source&target' ) {
@@ -300,9 +302,9 @@ let SearchUtils = {
 	        let txt = params.source ? params.source : params.target ;
 
             let regTxt = txt.replace(/(\W)/gi, "\\$1");
-            regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
+            // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
-            reg = new RegExp('(' + TextUtils.htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            reg = new RegExp('(' + TextUtils.htmlEncode(regTxt)+ ')', "g" + ignoreCase);
 
             if (params['exact-match'] ) {
                 reg = new RegExp('\\b(' + TextUtils.htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')\\b', "g" + ignoreCase);
@@ -314,6 +316,8 @@ let SearchUtils = {
             }
         }
         let spanArray = [];
+        text = text.replace(/>/g, GTPLACEHOLDER).replace(/</g, LTPLACEHOLDER);
+        text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
         text = text.replace(/(<[/]*(span|mark|a).*?>)/g, function ( match, text ) {
             spanArray.push(text);
             return "$&";
@@ -324,14 +328,17 @@ let SearchUtils = {
                 ( (!isSource && params.target) || (isSource && !params.target))
             ) {
                 matchIndex++;
-                return '<mark class="' + searchMarker + ' currSearchItem">' + match + '</mark>';
+                return '##LESSTHAN##mark class="' + searchMarker + ' currSearchItem"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
             }
             matchIndex++;
-            return '<mark class="' + searchMarker + '">' + match + '</mark>';
+            return '##LESSTHAN##mark class="' + searchMarker + '"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
         });
         text = text.replace(/(\$&)/g, function ( match, text ) {
             return spanArray.shift();
         });
+        text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        //console.log('-- text3: ' + text);
+        text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
         return text;
     },
     /**

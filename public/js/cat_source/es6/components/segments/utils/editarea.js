@@ -39,10 +39,11 @@ let EditArea = {
         let node = document.createElement("span");
         node.setAttribute('class', 'marker monad nbsp-marker ' + config.nbspPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
+        node.innerHTML = "&nbsp;";
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call(e, 1);
+            modifiedTranslationCallback.call(e);
         });
     },
     insertTabCursor: function (e, modifiedTranslationCallback ) {

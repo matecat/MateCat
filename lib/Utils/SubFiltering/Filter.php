@@ -22,6 +22,7 @@ use SubFiltering\Filters\LtGtDoubleDecode;
 use SubFiltering\Filters\LtGtDoubleEncode;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\MateCatCustomPHToStandardPH;
+use SubFiltering\Filters\PlaceBreakingSpacesInXliff;
 use SubFiltering\Filters\PlaceHoldXliffTags;
 use SubFiltering\Filters\RemoveDangerousChars;
 use SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
@@ -280,6 +281,7 @@ class Filter {
 
         $channel = new Pipeline();
         $channel->addLast( new PlaceHoldXliffTags() );
+        $channel->addLast( new PlaceBreakingSpacesInXliff() );
         $channel->addLast( new RestoreXliffTagsContent() );
         $channel->addLast( new RestorePlaceHoldersToXLIFFLtGt() );
         /** @var $channel Pipeline */

@@ -179,6 +179,7 @@ class SegmentsContainer extends React.Component {
     getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
         let isReviewExtended = !!(this.props.isReviewExtended);
 
+        let segmentHeight = (!segment.opened && this.segmentsHeightsMap[segment.sid]) ? this.segmentsHeightsMap[segment.sid].height : this.lastOpenedHeight;
 
         let item = <Segment
             key={segment.sid}
@@ -198,6 +199,7 @@ class SegmentsContainer extends React.Component {
             setBulkSelection={this.setBulkSelection.bind(this)}
             sideOpen={this.state.sideOpen}
             files={this.state.files}
+            height={segmentHeight}
         />;
         if ( segment.id_file !== currentFileId ) {
             let file = (!!this.state.files)? _.find(this.state.files, (file) => file.id == segment.id_file): false;
@@ -287,7 +289,9 @@ class SegmentsContainer extends React.Component {
         }
         let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index-1).get('id_file');
 
-        if ( this.segmentsHeightsMap[segment.get('sid')] && this.segmentsHeightsMap[segment.get('sid')].height > 0 &&  this.segmentsHeightsMap[segment.get('sid')].segment.equals(segment)) {
+        let calculatedHeight = this.segmentsHeightsMap[segment.get('sid')];
+
+        if ( calculatedHeight && calculatedHeight.height > 0 &&  calculatedHeight.segment.equals(segment)) {
             let heightToAdd = 0;
             if ( previousFileId !== segment.get('id_file')) {
                 heightToAdd = 43;
@@ -295,7 +299,7 @@ class SegmentsContainer extends React.Component {
             if ( index === this.state.segments.size - 1) {
                 heightToAdd = heightToAdd + 150;
             }
-            return this.segmentsHeightsMap[segment.get('sid')].height + heightToAdd ;
+            return calculatedHeight.height + heightToAdd ;
         }
 
         let itemHeight = 0;

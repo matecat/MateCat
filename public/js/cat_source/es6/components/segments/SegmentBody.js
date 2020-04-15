@@ -68,14 +68,14 @@ class SegmentBody extends React.Component {
         }
     }
 
-    afterRenderOrUpdate(area) {
+    afterRenderOrUpdate(area, tagMismatchChanged) {
         if ( area && area.length > 0 ) {
             var segment = UI.getSegmentById(this.props.segment.sid);
 
             if (LXQ.enabled()) {
                 LXQ.reloadPowertip(segment);
             }
-            if ( this.checkLockTags(area) ) {
+            if ( this.checkLockTags(area) && tagMismatchChanged ) {
                 try {
                     if ( this.hasSourceOrTargetTags() ) {
                         segment.addClass( 'hasTagsToggle' );
@@ -176,6 +176,7 @@ class SegmentBody extends React.Component {
                     <div className="outersource">
                         <SegmentSource
                             segment={this.props.segment}
+                            segImmutable={this.props.segImmutable}
                             decodeTextFn={this.props.decodeTextFn}
                             afterRenderOrUpdate={this.afterRenderOrUpdate}
                             beforeRenderOrUpdate={this.beforeRenderOrUpdate}
@@ -186,6 +187,7 @@ class SegmentBody extends React.Component {
                         </div>
                         <SegmentTarget
                             segment={this.props.segment}
+                            segImmutable={this.props.segImmutable}
                             enableTagProjection={this.props.enableTagProjection}
                             isReview={this.props.isReview}
                             isReviewExtended={this.props.isReviewExtended}
@@ -200,6 +202,7 @@ class SegmentBody extends React.Component {
                             readonly={this.props.readonly}
                             openSegment={this.props.openSegment}
                             removeSelection={this.props.removeSelection}
+                            height={this.props.height}
                         />
 
                     </div>

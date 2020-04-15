@@ -111,7 +111,7 @@ class setSegmentSplitController extends ajaxController {
         ];
 
         $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
-        $result         = $translationDao->update( $translationStruct );
+        $result         = $translationDao->atomicUpdate( $translationStruct );
 
         if ( $result instanceof TranslationsSplit_SplitStruct ) {
             //return success

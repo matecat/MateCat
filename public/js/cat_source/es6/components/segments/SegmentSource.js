@@ -51,8 +51,10 @@ class SegmentSource extends React.Component {
 
     }
 
-    afterRenderActions() {
-        this.props.afterRenderOrUpdate(this.props.segment.segment);
+    afterRenderActions(prevProps) {
+        let tagMismatchChanged = (!_.isUndefined(prevProps) &&
+            prevProps.segImmutable.get('tagMismatch')) ? !this.props.segImmutable.get('tagMismatch').equals(prevProps.segImmutable.get('tagMismatch')): true;
+        this.props.afterRenderOrUpdate(this.props.segment.segment, tagMismatchChanged);
         let self = this;
         if ( this.splitContainer ) {
             $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function(e) {
@@ -107,10 +109,10 @@ class SegmentSource extends React.Component {
 
     markSource() {
         let source = this.props.segment.decoded_source;
+        source = this.markSearch(source);
         source = this.markGlossary(source);
         source = this.markQaCheckGlossary(source);
         source = this.markLexiqa(source);
-        source = this.markSearch(source);
         return source;
     }
 
@@ -136,7 +138,8 @@ class SegmentSource extends React.Component {
     }
 
     markLexiqa(source) {
-        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source) {
+        let searchEnabled = this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.source;
+        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
             source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
         }
         return source;
@@ -177,11 +180,11 @@ class SegmentSource extends React.Component {
         return null;
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
         if ( QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary &&  this.props.segment.qaCheckGlossary.length ) {
             $(this.source).find('.unusedGlossaryTerm').each((index, item)=>QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
         }
-        this.afterRenderActions()
+        this.afterRenderActions(prevProps)
     }
 
     allowHTML(string) {

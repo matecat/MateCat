@@ -114,12 +114,12 @@ class Segment extends React.Component {
     }
 
     openSegmentFromAction(sid) {
-        let self = this;
         sid = sid + "";
+        clearTimeout(this.openSegmentTimeOut);
         if ( (sid === this.props.segment.sid || (this.props.segment.original_sid === sid && this.props.segment.firstOfSplit))
             && !this.props.segment.opened ) {
-            setTimeout(function () {
-                self.openSegment();
+            this.openSegmentTimeOut = setTimeout( () => {
+                this.openSegment();
             });
         }
     }
@@ -506,6 +506,7 @@ class Segment extends React.Component {
             nextState.showRevisionPanel !== this.state.showRevisionPanel ||
             nextState.selectedTextObj !== this.state.selectedTextObj ||
             nextProps.sideOpen !== this.props.sideOpen ||
+            nextProps.height !== this.props.height ||
             nextState.showActions !== this.state.showActions
         );
     }
@@ -632,6 +633,7 @@ class Segment extends React.Component {
                         repetition={autoPropagable}/>
                     <SegmentBody
                         segment={this.props.segment}
+                        segImmutable={this.props.segImmutable}
                         readonly={this.state.readonly}
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
@@ -644,6 +646,7 @@ class Segment extends React.Component {
                         isReviewExtended={this.props.isReviewExtended}
                         reviewType={this.props.reviewType}
                         isReviewImproved={this.props.isReviewImproved}
+                        height={this.props.height}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
