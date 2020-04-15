@@ -59,8 +59,8 @@ class RevisionFeedbackModal extends React.Component {
             <div className="matecat-modal-middle">
                 <div className="matecat-modal-text">
                     { this.props.revisionNumber === 1 ? (
-                    <span>Please leave some feedback for the translator on the job quality</span> ) :
-                        (<span>Please leave some feedback for the reviser on the job quality</span>)
+                    <span>Please leave some feedback for the translator on the job quality.</span> ) :
+                        (<span>Please leave some feedback for the reviser on the job quality.</span>)
                     }
                 </div>
                 <div className="matecat-modal-textarea">
