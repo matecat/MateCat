@@ -98,5 +98,20 @@ API.JOB = {
             xhrFields: { withCredentials: true },
             url : APP.getRandomUrl() + "api/app/jobs/" + idJob +"/" + password + "/stats"
         });
+    },
+    sendRevisionFeedback: function (idJob, revisionNumber, password, text) {
+        let data = {
+            id_job: idJob,
+            revision_number: revisionNumber,
+            password: password,
+            feedback: text
+        };
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "POST",
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v3/feedback"
+        });
     }
 };
