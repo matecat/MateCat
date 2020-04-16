@@ -803,8 +803,20 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                         if ( is_null( $value ) ) {
                             continue;
                         }
-                        $place_holders_fields[] = "$key = ?";
-                        $field_values[]         = $value;
+
+                        // UPDATE ONLY THIS FIELDS
+                        $fields_to_update = [
+                            'version_number',
+                            'status',
+                            'translation_date',
+                            'autopropagated_from',
+                            'warning',
+                        ];
+
+                        if(in_array($key, $fields_to_update)){
+                            $place_holders_fields[] = "$key = ?";
+                            $field_values[]         = $value;
+                        }
                     }
 
                     $place_holders_fields = implode( ",", $place_holders_fields );
