@@ -12,6 +12,10 @@ import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
+import {findWithRegex, encodeContent, getEntities} from "./utils/ContentEncoder";
+import {CompositeDecorator, convertFromRaw, convertToRaw, Editor, EditorState} from "draft-js";
+import TagEntity from "./TagEntity/TagEntity.component";
+
 
 
 class SegmentSource extends React.Component {
@@ -27,6 +31,40 @@ class SegmentSource extends React.Component {
         this.openConcordance = this.openConcordance.bind(this);
 
         this.beforeRenderActions();
+
+        const decorator = new CompositeDecorator([
+            {
+                strategy: getEntityStrategy('IMMUTABLE'),
+                component: TagEntity,
+                props: {
+                    onClick: this.onEntityClick
+                }
+            }
+        ]);
+
+        let raw = {
+            blocks: [
+                {
+                    text: (
+                        this.props.segment.segment
+                    ),
+                    type: 'unstyled',
+                    entityRanges: [],
+                },
+            ],
+            entityMap: {},
+        };
+
+        // Inizializza Editor State con solo testo
+        const plainEditorState = EditorState.createWithContent(convertFromRaw(raw), decorator);
+        const rawEncoded = encodeContent(plainEditorState);
+
+
+        this.state = {
+            editorState: rawEncoded,
+            editAreaClasses : ['targetarea']
+        };
+        this.onChange = (editorState) => this.setState({editorState});
     }
 
     decodeTextSource(segment, source) {
@@ -192,17 +230,26 @@ class SegmentSource extends React.Component {
     }
 
     render() {
-        let source = this.markSource();
+        // let source = this.markSource();
+
+        const {editorState} = this.state;
+        const {onChange} = this;
 
         let html = <div ref={(source)=>this.source=source}
                         className={"source item"}
                         tabIndex={0}
                         id={"segment-" + this.props.segment.sid +"-source"}
                         data-original={this.originalSource}
-                        dangerouslySetInnerHTML={ this.allowHTML(source) }
                         onCopy={this.onCopyEvent.bind(this)}
                         onDragStart={this.onDragEvent.bind(this)}
-        />;
+        >
+            <Editor
+                editorState={editorState}
+                onChange={onChange}
+                ref={(el) => this.editor = el}
+                readOnly={true}
+            />
+        </div>;
         if ( this.props.segment.openSplit ) {
             if ( this.props.segment.splitted ) {
                 let segmentsSplit = this.props.segment.split_group;
@@ -250,5 +297,18 @@ class SegmentSource extends React.Component {
 
     }
 }
-
+function getEntityStrategy(mutability, callback) {
+    return function (contentBlock, callback, contentState) {
+        contentBlock.findEntityRanges(
+            (character) => {
+                const entityKey = character.getEntity();
+                if (entityKey === null) {
+                    return false;
+                }
+                return contentState.getEntity(entityKey).getMutability() === mutability;
+            },
+            callback
+        );
+    };
+}
 export default SegmentSource;

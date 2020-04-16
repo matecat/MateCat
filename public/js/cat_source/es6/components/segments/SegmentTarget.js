@@ -27,7 +27,6 @@ class SegmentTarget extends React.Component {
                 : this.props.segment.translation),
             showTagsMenu: false,
         };
-        this.replaceTranslation = this.replaceTranslation.bind(this);
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
         this.beforeRenderActions = this.beforeRenderActions.bind(this);
         this.afterRenderActions = this.afterRenderActions.bind(this);
@@ -35,14 +34,6 @@ class SegmentTarget extends React.Component {
         this.hideTagsMenu = this.hideTagsMenu.bind(this);
         this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this);
         this.storeTranslation = this.storeTranslation.bind(this);
-    }
-
-    replaceTranslation(sid, translation) {
-        if (this.props.segment.sid == sid) {
-            this.setState({
-                translation: translation
-            });
-        }
     }
 
     showTagsMenu(sid) {
@@ -300,7 +291,6 @@ class SegmentTarget extends React.Component {
     }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
         SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
         SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
@@ -311,7 +301,6 @@ class SegmentTarget extends React.Component {
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
         SegmentStore.removeListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
         SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
@@ -333,10 +322,9 @@ class SegmentTarget extends React.Component {
     }
 
     render() {
+        // translation = this.markTranslation(translation);
         // let translation = this.props.segment.decoded_translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
         let buttonsDisabled = false;
-        // translation = this.markTranslation(translation);
-
         let translation = this.props.segment.translation;
 
         if (translation.trim().length === 0) {
