@@ -1,0 +1,44 @@
+.tag-container{
+  position: relative;
+  display: inline-block;
+  .tag {
+    display: inline-block;
+    background: #F2F4F7;
+    box-shadow: inset 0 0 0 2px #E5E9F1;
+    border-radius: 7px;
+    font-size: 15px;
+    color: #767676;
+    font-style: italic;
+    padding: 2px 4px;
+    vertical-align: middle;
+    margin: 1px;
+    cursor: pointer;
+    word-break: break-all;
+    span{
+      &::selection{
+        color: royalblue;
+        background-color: transparent;
+      }
+    }
+    &:hover{
+      background: #E5E9F1;
+      cursor: pointer;
+    }
+  }
+}
+
+.tag-tooltip{
+  position: absolute;
+  width: 140px;
+  height: 32px;
+  background-color: #ccc;
+  top: -35px;
+  border-radius: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  .tooltip-txt{
+
+  }
+}
