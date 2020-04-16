@@ -21,12 +21,12 @@ class TagEntity extends Component {
     };
 
     tooltipToggle = () => {
-       // this will trigger a rerender in the main Editor Component
-       const {showTooltip} = this.state;
-       console.log('toggle: ',showTooltip);
-       this.setState({
-           showTooltip: !showTooltip
-       })
+        // this will trigger a rerender in the main Editor Component
+        const {showTooltip} = this.state;
+        console.log('toggle: ',showTooltip);
+        this.setState({
+            showTooltip: !showTooltip
+        })
     };
 
     highlightTag = () => {
@@ -40,18 +40,18 @@ class TagEntity extends Component {
         const {decoratedText, entityKey, offsetkey, blockKey, start, end, children} = this.props;
         const {selection, forceSelection} = children[0].props;
         const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
-         console.log('props of the entity with key: ' + entityKey + '-> ', this.props);
+        console.log('props of the entity with key: ' + entityKey + '-> ', this.props);
 
-        return <div className="tag-container" contentEditable="false" suppressContentEditableWarning={true}>
+        return <div className="tag-container" /*contentEditable="false" suppressContentEditableWarning={true}*/>
             {showTooltip && <TooltipInfo/>}
             <span data-offset-key={offsetkey}
                   className="tag"
                   unselectable="on"
                   suppressContentEditableWarning={true}
-                  onMouseEnter={() => tooltipToggle()}
-                  onMouseLeave={() => tooltipToggle()}
+                /*onMouseEnter={() => tooltipToggle()}
+                onMouseLeave={() => tooltipToggle()}*/
                   onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
-                  contentEditable="false">
+                /*contentEditable="false"*/>
                 {children}
             </span>
         </div>

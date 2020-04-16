@@ -5,6 +5,64 @@ import {
 } from 'draft-js';
 
 
+export const tagStruct = {
+    'ph': {
+        type: 'ph',
+        openRegex: /&lt;ph/g,
+        openLength: 6,
+        closeRegex: /(\/&gt;)/, // '/>'
+        selfClosing: true,
+        isClosure: false,
+        placeholder: null,
+        placeholderRegex: /equiv-text="base64:(.+)"/,
+        decodeNeeded: true
+    },
+    'g': {
+        type: 'g',
+        openRegex: /&lt;g/g,
+        openLength: 5,
+        closeRegex: /(&gt;)/, // '>'
+        selfClosing: false,
+        isClosure: false,
+        placeholder: null,
+        placeholderRegex: /(id="\w+")/,
+        decodeNeeded: false
+    },
+    'cl': {
+        type: 'cl',
+        openRegex: /&lt;\/g&gt;/g,
+        openLength: 10,
+        closeRegex: null,
+        selfClosing: false,
+        isClosure: true,
+        placeholder: '<g/>',
+        placeholderRegex: null,
+        decodeNeeded: false
+    },
+    'nbsp':{
+        type: 'nbsp',
+        openRegex: /##\$(_A0)\$##/g,
+        openLength: 9,
+        closeRegex: null,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: '°',
+        placeholderRegex: null,
+        decodeNeeded: false
+    },
+    'tab':{
+        type: 'nbsp',
+        openRegex: /##\$(_09)\$##/g,
+        openLength: 9,
+        closeRegex: null,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: '°',
+        placeholderRegex: null,
+        decodeNeeded: false
+    }
+};
+
 /**
  *
  * @param tag
@@ -12,28 +70,21 @@ import {
  */
 export const decodeTagInfo = (tag) => {
     let decodedTagData;
-    // Todo: take out this structure
-    const tagInfoRegex = {
-        'ph': {
-            regex: /equiv-text="base64:(.+)"/, // Capture base64 text inside
-            decodeNeeded: true,
-        },
-        'g': {
-            regex: /(id="\w+")/, // Capture id
-            decodeNeeded: false,
-        },
-    };
-    // Todo: add check to be sure that each tag is available and has got his own regex
-    if(tag.type in tagInfoRegex) {
-        const idMatch = tagInfoRegex[tag.type].regex.exec(tag.data.originalText);
-        if(idMatch && idMatch.length > 1) {
-            decodedTagData =  tagInfoRegex[tag.type].decodeNeeded ? atob(idMatch[1]) : idMatch[1];
-            decodedTagData = unescapeHTML(decodedTagData);
-        }else{
-            decodedTagData = '</>'
+    if(tag.type in tagStruct) {
+        // If regex exists, try to search, else put placeholder
+        if(tagStruct[tag.type].placeholderRegex!== null){
+            const idMatch = tagStruct[tag.type].placeholderRegex.exec(tag.data.originalText);
+            if(idMatch && idMatch.length > 1) {
+                decodedTagData =  tagStruct[tag.type].decodeNeeded ? atob(idMatch[1]) : idMatch[1];
+                decodedTagData = unescapeHTML(decodedTagData);
+            }else if(tagStruct[tag.type].placeholder){
+                decodedTagData = tagStruct[tag.type].placeholder;
+            }
+        }else {
+            decodedTagData = tagStruct[tag.type].placeholder;
         }
     }else{
-        decodedTagData = '</>'
+        decodedTagData = '<unknown/>'
     }
     return decodedTagData;
 };
@@ -208,10 +259,10 @@ export const generateEntityMapForRaw = (originalContent, entitySet) => {
     console.log('Set: ', entitySet)
     entitySet.forEach( ({key, type, mutability, data}) => {
         entityMap[key] = {
-                type: type,
-                mutability: mutability,
-                data: data
-            };
+            type: type,
+            mutability: mutability,
+            data: data
+        };
         console.log('Added: ', entityMap[key])
     });
     return entityMap;
@@ -266,62 +317,49 @@ export const encodeContent = (editorState) => {
  */
 export const matchTag = (plainContent) => {
 
-    // Todo: take out as data structure
-    const tagRegex = {
-        'ph': {
-            type: 'ph',
-            openRegex: /&lt;ph/g,
-            openLength: 6,
-            closeRegex: true,
-            selfClosing: false,
-            isClosure: false
-        },
-        'g': {
-            type: 'g',
-            openRegex: /&lt;g/g,
-            openLength: 5,
-            closeRegex: true,
-            selfClosing: false,
-            isClosure: false
-        },
-        'cl': {
-            type: 'cl',
-            openRegex: /&lt;\/&gt;/g,
-            openLength: 9,
-            closeRegex: null,
-            selfClosing: true,
-            isClosure: true
-        },
-    };
-
     //findWithRegexV4(plainContent, tagRegex['ph']);
 
     // STEP 1 - Find all opening and save offset
     let tagMap;
     let openTags = [];
-    for (let key in tagRegex) {
-        if(!tagRegex[key].selfClosing){
-            tagMap = findWithRegexV4(plainContent, tagRegex[key]);
+    for (let key in tagStruct) {
+        if(!tagStruct[key].selfClosing && !tagStruct[key].isClosure){
+            tagMap = findWithRegexV4(plainContent, tagStruct[key]);
             openTags = [...openTags, ...tagMap]
         }
     }
     console.log('Openings: ', openTags);
+
     // STEP 2 - Find all closing and save offset
     let closingTags = [];
-    for (let key in tagRegex) {
-        if(tagRegex[key].isClosure){
-            tagMap = findWithRegexV4(plainContent, tagRegex[key]);
+    for (let key in tagStruct) {
+        if(tagStruct[key].isClosure){
+            tagMap = findWithRegexV4(plainContent, tagStruct[key]);
             closingTags = [...closingTags, ...tagMap]
         }
     }
+
     console.log('Closures: ', closingTags);
-    // STEP 3 - Sort arrays by offset
+
+    // STEP 3 - Find all self-closing tag and save offset
+    let selfClosingTags = [];
+    for (let key in tagStruct) {
+        if(tagStruct[key].selfClosing){
+            tagMap = findWithRegexV4(plainContent, tagStruct[key]);
+            selfClosingTags = [...selfClosingTags, ...tagMap]
+        }
+    }
+    console.log('Self-closing: ', selfClosingTags);
+
+    // STEP 4 - Sort arrays by offset
     openTags.sort((a, b) => {return b.offset-a.offset});
     closingTags.sort((a, b) => {return a.offset-b.offset});
-    // STEP 4 - Matching
+
+    // STEP 5 - Matching non self-closing with each closure
+    // Assuming that closure is the same for every tag: '</>'
     closingTags.forEach( closingTag => {
         let i = 0, notFound = true;
-        while(i < openTags.length -1 && notFound) {
+        while(i < openTags.length && notFound) {
             if(closingTag.offset > openTags[i].offset && openTags[i].data.closureOffset === -1){
                 notFound = !notFound;
                 openTags[i].data.closureOffset = closingTag.offset;
@@ -330,8 +368,9 @@ export const matchTag = (plainContent) => {
             i++;
         }
     });
-    return [...openTags, ...closingTags];
+    return [...openTags, ...closingTags, ...selfClosingTags];
 };
+
 
 
 /**
@@ -360,10 +399,9 @@ export const findWithRegexV4 = (text, tagSignature) => {
             entity.length = openLength;
             entity.data = {'openingOffset': -1, 'openTagId': null};
         }else {
-            // Search for tag closure (identical for each tag) start on opening offset
             let slicedText = text.slice(entity.offset, text.length);
-            matchArr = /&gt;/.exec(slicedText);
-            entity.length = matchArr.index + 5; //Length of previous regex, todo: make this number calculated
+            matchArr = closeRegex.exec(slicedText); // TODO: closing regex MUST be based on tag's type
+            entity.length = matchArr.index + matchArr[1].length; //Length of previous regex
             let originalText = text.slice(entity.offset, entity.offset + entity.length);
             entity.data = {'originalText': originalText, 'closureOffset': -1, 'closeTagId': null};
         }
