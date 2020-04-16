@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-// import "./Tag.scss";
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
 
 class TagEntity extends Component {
