@@ -333,9 +333,11 @@ class SegmentTarget extends React.Component {
     }
 
     render() {
-        let translation = this.props.segment.decoded_translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
+        // let translation = this.props.segment.decoded_translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
         let buttonsDisabled = false;
-        translation = this.markTranslation(translation);
+        // translation = this.markTranslation(translation);
+
+        let translation = this.props.segment.translation;
 
         if (translation.trim().length === 0) {
             buttonsDisabled = true;

@@ -2197,7 +2197,7 @@ section.editor .sid {
     /*display: inline-block;*/
     /*float:right;*/
     width: 100%;
-    height: 96%;
+    //height: 96%;
     min-height: 54px;
     resize: none;
     overflow: hidden;
@@ -2280,9 +2280,6 @@ body.archived section {
 section.readonly .status-container a.status:hover,
 body.archived section .status-container a.status:hover {
     cursor: default !important;
-}
-.editarea div:last-child {
-    margin-bottom: -22px !important;
 }
 
 .editor .editarea {
