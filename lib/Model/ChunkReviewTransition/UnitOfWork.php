@@ -142,7 +142,16 @@ class UnitOfWork implements IUnitOfWork {
      * @return int
      */
     private function recheckDatum( ChunkReviewStruct $chunkReview, $datum, $key ) {
-        return ( $chunkReview->$key > 0 ) ? $datum[ $key ] : 0;
+
+        if ( $chunkReview->$key > 0 ) {
+            if ( ( $chunkReview->$key + $datum[ $key ] ) < 0 ) {
+                return 0;
+            }
+
+            return $datum[ $key ];
+        }
+
+        return 0;
     }
 
     /**
