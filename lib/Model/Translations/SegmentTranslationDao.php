@@ -806,6 +806,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
                         // UPDATE ONLY THIS FIELDS
                         $fields_to_update = [
+                            'translation',
                             'version_number',
                             'status',
                             'translation_date',
