@@ -376,11 +376,14 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                       translation IS NULL OR
                       translation = ''
                     ) AND st.id_segment IN ( $segments_ids_placeholders )
-
+                    AND st.id_job = ?
+                    GROUP BY st.id_segment
                     ";
 
         $where_values = array_merge( $where_values, $segments_ids );
+        $where_values[] = $chunk->id;
         $stmt         = $conn->prepare( $sql );
+
         $stmt->execute( $where_values );
 
         return $stmt->fetchAll( PDO::FETCH_FUNC, function ( $id_segment ) {
@@ -800,8 +803,20 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
                         if ( is_null( $value ) ) {
                             continue;
                         }
-                        $place_holders_fields[] = "$key = ?";
-                        $field_values[]         = $value;
+
+                        // UPDATE ONLY THIS FIELDS
+                        $fields_to_update = [
+                            'version_number',
+                            'status',
+                            'translation_date',
+                            'autopropagated_from',
+                            'warning',
+                        ];
+
+                        if(in_array($key, $fields_to_update)){
+                            $place_holders_fields[] = "$key = ?";
+                            $field_values[]         = $value;
+                        }
                     }
 
                     $place_holders_fields = implode( ",", $place_holders_fields );

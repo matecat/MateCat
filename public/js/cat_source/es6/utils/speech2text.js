@@ -235,7 +235,7 @@ Speech2Text.init  = function () {
         });
 
         $(document).on('contribution:copied', function( ev, data) {
-            if ( Speech2Text.microphone.closest('section').attr('id') == data.segment.attr('id') ) {
+            if ( Speech2Text.microphone.closest('section').attr('id') == data.segment.sid ) {
                 Speech2Text.finalTranscript = data.translation + ' ';
             }
         });

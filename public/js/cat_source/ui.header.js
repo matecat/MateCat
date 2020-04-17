@@ -28,7 +28,7 @@ $.extend(UI, {
 				CatToolActions.showHeaderTooltip();
 			}, 2000);
 		}
-
+		this.renderQualityReportButton();
 		this.createJobMenu();
 	},
 	logoutAction: function() {
@@ -140,6 +140,26 @@ $.extend(UI, {
 		$("#jobMenu .jobmenu-list li").removeClass('current');
 		$("#jobMenu .jobmenu-list li[data-file=" + fileId +"]").addClass('current');
 	},
+	renderQualityReportButton: function() {
+		CatToolActions.renderQualityReportButton();
+		if ( config.isReview ) {
+			UI.reloadQualityReport();
+		}
+	},
+	reloadQualityReport : function() {
+		var path  = sprintf(APP.getRandomUrl() + 'api/app/jobs/%s/%s/quality-report',
+			config.id_job, config.password);
+		$.ajax( {
+			type: "GET",
+			xhrFields: {withCredentials: true},
+			url: path
+		})
+			.done( function( data ) {
+
+				CatToolActions.updateQualityReport(data['quality-report']);
+
+			});
+	}
 });
 
 var initEvents = function() {

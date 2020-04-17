@@ -495,22 +495,26 @@ class setTranslationController extends ajaxController {
             $newValues[] = $counter->getUpdatedValues( $old_count );
 
             if ( false == empty( $propagationTotal[ 'totals' ] ) ) {
-                $counter->setOldStatus( $old_status );
-                $counter->setNewStatus( $this->status );
 
-                $propagatedNotIceEqWordCount = 0;
-                foreach ( $propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'not_ice' ][ 'eq_word_count' ] as $item ) {
-                    $propagatedNotIceEqWordCount = $propagatedNotIceEqWordCount + (float)$item;
+                /** @var Translations_SegmentTranslationStruct[] $propagatedNotIce */
+                $propagatedNotIce = @$propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'not_ice' ][ 'object' ];
+                if(isset($propagatedNotIce)){
+                    foreach ( $propagatedNotIce as $item ) {
+                        $counter->setOldStatus( $item->status );
+                        $counter->setNewStatus( $this->status );
+                        $newValues[] = $counter->getUpdatedValues( $item->eq_word_count );
+                    }
                 }
 
-                $propagatedIceEqWordCount = 0;
-                foreach ( $propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'ice' ][ 'eq_word_count' ] as $item ) {
-                    $propagatedIceEqWordCount = $propagatedIceEqWordCount + (float)$item;
+                /** @var Translations_SegmentTranslationStruct[] $propagatedIce */
+                $propagatedIce = @$propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'ice' ][ 'object' ];
+                if(isset($propagatedIce)){
+                    foreach ( $propagatedIce as $item ) {
+                        $counter->setOldStatus( $item->status );
+                        $counter->setNewStatus( $this->status );
+                        $newValues[] = $counter->getUpdatedValues( $item->eq_word_count );
+                    }
                 }
-
-                $propagatedSegmentsCount = $propagatedIceEqWordCount + $propagatedNotIceEqWordCount;
-
-                $newValues[] = $counter->getUpdatedValues( $propagatedSegmentsCount );
             }
 
             try {

@@ -65,9 +65,6 @@ abstract class viewController extends controller {
             die(); // do not complete klein response, set 404 header in render404 instead of 200
         }
 
-        //load Template Engine
-        require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
-
         $this->setBrowserSupport();
 
         //SESSION ENABLED

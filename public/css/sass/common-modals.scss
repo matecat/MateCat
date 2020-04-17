@@ -583,7 +583,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 /***********************/
 
 /********Modal window ****/
-.matecat-modal {
+.matecat-modal,
+.matecat-modal-overlay
+{
     display: block;
     z-index: 13;
     position: fixed;
@@ -594,94 +596,149 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     overflow: auto;
     background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.4);
+    p {
+        line-height: 20px;
+    }
+    .matecat-modal-header {
+        text-align: left;
+        min-height: 47px;
+        border-radius: 4px 4px 0 0;
+        overflow: visible;
+        max-height: inherit;
+        font-size: 23px;
+        background: #002b5c;
+        padding: 10px 10px 7px 24px;
+        background-size: 35px;
+        color: #fff;
+        margin: 0 !important;
+        display: grid;
+        grid-template-columns: 40px 1fr 24px;
+        position: relative;
+        grid-column-gap: 16px;
+        h2 {
+            margin: 0 !important;
+            line-height: 30px;
+            font-size: 24px;
+            width: auto !important;
+            float: none !important;
+            font-family: Calibri, Arial, Helvetica, sans-serif;
+        }
+    }
+    .modal-logo {
+        background-size: inherit;
+        background: url(../../img/Logo-Onlycat-white.svg) no-repeat;
+        background-position-y: center;
+        background-size: contain;
+        width: 40px;
+        height: 26px;
+    }
+    /* Modal Body */
+    .matecat-modal-body {
+        min-height: 50px;
+        /*color: #000;*/
+        background-color: $grey5;
+        border-radius: 0 0 4px 4px;
+        margin: 0 auto;
+        overflow: hidden;
+        text-align: left;
+        h1 {
+            text-align: center;
+        }
+    }
+    /* Modal Footer */
+    .matecat-modal-footer {
+        padding: 2px 16px;
+        color: black;
+        text-align: left;
+        min-height: 30px;
+    }
+    /* Modal Content */
+    .matecat-modal-content {
+        margin: auto;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 60%;
+        border-radius: 4px;
+        -webkit-animation-name: animatetop;
+        -webkit-animation-duration: 0.4s;
+        animation-name: animatetop;
+        animation-duration: 0.4s;
+        text-align: center;
+        max-width: 600px;
+        min-width: 400px;
+        //-webkit-box-shadow: 0 1px 20px #000;
+        //box-shadow: 0 1px 20px #6f6e6e;
+        .half-form-left {
+            margin-right: 4%;
+        }
+        .half-form {
+            width: 48%;
+            float: left;
+        }
+    }
 }
 
-.matecat-modal-header {
-    text-align: left;
-    min-height: 47px;
-    border-radius: 4px 4px 0 0;
-    overflow: visible;
-    max-height: inherit;
-    font-size: 23px;
-    background: #002b5c;
-    padding: 10px 10px 7px 24px;
-    background-size: 35px;
-    color: #fff;
-    margin: 0 !important;
-    display: grid;
-    grid-template-columns: 40px 1fr 24px;
-    position: relative;
-    grid-column-gap: 16px;
-}
+.matecat-modal-overlay {
+    display: block;
+    z-index: 13;
+    position: fixed;
+    left: 6px;
+    bottom: 48px;
+    top: unset;
+    width: 325px;
+    height: 342px;
+    overflow: auto;
+    background-color: unset;
+    .modal-logo {
+        width: 34px;
+    }
+    .matecat-modal-content {
+        width: 320px;
+        min-width: unset;
+        box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important
+    }
+    .matecat-modal-header {
+        text-align: left;
+        min-height: 32px;
+        border-radius: 4px 4px 0 0;
+        overflow: visible;
+        max-height: inherit;
+        background: #002b5c;
+        padding: 6px 10px 3px 24px;
+        background-size: 31px;
+        color: #fff;
+        margin: 0 !important;
+        display: grid;
+        grid-template-columns: 35px 1fr 24px;
+        position: relative;
+        grid-column-gap: 16px;
+        h2 {
+            font-size: 21px;
+        }
+    }
+    .matecat-modal-body {
+        h1 {
+            font-size: 1.7rem;
+        }
+        .matecat-modal-textarea {
+            padding: 0;
+        }
+        .matecat-modal-middle {
+            padding: 0 20px;
+        }
+        .matecat-modal-top, .matecat-modal-bottom {
+            padding: 15px 17px;
+        }
+        .ui.button {
+            font-size: 15px;
+        }
+        .ui.button.cancel-button {
+            //margin-right: 45px;
+        }
+    }
 
-.modal-logo {
-    background-size: inherit;
-    background: url(../../img/Logo-Onlycat-white.svg) no-repeat;
-    background-position-y: center;
-    background-size: contain;
-    width: 40px;
-    height: 26px;
-}
-
-.matecat-modal-header h2 {
-    margin: 0 !important;
-    line-height: 30px;
-    font-size: 24px;
-    width: auto !important;
-    float: none !important;
-    font-family: Calibri, Arial, Helvetica, sans-serif;
-}
-
-/* Modal Body */
-.matecat-modal-body {
-    min-height: 50px;
-    /*color: #000;*/
-    background-color: $grey5;
-    border-radius: 0 0 4px 4px;
-    margin: 0 auto;
-    overflow: hidden;
-    text-align: left;
-}
-
-/* Modal Footer */
-.matecat-modal-footer {
-    padding: 2px 16px;
-    color: black;
-    text-align: left;
-    min-height: 30px;
-}
-
-/* Modal Content */
-.matecat-modal-content {
-    margin: auto;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 60%;
-    border-radius: 4px;
-    -webkit-animation-name: animatetop;
-    -webkit-animation-duration: 0.4s;
-    animation-name: animatetop;
-    animation-duration: 0.4s;
-    text-align: center;
-    max-width: 600px;
-    min-width: 400px;
-    //-webkit-box-shadow: 0 1px 20px #000;
-    //box-shadow: 0 1px 20px #6f6e6e;
-}
-
-.matecat-modal-body h1 {
-    text-align: center;
-}
-
-.matecat-modal-content .half-form-left {
-    margin-right: 4%;
-}
-
-.matecat-modal-content .half-form {
-    width: 48%;
-    float: left;
 }
 
 .preferences-modal {
@@ -717,10 +774,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     color: red;
     text-decoration: none;
     cursor: pointer;
-}
-
-div#matecat-modal p {
-    line-height: 20px;
 }
 
 /***********************/
@@ -979,7 +1032,7 @@ div#matecat-modal p {
 .x-popup:before, .x-popup2:before {
     content: "\f057";
 }
-.matecat-modal-content {
+.matecat-modal-content,  .matecat-modal-overlay-content{
     font-size: 16px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
 
@@ -1114,6 +1167,20 @@ div#matecat-modal p {
                     }
                 }
             }
+        }
+    }
+
+    .matecat-modal-text {
+        padding: 10px 10px;
+        font-size: 17px;
+    }
+    .matecat-modal-textarea {
+        padding: 10px 10px;
+        resize: none;
+        textarea {
+            padding: 10px;
+            border: 1px solid grey;
+            border-radius: 4px;
         }
     }
 
@@ -1341,7 +1408,7 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
 
 .shortcuts-modal {
     .matecat-modal-top {
-        padding: 10px 25px;
+        padding: 15px 25px;
     }
     .matecat-modal-middle {
         padding: 10px 15px;
@@ -1498,7 +1565,7 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
         }
     }
     .matecat-modal-bottom {
-        padding: 10px 25px;
+        padding: 15px 25px;
     }
 }
 

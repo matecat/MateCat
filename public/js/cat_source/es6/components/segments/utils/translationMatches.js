@@ -9,24 +9,22 @@ import Speech2Text from '../../../utils/speech2text';
 let TranslationMatches = {
 
 
-    copySuggestionInEditarea: function(segment, translation, editarea, match, which, createdBy) {
+    copySuggestionInEditarea: function(segment, index, translation) {
         if (!config.translation_matches_enabled) return;
-
-        var percentageClass = this.getPercentuageClass(match);
+        let matchToUse = segment.contributions.matches[index-1];
+        translation = (translation) ? translation : matchToUse.translation;
+        var percentageClass = this.getPercentuageClass(matchToUse.match);
         if ($.trim(translation) !== '') {
 
-            if(!which) translation = TagUtils.encodeSpacesAsPlaceholders(translation, true);
 
-            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), translation);
-            SegmentActions.addClassToEditArea(UI.getSegmentId(segment), UI.getSegmentFileId(segment), 'fromSuggestion');
-            SegmentActions.setHeaderPercentage(UI.getSegmentId( segment ), UI.getSegmentFileId(segment), match ,percentageClass, createdBy);
+            SegmentActions.replaceEditAreaTextContent(segment.sid, segment.id_file, translation);
+            SegmentActions.addClassToEditArea(segment.sid, segment.id_file, 'fromSuggestion');
+            SegmentActions.setHeaderPercentage(segment.sid, segment.id_file, matchToUse.match ,percentageClass, matchToUse.created_by);
             UI.registerQACheck();
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
 
-            if (which) {
-                SegmentActions.modifiedTranslation(UI.getSegmentId( segment ),UI.getSegmentFileId(segment),true);
-                segment.trigger('modified');
-            }
+            SegmentActions.modifiedTranslation(segment.sid, segment.id_file,true);
+
         }
     },
 
@@ -35,15 +33,20 @@ let TranslationMatches = {
         var segmentObj = SegmentStore.getSegmentByIdToJS(sid);
         if ( _.isUndefined(segmentObj) ) return;
 
-        let segment = UI.getSegmentById(sid);
-        let editarea = $('.editarea', segment);
         SegmentActions.setSegmentContributions(segmentObj.sid, segmentObj.id_file, data.matches, data.errors);
-        segmentObj = SegmentStore.getSegmentByIdToJS(sid);
-        if ( data.matches && data.matches.length > 0 && _.isUndefined(data.matches[0].error)) {
-            var editareaLength = segmentObj.translation.length;
-            var translation = data.matches[0].translation;
 
-            var match = data.matches[0].match;
+        this.useSuggestionInEditArea(sid);
+
+        SegmentActions.addClassToSegment(sid, 'loaded');
+    },
+    useSuggestionInEditArea: function(sid) {
+        let segmentObj = SegmentStore.getSegmentByIdToJS(sid);
+        let matches = (segmentObj.contributions) ? segmentObj.contributions.matches : [];
+        if ( matches && matches.length > 0 && _.isUndefined(matches[0].error)) {
+            var editareaLength = segmentObj.translation.length;
+            var translation = matches[0].translation;
+
+            var match = matches[0].match;
 
             if (editareaLength === 0) {
 
@@ -53,7 +56,7 @@ let TranslationMatches = {
                  * the source with the text with tags, the segment is tagged
                  */
                 if ( SegmentUtils.checkCurrentSegmentTPEnabled(segmentObj) ) {
-                    var currentContribution = data.matches[0];
+                    var currentContribution = matches[0];
                     if (parseInt(match) !== 100) {
                         translation = currentContribution.translation;
                         translation = TagUtils.removeAllTags(translation);
@@ -63,23 +66,17 @@ let TranslationMatches = {
                 }
 
                 var copySuggestion = function() {
-                    TranslationMatches.copySuggestionInEditarea(segment, translation, editarea, match, 1);
+                    TranslationMatches.copySuggestionInEditarea(segmentObj, 1, translation);
                 };
-                if ( TranslationMatches.autoCopySuggestionEnabled() &&
+                if ( segmentObj.opened && TranslationMatches.autoCopySuggestionEnabled() &&
                     ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() )
                 ) {
                     copySuggestion();
                 }
 
             }
-
-            $('.translated', segment).removeAttr('disabled');
-            $('.draft', segment).removeAttr('disabled');
         }
-
-        SegmentActions.addClassToSegment(sid, 'loaded');
     },
-
     getContribution: function(segmentSid, next, force) {
         if (!config.translation_matches_enabled){
             SegmentActions.addClassToSegment( UI.getSegmentId( segment ), 'loaded' ) ;
@@ -88,7 +85,7 @@ let TranslationMatches = {
             return deferred.resolve();
         }
         var txt;
-        var currentSegment = (next === 0) ? SegmentStore.getSegmentByIdToJS(segmentSid) : (next == 1) ? SegmentStore.getNextSegment(segmentSid) : SegmentStore.getNextSegment(segmentSid, 8);
+        var currentSegment = (next === 0) ? SegmentStore.getSegmentByIdToJS(segmentSid) : (next == 1) ? SegmentStore.getNextSegment(segmentSid) : SegmentStore.getNextSegment(segmentSid, null, 8);
 
         if ( !currentSegment) return;
 
@@ -110,12 +107,14 @@ let TranslationMatches = {
         var callNewContributions = areSimilar || isEqual || force;
 
         if (currentSegment.contributions && currentSegment.contributions.matches.length > 0 && !callNewContributions) {
+            if ( currentSegment.status === 'NEW' ) {
+                setTimeout(()=>TranslationMatches.copySuggestionInEditarea(currentSegment, 1));
+            }
             return $.Deferred().resolve();
         }
         if ((!currentSegment) && (next)) {
             return $.Deferred().resolve();
         }
-
         var id = currentSegment.original_sid;
         var id_segment_original = id.split('-')[0];
 

@@ -479,7 +479,18 @@ class XliffSAXTranslationReplacer {
                 $this->postProcAndFlush( $this->outputFP, $tag );
             }
 
-
+        }
+        //
+        // <note/> handling
+        // ------------------------------------------------
+        // this will transform <note/> to <note></note> in the target file
+        //
+        // we need it because if a file contains <note/> in the final node, the file writing won't be completed
+        elseif($this->CDATABuffer === '<note/>' and $this->bufferIsActive === true) {
+            $this->postProcAndFlush( $this->outputFP, '<note/>' );
+            $this->bufferIsActive = false;
+            $this->CDATABuffer = '';
+            $this->isEmpty = false;
         } else {
             //ok, nothing to be done; reset flag for next coming tag
             $this->isEmpty = false;
@@ -493,7 +504,7 @@ class XliffSAXTranslationReplacer {
     }
 
     protected function getWordCountGroup( $raw_word_count, $eq_word_count ){
-        return "\n<group mtc:name=\"x-matecat-word-count\"><count-group name=\"$this->currentId\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group></group>";
+        return "\n<count-group name=\"$this->currentId\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group>";
     }
 
     /**

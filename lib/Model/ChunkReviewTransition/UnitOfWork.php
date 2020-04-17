@@ -6,8 +6,10 @@ use Constants;
 use Database;
 use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Model\ChunkReviewDao;
+use Features\ReviewExtended\ReviewUtils;
 use Features\SecondPassReview\Model\SegmentTranslationEventDao;
 use IUnitOfWork;
+use LQA\ChunkReviewStruct;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;
 use PDOException;
@@ -87,9 +89,9 @@ class UnitOfWork implements IUnitOfWork {
 
         $data = [];
 
+        // $data will contain an array of DIFF values used to update qa_chunk_review table
         foreach ( $this->models as $model ) {
             foreach ( $model->getChunkReviews() as $chunkReview ) {
-                $data[ $chunkReview->id ][ 'is_pass' ]              = $chunkReview->is_pass;
                 $data[ $chunkReview->id ][ 'penalty_points' ]       = $data[ $chunkReview->id ][ 'penalty_points' ] + $chunkReview->penalty_points;
                 $data[ $chunkReview->id ][ 'reviewed_words_count' ] = $data[ $chunkReview->id ][ 'reviewed_words_count' ] + $chunkReview->reviewed_words_count;
                 $data[ $chunkReview->id ][ 'advancement_wc' ]       = $data[ $chunkReview->id ][ 'advancement_wc' ] + $chunkReview->advancement_wc;
@@ -101,8 +103,55 @@ class UnitOfWork implements IUnitOfWork {
 
         // just one UPDATE for each ChunkReview
         foreach ( $data as $id => $datum ) {
+
+            $chunkReview = $chunkReviewDao->findById( $id );
+
+            $datum[ 'is_pass' ]              = $this->calculateIsPass( $chunkReview, $datum );
+            $datum[ 'penalty_points' ]       = $this->recheckDatum( $chunkReview, $datum, 'penalty_points' );
+            $datum[ 'reviewed_words_count' ] = $this->recheckDatum( $chunkReview, $datum, 'reviewed_words_count' );
+            $datum[ 'advancement_wc' ]       = $this->recheckDatum( $chunkReview, $datum, 'advancement_wc' );
+            $datum[ 'total_tte' ]            = $this->recheckDatum( $chunkReview, $datum, 'total_tte' );
+
             $chunkReviewDao->passFailCountsAtomicUpdate( $id, $datum );
         }
+    }
+
+    /**
+     * @param ChunkReviewStruct $chunkReview
+     * @param                   $datum
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    private function calculateIsPass( ChunkReviewStruct $chunkReview, $datum ) {
+        $lqaModelLimit                     = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
+        $chunkReview->reviewed_words_count += $datum[ 'reviewed_words_count' ];
+        $chunkReview->penalty_points       += $datum[ 'penalty_points' ];
+        $score                             = ( $chunkReview->reviewed_words_count == 0 ) ? 0 : $chunkReview->penalty_points / $chunkReview->reviewed_words_count * 1000;
+
+        return ( $score <= $lqaModelLimit );
+    }
+
+    /**
+     * This method does not allow to update a ChunkReviewStruct field to a negative value
+     *
+     * @param ChunkReviewStruct $chunkReview
+     * @param array             $datum
+     * @param string            $key
+     *
+     * @return int
+     */
+    private function recheckDatum( ChunkReviewStruct $chunkReview, $datum, $key ) {
+
+        if ( $chunkReview->$key > 0 ) {
+            if ( ( $chunkReview->$key + $datum[ $key ] ) < 0 ) {
+                return 0;
+            }
+
+            return $datum[ $key ];
+        }
+
+        return 0;
     }
 
     /**
@@ -135,7 +184,7 @@ class UnitOfWork implements IUnitOfWork {
      */
     private function deleteIssues( ChunkReviewTransitionModel $model ) {
         foreach ( $model->getIssuesToDelete() as $issue ) {
-            $issue->addComments( ( new EntryCommentStruct() )->getEntriesById($issue->id) );
+            $issue->addComments( ( new EntryCommentStruct() )->getEntriesById( $issue->id ) );
             EntryDao::deleteEntry( $issue );
         }
     }

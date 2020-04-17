@@ -33,9 +33,13 @@ if ( true )
                     notAcceptedLanguages.push($('#source-lang').dropdown('get text').text());
                 }
                 if (acceptedLanguagesLXQ.indexOf(config.target_rfc) === -1) {
-                    notAcceptedLanguages.push(_.find(config.languages_array, function (e) {
-                        return e.code === config.target_rfc;
-                    }).name);
+                    try {
+                        notAcceptedLanguages.push(_.find(config.languages_array, function (e) {
+                            return e.code === config.target_rfc;
+                        }).name);
+                    } catch ( e ) {
+                        console.error("initAdvanceOptions: no language found", config.target_rfc);
+                    }
                 }
                 LXQContainer.find('.option-notsupported-languages').html(notAcceptedLanguages.join(', '));
                 $('.options-box #lexi_qa').prop( "disabled", true ).attr('checked', false);

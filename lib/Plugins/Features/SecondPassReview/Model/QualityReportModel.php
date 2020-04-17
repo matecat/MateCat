@@ -23,8 +23,12 @@ class QualityReportModel extends \Features\ReviewExtended\Model\QualityReportMod
 
             $chunkReviewModel = RevisionFactory::initFromProject( $this->getProject() )->getChunkReviewModel( $chunk_review );
 
+            $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page );
+            $feedback = ( new \Revise_FeedbackDAO() )->getFeedback( $this->chunk->id, $revisionNumber );
+
             $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
-                    'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $chunk_review->source_page ),
+                    'revision_number' => $revisionNumber,
+                    'feedback'        => $feedback['feedback'],
                     'is_pass'         => !!$chunk_review->is_pass,
                     'score'           => $chunkReviewModel->getScore(),
                     'reviewer_name'   => $this->getReviewerName()

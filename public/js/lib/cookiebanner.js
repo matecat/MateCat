@@ -237,7 +237,7 @@
                 position: 'bottom',
                 message: default_text,
                 linkmsg: default_link,
-                moreinfo: 'http://www.matecat.com/terms/#cookies',
+                moreinfo: 'terms/#cookies',
                 effect: null,
                 fontSize: '14px',
                 fontFamily: 'arial, sans-serif',
