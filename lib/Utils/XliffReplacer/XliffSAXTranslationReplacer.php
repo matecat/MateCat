@@ -2,10 +2,9 @@
 
 namespace XliffReplacer;
 
+use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\S3FilesStorage;
-use FeatureSet;
-use INIT;
 use Log;
 use QA;
 use SubFiltering\Filter;
@@ -68,11 +67,11 @@ class XliffSAXTranslationReplacer {
 
     /**
      * @param string $originalXliffFilename
-     * @param null $outputFile
+     * @param null   $outputFile
      *
      * @throws \Exception
      */
-    public function setFileDescriptors( $originalXliffFilename, $outputFile = null ){
+    public function setFileDescriptors( $originalXliffFilename, $outputFile = null ) {
 
         if ( is_resource( $outputFile ) ) {
             $this->outputFP = $outputFile;
@@ -87,7 +86,7 @@ class XliffSAXTranslationReplacer {
 
         // if Filestorage is on S3, download the file on a temp dir
         if ( AbstractFilesStorage::isOnS3() ) {
-            $s3Client = S3FilesStorage::getStaticS3Client();
+            $s3Client            = S3FilesStorage::getStaticS3Client();
             $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
             $params[ 'key' ]     = $originalXliffFilename;
             $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $outputFile, PATHINFO_BASENAME );
@@ -126,7 +125,7 @@ class XliffSAXTranslationReplacer {
         }
 
         $this->featureSet = $featureSet;
-        $this->filter = Filter::getInstance( $featureSet );
+        $this->filter     = Filter::getInstance( $featureSet );
 
         //write xml header
         fwrite( $this->outputFP, '<?xml version="1.0" encoding="UTF-8"?>' );
@@ -205,8 +204,8 @@ class XliffSAXTranslationReplacer {
         xml_parser_free( $xml_parser );
 
         // if Filestorage is on S3, delete the temporary file
-        if(AbstractFilesStorage::isOnS3()){
-            @unlink(stream_get_meta_data($this->originalFP)['uri']);
+        if ( AbstractFilesStorage::isOnS3() ) {
+            @unlink( stream_get_meta_data( $this->originalFP )[ 'uri' ] );
         }
     }
 
@@ -246,14 +245,20 @@ class XliffSAXTranslationReplacer {
                     $tag .= "$k=\"$this->target_lang\" ";
                     //Log::doJsonLog($k . " => " . $this->target_lang);
                 } else {
+                    // trans-unit, add help-id
+                    if ( $name === "trans-unit" and strpos( $tag, 'help-id' ) === false ) {
+                        $pos = current($this->transUnits[ $this->currentId ]);
+                        $sid = $this->segments[ $pos ][ 'sid' ];
+                        $tag .= "help-id=\"$sid\" ";
+                    }
+
                     //normal tag flux, put attributes in it
                     $tag .= "$k=\"$v\" ";
                 }
-
             }
 
             //add MateCat specific namespace, we want maybe add non-XLIFF attributes
-            if( $name == 'xliff' && !array_key_exists( 'xmlns:mtc', $attr ) ){
+            if ( $name == 'xliff' && !array_key_exists( 'xmlns:mtc', $attr ) ) {
                 $tag .= 'xmlns:mtc="https://www.matecat.com" ';
             }
 
@@ -387,8 +392,8 @@ class XliffSAXTranslationReplacer {
                     $state_prop   = '';
 
                     // we must reset the lastMrkId found because this is a new segment.
-                    $lastMrkId = -1;
-                    $eq_word_count = 0;
+                    $lastMrkId      = -1;
+                    $eq_word_count  = 0;
                     $raw_word_count = 0;
 
                     foreach ( $list_of_ids as $pos => $id ) {
@@ -421,14 +426,14 @@ class XliffSAXTranslationReplacer {
                         $seg = $this->segments[ $id ];
 
                         $raw_word_count += (int)$seg[ 'raw_word_count' ];
-                        $eq_word_count += floor( $seg[ 'eq_word_count' ] * 100 ) / 100;  //eq word counts are decimals with 2 decimal numbers, round them by truncating integers
+                        $eq_word_count  += floor( $seg[ 'eq_word_count' ] * 100 ) / 100;  //eq word counts are decimals with 2 decimal numbers, round them by truncating integers
 
                         //delete translations so the prepareSegment
                         // will put source content in target tag
                         if ( $this->sourceInTarget ) {
                             $seg[ 'translation' ] = '';
-                            $eq_word_count = 0;
-                            $raw_word_count = 0;
+                            $eq_word_count        = 0;
+                            $raw_word_count       = 0;
                         }
 
                         $translation = $this->prepareSegment( $seg, $translation );
@@ -479,7 +484,18 @@ class XliffSAXTranslationReplacer {
                 $this->postProcAndFlush( $this->outputFP, $tag );
             }
 
-
+        }
+        //
+        // <note/> handling
+        // ------------------------------------------------
+        // this will transform <note/> to <note></note> in the target file
+        //
+        // we need it because if a file contains <note/> in the final node, the file writing won't be completed
+        elseif ( $this->CDATABuffer === '<note/>' and $this->bufferIsActive === true ) {
+            $this->postProcAndFlush( $this->outputFP, '<note/>' );
+            $this->bufferIsActive = false;
+            $this->CDATABuffer    = '';
+            $this->isEmpty        = false;
         } else {
             //ok, nothing to be done; reset flag for next coming tag
             $this->isEmpty = false;
@@ -492,8 +508,8 @@ class XliffSAXTranslationReplacer {
 
     }
 
-    protected function getWordCountGroup( $raw_word_count, $eq_word_count ){
-        return "\n<group mtc:name=\"x-matecat-word-count\"><count-group name=\"$this->currentId\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group></group>";
+    protected function getWordCountGroup( $raw_word_count, $eq_word_count ) {
+        return "\n<count-group name=\"$this->currentId\"><count count-type=\"x-matecat-raw\">$raw_word_count</count><count count-type=\"x-matecat-weighted\">$eq_word_count</count></count-group>";
     }
 
     /**
@@ -503,52 +519,53 @@ class XliffSAXTranslationReplacer {
      *
      * @return array
      */
-    protected function setTransUnitState( $seg, $state_prop, $lastMrkState ){
+    protected function setTransUnitState( $seg, $state_prop, $lastMrkState ) {
 
         switch ( $seg[ 'status' ] ) {
 
             case \Constants_TranslationStatus::STATUS_FIXED:
             case \Constants_TranslationStatus::STATUS_APPROVED:
                 if ( $lastMrkState == null || $lastMrkState == \Constants_TranslationStatus::STATUS_APPROVED ) {
-                    $state_prop = "state=\"signed-off\"";
-                    $lastMrkState      = \Constants_TranslationStatus::STATUS_APPROVED;
+                    $state_prop   = "state=\"signed-off\"";
+                    $lastMrkState = \Constants_TranslationStatus::STATUS_APPROVED;
                 }
                 break;
 
             case \Constants_TranslationStatus::STATUS_TRANSLATED:
                 if ( $lastMrkState == null || $lastMrkState == \Constants_TranslationStatus::STATUS_TRANSLATED || $lastMrkState == \Constants_TranslationStatus::STATUS_APPROVED ) {
-                    $state_prop = "state=\"translated\"";
-                    $lastMrkState      = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                    $state_prop   = "state=\"translated\"";
+                    $lastMrkState = \Constants_TranslationStatus::STATUS_TRANSLATED;
                 }
                 break;
 
             case \Constants_TranslationStatus::STATUS_REJECTED:  // if there is a mark REJECTED and there is not a DRAFT, all the trans-unit is REJECTED
             case \Constants_TranslationStatus::STATUS_REBUTTED:
                 if ( ( $lastMrkState == null ) || ( $lastMrkState != \Constants_TranslationStatus::STATUS_NEW || $lastMrkState != \Constants_TranslationStatus::STATUS_DRAFT ) ) {
-                    $state_prop = "state=\"needs-review-translation\"";
-                    $lastMrkState      = \Constants_TranslationStatus::STATUS_REJECTED;
+                    $state_prop   = "state=\"needs-review-translation\"";
+                    $lastMrkState = \Constants_TranslationStatus::STATUS_REJECTED;
                 }
                 break;
 
             case \Constants_TranslationStatus::STATUS_NEW:
                 if ( ( $lastMrkState == null ) || $lastMrkState != \Constants_TranslationStatus::STATUS_DRAFT ) {
-                    $state_prop = "state=\"new\"";
-                    $lastMrkState      = \Constants_TranslationStatus::STATUS_NEW;
+                    $state_prop   = "state=\"new\"";
+                    $lastMrkState = \Constants_TranslationStatus::STATUS_NEW;
                 }
                 break;
 
             case \Constants_TranslationStatus::STATUS_DRAFT:
-                $state_prop = "state=\"needs-translation\"";
-                $lastMrkState      = \Constants_TranslationStatus::STATUS_DRAFT;
+                $state_prop   = "state=\"needs-translation\"";
+                $lastMrkState = \Constants_TranslationStatus::STATUS_DRAFT;
                 break;
             default:
                 // this is the case when a segment is not showed in cattool, so the row in
                 // segment_translations does not exists and
                 // ---> $seg[ 'status' ] is NULL
-                if( $lastMrkState == null ){ //this is the first MRK ID
-                    $state_prop = "state=\"translated\"";
-                    $lastMrkState      = \Constants_TranslationStatus::STATUS_TRANSLATED;
-                } else { /* Do nothing and preserve the last state */ }
+                if ( $lastMrkState == null ) { //this is the first MRK ID
+                    $state_prop   = "state=\"translated\"";
+                    $lastMrkState = \Constants_TranslationStatus::STATUS_TRANSLATED;
+                } else { /* Do nothing and preserve the last state */
+                }
                 break;
         }
 
@@ -595,8 +612,8 @@ class XliffSAXTranslationReplacer {
     protected function prepareSegment( $seg, $trans_unit_translation = "" ) {
         $end_tags = "";
 
-        $channel = new RemoveDangerousChars();
-        $segment = $channel->transform( $seg [ 'segment' ] );
+        $channel     = new RemoveDangerousChars();
+        $segment     = $channel->transform( $seg [ 'segment' ] );
         $translation = $channel->transform( $seg [ 'translation' ] );
 
         //We don't need transform/sanitize from wiew to xliff because the values comes from Database
@@ -619,8 +636,8 @@ class XliffSAXTranslationReplacer {
 
         if ( $seg[ 'mrk_id' ] !== null && $seg[ 'mrk_id' ] != '' ) {
 
-            if($this->target_lang === 'ja-JP'){
-                $seg[ 'mrk_succ_tags' ] = ltrim($seg[ 'mrk_succ_tags' ]);
+            if ( $this->target_lang === 'ja-JP' ) {
+                $seg[ 'mrk_succ_tags' ] = ltrim( $seg[ 'mrk_succ_tags' ] );
             }
 
             $translation = "<mrk mid=\"" . $seg[ 'mrk_id' ] . "\" mtype=\"seg\">" . $seg[ 'mrk_prev_tags' ] . $translation . $seg[ 'mrk_succ_tags' ] . "</mrk>";
