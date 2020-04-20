@@ -306,10 +306,11 @@ class Editarea extends React.Component {
         if (pos > 0) {
             this.undoStack.splice(pos);
         }
+        let position = this.saveCursorPosition(this.editAreaRef);
         this.undoStackPosition++;
         this.undoStack.push({
             text: textToSave,
-            position: this.saveCursorPosition(this.editAreaRef)
+            position: (position) ? position : {start: 0, end: 0}
         });
 
         // console.log("SAVE IN STACK IN SEGMENT", textToSave);

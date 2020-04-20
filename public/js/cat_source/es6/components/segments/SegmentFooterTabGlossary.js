@@ -24,10 +24,6 @@ class SegmentFooterTabGlossary extends React.Component {
         this.stopLoading = this.stopLoading.bind(this);
     }
 
-    checkGlossary() {
-        SegmentActions.addClassToSegment( this.props.id_segment, 'glossary-loaded' );
-    }
-
     stopLoading(sid) {
         if ( sid === this.props.id_segment ) {
             this.setState({
@@ -267,7 +263,6 @@ class SegmentFooterTabGlossary extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_GLOSSARY_TO_CACHE, this.stopLoading);
         // UI.markGlossaryItemsInSource(UI.getSegmentById( this.props.id_segment ), this.props.segment.glossary);
         // setTimeout(()=>this.setTotalMatchesInTab( this.props.segment.glossary), 0 );
-        // SegmentStore.addListener(SegmentConstants.RENDER_GLOSSARY, this.checkGlossary);
 
     }
 
@@ -303,7 +298,6 @@ class SegmentFooterTabGlossary extends React.Component {
     render() {
         let matches;
         if(this.props.segment && this.props.segment.glossary){
-            this.checkGlossary();
             matches= this.renderMatches();
         }
         let html = '';
