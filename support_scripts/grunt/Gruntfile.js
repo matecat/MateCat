@@ -221,7 +221,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/imagesloaded.min.js',
                     basePath + 'lib/jquery.atwho.min.js',
                     basePath + 'lib/jquery.caret.min.js',
-                    gruntDir + 'semantic/dist/semantic.min.js'
+                    basePath + 'lib/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
             },
@@ -257,7 +257,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/fileupload/locale.js',
                     <!-- The main application script -->
                     basePath + 'lib/fileupload/main.js',
-                    gruntDir + 'semantic/dist/semantic.min.js'
+                    basePath + 'lib/semantic.min.js'
                 ],
                 dest: buildPath + 'libs_upload.js'
             },
@@ -461,7 +461,7 @@ module.exports = function(grunt) {
             distSemantic: {
                 options : {
                     sourceMap : true,
-                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+                    includePaths: [ cssBase ]
                 },
                 src: [
                     cssBase + 'sass/vendor_mc/semantic/matecat_semantic.scss'
@@ -471,24 +471,13 @@ module.exports = function(grunt) {
             distLegacy: {
                 options : {
                     sourceMap : true,
-                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+                    includePaths: [ cssBase ]
                 },
                 src: [
                     cssBase + 'sass/legacy-misc.scss'
                 ],
                 dest: cssBase + 'build/legacy-misc.css'
             }
-            // ,
-            // distStyleOld: {
-            //     options : {
-            //         sourceMap : true,
-            //         includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
-            //     },
-            //     src: [
-            //         cssBase + 'sass/style.scss'
-            //     ],
-            //     dest: cssBase + 'build/style.css'
-            // }
         },
         jshint: {
             options: {
