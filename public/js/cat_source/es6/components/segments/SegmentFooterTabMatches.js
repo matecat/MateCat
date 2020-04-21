@@ -145,8 +145,11 @@ class SegmentFooterTabMatches extends React.Component {
     /**
      * Do not delete, overwritten by plugin
      */
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
         setTimeout(()=>SegmentActions.recomputeSegment(this.props.id_segment));
+        if ( !prevProps.segment.unlocked && this.props.segment.unlocked ) {
+            SegmentActions.getContribution(this.props.segment.sid);
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -154,7 +157,8 @@ class SegmentFooterTabMatches extends React.Component {
             ((!_.isUndefined(nextProps.segment.contributions) && _.isUndefined(this.props.segment.contributions)) ||
             !Immutable.fromJS(this.props.segment.contributions).equals(Immutable.fromJS(nextProps.segment.contributions)) )) ||
             this.props.active_class !== nextProps.active_class ||
-            this.props.tab_class !== nextProps.tab_class
+            this.props.tab_class !== nextProps.tab_class ||
+            this.props.segment.unlocked !== nextProps.segment.unlocked
     }
 
     allowHTML(string) {
