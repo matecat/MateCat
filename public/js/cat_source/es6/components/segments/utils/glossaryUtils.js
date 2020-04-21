@@ -204,7 +204,7 @@ let GlossaryUtils = {
             CursorUtils.replaceSelectedHtml(translation, rangeInsert);
             var clonedElem = $( '.editor .editarea').clone();
             SegmentActions.modifiedTranslation(segment.sid, null, true);
-            SegmentActions.replaceEditAreaTextContent(segment.sid, null, clonedElem.html());
+            SegmentActions.replaceEditAreaTextContent(segment.sid, clonedElem.html());
         }
     }
 };

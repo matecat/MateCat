@@ -33,7 +33,7 @@ class SegmentTarget extends React.Component {
         this.showTagsMenu = this.showTagsMenu.bind(this);
         this.hideTagsMenu = this.hideTagsMenu.bind(this);
         this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this);
-        this.storeTranslation = this.storeTranslation.bind(this);
+
     }
 
     showTagsMenu(sid) {
@@ -121,22 +121,10 @@ class SegmentTarget extends React.Component {
         if (this.editArea && this.props.segment.modified ) {
             let textToSend = this.editArea.editAreaRef.innerHTML;
             let sid = this.props.segment.sid;
-            SegmentActions.replaceEditAreaTextContent(sid, null, textToSend);
+            SegmentActions.replaceEditAreaTextContent(sid, textToSend);
         }
     }
 
-    sendTranslationWithoutUpdate(force) {
-        if (this.editArea && ( this.props.segment.modified || force ) ) {
-            let textToSend = this.editArea.editAreaRef.innerHTML;
-            let sid = this.props.segment.sid;
-            SegmentActions.updateTranslation(sid, textToSend);
-        }
-    }
-    storeTranslation(sid) {
-        if ( sid === this.props.segment.sid ) {
-            this.sendTranslationWithoutUpdate();
-        }
-    }
     getAllIssues() {
         let issues = [];
         if ( this.props.segment.versions ) {
@@ -151,8 +139,8 @@ class SegmentTarget extends React.Component {
 
     formatSelection(action) {
         UI.formatSelection(action);
-        SegmentActions.modifiedTranslation(this.props.segment.sid, null, true);
-        this.sendTranslationWithoutUpdate();
+        // SegmentActions.modifiedTranslation(this.props.segment.sid, null, true);
+        // this.sendTranslationWithoutUpdate();
     }
 
     getTargetArea(translation) {
@@ -232,7 +220,6 @@ class SegmentTarget extends React.Component {
                     translation={translation}
                     locked={this.props.locked}
                     readonly={this.props.readonly}
-                    sendTranslationWithoutUpdate={this.sendTranslationWithoutUpdate.bind(this)}
                 />
                 { this.state.showTagsMenu ? (
 
@@ -270,7 +257,7 @@ class SegmentTarget extends React.Component {
             let newTranslation = TagUtils.autoFillTagsInTarget(this.props.segment);
             //lock tags and run again getWarnings
             setTimeout( (  )=> {
-                SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, this.props.segment.id_file, newTranslation);
+                SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, newTranslation);
                 UI.segmentQA(UI.getSegmentById(this.props.segment.sid));
             }, 100);
         }
@@ -295,7 +282,6 @@ class SegmentTarget extends React.Component {
         SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.addListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
-        SegmentStore.addListener(SegmentConstants.STORE_TRANSLATION , this.storeTranslation);
         this.afterRenderActions();
 
     }
@@ -305,7 +291,6 @@ class SegmentTarget extends React.Component {
         SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.removeListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
-        SegmentStore.removeListener(SegmentConstants.STORE_TRANSLATION , this.storeTranslation);
 
     }
 

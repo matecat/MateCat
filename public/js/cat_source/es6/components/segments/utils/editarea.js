@@ -268,7 +268,7 @@ let EditArea = {
             txt = TagUtils.transformTextForLockTags(txt);
             $(clonedElem).find('#placeHolder').before(txt);
             let newHtml = $(clonedElem).html();
-            SegmentActions.replaceEditAreaTextContent(SegmentStore.getCurrentSegmentId(), null, newHtml);
+            SegmentActions.replaceEditAreaTextContent(SegmentStore.getCurrentSegmentId(), newHtml);
             if (e.preventDefault) {
                 e.stopPropagation();
                 e.preventDefault();

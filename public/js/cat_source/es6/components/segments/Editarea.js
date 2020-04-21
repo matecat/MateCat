@@ -52,17 +52,32 @@ class Editarea extends React.Component {
 
 
         this.state = {
+            translation: this.props.translation,
             editorState: rawEncoded,
             editAreaClasses : ['targetarea']
         };
         this.onChange = (editorState) => this.setState({editorState});
     }
 
+    //Receive the new translation and decode it for draftJS
+    setNewTranslation = (sid, translation) => {
+        this.state = {
+            translation: translation
+        };
+    };
 
+    updateTranslationInStore = () => {
+        let translation; // Retrieve the translation from draftJS and send it to the Store
+        SegmentActions.updateTranslation(this.props.segment.sid, translation)
+    };
 
-    componentDidMount() {}
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
+    }
 
-    componentWillUnmount() {}
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
+    }
 
     // shouldComponentUpdate(nextProps, nextState) {}
 

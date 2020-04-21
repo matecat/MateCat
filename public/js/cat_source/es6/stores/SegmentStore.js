@@ -888,16 +888,20 @@ AppDispatcher.register(function (action) {
             SegmentStore.setPropagation(action.id, action.fid, action.propagation, action.from);
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
+        // case SegmentConstants.REPLACE_TRANSLATION:
+        //     let trans = SegmentStore.replaceTranslation(action.id, action.translation);
+        //     if ( action.pastedLength ) {
+        //         SegmentStore.emitChange(SegmentConstants.UPDATE_CURSOR, action.id, action.pastedLength);
+        //     }
+        //     SegmentStore.emitChange(action.actionType, action.id, trans);
+        //     SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+        //     break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            let trans = SegmentStore.replaceTranslation(action.id, action.translation);
-            if ( action.pastedLength ) {
-                SegmentStore.emitChange(SegmentConstants.UPDATE_CURSOR, action.id, action.pastedLength);
-            }
-            SegmentStore.emitChange(action.actionType, action.id, trans);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.UPDATE_TRANSLATION:
             SegmentStore.replaceTranslation(action.id, action.translation);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);

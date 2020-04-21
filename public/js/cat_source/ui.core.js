@@ -392,7 +392,7 @@ var UI = {
 
 	updateSegments: function(segments) {
 		$.each(segments, function() {
-			SegmentActions.replaceEditAreaTextContent(this.sid, null, this.translation);
+			SegmentActions.replaceEditAreaTextContent(this.sid, this.translation);
             SegmentActions.setStatus(this.sid, null, this.status.lowercase());
 		});
 	},

@@ -237,7 +237,7 @@ const SegmentActions = {
             var sid = propagatedSegments[i];
             if ( sid !== segmentId && SegmentStore.getSegmentByIdToJS(sid)) {
 
-                SegmentActions.replaceEditAreaTextContent( sid, null, segment.translation );
+                SegmentActions.replaceEditAreaTextContent( sid, segment.translation );
                 //Tag Projection: disable it if enable
                 SegmentActions.setSegmentAsTagged( sid );
                 SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
@@ -391,7 +391,7 @@ const SegmentActions = {
         if ( currentSegment ) {
             let source = currentSegment.decoded_source;
             let sid = currentSegment.sid;
-            SegmentActions.replaceEditAreaTextContent( sid, null, source );
+            SegmentActions.replaceEditAreaTextContent( sid, source );
             SegmentActions.modifiedTranslation( sid, null, true );
             UI.segmentQA( UI.currentSegment );
 
@@ -498,13 +498,11 @@ const SegmentActions = {
         let $segment = UI.getSegmentById(sid);
         $segment.trigger('modified');
     },
-    replaceEditAreaTextContent: function(sid, fid, text, pastedLength) {
+    replaceEditAreaTextContent: function(sid, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_TRANSLATION,
             id: sid,
-            fid: fid,
-            translation: text,
-            pastedLength: pastedLength
+            translation: text
         });
     },
 
@@ -567,7 +565,7 @@ const SegmentActions = {
     },
     copyTagProjectionInCurrentSegment(sid, translation) {
         if (!_.isUndefined(translation) && translation.length > 0) {
-            SegmentActions.replaceEditAreaTextContent( sid, null, translation );
+            SegmentActions.replaceEditAreaTextContent( sid, translation );
         }
     },
     /************ SPLIT ****************/
