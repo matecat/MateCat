@@ -1,6 +1,8 @@
 import ReviewExtendedIssuesContainer  from './ReviewExtendedIssuesContainer';
 import ReviewExtendedIssuePanel  from './ReviewExtendedIssuePanel';
 import SegmentConstants  from '../../constants/SegmentConstants';
+import Shortcuts  from '../../utils/shortcuts';
+
 
 class ReviewExtendedPanel extends React.Component {
 
@@ -52,9 +54,6 @@ class ReviewExtendedPanel extends React.Component {
                         showAddIssueMessage: true,
                         showAddIssueToSelectedTextMessage: false
                     });
-                    setTimeout(()=>{
-                        SegmentActions.openIssuesPanel({ sid: sid }, false);
-                    });
                 }
                 break;
 			case this.addIssueToSelectedTextMessageType:
@@ -95,8 +94,13 @@ class ReviewExtendedPanel extends React.Component {
 	render() {
 		let issues = this.getAllIssues();
 		let thereAreIssuesClass = (issues.length > 0 ) ? "thereAreIssues" : "";
+		let cornerClass = classnames({
+			"error": this.state.showAddIssueMessage,
+			"warning": this.state.showAddIssueToSelectedTextMessage,
+			"re-open-view re-issues": true
+		});
         return <div className={"re-wrapper shadow-1 " + thereAreIssuesClass}>
-			<div className="re-open-view re-issues"/>
+			<div className={cornerClass}/>
 			<a className="re-close-balloon re-close-err shadow-1" onClick={this.closePanel.bind(this)}><i className="icon-cancel3 icon" /></a>
 			<ReviewExtendedIssuesContainer
 				reviewType={this.props.reviewType}
@@ -107,7 +111,9 @@ class ReviewExtendedPanel extends React.Component {
 			/>
             {this.state.showAddIssueMessage ? (
 				<div className="re-warning-not-added-issue">
-					<p>In order to Approve the segment you need to add an Issue from the Error list.</p>
+					<p>In order to Approve the segment you need to add an Issue from the list below.<br/>
+						<a onClick={()=>APP.ModalWindow.showModalComponent(ShortCutsModal, null, 'Shortcuts')}>{'Shortcut: ' +
+						Shortcuts.cattol.events.navigateIssues.equivalent[Shortcuts.shortCutsKeyType]}</a>.</p>
 				</div>
             ) : (null)}
 
@@ -131,7 +137,7 @@ class ReviewExtendedPanel extends React.Component {
 	}
 }
 ReviewExtendedPanel.defaultProps = {
-    issueRequiredOnSegmentChange: false
+    issueRequiredOnSegmentChange: true
 };
 
 

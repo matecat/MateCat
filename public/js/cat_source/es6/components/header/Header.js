@@ -223,7 +223,7 @@ class Header extends React.Component {
 									<li><a href="https://site.matecat.com/benefits/">Benefits</a></li>
 									<li><a href="https://site.matecat.com/outsourcing/">Outsource</a></li>
 									<li><a href="https://site.matecat.com/open-source/">Opensource</a></li>
-									<li><a href="https://site.matecat.com/support/">Contact us</a></li>
+									<li><a href="https://site.matecat.com/contact-us/">Contact us</a></li>
 									{/*<li><a href="/plugins/aligner/index"  target="_blank" className={"btn btn-primary"}>Aligner</a></li>*/}
                                     { this.getMoreLinks() }
 								</ul>

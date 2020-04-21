@@ -17,6 +17,7 @@ use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectStruct;
+use Revise_FeedbackDAO;
 use RevisionFactory;
 
 class QualitySummary {
@@ -98,8 +99,12 @@ class QualitySummary {
     public static function populateQualitySummarySection( $source_page, Jobs_JobStruct $jStruct, $quality_overall, $reviseIssues, $score, $categories,
                                                           $total_issues_weight, $total_reviewed_words_count, $passfail, $total_tte, $is_pass, $model_version ) {
 
+        $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $source_page );
+        $feedback = (new Revise_FeedbackDAO())->getFeedback($jStruct->id, $revisionNumber);
+
         $result = [
-                'revision_number'            => ReviewUtils::sourcePageToRevisionNumber( $source_page ),
+                'revision_number'            => $revisionNumber,
+                'feedback'                   => $feedback['feedback'],
                 'model_version'              => ( $model_version ? (int)$model_version : null ),
                 'equivalent_class'           => $jStruct->getQualityInfo(),
                 'is_pass'                    => $is_pass,

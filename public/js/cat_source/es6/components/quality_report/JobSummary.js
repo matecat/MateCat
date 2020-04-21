@@ -1,6 +1,7 @@
 import ProductionSummary from "./ProductionSummary";
 import QualitySummaryTable from "./QualitySummaryTable";
 import QualitySummaryTableOld from "./QualitySummaryTableOldRevise";
+import RevisionFeedback from "./RevisionFeedback";
 
 class JobSummary extends React.Component {
 
@@ -24,6 +25,13 @@ class JobSummary extends React.Component {
                 <QualitySummaryTableOld jobInfo={this.props.jobInfo} qualitySummary={this.props.qualitySummary}/>
             )
 
+            ) : null}
+
+            {this.props.qualitySummary.get('feedback') ? (
+                <RevisionFeedback jobInfo={this.props.jobInfo}
+                                   qualitySummary={this.props.qualitySummary}
+                                   secondPassReviewEnabled={this.props.secondPassReviewEnabled}
+                />
             ) : null}
 
         </div>

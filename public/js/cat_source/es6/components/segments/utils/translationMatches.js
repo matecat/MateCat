@@ -107,7 +107,9 @@ let TranslationMatches = {
         var callNewContributions = areSimilar || isEqual || force;
 
         if (currentSegment.contributions && currentSegment.contributions.matches.length > 0 && !callNewContributions) {
-            setTimeout(()=>TranslationMatches.copySuggestionInEditarea(currentSegment, 1));
+            if ( currentSegment.status === 'NEW' ) {
+                setTimeout(()=>TranslationMatches.copySuggestionInEditarea(currentSegment, 1));
+            }
             return $.Deferred().resolve();
         }
         if ((!currentSegment) && (next)) {

@@ -35,7 +35,7 @@ class SegmentButton extends React.Component {
     clickOnApprovedButton(event) {
         this.props.updateTranslation();
         let target = event.target;
-        setTimeout(()=>UI.clickOnApprovedButton(target));
+        setTimeout( () => UI.clickOnApprovedButton( target ) );
     }
 
     goToNextRepetition(event, status) {
