@@ -18,7 +18,6 @@ let TranslationMatches = {
 
 
             SegmentActions.replaceEditAreaTextContent(segment.sid, translation);
-            SegmentActions.addClassToEditArea(segment.sid, segment.id_file, 'fromSuggestion');
             SegmentActions.setHeaderPercentage(segment.sid, segment.id_file, matchToUse.match ,percentageClass, matchToUse.created_by);
             UI.registerQACheck();
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });

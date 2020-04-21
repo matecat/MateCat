@@ -903,9 +903,6 @@ AppDispatcher.register(function (action) {
             SegmentStore.replaceTranslation(action.id, action.translation);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
-        case SegmentConstants.ADD_EDITAREA_CLASS:
-            SegmentStore.emitChange(action.actionType, action.id, action.className);
-            break;
         case SegmentConstants.MODIFIED_TRANSLATION:
             SegmentStore.modifiedTranslation(action.sid, action.fid, action.status);
             if (action.translation) {

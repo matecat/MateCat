@@ -513,15 +513,6 @@ const SegmentActions = {
             translation: text
         });
     },
-
-    addClassToEditArea: function(sid, fid, className) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ADD_EDITAREA_CLASS,
-            id: sid,
-            fid: fid,
-            className: className
-        });
-    },
     lockEditArea : function ( sid, fid ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.LOCK_EDIT_AREA,
