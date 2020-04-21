@@ -60,7 +60,7 @@ module.exports = function(grunt) {
     var es2015Preset = require('babel-preset-env');
     var reactPreset = require('babel-preset-react');
     var babelstage2 = require('babel-preset-stage-2');
-
+    var sass = require('node-sass');
 
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
@@ -264,7 +264,7 @@ module.exports = function(grunt) {
 
             semantic: {
                 src: [
-                    gruntDir + 'semantic/dist/semantic.min.js'
+                    basePath + 'lib/semantic.min.js'
                 ],
                 dest: buildPath + 'semantic.js'
             },
@@ -370,6 +370,7 @@ module.exports = function(grunt) {
         sass: {
             distCommon: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -380,6 +381,7 @@ module.exports = function(grunt) {
             },
             distCattol: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -390,6 +392,7 @@ module.exports = function(grunt) {
             },
             distUpload: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -400,6 +403,7 @@ module.exports = function(grunt) {
             },
             distManage: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -410,6 +414,7 @@ module.exports = function(grunt) {
             },
             distAnalyze: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -420,6 +425,7 @@ module.exports = function(grunt) {
             },
             distQR: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -430,6 +436,7 @@ module.exports = function(grunt) {
             },
             distIcons: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase ]
                 },
@@ -440,6 +447,7 @@ module.exports = function(grunt) {
             },
             distSemantic: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase ]
                 },
@@ -450,6 +458,7 @@ module.exports = function(grunt) {
             },
             distLegacy: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase ]
                 },
