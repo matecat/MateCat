@@ -161,7 +161,7 @@ const OfflineUtils = {
                     this.restoringAbortedOperations = true;
                     this.execAbortedOperations( ()=>this.endOfflineMode() );
                     this.restoringAbortedOperations = false;
-                    UI.executingSetTranslation = false;
+                    UI.executingSetTranslation = [];
                     UI.execSetTranslationTail();
 
                     //reset counter

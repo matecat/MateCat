@@ -129,7 +129,7 @@ $.extend(UI, {
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.setTranslationTail = [];
-        this.executingSetTranslation = false;
+        this.executingSetTranslation = [];
 
         if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
