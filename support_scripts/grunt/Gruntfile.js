@@ -317,26 +317,6 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            /*react_libs: {
-                files: [
-                    basePath + 'cat_source/es6/react-libs.js'
-                ],
-                tasks: ['browserify:libs'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
-            },
-            react: {
-                files: [
-                    basePath + 'cat_source/es6/!**!/!*.js'
-                ],
-                tasks: ['browserify:components'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
-            },*/
             js: {
                 files: [
                     basePath + 'cat_source/*.js',
