@@ -33,22 +33,9 @@ class Editarea extends React.Component {
             }
         ]);
 
-        let raw = {
-            blocks: [
-                {
-                    text: (
-                        this.props.translation
-                    ),
-                    type: 'unstyled',
-                    entityRanges: [],
-                },
-            ],
-            entityMap: {},
-        };
-
         // Inizializza Editor State con solo testo
-        const plainEditorState = EditorState.createWithContent(convertFromRaw(raw), decorator);
-        const rawEncoded = encodeContent(plainEditorState);
+        const plainEditorState = EditorState.createEmpty(decorator);
+        const rawEncoded = encodeContent(plainEditorState, this.props.translation);
 
 
         this.state = {
