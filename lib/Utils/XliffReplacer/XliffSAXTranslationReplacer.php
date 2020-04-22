@@ -249,7 +249,9 @@ class XliffSAXTranslationReplacer {
                     if ( $name === "trans-unit" and strpos( $tag, 'help-id' ) === false ) {
                         $pos = current($this->transUnits[ $this->currentId ]);
                         $sid = $this->segments[ $pos ][ 'sid' ];
-                        $tag .= "help-id=\"$sid\" ";
+                        if(!empty($sid)){
+                            $tag .= "help-id=\"$sid\" ";
+                        }
                     }
 
                     //normal tag flux, put attributes in it
