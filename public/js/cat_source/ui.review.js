@@ -103,7 +103,7 @@ if ( config.enableReview && config.isReview ) {
              * @param e
              * @param button
              */
-            clickOnApprovedButton: function (button) {
+            clickOnApprovedButton: function () {
                 return false
             }
         });

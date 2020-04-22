@@ -26,16 +26,15 @@ class SegmentButton extends React.Component {
         });
     }
 
-    clickOnTranslatedButton(event) {
+    clickOnTranslatedButton(event, gotoUntranslated) {
         this.props.updateTranslation();
-        let target = event.currentTarget;
-        setTimeout(()=>UI.clickOnTranslatedButton(target));
+        setTimeout(()=>UI.clickOnTranslatedButton(this.props.segment, gotoUntranslated));
     }
 
-    clickOnApprovedButton(event) {
+    clickOnApprovedButton(event, gotoNexUnapproved) {
         this.props.updateTranslation();
         let target = event.target;
-        setTimeout( () => UI.clickOnApprovedButton( target ) );
+        setTimeout( () => UI.clickOnApprovedButton( this.props.segment, gotoNexUnapproved ) );
     }
 
     goToNextRepetition(event, status) {
@@ -98,7 +97,7 @@ class SegmentButton extends React.Component {
         nextButton = (enableGoToNext)? (
                 <li>
                     <a id={'segment-' + this.props.segment.sid +'-nexttranslated'}
-                       onClick={(event)=>this.clickOnApprovedButton(event)}
+                       onClick={(event)=>this.clickOnApprovedButton(event, true)}
                        className={"btn next-unapproved "+ classDisable + " "+ className } data-segmentid={'segment-' + this.props.segment.sid}
                        title="Revise and go to next translated"> A+>>
                     </a>
@@ -166,7 +165,7 @@ class SegmentButton extends React.Component {
         } else {
             nextButton = (enableGoToNext)? (
                 <li>
-                    <a id={'segment-' + this.props.segment.sid +'-nextuntranslated'} onClick={(e)=>this.clickOnTranslatedButton(e)}
+                    <a id={'segment-' + this.props.segment.sid +'-nextuntranslated'} onClick={(e)=>this.clickOnTranslatedButton(e, true)}
                        className={"btn next-untranslated " + classDisable} data-segmentid={'segment-' + this.props.segment.sid}
                        title="Translate and go to next untranslated"> T+>>
                     </a>
@@ -210,7 +209,7 @@ class SegmentButton extends React.Component {
 
     getTranslateButton() {
         const classDisable = (this.props.disabled) ? 'disabled' : '';
-        return <li><a id={'segment-' + this.props.segment.sid + '-button-translated'} onClick={(e)=>this.clickOnTranslatedButton(e)}
+        return <li><a id={'segment-' + this.props.segment.sid + '-button-translated'} onClick={(e)=>this.clickOnTranslatedButton(e, false)}
                       data-segmentid={'segment-' + this.props.segment.sid}
                       className={'translated ' +classDisable } > {config.status_labels.TRANSLATED} </a><p>
             {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
@@ -223,7 +222,7 @@ class SegmentButton extends React.Component {
 
         return <li><a id={'segment-' + this.props.segment.sid + '-button-translated'}
                data-segmentid={'segment-' + this.props.segment.sid}
-               onClick={(event)=>this.clickOnApprovedButton(event)}
+               onClick={(event)=>this.clickOnApprovedButton(event, false)}
                className={'approved ' + classDisable + " " + className} > {config.status_labels.APPROVED} </a><p>
             {(UI.isMac) ? 'CMD' : 'CTRL'} ENTER
         </p></li>

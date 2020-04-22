@@ -205,11 +205,10 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             return issues;
         },
 
-        clickOnApprovedButton: function (button ) {
+        clickOnApprovedButton: function (segment, goToNextUnapproved ) {
             // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
             // because of the event is triggered even on download button
-            var sid = UI.currentSegmentId;
-            var segment = SegmentStore.getSegmentByIdToJS(sid);
+            var sid = segment.sid;
 
             let issues = this.getCurrentVersionIssues(segment);
             if ( config.isReview && !segment.splitted && segment.modified && issues.length === 0) {
@@ -218,12 +217,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 return;
             }
 
-            var goToNextUnapproved = ($( button ).hasClass( 'next-unapproved' )) ? true : false;
             SegmentActions.removeClassToSegment( sid, 'modified' );
-            UI.currentSegment.data( 'modified', false );
-
-
-            $( '.sub-editor.review .error-type' ).removeClass( 'error' );
 
             var afterApproveFn = function (  ) {
                 if ( goToNextUnapproved ) {
@@ -237,26 +231,24 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 }
             };
 
-            UI.setTimeToEdit(UI.currentSegment);
-            UI.changeStatus( button, 'approved', afterApproveFn);  // this does < setTranslation
+            UI.setTimeToEdit(sid);
+            UI.changeStatus( segment, 'approved', afterApproveFn);  // this does < setTranslation
 
-            var original = UI.currentSegment.find( '.original-translation' ).text();
-
-
-
-
-            var data = {
-                action: 'setRevision',
-                job: config.id_job,
-                jpassword: config.password,
-                segment: sid,
-                original: original
-            };
+            // // ??
+            // var original = UI.currentSegment.find( '.original-translation' ).text();
+            // var data = {
+            //     action: 'setRevision',
+            //     job: config.id_job,
+            //     jpassword: config.password,
+            //     segment: sid,
+            //     original: original
+            // };
+            // UI.setRevision( data );
             // Lock the segment if it's approved in a second pass but was previously approved in first revision
             if ( ReviewExtended.number > 1 ) {
                 CommonUtils.removeFromStorage('unlocked-' + sid);
             }
-            UI.setRevision( data );
+
         },
         openNextApproved: function ( sid ) {
             sid = sid || UI.currentSegmentId;
