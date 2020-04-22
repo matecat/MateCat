@@ -958,10 +958,8 @@ var UI = {
             }
         } else {
             if ( this.executingSetTranslation.indexOf(id_segment) === -1 )  {
-                if (callback) {
-                    callback.call(this);
-                }
-                return this.execSetTranslationTail();
+
+                return this.execSetTranslationTail(callback);
             }
         }
     },
@@ -991,13 +989,13 @@ var UI = {
     },
     execSetTranslationTail: function ( callback_to_execute ) {
         if ( UI.setTranslationTail.length ) {
-            item = UI.setTranslationTail[0];
+            var item = UI.setTranslationTail[0];
             UI.setTranslationTail.shift(); // to move on ajax callback
-            return UI.execSetTranslation(item);
+            return UI.execSetTranslation(item, callback_to_execute);
         }
     },
 
-    execSetTranslation: function(options) {
+    execSetTranslation: function(options, callback_to_execute) {
         var id_segment = options.id_segment;
         var status = options.status;
         var caller = options.caller;
@@ -1015,11 +1013,17 @@ var UI = {
 
 
 		caller = (typeof caller == 'undefined') ? false : caller;
-
-		// Attention, to be modified when we will lock tags
-        translation = TagUtils.prepareTextToSend(segment.decoded_translation);
-        sourceSegment = TagUtils.prepareTextToSend(segment.segment);
-
+        try {
+            // Attention, to be modified when we will lock tags
+            translation = TagUtils.prepareTextToSend( segment.decoded_translation );
+            sourceSegment = TagUtils.prepareTextToSend( segment.segment );
+        } catch ( e ) {
+            var indexSegment = UI.executingSetTranslation.indexOf(id_segment);
+            if (indexSegment > -1) {
+                UI.executingSetTranslation.splice(indexSegment, 1);
+            }
+            return false;
+        }
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
             var index = this.executingSetTranslation.indexOf(id_segment);
@@ -1067,17 +1071,19 @@ var UI = {
         }
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
-
+        if (callback_to_execute) {
+            callback_to_execute.call(this);
+        }
         return APP.doRequest({
             data: reqData,
 			context: [reqArguments, options],
 			error: function(response) {
+                var idSegment = this[0][0].id_segment;
+                var index = UI.executingSetTranslation.indexOf(idSegment);
+                if (index > -1) {
+                    UI.executingSetTranslation.splice(index, 1);
+                }
                 if ( response.status ===  409 ) {
-                    var idSegment = this[0][0].id_segment;
-                    var index = UI.executingSetTranslation.indexOf(idSegment);
-                    if (index > -1) {
-                        UI.executingSetTranslation.splice(index, 1);
-                    }
 
                     SegmentActions.addClassToSegment(idSegment, 'setTranslationError');
                     var callback = function() {
