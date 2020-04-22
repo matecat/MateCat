@@ -371,8 +371,6 @@ export const matchTag = (plainContent) => {
     return [...openTags, ...closingTags, ...selfClosingTags];
 };
 
-
-
 /**
  *
  * @param text
@@ -411,4 +409,55 @@ export const findWithRegexV4 = (text, tagSignature) => {
     }
     console.log('Tag range: ', tagRange);
     return tagRange;
+};
+
+
+export const decodeSegment = (editorState) => {
+    const inlineStyle = editorState.getCurrentInlineStyle();
+    const entities = getEntities(editorState);
+    let entityKeys =  entities.map( entity => entity.entityKey);
+    let contentState = editorState.getCurrentContent();
+    let contentBlock, blockKey;
+    let editorStateClone = editorState;
+
+    entityKeys.forEach( key => {
+        // Update entities cause previous cycle updated offsets
+        let entitiesInEditor = getEntities(editorStateClone);
+        // Filter only looped tag
+        let tag = entitiesInEditor.filter( tag => tag.entityKey === key)[0];
+        contentBlock = contentState.getFirstBlock();
+        blockKey = contentBlock.getKey();
+
+        // Get DraftEntity to retrieve data
+        // TODO: provare con tag.entity.getData()
+        let tagInstance = contentState.getEntity(tag.entityKey);
+        let {originalText} = tagInstance.getData();
+
+        // Use selection based on temporary contentState
+        let selectionState = new SelectionState({
+            anchorKey: blockKey,
+            anchorOffset: tag.start,
+            focusKey: blockKey,
+            focusOffset: tag.end
+        });
+
+        // Replace text of entity with original text and no key
+        contentState = Modifier.replaceText(
+            contentState,
+            selectionState,
+            originalText,
+            inlineStyle,
+            null
+        );
+
+        // Update contentState
+        editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
+    });
+    return contentState.getPlainText();
+};
+
+
+export const addTagEntityToSegment = (editorState) => {
+    let contentState = editorState.getCurrentContent();
+    console.log(contentState)
 };
