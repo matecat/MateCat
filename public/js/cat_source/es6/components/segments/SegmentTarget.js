@@ -106,7 +106,7 @@ class SegmentTarget extends React.Component {
     lockEditArea(event) {
         event.preventDefault();
         if ( !this.props.segment.edit_area_locked ) {
-            this.sendTranslationUpdate();
+            // this.sendTranslationUpdate();
         } else {
             SegmentActions.showIssuesMessage(this.props.segment.sid, 0);
         }
@@ -119,9 +119,10 @@ class SegmentTarget extends React.Component {
 
     sendTranslationUpdate() {
         if (this.editArea && this.props.segment.modified ) {
-            let textToSend = this.editArea.editAreaRef.innerHTML;
-            let sid = this.props.segment.sid;
-            SegmentActions.replaceEditAreaTextContent(sid, textToSend);
+            // TODO Force update editarea
+            // let textToSend = this.editArea.editAreaRef.innerHTML;
+            // let sid = this.props.segment.sid;
+            // SegmentActions.replaceEditAreaTextContent(sid, textToSend);
         }
     }
 

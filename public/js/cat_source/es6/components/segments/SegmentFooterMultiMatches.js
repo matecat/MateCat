@@ -107,7 +107,7 @@ class SegmentFooterMultiMatches extends React.Component {
         SegmentActions.setFocusOnEditArea();
         SegmentActions.disableTPOnSegment(this.props.segment);
         setTimeout( () => {
-            SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, match.translationDecodedHtml);
+            SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, match.translation);
             SegmentActions.highlightEditarea(this.props.id_segment);
         }, 200);
     }

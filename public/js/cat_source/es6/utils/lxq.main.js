@@ -103,7 +103,7 @@ const LXQ = {
 
         if ( !segObj ) return;
 
-        var sourcetext =  this.getSourceTextForQa(segObj.decoded_source);
+        var sourcetext =  this.getSourceTextForQa(segObj.segment);
         var translation = this.getTargetTextForQa(segment);
 
 
@@ -126,7 +126,6 @@ const LXQ = {
                     var noVisibleErrorsFound = false, source_val, target_val;
                     //myWindow.location =result.qaurl;
                     var segObj = SegmentStore.getSegmentByIdToJS(id_segment, UI.getSegmentFileId(segment));
-                    source_val = segObj.decoded_source;
                     if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
 
                         //highlight the segments

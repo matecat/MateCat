@@ -389,7 +389,7 @@ const SegmentActions = {
         let currentSegment = SegmentStore.getCurrentSegment();
 
         if ( currentSegment ) {
-            let source = currentSegment.decoded_source;
+            let source = currentSegment.segment;
             let sid = currentSegment.sid;
             SegmentActions.replaceEditAreaTextContent( sid, source );
             SegmentActions.modifiedTranslation( sid, null, true );

@@ -885,13 +885,8 @@ var UI = {
 
         segment_status = segment.status;
 
-		if( config.brPlaceholdEnabled ){
-			src_content = TagUtils.prepareTextToSend(segment.decoded_source);
-			trg_content = TagUtils.prepareTextToSend(segment.decoded_translation);
-		} else {
-			src_content = segment.decoded_source;
-			trg_content = segment.translation;
-		}
+        src_content = segment.segment;
+        trg_content = segment.translation;
 
 		APP.doRequest({
 			data: {

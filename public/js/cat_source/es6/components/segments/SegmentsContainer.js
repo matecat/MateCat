@@ -319,7 +319,7 @@ class SegmentsContainer extends React.Component {
                 $('#hiddenHtml section').removeClass('slide-right');
             }
             let source = $('#hiddenHtml .source');
-            source.html(segment.get('decoded_source'));
+            source.html(segment.get('segment'));
             const sourceHeight = source.outerHeight();
 
 

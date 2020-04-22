@@ -145,15 +145,6 @@ class SegmentSource extends React.Component {
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
 
-    markSource() {
-        let source = this.props.segment.decoded_source;
-        source = this.markSearch(source);
-        source = this.markGlossary(source);
-        source = this.markQaCheckGlossary(source);
-        source = this.markLexiqa(source);
-        return source;
-    }
-
     markSearch(source) {
         if ( this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.source) {
             source = SearchUtils.markText(source, this.props.segment.search, true, this.props.segment.sid);
@@ -230,7 +221,6 @@ class SegmentSource extends React.Component {
     }
 
     render() {
-        // let source = this.markSource();
 
         const {editorState} = this.state;
         const {onChange} = this;

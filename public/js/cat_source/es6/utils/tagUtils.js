@@ -505,7 +505,7 @@ const TAGS_UTILS =  {
         //add tags into the target segment
         for(let i = 0; i < missingTags.length; i++){
             if ( !(config.tagLockCustomizable && !UI.tagLockEnabled) ) {
-                newhtml = newhtml + TagUtils.transformTextForLockTags(missingTags[i]);
+                newhtml = newhtml + missingTags[i];
             } else {
                 newhtml = newhtml + missingTags[i];
             }
