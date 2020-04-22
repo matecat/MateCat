@@ -1,7 +1,8 @@
 import {
     EditorState,
     Modifier,
-    SelectionState
+    SelectionState,
+    ContentState
 } from 'draft-js';
 
 
@@ -51,13 +52,13 @@ export const tagStruct = {
         decodeNeeded: false
     },
     'tab':{
-        type: 'nbsp',
+        type: 'tab',
         openRegex: /##\$(_09)\$##/g,
         openLength: 9,
         closeRegex: null,
         selfClosing: true,
         isClosure: false,
-        placeholder: '°',
+        placeholder: '#',
         placeholderRegex: null,
         decodeNeeded: false
     }
@@ -100,41 +101,56 @@ export const unescapeHTML = (escapedHTML) => {
 
 /**
  *
- * @param tagRange
- * @param editorState
+ * @param editorState - current editor state, can be empty
+ * @param plainText - text where each entity applies
  * @returns {ContentState}  contentState - A ContentState with each tag as an entity
  */
-export const createNewEntitiesFromMap = (tagRange, editorState) => {
+export const createNewEntitiesFromMap = (editorState, plainText = '') => {
     let contentState = editorState.getCurrentContent();
-    // Got only one block: the segment
-    const contentBlock = contentState.getFirstBlock();
-    const blockKey = contentBlock.getKey();
-
-    tagRange.forEach( tag =>{
-        // Clone tag
-        let tagEntity = {...tag};
-        // Select slice of text containing entity
-        const selectionState = new SelectionState({
-            anchorKey: blockKey,
-            anchorOffset: tag.offset,
-            focusKey: blockKey,
-            focusOffset: tag.offset + tag.length
+    // If editor content is empty, create new content from plainText
+    if(!contentState.hasText()){
+        console.log('ContentState is empty');
+        contentState = ContentState.createFromText(plainText);
+    }
+    // Compute tag range
+    const tagRangeFromPlainText = matchTag(contentState.getPlainText());
+    // Apply each entity to the block where it belongs
+    const blocks = contentState.getBlockMap();
+    let maxCharsInBlocks = 0;
+    blocks.forEach((contentBlock) => {
+        maxCharsInBlocks += contentBlock.getLength();
+        tagRangeFromPlainText.forEach( tag =>{
+            if (tag.offset < maxCharsInBlocks &&
+                (tag.offset + tag.length) <= maxCharsInBlocks &&
+                tag.offset >= (maxCharsInBlocks - contentBlock.getLength())) {
+                // Clone tag
+                const tagEntity = {...tag};
+                // Each block start with offset = 0 so we have to adapt selection
+                const selectionState = new SelectionState({
+                    anchorKey: contentBlock.getKey(),
+                    anchorOffset: (tag.offset - (maxCharsInBlocks - contentBlock.getLength())),
+                    focusKey: contentBlock.getKey(),
+                    focusOffset: ((tag.offset + tag.length) - (maxCharsInBlocks - contentBlock.getLength()))
+                });
+                // Decode tag data and place them cleaned inside tag object
+                tagEntity.data.placeHolder = decodeTagInfo(tagEntity);
+                // Create entity
+                const {type, mutability, data} = tagEntity;
+                const contentStateWithEntity = contentState.createEntity(type, mutability, data);
+                const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+                // Apply entity on the previous selection
+                contentState = Modifier.applyEntity(
+                    contentState,
+                    selectionState,
+                    entityKey
+                );
+            }
         });
-        // Decode tag data and place them cleaned inside tag object
-        tagEntity.data.placeHolder = decodeTagInfo(tagEntity);
-        // Create entity
-        const {type, mutability, data} = tagEntity;
-        const contentStateWithEntity = contentState.createEntity(type, mutability, data);
-        const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-        // Apply entity on the previous selection
-        contentState = Modifier.applyEntity(
-            contentState,
-            selectionState,
-            entityKey
-        );
     });
+
     return contentState
 };
+
 
 /**
  *
@@ -142,12 +158,25 @@ export const createNewEntitiesFromMap = (tagRange, editorState) => {
  * @param entityRange
  * @returns {ContentState} - A ContentState in which each tag that is not self-closable, is linked to another tag
  */
-export const linkEntities  = (editorState, entityRange) => {
+export const linkEntities  = (editorState) => {
     let contentState = editorState.getCurrentContent();
-    const entityToLink = entityRange.filter( entity => {
-        return entity.data.closureOffset && entity.data.closureOffset !== -1
+
+    // Get previously created entities
+    const entities = getEntities(editorState);
+
+    // Todo: filter only entitites to link?
+    const blocks = contentState.getBlockMap();
+    let maxCharsInBlocks = 0;
+    blocks.forEach((contentBlock) => {
+        maxCharsInBlocks += contentBlock.getLength();
+        /*entities.forEach( entity => {
+            if(entity.blockKey === contentBlock.getKey()){
+                openingEntityKey = contentBlock.getEntityAt(entity.start - (maxCharsInBlocks - contentBlock.getLength()));
+            }
+        });*/
     });
-    let contentBlock, openingEntityKey, closingEntityKey;
+
+    /*let contentBlock, openingEntityKey, closingEntityKey;
     entityToLink.forEach( tag => {
         contentBlock = contentState.getFirstBlock();
         openingEntityKey = contentBlock.getEntityAt(tag.offset);
@@ -155,7 +184,7 @@ export const linkEntities  = (editorState, entityRange) => {
         // Todo: clean various offsets placed in data:{} inside entities
         contentState = contentState.mergeEntityData( closingEntityKey, {openTagId: openingEntityKey} );
         contentState = contentState.mergeEntityData( openingEntityKey, {closeTagId: closingEntityKey} );
-    });
+    });*/
     return contentState;
 };
 
@@ -165,44 +194,44 @@ export const linkEntities  = (editorState, entityRange) => {
  * @returns {ContentState} contentState - A a new ContentState in which entities are displayed as placeholder
  */
 export const beautifyEntities  = (editorState) => {
+
     const inlineStyle = editorState.getCurrentInlineStyle();
     const entities = getEntities(editorState); //start - end
-    let entityKeys =  entities.map( entity => entity.entityKey);
+    const entityKeys =  entities.map( entity => entity.entityKey);
+
     let contentState = editorState.getCurrentContent();
-    let contentBlock, blockKey;
     let editorStateClone = editorState;
-    // Loop through keys and update entities text
+
     entityKeys.forEach( key => {
-        // Update entities cause previous cycle updated offsets
+        // Update entities and blocks cause previous cycle updated offsets
+        // LAZY NOTE: entity.start and entity.end are block-based
         let entitiesInEditor = getEntities(editorStateClone);
-        // Filter only looped tag
-        let tag = entitiesInEditor.filter( tag => tag.entityKey === key)[0];
-        contentBlock = contentState.getFirstBlock();
-        blockKey = contentBlock.getKey();
-        // Get DraftEntity to retrieve data
-        // TODO: provare con tag.entity.getData()
-        let tagInstance = contentState.getEntity(tag.entityKey);
-        let {placeHolder} = tagInstance.getData();
-        // Use selection based on temporary contentState
-        let selectionState = new SelectionState({
-            anchorKey: blockKey,
-            anchorOffset: tag.start,
-            focusKey: blockKey,
-            focusOffset: tag.end
+        // Filter only looped tag and get data
+        // Todo: add check on tag array length
+        const tagEntity = entitiesInEditor.filter( entity => entity.entityKey === key)[0];
+        const {placeHolder} = tagEntity.entity.data;
+        // Get block-based selection
+        const selectionState = new SelectionState({
+            anchorKey: tagEntity.blockKey,
+            anchorOffset: tagEntity.start,
+            focusKey: tagEntity.blockKey,
+            focusOffset: tagEntity.end
         });
-        // Replace text of entity
+        // Replace text of entity with placeholder
         contentState = Modifier.replaceText(
             contentState,
             selectionState,
             placeHolder,
             inlineStyle,
-            tag.entityKey
+            tagEntity.entityKey
         );
         // Update contentState
         editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
     });
     return contentState;
 };
+
+
 
 /**
  *
@@ -234,6 +263,7 @@ export const getEntities = (editorState, entityType = null) => {
                 entities.push({...selectedEntity, start, end});
             });
     });
+    // LAZY NOTE: returned entity.start and entity.end are block-based offsets
     return entities;
 };
 
@@ -290,20 +320,18 @@ export const replaceEntityText = (entity, editorState) => {
 /**
  *
  * @param editorState
+ * @param plainText - text to analyze when editor is empty
  * @returns {*|EditorState} editorStateModified - An EditorState with all known tags treated as entities
  */
-export const encodeContent = (editorState) => {
+export const encodeContent = (editorState, plainText = '') => {
 
-    const residualContentToParse = editorState.getCurrentContent().getPlainText();
-    // Match open and closing tags
-    const tagRange = matchTag(residualContentToParse);
     // Create entities
-    let newContent = createNewEntitiesFromMap(tagRange, editorState);
+    let newContent = createNewEntitiesFromMap(editorState, plainText);
     // Apply entities to EditorState
     let editorStateModified = EditorState.push(editorState, newContent, 'apply-entity');
     // Link each openTag with its closure
-    newContent = linkEntities(editorStateModified, tagRange);
-    editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');
+    /*newContent = linkEntities(editorStateModified);
+    editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');*/
     // Replace each tag text with a placeholder
     newContent = beautifyEntities(editorStateModified);
     editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');
@@ -319,12 +347,15 @@ export const matchTag = (plainContent) => {
 
     //findWithRegexV4(plainContent, tagRegex['ph']);
 
+    // Escape line feed or it counts as 1 position that disappear when you create the ContentBlock
+    const plainContentLineFeedEscaped = plainContent.replace(/\n/g,'');
+
     // STEP 1 - Find all opening and save offset
     let tagMap;
     let openTags = [];
     for (let key in tagStruct) {
         if(!tagStruct[key].selfClosing && !tagStruct[key].isClosure){
-            tagMap = findWithRegexV4(plainContent, tagStruct[key]);
+            tagMap = findWithRegexV4(plainContentLineFeedEscaped, tagStruct[key]);
             openTags = [...openTags, ...tagMap]
         }
     }
@@ -334,7 +365,7 @@ export const matchTag = (plainContent) => {
     let closingTags = [];
     for (let key in tagStruct) {
         if(tagStruct[key].isClosure){
-            tagMap = findWithRegexV4(plainContent, tagStruct[key]);
+            tagMap = findWithRegexV4(plainContentLineFeedEscaped, tagStruct[key]);
             closingTags = [...closingTags, ...tagMap]
         }
     }
@@ -345,7 +376,7 @@ export const matchTag = (plainContent) => {
     let selfClosingTags = [];
     for (let key in tagStruct) {
         if(tagStruct[key].selfClosing){
-            tagMap = findWithRegexV4(plainContent, tagStruct[key]);
+            tagMap = findWithRegexV4(plainContentLineFeedEscaped, tagStruct[key]);
             selfClosingTags = [...selfClosingTags, ...tagMap]
         }
     }
@@ -371,8 +402,6 @@ export const matchTag = (plainContent) => {
     return [...openTags, ...closingTags, ...selfClosingTags];
 };
 
-
-
 /**
  *
  * @param text
@@ -390,17 +419,18 @@ export const findWithRegexV4 = (text, tagSignature) => {
     const tagRange = [];
 
     // Todo: remove loop safelock after test
-    let lockdown = 0; // Never bet on a while loop
+    let safelock = 0; // Never bet on a while loop
     console.log('Searching for: ', type);
-    while((matchArr = openRegex.exec(text)) !== null && lockdown < 100){
-        lockdown = lockdown +1;
+    while((matchArr = openRegex.exec(text)) !== null && safelock < 100){
+        safelock = safelock +1;
         entity.offset = matchArr.index;
         if(!closeRegex) {
             entity.length = openLength;
-            entity.data = {'openingOffset': -1, 'openTagId': null};
+            let originalText = text.slice(entity.offset, entity.offset + entity.length);
+            entity.data = {'originalText': originalText, 'openingOffset': -1, 'openTagId': null};
         }else {
             let slicedText = text.slice(entity.offset, text.length);
-            matchArr = closeRegex.exec(slicedText); // TODO: closing regex MUST be based on tag's type
+            matchArr = closeRegex.exec(slicedText);
             entity.length = matchArr.index + matchArr[1].length; //Length of previous regex
             let originalText = text.slice(entity.offset, entity.offset + entity.length);
             entity.data = {'originalText': originalText, 'closureOffset': -1, 'closeTagId': null};
@@ -411,4 +441,52 @@ export const findWithRegexV4 = (text, tagSignature) => {
     }
     console.log('Tag range: ', tagRange);
     return tagRange;
+};
+
+/**
+ *
+ * @param editorState
+ * @returns {string}
+ */
+export const decodeSegment  = (editorState) => {
+
+    const inlineStyle = editorState.getCurrentInlineStyle();
+    const entities = getEntities(editorState); //start - end
+    const entityKeys =  entities.map( entity => entity.entityKey);
+
+    let contentState = editorState.getCurrentContent();
+    let editorStateClone = editorState;
+
+    entityKeys.forEach( key => {
+        // Update entities and blocks cause previous cycle updated offsets
+        // LAZY NOTE: entity.start and entity.end are block-based
+        let entitiesInEditor = getEntities(editorStateClone);
+        // Filter only looped tag and get data
+        // Todo: add check on tag array length
+        const tagEntity = entitiesInEditor.filter( entity => entity.entityKey === key)[0];
+        const {originalText} = tagEntity.entity.data;
+        // Get block-based selection
+        const selectionState = new SelectionState({
+            anchorKey: tagEntity.blockKey,
+            anchorOffset: tagEntity.start,
+            focusKey: tagEntity.blockKey,
+            focusOffset: tagEntity.end
+        });
+        // Replace text of entity with original text and delete entity key
+        contentState = Modifier.replaceText(
+            contentState,
+            selectionState,
+            originalText,
+            inlineStyle,
+            null
+        );
+        // Update contentState
+        editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
+    });
+    return contentState.getPlainText();
+};
+
+export const addTagEntityToSegment = (editorState) => {
+    let contentState = editorState.getCurrentContent();
+    console.log(contentState)
 };
