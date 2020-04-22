@@ -13,7 +13,7 @@ import Speech2Text from '../../utils/speech2text';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import TextUtils from "../../utils/textUtils";
 
-import {findWithRegex, encodeContent, getEntities} from "./utils/ContentEncoder";
+import {findWithRegex, encodeContent, decodeSegment, getEntities} from "./utils/ContentEncoder";
 import {CompositeDecorator, convertFromRaw, convertToRaw, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 
@@ -48,14 +48,23 @@ class Editarea extends React.Component {
 
     //Receive the new translation and decode it for draftJS
     setNewTranslation = (sid, translation) => {
-        this.state = {
-            translation: translation
-        };
+        if ( sid === this.props.segment.sid) {
+            const rawEncoded = encodeContent( this.state.editorState, translation );
+            this.setState( {
+                translation: translation,
+                editorState: rawEncoded,
+            } );
+        }
+
+        //TODO MOVE THIS
+        setTimeout(()=>this.updateTranslationInStore());
+
     };
 
     updateTranslationInStore = () => {
-        let translation; // Retrieve the translation from draftJS and send it to the Store
-        SegmentActions.updateTranslation(this.props.segment.sid, translation)
+        if ( this.state.translation !== '' ) {
+            SegmentActions.updateTranslation(this.props.segment.sid, decodeSegment(this.state.editorState))
+        }
     };
 
     componentDidMount() {

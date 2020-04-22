@@ -265,19 +265,6 @@ class SegmentTarget extends React.Component {
 
     }
 
-    markTranslation(translation) {
-        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.target) {
-            translation = LXQ.highLightText(translation, this.props.segment.lexiqa.target, true, false, true );
-        }
-        if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
-            translation = QaBlacklist.markBlacklistItemsInSegment(translation, this.props.segment.qaBlacklistGlossary);
-        }
-        if ( this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.target) {
-            translation = SearchUtils.markText(translation, this.props.segment.search, false, this.props.segment.sid);
-        }
-        return translation
-    }
-
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
         SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
@@ -308,8 +295,6 @@ class SegmentTarget extends React.Component {
     }
 
     render() {
-        // translation = this.markTranslation(translation);
-        // let translation = this.props.segment.decoded_translation.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
         let buttonsDisabled = false;
         let translation = this.props.segment.translation;
 

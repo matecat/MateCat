@@ -76,7 +76,7 @@ class Segment extends React.Component {
                 alertNotTranslatedYet(this.props.segment.sid);
             }
         } else {
-            if ( this.props.segment.decoded_translation.length !== 0 ) {
+            if ( this.props.segment.translation.length !== 0 ) {
                 UI.segmentQA(this.$section);
             }
 

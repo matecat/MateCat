@@ -324,7 +324,7 @@ class SegmentsContainer extends React.Component {
 
 
             let target = $('#hiddenHtml .targetarea');
-            target.html(segment.get('decoded_translation'));
+            target.html(segment.get('translation'));
             const targetHeight = target.closest('.target').outerHeight();
 
             source.html('');

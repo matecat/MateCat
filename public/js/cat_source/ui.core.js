@@ -895,7 +895,7 @@ var UI = {
     translationIsToSave : function( segment ) {
         // add to setTranslation tail
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
-        var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
+        var emptyTranslation = ( segment && segment.translation.length === 0 );
 
         return ( !alreadySet && !emptyTranslation );
     },
@@ -903,7 +903,7 @@ var UI = {
     translationIsToSaveBeforeClose : function( segment ) {
         // add to setTranslation tail
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
-        var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
+        var emptyTranslation = ( segment && segment.translation.length === 0 );
 
         return ( !alreadySet && !emptyTranslation && segment.modified && ( segment.status === config.status_labels.NEW.toUpperCase() || segment.status === config.status_labels.DRAFT.toUpperCase() ) );
     },
@@ -1010,7 +1010,7 @@ var UI = {
 		caller = (typeof caller == 'undefined') ? false : caller;
         try {
             // Attention, to be modified when we will lock tags
-            translation = TagUtils.prepareTextToSend( segment.decoded_translation );
+            translation = TagUtils.prepareTextToSend( segment.translation );
             sourceSegment = TagUtils.prepareTextToSend( segment.segment );
         } catch ( e ) {
             var indexSegment = UI.executingSetTranslation.indexOf(id_segment);
