@@ -4,7 +4,6 @@ namespace XliffReplacer;
 
 use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\S3FilesStorage;
 use Log;
 use QA;
 use SubFiltering\Filter;
@@ -81,20 +80,9 @@ class XliffSAXTranslationReplacer {
         }
 
         // setting $this->originalFP
-        $xmlLink    = $originalXliffFilename;
         $streamArgs = null;
 
-        // if Filestorage is on S3, download the file on a temp dir
-        if ( AbstractFilesStorage::isOnS3() ) {
-            $s3Client            = S3FilesStorage::getStaticS3Client();
-            $params[ 'bucket' ]  = \INIT::$AWS_STORAGE_BASE_BUCKET;
-            $params[ 'key' ]     = $originalXliffFilename;
-            $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $outputFile, PATHINFO_BASENAME );
-            $s3Client->downloadItem( $params );
-            $xmlLink = $params[ 'save_as' ];
-        }
-
-        if ( !( $this->originalFP = fopen( $xmlLink, "r", false, stream_context_create( $streamArgs ) ) ) ) {
+        if ( !( $this->originalFP = fopen( $originalXliffFilename, "r", false, stream_context_create( $streamArgs ) ) ) ) {
             die( "could not open XML input" );
         }
     }
