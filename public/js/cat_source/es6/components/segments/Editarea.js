@@ -306,10 +306,11 @@ class Editarea extends React.Component {
         if (pos > 0) {
             this.undoStack.splice(pos);
         }
+        let position = this.saveCursorPosition(this.editAreaRef);
         this.undoStackPosition++;
         this.undoStack.push({
             text: textToSave,
-            position: this.saveCursorPosition(this.editAreaRef)
+            position: (position) ? position : {start: 0, end: 0}
         });
 
         // console.log("SAVE IN STACK IN SEGMENT", textToSave);
@@ -489,7 +490,7 @@ class Editarea extends React.Component {
                     id={'segment-' + this.props.segment.sid + '-editarea'}
                     lang={lang}
                     data-gramm_editor="false"
-                    contentEditable={!readonly}
+                    contentEditable={!readonly && this.props.segment.opened}
                     spellCheck="true"
                     data-sid={this.props.segment.sid}
                     dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }

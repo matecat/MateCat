@@ -81,11 +81,10 @@ if ( ReviewSimple.enabled() ) {
                 } );
             },
 
-            clickOnApprovedButton: function (button ) {
+            clickOnApprovedButton: function (segment, goToNextNotApproved ) {
                 // the event click: 'A.APPROVED' i need to specify the tag a and not only the class
                 // because of the event is triggered even on download button
-                var sid = UI.currentSegmentId;
-                var goToNextNotApproved = ($( button ).hasClass( 'approved' )) ? true : false;
+                var sid = segment.sid;
                 SegmentActions.removeClassToSegment( sid, 'modified' );
                 UI.currentSegment.data( 'modified', false );
 
@@ -100,7 +99,7 @@ if ( ReviewSimple.enabled() ) {
                     }
                 };
 
-                UI.changeStatus( button, 'approved', afterApproveFn );  // this does < setTranslation
+                UI.changeStatus( SegmentStore.getCurrentSegment(), 'approved', afterApproveFn );  // this does < setTranslation
 
                 var original = UI.currentSegment.find( '.original-translation' ).text();
 

@@ -121,10 +121,11 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
 
     /**
      * @param array $id_segment_list
+     * @param int $id_job
      *
      * @return \DataAccess_IDaoStruct[]
      */
-    public function getTteForSegments( $id_segment_list ) {
+    public function getTteForSegments( $id_segment_list, $id_job ) {
         $in  = str_repeat('?,', count($id_segment_list) - 1) . '?';
         $sql = "
             SELECT 
@@ -135,10 +136,13 @@ class SegmentTranslationEventDao extends \DataAccess_AbstractDao {
                     segment_translation_events
                 WHERE
                     id_segment IN ( $in )
+                AND id_job = ?
                 GROUP BY id_segment, source_page
                 ORDER BY id_segment, source_page
         ";
-        $stmt = $this->_getStatementForCache( $sql );
+
+        $stmt   = $this->_getStatementForCache( $sql );
+        $id_segment_list[] = $id_job;
 
         return @$this->_fetchObject( $stmt, new ShapelessConcreteStruct, $id_segment_list );
     }

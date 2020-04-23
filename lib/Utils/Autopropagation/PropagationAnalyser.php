@@ -55,7 +55,7 @@ class PropagationAnalyser {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $parentSegmentTranslation
+     * @param Translations_SegmentTranslationStruct   $parentSegmentTranslation
      * @param Translations_SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
      * @return \Propagation_PropagationTotalStruct
@@ -68,23 +68,38 @@ class PropagationAnalyser {
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
 
                 if ( $this->detectIce( $segmentTranslation ) ) {
-                    $propagation->addNotPropagatedIce($segmentTranslation);
+                    $propagation->addNotPropagatedIce( $segmentTranslation );
                     $this->notPropagatedIceCount++;
                 } else {
-                    $propagation->addPropagatedNotIce($segmentTranslation);
-                    $propagation->addPropagatedId($segmentTranslation->id_segment);
+                    $propagation->addPropagatedNotIce( $segmentTranslation );
+                    $propagation->addPropagatedId( $segmentTranslation->id_segment );
+
+                    if ( false === \Utils::stringsAreEqual(
+                            $parentSegmentTranslation->translation,
+                            $segmentTranslation->translation
+                    ) ) {
+                        $propagation->addPropagatedIdToUpdateVersion( $segmentTranslation->id_segment );
+                    }
+
                     $this->propagatedCount++;
                 }
             }
         } else { // keep only ICE with the corresponding hash
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {
-
                 if ( $this->detectMatchingIce( $parentSegmentTranslation, $segmentTranslation ) ) {
-                    $propagation->addPropagatedIce($segmentTranslation);
-                    $propagation->addPropagatedId($segmentTranslation->id_segment);
+                    $propagation->addPropagatedIce( $segmentTranslation );
+                    $propagation->addPropagatedId( $segmentTranslation->id_segment );
+
+                    if ( false === \Utils::stringsAreEqual(
+                            $parentSegmentTranslation->translation,
+                            $segmentTranslation->translation
+                    ) ) {
+                        $propagation->addPropagatedIdToUpdateVersion( $segmentTranslation->id_segment );
+                    }
+
                     $this->propagatedIceCount++;
                 } else {
-                    $propagation->addNotPropagatedNotIce($segmentTranslation);
+                    $propagation->addNotPropagatedNotIce( $segmentTranslation );
                     $this->notPropagatedCount++;
                 }
             }
@@ -100,15 +115,6 @@ class PropagationAnalyser {
      */
     private function detectIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
         return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->id_segment !== null );
-    }
-
-    /**
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
-     *
-     * @return bool
-     */
-    private function detectUnlockedIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
-        return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 0 and $segmentTranslation->id_segment !== null );
     }
 
     /**

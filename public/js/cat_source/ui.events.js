@@ -45,17 +45,18 @@ $.extend(UI, {
             }
             if ( config.isReview ) {
                 if ( $('.editor .next-unapproved:not(.disabled)').length > 0 ) {
-                    setTimeout( function () { UI.clickOnApprovedButton( $( '.editor .next-unapproved:not(.disabled)' ) )} );
+                    setTimeout( function () { UI.clickOnApprovedButton( segment, true )} );
                 } else {
-                    setTimeout(function () { UI.clickOnApprovedButton($('.editor .approved'))});
+                    setTimeout(function () { UI.clickOnApprovedButton(segment, false)});
                 }
             } else {
-                if ( $('.editor .next-untranslated:not(.disabled)').length > 0 ) {
-                    setTimeout(function () { UI.clickOnTranslatedButton($('.editor .next-untranslated:not(.disabled)'))});
-                } else if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    setTimeout(function () { UI.clickOnTranslatedButton($('.editor .translated'))});
-                } else if ( $('.editor .guesstags').length > 0 ) {
-                    setTimeout(function () { UI.startSegmentTagProjection(UI.currentSegmentId)});
+                var nextUntranslatedSegmentId = SegmentStore.getNextUntranslatedSegmentId();
+                if ( !segment.tagged ) {
+                    setTimeout(function () { UI.startSegmentTagProjection(segment.sid)});
+                } else if ( nextUntranslatedSegmentId  && segment.translation.trim() !== "") {
+                    setTimeout(function () { UI.clickOnTranslatedButton(segment, true)});
+                } else if ( segment.translation.trim() !== "" ) {
+                    setTimeout(function () { UI.clickOnTranslatedButton(segment, false)});
                 }
             }
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
@@ -66,12 +67,12 @@ $.extend(UI, {
                 return;
             }
             if ( config.isReview ) {
-                setTimeout(function () { UI.clickOnApprovedButton($('body.review .editor .approved:not(.disabled)'))});
+                setTimeout(function () { UI.clickOnApprovedButton(segment, false)});
             } else {
-                if ( $('.editor .translated:not(.disabled)').length > 0 ) {
-                    setTimeout(function () {UI.clickOnTranslatedButton($('.editor .translated'))});
-                } else if ( $('.editor .guesstags').length > 0 ) {
-                    setTimeout(function () {UI.startSegmentTagProjection(UI.currentSegmentId)});
+                if ( !segment.tagged ) {
+                    setTimeout(function () {UI.startSegmentTagProjection(segment.sid)});
+                } else if ( segment.translation.trim() !== "" ) {
+                    setTimeout(function () {UI.clickOnTranslatedButton(segment, false)});
                 }
             }
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.toggleTagDisplayMode.keystrokes[Shortcuts.shortCutsKeyType], function(e) {

@@ -229,10 +229,7 @@ let SegmentFilterUtils = {
         } else {
             nextItem = groupArray[0];
         }
-        UI.changeStatus(button, status, function(){SegmentActions.openSegment(nextItem);});
-
-        UI.setStatusButtons(UI.currentSegment.find('a.translated'));
-
+        UI.changeStatus(SegmentStore.getCurrentSegment(), status, function(){SegmentActions.openSegment(nextItem);});
 
     },
     goToNextRepetitionGroup: function ( button, status ) {
@@ -248,9 +245,7 @@ let SegmentFilterUtils = {
         }
         var nextItem = segmentFilterData.serverData.grouping[nextGroupHash][0];
 
-        UI.changeStatus(button, status, function(){SegmentActions.openSegment(nextItem);});
-
-        UI.setStatusButtons(UI.currentSegment.find('a.translated'));
+        UI.changeStatus(SegmentStore.getCurrentSegment(), status, function(){SegmentActions.openSegment(nextItem);});
     }
 };
 

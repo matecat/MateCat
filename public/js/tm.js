@@ -1920,7 +1920,7 @@
                 }
             } else if (type == 'glossary') {
                 label = '<p class="pull-left">Select glossary in XLSX format ' +
-                        '   <a href="http://www.matecat.com/support/managing-language-resources/add-glossary/" target="_blank">(How-to)</a>' +
+                        '   <a href="http://site.matecat.com/support/managing-language-resources/add-glossary/" target="_blank">(How-to)</a>' +
                         '</p>';
                 format = '.xlsx,.xls';
             }

@@ -354,6 +354,44 @@ const CommonUtils = {
             localStorage.removeItem(key);
         }
     },
+    addInSessionStorage: function (key, val, operation) {
+        if(this.isPrivateSafari()) {
+            let item = {
+                key: key,
+                value: val
+            };
+            this.localStorageArray.push(item);
+        } else {
+            try {
+                sessionStorage.setItem(key, val);
+            } catch (e) {
+                CommonUtils.clearStorage(operation);
+                sessionStorage.setItem(key, val);
+            }
+        }
+    },
+    getFromSessionStorage: function (key) {
+        if(this.isPrivateSafari()) {
+            let foundVal = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key === key) foundVal = this.value;
+            });
+            return foundVal || false;
+        } else {
+            return sessionStorage.getItem(key);
+        }
+    },
+    removeFromSessionStorage: function (key) {
+        if(this.isPrivateSafari()) {
+            let foundIndex = 0;
+            $.each(this.localStorageArray, function (index) {
+                if(this.key == key) foundIndex = index;
+            });
+            this.localStorageArray.splice(foundIndex, 1);
+        } else {
+            sessionStorage.removeItem(key);
+        }
+    },
     /******************************/
 };
 

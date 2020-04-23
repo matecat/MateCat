@@ -11,8 +11,6 @@ namespace Features\ReviewExtended\Model;
 use Chunks_ChunkStruct;
 use Constants;
 use Database;
-use Exceptions\ControllerReturnException;
-use PDO;
 
 class ChunkReviewDao extends \LQA\ChunkReviewDao {
 
@@ -25,7 +23,7 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
      */
     public static function getPenaltyPointsForChunk( Chunks_ChunkStruct $chunk, $source_page = null ) {
         if ( is_null( $source_page ) ) {
-            $source_page = Constants::SOURCE_PAGE_REVISION ;
+            $source_page = Constants::SOURCE_PAGE_REVISION;
         }
 
         $sql = "SELECT SUM(penalty_points) FROM qa_entries e
@@ -46,14 +44,15 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                 'source_page' => $source_page
         ] );
 
-        $count =  $stmt->fetch();
+        $count = $stmt->fetch();
 
-        $penalty_points = $count[0] == null ? 0 : $count[0];
-        return $penalty_points ;
+        $penalty_points = $count[ 0 ] == null ? 0 : $count[ 0 ];
+
+        return $penalty_points;
     }
 
     public function getPenaltyPointsForChunkAndSourcePageAndSegment( $chunk, $segment_ids, $source_page ) {
-        $segment_ids = implode(',', $segment_ids ) ;
+        $segment_ids = implode( ',', $segment_ids );
 
         $sql = "SELECT SUM(penalty_points) FROM qa_entries e
                 JOIN jobs j on j.id = e.id_job
@@ -74,10 +73,11 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                 'source_page' => $source_page
         ] );
 
-        $count =  $stmt->fetch();
+        $count = $stmt->fetch();
 
-        $penalty_points = $count[0] == null ? 0 : $count[0];
-        return $penalty_points ;
+        $penalty_points = $count[ 0 ] == null ? 0 : $count[ 0 ];
+
+        return $penalty_points;
     }
 
     public function countTimeToEdit( Chunks_ChunkStruct $chunk, $source_page ) {
@@ -92,19 +92,19 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
 
                   GROUP BY ste.source_page
 
-        " ;
+        ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute([
+        $stmt->execute( [
                 'id_job'      => $chunk->id,
                 'password'    => $chunk->password,
                 'source_page' => $source_page,
-        ]);
+        ] );
 
         $result = $stmt->fetch();
 
-        return $result[0] == null ? 0 : $result[0];
+        return $result[ 0 ] == null ? 0 : $result[ 0 ];
     }
 
     public function recountAdvancementWords( Chunks_ChunkStruct $chunk, $source_page ) {
@@ -135,21 +135,52 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
                 ( source_page = :source_page OR
                   ( :source_page = 2 AND ste.ste_id_segment IS NULL and match_type = 'ICE' AND locked = 1 and st.status = 'APPROVED' )
                   ) ;
-            "  ;
+            ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute([
+        $stmt->execute( [
                 'id_job'            => $chunk->id,
                 'password'          => $chunk->password,
                 'source_page'       => $source_page,
                 'job_first_segment' => $chunk->job_first_segment,
                 'job_last_segment'  => $chunk->job_last_segment
-        ]);
+        ] );
 
         $result = $stmt->fetch();
 
-        return $result[0] == null ? 0 : $result[0];
+        return $result[ 0 ] == null ? 0 : $result[ 0 ];
     }
 
+    /**
+     * @param int   $id
+     * @param array $data
+     *
+     * @return int|void
+     */
+    public function passFailCountsAtomicUpdate( $id, $data = [] ) {
+
+        $sql = "UPDATE 
+        qa_chunk_reviews
+        SET 
+        is_pass = :is_pass,
+        penalty_points = penalty_points + :penalty_points,
+        reviewed_words_count = reviewed_words_count + :reviewed_words_count,
+        advancement_wc = advancement_wc + :advancement_wc,
+        total_tte = total_tte + :total_tte
+        WHERE id = :id";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+                'id'                   => $id,
+                'is_pass'              => $data[ 'is_pass' ],
+                'penalty_points'       => $data[ 'penalty_points' ],
+                'reviewed_words_count' => $data[ 'reviewed_words_count' ],
+                'advancement_wc'       => $data[ 'advancement_wc' ],
+                'total_tte'            => $data[ 'total_tte' ],
+        ] );
+
+        return $stmt->rowCount();
+    }
 }

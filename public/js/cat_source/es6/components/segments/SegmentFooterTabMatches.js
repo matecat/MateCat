@@ -97,9 +97,8 @@ class SegmentFooterTabMatches extends React.Component {
         setTimeout( () => {
             SegmentActions.setFocusOnEditArea();
             SegmentActions.disableTPOnSegment(this.props.segment);
-            SegmentActions.setChoosenSuggestion(this.props.segment, index);
-            TranslationMatches.copySuggestionInEditarea(UI.currentSegment, $(ulDataItem + index + '] li.b .translation').html(),
-                $('.editor .editarea'), $(ulDataItem + index + '] ul.graysmall-details .percent').text(), index, $(ulDataItem + index + '] li.graydesc .bold').text());
+            SegmentActions.setChoosenSuggestion(this.props.segment.original_sid, index);
+            TranslationMatches.copySuggestionInEditarea(this.props.segment, index);
             SegmentActions.highlightEditarea(self.props.id_segment);
         }, 200);
     }
@@ -146,8 +145,11 @@ class SegmentFooterTabMatches extends React.Component {
     /**
      * Do not delete, overwritten by plugin
      */
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
         setTimeout(()=>SegmentActions.recomputeSegment(this.props.id_segment));
+        if ( !prevProps.segment.unlocked && this.props.segment.unlocked ) {
+            SegmentActions.getContribution(this.props.segment.sid);
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -155,7 +157,8 @@ class SegmentFooterTabMatches extends React.Component {
             ((!_.isUndefined(nextProps.segment.contributions) && _.isUndefined(this.props.segment.contributions)) ||
             !Immutable.fromJS(this.props.segment.contributions).equals(Immutable.fromJS(nextProps.segment.contributions)) )) ||
             this.props.active_class !== nextProps.active_class ||
-            this.props.tab_class !== nextProps.tab_class
+            this.props.tab_class !== nextProps.tab_class ||
+            this.props.segment.unlocked !== nextProps.segment.unlocked
     }
 
     allowHTML(string) {

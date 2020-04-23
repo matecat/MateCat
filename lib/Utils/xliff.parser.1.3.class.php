@@ -594,9 +594,24 @@ class Xliff_Parser {
                 //if not specified
                 if ( $_tag->parentNode->nodeName == $parentNodeName && !empty( $childNodes ) ) {
 
-                    //Loop on the child nodes, saveXML concatenation
+                    //
+                    // Note 2020-02-11
+                    // ------------------------------------------------------------------
+                    // We substituted saveXML() with saveHTML() in order to transform all chars to entities.
+                    //
+                    // Consider this example:
+                    //
+                    // &#128076;&#127995; (an emoji with the corresponding color skin modifier)
+                    //
+                    // saveXML() will convert it to the emoji char
+                    // saveHTML() will convert it to a hexadecimal representation
+                    //
+                    // The color skin tone emojis are interpreted as a white space in ProjectManager:2531, and for this reason
+                    // the count of characters in $segment will be wrong. And then $before, $cleanSegment, $after will be broken
+                    //
+                    // Loop on the child nodes, saveHTML concatenation
                     foreach ( $_tag->childNodes as $node ) {
-                        $_tmpTag .= $dDoc->saveXML( $node );
+                        $_tmpTag .= $dDoc->saveHTML( $node );
                     }
 
                 }
@@ -616,10 +631,9 @@ class Xliff_Parser {
 
         if ( $asList ) {
             return array_values( $TagList );
-        } else {
-            return $TagList[ $parentNodeName ];
         }
 
+        return $TagList[ $parentNodeName ];
     }
 
     private function getSDLStatus( &$xliff, $i, $j, $trans_unit ) {

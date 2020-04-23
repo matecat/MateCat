@@ -3318,7 +3318,7 @@ section.opened.editor .status {
     .text .source.item,
     .text .target.item,
     .white li {
-        width: 45.3% !important
+        width: 45% !important
     }
 
     .target.item {
@@ -3515,11 +3515,6 @@ p.percent {
 
 .dialog form {
     font-size: 70%;
-}
-
-#stat-completion,
-#stat-wph {
-    display: none;
 }
 
 .misspelled {
@@ -4754,7 +4749,7 @@ header {
             background: transparent;
         }
 
-        .action-submenu {
+        .action-submenu, #quality-report {
 
             position: relative;
             display: grid;
@@ -4787,6 +4782,22 @@ header {
             .dropdown-menu-overlay {
                 width: 30px;
                 height: 80px;
+            }
+
+            .feedback-alert {
+                position: absolute;
+                margin: 0;
+                top: -8px;
+                padding: 0px 8px;
+                right: -12px;
+                background: $orangeDefault;
+                color: #fff;
+                font-size: 10px;
+                text-align: center;
+                border-radius: 25px;
+                vertical-align: middle;
+                line-height: 16px;
+                height: 17px;
             }
 
             .menu {
@@ -4888,6 +4899,10 @@ header {
                 display: grid;
                 background: transparent;
                 border:none !important;
+                opacity: unset;
+            }
+            #quality-report svg {
+                position: absolute;
             }
         }
 

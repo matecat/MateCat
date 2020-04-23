@@ -366,7 +366,6 @@ class setTranslationController extends ajaxController {
             $new_translation->time_to_edit = $this->time_to_edit;
         }
 
-
         $this->_validateSegmentTranslationChange( $new_translation, $old_translation );
 
         /**
@@ -387,6 +386,7 @@ class setTranslationController extends ajaxController {
         $editLogModel                      = new EditLog_EditLogModel( $this->id_job, $this->password, $this->featureSet );
         $this->result[ 'pee_error_level' ] = $editLogModel->getMaxIssueLevel();
 
+        // if evaluateVersionSave() return true it means that it was persisted a new version of the parent segment
         $this->VersionsHandler->evaluateVersionSave( $new_translation, $old_translation );
 
         /**
@@ -438,7 +438,6 @@ class setTranslationController extends ajaxController {
                         Constants_TranslationStatus::STATUS_REJECTED
                 ] )
         ) {
-
             //propagate translations
             $TPropagation                             = new Translations_SegmentTranslationStruct();
             $TPropagation[ 'status' ]                 = $this->status;
@@ -451,17 +450,14 @@ class setTranslationController extends ajaxController {
             $TPropagation[ 'translation_date' ]       = Utils::mysqlTimestamp( time() );
             $TPropagation[ 'match_type' ]             = $old_translation[ 'match_type' ];
 
-            $persistPropagatedVersions = $new_translation->translation !== $old_translation->translation;
-
             try {
-
                 $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                         $TPropagation,
                         $this->chunk,
                         $this->id_segment,
                         $this->project,
                         $this->VersionsHandler,
-                        $persistPropagatedVersions
+                        true
                 );
 
             } catch ( Exception $e ) {
@@ -473,7 +469,6 @@ class setTranslationController extends ajaxController {
                 return $e->getCode();
 
             }
-
         }
 
         $old_wStruct = $this->recountJobTotals( $old_translation[ 'status' ] );
@@ -500,12 +495,26 @@ class setTranslationController extends ajaxController {
             $newValues[] = $counter->getUpdatedValues( $old_count );
 
             if ( false == empty( $propagationTotal[ 'totals' ] ) ) {
-                $counter->setOldStatus( $old_status );
-                $counter->setNewStatus( $this->status );
 
-                $propagatedSegmentsCount = ( $propagationTotal[ 'totals' ]['propagated_ice_total'] + $propagationTotal[ 'totals' ]['propagated_total'] );
+                /** @var Translations_SegmentTranslationStruct[] $propagatedNotIce */
+                $propagatedNotIce = @$propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'not_ice' ][ 'object' ];
+                if(isset($propagatedNotIce)){
+                    foreach ( $propagatedNotIce as $item ) {
+                        $counter->setOldStatus( $item->status );
+                        $counter->setNewStatus( $this->status );
+                        $newValues[] = $counter->getUpdatedValues( $item->eq_word_count );
+                    }
+                }
 
-                $newValues[] = $counter->getUpdatedValues( $propagatedSegmentsCount );
+                /** @var Translations_SegmentTranslationStruct[] $propagatedIce */
+                $propagatedIce = @$propagationTotal[ 'segments_for_propagation' ][ 'propagated' ][ 'ice' ][ 'object' ];
+                if(isset($propagatedIce)){
+                    foreach ( $propagatedIce as $item ) {
+                        $counter->setOldStatus( $item->status );
+                        $counter->setNewStatus( $this->status );
+                        $newValues[] = $counter->getUpdatedValues( $item->eq_word_count );
+                    }
+                }
             }
 
             try {
@@ -584,7 +593,7 @@ class setTranslationController extends ajaxController {
                     'statuses' => $this->split_statuses
             ];
             $translationDao                          = new TranslationsSplit_SplitDAO( Database::obtain() );
-            $result                                  = $translationDao->update( $translationStruct );
+            $result                                  = $translationDao->atomicUpdate( $translationStruct );
 
         }
 

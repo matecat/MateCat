@@ -65,8 +65,7 @@ $.extend(UI, {
             }, UI.checkUpdatesEvery);
 
         }
-        CatToolActions.renderSubHeader();
-        this.renderQualityReportButton();
+
         return UI.getSegments(options);
 
     },
@@ -103,9 +102,11 @@ $.extend(UI, {
             LXQ.initPopup();
         }
         CatToolActions.startNotifications();
+        UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
         // Temporary js for header action menu
         UI.initHeader();
-        UI.splittedTranslationPlaceholder = '##$_SPLIT$##';
+        CatToolActions.renderSubHeader();
+        CatToolActions.renderFooter();
     },
 	init: function() {
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
@@ -128,7 +129,7 @@ $.extend(UI, {
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
         this.setTranslationTail = [];
-        this.executingSetTranslation = false;
+        this.executingSetTranslation = [];
 
         if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
@@ -146,12 +147,7 @@ $.extend(UI, {
         UI.unmountSegments();
         this.start();
     },
-    renderQualityReportButton: function() {
-        CatToolActions.renderQualityReportButton();
-        if ( config.secondRevisionsCount ) {
-            UI.reloadQualityReport();
-        }
-    },
+
     detectStartSegment: function() {
         if (this.segmentToScrollAtRender) {
             this.startSegmentId = this.segmentToScrollAtRender;

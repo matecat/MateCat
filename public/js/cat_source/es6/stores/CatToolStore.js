@@ -6,17 +6,36 @@ import AppDispatcher  from './AppDispatcher';
 import {EventEmitter} from 'events';
 import CatToolConstants  from '../constants/CatToolConstants';
 import assign  from 'object-assign';
+import SegmentConstants from "../constants/SegmentConstants";
 
 EventEmitter.prototype.setMaxListeners(0);
 
 
 let CatToolStore = assign({}, EventEmitter.prototype, {
     files: null,
+    qr: null,
     storeFilesInfo: function(files) {
         this.files = files
     },
     getJobFilesInfo: function() {
         return this.files;
+    },
+    setProgress: function (stats) {
+        stats.translationCompleted = stats.TODO === 0;
+        stats.revisionCompleted = stats.TRANSLATED === 0;
+        stats.revision1Completed = stats.revises && stats.revises.length > 0 && _.round(stats.revises[0].advancement_wc) === stats.TOTAL;
+        stats.revision2Completed = stats.revises && stats.revises.length > 1 && _.round(stats.revises[1].advancement_wc) === stats.TOTAL;
+
+        this._projectProgess = stats;
+    },
+    updateQR: function (qr) {
+        this.qr = qr;
+    },
+    getQR: function(revisionNumber) {
+        if ( this.qr ) {
+            return _.filter(this.qr.chunk.reviews, (rev)=>rev.revision_number === revisionNumber);
+        }
+        return null
     },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
@@ -55,6 +74,13 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.STORE_FILES_INFO:
             CatToolStore.storeFilesInfo(action.files);
             CatToolStore.emitChange(CatToolConstants.STORE_FILES_INFO, action.files);
+            break;
+        case CatToolConstants.SET_PROGRESS:
+            CatToolStore.setProgress(action.stats);
+            CatToolStore.emitChange(CatToolConstants.SET_PROGRESS, CatToolStore._projectProgess);
+            break;
+        case CatToolConstants.UPDATE_QR:
+            CatToolStore.updateQR(action.qr);
             break;
     }
 });

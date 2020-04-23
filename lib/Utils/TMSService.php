@@ -223,10 +223,7 @@ class TMSService {
      */
     public function tmxUploadStatus() {
 
-        //remove spaces because of MyMemory remove them and status check does not works
-        $name_space_replaced = str_replace( " ", "_", $this->name );
-
-        $allMemories = $this->mymemory_engine->getStatus( $this->tm_key, $name_space_replaced );
+        $allMemories = $this->mymemory_engine->getStatus( $this->tm_key, $this->name );
 
 //        Log::doJsonLog( $allMemories );
 

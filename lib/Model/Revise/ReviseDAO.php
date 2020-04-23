@@ -117,7 +117,7 @@ class Revise_ReviseDAO extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public function update( Revise_ReviseStruct $obj ) {
+    public function atomicUpdate( Revise_ReviseStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );

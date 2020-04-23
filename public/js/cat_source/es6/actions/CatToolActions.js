@@ -5,6 +5,9 @@ import Review_QualityReportButton from '../components/review/QualityReportButton
 import SubHeaderContainer from '../components/header/cattol/SubHeaderContainer';
 import SegmentFilter from "../components/header/cattol/segment_filter/segment_filter";
 import AnalyzeConstants from "../constants/AnalyzeConstants";
+import SegmentConstants from "../constants/SegmentConstants";
+import Footer from "../components/footer/Footer";
+import RevisionFeedbackModal from "../components/modals/RevisionFeedbackModal";
 
 let CatToolActions = {
 
@@ -123,6 +126,106 @@ let CatToolActions = {
 
         config.last_job_segment = data.last_segment;
         config.firstSegmentOfFiles = data.files;
+    },
+    renderFooter: function() {
+        var mountPoint = $("footer.stats-foo")[0];
+        ReactDOM.render(React.createElement(Footer, {
+            cattool: true,
+            idProject: config.id_project,
+            idJob: config.job_id,
+            password: config.password,
+            source: config.source_rfc,
+            target: config.target_rfc,
+            isReview: config.isReview,
+            isCJK: config.isCJK,
+            languagesArray: config.languages_array
+        }), mountPoint);
+    },
+    updateFooterStatistics: function () {
+        API.JOB.retrieveStatistics(config.id_job, config.password)
+        .done( function( data ) {
+            if (data.stats){
+                CatToolActions.setProgress(data.stats);
+                UI.setDownloadStatus(data.stats);
+            }
+        });
+    },
+    setProgress: function(stats) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.SET_PROGRESS,
+            stats: stats
+        });
+        //TODO move it
+        UI.projectStats = stats;
+        this.checkQualityReport(stats)
+    },
+    checkQualityReport: function(stats) {
+        if ( stats.APPROVED_PERC > 10 ) {
+            $('#quality-report-button').attr('data-revised', true);
+        }
+        let reviseCount = (config.isReview) ?_.filter(stats.revises, (rev) => rev.revision_number === config.revisionNumber ) : null;
+        if ( config.isReview && reviseCount && reviseCount[0].advancement_wc >= stats.TOTAL ) {
+            let revise = CatToolStore.getQR(config.revisionNumber);
+            if (revise && !revise[0].feedback ) {
+                // var notification = {
+                //     title: 'Leave your feedback',
+                //     text: "Kudos, you have completed the job! Please remember to leave some feedback for the translator. " +
+                //         "<a id='leaveFeedback' style='cursor: pointer'> Write feedback. </a>",
+                //     allowHtml: true,
+                //     timer: 6000,
+                //     type: 'warning',
+                //     position: "tc",
+                //     closeCallback: ()=>{
+                //         $('#leaveFeedback').off('click');
+                //     },
+                //     openCallback: ()=>{
+                //         $('#leaveFeedback').bind('click','#leaveFeedback', () => {
+                //             APP.removeAllNotifications();
+                //             CatToolActions.openFeedbackModal("", config.revisionNumber);
+                //         });
+                //     }
+                // };
+                //
+                // APP.addNotification(notification);
+                const isModalClosed = CommonUtils.getFromSessionStorage("feedback-modal");
+                if ( !isModalClosed ) {
+                    CatToolActions.openFeedbackModal("", config.revisionNumber);
+                }
+            }
+        }
+    },
+    openFeedbackModal: function (feedback, revisionNumber) {
+        var props = {
+            feedback: feedback,
+            revisionNumber: revisionNumber,
+            overlay: true,
+            onCloseCallback: function() {
+                CommonUtils.addInSessionStorage("feedback-modal", 1, "feedback-modal");
+            },
+            successCallback: function() {
+                APP.ModalWindow.onCloseModal();
+            }
+        };
+        APP.ModalWindow.showModalComponent(RevisionFeedbackModal, props, "Feedback submission");
+    },
+    sendRevisionFeedback: function (text) {
+        return API.JOB.sendRevisionFeedback(config.id_job, config.revisionNumber, config.review_password, text);
+
+    },
+    updateQualityReport: function (qr) {
+        var revNumber = (config.revisionNumber) ?  config.revisionNumber : 1;
+        var review = qr.chunk.reviews.find(function ( value ) {
+            return value.revision_number === revNumber;
+        }) ;
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.UPDATE_QR,
+            qr: qr
+        });
+        window.quality_report_btn_component.setState({
+            is_pass : review.is_pass,
+            score : review.score,
+            feedback: review.feedback
+        });
     }
 };
 
