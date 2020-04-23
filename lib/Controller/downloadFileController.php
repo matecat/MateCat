@@ -177,6 +177,16 @@ class downloadFileController extends downloadController {
                         , $xliffFilePath
                 );
 
+                // if Filestorage is on S3, download the file on a temp dir
+                if ( AbstractFilesStorage::isOnS3() ) {
+                    $s3Client            = S3FilesStorage::getStaticS3Client();
+                    $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
+                    $params[ 'key' ]     = $xliffFilePath;
+                    $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $xliffFilePath, PATHINFO_BASENAME );
+                    $s3Client->downloadItem( $params );
+                    $xliffFilePath = $params[ 'save_as' ];
+                }
+
                 $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
 
                 //instantiate parser
