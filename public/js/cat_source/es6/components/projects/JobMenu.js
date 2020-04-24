@@ -20,7 +20,6 @@ class JobMenu extends React.Component {
     openSecondPassUrl() {
         if ( this.props.job.has('revise_passwords') && this.props.job.get('revise_passwords').size > 1) {
             let url = config.hostpath + '/revise2/' + this.props.project.get('name') + '/'+ this.props.job.get('source') +'-'+ this.props.job.get('target') +'/'+ this.props.jobId +'-'+ this.props.job.get('revise_passwords').get(1).get('password');
-            console.log('Open url');
             window.open(url);
         }
     }

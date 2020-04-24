@@ -17,13 +17,11 @@ class TagEntity extends Component {
     }
 
     emitSelectionParameters = (blockKey, selection, forceSelection) => {
-        console.log("double clicked: ", blockKey, selection, forceSelection)
     };
 
     tooltipToggle = () => {
         // this will trigger a rerender in the main Editor Component
         const {showTooltip} = this.state;
-        console.log('toggle: ',showTooltip);
         this.setState({
             showTooltip: !showTooltip
         })
@@ -32,7 +30,6 @@ class TagEntity extends Component {
     highlightTag = () => {
         const {start, end, children} = this.props;
         const {selection} = children[0].props;
-        console.log(JSON.stringify(selection.toJS(), null, 4));
     };
 
     render() {
@@ -40,7 +37,6 @@ class TagEntity extends Component {
         const {decoratedText, entityKey, offsetkey, blockKey, start, end, children} = this.props;
         const {selection, forceSelection} = children[0].props;
         const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
-        console.log('props of the entity with key: ' + entityKey + '-> ', this.props);
 
         return <div className="tag-container" /*contentEditable="false" suppressContentEditableWarning={true}*/>
             {showTooltip && <TooltipInfo/>}

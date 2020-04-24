@@ -13,6 +13,8 @@ import Speech2Text from '../../utils/speech2text';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import TextUtils from "../../utils/textUtils";
 
+import DraftMatecatUtils from './utils/DraftUtils'
+
 import {
     findWithRegex,
     encodeContent,
@@ -99,11 +101,6 @@ class Editarea extends React.Component {
     render() {
         const {editorState} = this.state;
         const {onChange, onPaste} = this;
-        const contentState = editorState.getCurrentContent();
-
-        // Affidabile solo per il numero delle entità presenti, ma non per le chiavi
-        const entityKeys = Object.keys(convertToRaw(contentState).entityMap);
-        console.log('Entità presenti nell\'editor: ', entityKeys.length);
 
         let lang = '';
         let readonly = false;
