@@ -2,9 +2,12 @@ import {
     EditorState,
     Modifier,
     SelectionState,
-    ContentState
+    ContentState,
+    CharacterMetadata,
+    BlockMapBuilder
 } from 'draft-js';
 
+import Immutable from 'immutable';
 
 export const tagStruct = {
     'ph': {
@@ -59,6 +62,17 @@ export const tagStruct = {
         selfClosing: true,
         isClosure: false,
         placeholder: '#',
+        placeholderRegex: null,
+        decodeNeeded: false
+    },
+    'lineFeed':{
+        type: 'lineFeed',
+        openRegex: /##\$(_0D)\$##/g,
+        openLength: 9,
+        closeRegex: null,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: '\\n',
         placeholderRegex: null,
         decodeNeeded: false
     }
@@ -155,36 +169,32 @@ export const createNewEntitiesFromMap = (editorState, plainText = '') => {
 /**
  *
  * @param editorState
- * @param entityRange
  * @returns {ContentState} - A ContentState in which each tag that is not self-closable, is linked to another tag
  */
 export const linkEntities  = (editorState) => {
     let contentState = editorState.getCurrentContent();
 
-    // Get previously created entities
-    const entities = getEntities(editorState);
-
-    // Todo: filter only entitites to link?
-    const blocks = contentState.getBlockMap();
-    let maxCharsInBlocks = 0;
-    blocks.forEach((contentBlock) => {
-        maxCharsInBlocks += contentBlock.getLength();
-        /*entities.forEach( entity => {
-            if(entity.blockKey === contentBlock.getKey()){
-                openingEntityKey = contentBlock.getEntityAt(entity.start - (maxCharsInBlocks - contentBlock.getLength()));
-            }
-        });*/
+    const openEntities = getEntities(editorState).filter( entityObj => {
+        if ( entityObj.entity.data.hasOwnProperty('closeTagId') && entityObj.entity.data.closeTagId) {
+            return entityObj;
+        }
     });
-
-    /*let contentBlock, openingEntityKey, closingEntityKey;
-    entityToLink.forEach( tag => {
-        contentBlock = contentState.getFirstBlock();
-        openingEntityKey = contentBlock.getEntityAt(tag.offset);
-        closingEntityKey = contentBlock.getEntityAt(tag.data.closureOffset);
-        // Todo: clean various offsets placed in data:{} inside entities
-        contentState = contentState.mergeEntityData( closingEntityKey, {openTagId: openingEntityKey} );
-        contentState = contentState.mergeEntityData( openingEntityKey, {closeTagId: closingEntityKey} );
-    });*/
+    const closeEntities = getEntities(editorState).filter( entityObj => {
+        if (entityObj.entity.data.hasOwnProperty('openTagId') && entityObj.entity.data.openTagId) {
+            return entityObj;
+        }
+    });
+    openEntities.forEach( ent => {
+        const closure = closeEntities.filter(entObj => {
+            if(entObj.entity.data.openTagId === ent.entity.data.closeTagId){
+                return entObj;
+            }
+        });
+        if(closure.length > 0) {
+            contentState = contentState.mergeEntityData( closure[0].entityKey, {openTagKey: ent.entityKey} );
+            contentState = contentState.mergeEntityData( ent.entityKey, {closeTagKey: closure[0].entityKey} );
+        }
+    });
     return contentState;
 };
 
@@ -228,6 +238,7 @@ export const beautifyEntities  = (editorState) => {
         // Update contentState
         editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
     });
+    // Todo verificare se serve il push dell'editor state
     return contentState;
 };
 
@@ -329,12 +340,13 @@ export const encodeContent = (editorState, plainText = '') => {
     let newContent = createNewEntitiesFromMap(editorState, plainText);
     // Apply entities to EditorState
     let editorStateModified = EditorState.push(editorState, newContent, 'apply-entity');
-    // Link each openTag with its closure
-    /*newContent = linkEntities(editorStateModified);
-    editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');*/
+    // Link each openTag with its closure using entity key, otherwise tag are linked with openTagId/closeTagId
+    newContent = linkEntities(editorStateModified);
+    editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');
     // Replace each tag text with a placeholder
     newContent = beautifyEntities(editorStateModified);
     editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');
+    console.log(getEntities(editorStateModified));
     return editorStateModified;
 };
 
@@ -391,10 +403,12 @@ export const matchTag = (plainContent) => {
     closingTags.forEach( closingTag => {
         let i = 0, notFound = true;
         while(i < openTags.length && notFound) {
-            if(closingTag.offset > openTags[i].offset && openTags[i].data.closureOffset === -1){
+            if(closingTag.offset > openTags[i].offset && !openTags[i].data.closeTagId ){
                 notFound = !notFound;
-                openTags[i].data.closureOffset = closingTag.offset;
-                closingTag.data.openingOffset = openTags[i].offset;
+                const uniqueId = openTags[i].offset + '-' + closingTag.offset;
+                openTags[i].data.closeTagId = uniqueId;
+                closingTag.data.openTagId = uniqueId;
+
             }
             i++;
         }
@@ -427,13 +441,13 @@ export const findWithRegexV4 = (text, tagSignature) => {
         if(!closeRegex) {
             entity.length = openLength;
             let originalText = text.slice(entity.offset, entity.offset + entity.length);
-            entity.data = {'originalText': originalText, 'openingOffset': -1, 'openTagId': null};
+            entity.data = {'originalText': originalText, 'openTagId': null, 'openTagKey': null};
         }else {
             let slicedText = text.slice(entity.offset, text.length);
             matchArr = closeRegex.exec(slicedText);
             entity.length = matchArr.index + matchArr[1].length; //Length of previous regex
             let originalText = text.slice(entity.offset, entity.offset + entity.length);
-            entity.data = {'originalText': originalText, 'closureOffset': -1, 'closeTagId': null};
+            entity.data = {'originalText': originalText, 'closeTagId': null, 'closeTagKey': null};
         }
         entity.type = type;
         entity.mutability = 'IMMUTABLE';
@@ -486,7 +500,120 @@ export const decodeSegment  = (editorState) => {
     return contentState.getPlainText();
 };
 
-export const addTagEntityToSegment = (editorState) => {
-    let contentState = editorState.getCurrentContent();
-    console.log(contentState)
+
+
+/**
+ * Remove all tags except for: nbsp, tab, softReturn
+ * @param segmentString
+ * @returns {*|void|string}
+ */
+export const cleanSegmentString = (segmentString) => {
+    const regExp = getXliffRegExpression();
+    return segmentString.replace(regExp, '');
 };
+
+
+export const getXliffRegExpression = () => {
+    return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi; // group, multiline, case-insensitive
+};
+
+
+// Utilities for No-Merge
+
+export const insertFragment = (editorState, fragment) => {
+
+    let newContent = Modifier.replaceWithFragment(
+        editorState.getCurrentContent(),
+        editorState.getSelection(),
+        fragment
+    );
+    return EditorState.push(
+        editorState,
+        newContent,
+        'insert-fragment'
+    );
+};
+
+
+export const applyEntityToContentBlock = (contentBlock, start, end, entityKey) => {
+    var characterList = contentBlock.getCharacterList();
+    while (start < end) {
+        characterList = characterList.set(
+            start,
+            CharacterMetadata.applyEntity(characterList.get(start), entityKey)
+        );
+        start++;
+    }
+    return contentBlock.set('characterList', characterList);
+};
+
+
+export const getEntitiesInFragment = (fragment, editorState) => {
+    const contentState = editorState.getCurrentContent();
+    const entities = {};
+    fragment.forEach(block => {
+        block.getCharacterList().forEach(character => {
+            if (character.entity) {
+                entities[character.entity] = contentState.getEntity(character.entity)
+            }
+        });
+    });
+    return entities;
+};
+
+export const duplicateFragment = (fragment, editorState) => {
+    // Get all entities referenced in the fragment
+    const contentState = editorState.getCurrentContent();
+    const entities = getEntitiesInFragment(fragment, editorState);
+    const newEntityKeys = {};
+
+    let newEditorState = editorState;
+    let contentStateWithEntity = contentState;
+
+    // Create a clone of all entities available in fragment...
+    Object.keys(entities).forEach((key) => {
+        const entity = entities[key];
+        contentStateWithEntity = contentStateWithEntity.createEntity(
+            entity.type,
+            entity.mutability,
+            entity.data
+        );
+        // ...then match old entity keys with newly created keys
+        newEntityKeys[key] = contentStateWithEntity.getLastCreatedEntityKey();
+    });
+
+    // Todo: Check on contentStateWithEntity: must be different from contentState to procede with a EditorState.push
+    // Update editor history with new EditorState
+    newEditorState = EditorState.push(newEditorState, contentStateWithEntity, 'adjust-depth');
+
+    // Update all the entity references
+    let newFragment = BlockMapBuilder.createFromArray([]);
+    fragment.forEach((block, blockKey) => {
+        let updatedBlock = block;
+        newFragment = newFragment.set(blockKey, updatedBlock);
+        block.findEntityRanges(
+            character => character.getEntity() !== null,
+            (start, end) => {
+                const entityKey = block.getEntityAt(start);
+                const newEntityKey = newEntityKeys[entityKey];
+                updatedBlock = applyEntityToContentBlock(updatedBlock, start, end, newEntityKey);
+                newFragment = newFragment.set(blockKey, updatedBlock);
+            }
+        );
+    });
+
+    // Insert fragment
+    const newContentWithFragment = Modifier.replaceWithFragment(
+        newEditorState.getCurrentContent(),
+        newEditorState.getSelection(),
+        newFragment
+    );
+
+    return EditorState.push(
+        newEditorState,
+        newContentWithFragment,
+        'insert-fragment'
+    );
+};
+
+

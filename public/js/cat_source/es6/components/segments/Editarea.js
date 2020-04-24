@@ -13,9 +13,17 @@ import Speech2Text from '../../utils/speech2text';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import TextUtils from "../../utils/textUtils";
 
-import {findWithRegex, encodeContent, decodeSegment, getEntities} from "./utils/ContentEncoder";
+import {
+    findWithRegex,
+    encodeContent,
+    decodeSegment,
+    getEntities,
+    duplicateFragment,
+    cleanSegmentString
+} from "./utils/ContentEncoder";
 import {CompositeDecorator, convertFromRaw, convertToRaw, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
+import SegmentUtils from "../../utils/segmentUtils";
 
 
 class Editarea extends React.Component {
@@ -32,14 +40,15 @@ class Editarea extends React.Component {
                 }
             }
         ]);
+        const cleanTrans = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
+            cleanSegmentString(this.props.translation) : this.props.translation;
 
         // Inizializza Editor State con solo testo
         const plainEditorState = EditorState.createEmpty(decorator);
-        const rawEncoded = encodeContent(plainEditorState, this.props.translation);
-
+        const rawEncoded = encodeContent(plainEditorState, cleanTrans);
 
         this.state = {
-            translation: this.props.translation,
+            translation: cleanTrans,
             editorState: rawEncoded,
             editAreaClasses : ['targetarea']
         };
@@ -83,7 +92,7 @@ class Editarea extends React.Component {
 
     render() {
         const {editorState} = this.state;
-        const {onChange} = this;
+        const {onChange, onPaste} = this;
         const contentState = editorState.getCurrentContent();
 
         // Affidabile solo per il numero delle entità presenti, ma non per le chiavi
@@ -113,11 +122,26 @@ class Editarea extends React.Component {
                 lang={lang}
                 editorState={editorState}
                 onChange={onChange}
+                handlePastedText={onPaste}
                 ref={(el) => this.editor = el}
                 readOnly={readonly}
             />
         </div>;
     }
+    onPaste = (text, html) => {
+        const {editorState} = this.state;
+        const internalClipboard = this.editor.getClipboard();
+        if (internalClipboard) {
+            const clipboardEditorPasted = duplicateFragment(internalClipboard, editorState);
+            this.onChange(clipboardEditorPasted);
+            this.setState({
+                editorState: clipboardEditorPasted,
+            });
+            return true;
+        } else {
+            return false;
+        }
+    };
 }
 
 function getEntityStrategy(mutability, callback) {
