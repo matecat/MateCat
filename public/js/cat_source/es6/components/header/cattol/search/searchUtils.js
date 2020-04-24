@@ -50,7 +50,6 @@ let SearchUtils = {
 		}
 		this.searchParams['match-case'] = params.matchCase;
 		this.searchParams['exact-match'] = params.exactMatch;
-		this.searchParams.search = 1;
 		if (_.isUndefined(this.searchParams.source) && _.isUndefined(this.searchParams.target) && (this.searchParams.status == 'all')) {
 			APP.alert({msg: 'Enter text in source or target input boxes<br /> or select a status.'});
 			return false;
@@ -75,11 +74,6 @@ let SearchUtils = {
 		let target = (p.target) ? TextUtils.htmlEncode(p.target) : '';
 		let replace = (p.replace) ? p.replace : '';
 
-		// this.clearSearchMarkers();
-		this.pendingRender = {
-			// applySearch: true,
-			detectSegmentToScroll: true
-		};
 		UI.body.addClass('searchActive');
 		let makeSearchFn = () => {
             let dd = new Date();
@@ -128,24 +122,101 @@ let SearchUtils = {
 		this.searchResultsSegments = response.segments;
 		this.numSearchResultsSegments = (response.segments) ? response.segments.length : 0;
         CatToolActions.setSearchResults(response);
+
 		this.updateSearchDisplay();
         if ( response.segments.length > 0) {
+            let searchResults = [];
+            let occurrencesList = [];
+            let searchProgressiveIndex = 0;
+            let searchResultsDictionary = {};
+            const elements = response.segments;
+            searchResults = elements.map( (sid) => {
+                let ignoreCase = (this.searchParams['match-case']) ? '' : 'i';
+                let segment = SegmentStore.getSegmentByIdToJS(sid);
+                let item = {id: sid, occurrences: []};
+                if (segment) {
+                    if ( this.searchParams.searchMode === 'source&target' ) {
+                        let matches;
+                        let textSource = this.searchParams.source.replace( /(\W)/gi, "\\$1" );
+                        let regSource = new RegExp( '(' + textSource + ')', "g" + ignoreCase );
+                        let textTarget = this.searchParams.target.replace( /(\W)/gi, "\\$1" );
+                        let regTarget = new RegExp( '(' + textTarget + ')', "g" + ignoreCase );
+                        if ( this.searchParams['exact-match'] ) {
+                            regSource = new RegExp( '\\b(' + textSource.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
+                            regTarget = new RegExp( '\\b(' + textTarget.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
+                        }
+                        const matchesSource = segment.segment.matchAll( regSource );
+                        const matchesTarget = segment.translation.matchAll( regTarget );
+                        let sourcesMatches = [], targetMatches = [];
+                        for ( const match of matchesSource ) {
+                            sourcesMatches.push( match );
+                            console.log( `Found ${match[0]} start=${match.index} end=${match.index + match[0].length}.` );
+                        }
+                        for ( const match of matchesTarget ) {
+                            targetMatches.push( match );
+                            console.log( `Found ${match[0]} start=${match.index} end=${match.index + match[0].length}.` );
+                        }
+                        //Check if source and target has the same occurrences
+                        if ( sourcesMatches.length !== targetMatches.length ) {
+                            matches = (sourcesMatches.length > targetMatches.length) ? targetMatches : sourcesMatches;
+                        }
+
+                        for ( const match of matches ) {
+                            occurrencesList.push( sid );
+                            item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                            searchProgressiveIndex++;
+                        }
+
+                    } else {
+                        if ( this.searchParams.source ) {
+                            let textSource = this.searchParams.source.replace( /(\W)/gi, "\\$1" );
+                            let regSource = new RegExp( '(' + textSource + ')', "g" + ignoreCase );
+                            if ( this.searchParams['exact-match'] ) {
+                                regSource = new RegExp( '\\b(' + textSource.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
+                            }
+                            const matchesSource = segment.segment.matchAll( regSource );
+                            for ( const match of matchesSource ) {
+                                occurrencesList.push( sid );
+                                item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                                searchProgressiveIndex++;
+
+                            }
+                        } else if ( this.searchParams.target ) {
+                            let textTarget = this.searchParams.target.replace( /(\W)/gi, "\\$1" );
+                            let regTarget = new RegExp( '(' + textTarget + ')', "g" + ignoreCase );
+                            if ( this.searchParams['exact-match'] ) {
+                                regTarget = new RegExp( '\\b(' + textTarget.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
+                            }
+                            const matchesTarget = segment.translation.matchAll( regTarget );
+                            for ( const match of matchesTarget ) {
+                                occurrencesList.push( sid );
+                                item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                                searchProgressiveIndex++;
+
+                            }
+                        }
+                    }
+
+                } else {
+                    searchProgressiveIndex++;
+                }
+                occurrencesList.push(sid);
+                searchResultsDictionary[sid] = item;
+                return item;
+            });
+
+            console.log("SearchResults", searchResults);
+            console.log("occurrencesList", occurrencesList);
+            console.log("searchResultsDictionary", searchResultsDictionary);
+            console.log("searchProgressiveIndex", searchProgressiveIndex);
+
             this.searchParams.current = response.segments[0];
             this.searchParams.indexInSegment = 0;
+            CatToolActions.storeSearchResults(response);
             SegmentActions.addSearchResultToSegments(response.segments, this.searchParams);
-            if (this.pendingRender) {
-                if (this.pendingRender.detectSegmentToScroll) {
-                    this.pendingRender.segmentToOpen = this.nextResultSegment();
-                }
-                let segment = SegmentStore.getSegmentByIdToJS(this.pendingRender.segmentToOpen);
-                if (segment) {
-                    SegmentActions.openSegment(segment.sid);
-                } else {
-                    UI.unmountSegments();
-                    UI.render(this.pendingRender);
-                }
-                this.pendingRender = false;
-            }
+
+            SegmentActions.openSegment(this.searchParams.current);
+
         }
 	},
     /**
@@ -261,12 +332,6 @@ let SearchUtils = {
         });
     },
     /**
-     * Removes the warning message that appears when there is an unsaved segment
-     */
-    removeWarningFromSearchDisplay: function() {
-        $('.search-display .found .warning').remove();
-    },
-    /**
      * Update the results counter in the header container
      */
     updateSearchItemsCount: function() {
@@ -347,7 +412,8 @@ let SearchUtils = {
      * @param type next or prev
      */
     gotoNextResultItem: function(unmark, type) {
-
+        const searchParams = SegmentStore.getSearchParams();
+        const {current} = searchParams;
         let $current = ( $("mark.currSearchItem").length > 0) ? $("mark.currSearchItem") : $($('section.opened .searchMarker').get(0));
         let currentSegmentFind = $current.closest("div");
         let marksArray = currentSegmentFind.find("mark.searchMarker").toArray();

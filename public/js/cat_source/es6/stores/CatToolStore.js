@@ -37,6 +37,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
         }
         return null
     },
+    storeSearchResult: function() {
+
+    },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     }
@@ -78,6 +81,10 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.SET_PROGRESS:
             CatToolStore.setProgress(action.stats);
             CatToolStore.emitChange(CatToolConstants.SET_PROGRESS, CatToolStore._projectProgess);
+            break;
+        case CatToolConstants.STORE_SEARCH_RESULT:
+            CatToolStore.storeSearchResult();
+            CatToolStore.emitChange(CatToolConstants.STORE_SEARCH_RESULT);
             break;
         case CatToolConstants.UPDATE_QR:
             CatToolStore.updateQR(action.qr);

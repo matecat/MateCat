@@ -64,6 +64,12 @@ let CatToolActions = {
             segments: data.segments
         });
     },
+    storeSearchResults: function ( data ) {
+        AppDispatcher.dispatch({
+            actionType: CattolConstants.STORE_SEARCH_RESULT
+
+        });
+    },
     toggleSegmentFilter: function () {
         AppDispatcher.dispatch({
             actionType: CattolConstants.TOGGLE_CONTAINER,

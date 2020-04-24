@@ -589,10 +589,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             this._segments = this._segments.setIn([index, 'search'], Immutable.fromJS(params));
         });
         this.search = {
+            current: params.current,
             active: true,
             segments: segments,
             params: params
         }
+    },
+    getSearchParams: function(segments, params) {
+        return this.search;
     },
     removeSearchResults: function() {
         this._segments = this._segments.map((segment)=>segment.set('search', null));
