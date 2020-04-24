@@ -164,7 +164,7 @@ let CatToolActions = {
             $('#quality-report-button').attr('data-revised', true);
         }
         let reviseCount = (config.isReview) ?_.filter(stats.revises, (rev) => rev.revision_number === config.revisionNumber ) : null;
-        if ( config.isReview && reviseCount && reviseCount[0].advancement_wc >= stats.TOTAL ) {
+        if ( config.isReview && reviseCount && reviseCount.length > 0 && reviseCount[0].advancement_wc >= stats.TOTAL ) {
             let revise = CatToolStore.getQR(config.revisionNumber);
             if (revise && !revise[0].feedback ) {
                 // var notification = {

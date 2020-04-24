@@ -121,6 +121,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         split_points_source: [],
                         status: status,
                         time_to_edit: "0",
+                        original_translation: (translation) ? translation : '',
                         translation: (translation) ? translation : '',
                         version: segment.version,
                         warning: "0",
@@ -141,6 +142,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                     segData = null;
                 });
             } else {
+                segment.original_translation = segment.translation;
                 segment.unlocked = SegmentUtils.isUnlockedSegment(segment);
                 segment.warnings = {};
                 segment.tagged = !self.hasSegmentTagProjectionEnabled(segment);
@@ -280,6 +282,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     replaceTranslation(sid, translation) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
+        let segment = this._segments.get(index);
+        var trans = TextUtils.htmlEncode(this.removeLockTagsFromString(translation));
+
+        //Check segment is modified
+        if ( segment.get('original_translation') === trans) {
+            this._segments = this._segments.setIn([index, 'modified'], false);
+        }
         this._segments = this._segments.setIn([index, 'translation'], translation);
     },
     modifiedTranslation(sid, fid, status) {
@@ -304,6 +313,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     setSegmentOriginalTranslation(sid, fid, translation) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
+        translation = translation.replace(/amp;/g, "");
         this._segments = this._segments.setIn([index, 'original_translation'], translation);
     },
 

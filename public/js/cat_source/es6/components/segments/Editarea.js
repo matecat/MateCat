@@ -52,7 +52,13 @@ class Editarea extends React.Component {
             editorState: rawEncoded,
             editAreaClasses : ['targetarea']
         };
-        this.onChange = (editorState) => this.setState({editorState});
+
+        this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
+
+        this.onChange = (editorState) =>  {
+            this.setState({editorState});
+            setTimeout(()=>{this.updateTranslationDebounced()});
+        } ;
     }
 
     //Receive the new translation and decode it for draftJS
