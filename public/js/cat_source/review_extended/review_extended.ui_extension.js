@@ -35,10 +35,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             originalRender.call(this, options);
             return promise;
         },
-        /**
-         * Overwrite the Review function that updates the tab trackChanges, in this review we don't have track changes.
-         */
-        trackChanges: function () {},
 
         submitIssues: function (sid, data, diff) {
             return ReviewExtended.submitIssue(sid, data, diff);
@@ -179,26 +175,18 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
                 }
             } );
         },
-        /**
-         *
-         * @param d Data response from the SetCurrentSegment request
-         * @param id_segment
-         */
-        addOriginalTranslation: function ( d, id_segment ) {
-            var xEditarea = $( '#segment-' + id_segment + '-editarea' );
-            if ( d.original !== '' ) {
-                setTimeout( function () {
-                    SegmentActions.addOriginalTranslation( id_segment, UI.getSegmentFileId( $( '#segment-' + id_segment ) ), d.original );
-                } );
-            }
-        },
 
-        getCurrentVersionIssues(segment) {
+        getCurrentRevisionIssues( segment) {
             let issues = [];
             if ( segment.versions && segment.versions.length > 0 ) {
                 _.forEach(segment.versions, (version) => {
-                    if ( version.issues && version.issues.length > 0 && version.issues[0].revision_number === segment.revision_number) {
-                        issues = issues.concat( version.issues );
+                    if ( version.issues && version.issues.length > 0 ) {
+                        _.forEach(version.issues, (issue) => {
+                            if ( issue.revision_number === segment.revision_number ) {
+                                issues.push( issue );
+                            }
+                        });
+
                     }
                 });
             }
@@ -210,7 +198,7 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             // because of the event is triggered even on download button
             var sid = segment.sid;
 
-            let issues = this.getCurrentVersionIssues(segment);
+            let issues = this.getCurrentRevisionIssues(segment);
             if ( config.isReview && !segment.splitted && segment.modified && issues.length === 0) {
                 SegmentActions.openIssuesPanel({ sid: segment.sid }, true);
                 setTimeout(()=> SegmentActions.showIssuesMessage(segment.sid, 1));
@@ -234,16 +222,6 @@ if ( ReviewExtended.enabled() || ReviewExtendedFooter.enabled()) {
             UI.setTimeToEdit(sid);
             UI.changeStatus( segment, 'approved', afterApproveFn);  // this does < setTranslation
 
-            // // ??
-            // var original = UI.currentSegment.find( '.original-translation' ).text();
-            // var data = {
-            //     action: 'setRevision',
-            //     job: config.id_job,
-            //     jpassword: config.password,
-            //     segment: sid,
-            //     original: original
-            // };
-            // UI.setRevision( data );
             // Lock the segment if it's approved in a second pass but was previously approved in first revision
             if ( ReviewExtended.number > 1 ) {
                 CommonUtils.removeFromStorage('unlocked-' + sid);
