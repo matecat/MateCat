@@ -122,6 +122,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         split_points_source: [],
                         status: status,
                         time_to_edit: "0",
+                        original_translation: (translation) ? translation : '',
                         translation: (translation) ? translation : '',
                         decoded_translation: TagUtils.decodeText(segment, translation),
                         version: segment.version,
@@ -143,6 +144,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                     segData = null;
                 });
             } else {
+                segment.original_translation = TagUtils.decodeText(segment, segment.translation);
                 segment.decoded_translation = TagUtils.decodeText(segment, segment.translation);
                 segment.decoded_source = TagUtils.decodeText(segment, segment.segment);
                 segment.unlocked = SegmentUtils.isUnlockedSegment(segment);
