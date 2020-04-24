@@ -20,7 +20,13 @@ if ( ReviewSimple.enabled() ) {
             }
         } ).on( 'click', '.sub-editor.review .error-type input[type=radio]', function ( e ) {
             $( '.sub-editor.review .error-type' ).removeClass( 'error' );
-        } );
+        } ).on('afterFormatSelection', '.editor .editarea', function() {
+            UI.trackChanges();
+        }).on('click', '.editor .outersource .copy', function(e) {
+            UI.trackChanges();
+        }).on('setCurrentSegment_success', function(e, d, id_segment) {
+            UI.addOriginalTranslation(d, id_segment);
+        });
 
         $.extend( UI, {
 
@@ -28,16 +34,19 @@ if ( ReviewSimple.enabled() ) {
                 SegmentActions.registerTab( 'review', true, true );
             },
 
-            trackChanges: function ( ) {
-                var currentSegment = SegmentStore.getCurrentSegment();
-                var $segment = UI.getSegmentById(currentSegment.sid).closest('section');
-                var source = $segment.find( '.original-translation' ).html();
+            trackChanges: function () {
+                var currentSegmentId = SegmentStore.getCurrentSegment();
+                var $segment = UI.getSegmentById(currentSegmentId).closest('section');
+                var source = EditAreaUtils.postProcessEditarea($segment, '.original-translation');
                 source = TextUtils.clenaupTextFromPleaceholders( source );
+                //Fix for &amp in original-translation
+                source = source.replace(/&amp;/g, "&");
 
-                var target = $segment.find('.targetarea').text();
-                var diffHTML = TextUtils.trackChangesHTML( source, TextUtils.htmlEncode( target ) );
-
-                $( '.sub-editor.review .track-changes p', $segment ).html( diffHTML );
+                var target = EditAreaUtils.postProcessEditarea($segment, '.targetarea');
+                target = TextUtils.clenaupTextFromPleaceholders( target );
+                var diffHTML = TextUtils.trackChangesHTML( TextUtils.htmlEncode(source), TextUtils.htmlEncode(target) );
+                diffHTML = TagUtils.transformTextForLockTags(diffHTML);
+                $('.sub-editor.review .track-changes p', $segment).html( diffHTML );
             },
             setRevision: function ( data ) {
                 APP.doRequest( {
@@ -59,10 +68,11 @@ if ( ReviewSimple.enabled() ) {
              * @param id_segment
              */
             addOriginalTranslation: function ( d, id_segment ) {
-                var xEditarea = $( '#segment-' + id_segment + '-editarea' );
-                if ( d.original !== '' ) {
+                var segment = SegmentStore.getSegmentByIdToJS(id_segment);
+                var originalTrans = (d.original) ? d.original : segment.translation;
+                if ( originalTrans && originalTrans !== '' ) {
                     setTimeout( function () {
-                        SegmentActions.addOriginalTranslation( id_segment, UI.getSegmentFileId( $( '#segment-' + id_segment ) ), d.original );
+                        SegmentActions.addOriginalTranslation( id_segment, null, originalTrans );
                     } );
                 }
                 UI.setReviewErrorData( d.error_data, $( '#segment-' + id_segment ) );

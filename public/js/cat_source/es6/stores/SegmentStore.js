@@ -122,6 +122,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         split_points_source: [],
                         status: status,
                         time_to_edit: "0",
+                        original_translation: (translation) ? translation : '',
                         translation: (translation) ? translation : '',
                         decoded_translation: TagUtils.decodeText(segment, translation),
                         version: segment.version,
@@ -143,6 +144,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                     segData = null;
                 });
             } else {
+                segment.original_translation = segment.translation;
                 segment.decoded_translation = TagUtils.decodeText(segment, segment.translation);
                 segment.decoded_source = TagUtils.decodeText(segment, segment.segment);
                 segment.unlocked = SegmentUtils.isUnlockedSegment(segment);
@@ -290,6 +292,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( index === -1 ) return;
         let segment = this._segments.get(index);
         var trans = TextUtils.htmlEncode(this.removeLockTagsFromString(translation));
+
+        //Check segment is modified
+        if ( segment.get('original_translation') === trans) {
+            this._segments = this._segments.setIn([index, 'modified'], false);
+        }
+
         let decoded_translation = TagUtils.decodeText(segment.toJS(), trans);
         this._segments = this._segments.setIn([index, 'translation'], trans);
         this._segments = this._segments.setIn([index, 'decoded_translation'], decoded_translation);
@@ -317,6 +325,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     setSegmentOriginalTranslation(sid, fid, translation) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
+        translation = translation.replace(/amp;/g, "");
         this._segments = this._segments.setIn([index, 'original_translation'], translation);
     },
 

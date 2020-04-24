@@ -186,8 +186,6 @@ class Editarea extends React.Component {
                 length: txt.length
             }
         }
-
-		// this.emitTrackChanges();
     }
     onDragEvent(e) {
         EventHandlersUtils.handleDragEvent(e);
