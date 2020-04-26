@@ -42,6 +42,17 @@ class Search extends React.Component {
         this.dropdownInit = false;
     }
 
+    resetSearch() {
+        this.setState({
+            total: null,
+            searchReturn: false,
+            searchResults: [],
+            occurrencesList: [],
+            searchResultsDictionary: {},
+            featuredSearchResult: null
+        });
+    }
+
     handleSubmit() {
         if (this.state.funcFindButton) {
             SearchUtils.execFind(this.state.search);
@@ -60,7 +71,7 @@ class Search extends React.Component {
             featuredSearchResult: data.featuredSearchResult,
             searchReturn: true
         });
-        setTimeout(()=>SegmentActions.addSearchResultToSegments(data.occurrencesList));
+        setTimeout(()=>SegmentActions.addSearchResultToSegments(data.occurrencesList, data.featuredSearchResult));
     }
 
     goToNext() {
@@ -80,7 +91,7 @@ class Search extends React.Component {
     handleCancelClick() {
         this.dropdownInit = false;
         UI.body.removeClass('searchActive');
-        this.handleClearClick()
+        this.handleClearClick();
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
             setTimeout(()=>SegmentActions.scrollToSegment(UI.currentSegmentId));
         } else {
@@ -186,7 +197,13 @@ class Search extends React.Component {
         if ( name !== "enableReplace" ) {
             this.setState({
                 search: search,
-                funcFindButton: true
+                funcFindButton: true,
+                total: null,
+                searchReturn: false,
+                searchResults: [],
+                occurrencesList: [],
+                searchResultsDictionary: {},
+                featuredSearchResult: null
             });
         } else {
             this.setState({

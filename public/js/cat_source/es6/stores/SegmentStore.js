@@ -577,14 +577,20 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         });
         this._globalWarnings.matecat = warnings;
     },
-    addSearchResult: function(occurrencesList) {
+    addSearchResult: function(occurrencesList, current) {
         this.searchOccurrences = occurrencesList;
-        this._segments = this._segments.map((segment)=>segment.set('inSearch', (segment) => {
-            return occurrencesList.indexOf(segment.get('sid') > -1)
-        }));
+        this._segments = this._segments.map((segment)=> {
+            segment = segment.set('inSearch', occurrencesList.indexOf(segment.get('sid') > -1));
+            segment = segment.set('currentInSearch', segment.get('sid') == occurrencesList[current]);
+            return segment;
+        });
+    },
+    addCurrentSearchSegment: function(current) {
+        this._segments = this._segments.map((segment)=> segment.set('currentInSearch', segment.get('sid') == this.searchOccurrences[current]));
     },
     removeSearchResults: function() {
         this._segments = this._segments.map((segment)=>segment.set('inSearch', null));
+        this._segments = this._segments.map((segment)=>segment.set('currentInSearch', null));
         this.searchOccurrences = [];
     },
     openSegmentSplit: function(sid) {
@@ -1096,11 +1102,15 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_SEARCH_RESULTS:
-            SegmentStore.addSearchResult(action.occurrencesList);
+            SegmentStore.addSearchResult(action.occurrencesList,action.currentIndex);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.REMOVE_SEARCH_RESULTS:
             SegmentStore.removeSearchResults();
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.ADD_CURRENT_SEARCH:
+            SegmentStore.addCurrentSearchSegment(action.currentIndex);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         default:
