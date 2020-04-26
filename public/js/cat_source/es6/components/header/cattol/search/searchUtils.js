@@ -10,6 +10,13 @@ let SearchUtils = {
         search: 0
     },
     searchResultsSegments: false,
+
+    total: 0,
+    searchResults: [],
+    occurrencesList: [],
+    searchResultsDictionary: {},
+    featuredSearchResult: 0,
+
     /**
      * Called by the search component to execute search
      * @returns {boolean}
@@ -121,14 +128,10 @@ let SearchUtils = {
 		this.numSearchResultsItem = response.total;
 		this.searchResultsSegments = response.segments;
 		this.numSearchResultsSegments = (response.segments) ? response.segments.length : 0;
-        CatToolActions.setSearchResults(response);
 
-		this.updateSearchDisplay();
+        let {searchResults, occurrencesList, searchResultsDictionary } = this;
         if ( response.segments.length > 0) {
-            let searchResults = [];
-            let occurrencesList = [];
             let searchProgressiveIndex = 0;
-            let searchResultsDictionary = {};
             const elements = response.segments;
             searchResults = elements.map( (sid) => {
                 let ignoreCase = (this.searchParams['match-case']) ? '' : 'i';
@@ -199,8 +202,8 @@ let SearchUtils = {
 
                 } else {
                     searchProgressiveIndex++;
+                    occurrencesList.push(sid);
                 }
-                occurrencesList.push(sid);
                 searchResultsDictionary[sid] = item;
                 return item;
             });
@@ -210,13 +213,29 @@ let SearchUtils = {
             console.log("searchResultsDictionary", searchResultsDictionary);
             console.log("searchProgressiveIndex", searchProgressiveIndex);
 
-            this.searchParams.current = response.segments[0];
-            this.searchParams.indexInSegment = 0;
-            CatToolActions.storeSearchResults(response);
-            SegmentActions.addSearchResultToSegments(response.segments, this.searchParams);
+            this.searchParams.current = occurrencesList[0];
+            // CatToolActions.setSearchResults(response);
+            CatToolActions.storeSearchResults({
+                total: response.total,
+                searchResults: searchResults,
+                occurrencesList: occurrencesList,
+                searchResultsDictionary: searchResultsDictionary,
+                featuredSearchResult: 0,
+            });
 
-            SegmentActions.openSegment(this.searchParams.current);
 
+            // SegmentActions.openSegment(this.searchParams.current);
+
+        } else {
+            SegmentActions.removeSearchResultToSegments();
+            this.resetSearch();
+            CatToolActions.storeSearchResults({
+                total: 0,
+                searchResults: [],
+                occurrencesList: [],
+                searchResultsDictionary: {},
+                featuredSearchResult: 0,
+            });
         }
 	},
     /**
@@ -240,6 +259,17 @@ let SearchUtils = {
             numSeg.text(" " + newSeg);
         }
         this.updateSearchItemsCount();
+    },
+    /**
+     * Update the results counter in the header container
+     */
+    updateSearchItemsCount: function() {
+        let c = parseInt($('.search-display .numbers .results').text());
+        if (c > 0) {
+            $('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
+        } else {
+            $('#filterSwitch .numbererror').text('');
+        }
     },
     /**
      * Toggle the Search container
@@ -331,29 +361,11 @@ let SearchUtils = {
             }
         });
     },
-    /**
-     * Update the results counter in the header container
-     */
-    updateSearchItemsCount: function() {
-        let c = parseInt($('.search-display .numbers .results').text());
-        if (c > 0) {
-            $('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
-        } else {
-            $('#filterSwitch .numbererror').text('');
-        }
-    },
 
-    /**
-     * Go to next result
-     */
-    execNext: function() {
-        this.gotoNextResultItem(false);
-    },
-    execPrev: function() {
-        this.gotoNextResultItem(false, "prev");
-    },
-    markText: function(text, params, isSource, sid) {
+    markText: function(text, isSource, sid) {
+        if ( this.occurrencesList.indexOf(sid) === -1 ) return text;
 	    let reg;
+	    let params = this.searchParams;
         var LTPLACEHOLDER = "##LESSTHAN##";
         var GTPLACEHOLDER = "##GREATERTHAN##";
         let searchMarker = 'searchMarker';
@@ -407,6 +419,15 @@ let SearchUtils = {
         return text;
     },
     /**
+     * Go to next result
+     */
+    execNext: function() {
+        this.gotoNextResultItem(false);
+    },
+    execPrev: function() {
+        this.gotoNextResultItem(false, "prev");
+    },
+    /**
      * Go to next match inside the segment,
      * @param unmark
      * @param type next or prev
@@ -421,7 +442,6 @@ let SearchUtils = {
         let nextIndex = (type === "prev") ? currentMarkIndex - 1 : currentMarkIndex + 1;
         if ( $current && marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
             this.searchParams.indexInSegment = nextIndex;
-            SegmentActions.addSearchResultToSegments(this.searchResultsSegments, this.searchParams);
         } else { // jump to results in subsequents segments
             let $currentSegment = $current.length ? $current.parents('section') : UI.currentSegment;
             if ($currentSegment.length) {
@@ -440,7 +460,6 @@ let SearchUtils = {
         let seg2scroll = (type === 'prev' ) ? this.prevResultSegment(sid): this.nextResultSegment(sid);
         this.searchParams.current = seg2scroll;
         this.searchParams.indexInSegment = 0;
-        SegmentActions.addSearchResultToSegments(this.searchResultsSegments, this.searchParams);
         SegmentActions.scrollToSegment(seg2scroll);
 
     },
@@ -465,6 +484,12 @@ let SearchUtils = {
             found = this.searchResultsSegments[this.searchResultsSegments.length -1 ];
         }
         return found;
+    },
+    resetSearch: function() {
+        this.searchResults = [];
+        this.occurrencesList = [];
+        this.searchResultsDictionary = {};
+        this.featuredSearchResult = 0;
     },
     /**
      * Close search container

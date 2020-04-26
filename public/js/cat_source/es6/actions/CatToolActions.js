@@ -57,17 +57,10 @@ let CatToolActions = {
             container: "search"
         });
     },
-    setSearchResults: function ( data ) {
-        AppDispatcher.dispatch({
-            actionType: CattolConstants.SET_SEARCH_RESULTS,
-            total: data.total,
-            segments: data.segments
-        });
-    },
     storeSearchResults: function ( data ) {
         AppDispatcher.dispatch({
-            actionType: CattolConstants.STORE_SEARCH_RESULT
-
+            actionType: CattolConstants.STORE_SEARCH_RESULT,
+            data: data
         });
     },
     toggleSegmentFilter: function () {

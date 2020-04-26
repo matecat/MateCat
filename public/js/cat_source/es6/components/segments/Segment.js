@@ -193,9 +193,6 @@ class Segment extends React.Component {
         if ( this.props.segment.selected ) {
             classes.push('segment-selected');
         }
-        // if ( this.props.segment.search && this.props.segment.search.current === this.props.segment.sid ) {
-        //     classes.push('currSearchSegment');
-        // }
         return classes;
     }
 

@@ -23,9 +23,12 @@ class Search extends React.Component {
             },
             focus: true,
             funcFindButton: true, // true=find / false=next
-            segments: [],
             total: null,
-            searchReturn: false
+            searchReturn: false,
+            searchResults: [],
+            occurrencesList: [],
+            searchResultsDictionary: {},
+            featuredSearchResult: null
         };
         this.state = _.cloneDeep(this.defaultState);
 
@@ -48,12 +51,16 @@ class Search extends React.Component {
         })
     }
 
-    setResults(total, segments) {
+    setResults(data) {
         this.setState({
-            total: parseInt(total),
-            segments: segments,
+            total: data.total,
+            searchResults: data.searchResults,
+            occurrencesList: data.occurrencesList,
+            searchResultsDictionary: data.searchResultsDictionary,
+            featuredSearchResult: data.featuredSearchResult,
             searchReturn: true
         });
+        setTimeout(()=>SegmentActions.addSearchResultToSegments(data.occurrencesList));
     }
 
     goToNext() {
@@ -232,13 +239,13 @@ class Search extends React.Component {
     }
     getResultsHtml() {
         var html = "";
-
+        const {featuredSearchResult, searchReturn} = this.state;
         //Waiting for results
-        if (!this.state.funcFindButton && !this.state.searchReturn) {
+        if (!this.state.funcFindButton && !searchReturn) {
             html = <div className="search-display">
                     <p className="searching">Searching ...</p>
                 </div>;
-        } else if (!this.state.funcFindButton && this.state.searchReturn){
+        } else if (!this.state.funcFindButton && searchReturn){
 
             let query = [];
             if (this.state.search.exactMatch)
@@ -256,10 +263,10 @@ class Search extends React.Component {
             let searchMode =(this.state.search.searchSource !== "" && this.state.search.searchTarget !== "") ? 'source&target' : 'normal';
             let numbers = "";
             if (searchMode === 'source&target') {
-                let total = this.state.segments.length ? this.state.segments.length : 0;
+                let total = this.state.searchResults.length ? this.state.searchResults.length : 0;
                 let label = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
-                    <span key="numbers" className="numbers">Found <span className="segments">{this.state.segments.length}</span> {label}</span>
+                    <span key="numbers" className="numbers">Found <span className="segments">{this.state.searchResults.length}</span> {label}</span>
                 ) : (
                     <span key="numbers" className="numbers">No segments found</span>
                     )
@@ -270,7 +277,7 @@ class Search extends React.Component {
                 numbers =  total > 0 ? (
                     <span key="numbers" className="numbers">Found
                         <span className="results">{' '+this.state.total}</span>{' '}<span>{label}</span>  in
-                        <span className="segments">{' '+this.state.segments.length}</span> {' '}<span>{label2}</span>
+                        <span className="segments">{' '+this.state.searchResults.length}</span> {' '}<span>{label2}</span>
                     </span>
                 ) : (
                     <span key="numbers" className="numbers">No segments found</span>
@@ -283,8 +290,9 @@ class Search extends React.Component {
                             having
                             {query}
                         </p>
-                        {this.state.segments.length > 0 ? (
+                        {this.state.searchResults.length > 0 ? (
                             <div className="search-result-buttons">
+                                <span>{featuredSearchResult + 1 + " of " + this.state.total }</span>
                                 <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" /></button>
                                 <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}><i className="icon-chevron-right" /></button>
                             </div>
@@ -308,13 +316,13 @@ class Search extends React.Component {
     }
     componentDidMount(){
         document.addEventListener("keydown", this.handelKeydownFunction, false);
-        CatToolStore.addListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults.bind(this));
+        CatToolStore.addListener(CattolConstants.STORE_SEARCH_RESULT, this.setResults.bind(this));
         CatToolStore.addListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
 
     }
     componentWillUnmount(){
         document.removeEventListener("keydown", this.handelKeydownFunction, false);
-        CatToolStore.removeListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults);
+        CatToolStore.removeListener(CattolConstants.STORE_SEARCH_RESULT, this.setResults);
         CatToolStore.removeListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
     }
 

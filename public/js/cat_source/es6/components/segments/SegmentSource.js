@@ -117,10 +117,7 @@ class SegmentSource extends React.Component {
     }
 
     markSearch(source) {
-        if ( this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.source) {
-            source = SearchUtils.markText(source, this.props.segment.search, true, this.props.segment.sid);
-        }
-        return source;
+        return SearchUtils.markText(source, true, this.props.segment.sid);
     }
 
     markGlossary(source) {
@@ -138,7 +135,7 @@ class SegmentSource extends React.Component {
     }
 
     markLexiqa(source) {
-        let searchEnabled = this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.source;
+        let searchEnabled = this.props.segment.inSearch;
         if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
             source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
         }

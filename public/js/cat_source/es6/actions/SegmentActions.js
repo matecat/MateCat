@@ -89,11 +89,10 @@ const SegmentActions = {
             actionType: SegmentConstants.MOUNT_TRANSLATIONS_ISSUES
         });
     },
-    addSearchResultToSegments: function (segments, params) {
+    addSearchResultToSegments: function (occurrencesList) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEARCH_RESULTS,
-            segments: segments,
-            params: params
+            occurrencesList
         });
     },
     removeSearchResultToSegments: function () {

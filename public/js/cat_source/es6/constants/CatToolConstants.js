@@ -12,6 +12,5 @@ module.exports = keyMirror({
     STORE_FILES_INFO: null,
     SET_PROGRESS: null,
     UPDATE_QR: null,
-    SET_SEARCH_RESULTS: null,
     STORE_SEARCH_RESULT: null
 });
