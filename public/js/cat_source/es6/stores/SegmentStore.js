@@ -62,6 +62,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     segmentsInBulk: [],
     _footerTabsConfig: Immutable.fromJS({}),
     searchOccurrences : [],
+    searchResultsDictionary : {},
+    currentInSearch : 0,
     nextUntranslatedFromServer: null,
     consecutiveCopySourceNum: [],
     /**
@@ -90,9 +92,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             let splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
             let segment = this;
             let inSearch = false;
+            let currentInSearch = false;
+            let occurrencesInSearch = null;
             //if search active
             if ( self.searchOccurrences.length > 0 ) {
                 inSearch = (self.searchOccurrences.indexOf(segment.sid) > -1);
+                currentInSearch =  (segment.sid === self.searchOccurrences[self.currentInSearch]);
+                occurrencesInSearch = self.searchResultsDictionary[segment.sid];
             }
             if (splittedSourceAr.length > 1) {
                 var splitGroup = [];
@@ -134,7 +140,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         id_file: segment.id_file,
                         originalSource: segment.segment,
                         firstOfSplit: (i===0),
-                        inSearch: inSearch
+                        inSearch: inSearch,
+                        currentInSearch: currentInSearch,
+                        occurrencesInSearch: occurrencesInSearch
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -152,6 +160,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.opened = false;
                 segment.selected = false;
                 segment.propagable = (segment.repetitions_in_chunk !== "1");
+                segment.inSearch = inSearch;
+                segment.currentInSearch = currentInSearch;
+                segment.occurrencesInSearch = occurrencesInSearch;
                 newSegments.push(this);
             }
 
@@ -577,21 +588,27 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         });
         this._globalWarnings.matecat = warnings;
     },
-    addSearchResult: function(occurrencesList, current) {
+    addSearchResult: function(occurrencesList, searchResultsDictionary, current) {
         this.searchOccurrences = occurrencesList;
+        this.searchResultsDictionary = searchResultsDictionary;
+        this.currentInSearch = current;
         this._segments = this._segments.map((segment)=> {
-            segment = segment.set('inSearch', occurrencesList.indexOf(segment.get('sid') > -1));
+            segment = segment.set('inSearch', occurrencesList.indexOf(segment.get('sid')) > -1);
             segment = segment.set('currentInSearch', segment.get('sid') == occurrencesList[current]);
+            segment = segment.set('occurrencesInSearch', searchResultsDictionary[segment.get('sid')]);
             return segment;
         });
     },
     addCurrentSearchSegment: function(current) {
+        this.currentInSearch = current;
         this._segments = this._segments.map((segment)=> segment.set('currentInSearch', segment.get('sid') == this.searchOccurrences[current]));
     },
     removeSearchResults: function() {
         this._segments = this._segments.map((segment)=>segment.set('inSearch', null));
         this._segments = this._segments.map((segment)=>segment.set('currentInSearch', null));
         this.searchOccurrences = [];
+        this.searchResultsDictionary = {};
+        this.currentInSearch = 0;
     },
     openSegmentSplit: function(sid) {
         let index = this.getSegmentIndex(sid);
@@ -1102,7 +1119,7 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_SEARCH_RESULTS:
-            SegmentStore.addSearchResult(action.occurrencesList,action.currentIndex);
+            SegmentStore.addSearchResult(action.occurrencesList, action.searchResultsDictionary, action.currentIndex);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.REMOVE_SEARCH_RESULTS:

@@ -43,8 +43,6 @@ let SearchUtils = {
 		if (selectStatus !== '') {
 			this.searchParams.status = selectStatus ;
 			this.searchParams.status = this.searchParams.status.toLowerCase();
-
-			UI.body.attr('data-filter-status', this.searchParams.status);
 		} else {
 			delete this.searchParams.status;
 		}
@@ -125,6 +123,7 @@ let SearchUtils = {
      * @param response
      */
     execFind_success: function(response) {
+        this.resetSearch();
 		this.numSearchResultsItem = response.total;
 		this.searchResultsSegments = response.segments;
 		this.numSearchResultsSegments = (response.segments) ? response.segments.length : 0;
@@ -160,9 +159,8 @@ let SearchUtils = {
                             console.log( `Found ${match[0]} start=${match.index} end=${match.index + match[0].length}.` );
                         }
                         //Check if source and target has the same occurrences
-                        if ( sourcesMatches.length !== targetMatches.length ) {
-                            matches = (sourcesMatches.length > targetMatches.length) ? targetMatches : sourcesMatches;
-                        }
+                        matches = (sourcesMatches.length > targetMatches.length) ? targetMatches : sourcesMatches;
+
 
                         for ( const match of matches ) {
                             occurrencesList.push( sid );
@@ -214,7 +212,6 @@ let SearchUtils = {
             console.log("searchProgressiveIndex", searchProgressiveIndex);
 
             this.searchParams.current = occurrencesList[0];
-            // CatToolActions.setSearchResults(response);
             CatToolActions.storeSearchResults({
                 total: response.total,
                 searchResults: searchResults,
@@ -222,10 +219,7 @@ let SearchUtils = {
                 searchResultsDictionary: searchResultsDictionary,
                 featuredSearchResult: 0,
             });
-
-
-            // SegmentActions.openSegment(this.searchParams.current);
-
+            SegmentActions.addSearchResultToSegments(occurrencesList, searchResultsDictionary ,0);
         } else {
             SegmentActions.removeSearchResultToSegments();
             this.resetSearch();
@@ -239,37 +233,10 @@ let SearchUtils = {
         }
 	},
     /**
-     * Displays the message under the search container that contains the number of results and segments found
-     */
-    updateSearchDisplay: function() {
-        this.updateSearchItemsCount();
-    },
-    /**
      * Update the results counter in the search container
      */
     updateSearchDisplayCount: function(segment) {
-        let numRes = $('.search-display .numbers .results'),
-            currRes = parseInt(numRes.text()),
-            newRes = (currRes == 0)? 0 : currRes - 1;
-        numRes.text(" " + newRes);
-        if (($('.targetarea mark.searchMarker', segment).length - 1) <= 0) {
-            let numSeg = $('.search-display .numbers .segments'),
-                currSeg = parseInt(numSeg.text()),
-                newSeg = (currSeg == 0)? 0 : currSeg - 1;
-            numSeg.text(" " + newSeg);
-        }
-        this.updateSearchItemsCount();
-    },
-    /**
-     * Update the results counter in the header container
-     */
-    updateSearchItemsCount: function() {
-        let c = parseInt($('.search-display .numbers .results').text());
-        if (c > 0) {
-            $('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
-        } else {
-            $('#filterSwitch .numbererror').text('');
-        }
+
     },
     /**
      * Toggle the Search container
@@ -362,9 +329,16 @@ let SearchUtils = {
         });
     },
 
+    updateFeaturedResult(value) {
+        this.featuredSearchResult = value;
+    },
+
     markText: function(text, isSource, sid) {
+
         if ( this.occurrencesList.indexOf(sid) === -1 ) return text;
 	    let reg;
+	    const isCurrent = ( this.occurrencesList[this.featuredSearchResult] === sid );
+	    const occurrences = this.searchResultsDictionary[sid].occurrences;
 	    let params = this.searchParams;
         var LTPLACEHOLDER = "##LESSTHAN##";
         var GTPLACEHOLDER = "##GREATERTHAN##";
@@ -400,15 +374,10 @@ let SearchUtils = {
             return "$&";
         });
         let matchIndex = 0;
-        text = text.replace(reg, function ( match, text, index ) {
-            if ( params.current === sid && matchIndex === params.indexInSegment &&
-                ( (!isSource && params.target) || (isSource && !params.target))
-            ) {
-                matchIndex++;
-                return '##LESSTHAN##mark class="' + searchMarker + ' currSearchItem"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
-            }
+        text = text.replace(reg,  ( match, text, index ) => {
+            let className = (isCurrent && occurrences[matchIndex] && occurrences[matchIndex].searchProgressiveIndex === this.featuredSearchResult) ? searchMarker + " currSearchItem" : searchMarker;
             matchIndex++;
-            return '##LESSTHAN##mark class="' + searchMarker + '"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
+            return '##LESSTHAN##mark class="' + className + '"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
         });
         text = text.replace(/(\$&)/g, function ( match, text ) {
             return spanArray.shift();
@@ -417,73 +386,6 @@ let SearchUtils = {
         //console.log('-- text3: ' + text);
         text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
         return text;
-    },
-    /**
-     * Go to next result
-     */
-    execNext: function() {
-        this.gotoNextResultItem(false);
-    },
-    execPrev: function() {
-        this.gotoNextResultItem(false, "prev");
-    },
-    /**
-     * Go to next match inside the segment,
-     * @param unmark
-     * @param type next or prev
-     */
-    gotoNextResultItem: function(unmark, type) {
-        const searchParams = SegmentStore.getSearchParams();
-        const {current} = searchParams;
-        let $current = ( $("mark.currSearchItem").length > 0) ? $("mark.currSearchItem") : $($('section.opened .searchMarker').get(0));
-        let currentSegmentFind = $current.closest("div");
-        let marksArray = currentSegmentFind.find("mark.searchMarker").toArray();
-        let currentMarkIndex = marksArray.indexOf($current[0]);
-        let nextIndex = (type === "prev") ? currentMarkIndex - 1 : currentMarkIndex + 1;
-        if ( $current && marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
-            this.searchParams.indexInSegment = nextIndex;
-        } else { // jump to results in subsequents segments
-            let $currentSegment = $current.length ? $current.parents('section') : UI.currentSegment;
-            if ($currentSegment.length) {
-                this.gotoSearchResultAfter(UI.getSegmentId($currentSegment), type);
-            }
-        }
-        UI.goingToNext = false;
-
-    },
-    /**
-     * Go To next Segment
-     */
-    gotoSearchResultAfter: function(sid, type) {
-
-        // searchMode: source&target or normal
-        let seg2scroll = (type === 'prev' ) ? this.prevResultSegment(sid): this.nextResultSegment(sid);
-        this.searchParams.current = seg2scroll;
-        this.searchParams.indexInSegment = 0;
-        SegmentActions.scrollToSegment(seg2scroll);
-
-    },
-    nextResultSegment: function( sid) {
-        let found ;
-        if ( sid ) {
-            let index = this.searchResultsSegments.indexOf(sid);
-            found = (index > -1 && index+1 <= this.searchResultsSegments.length -1) ? this.searchResultsSegments[index+1] : null ;
-        }
-        if (!found) {
-            found = this.searchResultsSegments[0];
-        }
-        return found;
-    },
-    prevResultSegment: function( sid) {
-        let found ;
-        if ( sid ) {
-            let index = this.searchResultsSegments.indexOf(sid);
-            found = (index > -1 && index-1 !== -1) ? this.searchResultsSegments[index-1] : null ;
-        }
-        if (!found) {
-            found = this.searchResultsSegments[this.searchResultsSegments.length -1 ];
-        }
-        return found;
     },
     resetSearch: function() {
         this.searchResults = [];
@@ -495,8 +397,17 @@ let SearchUtils = {
      * Close search container
      */
     closeSearch : function() {
+        this.resetSearch();
         CatToolActions.closeSubHeader();
         SegmentActions.removeSearchResultToSegments();
+
+        CatToolActions.storeSearchResults({
+            total: 0,
+            searchResults: [],
+            occurrencesList: [],
+            searchResultsDictionary: {},
+            featuredSearchResult: 0,
+        });
     },
 };
 

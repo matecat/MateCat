@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import VirtualList from 'react-tiny-virtual-list';
 import SegmentStore from '../../stores/SegmentStore';
 import CommentsStore from '../../stores/CommentsStore';
+import CatToolStore from '../../stores/CatToolStore';
 import Segment from './Segment';
 import SegmentConstants from '../../constants/SegmentConstants';
 import CatToolConstants from '../../constants/CatToolConstants';
@@ -41,6 +42,7 @@ class SegmentsContainer extends React.Component {
         this.openSide = this.openSide.bind(this);
         this.closeSide = this.closeSide.bind(this);
         this.recomputeListSize = this.recomputeListSize.bind(this);
+        this.forceUpdateSegments = this.forceUpdateSegments.bind(this);
         this.storeJobInfo = this.storeJobInfo.bind(this);
 
         this.lastScrollTop = 0;
@@ -379,6 +381,14 @@ class SegmentsContainer extends React.Component {
         this.forceUpdate();
     }
 
+    forceUpdateSegments(segments) {
+        this.setState({
+            segments: segments,
+            splitGroup: splitGroup
+        });
+        this.forceUpdate();
+    }
+
     storeJobInfo(files) {
         this.setState({
             files: files
@@ -398,6 +408,7 @@ class SegmentsContainer extends React.Component {
         SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
 
         SegmentStore.addListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
+        SegmentStore.addListener(SegmentConstants.FORCE_UPDATE, this.forceUpdateSegments);
         CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
     }
 
@@ -412,6 +423,8 @@ class SegmentsContainer extends React.Component {
         SegmentStore.removeListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
 
         SegmentStore.removeListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
+        SegmentStore.addListener(SegmentConstants.FORCE_UPDATE, this.forceUpdateSegments);
+
         CatToolStore.removeListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
 
     }

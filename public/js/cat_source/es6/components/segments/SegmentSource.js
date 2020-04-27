@@ -117,7 +117,10 @@ class SegmentSource extends React.Component {
     }
 
     markSearch(source) {
-        return SearchUtils.markText(source, true, this.props.segment.sid);
+        if ( this.props.segment.inSearch ) {
+            return SearchUtils.markText(source, true, this.props.segment.sid);
+        }
+        return source
     }
 
     markGlossary(source) {

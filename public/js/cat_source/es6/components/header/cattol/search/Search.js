@@ -71,22 +71,40 @@ class Search extends React.Component {
             featuredSearchResult: data.featuredSearchResult,
             searchReturn: true
         });
-        setTimeout(()=>SegmentActions.addSearchResultToSegments(data.occurrencesList, data.featuredSearchResult));
+        setTimeout(()=>SegmentActions.scrollToSegment(this.state.occurrencesList[data.featuredSearchResult]));
     }
 
     goToNext() {
-        if (!UI.goingToNext) {
-            UI.goingToNext = true;
-            SearchUtils.execNext();
-        }
+        this.setFeatured(this.state.featuredSearchResult + 1);
     }
 
     goToPrev() {
-        if (!UI.goingToNext) {
-            UI.goingToNext = true;
-            SearchUtils.execPrev();
-        }
+        this.setFeatured(this.state.featuredSearchResult - 1);
+
     }
+
+    setFeatured(value) {
+        if (this.state.occurrencesList.length > 1) {
+            let module = this.state.occurrencesList.length;
+            value = this.mod(value, module);
+        } else {
+            value = 0;
+        }
+        SearchUtils.updateFeaturedResult(value);
+        CatToolActions.storeSearchResults({
+            total: this.state.total,
+            searchResults: this.state.searchResults,
+            occurrencesList: this.state.occurrencesList,
+            searchResultsDictionary: this.state.searchResultsDictionary,
+            featuredSearchResult: value,
+        });
+        SegmentActions.changeCurrentSearchSegment(value);
+    };
+
+    // handling module
+    mod (n, m)  {
+        return ((n % m) + m) % m;
+    };
 
     handleCancelClick() {
         this.dropdownInit = false;
@@ -279,7 +297,9 @@ class Search extends React.Component {
             query.push(caseLabel);
             let searchMode =(this.state.search.searchSource !== "" && this.state.search.searchTarget !== "") ? 'source&target' : 'normal';
             let numbers = "";
+            let totalResults = this.state.total;
             if (searchMode === 'source&target') {
+                totalResults = this.state.searchResults.length;
                 let total = this.state.searchResults.length ? this.state.searchResults.length : 0;
                 let label = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
@@ -309,7 +329,7 @@ class Search extends React.Component {
                         </p>
                         {this.state.searchResults.length > 0 ? (
                             <div className="search-result-buttons">
-                                <span>{featuredSearchResult + 1 + " of " + this.state.total }</span>
+                                <span>{featuredSearchResult + 1 + " of " + totalResults }</span>
                                 <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" /></button>
                                 <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}><i className="icon-chevron-right" /></button>
                             </div>
