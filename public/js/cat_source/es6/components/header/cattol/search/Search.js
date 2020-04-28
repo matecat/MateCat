@@ -3,6 +3,8 @@ import CattolConstants  from '../../../../constants/CatToolConstants';
 import SegmentStore  from '../../../../stores/SegmentStore';
 import CatToolStore  from '../../../../stores/CatToolStore';
 import SearchUtils  from './searchUtils';
+import SegmentConstants from "../../../../constants/SegmentConstants";
+import SegmentActions from "../../../../actions/SegmentActions";
 
 class Search extends React.Component {
 
@@ -39,6 +41,7 @@ class Search extends React.Component {
         this.handleReplaceClick = this.handleReplaceClick.bind(this);
         this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this);
         this.handelKeydownFunction = this.handelKeydownFunction.bind(this);
+        this.updateSearch = this.updateSearch.bind(this);
         this.dropdownInit = false;
     }
 
@@ -72,6 +75,43 @@ class Search extends React.Component {
             searchReturn: true
         });
         setTimeout(()=>SegmentActions.scrollToSegment(this.state.occurrencesList[data.featuredSearchResult]));
+    }
+
+    updateSearch() {
+        if ( this.props.active ) {
+            setTimeout(() => {
+                const searchObject = SearchUtils.updateSearchObject();
+                this.setState( {
+                    searchResults: searchObject.searchResults,
+                    occurrencesList: searchObject.occurrencesList,
+                    searchResultsDictionary: searchObject.searchResultsDictionary,
+                    featuredSearchResult: searchObject.featuredSearchResult
+                } );
+                SegmentStore.addSearchResult(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult);
+            });
+        }
+    }
+
+    updateAfterReplace(sid) {
+        let {searchResults} = this.state;
+        let itemReplaced = _.find(searchResults, (item)=>item.id === sid);
+        let total = this.state.total;
+        if ( itemReplaced.occurrences.length === 1 ) {
+            _.remove(searchResults, (item)=>item.id === sid);
+            total--;
+        }
+
+        let newResultArray = _.map(searchResults, (item)=>item.id);
+
+        const searchObject = SearchUtils.updateSearchObjectAfterReplace(newResultArray);
+        this.setState( {
+            total: total,
+            searchResults: searchObject.searchResults,
+            occurrencesList: searchObject.occurrencesList,
+            searchResultsDictionary: searchObject.searchResultsDictionary,
+        } );
+        SegmentStore.addSearchResult(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult);
+
     }
 
     goToNext() {
@@ -134,7 +174,6 @@ class Search extends React.Component {
         setTimeout(() => {
             this.setState(_.cloneDeep(this.defaultState));
             SegmentActions.removeSearchResultToSegments();
-            SearchUtils.updateSearchItemsCount();
         });
     }
 
@@ -177,17 +216,17 @@ class Search extends React.Component {
         SegmentActions.modifiedTranslation(segment.sid, null, true, $segment.find('.targetarea').html() );
         let status = segment.status;
 
+        this.updateAfterReplace(segment.original_sid);
+
         setTimeout(()=>
             UI.setTranslation({
                 id_segment: segment.original_sid,
                 status: status,
                 caller: 'replace'
-            })
+            }, ()=> SegmentActions.scrollToSegment(this.state.occurrencesList[this.state.featuredSearchResult]))
         );
 
-        SearchUtils.updateSearchDisplayCount($segment);
 
-        if (SearchUtils.numSearchResultsSegments > 1) this.goToNext();
     }
 
     handleStatusChange(value) {
@@ -241,6 +280,7 @@ class Search extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.active){
             if ( !prevProps.active ) {
+                window.dispatchEvent(new Event('resize')); // To resize content on VirtualList
                 if(this.sourceEl && this.state.focus){
                     this.sourceEl.focus();
                     this.setState({
@@ -261,6 +301,7 @@ class Search extends React.Component {
                 });
             }
         }else{
+            window.dispatchEvent(new Event('resize')); // To resize content on VirtualList
             $('body').removeClass("search-open");
             if(!this.state.focus){
                 this.setState({
@@ -274,7 +315,8 @@ class Search extends React.Component {
     }
     getResultsHtml() {
         var html = "";
-        const {featuredSearchResult, searchReturn} = this.state;
+        const {featuredSearchResult, searchReturn, occurrencesList, searchResults} = this.state;
+        const segmentIndex = _.findIndex(searchResults, (item)=>  item.id === occurrencesList[featuredSearchResult]);
         //Waiting for results
         if (!this.state.funcFindButton && !searchReturn) {
             html = <div className="search-display">
@@ -329,9 +371,19 @@ class Search extends React.Component {
                         </p>
                         {this.state.searchResults.length > 0 ? (
                             <div className="search-result-buttons">
-                                <span>{featuredSearchResult + 1 + " of " + totalResults }</span>
-                                <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" /></button>
-                                <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}><i className="icon-chevron-right" /></button>
+                                {searchMode === 'source&target' ? (
+                                    <p>{segmentIndex + 1 + " of " + totalResults + " segments" }</p>
+                                ) : (
+                                    <p>{featuredSearchResult + 1 + " of " + totalResults + " results" }</p>
+                                )}
+
+                                <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" />
+                                    <span> Find Previous (Shift + F3)</span>
+                                </button>
+                                <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}><i className="icon-chevron-right"/>
+                                    <span> Find Next (F3)</span>
+                                </button>
+
                             </div>
                         ) : (null) }
 
@@ -348,6 +400,12 @@ class Search extends React.Component {
                     event.preventDefault();
                     this.handleSubmit();
                 }
+            }else if ( event.key === "F3" && event.shiftKey ) {
+                event.preventDefault();
+                this.goToPrev();
+            } else if ( event.key === "F3") {
+                event.preventDefault();
+                this.goToNext();
             }
         }
     }
@@ -355,12 +413,16 @@ class Search extends React.Component {
         document.addEventListener("keydown", this.handelKeydownFunction, false);
         CatToolStore.addListener(CattolConstants.STORE_SEARCH_RESULT, this.setResults.bind(this));
         CatToolStore.addListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
+        SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch);
+
 
     }
     componentWillUnmount(){
         document.removeEventListener("keydown", this.handelKeydownFunction, false);
         CatToolStore.removeListener(CattolConstants.STORE_SEARCH_RESULT, this.setResults);
         CatToolStore.removeListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
+        SegmentStore.removeListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch);
+
     }
 
     render() {

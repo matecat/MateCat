@@ -443,7 +443,7 @@ class SegmentsContainer extends React.Component {
 
         let data = {};
         data.width = window.innerWidth;
-        data.height = window.innerHeight;
+        data.height = window.innerHeight - $('header').innerHeight() - $('footer').innerHeight();
 
         this.setState({
             window: data
@@ -476,7 +476,7 @@ class SegmentsContainer extends React.Component {
         return <VirtualList
             ref={(list)=>this.listRef=list}
             width={width}
-            height={this.state.window.height-106}
+            height={this.state.window.height}
             style={{overflowX: 'hidden'}}
             estimatedItemSize={80}
             overscanCount={10}

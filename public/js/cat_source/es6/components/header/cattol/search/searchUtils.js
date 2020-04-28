@@ -9,13 +9,12 @@ let SearchUtils = {
     searchParams: {
         search: 0
     },
-    searchResultsSegments: false,
-
     total: 0,
     searchResults: [],
     occurrencesList: [],
     searchResultsDictionary: {},
     featuredSearchResult: 0,
+    searchSegmentsResult: [],
 
     /**
      * Called by the search component to execute search
@@ -23,7 +22,6 @@ let SearchUtils = {
      */
     execFind: function(params) {
 
-		this.searchResultsSegments = false;
 		$('section.currSearchSegment').removeClass('currSearchSegment');
 
 		let searchSource = params.searchSource;
@@ -124,102 +122,23 @@ let SearchUtils = {
      */
     execFind_success: function(response) {
         this.resetSearch();
-		this.numSearchResultsItem = response.total;
-		this.searchResultsSegments = response.segments;
-		this.numSearchResultsSegments = (response.segments) ? response.segments.length : 0;
-
-        let {searchResults, occurrencesList, searchResultsDictionary } = this;
+        this.searchSegmentsResult = response.segments;
         if ( response.segments.length > 0) {
-            let searchProgressiveIndex = 0;
-            const elements = response.segments;
-            searchResults = elements.map( (sid) => {
-                let ignoreCase = (this.searchParams['match-case']) ? '' : 'i';
-                let segment = SegmentStore.getSegmentByIdToJS(sid);
-                let item = {id: sid, occurrences: []};
-                if (segment) {
-                    if ( this.searchParams.searchMode === 'source&target' ) {
-                        let matches;
-                        let textSource = this.searchParams.source.replace( /(\W)/gi, "\\$1" );
-                        let regSource = new RegExp( '(' + textSource + ')', "g" + ignoreCase );
-                        let textTarget = this.searchParams.target.replace( /(\W)/gi, "\\$1" );
-                        let regTarget = new RegExp( '(' + textTarget + ')', "g" + ignoreCase );
-                        if ( this.searchParams['exact-match'] ) {
-                            regSource = new RegExp( '\\b(' + textSource.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
-                            regTarget = new RegExp( '\\b(' + textTarget.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
-                        }
-                        const matchesSource = segment.segment.matchAll( regSource );
-                        const matchesTarget = segment.translation.matchAll( regTarget );
-                        let sourcesMatches = [], targetMatches = [];
-                        for ( const match of matchesSource ) {
-                            sourcesMatches.push( match );
-                            console.log( `Found ${match[0]} start=${match.index} end=${match.index + match[0].length}.` );
-                        }
-                        for ( const match of matchesTarget ) {
-                            targetMatches.push( match );
-                            console.log( `Found ${match[0]} start=${match.index} end=${match.index + match[0].length}.` );
-                        }
-                        //Check if source and target has the same occurrences
-                        matches = (sourcesMatches.length > targetMatches.length) ? targetMatches : sourcesMatches;
+            let searchObject = this.createSearchObject(response.segments);
 
+            this.occurrencesList = _.clone(searchObject.occurrencesList);
+            this.searchResultsDictionary = _.clone(searchObject.searchResultsDictionary);
 
-                        for ( const match of matches ) {
-                            occurrencesList.push( sid );
-                            item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
-                            searchProgressiveIndex++;
-                        }
+            this.searchParams.current = searchObject.occurrencesList[0];
 
-                    } else {
-                        if ( this.searchParams.source ) {
-                            let textSource = this.searchParams.source.replace( /(\W)/gi, "\\$1" );
-                            let regSource = new RegExp( '(' + textSource + ')', "g" + ignoreCase );
-                            if ( this.searchParams['exact-match'] ) {
-                                regSource = new RegExp( '\\b(' + textSource.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
-                            }
-                            const matchesSource = segment.segment.matchAll( regSource );
-                            for ( const match of matchesSource ) {
-                                occurrencesList.push( sid );
-                                item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
-                                searchProgressiveIndex++;
-
-                            }
-                        } else if ( this.searchParams.target ) {
-                            let textTarget = this.searchParams.target.replace( /(\W)/gi, "\\$1" );
-                            let regTarget = new RegExp( '(' + textTarget + ')', "g" + ignoreCase );
-                            if ( this.searchParams['exact-match'] ) {
-                                regTarget = new RegExp( '\\b(' + textTarget.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
-                            }
-                            const matchesTarget = segment.translation.matchAll( regTarget );
-                            for ( const match of matchesTarget ) {
-                                occurrencesList.push( sid );
-                                item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
-                                searchProgressiveIndex++;
-
-                            }
-                        }
-                    }
-
-                } else {
-                    searchProgressiveIndex++;
-                    occurrencesList.push(sid);
-                }
-                searchResultsDictionary[sid] = item;
-                return item;
-            });
-
-            console.log("SearchResults", searchResults);
-            console.log("occurrencesList", occurrencesList);
-            console.log("searchResultsDictionary", searchResultsDictionary);
-            console.log("searchProgressiveIndex", searchProgressiveIndex);
-
-            this.searchParams.current = occurrencesList[0];
             CatToolActions.storeSearchResults({
                 total: response.total,
-                searchResults: searchResults,
-                occurrencesList: occurrencesList,
-                searchResultsDictionary: searchResultsDictionary,
+                searchResults: searchObject.searchResults,
+                occurrencesList: this.occurrencesList,
+                searchResultsDictionary: _.clone(this.searchResultsDictionary),
                 featuredSearchResult: 0,
             });
-            SegmentActions.addSearchResultToSegments(occurrencesList, searchResultsDictionary ,0);
+            SegmentActions.addSearchResultToSegments(this.occurrencesList, this.searchResultsDictionary ,0);
         } else {
             SegmentActions.removeSearchResultToSegments();
             this.resetSearch();
@@ -232,12 +151,121 @@ let SearchUtils = {
             });
         }
 	},
-    /**
-     * Update the results counter in the search container
-     */
-    updateSearchDisplayCount: function(segment) {
 
+
+    updateSearchObjectAfterReplace: function(segmentsResult) {
+        this.searchSegmentsResult = segmentsResult ? segmentsResult : this.searchSegmentsResult;
+        let searchObject = this.createSearchObject(this.searchSegmentsResult);
+        this.occurrencesList = searchObject.occurrencesList;
+        this.searchResultsDictionary = searchObject.searchResultsDictionary;
+        return searchObject;
     },
+
+    updateSearchObject: function() {
+        let currentFeaturedSegment = this.occurrencesList[this.featuredSearchResult];
+        let searchObject = this.createSearchObject(this.searchSegmentsResult);
+        this.occurrencesList = searchObject.occurrencesList;
+        this.searchResultsDictionary = searchObject.searchResultsDictionary;
+        let newIndex = _.findIndex(this.occurrencesList, (item) => item === currentFeaturedSegment);
+        if ( newIndex > -1 ) {
+            this.featuredSearchResult = newIndex;
+        } else {
+            this.featuredSearchResult = this.featuredSearchResult + 1;
+        }
+        searchObject.featuredSearchResult = this.featuredSearchResult;
+        return searchObject;
+    },
+
+    getMatchesInText: function(text, textToMatch, ignoreCase, isExactMatch) {
+
+        let reg = new RegExp( '(' + textToMatch + ')', "g" + ignoreCase );
+        if (isExactMatch) {
+            reg = new RegExp( '\\b(' + textToMatch.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
+        }
+        return text.matchAll( reg );
+    },
+
+    createSearchObject: function(segments) {
+        let searchProgressiveIndex = 0;
+        let occurrencesList = [], searchResultsDictionary = {};
+        let searchResults = segments.map( (sid) => {
+            let ignoreCase = (this.searchParams['match-case']) ? '' : 'i';
+            let segment = SegmentStore.getSegmentByIdToJS(sid);
+            let item = {id: sid, occurrences: []};
+            if (segment) {
+                if ( this.searchParams.searchMode === 'source&target' ) {
+
+                    let {text : textSource, tagsIntervals: tagsIntervalsSource } = this.prepareTextToReplace(segment.decoded_source);
+                    const matchesSource = this.getMatchesInText(textSource, this.searchParams.source, ignoreCase, this.searchParams['exact-match']);
+                    let {text : textTarget, tagsIntervals: tagsIntervalsTarget} = this.prepareTextToReplace(segment.decoded_translation);
+                    const matchesTarget = this.getMatchesInText(textTarget, this.searchParams.target, ignoreCase, this.searchParams['exact-match']);
+
+                    let sourcesMatches = [], targetMatches = [];
+                    for ( const match of matchesSource ) {
+                        sourcesMatches.push( match );
+                    }
+                    for ( const match of matchesTarget ) {
+                        targetMatches.push( match );
+                    }
+                    //Check if source and target has the same occurrences
+                    let matches = (sourcesMatches.length > targetMatches.length) ? targetMatches : sourcesMatches;
+                    let tagsIntervals = (sourcesMatches.length > targetMatches.length) ? tagsIntervalsTarget : tagsIntervalsSource
+                    for ( const match of matches ) {
+                        let intervalSpan = _.find(tagsIntervals, (item)=> match.index > item.start && match.index < item.end);
+                        if ( !intervalSpan ) {
+                            occurrencesList.push( sid );
+                            item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                            searchProgressiveIndex++;
+                        }
+                    }
+
+                } else {
+                    if ( this.searchParams.source ) {
+
+                        let {text, tagsIntervals} = this.prepareTextToReplace(segment.decoded_source);
+
+                        const matchesSource = this.getMatchesInText(text, this.searchParams.source, ignoreCase, this.searchParams['exact-match']);
+                        for ( const match of matchesSource ) {
+                            let intervalSpan = _.find(tagsIntervals, (item)=> match.index > item.start && match.index < item.end);
+                            if ( !intervalSpan ) {
+                                occurrencesList.push( sid );
+                                item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                                searchProgressiveIndex++;
+                            }
+
+                        }
+                    } else if ( this.searchParams.target ) {
+                        let {text, tagsIntervals} = this.prepareTextToReplace(segment.decoded_translation);
+                        const matchesTarget = this.getMatchesInText(text, this.searchParams.target, ignoreCase, this.searchParams['exact-match']);
+                        for ( const match of matchesTarget ) {
+                            let intervalSpan = _.find(tagsIntervals, (item)=> match.index > item.start && match.index < item.end);
+                            if ( !intervalSpan ) {
+                                occurrencesList.push( sid );
+                                item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                                searchProgressiveIndex++;
+                            }
+
+                        }
+                    }
+                }
+
+            } else {
+                searchProgressiveIndex++;
+                occurrencesList.push(sid);
+            }
+            searchResultsDictionary[sid] = item;
+            return item;
+        });
+        console.log("SearchResults", searchResults);
+        console.log("occurrencesList", occurrencesList);
+        console.log("searchResultsDictionary", searchResultsDictionary);
+        return {
+            searchResults: searchResults,
+            occurrencesList: occurrencesList,
+            searchResultsDictionary: searchResultsDictionary
+        }
+    },
+
     /**
      * Toggle the Search container
      * @param e
@@ -333,15 +361,64 @@ let SearchUtils = {
         this.featuredSearchResult = value;
     },
 
-    markText: function(text, isSource, sid) {
+    prepareTextToReplace(text) {
+        var LTPLACEHOLDER = "##LESSTHAN##";
+        var GTPLACEHOLDER = "##GREATERTHAN##";
+        let spanArray = [];
+        // text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
+        // text = text.replace(/(&lt;[/]*(span|mark|a).*?&gt;)/g, function ( match, text ) {
+        //     spanArray.push(text);
+        //     return "$&";
+        // });
+        text = text.replace(/>/g, function (match, index) {
+            return GTPLACEHOLDER;
+        });
+        text = text.replace(/</g, function (match, index) {
+            return LTPLACEHOLDER;
+        });
+        let tagsIntervals = [];
+        let matchFind = 0;
+        let regGtp = new RegExp(GTPLACEHOLDER,'g');
+        text = text.replace(regGtp, function (match, index) {
+            let interval = {end: index + GTPLACEHOLDER.length};
+            tagsIntervals.push(interval);
+            matchFind++;
+            return match;
+        });
+        matchFind = 0;
+        let regLtp = new RegExp(LTPLACEHOLDER, 'g');
+        text = text.replace(regLtp, function (match, index) {
+            if ( tagsIntervals[matchFind] &&  tagsIntervals[matchFind].end) {
+                tagsIntervals[matchFind].start = index;
+            }
+            matchFind++;
+            return match;
+        });
+        return {
+            text: text,
+            tagsIntervals: tagsIntervals,
+            tagsArray: spanArray
+        }
+    },
 
-        if ( this.occurrencesList.indexOf(sid) === -1 ) return text;
+    restoreTextAfterReplace(text, tagsArray) {
+        // text = text.replace(/(\$&)/g, function ( match, text ) {
+        //     return tagsArray.shift();
+        // });
+        text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        //console.log('-- text3: ' + text);
+        text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
+        return text;
+    },
+
+    markText: function(textToMark, isSource, sid) {
+
+        if ( this.occurrencesList.indexOf(sid) === -1 ) return textToMark;
 	    let reg;
 	    const isCurrent = ( this.occurrencesList[this.featuredSearchResult] === sid );
 	    const occurrences = this.searchResultsDictionary[sid].occurrences;
 	    let params = this.searchParams;
-        var LTPLACEHOLDER = "##LESSTHAN##";
-        var GTPLACEHOLDER = "##GREATERTHAN##";
+
         let searchMarker = 'searchMarker';
         let ignoreCase = (params['match-case']) ? '' : 'i';
         if ( this.searchMode === 'source&target' ) {
@@ -349,7 +426,7 @@ let SearchUtils = {
             txt = txt.replace(/(\W)/gi, "\\$1");
             reg = new RegExp('(' + TextUtils.htmlEncode(txt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 
-        } else if ( params.source || params.target ) {
+        } else if ( (params.source && isSource) || (params.target && !isSource) ) {
 	        let txt = params.source ? params.source : params.target ;
 
             let regTxt = txt.replace(/(\W)/gi, "\\$1");
@@ -366,25 +443,21 @@ let SearchUtils = {
                 reg = new RegExp(/(&nbsp; )/, 'gi');
             }
         }
-        let spanArray = [];
-        text = text.replace(/>/g, GTPLACEHOLDER).replace(/</g, LTPLACEHOLDER);
-        text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
-        text = text.replace(/(<[/]*(span|mark|a).*?>)/g, function ( match, text ) {
-            spanArray.push(text);
-            return "$&";
-        });
+
+        let {text, tagsIntervals, tagsArray } = this.prepareTextToReplace(textToMark);
+
         let matchIndex = 0;
         text = text.replace(reg,  ( match, text, index ) => {
-            let className = (isCurrent && occurrences[matchIndex] && occurrences[matchIndex].searchProgressiveIndex === this.featuredSearchResult) ? searchMarker + " currSearchItem" : searchMarker;
-            matchIndex++;
-            return '##LESSTHAN##mark class="' + className + '"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
+            let intervalSpan = _.find(tagsIntervals, (item)=> index > item.start && index < item.end);
+            if ( !intervalSpan ) {
+                let className = (isCurrent && occurrences[matchIndex] && occurrences[matchIndex].searchProgressiveIndex === this.featuredSearchResult) ? searchMarker + " currSearchItem" : searchMarker;
+                matchIndex++;
+                return '##LESSTHAN##mark class="' + className + '"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
+            } else {
+                return match
+            }
         });
-        text = text.replace(/(\$&)/g, function ( match, text ) {
-            return spanArray.shift();
-        });
-        text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
-        //console.log('-- text3: ' + text);
-        text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
+        text = this.restoreTextAfterReplace(text, tagsArray);
         return text;
     },
     resetSearch: function() {
@@ -392,6 +465,7 @@ let SearchUtils = {
         this.occurrencesList = [];
         this.searchResultsDictionary = {};
         this.featuredSearchResult = 0;
+        this.searchSegmentsResult = [];
     },
     /**
      * Close search container

@@ -99,5 +99,7 @@ module.exports = keyMirror({
     RECOMPUTE_SIZE: null,
     SET_PROGRESS: null,
     UPDATE_CURSOR: null,
-    FORCE_UPDATE: null
+    FORCE_UPDATE: null,
+    FORCE_UPDATE_SEGMENT: null,
+    UPDATE_SEARCH: null
 });

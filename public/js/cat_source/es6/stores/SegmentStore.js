@@ -601,7 +601,16 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     },
     addCurrentSearchSegment: function(current) {
         this.currentInSearch = current;
-        this._segments = this._segments.map((segment)=> segment.set('currentInSearch', segment.get('sid') == this.searchOccurrences[current]));
+        let currentSegment;
+        this._segments = this._segments.map((segment)=> {
+            segment = segment.set('currentInSearch', segment.get('sid') == this.searchOccurrences[current]);
+            if ( segment.get('sid') == this.searchOccurrences[current] ) {
+                segment = segment.set('currentInSearchIndex', current);
+                currentSegment = segment;
+            }
+            return segment
+        });
+        return currentSegment;
     },
     removeSearchResults: function() {
         this._segments = this._segments.map((segment)=>segment.set('inSearch', null));
@@ -837,6 +846,9 @@ AppDispatcher.register(function (action) {
             if ( action.idToOpen ) {
                 SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
             }
+            if ( SegmentStore.searchOccurrences.length > 0 ) {// Search Active
+                SegmentStore.emitChange(SegmentConstants.UPDATE_SEARCH);
+            }
             break;
         case SegmentConstants.SET_OPEN_SEGMENT:
             SegmentStore.openSegment(action.sid);
@@ -867,6 +879,9 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.ADD_SEGMENTS:
             SegmentStore.updateAll(action.segments, action.where);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            if ( SegmentStore.searchOccurrences.length > 0 ) {// Search Active
+                SegmentStore.emitChange(SegmentConstants.UPDATE_SEARCH);
+            }
             break;
         case SegmentConstants.SCROLL_TO_SEGMENT:
             SegmentStore.emitChange(action.actionType, action.sid);
@@ -1127,8 +1142,11 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_CURRENT_SEARCH:
-            SegmentStore.addCurrentSearchSegment(action.currentIndex);
+            let currentSegment = SegmentStore.addCurrentSearchSegment(action.currentIndex);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            if ( currentSegment ) {
+                SegmentStore.emitChange(SegmentConstants.FORCE_UPDATE_SEGMENT, currentSegment.get('sid'));
+            }
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
