@@ -339,9 +339,8 @@ class Search extends React.Component {
             query.push(caseLabel);
             let searchMode =(this.state.search.searchSource !== "" && this.state.search.searchTarget !== "") ? 'source&target' : 'normal';
             let numbers = "";
-            let totalResults = this.state.total;
+            let totalResults = this.state.searchResults.length;
             if (searchMode === 'source&target') {
-                totalResults = this.state.searchResults.length;
                 let total = this.state.searchResults.length ? this.state.searchResults.length : 0;
                 let label = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
