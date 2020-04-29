@@ -48,6 +48,7 @@ class Segment extends React.Component {
         this.closeRevisionPanel = this.closeRevisionPanel.bind(this);
         this.openRevisionPanel = this.openRevisionPanel.bind(this);
         this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.forceUpdateSegment = this.forceUpdateSegment.bind(this);
 
         let readonly = UI.isReadonlySegment(this.props.segment);
         this.secondPassLocked = ( this.props.segment.status.toUpperCase() === this.segmentStatus.approved && this.props.segment.revision_number === 2 && config.revisionNumber !== 2);
@@ -193,9 +194,6 @@ class Segment extends React.Component {
         if ( this.props.segment.selected ) {
             classes.push('segment-selected');
         }
-        // if ( this.props.segment.search && this.props.segment.search.current === this.props.segment.sid ) {
-        //     classes.push('currSearchSegment');
-        // }
         return classes;
     }
 
@@ -447,6 +445,12 @@ class Segment extends React.Component {
         }
     }
 
+    forceUpdateSegment(sid) {
+        if ( this.props.segment.sid === sid ) {
+            this.forceUpdate();
+        }
+    }
+
     allowHTML(string) {
         return { __html: string };
     }
@@ -461,6 +465,8 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.addListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
+        SegmentStore.addListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdateSegment);
+
         //Review
         SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
         SegmentStore.addListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel);
@@ -487,13 +493,15 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
+        SegmentStore.removeListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdate);
+
         //Review
         SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
         SegmentStore.removeListener(SegmentConstants.CLOSE_ISSUES_PANEL, this.closeRevisionPanel);
     }
 
     componentDidUpdate() {
-        console.log("Update Segment" + this.props.segment.sid);
+        // console.log("Update Segment" + this.props.segment.sid);
     }
 
     shouldComponentUpdate(nextProps, nextState) {

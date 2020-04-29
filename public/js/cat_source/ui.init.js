@@ -23,7 +23,6 @@ $.extend(UI, {
         this.noMoreSegmentsBefore = false;
         this.nextUntranslatedSegmentIdByServer = null;
         this.checkUpdatesEvery = 180000;
-        this.goingToNext = false;
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
         if(this.tagModesEnabled && !SegmentUtils.checkTPEnabled()) {
             UI.body.addClass('tagModes');

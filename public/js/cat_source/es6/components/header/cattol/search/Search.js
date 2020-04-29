@@ -3,6 +3,8 @@ import CattolConstants  from '../../../../constants/CatToolConstants';
 import SegmentStore  from '../../../../stores/SegmentStore';
 import CatToolStore  from '../../../../stores/CatToolStore';
 import SearchUtils  from './searchUtils';
+import SegmentConstants from "../../../../constants/SegmentConstants";
+import SegmentActions from "../../../../actions/SegmentActions";
 
 class Search extends React.Component {
 
@@ -23,9 +25,12 @@ class Search extends React.Component {
             },
             focus: true,
             funcFindButton: true, // true=find / false=next
-            segments: [],
             total: null,
-            searchReturn: false
+            searchReturn: false,
+            searchResults: [],
+            occurrencesList: [],
+            searchResultsDictionary: {},
+            featuredSearchResult: null
         };
         this.state = _.cloneDeep(this.defaultState);
 
@@ -36,7 +41,19 @@ class Search extends React.Component {
         this.handleReplaceClick = this.handleReplaceClick.bind(this);
         this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this);
         this.handelKeydownFunction = this.handelKeydownFunction.bind(this);
+        this.updateSearch = this.updateSearch.bind(this);
         this.dropdownInit = false;
+    }
+
+    resetSearch() {
+        this.setState({
+            total: null,
+            searchReturn: false,
+            searchResults: [],
+            occurrencesList: [],
+            searchResultsDictionary: {},
+            featuredSearchResult: null
+        });
     }
 
     handleSubmit() {
@@ -48,32 +65,91 @@ class Search extends React.Component {
         })
     }
 
-    setResults(total, segments) {
+    setResults(data) {
         this.setState({
-            total: parseInt(total),
-            segments: segments,
+            total: data.total,
+            searchResults: data.searchResults,
+            occurrencesList: data.occurrencesList,
+            searchResultsDictionary: data.searchResultsDictionary,
+            featuredSearchResult: data.featuredSearchResult,
             searchReturn: true
         });
+        setTimeout(()=>SegmentActions.scrollToSegment(this.state.occurrencesList[data.featuredSearchResult]));
+    }
+
+    updateSearch() {
+        if ( this.props.active ) {
+            setTimeout(() => {
+                const searchObject = SearchUtils.updateSearchObject();
+                this.setState( {
+                    searchResults: searchObject.searchResults,
+                    occurrencesList: searchObject.occurrencesList,
+                    searchResultsDictionary: searchObject.searchResultsDictionary,
+                    featuredSearchResult: searchObject.featuredSearchResult
+                } );
+                SegmentStore.addSearchResult(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult);
+            });
+        }
+    }
+
+    updateAfterReplace(sid) {
+        let {searchResults} = this.state;
+        let itemReplaced = _.find(searchResults, (item)=>item.id === sid);
+        let total = this.state.total;
+        if ( itemReplaced.occurrences.length === 1 ) {
+            _.remove(searchResults, (item)=>item.id === sid);
+            total--;
+        }
+
+        let newResultArray = _.map(searchResults, (item)=>item.id);
+
+        const searchObject = SearchUtils.updateSearchObjectAfterReplace(newResultArray);
+        this.setState( {
+            total: total,
+            searchResults: searchObject.searchResults,
+            occurrencesList: searchObject.occurrencesList,
+            searchResultsDictionary: searchObject.searchResultsDictionary,
+        } );
+        SegmentStore.addSearchResult(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult);
+
     }
 
     goToNext() {
-        if (!UI.goingToNext) {
-            UI.goingToNext = true;
-            SearchUtils.execNext();
-        }
+        this.setFeatured(this.state.featuredSearchResult + 1);
     }
 
     goToPrev() {
-        if (!UI.goingToNext) {
-            UI.goingToNext = true;
-            SearchUtils.execPrev();
-        }
+        this.setFeatured(this.state.featuredSearchResult - 1);
+
     }
+
+    setFeatured(value) {
+        if (this.state.occurrencesList.length > 1) {
+            let module = this.state.occurrencesList.length;
+            value = this.mod(value, module);
+        } else {
+            value = 0;
+        }
+        SearchUtils.updateFeaturedResult(value);
+        CatToolActions.storeSearchResults({
+            total: this.state.total,
+            searchResults: this.state.searchResults,
+            occurrencesList: this.state.occurrencesList,
+            searchResultsDictionary: this.state.searchResultsDictionary,
+            featuredSearchResult: value,
+        });
+        SegmentActions.changeCurrentSearchSegment(value);
+    };
+
+    // handling module
+    mod (n, m)  {
+        return ((n % m) + m) % m;
+    };
 
     handleCancelClick() {
         this.dropdownInit = false;
         UI.body.removeClass('searchActive');
-        this.handleClearClick()
+        this.handleClearClick();
         if (UI.segmentIsLoaded(UI.currentSegmentId)) {
             setTimeout(()=>SegmentActions.scrollToSegment(UI.currentSegmentId));
         } else {
@@ -98,7 +174,6 @@ class Search extends React.Component {
         setTimeout(() => {
             this.setState(_.cloneDeep(this.defaultState));
             SegmentActions.removeSearchResultToSegments();
-            SearchUtils.updateSearchItemsCount();
         });
     }
 
@@ -141,17 +216,17 @@ class Search extends React.Component {
         SegmentActions.modifiedTranslation(segment.sid, null, true, $segment.find('.targetarea').html() );
         let status = segment.status;
 
+        this.updateAfterReplace(segment.original_sid);
+
         setTimeout(()=>
             UI.setTranslation({
                 id_segment: segment.original_sid,
                 status: status,
                 caller: 'replace'
-            })
+            }, ()=> SegmentActions.scrollToSegment(this.state.occurrencesList[this.state.featuredSearchResult]))
         );
 
-        SearchUtils.updateSearchDisplayCount($segment);
 
-        if (SearchUtils.numSearchResultsSegments > 1) this.goToNext();
     }
 
     handleStatusChange(value) {
@@ -179,7 +254,13 @@ class Search extends React.Component {
         if ( name !== "enableReplace" ) {
             this.setState({
                 search: search,
-                funcFindButton: true
+                funcFindButton: true,
+                total: null,
+                searchReturn: false,
+                searchResults: [],
+                occurrencesList: [],
+                searchResultsDictionary: {},
+                featuredSearchResult: null
             });
         } else {
             this.setState({
@@ -199,6 +280,7 @@ class Search extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.active){
             if ( !prevProps.active ) {
+                window.dispatchEvent(new Event('resize')); // To resize content on VirtualList
                 if(this.sourceEl && this.state.focus){
                     this.sourceEl.focus();
                     this.setState({
@@ -219,6 +301,7 @@ class Search extends React.Component {
                 });
             }
         }else{
+            window.dispatchEvent(new Event('resize')); // To resize content on VirtualList
             $('body').removeClass("search-open");
             if(!this.state.focus){
                 this.setState({
@@ -232,13 +315,14 @@ class Search extends React.Component {
     }
     getResultsHtml() {
         var html = "";
-
+        const {featuredSearchResult, searchReturn, occurrencesList, searchResults} = this.state;
+        const segmentIndex = _.findIndex(searchResults, (item)=>  item.id === occurrencesList[featuredSearchResult]);
         //Waiting for results
-        if (!this.state.funcFindButton && !this.state.searchReturn) {
+        if (!this.state.funcFindButton && !searchReturn) {
             html = <div className="search-display">
                     <p className="searching">Searching ...</p>
                 </div>;
-        } else if (!this.state.funcFindButton && this.state.searchReturn){
+        } else if (!this.state.funcFindButton && searchReturn){
 
             let query = [];
             if (this.state.search.exactMatch)
@@ -255,11 +339,12 @@ class Search extends React.Component {
             query.push(caseLabel);
             let searchMode =(this.state.search.searchSource !== "" && this.state.search.searchTarget !== "") ? 'source&target' : 'normal';
             let numbers = "";
+            let totalResults = this.state.searchResults.length;
             if (searchMode === 'source&target') {
-                let total = this.state.segments.length ? this.state.segments.length : 0;
+                let total = this.state.searchResults.length ? this.state.searchResults.length : 0;
                 let label = (total === 1) ? 'segment' : 'segments';
                 numbers =  total > 0 ? (
-                    <span key="numbers" className="numbers">Found <span className="segments">{this.state.segments.length}</span> {label}</span>
+                    <span key="numbers" className="numbers">Found <span className="segments">{this.state.searchResults.length}</span> {label}</span>
                 ) : (
                     <span key="numbers" className="numbers">No segments found</span>
                     )
@@ -270,7 +355,7 @@ class Search extends React.Component {
                 numbers =  total > 0 ? (
                     <span key="numbers" className="numbers">Found
                         <span className="results">{' '+this.state.total}</span>{' '}<span>{label}</span>  in
-                        <span className="segments">{' '+this.state.segments.length}</span> {' '}<span>{label2}</span>
+                        <span className="segments">{' '+this.state.searchResults.length}</span> {' '}<span>{label2}</span>
                     </span>
                 ) : (
                     <span key="numbers" className="numbers">No segments found</span>
@@ -283,10 +368,18 @@ class Search extends React.Component {
                             having
                             {query}
                         </p>
-                        {this.state.segments.length > 0 ? (
+                        {this.state.searchResults.length > 0 ? (
                             <div className="search-result-buttons">
-                                <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" /></button>
-                                <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}><i className="icon-chevron-right" /></button>
+
+                                <p>{segmentIndex + 1 + " of " + totalResults + " segments" }</p>
+
+                                <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" />
+                                    <span> Find Previous (Shift + F3)</span>
+                                </button>
+                                <button className="ui basic tiny button" onClick={this.goToNext.bind(this)}><i className="icon-chevron-right"/>
+                                    <span> Find Next (F3)</span>
+                                </button>
+
                             </div>
                         ) : (null) }
 
@@ -303,19 +396,29 @@ class Search extends React.Component {
                     event.preventDefault();
                     this.handleSubmit();
                 }
+            }else if ( event.key === "F3" && event.shiftKey ) {
+                event.preventDefault();
+                this.goToPrev();
+            } else if ( event.key === "F3") {
+                event.preventDefault();
+                this.goToNext();
             }
         }
     }
     componentDidMount(){
         document.addEventListener("keydown", this.handelKeydownFunction, false);
-        CatToolStore.addListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults.bind(this));
+        CatToolStore.addListener(CattolConstants.STORE_SEARCH_RESULT, this.setResults.bind(this));
         CatToolStore.addListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
+        SegmentStore.addListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch);
+
 
     }
     componentWillUnmount(){
         document.removeEventListener("keydown", this.handelKeydownFunction, false);
-        CatToolStore.removeListener(CattolConstants.SET_SEARCH_RESULTS, this.setResults);
+        CatToolStore.removeListener(CattolConstants.STORE_SEARCH_RESULT, this.setResults);
         CatToolStore.removeListener(CattolConstants.CLOSE_SEARCH, this.handleCancelClick);
+        SegmentStore.removeListener(SegmentConstants.UPDATE_SEARCH, this.updateSearch);
+
     }
 
     render() {

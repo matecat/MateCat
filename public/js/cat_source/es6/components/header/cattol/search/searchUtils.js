@@ -9,14 +9,19 @@ let SearchUtils = {
     searchParams: {
         search: 0
     },
-    searchResultsSegments: false,
+    total: 0,
+    searchResults: [],
+    occurrencesList: [],
+    searchResultsDictionary: {},
+    featuredSearchResult: 0,
+    searchSegmentsResult: [],
+
     /**
      * Called by the search component to execute search
      * @returns {boolean}
      */
     execFind: function(params) {
 
-		this.searchResultsSegments = false;
 		$('section.currSearchSegment').removeClass('currSearchSegment');
 
 		let searchSource = params.searchSource;
@@ -36,8 +41,6 @@ let SearchUtils = {
 		if (selectStatus !== '') {
 			this.searchParams.status = selectStatus ;
 			this.searchParams.status = this.searchParams.status.toLowerCase();
-
-			UI.body.attr('data-filter-status', this.searchParams.status);
 		} else {
 			delete this.searchParams.status;
 		}
@@ -50,7 +53,6 @@ let SearchUtils = {
 		}
 		this.searchParams['match-case'] = params.matchCase;
 		this.searchParams['exact-match'] = params.exactMatch;
-		this.searchParams.search = 1;
 		if (_.isUndefined(this.searchParams.source) && _.isUndefined(this.searchParams.target) && (this.searchParams.status == 'all')) {
 			APP.alert({msg: 'Enter text in source or target input boxes<br /> or select a status.'});
 			return false;
@@ -75,11 +77,6 @@ let SearchUtils = {
 		let target = (p.target) ? TextUtils.htmlEncode(p.target) : '';
 		let replace = (p.replace) ? p.replace : '';
 
-		// this.clearSearchMarkers();
-		this.pendingRender = {
-			// applySearch: true,
-			detectSegmentToScroll: true
-		};
 		UI.body.addClass('searchActive');
 		let makeSearchFn = () => {
             let dd = new Date();
@@ -124,52 +121,151 @@ let SearchUtils = {
      * @param response
      */
     execFind_success: function(response) {
-		this.numSearchResultsItem = response.total;
-		this.searchResultsSegments = response.segments;
-		this.numSearchResultsSegments = (response.segments) ? response.segments.length : 0;
-        CatToolActions.setSearchResults(response);
-		this.updateSearchDisplay();
+        this.resetSearch();
+        this.searchSegmentsResult = response.segments;
         if ( response.segments.length > 0) {
-            this.searchParams.current = response.segments[0];
-            this.searchParams.indexInSegment = 0;
-            SegmentActions.addSearchResultToSegments(response.segments, this.searchParams);
-            if (this.pendingRender) {
-                if (this.pendingRender.detectSegmentToScroll) {
-                    this.pendingRender.segmentToOpen = this.nextResultSegment();
-                }
-                let segment = SegmentStore.getSegmentByIdToJS(this.pendingRender.segmentToOpen);
-                if (segment) {
-                    SegmentActions.openSegment(segment.sid);
-                } else {
-                    UI.unmountSegments();
-                    UI.render(this.pendingRender);
-                }
-                this.pendingRender = false;
-            }
+            let searchObject = this.createSearchObject(response.segments);
+
+            this.occurrencesList = _.clone(searchObject.occurrencesList);
+            this.searchResultsDictionary = _.clone(searchObject.searchResultsDictionary);
+
+            this.searchParams.current = searchObject.occurrencesList[0];
+
+            CatToolActions.storeSearchResults({
+                total: response.total,
+                searchResults: searchObject.searchResults,
+                occurrencesList: this.occurrencesList,
+                searchResultsDictionary: _.clone(this.searchResultsDictionary),
+                featuredSearchResult: 0,
+            });
+            SegmentActions.addSearchResultToSegments(this.occurrencesList, this.searchResultsDictionary ,0);
+        } else {
+            SegmentActions.removeSearchResultToSegments();
+            this.resetSearch();
+            CatToolActions.storeSearchResults({
+                total: 0,
+                searchResults: [],
+                occurrencesList: [],
+                searchResultsDictionary: {},
+                featuredSearchResult: 0,
+            });
         }
 	},
-    /**
-     * Displays the message under the search container that contains the number of results and segments found
-     */
-    updateSearchDisplay: function() {
-        this.updateSearchItemsCount();
+
+
+    updateSearchObjectAfterReplace: function(segmentsResult) {
+        this.searchSegmentsResult = segmentsResult ? segmentsResult : this.searchSegmentsResult;
+        let searchObject = this.createSearchObject(this.searchSegmentsResult);
+        this.occurrencesList = searchObject.occurrencesList;
+        this.searchResultsDictionary = searchObject.searchResultsDictionary;
+        return searchObject;
     },
-    /**
-     * Update the results counter in the search container
-     */
-    updateSearchDisplayCount: function(segment) {
-        let numRes = $('.search-display .numbers .results'),
-            currRes = parseInt(numRes.text()),
-            newRes = (currRes == 0)? 0 : currRes - 1;
-        numRes.text(" " + newRes);
-        if (($('.targetarea mark.searchMarker', segment).length - 1) <= 0) {
-            let numSeg = $('.search-display .numbers .segments'),
-                currSeg = parseInt(numSeg.text()),
-                newSeg = (currSeg == 0)? 0 : currSeg - 1;
-            numSeg.text(" " + newSeg);
+
+    updateSearchObject: function() {
+        let currentFeaturedSegment = this.occurrencesList[this.featuredSearchResult];
+        let searchObject = this.createSearchObject(this.searchSegmentsResult);
+        this.occurrencesList = searchObject.occurrencesList;
+        this.searchResultsDictionary = searchObject.searchResultsDictionary;
+        let newIndex = _.findIndex(this.occurrencesList, (item) => item === currentFeaturedSegment);
+        if ( newIndex > -1 ) {
+            this.featuredSearchResult = newIndex;
+        } else {
+            this.featuredSearchResult = this.featuredSearchResult + 1;
         }
-        this.updateSearchItemsCount();
+        searchObject.featuredSearchResult = this.featuredSearchResult;
+        return searchObject;
     },
+
+    getMatchesInText: function(text, textToMatch, ignoreCase, isExactMatch) {
+
+        let reg = new RegExp( '(' + textToMatch + ')', "g" + ignoreCase );
+        if (isExactMatch) {
+            reg = new RegExp( '\\b(' + textToMatch.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
+        }
+        return text.matchAll( reg );
+    },
+
+    createSearchObject: function(segments) {
+        let searchProgressiveIndex = 0;
+        let occurrencesList = [], searchResultsDictionary = {};
+        let searchResults = segments.map( (sid) => {
+            let ignoreCase = (this.searchParams['match-case']) ? '' : 'i';
+            let segment = SegmentStore.getSegmentByIdToJS(sid);
+            let item = {id: sid, occurrences: []};
+            if (segment) {
+                if ( this.searchParams.searchMode === 'source&target' ) {
+
+                    let {text : textSource, tagsIntervals: tagsIntervalsSource } = this.prepareTextToReplace(segment.decoded_source);
+                    const matchesSource = this.getMatchesInText(textSource, this.searchParams.source, ignoreCase, this.searchParams['exact-match']);
+                    let {text : textTarget, tagsIntervals: tagsIntervalsTarget} = this.prepareTextToReplace(segment.decoded_translation);
+                    const matchesTarget = this.getMatchesInText(textTarget, this.searchParams.target, ignoreCase, this.searchParams['exact-match']);
+
+                    let sourcesMatches = [], targetMatches = [];
+                    for ( const match of matchesSource ) {
+                        sourcesMatches.push( match );
+                    }
+                    for ( const match of matchesTarget ) {
+                        targetMatches.push( match );
+                    }
+                    //Check if source and target has the same occurrences
+                    let matches = (sourcesMatches.length > targetMatches.length) ? targetMatches : sourcesMatches;
+                    let tagsIntervals = (sourcesMatches.length > targetMatches.length) ? tagsIntervalsTarget : tagsIntervalsSource
+                    for ( const match of matches ) {
+                        let intervalSpan = _.find(tagsIntervals, (item)=> match.index > item.start && match.index < item.end);
+                        if ( !intervalSpan ) {
+                            occurrencesList.push( sid );
+                            item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                            searchProgressiveIndex++;
+                        }
+                    }
+
+                } else {
+                    if ( this.searchParams.source ) {
+
+                        let {text, tagsIntervals} = this.prepareTextToReplace(segment.decoded_source);
+
+                        const matchesSource = this.getMatchesInText(text, this.searchParams.source, ignoreCase, this.searchParams['exact-match']);
+                        for ( const match of matchesSource ) {
+                            let intervalSpan = _.find(tagsIntervals, (item)=> match.index > item.start && match.index < item.end);
+                            if ( !intervalSpan ) {
+                                occurrencesList.push( sid );
+                                item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                                searchProgressiveIndex++;
+                            }
+
+                        }
+                    } else if ( this.searchParams.target ) {
+                        let {text, tagsIntervals} = this.prepareTextToReplace(segment.decoded_translation);
+                        const matchesTarget = this.getMatchesInText(text, this.searchParams.target, ignoreCase, this.searchParams['exact-match']);
+                        for ( const match of matchesTarget ) {
+                            let intervalSpan = _.find(tagsIntervals, (item)=> match.index > item.start && match.index < item.end);
+                            if ( !intervalSpan ) {
+                                occurrencesList.push( sid );
+                                item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
+                                searchProgressiveIndex++;
+                            }
+
+                        }
+                    }
+                }
+
+            } else {
+                searchProgressiveIndex++;
+                occurrencesList.push(sid);
+            }
+            searchResultsDictionary[sid] = item;
+            return item;
+        });
+        console.log("SearchResults", searchResults);
+        console.log("occurrencesList", occurrencesList);
+        console.log("searchResultsDictionary", searchResultsDictionary);
+        return {
+            searchResults: searchResults,
+            occurrencesList: occurrencesList,
+            searchResultsDictionary: searchResultsDictionary
+        }
+    },
+
     /**
      * Toggle the Search container
      * @param e
@@ -260,37 +356,69 @@ let SearchUtils = {
             }
         });
     },
-    /**
-     * Removes the warning message that appears when there is an unsaved segment
-     */
-    removeWarningFromSearchDisplay: function() {
-        $('.search-display .found .warning').remove();
+
+    updateFeaturedResult(value) {
+        this.featuredSearchResult = value;
     },
-    /**
-     * Update the results counter in the header container
-     */
-    updateSearchItemsCount: function() {
-        let c = parseInt($('.search-display .numbers .results').text());
-        if (c > 0) {
-            $('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
-        } else {
-            $('#filterSwitch .numbererror').text('');
+
+    prepareTextToReplace(text) {
+        var LTPLACEHOLDER = "##LESSTHAN##";
+        var GTPLACEHOLDER = "##GREATERTHAN##";
+        let spanArray = [];
+        // text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
+        // text = text.replace(/(&lt;[/]*(span|mark|a).*?&gt;)/g, function ( match, text ) {
+        //     spanArray.push(text);
+        //     return "$&";
+        // });
+        text = text.replace(/>/g, function (match, index) {
+            return GTPLACEHOLDER;
+        });
+        text = text.replace(/</g, function (match, index) {
+            return LTPLACEHOLDER;
+        });
+        let tagsIntervals = [];
+        let matchFind = 0;
+        let regGtp = new RegExp(GTPLACEHOLDER,'g');
+        text = text.replace(regGtp, function (match, index) {
+            let interval = {end: index + GTPLACEHOLDER.length};
+            tagsIntervals.push(interval);
+            matchFind++;
+            return match;
+        });
+        matchFind = 0;
+        let regLtp = new RegExp(LTPLACEHOLDER, 'g');
+        text = text.replace(regLtp, function (match, index) {
+            if ( tagsIntervals[matchFind] &&  tagsIntervals[matchFind].end) {
+                tagsIntervals[matchFind].start = index;
+            }
+            matchFind++;
+            return match;
+        });
+        return {
+            text: text,
+            tagsIntervals: tagsIntervals,
+            tagsArray: spanArray
         }
     },
 
-    /**
-     * Go to next result
-     */
-    execNext: function() {
-        this.gotoNextResultItem(false);
+    restoreTextAfterReplace(text, tagsArray) {
+        // text = text.replace(/(\$&)/g, function ( match, text ) {
+        //     return tagsArray.shift();
+        // });
+        text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        //console.log('-- text3: ' + text);
+        text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
+        return text;
     },
-    execPrev: function() {
-        this.gotoNextResultItem(false, "prev");
-    },
-    markText: function(text, params, isSource, sid) {
+
+    markText: function(textToMark, isSource, sid) {
+
+        if ( this.occurrencesList.indexOf(sid) === -1 ) return textToMark;
 	    let reg;
-        var LTPLACEHOLDER = "##LESSTHAN##";
-        var GTPLACEHOLDER = "##GREATERTHAN##";
+	    const isCurrent = ( this.occurrencesList[this.featuredSearchResult] === sid );
+	    const occurrences = this.searchResultsDictionary[sid].occurrences;
+	    let params = this.searchParams;
+
         let searchMarker = 'searchMarker';
         let ignoreCase = (params['match-case']) ? '' : 'i';
         if ( this.searchMode === 'source&target' ) {
@@ -298,7 +426,7 @@ let SearchUtils = {
             txt = txt.replace(/(\W)/gi, "\\$1");
             reg = new RegExp('(' + TextUtils.htmlEncode(txt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 
-        } else if ( params.source || params.target ) {
+        } else if ( (params.source && isSource) || (params.target && !isSource) ) {
 	        let txt = params.source ? params.source : params.target ;
 
             let regTxt = txt.replace(/(\W)/gi, "\\$1");
@@ -315,96 +443,45 @@ let SearchUtils = {
                 reg = new RegExp(/(&nbsp; )/, 'gi');
             }
         }
-        let spanArray = [];
-        text = text.replace(/>/g, GTPLACEHOLDER).replace(/</g, LTPLACEHOLDER);
-        text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
-        text = text.replace(/(<[/]*(span|mark|a).*?>)/g, function ( match, text ) {
-            spanArray.push(text);
-            return "$&";
-        });
+
+        let {text, tagsIntervals, tagsArray } = this.prepareTextToReplace(textToMark);
+
         let matchIndex = 0;
-        text = text.replace(reg, function ( match, text, index ) {
-            if ( params.current === sid && matchIndex === params.indexInSegment &&
-                ( (!isSource && params.target) || (isSource && !params.target))
-            ) {
+        text = text.replace(reg,  ( match, text, index ) => {
+            let intervalSpan = _.find(tagsIntervals, (item)=> index > item.start && index < item.end);
+            if ( !intervalSpan ) {
+                let className = (isCurrent && occurrences[matchIndex] && occurrences[matchIndex].searchProgressiveIndex === this.featuredSearchResult) ? searchMarker + " currSearchItem" : searchMarker;
                 matchIndex++;
-                return '##LESSTHAN##mark class="' + searchMarker + ' currSearchItem"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
+                return '##LESSTHAN##mark class="' + className + '"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
+            } else {
+                return match
             }
-            matchIndex++;
-            return '##LESSTHAN##mark class="' + searchMarker + '"##GREATERTHAN##' + match + '##LESSTHAN##/mark##GREATERTHAN##';
         });
-        text = text.replace(/(\$&)/g, function ( match, text ) {
-            return spanArray.shift();
-        });
-        text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
-        text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
+        text = this.restoreTextAfterReplace(text, tagsArray);
         return text;
     },
-    /**
-     * Go to next match inside the segment,
-     * @param unmark
-     * @param type next or prev
-     */
-    gotoNextResultItem: function(unmark, type) {
-
-        let $current = ( $("mark.currSearchItem").length > 0) ? $("mark.currSearchItem") : $($('section.opened .searchMarker').get(0));
-        let currentSegmentFind = $current.closest("div");
-        let marksArray = currentSegmentFind.find("mark.searchMarker").toArray();
-        let currentMarkIndex = marksArray.indexOf($current[0]);
-        let nextIndex = (type === "prev") ? currentMarkIndex - 1 : currentMarkIndex + 1;
-        if ( $current && marksArray.length > 1 && !_.isUndefined( marksArray[nextIndex] ) ) {
-            this.searchParams.indexInSegment = nextIndex;
-            SegmentActions.addSearchResultToSegments(this.searchResultsSegments, this.searchParams);
-        } else { // jump to results in subsequents segments
-            let $currentSegment = $current.length ? $current.parents('section') : UI.currentSegment;
-            if ($currentSegment.length) {
-                this.gotoSearchResultAfter(UI.getSegmentId($currentSegment), type);
-            }
-        }
-        UI.goingToNext = false;
-
-    },
-    /**
-     * Go To next Segment
-     */
-    gotoSearchResultAfter: function(sid, type) {
-
-        // searchMode: source&target or normal
-        let seg2scroll = (type === 'prev' ) ? this.prevResultSegment(sid): this.nextResultSegment(sid);
-        this.searchParams.current = seg2scroll;
-        this.searchParams.indexInSegment = 0;
-        SegmentActions.addSearchResultToSegments(this.searchResultsSegments, this.searchParams);
-        SegmentActions.scrollToSegment(seg2scroll);
-
-    },
-    nextResultSegment: function( sid) {
-        let found ;
-        if ( sid ) {
-            let index = this.searchResultsSegments.indexOf(sid);
-            found = (index > -1 && index+1 <= this.searchResultsSegments.length -1) ? this.searchResultsSegments[index+1] : null ;
-        }
-        if (!found) {
-            found = this.searchResultsSegments[0];
-        }
-        return found;
-    },
-    prevResultSegment: function( sid) {
-        let found ;
-        if ( sid ) {
-            let index = this.searchResultsSegments.indexOf(sid);
-            found = (index > -1 && index-1 !== -1) ? this.searchResultsSegments[index-1] : null ;
-        }
-        if (!found) {
-            found = this.searchResultsSegments[this.searchResultsSegments.length -1 ];
-        }
-        return found;
+    resetSearch: function() {
+        this.searchResults = [];
+        this.occurrencesList = [];
+        this.searchResultsDictionary = {};
+        this.featuredSearchResult = 0;
+        this.searchSegmentsResult = [];
     },
     /**
      * Close search container
      */
     closeSearch : function() {
+        this.resetSearch();
         CatToolActions.closeSubHeader();
         SegmentActions.removeSearchResultToSegments();
+
+        CatToolActions.storeSearchResults({
+            total: 0,
+            searchResults: [],
+            occurrencesList: [],
+            searchResultsDictionary: {},
+            featuredSearchResult: 0,
+        });
     },
 };
 
