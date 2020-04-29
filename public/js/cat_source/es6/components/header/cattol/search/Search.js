@@ -371,11 +371,8 @@ class Search extends React.Component {
                         </p>
                         {this.state.searchResults.length > 0 ? (
                             <div className="search-result-buttons">
-                                {searchMode === 'source&target' ? (
-                                    <p>{segmentIndex + 1 + " of " + totalResults + " segments" }</p>
-                                ) : (
-                                    <p>{featuredSearchResult + 1 + " of " + totalResults + " results" }</p>
-                                )}
+
+                                <p>{segmentIndex + 1 + " of " + totalResults + " segments" }</p>
 
                                 <button className="ui basic tiny button" onClick={this.goToPrev.bind(this)}><i className="icon-chevron-left" />
                                     <span> Find Previous (Shift + F3)</span>
