@@ -337,7 +337,6 @@ let SearchUtils = {
             return spanArray.shift();
         });
         text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
-        //console.log('-- text3: ' + text);
         text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
         return text;
     },

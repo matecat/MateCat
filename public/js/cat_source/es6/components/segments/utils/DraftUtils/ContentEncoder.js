@@ -77,7 +77,6 @@ export const tagStruct = {
         decodeNeeded: false
     }
 };
-
 /**
  *
  * @param tag
@@ -103,7 +102,6 @@ export const decodeTagInfo = (tag) => {
     }
     return decodedTagData;
 };
-
 /**
  *
  * @param escapedHTML
@@ -112,7 +110,6 @@ export const decodeTagInfo = (tag) => {
 export const unescapeHTML = (escapedHTML) => {
     return escapedHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>')
 };
-
 /**
  *
  * @param editorState - current editor state, can be empty
@@ -163,8 +160,6 @@ export const createNewEntitiesFromMap = (editorState, plainText = '') => {
 
     return contentState
 };
-
-
 /**
  *
  * @param editorState
@@ -196,7 +191,6 @@ export const linkEntities  = (editorState) => {
     });
     return contentState;
 };
-
 /**
  *
  * @param editorState
@@ -240,13 +234,10 @@ export const beautifyEntities  = (editorState) => {
     // Todo verificare se serve il push dell'editor state
     return contentState;
 };
-
-
-
 /**
  *
  * @param editorState
- * @param entityType
+ * @param [entityType]
  * @returns {[]} An array of entities with each entity position
  */
 export const getEntities = (editorState, entityType = null) => {
@@ -276,8 +267,6 @@ export const getEntities = (editorState, entityType = null) => {
     // LAZY NOTE: returned entity.start and entity.end are block-based offsets
     return entities;
 };
-
-
 export const generateBlocksForRaw = (originalContent, entitySet) => {
     let blocks = [];
     let entityRanges = [];
@@ -293,26 +282,28 @@ export const generateBlocksForRaw = (originalContent, entitySet) => {
 
     return blocks;
 };
-
 export const generateEntityMapForRaw = (originalContent, entitySet) => {
     let entityMap = {};
+    console.log('Set: ', entitySet)
     entitySet.forEach( ({key, type, mutability, data}) => {
         entityMap[key] = {
             type: type,
             mutability: mutability,
             data: data
         };
+        console.log('Added: ', entityMap[key])
     });
     return entityMap;
 };
-
 export const replaceEntityText = (entity, editorState) => {
     const contentState = editorState.getCurrentContent();
     const selectionState = editorState.getSelection().merge({
         anchorOffset: entity.offset,
         focusOffset: entity.offset + entity.length
     });
+    console.log('Selezione: ',selectionState);
     const replacedText = Modifier.replaceText(contentState, selectionState, '&lt;ph ');
+    console.log(replacedText);
 
     const newEditorState = EditorState.push(
         editorState,
@@ -322,7 +313,6 @@ export const replaceEntityText = (entity, editorState) => {
 
     return newEditorState;
 };
-
 /**
  *
  * @param editorState
@@ -341,9 +331,9 @@ export const encodeContent = (editorState, plainText = '') => {
     // Replace each tag text with a placeholder
     newContent = beautifyEntities(editorStateModified);
     editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');
+    console.log(getEntities(editorStateModified));
     return editorStateModified;
 };
-
 /**
  *
  * @param plainContent
@@ -365,6 +355,7 @@ export const matchTag = (plainContent) => {
             openTags = [...openTags, ...tagMap]
         }
     }
+    console.log('Openings: ', openTags);
 
     // STEP 2 - Find all closing and save offset
     let closingTags = [];
@@ -375,6 +366,7 @@ export const matchTag = (plainContent) => {
         }
     }
 
+    console.log('Closures: ', closingTags);
 
     // STEP 3 - Find all self-closing tag and save offset
     let selfClosingTags = [];
@@ -384,6 +376,7 @@ export const matchTag = (plainContent) => {
             selfClosingTags = [...selfClosingTags, ...tagMap]
         }
     }
+    console.log('Self-closing: ', selfClosingTags);
 
     // STEP 4 - Sort arrays by offset
     openTags.sort((a, b) => {return b.offset-a.offset});
@@ -406,7 +399,6 @@ export const matchTag = (plainContent) => {
     });
     return [...openTags, ...closingTags, ...selfClosingTags];
 };
-
 /**
  *
  * @param text
@@ -425,6 +417,7 @@ export const findWithRegexV4 = (text, tagSignature) => {
 
     // Todo: remove loop safelock after test
     let safelock = 0; // Never bet on a while loop
+    console.log('Searching for: ', type);
     while((matchArr = openRegex.exec(text)) !== null && safelock < 100){
         safelock = safelock +1;
         entity.offset = matchArr.index;
@@ -443,9 +436,9 @@ export const findWithRegexV4 = (text, tagSignature) => {
         entity.mutability = 'IMMUTABLE';
         tagRange.push({...entity});
     }
+    console.log('Tag range: ', tagRange);
     return tagRange;
 };
-
 /**
  *
  * @param editorState
@@ -488,9 +481,6 @@ export const decodeSegment  = (editorState) => {
     });
     return contentState.getPlainText();
 };
-
-
-
 /**
  * Remove all tags except for: nbsp, tab, softReturn
  * @param segmentString
@@ -500,15 +490,10 @@ export const cleanSegmentString = (segmentString) => {
     const regExp = getXliffRegExpression();
     return segmentString.replace(regExp, '');
 };
-
-
 export const getXliffRegExpression = () => {
     return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi; // group, multiline, case-insensitive
 };
-
-
 // Utilities for No-Merge
-
 export const insertFragment = (editorState, fragment) => {
 
     let newContent = Modifier.replaceWithFragment(
@@ -522,8 +507,6 @@ export const insertFragment = (editorState, fragment) => {
         'insert-fragment'
     );
 };
-
-
 export const applyEntityToContentBlock = (contentBlock, start, end, entityKey) => {
     var characterList = contentBlock.getCharacterList();
     while (start < end) {
@@ -535,8 +518,6 @@ export const applyEntityToContentBlock = (contentBlock, start, end, entityKey) =
     }
     return contentBlock.set('characterList', characterList);
 };
-
-
 export const getEntitiesInFragment = (fragment, editorState) => {
     const contentState = editorState.getCurrentContent();
     const entities = {};
@@ -549,7 +530,6 @@ export const getEntitiesInFragment = (fragment, editorState) => {
     });
     return entities;
 };
-
 export const duplicateFragment = (fragment, editorState) => {
     // Get all entities referenced in the fragment
     const contentState = editorState.getCurrentContent();

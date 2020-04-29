@@ -430,7 +430,6 @@ class ProjectContainer extends React.Component {
     componentDidUpdate() {
         let self = this;
         this.initDropdowns();
-        console.log("Updated Project : " + this.props.project.get('id'));
     }
 
     componentDidMount() {

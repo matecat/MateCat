@@ -223,7 +223,6 @@ class TagsMenu extends React.Component {
             endCursor.setAttribute( 'class', 'tag-autocomplete-endcursor' );
             TextUtils.insertNodeAtCursor( endCursor );
         } catch ( e ) {
-            console.log('Fail to insert tag', e);
         }
 
     }
@@ -236,7 +235,6 @@ class TagsMenu extends React.Component {
             TextUtils.setCursorPosition($(".tag-autocomplete-endcursor", UI.editarea)[0]);
             // CursorUtils.saveSelection();
         } catch ( e ) {
-            console.log(e);
         }
         // Todo: refactor this part
         let editareaClone = UI.editarea.clone();

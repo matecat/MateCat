@@ -34,7 +34,6 @@ class SegmentsFilter extends React.Component {
 
         if (storedState.reactState) {
             storedState.reactState.moreFilters = this.moreFilters;
-            console.log(storedState.reactState);
             return storedState.reactState;
         }
         else {

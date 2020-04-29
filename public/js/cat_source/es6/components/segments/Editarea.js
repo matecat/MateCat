@@ -13,9 +13,19 @@ import Speech2Text from '../../utils/speech2text';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import TextUtils from "../../utils/textUtils";
 
-import {encodeContent, decodeSegment, getEntities} from "./utils/ContentEncoder";
+import DraftMatecatUtils from './utils/DraftUtils'
+
+import {
+    findWithRegex,
+    encodeContent,
+    decodeSegment,
+    getEntities,
+    duplicateFragment,
+    cleanSegmentString
+} from "./utils/ContentEncoder";
 import {CompositeDecorator, convertFromRaw, convertToRaw, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
+import SegmentUtils from "../../utils/segmentUtils";
 
 
 class Editarea extends React.Component {
@@ -23,7 +33,7 @@ class Editarea extends React.Component {
     constructor(props) {
         super(props);
 
-        this.decoratorsStructure = [
+        const decorator = new CompositeDecorator([
             {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
@@ -31,17 +41,16 @@ class Editarea extends React.Component {
                     onClick: this.onEntityClick
                 }
             }
-        ];
-
-        const decorator = new CompositeDecorator(this.decoratorsStructure);
+        ]);
+        const cleanTrans = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
+            cleanSegmentString(this.props.translation) : this.props.translation;
 
         // Inizializza Editor State con solo testo
         const plainEditorState = EditorState.createEmpty(decorator);
-        const rawEncoded = encodeContent(plainEditorState, this.props.translation);
-
+        const rawEncoded = encodeContent(plainEditorState, cleanTrans);
 
         this.state = {
-            translation: this.props.translation,
+            translation: cleanTrans,
             editorState: rawEncoded,
             editAreaClasses : ['targetarea']
         };
@@ -75,27 +84,12 @@ class Editarea extends React.Component {
         }
     };
 
-    activateSearch = (sid) => {
-        if ( this.props.segment.sid === sid && this.props.segment.search) {
-            let search = this.props.segment.search.target;
-
-            let decorators = this.decoratorsStructure.slice();
-            decorators.push( generateDecorator( search ) );
-            const newDecorator = new CompositeDecorator( decorators );
-            this.setState( {
-                editorState: EditorState.set( this.state.editorState, {decorator: newDecorator} ),
-            } );
-        }
-    };
-
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
-        SegmentStore.addListener(SegmentConstants.ADD_SEARCH_RESULTS, this.activateSearch);
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
-        SegmentStore.removeListener(SegmentConstants.ADD_SEARCH_RESULTS, this.activateSearch);
     }
 
     // shouldComponentUpdate(nextProps, nextState) {}
@@ -106,12 +100,7 @@ class Editarea extends React.Component {
 
     render() {
         const {editorState} = this.state;
-        const {onChange} = this;
-        const contentState = editorState.getCurrentContent();
-
-        // Affidabile solo per il numero delle entità presenti, ma non per le chiavi
-        const entityKeys = Object.keys(convertToRaw(contentState).entityMap);
-        console.log('Entità presenti nell\'editor: ', entityKeys.length);
+        const {onChange, onPaste} = this;
 
         let lang = '';
         let readonly = false;
@@ -136,11 +125,26 @@ class Editarea extends React.Component {
                 lang={lang}
                 editorState={editorState}
                 onChange={onChange}
+                handlePastedText={onPaste}
                 ref={(el) => this.editor = el}
                 readOnly={readonly}
             />
         </div>;
     }
+    onPaste = (text, html) => {
+        const {editorState} = this.state;
+        const internalClipboard = this.editor.getClipboard();
+        if (internalClipboard) {
+            const clipboardEditorPasted = duplicateFragment(internalClipboard, editorState);
+            this.onChange(clipboardEditorPasted);
+            this.setState({
+                editorState: clipboardEditorPasted,
+            });
+            return true;
+        } else {
+            return false;
+        }
+    };
 }
 
 function getEntityStrategy(mutability, callback) {
@@ -157,31 +161,6 @@ function getEntityStrategy(mutability, callback) {
         );
     };
 }
-
-const generateDecorator = (highlightTerm) => {
-    const regex = new RegExp(highlightTerm, 'gi');
-    return {
-        strategy: (contentBlock, callback) => {
-            if (highlightTerm !== '') {
-                findWithRegex(regex, contentBlock, callback);
-            }
-        },
-        component: SearchHighlight,
-    };
-};
-const findWithRegex = (regex, contentBlock, callback) => {
-    const text = contentBlock.getText();
-    let matchArr, start, end;
-    while ((matchArr = regex.exec(text)) !== null) {
-        start = matchArr.index;
-        end = start + matchArr[0].length;
-        callback(start, end);
-    }
-};
-
-const SearchHighlight = (props) => (
-    <span style={{backgroundColor: 'rgba(248, 222, 126, 1.0)'}}>{props.children}</span>
-);
 
 export default Editarea ;
 
