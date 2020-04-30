@@ -17,6 +17,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 import {
     duplicateFragment,
+    activateSearch
 } from "./utils/ContentEncoder";
 import {CompositeDecorator, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
@@ -27,8 +28,7 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-
-        const decorator = new CompositeDecorator([
+        this.decoratorsStructure = [
             {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
@@ -36,13 +36,13 @@ class Editarea extends React.Component {
                     onClick: this.onEntityClick
                 }
             }
-        ]);
-
+        ];
+        const decorator = new CompositeDecorator(this.decoratorsStructure);
         // If GuessTag is Enabled, clean translation from tags
         const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
             DraftMatecatUtils.cleanSegmentString(this.props.translation) : this.props.translation;
 
-        // Inizializza Editor State con solo testo
+          // Inizializza Editor State con solo testo
         const plainEditorState = EditorState.createEmpty(decorator);
         const rawEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
 
@@ -59,6 +59,19 @@ class Editarea extends React.Component {
             setTimeout(()=>{this.updateTranslationDebounced()});
         } ;
     }
+
+    activateSearch = () => {
+        this.setState( {
+            editorState: activateSearch(this.state.editorState, this.decoratorsStructure, this.props.segment.textToSearch.target, this.props.segment.textToSearch ),
+        } );
+    };
+
+    deactivateSearch = () => {
+        const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+        this.setState( {
+            editorState: EditorState.set( this.state.editorState, {decorator: newDecorator} ),
+        } );
+    };
 
     //Receive the new translation and decode it for draftJS
     setNewTranslation = (sid, translation) => {
@@ -82,6 +95,9 @@ class Editarea extends React.Component {
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
+        if ( this.props.segment.inSearch ) {
+            setTimeout(this.activateSearch());
+        }
     }
 
     componentWillUnmount() {
@@ -92,7 +108,15 @@ class Editarea extends React.Component {
 
     // getSnapshotBeforeUpdate(prevProps) {}
 
-    componentDidUpdate(prevProps, prevState, snapshot) {}
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.props.segment.inSearch && this.props.segment.textToSearch.target && ( (!prevProps.segment.inSearch) ||
+            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.textToSearch).equals(Immutable.fromJS(this.props.segment.textToSearch)))) )
+        {
+            this.activateSearch();
+        } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
+            this.deactivateSearch();
+        }
+    }
 
     render() {
         const {editorState} = this.state;

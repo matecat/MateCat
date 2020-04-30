@@ -3,6 +3,7 @@
 
  */
 import React  from 'react';
+import Immutable  from 'immutable';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentActions  from '../../actions/SegmentActions';
 import GlossaryUtils  from './utils/glossaryUtils';
@@ -12,7 +13,8 @@ import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
-import {CompositeDecorator, convertFromRaw, convertToRaw, Editor, EditorState} from "draft-js";
+import {encodeContent, activateSearch} from "./utils/ContentEncoder";
+import {CompositeDecorator, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import DraftMatecatUtils from "./utils/DraftMatecatUtils";
@@ -34,7 +36,7 @@ class SegmentSource extends React.Component {
 
         this.beforeRenderActions();
 
-        const decorator = new CompositeDecorator([
+        this.decoratorsStructure = [
             {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
@@ -42,7 +44,9 @@ class SegmentSource extends React.Component {
                     onClick: this.onEntityClick
                 }
             }
-        ]);
+        ];
+
+        const decorator = new CompositeDecorator(this.decoratorsStructure);
 
         // Initialise EditorState
         const plainEditorState = EditorState.createEmpty(decorator);
@@ -148,13 +152,6 @@ class SegmentSource extends React.Component {
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
 
-    markSearch(source) {
-        if ( this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.source) {
-            source = SearchUtils.markText(source, this.props.segment.search, true, this.props.segment.sid);
-        }
-        return source;
-    }
-
     markGlossary(source) {
         if ( this.props.segment.glossary && _.size(this.props.segment.glossary) > 0 ) {
             return GlossaryUtils.markGlossaryItemsInText(source, this.props.segment.glossary, this.props.segment.sid);
@@ -170,7 +167,7 @@ class SegmentSource extends React.Component {
     }
 
     markLexiqa(source) {
-        let searchEnabled = this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.source;
+        let searchEnabled = this.props.segment.inSearch;
         if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
             source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
         }
@@ -188,6 +185,19 @@ class SegmentSource extends React.Component {
         }
     }
 
+    activateSearch = () => {
+        this.setState( {
+            editorState: activateSearch(this.state.editorState, this.decoratorsStructure, this.props.segment.textToSearch.source, this.props.segment.textToSearch ),
+        } );
+    };
+
+    deactivateSearch = () => {
+        const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+        this.setState( {
+            editorState: EditorState.set( this.state.editorState, {decorator: newDecorator} ),
+        } );
+    };
+
     componentDidMount() {
         this.$source = $(this.source);
 
@@ -195,6 +205,10 @@ class SegmentSource extends React.Component {
             e.preventDefault();
             SegmentActions.activateTab(this.props.segment.sid, 'glossary');
         });
+
+        if ( this.props.segment.inSearch ) {
+            setTimeout(this.activateSearch());
+        }
 
         this.afterRenderActions();
 
@@ -217,7 +231,18 @@ class SegmentSource extends React.Component {
         if ( QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary &&  this.props.segment.qaCheckGlossary.length ) {
             $(this.source).find('.unusedGlossaryTerm').each((index, item)=>QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
         }
-        this.afterRenderActions(prevProps)
+
+        //Search
+        if (this.props.segment.inSearch && this.props.segment.textToSearch.source && ( (!prevProps.segment.inSearch) ||
+            (prevProps.segment.inSearch  && !Immutable.fromJS(prevProps.segment.textToSearch).equals(Immutable.fromJS(this.props.segment.textToSearch))) ) )
+        {
+            this.activateSearch();
+        } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
+            this.deactivateSearch();
+        }
+        this.afterRenderActions(prevProps);
+
+
     }
 
     allowHTML(string) {
