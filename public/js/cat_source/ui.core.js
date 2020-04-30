@@ -12,7 +12,7 @@ var UI = {
 			return false;
 		} else {
             var segment = SegmentStore.getCurrentSegment();
-            currSegment = jobMenu.find('.currSegment');
+            var currSegment = jobMenu.find('.currSegment');
             if (segment) {
                 currSegment.removeClass('disabled');
             } else {
@@ -357,7 +357,7 @@ var UI = {
     // Update the translations if job is splitted
 	getUpdates: function() {
 		if (UI.chunkedSegmentsLoaded()) {
-			lastUpdateRequested = UI.lastUpdateRequested;
+			var lastUpdateRequested = UI.lastUpdateRequested;
 			UI.lastUpdateRequested = new Date();
 			APP.doRequest({
 				data: {
@@ -857,13 +857,13 @@ var UI = {
 	    var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment));
 
 		var dd = new Date();
-		ts = dd.getTime();
+		var ts = dd.getTime();
 		var token = segment.sid + '-' + ts.toString();
 
-        segment_status = segment.status;
+        var segment_status = segment.status;
 
-        src_content = segment.segment;
-        trg_content = segment.translation;
+        var src_content = segment.segment;
+        var trg_content = segment.translation;
 
 		APP.doRequest({
 			data: {
@@ -995,7 +995,7 @@ var UI = {
         var status = options.status;
         var caller = options.caller;
         var propagate = options.propagate;
-        var sourceSegment;
+        var sourceSegment, translation;
         this.executingSetTranslation.push(id_segment);
         var reqArguments = arguments;
 		var segment = SegmentStore.getSegmentByIdToJS(id_segment);
@@ -1064,7 +1064,7 @@ var UI = {
         if(!propagate) {
             this.tempReqArguments.propagate = false;
         }
-        reqData = this.tempReqArguments;
+        var reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
         if (callback_to_execute) {
             callback_to_execute.call(this);

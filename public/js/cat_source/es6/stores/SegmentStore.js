@@ -576,7 +576,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         });
         this._globalWarnings.matecat = warnings;
     },
-    addSearchResult: function(occurrencesList, searchResultsDictionary, current) {
+    addSearchResult: function(occurrencesList, searchResultsDictionary, current, text) {
         this.searchOccurrences = occurrencesList;
         this.searchResultsDictionary = searchResultsDictionary;
         this.currentInSearch = current;
@@ -584,6 +584,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             segment = segment.set('inSearch', occurrencesList.indexOf(segment.get('sid')) > -1);
             segment = segment.set('currentInSearch', segment.get('sid') == occurrencesList[current]);
             segment = segment.set('occurrencesInSearch', searchResultsDictionary[segment.get('sid')]);
+            segment = segment.set('textToSearch', text);
             return segment;
         });
     },
@@ -603,6 +604,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     removeSearchResults: function() {
         this._segments = this._segments.map((segment)=>segment.set('inSearch', null));
         this._segments = this._segments.map((segment)=>segment.set('currentInSearch', null));
+        this._segments = this._segments.map((segment)=>segment.set('occurrencesInSearch', null));
+        this._segments = this._segments.map((segment)=>segment.set('textToSearch', null));
         this.searchOccurrences = [];
         this.searchResultsDictionary = {};
         this.currentInSearch = 0;
@@ -1123,7 +1126,7 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_SEARCH_RESULTS:
-            SegmentStore.addSearchResult(action.occurrencesList, action.searchResultsDictionary, action.currentIndex);
+            SegmentStore.addSearchResult(action.occurrencesList, action.searchResultsDictionary, action.currentIndex, action.text);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             _.forEach(action.segments, (sid) => {
                 SegmentStore.emitChange(SegmentConstants.ADD_SEARCH_RESULTS, sid);

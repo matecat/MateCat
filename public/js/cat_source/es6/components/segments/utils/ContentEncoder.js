@@ -4,7 +4,8 @@ import {
     SelectionState,
     ContentState,
     CharacterMetadata,
-    BlockMapBuilder
+    BlockMapBuilder,
+    CompositeDecorator
 } from 'draft-js';
 
 import Immutable from 'immutable';
@@ -603,6 +604,42 @@ export const duplicateFragment = (fragment, editorState) => {
         newContentWithFragment,
         'insert-fragment'
     );
+};
+
+//Search
+export const activateSearch = (editorState, decoratorStructure, text, params) => {
+    const generateSearchDecorator = (highlightTerm, params) => {
+        let regex = SearchUtils.getSearchRegExp(highlightTerm, params.ingnoreCase, params.exactMatch);
+        return {
+            strategy: (contentBlock, callback) => {
+                if (highlightTerm !== '') {
+                    findWithRegex(regex, contentBlock, callback);
+                }
+            },
+            component: SearchHighlight,
+        };
+    };
+
+    const findWithRegex = (regex, contentBlock, callback) => {
+        const text = contentBlock.getText();
+        let matchArr, start, end;
+        while ((matchArr = regex.exec(text)) !== null) {
+            start = matchArr.index;
+            end = start + matchArr[0].length;
+            callback(start, end);
+        }
+    };
+
+
+    const SearchHighlight = (props) => (
+        <span style={{backgroundColor: 'rgba(248, 222, 126, 1.0)'}}>{props.children}</span>
+    );
+
+    let search = text;
+    let decorators = decoratorStructure.slice();
+    decorators.push( generateSearchDecorator( search, params ) );
+    const newDecorator = new CompositeDecorator( decorators );
+    return EditorState.set( editorState, {decorator: newDecorator} );
 };
 
 

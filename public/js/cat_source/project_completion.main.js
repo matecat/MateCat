@@ -1,4 +1,4 @@
-ProjectCompletion = {
+var ProjectCompletion = {
     enabled : function() {
         return config.project_completion_feature_enabled;
     }
@@ -26,7 +26,7 @@ if ( ProjectCompletion.enabled() ) {
 
         button.val( previousButtonState ) ;
         previousButtonState = null ;
-    }
+    };
 
     var disableButtonToSentState = function() {
         button.removeClass("isMarkableAsComplete");
@@ -35,7 +35,7 @@ if ( ProjectCompletion.enabled() ) {
         button.attr('disabled', 'disabled');
 
         button.val( sentLabel );
-    }
+    };
 
     var markAsCompleteSubmit = function() {
 
@@ -260,7 +260,7 @@ if ( ProjectCompletion.enabled() ) {
 
     var evalReviseNotice = function() {
         if ( config.isReview && config.job_completion_current_phase == 'translate' && config.job_marked_complete == 0 ) {
-            warningNotification = APP.addNotification({
+            var warningNotification = APP.addNotification({
                 type: 'warning',
                 title: 'Warning',
                 text: 'Translator/post-editor did not mark this job as complete yet. Please wait for vendor phase to complete before making any change.',

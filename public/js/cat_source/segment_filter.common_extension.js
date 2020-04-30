@@ -1,4 +1,3 @@
-
 if ( SegmentFilter.enabled() )
 (function($, UI, SF, undefined) {
 
