@@ -138,7 +138,7 @@ let SearchUtils = {
                 searchResultsDictionary: _.clone(this.searchResultsDictionary),
                 featuredSearchResult: 0,
             });
-            SegmentActions.addSearchResultToSegments(this.occurrencesList, this.searchResultsDictionary ,0, searchObject.textToSearch);
+            SegmentActions.addSearchResultToSegments(this.occurrencesList, this.searchResultsDictionary ,0, searchObject.searchParams);
         } else {
             SegmentActions.removeSearchResultToSegments();
             this.resetSearch();
@@ -193,20 +193,20 @@ let SearchUtils = {
     createSearchObject: function(segments) {
         let searchProgressiveIndex = 0;
         let occurrencesList = [], searchResultsDictionary = {};
-        let textToSearch = {};
-        textToSearch.source = this.searchParams.source;
-        textToSearch.target = this.searchParams.target;
-        textToSearch.ingnoreCase = !!(this.searchParams['match-case']);
-        textToSearch.exactMatch = this.searchParams['exact-match'];
+        let searchParams = {};
+        searchParams.source = this.searchParams.source;
+        searchParams.target = this.searchParams.target;
+        searchParams.ingnoreCase = !!(this.searchParams['match-case']);
+        searchParams.exactMatch = this.searchParams['exact-match'];
         let searchResults = segments.map( (sid) => {
             let segment = SegmentStore.getSegmentByIdToJS(sid);
             let item = {id: sid, occurrences: []};
             if (segment) {
                 if ( this.searchParams.searchMode === 'source&target' ) {
                     let textSource = segment.segment;
-                    const matchesSource = this.getMatchesInText(textSource, this.searchParams.source, textToSearch.ingnoreCase, this.searchParams['exact-match']);
+                    const matchesSource = this.getMatchesInText(textSource, this.searchParams.source, searchParams.ingnoreCase, this.searchParams['exact-match']);
                     let textTarget = segment.translation;
-                    const matchesTarget = this.getMatchesInText(textTarget, this.searchParams.target, textToSearch.ingnoreCase, this.searchParams['exact-match']);
+                    const matchesTarget = this.getMatchesInText(textTarget, this.searchParams.target, searchParams.ingnoreCase, this.searchParams['exact-match']);
 
                     let sourcesMatches = [], targetMatches = [];
                     for ( const match of matchesSource ) {
@@ -216,7 +216,7 @@ let SearchUtils = {
                         targetMatches.push( match );
                     }
                     //Check if source and target has the same occurrences
-                    let matches = (sourcesMatches.length > targetMatches.length) ? targetMatches : sourcesMatches;
+                    let matches = (sourcesMatches.length > targetMatches.length) ? sourcesMatches : targetMatches;
                     for ( const match of matches ) {
                         occurrencesList.push( sid );
                         item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
@@ -227,7 +227,7 @@ let SearchUtils = {
                 } else {
                     if ( this.searchParams.source ) {
                         let text = segment.segment;
-                        const matchesSource = this.getMatchesInText(text, this.searchParams.source, textToSearch.ingnoreCase, this.searchParams['exact-match']);
+                        const matchesSource = this.getMatchesInText(text, this.searchParams.source, searchParams.ingnoreCase, this.searchParams['exact-match']);
                         for ( const match of matchesSource ) {
                             occurrencesList.push( sid );
                             item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
@@ -235,7 +235,7 @@ let SearchUtils = {
                         }
                     } else if ( this.searchParams.target ) {
                         let text = segment.translation;
-                        const matchesTarget = this.getMatchesInText(text, this.searchParams.target, textToSearch.ingnoreCase, this.searchParams['exact-match']);
+                        const matchesTarget = this.getMatchesInText(text, this.searchParams.target, searchParams.ingnoreCase, this.searchParams['exact-match']);
                         for ( const match of matchesTarget ) {
                             occurrencesList.push( sid );
                             item.occurrences.push( {matchPosition: match.index, searchProgressiveIndex: searchProgressiveIndex} );
@@ -255,7 +255,7 @@ let SearchUtils = {
         console.log("occurrencesList", occurrencesList);
         console.log("searchResultsDictionary", searchResultsDictionary);
         return {
-            textToSearch: textToSearch,
+            searchParams: searchParams,
             searchResults: searchResults,
             occurrencesList: occurrencesList,
             searchResultsDictionary: searchResultsDictionary

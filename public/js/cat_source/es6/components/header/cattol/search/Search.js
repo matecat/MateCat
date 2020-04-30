@@ -87,7 +87,7 @@ class Search extends React.Component {
                     searchResultsDictionary: searchObject.searchResultsDictionary,
                     featuredSearchResult: searchObject.featuredSearchResult
                 } );
-                setTimeout(()=>SegmentActions.addSearchResultToSegments(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult, searchObject.textToSearch));
+                setTimeout(()=>SegmentActions.addSearchResultToSegments(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult, searchObject.searchParams));
             });
         }
     }
@@ -110,7 +110,7 @@ class Search extends React.Component {
             occurrencesList: searchObject.occurrencesList,
             searchResultsDictionary: searchObject.searchResultsDictionary,
         } );
-        SegmentActions.addSearchResultToSegments(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult, searchObject.textToSearch);
+        SegmentActions.addSearchResultToSegments(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult, searchObject.searchParams);
 
     }
 

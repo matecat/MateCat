@@ -32,8 +32,7 @@ class Editarea extends React.Component {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
-                    onClick: this.onEntityClick,
-                    error: errors
+                    onClick: this.onEntityClick
                 }
             }
         ];
@@ -61,9 +60,11 @@ class Editarea extends React.Component {
     }
 
     activateSearch = () => {
+        let { editorState } = this.state;
+        let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
         this.setState( {
-            editorState: activateSearch(this.state.editorState, this.decoratorsStructure, this.props.segment.textToSearch.target,
-                this.props.segment.textToSearch, this.props.segment.occurrencesInSearch.occurrences, this.props.segment.currentInSearchIndex ),
+            editorState: activateSearch( editorState, this.decoratorsStructure, searchParams.target,
+                searchParams, occurrencesInSearch.occurrences, currentInSearchIndex ),
         } );
     };
 
@@ -110,8 +111,11 @@ class Editarea extends React.Component {
     // getSnapshotBeforeUpdate(prevProps) {}
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.props.segment.inSearch && this.props.segment.textToSearch.target && ( (!prevProps.segment.inSearch) ||
-            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.textToSearch).equals(Immutable.fromJS(this.props.segment.textToSearch)))) )
+        if (this.props.segment.inSearch && this.props.segment.searchParams.target && (
+            (!prevProps.segment.inSearch) ||  //Before was not active
+            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(this.props.segment.searchParams))) ||//Before was active but some params change
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== this.props.segment.currentInSearch ) ||   //Before was the current
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== this.props.segment.currentInSearchIndex ) ) )   //There are more occurrences and the current change
         {
             this.activateSearch();
         } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {

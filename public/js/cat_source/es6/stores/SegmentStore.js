@@ -576,7 +576,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         });
         this._globalWarnings.matecat = warnings;
     },
-    addSearchResult: function(occurrencesList, searchResultsDictionary, current, text) {
+    addSearchResult: function(occurrencesList, searchResultsDictionary, current, params) {
         this.searchOccurrences = occurrencesList;
         this.searchResultsDictionary = searchResultsDictionary;
         this.currentInSearch = current;
@@ -584,7 +584,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             segment = segment.set('inSearch', occurrencesList.indexOf(segment.get('sid')) > -1);
             segment = segment.set('currentInSearch', segment.get('sid') == occurrencesList[current]);
             segment = segment.set('occurrencesInSearch', searchResultsDictionary[segment.get('sid')]);
-            segment = segment.set('textToSearch', text);
+            segment = segment.set('searchParams', params);
             if ( segment.get('sid') === this.searchOccurrences[current] ) {
                 segment = segment.set('currentInSearchIndex', current);
             }
@@ -599,6 +599,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             if ( segment.get('sid') == this.searchOccurrences[current] ) {
                 segment = segment.set('currentInSearchIndex', current);
                 currentSegment = segment;
+            } else {
+                segment = segment.set('currentInSearchIndex', false);
             }
             return segment
         });
@@ -608,7 +610,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.map((segment)=>segment.set('inSearch', null));
         this._segments = this._segments.map((segment)=>segment.set('currentInSearch', null));
         this._segments = this._segments.map((segment)=>segment.set('occurrencesInSearch', null));
-        this._segments = this._segments.map((segment)=>segment.set('textToSearch', null));
+        this._segments = this._segments.map((segment)=>segment.set('searchParams', null));
         this.searchOccurrences = [];
         this.searchResultsDictionary = {};
         this.currentInSearch = 0;

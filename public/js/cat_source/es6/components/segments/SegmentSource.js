@@ -186,8 +186,11 @@ class SegmentSource extends React.Component {
     }
 
     activateSearch = () => {
+        let { editorState } = this.state;
+        let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
         this.setState( {
-            editorState: activateSearch(this.state.editorState, this.decoratorsStructure, this.props.segment.textToSearch.source, this.props.segment.textToSearch ),
+            editorState: activateSearch( editorState, this.decoratorsStructure, searchParams.source,
+                searchParams, occurrencesInSearch.occurrences, currentInSearchIndex ),
         } );
     };
 
@@ -233,8 +236,11 @@ class SegmentSource extends React.Component {
         }
 
         //Search
-        if (this.props.segment.inSearch && this.props.segment.textToSearch.source && ( (!prevProps.segment.inSearch) ||
-            (prevProps.segment.inSearch  && !Immutable.fromJS(prevProps.segment.textToSearch).equals(Immutable.fromJS(this.props.segment.textToSearch))) ) )
+        if (this.props.segment.inSearch && this.props.segment.searchParams.source && (
+            (!prevProps.segment.inSearch) ||  //Before was not active
+            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(this.props.segment.searchParams))) ||//Before was active but some params change
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== this.props.segment.currentInSearch ) ||   //Before was the current
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== this.props.segment.currentInSearchIndex ) ) )   //There are more occurrences and the current change
         {
             this.activateSearch();
         } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {

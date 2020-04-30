@@ -4,7 +4,8 @@ import {
     SelectionState,
     ContentState,
     CharacterMetadata,
-    BlockMapBuilder
+    BlockMapBuilder,
+    CompositeDecorator
 } from 'draft-js';
 
 
@@ -549,13 +550,14 @@ export const getEntitiesInFragment = (fragment, editorState) => {
 };
 
 //Search
-export const activateSearch = (editorState, decoratorStructure, text, params, occurrences, currentIndex) => {
-    const generateSearchDecorator = (highlightTerm, params) => {
+export const activateSearch = (editorState, decoratorStructure, text, params, occurrencesInSegment, currentIndex) => {
+
+    const generateSearchDecorator = (highlightTerm, occurrences, params) => {
         let regex = SearchUtils.getSearchRegExp(highlightTerm, params.ingnoreCase, params.exactMatch);
         return {
             strategy: (contentBlock, callback) => {
                 if (highlightTerm !== '') {
-                    findWithRegex(regex, contentBlock, callback);
+                    findWithRegex(regex, contentBlock, occurrences, callback);
                 }
             },
             component: SearchHighlight,
@@ -566,14 +568,16 @@ export const activateSearch = (editorState, decoratorStructure, text, params, oc
         };
     };
 
-    const findWithRegex = (regex, contentBlock, callback) => {
+    const findWithRegex = (regex, contentBlock, occurrences, callback) => {
         const text = contentBlock.getText();
         let matchArr, start, end;
         let index = 0;
         while ((matchArr = regex.exec(text)) !== null) {
             start = matchArr.index;
             end = start + matchArr[0].length;
-            occurrences[index].start = start;
+            if ( occurrences[index] ) {
+                occurrences[index].start = start;
+            }
             callback(start, end);
             index++;
         }
@@ -581,16 +585,19 @@ export const activateSearch = (editorState, decoratorStructure, text, params, oc
 
 
     const SearchHighlight = (props) => {
-        let occurrence = _.find(occurrences, (occ) => occ.start = props.start);
-        if ( occurrence.searchProgressiveIndex === currentIndex) {
-            return <span style={{backgroundColor: 'rgba(248, 222, 126, 1.0)'}}>{props.children}</span>
+        let occurrence = _.find(props.occurrences, (occ) => occ.start === props.start);
+        if ( occurrence && occurrence.searchProgressiveIndex === currentIndex) {
+            return <span style={{backgroundColor: 'rgba(255, 255, 0, 1.0)'}}>{props.children}</span>
         }
-        return <span style={{backgroundColor: 'rgb(248,44,38)'}}>{props.children}</span>
+        return <span style={{backgroundColor: 'rgb(255,210,14)'}}>{props.children}</span>
     };
+
+
 
     let search = text;
     let decorators = decoratorStructure.slice();
-    decorators.push( generateSearchDecorator( search, params ) );
+    let occurrencesClone = _.cloneDeep(occurrencesInSegment);
+    decorators.push( generateSearchDecorator( search, occurrencesClone, params ) );
     const newDecorator = new CompositeDecorator( decorators );
     return EditorState.set( editorState, {decorator: newDecorator} );
 };
