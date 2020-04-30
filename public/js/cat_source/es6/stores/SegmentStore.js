@@ -974,6 +974,7 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SET_SEGMENT_TAGGED:
             SegmentStore.setSegmentAsTagged(action.id, action.fid);
+            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, action.id);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION:

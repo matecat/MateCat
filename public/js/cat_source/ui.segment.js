@@ -10,11 +10,19 @@
                 if (response.errors && !!(response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     SegmentActions.disableTPOnSegment();
+                    // Set as Tagged and restore source with taggedText
+                    SegmentActions.setSegmentAsTagged(sid);
+                    // Add missing tag at the end of the string
                     SegmentActions.autoFillTagsInTarget(sid);
                 } else {
+                    // Set as Tagged and restore source with taggedText
                     SegmentActions.setSegmentAsTagged(sid);
-                    SegmentActions.copyTagProjectionInCurrentSegment(sid, response.data.translation);
-                    SegmentActions.autoFillTagsInTarget(sid);
+                    // Unescape HTML
+                    let unescapedTranslation = DraftMatecatUtils.unescapeHTMLLeaveTags(response.data.translation);
+                    // Update target area
+                    SegmentActions.copyTagProjectionInCurrentSegment(sid, unescapedTranslation);
+                    // TODO: Autofill target based on Source Map, rewrite
+                    //SegmentActions.autoFillTagsInTarget(sid);
                 }
 
             }).fail(function () {

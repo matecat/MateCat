@@ -13,7 +13,7 @@ import Speech2Text from '../../utils/speech2text';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import TextUtils from "../../utils/textUtils";
 
-import DraftMatecatUtils from './utils/DraftUtils'
+import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 import {
     findWithRegex,
@@ -42,15 +42,17 @@ class Editarea extends React.Component {
                 }
             }
         ]);
-        const cleanTrans = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
-            cleanSegmentString(this.props.translation) : this.props.translation;
+
+        // If GuessTag is Enabled, clean translation from tags
+        const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
+            DraftMatecatUtils.cleanSegmentString(this.props.translation) : this.props.translation;
 
         // Inizializza Editor State con solo testo
         const plainEditorState = EditorState.createEmpty(decorator);
-        const rawEncoded = encodeContent(plainEditorState, cleanTrans);
+        const rawEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
 
         this.state = {
-            translation: cleanTrans,
+            translation: cleanTranslation,
             editorState: rawEncoded,
             editAreaClasses : ['targetarea']
         };
@@ -66,13 +68,12 @@ class Editarea extends React.Component {
     //Receive the new translation and decode it for draftJS
     setNewTranslation = (sid, translation) => {
         if ( sid === this.props.segment.sid) {
-            const rawEncoded = encodeContent( this.state.editorState, translation );
+            const rawEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, translation );
             this.setState( {
                 translation: translation,
                 editorState: rawEncoded,
             } );
         }
-
         //TODO MOVE THIS
         setTimeout(()=>this.updateTranslationInStore());
 
