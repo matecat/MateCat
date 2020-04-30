@@ -585,6 +585,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             segment = segment.set('currentInSearch', segment.get('sid') == occurrencesList[current]);
             segment = segment.set('occurrencesInSearch', searchResultsDictionary[segment.get('sid')]);
             segment = segment.set('textToSearch', text);
+            if ( segment.get('sid') === this.searchOccurrences[current] ) {
+                segment = segment.set('currentInSearchIndex', current);
+            }
             return segment;
         });
     },

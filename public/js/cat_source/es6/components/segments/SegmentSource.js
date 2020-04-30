@@ -13,7 +13,7 @@ import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
-import {encodeContent, activateSearch} from "./utils/ContentEncoder";
+import { activateSearch} from "./utils/DraftMatecatUtils/ContentEncoder";
 import {CompositeDecorator, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";

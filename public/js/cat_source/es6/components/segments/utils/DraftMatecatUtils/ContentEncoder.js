@@ -548,59 +548,51 @@ export const getEntitiesInFragment = (fragment, editorState) => {
     return entities;
 };
 
-export const duplicateFragment = (fragment, editorState) => {
-    // Get all entities referenced in the fragment
-    const contentState = editorState.getCurrentContent();
-    const entities = getEntitiesInFragment(fragment, editorState);
-    const newEntityKeys = {};
-
-    let newEditorState = editorState;
-    let contentStateWithEntity = contentState;
-
-    // Create a clone of all entities available in fragment...
-    Object.keys(entities).forEach((key) => {
-        const entity = entities[key];
-        contentStateWithEntity = contentStateWithEntity.createEntity(
-            entity.type,
-            entity.mutability,
-            entity.data
-        );
-        // ...then match old entity keys with newly created keys
-        newEntityKeys[key] = contentStateWithEntity.getLastCreatedEntityKey();
-    });
-
-    // Todo: Check on contentStateWithEntity: must be different from contentState to procede with a EditorState.push
-    // Update editor history with new EditorState
-    newEditorState = EditorState.push(newEditorState, contentStateWithEntity, 'adjust-depth');
-
-    // Update all the entity references
-    let newFragment = BlockMapBuilder.createFromArray([]);
-    fragment.forEach((block, blockKey) => {
-        let updatedBlock = block;
-        newFragment = newFragment.set(blockKey, updatedBlock);
-        block.findEntityRanges(
-            character => character.getEntity() !== null,
-            (start, end) => {
-                const entityKey = block.getEntityAt(start);
-                const newEntityKey = newEntityKeys[entityKey];
-                updatedBlock = applyEntityToContentBlock(updatedBlock, start, end, newEntityKey);
-                newFragment = newFragment.set(blockKey, updatedBlock);
+//Search
+export const activateSearch = (editorState, decoratorStructure, text, params, occurrences, currentIndex) => {
+    const generateSearchDecorator = (highlightTerm, params) => {
+        let regex = SearchUtils.getSearchRegExp(highlightTerm, params.ingnoreCase, params.exactMatch);
+        return {
+            strategy: (contentBlock, callback) => {
+                if (highlightTerm !== '') {
+                    findWithRegex(regex, contentBlock, callback);
+                }
+            },
+            component: SearchHighlight,
+            props: {
+                occurrences,
+                currentIndex
             }
-        );
-    });
+        };
+    };
 
-    // Insert fragment
-    const newContentWithFragment = Modifier.replaceWithFragment(
-        newEditorState.getCurrentContent(),
-        newEditorState.getSelection(),
-        newFragment
-    );
+    const findWithRegex = (regex, contentBlock, callback) => {
+        const text = contentBlock.getText();
+        let matchArr, start, end;
+        let index = 0;
+        while ((matchArr = regex.exec(text)) !== null) {
+            start = matchArr.index;
+            end = start + matchArr[0].length;
+            occurrences[index].start = start;
+            callback(start, end);
+            index++;
+        }
+    };
 
-    return EditorState.push(
-        newEditorState,
-        newContentWithFragment,
-        'insert-fragment'
-    );
+
+    const SearchHighlight = (props) => {
+        let occurrence = _.find(occurrences, (occ) => occ.start = props.start);
+        if ( occurrence.searchProgressiveIndex === currentIndex) {
+            return <span style={{backgroundColor: 'rgba(248, 222, 126, 1.0)'}}>{props.children}</span>
+        }
+        return <span style={{backgroundColor: 'rgb(248,44,38)'}}>{props.children}</span>
+    };
+
+    let search = text;
+    let decorators = decoratorStructure.slice();
+    decorators.push( generateSearchDecorator( search, params ) );
+    const newDecorator = new CompositeDecorator( decorators );
+    return EditorState.set( editorState, {decorator: newDecorator} );
 };
 
 

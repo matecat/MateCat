@@ -16,9 +16,8 @@ import TextUtils from "../../utils/textUtils";
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 import {
-    duplicateFragment,
     activateSearch
-} from "./utils/ContentEncoder";
+} from "./utils/DraftMatecatUtils/ContentEncoder";
 import {CompositeDecorator, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
@@ -33,7 +32,8 @@ class Editarea extends React.Component {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
-                    onClick: this.onEntityClick
+                    onClick: this.onEntityClick,
+                    error: errors
                 }
             }
         ];
@@ -62,7 +62,8 @@ class Editarea extends React.Component {
 
     activateSearch = () => {
         this.setState( {
-            editorState: activateSearch(this.state.editorState, this.decoratorsStructure, this.props.segment.textToSearch.target, this.props.segment.textToSearch ),
+            editorState: activateSearch(this.state.editorState, this.decoratorsStructure, this.props.segment.textToSearch.target,
+                this.props.segment.textToSearch, this.props.segment.occurrencesInSearch.occurrences, this.props.segment.currentInSearchIndex ),
         } );
     };
 
@@ -155,7 +156,7 @@ class Editarea extends React.Component {
         const {editorState} = this.state;
         const internalClipboard = this.editor.getClipboard();
         if (internalClipboard) {
-            const clipboardEditorPasted = duplicateFragment(internalClipboard, editorState);
+            const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(internalClipboard, editorState);
             this.onChange(clipboardEditorPasted);
             this.setState({
                 editorState: clipboardEditorPasted,
