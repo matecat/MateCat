@@ -1,24 +1,34 @@
 'use strict';
 
+import getEntities from "./getEntities";
+import matchTag from "./matchTag";
+import encodeContent from "./encodeContent";
+import decodeSegment from "./decodeSegment";
+import duplicateFragment from "./duplicateFragment";
+import applyEntityToContentBlock from "./applyEntityToContentBlock";
+import insertFragment from "./insertFragment";
 import {
-	getEntities,
-	duplicateFragment,
-	applyEntityToContentBlock,
+	getXliffRegExpression,
 	cleanSegmentString,
-	matchTag,
-	encodeContent,
+	unescapeHTML,
 	unescapeHTMLLeaveTags
-} from './ContentEncoder'
+} from "./textUtils"
 
 const DraftMatecatUtils = {
+	// Text utils
+	cleanSegmentString,
+	getXliffRegExpression,
+	unescapeHTML,
+	unescapeHTMLLeaveTags,
+	// Tag Utils
+	matchTag,
 	getEntities,
+	encodeContent,
+	decodeSegment,
+	// Entity Utils
 	duplicateFragment,
 	applyEntityToContentBlock,
-	cleanSegmentString,
-	matchTag,
-	encodeContent,
-	unescapeHTMLLeaveTags
+	insertFragment
 };
-
 
 module.exports = DraftMatecatUtils;

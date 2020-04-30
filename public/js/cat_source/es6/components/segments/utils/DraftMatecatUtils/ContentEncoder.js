@@ -7,7 +7,6 @@ import {
     BlockMapBuilder
 } from 'draft-js';
 
-import Immutable from 'immutable';
 
 export const tagStruct = {
     'ph': {
@@ -310,6 +309,7 @@ export const generateEntityMapForRaw = (originalContent, entitySet) => {
     });
     return entityMap;
 };
+
 export const replaceEntityText = (entity, editorState) => {
     const contentState = editorState.getCurrentContent();
     const selectionState = editorState.getSelection().merge({

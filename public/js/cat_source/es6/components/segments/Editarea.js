@@ -16,14 +16,9 @@ import TextUtils from "../../utils/textUtils";
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 import {
-    findWithRegex,
-    encodeContent,
-    decodeSegment,
-    getEntities,
     duplicateFragment,
-    cleanSegmentString
 } from "./utils/ContentEncoder";
-import {CompositeDecorator, convertFromRaw, convertToRaw, Editor, EditorState} from "draft-js";
+import {CompositeDecorator, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 
@@ -81,7 +76,7 @@ class Editarea extends React.Component {
 
     updateTranslationInStore = () => {
         if ( this.state.translation !== '' ) {
-            SegmentActions.updateTranslation(this.props.segment.sid, decodeSegment(this.state.editorState))
+            SegmentActions.updateTranslation(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState))
         }
     };
 

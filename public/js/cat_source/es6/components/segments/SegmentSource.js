@@ -12,7 +12,6 @@ import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
-import {findWithRegex, encodeContent, getEntities, cleanSegmentString} from "./utils/ContentEncoder";
 import {CompositeDecorator, convertFromRaw, convertToRaw, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
@@ -51,7 +50,7 @@ class SegmentSource extends React.Component {
         const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
             DraftMatecatUtils.cleanSegmentString(this.props.segment.segment) : this.props.segment.segment;
         // New EditorState with translation
-        const rawEncoded = encodeContent(plainEditorState, cleanTranslation);
+        const rawEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
 
         this.state = {
             editorState: rawEncoded,
