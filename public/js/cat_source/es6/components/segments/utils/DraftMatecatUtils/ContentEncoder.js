@@ -7,7 +7,6 @@ import {
     BlockMapBuilder
 } from 'draft-js';
 
-import Immutable from 'immutable';
 
 export const tagStruct = {
     'ph': {
@@ -108,8 +107,23 @@ export const decodeTagInfo = (tag) => {
  * @returns {string}
  */
 export const unescapeHTML = (escapedHTML) => {
-    return escapedHTML.replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    return escapedHTML
+        .replace(/&lt;/g,'<')
+        .replace(/&gt;/g,'>')
+        .replace(/&amp;/g,'&')
+        .replace(/&apos;/g,'\'')
+        .replace(/&quot;/g,'\"');
 };
+
+/**
+ *
+ * @param escapedHTML
+ * @returns {string}
+ */
+export const unescapeHTMLLeaveTags = (escapedHTML) => {
+    return escapedHTML.replace(/&amp;/g,'&').replace(/&apos;/g,'\'').replace(/&quot;/g,'\"');
+};
+
 /**
  *
  * @param editorState - current editor state, can be empty
@@ -119,7 +133,7 @@ export const unescapeHTML = (escapedHTML) => {
 export const createNewEntitiesFromMap = (editorState, plainText = '') => {
     let contentState = editorState.getCurrentContent();
     // If editor content is empty, create new content from plainText
-    if(!contentState.hasText()){
+    if(!contentState.hasText() || plainText !== ''){
         contentState = ContentState.createFromText(plainText);
     }
     // Compute tag range
@@ -295,6 +309,7 @@ export const generateEntityMapForRaw = (originalContent, entitySet) => {
     });
     return entityMap;
 };
+
 export const replaceEntityText = (entity, editorState) => {
     const contentState = editorState.getCurrentContent();
     const selectionState = editorState.getSelection().merge({
@@ -507,6 +522,7 @@ export const insertFragment = (editorState, fragment) => {
         'insert-fragment'
     );
 };
+
 export const applyEntityToContentBlock = (contentBlock, start, end, entityKey) => {
     var characterList = contentBlock.getCharacterList();
     while (start < end) {
@@ -518,6 +534,7 @@ export const applyEntityToContentBlock = (contentBlock, start, end, entityKey) =
     }
     return contentBlock.set('characterList', characterList);
 };
+
 export const getEntitiesInFragment = (fragment, editorState) => {
     const contentState = editorState.getCurrentContent();
     const entities = {};
@@ -530,6 +547,7 @@ export const getEntitiesInFragment = (fragment, editorState) => {
     });
     return entities;
 };
+
 export const duplicateFragment = (fragment, editorState) => {
     // Get all entities referenced in the fragment
     const contentState = editorState.getCurrentContent();

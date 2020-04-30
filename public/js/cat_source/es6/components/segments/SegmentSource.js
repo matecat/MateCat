@@ -16,6 +16,9 @@ import LXQ from '../../utils/lxq.main';
 import {encodeContent, activateSearch} from "./utils/ContentEncoder";
 import {CompositeDecorator, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
+import SegmentUtils from "../../utils/segmentUtils";
+import DraftMatecatUtils from "./utils/DraftMatecatUtils";
+import SegmentConstants from "../../constants/SegmentConstants";
 
 
 
@@ -45,10 +48,13 @@ class SegmentSource extends React.Component {
 
         const decorator = new CompositeDecorator(this.decoratorsStructure);
 
-        // Inizializza Editor State con solo testo
+        // Initialise EditorState
         const plainEditorState = EditorState.createEmpty(decorator);
-        const rawEncoded = encodeContent(plainEditorState, this.props.segment.segment);
-
+        // If GuessTag enabled, clean string from tag
+        const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
+            DraftMatecatUtils.cleanSegmentString(this.props.segment.segment) : this.props.segment.segment;
+        // New EditorState with translation
+        const rawEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
 
         this.state = {
             editorState: rawEncoded,
@@ -56,6 +62,17 @@ class SegmentSource extends React.Component {
         };
         this.onChange = (editorState) => this.setState({editorState});
     }
+
+    // Restore tagged source in draftJS after GuessTag
+    setTaggedSource = (sid) => {
+        if ( sid === this.props.segment.sid) {
+            // TODO: get taggedSource from store
+            const rawEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, this.props.segment.segment );
+            this.setState( {
+                editorState: rawEncoded,
+            } );
+        }
+    };
 
     decodeTextSource(segment, source) {
         return this.props.decodeTextFn(segment, source);
@@ -196,6 +213,7 @@ class SegmentSource extends React.Component {
         this.afterRenderActions();
 
         this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType], this.openConcordance);
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource)
     }
 
     componentWillUnmount() {

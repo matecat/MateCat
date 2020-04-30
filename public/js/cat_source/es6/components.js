@@ -81,6 +81,7 @@ window.OfflineUtils = require('./utils/offlineUtils');
 window.Shortcuts = require('./utils/shortcuts');
 window.Customizations = require('./utils/customizations');
 window.SegmentUtils = require('./utils/segmentUtils');
+window.DraftMatecatUtils = require('./components/segments/utils/DraftMatecatUtils');
 
 window.LXQ = require('./utils/lxq.main');
 window.MBC = require('./utils/mbc.main');
