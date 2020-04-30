@@ -1103,6 +1103,10 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.ADD_SEARCH_RESULTS:
             SegmentStore.addSearchResults(action.segments, action.params);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            _.forEach(action.segments, (sid) => {
+                SegmentStore.emitChange(SegmentConstants.ADD_SEARCH_RESULTS, sid);
+            });
+
             break;
         case SegmentConstants.REMOVE_SEARCH_RESULTS:
             SegmentStore.removeSearchResults();
