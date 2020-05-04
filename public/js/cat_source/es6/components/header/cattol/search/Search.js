@@ -96,20 +96,25 @@ class Search extends React.Component {
         let {searchResults} = this.state;
         let itemReplaced = _.find(searchResults, (item)=>item.id === sid);
         let total = this.state.total;
+        total--;
         if ( itemReplaced.occurrences.length === 1 ) {
             _.remove(searchResults, (item)=>item.id === sid);
-            total--;
         }
-
         let newResultArray = _.map(searchResults, (item)=>item.id);
-
         const searchObject = SearchUtils.updateSearchObjectAfterReplace(newResultArray);
         this.setState( {
-            total: total,
+            total: total ,
             searchResults: searchObject.searchResults,
             occurrencesList: searchObject.occurrencesList,
             searchResultsDictionary: searchObject.searchResultsDictionary,
         } );
+        CatToolActions.storeSearchResults({
+            total: total ,
+            searchResults: searchObject.searchResults,
+            occurrencesList: searchObject.occurrencesList,
+            searchResultsDictionary: searchObject.searchResultsDictionary,
+            featuredSearchResult: this.state.featuredSearchResult,
+        });
         SegmentActions.addSearchResultToSegments(searchObject.occurrencesList, searchObject.searchResultsDictionary, this.state.featuredSearchResult, searchObject.searchParams);
 
     }
@@ -191,6 +196,13 @@ class Search extends React.Component {
             successCallback: function () {
                 SearchUtils.execReplaceAll(self.state.search);
                 APP.ModalWindow.onCloseModal();
+                CatToolActions.storeSearchResults({
+                    total: 0,
+                    searchResults: [],
+                    occurrencesList: [],
+                    searchResultsDictionary: {},
+                    featuredSearchResult: null,
+                });
             },
             cancelText: "Cancel",
             cancelCallback: function () {
@@ -207,24 +219,22 @@ class Search extends React.Component {
             return false;
         }
 
-        // todo: redo marksearchresults on the target
-        let mark = $("mark.currSearchItem");
-        mark.text(this.state.search.replaceTarget);
-        let $segment = mark.parents('section');
-        mark.replaceWith(mark.text());
-        let segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment));
-        SegmentActions.modifiedTranslation(segment.sid, null, true, $segment.find('.targetarea').html() );
-        let status = segment.status;
+        SegmentActions.replaceCurrentSearch(this.state.search.replaceTarget);
+        let segment = SegmentStore.getSegmentByIdToJS( this.state.occurrencesList[this.state.featuredSearchResult] );
 
-        this.updateAfterReplace(segment.original_sid);
-
-        setTimeout(()=>
-            UI.setTranslation({
+        setTimeout(()=> {
+            this.updateAfterReplace(segment.original_sid);
+            let next = this.state.occurrencesList[this.state.featuredSearchResult];
+            UI.setTranslation( {
                 id_segment: segment.original_sid,
-                status: status,
+                status: segment.status,
                 caller: 'replace'
-            }, ()=> SegmentActions.scrollToSegment(this.state.occurrencesList[this.state.featuredSearchResult]))
-        );
+            }, () => {
+                if ( next ) {
+                    SegmentActions.scrollToSegment( next )
+                }
+            } );
+        });
 
 
     }
@@ -352,10 +362,10 @@ class Search extends React.Component {
                 let total = this.state.total ? parseInt(this.state.total) : 0;
                 let label = (total === 1) ? 'result' : 'results';
                 let label2 = (total === 1) ? 'segment' : 'segments';
-                numbers =  total > 0 ? (
+                numbers =  total > 0  ? (
                     <span key="numbers" className="numbers">Found
-                        <span className="results">{' '+this.state.total}</span>{' '}<span>{label}</span>  in
-                        <span className="segments">{' '+this.state.searchResults.length}</span> {' '}<span>{label2}</span>
+                        <span className="results">{' '+ this.state.total}</span>{' '}<span>{label}</span>  in
+                        <span className="segments">{' '+ this.state.searchResults.length}</span> {' '}<span>{label2}</span>
                     </span>
                 ) : (
                     <span key="numbers" className="numbers">No segments found</span>

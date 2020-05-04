@@ -1118,6 +1118,9 @@ var UI = {
                 data.segment = segment;
                 SegmentActions.addOriginalTranslation(segment.sid, null, TextUtils.htmlEncode(translation));
                 $(document).trigger('setTranslation:success', data);
+                if (config.alternativesEnabled ) {
+                    UI.getTranslationMismatches(id_segment);
+                }
 			}
 		});
 	},

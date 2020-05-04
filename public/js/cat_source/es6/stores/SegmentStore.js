@@ -39,6 +39,7 @@ import TagUtils  from '../utils/tagUtils';
 import TextUtils  from '../utils/textUtils';
 import SegmentUtils  from '../utils/segmentUtils';
 import Immutable  from 'immutable';
+import EditAreaConstants from "../constants/EditAreaConstants";
 
 EventEmitter.prototype.setMaxListeners(0);
 
@@ -64,6 +65,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     searchOccurrences : [],
     searchResultsDictionary : {},
     currentInSearch : 0,
+    searchParams: {},
     nextUntranslatedFromServer: null,
     consecutiveCopySourceNum: [],
     /**
@@ -140,7 +142,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         firstOfSplit: (i===0),
                         inSearch: inSearch,
                         currentInSearch: currentInSearch,
-                        occurrencesInSearch: occurrencesInSearch
+                        occurrencesInSearch: occurrencesInSearch,
+                        searchParams: self.searchParams
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -159,6 +162,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.inSearch = inSearch;
                 segment.currentInSearch = currentInSearch;
                 segment.occurrencesInSearch = occurrencesInSearch;
+                segment.searchParams = self.searchParams;
                 newSegments.push(this);
             }
 
@@ -580,6 +584,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this.searchOccurrences = occurrencesList;
         this.searchResultsDictionary = searchResultsDictionary;
         this.currentInSearch = current;
+        this.searchParams = params;
         this._segments = this._segments.map((segment)=> {
             segment = segment.set('inSearch', occurrencesList.indexOf(segment.get('sid')) > -1);
             segment = segment.set('currentInSearch', segment.get('sid') == occurrencesList[current]);
@@ -614,6 +619,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this.searchOccurrences = [];
         this.searchResultsDictionary = {};
         this.currentInSearch = 0;
+        this.searchParams = {};
     },
     openSegmentSplit: function(sid) {
         let index = this.getSegmentIndex(sid);
@@ -1137,7 +1143,6 @@ AppDispatcher.register(function (action) {
             _.forEach(action.segments, (sid) => {
                 SegmentStore.emitChange(SegmentConstants.ADD_SEARCH_RESULTS, sid);
             });
-
             break;
         case SegmentConstants.REMOVE_SEARCH_RESULTS:
             SegmentStore.removeSearchResults();
@@ -1149,6 +1154,9 @@ AppDispatcher.register(function (action) {
             if ( currentSegment ) {
                 SegmentStore.emitChange(SegmentConstants.FORCE_UPDATE_SEGMENT, currentSegment.get('sid'));
             }
+            break;
+        case EditAreaConstants.REPLACE_SEARCH_RESULTS:
+            SegmentStore.emitChange(EditAreaConstants.REPLACE_SEARCH_RESULTS, action.text);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

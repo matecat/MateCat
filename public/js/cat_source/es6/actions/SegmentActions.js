@@ -11,6 +11,7 @@
 
 import AppDispatcher  from '../stores/AppDispatcher';
 import SegmentConstants  from '../constants/SegmentConstants';
+import EditAreaConstants  from '../constants/EditAreaConstants';
 import SegmentStore  from '../stores/SegmentStore';
 import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
 import TranslationMatches  from '../components/segments/utils/translationMatches';
@@ -107,6 +108,12 @@ const SegmentActions = {
     removeSearchResultToSegments: function () {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REMOVE_SEARCH_RESULTS
+        });
+    },
+    replaceCurrentSearch: function(text) {
+        AppDispatcher.dispatch({
+            actionType: EditAreaConstants.REPLACE_SEARCH_RESULTS,
+            text: text
         });
     },
 
