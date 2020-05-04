@@ -5,6 +5,11 @@
 
     "categories": [
       {
+        "label": "Style (readability, consistent style and tone)",
+        "code": "STY",
+        "dqf_id" : 4
+      }
+      ,{
         "label": "Tag issues (mismatches, whitespaces)",
         "code": "TAG",
         "dqf_id" : 5
@@ -23,11 +28,6 @@
         "label": "Language quality (grammar, punctuation, spelling)",
         "code": "LQ",
         "dqf_id" : 2
-      },
-      {
-        "label": "Style (readability, consistent style and tone)",
-        "code": "STY",
-        "dqf_id" : 4
       }
     ],
     "severities": [
