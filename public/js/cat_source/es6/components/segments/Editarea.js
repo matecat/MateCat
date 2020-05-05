@@ -171,6 +171,7 @@ class Editarea extends React.Component {
             EventHandlersUtils.handleCopyEvent(e);
             TextUtils.removeSelectedText();
         }
+
     }
     onPasteEvent(e) {
         EditArea.pasteEditAreaEventHandler(e.nativeEvent);
@@ -467,6 +468,10 @@ class Editarea extends React.Component {
             } catch ( e ) {
                 console.log("Error restoring cursor position in EditArea component", e)
             }
+        }
+        let textToSend = this.editAreaRef.innerHTML;
+        if ( textToSend === '' ) {
+            SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, null, textToSend);
         }
         this.saveInUndoStack();
     }
