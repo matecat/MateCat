@@ -471,7 +471,7 @@ class Editarea extends React.Component {
         }
         let textToSend = this.editAreaRef.innerHTML;
         if ( textToSend === '' ) {
-            SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, null, textToSend);
+            setTimeout(()=>SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, null, textToSend));
         }
         this.saveInUndoStack();
     }
