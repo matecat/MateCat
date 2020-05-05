@@ -469,10 +469,6 @@ class Editarea extends React.Component {
                 console.log("Error restoring cursor position in EditArea component", e)
             }
         }
-        let textToSend = this.editAreaRef.innerHTML;
-        if ( textToSend === '' ) {
-            setTimeout(()=>SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, null, textToSend));
-        }
         this.saveInUndoStack();
     }
     render() {
