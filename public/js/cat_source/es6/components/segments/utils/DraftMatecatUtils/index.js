@@ -12,6 +12,7 @@ import createNewEntitiesFromMap from "./createNewEntitiesFromMap";
 import linkEntities from "./linkEntities";
 import beautifyEntities from "./beautifyEntities";
 import decodeTagInfo from "./decodeTagInfo";
+import replaceOccurrences from "./replaceOccurrences";
 import {
 	getXliffRegExpression,
 	cleanSegmentString,
@@ -42,6 +43,7 @@ const DraftMatecatUtils = {
 	// Segment Utils
 	encodeContent,
 	decodeSegment,
+	replaceOccurrences
 
 };
 

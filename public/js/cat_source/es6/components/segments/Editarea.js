@@ -3,8 +3,8 @@
 
  */
 import React  from 'react';
-import $  from 'jquery';
 import SegmentConstants  from '../../constants/SegmentConstants';
+import EditAreaConstants  from '../../constants/EditAreaConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
 import EditArea  from './utils/editarea';
@@ -91,6 +91,17 @@ class Editarea extends React.Component {
 
     };
 
+    replaceCurrentSearch = (text) => {
+        let { searchParams, occurrencesInSearch, currentInSearchIndex, currentInSearch } = this.props.segment;
+        if ( currentInSearch && searchParams.target ) {
+            let index = _.findIndex(occurrencesInSearch.occurrences, (item)=>item.searchProgressiveIndex === currentInSearchIndex);
+            this.setState( {
+                editorState: DraftMatecatUtils.replaceOccurrences(this.state.editorState, searchParams.target, text, index)
+            } );
+        }
+        setTimeout(()=>this.updateTranslationInStore());
+    };
+
     updateTranslationInStore = () => {
         if ( this.state.translation !== '' ) {
             SegmentActions.updateTranslation(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState))
@@ -99,6 +110,7 @@ class Editarea extends React.Component {
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
+        SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
         if ( this.props.segment.inSearch ) {
             setTimeout(this.activateSearch());
         }
@@ -106,6 +118,7 @@ class Editarea extends React.Component {
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
+        SegmentStore.removeListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
     }
 
     // shouldComponentUpdate(nextProps, nextState) {}
