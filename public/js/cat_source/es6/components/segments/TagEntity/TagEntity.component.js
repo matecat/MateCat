@@ -33,7 +33,6 @@ class TagEntity extends Component {
     };
 
     markSearch = (text) => {
-        let textToRender = [];
         let {active, currentActive, textToReplace, params} = this.props.getSearchParams();
         if ( active && currentActive ) {
             let regex = SearchUtils.getSearchRegExp(textToReplace, params.ingnoreCase, params.exactMatch);
@@ -42,7 +41,6 @@ class TagEntity extends Component {
                 parts[i] = <span key={i} style={{backgroundColor: 'rgb(255,210,14)'}}>{parts[i]}</span>;
             }
             return parts;
-            // text = text.replace(regex, "<span style={{backgroundColor: 'rgb(255,210,14)'}}>" + text + "</span>");
         }
         return text;
     };
