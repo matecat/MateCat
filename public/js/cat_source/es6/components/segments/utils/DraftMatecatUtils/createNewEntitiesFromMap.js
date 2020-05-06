@@ -19,13 +19,13 @@ const createNewEntitiesFromMap = (editorState, plainText = '') => {
         contentState = ContentState.createFromText(plainText);
     }
     // Compute tag range
-    const tagRangeFromPlainText = matchTag(contentState.getPlainText());
+    const tagRange = matchTag(contentState.getPlainText());
     // Apply each entity to the block where it belongs
     const blocks = contentState.getBlockMap();
     let maxCharsInBlocks = 0;
     blocks.forEach((contentBlock) => {
         maxCharsInBlocks += contentBlock.getLength();
-        tagRangeFromPlainText.forEach( tag =>{
+        tagRange.forEach( tag =>{
             if (tag.offset < maxCharsInBlocks &&
                 (tag.offset + tag.length) <= maxCharsInBlocks &&
                 tag.offset >= (maxCharsInBlocks - contentBlock.getLength())) {
@@ -38,8 +38,6 @@ const createNewEntitiesFromMap = (editorState, plainText = '') => {
                     focusKey: contentBlock.getKey(),
                     focusOffset: ((tag.offset + tag.length) - (maxCharsInBlocks - contentBlock.getLength()))
                 });
-                // Decode tag data and place them cleaned inside tag object
-                tagEntity.data.placeHolder = decodeTagInfo(tagEntity);
                 // Create entity
                 const {type, mutability, data} = tagEntity;
                 const contentStateWithEntity = contentState.createEntity(type, mutability, data);
@@ -54,7 +52,7 @@ const createNewEntitiesFromMap = (editorState, plainText = '') => {
         });
     });
 
-    return contentState
+    return {contentState, tagRange}
 };
 
 export default createNewEntitiesFromMap;

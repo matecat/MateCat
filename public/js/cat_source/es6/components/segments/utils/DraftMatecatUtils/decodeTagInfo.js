@@ -1,4 +1,4 @@
-import tagStruct from "./tagStruct";
+import {tagSignatures, TagStruct} from "./tagModel";
 import {unescapeHTML} from "./textUtils";
 
 /**
@@ -8,18 +8,18 @@ import {unescapeHTML} from "./textUtils";
  */
 const decodeTagInfo = (tag) => {
     let decodedTagData;
-    if(tag.type in tagStruct) {
+    if(tag.type in tagSignatures) {
         // If regex exists, try to search, else put placeholder
-        if(tagStruct[tag.type].placeholderRegex!== null){
-            const idMatch = tagStruct[tag.type].placeholderRegex.exec(tag.data.originalText);
+        if(tagSignatures[tag.type].placeholderRegex!== null){
+            const idMatch = tagSignatures[tag.type].placeholderRegex.exec(tag.data.encodedText);
             if(idMatch && idMatch.length > 1) {
-                decodedTagData =  tagStruct[tag.type].decodeNeeded ? atob(idMatch[1]) : idMatch[1];
+                decodedTagData =  tagSignatures[tag.type].decodeNeeded ? atob(idMatch[1]) : idMatch[1];
                 decodedTagData = unescapeHTML(decodedTagData);
-            }else if(tagStruct[tag.type].placeholder){
-                decodedTagData = tagStruct[tag.type].placeholder;
+            }else if(tagSignatures[tag.type].placeholder){
+                decodedTagData = tagSignatures[tag.type].placeholder;
             }
         }else {
-            decodedTagData = tagStruct[tag.type].placeholder;
+            decodedTagData = tagSignatures[tag.type].placeholder;
         }
     }else{
         decodedTagData = '<unknown/>'
