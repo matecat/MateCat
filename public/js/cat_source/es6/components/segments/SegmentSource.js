@@ -41,7 +41,8 @@ class SegmentSource extends React.Component {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
-                    onClick: this.onEntityClick
+                    onClick: this.onEntityClick,
+                    getSearchParams: this.getSearchParams
                 }
             }
         ];
@@ -51,18 +52,29 @@ class SegmentSource extends React.Component {
         // Initialise EditorState
         const plainEditorState = EditorState.createEmpty(decorator);
         // If GuessTag enabled, clean string from tag
-        const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
+        const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
             DraftMatecatUtils.cleanSegmentString(this.props.segment.segment) : this.props.segment.segment;
         // New EditorState with translation
-        const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
+        const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanSource);
         const {editorState, tagRange} =  contentEncoded;
 
         this.state = {
+            source: cleanSource,
             editorState: editorState,
-            editAreaClasses : ['targetarea']
+            editAreaClasses : ['targetarea'],
+            tagRange: tagRange
         };
         this.onChange = (editorState) => this.setState({editorState});
     }
+
+    getSearchParams = () => {
+        return {
+            active: this.props.segment.inSearch,
+            currentActive: this.props.segment.currentInSearch,
+            textToReplace: this.props.segment.searchParams.source,
+            params: this.props.segment.searchParams
+        }
+    };
 
     // Restore tagged source in draftJS after GuessTag
     setTaggedSource = (sid) => {
@@ -203,6 +215,15 @@ class SegmentSource extends React.Component {
         } );
     };
 
+    updateSourceInStore = () => {
+        if ( this.state.source !== '' ) {
+            const {editorState, tagRange} = this.state;
+            let contentState = editorState.getCurrentContent();
+            let plainText = contentState.getPlainText();
+            SegmentActions.updateSource(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState), plainText, tagRange);
+        }
+    };
+
     componentDidMount() {
         this.$source = $(this.source);
 
@@ -218,7 +239,9 @@ class SegmentSource extends React.Component {
         this.afterRenderActions();
 
         this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType], this.openConcordance);
-        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource)
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
+
+        setTimeout(()=>this.updateSourceInStore());
     }
 
     componentWillUnmount() {

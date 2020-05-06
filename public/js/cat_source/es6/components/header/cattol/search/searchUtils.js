@@ -203,9 +203,9 @@ let SearchUtils = {
             let item = {id: sid, occurrences: []};
             if (segment) {
                 if ( this.searchParams.searchMode === 'source&target' ) {
-                    let textSource = segment.segment;
+                    let textSource = segment.decodedSource;
                     const matchesSource = this.getMatchesInText(textSource, this.searchParams.source, searchParams.ingnoreCase, this.searchParams['exact-match']);
-                    let textTarget = segment.translation;
+                    let textTarget = segment.decodedTranslation;
                     const matchesTarget = this.getMatchesInText(textTarget, this.searchParams.target, searchParams.ingnoreCase, this.searchParams['exact-match']);
 
                     let sourcesMatches = [], targetMatches = [];
@@ -226,7 +226,7 @@ let SearchUtils = {
 
                 } else {
                     if ( this.searchParams.source ) {
-                        let text = segment.segment;
+                        let text = segment.decodedSource;
                         const matchesSource = this.getMatchesInText(text, this.searchParams.source, searchParams.ingnoreCase, this.searchParams['exact-match']);
                         for ( const match of matchesSource ) {
                             occurrencesList.push( sid );
@@ -234,7 +234,7 @@ let SearchUtils = {
                             searchProgressiveIndex++;
                         }
                     } else if ( this.searchParams.target ) {
-                        let text = segment.translation;
+                        let text = segment.decodedTranslation;
                         const matchesTarget = this.getMatchesInText(text, this.searchParams.target, searchParams.ingnoreCase, this.searchParams['exact-match']);
                         for ( const match of matchesTarget ) {
                             occurrencesList.push( sid );

@@ -17,7 +17,8 @@ import {
 	getXliffRegExpression,
 	cleanSegmentString,
 	unescapeHTML,
-	unescapeHTMLLeaveTags
+	unescapeHTMLLeaveTags,
+	decodePhTags
 } from "./textUtils"
 
 
@@ -43,8 +44,8 @@ const DraftMatecatUtils = {
 	// Segment Utils
 	encodeContent,
 	decodeSegment,
-	replaceOccurrences
-
+	replaceOccurrences,
+	decodePhTags
 };
 
 module.exports = DraftMatecatUtils;

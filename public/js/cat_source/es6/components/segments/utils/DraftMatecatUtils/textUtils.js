@@ -42,3 +42,9 @@ export const unescapeHTMLLeaveTags = (escapedHTML) => {
         .replace(/&apos;/g,'\'')
         .replace(/&quot;/g,'\"');
 };
+
+export const decodePhTags = (text) => {
+    return text.replace( /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi , (match, text) => {
+        return Base64.decode(text);
+    });
+};

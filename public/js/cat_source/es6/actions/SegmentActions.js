@@ -521,11 +521,22 @@ const SegmentActions = {
         });
     },
 
-    updateTranslation: function(sid, text) {
+    updateTranslation: function(sid, translation, decodedTranslation, tagMap) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UPDATE_TRANSLATION,
             id: sid,
-            translation: text
+            translation: translation,
+            decodedTranslation,
+            tagMap
+        });
+    },
+    updateSource: function(sid, source, decodedSource, tagMap) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UPDATE_SOURCE,
+            id: sid,
+            source: source,
+            decodedSource,
+            tagMap
         });
     },
     lockEditArea : function ( sid, fid ) {

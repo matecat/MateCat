@@ -32,12 +32,28 @@ class TagEntity extends Component {
         const {selection} = children[0].props;
     };
 
+    markSearch = (text) => {
+        let textToRender = [];
+        let {active, currentActive, textToReplace, params} = this.props.getSearchParams();
+        if ( active && currentActive ) {
+            let regex = SearchUtils.getSearchRegExp(textToReplace, params.ingnoreCase, params.exactMatch);
+            var parts = text.split(regex);
+            for (var i = 1; i < parts.length; i += 2) {
+                parts[i] = <span key={i} style={{backgroundColor: 'rgb(255,210,14)'}}>{parts[i]}</span>;
+            }
+            return parts;
+            // text = text.replace(regex, "<span style={{backgroundColor: 'rgb(255,210,14)'}}>" + text + "</span>");
+        }
+        return text;
+    };
+
     render() {
+        debugger;
         const {selected, tyselectionStateInputs ,showTooltip} = this.state;
         const {decoratedText, entityKey, offsetkey, blockKey, start, end, children} = this.props;
         const {selection, forceSelection} = children[0].props;
         const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
-
+        let text = this.markSearch(children[0].props.text);
         return <div className="tag-container" /*contentEditable="false" suppressContentEditableWarning={true}*/>
             {showTooltip && <TooltipInfo/>}
             <span data-offset-key={offsetkey}
@@ -48,8 +64,9 @@ class TagEntity extends Component {
                 onMouseLeave={() => tooltipToggle()}*/
                   onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                 /*contentEditable="false"*/>
-                {children}
+                {text}
             </span>
+            <span style={{display:'none'}}>{children}</span>
         </div>
     }
 }
