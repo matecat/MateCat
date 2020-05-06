@@ -43,11 +43,12 @@ class Editarea extends React.Component {
 
           // Inizializza Editor State con solo testo
         const plainEditorState = EditorState.createEmpty(decorator);
-        const rawEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
+        const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
+        const {editorState, tagRange} =  contentEncoded;
 
         this.state = {
             translation: cleanTranslation,
-            editorState: rawEncoded,
+            editorState: editorState,
             editAreaClasses : ['targetarea']
         };
 
@@ -78,10 +79,11 @@ class Editarea extends React.Component {
     //Receive the new translation and decode it for draftJS
     setNewTranslation = (sid, translation) => {
         if ( sid === this.props.segment.sid) {
-            const rawEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, translation );
+            const contentEncoded = DraftMatecatUtils.encodeContent(this.state.editorState, translation );
+            const {editorState, tagRange} =  contentEncoded;
             this.setState( {
                 translation: translation,
-                editorState: rawEncoded,
+                editorState: editorState,
             } );
         }
         //TODO MOVE THIS

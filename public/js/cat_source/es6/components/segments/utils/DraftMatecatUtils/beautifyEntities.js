@@ -26,7 +26,7 @@ const beautifyEntities  = (editorState) => {
         // Filter only looped tag and get data
         // Todo: add check on tag array length
         const tagEntity = entitiesInEditor.filter( entity => entity.entityKey === key)[0];
-        const {placeHolder} = tagEntity.entity.data;
+        const {placeholder} = tagEntity.entity.data;
         // Get block-based selection
         const selectionState = new SelectionState({
             anchorKey: tagEntity.blockKey,
@@ -38,14 +38,13 @@ const beautifyEntities  = (editorState) => {
         contentState = Modifier.replaceText(
             contentState,
             selectionState,
-            placeHolder,
+            placeholder,
             inlineStyle,
             tagEntity.entityKey
         );
         // Update contentState
         editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
     });
-    // Todo verificare se serve il push dell'editor state
     return contentState;
 };
 
