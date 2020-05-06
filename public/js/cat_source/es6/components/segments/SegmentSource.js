@@ -54,10 +54,11 @@ class SegmentSource extends React.Component {
         const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
             DraftMatecatUtils.cleanSegmentString(this.props.segment.segment) : this.props.segment.segment;
         // New EditorState with translation
-        const rawEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
+        const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
+        const {editorState, tagRange} =  contentEncoded;
 
         this.state = {
-            editorState: rawEncoded,
+            editorState: editorState,
             editAreaClasses : ['targetarea']
         };
         this.onChange = (editorState) => this.setState({editorState});
@@ -67,9 +68,10 @@ class SegmentSource extends React.Component {
     setTaggedSource = (sid) => {
         if ( sid === this.props.segment.sid) {
             // TODO: get taggedSource from store
-            const rawEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, this.props.segment.segment );
+            const contentEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, this.props.segment.segment );
+            const {editorState, tagRange} =  contentEncoded;
             this.setState( {
-                editorState: rawEncoded,
+                editorState: editorState,
             } );
         }
     };

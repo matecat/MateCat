@@ -9,19 +9,22 @@ import {EditorState} from 'draft-js';
  * @param plainText - text to analyze when editor is empty
  * @returns {*|EditorState} editorStateModified - An EditorState with all known tags treated as entities
  */
-const encodeContent = (editorState, plainText = '') => {
+const encodeContent = (originalEditorState, plainText = '') => {
 
     // Create entities
-    let newContent = createNewEntitiesFromMap(editorState, plainText);
+    const entitiesFromMap = createNewEntitiesFromMap(originalEditorState, plainText);
+    let {contentState, tagRange} = entitiesFromMap;
+
     // Apply entities to EditorState
-    let editorStateModified = EditorState.push(editorState, newContent, 'apply-entity');
+    let editorState = EditorState.push(originalEditorState, contentState, 'apply-entity');
     // Link each openTag with its closure using entity key, otherwise tag are linked with openTagId/closeTagId
-    newContent = linkEntities(editorStateModified);
-    editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');
+    /*contentState = linkEntities(editorState);
+    editorState = EditorState.push(originalEditorState, contentState, 'change-block-data');*/
     // Replace each tag text with a placeholder
-    newContent = beautifyEntities(editorStateModified);
-    editorStateModified = EditorState.push(editorState, newContent, 'change-block-data');
-    return editorStateModified;
+    contentState = beautifyEntities(editorState);
+    editorState = EditorState.push(originalEditorState, contentState, 'change-block-data');
+
+    return {editorState, tagRange};
 };
 
 export default encodeContent;
