@@ -40,6 +40,7 @@ import TextUtils  from '../utils/textUtils';
 import SegmentUtils  from '../utils/segmentUtils';
 import Immutable  from 'immutable';
 import EditAreaConstants from "../constants/EditAreaConstants";
+import DraftMatecatUtils from './../components/segments/utils/DraftMatecatUtils'
 
 EventEmitter.prototype.setMaxListeners(0);
 
@@ -118,6 +119,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
                         segment: splittedSourceAr[i],
+                        decodedSource : DraftMatecatUtils.decodePhTags(segment.segment),
                         segment_hash: segment.segment_hash,
                         original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
@@ -127,6 +129,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         time_to_edit: "0",
                         original_translation: (translation) ? translation : '',
                         translation: (translation) ? translation : '',
+                        decodedTranslation: DraftMatecatUtils.decodePhTags(translation),
                         version: segment.version,
                         warning: "0",
                         warnings: {},
@@ -163,6 +166,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.currentInSearch = currentInSearch;
                 segment.occurrencesInSearch = occurrencesInSearch;
                 segment.searchParams = self.searchParams;
+                segment.decodedTranslation = DraftMatecatUtils.decodePhTags(segment.translation);
+                segment.decodedSource = DraftMatecatUtils.decodePhTags(segment.segment);
                 newSegments.push(this);
             }
 
@@ -289,7 +294,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             this._segments = this._segments.setIn([index, 'autopropagated_from'], "0");
         }
     },
-    replaceTranslation(sid, translation) {
+    replaceTranslation(sid, translation, decodedTranslation, tagMap) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         let segment = this._segments.get(index);
@@ -300,6 +305,15 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             this._segments = this._segments.setIn([index, 'modified'], false);
         }
         this._segments = this._segments.setIn([index, 'translation'], translation);
+        this._segments = this._segments.setIn([index, 'decodedTranslation'], decodedTranslation);
+        this._segments = this._segments.setIn([index, 'targetTagMap'], tagMap);
+    },
+    updateSource(sid, source, decodedSource, tagMap) {
+        var index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+
+        this._segments = this._segments.setIn([index, 'decodedSource'], decodedSource);
+        this._segments = this._segments.setIn([index, 'sourceTagMap'], tagMap);
     },
     modifiedTranslation(sid, fid, status) {
         const index = this.getSegmentIndex(sid, fid);
@@ -315,7 +329,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'tagged'], true);
-        let segment = this._segments.get(index);
+        // let segment = this._segments.get(index);
         // this._segments = this._segments.setIn([index, 'decoded_translation'], TagUtils.decodeText(segment.toJS(), segment.get('translation')));
         // this._segments = this._segments.setIn([index, 'decoded_source'], TagUtils.decodeText(segment.toJS(), segment.get('segment')));
     },
@@ -934,7 +948,11 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.UPDATE_TRANSLATION:
-            SegmentStore.replaceTranslation(action.id, action.translation);
+            SegmentStore.replaceTranslation(action.id, action.translation, action.decodedTranslation, action.tagMap);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            break;
+        case SegmentConstants.UPDATE_SOURCE:
+            SegmentStore.updateSource(action.id, action.source, action.decodedSource, action.tagMap);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.MODIFIED_TRANSLATION:

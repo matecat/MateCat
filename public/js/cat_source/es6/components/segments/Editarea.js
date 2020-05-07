@@ -32,7 +32,8 @@ class Editarea extends React.Component {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
-                    onClick: this.onEntityClick
+                    onClick: this.onEntityClick,
+                    getSearchParams: this.getSearchParams
                 }
             }
         ];
@@ -49,7 +50,8 @@ class Editarea extends React.Component {
         this.state = {
             translation: cleanTranslation,
             editorState: editorState,
-            editAreaClasses : ['targetarea']
+            editAreaClasses : ['targetarea'],
+            tagRange: tagRange
         };
 
         this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
@@ -59,6 +61,15 @@ class Editarea extends React.Component {
             setTimeout(()=>{this.updateTranslationDebounced()});
         } ;
     }
+
+    getSearchParams = () => {
+        return {
+            active: this.props.segment.inSearch,
+            currentActive: this.props.segment.currentInSearch,
+            textToReplace: this.props.segment.searchParams.target,
+            params: this.props.segment.searchParams
+        }
+    };
 
     activateSearch = () => {
         let { editorState } = this.state;
@@ -104,7 +115,10 @@ class Editarea extends React.Component {
 
     updateTranslationInStore = () => {
         if ( this.state.translation !== '' ) {
-            SegmentActions.updateTranslation(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState))
+            const {editorState, tagRange} = this.state;
+            let contentState = editorState.getCurrentContent();
+            let plainText = contentState.getPlainText();
+            SegmentActions.updateTranslation(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState), plainText, tagRange);
         }
     };
 
@@ -114,6 +128,7 @@ class Editarea extends React.Component {
         if ( this.props.segment.inSearch ) {
             setTimeout(this.activateSearch());
         }
+        setTimeout(()=>this.updateTranslationInStore());
     }
 
     componentWillUnmount() {

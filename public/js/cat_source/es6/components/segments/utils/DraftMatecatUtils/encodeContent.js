@@ -5,7 +5,7 @@ import {EditorState} from 'draft-js';
 
 /**
  *
- * @param editorState
+ * @param originalEditorState
  * @param plainText - text to analyze when editor is empty
  * @returns {*|EditorState} editorStateModified - An EditorState with all known tags treated as entities
  */
