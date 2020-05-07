@@ -46,7 +46,6 @@ class TagEntity extends Component {
     };
 
     render() {
-        debugger;
         const {selected, tyselectionStateInputs ,showTooltip} = this.state;
         const {decoratedText, entityKey, offsetkey, blockKey, start, end, children} = this.props;
         const {selection, forceSelection} = children[0].props;

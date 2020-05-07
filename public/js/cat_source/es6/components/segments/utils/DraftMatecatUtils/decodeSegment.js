@@ -25,7 +25,7 @@ const decodeSegment  = (editorState) => {
         // Filter only looped tag and get data
         // Todo: add check on tag array length
         const tagEntity = entitiesInEditor.filter( entity => entity.entityKey === key)[0];
-        const {originalText} = tagEntity.entity.data;
+        const {encodedText} = tagEntity.entity.data;
         // Get block-based selection
         const selectionState = new SelectionState({
             anchorKey: tagEntity.blockKey,
@@ -37,7 +37,7 @@ const decodeSegment  = (editorState) => {
         contentState = Modifier.replaceText(
             contentState,
             selectionState,
-            originalText,
+            encodedText,
             inlineStyle,
             null
         );
