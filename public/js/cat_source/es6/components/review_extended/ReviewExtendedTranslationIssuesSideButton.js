@@ -9,7 +9,6 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
         this.state = {
             issues_count : this.setIssueCount()
         };
-        this.setSegmentPreloadedIssues = this.setSegmentPreloadedIssues.bind(this);
         this.setSegmentVersions = this.setSegmentVersions.bind(this);
     }
 
@@ -47,12 +46,10 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions);
-        SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES, this.setSegmentPreloadedIssues);
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES, this.setSegmentVersions);
-        SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES, this.setSegmentPreloadedIssues);
     }
 
     handleClick (e) {

@@ -337,12 +337,22 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         //If is a splitted segment the versions are added to the first of the split
         let index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        let segment = this._segments.get(index);
         if (versions.length === 1 && versions[0].id === 0 && versions[0].translation == "") {
             // TODO Remove this if
             this._segments = this._segments.setIn([index, 'versions'], Immutable.fromJS([]));
             return this._segments.get(index);
         }
+        this._segments = this._segments.setIn([index, 'versions'], Immutable.fromJS(versions));
+        return this._segments.get(index);
+    },
+    addSegmentPreloadedIssues(sid, issues) {
+        //If is a splitted segment the versions are added to the first of the split
+        let index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        let versions = [];
+        versions.push({
+            issues: issues
+        });
         this._segments = this._segments.setIn([index, 'versions'], Immutable.fromJS(versions));
         return this._segments.get(index);
     },
@@ -996,6 +1006,13 @@ AppDispatcher.register(function (action) {
             if ( seg ) {
                 SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
             }
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES:
+            SegmentStore.addSegmentPreloadedIssues(action.sid, action.issues);
+            // if ( seg ) {
+            //     SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
+            // }
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:

@@ -940,7 +940,7 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
             sid: sid,
-            data: issues
+            issues: issues
         });
     },
 
