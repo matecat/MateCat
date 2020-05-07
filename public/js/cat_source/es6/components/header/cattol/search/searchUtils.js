@@ -362,6 +362,7 @@ let SearchUtils = {
         this.searchResultsDictionary = {};
         this.featuredSearchResult = 0;
         this.searchSegmentsResult = [];
+        SegmentActions.removeSearchResultToSegments();
     },
     /**
      * Close search container

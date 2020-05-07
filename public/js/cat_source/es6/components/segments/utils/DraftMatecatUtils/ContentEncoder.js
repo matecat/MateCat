@@ -578,7 +578,7 @@ export const activateSearch = (editorState, decoratorStructure, text, params, oc
             if ( occurrences[index] ) {
                 occurrences[index].start = start;
             }
-            callback(start, end);
+            callback(start, end, occurrences);
             index++;
         }
     };

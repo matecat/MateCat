@@ -68,11 +68,25 @@ class SegmentSource extends React.Component {
     }
 
     getSearchParams = () => {
-        return {
-            active: this.props.segment.inSearch,
-            currentActive: this.props.segment.currentInSearch,
-            textToReplace: this.props.segment.searchParams.source,
-            params: this.props.segment.searchParams
+        const {inSearch,
+            currentInSearch,
+            searchParams,
+            occurrencesInSearch,
+            currentInSearchIndex
+        } = this.props.segment;
+        if ( inSearch && searchParams.source) {
+            return {
+                active: inSearch,
+                currentActive: currentInSearch,
+                textToReplace: searchParams.source,
+                params: searchParams,
+                occurrences : occurrencesInSearch.occurrences,
+                currentInSearchIndex
+            }
+        } else {
+            return {
+                active: false
+            }
         }
     };
 

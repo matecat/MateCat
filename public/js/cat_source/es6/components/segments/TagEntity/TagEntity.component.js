@@ -33,12 +33,18 @@ class TagEntity extends Component {
     };
 
     markSearch = (text) => {
-        let {active, currentActive, textToReplace, params} = this.props.getSearchParams();
-        if ( active && currentActive ) {
+        let {active, currentActive, textToReplace, params, occurrences, currentInSearchIndex} = this.props.getSearchParams();
+        let currentOccurrence = _.find(occurrences, (occ) => occ.searchProgressiveIndex === currentInSearchIndex);
+        let isCurrent = (currentOccurrence && currentOccurrence.matchPosition >= this.props.start && currentOccurrence.matchPosition < this.props.end);
+        if ( active ) {
             let regex = SearchUtils.getSearchRegExp(textToReplace, params.ingnoreCase, params.exactMatch);
             var parts = text.split(regex);
             for (var i = 1; i < parts.length; i += 2) {
-                parts[i] = <span key={i} style={{backgroundColor: 'rgb(255,210,14)'}}>{parts[i]}</span>;
+                if ( currentActive && isCurrent ) {
+                    parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 210 14)'}}>{parts[i]}</span>;
+                } else {
+                    parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 255 0)'}}>{parts[i]}</span>;
+                }
             }
             return parts;
         }
@@ -46,7 +52,6 @@ class TagEntity extends Component {
     };
 
     render() {
-        debugger;
         const {selected, tyselectionStateInputs ,showTooltip} = this.state;
         const {decoratedText, entityKey, offsetkey, blockKey, start, end, children} = this.props;
         const {selection, forceSelection} = children[0].props;

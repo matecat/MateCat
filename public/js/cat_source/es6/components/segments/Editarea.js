@@ -33,7 +33,7 @@ class Editarea extends React.Component {
                 component: TagEntity,
                 props: {
                     onClick: this.onEntityClick,
-                    getSearchParams: this.getSearchParams
+                    getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
             }
         ];
@@ -63,11 +63,25 @@ class Editarea extends React.Component {
     }
 
     getSearchParams = () => {
-        return {
-            active: this.props.segment.inSearch,
-            currentActive: this.props.segment.currentInSearch,
-            textToReplace: this.props.segment.searchParams.target,
-            params: this.props.segment.searchParams
+        const {inSearch,
+            currentInSearch,
+            searchParams,
+            occurrencesInSearch,
+            currentInSearchIndex
+        } = this.props.segment;
+        if ( inSearch && searchParams.target) {
+            return {
+                active: inSearch,
+                currentActive: currentInSearch,
+                textToReplace: searchParams.target,
+                params: searchParams,
+                occurrences : occurrencesInSearch.occurrences,
+                currentInSearchIndex
+            }
+        } else {
+            return {
+                active: false
+            }
         }
     };
 
