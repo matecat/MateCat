@@ -32,11 +32,11 @@ const tagSignatures = {
         selfClosing: false,
         isClosure: false,
         placeholder: null,
-        placeholderRegex: /(id="\w+")/,
+        placeholderRegex: /id="(\d+)"/,
         decodeNeeded: false
     },
-    'cl': {
-        type: 'cl',
+    'gCl': {
+        type: 'gCl',
         openRegex: /&lt;\/g&gt;/g,
         openLength: 10,
         closeRegex: null,
@@ -98,6 +98,7 @@ function TagStruct(offset, length, type) {
     this.type = type || null;
     this.mutability = 'IMMUTABLE';
     this.data = {
+        id: null,
         encodedText: null,
         decodedText: null,
         openTagId: null,

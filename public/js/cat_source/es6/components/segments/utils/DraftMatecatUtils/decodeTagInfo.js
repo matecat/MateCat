@@ -1,28 +1,38 @@
-import {tagSignatures, TagStruct} from "./tagModel";
-import {unescapeHTML} from "./textUtils";
+import {tagSignatures} from "./tagModel";
+import {getIdAttributeRegEx, unescapeHTML} from "./textUtils";
 
 /**
  *
  * @param tag
- * @returns {string} decodedTagData - Decoded data inside tag
+ * @returns {{id: string, content: string}}
  */
+
 const decodeTagInfo = (tag) => {
-    let decodedTagData;
+    let decodedTagData = {
+        id: '',
+        content: ''
+    };
+    // if Tag is defined
     if(tag.type in tagSignatures) {
-        // If regex exists, try to search, else put placeholder
+        // Catch ID attribute
+        const idMatch = getIdAttributeRegEx().exec(tag.data.encodedText);
+        if(idMatch && idMatch.length > 1) {
+            decodedTagData.id = decodedTagData.id + idMatch[1];
+        }
+        // Catch Content - if regex exists, try to search, else put placeholder
         if(tagSignatures[tag.type].placeholderRegex!== null){
-            const idMatch = tagSignatures[tag.type].placeholderRegex.exec(tag.data.encodedText);
-            if(idMatch && idMatch.length > 1) {
-                decodedTagData =  tagSignatures[tag.type].decodeNeeded ? atob(idMatch[1]) : idMatch[1];
-                decodedTagData = unescapeHTML(decodedTagData);
+            const contentMatch = tagSignatures[tag.type].placeholderRegex.exec(tag.data.encodedText);
+            if(contentMatch && contentMatch.length > 1) {
+                decodedTagData.content =  tagSignatures[tag.type].decodeNeeded ? atob(contentMatch[1]) : contentMatch[1];
+                decodedTagData.content = unescapeHTML(decodedTagData.content);
             }else if(tagSignatures[tag.type].placeholder){
-                decodedTagData = tagSignatures[tag.type].placeholder;
+                decodedTagData.content = tagSignatures[tag.type].placeholder;
             }
         }else {
-            decodedTagData = tagSignatures[tag.type].placeholder;
+            decodedTagData.content = tagSignatures[tag.type].placeholder;
         }
     }else{
-        decodedTagData = '<unknown/>'
+        decodedTagData.content = '<>'
     }
     return decodedTagData;
 };

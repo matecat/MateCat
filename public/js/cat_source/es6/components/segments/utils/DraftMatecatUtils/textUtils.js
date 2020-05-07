@@ -16,6 +16,10 @@ export const getXliffRegExpression = () => {
     return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi; // group, multiline, case-insensitive
 };
 
+export const getIdAttributeRegEx = () => {
+    return /id="(mtc_\d+|\d+)"/g;
+}
+
 
 /**
  *
