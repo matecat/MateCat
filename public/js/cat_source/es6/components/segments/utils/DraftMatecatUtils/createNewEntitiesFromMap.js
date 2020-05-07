@@ -1,5 +1,4 @@
 import matchTag from "./matchTag";
-import decodeTagInfo from "./decodeTagInfo";
 import {
     Modifier,
     SelectionState,

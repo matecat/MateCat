@@ -54,11 +54,15 @@ const matchTag = (plainContent) => {
                 const uniqueId = openTags[i].offset + '-' + closingTag.offset;
                 openTags[i].data.closeTagId = uniqueId;
                 closingTag.data.openTagId = uniqueId;
-
+                // Closing tag has no ID, so take the one available inside open tag
+                closingTag.data.id = openTags[i].data.id;
+                // Placeholder for closing (cases: <g>, <ex>)
+                closingTag.data.placeholder = openTags[i].data.id;
             }
             i++;
         }
     });
+
     return [...openTags, ...closingTags, ...selfClosingTags];
 };
 

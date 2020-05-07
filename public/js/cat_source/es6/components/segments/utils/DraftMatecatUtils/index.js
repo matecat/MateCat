@@ -15,6 +15,7 @@ import decodeTagInfo from "./decodeTagInfo";
 import replaceOccurrences from "./replaceOccurrences";
 import {
 	getXliffRegExpression,
+	getIdAttributeRegEx,
 	cleanSegmentString,
 	unescapeHTML,
 	unescapeHTMLLeaveTags,
@@ -26,6 +27,7 @@ const DraftMatecatUtils = {
 	// Text utils
 	cleanSegmentString,
 	getXliffRegExpression,
+	getIdAttributeRegEx,
 	unescapeHTML,
 	unescapeHTMLLeaveTags,
 	// Tag Utils

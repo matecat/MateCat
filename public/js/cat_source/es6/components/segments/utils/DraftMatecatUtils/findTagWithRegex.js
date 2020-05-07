@@ -25,10 +25,13 @@ const findTagWithRegex = (text, tagSignature) => {
             tag.data.encodedText = text.slice(tag.offset, tag.offset + tag.length);
         }
         tag.type = type;
-        // Todo: maybe decodedText should include other decoded data, like id='mtc_1'
-        tag.data.placeholder = decodeTagInfo(tag);
-        tag.data.decodedText = decodeTagInfo(tag);
-        tagRange.push({...tag});
+
+        const tagInfo = decodeTagInfo(tag);
+        tag.data.id = tagInfo.id;
+        tag.data.placeholder = tagInfo.content;
+        tag.data.decodedText = tagInfo.content;
+
+        tagRange.push(tag);
     }
     return tagRange;
 };
