@@ -493,9 +493,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             errors: errors
         });
     },
-    showTranslationsIssues: function() {
-        this._segments = this._segments.map((segment)=>segment.set('showIssues', true));
-    },
+    // showTranslationsIssues: function() {
+    //     this._segments = this._segments.map((segment)=>segment.set('showIssues', true));
+    // },
     openSegmentIssuePanel: function(sid) {
         const index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
@@ -989,10 +989,10 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.RENDER_GLOSSARY:
             SegmentStore.emitChange(action.actionType, action.sid, action.segment);
             break;
-        case SegmentConstants.MOUNT_TRANSLATIONS_ISSUES:
-            SegmentStore.showTranslationsIssues();
-            SegmentStore.emitChange(action.actionType);
-            break;
+        // case SegmentConstants.MOUNT_TRANSLATIONS_ISSUES:
+        //     SegmentStore.showTranslationsIssues();
+        //     SegmentStore.emitChange(action.actionType);
+        //     break;
         case SegmentConstants.SET_SEGMENT_TAGGED:
             SegmentStore.setSegmentAsTagged(action.id, action.fid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
