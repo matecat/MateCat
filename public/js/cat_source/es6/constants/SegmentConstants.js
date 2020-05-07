@@ -41,7 +41,7 @@ module.exports = keyMirror({
     DELETE_FROM_GLOSSARY: null,
     ADD_GLOSSARY_ITEM: null,
     SET_SEGMENT_ORIGINAL_TRANSLATION: null,
-    MOUNT_TRANSLATIONS_ISSUES: null,
+    // MOUNT_TRANSLATIONS_ISSUES: null,
     SET_SEGMENT_TAGGED: null,
     SHOW_SELECTION: null,
     OPEN_ISSUES_PANEL: null,
