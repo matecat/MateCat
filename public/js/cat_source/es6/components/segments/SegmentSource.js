@@ -14,13 +14,12 @@ import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
 import { activateSearch, activateGlossary} from "./utils/DraftMatecatUtils/ContentEncoder";
-import {CompositeDecorator, Editor, EditorState} from "draft-js";
+import {Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import DraftMatecatUtils from "./utils/DraftMatecatUtils";
 import SegmentConstants from "../../constants/SegmentConstants";
-
-
+import CompoundDecorator from "./utils/CompoundDecorator"
 
 class SegmentSource extends React.Component {
 
@@ -34,6 +33,7 @@ class SegmentSource extends React.Component {
 
         this.decoratorsStructure = [
             {
+                name: 'tags',
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
@@ -42,8 +42,8 @@ class SegmentSource extends React.Component {
                 }
             }
         ];
-
-        const decorator = new CompositeDecorator(this.decoratorsStructure);
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        // const decorator = new CompositeDecorator(this.decoratorsStructure);
 
         // Initialise EditorState
         const plainEditorState = EditorState.createEmpty(decorator);
@@ -169,34 +169,42 @@ class SegmentSource extends React.Component {
         }
     }
 
-    activateSearch = () => {
+    addSearchDecorator = () => {
         let { editorState } = this.state;
         let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
+        const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, searchParams.source,
+            searchParams, occurrencesInSearch.occurrences, currentInSearchIndex );
+        this.decoratorsStructure = decorators;
         this.setState( {
-            editorState: activateSearch( editorState, this.decoratorsStructure, searchParams.source,
-                searchParams, occurrencesInSearch.occurrences, currentInSearchIndex ),
+            editorState: newEditorState,
         } );
     };
 
-    deactivateSearch = () => {
-        const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+    removeSearchDecorator = () => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'search');
+        // const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
         this.setState( {
-            editorState: EditorState.set( this.state.editorState, {decorator: newDecorator} ),
+            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
         } );
     };
 
-    activateGlossary = () => {
+    addGlossaryDecorator = () => {
         let { editorState } = this.state;
         let { glossary, segment, sid } = this.props.segment;
+        const { editorState : newEditorState, decorators } = activateGlossary( editorState, this.decoratorsStructure, glossary, segment, sid );
+        this.decoratorsStructure = decorators;
         this.setState( {
-            editorState: activateGlossary( editorState, this.decoratorsStructure, glossary, segment, sid ),
+            editorState: newEditorState,
         } );
     };
 
-    deactivateGlossary = () => {
-        const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+    removeGlossaryDecorator = () => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'glossary');
+        // const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
         this.setState( {
-            editorState: EditorState.set( this.state.editorState, {decorator: newDecorator} ),
+            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
         } );
     };
 
@@ -213,7 +221,7 @@ class SegmentSource extends React.Component {
         this.$source = $(this.source);
 
         if ( this.props.segment.inSearch ) {
-            setTimeout(this.activateSearch());
+            setTimeout(this.addSearchDecorator());
         }
 
         this.afterRenderActions();
@@ -242,18 +250,18 @@ class SegmentSource extends React.Component {
             (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== currentInSearch ) ||   //Before was the current
             (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== currentInSearchIndex ) ) )   //There are more occurrences and the current change
         {
-            this.activateSearch();
+            this.addSearchDecorator();
         } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
-            this.deactivateSearch();
+            this.removeSearchDecorator();
         }
 
         //Glossary
         const { glossary } = this.props.segment;
         const { glossary : prevGlossary } = prevProps.segment;
         if ( glossary && _.size(glossary) > 0 && (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ) ) {
-           this.activateGlossary();
+           this.addGlossaryDecorator();
         } else if ( _.size(prevGlossary) > 0 && ( !glossary || _.size(glossary) === 0 ) ) {
-            this.deactivateGlossary();
+            this.removeGlossaryDecorator();
         }
     }
 

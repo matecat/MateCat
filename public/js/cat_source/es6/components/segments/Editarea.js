@@ -18,9 +18,10 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import {
     activateSearch
 } from "./utils/DraftMatecatUtils/ContentEncoder";
-import {CompositeDecorator, Editor, EditorState} from "draft-js";
+import {Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
+import CompoundDecorator from "./utils/CompoundDecorator"
 
 
 class Editarea extends React.Component {
@@ -37,7 +38,9 @@ class Editarea extends React.Component {
                 }
             }
         ];
-        const decorator = new CompositeDecorator(this.decoratorsStructure);
+        // const decorator = new CompositeDecorator(this.decoratorsStructure);
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
+
         // If GuessTag is Enabled, clean translation from tags
         const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
             DraftMatecatUtils.cleanSegmentString(this.props.translation) : this.props.translation;
@@ -85,19 +88,23 @@ class Editarea extends React.Component {
         }
     };
 
-    activateSearch = () => {
+    addSearchDecorator = () => {
         let { editorState } = this.state;
         let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
+        const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, searchParams.target,
+            searchParams, occurrencesInSearch.occurrences, currentInSearchIndex );
+        this.decoratorsStructure = decorators;
         this.setState( {
-            editorState: activateSearch( editorState, this.decoratorsStructure, searchParams.target,
-                searchParams, occurrencesInSearch.occurrences, currentInSearchIndex ),
+            editorState: newEditorState,
         } );
     };
 
-    deactivateSearch = () => {
-        const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+    removeSearchDecorator = () => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'search');
+        // const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
         this.setState( {
-            editorState: EditorState.set( this.state.editorState, {decorator: newDecorator} ),
+            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
         } );
     };
 
@@ -140,7 +147,7 @@ class Editarea extends React.Component {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
         if ( this.props.segment.inSearch ) {
-            setTimeout(this.activateSearch());
+            setTimeout(this.addSearchDecorator());
         }
         setTimeout(()=>this.updateTranslationInStore());
     }
@@ -161,9 +168,9 @@ class Editarea extends React.Component {
             (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== this.props.segment.currentInSearch ) ||   //Before was the current
             (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== this.props.segment.currentInSearchIndex ) ) )   //There are more occurrences and the current change
         {
-            this.activateSearch();
+            this.addSearchDecorator();
         } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
-            this.deactivateSearch();
+            this.removeSearchDecorator();
         }
     }
 

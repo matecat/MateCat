@@ -29,7 +29,7 @@ class TagEntity extends Component {
 
     highlightTag = () => {
         const {start, end, children} = this.props;
-        const {selection} = children[0].props;
+        const {selection} = children.props.children[0];
     };
 
     markSearch = (text) => {
@@ -53,8 +53,9 @@ class TagEntity extends Component {
 
     render() {
         const {selected, tyselectionStateInputs ,showTooltip} = this.state;
-        const {decoratedText, entityKey, offsetkey, blockKey, start, end, children} = this.props;
-        const {selection, forceSelection} = children[0].props;
+        const {decoratedText, entityKey, offsetkey, blockKey, start, end} = this.props;
+        const { children } = this.props.children.props;
+        const {selection, forceSelection} = children[0];
         const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
         let text = this.markSearch(children[0].props.text);
         return <div className="tag-container" /*contentEditable="false" suppressContentEditableWarning={true}*/>

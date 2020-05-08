@@ -493,7 +493,7 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
-        SegmentStore.removeListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdate);
+        SegmentStore.removeListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdateSegment);
 
         //Review
         SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);

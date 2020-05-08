@@ -10,7 +10,9 @@ import {
 
 import _ from 'lodash';
 import SearchHighlight from '../../SearchHighLight/SearchHighLight.component';
-import GlossaryComponent from '../../GlossaryComponent/GlossaryComponent.component'
+import GlossaryComponent from '../../GlossaryComponent/GlossaryComponent.component';
+import CompoundDecorator from "../CompoundDecorator"
+
 
 export const tagStruct = {
     'ph': {
@@ -555,9 +557,10 @@ export const getEntitiesInFragment = (fragment, editorState) => {
 //Search
 export const activateSearch = (editorState, decoratorStructure, text, params, occurrencesInSegment, currentIndex) => {
 
-    const generateSearchDecorator = (highlightTerm, occurrences, params) => {
+    const generateSearchDecorator = (highlightTerm, occurrences, params, currentIndex) => {
         let regex = SearchUtils.getSearchRegExp(highlightTerm, params.ingnoreCase, params.exactMatch);
         return {
+            name: 'search',
             strategy: (contentBlock, callback) => {
                 if (highlightTerm !== '') {
                     findWithRegex(regex, contentBlock, occurrences, callback);
@@ -589,9 +592,14 @@ export const activateSearch = (editorState, decoratorStructure, text, params, oc
     let search = text;
     let decorators = decoratorStructure.slice();
     let occurrencesClone = _.cloneDeep(occurrencesInSegment);
-    decorators.push( generateSearchDecorator( search, occurrencesClone, params ) );
-    const newDecorator = new CompositeDecorator( decorators );
-    return EditorState.set( editorState, {decorator: newDecorator} );
+    _.remove(decorators, (decorator) => decorator.name === 'search');
+    decorators.push( generateSearchDecorator( search, occurrencesClone, params, currentIndex) );
+    // const newDecorator = new CompositeDecorator( decorators );
+    const newDecorator = new CompoundDecorator( decorators );
+    return {
+        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
+        decorators: decorators
+    }
 };
 
 //Glossary
@@ -599,6 +607,7 @@ export const activateGlossary = (editorState, decoratorStructure, glossary, text
 
     const generateGlossaryDecorator = (regex, sid) => {
         return {
+            name: 'glossary',
             strategy: (contentBlock, callback) => {
                 if ( regex !== '') {
                     findWithRegex(regex, contentBlock, callback);
@@ -638,9 +647,14 @@ export const activateGlossary = (editorState, decoratorStructure, glossary, text
 
     let decorators = decoratorStructure.slice();
     const regex = createGlossaryRegex(glossary, text);
+    _.remove(decorators, (decorator) => decorator.name === 'glossary');
     decorators.push( generateGlossaryDecorator( regex, sid ) );
-    const newDecorator = new CompositeDecorator( decorators );
-    return EditorState.set( editorState, {decorator: newDecorator} );
+    // const newDecorator = new CompositeDecorator( decorators );
+    const newDecorator = new CompoundDecorator( decorators );
+    return {
+        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
+        decorators: decorators
+    }
 };
 
 
