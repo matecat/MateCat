@@ -2334,25 +2334,6 @@ class ProjectManager {
                         'standard_word_count' => $iceLockArray[ 'standard_word_count' ],
                 ];
 
-//                //
-//                // -----------------------------------------------------
-//                // BugFix 2020-05-07
-//                // -----------------------------------------------------
-//                //
-//                // If for some reason an ICE match has no suggestions and no match_type,
-//                // then we reset manually the status to DRAFT and match_type to NO_MATCH
-//                //
-//                if(
-//                    $iceLockArray[ 'status' ] === Constants_TranslationStatus::STATUS_TRANSLATED and
-//                    $iceLockArray[ 'match_type' ] === Constants_SegmentTranslationsMatchType::ICE and
-//                    $iceLockArray[ 'suggestion_match' ] === null and
-//                    $iceLockArray['suggestion'] === null
-//                ){
-//                    $sql_values['status'] = Constants_TranslationStatus::STATUS_DRAFT;
-//                    $sql_values['match_type'] = Constants_SegmentTranslationsMatchType::NO_MATCH;
-//                    $sql_values['translation'] = null;
-//                }
-
                 $query_translations_values[] = $sql_values;
             }
 
