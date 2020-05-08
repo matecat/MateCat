@@ -207,6 +207,7 @@ class Xliff_Parser {
 
                         // Getting Source and Target raw content
                         $this->getSource( $xliff, $i, $j, $trans_unit );
+                        $this->getSegSource( $xliff, $i, $j, $trans_unit );
                         $this->getTarget( $xliff, $i, $j, $trans_unit );
                         //TODO add seg-source from dom, il raw-content del target viene dal dom
                         //TODO il raw-content del seg-source viene dalle regexp
@@ -222,9 +223,10 @@ class Xliff_Parser {
 
                         //TODO improve with DOM
                         preg_match( '|<seg-source.*?>(.*?)</seg-source>|si', $trans_unit, $temp );
-                        if ( isset( $temp[ 1 ] ) ) {
 
-                            $markers = $temp[ 1 ];
+                        if ( isset($temp[1])  ) {
+
+                            $markers = @$xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ 'raw-content' ];
 
                             unset( $temp );
 
@@ -426,6 +428,22 @@ class Xliff_Parser {
         $cleanXMLContent = new SimpleXMLElement( '<rootNoteNode>' . $testString . '</rootNoteNode>', LIBXML_NOCDATA );
 
         return $cleanXMLContent->__toString();
+    }
+
+    /**
+     * @param $xliff
+     * @param $i
+     * @param $j
+     * @param $trans_unit
+     */
+    private function getSegSource( &$xliff, $i, $j, $trans_unit ) {
+        try {
+            $tagArray                                                                   = $this->_getTagContent( 'seg-source', $trans_unit );
+            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ 'raw-content' ] = self::fix_non_well_formed_xml( $tagArray[ 'content' ] );
+        } catch ( UnexpectedValueException $e ) {
+            //Found Empty Source Tag
+//            Log::doJsonLog(  $e->getMessage()  );
+        }
     }
 
     /**

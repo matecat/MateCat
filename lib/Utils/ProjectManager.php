@@ -549,9 +549,9 @@ class ProjectManager {
                 // make a cache package (with work/ only, empty orig/)
                 try {
                     $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
-                } catch ( \Exception $e ){
+                } catch ( \Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -230,
+                            "code"    => -230,
                             "message" => $e->getMessage()
                     ];
                 }
@@ -582,7 +582,7 @@ class ProjectManager {
             $this->_log( $e );
             //Zip file Handling
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code" => $e->getCode(),
+                    "code"    => $e->getCode(),
                     "message" => $e->getMessage()
             ];
         }
@@ -621,7 +621,7 @@ class ProjectManager {
 
                 if ( AbstractFilesStorage::isOnS3() ) {
                     if ( null === $cachedXliffFilePathName ) {
-                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)    ), -6 );
+                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode( ',', $_originalFileNames ) ), -6 );
                     }
                 } else {
                     if ( !file_exists( $cachedXliffFilePathName ) ) {
@@ -680,23 +680,24 @@ class ProjectManager {
                             "code" => -13, "message" => $e->getMessage()
                     ];
                     //we can not write to disk!! Break project creation
-                }
-                // S3 EXCEPTIONS HERE
-                elseif ($e->getCode() == -200 ) {
+                } // S3 EXCEPTIONS HERE
+                elseif ( $e->getCode() == -200 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -200,
+                            "code"    => -200,
                             "message" => $e->getMessage()
                     ];
-                } else if ($e->getCode() == 0 ) {
+                } else {
+                    if ( $e->getCode() == 0 ) {
 
-                    // check for 'Invalid copy source encoding' error
-                    $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
+                        // check for 'Invalid copy source encoding' error
+                        $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
 
-                    if (strpos($e->getMessage(), $copyErrorMsg) !== false) {
-                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => -200,
-                                "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
-                        ];
+                        if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
+                            $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                    "code"    => -200,
+                                    "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
+                            ];
+                        }
                     }
                 }
                 $this->__clearFailedProject( $e );
@@ -752,7 +753,7 @@ class ProjectManager {
                     ]
             );
 
-            foreach( $totalFilesStructure as $fid => $empty ){
+            foreach ( $totalFilesStructure as $fid => $empty ) {
                 $this->_storeSegments( $fid );
             }
 
@@ -779,7 +780,7 @@ class ProjectManager {
 
                 //invalid Trans-unit value found empty ID
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(),
+                        "code"    => $e->getCode(),
                         "message" => $message,
                 ];
             } else {
@@ -1786,86 +1787,88 @@ class ProjectManager {
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
 
-                            //rest flag because if the first mrk of the seg-source is not translatable the rest of
-                            //mrk in the list will not be too!!!
-                            $show_in_cattool = 1;
+                            if ( is_array( $seg_source ) ) {
+                                //rest flag because if the first mrk of the seg-source is not translatable the rest of
+                                //mrk in the list will not be too!!!
+                                $show_in_cattool = 1;
 
-                            $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter );
+                                $wordCount = CatUtils::segment_raw_word_count( $seg_source[ 'raw-content' ], $this->projectStructure[ 'source_language' ], $this->filter );
 
-                            //init tags
-                            $seg_source[ 'mrk-ext-prec-tags' ] = '';
-                            $seg_source[ 'mrk-ext-succ-tags' ] = '';
+                                //init tags
+                                $seg_source[ 'mrk-ext-prec-tags' ] = '';
+                                $seg_source[ 'mrk-ext-succ-tags' ] = '';
 
-                            if ( empty( $wordCount ) ) {
-                                $show_in_cattool = 0;
-                            } else {
-                                $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
-                                $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
-                                $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
-                                $seg_source[ 'raw-content' ]       = $extract_external[ 'seg' ];
+                                if ( empty( $wordCount ) ) {
+                                    $show_in_cattool = 0;
+                                } else {
+                                    $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
+                                    $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
+                                    $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
+                                    $seg_source[ 'raw-content' ]       = $extract_external[ 'seg' ];
 
-                                if ( isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] ) ) {
-                                    $target_extract_external = $this->_strip_external(
-                                            $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ]
-                                    );
-
-                                    //we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
-                                    //AND IF IT IS ONLY A CHAR? like "*" ?
-                                    //we can't distinguish if it is translated or not
-                                    //this means that we lose the tags id inside the target if different from source
-                                    $src = trim( strip_tags( html_entity_decode( $extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
-                                    $trg = trim( strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
-
-
-                                    if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
-
-                                        $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
-
-                                        //add an empty string to avoid casting to int: 0001 -> 1
-                                        //useful for idiom internal xliff id
-                                        if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
-                                            $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
-                                        }
-
-                                        /**
-                                         * Trans-Unit
-                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
-                                         */
-                                        $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
-                                                $seg_source[ 'mid' ],
-                                                new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
+                                    if ( isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] ) ) {
+                                        $target_extract_external = $this->_strip_external(
+                                                $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ]
                                         );
 
-                                        //seg-source and target translation can have different mrk id
-                                        //override the seg-source surrounding mrk-id with them of target
-                                        $seg_source[ 'mrk-ext-prec-tags' ] = $target_extract_external[ 'prec' ];
-                                        $seg_source[ 'mrk-ext-succ-tags' ] = $target_extract_external[ 'succ' ];
+                                        //we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
+                                        //AND IF IT IS ONLY A CHAR? like "*" ?
+                                        //we can't distinguish if it is translated or not
+                                        //this means that we lose the tags id inside the target if different from source
+                                        $src = trim( strip_tags( html_entity_decode( $extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
+                                        $trg = trim( strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
+
+
+                                        if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+
+                                            $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
+
+                                            //add an empty string to avoid casting to int: 0001 -> 1
+                                            //useful for idiom internal xliff id
+                                            if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
+                                                $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
+                                            }
+
+                                            /**
+                                             * Trans-Unit
+                                             * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
+                                             */
+                                            $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
+                                                    $seg_source[ 'mid' ],
+                                                    new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
+                                            );
+
+                                            //seg-source and target translation can have different mrk id
+                                            //override the seg-source surrounding mrk-id with them of target
+                                            $seg_source[ 'mrk-ext-prec-tags' ] = $target_extract_external[ 'prec' ];
+                                            $seg_source[ 'mrk-ext-succ-tags' ] = $target_extract_external[ 'succ' ];
+
+                                        }
 
                                     }
 
                                 }
 
+                                $segStruct = new Segments_SegmentStruct( [
+                                        'id_file'                 => $fid,
+                                        'id_project'              => $this->projectStructure[ 'id_project' ],
+                                        'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
+                                        'xliff_mrk_id'            => $seg_source[ 'mid' ],
+                                        'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
+                                        'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
+                                        'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
+                                        'segment_hash'            => md5( $seg_source[ 'raw-content' ] ),
+                                        'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
+                                        'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
+                                        'raw_word_count'          => $wordCount,
+                                        'show_in_cattool'         => $show_in_cattool
+                                ] );
+
+                                $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
+
+                                //increment counter for word count
+                                $this->files_word_count += $wordCount;
                             }
-
-                            $segStruct = new Segments_SegmentStruct( [
-                                    'id_file'                 => $fid,
-                                    'id_project'              => $this->projectStructure[ 'id_project' ],
-                                    'internal_id'             => $xliff_trans_unit[ 'attr' ][ 'id' ],
-                                    'xliff_mrk_id'            => $seg_source[ 'mid' ],
-                                    'xliff_ext_prec_tags'     => $seg_source[ 'ext-prec-tags' ],
-                                    'xliff_mrk_ext_prec_tags' => $seg_source[ 'mrk-ext-prec-tags' ],
-                                    'segment'                 => $this->filter->fromRawXliffToLayer0( $seg_source[ 'raw-content' ] ),
-                                    'segment_hash'            => md5( $seg_source[ 'raw-content' ] ),
-                                    'xliff_mrk_ext_succ_tags' => $seg_source[ 'mrk-ext-succ-tags' ],
-                                    'xliff_ext_succ_tags'     => $seg_source[ 'ext-succ-tags' ],
-                                    'raw_word_count'          => $wordCount,
-                                    'show_in_cattool'         => $show_in_cattool
-                            ] );
-
-                            $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
-
-                            //increment counter for word count
-                            $this->files_word_count += $wordCount;
 
                         } // end foreach seg-source
 
@@ -2023,8 +2026,8 @@ class ProjectManager {
             );
 
             // check if the files were moved
-            if (true !== $moved) {
-                throw new \Exception('Project creation failed. Please refresh page and retry.', -200);
+            if ( true !== $moved ) {
+                throw new \Exception( 'Project creation failed. Please refresh page and retry.', -200 );
             }
 
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
@@ -2331,24 +2334,24 @@ class ProjectManager {
                         'standard_word_count' => $iceLockArray[ 'standard_word_count' ],
                 ];
 
-                //
-                // -----------------------------------------------------
-                // BugFix 2020-05-07
-                // -----------------------------------------------------
-                //
-                // If for some reason an ICE match has no suggestions and no match_type,
-                // then we reset manually the status to DRAFT and match_type to NO_MATCH
-                //
-                if(
-                    $iceLockArray[ 'status' ] === Constants_TranslationStatus::STATUS_TRANSLATED and
-                    $iceLockArray[ 'match_type' ] === Constants_SegmentTranslationsMatchType::ICE and
-                    $iceLockArray[ 'suggestion_match' ] === null and
-                    $iceLockArray['suggestion'] === null
-                ){
-                    $sql_values['status'] = Constants_TranslationStatus::STATUS_DRAFT;
-                    $sql_values['match_type'] = Constants_SegmentTranslationsMatchType::NO_MATCH;
-                    $sql_values['translation'] = null;
-                }
+//                //
+//                // -----------------------------------------------------
+//                // BugFix 2020-05-07
+//                // -----------------------------------------------------
+//                //
+//                // If for some reason an ICE match has no suggestions and no match_type,
+//                // then we reset manually the status to DRAFT and match_type to NO_MATCH
+//                //
+//                if(
+//                    $iceLockArray[ 'status' ] === Constants_TranslationStatus::STATUS_TRANSLATED and
+//                    $iceLockArray[ 'match_type' ] === Constants_SegmentTranslationsMatchType::ICE and
+//                    $iceLockArray[ 'suggestion_match' ] === null and
+//                    $iceLockArray['suggestion'] === null
+//                ){
+//                    $sql_values['status'] = Constants_TranslationStatus::STATUS_DRAFT;
+//                    $sql_values['match_type'] = Constants_SegmentTranslationsMatchType::NO_MATCH;
+//                    $sql_values['translation'] = null;
+//                }
 
                 $query_translations_values[] = $sql_values;
             }

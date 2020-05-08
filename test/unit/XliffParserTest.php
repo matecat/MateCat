@@ -202,6 +202,29 @@ class XliffParserTest extends AbstractTest {
 
     }
 
+    public function testSegSource(){
+
+        $x = "<trans-unit id=\"NFDBB2FA9-tu13\" xml:space=\"preserve\">
+<source xml:lang=\"en-US\"><g id=\"1\">With over 600 journalists across 50 countries, the Financial Times is best positioned to provide you and your team with accurate global analysis first, during these unprecedented times. </g></source>
+<seg-source><mrk mid=\"0\" mtype=\"seg\"><g id=\"1\">With over 600 journalists across 50 countries, the Financial Times is best positioned to provide you and your team with accurate global analysis first, during these unprecedented times. </g></mrk></seg-source>
+<target xml:lang=\"it-IT\"><mrk mid=\"0\" mtype=\"seg\"><g id=\"1\">With over 600 journalists across 50 countries, the Financial Times is best positioned to provide you and your team with accurate global analysis first, during these unprecedented times. </g></mrk></target>
+</trans-unit>";
+
+        $refMethod = new ReflectionMethod( 'Xliff_Parser', 'getSegSource' );
+        $refMethod->setAccessible(true);
+
+        $xliff = [];
+        $refMethod->invokeArgs( new Xliff_Parser(), [ &$xliff, 0, 0, $x ] );
+
+        var_dump($xliff);
+
+        $this->assertNotEmpty( $xliff );
+        $this->assertEquals( "PPC000460", $xliff[ 'files' ][ 0 ][ 'trans-units' ][ 0 ][ 'target' ][ 'raw-content' ] );
+
+
+
+    }
+
     public function testNotEmptyTargetTagWithMrkWithAltTrans(){
 
         $x = "<trans-unit id=\"0000000002\" datatype=\"x-text/x-4cb\" restype=\"string\">
