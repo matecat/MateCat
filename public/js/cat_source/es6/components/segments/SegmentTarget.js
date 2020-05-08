@@ -28,8 +28,6 @@ class SegmentTarget extends React.Component {
             showTagsMenu: false,
         };
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
-        this.beforeRenderActions = this.beforeRenderActions.bind(this);
-        this.afterRenderActions = this.afterRenderActions.bind(this);
         this.showTagsMenu = this.showTagsMenu.bind(this);
         this.hideTagsMenu = this.hideTagsMenu.bind(this);
         this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this);
@@ -60,16 +58,6 @@ class SegmentTarget extends React.Component {
                 originalTranslation: translation
             });
         }
-    }
-
-    beforeRenderActions() {
-        this.props.beforeRenderOrUpdate(this.props.segment.translation);
-    }
-
-    afterRenderActions(prevProps) {
-        let tagMismatchChanged = (!_.isUndefined(prevProps) &&
-            prevProps.segImmutable.get('tagMismatch') ) ? !this.props.segImmutable.get('tagMismatch').equals(prevProps.segImmutable.get('tagMismatch')): true;
-        this.props.afterRenderOrUpdate(this.props.segment.translation, tagMismatchChanged);
     }
 
     onClickEvent(event) {
@@ -270,8 +258,6 @@ class SegmentTarget extends React.Component {
         SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.addListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
-        this.afterRenderActions();
-
     }
 
     componentWillUnmount() {
@@ -283,15 +269,9 @@ class SegmentTarget extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        this.afterRenderActions(prevProps);
         if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
             $(this.target).find('.blacklistItem').each((index, item)=>QaBlacklist.powerTipFn(item, this.props.segment.qaCheckGlossary));
         }
-    }
-
-    getSnapshotBeforeUpdate(prevProps, prevState) {
-        this.beforeRenderActions();
-        return null;
     }
 
     render() {

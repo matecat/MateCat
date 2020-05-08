@@ -13,7 +13,7 @@ import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
-import { activateSearch} from "./utils/DraftMatecatUtils/ContentEncoder";
+import { activateSearch, activateGlossary} from "./utils/DraftMatecatUtils/ContentEncoder";
 import {CompositeDecorator, Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
@@ -27,14 +27,10 @@ class SegmentSource extends React.Component {
     constructor(props) {
         super(props);
 
-        this.originalSource = this.createEscapedSegment(this.props.segment.segment);
-        this.createEscapedSegment = this.createEscapedSegment.bind(this);
-        this.decodeTextSource = this.decodeTextSource.bind(this);
-        this.beforeRenderActions = this.beforeRenderActions.bind(this);
+        this.originalSource = this.props.segment.segment;
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
 
-        this.beforeRenderActions();
 
         this.decoratorsStructure = [
             {
@@ -102,32 +98,7 @@ class SegmentSource extends React.Component {
         }
     };
 
-    decodeTextSource(segment, source) {
-        return this.props.decodeTextFn(segment, source);
-    }
-
-    createEscapedSegment(text) {
-        if (!$.parseHTML(text).length) {
-            text = text.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
-        }
-
-        let escapedSegment = TextUtils.htmlEncode(text.replace(/\"/g, "&quot;"));
-        /* this is to show line feed in source too, because server side we replace \n with placeholders */
-        escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
-        escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
-        escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-        return escapedSegment;
-    }
-
-    beforeRenderActions() {
-        this.props.beforeRenderOrUpdate(this.props.segment.segment);
-
-    }
-
     afterRenderActions(prevProps) {
-        let tagMismatchChanged = (!_.isUndefined(prevProps) &&
-            prevProps.segImmutable.get('tagMismatch')) ? !this.props.segImmutable.get('tagMismatch').equals(prevProps.segImmutable.get('tagMismatch')): true;
-        this.props.afterRenderOrUpdate(this.props.segment.segment, tagMismatchChanged);
         let self = this;
         if ( this.splitContainer ) {
             $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function(e) {
@@ -156,14 +127,6 @@ class SegmentSource extends React.Component {
         $(this.splitContainer).find('.splitArea').blur();
     }
 
-    onCopyEvent(e) {
-        EventHandlersUtils.handleCopyEvent(e);
-    }
-
-    onDragEvent(e) {
-        EventHandlersUtils.handleDragEvent(e);
-    }
-
     addSplitPoint(event) {
         if(window.getSelection().type === 'Range') return false;
         TextUtils.pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"/></span>');
@@ -180,27 +143,20 @@ class SegmentSource extends React.Component {
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
 
-    markGlossary(source) {
-        if ( this.props.segment.glossary && _.size(this.props.segment.glossary) > 0 ) {
-            return GlossaryUtils.markGlossaryItemsInText(source, this.props.segment.glossary, this.props.segment.sid);
-        }
-        return source;
-    }
-
-    markQaCheckGlossary(source) {
-        if (QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary && this.props.segment.qaCheckGlossary.length > 0) {
-            return QACheckGlossary.markGlossaryUnusedMatches(source, this.props.segment.qaCheckGlossary);
-        }
-        return source;
-    }
-
-    markLexiqa(source) {
-        let searchEnabled = this.props.segment.inSearch;
-        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
-            source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
-        }
-        return source;
-    }
+    // markQaCheckGlossary(source) {
+    //     if (QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary && this.props.segment.qaCheckGlossary.length > 0) {
+    //         return QACheckGlossary.markGlossaryUnusedMatches(source, this.props.segment.qaCheckGlossary);
+    //     }
+    //     return source;
+    // }
+    //
+    // markLexiqa(source) {
+    //     let searchEnabled = this.props.segment.inSearch;
+    //     if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
+    //         source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
+    //     }
+    //     return source;
+    // }
 
     openConcordance(e) {
         e.preventDefault();
@@ -229,6 +185,21 @@ class SegmentSource extends React.Component {
         } );
     };
 
+    activateGlossary = () => {
+        let { editorState } = this.state;
+        let { glossary, segment, sid } = this.props.segment;
+        this.setState( {
+            editorState: activateGlossary( editorState, this.decoratorsStructure, glossary, segment, sid ),
+        } );
+    };
+
+    deactivateGlossary = () => {
+        const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+        this.setState( {
+            editorState: EditorState.set( this.state.editorState, {decorator: newDecorator} ),
+        } );
+    };
+
     updateSourceInStore = () => {
         if ( this.state.source !== '' ) {
             const {editorState, tagRange} = this.state;
@@ -240,11 +211,6 @@ class SegmentSource extends React.Component {
 
     componentDidMount() {
         this.$source = $(this.source);
-
-        this.$source.on('click', 'mark.inGlossary',  ( e ) => {
-            e.preventDefault();
-            SegmentActions.activateTab(this.props.segment.sid, 'glossary');
-        });
 
         if ( this.props.segment.inSearch ) {
             setTimeout(this.activateSearch());
@@ -259,35 +225,36 @@ class SegmentSource extends React.Component {
     }
 
     componentWillUnmount() {
-        this.$source.off('click', 'mark.inGlossary');
-        $.powerTip.destroy($('.blacklistItem', this.$source));
-
         this.$source.on('keydown', this.openConcordance);
-    }
-    getSnapshotBeforeUpdate() {
-        this.beforeRenderActions();
-        return null;
     }
 
     componentDidUpdate(prevProps) {
         if ( QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary &&  this.props.segment.qaCheckGlossary.length ) {
             $(this.source).find('.unusedGlossaryTerm').each((index, item)=>QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
         }
+        this.afterRenderActions(prevProps);
 
         //Search
-        if (this.props.segment.inSearch && this.props.segment.searchParams.source && (
+        const { inSearch, searchParams, currentInSearch, currentInSearchIndex } = this.props.segment;
+        if (inSearch && searchParams.source && (
             (!prevProps.segment.inSearch) ||  //Before was not active
-            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(this.props.segment.searchParams))) ||//Before was active but some params change
-            (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== this.props.segment.currentInSearch ) ||   //Before was the current
-            (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== this.props.segment.currentInSearchIndex ) ) )   //There are more occurrences and the current change
+            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(searchParams))) ||//Before was active but some params change
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== currentInSearch ) ||   //Before was the current
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== currentInSearchIndex ) ) )   //There are more occurrences and the current change
         {
             this.activateSearch();
         } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
             this.deactivateSearch();
         }
-        this.afterRenderActions(prevProps);
 
-
+        //Glossary
+        const { glossary } = this.props.segment;
+        const { glossary : prevGlossary } = prevProps.segment;
+        if ( glossary && _.size(glossary) > 0 && (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ) ) {
+           this.activateGlossary();
+        } else if ( _.size(prevGlossary) > 0 && ( !glossary || _.size(glossary) === 0 ) ) {
+            this.deactivateGlossary();
+        }
     }
 
     allowHTML(string) {
@@ -304,9 +271,7 @@ class SegmentSource extends React.Component {
                         tabIndex={0}
                         id={"segment-" + this.props.segment.sid +"-source"}
                         data-original={this.originalSource}
-                        onCopy={this.onCopyEvent.bind(this)}
-                        onDragStart={this.onDragEvent.bind(this)}
-        >
+                    >
             <Editor
                 editorState={editorState}
                 onChange={onChange}

@@ -643,7 +643,6 @@ class Segment extends React.Component {
                         segment={this.props.segment}
                         segImmutable={this.props.segImmutable}
                         readonly={this.state.readonly}
-                        decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}
