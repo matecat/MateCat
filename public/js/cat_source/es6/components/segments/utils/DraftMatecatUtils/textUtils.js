@@ -31,6 +31,7 @@ export const unescapeHTML = (escapedHTML) => {
         .replace(/&lt;/g,'<')
         .replace(/&gt;/g,'>')
         .replace(/&amp;/g,'&')
+        .replace(/&nbsp;/g,' ')
         .replace(/&apos;/g,'\'')
         .replace(/&quot;/g,'\"');
 };
@@ -43,6 +44,7 @@ export const unescapeHTML = (escapedHTML) => {
 export const unescapeHTMLLeaveTags = (escapedHTML) => {
     return escapedHTML
         .replace(/&amp;/g,'&')
+        .replace(/&nbsp;/g,' ')
         .replace(/&apos;/g,'\'')
         .replace(/&quot;/g,'\"');
 };

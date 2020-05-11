@@ -41,9 +41,12 @@ class Editarea extends React.Component {
         // const decorator = new CompositeDecorator(this.decoratorsStructure);
         const decorator = new CompoundDecorator(this.decoratorsStructure);
 
+        // Escape html
+        const translation =  DraftMatecatUtils.unescapeHTMLLeaveTags(this.props.translation);
+
         // If GuessTag is Enabled, clean translation from tags
         const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
-            DraftMatecatUtils.cleanSegmentString(this.props.translation) : this.props.translation;
+            DraftMatecatUtils.cleanSegmentString(translation) : translation;
 
           // Inizializza Editor State con solo testo
         const plainEditorState = EditorState.createEmpty(decorator);

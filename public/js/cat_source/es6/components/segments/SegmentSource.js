@@ -47,9 +47,11 @@ class SegmentSource extends React.Component {
 
         // Initialise EditorState
         const plainEditorState = EditorState.createEmpty(decorator);
+        // Escape html
+        const translation =  DraftMatecatUtils.unescapeHTMLLeaveTags(this.props.segment.segment);
         // If GuessTag enabled, clean string from tag
         const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
-            DraftMatecatUtils.cleanSegmentString(this.props.segment.segment) : this.props.segment.segment;
+            DraftMatecatUtils.cleanSegmentString(translation) : translation;
         // New EditorState with translation
         const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanSource);
         const {editorState, tagRange} =  contentEncoded;
