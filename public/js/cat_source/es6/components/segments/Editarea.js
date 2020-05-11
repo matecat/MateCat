@@ -176,7 +176,7 @@ class Editarea extends React.Component {
 
     render() {
         const {editorState} = this.state;
-        const {onChange, onPaste} = this;
+        const {onChange, onPaste, saveFragment, putFragment} = this;
 
         let lang = '';
         let readonly = false;
@@ -196,12 +196,13 @@ class Editarea extends React.Component {
                     id={'segment-' + this.props.segment.sid + '-editarea'}
                     data-sid={this.props.segment.sid}
                     tabIndex="-1"
+                    onCopy={saveFragment}
         >
             <Editor
                 lang={lang}
                 editorState={editorState}
                 onChange={onChange}
-                handlePastedText={onPaste}
+                handlePastedText={putFragment}
                 ref={(el) => this.editor = el}
                 readOnly={readonly}
             />
@@ -211,6 +212,7 @@ class Editarea extends React.Component {
         const {editorState} = this.state;
         const internalClipboard = this.editor.getClipboard();
         if (internalClipboard) {
+            console.log('Fragment --> ',internalClipboard )
             const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(internalClipboard, editorState);
             this.onChange(clipboardEditorPasted);
             this.setState({
@@ -219,6 +221,54 @@ class Editarea extends React.Component {
             return true;
         } else {
             return false;
+        }
+    };
+
+
+    putFragment = (text, html) => {
+        const {editorState} = this.state;
+        if(text) {
+            const contentState = editorState.getCurrentContent();
+            const fragmentContent = JSON.parse(text);
+            let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
+
+            console.log('Fragment --> ',fragment );
+
+            const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
+                fragment,
+                editorState,
+                fragmentContent.entitiesMap
+            );
+
+            this.onChange(clipboardEditorPasted);
+            this.setState({
+                editorState: clipboardEditorPasted,
+            });
+            return true;
+        }else{
+            return false;
+        }
+
+    }
+
+
+    saveFragment = (e) => {
+        const internalClipboard = this.editor.getClipboard();
+        const {editorState} = this.state;
+
+        if (internalClipboard) {
+            console.log('InternalClipboard ', internalClipboard)
+            const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
+
+            const fragment = JSON.stringify({
+                orderedMap: internalClipboard,
+                entitiesMap: entitiesMap
+            });
+            e.clipboardData.clearData();
+            e.clipboardData.setData('text/html', fragment);
+            e.clipboardData.setData('text/plain', fragment);
+            console.log("Copied -> ", e.clipboardData.getData('text/html'));
+            e.preventDefault();
         }
     };
 }

@@ -6,16 +6,18 @@ import {
     BlockMapBuilder
 } from 'draft-js';
 
-const duplicateFragment = (fragment, editorState) => {
+const duplicateFragment = (fragment, editorState, entitiesMap = null) => {
     // Get all entities referenced in the fragment
     const contentState = editorState.getCurrentContent();
-    const entities = getEntitiesInFragment(fragment, editorState);
+    // If entitiesMap exists, probably fragment come from another editor
+    const entities = entitiesMap ? entitiesMap : getEntitiesInFragment(fragment, editorState);
+
     const newEntityKeys = {};
 
     let newEditorState = editorState;
     let contentStateWithEntity = contentState;
 
-    // Create a clone of all entities available in fragment...
+    // Create a clone of all entities available in fragment using the ContentState of the current Editor
     Object.keys(entities).forEach((key) => {
         const entity = entities[key];
         contentStateWithEntity = contentStateWithEntity.createEntity(
@@ -33,6 +35,7 @@ const duplicateFragment = (fragment, editorState) => {
 
     // Update all the entity references
     let newFragment = BlockMapBuilder.createFromArray([]);
+
     fragment.forEach((block, blockKey) => {
         let updatedBlock = block;
         newFragment = newFragment.set(blockKey, updatedBlock);
