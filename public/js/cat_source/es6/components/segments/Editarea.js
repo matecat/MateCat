@@ -28,12 +28,13 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
+        const {onEntityClick} = this;
         this.decoratorsStructure = [
             {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
-                    onClick: this.onEntityClick,
+                    onClick: onEntityClick,
                     // getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
             }
@@ -274,6 +275,20 @@ class Editarea extends React.Component {
             console.log("Copied -> ", e.clipboardData.getData('text/html'));
             e.preventDefault();
         }
+    };
+
+    onEntityClick = (start, end) => {
+        const {editorState} = this.state;
+        const selectionState = editorState.getSelection();
+        let newSelection = selectionState.merge({
+            anchorOffset: start,
+            focusOffset: end,
+        });
+        const newEditorState = EditorState.forceSelection(
+            editorState,
+            newSelection,
+        );
+        this.setState({editorState: newEditorState});
     };
 }
 

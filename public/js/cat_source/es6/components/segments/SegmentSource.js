@@ -337,6 +337,19 @@ class SegmentSource extends React.Component {
 
     }
 
+    onEntityClick = (start, end) => {
+        const {editorState} = this.state;
+        const selectionState = editorState.getSelection();
+        let newSelection = selectionState.merge({
+            anchorOffset: start,
+            focusOffset: end,
+        });
+        const newEditorState = EditorState.forceSelection(
+            editorState,
+            newSelection,
+        );
+        this.setState({editorState: newEditorState});
+    };
 
     copyFragment = (e) => {
         const internalClipboard = this.editor.getClipboard();
