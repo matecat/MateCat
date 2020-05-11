@@ -10,7 +10,7 @@ class TooltipInfo extends Component {
     render() {
         return <div className="tag-tooltip">
             <span className="tooltip-txt">
-                this is a simple info text
+                {this.props.text}
             </span>
         </div>
     }

@@ -43,12 +43,12 @@ const QaCheckBlacklist = {
         });
     },
 
-    powerTipFn( item ) {
-        $(item).powerTip({
-            placement : 's'
-        });
-        $(item).data({ 'powertipjq' : $('<div class="blacklistTooltip">Blacklisted term</div>') });
-    }
+    // powerTipFn( item ) {
+    //     $(item).powerTip({
+    //         placement : 's'
+    //     });
+    //     $(item).data({ 'powertipjq' : $('<div class="blacklistTooltip">Blacklisted term</div>') });
+    // }
 
 };
 

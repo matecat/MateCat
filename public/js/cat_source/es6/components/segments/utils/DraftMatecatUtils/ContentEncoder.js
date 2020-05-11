@@ -10,7 +10,8 @@ import {
 
 import _ from 'lodash';
 import SearchHighlight from '../../SearchHighLight/SearchHighLight.component';
-import GlossaryComponent from '../../GlossaryComponent/GlossaryComponent.component';
+import GlossaryComponent from '../../GlossaryComponents/GlossaryHighlight.component';
+import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component';
 import CompoundDecorator from "../CompoundDecorator"
 
 
@@ -650,6 +651,57 @@ export const activateGlossary = (editorState, decoratorStructure, glossary, text
     _.remove(decorators, (decorator) => decorator.name === 'glossary');
     decorators.push( generateGlossaryDecorator( regex, sid ) );
     // const newDecorator = new CompositeDecorator( decorators );
+    const newDecorator = new CompoundDecorator( decorators );
+    return {
+        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
+        decorators: decorators
+    }
+};
+
+//Qa check Glossary
+export const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheckGlossary, text, sid) => {
+
+    const generateGlossaryDecorator = (regex, sid) => {
+        return {
+            name: 'qaCheckGlossary',
+            strategy: (contentBlock, callback) => {
+                if ( regex !== '') {
+                    findWithRegex(regex, contentBlock, callback);
+                }
+            },
+            component: QaCheckGlossaryHighlight
+        };
+    };
+
+    const findWithRegex = (regex, contentBlock, callback) => {
+        const text = contentBlock.getText();
+        let matchArr, start, end;
+        while ((matchArr = regex.exec(text)) !== null) {
+            start = matchArr.index;
+            end = start + matchArr[0].length;
+            callback(start, end);
+        }
+    };
+
+    const createGlossaryRegex = (glossaryArray, text) => {
+        const matches = _.map(glossaryArray, ( elem ) => (elem.raw_segment) ? elem.raw_segment: elem.segment);
+        let re;
+        try {
+            re = new RegExp( '\\b(' + matches.join('|') + ')\\b', "gi" );
+            //If source languace is Cyrillic or CJK
+            if ( config.isCJK) {
+                re = new RegExp( '(' + matches.join('|') + ')', "gi" );
+            }
+        } catch ( e ) {
+            return null;
+        }
+        return re;
+    };
+
+    let decorators = decoratorStructure.slice();
+    const regex = createGlossaryRegex(qaCheckGlossary, text);
+    _.remove(decorators, (decorator) => decorator.name === 'qaCheckGlossary');
+    decorators.push( generateGlossaryDecorator( regex, sid ) );
     const newDecorator = new CompoundDecorator( decorators );
     return {
         editorState: EditorState.set( editorState, {decorator: newDecorator} ),
