@@ -611,7 +611,7 @@ class Xliff_Parser {
                     //
                     // Loop on the child nodes, saveHTML concatenation
                     foreach ( $_tag->childNodes as $node ) {
-                        $_tmpTag .= $dDoc->saveHTML( $node );
+                        $_tmpTag .= $dDoc->saveXML( $node );
                     }
 
                 }
