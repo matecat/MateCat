@@ -34,7 +34,7 @@ class Editarea extends React.Component {
                 component: TagEntity,
                 props: {
                     onClick: this.onEntityClick,
-                    getSearchParams: this.getSearchParams //TODO: Make it general ?
+                    // getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
             }
         ];
@@ -65,28 +65,28 @@ class Editarea extends React.Component {
         } ;
     }
 
-    getSearchParams = () => {
-        const {inSearch,
-            currentInSearch,
-            searchParams,
-            occurrencesInSearch,
-            currentInSearchIndex
-        } = this.props.segment;
-        if ( inSearch && searchParams.target) {
-            return {
-                active: inSearch,
-                currentActive: currentInSearch,
-                textToReplace: searchParams.target,
-                params: searchParams,
-                occurrences : occurrencesInSearch.occurrences,
-                currentInSearchIndex
-            }
-        } else {
-            return {
-                active: false
-            }
-        }
-    };
+    // getSearchParams = () => {
+    //     const {inSearch,
+    //         currentInSearch,
+    //         searchParams,
+    //         occurrencesInSearch,
+    //         currentInSearchIndex
+    //     } = this.props.segment;
+    //     if ( inSearch && searchParams.target) {
+    //         return {
+    //             active: inSearch,
+    //             currentActive: currentInSearch,
+    //             textToReplace: searchParams.target,
+    //             params: searchParams,
+    //             occurrences : occurrencesInSearch.occurrences,
+    //             currentInSearchIndex
+    //         }
+    //     } else {
+    //         return {
+    //             active: false
+    //         }
+    //     }
+    // };
 
     addSearchDecorator = () => {
         let { editorState } = this.state;

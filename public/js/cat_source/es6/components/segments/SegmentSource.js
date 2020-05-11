@@ -38,7 +38,7 @@ class SegmentSource extends React.Component {
                 component: TagEntity,
                 props: {
                     onClick: this.onEntityClick,
-                    getSearchParams: this.getSearchParams
+                    // getSearchParams: this.getSearchParams
                 }
             }
         ];
@@ -63,28 +63,28 @@ class SegmentSource extends React.Component {
         this.onChange = (editorState) => this.setState({editorState});
     }
 
-    getSearchParams = () => {
-        const {inSearch,
-            currentInSearch,
-            searchParams,
-            occurrencesInSearch,
-            currentInSearchIndex
-        } = this.props.segment;
-        if ( inSearch && searchParams.source) {
-            return {
-                active: inSearch,
-                currentActive: currentInSearch,
-                textToReplace: searchParams.source,
-                params: searchParams,
-                occurrences : occurrencesInSearch.occurrences,
-                currentInSearchIndex
-            }
-        } else {
-            return {
-                active: false
-            }
-        }
-    };
+    // getSearchParams = () => {
+    //     const {inSearch,
+    //         currentInSearch,
+    //         searchParams,
+    //         occurrencesInSearch,
+    //         currentInSearchIndex
+    //     } = this.props.segment;
+    //     if ( inSearch && searchParams.source) {
+    //         return {
+    //             active: inSearch,
+    //             currentActive: currentInSearch,
+    //             textToReplace: searchParams.source,
+    //             params: searchParams,
+    //             occurrences : occurrencesInSearch.occurrences,
+    //             currentInSearchIndex
+    //         }
+    //     } else {
+    //         return {
+    //             active: false
+    //         }
+    //     }
+    // };
 
     // Restore tagged source in draftJS after GuessTag
     setTaggedSource = (sid) => {
