@@ -8,6 +8,11 @@ import {
     CompositeDecorator
 } from 'draft-js';
 
+import _ from 'lodash';
+import SearchHighlight from '../../SearchHighLight/SearchHighLight.component';
+import GlossaryComponent from '../../GlossaryComponent/GlossaryComponent.component';
+import CompoundDecorator from "../CompoundDecorator"
+
 
 export const tagStruct = {
     'ph': {
@@ -552,9 +557,10 @@ export const getEntitiesInFragment = (fragment, editorState) => {
 //Search
 export const activateSearch = (editorState, decoratorStructure, text, params, occurrencesInSegment, currentIndex) => {
 
-    const generateSearchDecorator = (highlightTerm, occurrences, params) => {
+    const generateSearchDecorator = (highlightTerm, occurrences, params, currentIndex) => {
         let regex = SearchUtils.getSearchRegExp(highlightTerm, params.ingnoreCase, params.exactMatch);
         return {
+            name: 'search',
             strategy: (contentBlock, callback) => {
                 if (highlightTerm !== '') {
                     findWithRegex(regex, contentBlock, occurrences, callback);
@@ -583,23 +589,72 @@ export const activateSearch = (editorState, decoratorStructure, text, params, oc
         }
     };
 
-
-    const SearchHighlight = (props) => {
-        let occurrence = _.find(props.occurrences, (occ) => occ.start === props.start);
-        if ( occurrence && occurrence.searchProgressiveIndex === currentIndex) {
-            return <span style={{backgroundColor: 'rgb(255,210,14)'}}>{props.children}</span>
-        }
-        return <span style={{backgroundColor: 'rgba(255, 255, 0, 1.0)'}}>{props.children}</span>
-    };
-
-
-
     let search = text;
     let decorators = decoratorStructure.slice();
     let occurrencesClone = _.cloneDeep(occurrencesInSegment);
-    decorators.push( generateSearchDecorator( search, occurrencesClone, params ) );
-    const newDecorator = new CompositeDecorator( decorators );
-    return EditorState.set( editorState, {decorator: newDecorator} );
+    _.remove(decorators, (decorator) => decorator.name === 'search');
+    decorators.push( generateSearchDecorator( search, occurrencesClone, params, currentIndex) );
+    // const newDecorator = new CompositeDecorator( decorators );
+    const newDecorator = new CompoundDecorator( decorators );
+    return {
+        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
+        decorators: decorators
+    }
+};
+
+//Glossary
+export const activateGlossary = (editorState, decoratorStructure, glossary, text, sid) => {
+
+    const generateGlossaryDecorator = (regex, sid) => {
+        return {
+            name: 'glossary',
+            strategy: (contentBlock, callback) => {
+                if ( regex !== '') {
+                    findWithRegex(regex, contentBlock, callback);
+                }
+            },
+            component: GlossaryComponent,
+            props: {
+                sid: sid
+            }
+        };
+    };
+
+    const findWithRegex = (regex, contentBlock, callback) => {
+        const text = contentBlock.getText();
+        let matchArr, start, end;
+        while ((matchArr = regex.exec(text)) !== null) {
+            start = matchArr.index;
+            end = start + matchArr[0].length;
+            callback(start, end);
+        }
+    };
+
+    const createGlossaryRegex = (glossaryObj, text) => {
+        const matches = _.map(glossaryObj, ( elem ) => (elem[0].raw_segment) ? elem[0].raw_segment: elem[0].segment);
+        let re;
+        try {
+            re = new RegExp( '\\b(' + matches.join('|') + ')\\b', "gi" );
+            //If source languace is Cyrillic or CJK
+            if ( config.isCJK) {
+                re = new RegExp( '(' + matches.join('|') + ')', "gi" );
+            }
+        } catch ( e ) {
+            return null;
+        }
+        return re;
+    };
+
+    let decorators = decoratorStructure.slice();
+    const regex = createGlossaryRegex(glossary, text);
+    _.remove(decorators, (decorator) => decorator.name === 'glossary');
+    decorators.push( generateGlossaryDecorator( regex, sid ) );
+    // const newDecorator = new CompositeDecorator( decorators );
+    const newDecorator = new CompoundDecorator( decorators );
+    return {
+        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
+        decorators: decorators
+    }
 };
 
 

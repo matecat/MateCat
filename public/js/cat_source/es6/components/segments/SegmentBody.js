@@ -13,8 +13,6 @@ class SegmentBody extends React.Component {
 
     constructor(props) {
         super(props);
-        this.beforeRenderOrUpdate = this.beforeRenderOrUpdate.bind(this);
-        this.afterRenderOrUpdate = this.afterRenderOrUpdate.bind(this);
         this.openStatusSegmentMenu = this.openStatusSegmentMenu.bind(this);
         this.handleClickOutside = this.handleClickOutside.bind(this);
         this.state = {
@@ -56,47 +54,6 @@ class SegmentBody extends React.Component {
             this.setState({
                 showStatusMenu: false
             });
-        }
-    }
-
-    beforeRenderOrUpdate(area) {
-        if ( area && area.length > 0 && this.checkLockTags(area) ) {
-            if (LXQ.enabled()) {
-                $.powerTip.destroy($('.tooltipa', UI.getSegmentById(this.props.segment.sid)));
-                $.powerTip.destroy($('.tooltipas', UI.getSegmentById(this.props.segment.sid)));
-            }
-        }
-    }
-
-    afterRenderOrUpdate(area, tagMismatchChanged) {
-        if ( area && area.length > 0 ) {
-            var segment = UI.getSegmentById(this.props.segment.sid);
-
-            if (LXQ.enabled()) {
-                LXQ.reloadPowertip(segment);
-            }
-            if ( this.checkLockTags(area) && tagMismatchChanged ) {
-                try {
-                    if ( this.hasSourceOrTargetTags() ) {
-                        segment.addClass( 'hasTagsToggle' );
-                        TagUtils.detectTagType( segment );
-
-                    } else {
-                        segment.removeClass( 'hasTagsToggle' );
-                    }
-
-                    if ( this.props.segment.tagMismatch && (_.size( this.props.segment.tagMismatch.source ) || _.size( this.props.segment.tagMismatch.target )) > 0 ) {
-                        TagUtils.markTagMismatch( this.props.segment.tagMismatch, this.props.segment.sid );
-                        segment.addClass( 'hasTagsAutofill' );
-                    } else {
-                        segment.removeClass( 'hasTagsAutofill' );
-                        TagUtils.removeHighlightErrorsTags(segment);
-                    }
-
-                } catch ( e ) {
-                    console.log( "Fail afterRenderOrUpdate in SegmentBody component" )
-                }
-            }
         }
     }
 
@@ -177,9 +134,6 @@ class SegmentBody extends React.Component {
                         <SegmentSource
                             segment={this.props.segment}
                             segImmutable={this.props.segImmutable}
-                            decodeTextFn={this.props.decodeTextFn}
-                            afterRenderOrUpdate={this.afterRenderOrUpdate}
-                            beforeRenderOrUpdate={this.beforeRenderOrUpdate}
                         />
                         <div className="copy" title="Copy source to target" onClick={(e)=>this.copySource(e)}>
                             <a href="#"/>
@@ -193,11 +147,8 @@ class SegmentBody extends React.Component {
                             isReviewExtended={this.props.isReviewExtended}
                             isReviewImproved={this.props.isReviewImproved}
                             reviewType={this.props.reviewType}
-                            decodeTextFn={this.props.decodeTextFn}
                             tagModesEnabled={this.props.tagModesEnabled}
                             speech2textEnabledFn={this.props.speech2textEnabledFn}
-                            afterRenderOrUpdate={this.afterRenderOrUpdate}
-                            beforeRenderOrUpdate={this.beforeRenderOrUpdate}
                             locked={this.props.locked}
                             readonly={this.props.readonly}
                             openSegment={this.props.openSegment}

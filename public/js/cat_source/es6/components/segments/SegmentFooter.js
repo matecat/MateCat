@@ -312,13 +312,15 @@ class SegmentFooter extends React.Component {
     }
 
     showMessage(sid, message) {
-        this.setState({
-            showMessage: true,
-            message: message
-        });
-        setTimeout(()=>{
-            this.setState({showMessage:false, message:''});
-        }, 7000);
+        if ( sid === this.props.segment.sid ) {
+            this.setState({
+                showMessage: true,
+                message: message
+            });
+            setTimeout(()=>{
+                this.setState({showMessage:false, message:''});
+            }, 7000);
+        }
     }
 
     handleShortcutsKeyDown(e) {

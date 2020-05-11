@@ -493,7 +493,7 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.MOUNT_TRANSLATIONS_ISSUES, this.addTranslationsIssues);
         SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
-        SegmentStore.removeListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdate);
+        SegmentStore.removeListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdateSegment);
 
         //Review
         SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
@@ -643,7 +643,6 @@ class Segment extends React.Component {
                         segment={this.props.segment}
                         segImmutable={this.props.segImmutable}
                         readonly={this.state.readonly}
-                        decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
                         enableTagProjection={this.props.enableTagProjection && !this.props.segment.tagged}

@@ -29,16 +29,22 @@ class TagEntity extends Component {
 
     highlightTag = () => {
         const {start, end, children} = this.props;
-        const {selection} = children[0].props;
+        const {selection} = children.props.children[0];
     };
 
     markSearch = (text) => {
-        let {active, currentActive, textToReplace, params} = this.props.getSearchParams();
-        if ( active && currentActive ) {
+        let {active, currentActive, textToReplace, params, occurrences, currentInSearchIndex} = this.props.getSearchParams();
+        let currentOccurrence = _.find(occurrences, (occ) => occ.searchProgressiveIndex === currentInSearchIndex);
+        let isCurrent = (currentOccurrence && currentOccurrence.matchPosition >= this.props.start && currentOccurrence.matchPosition < this.props.end);
+        if ( active ) {
             let regex = SearchUtils.getSearchRegExp(textToReplace, params.ingnoreCase, params.exactMatch);
             var parts = text.split(regex);
             for (var i = 1; i < parts.length; i += 2) {
-                parts[i] = <span key={i} style={{backgroundColor: 'rgb(255,210,14)'}}>{parts[i]}</span>;
+                if ( currentActive && isCurrent ) {
+                    parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 210 14)'}}>{parts[i]}</span>;
+                } else {
+                    parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 255 0)'}}>{parts[i]}</span>;
+                }
             }
             return parts;
         }
@@ -47,8 +53,9 @@ class TagEntity extends Component {
 
     render() {
         const {selected, tyselectionStateInputs ,showTooltip} = this.state;
-        const {decoratedText, entityKey, offsetkey, blockKey, start, end, children} = this.props;
-        const {selection, forceSelection} = children[0].props;
+        const {decoratedText, entityKey, offsetkey, blockKey, start, end} = this.props;
+        const { children } = this.props.children.props;
+        const {selection, forceSelection} = children[0];
         const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
         let text = this.markSearch(children[0].props.text);
         return <div className="tag-container" /*contentEditable="false" suppressContentEditableWarning={true}*/>
