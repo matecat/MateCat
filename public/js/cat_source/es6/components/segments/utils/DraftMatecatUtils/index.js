@@ -22,6 +22,8 @@ import {
 	decodePhTags
 } from "./textUtils"
 
+import buildFragmentFromText from "./buildFragmentFromText";
+
 
 const DraftMatecatUtils = {
 	// Text utils
@@ -43,6 +45,7 @@ const DraftMatecatUtils = {
 	insertFragment,
 	duplicateFragment,
 	getEntitiesInFragment,
+	buildFragmentFromText,
 	// Segment Utils
 	encodeContent,
 	decodeSegment,
