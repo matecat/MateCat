@@ -60,7 +60,7 @@ class SegmentSource extends React.Component {
             editAreaClasses : ['targetarea'],
             tagRange: tagRange
         };
-        this.onChange = (editorState) => this.setState({editorState});
+        this.onChange = () => {console.log('Source is not editable!')}
     }
 
     // getSearchParams = () => {
@@ -272,19 +272,20 @@ class SegmentSource extends React.Component {
     render() {
 
         const {editorState} = this.state;
-        const {onChange} = this;
+        const {onChange, copyFragment} = this;
 
         let html = <div ref={(source)=>this.source=source}
                         className={"source item"}
                         tabIndex={0}
                         id={"segment-" + this.props.segment.sid +"-source"}
                         data-original={this.originalSource}
+                        onCopy={copyFragment}
                     >
             <Editor
                 editorState={editorState}
                 onChange={onChange}
                 ref={(el) => this.editor = el}
-                readOnly={true}
+                readOnly={false}
             />
         </div>;
         if ( this.props.segment.openSplit ) {
@@ -333,6 +334,27 @@ class SegmentSource extends React.Component {
         return html;
 
     }
+
+
+    copyFragment = (e) => {
+        const internalClipboard = this.editor.getClipboard();
+        const {editorState} = this.state;
+
+        if (internalClipboard) {
+            console.log('InternalClipboard ', internalClipboard)
+            const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
+
+            const fragment = JSON.stringify({
+                orderedMap: internalClipboard,
+                entitiesMap: entitiesMap
+            });
+            e.clipboardData.clearData();
+            e.clipboardData.setData('text/html', fragment);
+            e.clipboardData.setData('text/plain', fragment);
+            console.log("Copied -> ", e.clipboardData.getData('text/html'));
+            e.preventDefault();
+        }
+    };
 }
 function getEntityStrategy(mutability, callback) {
     return function (contentBlock, callback, contentState) {
