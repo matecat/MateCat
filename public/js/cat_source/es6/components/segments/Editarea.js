@@ -176,7 +176,7 @@ class Editarea extends React.Component {
 
     render() {
         const {editorState} = this.state;
-        const {onChange, onPaste, saveFragment, putFragment} = this;
+        const {onChange, onPaste, copyFragment, pasteFragment} = this;
 
         let lang = '';
         let readonly = false;
@@ -196,13 +196,13 @@ class Editarea extends React.Component {
                     id={'segment-' + this.props.segment.sid + '-editarea'}
                     data-sid={this.props.segment.sid}
                     tabIndex="-1"
-                    onCopy={saveFragment}
+                    onCopy={copyFragment}
         >
             <Editor
                 lang={lang}
                 editorState={editorState}
                 onChange={onChange}
-                handlePastedText={putFragment}
+                handlePastedText={pasteFragment}
                 ref={(el) => this.editor = el}
                 readOnly={readonly}
             />
@@ -225,34 +225,35 @@ class Editarea extends React.Component {
     };
 
 
-    putFragment = (text, html) => {
+    pasteFragment = (text, html) => {
         const {editorState} = this.state;
         if(text) {
-            const contentState = editorState.getCurrentContent();
-            const fragmentContent = JSON.parse(text);
-            let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
+            try {
+                const fragmentContent = JSON.parse(text);
+                let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
 
-            console.log('Fragment --> ',fragment );
+                console.log('Fragment --> ',fragment );
 
-            const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
-                fragment,
-                editorState,
-                fragmentContent.entitiesMap
-            );
+                const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
+                    fragment,
+                    editorState,
+                    fragmentContent.entitiesMap
+                );
 
-            this.onChange(clipboardEditorPasted);
-            this.setState({
-                editorState: clipboardEditorPasted,
-            });
-            return true;
-        }else{
-            return false;
+                this.onChange(clipboardEditorPasted);
+                this.setState({
+                    editorState: clipboardEditorPasted,
+                });
+                return true;
+            } catch (e) {
+                return false;
+            }
         }
+        return false;
+    };
 
-    }
 
-
-    saveFragment = (e) => {
+    copyFragment = (e) => {
         const internalClipboard = this.editor.getClipboard();
         const {editorState} = this.state;
 
