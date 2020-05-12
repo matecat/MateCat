@@ -585,7 +585,6 @@ module.exports = function(grunt) {
         'concat:app',
         'concat:common',
         'concat:manage',
-        'concat:analyze',
         'concat:analyze_new',
         'concat:upload',
         'replace:version'
