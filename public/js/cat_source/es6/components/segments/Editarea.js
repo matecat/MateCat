@@ -28,12 +28,13 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
+        const {onEntityClick} = this;
         this.decoratorsStructure = [
             {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
-                    onClick: this.onEntityClick,
+                    onClick: onEntityClick,
                     // getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
             }
@@ -41,9 +42,12 @@ class Editarea extends React.Component {
         // const decorator = new CompositeDecorator(this.decoratorsStructure);
         const decorator = new CompoundDecorator(this.decoratorsStructure);
 
+        // Escape html
+        const translation =  DraftMatecatUtils.unescapeHTMLLeaveTags(this.props.translation);
+
         // If GuessTag is Enabled, clean translation from tags
         const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
-            DraftMatecatUtils.cleanSegmentString(this.props.translation) : this.props.translation;
+            DraftMatecatUtils.cleanSegmentString(translation) : translation;
 
           // Inizializza Editor State con solo testo
         const plainEditorState = EditorState.createEmpty(decorator);
@@ -271,6 +275,20 @@ class Editarea extends React.Component {
             console.log("Copied -> ", e.clipboardData.getData('text/html'));
             e.preventDefault();
         }
+    };
+
+    onEntityClick = (start, end) => {
+        const {editorState} = this.state;
+        const selectionState = editorState.getSelection();
+        let newSelection = selectionState.merge({
+            anchorOffset: start,
+            focusOffset: end,
+        });
+        const newEditorState = EditorState.forceSelection(
+            editorState,
+            newSelection,
+        );
+        this.setState({editorState: newEditorState});
     };
 }
 
