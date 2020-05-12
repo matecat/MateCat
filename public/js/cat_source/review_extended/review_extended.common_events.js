@@ -4,7 +4,7 @@
 
 if (ReviewExtended.enabled()) {
     $(document).on('files:appended', function () {
-        SegmentActions.mountTranslationIssues();
+        // SegmentActions.mountTranslationIssues();
         ReviewExtended.getSegmentsIssues();
     });
 

@@ -85,11 +85,6 @@ const SegmentActions = {
         });
     },
 
-    mountTranslationIssues: function () {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.MOUNT_TRANSLATIONS_ISSUES
-        });
-    },
     addSearchResultToSegments: function (occurrencesList, searchResultsDictionary, currentIndex, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEARCH_RESULTS,
@@ -955,7 +950,7 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
             sid: sid,
-            data: issues
+            issues: issues
         });
     },
 
