@@ -124,10 +124,10 @@ class UnitOfWork implements IUnitOfWork {
      * @throws \Exception
      */
     private function calculateIsPass( ChunkReviewStruct $chunkReview, $datum ) {
-        $lqaModelLimit                     = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
-        $chunkReview->reviewed_words_count += $datum[ 'reviewed_words_count' ];
-        $chunkReview->penalty_points       += $datum[ 'penalty_points' ];
-        $score                             = ( $chunkReview->reviewed_words_count == 0 ) ? 0 : $chunkReview->penalty_points / $chunkReview->reviewed_words_count * 1000;
+        $lqaModelLimit = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
+        $wordCount     = $chunkReview->reviewed_words_count + $datum[ 'reviewed_words_count' ];
+        $penaltyPoints = $chunkReview->penalty_points + $datum[ 'penalty_points' ];
+        $score         = ( $wordCount == 0 ) ? 0 : $penaltyPoints / $wordCount * 1000;
 
         return ( $score <= $lqaModelLimit );
     }
