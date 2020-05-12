@@ -1,0 +1,8 @@
+.qaCheckGlossaryItem {
+    display: inline-block;
+    position: relative;
+    > span {
+      background-color: #ff8734;
+      cursor: pointer;
+    }
+}

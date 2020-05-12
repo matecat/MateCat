@@ -268,11 +268,7 @@ class SegmentTarget extends React.Component {
 
     }
 
-    componentDidUpdate(prevProps) {
-        if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
-            $(this.target).find('.blacklistItem').each((index, item)=>QaBlacklist.powerTipFn(item, this.props.segment.qaCheckGlossary));
-        }
-    }
+    componentDidUpdate(prevProps) {}
 
     render() {
         let buttonsDisabled = false;

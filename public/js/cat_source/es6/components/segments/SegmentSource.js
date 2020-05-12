@@ -13,7 +13,7 @@ import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
 import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
-import { activateSearch, activateGlossary} from "./utils/DraftMatecatUtils/ContentEncoder";
+import {activateSearch, activateGlossary, activateQaCheckGlossary} from "./utils/DraftMatecatUtils/ContentEncoder";
 import {Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
@@ -145,13 +145,7 @@ class SegmentSource extends React.Component {
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
 
-    // markQaCheckGlossary(source) {
-    //     if (QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary && this.props.segment.qaCheckGlossary.length > 0) {
-    //         return QACheckGlossary.markGlossaryUnusedMatches(source, this.props.segment.qaCheckGlossary);
-    //     }
-    //     return source;
-    // }
-    //
+
     // markLexiqa(source) {
     //     let searchEnabled = this.props.segment.inSearch;
     //     if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
@@ -210,6 +204,25 @@ class SegmentSource extends React.Component {
         } );
     };
 
+    addQaCheckGlossaryDecorator = () => {
+        let { editorState } = this.state;
+        let { qaCheckGlossary, segment, sid } = this.props.segment;
+        const { editorState : newEditorState, decorators } = activateQaCheckGlossary( editorState, this.decoratorsStructure, qaCheckGlossary, segment, sid );
+        this.decoratorsStructure = decorators;
+        this.setState( {
+            editorState: newEditorState,
+        } );
+    };
+
+    removeQaCheckGlossaryDecorator = () => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'qaCheckGlossary');
+        // const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        this.setState( {
+            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
+        } );
+    };
+
     updateSourceInStore = () => {
         if ( this.state.source !== '' ) {
             const {editorState, tagRange} = this.state;
@@ -239,9 +252,6 @@ class SegmentSource extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        if ( QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary &&  this.props.segment.qaCheckGlossary.length ) {
-            $(this.source).find('.unusedGlossaryTerm').each((index, item)=>QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
-        }
         this.afterRenderActions(prevProps);
 
         //Search
@@ -264,6 +274,15 @@ class SegmentSource extends React.Component {
            this.addGlossaryDecorator();
         } else if ( _.size(prevGlossary) > 0 && ( !glossary || _.size(glossary) === 0 ) ) {
             this.removeGlossaryDecorator();
+        }
+
+        //Qa Check Glossary
+        const { qaCheckGlossary } = this.props.segment;
+        const { qaCheckGlossary : prevQaCheckGlossary } = prevProps.segment;
+        if ( qaCheckGlossary && qaCheckGlossary.length > 0 && (_.isUndefined(prevQaCheckGlossary) || !Immutable.fromJS(prevQaCheckGlossary).equals(Immutable.fromJS(qaCheckGlossary)) ) ) {
+            this.addQaCheckGlossaryDecorator();
+        } else if ( (prevQaCheckGlossary && prevQaCheckGlossary.length > 0 ) && ( !qaCheckGlossary ||  qaCheckGlossary.length === 0 ) ) {
+            this.removeQaCheckGlossaryDecorator();
         }
     }
 
