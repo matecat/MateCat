@@ -6,12 +6,9 @@ import React  from 'react';
 import Immutable  from 'immutable';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentActions  from '../../actions/SegmentActions';
-import GlossaryUtils  from './utils/glossaryUtils';
 import QACheckGlossary  from './utils/qaCheckGlossaryUtils';
-import SearchUtils  from '../header/cattol/search/searchUtils';
 import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
-import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
 import {activateSearch, activateGlossary, activateQaCheckGlossary} from "./utils/DraftMatecatUtils/ContentEncoder";
 import {Editor, EditorState} from "draft-js";
@@ -263,7 +260,7 @@ class SegmentSource extends React.Component {
         } else if ( (prevQaCheckGlossary && prevQaCheckGlossary.length > 0 ) && ( !qaCheckGlossary ||  qaCheckGlossary.length === 0 ) ) {
             this.removeQaCheckGlossaryDecorator();
         }
-    }
+    };
 
     componentDidMount() {
         this.$source = $(this.source);

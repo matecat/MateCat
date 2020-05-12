@@ -12,6 +12,7 @@ import _ from 'lodash';
 import SearchHighlight from '../../SearchHighLight/SearchHighLight.component';
 import GlossaryComponent from '../../GlossaryComponents/GlossaryHighlight.component';
 import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component';
+import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklistHighlight.component';
 import CompoundDecorator from "../CompoundDecorator"
 
 
@@ -701,6 +702,56 @@ export const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheck
     let decorators = decoratorStructure.slice();
     const regex = createGlossaryRegex(qaCheckGlossary, text);
     _.remove(decorators, (decorator) => decorator.name === 'qaCheckGlossary');
+    decorators.push( generateGlossaryDecorator( regex, sid ) );
+    const newDecorator = new CompoundDecorator( decorators );
+    return {
+        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
+        decorators: decorators
+    }
+};
+
+//Qa check Blacklist
+export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaCheckGlossary, text, sid) => {
+
+    const generateGlossaryDecorator = (regex, sid) => {
+        return {
+            name: 'qaCheckBlacklist',
+            strategy: (contentBlock, callback) => {
+                if ( regex !== '') {
+                    findWithRegex(regex, contentBlock, callback);
+                }
+            },
+            component: QaCheckBlacklistHighlight
+        };
+    };
+
+    const findWithRegex = (regex, contentBlock, callback) => {
+        const text = contentBlock.getText();
+        let matchArr, start, end;
+        while ((matchArr = regex.exec(text)) !== null) {
+            start = matchArr.index;
+            end = start + matchArr[0].length;
+            callback(start, end);
+        }
+    };
+
+    const createGlossaryRegex = (glossaryArray) => {
+        let re;
+        try {
+            re = new RegExp( '\\b(' + glossaryArray.join('|') + ')\\b', "gi" );
+            //If source languace is Cyrillic or CJK
+            if ( config.isCJK) {
+                re = new RegExp( '(' + glossaryArray.join('|') + ')', "gi" );
+            }
+        } catch ( e ) {
+            return null;
+        }
+        return re;
+    };
+
+    let decorators = decoratorStructure.slice();
+    const regex = createGlossaryRegex(qaCheckGlossary);
+    _.remove(decorators, (decorator) => decorator.name === 'qaCheckBlacklist');
     decorators.push( generateGlossaryDecorator( regex, sid ) );
     const newDecorator = new CompoundDecorator( decorators );
     return {

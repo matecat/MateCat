@@ -7,15 +7,13 @@ import SegmentConstants  from '../../constants/SegmentConstants';
 import EditAreaConstants  from '../../constants/EditAreaConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
-import EditArea  from './utils/editarea';
-import TagUtils  from '../../utils/tagUtils';
+import QaBlacklist  from './utils/qaCheckBlacklistUtils';
 import Speech2Text from '../../utils/speech2text';
-import EventHandlersUtils  from './utils/eventsHandlersUtils';
-import TextUtils from "../../utils/textUtils";
 
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 
 import {
+    activateQaCheckBlacklist,
     activateSearch
 } from "./utils/DraftMatecatUtils/ContentEncoder";
 import {Editor, EditorState} from "draft-js";
@@ -112,6 +110,25 @@ class Editarea extends React.Component {
         } );
     };
 
+    addQaBlacklistGlossaryDecorator = () => {
+        let { editorState } = this.state;
+        let { qaBlacklistGlossary, segment, sid } = this.props.segment;
+        const { editorState : newEditorState, decorators } = activateQaCheckBlacklist( editorState, this.decoratorsStructure, qaBlacklistGlossary, segment, sid, true );
+        this.decoratorsStructure = decorators;
+        this.setState( {
+            editorState: newEditorState,
+        } );
+    };
+
+    removeQaBlacklistGlossaryDecorator = () => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'qaCheckBlacklist');
+        // const newDecorator = new CompositeDecorator( this.decoratorsStructure );
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        this.setState( {
+            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
+        } );
+    };
+
     //Receive the new translation and decode it for draftJS
     setNewTranslation = (sid, translation) => {
         if ( sid === this.props.segment.sid) {
@@ -158,6 +175,16 @@ class Editarea extends React.Component {
             this.addSearchDecorator();
         } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
             this.removeSearchDecorator();
+        }
+
+        //Qa Check Blacklist
+        const { qaBlacklistGlossary } = this.props.segment;
+        const { qaBlacklistGlossary : prevQaBlacklistGlossary } = prevProps.segment;
+        if ( qaBlacklistGlossary && qaBlacklistGlossary.length > 0 &&
+            (_.isUndefined(prevQaBlacklistGlossary) || !Immutable.fromJS(prevQaBlacklistGlossary).equals(Immutable.fromJS(qaBlacklistGlossary)) ) ) {
+            this.addQaBlacklistGlossaryDecorator();
+        } else if ((prevQaBlacklistGlossary && prevQaBlacklistGlossary.length > 0 ) && ( !qaBlacklistGlossary ||  qaBlacklistGlossary.length === 0 ) ) {
+            this.removeQaBlacklistGlossaryDecorator();
         }
     };
 
