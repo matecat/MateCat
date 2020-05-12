@@ -25,7 +25,7 @@
             UI.checkCrossLanguageSettings();
             $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
                 e.preventDefault();
-                UI.closeTMPanel();
+                UI.saveTMdata(true);
             });
 
             $(".outer-tm").click(function() {

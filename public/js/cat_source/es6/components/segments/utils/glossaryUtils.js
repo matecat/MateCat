@@ -52,7 +52,7 @@ let GlossaryUtils = {
         matches = matches.sort(function(a, b){
             return b.length - a.length;
         });
-        $.each( matches, function ( index, k ) {
+        _.each( matches, function ( k, index ) {
             let glossaryTerm_noPlaceholders = TagUtils.decodePlaceholdersToText( k, true );
 
             if ( matchesToRemove.indexOf( glossaryTerm_noPlaceholders ) != -1 ) return true ;
@@ -61,9 +61,12 @@ let GlossaryUtils = {
                 .replace( /<\//gi, '<\\/' )
                 .replace( /\(/gi, '\\(' )
                 .replace( /\)/gi, '\\)' );
-
-            let re = new RegExp( '\b'+ glossaryTerm_escaped.trim() + '\b', "gi" );
-
+            let re;
+            try {
+                re = new RegExp( '\b' + glossaryTerm_escaped.trim() + '\b', "gi" );
+            } catch ( e ) {
+                return true;
+            }
             //If source languace is Cyrillic or CJK
             if ( cleanString.match(/[\w\u0430-\u044f]+/ig) || config.isCJK) {
                 re = new RegExp( glossaryTerm_escaped.trim(), "gi" );

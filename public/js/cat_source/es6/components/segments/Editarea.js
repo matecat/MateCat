@@ -171,6 +171,13 @@ class Editarea extends React.Component {
             EventHandlersUtils.handleCopyEvent(e);
             TextUtils.removeSelectedText();
         }
+        setTimeout(()=> {
+            let textToSend = this.editAreaRef.innerHTML;
+            if ( textToSend === '' ) {
+                SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, null, textToSend);
+            }
+        });
+
     }
     onPasteEvent(e) {
         EditArea.pasteEditAreaEventHandler(e.nativeEvent);
