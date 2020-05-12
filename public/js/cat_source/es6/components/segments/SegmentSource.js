@@ -232,28 +232,7 @@ class SegmentSource extends React.Component {
         }
     };
 
-    componentDidMount() {
-        this.$source = $(this.source);
-
-        if ( this.props.segment.inSearch ) {
-            setTimeout(this.addSearchDecorator());
-        }
-
-        this.afterRenderActions();
-
-        this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType], this.openConcordance);
-        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
-
-        setTimeout(()=>this.updateSourceInStore());
-    }
-
-    componentWillUnmount() {
-        this.$source.on('keydown', this.openConcordance);
-    }
-
-    componentDidUpdate(prevProps) {
-        this.afterRenderActions(prevProps);
-
+    checkDecorators = (prevProps) => {
         //Search
         const { inSearch, searchParams, currentInSearch, currentInSearchIndex } = this.props.segment;
         if (inSearch && searchParams.source && (
@@ -271,7 +250,7 @@ class SegmentSource extends React.Component {
         const { glossary } = this.props.segment;
         const { glossary : prevGlossary } = prevProps.segment;
         if ( glossary && _.size(glossary) > 0 && (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ) ) {
-           this.addGlossaryDecorator();
+            this.addGlossaryDecorator();
         } else if ( _.size(prevGlossary) > 0 && ( !glossary || _.size(glossary) === 0 ) ) {
             this.removeGlossaryDecorator();
         }
@@ -284,6 +263,34 @@ class SegmentSource extends React.Component {
         } else if ( (prevQaCheckGlossary && prevQaCheckGlossary.length > 0 ) && ( !qaCheckGlossary ||  qaCheckGlossary.length === 0 ) ) {
             this.removeQaCheckGlossaryDecorator();
         }
+    }
+
+    componentDidMount() {
+        this.$source = $(this.source);
+
+        if ( this.props.segment.inSearch ) {
+            setTimeout(this.addSearchDecorator());
+        }
+        if ( this.props.segment.qaCheckGlossary ) {
+            setTimeout(this.addQaCheckGlossaryDecorator());
+        }
+
+        this.afterRenderActions();
+
+        this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType], this.openConcordance);
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
+
+        setTimeout(()=>this.updateSourceInStore());
+    }
+
+    componentWillUnmount() {
+        this.$source.on('keydown', this.openConcordance);
+    }
+
+    componentDidUpdate(prevProps) {
+        this.afterRenderActions(prevProps);
+
+        this.checkDecorators(prevProps);
     }
 
     allowHTML(string) {

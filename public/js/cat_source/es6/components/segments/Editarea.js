@@ -147,6 +147,20 @@ class Editarea extends React.Component {
         }
     };
 
+    checkDecorators = (prevProps) => {
+        //Search
+        if (this.props.segment.inSearch && this.props.segment.searchParams.target && (
+            (!prevProps.segment.inSearch) ||  //Before was not active
+            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(this.props.segment.searchParams))) ||//Before was active but some params change
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== this.props.segment.currentInSearch ) ||   //Before was the current
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== this.props.segment.currentInSearchIndex ) ) )   //There are more occurrences and the current change
+        {
+            this.addSearchDecorator();
+        } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
+            this.removeSearchDecorator();
+        }
+    };
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
@@ -166,16 +180,9 @@ class Editarea extends React.Component {
     // getSnapshotBeforeUpdate(prevProps) {}
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.props.segment.inSearch && this.props.segment.searchParams.target && (
-            (!prevProps.segment.inSearch) ||  //Before was not active
-            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(this.props.segment.searchParams))) ||//Before was active but some params change
-            (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== this.props.segment.currentInSearch ) ||   //Before was the current
-            (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== this.props.segment.currentInSearchIndex ) ) )   //There are more occurrences and the current change
-        {
-            this.addSearchDecorator();
-        } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
-            this.removeSearchDecorator();
-        }
+
+        this.checkDecorators(prevProps);
+
     }
 
     render() {
