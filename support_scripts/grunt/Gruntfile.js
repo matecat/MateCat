@@ -285,15 +285,6 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'manage.js'
             },
-            analyze: {
-                src: [
-                    basePath + 'analyze_old.js',
-                    basePath + 'forcedelivery.js',
-                    basePath + 'outsource_old.js',
-                    basePath + 'cat_source/es6/ajax_utils/*.js'
-                ],
-                dest: buildPath + 'analyze_old.js'
-            },
             analyze_new: {
                 src: [
                     basePath + 'analyze.js',
