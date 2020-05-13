@@ -248,13 +248,13 @@ class TagsMenu extends React.Component {
             }
         }
         let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(TextUtils.htmlEncode(this.state.filter)) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
-        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\\/span>)(' + tag + ')*(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
+        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\\/span>)(' + tag.trim() + ').*?(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
 
         editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
         editareaClone.find('.tag-autocomplete-endcursor').after(editareaClone.find('.tag-autocomplete-endcursor').html());
         editareaClone.find('.tag-autocomplete-endcursor').html('');
 
-        // editareaClone.html(editareaClone.html().replace(regStartTarget, '$2$3$1'));
+        editareaClone.html(editareaClone.html().replace(regStartTarget, '$2$3$1'));
         this.state.filter !== "" && editareaClone.html(editareaClone.html().replace(regeExp, '$2'));
 
         editareaClone.html(editareaClone.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
