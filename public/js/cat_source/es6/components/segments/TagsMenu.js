@@ -248,7 +248,7 @@ class TagsMenu extends React.Component {
             }
         }
         let regeExp = this.state.filter !== "" && new RegExp('(' + escapeStringRegexp(TextUtils.htmlEncode(this.state.filter)) +')?(<span class="tag-autocomplete-endcursor">)', 'gi');
-        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\\/span>)(<span.*?<\\/span>)*(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
+        let regStartTarget = new RegExp('(<span class="tag-autocomplete-endcursor"><\\/span>)(' + tag + ')*(&lt;)+'+ TextUtils.htmlEncode(this.state.filter), 'gi');
 
         editareaClone.find('.rangySelectionBoundary').before(editareaClone.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
         editareaClone.find('.tag-autocomplete-endcursor').after(editareaClone.find('.tag-autocomplete-endcursor').html());
