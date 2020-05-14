@@ -6,17 +6,21 @@ import React  from 'react';
 import Immutable  from 'immutable';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentActions  from '../../actions/SegmentActions';
-import QACheckGlossary  from './utils/qaCheckGlossaryUtils';
 import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
-import LXQ from '../../utils/lxq.main';
-import {activateSearch, activateGlossary, activateQaCheckGlossary} from "./utils/DraftMatecatUtils/ContentEncoder";
+import {
+    activateSearch,
+    activateGlossary,
+    activateQaCheckGlossary,
+    activateLexiqa
+} from "./utils/DraftMatecatUtils/ContentEncoder";
 import {Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import DraftMatecatUtils from "./utils/DraftMatecatUtils";
 import SegmentConstants from "../../constants/SegmentConstants";
 import CompoundDecorator from "./utils/CompoundDecorator"
+import LexiqaUtils from "../../utils/lxq.main";
 
 class SegmentSource extends React.Component {
 
@@ -220,6 +224,29 @@ class SegmentSource extends React.Component {
         } );
     };
 
+    addLexiqaDecorator = () => {
+        let { editorState } = this.state;
+        let { lexiqa, sid, decodedTranslation } = this.props.segment;
+        let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.source), decodedTranslation, true);
+        if ( ranges.length > 0 ) {
+            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, ranges, sid, true);
+            this.decoratorsStructure = decorators;
+            this.setState( {
+                editorState: newEditorState,
+            } );
+        } else {
+            this.removeLexiqaDecorator();
+        }
+    };
+
+    removeLexiqaDecorator = () => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'lexiqa');
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        this.setState( {
+            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
+        } );
+    };
+
     updateSourceInStore = () => {
         if ( this.state.source !== '' ) {
             const {editorState, tagRange} = this.state;
@@ -260,6 +287,16 @@ class SegmentSource extends React.Component {
         } else if ( (prevQaCheckGlossary && prevQaCheckGlossary.length > 0 ) && ( !qaCheckGlossary ||  qaCheckGlossary.length === 0 ) ) {
             this.removeQaCheckGlossaryDecorator();
         }
+
+        //Lexiqa
+        const { lexiqa  } = this.props.segment;
+        const { lexiqa : prevLexiqa } = prevProps.segment;
+        if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source &&
+            (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) ) ) {
+            this.addLexiqaDecorator();
+        } else if ((prevLexiqa && prevLexiqa.length > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.source ) ) {
+            this.removeLexiqaDecorator()
+        }
     };
 
     componentDidMount() {
@@ -270,6 +307,10 @@ class SegmentSource extends React.Component {
         }
         if ( this.props.segment.qaCheckGlossary ) {
             setTimeout(this.addQaCheckGlossaryDecorator());
+        }
+        const {lexiqa} = this.props.segment;
+        if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source ) {
+            setTimeout(this.addLexiqaDecorator());
         }
 
         this.afterRenderActions();

@@ -15,7 +15,6 @@ module.exports = function(grunt) {
     //     basePath + '../css/scss/segment-notes.scss',
     //     basePath + '../css/project-completion-feature.css',
     //     basePath + '../css/editlog.css',
-	//     basePath + '../css/lxq-style.css',
 	//     basePath + '../css/lexiqa.css',
     // ];
 
@@ -31,7 +30,6 @@ module.exports = function(grunt) {
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
 	    cssBase + 'jquery.powertip.min.css',
-	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
         cssBase + 'sass/*.scss',
         cssBase + 'sass/commons/*.scss',

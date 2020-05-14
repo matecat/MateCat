@@ -13,6 +13,7 @@ import SearchHighlight from '../../SearchHighLight/SearchHighLight.component';
 import GlossaryComponent from '../../GlossaryComponents/GlossaryHighlight.component';
 import QaCheckGlossaryHighlight from '../../GlossaryComponents/QaCheckGlossaryHighlight.component';
 import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklistHighlight.component';
+import LexiqaHighlight from '../../LexiqaHighlight/LexiqaHighlight.component';
 import CompoundDecorator from "../CompoundDecorator"
 
 
@@ -646,6 +647,7 @@ export const activateGlossary = (editorState, decoratorStructure, glossary, text
         }
         return re;
     };
+    console.log("Add Glossary Decorator: ", sid,  glossary);
 
     let decorators = decoratorStructure.slice();
     const regex = createGlossaryRegex(glossary, text);
@@ -684,7 +686,7 @@ export const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheck
         }
     };
 
-    const createGlossaryRegex = (glossaryArray, text) => {
+    const createGlossaryRegex = (glossaryArray) => {
         const matches = _.map(glossaryArray, ( elem ) => (elem.raw_segment) ? elem.raw_segment: elem.segment);
         let re;
         try {
@@ -698,9 +700,10 @@ export const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheck
         }
         return re;
     };
+    console.log("Add Glossary check Decorator: ", sid,  qaCheckGlossary);
 
     let decorators = decoratorStructure.slice();
-    const regex = createGlossaryRegex(qaCheckGlossary, text);
+    const regex = createGlossaryRegex(qaCheckGlossary);
     _.remove(decorators, (decorator) => decorator.name === 'qaCheckGlossary');
     decorators.push( generateGlossaryDecorator( regex, sid ) );
     const newDecorator = new CompoundDecorator( decorators );
@@ -711,9 +714,9 @@ export const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheck
 };
 
 //Qa check Blacklist
-export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaCheckGlossary, text, sid) => {
+export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaCheckGlossary) => {
 
-    const generateGlossaryDecorator = (regex, sid) => {
+    const generateGlossaryDecorator = (regex) => {
         return {
             name: 'qaCheckBlacklist',
             strategy: (contentBlock, callback) => {
@@ -750,9 +753,10 @@ export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaChec
     };
 
     let decorators = decoratorStructure.slice();
+    console.log("Add Blacklist Decorator: ", qaCheckGlossary);
     const regex = createGlossaryRegex(qaCheckGlossary);
     _.remove(decorators, (decorator) => decorator.name === 'qaCheckBlacklist');
-    decorators.push( generateGlossaryDecorator( regex, sid ) );
+    decorators.push( generateGlossaryDecorator( regex ) );
     const newDecorator = new CompoundDecorator( decorators );
     return {
         editorState: EditorState.set( editorState, {decorator: newDecorator} ),
@@ -760,4 +764,30 @@ export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaChec
     }
 };
 
+//Qa check Blacklist
+export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, sid, isSource) => {
 
+    const generateGlossaryDecorator = (warnings, sid, isSource) => {
+        return {
+            name: 'lexiqa',
+            strategy: (contentBlock, callback) => {
+                _.each(warnings, (warn)=>{ callback(warn.start, warn.end) });
+            },
+            component: LexiqaHighlight,
+            props: {
+                warnings,
+                sid,
+                isSource
+            }
+        };
+    };
+    console.log("Add Lexiqa Decorator: ", sid, lexiqaWarnings);
+    let decorators = decoratorStructure.slice();
+    _.remove(decorators, (decorator) => decorator.name === 'lexiqa');
+    decorators.push( generateGlossaryDecorator( lexiqaWarnings, sid, isSource ) );
+    const newDecorator = new CompoundDecorator( decorators );
+    return {
+        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
+        decorators: decorators
+    }
+};
