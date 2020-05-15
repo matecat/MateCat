@@ -252,7 +252,7 @@ const SegmentActions = {
                 SegmentActions.setSegmentAsTagged( sid );
                 SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
                 SegmentActions.setSegmentPropagation( sid, null, true, segment.sid );
-                SegmentActions.modifiedTranslation( sid, null, false );
+                SegmentActions.modifiedTranslation( sid, false );
             }
             SegmentActions.setAlternatives(sid, undefined);
         }
@@ -402,7 +402,7 @@ const SegmentActions = {
             let source = currentSegment.segment;
             let sid = currentSegment.sid;
             SegmentActions.replaceEditAreaTextContent( sid, source );
-            SegmentActions.modifiedTranslation( sid, null, true );
+            SegmentActions.modifiedTranslation( sid, true );
             UI.segmentQA( UI.currentSegment );
 
             if ( config.translation_matches_enabled ) {
@@ -497,16 +497,12 @@ const SegmentActions = {
             id: sid
         });
     },
-    modifiedTranslation: function (sid, fid, status, translation) {
+    modifiedTranslation: function (sid, status) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.MODIFIED_TRANSLATION,
             sid: sid,
-            fid: fid,
-            status: status,
-            translation: translation
+            status: status
         });
-        let $segment = UI.getSegmentById(sid);
-        $segment.trigger('modified');
     },
     replaceEditAreaTextContent: function(sid, text) {
         AppDispatcher.dispatch({
@@ -1042,7 +1038,7 @@ const SegmentActions = {
                 var segment = SegmentStore.getSegmentByIdToJS(item);
                 if ( segment ) {
                     SegmentActions.setStatus(item, segment.id_file, status);
-                    SegmentActions.modifiedTranslation(item, segment.id_file, false);
+                    SegmentActions.modifiedTranslation(item, false);
                     SegmentActions.disableTPOnSegment( segment )
                 }
             });

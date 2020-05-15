@@ -20,7 +20,7 @@ class SegmentFooterTabConflicts extends React.Component {
         setTimeout(()=>{
             SegmentActions.replaceEditAreaTextContent( this.props.segment.sid, text);
             SegmentActions.highlightEditarea( this.props.segment.sid );
-            SegmentActions.modifiedTranslation(this.props.segment.sid,this.props.segment.id_file,true);
+            SegmentActions.modifiedTranslation(this.props.segment.sid, true);
         });
     }
 

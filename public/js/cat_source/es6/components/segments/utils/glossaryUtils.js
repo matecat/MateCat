@@ -206,7 +206,7 @@ let GlossaryUtils = {
             var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="glossary-placeholder"></span>');
             CursorUtils.replaceSelectedHtml(translation, rangeInsert);
             var clonedElem = $( '.editor .editarea').clone();
-            SegmentActions.modifiedTranslation(segment.sid, null, true);
+            SegmentActions.modifiedTranslation(segment.sid, true);
             SegmentActions.replaceEditAreaTextContent(segment.sid, clonedElem.html());
         }
     }

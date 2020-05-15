@@ -169,8 +169,8 @@ var UI = {
             propagate: propagation,
             autoPropagation: options.autoPropagation
         }, optStr.callback);
-        SegmentActions.removeClassToSegment(options.segment_id, 'saved');
-        SegmentActions.modifiedTranslation(options.segment_id, null, false);
+
+         SegmentActions.modifiedTranslation(options.segment_id, false);
     },
 
     getSegmentId: function (segment) {

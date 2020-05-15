@@ -119,7 +119,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
                         segment: splittedSourceAr[i],
-                        decodedSource : DraftMatecatUtils.decodePhTags(segment.segment),
+                        decodedSource : DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(segment.segment)),
                         segment_hash: segment.segment_hash,
                         original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
@@ -127,9 +127,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         split_points_source: [],
                         status: status,
                         time_to_edit: "0",
-                        original_translation: (translation) ? translation : '',
+                        originalDecodedTranslation: DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(translation)),
                         translation: (translation) ? translation : '',
-                        decodedTranslation: DraftMatecatUtils.decodePhTags(translation),
+                        decodedTranslation: DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(translation)),
                         version: segment.version,
                         warning: "0",
                         warnings: {},
@@ -166,8 +166,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.currentInSearch = currentInSearch;
                 segment.occurrencesInSearch = occurrencesInSearch;
                 segment.searchParams = self.searchParams;
-                segment.decodedTranslation = DraftMatecatUtils.decodePhTags(segment.translation);
-                segment.decodedSource = DraftMatecatUtils.decodePhTags(segment.segment);
+                segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(segment.translation));
+                segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(segment.translation));
+                segment.decodedSource = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(segment.segment));
                 newSegments.push(this);
             }
 
@@ -298,10 +299,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         let segment = this._segments.get(index);
-        var trans = TextUtils.htmlEncode(this.removeLockTagsFromString(translation));
 
         //Check segment is modified
-        if ( segment.get('original_translation') === trans) {
+        if ( segment.get('originalDecodedTranslation') !== decodedTranslation) {
+            this._segments = this._segments.setIn([index, 'modified'], true);
+        } else {
             this._segments = this._segments.setIn([index, 'modified'], false);
         }
         this._segments = this._segments.setIn([index, 'translation'], translation);
@@ -315,10 +317,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'decodedSource'], decodedSource);
         this._segments = this._segments.setIn([index, 'sourceTagMap'], tagMap);
     },
-    modifiedTranslation(sid, fid, status) {
-        const index = this.getSegmentIndex(sid, fid);
+    modifiedTranslation(sid, modified) {
+        const index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        this._segments = this._segments.setIn([index, 'modified'], status);
+        this._segments = this._segments.setIn([index, 'modified'], modified);
+        if ( !modified ) {
+            let segment = this._segments.get(index);
+            this._segments = this._segments.setIn([index, 'originalDecodedTranslation'], segment.get('decodedTranslation'));
+        }
     },
     decodeSegmentsText: function () {
         let self = this;
@@ -966,10 +972,7 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.MODIFIED_TRANSLATION:
-            SegmentStore.modifiedTranslation(action.sid, action.fid, action.status);
-            if (action.translation) {
-                SegmentStore.replaceTranslation(action.sid, action.translation);
-            }
+            SegmentStore.modifiedTranslation(action.sid, action.status);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.LOCK_EDIT_AREA:
