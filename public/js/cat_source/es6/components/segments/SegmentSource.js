@@ -25,7 +25,7 @@ class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
-
+        const {onEntityClick} = this;
         this.originalSource = this.props.segment.segment;
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
@@ -37,7 +37,7 @@ class SegmentSource extends React.Component {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
-                    onClick: this.onEntityClick,
+                    onClick: onEntityClick,
                     // getSearchParams: this.getSearchParams
                 }
             }
@@ -245,6 +245,23 @@ class SegmentSource extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
 
         setTimeout(()=>this.updateSourceInStore());
+
+
+        // Todo: find a nicer solution to "unlock" the editor for copy event
+        setTimeout(()=> {
+            const {editorState} = this.state;
+            const selectionState = editorState.getSelection();
+            let newSelection = selectionState.merge({
+                anchorOffset: 0,
+                focusOffset: 0,
+            });
+            const newEditorState = EditorState.forceSelection(
+                editorState,
+                newSelection,
+            );
+            this.setState({editorState: newEditorState});
+            console.log('Selection --> ', newSelection)
+        });
     }
 
     componentWillUnmount() {
