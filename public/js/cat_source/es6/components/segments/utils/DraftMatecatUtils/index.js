@@ -23,6 +23,8 @@ import {
 } from "./textUtils"
 
 import buildFragmentFromText from "./buildFragmentFromText";
+import insertText from "./insertText";
+import updateEntityData from "./updateEntityData";
 
 
 const DraftMatecatUtils = {
@@ -41,6 +43,7 @@ const DraftMatecatUtils = {
 	linkEntities,
 	beautifyEntities,
 	applyEntityToContentBlock,
+	updateEntityData,
 	// Fragment Utils
 	insertFragment,
 	duplicateFragment,
@@ -50,7 +53,9 @@ const DraftMatecatUtils = {
 	encodeContent,
 	decodeSegment,
 	replaceOccurrences,
-	decodePhTags
+	decodePhTags,
+	// General
+	insertText
 };
 
 module.exports = DraftMatecatUtils;
