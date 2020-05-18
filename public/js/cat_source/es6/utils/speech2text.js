@@ -188,7 +188,7 @@ Speech2Text.init  = function () {
                         + Speech2Text.linebreak(Speech2Text.interimTranscript);
                     let sid = UI.getSegmentId(Speech2Text.targetElement);
                     SegmentActions.replaceEditAreaTextContent(sid, html);
-                    SegmentActions.modifiedTranslation(sid, null, true);
+                    SegmentActions.modifiedTranslation(sid, true);
                 }
             },
             linebreak: function (s) {

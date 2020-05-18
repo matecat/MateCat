@@ -15,7 +15,6 @@ module.exports = function(grunt) {
     //     basePath + '../css/scss/segment-notes.scss',
     //     basePath + '../css/project-completion-feature.css',
     //     basePath + '../css/editlog.css',
-	//     basePath + '../css/lxq-style.css',
 	//     basePath + '../css/lexiqa.css',
     // ];
 
@@ -31,7 +30,6 @@ module.exports = function(grunt) {
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
 	    cssBase + 'jquery.powertip.min.css',
-	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
         cssBase + 'sass/*.scss',
         cssBase + 'sass/commons/*.scss',
@@ -284,15 +282,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/es6/ajax_utils/*.js'
                 ],
                 dest: buildPath + 'manage.js'
-            },
-            analyze: {
-                src: [
-                    basePath + 'analyze_old.js',
-                    basePath + 'forcedelivery.js',
-                    basePath + 'outsource_old.js',
-                    basePath + 'cat_source/es6/ajax_utils/*.js'
-                ],
-                dest: buildPath + 'analyze_old.js'
             },
             analyze_new: {
                 src: [
@@ -548,7 +537,6 @@ module.exports = function(grunt) {
         'concat:app',
         'concat:common',
         'concat:manage',
-        'concat:analyze',
         'concat:analyze_new',
         'concat:upload',
         'replace:version'
@@ -573,7 +561,6 @@ module.exports = function(grunt) {
         'concat:app',
         'concat:common',
         'concat:manage',
-        'concat:analyze',
         'concat:analyze_new',
         'concat:upload',
         'replace:version'

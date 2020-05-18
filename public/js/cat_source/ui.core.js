@@ -169,8 +169,8 @@ var UI = {
             propagate: propagation,
             autoPropagation: options.autoPropagation
         }, optStr.callback);
-        SegmentActions.removeClassToSegment(options.segment_id, 'saved');
-        SegmentActions.modifiedTranslation(options.segment_id, null, false);
+
+         SegmentActions.modifiedTranslation(options.segment_id, false);
     },
 
     getSegmentId: function (segment) {
@@ -595,15 +595,10 @@ var UI = {
 				newStr += this.outerHTML;
 			}
 		});
-        if (LXQ.enabled()) {
-            $.powerTip.destroy($('.tooltipa',this.currentSegment));
-            $.powerTip.destroy($('.tooltipas',this.currentSegment));
-            CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
-            LXQ.reloadPowertip(this.currentSegment);
-        }
-        else {
-            CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
-        }
+
+
+        CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
+
 
         $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
         $('.editor .editarea .formatSelection-placeholder').remove();
@@ -886,7 +881,7 @@ var UI = {
                 }else{
                     SegmentActions.setSegmentWarnings(segment.original_sid, {}, {});
                 }
-                $(document).trigger('getWarning:local:success', { resp : d, segment: UI.getSegmentById( segment.sid )    }) ;
+                $(document).trigger('getWarning:local:success', { resp : d, segment: segment    }) ;
 			}
 		}, 'local');
 

@@ -6,20 +6,21 @@ import React  from 'react';
 import Immutable  from 'immutable';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentActions  from '../../actions/SegmentActions';
-import GlossaryUtils  from './utils/glossaryUtils';
-import QACheckGlossary  from './utils/qaCheckGlossaryUtils';
-import SearchUtils  from '../header/cattol/search/searchUtils';
 import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
-import EventHandlersUtils  from './utils/eventsHandlersUtils';
-import LXQ from '../../utils/lxq.main';
-import {activateSearch, activateGlossary, activateQaCheckGlossary} from "./utils/DraftMatecatUtils/ContentEncoder";
+import {
+    activateSearch,
+    activateGlossary,
+    activateQaCheckGlossary,
+    activateLexiqa
+} from "./utils/DraftMatecatUtils/ContentEncoder";
 import {Editor, EditorState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import DraftMatecatUtils from "./utils/DraftMatecatUtils";
 import SegmentConstants from "../../constants/SegmentConstants";
 import CompoundDecorator from "./utils/CompoundDecorator"
+import LexiqaUtils from "../../utils/lxq.main";
 
 class SegmentSource extends React.Component {
 
@@ -223,6 +224,29 @@ class SegmentSource extends React.Component {
         } );
     };
 
+    addLexiqaDecorator = () => {
+        let { editorState } = this.state;
+        let { lexiqa, sid, decodedTranslation } = this.props.segment;
+        let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.source), decodedTranslation, true);
+        if ( ranges.length > 0 ) {
+            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, ranges, sid, true);
+            this.decoratorsStructure = decorators;
+            this.setState( {
+                editorState: newEditorState,
+            } );
+        } else {
+            this.removeLexiqaDecorator();
+        }
+    };
+
+    removeLexiqaDecorator = () => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'lexiqa');
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        this.setState( {
+            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
+        } );
+    };
+
     updateSourceInStore = () => {
         if ( this.state.source !== '' ) {
             const {editorState, tagRange} = this.state;
@@ -232,11 +256,61 @@ class SegmentSource extends React.Component {
         }
     };
 
+    checkDecorators = (prevProps) => {
+        //Search
+        const { inSearch, searchParams, currentInSearch, currentInSearchIndex } = this.props.segment;
+        if (inSearch && searchParams.source && (
+            (!prevProps.segment.inSearch) ||  //Before was not active
+            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(searchParams))) ||//Before was active but some params change
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== currentInSearch ) ||   //Before was the current
+            (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== currentInSearchIndex ) ) )   //There are more occurrences and the current change
+        {
+            this.addSearchDecorator();
+        } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
+            this.removeSearchDecorator();
+        }
+
+        //Glossary
+        const { glossary } = this.props.segment;
+        const { glossary : prevGlossary } = prevProps.segment;
+        if ( glossary && _.size(glossary) > 0 && (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ) ) {
+            this.addGlossaryDecorator();
+        } else if ( _.size(prevGlossary) > 0 && ( !glossary || _.size(glossary) === 0 ) ) {
+            this.removeGlossaryDecorator();
+        }
+
+        //Qa Check Glossary
+        const { qaCheckGlossary } = this.props.segment;
+        const { qaCheckGlossary : prevQaCheckGlossary } = prevProps.segment;
+        if ( qaCheckGlossary && qaCheckGlossary.length > 0 && (_.isUndefined(prevQaCheckGlossary) || !Immutable.fromJS(prevQaCheckGlossary).equals(Immutable.fromJS(qaCheckGlossary)) ) ) {
+            this.addQaCheckGlossaryDecorator();
+        } else if ( (prevQaCheckGlossary && prevQaCheckGlossary.length > 0 ) && ( !qaCheckGlossary ||  qaCheckGlossary.length === 0 ) ) {
+            this.removeQaCheckGlossaryDecorator();
+        }
+
+        //Lexiqa
+        const { lexiqa  } = this.props.segment;
+        const { lexiqa : prevLexiqa } = prevProps.segment;
+        if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source &&
+            (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) ) ) {
+            this.addLexiqaDecorator();
+        } else if ((prevLexiqa && prevLexiqa.length > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.source ) ) {
+            this.removeLexiqaDecorator()
+        }
+    };
+
     componentDidMount() {
         this.$source = $(this.source);
 
         if ( this.props.segment.inSearch ) {
             setTimeout(this.addSearchDecorator());
+        }
+        if ( this.props.segment.qaCheckGlossary ) {
+            setTimeout(this.addQaCheckGlossaryDecorator());
+        }
+        const {lexiqa} = this.props.segment;
+        if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source ) {
+            setTimeout(this.addLexiqaDecorator());
         }
 
         this.afterRenderActions();
@@ -245,7 +319,6 @@ class SegmentSource extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
 
         setTimeout(()=>this.updateSourceInStore());
-
 
         // Todo: find a nicer solution to "unlock" the editor for copy event
         setTimeout(()=> {
@@ -271,36 +344,7 @@ class SegmentSource extends React.Component {
     componentDidUpdate(prevProps) {
         this.afterRenderActions(prevProps);
 
-        //Search
-        const { inSearch, searchParams, currentInSearch, currentInSearchIndex } = this.props.segment;
-        if (inSearch && searchParams.source && (
-            (!prevProps.segment.inSearch) ||  //Before was not active
-            (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(searchParams))) ||//Before was active but some params change
-            (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== currentInSearch ) ||   //Before was the current
-            (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== currentInSearchIndex ) ) )   //There are more occurrences and the current change
-        {
-            this.addSearchDecorator();
-        } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
-            this.removeSearchDecorator();
-        }
-
-        //Glossary
-        const { glossary } = this.props.segment;
-        const { glossary : prevGlossary } = prevProps.segment;
-        if ( glossary && _.size(glossary) > 0 && (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ) ) {
-           this.addGlossaryDecorator();
-        } else if ( _.size(prevGlossary) > 0 && ( !glossary || _.size(glossary) === 0 ) ) {
-            this.removeGlossaryDecorator();
-        }
-
-        //Qa Check Glossary
-        const { qaCheckGlossary } = this.props.segment;
-        const { qaCheckGlossary : prevQaCheckGlossary } = prevProps.segment;
-        if ( qaCheckGlossary && qaCheckGlossary.length > 0 && (_.isUndefined(prevQaCheckGlossary) || !Immutable.fromJS(prevQaCheckGlossary).equals(Immutable.fromJS(qaCheckGlossary)) ) ) {
-            this.addQaCheckGlossaryDecorator();
-        } else if ( (prevQaCheckGlossary && prevQaCheckGlossary.length > 0 ) && ( !qaCheckGlossary ||  qaCheckGlossary.length === 0 ) ) {
-            this.removeQaCheckGlossaryDecorator();
-        }
+        this.checkDecorators(prevProps);
     }
 
     allowHTML(string) {

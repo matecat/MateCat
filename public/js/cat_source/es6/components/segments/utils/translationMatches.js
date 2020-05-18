@@ -22,7 +22,7 @@ let TranslationMatches = {
             UI.registerQACheck();
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
 
-            SegmentActions.modifiedTranslation(segment.sid, segment.id_file,true);
+            SegmentActions.modifiedTranslation(segment.sid, true);
 
         }
     },

@@ -97,7 +97,6 @@ $.extend(UI, {
         $('html').trigger('start');
 
         if (LXQ.enabled()) {
-            $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();
         }
         CatToolActions.startNotifications();
