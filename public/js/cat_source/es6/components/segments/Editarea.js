@@ -39,7 +39,7 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick} = this;
+        const {onEntityClick, updateTagsInEditor} = this;
 
         this.decoratorsStructure = [
             {
@@ -81,6 +81,7 @@ class Editarea extends React.Component {
             triggerText: null
         };
         this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
+        this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 1000);
     }
 
     // getSearchParams = () => {
@@ -396,33 +397,49 @@ class Editarea extends React.Component {
             });
             editorSync.editorFocused = false;
         }
-    }
+    };
+
     onFocus() {
         editorSync.editorFocused = true;
         editorSync.inTransitionToFocus = true;
         this.setState({
             editorFocused: true,
         });
-    }
+    };
+
+
+    updateTagsInEditor = () => {
+
+        console.log('Executing updateTagsInEditor');
+        const {editorState, tagRange} = this.state;
+        let newEditorState = editorState;
+        let newTagRange = tagRange;
+        // Cerco i tag attualmente presenti nell'editor
+        // Todo: Se ci sono altre entità oltre i tag nell'editor, aggiungere l'entityType alla chiamata
+        const entities = DraftMatecatUtils.getEntities(editorState);
+        if(tagRange.length !== entities.length){
+            console.log('Aggiorno tutte le entità');
+            const lastSelection = editorState.getSelection();
+            // Aggiorna i tag presenti
+            const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
+            newTagRange = matchTag(decodedSegment); // range update
+            // Aggiorna i collegamenti tra i tag non self-closed
+            newEditorState = updateEntityData(editorState, newTagRange, lastSelection, entities);
+        }
+        this.setState({
+            editorState: newEditorState,
+            tagRange: newTagRange
+        });
+    };
 
     onChange = (editorState) =>  {
         const {displayPopover} = this.state;
-        const {closePopover} = this;
-
-        /*const lastSelection = editorState.getSelection();
-        // Aggiorna i tag presenti
-        const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
-        const currentTagRange = matchTag(decodedSegment); // range update
-        // Aggiorna i collegamenti tra i tag non self-closed
-        editorState = updateEntityData(editorState, currentTagRange, lastSelection);*/
-
-        /*this.setState({
-            editorState: editorState,
-            tagRange: currentTagRange
-        });*/
+        const {closePopover, updateTagsInEditorDebounced} = this;
 
         this.setState({
             editorState: editorState,
+        }, () => {
+            updateTagsInEditorDebounced()
         });
 
         if(displayPopover){
@@ -430,7 +447,6 @@ class Editarea extends React.Component {
         }
         setTimeout(()=>{this.updateTranslationDebounced()});
     };
-
 
     // Methods for TagMenu ---- START
     moveUpTagMenuSelection = () => {
@@ -473,7 +489,8 @@ class Editarea extends React.Component {
             editorState: editorStateWithSuggestedTag,
             displayPopover: false,
             clickedTag: selectedTag,
-            clickedOnTag: true
+            clickedOnTag: true,
+            triggerText: null
         });
     };
 
@@ -494,7 +511,10 @@ class Editarea extends React.Component {
     };
 
     closePopover = () => {
-        this.setState({displayPopover: false});
+        this.setState({
+            displayPopover: false,
+            triggerText: null
+        });
     };
 
     onTagClick = (suggestionTag) => {
@@ -508,7 +528,8 @@ class Editarea extends React.Component {
             editorFocused: true,
             clickedOnTag: true,
             clickedTag: suggestionTag,
-            displayPopover: false
+            displayPopover: false,
+            triggerText: null
         });
     };
 
