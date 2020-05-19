@@ -11,11 +11,15 @@ import {
  */
 const decodeSegment  = (editorState) => {
 
+
+    let contentState = editorState.getCurrentContent();
+    // Se non c'è niente da decodare ritorna così
+    if(!contentState.hasText()) return contentState.getPlainText();
+
     const inlineStyle = editorState.getCurrentInlineStyle();
     const entities = getEntities(editorState); //start - end
     const entityKeys =  entities.map( entity => entity.entityKey);
 
-    let contentState = editorState.getCurrentContent();
     let editorStateClone = editorState;
 
     entityKeys.forEach( key => {

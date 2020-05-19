@@ -53,11 +53,14 @@ class TagEntity extends Component {
 
     render() {
         const {selected, tyselectionStateInputs ,showTooltip} = this.state;
-        const {decoratedText, entityKey, offsetkey, blockKey, start, end, onClick} = this.props;
+        const {decoratedText, entityKey, offsetkey, blockKey, start, end, onClick, contentState} = this.props;
         const { children } = this.props.children.props;
         const {selection, forceSelection} = children[0];
         const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
         // let text = this.markSearch(children[0].props.text);
+
+        const entity = contentState.getEntity(entityKey);
+
         return <div className="tag-container"
                     contentEditable="false"
                     suppressContentEditableWarning={true}>
@@ -66,8 +69,8 @@ class TagEntity extends Component {
                   className="tag"
                   unselectable="on"
                   suppressContentEditableWarning={true}
-                /*onMouseEnter={() => tooltipToggle()}
-                onMouseLeave={() => tooltipToggle()}*/
+                onMouseEnter={() => console.log(entity.data)}
+                /*onMouseLeave={() => tooltipToggle()}*/
                   onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                 /*contentEditable="false"*/
                   onClick={() => onClick(start, end)}>

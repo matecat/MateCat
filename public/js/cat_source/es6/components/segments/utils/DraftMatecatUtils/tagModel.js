@@ -22,7 +22,8 @@ const tagSignatures = {
         isClosure: false,
         placeholder: null,
         placeholderRegex: /equiv-text="base64:(.+)"/,
-        decodeNeeded: true
+        decodeNeeded: true,
+        errorCheckAvailable: true
     },
     'g': {
         type: 'g',
@@ -33,7 +34,8 @@ const tagSignatures = {
         isClosure: false,
         placeholder: null,
         placeholderRegex: /id="(\d+)"/,
-        decodeNeeded: false
+        decodeNeeded: false,
+        errorCheckAvailable: true
     },
     'gCl': {
         type: 'gCl',
@@ -42,9 +44,10 @@ const tagSignatures = {
         closeRegex: null,
         selfClosing: false,
         isClosure: true,
-        placeholder: '<g/>',
+        placeholder: '</g>',
         placeholderRegex: null,
-        decodeNeeded: false
+        decodeNeeded: false,
+        errorCheckAvailable: true
     },
     'nbsp':{
         type: 'nbsp',
@@ -55,7 +58,8 @@ const tagSignatures = {
         isClosure: false,
         placeholder: '°',
         placeholderRegex: null,
-        decodeNeeded: false
+        decodeNeeded: false,
+        errorCheckAvailable: false
     },
     'tab':{
         type: 'tab',
@@ -66,7 +70,8 @@ const tagSignatures = {
         isClosure: false,
         placeholder: '#',
         placeholderRegex: null,
-        decodeNeeded: false
+        decodeNeeded: false,
+        errorCheckAvailable: false
     },
     'lineFeed':{
         type: 'lineFeed',
@@ -77,7 +82,8 @@ const tagSignatures = {
         isClosure: false,
         placeholder: '\\n',
         placeholderRegex: null,
-        decodeNeeded: false
+        decodeNeeded: false,
+        errorCheckAvailable: false
     },
     'carriageReturn':{
         type: 'carriageReturn',
@@ -88,7 +94,8 @@ const tagSignatures = {
         isClosure: false,
         placeholder: '\\r',
         placeholderRegex: null,
-        decodeNeeded: false
+        decodeNeeded: false,
+        errorCheckAvailable: false
     }
 };
 
@@ -109,4 +116,10 @@ function TagStruct(offset, length, type) {
     }
 }
 
-export {tagSignatures, TagStruct};
+const getErrorCheckTag = () => {
+    return Object.keys(tagSignatures).
+    filter(tagKey =>{return tagSignatures[tagKey].errorCheckAvailable}).
+    map(tagKey => {return tagSignatures[tagKey].type})
+};
+
+export {tagSignatures, TagStruct, getErrorCheckTag};
