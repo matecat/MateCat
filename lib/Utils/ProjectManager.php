@@ -2390,7 +2390,8 @@ class ProjectManager {
         // This is the fastest way I found to spot Unicode whitespaces in the string.
         // Removing this step gives a gain of 7% in speed.
         $isSpace = [];
-        if ( preg_match_all( '|[\pMc]+|u', $segment, $matches, PREG_OFFSET_CAPTURE ) ) {
+
+        if ( preg_match_all( '|[\p{Mc}]+|u', $segment, $matches, PREG_OFFSET_CAPTURE ) ) {
             foreach ( $matches[ 0 ] as $match ) {
                 // All the bytes in the matched groups are whitespaces and must be
                 // ignored in the next steps
