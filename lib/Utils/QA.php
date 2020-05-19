@@ -2143,7 +2143,7 @@ class QA {
     protected function _checkTailCRNL( $srcNodeContent, $trgNodeContent ) {
 
         $headSrcCRNL = mb_split( '[\r\n]+$', $srcNodeContent );
-        $headTrgCRNL = mb_split( '^[\r\n]+$', $trgNodeContent );
+        $headTrgCRNL = mb_split( '[\r\n]+$', $trgNodeContent );
         if ( ( count( $headSrcCRNL ) > 1 || count( $headTrgCRNL ) > 1 ) && end( $headSrcCRNL ) !== end( $headTrgCRNL ) ) {
             $this->_addError( self::ERR_CR_TAIL );
         }
