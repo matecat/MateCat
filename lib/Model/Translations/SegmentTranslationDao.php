@@ -235,15 +235,8 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         ];
 
         $db = Database::obtain();
-        try {
-            $affectedRows = $db->update( 'segment_translations', $data, $where );
-        } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
 
-            return $e->getCode() * -1;
-        }
-
-        return $affectedRows;
+        return $db->update( 'segment_translations', $data, $where );
     }
 
     /**
