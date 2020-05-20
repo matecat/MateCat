@@ -455,19 +455,19 @@ class Search extends React.Component {
                             <div className="find-list">
                                 <div className="find-element ui input">
                                     <div className="find-in-source">
-                                        <input type="text" value={this.state.search.searchSource} placeholder="Find in source"
+                                        <input type="text" tabIndex={1} value={this.state.search.searchSource} placeholder="Find in source"
                                                onChange={this.handleInputChange.bind(this, "searchSource")}
                                                ref={(input)=>this.sourceEl=input}
                                         />
                                     </div>
                                     <div className="find-exact-match">
                                         <div className="exact-match">
-                                            <input type="checkbox" checked={this.state.search.matchCase} onChange={this.handleInputChange.bind(this, "matchCase")}
+                                            <input type="checkbox" tabIndex={3} checked={this.state.search.matchCase} onChange={this.handleInputChange.bind(this, "matchCase")}
                                                    ref={(checkbox)=>this.matchCaseCheck=checkbox}/>
                                             <label> Match Case</label>
                                         </div>
                                         <div className="exact-match">
-                                            <input type="checkbox" checked={this.state.search.exactMatch} onChange={this.handleInputChange.bind(this, "exactMatch")}/>
+                                            <input type="checkbox" tabIndex={4} checked={this.state.search.exactMatch} onChange={this.handleInputChange.bind(this, "exactMatch")}/>
                                             <label> Whole word</label>
                                         </div>
                                     </div>
@@ -475,11 +475,11 @@ class Search extends React.Component {
                                 <div className="find-element-container">
                                     <div className="find-element ui input">
                                         <div className="find-in-target">
-                                            <input type="text" placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
+                                            <input type="text" tabIndex={2} placeholder="Find in target" value={this.state.search.searchTarget} onChange={this.handleInputChange.bind(this, "searchTarget")}
                                                    className={(!this.state.search.searchTarget && this.state.search.enableReplace ? 'warn' : null)}/>
                                             {this.state.showReplaceOptionsInSearch ?
                                             <div className={"enable-replace-check " + replaceCheckboxClass}>
-                                                <input type="checkbox" checked={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
+                                                <input type="checkbox" tabIndex={5} checked={this.state.search.enableReplace} onChange={this.handleInputChange.bind(this, "enableReplace")}/>
                                                 <label> Replace with</label>
                                             </div>
                                             : (null)}
