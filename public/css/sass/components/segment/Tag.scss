@@ -14,6 +14,17 @@
     margin: 1px;
     cursor: pointer;
     word-break: break-all;
+
+    &.tag-mismatch-error {
+      background-color: #fdeae2;
+      color: #E1565A;
+    }
+
+    &.tag-mismatch-warning {
+      background-color: #FFF4E3;
+      color:#FFCC01;
+    }
+
     span{
       &::selection{
         color: royalblue;
