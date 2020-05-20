@@ -74,7 +74,7 @@ class Search extends React.Component {
             featuredSearchResult: data.featuredSearchResult,
             searchReturn: true
         });
-        setTimeout(()=>SegmentActions.scrollToSegment(this.state.occurrencesList[data.featuredSearchResult]));
+        setTimeout(()=>SegmentActions.openSegment(this.state.occurrencesList[data.featuredSearchResult]));
     }
 
     updateSearch() {
