@@ -204,11 +204,9 @@ class Editarea extends React.Component {
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
-            // Todo: replicare la matchTag SENZA il ricalcolo degli id
-            const currentTagRange = matchTag(decodedSegment); // range update
-            // Todo: update tagRange with the one in this.state, withoute recompute
-            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange);
-            //Todo
+            //const currentTagRange = matchTag(decodedSegment); // range updates at every onChange
+            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, tagRange);
+            console.log('updatingTranslationInStore')
             UI.registerQACheck();
         }
     };
