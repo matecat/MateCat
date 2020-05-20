@@ -26,7 +26,7 @@ class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick} = this;
+        const {onEntityClick, getUpdatedWarnings} = this;
         this.originalSource = this.props.segment.segment;
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
@@ -39,6 +39,8 @@ class SegmentSource extends React.Component {
                 component: TagEntity,
                 props: {
                     onClick: onEntityClick,
+                    getUpdatedWarnings: getUpdatedWarnings,
+                    isTarget: false
                     // getSearchParams: this.getSearchParams
                 }
             }
@@ -450,6 +452,17 @@ class SegmentSource extends React.Component {
             e.preventDefault();
         }
     };
+
+    getUpdatedWarnings= () => {
+        const {segment: { warnings, tagMismatch, opened}} = this.props;
+        const {tagRange} = this.state;
+        return{
+            warnings : warnings,
+            tagMismatch: tagMismatch,
+            tagRange: tagRange,
+            segmentOpened: opened
+        }
+    }
 }
 function getEntityStrategy(mutability, callback) {
     return function (contentBlock, callback, contentState) {

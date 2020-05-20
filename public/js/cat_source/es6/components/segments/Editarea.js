@@ -39,14 +39,16 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, updateTagsInEditor} = this;
+        const {onEntityClick, updateTagsInEditor, getUpdatedWarnings} = this;
 
         this.decoratorsStructure = [
             {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
+                    isTarget: true,
                     onClick: onEntityClick,
+                    getUpdatedWarnings: getUpdatedWarnings,
                     // getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
             }
@@ -270,7 +272,6 @@ class Editarea extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
 
         this.checkDecorators(prevProps);
-
     }
 
     render() {
@@ -291,7 +292,6 @@ class Editarea extends React.Component {
 
         let lang = '';
         let readonly = false;
-
 
         if (this.props.segment){
             lang = config.target_rfc.toLowerCase();
@@ -407,7 +407,6 @@ class Editarea extends React.Component {
         });
     };
 
-
     updateTagsInEditor = () => {
 
         console.log('Executing updateTagsInEditor');
@@ -494,7 +493,6 @@ class Editarea extends React.Component {
         });
     };
 
-
     openPopover = (suggestions, position) => {
         // Posizione da salvare e passare al compoennte
         const popoverPosition = {
@@ -534,7 +532,6 @@ class Editarea extends React.Component {
     };
 
     // Methods for TagMenu ---- END
-
 
     onPaste = (text, html) => {
         const {editorState} = this.state;
@@ -599,7 +596,6 @@ class Editarea extends React.Component {
         }
     };
 
-
     onEntityClick = (start, end) => {
         const {editorState} = this.state;
         const selectionState = editorState.getSelection();
@@ -631,6 +627,17 @@ class Editarea extends React.Component {
             top: selectionBoundingRect.bottom - editorBoundingRect.top + selectionBoundingRect.height,
             left: leftAdjusted
         };
+    }
+
+    getUpdatedWarnings = () => {
+        const {segment: { warnings, tagMismatch, opened}} = this.props;
+        const {tagRange} = this.state;
+        return{
+            warnings : warnings,
+            tagMismatch: tagMismatch,
+            tagRange: tagRange,
+            segmentOpened: opened
+        }
     }
 }
 

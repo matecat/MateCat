@@ -12,7 +12,8 @@ class TagEntity extends Component {
                 anchorKey: '',
                 focusKey: '',
             },
-            showTooltip: false
+            showTooltip: false,
+            tagStyle: '',
         };
     }
 
@@ -51,8 +52,55 @@ class TagEntity extends Component {
     //     return text;
     // };
 
+    highlightOnWarnings = () => {
+        const {getUpdatedWarnings, contentState, entityKey, isTarget} = this.props;
+        const {warnings, tagMismatch, tagRange, segmentOpened} = getUpdatedWarnings();
+        const draftEntity = contentState.getEntity(entityKey);
+        if(!segmentOpened || !tagMismatch) return;
+        let tagStyle = '';
+        if(tagMismatch.target > 0 && isTarget){
+            let tagObject;
+            let tagInfo;
+            tagMismatch.target.forEach(tagString => {
+                //tagObject = DraftMatecatUtils.tagFromString(tagString);
+                //tagInfo = DraftMatecatUtils.decodeTagInfo(tagObject);
+                if(draftEntity.data.encodedText === tagString){
+                    tagStyle = 'tag-mismatch-error'
+                }
+            });
+        }else if(tagMismatch.source && !isTarget){
+            tagMismatch.source.forEach(tagString => {
+                if(draftEntity.data.encodedText === tagString){
+                    tagStyle = 'tag-mismatch-error'
+                }
+            });
+        }else if(tagMismatch.order && isTarget){
+            tagMismatch.order.forEach(tagString => {
+                if(draftEntity.data.encodedText === tagString){
+                    tagStyle = 'tag-mismatch-warning'
+                }
+            });
+        }
+        this.setState({
+            tagStyle: tagStyle
+        });
+    };
+
+    componentDidMount() {
+
+        this.warningCheck = setInterval(
+            () => this.highlightOnWarnings(),
+            2000
+        );
+
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.warningCheck);
+    }
+
     render() {
-        const {selected, tyselectionStateInputs ,showTooltip} = this.state;
+        const {selected, tyselectionStateInputs ,showTooltip, tagStyle} = this.state;
         const {decoratedText, entityKey, offsetkey, blockKey, start, end, onClick, contentState} = this.props;
         const { children } = this.props.children.props;
         const {selection, forceSelection} = children[0];
@@ -61,19 +109,19 @@ class TagEntity extends Component {
 
         const entity = contentState.getEntity(entityKey);
 
-        return <div className="tag-container"
+        return <div className={"tag-container"}
                     contentEditable="false"
                     suppressContentEditableWarning={true}>
             {showTooltip && <TooltipInfo/>}
             <span data-offset-key={offsetkey}
-                  className="tag"
-                  unselectable="on"
-                  suppressContentEditableWarning={true}
-                onMouseEnter={() => console.log(entity.data)}
+                className={`tag ${tagStyle}`}
+                unselectable="on"
+                suppressContentEditableWarning={true}
+                onMouseEnter={()=> console.log(entity.data)}
                 /*onMouseLeave={() => tooltipToggle()}*/
-                  onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
+                onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                 /*contentEditable="false"*/
-                  onClick={() => onClick(start, end)}>
+                onClick={() => onClick(start, end)}>
                 {children}
             </span>
             {/*<span style={{display:'none'}}>{children}</span>*/}
