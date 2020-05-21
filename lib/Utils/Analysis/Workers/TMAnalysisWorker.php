@@ -235,26 +235,16 @@ class TMAnalysisWorker extends AbstractWorker {
 
         //check the value of suggestion_match
         $tm_data[ 'suggestion_match' ] = $suggestion_match;
-
         $tm_data = $this->_iceLockCheck( $tm_data, $queueElement->params );
 
-        $updateRes = Translations_SegmentTranslationDao::setAnalysisValue( $tm_data );
-        if ( $updateRes < 0 ) {
-
+        try {
+            $updateRes = Translations_SegmentTranslationDao::setAnalysisValue( $tm_data );
+            $message = ( $updateRes == 0 ) ? "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] : "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.";
+            $this->_doLog( $message );
+        } catch (\Exception $exception){
             $this->_doLog( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}" );
             throw new ReQueueException( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}", self::ERR_REQUEUE );
-
-        } elseif ( $updateRes == 0 ) {
-
-            //There was not a fast Analysis??? Impossible.
-            $this->_doLog( "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] );
-
-        } else {
-
-            $this->_doLog( "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED." );
-
         }
-
 
         //set redis cache
         $this->_incrementAnalyzedCount( $queueElement->params->pid, $eq_words, $standard_words );

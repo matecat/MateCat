@@ -564,19 +564,25 @@ section.opened .warnings {
     left: -5.5%;
     text-align: center;
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     color: #b6b8bb;
     text-decoration: none;
     cursor: default;
     height: 100%;
     padding-bottom: 1px;
     width: 4.5%;
+
+}
+
+.slide-right .sid {
+    left: -6%;
 }
 
 .sid .txt {
     padding: 0px 3px;
     margin: 2px 0px 0 0px;
     background: $grey5;
+    display: contents;
 }
 
 section.readonly .txt input {
@@ -2164,6 +2170,9 @@ section.editor .sid {
     color: black;
     left: -5%;
 }
+section.editor.slide-right .sid {
+    left: -6%;
+}
 
 .source {
     line-height: 27px;
@@ -3303,6 +3312,15 @@ section.opened.editor .status {
         left: -5.1%;
         width: 4.5%;
     }
+    //section.editor.slide-right {
+    //    width: 71% !important;
+    //}
+    section.slide-right .sid{
+        left: -6.5%;
+    }
+    section.editor.slide-right .sid{
+        left: -6%;
+    }
 }
 
 @media screen and (max-width: 1280px) {
@@ -3430,13 +3448,35 @@ section.opened.editor .status {
         width: 44% !important
     }
 
+    section.editor {
+        width: 87%;
+        margin-left: 6%;
+    }
+
     .sid {
         width: 6%;
         left: -6.5%;
     }
     section.editor .sid {
-        left: -6.2%;
+        left: -6.5%;
         width: 6%;
+    }
+    section {
+        width: 86%;
+        margin-left: 6%;
+    }
+    section.editor.slide-right .sid {
+        left: -7%;
+        width: 6%;
+    }
+    section.editor.slide-right {
+        width: 70% !important;
+    }
+    section.slide-right {
+        width: 68% !important;
+    }
+    section.slide-right .sid {
+        left: -8%;
     }
 }
 
