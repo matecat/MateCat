@@ -11,9 +11,7 @@ const QaCheckGlossary = {
             mapped[ item.id_segment ].push( item.data );
 
         });
-        _.forOwn(mapped, function(value, key) {
-            SegmentActions.addQaCheckMatches(key, value)
-        });
+        SegmentActions.addQaCheckMatches(mapped)
     }
 };
 

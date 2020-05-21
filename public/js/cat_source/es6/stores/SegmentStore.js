@@ -580,10 +580,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'warnings'], Immutable.fromJS(warning));
         this._segments = this._segments.setIn([index, 'tagMismatch'], Immutable.fromJS(tagMismatch));
     },
-    setQACheckMatches(sid, matches) {
-        const index = this.getSegmentIndex(sid);
-        if ( index === -1 ) return;
-        this._segments = this._segments.setIn([index, 'qaCheckGlossary'], matches);
+    setQACheckMatches(matches) {
+        this._segments = this._segments.map((segment)=>segment.remove('qaCheckGlossary'));
+        Object.keys(matches).map(sid => {
+            let index = this.getSegmentIndex(sid);
+            if ( index === -1 ) return;
+            this._segments = this._segments.setIn([index, 'qaCheckGlossary'], matches[sid]);
+        });
+
     },
     setQABlacklistMatches(sid, matches) {
         const index = this.getSegmentIndex(sid);
@@ -1170,7 +1174,7 @@ AppDispatcher.register(function (action) {
             SegmentStore.setChoosenSuggestion(action.sid, action.index);
             break;
         case SegmentConstants.SET_QA_CHECK_MATCHES:
-            SegmentStore.setQACheckMatches(action.sid, action.matches);
+            SegmentStore.setQACheckMatches(action.matches);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.SET_QA_BLACKLIST_MATCHES:

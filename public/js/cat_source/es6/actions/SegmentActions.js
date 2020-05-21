@@ -346,11 +346,10 @@ const SegmentActions = {
             index: index
         });
     },
-    addQaCheckMatches: function(sid, matches) {
+    addQaCheckMatches: function(matches) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_QA_CHECK_MATCHES,
-            sid: sid,
-            matches: matches
+            matches: matches,
         });
     },
     addQaBlacklistMatches: function(sid, matches) {

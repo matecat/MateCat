@@ -367,7 +367,7 @@ class SegmentSource extends React.Component {
                 editorState={editorState}
                 onChange={onChange}
                 ref={(el) => this.editor = el}
-                readOnly={false}
+                readOnly={true}
             />
         </div>;
         if ( this.props.segment.openSplit ) {
