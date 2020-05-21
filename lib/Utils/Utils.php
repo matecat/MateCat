@@ -5,15 +5,32 @@ use FilesStorage\FilesStorageFactory;
 
 class Utils {
 
+    public static function getSourcePageFromReferer() {
+        return self::returnSourcePageAsInt(parse_url( @$_SERVER[ 'HTTP_REFERER' ] ));
+    }
+
+
     /**
      * @return int
      */
     public static function getSourcePage() {
-        $_from_url  = parse_url( @$_SERVER[ 'REQUEST_URI' ] );
+        return self::returnSourcePageAsInt(parse_url( @$_SERVER[ 'REQUEST_URI' ] ));
+    }
+
+    /**
+     * @param array $url
+     *
+     * @return int
+     */
+    private static function returnSourcePageAsInt($url) {
         $sourcePage = Constants::SOURCE_PAGE_TRANSLATE;
 
+        if(!isset($url[ 'path' ])){
+            return $sourcePage;
+        }
+
         // this regex matches /revise /revise[2-9]
-        preg_match( '/revise([2-9]|\'\')?\//s', $_from_url[ 'path' ], $matches );
+        preg_match( '/revise([2-9]|\'\')?\//s', $url[ 'path' ], $matches );
 
         if ( count( $matches ) === 1 ) { // [0] => revise/
             $sourcePage = ReviewUtils::revisionNumberToSourcePage( Constants::SOURCE_PAGE_TRANSLATE );
