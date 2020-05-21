@@ -764,14 +764,18 @@ export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaChec
     }
 };
 
-//Qa check Blacklist
+//Qa check Lexiqa
 export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, sid, isSource) => {
 
     const generateGlossaryDecorator = (warnings, sid, isSource) => {
         return {
             name: 'lexiqa',
             strategy: (contentBlock, callback) => {
-                _.each(warnings, (warn)=>{ callback(warn.start, warn.end) });
+                _.each(warnings, (warn)=>{
+                    if(warn.blockKey === contentBlock.getKey()){
+                        callback(warn.start, warn.end);
+                    }
+                });
             },
             component: LexiqaHighlight,
             props: {

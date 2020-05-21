@@ -30,16 +30,17 @@ class LexiqaHighlight extends Component {
         const { children, sid } = this.props;
         const {showTooltip} = this.state;
         const warning = this.getWarning();
-        return <div className="lexiqahighlight"
-                    onMouseEnter={() => this.tooltipToggle()}
-                    onMouseLeave={() => this.tooltipToggle()}>
-            {showTooltip && warning && <LexiqaTooltipInfo messages={warning.messages}/>}
-            <span
-                style={{backgroundColor: warning.color}}
-            >
+
+        return warning ? <div className="lexiqahighlight"
+                 onMouseEnter={() => this.tooltipToggle()}
+                 onMouseLeave={() => this.tooltipToggle()}>
+                {showTooltip && warning && <LexiqaTooltipInfo messages={warning.messages}/>}
+                <span
+                    style={{backgroundColor: warning.color}}
+                >
                 {children}
             </span>
-        </div>
+            </div> : null
     };
 }
 

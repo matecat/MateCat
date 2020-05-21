@@ -27,6 +27,7 @@ import checkForMissingTags from "./utils/DraftMatecatUtils/TagMenu/checkForMissi
 import updateEntityData from "./utils/DraftMatecatUtils/updateEntityData";
 const {hasCommandModifier} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
+import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 
 
 const editorSync = {
@@ -151,9 +152,11 @@ class Editarea extends React.Component {
     addLexiqaDecorator = () => {
         let { editorState } = this.state;
         let { lexiqa, sid, decodedTranslation } = this.props.segment;
+        // passare la decoded translation con i tag <g id='1'> e non 1
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), decodedTranslation, false);
+        const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
-            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, ranges, sid, false);
+            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, updatedLexiqaWarnings, sid, false);
             this.decoratorsStructure = decorators;
             this.setState( {
                 editorState: newEditorState,

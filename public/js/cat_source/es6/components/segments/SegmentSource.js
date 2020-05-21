@@ -21,6 +21,7 @@ import DraftMatecatUtils from "./utils/DraftMatecatUtils";
 import SegmentConstants from "../../constants/SegmentConstants";
 import CompoundDecorator from "./utils/CompoundDecorator"
 import LexiqaUtils from "../../utils/lxq.main";
+import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 
 class SegmentSource extends React.Component {
 
@@ -230,8 +231,9 @@ class SegmentSource extends React.Component {
         let { editorState } = this.state;
         let { lexiqa, sid, decodedTranslation } = this.props.segment;
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.source), decodedTranslation, true);
+        const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
-            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, ranges, sid, true);
+            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, updatedLexiqaWarnings, sid, true);
             this.decoratorsStructure = decorators;
             this.setState( {
                 editorState: newEditorState,
@@ -335,7 +337,6 @@ class SegmentSource extends React.Component {
                 newSelection,
             );
             this.setState({editorState: newEditorState});
-            console.log('Selection --> ', newSelection)
         });
     }
 
@@ -369,7 +370,7 @@ class SegmentSource extends React.Component {
                 editorState={editorState}
                 onChange={onChange}
                 ref={(el) => this.editor = el}
-                readOnly={false}
+                readOnly={true}
             />
         </div>;
         if ( this.props.segment.openSplit ) {
