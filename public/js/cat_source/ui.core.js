@@ -507,13 +507,13 @@ var UI = {
                 if (d.errors.length) {
                     UI.processErrors(d.errors, 'setTranslation');
                 } else {
-                    UI.detectTranslationAlternatives(d);
+                    UI.detectTranslationAlternatives(d, id_segment);
                 }
             }
         });
     },
 
-    detectTranslationAlternatives: function(d) {
+    detectTranslationAlternatives: function(d, id_segment) {
         /**
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
@@ -530,8 +530,9 @@ var UI = {
          *
          */
         var sameContentIndex = -1;
+        var segmentObj = SegmentStore.getSegmentByIdToJS(id_segment)
         $.each(d.data.editable, function(ind) {
-            if( this.translation == TextUtils.htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+            if( this.translation === segmentObj.translation ) {
                 sameContentIndex = ind;
             }
         });
@@ -540,7 +541,7 @@ var UI = {
         let sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if( this.translation == TextUtils.htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+            if( this.translation === segmentObj.translation ) {
                 sameContentIndex1 = ind;
             }
         });
@@ -553,9 +554,9 @@ var UI = {
         });
         if(numAlt) {
             // UI.renderAlternatives(d);
-            SegmentActions.setAlternatives(UI.getSegmentId(UI.currentSegment), d.data);
-            SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'alternatives');
-            SegmentActions.setTabIndex(UI.getSegmentId(UI.currentSegment), 'alternatives', numAlt);
+            SegmentActions.setAlternatives(id_segment, d.data);
+            SegmentActions.activateTab(id_segment, 'alternatives');
+            SegmentActions.setTabIndex(id_segment, 'alternatives', numAlt);
         }
     },
 
