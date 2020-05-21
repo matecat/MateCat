@@ -4,6 +4,7 @@ import SegmentUtils from '../../../utils/segmentUtils';
 import CommonUtils from '../../../utils/commonUtils';
 import OfflineUtils from '../../../utils/offlineUtils';
 import Speech2Text from '../../../utils/speech2text';
+import DraftMatecatUtils from "./DraftMatecatUtils";
 
 
 let TranslationMatches = {
@@ -54,11 +55,11 @@ let TranslationMatches = {
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and replace
                  * the source with the text with tags, the segment is tagged
                  */
+                var currentContribution = matches[0];
+                translation = currentContribution.translation;
                 if ( SegmentUtils.checkCurrentSegmentTPEnabled(segmentObj) ) {
-                    var currentContribution = matches[0];
                     if (parseInt(match) !== 100) {
-                        translation = currentContribution.translation;
-                        translation = TagUtils.removeAllTags(translation);
+                        translation = DraftMatecatUtils.cleanSegmentString(translation)
                     } else {
                         SegmentActions.disableTPOnSegment(segmentObj);
                     }
