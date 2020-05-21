@@ -8,7 +8,7 @@ class GlossaryHighlight extends Component {
     }
     render() {
         const { children, sid } = this.props;
-        return <span style={{borderBottom: '1px dotted #c0c', cursor: 'pointer'}}
+        return <span className={'glossaryItem'} style={{borderBottom: '1px dotted #c0c', cursor: 'pointer'}}
                 onClick={()=>SegmentActions.activateTab(sid, 'glossary')}
         >{children}</span>
     };

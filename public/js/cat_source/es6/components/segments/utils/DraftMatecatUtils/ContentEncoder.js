@@ -764,7 +764,7 @@ export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaChec
     }
 };
 
-//Qa check Lexiqa
+//Lexiqa
 export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, sid, isSource) => {
 
     const generateGlossaryDecorator = (warnings, sid, isSource) => {
