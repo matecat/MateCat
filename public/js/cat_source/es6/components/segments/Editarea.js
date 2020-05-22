@@ -27,6 +27,7 @@ import checkForMissingTags from "./utils/DraftMatecatUtils/TagMenu/checkForMissi
 import updateEntityData from "./utils/DraftMatecatUtils/updateEntityData";
 const {hasCommandModifier} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
+import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 
 
 const editorSync = {
@@ -39,14 +40,16 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, updateTagsInEditor} = this;
+        const {onEntityClick, updateTagsInEditor, getUpdatedWarnings} = this;
 
         this.decoratorsStructure = [
             {
                 strategy: getEntityStrategy('IMMUTABLE'),
                 component: TagEntity,
                 props: {
+                    isTarget: true,
                     onClick: onEntityClick,
+                    getUpdatedWarnings: getUpdatedWarnings,
                     // getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
             }
@@ -149,9 +152,11 @@ class Editarea extends React.Component {
     addLexiqaDecorator = () => {
         let { editorState } = this.state;
         let { lexiqa, sid, decodedTranslation } = this.props.segment;
+        // passare la decoded translation con i tag <g id='1'> e non 1
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), decodedTranslation, false);
+        const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
-            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, ranges, sid, false);
+            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, updatedLexiqaWarnings, sid, false);
             this.decoratorsStructure = decorators;
             this.setState( {
                 editorState: newEditorState,
@@ -202,11 +207,9 @@ class Editarea extends React.Component {
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
-            // Todo: replicare la matchTag SENZA il ricalcolo degli id
-            const currentTagRange = matchTag(decodedSegment); // range update
-            // Todo: update tagRange with the one in this.state, withoute recompute
-            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange);
-            //Todo
+            //const currentTagRange = matchTag(decodedSegment); // range updates at every onChange
+            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, tagRange);
+            console.log('updatingTranslationInStore')
             UI.registerQACheck();
         }
     };
@@ -270,7 +273,6 @@ class Editarea extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
 
         this.checkDecorators(prevProps);
-
     }
 
     render() {
@@ -291,7 +293,6 @@ class Editarea extends React.Component {
 
         let lang = '';
         let readonly = false;
-
 
         if (this.props.segment){
             lang = config.target_rfc.toLowerCase();
@@ -407,7 +408,6 @@ class Editarea extends React.Component {
         });
     };
 
-
     updateTagsInEditor = () => {
 
         console.log('Executing updateTagsInEditor');
@@ -494,7 +494,6 @@ class Editarea extends React.Component {
         });
     };
 
-
     openPopover = (suggestions, position) => {
         // Posizione da salvare e passare al compoennte
         const popoverPosition = {
@@ -534,7 +533,6 @@ class Editarea extends React.Component {
     };
 
     // Methods for TagMenu ---- END
-
 
     onPaste = (text, html) => {
         const {editorState} = this.state;
@@ -599,7 +597,6 @@ class Editarea extends React.Component {
         }
     };
 
-
     onEntityClick = (start, end) => {
         const {editorState} = this.state;
         const selectionState = editorState.getSelection();
@@ -631,6 +628,17 @@ class Editarea extends React.Component {
             top: selectionBoundingRect.bottom - editorBoundingRect.top + selectionBoundingRect.height,
             left: leftAdjusted
         };
+    }
+
+    getUpdatedWarnings = () => {
+        const {segment: { warnings, tagMismatch, opened}} = this.props;
+        const {tagRange} = this.state;
+        return{
+            warnings : warnings,
+            tagMismatch: tagMismatch,
+            tagRange: tagRange,
+            segmentOpened: opened
+        }
     }
 }
 

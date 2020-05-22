@@ -22,12 +22,14 @@ import SegmentConstants from "../../constants/SegmentConstants";
 import CompoundDecorator from "./utils/CompoundDecorator"
 import LexiqaUtils from "../../utils/lxq.main";
 import matchTag from "./utils/DraftMatecatUtils/matchTag";
+import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
+
 
 class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick} = this;
+        const {onEntityClick, getUpdatedWarnings} = this;
         this.originalSource = this.props.segment.segment;
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
@@ -40,6 +42,8 @@ class SegmentSource extends React.Component {
                 component: TagEntity,
                 props: {
                     onClick: onEntityClick,
+                    getUpdatedWarnings: getUpdatedWarnings,
+                    isTarget: false
                     // getSearchParams: this.getSearchParams
                 }
             }
@@ -229,8 +233,9 @@ class SegmentSource extends React.Component {
         let { editorState } = this.state;
         let { lexiqa, sid, decodedTranslation } = this.props.segment;
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.source), decodedTranslation, true);
+        const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
-            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, ranges, sid, true);
+            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, updatedLexiqaWarnings, sid, true);
             this.decoratorsStructure = decorators;
             this.setState( {
                 editorState: newEditorState,
@@ -334,7 +339,6 @@ class SegmentSource extends React.Component {
                 newSelection,
             );
             this.setState({editorState: newEditorState});
-            console.log('Selection --> ', newSelection)
         });
     }
 
@@ -451,6 +455,17 @@ class SegmentSource extends React.Component {
             e.preventDefault();
         }
     };
+
+    getUpdatedWarnings= () => {
+        const {segment: { warnings, tagMismatch, opened}} = this.props;
+        const {tagRange} = this.state;
+        return{
+            warnings : warnings,
+            tagMismatch: tagMismatch,
+            tagRange: tagRange,
+            segmentOpened: opened
+        }
+    }
 }
 function getEntityStrategy(mutability, callback) {
     return function (contentBlock, callback, contentState) {

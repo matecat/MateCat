@@ -771,7 +771,11 @@ export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, 
         return {
             name: 'lexiqa',
             strategy: (contentBlock, callback) => {
-                _.each(warnings, (warn)=>{ callback(warn.start, warn.end) });
+                _.each(warnings, (warn)=>{
+                    if(warn.blockKey === contentBlock.getKey()){
+                        callback(warn.start, warn.end);
+                    }
+                });
             },
             component: LexiqaHighlight,
             props: {
