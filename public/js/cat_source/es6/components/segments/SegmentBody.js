@@ -16,7 +16,8 @@ class SegmentBody extends React.Component {
         this.openStatusSegmentMenu = this.openStatusSegmentMenu.bind(this);
         this.handleClickOutside = this.handleClickOutside.bind(this);
         this.state = {
-            showStatusMenu: false
+            showStatusMenu: false,
+            clickedTagId: null
         };
         this.isReviewExtended = this.props.reviewType === 'extended'
     }
@@ -134,6 +135,8 @@ class SegmentBody extends React.Component {
                         <SegmentSource
                             segment={this.props.segment}
                             segImmutable={this.props.segImmutable}
+                            onTagClick={this.onTagClick}
+                            clickedTagId={this.state.clickedTagId}
                         />
                         <div className="copy" title="Copy source to target" onClick={(e)=>this.copySource(e)}>
                             <a href="#"/>
@@ -154,6 +157,8 @@ class SegmentBody extends React.Component {
                             openSegment={this.props.openSegment}
                             removeSelection={this.props.removeSelection}
                             height={this.props.height}
+                            onTagClick={this.onTagClick}
+                            clickedTagId={this.state.clickedTagId}
                         />
 
                     </div>
@@ -177,6 +182,12 @@ class SegmentBody extends React.Component {
 
             </div>
         )
+    }
+
+    onTagClick = (id) =>{
+        this.setState({
+            clickedTagId: id
+        })
     }
 }
 

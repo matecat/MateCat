@@ -208,6 +208,8 @@ class SegmentTarget extends React.Component {
                     translation={translation}
                     locked={this.props.locked}
                     readonly={this.props.readonly}
+                    onTagClick={this.props.onTagClick}
+                    clickedTagId={this.props.clickedTagId}
                 />
                 { this.state.showTagsMenu ? (
 

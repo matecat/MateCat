@@ -40,7 +40,7 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, updateTagsInEditor, getUpdatedWarnings} = this;
+        const {onEntityClick, updateTagsInEditor, getUpdatedWarnings, getClickedTagId} = this;
 
         this.decoratorsStructure = [
             {
@@ -50,6 +50,7 @@ class Editarea extends React.Component {
                     isTarget: true,
                     onClick: onEntityClick,
                     getUpdatedWarnings: getUpdatedWarnings,
+                    getClickedTagId: getClickedTagId
                     // getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
             }
@@ -258,7 +259,12 @@ class Editarea extends React.Component {
         if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.target ) {
             setTimeout(this.addLexiqaDecorator());
         }
-        setTimeout(()=>this.updateTranslationInStore());
+        setTimeout(()=>{
+            this.updateTranslationInStore();
+            if(this.props.segment.opened){
+                this.editor.focus();
+            }
+        });
     }
 
     componentWillUnmount() {
@@ -520,7 +526,6 @@ class Editarea extends React.Component {
 
         const {editorState, triggerText} = this.state;
         let editorStateWithSuggestedTag = insertTag(suggestionTag, editorState, triggerText);
-        // Todo: Force to recompute every tag association
 
         this.setState({
             editorState: editorStateWithSuggestedTag,
@@ -597,8 +602,10 @@ class Editarea extends React.Component {
         }
     };
 
-    onEntityClick = (start, end) => {
+    onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
+        const {onTagClick} = this.props;
+        onTagClick(id);
         const selectionState = editorState.getSelection();
         let newSelection = selectionState.merge({
             anchorOffset: start,
@@ -609,6 +616,11 @@ class Editarea extends React.Component {
             newSelection,
         );
         this.setState({editorState: newEditorState});
+    };
+
+    getClickedTagId = () => {
+        const {clickedTagId} = this.props;
+        return clickedTagId;
     };
 
     /**

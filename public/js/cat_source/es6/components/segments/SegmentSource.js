@@ -27,7 +27,7 @@ class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, getUpdatedWarnings} = this;
+        const {onEntityClick, getUpdatedWarnings, getClickedTagId} = this;
         this.originalSource = this.props.segment.segment;
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
@@ -41,7 +41,8 @@ class SegmentSource extends React.Component {
                 props: {
                     onClick: onEntityClick,
                     getUpdatedWarnings: getUpdatedWarnings,
-                    isTarget: false
+                    getClickedTagId: getClickedTagId,
+                    isTarget: false,
                     // getSearchParams: this.getSearchParams
                 }
             }
@@ -325,7 +326,7 @@ class SegmentSource extends React.Component {
         setTimeout(()=>this.updateSourceInStore());
 
         // Todo: find a nicer solution to "unlock" the editor for copy event
-        setTimeout(()=> {
+        /*setTimeout(()=> {
             const {editorState} = this.state;
             const selectionState = editorState.getSelection();
             let newSelection = selectionState.merge({
@@ -337,7 +338,7 @@ class SegmentSource extends React.Component {
                 newSelection,
             );
             this.setState({editorState: newEditorState});
-        });
+        });*/
     }
 
     componentWillUnmount() {
@@ -420,8 +421,10 @@ class SegmentSource extends React.Component {
 
     }
 
-    onEntityClick = (start, end) => {
+    onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
+        const {onTagClick} = this.props;
+        onTagClick(id);
         const selectionState = editorState.getSelection();
         let newSelection = selectionState.merge({
             anchorOffset: start,
@@ -432,6 +435,11 @@ class SegmentSource extends React.Component {
             newSelection,
         );
         this.setState({editorState: newEditorState});
+    };
+
+    getClickedTagId = () => {
+        const {clickedTagId} = this.props;
+        return clickedTagId;
     };
 
     copyFragment = (e) => {
