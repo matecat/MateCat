@@ -25,6 +25,11 @@
       color:#FFCC01;
     }
 
+    &.clicked {
+      background-color: #e4ffdb;
+      color: #1BA61B;
+    }
+
     span{
       &::selection{
         color: royalblue;

@@ -101,27 +101,28 @@ class TagEntity extends Component {
 
     render() {
         const {selected, tyselectionStateInputs ,showTooltip, tagStyle} = this.state;
-        const {decoratedText, entityKey, offsetkey, blockKey, start, end, onClick, contentState} = this.props;
+        const {decoratedText, entityKey, offsetkey, blockKey, start, end, onClick, contentState, getClickedTagId} = this.props;
         const { children } = this.props.children.props;
         const {selection, forceSelection} = children[0];
         const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
         // let text = this.markSearch(children[0].props.text);
-
         const entity = contentState.getEntity(entityKey);
+        const clickedTagId = getClickedTagId();
+        const mirrorClickedStyle = entity.data.id && clickedTagId === entity.data.id ? 'clicked' : '';
 
         return <div className={"tag-container"}
                     contentEditable="false"
                     suppressContentEditableWarning={true}>
             {showTooltip && <TooltipInfo/>}
             <span data-offset-key={offsetkey}
-                className={`tag ${tagStyle}`}
+                className={`tag ${tagStyle} ${mirrorClickedStyle}`}
                 unselectable="on"
                 suppressContentEditableWarning={true}
                 onMouseEnter={()=> console.log(entity.data)}
                 /*onMouseLeave={() => tooltipToggle()}*/
                 onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                 /*contentEditable="false"*/
-                onClick={() => onClick(start, end)}>
+                onClick={() => onClick(start, end, entity.data.id)}>
                 {children}
             </span>
             {/*<span style={{display:'none'}}>{children}</span>*/}
