@@ -282,6 +282,8 @@ class Editarea extends React.Component {
     }
 
     render() {
+
+        const {setClickedTagId} = this.props;
         const {editorState,
             displayPopover,
             autocompleteSuggestions,
@@ -439,8 +441,13 @@ class Editarea extends React.Component {
     };
 
     onChange = (editorState) =>  {
+        const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
-        const {closePopover, updateTagsInEditorDebounced} = this;
+        const {closePopover, updateTagsInEditorDebounced, selectionIsEntity} = this;
+
+        // Se non ti trovi ancora su un'entità, annulla eventuali TagClickedId settati
+        const entityKey = selectionIsEntity(editorState);
+        if(!entityKey) {setClickedTagId();}
 
         this.setState({
             editorState: editorState,
@@ -452,6 +459,14 @@ class Editarea extends React.Component {
             closePopover();
         }
         setTimeout(()=>{this.updateTranslationDebounced()});
+    };
+
+    selectionIsEntity = (editorState) => {
+        const contentState = editorState.getCurrentContent();
+        const selectionKey = editorState.getSelection().getAnchorKey();
+        const selectionOffset =  editorState.getSelection().getAnchorOffset();
+        const block = contentState.getBlockForKey(selectionKey);
+        return block.getEntityAt(selectionOffset);
     };
 
     // Methods for TagMenu ---- START
@@ -604,8 +619,8 @@ class Editarea extends React.Component {
 
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
-        const {onTagClick} = this.props;
-        onTagClick(id);
+        const {setClickedTagId} = this.props;
+        setClickedTagId(id);
         const selectionState = editorState.getSelection();
         let newSelection = selectionState.merge({
             anchorOffset: start,

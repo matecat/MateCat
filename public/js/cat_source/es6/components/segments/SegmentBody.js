@@ -135,7 +135,7 @@ class SegmentBody extends React.Component {
                         <SegmentSource
                             segment={this.props.segment}
                             segImmutable={this.props.segImmutable}
-                            onTagClick={this.onTagClick}
+                            setClickedTagId={this.setClickedTagId}
                             clickedTagId={this.state.clickedTagId}
                         />
                         <div className="copy" title="Copy source to target" onClick={(e)=>this.copySource(e)}>
@@ -157,7 +157,7 @@ class SegmentBody extends React.Component {
                             openSegment={this.props.openSegment}
                             removeSelection={this.props.removeSelection}
                             height={this.props.height}
-                            onTagClick={this.onTagClick}
+                            setClickedTagId={this.setClickedTagId}
                             clickedTagId={this.state.clickedTagId}
                         />
 
@@ -184,7 +184,7 @@ class SegmentBody extends React.Component {
         )
     }
 
-    onTagClick = (id) =>{
+    setClickedTagId = (id=null) =>{
         this.setState({
             clickedTagId: id
         })

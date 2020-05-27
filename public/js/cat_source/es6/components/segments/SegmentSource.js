@@ -372,6 +372,7 @@ class SegmentSource extends React.Component {
                 onChange={onChange}
                 ref={(el) => this.editor = el}
                 readOnly={true}
+
             />
         </div>;
         if ( this.props.segment.openSplit ) {
@@ -423,8 +424,10 @@ class SegmentSource extends React.Component {
 
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
-        const {onTagClick} = this.props;
-        onTagClick(id);
+        const {setClickedTagId} = this.props;
+        // Highlight del tag
+        setClickedTagId(id);
+        // Selezione del tag
         const selectionState = editorState.getSelection();
         let newSelection = selectionState.merge({
             anchorOffset: start,
