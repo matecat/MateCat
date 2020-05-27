@@ -31,14 +31,24 @@ const TagBox = (props) => {
         <div style={props.displayPopover ? popoverOpen : styles.popoverClosed}>
             <div>
                 <div style={styles.headTagList}>Missing source
-                    <span style={styles.styleTagMismatch}>tags</span>
+                    <div className={"tag-container"}>
+                        <span
+                            className={`tag tag-selfclosed tag-mismatch-error`}>
+                            tags
+                        </span>
+                    </div>
                     in target
                 </div>
                 {missingSuggestions}
             </div>
             <div>
                 <div style={styles.headTagList}>All
-                    <span style={styles.styleTag}>tags</span>
+                    <div className={"tag-container"}>
+                        <span
+                            className={`tag tag-selfclosed`}>
+                            tags
+                        </span>
+                    </div>
                     available
                 </div>
                 {suggestions}
@@ -54,10 +64,11 @@ const styles = {
         border: '1px solid #dadada',
         cursor: 'pointer',
         zIndex: 1,
-        borderRadius: '2px',
+        borderRadius: '5px',
         boxSizing: 'border-box',
         maxWidth: '300px',
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.3)'
+        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.3)',
+        padding: '0 12px',
     },
     popoverClosed: {
         display: 'none',
