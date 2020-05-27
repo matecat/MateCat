@@ -511,13 +511,14 @@ const SegmentActions = {
         });
     },
 
-    updateTranslation: function(sid, translation, decodedTranslation, tagMap) {
+    updateTranslation: function(sid, translation, decodedTranslation, tagMap, missingTagsInTarget) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UPDATE_TRANSLATION,
             id: sid,
             translation: translation,
             decodedTranslation,
-            tagMap
+            tagMap,
+            missingTagsInTarget
         });
     },
     updateSource: function(sid, source, decodedSource, tagMap) {

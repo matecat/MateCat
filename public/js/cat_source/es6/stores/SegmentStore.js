@@ -300,7 +300,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'translation'], translation);
     },
-    updateTranslation(sid, translation, decodedTranslation, tagMap) {
+    updateTranslation(sid, translation, decodedTranslation, tagMap, missingTagsInTarget) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         let segment = this._segments.get(index);
@@ -314,6 +314,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'translation'], translation);
         this._segments = this._segments.setIn([index, 'decodedTranslation'], decodedTranslation);
         this._segments = this._segments.setIn([index, 'targetTagMap'], tagMap);
+        this._segments = this._segments.setIn([index, 'missingTagsInTarget'], missingTagsInTarget);
     },
     updateSource(sid, source, decodedSource, tagMap) {
         var index = this.getSegmentIndex(sid);
@@ -974,7 +975,7 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.UPDATE_TRANSLATION:
-            SegmentStore.updateTranslation(action.id, action.translation, action.decodedTranslation, action.tagMap);
+            SegmentStore.updateTranslation(action.id, action.translation, action.decodedTranslation, action.tagMap, action.missingTagsInTarget);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.UPDATE_SOURCE:

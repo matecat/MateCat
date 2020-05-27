@@ -203,15 +203,17 @@ class Editarea extends React.Component {
 
     updateTranslationInStore = () => {
         if ( this.state.translation !== '' ) {
-            const {segment} = this.props;
+            const {segment, segment: {sourceTagMap, targetTagMap}} = this.props;
             const {editorState, tagRange} = this.state;
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
+            // Add missing tag to store for highlight warnings on tags
+            const {missingTags} = checkForMissingTags(sourceTagMap, targetTagMap);
             // Match tag without compute tag id
             const currentTagRange = DraftMatecatUtils.matchTagInEditor(editorState);
             //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
-            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange);
+            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags);
             console.log('updatingTranslationInStore');
             UI.registerQACheck();
         }
@@ -660,13 +662,14 @@ class Editarea extends React.Component {
     }
 
     getUpdatedWarnings = () => {
-        const {segment: { warnings, tagMismatch, opened}} = this.props;
+        const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
         const {tagRange} = this.state;
         return{
-            warnings : warnings,
-            tagMismatch: tagMismatch,
-            tagRange: tagRange,
-            segmentOpened: opened
+            warnings,
+            tagMismatch,
+            tagRange,
+            segmentOpened: opened,
+            missingTagsInTarget
         }
     }
 }

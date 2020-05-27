@@ -466,13 +466,14 @@ class SegmentSource extends React.Component {
     };
 
     getUpdatedWarnings= () => {
-        const {segment: { warnings, tagMismatch, opened}} = this.props;
+        const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
         const {tagRange} = this.state;
         return{
-            warnings : warnings,
-            tagMismatch: tagMismatch,
-            tagRange: tagRange,
-            segmentOpened: opened
+            warnings,
+            tagMismatch,
+            tagRange,
+            segmentOpened: opened,
+            missingTagsInTarget
         }
     }
 }

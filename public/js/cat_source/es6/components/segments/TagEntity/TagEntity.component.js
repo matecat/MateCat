@@ -54,7 +54,7 @@ class TagEntity extends Component {
 
     highlightOnWarnings = () => {
         const {getUpdatedWarnings, contentState, entityKey, isTarget} = this.props;
-        const {warnings, tagMismatch, tagRange, segmentOpened} = getUpdatedWarnings();
+        const {warnings, tagMismatch, tagRange, segmentOpened, missingTagsInTarget} = getUpdatedWarnings();
         const draftEntity = contentState.getEntity(entityKey);
         if(!segmentOpened || !tagMismatch) return;
         let tagStyle = '';
@@ -69,11 +69,17 @@ class TagEntity extends Component {
                 }
             });
         }else if(tagMismatch.source && !isTarget){
-            tagMismatch.source.forEach(tagString => {
+            // Find tag and specific Tag ID in missing tags in target array
+            const missingTagInError = missingTagsInTarget.filter( tag => {
+                return tag.data.encodedText === draftEntity.data.encodedText && tag.data.id === draftEntity.data.id
+            });
+            // Array should contain only one item
+            if(missingTagInError.length === 1) tagStyle = 'tag-mismatch-error';
+            /*tagMismatch.source.forEach(tagString => {
                 if(draftEntity.data.encodedText === tagString){
                     tagStyle = 'tag-mismatch-error'
                 }
-            });
+            });*/
         }else if(tagMismatch.order && isTarget){
             tagMismatch.order.forEach(tagString => {
                 if(draftEntity.data.encodedText === tagString){
@@ -90,7 +96,7 @@ class TagEntity extends Component {
 
         this.warningCheck = setInterval(
             () => this.highlightOnWarnings(),
-            2000
+            1000
         );
 
     }

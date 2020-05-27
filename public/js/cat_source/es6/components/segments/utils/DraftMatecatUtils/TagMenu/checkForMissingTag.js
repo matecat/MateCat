@@ -4,6 +4,13 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
 
     console.log('Mappe che arrivano --> ',sourceTagMap, targetTagMap )
 
+    if(!sourceTagMap || !targetTagMap){
+        return {
+            missingTags: [],
+            sourceTags: []
+        }
+    }
+
     // Rimuovo i tag non necessari (nbsp, \t, \r, \n)
     let filteredSourceTagMap = sourceTagMap.filter( tag => {
         return getErrorCheckTag().includes(tag.type)
