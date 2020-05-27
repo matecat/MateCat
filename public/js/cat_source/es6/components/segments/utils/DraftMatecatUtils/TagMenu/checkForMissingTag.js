@@ -22,6 +22,7 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
         });
         return notFound;
     });
+/*
 
     // Prendo gli id delle chiusure presenti nei missing tag (quelle che hanno openTagId)
     // in modo ordinato in base agli offset, e rimuovo quelli che assegno dai missing tag
@@ -46,6 +47,7 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
     missingTagInTarget = missingTagInTarget.filter( missingTag => {
         return !(reassignedIds.includes(missingTag.data.id) &&  missingTag.data.openTagId)
     });
+*/
 
     //checkTags
     return {

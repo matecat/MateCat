@@ -85,7 +85,7 @@ class Editarea extends React.Component {
             triggerText: null
         };
         this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
-        this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 1000);
+        this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500);
     }
 
     // getSearchParams = () => {
@@ -208,9 +208,11 @@ class Editarea extends React.Component {
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
-            //const currentTagRange = matchTag(decodedSegment); // range updates at every onChange
-            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, tagRange);
-            console.log('updatingTranslationInStore')
+            // Match tag without compute tag id
+            const currentTagRange = DraftMatecatUtils.matchTagInEditor(editorState);
+            //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
+            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange);
+            console.log('updatingTranslationInStore');
             UI.registerQACheck();
         }
     };
@@ -431,7 +433,7 @@ class Editarea extends React.Component {
             // Aggiorna i tag presenti
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
             newTagRange = matchTag(decodedSegment); // range update
-            // Aggiorna i collegamenti tra i tag non self-closed
+            // Aggiornamento live dei collegamenti tra i tag non self-closed
             newEditorState = updateEntityData(editorState, newTagRange, lastSelection, entities);
         }
         this.setState({
@@ -451,9 +453,9 @@ class Editarea extends React.Component {
 
         this.setState({
             editorState: editorState,
-        }, () => {
+        }/*, () => {
             updateTagsInEditorDebounced()
-        });
+        }*/);
 
         if(displayPopover){
             closePopover();

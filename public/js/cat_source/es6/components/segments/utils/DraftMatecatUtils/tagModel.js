@@ -112,7 +112,8 @@ function TagStruct(offset, length, type) {
         closeTagId:null,
         openTagKey: null,
         closeTagKey: null,
-        placeholder: null
+        placeholder: null,
+        originalOffset: -1
     }
 }
 
