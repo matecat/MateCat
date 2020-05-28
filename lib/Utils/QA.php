@@ -1531,15 +1531,8 @@ class QA {
         //so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
-            // CJK = chinese, japanese, korean
-            $cjk = [
-                'ja-JP',
-                'zh-TW',
-                'ko-KO'
-            ];
-
             // CJK need special handling
-            if(in_array($this->target_seg_lang, $cjk)){
+            if(CatUtils::isCJK($this->target_seg_lang)){
                 $this->target_seg = rtrim( $this->target_seg );
                 $lastChar = substr($this->target_seg, -1);
                 $specialCKJTerminateChars = [
