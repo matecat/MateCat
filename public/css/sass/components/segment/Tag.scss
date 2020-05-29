@@ -4,7 +4,6 @@
   .tag {
     position: relative;
     display: inline-block;
-    margin: 0 10px 0 10px;
     padding: 0 4px;
     background: #002b5c;
     /*box-shadow: inset 0 0 0 2px #E5E9F1;*/
@@ -17,6 +16,7 @@
     word-break: break-all;
 
     &.tag-open {
+      margin: 0 12px 0 5px;
       &:before {
         content: "";
         position: absolute;
@@ -31,6 +31,7 @@
     }
 
     &.tag-close {
+      margin: 0 5px 0 12px;
       &:after {
         content: "";
         position: absolute;
@@ -45,6 +46,7 @@
     }
 
     &.tag-selfclosed {
+      margin: 0 12px 0 12px;
       &:after {
         content: "";
         position: absolute;
@@ -128,46 +130,76 @@
   }
 }
 
-.tag-menu-suggestion {
-  border-bottom: 1px solid #e0e3e8;
-  padding: 8px 4px;
-  color: rgb(0, 85, 184);
-  text-overflow: ellipsis;
-  overflow: hidden;
-  width: 100%;
-  font-size: 14px;
-  white-space: nowrap;
-  cursor: pointer;
-  &.active {
-    font-weight: 700;
-  }
-}
-.tag-menu-suggestion-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: transparent;
 
-  .tag {
-    max-width: 140px;
-    .tag-placeholder {
-      display: block;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
+.tag-box {
+  .tag-box-heading {
+    width: 100%;
+    padding: 1rem 0;
+    font-weight: 700;
+    line-height: 17px;
+    border-bottom: 1px solid #e0e3e8;
+    background: #fff;
+    align-items: center;
+    cursor: default;
+  }
+
+  .all {
+    .tag-menu-suggestion {
+      &:last-child {
+        border-bottom: none;
+      }
     }
   }
-  &:hover {
-    background-color: #f2f5f7;
-    font-weight: 700;
-  }
 
-  .place-here-tips {
-    border: 1px solid #08BEEC;
-    color: #08BEEC;
-    border-radius: 2px;
-    padding: 1px 2px;
-    line-height: 1;
-    max-height: 15px;
+  .tag-menu-suggestion {
+    border-bottom: 1px solid #e0e3e8;
+    padding: 8px 0;
+    color: rgb(0, 85, 184);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+    font-size: 14px;
+    white-space: nowrap;
+    cursor: pointer;
+    &.active {
+      font-weight: 700;
+    }
+    .tag-menu-suggestion-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: transparent;
+
+      .tag {
+        max-width: 128px;
+        &.tag-close {
+          margin: 0 0 0 12px;
+        }
+        &.tag-open {
+          margin: 0 12px 0 0;
+        }
+        .tag-placeholder {
+          display: block;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
+      }
+      &:hover {
+        background-color: #f2f5f7;
+        font-weight: 700;
+      }
+
+      .place-here-tips {
+        border: 1px solid #08BEEC;
+        color: #08BEEC;
+        border-radius: 2px;
+        padding: 1px 2px;
+        line-height: 1.1;
+        max-height: 17px;
+      }
+    }
   }
 }
+
+

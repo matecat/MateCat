@@ -1,65 +1,99 @@
 import React from 'react';
+
 import TagSuggestion from "./TagSuggestion";
 
-const TagBox = (props) => {
-    // props.suggestions = { missingTag: [...], sourceTag: [...]}
-    const lastIndex = props.suggestions.missingTags ? props.suggestions.missingTags.length : 0;
+class TagBox extends React.Component  {
 
-    const missingSuggestions =  props.suggestions.missingTags ?  props.suggestions.missingTags.map((suggestion, index) => (
-        <TagSuggestion
-            key={index}
-            suggestion={suggestion}
-            onTagClick={props.onTagClick}
-            isFocused={props.focusedTagIndex === index}
-        />
-    )) : null;
+    tagBox = React.createRef();
+    childRefs = [];
 
-    const suggestions = props.suggestions.sourceTags ? props.suggestions.sourceTags.map((suggestion, index) => (
-        <TagSuggestion
-            key={index + lastIndex}
-            suggestion={suggestion}
-            onTagClick={props.onTagClick}
-            isFocused={props.focusedTagIndex === (index + lastIndex)}
-        />
-    )) : null;
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        this.scrollElementIntoViewIfNeeded(prevProps);
+    }
 
+    render() {
+        const {popoverPosition, displayPopover, suggestions, onTagClick, focusedTagIndex} = this.props;
+        const popoverOpen = Object.assign({}, popoverPosition, styles.popoverOpen);
+        const lastIndex = suggestions.missingTags ? suggestions.missingTags.length : 0;
 
+        const missingSuggestions =  suggestions.missingTags ?  suggestions.missingTags.map((suggestion, index) => {
+            this.childRefs[index] = React.createRef();
+            return <TagSuggestion
+                ref={this.childRefs[index]}
+                tabIndex={index}
+                key={index}
+                suggestion={suggestion}
+                onTagClick={onTagClick}
+                isFocused={focusedTagIndex === index}
+            />
+        }) : null;
 
-    const popoverOpen = Object.assign({}, props.popoverPosition, styles.popoverOpen)
+        const allSuggestions = suggestions.sourceTags ? suggestions.sourceTags.map((suggestion, index) => {
+            this.childRefs[index + lastIndex] = React.createRef();
+            return <TagSuggestion
+                ref={this.childRefs[index + lastIndex]}
+                tabIndex={index + lastIndex}
+                key={index + lastIndex}
+                suggestion={suggestion}
+                onTagClick={onTagClick}
+                isFocused={focusedTagIndex === (index + lastIndex)}
+            />
+        }) : null;
 
-    return (
-        <div style={props.displayPopover ? popoverOpen : styles.popoverClosed}>
-            <div>
-                <div style={styles.headTagList}>Missing source
-                    <div className={"tag-container"}>
-                        <span
-                            className={`tag tag-selfclosed tag-mismatch-error`}>
-                            tags
-                        </span>
+        return (
+            <div className={`tag-box`}
+                style={displayPopover ? popoverOpen : styles.popoverClosed}
+                ref={this.tagBox}>
+                {missingSuggestions && missingSuggestions.length > 0 &&
+                (<div className={`missing`}>
+                    <div className={`tag-box-heading`}>Missing source
+                        <div className={"tag-container"}>
+                            <span
+                                className={`tag tag-selfclosed tag-mismatch-error`}>
+                                tags
+                            </span>
+                        </div>
+                        in target
                     </div>
-                    in target
-                </div>
-                {missingSuggestions}
-            </div>
-            <div>
-                <div style={styles.headTagList}>All
-                    <div className={"tag-container"}>
-                        <span
-                            className={`tag tag-selfclosed`}>
-                            tags
-                        </span>
+                    {missingSuggestions}
+                </div>)}
+                <div className={`all`}>
+                    <div className={`tag-box-heading`}>All
+                        <div className={"tag-container"}>
+                            <span
+                                className={`tag tag-selfclosed`}>
+                                tags
+                            </span>
+                        </div>
+                        available
                     </div>
-                    available
+                    {allSuggestions}
                 </div>
-                {suggestions}
             </div>
-        </div>
-    );
-};
+        );
+    }
+
+    scrollElementIntoViewIfNeeded = (prevProps) => {
+        const {focusedTagIndex} = this.props;
+        if(this.childRefs[focusedTagIndex] && prevProps.focusedTagIndex !== focusedTagIndex) {
+            const tabBoxClientRect = this.tagBox.current.getBoundingClientRect();
+            const activeElementClientRect = this.childRefs[focusedTagIndex].current.getBoundingClientRect();
+            if(activeElementClientRect.top < tabBoxClientRect.top || activeElementClientRect.bottom > tabBoxClientRect.bottom){
+                const top = focusedTagIndex === 0 ? 0 : this.childRefs[focusedTagIndex].current.offsetTop - 60;
+                this.tagBox.current.scrollTo({
+                    top: top,
+                    left: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }
+}
 
 const styles = {
     popoverOpen: {
         position: 'absolute',
+        maxHeight: '240px',
         background: '#fff',
         border: '1px solid #dadada',
         cursor: 'pointer',
@@ -69,6 +103,7 @@ const styles = {
         maxWidth: '300px',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.3)',
         padding: '0 12px',
+        overflowY: 'scroll'
     },
     popoverClosed: {
         display: 'none',
@@ -79,42 +114,7 @@ const styles = {
         zIndex: 1,
         borderRadius: '2px',
         width: '18rem',
-    },
-    headTagList: {
-        width: '100%',
-        padding: '1rem 1.14rem',
-        fontWeight: '700',
-        lineHeight: '17px',
-        borderTop: '1px solid #e9e3e8',
-        borderBottom: '1px solid #e0e3e8',
-        background: '#fff',
-        alignItems: 'center',
-        cursor:'default'
-    },
-    styleTagMismatch: {
-        backgroundColor: '#fdeae2',
-        boxShadow: 'inset 0 0 0 2px #f9dcd1',
-        padding: '4px 8px',
-        margin: '0 5px',
-        color: '#E1565A',
-        borderRadius: '7px',
-        fontSize: '15px',
-        fontStyle: 'italic',
-    },
-    styleTag: {
-        display: 'inline-flex',
-        background: '#F2F4F7',
-        boxShadow: 'inset 0 0 0 2px #E5E9F1',
-        borderRadius: '7px',
-        fontSize: '15px',
-        color: '#767676',
-        fontStyle: 'italic',
-        padding: '4px 8px',
-        verticalAlign: 'middle',
-        margin: '0 5px',
     }
-
-
 };
 
 export default TagBox;

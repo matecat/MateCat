@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-const TagSuggestion = (props) => {
+const TagSuggestion = React.forwardRef((props,ref) => {
 
     let tagStyle = '';
     if(props.suggestion.data.openTagId){
@@ -13,9 +13,11 @@ const TagSuggestion = (props) => {
 
     return (
         <div
-            className={`tag-menu-suggestion ${props.isFocused && `active`}`}
+            className={`tag-menu-suggestion ${props.isFocused ?  `active` : ''}`}
             onMouseDown={ () => props.onTagClick(props.suggestion) }
             style={props.isFocused ? {fontWeight: '700'} : null}
+            tabIndex={props.tabIndex}
+            ref={ref}
         >
             <div className={"tag-menu-suggestion-item"}>
                 {props.suggestion ?
@@ -30,6 +32,6 @@ const TagSuggestion = (props) => {
             </div>
         </div>
     );
-};
+});
 
 export default TagSuggestion;
