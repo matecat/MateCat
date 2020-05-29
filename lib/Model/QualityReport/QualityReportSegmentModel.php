@@ -219,7 +219,9 @@ class QualityReportSegmentModel {
                     $seg->is_pre_translated = true;
                 }
 
-                for ($i = 1; $i <= count($this->_getChunkReviews()); $i++ ) {
+                $revisionCount = (false === $this->isAnApprovedIce($seg)) ? count($this->_getChunkReviews()) : 1;
+
+                for ($i = 1; $i <= $revisionCount; $i++ ) {
                     $seg->last_revisions [] = [
                             'revision_number' => $i,
                             'translation' => $translation
@@ -234,6 +236,20 @@ class QualityReportSegmentModel {
         }
 
         return $files;
+    }
+
+    /**
+     * @param QualityReport_QualityReportSegmentStruct $qrSegmentStruct
+     *
+     * @return bool
+     */
+    private function isAnApprovedIce(QualityReport_QualityReportSegmentStruct $qrSegmentStruct) {
+        return (
+                $qrSegmentStruct->locked == 1 &&
+                $qrSegmentStruct->status === Constants_TranslationStatus::STATUS_APPROVED &&
+                $qrSegmentStruct->match_type === 'ICE' &&
+                $qrSegmentStruct->source_page == null
+        );
     }
 
     /**
