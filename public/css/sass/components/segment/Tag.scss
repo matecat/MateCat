@@ -16,7 +16,7 @@
     word-break: break-all;
 
     &.tag-open {
-      margin: 0 12px 0 5px;
+      margin: 0 8px 0 1px;
       &:before {
         content: "";
         position: absolute;
@@ -31,7 +31,7 @@
     }
 
     &.tag-close {
-      margin: 0 5px 0 12px;
+      margin: 0 1px 0 8px;
       &:after {
         content: "";
         position: absolute;
@@ -46,7 +46,7 @@
     }
 
     &.tag-selfclosed {
-      margin: 0 12px 0 12px;
+      margin: 0 8px 0 8px;
       &:after {
         content: "";
         position: absolute;
@@ -68,6 +68,16 @@
         border-left: 8px solid #002b5c;
         border-top: 8px solid transparent;
         border-bottom: 8px solid transparent;
+      }
+    }
+
+    &.tag-inactive {
+      background: #95A3B2;
+      &:before {
+        border-left-color: #95A3B2;
+      }
+      &:after {
+        border-right-color: #95A3B2;
       }
     }
 

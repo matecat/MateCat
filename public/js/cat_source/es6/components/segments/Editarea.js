@@ -40,7 +40,7 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, updateTagsInEditor, getUpdatedWarnings, getClickedTagId} = this;
+        const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo, getClickedTagId} = this;
 
         this.decoratorsStructure = [
             {
@@ -49,7 +49,7 @@ class Editarea extends React.Component {
                 props: {
                     isTarget: true,
                     onClick: onEntityClick,
-                    getUpdatedWarnings: getUpdatedWarnings,
+                    getUpdatedSegmentInfo: getUpdatedSegmentInfo,
                     getClickedTagId: getClickedTagId
                     // getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
@@ -287,7 +287,6 @@ class Editarea extends React.Component {
 
     render() {
 
-        const {setClickedTagId} = this.props;
         const {editorState,
             displayPopover,
             autocompleteSuggestions,
@@ -659,9 +658,9 @@ class Editarea extends React.Component {
             top: selectionBoundingRect.bottom - editorBoundingRect.top + selectionBoundingRect.height,
             left: leftAdjusted
         };
-    }
+    };
 
-    getUpdatedWarnings = () => {
+    getUpdatedSegmentInfo = () => {
         const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
         const {tagRange} = this.state;
         return{
