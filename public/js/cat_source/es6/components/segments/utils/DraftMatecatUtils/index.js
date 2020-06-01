@@ -25,6 +25,8 @@ import {
 import buildFragmentFromText from "./buildFragmentFromText";
 import insertText from "./insertText";
 import updateEntityData from "./updateEntityData";
+import tagFromEntity from "./tagFromEntity";
+import matchTagInEditor from "./matchTagInEditor";
 
 
 const DraftMatecatUtils = {
@@ -37,6 +39,7 @@ const DraftMatecatUtils = {
 	// Tag Utils
 	matchTag,
 	decodeTagInfo,
+	tagFromEntity,
 	// Entity Utils
 	getEntities,
 	createNewEntitiesFromMap,
@@ -44,6 +47,7 @@ const DraftMatecatUtils = {
 	beautifyEntities,
 	applyEntityToContentBlock,
 	updateEntityData,
+	matchTagInEditor,
 	// Fragment Utils
 	insertFragment,
 	duplicateFragment,

@@ -4,6 +4,18 @@ import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
 class TagEntity extends Component {
     constructor(props) {
         super(props);
+
+        const {entityKey, contentState} = this.props;
+        const entity = contentState.getEntity(entityKey);
+        let tagStyle = '';
+        if(entity.data.openTagId){
+            tagStyle = 'tag-close';
+        }else if(entity.data.closeTagId){
+            tagStyle = 'tag-open';
+        }else{
+            tagStyle = 'tag-selfclosed';
+        }
+
         this.state = {
             selected: false,
             selectionStateInputs: {
@@ -13,7 +25,8 @@ class TagEntity extends Component {
                 focusKey: '',
             },
             showTooltip: false,
-            tagStyle: '',
+            tagWarningStyle: '',
+            tagStyle
         };
     }
 
@@ -54,10 +67,10 @@ class TagEntity extends Component {
 
     highlightOnWarnings = () => {
         const {getUpdatedWarnings, contentState, entityKey, isTarget} = this.props;
-        const {warnings, tagMismatch, tagRange, segmentOpened} = getUpdatedWarnings();
+        const {warnings, tagMismatch, tagRange, segmentOpened, missingTagsInTarget} = getUpdatedWarnings();
         const draftEntity = contentState.getEntity(entityKey);
         if(!segmentOpened || !tagMismatch) return;
-        let tagStyle = '';
+        let tagWarningStyle = '';
         if(tagMismatch.target > 0 && isTarget){
             let tagObject;
             let tagInfo;
@@ -65,34 +78,38 @@ class TagEntity extends Component {
                 //tagObject = DraftMatecatUtils.tagFromString(tagString);
                 //tagInfo = DraftMatecatUtils.decodeTagInfo(tagObject);
                 if(draftEntity.data.encodedText === tagString){
-                    tagStyle = 'tag-mismatch-error'
+                    tagWarningStyle = 'tag-mismatch-error'
                 }
             });
-        }else if(tagMismatch.source && !isTarget){
-            tagMismatch.source.forEach(tagString => {
+        }else if(tagMismatch.source && !isTarget && missingTagsInTarget){
+            // Find tag and specific Tag ID in missing tags in target array
+            const missingTagInError = missingTagsInTarget.filter( tag => {
+                return tag.data.encodedText === draftEntity.data.encodedText && tag.data.id === draftEntity.data.id
+            });
+            // Array should contain only one item
+            if(missingTagInError.length === 1) tagWarningStyle = 'tag-mismatch-error';
+            /*tagMismatch.source.forEach(tagString => {
                 if(draftEntity.data.encodedText === tagString){
-                    tagStyle = 'tag-mismatch-error'
+                    tagWarningStyle = 'tag-mismatch-error'
                 }
-            });
+            });*/
         }else if(tagMismatch.order && isTarget){
             tagMismatch.order.forEach(tagString => {
                 if(draftEntity.data.encodedText === tagString){
-                    tagStyle = 'tag-mismatch-warning'
+                    tagWarningStyle = 'tag-mismatch-warning'
                 }
             });
         }
         this.setState({
-            tagStyle: tagStyle
+            tagWarningStyle: tagWarningStyle
         });
     };
 
     componentDidMount() {
-
         this.warningCheck = setInterval(
             () => this.highlightOnWarnings(),
-            2000
+            1000
         );
-
     }
 
     componentWillUnmount() {
@@ -100,28 +117,29 @@ class TagEntity extends Component {
     }
 
     render() {
-        const {selected, tyselectionStateInputs ,showTooltip, tagStyle} = this.state;
-        const {decoratedText, entityKey, offsetkey, blockKey, start, end, onClick, contentState} = this.props;
+        const {selected, tyselectionStateInputs , showTooltip, tagStyle, tagWarningStyle} = this.state;
+        const {decoratedText, entityKey, offsetkey, blockKey, start, end, onClick, contentState, getClickedTagId} = this.props;
         const { children } = this.props.children.props;
         const {selection, forceSelection} = children[0];
         const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
         // let text = this.markSearch(children[0].props.text);
-
         const entity = contentState.getEntity(entityKey);
+        const clickedTagId = getClickedTagId();
+        const mirrorClickedStyle = entity.data.id && clickedTagId === entity.data.id ? 'clicked' : '';
 
         return <div className={"tag-container"}
                     contentEditable="false"
                     suppressContentEditableWarning={true}>
             {showTooltip && <TooltipInfo/>}
             <span data-offset-key={offsetkey}
-                className={`tag ${tagStyle}`}
+                className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
                 unselectable="on"
                 suppressContentEditableWarning={true}
                 onMouseEnter={()=> console.log(entity.data)}
                 /*onMouseLeave={() => tooltipToggle()}*/
                 onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                 /*contentEditable="false"*/
-                onClick={() => onClick(start, end)}>
+                onClick={() => onClick(start, end, entity.data.id)}>
                 {children}
             </span>
             {/*<span style={{display:'none'}}>{children}</span>*/}
