@@ -19,7 +19,8 @@ import {
 	cleanSegmentString,
 	unescapeHTML,
 	unescapeHTMLLeaveTags,
-	decodePhTags
+	decodePhTags,
+	formatText
 } from "./textUtils"
 
 import buildFragmentFromText from "./buildFragmentFromText";
@@ -27,6 +28,7 @@ import insertText from "./insertText";
 import updateEntityData from "./updateEntityData";
 import tagFromEntity from "./tagFromEntity";
 import matchTagInEditor from "./matchTagInEditor";
+import getSelectedText from "./getSelectedText";
 
 
 const DraftMatecatUtils = {
@@ -36,6 +38,7 @@ const DraftMatecatUtils = {
 	getIdAttributeRegEx,
 	unescapeHTML,
 	unescapeHTMLLeaveTags,
+	formatText,
 	// Tag Utils
 	matchTag,
 	decodeTagInfo,
@@ -59,7 +62,8 @@ const DraftMatecatUtils = {
 	replaceOccurrences,
 	decodePhTags,
 	// General
-	insertText
+	insertText,
+	getSelectedText
 };
 
 module.exports = DraftMatecatUtils;
