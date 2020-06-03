@@ -134,6 +134,7 @@ class SegmentTarget extends React.Component {
 
     getTargetArea(translation) {
 
+        const {segment} = this.props;
         const {showFormatMenu} = this.state;
         const {toggleFormatMenu} = this;
 
@@ -198,9 +199,13 @@ class SegmentTarget extends React.Component {
                     </a>;
 
             }
-            if (this.props.tagModesEnabled  && UI.tagLockEnabled) {
-                tagCopyButton = <a className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target" onClick={()=>this.autoFillTagsInTarget()}/>
-
+            // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi
+            //  riga 3844 del file style.scss, ora il segmento è sempre visibile se ci mancano dei tag del target
+            if (this.props.tagModesEnabled  && segment.missingTagsInTarget && segment.missingTagsInTarget.length > 0) {
+                tagCopyButton = <a className="autofillTag"
+                                   alt="Copy missing tags from source to target"
+                                   title="Copy missing tags from source to target"
+                                   onClick={ this.editArea.addMissingSourceTagsToTarget } />
             }
 
             //Text Area

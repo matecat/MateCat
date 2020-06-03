@@ -703,6 +703,31 @@ class Editarea extends React.Component {
         });
     };
 
+    addMissingSourceTagsToTarget = () => {
+        const {segment} = this.props;
+        const {editorState} = this.state;
+        // Append missing tag at the end of the current translation string
+        let newTranslation = segment.translation;
+        let newDecodedTranslation = segment.decodedTranslation;
+        let newEditorState = editorState;
+        segment.missingTagsInTarget.forEach( tag => {
+            newTranslation += tag.data.encodedText;
+            newDecodedTranslation+= tag.data.placeholder;
+            newEditorState = DraftMatecatUtils.addTagEntityToEditor(newEditorState, tag);
+        });
+        // Append missing tags to targetTagMap
+        let segmentTargetTagMap = [...segment.targetTagMap, ...segment.missingTagsInTarget];
+        // Insert tag entity in current editor without recompute tags associations
+        this.setState({
+            editorState: newEditorState
+        });
+        //lock tags and run again getWarnings
+        setTimeout( (  )=> {
+            SegmentActions.updateTranslation(segment.sid, newTranslation, newDecodedTranslation, segmentTargetTagMap, []);
+            UI.segmentQA(UI.getSegmentById(this.props.segment.sid));
+        }, 100);
+    };
+
 }
 
 function getEntityStrategy(mutability, callback) {
