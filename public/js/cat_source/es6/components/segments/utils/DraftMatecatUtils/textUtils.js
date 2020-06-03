@@ -50,7 +50,27 @@ export const unescapeHTMLLeaveTags = (escapedHTML) => {
 };
 
 export const decodePhTags = (text) => {
-    return text.replace( /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi , (match, text) => {
-        return Base64.decode(text);
-    });
+    if(text){
+        return text.replace( /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi , (match, text) => {
+            return Base64.decode(text);
+        });
+    }
+    return '';
+};
+
+export const formatText = (text, format) => {
+    switch (format) {
+        case 'uppercase':
+            text = text.toUpperCase();
+            break;
+        case 'lowercase':
+            text = text.toLowerCase();
+            break;
+        case 'capitalize':
+            text = text.charAt(0).toUpperCase() + text.substr(1).toLowerCase();
+            break;
+        default:
+            break;
+    }
+    return text;
 };

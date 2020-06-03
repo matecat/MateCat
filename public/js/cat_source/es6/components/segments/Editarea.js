@@ -28,6 +28,7 @@ import updateEntityData from "./utils/DraftMatecatUtils/updateEntityData";
 const {hasCommandModifier} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
+import insertText from "./utils/DraftMatecatUtils/insertText";
 
 
 const editorSync = {
@@ -40,7 +41,7 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, updateTagsInEditor, getUpdatedWarnings, getClickedTagId} = this;
+        const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo, getClickedTagId} = this;
 
         this.decoratorsStructure = [
             {
@@ -49,7 +50,7 @@ class Editarea extends React.Component {
                 props: {
                     isTarget: true,
                     onClick: onEntityClick,
-                    getUpdatedWarnings: getUpdatedWarnings,
+                    getUpdatedSegmentInfo: getUpdatedSegmentInfo,
                     getClickedTagId: getClickedTagId
                     // getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
@@ -287,12 +288,12 @@ class Editarea extends React.Component {
 
     render() {
 
-        const {setClickedTagId} = this.props;
         const {editorState,
             displayPopover,
             autocompleteSuggestions,
             focusedTagIndex,
-            popoverPosition} = this.state;
+            popoverPosition
+        } = this.state;
 
         const {
             onChange,
@@ -301,6 +302,8 @@ class Editarea extends React.Component {
             onTagClick,
             handleKeyCommand,
             myKeyBindingFn,
+            onMouseUpEvent,
+            onBlurEvent
         } = this;
 
         let lang = '';
@@ -323,6 +326,8 @@ class Editarea extends React.Component {
                     data-sid={this.props.segment.sid}
                     tabIndex="-1"
                     onCopy={copyFragment}
+                    onMouseUp={onMouseUpEvent}
+                    onBlur={onBlurEvent}
         >
             <Editor
                 lang={lang}
@@ -401,8 +406,19 @@ class Editarea extends React.Component {
         }
     };
 
+    onMouseUpEvent = () => {
+        const {toggleFormatMenu} = this.props;
+        toggleFormatMenu(!this.editor._latestEditorState.getSelection().isCollapsed());
+    };
+
+    onBlurEvent = () => {
+        // Hide Edit Toolbar
+        const {toggleFormatMenu} = this.props;
+        toggleFormatMenu(false);
+    };
+
     // Focus on editor trigger 2 onChange events
-    onBlur() {
+    /*onBlur = () => {
         if (!editorSync.clickedOnTag) {
             this.setState({
                 displayPopover: false,
@@ -410,15 +426,15 @@ class Editarea extends React.Component {
             });
             editorSync.editorFocused = false;
         }
-    };
+    };*/
 
-    onFocus() {
+    /*onFocus = () => {
         editorSync.editorFocused = true;
         editorSync.inTransitionToFocus = true;
         this.setState({
             editorFocused: true,
         });
-    };
+    };*/
 
     updateTagsInEditor = () => {
 
@@ -659,9 +675,9 @@ class Editarea extends React.Component {
             top: selectionBoundingRect.bottom - editorBoundingRect.top + selectionBoundingRect.height,
             left: leftAdjusted
         };
-    }
+    };
 
-    getUpdatedWarnings = () => {
+    getUpdatedSegmentInfo = () => {
         const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
         const {tagRange} = this.state;
         return{
@@ -671,7 +687,22 @@ class Editarea extends React.Component {
             segmentOpened: opened,
             missingTagsInTarget
         }
-    }
+    };
+
+
+    formatSelection = (format) =>{
+        const {editorState} = this.state;
+        if(editorState.getSelection().isCollapsed()) {
+            return;
+        }
+        let selectedText = DraftMatecatUtils.getSelectedText(editorState);
+        selectedText = DraftMatecatUtils.formatText(selectedText, format);
+        const newEditorState = insertText(editorState, selectedText);
+        this.setState({
+            editorState: newEditorState
+        });
+    };
+
 }
 
 function getEntityStrategy(mutability, callback) {

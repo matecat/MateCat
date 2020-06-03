@@ -25,6 +25,7 @@ class SegmentTarget extends React.Component {
             originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
                 : this.props.segment.translation),
             showTagsMenu: false,
+            showFormatMenu: false
         };
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
         this.showTagsMenu = this.showTagsMenu.bind(this);
@@ -132,6 +133,10 @@ class SegmentTarget extends React.Component {
     }
 
     getTargetArea(translation) {
+
+        const {showFormatMenu} = this.state;
+        const {toggleFormatMenu} = this;
+
         var textAreaContainer = "";
         let issues = this.getAllIssues();
         if ( this.props.segment.edit_area_locked ) {
@@ -210,6 +215,7 @@ class SegmentTarget extends React.Component {
                     readonly={this.props.readonly}
                     setClickedTagId={this.props.setClickedTagId}
                     clickedTagId={this.props.clickedTagId}
+                    toggleFormatMenu={toggleFormatMenu}
                 />
                 { this.state.showTagsMenu ? (
 
@@ -231,10 +237,10 @@ class SegmentTarget extends React.Component {
                     {tagLockCustomizable}
                     {tagModeButton}
                     {tagCopyButton}
-                    <ul className="editToolbar">
-                        <li className="uppercase" title="Uppercase" onMouseDown={()=>this.formatSelection('uppercase')}/>
-                        <li className="lowercase" title="Lowercase" onMouseDown={ ()=>this.formatSelection('lowercase')}/>
-                        <li className="capitalize" title="Capitalized" onMouseDown={()=>this.formatSelection('capitalize')}/>
+                    <ul className="editToolbar" style={showFormatMenu ? {visibility:'visible'} : {visibility:'hidden'}}>
+                        <li className="uppercase" title="Upper Case" onMouseDown={()=>this.editArea.formatSelection('uppercase')}/>
+                        <li className="lowercase" title="Lower Case" onMouseDown={()=>this.editArea.formatSelection('lowercase')}/>
+                        <li className="capitalize" title="Capitalize" onMouseDown={()=>this.editArea.formatSelection('capitalize')}/>
                     </ul>
                 </div>
             </div>;
@@ -313,6 +319,13 @@ class SegmentTarget extends React.Component {
             </div>
         )
     }
+
+    toggleFormatMenu = (show) => {
+        // Show/Hide Edit Toolbar
+        this.setState({
+            showFormatMenu: show
+        })
+    };
 }
 
 export default SegmentTarget;

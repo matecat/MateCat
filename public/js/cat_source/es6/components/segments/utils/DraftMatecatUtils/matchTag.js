@@ -57,7 +57,7 @@ const matchTag = (plainContent) => {
                 // Closing tag has no ID, so take the one available inside open tag
                 closingTag.data.id = openTags[i].data.id;
                 // Placeholder for closing (cases: <g>, <ex>)
-                closingTag.data.placeholder = '/' + openTags[i].data.id ;
+                closingTag.data.placeholder = openTags[i].data.id ;
             }
             i++;
         }
