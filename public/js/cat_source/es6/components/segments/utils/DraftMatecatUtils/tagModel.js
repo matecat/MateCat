@@ -23,7 +23,8 @@ const tagSignatures = {
         placeholder: null,
         placeholderRegex: /equiv-text="base64:(.+)"/,
         decodeNeeded: true,
-        errorCheckAvailable: true
+        errorCheckAvailable: true,
+        lexiqaAvailable: true
     },
     'g': {
         type: 'g',
@@ -35,7 +36,8 @@ const tagSignatures = {
         placeholder: null,
         placeholderRegex: /id="(\d+)"/,
         decodeNeeded: false,
-        errorCheckAvailable: true
+        errorCheckAvailable: true,
+        lexiqaAvailable: false
     },
     'gCl': {
         type: 'gCl',
@@ -47,7 +49,8 @@ const tagSignatures = {
         placeholder: '</g>',
         placeholderRegex: null,
         decodeNeeded: false,
-        errorCheckAvailable: true
+        errorCheckAvailable: true,
+        lexiqaAvailable: false
     },
     'nbsp':{
         type: 'nbsp',
@@ -59,7 +62,8 @@ const tagSignatures = {
         placeholder: '°',
         placeholderRegex: null,
         decodeNeeded: false,
-        errorCheckAvailable: false
+        errorCheckAvailable: false,
+        lexiqaAvailable: true
     },
     'tab':{
         type: 'tab',
@@ -71,7 +75,8 @@ const tagSignatures = {
         placeholder: '#',
         placeholderRegex: null,
         decodeNeeded: false,
-        errorCheckAvailable: false
+        errorCheckAvailable: false,
+        lexiqaAvailable: true
     },
     'lineFeed':{
         type: 'lineFeed',
@@ -83,7 +88,8 @@ const tagSignatures = {
         placeholder: '\\n',
         placeholderRegex: null,
         decodeNeeded: false,
-        errorCheckAvailable: false
+        errorCheckAvailable: false,
+        lexiqaAvailable: true
     },
     'carriageReturn':{
         type: 'carriageReturn',
@@ -95,7 +101,8 @@ const tagSignatures = {
         placeholder: '\\r',
         placeholderRegex: null,
         decodeNeeded: false,
-        errorCheckAvailable: false
+        errorCheckAvailable: false,
+        lexiqaAvailable: true
     }
 };
 
@@ -117,10 +124,18 @@ function TagStruct(offset, length, type) {
     }
 }
 
+// Control params: errorCheckAvailable
 const getErrorCheckTag = () => {
     return Object.keys(tagSignatures).
     filter(tagKey =>{return tagSignatures[tagKey].errorCheckAvailable}).
     map(tagKey => {return tagSignatures[tagKey].type})
 };
 
-export {tagSignatures, TagStruct, getErrorCheckTag};
+// Control params: lexiqaAvailable
+const getNoLexiqaTag = () => {
+    return Object.keys(tagSignatures).
+    filter(tagKey =>{return !tagSignatures[tagKey].lexiqaAvailable}).
+    map(tagKey => {return tagSignatures[tagKey].type})
+};
+
+export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag};

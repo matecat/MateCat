@@ -767,13 +767,15 @@ export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaChec
 //Lexiqa
 export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, sid, isSource) => {
 
-    const generateGlossaryDecorator = (warnings, sid, isSource) => {
+    const generateLexiqaDecorator = (warnings, sid, isSource, decoratorName) => {
         return {
             name: 'lexiqa',
-            strategy: (contentBlock, callback) => {
+            strategy: (contentBlock, callback, contentState) => {
                 _.each(warnings, (warn)=>{
                     if(warn.blockKey === contentBlock.getKey()){
-                        callback(warn.start, warn.end);
+                        const canDecorate = DraftMatecatUtils.canDecorateRange(warn.start, warn.end, contentBlock, contentState, decoratorName);
+                        if(canDecorate) callback(warn.start, warn.end);
+                        //callback(warn.start, warn.end);
                     }
                 });
             },
@@ -788,7 +790,7 @@ export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, 
     console.log("Add Lexiqa Decorator: ", sid, lexiqaWarnings);
     let decorators = decoratorStructure.slice();
     _.remove(decorators, (decorator) => decorator.name === 'lexiqa');
-    decorators.push( generateGlossaryDecorator( lexiqaWarnings, sid, isSource ) );
+    decorators.push( generateLexiqaDecorator( lexiqaWarnings, sid, isSource, 'lexiqa' ) );
     const newDecorator = new CompoundDecorator( decorators );
     return {
         editorState: EditorState.set( editorState, {decorator: newDecorator} ),

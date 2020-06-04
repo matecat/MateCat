@@ -30,6 +30,7 @@ import tagFromEntity from "./tagFromEntity";
 import matchTagInEditor from "./matchTagInEditor";
 import getSelectedText from "./getSelectedText";
 import addTagEntityToEditor from "./addTagEntityToEditor";
+import canDecorateRange from "./canDecorateRange";
 
 
 const DraftMatecatUtils = {
@@ -53,6 +54,7 @@ const DraftMatecatUtils = {
 	updateEntityData,
 	matchTagInEditor,
 	addTagEntityToEditor,
+	canDecorateRange,
 	// Fragment Utils
 	insertFragment,
 	duplicateFragment,
