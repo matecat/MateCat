@@ -1534,7 +1534,7 @@ class QA {
             // CJK need special handling
             if(CatUtils::isCJK($this->target_seg_lang)){
                 $this->target_seg = rtrim( $this->target_seg );
-                $lastChar = substr($this->target_seg, -1);
+                $lastChar = mb_substr($this->target_seg, -1);
                 $specialCKJTerminateChars = [
                     '。',
                     '、',
