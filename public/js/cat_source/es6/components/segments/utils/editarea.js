@@ -55,7 +55,7 @@ let EditArea = {
         TextUtils.insertNodeAtCursor(node);
         EditArea.unnestMarkers();
         setTimeout(()=>{
-            modifiedTranslationCallback.call(e, 1);
+            modifiedTranslationCallback.call(e);
         });
     },
     keydownEditAreaEventHandler: function (e, modifiedTranslationCallback) {
