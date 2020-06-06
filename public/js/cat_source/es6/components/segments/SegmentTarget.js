@@ -188,7 +188,7 @@ class SegmentTarget extends React.Component {
 
             //Tag Mode Buttons
 
-            if (this.props.tagModesEnabled && !this.props.enableTagProjection && UI.tagLockEnabled) {
+            if (/*this.props.tagModesEnabled &&*/ !this.props.enableTagProjection && UI.tagLockEnabled) {
                 var buttonClass = ($('body').hasClass("tagmode-default-extended")) ? "active" : "";
                 tagModeButton =
                     <a className={"tagModeToggle " + buttonClass} alt="Display full/short tags" onClick={() => Customizations.toggleTagsMode()}
@@ -199,8 +199,7 @@ class SegmentTarget extends React.Component {
                     </a>;
 
             }
-            // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi
-            //  riga 3844 del file style.scss, ora il segmento è sempre visibile se ci mancano dei tag del target
+            // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi riga 3844 del file style.scss
             if (this.props.tagModesEnabled  && segment.missingTagsInTarget && segment.missingTagsInTarget.length > 0) {
                 tagCopyButton = <a className="autofillTag"
                                    alt="Copy missing tags from source to target"
