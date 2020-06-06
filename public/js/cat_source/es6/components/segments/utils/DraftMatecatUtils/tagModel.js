@@ -24,7 +24,8 @@ const tagSignatures = {
         placeholderRegex: /equiv-text="base64:(.+)"/,
         decodeNeeded: true,
         errorCheckAvailable: true,
-        lexiqaAvailable: true
+        lexiqaAvailable: true,
+        style: 'tag tag-selfclosed'
     },
     'g': {
         type: 'g',
@@ -37,7 +38,8 @@ const tagSignatures = {
         placeholderRegex: /id="(\d+)"/,
         decodeNeeded: false,
         errorCheckAvailable: true,
-        lexiqaAvailable: false
+        lexiqaAvailable: false,
+        style: 'tag tag-open'
     },
     'gCl': {
         type: 'gCl',
@@ -50,7 +52,8 @@ const tagSignatures = {
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: true,
-        lexiqaAvailable: false
+        lexiqaAvailable: false,
+        style: 'tag tag-close'
     },
     'nbsp':{
         type: 'nbsp',
@@ -63,7 +66,8 @@ const tagSignatures = {
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
-        lexiqaAvailable: true
+        lexiqaAvailable: true,
+        style: 'tag tag-selfclosed'
     },
     'tab':{
         type: 'tab',
@@ -76,24 +80,12 @@ const tagSignatures = {
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
-        lexiqaAvailable: true
-    },
-    'lineFeed':{
-        type: 'lineFeed',
-        openRegex: /##\$(_0D)\$##/g,
-        openLength: 9,
-        closeRegex: null,
-        selfClosing: true,
-        isClosure: false,
-        placeholder: '\\n',
-        placeholderRegex: null,
-        decodeNeeded: false,
-        errorCheckAvailable: false,
-        lexiqaAvailable: true
+        lexiqaAvailable: true,
+        style: 'tag tag-selfclosed'
     },
     'carriageReturn':{
         type: 'carriageReturn',
-        openRegex: /##\$(_0A)\$##/g,
+        openRegex: /##\$(_0D)\$##/g,
         openLength: 9,
         closeRegex: null,
         selfClosing: true,
@@ -102,7 +94,22 @@ const tagSignatures = {
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
-        lexiqaAvailable: true
+        lexiqaAvailable: true,
+        style: 'tag tag-selfclosed'
+    },
+    'lineFeed':{
+        type: 'lineFeed',
+        openRegex: /##\$(_0A)\$##/g,
+        openLength: 9,
+        closeRegex: null,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: '\\n',
+        placeholderRegex: null,
+        decodeNeeded: false,
+        errorCheckAvailable: false,
+        lexiqaAvailable: true,
+        style: 'tag tag-selfclosed'
     }
 };
 
