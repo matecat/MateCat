@@ -182,6 +182,7 @@ let SearchUtils = {
         if (isExactMatch) {
             reg = new RegExp( '\\b(' + textToMatch.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
         }
+        text = TextUtils.escapeRegExp(text);
         return text.matchAll( reg );
     },
 

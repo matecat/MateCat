@@ -202,7 +202,7 @@ const TEXT_UTILS =  {
     },
 
     escapeRegExp(str) {
-        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
     },
     insertNodeAtCursor(node) {
         try {
@@ -522,7 +522,7 @@ const TEXT_UTILS =  {
             .replace( config.tabPlaceholderRegex, "\t" )
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
         return text;
-    },
+    }
 
 };
 module.exports =  TEXT_UTILS;
