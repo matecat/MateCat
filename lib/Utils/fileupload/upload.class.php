@@ -232,8 +232,8 @@ class UploadHandler {
         $file->name     = $this->trim_file_name( $name );
         $file->size     = intval( $size );
         $file->tmp_name = $uploaded_file;
-        //$file->type = $type; // Override and ignore the client type definition
-        $file->type = mime_content_type( $file->tmp_name );
+
+        $file->type = $this->getMimeContentType( $file->tmp_name );
 
         if ( $this->validate( $uploaded_file, $file, $error, $index ) ) {
             $file_path   = $this->options[ 'upload_dir' ] . $file->name;
@@ -296,6 +296,39 @@ class UploadHandler {
         $file->convert = true;
 
         return $file;
+    }
+
+    /**
+     * Detection of MIME Type improvement
+     * Using File Information extention
+     * https://www.php.net/manual/en/fileinfo.installation.php
+     *
+     * File Information seems to be slightly better than mime_content_type function
+     * because tries to guess the content type and encoding of a file by looking for certain magic byte sequences at specific positions within the file.
+     * While this is not a bullet proof approach the heuristics used do a very good job.
+     *
+     * Even though some false positive are always possible. Take a look here:
+     *
+     * https://stackoverflow.com/questions/16190929/detecting-a-mime-type-fails-in-php
+     *
+     * @param $filename
+     *
+     * @return mixed|string
+     */
+    private function getMimeContentType( $filename ) {
+        if ( function_exists( 'finfo_open' ) ) {
+            $finfo     = finfo_open( FILEINFO_MIME_TYPE );
+            $finfoFile = finfo_file( $finfo, $filename );
+            finfo_close( $finfo );
+
+            return $finfoFile;
+        }
+
+        if ( function_exists( 'mime_content_type' ) ) {
+            return mime_content_type( $filename );
+        }
+
+        return 'application/octet-stream';
     }
 
     public function get() {

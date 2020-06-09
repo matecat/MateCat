@@ -3108,13 +3108,13 @@ $reference = [
 //                        6 => 'dic',
                         7 => 'srt'
                 ],
-//            'text/x-fortran'                   =>
-//                    array(
-//                        0 => 'f',
-//                        1 => 'for',
-//                        2 => 'f77',
-//                        3 => 'f90',
-//                    ),
+            'text/x-fortran'                   =>
+                    array(
+                        0 => 'f',
+                        1 => 'for',
+                        2 => 'f77',
+                        3 => 'f90',
+                    ),
 //            'text/x-java-source'               =>
 //                    array(
 //                        0 => 'java',
