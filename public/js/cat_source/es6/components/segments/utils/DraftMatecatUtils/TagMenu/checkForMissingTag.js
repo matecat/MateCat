@@ -2,8 +2,6 @@ import {getErrorCheckTag} from "../tagModel";
 
 const checkForMissingTags = (sourceTagMap, targetTagMap) => {
 
-    console.log('Mappe che arrivano --> ',sourceTagMap, targetTagMap )
-
     if(!sourceTagMap || !targetTagMap){
         return {
             missingTags: [],
