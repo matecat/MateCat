@@ -30,6 +30,7 @@ const findTagWithRegex = (text, tagSignature) => {
         tag.data.id = tagInfo.id;
         tag.data.placeholder = tagInfo.content;
         tag.data.decodedText = tagInfo.content;
+        tag.data.originalOffset = tag.offset;
 
         tagRange.push(tag);
     }

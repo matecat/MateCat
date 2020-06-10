@@ -1,45 +1,37 @@
-const TagSuggestion = (props) => {
+import React, {Component} from 'react';
 
-    const hoverStyle = (e) => {
-        e.target.style.background = 'rgba(0, 0, 0, 0.05)';
-        e.target.style.color = '#0055b8';
+const TagSuggestion = React.forwardRef((props,ref) => {
 
-    };
-
-    const normalStyle = (e) => {
-        e.target.style.background = 'transparent';
-        e.target.style.color = '#767676';
-    };
+    let tagStyle = '';
+    if(props.suggestion.data.openTagId){
+        tagStyle = 'tag-close';
+    }else if(props.suggestion.data.closeTagId){
+        tagStyle = 'tag-open';
+    }else{
+        tagStyle = 'tag-selfclosed';
+    }
 
     return (
         <div
+            className={`tag-menu-suggestion ${props.isFocused ?  `active` : ''}`}
             onMouseDown={ () => props.onTagClick(props.suggestion) }
-            style={props.isFocused ? tagSuggestionActive : tagSuggestion}
-            onMouseOver={hoverStyle}
-            onMouseLeave={normalStyle}
+            style={props.isFocused ? {fontWeight: '700'} : null}
+            tabIndex={props.tabIndex}
+            ref={ref}
         >
-            {props.suggestion ? props.suggestion.data.placeholder : 'No tags'}
+            <div className={"tag-menu-suggestion-item"}>
+                {props.suggestion ?
+                    (<div className={"tag-container"}>
+                        <div
+                            className={`tag ${tagStyle}`}>
+                            <span className={`tag-placeholder`}>{props.suggestion.data.placeholder}</span>
+                        </div>
+                    </div>)
+                    : 'No tags'}
+                <span className={`place-here-tips`}>Place here</span>
+            </div>
         </div>
     );
-};
-
-const tagSuggestion = {
-        color: '#767676',
-        textOverflow: 'ellipsis',
-        overflow: 'hidden',
-        padding: '12px 16px',
-        width: '100%',
-        fontSize: '14px',
-        whiteSpace: 'nowrap',
-        cursor: 'pointer',
-
-};
-
-const tagSuggestionActive = {
-    ...tagSuggestion,
-    fontWeight: '700',
-    color:'#0055b8',
-    background: 'rgba(0, 0, 0, 0.05)'
-};
+});
 
 export default TagSuggestion;

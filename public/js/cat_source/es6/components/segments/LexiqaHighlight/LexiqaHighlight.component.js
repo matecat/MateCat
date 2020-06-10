@@ -20,7 +20,8 @@ class LexiqaHighlight extends Component {
     getWarning = () => {
         let {start, end, warnings, isSource, sid} = this.props;
         let warning =  _.find(warnings, (warn) => warn.start === start || warn.end === end);
-        if ( warning ) {
+        // Todo check why myClass is missing sometimes
+        if ( warning && warning.myClass ) {
             warning.messages = LexiqaUtils.buildTooltipMessages(warning, sid, isSource);
         }
         return warning;

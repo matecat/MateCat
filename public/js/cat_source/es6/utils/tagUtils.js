@@ -56,9 +56,26 @@ const TAGS_UTILS =  {
         return _str;
     },
 
+    // Replace old function decodePlaceholdersToText
+    decodePlaceholdersToTextSimple: function (str) {
+        let _str = str;
+
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="tag small tag-selfclosed">\\n</span>' )
+            .replace( config.crPlaceholderRegex, '<span class="tag small tag-selfclosed">\\r</span>' )
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false">\\n</span>' )
+            .replace( config.crPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false">\\r</span>' )
+            .replace( config.crlfPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false">\\r\\n</span>' )
+            .replace( config.tabPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false">&#8677;</span>' )
+            .replace( config.nbspPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false">°</span>' )
+            //.replace(/(<\/span\>)$/gi, "</span><br class=\"end\">"); // For rangy cursor after a monad marker
+
+        return _str;
+    },
+
     transformTextForLockTags: function ( tx ) {
         let brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked style-tag \">$1</_plh_>";
         let brTx2 =  "<span contenteditable=\"false\" class=\"locked style-tag\">$1</span>";
+
 
         tx = tx.replace( /&amp;/gi, "&" )
             .replace( /<span/gi, "<_plh_" )
@@ -85,10 +102,51 @@ const TAGS_UTILS =  {
             .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
             .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2 );
 
-
         tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
         tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
         tx = this.transformTagsWithHtmlAttribute(tx);
+        // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );  // This to show the cursor after the last tag, moved to editarea component
+        return tx;
+    },
+
+    // Replace old function transformTextForLockTags
+    decodeHtmlInTag: function ( tx ) {
+        let brTx1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-open\">$1</_plh_>";
+        let brTx2 =  "<span contenteditable=\"false\" class=\"tag small tag-close\">$1</span>";
+        let brTxPlPh1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</_plh_>";
+        let brTxPlPh12 =  "<span contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</span>";
+
+        tx = tx.replace( /&amp;/gi, "&" )
+            .replace( /<span/gi, "<_plh_" )
+            .replace( /<\/span/gi, "</_plh_" )
+            .replace( /&lt;/gi, "<" )
+            .replace( /(<(ph.*?)\s*?\/&gt;)/gi, brTxPlPh1 ) // <ph \/&gt;
+            .replace( /(<(g|x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1 )
+            .replace( /(<(ph.*?)\sid[^<“]*?&gt;)/gi, brTxPlPh1 )
+            .replace( /(<(ph.*?)\sid[^<“]*?\/>)/gi, brTxPlPh1 )
+            .replace( /</gi, "&lt;" )
+            .replace( /\&lt;_plh_/gi, "<span" )
+            .replace( /\&lt;\/_plh_/gi, "</span" )
+            .replace( /\&lt;lxqwarning/gi, "<lxqwarning" )
+            .replace( /\&lt;\/lxqwarning/gi, "</lxqwarning" )
+            .replace( /\&lt;div\>/gi, "<div>" )
+            .replace( /\&lt;\/div\>/gi, "</div>" )
+            .replace( /\&lt;br\>/gi, "<br />" )
+            .replace( /\&lt;br \/>/gi, "<br />" )
+            .replace( /\&lt;mark /gi, "<mark " )
+            .replace( /\&lt;\/mark/gi, "</mark" )
+            .replace( /\&lt;ins /gi, "<ins " ) // For translation conflicts tab
+            .replace( /\&lt;\/ins/gi, "</ins" ) // For translation conflicts tab
+            .replace( /\&lt;del /gi, "<del " ) // For translation conflicts tab
+            .replace( /\&lt;\/del/gi, "</del" ) // For translation conflicts tab
+            .replace( /\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />' )
+            .replace( /(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|it|mrk)\s*&gt;)/gi, brTx2 )
+            .replace( /(&lt;\s*\/\s*(ph)\s*&gt;)/gi, brTxPlPh12 );
+
+
+        tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
+        tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
+        tx = this.transformTagsWithHtmlAttributeSimple(tx);
         // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );  // This to show the cursor after the last tag, moved to editarea component
         return tx;
     },
@@ -135,6 +193,89 @@ const TAGS_UTILS =  {
         } finally {
             return returnValue;
         }
+    },
+
+    // Replace old function transformTagsWithHtmlAttribute
+    transformTagsWithHtmlAttributeSimple: function (tx) {
+        let returnValue = tx;
+        try {
+            let phIDs =[];
+            tx = tx.replace( /&quot;/gi, '"' );
+            // check if is matecat ph tag
+            tx = tx.replace( /&lt;ph.*?id="(.*?)".*?&gt/gi, function (match, text) {
+                phIDs.push(text);
+                console.log('match ID', match)
+                return match;
+            });
+            // replace con equiv text
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:(.*?)".*?\/&gt;/gi , function (match, text) {
+                if ( phIDs.length === 0 ) return text;
+                return Base64.decode(text);
+            });
+
+            returnValue = tx;
+        } catch (e) {
+            console.error("Error parsing tag ph in transformTagsWithHtmlAttribute function");
+            returnValue = "";
+        } finally {
+            return returnValue;
+        }
+    },
+
+    // Associate tag of type g with integer id
+    matchTag: function (tx) {
+        let returnValue = tx;
+        const openRegex =  RegExp('&lt;g.*?id="(.*?)".*?&gt;', 'gi');
+        const closeRegex =  RegExp('&lt;(\/g)&gt;', 'gi');
+        try {
+            let openingMatchArr;
+            let openings = [];
+            while ((openingMatchArr = openRegex.exec(tx)) !== null) {
+                const openingGTag = {};
+                openingGTag.length = openingMatchArr[0].length;
+                openingGTag.id = openingMatchArr[1];
+                openingGTag.offset = openingMatchArr.index;
+                openings.push(openingGTag);
+                console.log(`Found ${openingMatchArr[0]} with id ${openingMatchArr[1]} of length ${openingMatchArr[0].length} at ${openingMatchArr.index}. Next starts at ${openRegex.lastIndex}.`);
+            }
+
+            let closingMatchArr;
+            let closings = [];
+            while ((closingMatchArr = closeRegex.exec(tx)) !== null) {
+                const closingGTag = {};
+                closingGTag.length = closingMatchArr[0].length;
+                closingGTag.offset = closingMatchArr.index;
+                closings.push(closingGTag);
+                console.log(`Found ${closingMatchArr[0]} of length ${closingMatchArr[0].length} at ${closingMatchArr.index}. Next starts at ${closeRegex.lastIndex}.`);
+            }
+
+            openings.sort((a, b) => {return b.offset-a.offset});
+            closings.sort((a, b) => {return a.offset-b.offset});
+
+            closings.forEach( closingTag => {
+                let i = 0, notFound = true;
+                while(i < openings.length && notFound) {
+                    if(closingTag.offset > openings[i].offset && !openings[i].closeTagId ){
+                        notFound = !notFound;
+                        // Closing tag has no ID, so take the one available inside open tag
+                        closingTag.id = openings[i].id;
+                    }
+                    i++;
+                }
+            });
+
+            tx = tx.replace( openRegex, function () {
+                return openings.pop().id;
+            });
+
+            tx = tx.replace( closeRegex, function () {
+                return closings.shift().id;
+            });
+            returnValue = tx;
+        } catch (e) {
+            console.error("Error matching tag g in TagUtils.matchTag function");
+        }
+        return returnValue;
     },
 
     encodeSpacesAsPlaceholders: function(str, root) {

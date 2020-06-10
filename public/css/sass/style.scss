@@ -2690,9 +2690,9 @@ body.rtl-target .editor .editarea span {
     /*background: #999;*/
 }
 
-.graysmall:hover li span {
+/*.graysmall:hover li span {
     color: #000 !important
-}
+}*/
 
 .sub-editor.glossary .glossary-item {
     float: right;
@@ -3841,7 +3841,7 @@ section .toolbar .autofillTag {
     float: left;
     font-size: 60%;
     text-decoration: none;
-    display: none;
+    display: block;
 }
 
 .editToolbar {

@@ -29,7 +29,7 @@ class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, getUpdatedWarnings} = this;
+        const {onEntityClick, getUpdatedSegmentInfo, getClickedTagId} = this;
         this.originalSource = this.props.segment.segment;
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
@@ -42,8 +42,9 @@ class SegmentSource extends React.Component {
                 component: TagEntity,
                 props: {
                     onClick: onEntityClick,
-                    getUpdatedWarnings: getUpdatedWarnings,
-                    isTarget: false
+                    getUpdatedSegmentInfo: getUpdatedSegmentInfo,
+                    getClickedTagId: getClickedTagId,
+                    isTarget: false,
                     // getSearchParams: this.getSearchParams
                 }
             }
@@ -327,7 +328,7 @@ class SegmentSource extends React.Component {
         setTimeout(()=>this.updateSourceInStore());
 
         // Todo: find a nicer solution to "unlock" the editor for copy event
-        setTimeout(()=> {
+        /*setTimeout(()=> {
             const {editorState} = this.state;
             const selectionState = editorState.getSelection();
             let newSelection = selectionState.merge({
@@ -339,7 +340,7 @@ class SegmentSource extends React.Component {
                 newSelection,
             );
             this.setState({editorState: newEditorState});
-        });
+        });*/
     }
 
     componentWillUnmount() {
@@ -373,6 +374,7 @@ class SegmentSource extends React.Component {
                 onChange={onChange}
                 ref={(el) => this.editor = el}
                 readOnly={true}
+
             />
         </div>;
         if ( this.props.segment.openSplit ) {
@@ -422,8 +424,12 @@ class SegmentSource extends React.Component {
 
     }
 
-    onEntityClick = (start, end) => {
+    onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
+        const {setClickedTagId} = this.props;
+        // Highlight del tag
+        setClickedTagId(id);
+        // Selezione del tag
         const selectionState = editorState.getSelection();
         let newSelection = selectionState.merge({
             anchorOffset: start,
@@ -434,6 +440,11 @@ class SegmentSource extends React.Component {
             newSelection,
         );
         this.setState({editorState: newEditorState});
+    };
+
+    getClickedTagId = () => {
+        const {clickedTagId} = this.props;
+        return clickedTagId;
     };
 
     copyFragment = (e) => {
@@ -456,14 +467,15 @@ class SegmentSource extends React.Component {
         }
     };
 
-    getUpdatedWarnings= () => {
-        const {segment: { warnings, tagMismatch, opened}} = this.props;
+    getUpdatedSegmentInfo= () => {
+        const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
         const {tagRange} = this.state;
         return{
-            warnings : warnings,
-            tagMismatch: tagMismatch,
-            tagRange: tagRange,
-            segmentOpened: opened
+            warnings,
+            tagMismatch,
+            tagRange,
+            segmentOpened: opened,
+            missingTagsInTarget
         }
     }
 }
