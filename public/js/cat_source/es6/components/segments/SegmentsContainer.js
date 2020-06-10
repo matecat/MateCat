@@ -137,6 +137,24 @@ class SegmentsContainer extends React.Component {
 
 	renderSegments(segments) {
 		// VirtualList.prototype.animateScroll = false;
+		// Update previous last segment height inside segmentsHeightsMap
+		if(this.state.segments.size !== segments.size){
+			console.log(`old size was ${this.state.segments.size} new size is ${segments.size}`)
+			const oldLastSegment = this.getSegmentByIndex(this.state.segments.size - 1);
+			const newLastSegment = segments.get(segments.size - 1);
+			if(oldLastSegment && newLastSegment){
+				const oldLastSid = oldLastSegment.get('sid');
+				const newLastSid = newLastSegment.get('sid');
+				if(oldLastSid !== newLastSid){
+					const lastHeight = this.segmentsHeightsMap[oldLastSid].height;
+					this.segmentsHeightsMap[oldLastSid] = {
+						segment: oldLastSegment,
+						height: lastHeight - 150
+					};
+				}
+			}
+		}
+
 		let splitGroup = [];
 		this.setState({
 			segments: segments,
@@ -344,13 +362,13 @@ class SegmentsContainer extends React.Component {
 
 	getSegmentHeight = (index, components) => {
 		const segment = this.getSegmentByIndex(index);
-		const sid = segment.get('sid');
 
 		// no segment
 		if (!segment) {
 			return 0;
 		}
 
+		const sid = segment.get('sid');
 		let height = 0;
 
 		// compute height for opened segment
@@ -380,7 +398,7 @@ class SegmentsContainer extends React.Component {
 				this.lastOpenedHeight = height
 			}
 		// compute height for the first time
-		}else if( !this.segmentsHeightsMap[segment.get('sid')]){
+		}else if( !this.segmentsHeightsMap[segment.get('sid')] || this.segmentsHeightsMap[segment.get('sid')].height === 0 ){
 			// if not available in cache, compute height
 			if (components && Object.keys(components).length) {
 				const container = document.createElement("div", {});
@@ -389,7 +407,6 @@ class SegmentsContainer extends React.Component {
 					const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
 					let height = h;
 					let commentsPadding = this.getCommentsPadding(index, segment);
-
 					// add comment padding
 					height += commentsPadding;
 
@@ -397,17 +414,14 @@ class SegmentsContainer extends React.Component {
 					if (previousFileId !== segment.get('id_file')) {
 						height = height + 43;
 					}
-
 					// if it's last segment, add 150 to height as distance from footer
 					if (index === this.state.segments.size - 1) {
 						height = height + 150;
 					}
-
 					// collection type
 					if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
 						height += 42;
 					}
-
 					// save height
 					this.segmentsHeightsMap[segment.get('sid')] = {
 						segment: segment,
@@ -418,7 +432,6 @@ class SegmentsContainer extends React.Component {
 
 				};
 				ReactDOM.render(<SegmentPlaceholder sid={sid} component={components[index]} calc={tempMount}/>, container);
-
 			}
 		// retrieve height from cache
 		}else{
@@ -524,7 +537,7 @@ class SegmentsContainer extends React.Component {
 			return segment.get('sid') === idFrom;
 		});
 		this.listRef.recomputeSizes(index);
-		(this.segmentsHeightsMap[idFrom]) ? this.segmentsHeightsMap[idFrom].height = 0 : null;
+		this.segmentsHeightsMap[idFrom] ? this.segmentsHeightsMap[idFrom].height = 0 : null;
 		this.forceUpdate();
 	}
 
