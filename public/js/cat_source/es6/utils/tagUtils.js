@@ -204,7 +204,6 @@ const TAGS_UTILS =  {
             // check if is matecat ph tag
             tx = tx.replace( /&lt;ph.*?id="(.*?)".*?&gt/gi, function (match, text) {
                 phIDs.push(text);
-                console.log('match ID', match)
                 return match;
             });
             // replace con equiv text
@@ -236,7 +235,6 @@ const TAGS_UTILS =  {
                 openingGTag.id = openingMatchArr[1];
                 openingGTag.offset = openingMatchArr.index;
                 openings.push(openingGTag);
-                console.log(`Found ${openingMatchArr[0]} with id ${openingMatchArr[1]} of length ${openingMatchArr[0].length} at ${openingMatchArr.index}. Next starts at ${openRegex.lastIndex}.`);
             }
 
             let closingMatchArr;
@@ -246,7 +244,6 @@ const TAGS_UTILS =  {
                 closingGTag.length = closingMatchArr[0].length;
                 closingGTag.offset = closingMatchArr.index;
                 closings.push(closingGTag);
-                console.log(`Found ${closingMatchArr[0]} of length ${closingMatchArr[0].length} at ${closingMatchArr.index}. Next starts at ${closeRegex.lastIndex}.`);
             }
 
             openings.sort((a, b) => {return b.offset-a.offset});

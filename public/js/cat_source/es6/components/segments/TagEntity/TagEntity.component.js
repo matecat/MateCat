@@ -91,7 +91,7 @@ class TagEntity extends Component {
                 className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
                 unselectable="on"
                 suppressContentEditableWarning={true}
-                onMouseEnter={()=> console.log(entity.data)}
+                /*onMouseEnter={()=> console.log(entity.data)}*/
                 /*onMouseLeave={() => tooltipToggle()}*/
                 onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                 /*contentEditable="false"*/
