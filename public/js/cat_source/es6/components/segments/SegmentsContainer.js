@@ -17,7 +17,7 @@ import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
 
 
-class TestComponent extends React.Component {
+class SegmentPlaceholder extends React.Component {
 	constructor(props) {
 		super(props);
 	}
@@ -25,22 +25,55 @@ class TestComponent extends React.Component {
 	elRef = null;
 
 	componentDidMount() {
-		const h = this.elRef.getBoundingClientRect().height;
-		const source = this.elRef.getElementsByClassName('source')[0].getBoundingClientRect().height,
-			target = this.elRef.getElementsByClassName('editarea')[0].getBoundingClientRect().height;
-		console.log(h,Math.max(source,target))
-		this.props.calc(Math.max(source,target))
+
+		const {sid} = this.props;
+
+		// Adeguamento larghezza container
+		const segmentContainerOriginalWidth = this.elRef.getBoundingClientRect().width;
+		this.elRef.style.cssText = `width:${segmentContainerOriginalWidth - 10}px !important;`;
+
+		// Ottine source e target attualmente renderizzati
+		const source = this.elRef.getElementsByClassName('source')[0],
+			target = this.elRef.getElementsByClassName('target')[0];
+
+		// Ottieni le dimensioni del div "source"
+		const sourceBCR = source.getBoundingClientRect();
+
+		// Ottieni gli editor originali
+		const sourceEditor = source.getElementsByClassName('DraftEditor-root')[0];
+		const targetEditor = target.getElementsByClassName('DraftEditor-root')[0];
+
+		// L'editor è grande quando il div "source" che lo contiene
+		sourceEditor.style.cssText = `width:${sourceBCR.width}px !important;`;
+		const sourceEditorAdjustedBCR = sourceEditor.getBoundingClientRect();
+
+		// Aggiusto il target che è sempre più piccolo del source
+		targetEditor.style.cssText = `width:${sourceEditorAdjustedBCR.width}px !important;`;
+		const targetEditorAdjustedBCR = targetEditor.getBoundingClientRect();
+
+		// Verifico quale degli editor ha l'altezza più grande
+		let maxEditor = Math.max(sourceEditorAdjustedBCR.height, targetEditorAdjustedBCR.height);
+
+		// Aggiungi il padding esterno
+		const outerDivPadding = 33;
+
+		// Limita la grandezza minima dell'editor
+		const minEditorHeight = 90;
+
+		//
+		console.log(`Altezza finale SID:${sid} --> h:${Math.max(maxEditor + outerDivPadding, minEditorHeight)}px`)
+		this.props.calc(Math.max(maxEditor + outerDivPadding, minEditorHeight));
 	}
 
 	render() {
 		const {component} = this.props;
-		return <div  className={'segment-container'} ref={el => this.elRef = el} style={{display: 'inline-block', /*visibility:'hidden'*/}}>
+		return <div  className={'segment-container'} ref={el => this.elRef = el} style={{display: 'inline-block', width: '100%' /*visibility:'hidden'*/}}>
 			{component}
 		</div>
 	}
 }
 
-let keysCache = {};
+let segmentHeightCache = {};
 
 class SegmentsContainer extends React.Component {
 
@@ -309,50 +342,73 @@ class SegmentsContainer extends React.Component {
 	}
 
 	getSegmentHeight = (index, components) => {
-		const segment = this.getSegmentByIndex(index)
-		let height = 100;
+		const segment = this.getSegmentByIndex(index);
+		const sid = segment.get('sid');
+
+		// no segment
+		if (!segment) {
+			return 0;
+		}
+
+		let height = 0;
+
+		// compute height for opened segment
 		if (segment.get('opened')) {
 			const $segment = $('#segment-' + segment.get('sid'));
 			const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
+
 			if (($segment.length && $segment.hasClass('opened')) || ($segment.length === 0 && this.lastOpenedHeight)) {
 				height = ($segment.length) ? $segment.outerHeight() + 20 : this.lastOpenedHeight;
-				height = height - 23; //Add private resources div
-				//If is the first segment of a file add the file header
+				// add private resources div
+				height = height - 23;
+				// if is the first segment of a file, add the file header
 				if (previousFileId !== segment.get('id_file')) {
 					height = height + 43;
 				}
-
+				// if it's last segment, add 150 to height as distance from footer
 				if (index === this.state.segments.size - 1) {
 					height = height + 150;
 				}
 				this.lastOpenedHeight = height
 			}
-		}else if(!keysCache[index]){
+		// compute height for the first time
+		}else if( !this.segmentsHeightsMap[segment.get('sid')]){
+			console.warn('### RECOMPUTE ###')
+			// if not available in cache, compute height
 			if (components && Object.keys(components).length) {
-					const container = document.createElement("div", {});
-					document.body.appendChild(container);
-					const func = (h) => {
-						const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
-						let height = h;
+				const container = document.createElement("div", {});
+				document.body.appendChild(container);
+				const tempMount = (h) => {
+					const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
+					let height = h;
 
-						if (index === this.state.segments.size - 1) {
-							height = height + 150;
-						}
-						//If is the first segment of a file add the file header
-						if (previousFileId !== segment.get('id_file')) {
-							height = height + 43;
-						}
-						keysCache[index] = height;
-						ReactDOM.unmountComponentAtNode(container);
-						container.parentNode.removeChild(container);
+					// if is the first segment of a file, add the file header
+					if (previousFileId !== segment.get('id_file')) {
+						height = height + 43;
 					}
-					ReactDOM.render(<TestComponent component={components[index]} calc={func}/>, container);
+
+					// if it's last segment, add 150 to height as distance from footer
+					if (index === this.state.segments.size - 1) {
+						height = height + 150;
+					}
+
+					// save height
+					this.segmentsHeightsMap[segment.get('sid')] = {
+						segment: segment,
+						height: height
+					};
+					ReactDOM.unmountComponentAtNode(container);
+					container.parentNode.removeChild(container);
+
+				};
+				ReactDOM.render(<SegmentPlaceholder sid={sid} component={components[index]} calc={tempMount}/>, container);
 
 			}
+		// retrieve height from cache
 		}else{
-			height = keysCache[index]
+			height = this.segmentsHeightsMap[segment.get('sid')].height;
 		}
-		//console.log(index,height)
+
 		return height
 
 		/*
@@ -364,10 +420,10 @@ class SegmentsContainer extends React.Component {
 						if (!segment) {
 							return 0;
 						}
+
+
 						let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
-
 						let calculatedHeight = this.segmentsHeightsMap[segment.get('sid')];
-
 						if (calculatedHeight && calculatedHeight.height > 0 && calculatedHeight.segment.equals(segment)) {
 							let heightToAdd = 0;
 							if (previousFileId !== segment.get('id_file')) {
@@ -389,6 +445,8 @@ class SegmentsContainer extends React.Component {
 								this.lastOpenedHeight = itemHeight
 							}
 						}
+
+
 						if (itemHeight === 0) {
 							if (this.state.sideOpen) {
 								$('#hiddenHtml section').addClass('slide-right');
@@ -512,15 +570,16 @@ class SegmentsContainer extends React.Component {
 	}
 
 	updateWindowDimensions() {
-		this.segmentsHeightsMap = {};
-
 		let data = {};
 		data.width = window.innerWidth;
 		data.height = window.innerHeight - $('header').innerHeight() - $('footer').innerHeight();
 
-		this.setState({
-			window: data
-		})
+		if(this.state.window.width !== data.width || this.state.window.height !== data.height ){
+			this.setState({
+				window: data
+			});
+			this.segmentsHeightsMap = {};
+		}
 	};
 
 	componentDidCatch(e) {
