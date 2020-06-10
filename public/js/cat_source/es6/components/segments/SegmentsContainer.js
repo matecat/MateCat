@@ -329,13 +329,13 @@ class SegmentsContainer extends React.Component {
 			} else if (segment1 && segment1.get('openComments')) {
 				let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
 				if (comments.length === 0)
-					return 100;
+					return 40;
 				else if (comments.length > 0)
-					return 150;
+					return 140;
 			} else if (segment2 && segment2.get('openComments')) {
 				let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
 				if (comments.length > 0)
-					return 100;
+					return 50;
 			}
 		}
 		return 0;
@@ -369,6 +369,9 @@ class SegmentsContainer extends React.Component {
 				if (index === this.state.segments.size - 1) {
 					height = height + 150;
 				}
+				// add comment padding
+				let commentsPadding = this.getCommentsPadding(index, segment);
+				height += commentsPadding;
 				this.lastOpenedHeight = height
 			}
 		// compute height for the first time
@@ -376,11 +379,16 @@ class SegmentsContainer extends React.Component {
 			console.warn('### RECOMPUTE ###')
 			// if not available in cache, compute height
 			if (components && Object.keys(components).length) {
+
 				const container = document.createElement("div", {});
 				document.body.appendChild(container);
 				const tempMount = (h) => {
 					const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
 					let height = h;
+					let commentsPadding = this.getCommentsPadding(index, segment);
+
+					// add comment padding
+					height += commentsPadding;
 
 					// if is the first segment of a file, add the file header
 					if (previousFileId !== segment.get('id_file')) {
@@ -571,15 +579,21 @@ class SegmentsContainer extends React.Component {
 
 	updateWindowDimensions() {
 		let data = {};
+
+		this.segmentsHeightsMap = {};
+
 		data.width = window.innerWidth;
 		data.height = window.innerHeight - $('header').innerHeight() - $('footer').innerHeight();
 
-		if(this.state.window.width !== data.width || this.state.window.height !== data.height ){
+		this.setState({
+			window: data
+		});
+		/*if(this.state.window.width !== data.width || this.state.window.height !== data.height ){
 			this.setState({
 				window: data
 			});
 			this.segmentsHeightsMap = {};
-		}
+		}*/
 	};
 
 	componentDidCatch(e) {
@@ -636,7 +650,7 @@ class SegmentsContainer extends React.Component {
 						if (comments.length === 0)
 							styleCopy.marginTop = '40px';
 						else if (comments.length > 0)
-							styleCopy.marginTop = '100px';
+							styleCopy.marginTop = '140px';
 					} else if (segment2 && segment2.get('openComments')) {
 						let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
 						if (comments.length === 0)
