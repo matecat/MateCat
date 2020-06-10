@@ -29,8 +29,8 @@ class SegmentPlaceholder extends React.Component {
 		const {sid} = this.props;
 
 		// Adeguamento larghezza container
-		const segmentContainerOriginalWidth = this.elRef.getBoundingClientRect().width;
-		this.elRef.style.cssText = `width:${segmentContainerOriginalWidth - 10}px !important;`;
+		// const segmentContainerOriginalWidth = this.elRef.getBoundingClientRect().width;
+		this.elRef.style.cssText = `width:${window.innerWidth - 10}px !important;`;
 
 		// Ottine source e target attualmente renderizzati
 		const source = this.elRef.getElementsByClassName('source')[0],
@@ -61,7 +61,6 @@ class SegmentPlaceholder extends React.Component {
 		const minEditorHeight = 90;
 
 		//
-		console.log(`Altezza finale SID:${sid} --> h:${Math.max(maxEditor + outerDivPadding, minEditorHeight)}px`)
 		this.props.calc(Math.max(maxEditor + outerDivPadding, minEditorHeight));
 	}
 
@@ -126,8 +125,10 @@ class SegmentsContainer extends React.Component {
 	}
 
 	closeSide() {
-		this.segmentsHeightsMap = {};
-		this.setState({sideOpen: false});
+		if(this.state.sideOpen){
+			this.segmentsHeightsMap = {};
+			this.setState({sideOpen: false});
+		}
 	}
 
 	updateAllSegments() {
@@ -316,7 +317,7 @@ class SegmentsContainer extends React.Component {
 	}
 
 	getCommentsPadding(index, segment) {
-		if (index === 0) {
+		if (index === 0 && this.state.sideOpen) {
 			let segment1 = this.getSegmentByIndex(1);
 			let segment2 = this.getSegmentByIndex(2);
 
@@ -376,10 +377,8 @@ class SegmentsContainer extends React.Component {
 			}
 		// compute height for the first time
 		}else if( !this.segmentsHeightsMap[segment.get('sid')]){
-			console.warn('### RECOMPUTE ###')
 			// if not available in cache, compute height
 			if (components && Object.keys(components).length) {
-
 				const container = document.createElement("div", {});
 				document.body.appendChild(container);
 				const tempMount = (h) => {
@@ -580,20 +579,15 @@ class SegmentsContainer extends React.Component {
 	updateWindowDimensions() {
 		let data = {};
 
-		this.segmentsHeightsMap = {};
-
 		data.width = window.innerWidth;
 		data.height = window.innerHeight - $('header').innerHeight() - $('footer').innerHeight();
 
-		this.setState({
-			window: data
-		});
-		/*if(this.state.window.width !== data.width || this.state.window.height !== data.height ){
+		if(this.state.window.width !== data.width || this.state.window.height !== data.height ){
 			this.setState({
 				window: data
 			});
 			this.segmentsHeightsMap = {};
-		}*/
+		}
 	};
 
 	componentDidCatch(e) {
