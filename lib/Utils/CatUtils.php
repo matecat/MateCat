@@ -31,8 +31,27 @@ class CatUtils {
 
     public static $cjk = [ 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 ];
 
+    /**
+     * @param $langCode
+     *
+     * @return bool
+     */
     public static function isCJK( $langCode ) {
         return array_key_exists( explode( '-', $langCode )[ 0 ], self::$cjk );
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function CJKTerminateChars() {
+        return [
+                '。',
+                '、',
+                '?',
+                '!',
+                ' ',
+                '）',
+        ];
     }
 
     // ----------------------------------------------------------------
@@ -138,7 +157,7 @@ class CatUtils {
      *
      * @return string
      */
-    public static function reApplySegmentSplit( $segment, Array $chunk_positions ) {
+    public static function reApplySegmentSplit( $segment, array $chunk_positions ) {
 
         $string_chunks = [];
         $last_sum      = 0;
@@ -649,9 +668,9 @@ class CatUtils {
 
         $result = null;
         if ( $featureSet->hasRevisionFeature() ) {
-            $result = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[0];
+            $result = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
         } else {
-            $result = self::getQualityInfoFromJobStruct( $job, $featureSet ) ;
+            $result = self::getQualityInfoFromJobStruct( $job, $featureSet );
         }
 
         return $result;
@@ -664,7 +683,7 @@ class CatUtils {
      * @return array
      */
     public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet ) {
-        $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
+        $struct      = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
         $reviseClass = new Constants_Revise;
 
         $jobQA = new Revise_JobQA(
@@ -678,6 +697,7 @@ class CatUtils {
          */
         list( $jobQA, ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
         $jobQA->retrieveJobErrorTotals();
+
         return $jobQA->evalJobVote();
     }
 
