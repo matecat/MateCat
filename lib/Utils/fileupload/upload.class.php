@@ -235,6 +235,10 @@ class UploadHandler {
 
         $file->type = $this->getMimeContentType( $file->tmp_name );
 
+        if(false === $file->type){
+            $file->error = "Mime type was not recognized";
+        }
+
         if ( $this->validate( $uploaded_file, $file, $error, $index ) ) {
             $file_path   = $this->options[ 'upload_dir' ] . $file->name;
             $append_file = !$this->options[ 'discard_aborted_uploads' ] &&
@@ -300,7 +304,8 @@ class UploadHandler {
 
     /**
      * Detection of MIME Type improvement
-     * Using File Information extention
+     *
+     * Using File Information extention asa backup method
      * https://www.php.net/manual/en/fileinfo.installation.php
      *
      * File Information seems to be slightly better than mime_content_type function
@@ -311,9 +316,11 @@ class UploadHandler {
      *
      * https://stackoverflow.com/questions/16190929/detecting-a-mime-type-fails-in-php
      *
+     * Returns false in case of failure
+     *
      * @param $filename
      *
-     * @return mixed|string
+     * @return string|bool
      */
     private function getMimeContentType( $filename ) {
         if ( function_exists( 'mime_content_type' ) ) {
