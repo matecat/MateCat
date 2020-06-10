@@ -370,6 +370,10 @@ class SegmentsContainer extends React.Component {
 				if (index === this.state.segments.size - 1) {
 					height = height + 150;
 				}
+				// collection type
+				if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
+					height += 42;
+				}
 				// add comment padding
 				let commentsPadding = this.getCommentsPadding(index, segment);
 				height += commentsPadding;
@@ -397,6 +401,11 @@ class SegmentsContainer extends React.Component {
 					// if it's last segment, add 150 to height as distance from footer
 					if (index === this.state.segments.size - 1) {
 						height = height + 150;
+					}
+
+					// collection type
+					if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
+						height += 42;
 					}
 
 					// save height
