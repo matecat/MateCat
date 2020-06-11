@@ -340,9 +340,9 @@ class Editarea extends React.Component {
             let preSelectionRange = range.cloneRange();
             preSelectionRange.selectNodeContents(containerEl);
             preSelectionRange.setEnd(range.startContainer, range.startOffset);
-            let tabCode = TextUtils.htmlDecode("&#8677;");
-            let regExp = new RegExp(tabCode, 'g');
-            let selectionText = preSelectionRange.toString().replace(regExp, '');
+            // let tabCode = TextUtils.htmlDecode("&#8677;");
+            // let regExp = new RegExp(tabCode, 'g');
+            let selectionText = preSelectionRange.toString();
             start = selectionText.length;
 
             return {
