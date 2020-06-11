@@ -177,7 +177,7 @@ let SearchUtils = {
     },
 
     getMatchesInText: function(text, textToMatch, ignoreCase, isExactMatch) {
-
+        textToMatch = TextUtils.escapeRegExp(textToMatch);
         let reg = new RegExp( '(' + textToMatch + ')', "g" + ignoreCase );
         if (isExactMatch) {
             reg = new RegExp( '\\b(' + textToMatch.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreCase );
