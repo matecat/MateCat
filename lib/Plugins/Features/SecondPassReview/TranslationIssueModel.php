@@ -34,16 +34,12 @@ class TranslationIssueModel extends \Features\ReviewExtended\TranslationIssueMod
             $this->subtractPenaltyPoints( $chunk_review_model );
         }
 
-        // If I am in R2 and I am deleting an issue
-        // I would add penalty points from R1
-        if ( \Utils::getSourcePageFromReferer() === 3 ) {
-            $chunkReviews = ChunkReviewDao::findByIdJob( $this->chunk->id );
-            foreach ( $chunkReviews as $chunkReview ) {
-                if ( $chunkReview->source_page == 2 ) {
-                    $chunk_review_model = new ChunkReviewModel( $chunkReview );
-                    $this->subtractPenaltyPoints( $chunk_review_model );
-                }
-            }
+        // If I am in R2 and I am deleting an R1 issue
+        // I must subtract penalty points from R1
+        if ( \Utils::getSourcePageFromReferer() === 3 and $this->issue->source_page == 2 ) {
+            $chunkReview = ChunkReviewDao::findByIdJobAndSourcePage($this->chunk->id, 2);
+            $chunk_review_model = new ChunkReviewModel( $chunkReview );
+            $chunk_review_model->subtractPenaltyPoints($this->issue->penalty_points , $chunk_review_model->getChunk()->getProject());
         }
     }
 }
