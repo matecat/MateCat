@@ -266,7 +266,7 @@ class Editarea extends React.Component {
         }
         setTimeout(()=>{
             this.updateTranslationInStore();
-            if(this.props.segment.opened){
+            if(this.props.segment.opened && this.editor){
                 this.editor.focus();
             }
         });
@@ -349,7 +349,7 @@ class Editarea extends React.Component {
         </div>;
     }
 
-
+    // Todo: convert & test e.key
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
 
@@ -389,6 +389,7 @@ class Editarea extends React.Component {
 
         switch (command) {
             case 'toggle-tag-menu':
+                // Todo: prenderla dallo state
                 const tagSuggestions = checkForMissingTags(sourceTagMap, targetTagMap);
                 openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
                 return 'handled';
