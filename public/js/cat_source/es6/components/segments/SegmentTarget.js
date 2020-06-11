@@ -133,7 +133,7 @@ class SegmentTarget extends React.Component {
     }
 
     getTargetArea(translation) {
-
+        const {segment} = this.props;
         const {showFormatMenu} = this.state;
         const {toggleFormatMenu} = this;
 
