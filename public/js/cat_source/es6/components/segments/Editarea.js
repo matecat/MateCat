@@ -266,9 +266,9 @@ class Editarea extends React.Component {
         }
         setTimeout(()=>{
             this.updateTranslationInStore();
-            if(this.props.segment.opened && this.editor){
+            /*if(this.props.segment.opened && this.editor){
                 this.editor.focus();
-            }
+            }*/
         });
     }
 
