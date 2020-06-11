@@ -6,7 +6,7 @@
          */
 
         startSegmentTagProjection: function (sid) {
-            UI.getSegmentTagsProjection().done(function(response) {
+            UI.getSegmentTagsProjection(sid).done(function(response) {
                 if (response.errors && !!(response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     SegmentActions.disableTPOnSegment();
@@ -38,20 +38,21 @@
          * Tag Projection: get the tag projection for the current segment
          * @returns translation with the Tag prjection
          */
-        getSegmentTagsProjection: function () {
-            var source = UI.currentSegment.find('.source').data('original');
+        getSegmentTagsProjection: function (sid) {
+            var segmentObj = SegmentStore.getSegmentByIdToJS(sid);
+            var source = segmentObj.segment;
             source = TextUtils.htmlDecode(source).replace(/&quot;/g, '\"');
-            source = TextUtils.htmlDecode(source);
+            // source = TextUtils.htmlDecode(source);
             //Retrieve the chosen suggestion if exist
             var suggestion;
-            var currentContribution = SegmentStore.getSegmentChoosenContribution(UI.currentSegmentId);
+            var currentContribution = SegmentStore.getSegmentChoosenContribution(sid);
             // Send the suggestion to Tag Projection only if is > 89% and is not MT
             if (!_.isUndefined(currentContribution) && currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
                 suggestion = currentContribution.translation;
             }
 
             //Before send process with this.postProcessEditarea
-            var target = EditAreaUtils.postProcessEditarea(UI.currentSegment, ".editarea");
+            var target = segmentObj.translation;
             return APP.doRequest({
                 data: {
                     action: 'getTagProjection',

@@ -29,10 +29,10 @@ const addTagEntityToEditor = (editorState, tag, selectionState = null) => {
         entityKey);
 
     return EditorState.push(
-         editorState,
-         replacedContent,
-         'apply-entity'
-     );
+        editorState,
+        replacedContent,
+        'apply-entity'
+    );
 
 };
 

@@ -21,7 +21,9 @@ import DraftMatecatUtils from "./utils/DraftMatecatUtils";
 import SegmentConstants from "../../constants/SegmentConstants";
 import CompoundDecorator from "./utils/CompoundDecorator"
 import LexiqaUtils from "../../utils/lxq.main";
+import matchTag from "./utils/DraftMatecatUtils/matchTag";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
+
 
 class SegmentSource extends React.Component {
 
@@ -102,7 +104,7 @@ class SegmentSource extends React.Component {
             this.setState( {
                 editorState: editorState,
             } );
-        }
+            setTimeout(()=>this.updateSourceInStore());        }
     };
 
     afterRenderActions(prevProps) {
