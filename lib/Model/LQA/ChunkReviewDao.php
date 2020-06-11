@@ -49,6 +49,26 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param $id_job
+     * @param $source_page
+     *
+     * @return ChunkReviewStruct
+     */
+    public static function findByIdJobAndSourcePage( $id_job, $source_page ) {
+        $sql  = "SELECT * FROM qa_chunk_reviews " .
+                " WHERE id_job = :id_job AND source_page = :source_page ORDER BY id";
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\ChunkReviewStruct' );
+        $stmt->execute( [
+                'id_job' => $id_job,
+                'source_page' => $source_page,
+        ] );
+
+        return $stmt->fetchAll()[0];
+    }
+
+    /**
      * @param $id
      *
      * @return ChunkReviewStruct
