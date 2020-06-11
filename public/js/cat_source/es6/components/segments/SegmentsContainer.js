@@ -61,6 +61,7 @@ class SegmentPlaceholder extends React.Component {
 		const minEditorHeight = 90;
 
 		//
+		//console.log(`Computed ${sid}, height: ${maxEditor}`)
 		this.props.calc(Math.max(maxEditor + outerDivPadding, minEditorHeight));
 	}
 
@@ -139,7 +140,6 @@ class SegmentsContainer extends React.Component {
 		// VirtualList.prototype.animateScroll = false;
 		// Update previous last segment height inside segmentsHeightsMap
 		if(this.state.segments.size !== segments.size){
-			console.log(`old size was ${this.state.segments.size} new size is ${segments.size}`)
 			const oldLastSegment = this.getSegmentByIndex(this.state.segments.size - 1);
 			const newLastSegment = segments.get(segments.size - 1);
 			if(oldLastSegment && newLastSegment){
@@ -376,8 +376,9 @@ class SegmentsContainer extends React.Component {
 			const $segment = $('#segment-' + segment.get('sid'));
 			const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
 
-			if (($segment.length && $segment.hasClass('opened')) || ($segment.length === 0 && this.lastOpenedHeight)) {
-				height = ($segment.length) ? $segment.outerHeight() + 20 : this.lastOpenedHeight;
+			if (($segment.length && $segment.hasClass('opened'))/* || ($segment.length === 0 && this.lastOpenedHeight)*/) {
+				//height = ($segment.length) ? $segment.outerHeight() + 20 : this.lastOpenedHeight;
+				height = $segment.outerHeight() + 20;
 				// add private resources div
 				height = height - 23;
 				// if is the first segment of a file, add the file header
@@ -396,6 +397,8 @@ class SegmentsContainer extends React.Component {
 				let commentsPadding = this.getCommentsPadding(index, segment);
 				height += commentsPadding;
 				this.lastOpenedHeight = height
+			}else if ($segment.length === 0 && this.lastOpenedHeight){
+				height = this.lastOpenedHeight
 			}
 		// compute height for the first time
 		}else if( !this.segmentsHeightsMap[segment.get('sid')] || this.segmentsHeightsMap[segment.get('sid')].height === 0 ){
@@ -431,6 +434,7 @@ class SegmentsContainer extends React.Component {
 					container.parentNode.removeChild(container);
 
 				};
+
 				ReactDOM.render(<SegmentPlaceholder sid={sid} component={components[index]} calc={tempMount}/>, container);
 			}
 		// retrieve height from cache
