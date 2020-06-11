@@ -29,11 +29,7 @@ import updateEntityData from "./updateEntityData";
 import tagFromEntity from "./tagFromEntity";
 import matchTagInEditor from "./matchTagInEditor";
 import getSelectedText from "./getSelectedText";
-<<<<<<< HEAD
-import addTagEntityToEditor from "./addTagEntityToEditor";
 import canDecorateRange from "./canDecorateRange";
-=======
->>>>>>> parent of 136e5afc5... autofill missing tags in target button
 
 
 const DraftMatecatUtils = {
@@ -56,11 +52,8 @@ const DraftMatecatUtils = {
 	applyEntityToContentBlock,
 	updateEntityData,
 	matchTagInEditor,
-<<<<<<< HEAD
 	addTagEntityToEditor,
 	canDecorateRange,
-=======
->>>>>>> parent of 136e5afc5... autofill missing tags in target button
 	// Fragment Utils
 	insertFragment,
 	duplicateFragment,
