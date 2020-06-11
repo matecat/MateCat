@@ -200,7 +200,7 @@ class SegmentTarget extends React.Component {
 
             }
             // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi riga 3844 del file style.scss
-            if (this.props.tagModesEnabled  && segment.missingTagsInTarget && segment.missingTagsInTarget.length > 0) {
+            if (this.props.tagModesEnabled  && segment.missingTagsInTarget && segment.missingTagsInTarget.length > 0 && this.editArea) {
                 tagCopyButton = <a className="autofillTag"
                                    alt="Copy missing tags from source to target"
                                    title="Copy missing tags from source to target"
