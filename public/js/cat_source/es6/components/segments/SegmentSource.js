@@ -145,8 +145,12 @@ class SegmentSource extends React.Component {
 
     splitSegment(split) {
         let text = $(this.splitContainer).find('.splitArea').html();
-        text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/, '##$_SPLIT$##');
+        text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/gi, '##$_SPLIT$##');
+        // Rimuovi lo span del vecchio split ( verrà ricalcolato con ##$_SPLIT_$## )
         text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
+        // Remove split placeholer if inside tag
+        text = text.replace(/<span contenteditable="false" class=\"(.*?)tag(.*?)\">(.*?)##\$_SPLIT\$##(.*?)<\/span>/gi,
+            '<span contenteditable="false" class="$1tag$2">$3$4</span>');
         text = TagUtils.prepareTextToSend(text);
         // let splitArray = text.split('##_SPLIT_##');
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
@@ -384,9 +388,9 @@ class SegmentSource extends React.Component {
                 segmentsSplit.forEach((sid, index)=>{
                     let segment = SegmentStore.getSegmentByIdToJS(sid);
                     if ( sid === this.props.segment.sid) {
-                        sourceHtml += '<span class="currentSplittedSegment">'+TagUtils.transformPlaceholdersAndTags(segment.segment)+'</span>';
+                        sourceHtml += '<span class="currentSplittedSegment">'+TagUtils.transformPlaceholdersAndTagsNew(segment.segment)+'</span>';
                     } else {
-                        sourceHtml+= TagUtils.transformPlaceholdersAndTags(segment.segment);
+                        sourceHtml+= TagUtils.transformPlaceholdersAndTagsNew(segment.segment);
                     }
                     if(index !== segmentsSplit.length - 1)
                         sourceHtml += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
@@ -408,7 +412,7 @@ class SegmentSource extends React.Component {
                 html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
                     <div className="splitArea" contentEditable = "false"
                          onClick={(e)=>this.addSplitPoint(e)}
-                         dangerouslySetInnerHTML={this.allowHTML(TagUtils.transformPlaceholdersAndTags(this.props.segment.segment))}/>
+                         dangerouslySetInnerHTML={this.allowHTML(TagUtils.transformPlaceholdersAndTagsNew(this.props.segment.segment))}/>
                     <div className="splitBar">
                         <div className="buttons">
                             <a className="ui button cancel-button cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >

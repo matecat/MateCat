@@ -36,6 +36,16 @@ const TAGS_UTILS =  {
         }
         return text;
     },
+
+    transformPlaceholdersAndTagsNew: function(text) {
+        text = this.decodePlaceholdersToTextSimple(text || '');
+        if ( !(config.tagLockCustomizable && !UI.tagLockEnabled) ) {
+            // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
+            text = this.matchTag(this.decodeHtmlInTag(text));
+        }
+        return text;
+    },
+
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
      * @param str
