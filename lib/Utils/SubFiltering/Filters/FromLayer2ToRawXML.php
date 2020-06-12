@@ -54,13 +54,16 @@ class FromLayer2ToRawXML extends AbstractHandler {
 
         //normal control characters must be converted to entities
         $segment = str_replace(
-                [ "\r\n", "\r", "\n", "\t" ],
+                [ "\r\n", "\r", "\n", "\t", ],
                 [
                         '&#13;&#10;',
                         '&#13;',
                         '&#10;',
-                        '&#09;'
+                        '&#09;',
                 ], $segment );
+
+        // handle 9D character (TAB)
+        $segment = preg_replace('/[\x9d]/', '&#09;', $segment);
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s',  [ 'CatUtils', 'htmlentitiesFromUnicode' ], $segment );
