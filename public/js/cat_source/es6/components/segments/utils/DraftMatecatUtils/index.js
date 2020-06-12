@@ -31,6 +31,7 @@ import matchTagInEditor from "./matchTagInEditor";
 import getSelectedText from "./getSelectedText";
 import addTagEntityToEditor from "./addTagEntityToEditor";
 import canDecorateRange from "./canDecorateRange";
+import getEntityStrategy from "./getEntityStrategy";
 
 
 const DraftMatecatUtils = {
@@ -46,6 +47,7 @@ const DraftMatecatUtils = {
 	decodeTagInfo,
 	tagFromEntity,
 	// Entity Utils
+	getEntityStrategy,
 	getEntities,
 	createNewEntitiesFromMap,
 	linkEntities,

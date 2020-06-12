@@ -15,9 +15,10 @@ import CatToolConstants from '../../constants/CatToolConstants';
 import Speech2Text from '../../utils/speech2text';
 import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
+import SegmentPlaceholderLite from "./SegmentPlaceholderLite";
 
 
-class SegmentPlaceholder extends React.Component {
+/*class SegmentPlaceholder extends React.Component {
 	constructor(props) {
 		super(props);
 	}
@@ -67,13 +68,13 @@ class SegmentPlaceholder extends React.Component {
 
 	render() {
 		const {component} = this.props;
-		return <div  className={'segment-container'} ref={el => this.elRef = el} style={{display: 'inline-block', width: '100%' /*visibility:'hidden'*/}}>
+		return <div  className={'segment-container'} ref={el => this.elRef = el} style={{display: 'inline-block', width: '100%' /!*visibility:'hidden'*!/}}>
 			{component}
 		</div>
 	}
-}
+}*/
 
-let segmentHeightCache = {};
+/*let segmentHeightCache = {};*/
 
 class SegmentsContainer extends React.Component {
 
@@ -418,7 +419,7 @@ class SegmentsContainer extends React.Component {
 			if (components && Object.keys(components).length) {
 				const container = document.createElement("div", {});
 				document.body.appendChild(container);
-				const tempMount = (h) => {
+				const computeHeightAndUnmount = (h) => {
 					let height = h;
 
 					height += this.getSegmentBasicSize(index, segment);
@@ -432,13 +433,17 @@ class SegmentsContainer extends React.Component {
 					container.parentNode.removeChild(container);
 
 				};
-				ReactDOM.render(<SegmentPlaceholder sid={sid} component={components[index]} calc={tempMount}/>, container);
+				const segmentObject = segment.toJS();
+				ReactDOM.render(<SegmentPlaceholderLite sid={sid}
+														segment={segmentObject}
+														computeHeight={computeHeightAndUnmount}
+														sideOpen={this.state.sideOpen}/>, container);
+				//ReactDOM.render(<SegmentPlaceholder sid={sid} component={components[index]} calc={computeHeightAndUnmount}/>, container);
 			}
 		// --- Retrieve height from cache
 		}else{
 			height = this.segmentsHeightsMap[segment.get('sid')].height;
 		}
-
 		return height
 
 		/*
