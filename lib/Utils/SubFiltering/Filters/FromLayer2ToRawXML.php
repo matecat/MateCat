@@ -63,7 +63,7 @@ class FromLayer2ToRawXML extends AbstractHandler {
                 ], $segment );
 
         // handle 9D character (TAB)
-        $segment = preg_replace('/[\x9d]/', '&#09;', $segment);
+        $segment = preg_replace('/\x9d/', '&#09;', $segment);
 
         //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s',  [ 'CatUtils', 'htmlentitiesFromUnicode' ], $segment );

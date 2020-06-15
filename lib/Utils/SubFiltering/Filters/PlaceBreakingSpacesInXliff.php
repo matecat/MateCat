@@ -20,6 +20,6 @@ class PlaceBreakingSpacesInXliff extends AbstractHandler {
                 ], $segment );
 
         // handle 9D character (TAB)
-        return preg_replace('/[\x9d]/', '&#09;', $segment);
+        return preg_replace('/\x9d/', '&#09;', $segment);
     }
 }
