@@ -419,8 +419,10 @@ class Editarea extends React.Component {
 
     onBlurEvent = () => {
         // Hide Edit Toolbar
-        const {toggleFormatMenu} = this.props;
+        const {toggleFormatMenu, setClickedTagId} = this.props;
         toggleFormatMenu(false);
+        setClickedTagId();
+
     };
 
     // Focus on editor trigger 2 onChange events
