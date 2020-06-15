@@ -84,8 +84,8 @@ class TagEntity extends Component {
         const mirrorClickedStyle = entity.data.id && clickedTagId === entity.data.id ? 'clicked' : '';
         
         return <div className={"tag-container"}
-                    contentEditable="false"
-                    suppressContentEditableWarning={true}>
+                    /*contentEditable="true"
+                    suppressContentEditableWarning={true}*/>
             {showTooltip && <TooltipInfo/>}
             <span data-offset-key={offsetkey}
                 className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
