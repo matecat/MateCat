@@ -25,7 +25,7 @@ import insertTag from "./utils/DraftMatecatUtils/TagMenu/insertTag";
 import matchTag from "./utils/DraftMatecatUtils/matchTag";
 import checkForMissingTags from "./utils/DraftMatecatUtils/TagMenu/checkForMissingTag";
 import updateEntityData from "./utils/DraftMatecatUtils/updateEntityData";
-const {hasCommandModifier} = KeyBindingUtil;
+const {hasCommandModifier, isOptionKeyCommand} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import insertText from "./utils/DraftMatecatUtils/insertText";
@@ -255,6 +255,7 @@ class Editarea extends React.Component {
     };
 
     componentDidMount() {
+        //console.log(`componentDidMount@EditArea ${this.props.segment.sid}`)
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
         if ( this.props.segment.inSearch ) {
@@ -266,9 +267,9 @@ class Editarea extends React.Component {
         }
         setTimeout(()=>{
             this.updateTranslationInStore();
-            if(this.props.segment.opened){
+            /*if(this.props.segment.opened && this.editor){
                 this.editor.focus();
-            }
+            }*/
         });
     }
 
@@ -349,11 +350,9 @@ class Editarea extends React.Component {
         </div>;
     }
 
-
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
-
-        if(e.keyCode === 84 && !hasCommandModifier(e) && e.altKey) {
+        if(e.keyCode === 84 && isOptionKeyCommand(e) && !e.shiftKey) {
             this.setState({
                 triggerText: null
             });
@@ -373,6 +372,8 @@ class Editarea extends React.Component {
             if(displayPopover) return 'down-arrow-press';
         }else if(e.keyCode === 13 && !hasCommandModifier(e)){ // enter
             if(displayPopover) return 'enter-press';
+        }else if(e.keyCode === 27){ // enter
+            return 'close-tag-menu';
         }
         return getDefaultKeyBinding(e);
     };
@@ -380,6 +381,7 @@ class Editarea extends React.Component {
     handleKeyCommand = (command) => {
         const {
             openPopover,
+            closePopover,
             getEditorRelativeSelectionOffset,
             moveDownTagMenuSelection,
             moveUpTagMenuSelection,
@@ -389,8 +391,12 @@ class Editarea extends React.Component {
 
         switch (command) {
             case 'toggle-tag-menu':
+                // Todo: prenderla dallo state
                 const tagSuggestions = checkForMissingTags(sourceTagMap, targetTagMap);
                 openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
+                return 'handled';
+            case 'close-tag-menu':
+                closePopover();
                 return 'handled';
             case 'up-arrow-press':
                 moveUpTagMenuSelection();

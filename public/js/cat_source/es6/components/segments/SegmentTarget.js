@@ -24,25 +24,25 @@ class SegmentTarget extends React.Component {
         this.state = {
             originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
                 : this.props.segment.translation),
-            showTagsMenu: false,
+            /*showTagsMenu: false,*/
             showFormatMenu: false
         };
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
-        this.showTagsMenu = this.showTagsMenu.bind(this);
-        this.hideTagsMenu = this.hideTagsMenu.bind(this);
+        /*this.showTagsMenu = this.showTagsMenu.bind(this);*/
+        /*this.hideTagsMenu = this.hideTagsMenu.bind(this);*/
         this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this);
 
     }
 
-    showTagsMenu(sid) {
+    /*showTagsMenu(sid) {
         if ( this.props.segment.sid == sid ) {
             this.setState({
                 showTagsMenu: true
             });
         }
-    }
+    }*/
 
-    hideTagsMenu() {
+    /*hideTagsMenu() {
         if ( this.state.showTagsMenu ) {
             this.setState({
                 showTagsMenu: false
@@ -50,7 +50,7 @@ class SegmentTarget extends React.Component {
             //TODO Move it
             $('.tag-autocomplete-endcursor').remove();
         }
-    }
+    }*/
 
     setOriginalTranslation(sid, translation) {
         if (this.props.segment.sid == sid) {
@@ -199,7 +199,7 @@ class SegmentTarget extends React.Component {
 
             }
             // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi riga 3844 del file style.scss
-            if (this.props.tagModesEnabled  && segment.missingTagsInTarget && segment.missingTagsInTarget.length > 0) {
+            if (this.props.tagModesEnabled  && segment.missingTagsInTarget && segment.missingTagsInTarget.length > 0 && this.editArea) {
                 tagCopyButton = <a className="autofillTag"
                                    alt="Copy missing tags from source to target"
                                    title="Copy missing tags from source to target"
@@ -220,13 +220,13 @@ class SegmentTarget extends React.Component {
                     clickedTagId={this.props.clickedTagId}
                     toggleFormatMenu={toggleFormatMenu}
                 />
-                { this.state.showTagsMenu ? (
+                {/*{ this.state.showTagsMenu ? (
 
                     <TagsMenu segment={this.props.segment}
                               height={this.props.height}
                     />
 
-                ): null}
+                ): null}*/}
                 {s2tMicro}
                 <div className="original-translation" style={{display: 'none'}}
                      dangerouslySetInnerHTML={this.allowHTML(this.state.originalTranslation)}/>
@@ -277,15 +277,15 @@ class SegmentTarget extends React.Component {
     // }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
-        SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
+        /*SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);*/
+        /*SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);*/
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.addListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);
-        SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);
+        /*SegmentStore.removeListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);*/
+        /*SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);*/
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.removeListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
 

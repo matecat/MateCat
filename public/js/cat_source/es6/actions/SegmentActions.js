@@ -537,19 +537,19 @@ const SegmentActions = {
             id: sid,
         });
     },
-    showTagsMenu: function(sid) {
+    /*showTagsMenu: function(sid) {
         if ( !SegmentUtils.checkCurrentSegmentTPEnabled() ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_TAGS_MENU,
                 sid: sid,
             });
         }
-    },
-    closeTagsMenu: function() {
+    },*/
+    /*closeTagsMenu: function() {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_TAGS_MENU
         });
-    },
+    },*/
     undoInSegment: function() {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UNDO_TEXT

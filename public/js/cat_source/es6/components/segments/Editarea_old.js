@@ -107,7 +107,7 @@ class Editarea extends React.Component {
 
     }
     onClickEvent(event) {
-        SegmentActions.closeTagsMenu();
+        /*SegmentActions.closeTagsMenu();*/
         if (this.props.readonly || this.props.locked) {
             UI.handleClickOnReadOnly( $(event.currentTarget).closest('section') );
         } else {
