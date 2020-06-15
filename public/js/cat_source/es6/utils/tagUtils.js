@@ -234,8 +234,8 @@ const TAGS_UTILS =  {
     // Associate tag of type g with integer id
     matchTag: function (tx) {
         let returnValue = tx;
-        const openRegex =  RegExp('&lt;g.*?id="(.*?)".*?&gt;', 'gi');
-        const closeRegex =  RegExp('&lt;(\/g)&gt;', 'gi');
+        const openRegex =  new RegExp('&lt;g.*?id="(.*?)".*?&gt;', 'gi');
+        const closeRegex =  new RegExp('&lt;(\/g)&gt;', 'gi');
         try {
             let openingMatchArr;
             let openings = [];

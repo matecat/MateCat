@@ -30,13 +30,17 @@ export const getIdAttributeRegEx = () => {
  * @returns {string}
  */
 export const unescapeHTML = (escapedHTML) => {
-    return escapedHTML
-        .replace(/&lt;/g,'<')
-        .replace(/&gt;/g,'>')
-        .replace(/&amp;/g,'&')
-        .replace(/&nbsp;/g,' ')
-        .replace(/&apos;/g,'\'')
-        .replace(/&quot;/g,'\"');
+    try{
+        return escapedHTML
+            .replace(/&lt;/g,'<')
+            .replace(/&gt;/g,'>')
+            .replace(/&amp;/g,'&')
+            .replace(/&nbsp;/g,' ')
+            .replace(/&apos;/g,'\'')
+            .replace(/&quot;/g,'\"');
+    }catch(e){
+        return '';
+    }
 };
 
 /**

@@ -456,7 +456,7 @@ class Editarea extends React.Component {
             const lastSelection = editorState.getSelection();
             // Aggiorna i tag presenti
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
-            newTagRange = matchTag(decodedSegment); // range update
+            newTagRange = DraftMatecatUtils.matchTag(decodedSegment); // range update
             // Aggiornamento live dei collegamenti tra i tag non self-closed
             newEditorState = updateEntityData(editorState, newTagRange, lastSelection, entities);
         }

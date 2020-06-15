@@ -15,13 +15,11 @@
 const tagSignatures = {
     'ph': {
         type: 'ph',
-        openRegex: /&lt;ph/g,
-        openLength: 6,
-        closeRegex: /(\/&gt;)/, // '/>'
+        regex: /&lt;ph.*?id="(.*?)".*?equiv-text="base64:(.*?)".*?&gt;/gi,
         selfClosing: true,
         isClosure: false,
         placeholder: null,
-        placeholderRegex: /equiv-text="base64:(.+)"/,
+        placeholderRegex: /equiv-text="base64:(.*?)"/,
         decodeNeeded: true,
         errorCheckAvailable: true,
         lexiqaAvailable: true,
@@ -29,9 +27,7 @@ const tagSignatures = {
     },
     'g': {
         type: 'g',
-        openRegex: /&lt;g/g,
-        openLength: 5,
-        closeRegex: /(&gt;)/, // '>'
+        regex: /&lt;g.*?id="(.*?)".*?&gt;/gi,
         selfClosing: false,
         isClosure: false,
         placeholder: null,
@@ -43,9 +39,7 @@ const tagSignatures = {
     },
     'gCl': {
         type: 'gCl',
-        openRegex: /&lt;\/g&gt;/g,
-        openLength: 10,
-        closeRegex: null,
+        regex: /&lt;(\/g)&gt;/gi,
         selfClosing: false,
         isClosure: true,
         placeholder: '</g>',
@@ -55,11 +49,45 @@ const tagSignatures = {
         lexiqaAvailable: false,
         style: 'tag tag-close'
     },
+    'bx': {
+        type: 'bx',
+        regex: /&lt;bx.*?id="(.*?)".*?&gt;/gi,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: null,
+        placeholderRegex: /id="(\d+)"/,
+        decodeNeeded: false,
+        errorCheckAvailable: true,
+        lexiqaAvailable: false,
+        style: 'tag tag-selfclosed'
+    },
+    'ex': {
+        type: 'ex',
+        regex: /&lt;ex.*?id="(.*?)".*?&gt;/gi,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: null,
+        placeholderRegex: /id="(\d+)"/,
+        decodeNeeded: false,
+        errorCheckAvailable: true,
+        lexiqaAvailable: false,
+        style: 'tag tag-selfclosed'
+    },
+    'x': {
+        type: 'x',
+        regex: /&lt;x.*?id="(.*?)".*?&gt;/gi,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: null,
+        placeholderRegex: /id="(\d+)"/,
+        decodeNeeded: false,
+        errorCheckAvailable: true,
+        lexiqaAvailable: false,
+        style: 'tag tag-selfclosed'
+    },
     'nbsp':{
         type: 'nbsp',
-        openRegex: /##\$(_A0)\$##/g,
-        openLength: 9,
-        closeRegex: null,
+        regex: /##\$(_A0)\$##/g,
         selfClosing: true,
         isClosure: false,
         placeholder: '°',
@@ -71,9 +99,7 @@ const tagSignatures = {
     },
     'tab':{
         type: 'tab',
-        openRegex: /##\$(_09)\$##/g,
-        openLength: 9,
-        closeRegex: null,
+        regex: /##\$(_09)\$##/g,
         selfClosing: true,
         isClosure: false,
         placeholder: '#',
@@ -85,6 +111,7 @@ const tagSignatures = {
     },
     'carriageReturn':{
         type: 'carriageReturn',
+        regex: /##\$(_0D)\$##/g,
         openRegex: /##\$(_0D)\$##/g,
         openLength: 9,
         closeRegex: null,
@@ -99,6 +126,7 @@ const tagSignatures = {
     },
     'lineFeed':{
         type: 'lineFeed',
+        regex: /##\$(_0A)\$##/g,
         openRegex: /##\$(_0A)\$##/g,
         openLength: 9,
         closeRegex: null,
