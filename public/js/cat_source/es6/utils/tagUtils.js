@@ -245,7 +245,8 @@ const TAGS_UTILS =  {
                 if(tagSignatures[key].selfClosing){
                     const {placeholderRegex, decodeNeeded} = tagSignatures[key];
                     if(placeholderRegex){
-                        tx = tx.replace( placeholderRegex , function (match, text) {
+                        let globalRegex = new RegExp(placeholderRegex.source, placeholderRegex.flags + "gi");
+                        tx = tx.replace( globalRegex , function (match, text) {
                             if(decodeNeeded){
                                 return Base64.decode(text);
                             }
