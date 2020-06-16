@@ -372,6 +372,7 @@ class SegmentSource extends React.Component {
                         id={"segment-" + this.props.segment.sid +"-source"}
                         data-original={this.originalSource}
                         onCopy={copyFragment}
+                        onBlur={this.onBlurEvent}
                     >
             <Editor
                 editorState={editorState}
@@ -427,6 +428,11 @@ class SegmentSource extends React.Component {
         return html;
 
     }
+
+    onBlurEvent = () => {
+        const {setClickedTagId} = this.props;
+        setClickedTagId();
+    };
 
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;

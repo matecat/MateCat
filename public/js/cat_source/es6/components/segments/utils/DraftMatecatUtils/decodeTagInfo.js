@@ -20,7 +20,7 @@ const decodeTagInfo = (tag) => {
             decodedTagData.id = decodedTagData.id + idMatch[1];
         }
         // Catch Content - if regex exists, try to search, else put placeholder
-        if(tagSignatures[tag.type].placeholderRegex!== null){
+        if(tagSignatures[tag.type].placeholderRegex){
             const contentMatch = tagSignatures[tag.type].placeholderRegex.exec(tag.data.encodedText);
             if(contentMatch && contentMatch.length > 1) {
                 decodedTagData.content =  tagSignatures[tag.type].decodeNeeded ? atob(contentMatch[1]) : contentMatch[1];
