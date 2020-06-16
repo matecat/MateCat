@@ -158,6 +158,11 @@ class getWarningController extends ajaxController {
     /**
      * Performs a check on single segment
      *
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function __segmentWarningsCall() {
 

@@ -1809,6 +1809,17 @@ class ProjectManager {
                                             $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ]
                                     );
 
+                                    //
+                                    // -----------------------------------------------
+                                    // NOTE 2020-06-16
+                                    // -----------------------------------------------
+                                    //
+                                    // before calling html_entity_decode function we convert
+                                    // all unicode entities with no corresponding HTML entity
+                                    //
+                                    $extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues($extract_external[ 'seg' ]);
+                                    $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ]);
+
                                     //we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
                                     //AND IF IT IS ONLY A CHAR? like "*" ?
                                     //we can't distinguish if it is translated or not
@@ -2895,12 +2906,7 @@ class ProjectManager {
         if ( $source != $target ) {
 
             // evaluate if different source and target should be considered translated
-            if ( empty( $target ) ) {
-                $differentSourceAndTargetIsTranslated = false;
-            } else {
-                $differentSourceAndTargetIsTranslated = true;
-            }
-
+            $differentSourceAndTargetIsTranslated = ( empty( $target ) ) ? false : true;
             $differentSourceAndTargetIsTranslated = $this->features->filter(
                     'filterDifferentSourceAndTargetIsTranslated',
                     $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
@@ -2908,16 +2914,15 @@ class ProjectManager {
 
             return $differentSourceAndTargetIsTranslated;
             //return true;
-        } else {
-            // evaluate if identical source and target should be considered non translated
-            $identicalSourceAndTargetIsTranslated = false;
-            $identicalSourceAndTargetIsTranslated = $this->features->filter(
-                    'filterIdenticalSourceAndTargetIsTranslated',
-                    $identicalSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
-            );
-
-            return $identicalSourceAndTargetIsTranslated;
         }
-    }
 
+        // evaluate if identical source and target should be considered non translated
+        $identicalSourceAndTargetIsTranslated = false;
+        $identicalSourceAndTargetIsTranslated = $this->features->filter(
+                'filterIdenticalSourceAndTargetIsTranslated',
+                $identicalSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
+        );
+
+        return $identicalSourceAndTargetIsTranslated;
+    }
 }
