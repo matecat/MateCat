@@ -22,20 +22,28 @@ const EnventHandlers =  {
     },
     handleDragEvent: function ( e ) {
         let elem = $(e.target);
+        let cloneTag, text;
         if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
             let tag = elem.closest('span.locked:not(.inside-attribute)');
-            let cloneTag = tag.clone();
+            cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
-            let text = TextUtils.htmlEncode(cloneTag.text());
-            text = TagUtils.transformTextForLockTags(text).trim();
+            text = TextUtils.htmlEncode(cloneTag.text());
+            text = TagUtils.transformTextForLockTags(text).trim()+ " ";
             e.dataTransfer.clearData();
             e.dataTransfer.setData('text/plain', text);
             e.dataTransfer.setData('text/html', text);
+            console.log('text dragged', text);
         } else if (elem.hasClass('locked')) {
-            let text = TextUtils.htmlEncode(elem.text());
+            let tag = elem.closest('span.locked');
+            cloneTag = tag.clone();
+            cloneTag.find('.inside-attribute').remove();
+            text = TextUtils.htmlEncode(cloneTag.text());
+            text = TagUtils.transformTextForLockTags(text).trim() + " ";
             e.dataTransfer.clearData();
-            e.dataTransfer.setData('text/plain', TagUtils.transformTextForLockTags(text).trim());
-            e.dataTransfer.setData('text/html', TagUtils.transformTextForLockTags(text).trim());
+            e.dataTransfer.setData('text/plain', text);
+            e.dataTransfer.setData('text/html', text);
+            console.log('text dragged', text);
+
         }
     },
 };

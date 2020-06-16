@@ -51,5 +51,4 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
     {
         $this->sendTo($this->recipientUser->email, $this->recipientUser->fullName() );
     }
-
 }
