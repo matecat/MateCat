@@ -762,6 +762,7 @@ const SegmentActions = {
     },
 
     addGlossaryItem: function ( source, target, comment, sid ) {
+        source = TextUtils.htmlEncode(source);
         return API.SEGMENT.addGlossaryItem(source, target, comment)
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'addGlossaryItem' );
