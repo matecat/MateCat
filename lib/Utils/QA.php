@@ -1562,7 +1562,7 @@ class QA {
 
                 // Append a space to target for normalization ONLY if $lastChar
                 // is not a special terminate char
-                if(!in_array($lastChar, CatUtils::CJKTerminateChars())){
+                if(!in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
 
                     $this->target_seg .= $source_tags[ 1 ][ 0 ];
 
@@ -1594,7 +1594,7 @@ class QA {
         //
         if(CatUtils::isCJK($this->source_seg_lang) and false === CatUtils::isCJK($this->target_seg_lang)){
             $lastChar = mb_substr($this->source_seg, -1);
-            if(in_array($lastChar, CatUtils::CJKTerminateChars())){
+            if(in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
                 $this->target_seg = rtrim( $this->target_seg );
                 $this->target_seg .= ' ';
             }
