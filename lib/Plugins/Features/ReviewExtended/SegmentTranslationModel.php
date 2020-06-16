@@ -305,9 +305,9 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
 
         $segmentInfo = [
-                'segment_source'  => htmlentities( $this->_model->getSegmentStruct()->segment, ENT_HTML5 | ENT_NOQUOTES ),
-                'old_translation' => htmlentities( $this->_model->getEventModel()->getOldTranslation()->translation, ENT_HTML5 | ENT_NOQUOTES ),
-                'new_translation' => htmlentities( $this->_model->getEventModel()->getTranslation()->translation, ENT_HTML5 | ENT_NOQUOTES ),
+                'segment_source'  => \Utils::htmlentities($this->_model->getSegmentStruct()->segment),
+                'old_translation' => \Utils::htmlentities($this->_model->getEventModel()->getOldTranslation()->translation),
+                'new_translation' => \Utils::htmlentities($this->_model->getEventModel()->getTranslation()->translation),
                 'issues'          => $serialized_issues
         ];
 
@@ -358,6 +358,7 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
             }
         }
     }
+
 
 
     protected function advancementWordCount() {
