@@ -43,18 +43,26 @@ class CatUtils {
     /**
      * @return string[]
      */
-    public static function CJKTerminateChars() {
+    public static function CJKFullwidthPunctuationChars() {
         return [
-                '。',
-                '、',
-                '?',
-                '!',
-                ' ',
-                '）',
+            '，',
+            '。',
+            '、',
+            '！',
+            '？',
+            '：',
+            '；',
+            '「',
+            '」',
+            '『',
+            '』',
+            '（',
+            '）',
+            '—',
+            '《',
+            '》',
         ];
     }
-
-    // ----------------------------------------------------------------
 
     public static function placeholdamp( $s ) {
         $s = preg_replace( "/\&/", AMPPLACEHOLDER, $s );

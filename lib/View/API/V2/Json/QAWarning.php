@@ -32,6 +32,8 @@ class QAWarning {
             case QA::ERR_SPACE_MISMATCH:
             case QA::ERR_BOUNDARY_HEAD_SPACE_MISMATCH:
             case QA::ERR_BOUNDARY_TAIL_SPACE_MISMATCH:
+            case QA::ERR_SPACE_MISMATCH_AFTER_TAG:
+            case QA::ERR_SPACE_MISMATCH_BEFORE_TAG:
             case QA::ERR_SYMBOL_MISMATCH:
             case QA::ERR_NEWLINE_MISMATCH:
                 $category = self::MISMATCH_CATEGORY;
