@@ -306,9 +306,9 @@ class SegmentTranslationModel implements ISegmentTranslationModel {
         }
 
         $segmentInfo = [
-                'segment_source'  => \Utils::htmlentities( $this->_model->getSegmentStruct()->segment ),
-                'old_translation' => \Utils::htmlentities( $this->_model->getEventModel()->getOldTranslation()->translation ),
-                'new_translation' => \Utils::htmlentities( $this->_model->getEventModel()->getTranslation()->translation ),
+                'segment_source'  => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getSegmentStruct()->segment ),
+                'old_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getEventModel()->getOldTranslation()->translation ),
+                'new_translation' => \Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_model->getEventModel()->getTranslation()->translation ),
                 'issues'          => $serialized_issues
         ];
 
