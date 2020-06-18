@@ -742,11 +742,14 @@ class Utils {
     }
 
     /**
+     * shortcut to htmlentities (UTF-8 charset)
+     * avoiding double-encoding
+     *
      * @param $string
      *
      * @return string
      */
-    public static function htmlentities( $string ) {
-        return htmlentities( $string, ENT_QUOTES, 'UTF-8' );
+    public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ) {
+        return htmlentities( $string, ENT_QUOTES, 'UTF-8', false );
     }
 }
