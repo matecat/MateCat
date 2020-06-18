@@ -66,6 +66,6 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
             return false;
         }
 
-        return $user->getEmail() !== $email;
+        return $user->getEmail() === $email;
     }
 }
