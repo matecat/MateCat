@@ -43,17 +43,19 @@ class SegmentFooterTabConflicts extends React.Component {
             let diff_obj = TextUtils.execDiff( mainStr, transDecoded );
 
             //replace the original string in the diff object by the character placeholder
-            Object.keys( diff_obj ).forEach( ( element ) => {
-                if( replacementsMap[ diff_obj[ element ][ 1 ] ] ){
-                    diff_obj[ element ][ 1 ] = replacementsMap[ diff_obj[ element ][ 1 ] ];
-                } else {
-                    Object.keys( replacementsMap ).forEach( (replaceElem) => {
-                        if ( diff_obj[ element ][ 1 ].indexOf(replaceElem) !== -1 ) {
-                            diff_obj[ element ][ 1 ] = diff_obj[ element ][ 1 ].replace(replaceElem, replacementsMap[replaceElem]);
-                        }
-                    });
-                }
-            } );
+            if (replacementsMap.length  > 0 ) {
+                Object.keys(diff_obj).forEach((element) => {
+                    if (replacementsMap[diff_obj[element][1]]) {
+                        diff_obj[element][1] = replacementsMap[diff_obj[element][1]];
+                    } else {
+                        Object.keys(replacementsMap).forEach((replaceElem) => {
+                            if (diff_obj[element][1].indexOf(replaceElem) !== -1) {
+                                diff_obj[element][1] = diff_obj[element][1].replace(replaceElem, replacementsMap[replaceElem]);
+                            }
+                        });
+                    }
+                });
+            }
 
             let translation = TagUtils.decodePlaceholdersToText(TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)));
             let source = TagUtils.decodePlaceholdersToText(TagUtils.transformTextForLockTags(escapedSegment));
