@@ -318,6 +318,32 @@ const TAGS_UTILS =  {
         return returnValue;
     },
 
+    cleanTextFromTag: function (text) {
+        let tagsMap = [];
+        // Save tags
+        for (let key in tagSignatures) {
+            if(tagSignatures[key].regex){
+                const {regex} = tagSignatures[key];
+                // Assuming that every regex has exactly 1 capturing groups
+                text = text.replace( regex , function (match, p1, offset, string) {
+                    tagsMap.push({
+                        match,
+                        offset: offset,
+                    })
+                    return match;
+                });
+            }
+        }
+        // Clean
+        for (let key in tagSignatures) {
+            if(tagSignatures[key].regex){
+                const {regex} = tagSignatures[key];
+                text = text.replace( regex , '');
+            }
+        }
+        return {tagsMap, text}
+    },
+
     encodeSpacesAsPlaceholders: function(str, root) {
         let newStr = '';
         $.each($.parseHTML(str), function() {
