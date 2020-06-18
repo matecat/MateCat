@@ -237,6 +237,14 @@ class QA {
 
     const ERR_SPACE_MISMATCH_TEXT = 1101;
 
+    const ERR_BOUNDARY_HEAD_SPACE_MISMATCH = 1102;
+
+    const ERR_BOUNDARY_TAIL_SPACE_MISMATCH = 1103;
+
+    const ERR_SPACE_MISMATCH_AFTER_TAG = 1104;
+
+    const ERR_SPACE_MISMATCH_BEFORE_TAG = 1105;
+
     const ERR_SYMBOL_MISMATCH = 1200;
 
     const ERR_EX_BX_NESTED_IN_G = 1300;
@@ -323,6 +331,11 @@ class QA {
             1100 => 'More/fewer whitespaces found next to the tags.',
 
             1101 => 'More/fewer whitespaces found in the text.',
+
+            1102 => 'Leading space in target not corresponding to source.',
+            1103 => 'Trailing space in target not corresponding to source.',
+            1104 => 'Whitespace(s) mismatch AFTER a tag.',
+            1105 => 'Whitespace(s) mismatch BEFORE a tag.',
         /*
          * grouping
          * 17 => 'Dollar sign mismatch',
@@ -521,7 +534,41 @@ class QA {
                 break;
 
             case self::ERR_BOUNDARY_HEAD:
+                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                        'outcome' => self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH )
+                ] );
+                break;
+
             case self::ERR_BOUNDARY_TAIL:
+                // if source target is CJK we won't to add an trailing space mismatch error
+                if(false === CatUtils::isCJK($this->getSourceSegLang())){
+                    $this->exceptionList[ self::INFO ][] = errObject::get( [
+                            'outcome' => self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH,
+                            'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH ],
+                            'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH )
+                    ] );
+                }
+                break;
+
+            case self::ERR_SPACE_MISMATCH_AFTER_TAG:
+                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                        'outcome' => self::ERR_SPACE_MISMATCH_AFTER_TAG,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_AFTER_TAG ],
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_AFTER_TAG )
+                ] );
+                break;
+
+            case self::ERR_SPACE_MISMATCH_BEFORE_TAG:
+                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                        'outcome' => self::ERR_SPACE_MISMATCH_BEFORE_TAG,
+                        'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_BEFORE_TAG ],
+                        'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_BEFORE_TAG )
+                ] );
+                break;
+
+
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->exceptionList[ self::INFO ][] = errObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH,
@@ -1491,7 +1538,7 @@ class QA {
 //            Log::hexDump($this->source_seg);
 //            Log::hexDump($this->target_seg);
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_BOUNDARY_HEAD_TEXT );
+                $this->_addError( self::ERR_SPACE_MISMATCH_BEFORE_TAG );
             }
         }
 
@@ -1506,7 +1553,7 @@ class QA {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_BOUNDARY_TAIL );
+                $this->_addError( self::ERR_SPACE_MISMATCH_AFTER_TAG );
             }
         }
 
@@ -1520,7 +1567,7 @@ class QA {
             $num = abs( count( $source_tags ) - count( $target_tags ) );
 
             for ( $i = 0; $i < $num; $i++ ) {
-                $this->_addError( self::ERR_BOUNDARY_HEAD );
+                $this->_addError( self::ERR_BOUNDARY_HEAD_TEXT );
             }
         }
 
@@ -1528,37 +1575,28 @@ class QA {
         preg_match_all( '/([\s\t\x{a0}\r\n]+)$/u', $this->source_seg, $source_tags );
         preg_match_all( '/([\s\t\x{a0}\r\n]+)$/u', $this->target_seg, $target_tags );
 
-        //so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
+        // so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
             // CJK need special handling
             if(CatUtils::isCJK($this->target_seg_lang)){
                 $this->target_seg = rtrim( $this->target_seg );
                 $lastChar = mb_substr($this->target_seg, -1);
-                $specialCKJTerminateChars = [
-                        '。',
-                        '、',
-                        '?',
-                        '!',
-                        ' ',
-                        '）',
-                ];
 
                 // Append a space to target for normalization ONLY if $lastChar
                 // is not a special terminate char
-                if(!in_array($lastChar, $specialCKJTerminateChars)){
+                if(!in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
 
                     $this->target_seg .= $source_tags[ 1 ][ 0 ];
 
-                    //Suppress Warning
                     $this->_addError(self::ERR_BOUNDARY_TAIL);
                 }
             } else {
-                //Append a space to target for normalization.
+                // Append a space to target for normalization.
+                // We can't use $source_tags[ 1 ][ 0 ] because for CJK is not a space
                 $this->target_seg = rtrim( $this->target_seg );
-                $this->target_seg .= $source_tags[ 1 ][ 0 ];
+                $this->target_seg .= ' ';
 
-                //Suppress Warning
                 $this->_addError(self::ERR_BOUNDARY_TAIL);
             }
 
@@ -1566,13 +1604,28 @@ class QA {
             $this->target_seg = rtrim( $this->target_seg );
         }
 
+        //
+        // --------------------------------------------------
+        // NOTE 2020-06-10
+        // --------------------------------------------------
+        //
+        // If source is CJK and target is NOT CJK
+        // and source terminates with CJKTerminateChars
+        // then we add a trailing space to target
+        //
+        if(CatUtils::isCJK($this->source_seg_lang) and false === CatUtils::isCJK($this->target_seg_lang)){
+            $lastChar = mb_substr($this->source_seg, -1);
+            if(in_array($lastChar, CatUtils::CJKFullwidthPunctuationChars())){
+                $this->target_seg = rtrim( $this->target_seg );
+                $this->target_seg .= ' ';
+            }
+        }
+
         $this->trgDom = $this->_loadDom( $this->target_seg, self::ERR_TARGET );
+
         //Save normalized dom Element
         $this->normalizedTrgDOM = clone $this->trgDom;
-
     }
-
-    //
 
     /**
      * Try to perform an heuristic re-align of tags id by position.

@@ -31,11 +31,38 @@ class CatUtils {
 
     public static $cjk = [ 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 ];
 
+    /**
+     * @param $langCode
+     *
+     * @return bool
+     */
     public static function isCJK( $langCode ) {
         return array_key_exists( explode( '-', $langCode )[ 0 ], self::$cjk );
     }
 
-    // ----------------------------------------------------------------
+    /**
+     * @return string[]
+     */
+    public static function CJKFullwidthPunctuationChars() {
+        return [
+            '，',
+            '。',
+            '、',
+            '！',
+            '？',
+            '：',
+            '；',
+            '「',
+            '」',
+            '『',
+            '』',
+            '（',
+            '）',
+            '—',
+            '《',
+            '》',
+        ];
+    }
 
     public static function placeholdamp( $s ) {
         $s = preg_replace( "/\&/", AMPPLACEHOLDER, $s );
@@ -138,7 +165,7 @@ class CatUtils {
      *
      * @return string
      */
-    public static function reApplySegmentSplit( $segment, Array $chunk_positions ) {
+    public static function reApplySegmentSplit( $segment, array $chunk_positions ) {
 
         $string_chunks = [];
         $last_sum      = 0;
@@ -564,9 +591,31 @@ class CatUtils {
     public static function unicode2chr( $o ) {
         if ( function_exists( 'mb_convert_encoding' ) ) {
             return mb_convert_encoding( '&#' . intval( $o ) . ';', 'UTF-8', 'HTML-ENTITIES' );
-        } else {
-            return chr( intval( $o ) );
         }
+
+        return chr( intval( $o ) );
+    }
+
+    /**
+     * This function converts Unicode entites with no corresponding HTML entity
+     * to their original value
+     *
+     * @param $str
+     *
+     * @return string|string[]
+     */
+    public static function restoreUnicodeEntitesToOriginalValues($str) {
+
+        $entities = [
+                "157" // https://www.codetable.net/decimal/157
+        ];
+
+        foreach ($entities as $entity){
+            $value = self::unicode2chr($entity);
+            $str = str_replace("&#".$entity.";",$value, $str);
+        }
+
+        return $str;
     }
 
     /**
@@ -649,9 +698,9 @@ class CatUtils {
 
         $result = null;
         if ( $featureSet->hasRevisionFeature() ) {
-            $result = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[0];
+            $result = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( $job->toArray() ) )[ 0 ];
         } else {
-            $result = self::getQualityInfoFromJobStruct( $job, $featureSet ) ;
+            $result = self::getQualityInfoFromJobStruct( $job, $featureSet );
         }
 
         return $result;
@@ -664,7 +713,7 @@ class CatUtils {
      * @return array
      */
     public static function getQualityInfoFromJobStruct( Jobs_JobStruct $job, FeatureSet $featureSet ) {
-        $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
+        $struct      = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis );
         $reviseClass = new Constants_Revise;
 
         $jobQA = new Revise_JobQA(
@@ -678,6 +727,7 @@ class CatUtils {
          */
         list( $jobQA, ) = $featureSet->filter( "overrideReviseJobQA", [ $jobQA, $reviseClass ], $job->id, $job->password, $struct->getTotal() );
         $jobQA->retrieveJobErrorTotals();
+
         return $jobQA->evalJobVote();
     }
 
