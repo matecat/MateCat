@@ -160,10 +160,6 @@ class TMAnalysisWorker extends AbstractWorker {
         $eq_words       = $equivalentWordMapping[ $new_match_type ] * $queueElement->params->raw_word_count / 100;
         $standard_words = $eq_words;
 
-        // Init \PostProcess
-        $check = new \PostProcess( $queueElement->params->segment, $suggestion );
-        $check->setFeatureSet( $this->featureSet );
-
         /**
          * if the first match is MT perform QA realignment because some MT engines breaks tags
          * also perform a tag ID check and mismatch validation
@@ -173,6 +169,9 @@ class TMAnalysisWorker extends AbstractWorker {
             //Reset the standard word count to be equals to other cat tools which do not have the MT in analysis
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
 
+            // realign MT Spaces
+            $check = new \PostProcess( $this->_matches[ 0 ][ 'raw_segment' ] , $suggestion );
+            $check->setFeatureSet( $this->featureSet );
             $check->setSourceSegLang( $queueElement->params->source );
             $check->setTargetSegLang( $queueElement->params->target );
             $check->realignMTSpaces();
@@ -187,9 +186,9 @@ class TMAnalysisWorker extends AbstractWorker {
 
         } else {
 
-            /**
-             * Otherwise try to perform only the tagCheck
-             */
+            // Otherwise try to perform only the tagCheck
+            $check = new \PostProcess( $queueElement->params->segment, $suggestion );
+            $check->setFeatureSet( $this->featureSet );
             $check->performTagCheckOnly();
 
             //_TimeStampMsg( $check->getErrors() );
@@ -207,10 +206,13 @@ class TMAnalysisWorker extends AbstractWorker {
                 $mt_qe = null
         );
 
-        // perform a consistency check in order to check errors and
-        // add spaces to translation if needed
+        // perform a consistency check as setTranslation does
+        // in order to add spaces to translation if needed
+        $check = new \PostProcess( $queueElement->params->segment, $suggestion );
+        $check->setFeatureSet( $this->featureSet );
         $check->performConsistencyCheck();
         $suggestion = $check->getTargetSeg();
+
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
         $tm_data                             = [];
