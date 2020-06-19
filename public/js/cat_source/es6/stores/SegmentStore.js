@@ -1040,6 +1040,9 @@ AppDispatcher.register(function (action) {
             SegmentStore.addGlossaryItem(action.sid, action.match, action.name);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
+        case EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA:
+            SegmentStore.emitChange(action.actionType, action.segment, action.glossaryTranslation);
+            break;
         case SegmentConstants.CONCORDANCE_RESULT:
             SegmentStore.setConcordanceMatches(action.sid, action.matches);
             SegmentStore.emitChange(action.actionType, action.sid, action.matches);

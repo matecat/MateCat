@@ -258,6 +258,7 @@ class Editarea extends React.Component {
         //console.log(`componentDidMount@EditArea ${this.props.segment.sid}`)
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
+        SegmentStore.addListener(EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA, this.copyGlossaryToEditArea);
         if ( this.props.segment.inSearch ) {
             setTimeout(this.addSearchDecorator());
         }
@@ -273,9 +274,20 @@ class Editarea extends React.Component {
         });
     }
 
+    copyGlossaryToEditArea = (segment, glossaryTranslation) =>{
+        if(segment.sid === this.props.segment.sid) {
+            const {editorState} = this.state;
+            const newEditorState = DraftMatecatUtils.insertText(editorState, glossaryTranslation)
+            this.setState({
+                editorState: newEditorState
+            })
+        }
+    }
+
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.removeListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
+        SegmentStore.removeListener(EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA, this.copyGlossaryToEditArea);
     }
 
     // shouldComponentUpdate(nextProps, nextState) {}
