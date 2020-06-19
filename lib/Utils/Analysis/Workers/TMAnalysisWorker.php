@@ -178,11 +178,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             //this should every time be ok because MT preserve tags, but we use the check on the errors
             //for logic correctness
-            if ( !$check->thereAreErrors() ) {
-                $err_json = '';
-            } else {
-                $err_json = $check->getErrorsJSON();
-            }
+            $err_json = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         } else {
 
@@ -193,11 +189,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             //_TimeStampMsg( $check->getErrors() );
 
-            if ( $check->thereAreErrors() ) {
-                $err_json = $check->getErrorsJSON();
-            } else {
-                $err_json = '';
-            }
+            $err_json = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         }
 
