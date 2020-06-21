@@ -23,7 +23,7 @@ const tagSignatures = {
         decodeNeeded: true,
         errorCheckAvailable: true,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed'
     },
     'g': {
         type: 'g',
@@ -35,7 +35,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-open'
+        style: 'tag-open'
     },
     'gCl': {
         type: 'gCl',
@@ -47,7 +47,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-close'
+        style: 'tag-close'
     },
     'bx': {
         type: 'bx',
@@ -59,7 +59,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed'
     },
     'ex': {
         type: 'ex',
@@ -71,7 +71,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed'
     },
     'x': {
         type: 'x',
@@ -83,7 +83,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed'
     },
     'nbsp':{
         type: 'nbsp',
@@ -95,7 +95,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed tag-nbsp'
     },
     'tab':{
         type: 'tab',
@@ -107,7 +107,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed tag-tab'
     },
     'carriageReturn':{
         type: 'carriageReturn',
@@ -122,7 +122,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed tag-cr'
     },
     'lineFeed':{
         type: 'lineFeed',
@@ -137,7 +137,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed tag-lf'
     }
 };
 

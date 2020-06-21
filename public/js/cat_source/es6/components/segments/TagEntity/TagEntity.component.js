@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
+import {tagSignatures} from "../utils/DraftMatecatUtils/tagModel";
 
 class TagEntity extends Component {
     constructor(props) {
@@ -119,18 +120,15 @@ class TagEntity extends Component {
         let tagStyle = [];
 
         // Check for tag type
-        if(entityInstance.data.openTagId){
-            tagStyle.push('tag-close');
-        }else if(entityInstance.data.closeTagId){
-            tagStyle.push('tag-open');
-        }else{
-            tagStyle.push('tag-selfclosed');
-        }
+        const entityType = entityInstance.type;
+        const style = tagSignatures[entityType].style;
+        tagStyle.push(style);
         // Check if tag is in an active segment
         if(!segmentOpened) tagStyle.push('tag-inactive');
 
         return tagStyle.join(' ');
     };
+
 
     highlightOnWarnings = () => {
         const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} = this.props;
