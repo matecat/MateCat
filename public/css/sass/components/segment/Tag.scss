@@ -111,6 +111,27 @@
       }
     }
 
+    &.tag-nbsp{
+      font-size: 18px;
+      margin: 0 4px 0 4px;
+      color: #08BEEC;
+      background: transparent;
+      &:before {
+        border:none;
+      }
+      &:after {
+        border:none;
+      }
+    }
+
+    &.tag-cr {
+
+    }
+
+    &.tag-lf{
+
+    }
+
     span{
       &::selection{
         color: #fff;
