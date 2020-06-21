@@ -516,30 +516,19 @@ class Editarea extends React.Component {
     onChange = (editorState) =>  {
         const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
-        const {closePopover, updateTagsInEditorDebounced, selectionIsEntity} = this;
+        const {closePopover, updateTagsInEditorDebounced} = this;
 
         // Se non ti trovi ancora su un'entità, annulla eventuali TagClickedId settati
-        const entityKey = selectionIsEntity(editorState);
-        if(!entityKey) {setClickedTagId();}
+        const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
+        if(!entityKey) {setClickedTagId(); console.log('Sta a funzionà')}
 
         this.setState({
             editorState: editorState,
         }/*, () => {
             updateTagsInEditorDebounced()
         }*/);
-
-        if(displayPopover){
-            closePopover();
-        }
+        if(displayPopover) closePopover();
         setTimeout(()=>{this.updateTranslationDebounced()});
-    };
-
-    selectionIsEntity = (editorState) => {
-        const contentState = editorState.getCurrentContent();
-        const selectionKey = editorState.getSelection().getAnchorKey();
-        const selectionOffset =  editorState.getSelection().getAnchorOffset();
-        const block = contentState.getBlockForKey(selectionKey);
-        return block.getEntityAt(selectionOffset);
     };
 
     // Methods for TagMenu ---- START
@@ -577,7 +566,6 @@ class Editarea extends React.Component {
         const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags];
         const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex];
         const editorStateWithSuggestedTag = insertTag(selectedTag, editorState, triggerText);
-        // Todo: Force to recompute every tag association
 
         this.setState({
             editorState: editorStateWithSuggestedTag,
@@ -611,10 +599,8 @@ class Editarea extends React.Component {
     };
 
     onTagClick = (suggestionTag) => {
-
         const {editorState, triggerText} = this.state;
         let editorStateWithSuggestedTag = insertTag(suggestionTag, editorState, triggerText);
-
         this.setState({
             editorState: editorStateWithSuggestedTag,
             editorFocused: true,

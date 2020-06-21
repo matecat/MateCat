@@ -33,6 +33,7 @@ import addTagEntityToEditor from "./addTagEntityToEditor";
 import canDecorateRange from "./canDecorateRange";
 import getEntityStrategy from "./getEntityStrategy";
 import moveCursorJumpEntity from "./moveCursorJumpEntity";
+import selectionIsEntity from "./selectionIsEntity";
 
 
 const DraftMatecatUtils = {
@@ -58,6 +59,7 @@ const DraftMatecatUtils = {
 	matchTagInEditor,
 	addTagEntityToEditor,
 	canDecorateRange,
+	selectionIsEntity,
 	moveCursorJumpEntity,
 	// Fragment Utils
 	insertFragment,
