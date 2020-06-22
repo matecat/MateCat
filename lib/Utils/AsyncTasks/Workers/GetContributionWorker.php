@@ -548,13 +548,24 @@ class GetContributionWorker extends AbstractWorker {
 
             $data                        = array();
             $data[ 'suggestions_array' ] = $suggestions_json_array;
-            $data[ 'suggestion' ]        = $match[ 'raw_translation' ];
-            $data[ 'translation' ]       = $match[ 'raw_translation' ];
+
+            $idSegment = $contributionStruct->segmentId;
+            $idJob = $contributionStruct->getJobStruct()->id;
+
+            // check if the $match[ 'raw_translation' ]
+            // is different from trimmed pre-filled translation
+            $preFilledTranslation = \Translations_SegmentTranslationDao::findBySegmentAndJob($idSegment, $idJob);
+
+            if( trim($preFilledTranslation->translation) !== $match[ 'raw_translation' ] ){
+                $data[ 'suggestion' ]  = $match[ 'raw_translation' ];
+                $data[ 'translation' ] = $match[ 'raw_translation' ];
+            }
+
             $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
             $where = [
-                    'id_segment' => $contributionStruct->segmentId,
-                    'id_job'     => $contributionStruct->getJobStruct()->id,
+                    'id_segment' => $idSegment,
+                    'id_job'     => $idJob,
                     'status'     => Constants_TranslationStatus::STATUS_NEW
             ];
 
