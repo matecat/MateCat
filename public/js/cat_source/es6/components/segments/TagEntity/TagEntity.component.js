@@ -136,9 +136,10 @@ class TagEntity extends Component {
         const draftEntity = contentState.getEntity(entityKey);
         if(!segmentOpened || !tagMismatch) return;
         let tagWarningStyle = '';
-        if(tagMismatch.target > 0 && isTarget){
+        if(tagMismatch.target.length > 0 && isTarget){
             let tagObject;
             let tagInfo;
+            // Todo: Check tag type and tag id instead of string
             tagMismatch.target.forEach(tagString => {
                 //tagObject = DraftMatecatUtils.tagFromString(tagString);
                 //tagInfo = DraftMatecatUtils.decodeTagInfo(tagObject);
