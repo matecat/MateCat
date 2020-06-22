@@ -91,6 +91,7 @@ const tagSignatures = {
         selfClosing: true,
         isClosure: false,
         placeholder: '°',
+        encodedPlaceholder: '##$_A0$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
@@ -103,6 +104,7 @@ const tagSignatures = {
         selfClosing: true,
         isClosure: false,
         placeholder: '#',
+        encodedPlaceholder: '##$_09$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
@@ -112,12 +114,10 @@ const tagSignatures = {
     'carriageReturn':{
         type: 'carriageReturn',
         regex: /##\$(_0D)\$##/g,
-        openRegex: /##\$(_0D)\$##/g,
-        openLength: 9,
-        closeRegex: null,
         selfClosing: true,
         isClosure: false,
         placeholder: '\\r',
+        encodedPlaceholder: '##$_0D$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
@@ -127,12 +127,10 @@ const tagSignatures = {
     'lineFeed':{
         type: 'lineFeed',
         regex: /##\$(_0A)\$##/g,
-        openRegex: /##\$(_0A)\$##/g,
-        openLength: 9,
-        closeRegex: null,
         selfClosing: true,
         isClosure: false,
         placeholder: '\\n',
+        encodedPlaceholder: '##$_0A$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
@@ -159,6 +157,12 @@ function TagStruct(offset, length, type) {
     }
 }
 
+const getBuildableTag = () => {
+    return Object.keys(tagSignatures).
+    filter(tagKey =>{return tagSignatures[tagKey].encodedPlaceholder}).
+    map(tagKey => {return tagSignatures[tagKey].type})
+};
+
 // Control params: errorCheckAvailable
 const getErrorCheckTag = () => {
     return Object.keys(tagSignatures).
@@ -173,4 +177,4 @@ const getNoLexiqaTag = () => {
     map(tagKey => {return tagSignatures[tagKey].type})
 };
 
-export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag};
+export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getBuildableTag};

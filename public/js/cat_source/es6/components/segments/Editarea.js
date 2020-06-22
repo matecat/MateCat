@@ -29,6 +29,8 @@ const {hasCommandModifier, isOptionKeyCommand} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import insertText from "./utils/DraftMatecatUtils/insertText";
+import {TagStruct} from "./utils/DraftMatecatUtils/tagModel";
+import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
 
 
 const editorSync = {
@@ -378,14 +380,21 @@ class Editarea extends React.Component {
                 triggerText: textToInsert
             });
             return 'toggle-tag-menu';
-        }else if(e.keyCode === 38 && !hasCommandModifier(e)){ //
+        }else if(e.keyCode === 38 && !hasCommandModifier(e)){
             if(displayPopover) return 'up-arrow-press';
-        }else if(e.keyCode === 40 && !hasCommandModifier(e)){ // giù
+        }else if(e.keyCode === 40 && !hasCommandModifier(e)){
             if(displayPopover) return 'down-arrow-press';
-        }else if(e.keyCode === 13 && !hasCommandModifier(e)){ // enter
+        }else if(e.keyCode === 13 && !hasCommandModifier(e)){
             if(displayPopover) return 'enter-press';
-        }else if(e.keyCode === 27){ // enter
+            if((isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
+                return 'insert-linefeed-tag';
+            }
+        }else if(e.keyCode === 27){ // escape
             return 'close-tag-menu';
+        }else if(e.keyCode === 9 && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
+            return 'insert-tab-tag';
+        }else if(e.keyCode === 32 && (isOptionKeyCommand(e) || e.altKey) && e.shiftKey){
+            return 'insert-nbsp-tag';
         }else if (e.keyCode === 37 && !hasCommandModifier(e) && !e.altKey) {
             if (e.shiftKey) {
                 return 'left-nav-shift';
@@ -444,10 +453,32 @@ class Editarea extends React.Component {
             case 'right-nav-shift':
                 handleCursorMovement(1, true);
                 return 'handled';
+            case 'insert-tab-tag':
+                this.insertTagAtSelection('tab');
+                return 'handled';
+            case 'insert-nbsp-tag':
+                this.insertTagAtSelection('nbsp');
+                return 'handled';
+            case 'insert-linefeed-tag':
+                console.log('insert-linefeed-tag')
+                this.insertTagAtSelection('lineFeed');
+                return 'handled';
             default:
                 return 'not-handled';
         }
     };
+
+
+    insertTagAtSelection = (tagType=null) => {
+        const {editorState} = this.state;
+        const customTag = DraftMatecatUtils.structFromType(tagType);
+        // If tag creation has failed, return
+        if(!customTag) return;
+        const newEditorState = DraftMatecatUtils.insertEntityAtSelection(editorState, customTag);
+        this.setState({
+            editorState: newEditorState
+        });
+    }
 
     handleCursorMovement = (step, shift = false) =>{
         const {editorState} = this.state;
@@ -520,7 +551,7 @@ class Editarea extends React.Component {
 
         // Se non ti trovi ancora su un'entità, annulla eventuali TagClickedId settati
         const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
-        if(!entityKey) {setClickedTagId(); console.log('Sta a funzionà')}
+        if(!entityKey) setClickedTagId();
 
         this.setState({
             editorState: editorState,

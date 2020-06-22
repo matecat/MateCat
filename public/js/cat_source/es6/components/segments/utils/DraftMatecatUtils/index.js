@@ -34,6 +34,8 @@ import canDecorateRange from "./canDecorateRange";
 import getEntityStrategy from "./getEntityStrategy";
 import moveCursorJumpEntity from "./moveCursorJumpEntity";
 import selectionIsEntity from "./selectionIsEntity";
+import insertEntityAtSelection from "./insertEntityAtSelection";
+import structFromType from "./tagFromTagType";
 
 
 const DraftMatecatUtils = {
@@ -48,6 +50,7 @@ const DraftMatecatUtils = {
 	matchTag,
 	decodeTagInfo,
 	tagFromEntity,
+	structFromType,
 	// Entity Utils
 	getEntityStrategy,
 	getEntities,
@@ -61,6 +64,7 @@ const DraftMatecatUtils = {
 	canDecorateRange,
 	selectionIsEntity,
 	moveCursorJumpEntity,
+	insertEntityAtSelection,
 	// Fragment Utils
 	insertFragment,
 	duplicateFragment,
