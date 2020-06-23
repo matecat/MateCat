@@ -169,6 +169,7 @@ class TMAnalysisWorker extends AbstractWorker {
             //Reset the standard word count to be equals to other cat tools which do not have the MT in analysis
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
 
+            // realign MT Spaces
             $check = new \PostProcess( $this->_matches[ 0 ][ 'raw_segment' ], $suggestion );
             $check->setFeatureSet( $this->featureSet );
             $check->setSourceSegLang( $queueElement->params->source );
@@ -177,28 +178,18 @@ class TMAnalysisWorker extends AbstractWorker {
 
             //this should every time be ok because MT preserve tags, but we use the check on the errors
             //for logic correctness
-            if ( !$check->thereAreErrors() ) {
-                $err_json = '';
-            } else {
-                $err_json = $check->getErrorsJSON();
-            }
+            $err_json = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         } else {
 
-            /**
-             * Otherwise try to perform only the tagCheck
-             */
+            // Otherwise try to perform only the tagCheck
             $check = new \PostProcess( $queueElement->params->segment, $suggestion );
             $check->setFeatureSet( $this->featureSet );
             $check->performTagCheckOnly();
 
             //_TimeStampMsg( $check->getErrors() );
 
-            if ( $check->thereAreErrors() ) {
-                $err_json = $check->getErrorsJSON();
-            } else {
-                $err_json = '';
-            }
+            $err_json = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         }
 
@@ -206,6 +197,14 @@ class TMAnalysisWorker extends AbstractWorker {
                 $mt_qe = floatval( $this->_matches[ 0 ][ 'sentence_confidence' ] ) :
                 $mt_qe = null
         );
+
+        // perform a consistency check as setTranslation does
+        // in order to add spaces to translation if needed
+        $check = new \PostProcess( $queueElement->params->segment, $suggestion );
+        $check->setFeatureSet( $this->featureSet );
+        $check->performConsistencyCheck();
+        $suggestion = $check->getTargetSeg();
+        $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
@@ -220,7 +219,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data[ 'standard_word_count' ]    = $standard_words;
         $tm_data[ 'tm_analysis_status' ]     = "DONE";
         $tm_data[ 'warning' ]                = (int)$check->thereAreErrors();
-        $tm_data[ 'serialized_errors_list' ] = $err_json;
+        $tm_data[ 'serialized_errors_list' ] = $this->mergeJsonErrors( $err_json, $err_json2 );
         $tm_data[ 'mt_qe' ]                  = $mt_qe;
 
 
@@ -235,13 +234,13 @@ class TMAnalysisWorker extends AbstractWorker {
 
         //check the value of suggestion_match
         $tm_data[ 'suggestion_match' ] = $suggestion_match;
-        $tm_data = $this->_iceLockCheck( $tm_data, $queueElement->params );
+        $tm_data                       = $this->_iceLockCheck( $tm_data, $queueElement->params );
 
         try {
             $updateRes = Translations_SegmentTranslationDao::setAnalysisValue( $tm_data );
-            $message = ( $updateRes == 0 ) ? "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] : "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.";
+            $message   = ( $updateRes == 0 ) ? "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] : "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.";
             $this->_doLog( $message );
-        } catch (\Exception $exception){
+        } catch ( \Exception $exception ) {
             $this->_doLog( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}" );
             throw new ReQueueException( "**** Error occurred during the storing (UPDATE) of the suggestions for the segment {$tm_data[ 'id_segment' ]}", self::ERR_REQUEUE );
         }
@@ -257,6 +256,28 @@ class TMAnalysisWorker extends AbstractWorker {
                 'queue_element' => $queueElement
         ] );
 
+    }
+
+    /**
+     * @param string $err_json
+     * @param string $err_json2
+     *
+     * @return false|string
+     */
+    private function mergeJsonErrors( $err_json, $err_json2 ) {
+        if ( $err_json === '' and $err_json2 === '' ) {
+            return '';
+        }
+
+        if ( $err_json !== '' and $err_json2 === '' ) {
+            return $err_json;
+        }
+
+        if ( $err_json === '' and $err_json2 !== '' ) {
+            return $err_json2;
+        }
+
+        return json_encode( array_merge_recursive( json_decode( $err_json, true ), json_decode( $err_json2, true ) ) );
     }
 
     protected function _iceLockCheck( $tm_data, $queueElementParams ) {
@@ -424,15 +445,15 @@ class TMAnalysisWorker extends AbstractWorker {
 
         if ( $mtEngine instanceof \Engines_MyMemory || $mtEngine instanceof \Engines_MMT ) {
 
-            $_config[ 'get_mt' ]  = true;
+            $_config[ 'get_mt' ] = true;
 //            $_config[ 'mt_only' ] = true;
-            $mtEngine            = Engine::getInstance( 0 );  //Do Not Call MyMemory with this instance, use $tmsEngine instance
+            $mtEngine = Engine::getInstance( 0 );  //Do Not Call MyMemory with this instance, use $tmsEngine instance
 
         } else {
             $_config[ 'get_mt' ] = false;
         }
 
-        if( $queueElement->params->only_private ){
+        if ( $queueElement->params->only_private ) {
             $_config[ 'onlyprivate' ] = true; // MyMemory configuration, get matches only from private memories
         }
 
@@ -444,7 +465,7 @@ class TMAnalysisWorker extends AbstractWorker {
          * So don't worry, perform TMS Analysis
          *
          */
-        $matches   = [];
+        $matches = [];
         try {
 
             $tms_match = $this->_getTM( $tmsEngine, $_config );
@@ -452,9 +473,9 @@ class TMAnalysisWorker extends AbstractWorker {
                 $matches = $tms_match;
             }
 
-        } catch( ReQueueException $rEx ){
+        } catch ( ReQueueException $rEx ) {
             throw $rEx;  // just to make code more readable, re-throw exception
-        } catch( NotSupportedMTException $nMTEx ){
+        } catch ( NotSupportedMTException $nMTEx ) {
             // Do nothing, skip frame
         }
 
@@ -548,12 +569,12 @@ class TMAnalysisWorker extends AbstractWorker {
          *
          * MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc.. )
          */
-        if ( !empty( $tms_match->error ) )  {
+        if ( !empty( $tms_match->error ) ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received." );
             throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received.", self::ERR_REQUEUE );
         }
 
-        if( $tms_match->mtLangSupported == false ){
+        if ( $tms_match->mtLangSupported == false ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. MT not supported." );
             throw new NotSupportedMTException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. MT not supported.", self::ERR_EMPTY_ELEMENT );
         }
@@ -564,7 +585,7 @@ class TMAnalysisWorker extends AbstractWorker {
             throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.", self::ERR_REQUEUE );
         }
 
-        if( !empty( $tms_match ) ){
+        if ( !empty( $tms_match ) ) {
             $tms_match = $tms_match->get_matches_as_array( 1 );
         }
 

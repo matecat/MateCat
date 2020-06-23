@@ -2328,13 +2328,24 @@ class ProjectManager {
                         $this->filter
                 );
 
+                // Use QA to get target segment
+                $chunk = \Chunks_ChunkDao::getByJobID( $jid )[0];
+                $segment = (new Segments_SegmentDao())->getById($translation_row [ 0 ]);
+                $source = $segment->segment;
+                $target = $translation_row [ 2 ];
+                $check = new QA( $source, $target);
+                $check->setFeatureSet( $this->features );
+                $check->setSourceSegLang( $chunk->source );
+                $check->setTargetSegLang( $chunk->target );
+                $check->performConsistencyCheck();
+
                 /* WARNING do not change the order of the keys */
                 $sql_values = [
                         'id_segment'          => $translation_row [ 0 ],
                         'id_job'              => $jid,
                         'segment_hash'        => $translation_row [ 3 ],
                         'status'              => $iceLockArray[ 'status' ],
-                        'translation'         => $translation_row [ 2 ],
+                        'translation'         => $check->getTargetSeg(),
                         'locked'              => 0, // not allowed to change locked status for pre-translations
                         'match_type'          => $iceLockArray[ 'match_type' ],
                         'eq_word_count'       => $iceLockArray[ 'eq_word_count' ],
