@@ -53,7 +53,9 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
         return !(reassignedIds.includes(missingTag.data.id) &&  missingTag.data.openTagId)
     });
 */
-
+    // Sort tag by offset
+    missingTagInTarget.sort((a, b) => {return a.offset-b.offset});
+    filteredSourceTagMap.sort((a, b) => {return a.offset-b.offset});
     //checkTags
     return {
         missingTags: [...missingTagInTarget],
