@@ -371,12 +371,12 @@ class Editarea extends React.Component {
 
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
-        if(e.keyCode === 84 && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
+        if((e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
             this.setState({
                 triggerText: null
             });
             return 'toggle-tag-menu';
-        }else if(e.keyCode === 188 && !hasCommandModifier(e)) {
+        }else if(e.key === '<' && !hasCommandModifier(e)) {
             const textToInsert = '<';
             const {editorState} = this.state;
             const newEditorState = DraftMatecatUtils.insertText(editorState, textToInsert);
@@ -385,28 +385,28 @@ class Editarea extends React.Component {
                 triggerText: textToInsert
             });
             return 'toggle-tag-menu';
-        }else if(e.keyCode === 38 && !hasCommandModifier(e)){
+        }else if(e.key === 'ArrowUp' && !hasCommandModifier(e)){
             if(displayPopover) return 'up-arrow-press';
-        }else if(e.keyCode === 40 && !hasCommandModifier(e)){
+        }else if(e.key === 'ArrowDown' && !hasCommandModifier(e)){
             if(displayPopover) return 'down-arrow-press';
-        }else if(e.keyCode === 13 && !hasCommandModifier(e)){
+        }else if(e.key === 'Enter' && !hasCommandModifier(e)){
             if(displayPopover) return 'enter-press';
             if((isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
                 return 'insert-linefeed-tag';
             }
-        }else if(e.keyCode === 27){ // escape
+        }else if(e.key === 'Escape'){
             return 'close-tag-menu';
-        }else if(e.keyCode === 9 && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
+        }else if(e.key === 'Tab' && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
             return 'insert-tab-tag';
-        }else if(e.keyCode === 32 && (isOptionKeyCommand(e) || e.altKey) && e.shiftKey){
+        }else if( (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') && (isOptionKeyCommand(e) || e.altKey) && e.shiftKey){ // e.key is an &nbsp;
             return 'insert-nbsp-tag';
-        }else if (e.keyCode === 37 && !hasCommandModifier(e) && !e.altKey) {
+        }else if (e.key === 'ArrowLeft' && !hasCommandModifier(e) && !e.altKey) {
             if (e.shiftKey) {
                 return 'left-nav-shift';
             } else {
                 return 'left-nav';
             }
-        } else if (e.keyCode === 39 && !hasCommandModifier(e) && !e.altKey) {
+        } else if (e.key === 'ArrowRight' && !hasCommandModifier(e) && !e.altKey) {
             if (e.shiftKey) {
                 return 'right-nav-shift';
             } else {
@@ -465,7 +465,6 @@ class Editarea extends React.Component {
                 this.insertTagAtSelection('nbsp');
                 return 'handled';
             case 'insert-linefeed-tag':
-                console.log('insert-linefeed-tag')
                 this.insertTagAtSelection('lineFeed');
                 return 'handled';
             default:
