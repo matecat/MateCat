@@ -2992,7 +2992,7 @@ $reference = [
                         0 => 'rtx',
                         1 => 'rtf',
                 ],
-        'text/rtf'                                                             =>
+        'text/rtf'                                                                  =>
                 [
                         0 => 'rtx',
                         1 => 'rtf',
@@ -3081,11 +3081,11 @@ $reference = [
                 [
                         0 => 'wmls',
                 ],
-//            'text/x-asm'                       =>
-//                    array(
-//                        0 => 's',
-//                        1 => 'asm',
-//                    ),
+        'text/x-asm'                                                                =>
+                [
+                        0 => 's',
+                        1 => 'asm',
+                ],
         'text/x-c'                                                                  =>
                 [
 //                        0 => 'c',
@@ -3108,13 +3108,13 @@ $reference = [
 //                        6 => 'dic',
                         7 => 'srt'
                 ],
-            'text/x-fortran'                   =>
-                    array(
+        'text/x-fortran'                                                            =>
+                [
                         0 => 'f',
                         1 => 'for',
                         2 => 'f77',
                         3 => 'f90',
-                    ),
+                ],
 //            'text/x-java-source'               =>
 //                    array(
 //                        0 => 'java',
