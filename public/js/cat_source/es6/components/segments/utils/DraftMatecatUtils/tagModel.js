@@ -157,6 +157,10 @@ function TagStruct(offset, length, type) {
     }
 }
 
+const getSplitBlockTag = () => {
+    return ['lineFeed', 'carriageReturn']
+};
+
 const getBuildableTag = () => {
     return Object.keys(tagSignatures).
     filter(tagKey =>{return tagSignatures[tagKey].encodedPlaceholder}).
@@ -177,4 +181,4 @@ const getNoLexiqaTag = () => {
     map(tagKey => {return tagSignatures[tagKey].type})
 };
 
-export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getBuildableTag};
+export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getBuildableTag, getSplitBlockTag};

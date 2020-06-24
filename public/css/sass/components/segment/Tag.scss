@@ -1,3 +1,41 @@
+.DraftEditor-root{
+  .public-DraftEditor-content > div > div{
+    // everything
+    &:not(:last-child) {
+      .public-DraftStyleDefault-block {
+        & > * {
+          &:last-child{
+            &:after{
+              content:'↵';
+              padding: 0 4px;
+              font-size: 14px;
+              color: #08BEEC;
+            }
+          }
+        }
+      }
+    }
+    // Case <br>
+    &:not(:last-child) {
+      .public-DraftStyleDefault-block {
+        & > span {
+          &:only-child[data-offset-key]{
+            &:before{
+              content:'↵';
+              padding: 0 4px;
+              font-size: 14px;
+              color: #08BEEC;
+            }
+            &:after{
+              display:none;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 .tag-container{
   position: relative;
   display: inline-block;
