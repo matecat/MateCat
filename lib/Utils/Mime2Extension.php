@@ -3081,11 +3081,11 @@ $reference = [
                 [
                         0 => 'wmls',
                 ],
-//            'text/x-asm'                       =>
-//                    array(
-//                        0 => 's',
-//                        1 => 'asm',
-//                    ),
+        'text/x-asm' =>
+                array(
+                        0 => 's',
+                        1 => 'asm',
+                ),
         'text/x-c'                                                                  =>
                 [
 //                        0 => 'c',
