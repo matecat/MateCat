@@ -36,7 +36,6 @@ import moveCursorJumpEntity from "./moveCursorJumpEntity";
 import selectionIsEntity from "./selectionIsEntity";
 import insertEntityAtSelection from "./insertEntityAtSelection";
 import structFromType from "./tagFromTagType";
-import tagFromString from "./tagFromString";
 import splitBlockAtSelection from "./splitBlockAtSelection";
 
 
@@ -53,7 +52,6 @@ const DraftMatecatUtils = {
 	decodeTagInfo,
 	tagFromEntity,
 	structFromType,
-	tagFromString,
 	// Entity Utils
 	getEntityStrategy,
 	getEntities,
