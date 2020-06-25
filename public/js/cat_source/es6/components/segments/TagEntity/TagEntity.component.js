@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
+import {tagSignatures} from "../utils/DraftMatecatUtils/tagModel";
 
 class TagEntity extends Component {
     constructor(props) {
@@ -119,18 +120,15 @@ class TagEntity extends Component {
         let tagStyle = [];
 
         // Check for tag type
-        if(entityInstance.data.openTagId){
-            tagStyle.push('tag-close');
-        }else if(entityInstance.data.closeTagId){
-            tagStyle.push('tag-open');
-        }else{
-            tagStyle.push('tag-selfclosed');
-        }
+        const entityType = entityInstance.type;
+        const style = tagSignatures[entityType].style;
+        tagStyle.push(style);
         // Check if tag is in an active segment
         if(!segmentOpened) tagStyle.push('tag-inactive');
 
         return tagStyle.join(' ');
     };
+
 
     highlightOnWarnings = () => {
         const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} = this.props;
@@ -138,9 +136,10 @@ class TagEntity extends Component {
         const draftEntity = contentState.getEntity(entityKey);
         if(!segmentOpened || !tagMismatch) return;
         let tagWarningStyle = '';
-        if(tagMismatch.target > 0 && isTarget){
+        if(tagMismatch.target.length > 0 && isTarget){
             let tagObject;
             let tagInfo;
+            // Todo: Check tag type and tag id instead of string
             tagMismatch.target.forEach(tagString => {
                 //tagObject = DraftMatecatUtils.tagFromString(tagString);
                 //tagInfo = DraftMatecatUtils.decodeTagInfo(tagObject);

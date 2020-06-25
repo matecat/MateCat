@@ -166,8 +166,9 @@ class SegmentFooterTabGlossary extends React.Component {
         return !!source && !!target;
     }
 
-    copyItemInEditArea(translation) {
-        GlossaryUtils.copyGlossaryItemInEditarea(TagUtils.decodePlaceholdersToText(translation, true), this.props.segment);
+    copyItemInEditArea(glossaryTranslation) {
+        SegmentActions.copyGlossaryItemInEditarea(glossaryTranslation , this.props.segment)
+        // GlossaryUtils.copyGlossaryItemInEditareaDraftJs(glossaryTranslation, this.props.segment);
     }
     onPasteEvent(e) {
         // cancel paste

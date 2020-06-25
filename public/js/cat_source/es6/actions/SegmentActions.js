@@ -792,7 +792,6 @@ const SegmentActions = {
                 });
             });
     },
-
     updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, name, sid ) {
         return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment)
             .fail(function (  ) {
@@ -822,6 +821,14 @@ const SegmentActions = {
         if (QaCheckBlacklist.enabled() && data.blacklist) {
             QaCheckBlacklist.update(data.blacklist);
         }
+    },
+
+    copyGlossaryItemInEditarea: function (glossaryTranslation, segment) {
+        AppDispatcher.dispatch({
+            actionType: EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
+            segment: segment,
+            glossaryTranslation: glossaryTranslation
+        });
     },
 
     setTabIndex: function ( sid, tab, index ) {

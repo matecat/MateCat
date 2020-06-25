@@ -33,6 +33,11 @@ import addTagEntityToEditor from "./addTagEntityToEditor";
 import canDecorateRange from "./canDecorateRange";
 import getEntityStrategy from "./getEntityStrategy";
 import moveCursorJumpEntity from "./moveCursorJumpEntity";
+import selectionIsEntity from "./selectionIsEntity";
+import insertEntityAtSelection from "./insertEntityAtSelection";
+import structFromType from "./tagFromTagType";
+import tagFromString from "./tagFromString";
+import splitBlockAtSelection from "./splitBlockAtSelection";
 
 
 const DraftMatecatUtils = {
@@ -47,6 +52,8 @@ const DraftMatecatUtils = {
 	matchTag,
 	decodeTagInfo,
 	tagFromEntity,
+	structFromType,
+	tagFromString,
 	// Entity Utils
 	getEntityStrategy,
 	getEntities,
@@ -58,7 +65,9 @@ const DraftMatecatUtils = {
 	matchTagInEditor,
 	addTagEntityToEditor,
 	canDecorateRange,
+	selectionIsEntity,
 	moveCursorJumpEntity,
+	insertEntityAtSelection,
 	// Fragment Utils
 	insertFragment,
 	duplicateFragment,
@@ -71,7 +80,8 @@ const DraftMatecatUtils = {
 	decodePhTags,
 	// General
 	insertText,
-	getSelectedText
+	getSelectedText,
+	splitBlockAtSelection
 };
 
 module.exports = DraftMatecatUtils;

@@ -15,7 +15,7 @@
 const tagSignatures = {
     'ph': {
         type: 'ph',
-        regex: /&lt;ph.*?id="(.*?)".*?equiv-text="base64:(.*?)".*?&gt;/gi,
+        regex: /&lt;ph.*?id=".*?".*?equiv-text="base64:(.*?)".*?&gt;/gi,
         selfClosing: true,
         isClosure: false,
         placeholder: null,
@@ -23,7 +23,7 @@ const tagSignatures = {
         decodeNeeded: true,
         errorCheckAvailable: true,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed'
     },
     'g': {
         type: 'g',
@@ -35,7 +35,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-open'
+        style: 'tag-open'
     },
     'gCl': {
         type: 'gCl',
@@ -47,7 +47,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-close'
+        style: 'tag-close'
     },
     'bx': {
         type: 'bx',
@@ -59,7 +59,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed'
     },
     'ex': {
         type: 'ex',
@@ -71,7 +71,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed'
     },
     'x': {
         type: 'x',
@@ -83,7 +83,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed'
     },
     'nbsp':{
         type: 'nbsp',
@@ -91,11 +91,12 @@ const tagSignatures = {
         selfClosing: true,
         isClosure: false,
         placeholder: '°',
+        encodedPlaceholder: '##$_A0$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed tag-nbsp'
     },
     'tab':{
         type: 'tab',
@@ -103,41 +104,38 @@ const tagSignatures = {
         selfClosing: true,
         isClosure: false,
         placeholder: '#',
+        encodedPlaceholder: '##$_09$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed tag-tab'
     },
     'carriageReturn':{
         type: 'carriageReturn',
         regex: /##\$(_0D)\$##/g,
-        openRegex: /##\$(_0D)\$##/g,
-        openLength: 9,
-        closeRegex: null,
         selfClosing: true,
         isClosure: false,
         placeholder: '\\r',
+        encodedPlaceholder: '##$_0D$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed tag-cr'
     },
     'lineFeed':{
         type: 'lineFeed',
         regex: /##\$(_0A)\$##/g,
-        openRegex: /##\$(_0A)\$##/g,
-        openLength: 9,
-        closeRegex: null,
         selfClosing: true,
         isClosure: false,
         placeholder: '\\n',
+        encodedPlaceholder: '##$_0A$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag tag-selfclosed'
+        style: 'tag-selfclosed tag-lf'
     }
 };
 
@@ -159,6 +157,16 @@ function TagStruct(offset, length, type) {
     }
 }
 
+const getSplitBlockTag = () => {
+    return ['lineFeed', 'carriageReturn']
+};
+
+const getBuildableTag = () => {
+    return Object.keys(tagSignatures).
+    filter(tagKey =>{return tagSignatures[tagKey].encodedPlaceholder}).
+    map(tagKey => {return tagSignatures[tagKey].type})
+};
+
 // Control params: errorCheckAvailable
 const getErrorCheckTag = () => {
     return Object.keys(tagSignatures).
@@ -173,4 +181,4 @@ const getNoLexiqaTag = () => {
     map(tagKey => {return tagSignatures[tagKey].type})
 };
 
-export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag};
+export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getBuildableTag, getSplitBlockTag};

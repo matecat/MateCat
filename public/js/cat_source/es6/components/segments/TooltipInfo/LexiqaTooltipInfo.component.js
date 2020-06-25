@@ -14,9 +14,9 @@ class LexiqaTooltipInfo extends Component {
             html.push(
                 <div className="tooltip-error-container" key={i}>
                     <span className="tooltip-error-category">{message.msg}</span>
-                    <div className="tooltip-error-ignore">
+                    <div className="tooltip-error-ignore" onClick={()=>this.ignoreError(message)}>
                         <span className="icon-cancel-circle"/>
-                        <span className="tooltip-error-ignore-text" onClick={()=>this.ignoreError(message)}>Ignore</span>
+                        <span className="tooltip-error-ignore-text">Ignore</span>
                     </div>
                 </div>
             )

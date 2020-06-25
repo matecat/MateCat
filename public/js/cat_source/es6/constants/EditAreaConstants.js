@@ -5,5 +5,6 @@
 import keyMirror  from 'keymirror';
 
 module.exports = keyMirror({
-    REPLACE_SEARCH_RESULTS: null
+    REPLACE_SEARCH_RESULTS: null,
+    COPY_GLOSSARY_IN_EDIT_AREA:  null
 });

@@ -29,6 +29,8 @@ const {hasCommandModifier, isOptionKeyCommand} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import insertText from "./utils/DraftMatecatUtils/insertText";
+import {TagStruct} from "./utils/DraftMatecatUtils/tagModel";
+import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
 
 
 const editorSync = {
@@ -217,6 +219,7 @@ class Editarea extends React.Component {
             SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags);
             console.log('updatingTranslationInStore');
             UI.registerQACheck();
+            this.focusEditor();
         }
     };
 
@@ -258,6 +261,7 @@ class Editarea extends React.Component {
         //console.log(`componentDidMount@EditArea ${this.props.segment.sid}`)
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
+        SegmentStore.addListener(EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA, this.copyGlossaryToEditArea);
         if ( this.props.segment.inSearch ) {
             setTimeout(this.addSearchDecorator());
         }
@@ -273,9 +277,20 @@ class Editarea extends React.Component {
         });
     }
 
+    copyGlossaryToEditArea = (segment, glossaryTranslation) =>{
+        if(segment.sid === this.props.segment.sid) {
+            const {editorState} = this.state;
+            const newEditorState = DraftMatecatUtils.insertText(editorState, glossaryTranslation)
+            this.setState({
+                editorState: newEditorState
+            })
+        }
+    }
+
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.removeListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
+        SegmentStore.removeListener(EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA, this.copyGlossaryToEditArea);
     }
 
     // shouldComponentUpdate(nextProps, nextState) {}
@@ -350,14 +365,18 @@ class Editarea extends React.Component {
         </div>;
     }
 
+    focusEditor = () =>{
+        if(this.editor) this.editor.focus();
+    }
+
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
-        if(e.keyCode === 84 && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
+        if((e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
             this.setState({
                 triggerText: null
             });
             return 'toggle-tag-menu';
-        }else if(e.keyCode === 188 && !hasCommandModifier(e)) {
+        }else if(e.key === '<' && !hasCommandModifier(e)) {
             const textToInsert = '<';
             const {editorState} = this.state;
             const newEditorState = DraftMatecatUtils.insertText(editorState, textToInsert);
@@ -366,21 +385,28 @@ class Editarea extends React.Component {
                 triggerText: textToInsert
             });
             return 'toggle-tag-menu';
-        }else if(e.keyCode === 38 && !hasCommandModifier(e)){ //
+        }else if(e.key === 'ArrowUp' && !hasCommandModifier(e)){
             if(displayPopover) return 'up-arrow-press';
-        }else if(e.keyCode === 40 && !hasCommandModifier(e)){ // giù
+        }else if(e.key === 'ArrowDown' && !hasCommandModifier(e)){
             if(displayPopover) return 'down-arrow-press';
-        }else if(e.keyCode === 13 && !hasCommandModifier(e)){ // enter
+        }else if(e.key === 'Enter' && !hasCommandModifier(e)){
             if(displayPopover) return 'enter-press';
-        }else if(e.keyCode === 27){ // enter
+            if((isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
+                return 'insert-linefeed-tag';
+            }
+        }else if(e.key === 'Escape'){
             return 'close-tag-menu';
-        }else if (e.keyCode === 37 && !hasCommandModifier(e) && !e.altKey) {
+        }else if(e.key === 'Tab' && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
+            return 'insert-tab-tag';
+        }else if( (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') && (isOptionKeyCommand(e) || e.altKey) && e.shiftKey){ // e.key is an &nbsp;
+            return 'insert-nbsp-tag';
+        }else if (e.key === 'ArrowLeft' && !hasCommandModifier(e) && !e.altKey) {
             if (e.shiftKey) {
                 return 'left-nav-shift';
             } else {
                 return 'left-nav';
             }
-        } else if (e.keyCode === 39 && !hasCommandModifier(e) && !e.altKey) {
+        } else if (e.key === 'ArrowRight' && !hasCommandModifier(e) && !e.altKey) {
             if (e.shiftKey) {
                 return 'right-nav-shift';
             } else {
@@ -432,10 +458,31 @@ class Editarea extends React.Component {
             case 'right-nav-shift':
                 handleCursorMovement(1, true);
                 return 'handled';
+            case 'insert-tab-tag':
+                this.insertTagAtSelection('tab');
+                return 'handled';
+            case 'insert-nbsp-tag':
+                this.insertTagAtSelection('nbsp');
+                return 'handled';
+            case 'insert-linefeed-tag':
+                this.insertTagAtSelection('lineFeed');
+                return 'handled';
             default:
                 return 'not-handled';
         }
     };
+
+
+    insertTagAtSelection = (tagType=null) => {
+        const {editorState} = this.state;
+        const customTag = DraftMatecatUtils.structFromType(tagType);
+        // If tag creation has failed, return
+        if(!customTag) return;
+        const newEditorState = DraftMatecatUtils.insertEntityAtSelection(editorState, customTag);
+        this.setState({
+            editorState: newEditorState
+        });
+    }
 
     handleCursorMovement = (step, shift = false) =>{
         const {editorState} = this.state;
@@ -504,30 +551,19 @@ class Editarea extends React.Component {
     onChange = (editorState) =>  {
         const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
-        const {closePopover, updateTagsInEditorDebounced, selectionIsEntity} = this;
+        const {closePopover, updateTagsInEditorDebounced} = this;
 
         // Se non ti trovi ancora su un'entità, annulla eventuali TagClickedId settati
-        const entityKey = selectionIsEntity(editorState);
-        if(!entityKey) {setClickedTagId();}
+        const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
+        if(!entityKey) setClickedTagId();
 
         this.setState({
             editorState: editorState,
         }/*, () => {
             updateTagsInEditorDebounced()
         }*/);
-
-        if(displayPopover){
-            closePopover();
-        }
+        if(displayPopover) closePopover();
         setTimeout(()=>{this.updateTranslationDebounced()});
-    };
-
-    selectionIsEntity = (editorState) => {
-        const contentState = editorState.getCurrentContent();
-        const selectionKey = editorState.getSelection().getAnchorKey();
-        const selectionOffset =  editorState.getSelection().getAnchorOffset();
-        const block = contentState.getBlockForKey(selectionKey);
-        return block.getEntityAt(selectionOffset);
     };
 
     // Methods for TagMenu ---- START
@@ -565,7 +601,6 @@ class Editarea extends React.Component {
         const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags];
         const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex];
         const editorStateWithSuggestedTag = insertTag(selectedTag, editorState, triggerText);
-        // Todo: Force to recompute every tag association
 
         this.setState({
             editorState: editorStateWithSuggestedTag,
@@ -599,10 +634,8 @@ class Editarea extends React.Component {
     };
 
     onTagClick = (suggestionTag) => {
-
         const {editorState, triggerText} = this.state;
         let editorStateWithSuggestedTag = insertTag(suggestionTag, editorState, triggerText);
-
         this.setState({
             editorState: editorStateWithSuggestedTag,
             editorFocused: true,

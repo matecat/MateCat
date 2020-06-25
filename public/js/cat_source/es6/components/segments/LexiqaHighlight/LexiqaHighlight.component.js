@@ -9,14 +9,34 @@ class LexiqaHighlight extends Component {
         this.state = {
             showTooltip: false
         };
+        this.delayHideLoop = null;
     }
-    tooltipToggle = () => {
-        // this will trigger a rerender in the main Editor Component
-        const {showTooltip} = this.state;
+
+    clearTimer() {
+        clearTimeout(this.delayHideLoop);
+    }
+
+    resetState = () => {
         this.setState({
-            showTooltip: !showTooltip
+            showTooltip: false
         })
-    };
+    }
+
+    showTooltip= () => {
+        this.clearTimer();
+        this.setState({
+            showTooltip: true
+        })
+    }
+
+    hideTooltip = (delayHide) => {
+        if (delayHide) {
+            this.delayHideLoop = setTimeout(this.resetState, parseInt(delayHide, 10));
+        } else {
+            this.resetState();
+        }
+    }
+
     getWarning = () => {
         let {start, end, warnings, isSource, sid} = this.props;
         let warning =  _.find(warnings, (warn) => warn.start === start || warn.end === end);
@@ -27,14 +47,18 @@ class LexiqaHighlight extends Component {
         return warning;
     };
 
+    componentWillUnmount() {
+        this.clearTimer();
+    }
+
     render() {
         const { children, sid } = this.props;
         const {showTooltip} = this.state;
         const warning = this.getWarning();
 
         return warning ? <div className="lexiqahighlight"
-                 onMouseEnter={() => this.tooltipToggle()}
-                 onMouseLeave={() => this.tooltipToggle()}>
+                 onMouseEnter={() => this.showTooltip()}
+                 onMouseLeave={() => this.hideTooltip(1000)}>
                 {showTooltip && warning && <LexiqaTooltipInfo messages={warning.messages}/>}
                 <span
                     style={{backgroundColor: warning.color}}
