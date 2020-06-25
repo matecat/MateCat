@@ -25,7 +25,7 @@ import insertTag from "./utils/DraftMatecatUtils/TagMenu/insertTag";
 import matchTag from "./utils/DraftMatecatUtils/matchTag";
 import checkForMissingTags from "./utils/DraftMatecatUtils/TagMenu/checkForMissingTag";
 import updateEntityData from "./utils/DraftMatecatUtils/updateEntityData";
-const {hasCommandModifier} = KeyBindingUtil;
+const {hasCommandModifier, isOptionKeyCommand} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import insertText from "./utils/DraftMatecatUtils/insertText";
@@ -255,6 +255,7 @@ class Editarea extends React.Component {
     };
 
     componentDidMount() {
+        //console.log(`componentDidMount@EditArea ${this.props.segment.sid}`)
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
         if ( this.props.segment.inSearch ) {
@@ -266,9 +267,9 @@ class Editarea extends React.Component {
         }
         setTimeout(()=>{
             this.updateTranslationInStore();
-            if(this.props.segment.opened){
+            /*if(this.props.segment.opened && this.editor){
                 this.editor.focus();
-            }
+            }*/
         });
     }
 
@@ -349,11 +350,9 @@ class Editarea extends React.Component {
         </div>;
     }
 
-
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
-
-        if(e.keyCode === 84 && !hasCommandModifier(e) && e.altKey) {
+        if(e.keyCode === 84 && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
             this.setState({
                 triggerText: null
             });
@@ -373,6 +372,20 @@ class Editarea extends React.Component {
             if(displayPopover) return 'down-arrow-press';
         }else if(e.keyCode === 13 && !hasCommandModifier(e)){ // enter
             if(displayPopover) return 'enter-press';
+        }else if(e.keyCode === 27){ // enter
+            return 'close-tag-menu';
+        }else if (e.keyCode === 37 && !hasCommandModifier(e) && !e.altKey) {
+            if (e.shiftKey) {
+                return 'left-nav-shift';
+            } else {
+                return 'left-nav';
+            }
+        } else if (e.keyCode === 39 && !hasCommandModifier(e) && !e.altKey) {
+            if (e.shiftKey) {
+                return 'right-nav-shift';
+            } else {
+                return 'right-nav';
+            }
         }
         return getDefaultKeyBinding(e);
     };
@@ -380,17 +393,23 @@ class Editarea extends React.Component {
     handleKeyCommand = (command) => {
         const {
             openPopover,
+            closePopover,
             getEditorRelativeSelectionOffset,
             moveDownTagMenuSelection,
             moveUpTagMenuSelection,
-            acceptTagMenuSelection
+            acceptTagMenuSelection,
+            handleCursorMovement
         } = this;
         const {segment: {sourceTagMap, targetTagMap}} = this.props;
 
         switch (command) {
             case 'toggle-tag-menu':
+                // Todo: prenderla dallo state
                 const tagSuggestions = checkForMissingTags(sourceTagMap, targetTagMap);
                 openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
+                return 'handled';
+            case 'close-tag-menu':
+                closePopover();
                 return 'handled';
             case 'up-arrow-press':
                 moveUpTagMenuSelection();
@@ -401,10 +420,30 @@ class Editarea extends React.Component {
             case 'enter-press':
                 acceptTagMenuSelection();
                 return 'handled';
+            case 'left-nav':
+                handleCursorMovement(-1);
+                return 'handled';
+            case 'left-nav-shift':
+                handleCursorMovement(-1, true);
+                return 'handled';
+            case 'right-nav':
+                handleCursorMovement(1);
+                return 'handled';
+            case 'right-nav-shift':
+                handleCursorMovement(1, true);
+                return 'handled';
             default:
                 return 'not-handled';
         }
     };
+
+    handleCursorMovement = (step, shift = false) =>{
+        const {editorState} = this.state;
+        const newEditorState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift)
+        this.setState({
+            editorState: newEditorState
+        })
+    }
 
     onMouseUpEvent = () => {
         const {toggleFormatMenu} = this.props;
@@ -413,8 +452,10 @@ class Editarea extends React.Component {
 
     onBlurEvent = () => {
         // Hide Edit Toolbar
-        const {toggleFormatMenu} = this.props;
+        const {toggleFormatMenu, setClickedTagId} = this.props;
         toggleFormatMenu(false);
+        setClickedTagId();
+
     };
 
     // Focus on editor trigger 2 onChange events
@@ -450,7 +491,7 @@ class Editarea extends React.Component {
             const lastSelection = editorState.getSelection();
             // Aggiorna i tag presenti
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
-            newTagRange = matchTag(decodedSegment); // range update
+            newTagRange = DraftMatecatUtils.matchTag(decodedSegment); // range update
             // Aggiornamento live dei collegamenti tra i tag non self-closed
             newEditorState = updateEntityData(editorState, newTagRange, lastSelection, entities);
         }

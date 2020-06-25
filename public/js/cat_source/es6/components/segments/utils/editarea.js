@@ -171,7 +171,7 @@ let EditArea = {
 
                 }
             }
-            SegmentActions.closeTagsMenu();
+            /*SegmentActions.closeTagsMenu();*/
         }
 
         if (code == 38) { // top arrow
@@ -213,7 +213,7 @@ let EditArea = {
                     $('.rangySelectionBoundary', UI.editarea).remove();
                 }
             }
-            SegmentActions.closeTagsMenu();
+            /*SegmentActions.closeTagsMenu();*/
         }
 
         if (code == 40) { // down arrow
@@ -242,7 +242,7 @@ let EditArea = {
     keyPressEditAreaEventHandler: function (e, sid) {
         let segmentObj = SegmentStore.getSegmentByIdToJS(sid);
         if( (e.which === 60) && (UI.tagLockEnabled) && TagUtils.hasDataOriginalTags(segmentObj.segment) && !UI.tagMenuOpen) { // opening tag sign
-            SegmentActions.showTagsMenu(sid);
+            /*SegmentActions.showTagsMenu(sid);*/
         }
     },
     handleEditAreaPaste: function( e) {

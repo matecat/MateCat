@@ -1,5 +1,7 @@
 // import SegmentStore  from '../stores/SegmentStore';
 import TextUtils from './textUtils';
+import {tagSignatures} from "../components/segments/utils/DraftMatecatUtils/tagModel";
+import findTagWithRegex from "../components/segments/utils/DraftMatecatUtils/findTagWithRegex";
 
 const TAGS_UTILS =  {
     // TODO: move it in another module
@@ -36,6 +38,16 @@ const TAGS_UTILS =  {
         }
         return text;
     },
+
+    transformPlaceholdersAndTagsNew: function(text) {
+        text = this.decodePlaceholdersToTextSimple(text || '');
+        if ( !(config.tagLockCustomizable && !UI.tagLockEnabled) ) {
+            // matchTag transform <g id='1'> and  </g> in opening "1" and closing "1"
+            text = this.matchTag(this.decodeHtmlInTag(text));
+        }
+        return text;
+    },
+
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with tags
      * @param str
@@ -113,15 +125,16 @@ const TAGS_UTILS =  {
     decodeHtmlInTag: function ( tx ) {
         let brTx1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-open\">$1</_plh_>";
         let brTx2 =  "<span contenteditable=\"false\" class=\"tag small tag-close\">$1</span>";
+        let brTx3 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</_plh_>";
         let brTxPlPh1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</_plh_>";
         let brTxPlPh12 =  "<span contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</span>";
-
         tx = tx.replace( /&amp;/gi, "&" )
             .replace( /<span/gi, "<_plh_" )
             .replace( /<\/span/gi, "</_plh_" )
             .replace( /&lt;/gi, "<" )
             .replace( /(<(ph.*?)\s*?\/&gt;)/gi, brTxPlPh1 ) // <ph \/&gt;
-            .replace( /(<(g|x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1 )
+            .replace( /(<g\sid[^<“]*?&gt;)/gi, brTx1 )
+            .replace( /(<(x|bx|ex|bpt|ept|it|mrk)\sid[^<“]*?&gt;)/gi, brTx3 )
             .replace( /(<(ph.*?)\sid[^<“]*?&gt;)/gi, brTxPlPh1 )
             .replace( /(<(ph.*?)\sid[^<“]*?\/>)/gi, brTxPlPh1 )
             .replace( /</gi, "&lt;" )
@@ -146,7 +159,7 @@ const TAGS_UTILS =  {
 
         tx = tx.replace( /(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>" );
         tx = tx.replace( /(<\/span\>)$(\s){0,}/gi, "</span> " );
-        tx = this.transformTagsWithHtmlAttributeSimple(tx);
+        tx = this.transformTagsWithHtmlAttributeGeneral(tx);
         // tx = tx.replace( /(<\/span\>\s)$/gi, "</span><br class=\"end\">" );  // This to show the cursor after the last tag, moved to editarea component
         return tx;
     },
@@ -221,11 +234,41 @@ const TAGS_UTILS =  {
         }
     },
 
+    // Replace old function transformTagsWithHtmlAttribute
+    // Each tag is replaced with its own placeholder except for <g id=""> tags that will be passed to matchTag()
+    // for open-close match
+    transformTagsWithHtmlAttributeGeneral: function (tx) {
+        let returnValue = tx;
+        try {
+            tx = tx.replace( /&quot;/gi, '"' );
+            for (let key in tagSignatures) {
+                if(tagSignatures[key].selfClosing){
+                    const {placeholderRegex, decodeNeeded} = tagSignatures[key];
+                    if(placeholderRegex){
+                        let globalRegex = new RegExp(placeholderRegex.source, placeholderRegex.flags + "gi");
+                        tx = tx.replace( globalRegex , function (match, text) {
+                            if(decodeNeeded){
+                                return Base64.decode(text);
+                            }
+                            return text;
+                        });
+                    }
+                }
+            }
+            returnValue = tx;
+        } catch (e) {
+            console.error("Error parsing tag in transformTagsWithHtmlAttributeGeneral function");
+            returnValue = "";
+        } finally {
+            return returnValue;
+        }
+    },
+
     // Associate tag of type g with integer id
     matchTag: function (tx) {
         let returnValue = tx;
-        const openRegex =  RegExp('&lt;g.*?id="(.*?)".*?&gt;', 'gi');
-        const closeRegex =  RegExp('&lt;(\/g)&gt;', 'gi');
+        const openRegex =  new RegExp('&lt;g.*?id="(.*?)".*?&gt;', 'gi');
+        const closeRegex =  new RegExp('&lt;(\/g)&gt;', 'gi');
         try {
             let openingMatchArr;
             let openings = [];

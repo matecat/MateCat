@@ -31,6 +31,8 @@ import matchTagInEditor from "./matchTagInEditor";
 import getSelectedText from "./getSelectedText";
 import addTagEntityToEditor from "./addTagEntityToEditor";
 import canDecorateRange from "./canDecorateRange";
+import getEntityStrategy from "./getEntityStrategy";
+import moveCursorJumpEntity from "./moveCursorJumpEntity";
 
 
 const DraftMatecatUtils = {
@@ -46,6 +48,7 @@ const DraftMatecatUtils = {
 	decodeTagInfo,
 	tagFromEntity,
 	// Entity Utils
+	getEntityStrategy,
 	getEntities,
 	createNewEntitiesFromMap,
 	linkEntities,
@@ -55,6 +58,7 @@ const DraftMatecatUtils = {
 	matchTagInEditor,
 	addTagEntityToEditor,
 	canDecorateRange,
+	moveCursorJumpEntity,
 	// Fragment Utils
 	insertFragment,
 	duplicateFragment,

@@ -5,7 +5,10 @@
  */
 export const cleanSegmentString = (segmentString) => {
     const regExp = getXliffRegExpression();
-    return segmentString.replace(regExp, '');
+    if(segmentString){
+        return segmentString.replace(regExp, '');
+    }
+    return segmentString;
 };
 
 /**
@@ -27,13 +30,17 @@ export const getIdAttributeRegEx = () => {
  * @returns {string}
  */
 export const unescapeHTML = (escapedHTML) => {
-    return escapedHTML
-        .replace(/&lt;/g,'<')
-        .replace(/&gt;/g,'>')
-        .replace(/&amp;/g,'&')
-        .replace(/&nbsp;/g,' ')
-        .replace(/&apos;/g,'\'')
-        .replace(/&quot;/g,'\"');
+    try{
+        return escapedHTML
+            .replace(/&lt;/g,'<')
+            .replace(/&gt;/g,'>')
+            .replace(/&amp;/g,'&')
+            .replace(/&nbsp;/g,' ')
+            .replace(/&apos;/g,'\'')
+            .replace(/&quot;/g,'\"');
+    }catch(e){
+        return '';
+    }
 };
 
 /**
@@ -42,11 +49,15 @@ export const unescapeHTML = (escapedHTML) => {
  * @returns {string}
  */
 export const unescapeHTMLLeaveTags = (escapedHTML) => {
-    return escapedHTML
-        .replace(/&amp;/g,'&')
-        .replace(/&nbsp;/g,' ')
-        .replace(/&apos;/g,'\'')
-        .replace(/&quot;/g,'\"');
+    if(escapedHTML){
+        return escapedHTML
+            .replace(/&amp;/g,'&')
+            .replace(/&nbsp;/g,' ')
+            .replace(/&apos;/g,'\'')
+            .replace(/&quot;/g,'\"');
+    }
+    return escapedHTML;
+
 };
 
 export const decodePhTags = (text) => {
