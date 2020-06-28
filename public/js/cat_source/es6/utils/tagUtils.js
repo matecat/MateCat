@@ -72,11 +72,11 @@ const TAGS_UTILS =  {
     decodePlaceholdersToTextSimple: function (str) {
         let _str = str;
 
-        _str = _str.replace( config.lfPlaceholderRegex, '<span class="tag small tag-selfclosed tag-lf">\\n</span>' )
-            .replace( config.crPlaceholderRegex, '<span class="tag small tag-selfclosed tag-cr">\\r</span>' )
-        _str = _str.replace( config.lfPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false">\\n</span>' )
-            .replace( config.crPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false">\\r</span>' )
-            .replace( config.crlfPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false">\\r\\n</span>' )
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="tag small tag-selfclosed tag-lf"> </span><br />' )
+            .replace( config.crPlaceholderRegex, '<span class="tag small tag-selfclosed tag-cr"> </span><br />' )
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false"> </span><br />' )
+            .replace( config.crPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false"> </span><br />' )
+            .replace( config.crlfPlaceholderRegex, '<span class="tag small tag-selfclosed" contenteditable="false"> </span><br />' )
             .replace( config.tabPlaceholderRegex, '<span class="tag small tag-selfclosed tag-tab" contenteditable="false">&#8677;</span>' )
             .replace( config.nbspPlaceholderRegex, '<span class="tag small tag-selfclosed tag-nbsp" contenteditable="false">°</span>' )
             //.replace(/(<\/span\>)$/gi, "</span><br class=\"end\">"); // For rangy cursor after a monad marker
