@@ -219,7 +219,6 @@ class Editarea extends React.Component {
             SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags);
             console.log('updatingTranslationInStore');
             UI.registerQACheck();
-            this.focusEditor();
         }
     };
 
