@@ -390,9 +390,6 @@ class Editarea extends React.Component {
             if(displayPopover) return 'down-arrow-press';
         }else if(e.key === 'Enter' && !hasCommandModifier(e)){
             if(displayPopover) return 'enter-press';
-            if((isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
-                return 'insert-linefeed-tag';
-            }
         }else if(e.key === 'Escape'){
             return 'close-tag-menu';
         }else if(e.key === 'Tab' && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
@@ -463,16 +460,12 @@ class Editarea extends React.Component {
             case 'insert-nbsp-tag':
                 this.insertTagAtSelection('nbsp');
                 return 'handled';
-            case 'insert-linefeed-tag':
-                this.insertTagAtSelection('lineFeed');
-                return 'handled';
             default:
                 return 'not-handled';
         }
     };
 
-
-    insertTagAtSelection = (tagType=null) => {
+    insertTagAtSelection = (tagType) => {
         const {editorState} = this.state;
         const customTag = DraftMatecatUtils.structFromType(tagType);
         // If tag creation has failed, return
