@@ -136,7 +136,7 @@ class TagEntity extends Component {
         const draftEntity = contentState.getEntity(entityKey);
         if(!segmentOpened || !tagMismatch) return;
         let tagWarningStyle = '';
-        if(tagMismatch.target.length > 0 && isTarget){
+        if(tagMismatch.target && tagMismatch.target.length > 0 && isTarget){
             let tagObject;
             let tagInfo;
             // Todo: Check tag type and tag id instead of string
@@ -147,7 +147,7 @@ class TagEntity extends Component {
                     tagWarningStyle = 'tag-mismatch-error'
                 }
             });
-        }else if(tagMismatch.source && !isTarget && missingTagsInTarget){
+        }else if(tagMismatch.source && tagMismatch.source.length > 0 && !isTarget && missingTagsInTarget){
             // Find tag and specific Tag ID in missing tags in target array
             const missingTagInError = missingTagsInTarget.filter( tag => {
                 return tag.data.encodedText === draftEntity.data.encodedText && tag.data.id === draftEntity.data.id

@@ -211,15 +211,15 @@ class Editarea extends React.Component {
 
     updateTranslationInStore = () => {
         if ( this.state.translation !== '' ) {
-            const {segment, segment: {sourceTagMap, targetTagMap}} = this.props;
+            const {segment, segment: {sourceTagMap}} = this.props;
             const {editorState, tagRange} = this.state;
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
-            // Add missing tag to store for highlight warnings on tags
-            const {missingTags} = checkForMissingTags(sourceTagMap, targetTagMap);
             // Match tag without compute tag id
             const currentTagRange = DraftMatecatUtils.matchTagInEditor(editorState);
+            // Add missing tag to store for highlight warnings on tags
+            const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange);
             //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
             SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags);
             console.log('updatingTranslationInStore');
