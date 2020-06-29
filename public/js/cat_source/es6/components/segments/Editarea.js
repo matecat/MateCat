@@ -183,16 +183,19 @@ class Editarea extends React.Component {
     //Receive the new translation and decode it for draftJS
     setNewTranslation = (sid, translation) => {
         if ( sid === this.props.segment.sid) {
-            const contentEncoded = DraftMatecatUtils.encodeContent(this.state.editorState, translation );
-            const {editorState, tagRange} =  contentEncoded;
+            const {editorState} = this.state;
+            const contentEncoded = DraftMatecatUtils.encodeContent(editorState, translation );
+            // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
+            let {editorState: newEditorState} =  contentEncoded;
+            const newContentState = newEditorState.getCurrentContent();
+            newEditorState = EditorState.push(editorState, newContentState, 'insert-fragment');
             this.setState( {
                 translation: translation,
-                editorState: editorState,
-            } );
+                editorState: newEditorState,
+            }, () => {
+                this.updateTranslationDebounced();
+            });
         }
-        //TODO MOVE THIS
-        setTimeout(()=>this.updateTranslationInStore());
-
     };
 
     replaceCurrentSearch = (text) => {
@@ -284,6 +287,8 @@ class Editarea extends React.Component {
             const newEditorState = DraftMatecatUtils.insertText(editorState, glossaryTranslation)
             this.setState({
                 editorState: newEditorState
+            }, () => {
+                this.updateTranslationDebounced();
             })
         }
     }
@@ -476,6 +481,8 @@ class Editarea extends React.Component {
         const newEditorState = DraftMatecatUtils.insertEntityAtSelection(editorState, customTag);
         this.setState({
             editorState: newEditorState
+        }, () => {
+            this.updateTranslationDebounced();
         });
     }
 
@@ -543,23 +550,20 @@ class Editarea extends React.Component {
     };
 
     onCompositionStop = () => {
-        console.log('onCompositionStop');
         editorSync.onComposition = false;
     }
 
     onChange = (editorState) =>  {
-        console.log('onChange Call')
-
         const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
-
+        const contentChanged = editorState.getCurrentContent() !== this.state.editorState.getCurrentContent();
         // if not on an entity, remove any previous selection highlight
         const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
         if(!entityKey) setClickedTagId();
         // while onComposition, remove unwanted decorators like lexiqa
-        if(editorState.getCurrentContent() !== this.state.editorState.getCurrentContent()){
-            console.log('onComposition');
+        if(contentChanged){
+            console.log('contentChanged')
             editorSync.onComposition = true;
             // remove lexiqa
             _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'lexiqa');
@@ -571,11 +575,10 @@ class Editarea extends React.Component {
 
         this.setState({
             editorState: editorState,
-        }/*, () => {
-            updateTagsInEditorDebounced()
-        }*/);
-
-        this.updateTranslationDebounced()
+        }, () => {
+            //updateTagsInEditorDebounced()
+            if(contentChanged) this.updateTranslationDebounced();
+        });
         this.onCompositionStopDebounced()
     };
 
@@ -621,7 +624,10 @@ class Editarea extends React.Component {
             clickedTag: selectedTag,
             clickedOnTag: true,
             triggerText: null
+        }, () => {
+            this.updateTranslationDebounced();
         });
+
     };
 
     openPopover = (suggestions, position) => {
@@ -656,6 +662,8 @@ class Editarea extends React.Component {
             clickedTag: suggestionTag,
             displayPopover: false,
             triggerText: null
+        }, () => {
+            this.updateTranslationDebounced();
         });
     };
 
