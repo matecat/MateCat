@@ -36,7 +36,8 @@ import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
 const editorSync = {
     inTransitionToFocus: false,
     editorFocused: false,
-    clickedOnTag: false
+    clickedOnTag: false,
+    onComposition: false
 };
 
 class Editarea extends React.Component {
@@ -89,6 +90,7 @@ class Editarea extends React.Component {
         };
         this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
         this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500);
+        this.onCompositionStopDebounced = _.debounce(this.onCompositionStop, 1000);
     }
 
     // getSearchParams = () => {
@@ -297,8 +299,9 @@ class Editarea extends React.Component {
     // getSnapshotBeforeUpdate(prevProps) {}
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-
-        this.checkDecorators(prevProps);
+        if(!editorSync.onComposition){
+            this.checkDecorators(prevProps);
+        }
     }
 
     render() {
@@ -517,7 +520,6 @@ class Editarea extends React.Component {
     };*/
 
     updateTagsInEditor = () => {
-
         console.log('Executing updateTagsInEditor');
         const {editorState, tagRange} = this.state;
         let newEditorState = editorState;
@@ -540,22 +542,41 @@ class Editarea extends React.Component {
         });
     };
 
+    onCompositionStop = () => {
+        console.log('onCompositionStop');
+        editorSync.onComposition = false;
+    }
+
     onChange = (editorState) =>  {
+        console.log('onChange Call')
+
         const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
 
-        // Se non ti trovi ancora su un'entità, annulla eventuali TagClickedId settati
+        // if not on an entity, remove any previous selection highlight
         const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
         if(!entityKey) setClickedTagId();
+        // while onComposition, remove unwanted decorators like lexiqa
+        if(editorState.getCurrentContent() !== this.state.editorState.getCurrentContent()){
+            console.log('onComposition');
+            editorSync.onComposition = true;
+            // remove lexiqa
+            _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'lexiqa');
+            const decorator = new CompoundDecorator(this.decoratorsStructure);
+            editorState = EditorState.set( editorState, {decorator} )
+        }
+        // if opened, close TagsMenu
+        if(displayPopover) closePopover();
 
         this.setState({
             editorState: editorState,
         }/*, () => {
             updateTagsInEditorDebounced()
         }*/);
-        if(displayPopover) closePopover();
-        setTimeout(()=>{this.updateTranslationDebounced()});
+
+        this.updateTranslationDebounced()
+        this.onCompositionStopDebounced()
     };
 
     // Methods for TagMenu ---- START
@@ -754,7 +775,6 @@ class Editarea extends React.Component {
             missingTagsInTarget
         }
     };
-
 
     formatSelection = (format) =>{
         const {editorState} = this.state;
