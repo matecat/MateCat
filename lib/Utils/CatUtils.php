@@ -45,22 +45,22 @@ class CatUtils {
      */
     public static function CJKFullwidthPunctuationChars() {
         return [
-            '，',
-            '。',
-            '、',
-            '！',
-            '？',
-            '：',
-            '；',
-            '「',
-            '」',
-            '『',
-            '』',
-            '（',
-            '）',
-            '—',
-            '《',
-            '》',
+                '，',
+                '。',
+                '、',
+                '！',
+                '？',
+                '：',
+                '；',
+                '「',
+                '」',
+                '『',
+                '』',
+                '（',
+                '）',
+                '—',
+                '《',
+                '》',
         ];
     }
 
@@ -604,18 +604,29 @@ class CatUtils {
      *
      * @return string|string[]
      */
-    public static function restoreUnicodeEntitesToOriginalValues($str) {
+    public static function restoreUnicodeEntitesToOriginalValues( $str ) {
 
         $entities = [
                 "157" // https://www.codetable.net/decimal/157
         ];
 
-        foreach ($entities as $entity){
-            $value = self::unicode2chr($entity);
-            $str = str_replace("&#".$entity.";",$value, $str);
+        foreach ( $entities as $entity ) {
+            $value = self::unicode2chr( $entity );
+            $str   = str_replace( "&#" . $entity . ";", $value, $str );
         }
 
         return $str;
+    }
+
+    /**
+     * This function trims, strips tags from a html entity decoded string
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    public static function trimAndStripFromAnHtmlEntityDecoded( $str ) {
+        return trim( strip_tags( html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
     }
 
     /**
