@@ -23,7 +23,8 @@ import CompoundDecorator from "./utils/CompoundDecorator"
 import LexiqaUtils from "../../utils/lxq.main";
 import matchTag from "./utils/DraftMatecatUtils/matchTag";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
-
+import getFragmentFromSelection from "./utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection";
+//import getFragmentFromSelection from 'draft-js/lib/getFragmentFromSelection';
 
 class SegmentSource extends React.Component {
 
@@ -67,9 +68,20 @@ class SegmentSource extends React.Component {
             source: cleanSource,
             editorState: editorState,
             editAreaClasses : ['targetarea'],
-            tagRange: tagRange
+            tagRange: tagRange,
+            unlockedForCopy: false
         };
-        this.onChange = () => {console.log('Source is not editable!')}
+        this.onChange = (editorState) => {
+            const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
+            if(!entityKey) {
+                this.props.setClickedTagId();
+                // Accept updated selection only
+                const newEditorSelection = EditorState.acceptSelection(this.state.editorState, editorState.getSelection())
+                this.setState({
+                    editorState: newEditorSelection
+                })
+            }
+        }
     }
 
     // getSearchParams = () => {
@@ -155,7 +167,6 @@ class SegmentSource extends React.Component {
         // let splitArray = text.split('##_SPLIT_##');
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
     }
-
 
     // markLexiqa(source) {
     //     let searchEnabled = this.props.segment.inSearch;
@@ -330,21 +341,6 @@ class SegmentSource extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
 
         setTimeout(()=>this.updateSourceInStore());
-
-        // Todo: find a nicer solution to "unlock" the editor for copy event
-        /*setTimeout(()=> {
-            const {editorState} = this.state;
-            const selectionState = editorState.getSelection();
-            let newSelection = selectionState.merge({
-                anchorOffset: 0,
-                focusOffset: 0,
-            });
-            const newEditorState = EditorState.forceSelection(
-                editorState,
-                newSelection,
-            );
-            this.setState({editorState: newEditorState});
-        });*/
     }
 
     componentWillUnmount() {
@@ -353,8 +349,8 @@ class SegmentSource extends React.Component {
 
     componentDidUpdate(prevProps) {
         this.afterRenderActions(prevProps);
-
         this.checkDecorators(prevProps);
+        this.forceSelectionToUnlockCopy()
     }
 
     allowHTML(string) {
@@ -373,13 +369,14 @@ class SegmentSource extends React.Component {
                         data-original={this.originalSource}
                         onCopy={copyFragment}
                         onBlur={this.onBlurEvent}
+                        onDragStart={this.dragFragment}
+                        onDragEnd={this.onDragEndEvent}
                     >
             <Editor
                 editorState={editorState}
                 onChange={onChange}
                 ref={(el) => this.editor = el}
-                readOnly={true}
-
+                readOnly={false}
             />
         </div>;
         if ( this.props.segment.openSplit ) {
@@ -437,9 +434,9 @@ class SegmentSource extends React.Component {
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
         const {setClickedTagId} = this.props;
-        // Highlight del tag
+        // Highlight
         setClickedTagId(id);
-        // Selezione del tag
+        // Selection
         const selectionState = editorState.getSelection();
         let newSelection = selectionState.merge({
             anchorOffset: start,
@@ -457,14 +454,31 @@ class SegmentSource extends React.Component {
         return clickedTagId;
     };
 
+    // Needed to "unlock" segment for a successful copy/paste or dragNdrop
+    forceSelectionToUnlockCopy = () => {
+        if(this.props.segment.opened && !this.state.unlockedForCopy){
+            const {editorState} = this.state;
+            const selectionState = editorState.getSelection();
+            let newSelection = selectionState.merge({
+                anchorOffset: 0,
+                focusOffset: 0,
+            });
+            const newEditorState = EditorState.forceSelection(
+                editorState,
+                newSelection
+            );
+            this.setState({
+                editorState: newEditorState,
+                unlockedForCopy: true
+            });
+        }
+    }
+
     copyFragment = (e) => {
         const internalClipboard = this.editor.getClipboard();
         const {editorState} = this.state;
-
         if (internalClipboard) {
-            console.log('InternalClipboard ', internalClipboard)
             const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
-
             const fragment = JSON.stringify({
                 orderedMap: internalClipboard,
                 entitiesMap: entitiesMap
@@ -472,10 +486,29 @@ class SegmentSource extends React.Component {
             e.clipboardData.clearData();
             e.clipboardData.setData('text/html', fragment);
             e.clipboardData.setData('text/plain', fragment);
-            console.log("Copied -> ", e.clipboardData.getData('text/html'));
             e.preventDefault();
         }
     };
+
+    dragFragment = (e) => {
+        const {editorState} = this.state;
+        let fragment = getFragmentFromSelection(editorState);
+        if(fragment){
+            const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(fragment, editorState)
+            fragment = JSON.stringify({
+                orderedMap: fragment,
+                entitiesMap: entitiesMap
+            });
+            e.dataTransfer.clearData();
+            e.dataTransfer.setData("text/plain", fragment);
+            e.dataTransfer.setData("text/html", fragment);
+        }
+
+    };
+
+    onDragEndEvent = (e) => {
+        e.dataTransfer.clearData();
+    }
 
     getUpdatedSegmentInfo= () => {
         const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;

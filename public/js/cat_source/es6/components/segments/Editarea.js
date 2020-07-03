@@ -351,6 +351,8 @@ class Editarea extends React.Component {
                     onCopy={copyFragment}
                     onMouseUp={onMouseUpEvent}
                     onBlur={onBlurEvent}
+                    onDragStart={this.onDragEvent}
+                    onDragEnd={this.onDragEnd}
         >
             <Editor
                 lang={lang}
@@ -361,6 +363,7 @@ class Editarea extends React.Component {
                 readOnly={readonly}
                 handleKeyCommand={handleKeyCommand}
                 keyBindingFn={myKeyBindingFn}
+                handleDrop={this.handleDrop}
             />
             <TagBox
                 displayPopover={displayPopover}
@@ -691,16 +694,12 @@ class Editarea extends React.Component {
             try {
                 const fragmentContent = JSON.parse(text);
                 let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
-
-                console.log('Fragment --> ',fragment );
-
                 const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
                     fragment,
                     editorState,
                     fragmentContent.entitiesMap
                 );
-
-                this.onChange(clipboardEditorPasted);
+                //this.onChange(clipboardEditorPasted);
                 this.setState({
                     editorState: clipboardEditorPasted,
                 });
@@ -731,6 +730,41 @@ class Editarea extends React.Component {
             e.preventDefault();
         }
     };
+
+    onDragEvent = (e) => {
+        editorSync.draggingFromEditArea = true;
+    }
+    onDragEnd = (e) => {
+        editorSync.draggingFromEditArea = false;
+    }
+
+    handleDrop = (selection, dataTransfer, isInternal) => {
+        let {editorState} = this.state;
+        const text = dataTransfer.getText();
+        editorState = EditorState.forceSelection(editorState, selection);
+        // Cannot drop anything on entities
+        if(DraftMatecatUtils.selectionIsEntity(editorState)){
+            return 'handled';
+        }
+        if(text && !editorSync.draggingFromEditArea) {
+            try {
+                const fragmentContent = JSON.parse(text);
+                let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
+                const editorStateWithFragment = DraftMatecatUtils.duplicateFragment(
+                    fragment,
+                    editorState,
+                    fragmentContent.entitiesMap
+                );
+                this.setState({
+                    editorState: editorStateWithFragment,
+                });
+                return 'handled';
+            } catch (err) {
+                return 'not-handled';
+            }
+        }
+        return 'not-handled';
+    }
 
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;

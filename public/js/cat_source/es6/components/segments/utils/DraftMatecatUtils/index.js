@@ -37,6 +37,7 @@ import selectionIsEntity from "./selectionIsEntity";
 import insertEntityAtSelection from "./insertEntityAtSelection";
 import structFromType from "./tagFromTagType";
 import splitBlockAtSelection from "./splitBlockAtSelection";
+import getFragmentFromSelection from "./DraftSource/src/component/handlers/edit/getFragmentFromSelection";
 
 
 const DraftMatecatUtils = {
@@ -71,6 +72,7 @@ const DraftMatecatUtils = {
 	duplicateFragment,
 	getEntitiesInFragment,
 	buildFragmentFromText,
+	getFragmentFromSelection, // Duplicated from draft-js/lib, not part of the draft-js public API
 	// Segment Utils
 	encodeContent,
 	decodeSegment,
