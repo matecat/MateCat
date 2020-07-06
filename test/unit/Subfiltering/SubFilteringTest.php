@@ -210,9 +210,9 @@ class SubFilteringTest extends AbstractTest {
         $this->assertEquals( $segmentL2, $this->filter->fromLayer1ToLayer2( $segmentL1 ) );
 
         //These tests are skipped because the integrity can not be granted
-//        $string_from_UI = '<g id="1">##$_09$##Si noti che ci vogliono circa 3 ore dopo aver ingerito</g><g id="2">&lt;a </g><g id="3"/>href<g id="4"> =</g><g id="5">"https://www.supersmart.com/fr--Phytonutriments--CBD-25-mg--0771--WNN" target<x id="6"/>=<x id="7"/><x id="8"/>"_blank"</g><g id="9">&gt;</g><g id="10">una capsula di CBD da 25 mg</g><g id="11"><ph id="mtc_1" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/></g><bx id="12"/> affinché i livelli ematici raggiungano il picco.';
-//        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
-//        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $string_from_UI ) );
+        $string_from_UI = '<g id="1">##$_09$##Si noti che ci vogliono circa 3 ore dopo aver ingerito</g><g id="2">&lt;a </g><g id="3"/>href<g id="4"> =</g><g id="5">"https://www.supersmart.com/fr--Phytonutriments--CBD-25-mg--0771--WNN" target<x id="6"/>=<x id="7"/><x id="8"/>"_blank"</g><g id="9">&gt;</g><g id="10">una capsula di CBD da 25 mg</g><g id="11"><ph id="mtc_1" equiv-text="base64:Jmx0Oy9hJmd0Ow=="/></g><bx id="12"/> affinché i livelli ematici raggiungano il picco.';
+        $this->assertEquals( $segment, $this->filter->fromLayer2ToLayer0( $string_from_UI ) );
+        $this->assertEquals( $segmentL1, $this->filter->fromLayer2ToLayer1( $string_from_UI ) );
 
     }
 
