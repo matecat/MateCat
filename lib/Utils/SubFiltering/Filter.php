@@ -25,6 +25,7 @@ use SubFiltering\Filters\MateCatCustomPHToStandardPH;
 use SubFiltering\Filters\PlaceBreakingSpacesInXliff;
 use SubFiltering\Filters\PlaceHoldXliffTags;
 use SubFiltering\Filters\RemoveDangerousChars;
+use SubFiltering\Filters\RestoreTabsPlaceholders;
 use SubFiltering\Filters\RestoreEquivTextPhToXliffOriginal;
 use SubFiltering\Filters\RestorePlaceHoldersToXLIFFLtGt;
 use SubFiltering\Filters\RestoreXliffTagsContent;
@@ -140,6 +141,7 @@ class Filter {
         $channel = new Pipeline();
         $channel->addLast( new SpacesToNBSPForView() );
         $channel->addLast( new RestoreXliffTagsForView() );
+        $channel->addLast( new RestoreTabsPlaceholders() );
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
