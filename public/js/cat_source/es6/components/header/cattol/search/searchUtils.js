@@ -423,18 +423,18 @@ let SearchUtils = {
         let ignoreCase = (params['match-case']) ? '' : 'i';
         if ( this.searchMode === 'source&target' ) {
             let txt = (isSource) ? params.source : params.target;
-            txt = TextUtils.escapeRegExp(txt);
-            reg = new RegExp('(' + TextUtils.htmlEncode(txt) + ')', "g" + ignoreCase);
+            txt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt));
+            reg = new RegExp('(' + txt + ')', "g" + ignoreCase);
 
         } else if ( (params.source && isSource) || (params.target && !isSource) ) {
 	        let txt = params.source ? params.source : params.target ;
-            let regTxt = TextUtils.escapeRegExp(txt);
+            let regTxt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt));
             // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
-            reg = new RegExp('(' + TextUtils.htmlEncode(regTxt)+ ')', "g" + ignoreCase);
+            reg = new RegExp('(' + regTxt+ ')', "g" + ignoreCase);
 
             if (params['exact-match'] ) {
-                reg = new RegExp('\\b(' + TextUtils.htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')\\b', "g" + ignoreCase);
+                reg = new RegExp('\\b(' + regTxt + ')\\b', "g" + ignoreCase);
             }
 
             // Finding double spaces
@@ -446,7 +446,7 @@ let SearchUtils = {
         let {text, tagsIntervals, tagsArray } = this.prepareTextToReplace(textToMark);
 
         let matchIndex = 0;
-
+        text = TextUtils.htmlEncode(text);
         text = text.replace(reg,  ( match, text, index ) => {
             let intervalSpan = _.find(tagsIntervals, (item)=> index > item.start && index < item.end);
             if ( !intervalSpan ) {
