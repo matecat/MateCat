@@ -423,12 +423,12 @@ let SearchUtils = {
         let ignoreCase = (params['match-case']) ? '' : 'i';
         if ( this.searchMode === 'source&target' ) {
             let txt = (isSource) ? params.source : params.target;
-            txt = txt.replace(/(\W)/gi, "\\$1");
-            reg = new RegExp('(' + TextUtils.htmlEncode(txt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            txt = TextUtils.escapeRegExp(txt.replace(/(\W)/gi, "\\$1"));
+            reg = new RegExp('(' + TextUtils.htmlEncode(txt) + ')', "g" + ignoreCase);
 
         } else if ( (params.source && isSource) || (params.target && !isSource) ) {
 	        let txt = params.source ? params.source : params.target ;
-
+            txt = TextUtils.escapeRegExp(txt);
             let regTxt = txt.replace(/(\W)/gi, "\\$1");
             // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
