@@ -50,8 +50,15 @@
     line-height: 1.2;
     color: #fff;
     vertical-align: middle;
-    cursor: pointer;
+    /*cursor: pointer;*/
     word-break: break-all;
+
+    span{
+      &::selection{
+        color: #fff;
+        background-color: transparent;
+      }
+    }
 
     &.tag-open {
       margin: 0 8px 0 1px;
@@ -139,8 +146,16 @@
       }
     }
 
+    &:not(.clicked):hover {
+      cursor: pointer;
+    }
+
     &.clicked {
+      cursor: grab;
       background-color: #6BD3BD;
+      &:active {
+        cursor: grabbing;
+      }
       &:before {
         border-left-color: #6BD3BD;
       }
@@ -160,6 +175,12 @@
       &:after {
         border:none;
       }
+      span{
+        &::selection{
+          color: #002b5c;
+          background-color: transparent;
+        }
+      }
     }
 
     &.tag-lf {
@@ -168,17 +189,6 @@
 
     &.tag-cr {
 
-    }
-
-    /*span{
-      &::selection{
-        color: #fff;
-        background-color: transparent;
-      }
-    }*/
-    &:hover{
-      /*background: #E5E9F1;*/
-      cursor: pointer;
     }
   }
 }
@@ -194,8 +204,14 @@
   line-height: 1.3;
   color: #fff;
   vertical-align: middle;
-  cursor: pointer;
   word-break: break-all;
+
+  span{
+    &::selection{
+      color: #fff;
+      background-color: transparent;
+    }
+  }
 
   &.tag-open {
     margin: 0 8px 0 1px;
@@ -284,6 +300,7 @@
   }
 
   &.clicked {
+    cursor: grab;
     background-color: #6BD3BD;
     &:before {
       border-left-color: #6BD3BD;
@@ -362,17 +379,6 @@
         font-size: 12px;
       }
     }
-  }
-
-  span{
-    &::selection{
-      color: #fff;
-      background-color: transparent;
-    }
-  }
-  &:hover{
-    /*background: #E5E9F1;*/
-    cursor: pointer;
   }
 }
 

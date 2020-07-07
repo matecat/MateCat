@@ -434,19 +434,24 @@ class SegmentSource extends React.Component {
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
         const {setClickedTagId} = this.props;
-        // Highlight
-        setClickedTagId(id);
-        // Selection
-        const selectionState = editorState.getSelection();
-        let newSelection = selectionState.merge({
-            anchorOffset: start,
-            focusOffset: end,
-        });
-        const newEditorState = EditorState.forceSelection(
-            editorState,
-            newSelection,
-        );
-        this.setState({editorState: newEditorState});
+        // Use _latestEditorState to get latest selection
+        try{
+            // Selection
+            const selectionState = this.editor._latestEditorState.getSelection();
+            let newSelection = selectionState.merge({
+                anchorOffset: start,
+                focusOffset: end,
+            });
+            const newEditorState = EditorState.forceSelection(
+                editorState,
+                newSelection,
+            );
+            this.setState({editorState: newEditorState});
+            // Highlight
+            setClickedTagId(id);
+        }catch (e) {
+            console.log('Invalid selection')
+        }
     };
 
     getClickedTagId = () => {

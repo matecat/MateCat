@@ -353,6 +353,7 @@ class Editarea extends React.Component {
                     onBlur={onBlurEvent}
                     onDragStart={this.onDragEvent}
                     onDragEnd={this.onDragEnd}
+                    onDrop={this.onDragEnd}
         >
             <Editor
                 lang={lang}
@@ -746,6 +747,7 @@ class Editarea extends React.Component {
         if(DraftMatecatUtils.selectionIsEntity(editorState)){
             return 'handled';
         }
+        // when drop is inside the same editor, use default behavior
         if(text && !editorSync.draggingFromEditArea) {
             try {
                 const fragmentContent = JSON.parse(text);
@@ -769,17 +771,24 @@ class Editarea extends React.Component {
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
         const {setClickedTagId} = this.props;
-        setClickedTagId(id);
-        const selectionState = editorState.getSelection();
-        let newSelection = selectionState.merge({
-            anchorOffset: start,
-            focusOffset: end,
-        });
-        const newEditorState = EditorState.forceSelection(
-            editorState,
-            newSelection,
-        );
-        this.setState({editorState: newEditorState});
+        // Use _latestEditorState
+        try{
+            // Selection
+            const selectionState = this.editor._latestEditorState.getSelection();
+            let newSelection = selectionState.merge({
+                anchorOffset: start,
+                focusOffset: end,
+            });
+            const newEditorState = EditorState.forceSelection(
+                editorState,
+                newSelection,
+            );
+            this.setState({editorState: newEditorState});
+            // Highlight
+            setClickedTagId(id);
+        }catch (e) {
+            console.log('Invalid selection')
+        }
     };
 
     getClickedTagId = () => {
