@@ -22,24 +22,23 @@ class TranslationIssueModel extends \Features\ReviewExtended\TranslationIssueMod
     public function delete() {
         EntryDao::deleteEntry( $this->issue );
 
+        //
+        // ---------------------------------------------------
+        // Note 2020-06-24
+        // ---------------------------------------------------
+        //
+        // $this->chunkReview may not refer to the chunk review associated to issue source page
+        //
+        $chunkReview    = ChunkReviewDao::findByIdJobAndSourcePage( $this->chunk->id, $this->issue->source_page );
         $final_revision = ( new SegmentTranslationEventDao() )
                 ->getFinalRevisionForSegmentAndSourcePage(
-                        $this->chunk_review->id_job,
+                        $chunkReview->id_job,
                         $this->issue->id_segment,
                         $this->issue->source_page );
 
-
         if ( $final_revision ) {
-            $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-            $this->subtractPenaltyPoints( $chunk_review_model );
-        }
-
-        // If I am in R2 and I am deleting an R1 issue
-        // I must subtract penalty points from R1
-        if ( \Utils::getSourcePageFromReferer() === 3 and $this->issue->source_page == 2 ) {
-            $chunkReview = ChunkReviewDao::findByIdJobAndSourcePage($this->chunk->id, 2);
             $chunk_review_model = new ChunkReviewModel( $chunkReview );
-            $chunk_review_model->subtractPenaltyPoints($this->issue->penalty_points , $chunk_review_model->getChunk()->getProject());
+            $this->subtractPenaltyPoints( $chunk_review_model );
         }
     }
 }

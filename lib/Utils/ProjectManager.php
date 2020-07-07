@@ -1820,13 +1820,12 @@ class ProjectManager {
                                     $extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues($extract_external[ 'seg' ]);
                                     $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ]);
 
-                                    //we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
-                                    //AND IF IT IS ONLY A CHAR? like "*" ?
-                                    //we can't distinguish if it is translated or not
-                                    //this means that we lose the tags id inside the target if different from source
-                                    $src = trim( strip_tags( html_entity_decode( $extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
-                                    $trg = trim( strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
-
+                                    // we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
+                                    // AND IF IT IS ONLY A CHAR? like "*" ?
+                                    // we can't distinguish if it is translated or not
+                                    // this means that we lose the tags id inside the target if different from source
+                                    $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded($extract_external[ 'seg' ]);
+                                    $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded($target_extract_external[ 'seg' ]);
 
                                     if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
