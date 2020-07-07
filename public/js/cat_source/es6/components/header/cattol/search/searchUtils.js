@@ -423,13 +423,12 @@ let SearchUtils = {
         let ignoreCase = (params['match-case']) ? '' : 'i';
         if ( this.searchMode === 'source&target' ) {
             let txt = (isSource) ? params.source : params.target;
-            txt = TextUtils.escapeRegExp(txt.replace(/(\W)/gi, "\\$1"));
+            txt = TextUtils.escapeRegExp(txt);
             reg = new RegExp('(' + TextUtils.htmlEncode(txt) + ')', "g" + ignoreCase);
 
         } else if ( (params.source && isSource) || (params.target && !isSource) ) {
 	        let txt = params.source ? params.source : params.target ;
-            txt = TextUtils.escapeRegExp(txt);
-            let regTxt = txt.replace(/(\W)/gi, "\\$1");
+            let regTxt = TextUtils.escapeRegExp(txt);
             // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
             reg = new RegExp('(' + TextUtils.htmlEncode(regTxt)+ ')', "g" + ignoreCase);
@@ -447,6 +446,7 @@ let SearchUtils = {
         let {text, tagsIntervals, tagsArray } = this.prepareTextToReplace(textToMark);
 
         let matchIndex = 0;
+
         text = text.replace(reg,  ( match, text, index ) => {
             let intervalSpan = _.find(tagsIntervals, (item)=> index > item.start && index < item.end);
             if ( !intervalSpan ) {
