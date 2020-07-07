@@ -10,30 +10,36 @@ class LexiqaHighlight extends Component {
             showTooltip: false
         };
         this.delayHideLoop = null;
+        this.delayShowLoop = null;
     }
 
     clearTimer() {
         clearTimeout(this.delayHideLoop);
+        clearTimeout(this.delayShowLoop);
     }
 
-    resetState = () => {
+    toggleTooltip = (show = false) => {
         this.setState({
-            showTooltip: false
+            showTooltip: show
         })
     }
 
-    showTooltip= () => {
+    showTooltip= (delayShow) => {
         this.clearTimer();
-        this.setState({
-            showTooltip: true
-        })
+        if (delayShow) {
+            this.delayShowLoop = setTimeout(() => this.toggleTooltip(true), parseInt(delayShow, 10));
+        } else {
+            this.toggleTooltip(true);
+        }
     }
 
     hideTooltip = (delayHide) => {
+        this.clearTimer();
+
         if (delayHide) {
-            this.delayHideLoop = setTimeout(this.resetState, parseInt(delayHide, 10));
+            this.delayHideLoop = setTimeout(this.toggleTooltip, parseInt(delayHide, 10));
         } else {
-            this.resetState();
+            this.toggleTooltip();
         }
     }
 
@@ -57,8 +63,8 @@ class LexiqaHighlight extends Component {
         const warning = this.getWarning();
 
         return warning ? <div className="lexiqahighlight"
-                 onMouseEnter={() => this.showTooltip()}
-                 onMouseLeave={() => this.hideTooltip(1000)}>
+                 onMouseEnter={() => this.showTooltip(300)}
+                 onMouseLeave={() => this.hideTooltip(300)}>
                 {showTooltip && warning && <LexiqaTooltipInfo messages={warning.messages}/>}
                 <span
                     style={{backgroundColor: warning.color}}

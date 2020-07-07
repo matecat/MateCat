@@ -14,7 +14,10 @@ const TagSuggestion = React.forwardRef((props,ref) => {
     return (
         <div
             className={`tag-menu-suggestion ${props.isFocused ?  `active` : ''}`}
-            onMouseDown={ () => props.onTagClick(props.suggestion) }
+            onMouseDown={ (e) => {
+                e.preventDefault();
+                props.onTagClick(props.suggestion);
+            } }
             style={props.isFocused ? {fontWeight: '700'} : null}
             tabIndex={props.tabIndex}
             ref={ref}

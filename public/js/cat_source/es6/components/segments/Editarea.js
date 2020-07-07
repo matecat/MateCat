@@ -36,7 +36,8 @@ import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
 const editorSync = {
     inTransitionToFocus: false,
     editorFocused: false,
-    clickedOnTag: false
+    clickedOnTag: false,
+    onComposition: false
 };
 
 class Editarea extends React.Component {
@@ -89,6 +90,7 @@ class Editarea extends React.Component {
         };
         this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
         this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500);
+        this.onCompositionStopDebounced = _.debounce(this.onCompositionStop, 1000);
     }
 
     // getSearchParams = () => {
@@ -181,16 +183,19 @@ class Editarea extends React.Component {
     //Receive the new translation and decode it for draftJS
     setNewTranslation = (sid, translation) => {
         if ( sid === this.props.segment.sid) {
-            const contentEncoded = DraftMatecatUtils.encodeContent(this.state.editorState, translation );
-            const {editorState, tagRange} =  contentEncoded;
+            const {editorState} = this.state;
+            const contentEncoded = DraftMatecatUtils.encodeContent(editorState, translation );
+            // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
+            let {editorState: newEditorState} =  contentEncoded;
+            const newContentState = newEditorState.getCurrentContent();
+            newEditorState = EditorState.push(editorState, newContentState, 'insert-fragment');
             this.setState( {
                 translation: translation,
-                editorState: editorState,
-            } );
+                editorState: newEditorState,
+            }, () => {
+                this.updateTranslationDebounced();
+            });
         }
-        //TODO MOVE THIS
-        setTimeout(()=>this.updateTranslationInStore());
-
     };
 
     replaceCurrentSearch = (text) => {
@@ -206,20 +211,19 @@ class Editarea extends React.Component {
 
     updateTranslationInStore = () => {
         if ( this.state.translation !== '' ) {
-            const {segment, segment: {sourceTagMap, targetTagMap}} = this.props;
+            const {segment, segment: {sourceTagMap}} = this.props;
             const {editorState, tagRange} = this.state;
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
-            // Add missing tag to store for highlight warnings on tags
-            const {missingTags} = checkForMissingTags(sourceTagMap, targetTagMap);
             // Match tag without compute tag id
             const currentTagRange = DraftMatecatUtils.matchTagInEditor(editorState);
+            // Add missing tag to store for highlight warnings on tags
+            const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange);
             //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
             SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags);
             console.log('updatingTranslationInStore');
             UI.registerQACheck();
-            this.focusEditor();
         }
     };
 
@@ -283,6 +287,8 @@ class Editarea extends React.Component {
             const newEditorState = DraftMatecatUtils.insertText(editorState, glossaryTranslation)
             this.setState({
                 editorState: newEditorState
+            }, () => {
+                this.updateTranslationDebounced();
             })
         }
     }
@@ -298,8 +304,9 @@ class Editarea extends React.Component {
     // getSnapshotBeforeUpdate(prevProps) {}
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-
-        this.checkDecorators(prevProps);
+        if(!editorSync.onComposition){
+            this.checkDecorators(prevProps);
+        }
     }
 
     render() {
@@ -344,6 +351,8 @@ class Editarea extends React.Component {
                     onCopy={copyFragment}
                     onMouseUp={onMouseUpEvent}
                     onBlur={onBlurEvent}
+                    onDragStart={this.onDragEvent}
+                    onDragEnd={this.onDragEnd}
         >
             <Editor
                 lang={lang}
@@ -354,6 +363,7 @@ class Editarea extends React.Component {
                 readOnly={readonly}
                 handleKeyCommand={handleKeyCommand}
                 keyBindingFn={myKeyBindingFn}
+                handleDrop={this.handleDrop}
             />
             <TagBox
                 displayPopover={displayPopover}
@@ -391,9 +401,6 @@ class Editarea extends React.Component {
             if(displayPopover) return 'down-arrow-press';
         }else if(e.key === 'Enter' && !hasCommandModifier(e)){
             if(displayPopover) return 'enter-press';
-            if((isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
-                return 'insert-linefeed-tag';
-            }
         }else if(e.key === 'Escape'){
             return 'close-tag-menu';
         }else if(e.key === 'Tab' && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
@@ -464,16 +471,12 @@ class Editarea extends React.Component {
             case 'insert-nbsp-tag':
                 this.insertTagAtSelection('nbsp');
                 return 'handled';
-            case 'insert-linefeed-tag':
-                this.insertTagAtSelection('lineFeed');
-                return 'handled';
             default:
                 return 'not-handled';
         }
     };
 
-
-    insertTagAtSelection = (tagType=null) => {
+    insertTagAtSelection = (tagType) => {
         const {editorState} = this.state;
         const customTag = DraftMatecatUtils.structFromType(tagType);
         // If tag creation has failed, return
@@ -481,6 +484,8 @@ class Editarea extends React.Component {
         const newEditorState = DraftMatecatUtils.insertEntityAtSelection(editorState, customTag);
         this.setState({
             editorState: newEditorState
+        }, () => {
+            this.updateTranslationDebounced();
         });
     }
 
@@ -525,7 +530,6 @@ class Editarea extends React.Component {
     };*/
 
     updateTagsInEditor = () => {
-
         console.log('Executing updateTagsInEditor');
         const {editorState, tagRange} = this.state;
         let newEditorState = editorState;
@@ -548,22 +552,37 @@ class Editarea extends React.Component {
         });
     };
 
+    onCompositionStop = () => {
+        editorSync.onComposition = false;
+    }
+
     onChange = (editorState) =>  {
         const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
-
-        // Se non ti trovi ancora su un'entità, annulla eventuali TagClickedId settati
+        const contentChanged = editorState.getCurrentContent() !== this.state.editorState.getCurrentContent();
+        // if not on an entity, remove any previous selection highlight
         const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
         if(!entityKey) setClickedTagId();
+        // while onComposition, remove unwanted decorators like lexiqa
+        if(contentChanged){
+            console.log('contentChanged')
+            editorSync.onComposition = true;
+            // remove lexiqa
+            _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'lexiqa');
+            const decorator = new CompoundDecorator(this.decoratorsStructure);
+            editorState = EditorState.set( editorState, {decorator} )
+        }
+        // if opened, close TagsMenu
+        if(displayPopover) closePopover();
 
         this.setState({
             editorState: editorState,
-        }/*, () => {
-            updateTagsInEditorDebounced()
-        }*/);
-        if(displayPopover) closePopover();
-        setTimeout(()=>{this.updateTranslationDebounced()});
+        }, () => {
+            //updateTagsInEditorDebounced()
+            if(contentChanged) this.updateTranslationDebounced();
+        });
+        this.onCompositionStopDebounced()
     };
 
     // Methods for TagMenu ---- START
@@ -608,7 +627,10 @@ class Editarea extends React.Component {
             clickedTag: selectedTag,
             clickedOnTag: true,
             triggerText: null
+        }, () => {
+            this.updateTranslationDebounced();
         });
+
     };
 
     openPopover = (suggestions, position) => {
@@ -643,6 +665,8 @@ class Editarea extends React.Component {
             clickedTag: suggestionTag,
             displayPopover: false,
             triggerText: null
+        }, () => {
+            this.updateTranslationDebounced();
         });
     };
 
@@ -670,16 +694,12 @@ class Editarea extends React.Component {
             try {
                 const fragmentContent = JSON.parse(text);
                 let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
-
-                console.log('Fragment --> ',fragment );
-
                 const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
                     fragment,
                     editorState,
                     fragmentContent.entitiesMap
                 );
-
-                this.onChange(clipboardEditorPasted);
+                //this.onChange(clipboardEditorPasted);
                 this.setState({
                     editorState: clipboardEditorPasted,
                 });
@@ -710,6 +730,41 @@ class Editarea extends React.Component {
             e.preventDefault();
         }
     };
+
+    onDragEvent = (e) => {
+        editorSync.draggingFromEditArea = true;
+    }
+    onDragEnd = (e) => {
+        editorSync.draggingFromEditArea = false;
+    }
+
+    handleDrop = (selection, dataTransfer, isInternal) => {
+        let {editorState} = this.state;
+        const text = dataTransfer.getText();
+        editorState = EditorState.forceSelection(editorState, selection);
+        // Cannot drop anything on entities
+        if(DraftMatecatUtils.selectionIsEntity(editorState)){
+            return 'handled';
+        }
+        if(text && !editorSync.draggingFromEditArea) {
+            try {
+                const fragmentContent = JSON.parse(text);
+                let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
+                const editorStateWithFragment = DraftMatecatUtils.duplicateFragment(
+                    fragment,
+                    editorState,
+                    fragmentContent.entitiesMap
+                );
+                this.setState({
+                    editorState: editorStateWithFragment,
+                });
+                return 'handled';
+            } catch (err) {
+                return 'not-handled';
+            }
+        }
+        return 'not-handled';
+    }
 
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
@@ -762,7 +817,6 @@ class Editarea extends React.Component {
             missingTagsInTarget
         }
     };
-
 
     formatSelection = (format) =>{
         const {editorState} = this.state;

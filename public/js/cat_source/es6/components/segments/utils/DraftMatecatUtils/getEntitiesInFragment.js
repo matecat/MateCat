@@ -1,13 +1,19 @@
 const getEntitiesInFragment = (fragment, editorState) => {
     const contentState = editorState.getCurrentContent();
     const entities = {};
-    fragment.forEach(block => {
-        block.getCharacterList().forEach(character => {
-            if (character.entity) {
-                entities[character.entity] = contentState.getEntity(character.entity)
-            }
+    try{
+        fragment.forEach(block => {
+            block.getCharacterList().forEach(character => {
+                if (character.entity) {
+                    entities[character.entity] = contentState.getEntity(character.entity)
+                }
+            });
         });
-    });
+    }catch (e){
+        if (e instanceof TypeError) {
+            console.log('Invalid fragment')
+        }
+    }
     return entities;
 };
 

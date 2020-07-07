@@ -39,7 +39,11 @@ const encodeContent = (originalEditorState, plainText = '') => {
 
     // Replace each tag text with a placeholder
     contentState = beautifyEntities(editorState);
-    editorState = EditorState.push(editorState, contentState, 'insert-characters');
+    //editorState = EditorState.push(editorState, contentState, 'insert-characters');
+
+    //
+    const decorator = originalEditorState.getDecorator();
+    editorState = EditorState.createWithContent(contentState, decorator);
 
     return {editorState, tagRange};
 };
