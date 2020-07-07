@@ -939,11 +939,10 @@ const SegmentActions = {
         this.openSideSegments();
     },
 
-    addPreloadedIssuesToSegment: function ( sid, issues ) {
+    addPreloadedIssuesToSegment: function ( issues ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
-            sid: sid,
-            issues: issues
+            versionsIssues: issues
         });
     },
 

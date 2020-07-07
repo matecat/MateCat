@@ -16,9 +16,7 @@ ReviewExtended = {
                 }
                 versionsIssues[issue.id_segment].push(issue);
             });
-            _.each(versionsIssues, function ( issues, segmentId ) {
-                SegmentActions.addPreloadedIssuesToSegment(segmentId, issues);
-            })
+            SegmentActions.addPreloadedIssuesToSegment(versionsIssues);
         });
     }
 };

@@ -433,6 +433,7 @@ var UI = {
 			if (articleToAdd) {
                 $('#outer').append(newFile);
                 $('#outer').append('   <div id="hiddenHtml" style="width: 100%; visibility: hidden; overflow-y: scroll;box-sizing: content-box;">' + self.getSegmentStructure()  + '</div>' );
+                $('#outer').append('   <div id="loader-getMoreSegments"/>' );
             }
 			segments = segments.concat(this.segments);
 
