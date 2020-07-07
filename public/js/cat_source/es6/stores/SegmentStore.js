@@ -1009,7 +1009,10 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES:
-            SegmentStore.addSegmentPreloadedIssues(action.sid, action.issues);
+            _.each(action.versionsIssues, function ( issues, segmentId ) {
+                SegmentStore.addSegmentPreloadedIssues(segmentId, issues);
+            });
+
             // if ( seg ) {
             //     SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
             // }
