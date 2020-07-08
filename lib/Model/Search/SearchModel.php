@@ -52,12 +52,12 @@ class SearchModel {
     /**
      * @throws Exception
      */
-    public function replaceAll(){
+    public function replaceAll() {
 
-        $sql = $this->_loadReplaceAllQuery();
+        $sql       = $this->_loadReplaceAllQuery();
         $resultSet = $this->_getQuery( $sql );
 
-        $sqlBatch = [];
+        $sqlBatch  = [];
         $sqlValues = [];
         foreach ( $resultSet as $key => $tRow ) {
 
@@ -71,9 +71,9 @@ class SearchModel {
             /**
              * Escape for database
              */
-            $sqlBatch[] = "(?,?,?)";
-            $sqlValues[] = $tRow['id_segment'];
-            $sqlValues[] = $tRow['id_job'];
+            $sqlBatch[]  = "(?,?,?)";
+            $sqlValues[] = $tRow[ 'id_segment' ];
+            $sqlValues[] = $tRow[ 'id_job' ];
             $sqlValues[] = $trMod;
 
         }
@@ -82,7 +82,7 @@ class SearchModel {
         //but we can assume that max translation length is more or less 2.5KB
         // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
         // 300KB is a very low number compared to 16MB
-        $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
+        $sqlBatchChunk  = array_chunk( $sqlBatch, 100 );
         $sqlValuesChunk = array_chunk( $sqlValues, 100 * 3 );
 
         foreach ( $sqlBatchChunk as $k => $batch ) {
@@ -93,8 +93,8 @@ class SearchModel {
             ";
 
             $data = [
-                    'id_segment' => $sqlValuesChunk[ $k ][ 0 ],
-                    'id_job' => $sqlValuesChunk[ $k ][ 1 ],
+                    'id_segment'  => $sqlValuesChunk[ $k ][ 0 ],
+                    'id_job'      => $sqlValuesChunk[ $k ][ 1 ],
                     'translation' => $sqlValuesChunk[ $k ][ 2 ],
             ];
 
@@ -102,7 +102,7 @@ class SearchModel {
 
                 $this->_insertQuery( $sqlUpdate, $data );
 
-            } catch ( Exception $e ){
+            } catch ( Exception $e ) {
 
                 $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
 				- job id            : " . $this->queryParams->job . "
@@ -137,27 +137,25 @@ class SearchModel {
         $sql = null;
         switch ( $this->queryParams->key ) {
             case 'source':
-                $sql = $this->_loadSearchInSourceQuery();
+                $results = $this->_getQuery( $this->_loadSearchInSourceQuery() );
                 break;
             case 'target':
-                $sql = $this->_loadSearchInTargetQuery();
+                $results = $this->_getQuery( $this->_loadSearchInTargetQuery() );
                 break;
             case 'coupled':
-                $sql = $this->_loadSearchCoupledQuery();
+                $results = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery() ), $this->_getQuery( $this->_loadSearchInTargetQuery() ) );
                 break;
             case 'status_only':
-                $sql = $this->_loadSearchStatusOnlyQuery();
+                $results = $this->_getQuery( $this->_loadSearchStatusOnlyQuery() );
                 break;
         }
-
-        $results = $this->_getQuery( $sql );
 
         $vector = [
                 'sid_list' => [],
                 'count'    => '0'
         ];
 
-        if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' ) {
+        if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' || $this->queryParams->key === 'coupled' ) {
 
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
