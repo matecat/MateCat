@@ -14,6 +14,12 @@ EventEmitter.prototype.setMaxListeners(0);
 let CatToolStore = assign({}, EventEmitter.prototype, {
     files: null,
     qr: null,
+    searchResults: {
+        searchResults: [], // Array
+        occurrencesList: [],
+        searchResultsDictionary: {},
+        featuredSearchResult: 0
+    },
     storeFilesInfo: function(files) {
         this.files = files
     },
@@ -36,6 +42,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
             return _.filter(this.qr.chunk.reviews, (rev)=>rev.revision_number === revisionNumber);
         }
         return null
+    },
+    storeSearchResult: function(data) {
+        this.searchResults = data
     },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
@@ -62,9 +71,6 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.SET_SEGMENT_FILTER:
             CatToolStore.emitChange(CatToolConstants.SET_SEGMENT_FILTER, action.data, action.state);
             break;
-        case CatToolConstants.SET_SEARCH_RESULTS:
-            CatToolStore.emitChange(CatToolConstants.SET_SEARCH_RESULTS, action.total, action.segments);
-            break;
         case CatToolConstants.RELOAD_SEGMENT_FILTER:
             CatToolStore.emitChange(CatToolConstants.RELOAD_SEGMENT_FILTER);
             break;
@@ -78,6 +84,10 @@ AppDispatcher.register(function(action) {
         case CatToolConstants.SET_PROGRESS:
             CatToolStore.setProgress(action.stats);
             CatToolStore.emitChange(CatToolConstants.SET_PROGRESS, CatToolStore._projectProgess);
+            break;
+        case CatToolConstants.STORE_SEARCH_RESULT:
+            CatToolStore.storeSearchResult(action.data);
+            CatToolStore.emitChange(CatToolConstants.STORE_SEARCH_RESULT, action.data);
             break;
         case CatToolConstants.UPDATE_QR:
             CatToolStore.updateQR(action.qr);

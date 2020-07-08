@@ -287,15 +287,17 @@ class SegmentTarget extends React.Component {
     }
 
     markTranslation(translation) {
-        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.target) {
+        let searchEnabled = this.props.segment.inSearch;
+        if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.target && !searchEnabled) {
             translation = LXQ.highLightText(translation, this.props.segment.lexiqa.target, true, false, true );
         }
         if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
             translation = QaBlacklist.markBlacklistItemsInSegment(translation, this.props.segment.qaBlacklistGlossary);
         }
-        if ( this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.target) {
-            translation = SearchUtils.markText(translation, this.props.segment.search, false, this.props.segment.sid);
+        if (searchEnabled) {
+            translation = SearchUtils.markText(translation, false, this.props.segment.sid);
         }
+
         return translation
     }
 
