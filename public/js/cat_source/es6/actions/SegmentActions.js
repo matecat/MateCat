@@ -84,16 +84,18 @@ const SegmentActions = {
         });
     },
 
-    // mountTranslationIssues: function () {
-    //     AppDispatcher.dispatch({
-    //         actionType: SegmentConstants.MOUNT_TRANSLATIONS_ISSUES
-    //     });
-    // },
-    addSearchResultToSegments: function (segments, params) {
+    addSearchResultToSegments: function (occurrencesList, searchResultsDictionary, currentIndex) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEARCH_RESULTS,
-            segments: segments,
-            params: params
+            occurrencesList,
+            searchResultsDictionary,
+            currentIndex
+        });
+    },
+    changeCurrentSearchSegment: function (currentIndex) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_CURRENT_SEARCH,
+            currentIndex
         });
     },
     removeSearchResultToSegments: function () {
