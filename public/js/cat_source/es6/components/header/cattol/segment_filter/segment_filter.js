@@ -195,9 +195,10 @@ let SegmentFilterUtils = {
         var localStorageData = SegmentFilterUtils.getStoredState();
         if ( localStorageData.serverData ) {
             SegmentActions.setMutedSegments(SegmentFilterUtils.getStoredState().serverData.segment_ids);
-            CatToolActions.setSegmentFilter(localStorageData.serverData, localStorageData.reactState);
             SegmentFilterUtils.filteringSegments = true;
             setTimeout( () => {
+                CatToolActions.setSegmentFilter(localStorageData.serverData, localStorageData.reactState);
+                CatToolActions.openSegmentFilter();
                 SegmentFilterUtils.tryToFocusLastSegment();
             }, 200 );
         }
