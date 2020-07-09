@@ -112,7 +112,7 @@ class SearchModel {
                 Log::$fileName = 'ReplaceAll_Failures.log';
                 Log::doJsonLog( $sql );
                 Log::doJsonLog( $resultSet );
-                Log::doJsonLog( $sqlInsert );
+//                Log::doJsonLog( $sqlInsert );
                 Log::doJsonLog( $msg );
 
                 Utils::sendErrMailReport( $msg );
@@ -143,7 +143,15 @@ class SearchModel {
                 $results = $this->_getQuery( $this->_loadSearchInTargetQuery() );
                 break;
             case 'coupled':
-                $results = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery() ), $this->_getQuery( $this->_loadSearchInTargetQuery() ) );
+                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery() ), $this->_getQuery( $this->_loadSearchInTargetQuery() ) );
+                $results    = [];
+
+                // in this case $results is the merge of the results of two queries,
+                // every segment id will possibly have 2 occurrences (source and target)
+                foreach ( $rawResults as $rawResult ) {
+                    $results[ $rawResult[ 'id' ] ][] = $rawResult[ 'text' ];
+                }
+
                 break;
             case 'status_only':
                 $results = $this->_getQuery( $this->_loadSearchStatusOnlyQuery() );
@@ -155,17 +163,45 @@ class SearchModel {
                 'count'    => '0'
         ];
 
-        if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' || $this->queryParams->key === 'coupled' ) {
+        if ( $this->queryParams->key === 'source' || $this->queryParams->key === 'target' ) {
 
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $matches      = WholeTextFinder::find( $occurrence[ 'text' ], $searchTerm, true, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
+                $matches      = $this->find( $occurrence[ 'text' ], $searchTerm );
                 $matchesCount = count( $matches );
 
-                if ( $matchesCount > 0 and $matches[ 0 ][ 0 ] !== '' ) {
+                if ( $this->hasMatches( $matches ) ) {
                     $vector[ 'sid_list' ][] = $occurrence[ 'id' ];
                     $vector[ 'count' ]      = $vector[ 'count' ] + $matchesCount;
+                }
+            }
+
+            if ( $vector[ 'count' ] == 0 ) {
+                $vector[ 'sid_list' ] = [];
+                $vector[ 'count' ]    = 0;
+            }
+
+        } elseif ( $this->queryParams->key === 'coupled' ) {
+
+            foreach ( $results as $id => $occurrence ) {
+
+                // check if exists match target
+                if ( isset( $occurrence[ 1 ] ) ) {
+
+                    // match source
+                    $searchTermSource   = $this->queryParams->source;
+                    $matchesSource      = $this->find( $occurrence[ 0 ], $searchTermSource );
+                    $matchesSourceCount = count( $matchesSource );
+
+                    $searchTermTarget   = $this->queryParams->target;
+                    $matchesTarget      = $this->find( $occurrence[ 1 ], $searchTermTarget );
+                    $matchesTargetCount = count( $matchesTarget );
+
+                    if ( $this->hasMatches( $matchesSource ) and $this->hasMatches( $matchesTarget ) ) {
+                        $vector[ 'sid_list' ][] = $id;
+                        $vector[ 'count' ]      = $vector[ 'count' ] + $matchesTargetCount + $matchesSourceCount;
+                    }
                 }
             }
 
@@ -183,6 +219,26 @@ class SearchModel {
         }
 
         return $vector;
+    }
+
+    /**
+     * @param array $matches
+     *
+     * @return bool
+     */
+    private function hasMatches( array $matches ) {
+
+        return count( $matches ) > 0 and $matches[ 0 ][ 0 ] !== '';
+    }
+
+    /**
+     * @param string $haystack
+     * @param string $needle
+     *
+     * @return array
+     */
+    private function find( $haystack, $needle ) {
+        return WholeTextFinder::find( $haystack, $needle, true, $this->queryParams->isExactMatchRequested, $this->queryParams->isMatchCaseRequested );
     }
 
     /**
