@@ -483,15 +483,14 @@ class SegmentSource extends React.Component {
         const internalClipboard = this.editor.getClipboard();
         const {editorState} = this.state;
         if (internalClipboard) {
+            // Get plain text form internalClipboard fragment
+            const plainText = internalClipboard.map((block) => block.getText()).join('');
             const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
             const fragment = JSON.stringify({
                 orderedMap: internalClipboard,
                 entitiesMap: entitiesMap
             });
-            e.clipboardData.clearData();
-            e.clipboardData.setData('text/html', fragment);
-            e.clipboardData.setData('text/plain', fragment);
-            e.preventDefault();
+            SegmentActions.copyFragmentToClipboard(fragment, plainText);
         }
     };
 

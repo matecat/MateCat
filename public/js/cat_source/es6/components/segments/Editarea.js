@@ -31,6 +31,7 @@ import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings
 import insertText from "./utils/DraftMatecatUtils/insertText";
 import {TagStruct} from "./utils/DraftMatecatUtils/tagModel";
 import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
+import SegmentActions from "../../actions/SegmentActions";
 
 
 const editorSync = {
@@ -691,44 +692,44 @@ class Editarea extends React.Component {
 
     pasteFragment = (text, html) => {
         const {editorState} = this.state;
-        if(text) {
+        const {fragment: clipboardFragment, plainText: clipboardPlainText} = SegmentStore.getFragmentFromClipboard();
+        // if text in standard clipboard matches the the plainClipboard saved in store proceed using fragment
+        // otherwise we're handling an external copy and must paste the external plain text
+        if(clipboardFragment && clipboardPlainText === text) {
             try {
-                const fragmentContent = JSON.parse(text);
+                const fragmentContent = JSON.parse(clipboardFragment);
                 let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
                 const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
                     fragment,
                     editorState,
                     fragmentContent.entitiesMap
                 );
-                //this.onChange(clipboardEditorPasted);
                 this.setState({
                     editorState: clipboardEditorPasted,
                 });
+                // Paste fragment
                 return true;
             } catch (e) {
+                // Paste plain standard clipboard
                 return false;
             }
         }
+        // Paste plain standard clipboard
         return false;
     };
 
     copyFragment = (e) => {
         const internalClipboard = this.editor.getClipboard();
         const {editorState} = this.state;
-
         if (internalClipboard) {
-            console.log('InternalClipboard ', internalClipboard)
+            // Get plain text form internalClipboard fragment
+            const plainText = internalClipboard.map((block) => block.getText()).join('');
             const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
-
             const fragment = JSON.stringify({
                 orderedMap: internalClipboard,
                 entitiesMap: entitiesMap
             });
-            e.clipboardData.clearData();
-            e.clipboardData.setData('text/html', fragment);
-            e.clipboardData.setData('text/plain', fragment);
-            console.log("Copied -> ", e.clipboardData.getData('text/html'));
-            e.preventDefault();
+            SegmentActions.copyFragmentToClipboard(fragment, plainText)
         }
     };
 

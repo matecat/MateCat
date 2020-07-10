@@ -69,6 +69,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     searchParams: {},
     nextUntranslatedFromServer: null,
     consecutiveCopySourceNum: [],
+    clipboardFragment: '',
+    clipboardPlainText: '',
     /**
      * Update all
      */
@@ -869,6 +871,18 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         const issueOpen = this._segments.findIndex((segment)=>segment.get('openIssues') === true);
         return ( commentOpen !== -1 ||  issueOpen !== -1);
     },
+    copyFragmentToClipboard: function(fragment, plainText){
+        this.clipboardFragment = fragment;
+        this.clipboardPlainText = plainText;
+    },
+    getFragmentFromClipboard: function(){
+        const fragment = this.clipboardFragment;
+        const plainText = this.clipboardPlainText;
+        return {
+            fragment,
+            plainText
+        };
+    },
     emitChange: function (event, args) {
         this.emit.apply(this, arguments);
     }
@@ -1209,6 +1223,9 @@ AppDispatcher.register(function (action) {
             break;
         case EditAreaConstants.REPLACE_SEARCH_RESULTS:
             SegmentStore.emitChange(EditAreaConstants.REPLACE_SEARCH_RESULTS, action.text);
+            break;
+        case EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD:
+            SegmentStore.copyFragmentToClipboard(action.fragment, action.plainText);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
