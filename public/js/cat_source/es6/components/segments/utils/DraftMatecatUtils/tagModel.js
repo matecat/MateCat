@@ -42,7 +42,7 @@ const tagSignatures = {
         regex: /&lt;(\/g)&gt;/gi,
         selfClosing: false,
         isClosure: true,
-        placeholder: '</g>',
+        placeholder: '</>',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: true,
