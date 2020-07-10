@@ -6,7 +6,7 @@
         & > * {
           &:last-child{
             &:after{
-              content:'↵';
+              content:'\21B5'; //↵
               padding: 0 4px;
               font-size: 14px;
               color: #08BEEC;
@@ -21,7 +21,7 @@
         & > span {
           &:only-child[data-offset-key]{
             &:before{
-              content:'↵';
+              content:'\21B5'; //↵
               padding: 0 4px;
               font-size: 14px;
               color: #08BEEC;
@@ -39,158 +39,6 @@
 .tag-container{
   position: relative;
   display: inline-block;
-  .tag {
-    position: relative;
-    display: inline-block;
-    padding: 0 2px;
-    background: #002b5c;
-    /*box-shadow: inset 0 0 0 2px #E5E9F1;*/
-    /*border-radius: 7px;*/
-    font-size: 12px;
-    line-height: 1.2;
-    color: #fff;
-    vertical-align: middle;
-    /*cursor: pointer;*/
-    word-break: break-all;
-
-    span{
-      &::selection{
-        color: #fff;
-        background-color: transparent;
-      }
-    }
-
-    &.tag-open {
-      margin: 0 8px 0 1px;
-      &:before {
-        content: "";
-        position: absolute;
-        right: -8px;
-        bottom: 0;
-        width: 0;
-        height: 0;
-        border-left: 8px solid #002b5c;
-        border-top: 7px solid transparent;
-        border-bottom: 7px solid transparent;
-      }
-    }
-
-    &.tag-close {
-      margin: 0 1px 0 8px;
-      &:after {
-        content: "";
-        position: absolute;
-        left: -8px;
-        top: 0;
-        width: 0;
-        height: 0;
-        border-right: 8px solid #002b5c;
-        border-top: 7px solid transparent;
-        border-bottom: 7px solid transparent;
-      }
-    }
-
-    &.tag-selfclosed {
-      margin: 0 8px 0 8px;
-      &:after {
-        content: "";
-        position: absolute;
-        left: -8px;
-        top: 0;
-        width: 0;
-        height: 0;
-        border-right: 8px solid #002b5c;
-        border-top: 7px solid transparent;
-        border-bottom: 7px solid transparent;
-      }
-      &:before {
-        content: "";
-        position: absolute;
-        right: -8px;
-        bottom: 0;
-        width: 0;
-        height: 0;
-        border-left: 8px solid #002b5c;
-        border-top: 7px solid transparent;
-        border-bottom: 7px solid transparent;
-      }
-    }
-
-    &.tag-inactive {
-      background: #95A3B2;
-      &:before {
-        border-left-color: #95A3B2;
-      }
-      &:after {
-        border-right-color: #95A3B2;
-      }
-    }
-
-    &.tag-mismatch-error {
-      background-color: #FF4233;
-      &:before {
-        border-left-color: #FF4233;
-      }
-      &:after {
-        border-right-color: #FF4233;
-      }
-    }
-
-    &.tag-mismatch-warning {
-      background-color: #FFBF24;
-      &:before {
-        border-left-color: #FFBF24;
-      }
-      &:after {
-        border-right-color: #FFBF24;
-      }
-    }
-
-    &:not(.clicked):hover {
-      cursor: pointer;
-    }
-
-    &.clicked {
-      cursor: grab;
-      background-color: #6BD3BD;
-      &:active {
-        cursor: grabbing;
-      }
-      &:before {
-        border-left-color: #6BD3BD;
-      }
-      &:after {
-        border-right-color: #6BD3BD;
-      }
-    }
-
-    &.tag-nbsp{
-      font-size: 18px;
-      margin: 0 4px 0 4px;
-      color: #08BEEC;
-      background: transparent;
-      &:before {
-        border:none;
-      }
-      &:after {
-        border:none;
-      }
-      span{
-        &::selection{
-          color: #002b5c;
-          background-color: transparent;
-        }
-      }
-    }
-
-    &.tag-lf {
-
-    }
-
-    &.tag-cr {
-
-    }
-  }
 }
 
 .tag {
@@ -198,10 +46,8 @@
   display: inline-block;
   padding: 0 2px;
   background: #002b5c;
-  /*box-shadow: inset 0 0 0 2px #E5E9F1;*/
-  /*border-radius: 7px;*/
-  font-size: 13px;
-  line-height: 1.3;
+  font-size: 12px;
+  line-height: 1.2;
   color: #fff;
   vertical-align: middle;
   word-break: break-all;
@@ -223,8 +69,8 @@
       width: 0;
       height: 0;
       border-left: 8px solid #002b5c;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
     }
   }
 
@@ -234,12 +80,12 @@
       content: "";
       position: absolute;
       left: -8px;
-      bottom: 0;
+      top: 0;
       width: 0;
       height: 0;
       border-right: 8px solid #002b5c;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
     }
   }
 
@@ -253,8 +99,8 @@
       width: 0;
       height: 0;
       border-right: 8px solid #002b5c;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
     }
     &:before {
       content: "";
@@ -264,8 +110,8 @@
       width: 0;
       height: 0;
       border-left: 8px solid #002b5c;
-      border-top: 8px solid transparent;
-      border-bottom: 8px solid transparent;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
     }
   }
 
@@ -299,9 +145,16 @@
     }
   }
 
+  &:not(.clicked):hover {
+    cursor: pointer;
+  }
+
   &.clicked {
     cursor: grab;
     background-color: #6BD3BD;
+    &:active {
+      cursor: grabbing;
+    }
     &:before {
       border-left-color: #6BD3BD;
     }
@@ -313,13 +166,19 @@
   &.tag-nbsp{
     font-size: 18px;
     margin: 0 4px 0 4px;
-    color: #08beec;
+    color: #08BEEC;
     background: transparent;
     &:before {
       border:none;
     }
     &:after {
       border:none;
+    }
+    span{
+      &::selection{
+        color: #002b5c;
+        background-color: transparent;
+      }
     }
   }
 
@@ -328,7 +187,7 @@
       border:none;
     }
     &:after{
-      content:'↵';
+      content:'\00B0';
       top: -7px;
       padding: 0 4px;
       font-size: 14px;
@@ -342,7 +201,7 @@
       border:none;
     }
     &:after{
-      content:'↵';
+      content:'\00B0';
       top: -7px;
       padding: 0 4px;
       font-size: 14px;
@@ -351,8 +210,25 @@
     }
   }
 
+  &.tag-tab{
+    font-size: 14px;
+    margin: 0 2px;
+    color: #08BEEC;
+    background: transparent;
+    &:before {
+      border:none;
+    }
+    &:after {
+      border:none;
+    }
+  }
+
   &.small {
+    &:hover{
+      cursor: default;
+    }
     font-size: 10px;
+    line-height: 1.3;
     &:after {
       left: -7px;
       border-right-width: 7px;
@@ -378,6 +254,9 @@
       &:after{
         font-size: 12px;
       }
+    }
+    &.tag-tab{
+      font-size: 12px;
     }
   }
 }

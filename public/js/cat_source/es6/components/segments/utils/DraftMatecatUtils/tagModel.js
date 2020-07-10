@@ -90,7 +90,7 @@ const tagSignatures = {
         regex: /##\$(_A0)\$##/g,
         selfClosing: true,
         isClosure: false,
-        placeholder: '°',
+        placeholder: '\u00B0', //'°',
         encodedPlaceholder: '##$_A0$##',
         placeholderRegex: null,
         decodeNeeded: false,
@@ -103,7 +103,7 @@ const tagSignatures = {
         regex: /##\$(_09)\$##/g,
         selfClosing: true,
         isClosure: false,
-        placeholder: '#',
+        placeholder: '\u21E5', //'⇥'
         encodedPlaceholder: '##$_09$##',
         placeholderRegex: null,
         decodeNeeded: false,
