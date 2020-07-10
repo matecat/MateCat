@@ -29,10 +29,9 @@ const {hasCommandModifier, isOptionKeyCommand} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import insertText from "./utils/DraftMatecatUtils/insertText";
-import {TagStruct} from "./utils/DraftMatecatUtils/tagModel";
+import {tagSignatures, TagStruct} from "./utils/DraftMatecatUtils/tagModel";
 import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
 import SegmentActions from "../../actions/SegmentActions";
-
 
 const editorSync = {
     inTransitionToFocus: false,
@@ -694,11 +693,11 @@ class Editarea extends React.Component {
         const {editorState} = this.state;
         const {fragment: clipboardFragment, plainText: clipboardPlainText} = SegmentStore.getFragmentFromClipboard();
         // if text in standard clipboard matches the the plainClipboard saved in store proceed using fragment
-        // otherwise we're handling an external copy and must paste the external plain text
-        if(clipboardFragment && clipboardPlainText === text) {
+        // otherwise we're handling an external copy
+        if(clipboardFragment && text && clipboardPlainText === text) {
             try {
                 const fragmentContent = JSON.parse(clipboardFragment);
-                let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
+                let fragment = DraftMatecatUtils.buildFragmentFromJson(fragmentContent.orderedMap);
                 const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
                     fragment,
                     editorState,
@@ -713,6 +712,25 @@ class Editarea extends React.Component {
                 // Paste plain standard clipboard
                 return false;
             }
+        }else if(text){
+            // we're handling an external copy, special chars must be striped from text
+            // and we have to add tag for external entities like nbsp or tab
+            let cleanText = DraftMatecatUtils.cleanSegmentString(DraftMatecatUtils.unescapeHTML(text));
+            // Replace with placeholder
+            const nbspSign = tagSignatures['nbsp'].encodedPlaceholder;
+            const tabSign = tagSignatures['tab'].encodedPlaceholder
+            cleanText = cleanText.replace(/°/gi, nbspSign).replace(/\t/gi, tabSign);
+            console.log('using sign')
+            const plainTextClipboardFragment = DraftMatecatUtils.buildFragmentFromText(cleanText);
+            const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
+                plainTextClipboardFragment,
+                editorState
+            );
+            this.setState({
+                editorState: clipboardEditorPasted,
+            });
+            // Paste fragment
+            return true;
         }
         // Paste plain standard clipboard
         return false;
@@ -752,7 +770,7 @@ class Editarea extends React.Component {
         if(text && !editorSync.draggingFromEditArea) {
             try {
                 const fragmentContent = JSON.parse(text);
-                let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
+                let fragment = DraftMatecatUtils.buildFragmentFromJson(fragmentContent.orderedMap);
                 const editorStateWithFragment = DraftMatecatUtils.duplicateFragment(
                     fragment,
                     editorState,
