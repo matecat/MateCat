@@ -176,19 +176,15 @@ let SearchUtils = {
         return searchObject;
     },
 
-    getSearchRegExp(textToMatch, ignoreCase, isExactMatch) {
-        let ignoreFlag = (ignoreCase)? "" : "i";
-        let reg = new RegExp( '(' + textToMatch + ')', "g" + ignoreFlag );
+    getMatchesInText: function(text, textToMatch, ignoreCase, isExactMatch) {
+        textToMatch = TextUtils.escapeRegExp(textToMatch);
+        let reg = new RegExp( '(' + textToMatch + ')', "g" + ignoreCase );
         if (isExactMatch) {
             reg = new RegExp( '\\b(' + textToMatch.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreFlag );
         }
-        return reg
-    },
-
-    getMatchesInText: function(text, textToMatch, ignoreCase, isExactMatch) {
-        let reg = this.getSearchRegExp(textToMatch, ignoreCase, isExactMatch);
         return text.matchAll( reg );
     },
+
 
     createSearchObject: function(segments) {
         let searchProgressiveIndex = 0;
