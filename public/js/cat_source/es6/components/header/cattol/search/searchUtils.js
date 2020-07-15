@@ -380,7 +380,7 @@ let SearchUtils = {
         let matchFind = 0;
         let regGtp = new RegExp(GTPLACEHOLDER,'g');
         text = text.replace(regGtp, function (match, index) {
-            let interval = {end: index + GTPLACEHOLDER.length};
+            let interval = {end: index};
             tagsIntervals.push(interval);
             matchFind++;
             return match;
@@ -426,7 +426,7 @@ let SearchUtils = {
             txt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt));
             reg = new RegExp('(' + txt + ')', "g" + ignoreCase);
 
-        } else if ( (params.source && isSource) || (params.target && !isSource) ) {
+        } else if ( (!_.isUndefined(params.source) && isSource) || (!_.isUndefined(params.target) && !isSource) ) {
 	        let txt = params.source ? params.source : params.target ;
             let regTxt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt));
             // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
@@ -457,6 +457,7 @@ let SearchUtils = {
                 return match
             }
         });
+        text = TextUtils.htmlDecode(text);
         text = this.restoreTextAfterReplace(text, tagsArray);
         return text;
     },
