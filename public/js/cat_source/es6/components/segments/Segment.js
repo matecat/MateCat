@@ -373,7 +373,7 @@ class Segment extends React.Component {
     }
 
     openRevisionPanel(data) {
-        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) && ( this.props.segment.ice_locked == 0 || ( this.props.segment.ice_locked == 1 && this.props.segment.unlocked ) ) ) {
+        if ( parseInt(data.sid) === parseInt(this.props.segment.sid)  ) {
             this.setState( {
                 showRevisionPanel: true,
                 showTranslationIssues: false,
@@ -694,7 +694,7 @@ class Segment extends React.Component {
                     {config.comments_enabled && this.props.segment.openComments ? (
                         <SegmentCommentsContainer {...this.props} />
                     ) : (null)}
-                    {this.props.isReviewExtended && this.state.showRevisionPanel && this.props.segment.opened && !locked  ? (
+                    {this.props.isReviewExtended && this.state.showRevisionPanel && this.props.segment.opened  ? (
                         <div className="review-balloon-container">
                             {!this.props.segment.versions ? (
                                 (null)
