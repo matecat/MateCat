@@ -211,7 +211,7 @@ const SegmentActions = {
             });
         }
     },
-    
+
     setHeaderPercentage: function (sid, fid, perc, className, createdBy) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_HEADER,
@@ -783,8 +783,8 @@ const SegmentActions = {
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
                     sid: sid,
-                    match: response.data.matches.length !== 0 ? response.data.matches[source] : {},
-                    name: source
+                    match: response.data.matches.length !== 0 ? response.data.matches[source.replace(/\'/g, '&apos;')] : {},
+                    name: source.replace(/\'/g, '&apos;')
                 });
             });
     },
