@@ -828,6 +828,14 @@ class Editarea extends React.Component {
             leftInitial  - (minWidth - (editorBoundingRect.right - selectionBoundingRect.left))
             :
             leftInitial;
+        if(selectionBoundingRect.bottom === 0 &&
+            selectionBoundingRect.left === 0 &&
+            selectionBoundingRect.height === 0){
+            return {
+                top: 50,
+                left: 50
+            };
+        }
         return {
             top: selectionBoundingRect.bottom - editorBoundingRect.top + selectionBoundingRect.height,
             left: leftAdjusted
