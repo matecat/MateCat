@@ -20,7 +20,7 @@ export const getXliffRegExpression = () => {
 };
 
 export const getIdAttributeRegEx = () => {
-    return /id=".*?(\d+).*?"/g;
+    return /id="(\w+)"/g;
 }
 
 

@@ -115,33 +115,102 @@
     }
   }
 
-  &.tag-inactive {
-    background: #95A3B2;
+  &.tag-ph{
+    border-radius: 8px;
+    background: #AEBDCD;
+    margin: 0 1px;
+    padding: 0 4px;
     &:before {
-      border-left-color: #95A3B2;
+      border:none;
+    }
+    &:after{
+      border:none;
+    }
+    span{
+      span {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 64px;
+      }
+    }
+  }
+
+  /* Used in TM */
+  &.small {
+    &:hover{
+      cursor: default !important;
+    }
+    font-size: 10px;
+    line-height: 1.3;
+    &:after {
+      left: -7px;
+      border-right-width: 7px;
+      border-top-width: 6.5px;
+      border-bottom-width: 6.5px;
+    }
+    &:before {
+      right: -7px;
+      border-left-width: 7px;
+      border-top-width: 6.5px;
+      border-bottom-width: 6.5px;
+    }
+    &.tag-nbsp{
+      font-size: 14px;
+    }
+    &.tag-lf {
+      &:after{
+        font-size: 12px;
+      }
+    }
+
+    &.tag-cr {
+      &:after{
+        font-size: 12px;
+      }
+    }
+    &.tag-tab{
+      font-size: 12px;
+    }
+    &.tag-ph{
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 64px;
+    }
+  }
+
+  /* Tag states */
+  &.tag-inactive {
+    color: #788190;
+    background: #F5F6F7;
+    &:before {
+      border-left-color: #F5F6F7;
     }
     &:after {
-      border-right-color: #95A3B2;
+      border-right-color: #F5F6F7;
     }
   }
 
   &.tag-mismatch-error {
-    background-color: #FF4233;
+    background-color: #E02020;
     &:before {
-      border-left-color: #FF4233;
+      border-left-color: #E02020;
     }
     &:after {
-      border-right-color: #FF4233;
+      border-right-color: #E02020;
     }
   }
 
   &.tag-mismatch-warning {
-    background-color: #FFBF24;
+    background-color: #FFCC01;
     &:before {
-      border-left-color: #FFBF24;
+      border-left-color: #FFCC01;
     }
     &:after {
-      border-right-color: #FFBF24;
+      border-right-color: #FFCC01;
     }
   }
 
@@ -151,18 +220,19 @@
 
   &.clicked {
     cursor: grab;
-    background-color: #6BD3BD;
+    background-color: #2FB177;
     &:active {
       cursor: grabbing;
     }
     &:before {
-      border-left-color: #6BD3BD;
+      border-left-color: #2FB177;
     }
     &:after {
-      border-right-color: #6BD3BD;
+      border-right-color: #2FB177;
     }
   }
 
+  /* Inline tag */
   &.tag-nbsp{
     font-size: 18px;
     margin: 0 2px;
@@ -221,42 +291,11 @@
     &:after {
       border:none;
     }
-  }
-
-  &.small {
-    &:hover{
-      cursor: default;
-    }
-    font-size: 10px;
-    line-height: 1.3;
-    &:after {
-      left: -7px;
-      border-right-width: 7px;
-      border-top-width: 6.5px;
-      border-bottom-width: 6.5px;
-    }
-    &:before {
-      right: -7px;
-      border-left-width: 7px;
-      border-top-width: 6.5px;
-      border-bottom-width: 6.5px;
-    }
-    &.tag-nbsp{
-      font-size: 14px;
-    }
-    &.tag-lf {
-      &:after{
-        font-size: 12px;
+    span{
+      &::selection{
+        color: #002b5c;
+        background-color: transparent;
       }
-    }
-
-    &.tag-cr {
-      &:after{
-        font-size: 12px;
-      }
-    }
-    &.tag-tab{
-      font-size: 12px;
     }
   }
 }
@@ -280,7 +319,7 @@
 .common-tooltip {
   position: absolute;
   z-index: 1001;
-  padding: 0 4px;
+  padding: 8px;
   bottom: 32px;
   left:50%;
   transform: translateX(-50%);
@@ -329,6 +368,7 @@
     -ms-flex-wrap: wrap;
     flex-wrap: wrap;
     width: 100%;
+    z-index: 1;
   }
   .tooltip-error-container {
     display: -webkit-box;

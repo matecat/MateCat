@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
-import {tagSignatures} from "../utils/DraftMatecatUtils/tagModel";
+import {tagSignatures, getTooltipTag, getNoLexiqaTag} from "../utils/DraftMatecatUtils/tagModel";
 
 class TagEntity extends Component {
     constructor(props) {
@@ -16,8 +16,8 @@ class TagEntity extends Component {
                 anchorKey: '',
                 focusKey: '',
             },
-            showTooltip: false,
             tagWarningStyle: '',
+            showTooltip: false,
             tagStyle
         };
     }
@@ -25,11 +25,10 @@ class TagEntity extends Component {
     emitSelectionParameters = (blockKey, selection, forceSelection) => {
     };
 
-    tooltipToggle = () => {
+    tooltipToggle = (show = false) => {
         // this will trigger a rerender in the main Editor Component
-        const {showTooltip} = this.state;
         this.setState({
-            showTooltip: !showTooltip
+            showTooltip: show
         })
     };
 
@@ -74,26 +73,27 @@ class TagEntity extends Component {
     }
 
     render() {
-        const {selected, tyselectionStateInputs , showTooltip, tagWarningStyle, tagStyle} = this.state;
-        const {decoratedText, entityKey, offsetkey, blockKey, start, end, onClick, contentState, getClickedTagId} = this.props;
+        const {selected, tagWarningStyle, tagStyle} = this.state;
+        const {entityKey, offsetkey, blockKey, start, end, onClick, contentState, getClickedTagId} = this.props;
         const { children } = this.props.children.props;
         const {selection, forceSelection} = children[0];
-        const {emitSelectionParameters,tooltipToggle,highlightTag} = this;
+        const {emitSelectionParameters, tooltipToggle} = this;
         // let text = this.markSearch(children[0].props.text);
         const entity = contentState.getEntity(entityKey);
         const clickedTagId = getClickedTagId();
         const mirrorClickedStyle = entity.data.id && clickedTagId === entity.data.id ? 'clicked' : '';
-        
+        const showTooltip = this.state.showTooltip && getTooltipTag().includes(entity.type);
+
         return <div className={"tag-container"}
-                    /*contentEditable="true"
+                    /*contentEditable="false"
                     suppressContentEditableWarning={true}*/>
-            {showTooltip && <TooltipInfo/>}
+            {showTooltip && <TooltipInfo text={entity.data.placeholder} isTag tagStyle={tagStyle}/>}
             <span data-offset-key={offsetkey}
                 className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
                 unselectable="on"
                 suppressContentEditableWarning={true}
-                /*onMouseEnter={()=> console.log(entity.data)}*/
-                /*onMouseLeave={() => tooltipToggle()}*/
+                onMouseEnter={()=> tooltipToggle(true)}
+                onMouseLeave={() => tooltipToggle()}
                 onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                 /*contentEditable="false"*/
                 onClick={() => onClick(start, end, entity.data.id)}>
