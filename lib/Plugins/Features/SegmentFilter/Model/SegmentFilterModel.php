@@ -25,6 +25,12 @@ class SegmentFilterModel {
      *
      * @param \Chunks_ChunkStruct $chunk
      * @param FilterDefinition    $filter
+     *
+     * @throws \API\V2\Exceptions\AuthenticationError
+     * @throws \Exceptions\NotFoundException
+     * @throws \Exceptions\ValidationError
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \TaskRunner\Exceptions\ReQueueException
      */
     public function __construct( \Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
         $this->chunk  = $chunk;
