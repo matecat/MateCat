@@ -128,11 +128,12 @@
     }
     span{
       span {
-        display: block;
+        display: inline-block;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         max-width: 64px;
+        vertical-align: middle;
       }
     }
   }
