@@ -1,35 +1,35 @@
-import {ContentBlock, BlockMapBuilder, CharacterMetadata} from "draft-js";
-import Immutable  from 'immutable';
+import getFragmentFromSelection from "./DraftSource/src/component/handlers/edit/getFragmentFromSelection";
+import encodeContent from "./encodeContent";
+import {EditorState} from "draft-js";
 
-const buildFragmentFromText = (fragmentObject) => {
-    const {OrderedMap, List} = Immutable;
-
-    //const fragmentContent =  JSON.parse(text);
-    const fragmentMap = new OrderedMap(fragmentObject);
-
-    let blocks = [];
-    fragmentMap.forEach((block) => {
-        // Rebuild CharacterMetadata
-        let charsArray = [];
-        block.characterList.forEach(char => {
-            charsArray.push(new CharacterMetadata(char))
-        });
-        const charList = new List(charsArray);
-
-        // Rebuild ContentBlock
-        const newBlock = new ContentBlock({
-            key: block.key,
-            type: block.type,
-            text: block.text,
-            characterList: charList,
-            depth: block.depth,
-            data: block.data,
-        });
-        // Add
-        blocks.push(new ContentBlock(newBlock))
-    });
-    // Create fragment
-    return BlockMapBuilder.createFromArray(blocks);
+/**
+ *
+ * @param plainText
+ * @returns OrderedMap - the fragment created with the plainText
+ *
+ * Here we create a new EditorState just to exploit getFragmentFromSelection and be sure to have a full working fragment.
+ *
+ */
+const buildFragmentFromText = (plainText) => {
+    // encode plain text
+    const emptyEditorState = EditorState.createEmpty();
+    const plainEditorStateEncoded = encodeContent(emptyEditorState, plainText);
+    let {editorState: clipboardEditorState} =  plainEditorStateEncoded;
+    const contentState = clipboardEditorState.getCurrentContent();
+    // select all content
+    const selectAll = clipboardEditorState.getSelection().merge({
+        anchorKey: contentState.getFirstBlock().getKey(),
+        anchorOffset: 0,
+        focusOffset: contentState.getLastBlock().getText().length,
+        focusKey: contentState.getLastBlock().getKey(),
+    })
+    // force selection on all content
+    clipboardEditorState = EditorState.forceSelection(
+        clipboardEditorState,
+        selectAll
+    )
+    // get fragment
+    return getFragmentFromSelection(clipboardEditorState)
 };
 
 export default buildFragmentFromText;

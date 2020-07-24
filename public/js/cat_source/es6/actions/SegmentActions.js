@@ -1154,6 +1154,13 @@ const SegmentActions = {
     },
     setNextUntranslatedSegmentFromServer(sid) {
         SegmentStore.nextUntranslatedFromServer = sid;
+    },
+    copyFragmentToClipboard: function (fragment, plainText) {
+        AppDispatcher.dispatch({
+            actionType: EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD,
+            fragment,
+            plainText
+        });
     }
 
 };

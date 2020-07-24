@@ -23,7 +23,7 @@ import {
 	formatText
 } from "./textUtils"
 
-import buildFragmentFromText from "./buildFragmentFromText";
+import buildFragmentFromJson from "./buildFragmentFromJson";
 import insertText from "./insertText";
 import updateEntityData from "./updateEntityData";
 import tagFromEntity from "./tagFromEntity";
@@ -38,6 +38,7 @@ import insertEntityAtSelection from "./insertEntityAtSelection";
 import structFromType from "./tagFromTagType";
 import splitBlockAtSelection from "./splitBlockAtSelection";
 import getFragmentFromSelection from "./DraftSource/src/component/handlers/edit/getFragmentFromSelection";
+import buildFragmentFromText from "./buildFragmentFromText";
 
 
 const DraftMatecatUtils = {
@@ -71,6 +72,7 @@ const DraftMatecatUtils = {
 	insertFragment,
 	duplicateFragment,
 	getEntitiesInFragment,
+	buildFragmentFromJson,
 	buildFragmentFromText,
 	getFragmentFromSelection, // Duplicated from draft-js/lib, not part of the draft-js public API
 	// Segment Utils

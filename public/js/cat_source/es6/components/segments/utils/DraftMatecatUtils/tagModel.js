@@ -22,8 +22,9 @@ const tagSignatures = {
         placeholderRegex: /&lt;ph.*?id="(?:.*?)".*?equiv-text="base64:(.*?)".*?&gt;/,
         decodeNeeded: true,
         errorCheckAvailable: true,
-        lexiqaAvailable: true,
-        style: 'tag-selfclosed'
+        lexiqaAvailable: false,
+        style: 'tag-selfclosed tag-ph',
+        showTooltip: true
     },
     'g': {
         type: 'g',
@@ -35,19 +36,21 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag-open'
+        style: 'tag-open',
+        showTooltip: false
     },
     'gCl': {
         type: 'gCl',
         regex: /&lt;(\/g)&gt;/gi,
         selfClosing: false,
         isClosure: true,
-        placeholder: '</g>',
+        placeholder: '</>',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag-close'
+        style: 'tag-close',
+        showTooltip: false
     },
     'bx': {
         type: 'bx',
@@ -59,7 +62,8 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag-selfclosed'
+        style: 'tag-selfclosed',
+        showTooltip: false
     },
     'ex': {
         type: 'ex',
@@ -71,7 +75,8 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag-selfclosed'
+        style: 'tag-selfclosed',
+        showTooltip: false
     },
     'x': {
         type: 'x',
@@ -83,33 +88,36 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
-        style: 'tag-selfclosed'
+        style: 'tag-selfclosed',
+        showTooltip: false
     },
     'nbsp':{
         type: 'nbsp',
         regex: /##\$(_A0)\$##/g,
         selfClosing: true,
         isClosure: false,
-        placeholder: '°',
+        placeholder: '\u00B0', //'°',
         encodedPlaceholder: '##$_A0$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag-selfclosed tag-nbsp'
+        style: 'tag-selfclosed tag-nbsp',
+        showTooltip: false
     },
     'tab':{
         type: 'tab',
         regex: /##\$(_09)\$##/g,
         selfClosing: true,
         isClosure: false,
-        placeholder: '#',
+        placeholder: '\u21E5', //'⇥'
         encodedPlaceholder: '##$_09$##',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag-selfclosed tag-tab'
+        style: 'tag-selfclosed tag-tab',
+        showTooltip: false
     },
     'carriageReturn':{
         type: 'carriageReturn',
@@ -122,7 +130,8 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag-selfclosed tag-cr'
+        style: 'tag-selfclosed tag-cr',
+        showTooltip: false
     },
     'lineFeed':{
         type: 'lineFeed',
@@ -135,7 +144,8 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
-        style: 'tag-selfclosed tag-lf'
+        style: 'tag-selfclosed tag-lf',
+        showTooltip: false
     }
 };
 
@@ -181,4 +191,11 @@ const getNoLexiqaTag = () => {
     map(tagKey => {return tagSignatures[tagKey].type})
 };
 
-export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getBuildableTag, getSplitBlockTag};
+// Control params: showTooltip
+const getTooltipTag = () => {
+    return Object.keys(tagSignatures).
+    filter(tagKey =>{return tagSignatures[tagKey].showTooltip}).
+    map(tagKey => {return tagSignatures[tagKey].type})
+};
+
+export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getBuildableTag, getSplitBlockTag, getTooltipTag};

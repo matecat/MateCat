@@ -313,8 +313,8 @@ class SegmentSource extends React.Component {
         //Lexiqa
         const { lexiqa  } = this.props.segment;
         const { lexiqa : prevLexiqa } = prevProps.segment;
-        if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source &&
-            (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) ) ) {
+        if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source && prevLexiqa && _.size(prevLexiqa) > 0 && prevLexiqa.source &&
+            (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa.source).equals(Immutable.fromJS(lexiqa.source)) ) ) {
             this.addLexiqaDecorator();
         } else if ((prevLexiqa && prevLexiqa.length > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.source ) ) {
             this.removeLexiqaDecorator()
@@ -434,19 +434,24 @@ class SegmentSource extends React.Component {
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
         const {setClickedTagId} = this.props;
-        // Highlight
-        setClickedTagId(id);
-        // Selection
-        const selectionState = editorState.getSelection();
-        let newSelection = selectionState.merge({
-            anchorOffset: start,
-            focusOffset: end,
-        });
-        const newEditorState = EditorState.forceSelection(
-            editorState,
-            newSelection,
-        );
-        this.setState({editorState: newEditorState});
+        // Use _latestEditorState to get latest selection
+        try{
+            // Selection
+            const selectionState = this.editor._latestEditorState.getSelection();
+            let newSelection = selectionState.merge({
+                anchorOffset: start,
+                focusOffset: end,
+            });
+            const newEditorState = EditorState.forceSelection(
+                editorState,
+                newSelection,
+            );
+            this.setState({editorState: newEditorState});
+            // Highlight
+            setClickedTagId(id);
+        }catch (e) {
+            console.log('Invalid selection')
+        }
     };
 
     getClickedTagId = () => {
@@ -478,15 +483,14 @@ class SegmentSource extends React.Component {
         const internalClipboard = this.editor.getClipboard();
         const {editorState} = this.state;
         if (internalClipboard) {
+            // Get plain text form internalClipboard fragment
+            const plainText = internalClipboard.map((block) => block.getText()).join('');
             const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
             const fragment = JSON.stringify({
                 orderedMap: internalClipboard,
                 entitiesMap: entitiesMap
             });
-            e.clipboardData.clearData();
-            e.clipboardData.setData('text/html', fragment);
-            e.clipboardData.setData('text/plain', fragment);
-            e.preventDefault();
+            SegmentActions.copyFragmentToClipboard(fragment, plainText);
         }
     };
 

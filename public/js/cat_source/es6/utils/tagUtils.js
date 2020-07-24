@@ -126,8 +126,8 @@ const TAGS_UTILS =  {
         let brTx1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-open\">$1</_plh_>";
         let brTx2 =  "<span contenteditable=\"false\" class=\"tag small tag-close\">$1</span>";
         let brTx3 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</_plh_>";
-        let brTxPlPh1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</_plh_>";
-        let brTxPlPh12 =  "<span contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</span>";
+        let brTxPlPh1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">$1</_plh_>";
+        let brTxPlPh12 =  "<span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">$1</span>";
         tx = tx.replace( /&amp;/gi, "&" )
             .replace( /<span/gi, "<_plh_" )
             .replace( /<\/span/gi, "</_plh_" )

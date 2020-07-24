@@ -29,9 +29,9 @@ const {hasCommandModifier, isOptionKeyCommand} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import insertText from "./utils/DraftMatecatUtils/insertText";
-import {TagStruct} from "./utils/DraftMatecatUtils/tagModel";
+import {tagSignatures, TagStruct} from "./utils/DraftMatecatUtils/tagModel";
 import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
-
+import SegmentActions from "../../actions/SegmentActions";
 
 const editorSync = {
     inTransitionToFocus: false,
@@ -349,10 +349,12 @@ class Editarea extends React.Component {
                     data-sid={this.props.segment.sid}
                     tabIndex="-1"
                     onCopy={copyFragment}
+                    onCut={copyFragment}
                     onMouseUp={onMouseUpEvent}
                     onBlur={onBlurEvent}
                     onDragStart={this.onDragEvent}
                     onDragEnd={this.onDragEnd}
+                    onDrop={this.onDragEnd}
         >
             <Editor
                 lang={lang}
@@ -491,7 +493,7 @@ class Editarea extends React.Component {
 
     handleCursorMovement = (step, shift = false) =>{
         const {editorState} = this.state;
-        const newEditorState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift)
+        const newEditorState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift);
         this.setState({
             editorState: newEditorState
         })
@@ -690,44 +692,62 @@ class Editarea extends React.Component {
 
     pasteFragment = (text, html) => {
         const {editorState} = this.state;
-        if(text) {
+        const {fragment: clipboardFragment, plainText: clipboardPlainText} = SegmentStore.getFragmentFromClipboard();
+        // if text in standard clipboard matches the the plainClipboard saved in store proceed using fragment
+        // otherwise we're handling an external copy
+        if(clipboardFragment && text && clipboardPlainText === text) {
             try {
-                const fragmentContent = JSON.parse(text);
-                let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
+                const fragmentContent = JSON.parse(clipboardFragment);
+                let fragment = DraftMatecatUtils.buildFragmentFromJson(fragmentContent.orderedMap);
                 const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
                     fragment,
                     editorState,
                     fragmentContent.entitiesMap
                 );
-                //this.onChange(clipboardEditorPasted);
                 this.setState({
                     editorState: clipboardEditorPasted,
                 });
+                // Paste fragment
                 return true;
             } catch (e) {
+                // Paste plain standard clipboard
                 return false;
             }
+        }else if(text){
+            // we're handling an external copy, special chars must be striped from text
+            // and we have to add tag for external entities like nbsp or tab
+            let cleanText = DraftMatecatUtils.cleanSegmentString(DraftMatecatUtils.unescapeHTML(text));
+            // Replace with placeholder
+            const nbspSign = tagSignatures['nbsp'].encodedPlaceholder;
+            const tabSign = tagSignatures['tab'].encodedPlaceholder
+            cleanText = cleanText.replace(/°/gi, nbspSign).replace(/\t/gi, tabSign);
+            const plainTextClipboardFragment = DraftMatecatUtils.buildFragmentFromText(cleanText);
+            const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
+                plainTextClipboardFragment,
+                editorState
+            );
+            this.setState({
+                editorState: clipboardEditorPasted,
+            });
+            // Paste fragment
+            return true;
         }
+        // Paste plain standard clipboard
         return false;
     };
 
     copyFragment = (e) => {
         const internalClipboard = this.editor.getClipboard();
         const {editorState} = this.state;
-
         if (internalClipboard) {
-            console.log('InternalClipboard ', internalClipboard)
+            // Get plain text form internalClipboard fragment
+            const plainText = internalClipboard.map((block) => block.getText()).join('');
             const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
-
             const fragment = JSON.stringify({
                 orderedMap: internalClipboard,
                 entitiesMap: entitiesMap
             });
-            e.clipboardData.clearData();
-            e.clipboardData.setData('text/html', fragment);
-            e.clipboardData.setData('text/plain', fragment);
-            console.log("Copied -> ", e.clipboardData.getData('text/html'));
-            e.preventDefault();
+            SegmentActions.copyFragmentToClipboard(fragment, plainText)
         }
     };
 
@@ -746,10 +766,11 @@ class Editarea extends React.Component {
         if(DraftMatecatUtils.selectionIsEntity(editorState)){
             return 'handled';
         }
+        // when drop is inside the same editor, use default behavior
         if(text && !editorSync.draggingFromEditArea) {
             try {
                 const fragmentContent = JSON.parse(text);
-                let fragment = DraftMatecatUtils.buildFragmentFromText(fragmentContent.orderedMap);
+                let fragment = DraftMatecatUtils.buildFragmentFromJson(fragmentContent.orderedMap);
                 const editorStateWithFragment = DraftMatecatUtils.duplicateFragment(
                     fragment,
                     editorState,
@@ -769,17 +790,24 @@ class Editarea extends React.Component {
     onEntityClick = (start, end, id) => {
         const {editorState} = this.state;
         const {setClickedTagId} = this.props;
-        setClickedTagId(id);
-        const selectionState = editorState.getSelection();
-        let newSelection = selectionState.merge({
-            anchorOffset: start,
-            focusOffset: end,
-        });
-        const newEditorState = EditorState.forceSelection(
-            editorState,
-            newSelection,
-        );
-        this.setState({editorState: newEditorState});
+        // Use _latestEditorState
+        try{
+            // Selection
+            const selectionState = this.editor._latestEditorState.getSelection();
+            let newSelection = selectionState.merge({
+                anchorOffset: start,
+                focusOffset: end,
+            });
+            const newEditorState = EditorState.forceSelection(
+                editorState,
+                newSelection,
+            );
+            this.setState({editorState: newEditorState});
+            // Highlight
+            setClickedTagId(id);
+        }catch (e) {
+            console.log('Invalid selection')
+        }
     };
 
     getClickedTagId = () => {
@@ -800,6 +828,14 @@ class Editarea extends React.Component {
             leftInitial  - (minWidth - (editorBoundingRect.right - selectionBoundingRect.left))
             :
             leftInitial;
+        if(selectionBoundingRect.bottom === 0 &&
+            selectionBoundingRect.left === 0 &&
+            selectionBoundingRect.height === 0){
+            return {
+                top: 50,
+                left: 50
+            };
+        }
         return {
             top: selectionBoundingRect.bottom - editorBoundingRect.top + selectionBoundingRect.height,
             left: leftAdjusted

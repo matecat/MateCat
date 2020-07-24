@@ -7,30 +7,34 @@ const updateLexiqaWarnings = (editorState, warnings) => {
     let updatedWarnings = [];
 
     blocks.forEach((loopedContentBlock) => {
-        const lastBlockKey = contentState.getLastBlock().getKey();
+        const firstBlockKey = contentState.getFirstBlock().getKey();
         const loopedBlockKey = loopedContentBlock.getKey();
-        // Se non è l'ultimo blocco, aggiungi un carattere per indicare il newline
-        const newLineChar = loopedBlockKey !== lastBlockKey ? 1 : 0;
-        maxCharsInBlocks += newLineChar;
-        // Aggiungi la lunghezza del blocco corrente
-        maxCharsInBlocks += loopedContentBlock.getLength();
-
-        _.each(warnings, warn => {
+        // Add current block length
+        const newLineChar = loopedBlockKey !== firstBlockKey ? 1 : 0;
+        maxCharsInBlocks += loopedContentBlock.getLength() + newLineChar;
+       _.each(warnings, warn => {
             // Todo: warnings between 2 block are now ignored
+            const alreadyScannedChars = maxCharsInBlocks - loopedContentBlock.getLength();
             if (warn.start < maxCharsInBlocks &&
                 warn.end <= maxCharsInBlocks &&
-                warn.start >= (maxCharsInBlocks - loopedContentBlock.getLength())) {
-
-                const alreadyScannedChars = maxCharsInBlocks - (loopedContentBlock.getLength() + newLineChar );
-                const relativeStart = warn.start - alreadyScannedChars;
-                const relativeEnd = warn.end - alreadyScannedChars;
-
+                (warn.start >= alreadyScannedChars || warn.start === alreadyScannedChars -1)) {
+                // Lexiqa warning length isn't valid, recompute length based on offset
+                let warnLength = warn.end - warn.start;
+                let relativeStart = warn.start - alreadyScannedChars;
+                // Strings passed to lexiqa includes newlines so if two spaces are at the end of the line,
+                // they will be paired with newline char, causing lexiqa error to be of length 3.
+                // Same occurs if spaces are placed at the begininning of a new block: they will be paired with previous
+                // block's newline. Here we correct the last case, forcing error to start on the new block and ignoring newline char
+                if(warn.start === alreadyScannedChars - 1){
+                    warnLength -= 1; // delete newline
+                    relativeStart += 1; // start on next block
+                }
+                const relativeEnd = relativeStart + warnLength;
                 const warnUpdated = _.cloneDeep(warn);
                 warnUpdated.start = relativeStart;
                 warnUpdated.end = relativeEnd;
-                // Aggiungi la chiave da riutilizzare poi nella strategy del decoratore
+                // Add blockKey needed in decorator to find correct warning
                 warnUpdated.blockKey = loopedBlockKey;
-
                 updatedWarnings.push(warnUpdated)
             }
         });
