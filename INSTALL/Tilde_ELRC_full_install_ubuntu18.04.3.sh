@@ -24,10 +24,19 @@ MYSQL_ROOT_PWD="matecatRuuc" # This password will be set for mysql root user
 MATECAT_USER="matecat" # This user will be created for matecat solution to work with
 MATECAT_COMMIT="a82a3c6" # This commit will be checked out from MateCat git repo during setup process
 MATECAT_SERVERNAME="dev.matecat.com" # MateCat's server name, must match with google's Authorized origins and Authorized redirect URIs
-MATECAT_STORAGE_DIR="/home/$MATECAT_USER/cattool/storage" # Directory where MateCat will write it's logs and temporarly files
+HOSTNAME=$(hostname) # Used as one of server alias in Apache config
+MATECAT_STORAGE_DIR="/home/$MATECAT_USER/matecat-storage" # Directory where MateCat will write it's logs and temporarly files
 OKAPI_COMMIT="0868188" # okapi commit that will be checked out
 FILTERS_COMMIT="750dcca" # MateCat Filters commit that will be checked out
 FILTERS_VERSION=1.2.5 # MateCat Filters .jar version that will be built from FILTERS_COMMIT
+SMTP_HOST="smtp-host" # SMTP server
+SMTP_PORT="25" # SMTP server port
+SMTP_SENDER="matecat-noreply@dev.matecat.com" # Matecat system emails are sent from this address
+SMTP_HOSTNAME="localhost"
+GOOGLE_OAUTH_CLIENT_ID="Your client id"
+GOOGLE_OAUTH_CLIENT_SECRET="Your client secret"
+GOOGLE_OAUTH_CLIENT_APP_NAME="Your client app name"
+GOOGLE_OAUTH_BROWSER_API_KEY="Your api key"
 
 # Prepare apt
 sudo apt-get update
@@ -39,7 +48,7 @@ sudo apt-get install -y apache2
 sudo a2enmod rewrite filter deflate headers expires proxy_http.load ssl
 sudo apache2ctl restart
 
-# Install MySQL 5.7 
+# Install MySQL 5.7
 echo "mysql-server mysql-server/root_password password $MYSQL_ROOT_PWD" | sudo debconf-set-selections
 echo "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PWD" | sudo debconf-set-selections
 sudo apt-get install -y mysql-server mysql-client
@@ -49,17 +58,17 @@ sudo systemctl restart mysql.service
 
 # Install PHP7.0
 sudo apt-add-repository ppa:ondrej/php -y
-sudo apt-get install -y php7.0 php7.0-mysql libapache2-mod-php7.0 php7.0-curl php7.0-json php7.0-xml php7.0-mcrypt php7.0-mbstring php7.0-zip php-xdebug
+sudo apt-get install -y unzip php7.0 php7.0-mysql libapache2-mod-php7.0 php7.0-curl php7.0-json php7.0-xml php7.0-mcrypt php7.0-mbstring php7.0-zip php-xdebug
 sudo sed -i 's/short_open_tag = .*/short_open_tag = On/g' /etc/php/7.0/cli/php.ini
 sudo sed -i 's/memory_limit = .*/memory_limit = 1024M/g' /etc/php/7.0/cli/php.ini
 sudo apache2ctl restart
 
-# Install screen
+# Install screen (used for FastAnalysis.php TmAnalysis.php)
 sudo apt-get install -y screen
 
 # Install Redis
 sudo apt-get install -y redis-server
-sudo systemctl restart redis-server.service
+#sudo systemctl restart redis-server.service
 
 # Install Git
 sudo apt-get -y install git
@@ -77,7 +86,7 @@ sudo apt-get -y install maven
 
 # Install ActiveMQ 5.11.3
 sudo apt-get install -y openjdk-8-jdk
-wget https://archive.apache.org/dist/activemq/5.11.3/apache-activemq-5.11.3-bin.tar.gz
+wget -T 10 https://archive.apache.org/dist/activemq/5.11.3/apache-activemq-5.11.3-bin.tar.gz
 sudo tar xzf apache-activemq-5.11.3-bin.tar.gz -C /opt/ && rm apache-activemq-5.11.3-bin.tar.gz
 sudo ln -sf /opt/apache-activemq-5.11.3/ /opt/activemq
 sudo adduser -system activemq
@@ -86,21 +95,22 @@ sudo chown -R activemq: /opt/apache-activemq-5.11.3/
 sudo ln -sf /opt/activemq/bin/activemq /etc/init.d/
 
 # Set up ActiveMQ as systemd service
-sudo bash <<EOF
-echo "[Unit]" > /etc/systemd/system/activemq.service
-echo "Description=Apache ActiveMQ" >> /etc/systemd/system/activemq.service
-echo "After=network-online.target" >> /etc/systemd/system/activemq.service
-echo "[Service]" >> /etc/systemd/system/activemq.service
-echo "Type=forking" >> /etc/systemd/system/activemq.service
-echo "PIDFile=/opt/activemq/data/activemq.pid" >> /etc/systemd/system/activemq.service
-echo "WorkingDirectory=/opt/activemq/bin" >> /etc/systemd/system/activemq.service
-echo "ExecStart=/etc/init.d/activemq start" >> /etc/systemd/system/activemq.service
-echo "ExecStop=/etc/init.d/activemq stop" >> /etc/systemd/system/activemq.service
-echo "Restart=on-abort" >> /etc/systemd/system/activemq.service
-echo "User=activemq" >> /etc/systemd/system/activemq.service
-echo "[Install]" >> /etc/systemd/system/activemq.service
-echo "WantedBy=multi-user.target" >> /etc/systemd/system/activemq.service
+sudo tee /etc/systemd/system/activemq.service << EOF
+[Unit]
+Description=Apache ActiveMQ
+After=network.target
+[Service]
+Type=forking
+PIDFile=/opt/activemq/data/activemq.pid
+WorkingDirectory=/opt/activemq/bin
+ExecStart=/etc/init.d/activemq start
+ExecStop=/etc/init.d/activemq stop
+Restart=on-abort
+User=activemq
+[Install]
+WantedBy=multi-user.target
 EOF
+
 sudo systemctl daemon-reload
 sudo systemctl enable activemq.service || echo "Continue no matter what. ExitCode [$?]"
 
@@ -109,10 +119,17 @@ sudo chown root:nogroup /etc/default/activemq
 sudo chmod 600 /etc/default/activemq
 sudo sed -i 's/managementContext createConnector="false"/managementContext createConnector="true"/g' /opt/activemq/conf/activemq.xml
 sudo ln -sf /etc/init.d/activemq /usr/bin/activemq
+sudo systemctl stop activemq.service
 sudo systemctl start activemq.service
 
-# Check out MateCat source code
+# Prep user acc
 id -u "$MATECAT_USER" || sudo adduser --disabled-password --gecos "" $MATECAT_USER
+sudo usermod -a -G www-data $MATECAT_USER
+# Matecat storage configuration
+sudo mkdir -p $MATECAT_STORAGE_DIR
+sudo chmod g+w -R $MATECAT_STORAGE_DIR
+sudo chown -R www-data:www-data $MATECAT_STORAGE_DIR
+# Check out MateCat source code
 sudo rm -rf /home/$MATECAT_USER/cattool
 sudo -i -u $MATECAT_USER git clone https://github.com/matecat/MateCat.git cattool
 sudo -u $MATECAT_USER -H sh -c "cd /home/$MATECAT_USER/cattool; git fetch --all"
@@ -121,10 +138,18 @@ sudo -u $MATECAT_USER -H sh -c "cp /home/$MATECAT_USER/cattool/inc/task_manager_
 # Set up MateCat config.ini
 sudo -u $MATECAT_USER -H sh -c "cp /home/$MATECAT_USER/cattool/inc/config.ini.sample /home/$MATECAT_USER/cattool/inc/config.ini"
 sudo sed -i "s|STORAGE_DIR = \"/home/matecat/cattool/storage\"|STORAGE_DIR = \"$MATECAT_STORAGE_DIR\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
-sudo sed -i "s|CLI_HTTP_HOST = \"http://localhost\"|CLI_HTTP_HOST = \"http://$MATECAT_SERVERNAME\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
+sudo sed -i "s|CLI_HTTP_HOST = \"http://localhost\"|CLI_HTTP_HOST = \"https://$MATECAT_SERVERNAME\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
 sudo sed -i "s|COOKIE_DOMAIN = \"localhost\"|COOKIE_DOMAIN = \"$MATECAT_SERVERNAME\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
 sudo sed -i "s|SSE_BASE_URL      = \"localhost/sse\"|SSE_BASE_URL = \"$MATECAT_SERVERNAME/sse\"|g" /home/$MATECAT_USER/cattool/inc/config.ini
 sudo sed -i "s|FILE_STORAGE_METHOD = 's3'|FILE_STORAGE_METHOD = 'fs'|g" /home/$MATECAT_USER/cattool/inc/config.ini
+sudo sed -i "s|^SMTP_HOST = .*|SMTP_HOST = \'${SMTP_HOST}\'|" /home/$MATECAT_USER/cattool/inc/config.ini
+sudo sed -i "s|^SMTP_PORT = .*|SMTP_PORT = \'${SMTP_PORT}\'|" /home/$MATECAT_USER/cattool/inc/config.ini
+sudo sed -i "s|^SMTP_HOSTNAME = .*|SMTP_HOSTNAME = \'${SMTP_HOSTNAME}\'|" /home/$MATECAT_USER/cattool/inc/config.ini
+sudo sed -i "s|^SMTP_SENDER = .*|SMTP_SENDER = \'${SMTP_SENDER}\'|" /home/$MATECAT_USER/cattool/inc/config.ini
+
+# Change default e-mail addresses in INIT.php
+sudo sed -i "s|cattool@matecat.com|${SMTP_SENDER}|" /home/$MATECAT_USER/cattool/inc/INIT.php
+sudo sed -i "s|no-reply@matecat.com|${SMTP_SENDER}|" /home/$MATECAT_USER/cattool/inc/INIT.php
 
 # Set up login_secret.dat file
 sudo touch /home/$MATECAT_USER/cattool/inc/login_secret.dat
@@ -141,41 +166,78 @@ sudo -u $MATECAT_USER -H sh -c "cd /home/$MATECAT_USER/cattool;php -r \"unlink('
 sudo -u $MATECAT_USER -H sh -c "cd /home/$MATECAT_USER/cattool;php composer.phar install"
 
 # Set up front-end code
-echo "screen -d -m -S 'node' node \/home\/$MATECAT_USER\/cattool\/nodejs\/server.js" >> /etc/rc.local
-cd /home/$MATECAT_USER/cattool/support_scripts/grunt
-sudo npm install grunt grunt-cli -g
+
+cd /home/$MATECAT_USER/cattool/nodejs/
 sudo npm install
+cp config.ini.sample config.ini
+sed -i 's|^host =.*|host = localhost|' config.ini
+cd /home/$MATECAT_USER/
+
+sudo tee /etc/systemd/system/matecat-nodejs.service << EOF
+[Unit]
+Description=Node.js for realtime chat within matecat
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /home/$MATECAT_USER/cattool/nodejs/server.js
+Restart=always
+User=www-data
+WorkingDirectory=/home/$MATECAT_USER/cattool/nodejs
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable matecat-nodejs.service
+sudo systemctl start matecat-nodejs.service
+
+cd /home/$MATECAT_USER/cattool/support_scripts/grunt
+sudo npm config set user 0
+sudo npm config set unsafe-perm true
+sudo npm install --save-dev @babel/core
+sudo npm install --save-dev webpack@2
+sudo rm -rf node_modules
+sudo npm install
+sudo npm install grunt
+sudo npm install -g grunt-cli
 sudo grunt deploy
+
 cd /home/$MATECAT_USER/
 
 # Apply MateCat sql
-mysql -u root -p$MYSQL_ROOT_PWD < /home/$MATECAT_USER/cattool/INSTALL/matecat.sql
-
-# Set up Apache2 MateCat vhost
-sudo cp /home/$MATECAT_USER/cattool/INSTALL/matecat-vhost.conf.sample /etc/apache2/sites-available/matecat-vhost.conf
-sudo sed -i "s/@@@path@@@/\/home\/$MATECAT_USER\/cattool/g" /etc/apache2/sites-available/matecat-vhost.conf
-sudo sed -i -- "s/localhost/$MATECAT_SERVERNAME/g" /etc/apache2/sites-available/matecat-vhost.conf
-sudo sed -i -- "s/#ServerName www.example.com/ServerName DONT-USE-ME-DOT-COM/g" /etc/apache2/sites-enabled/000-default.conf
-sudo a2ensite matecat-vhost.conf
-sudo apache2ctl restart
+#Crate DB if not exist
+if [ ! -d /var/lib/mysql/matecat ]; then
+  echo "No matecat DB exists, creating DB"
+  mysql -u root -p$MYSQL_ROOT_PWD < /home/$MATECAT_USER/cattool/INSTALL/matecat.sql
+else
+  echo "Matecat DB exists, skipping"
+fi
 
 # Turn on the analysis daemon
-sudo -u $MATECAT_USER -H sh -c "echo '25' > /home/$MATECAT_USER/cattool/daemons/.num_processes"
-sudo -u $MATECAT_USER /bin/bash /home/$MATECAT_USER/cattool/daemons/restartAnalysis.sh
 sudo crontab -l > mycron || echo "^ Safe to ignore \"no crontab for root\""
-# Remove restartAnalysis cron task(s) on repeated installs
-sed -i '/restartAnalysis/d' mycron
 # Echo new cron into cron file
 echo "@reboot /bin/bash /home/$MATECAT_USER/cattool/daemons/restartAnalysis.sh" >> mycron
 # Install new cron file
-sudo -u $MATECAT_USER crontab mycron
+sudo -u www-data crontab mycron
 sudo rm mycron
 
-# Allow writing to logs directory
+sudo touch /home/$MATECAT_USER/cattool/daemons/.num_processes
+sudo chown www-data:matecat /home/$MATECAT_USER/cattool/daemons/.num_processes
+sudo -u www-data -H sh -c "echo '25' > /home/$MATECAT_USER/cattool/daemons/.num_processes"
+sudo -u www-data /bin/bash /home/$MATECAT_USER/cattool/daemons/restartAnalysis.sh
+# wait for restartAnalysis.sh
+sleep 5
+# Permissions, improvments needed
 sudo chown -R www-data $MATECAT_STORAGE_DIR
+sudo chmod -R 775 $MATECAT_STORAGE_DIR
 
 # Set up Google auth
 sudo -u $MATECAT_USER -H sh -c "cp /home/$MATECAT_USER/cattool/inc/oauth_config.ini.sample /home/$MATECAT_USER/cattool/inc/oauth_config.ini"
+sudo sed -i "s|OAUTH_CLIENT_ID       = |OAUTH_CLIENT_ID       = \"$GOOGLE_OAUTH_CLIENT_ID\"|g" /home/$MATECAT_USER/cattool/inc/oauth_config.ini
+sudo sed -i "s|OAUTH_CLIENT_SECRET   = |OAUTH_CLIENT_ID       = \"$GOOGLE_OAUTH_CLIENT_SECRET\"|g" /home/$MATECAT_USER/cattool/inc/oauth_config.ini
+sudo sed -i "s|OAUTH_CLIENT_APP_NAME = Matecat|OAUTH_CLIENT_APP_NAME       = \"$GOOGLE_OAUTH_CLIENT_APP_NAME\"|g" /home/$MATECAT_USER/cattool/inc/oauth_config.ini
+sudo sed -i "s|OAUTH_BROWSER_API_KEY = |OAUTH_BROWSER_API_KEY       = \"$GOOGLE_OAUTH_BROWSER_API_KEY\"|g" /home/$MATECAT_USER/cattool/inc/oauth_config.ini
 # Create empty file, because matecat tries to open in to save encryption key
 sudo -u $MATECAT_USER -H sh -c "touch /home/$MATECAT_USER/cattool/inc/oauth-token-key.txt"
 # Repeat chown on [storage] directory - matecat can't write logs (log.txt)
@@ -200,17 +262,19 @@ sudo cp target/filters-$FILTERS_VERSION.jar /opt/filters/
 sudo cp src/main/resources/config.sample.properties /opt/filters/config.properties
 
 # MateCat filter as systemd service
-sudo bash <<EOF
-echo "[Unit]" > /etc/systemd/system/matecat-filter.service
-echo "Description=Matecat filter service" >> /etc/systemd/system/matecat-filter.service
-echo "[Service]" >> /etc/systemd/system/matecat-filter.service
-echo "WorkingDirectory=/opt/filters/" >> /etc/systemd/system/matecat-filter.service
-echo "ExecStart=/usr/bin/java -cp \".:filters-${FILTERS_VERSION}.jar\" com.matecat.converter.Main" >> /etc/systemd/system/matecat-filter.service
-echo "Restart=always" >> /etc/systemd/system/matecat-filter.service
-echo "RestartSec=10" >> /etc/systemd/system/matecat-filter.service
-echo "SyslogIdentifier=Matecat-Filter" >> /etc/systemd/system/matecat-filter.service
-echo "[Install]" >> /etc/systemd/system/matecat-filter.service
-echo "WantedBy=multi-user.target" >> /etc/systemd/system/matecat-filter.service
+sudo tee /etc/systemd/system/matecat-filter.service << EOF
+[Unit]
+Description=Matecat filter service
+
+[Service]
+WorkingDirectory=/opt/filters/
+ExecStart=/usr/bin/java -cp ".:filters-${FILTERS_VERSION}.jar" com.matecat.converter.Main
+Restart=always
+RestartSec=10
+SyslogIdentifier=Matecat-Filter
+User=${MATECAT_USER}
+[Install]
+WantedBy=multi-user.target
 EOF
 
 sudo systemctl daemon-reload
@@ -219,98 +283,53 @@ sudo systemctl start matecat-filter.service
 
 sudo sed -i "s/FILTERS_ADDRESS.*/FILTERS_ADDRESS = http:\/\/localhost:8732/g" /home/$MATECAT_USER/cattool/inc/config.ini
 sudo sed -i "s/FILTERS_MASHAPE_KEY.*/FILTERS_MASHAPE_KEY = /g" /home/$MATECAT_USER/cattool/inc/config.ini
-sudo chown -R www-data:$MATECAT_USER $MATECAT_STORAGE_DIR
 sudo echo "127.0.0.1    $MATECAT_SERVERNAME" >> /etc/hosts
 
-# Set up SSL
-sudo mkdir /etc/apache2/ssl-cert
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl-cert/$MATECAT_SERVERNAME.key -out /etc/apache2/ssl-cert/$MATECAT_SERVERNAME.crt -subj "/C=US/ST=./L=./O=Matecat/OU=Matecat/CN=dev.matecat.com"
-
+# Set up self signed SSL certificate
+sudo mkdir -p /etc/apache2/ssl-cert
+sudo touch ~/.rnd
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl-cert/$MATECAT_SERVERNAME.key -out /etc/apache2/ssl-cert/$MATECAT_SERVERNAME.crt -subj "/C=EU/ST=./L=./O=Matecat/OU=Matecat/CN=${MATECAT_SERVERNAME}"
+sudo rm ~/.rnd
+# Set up Apache2 MateCat vhost
 sudo touch /etc/apache2/sites-available/matecat-ssl.conf
-sudo cat>/etc/apache2/sites-available/matecat-ssl.conf << EOL
+sudo cat> /etc/apache2/sites-available/matecat-ssl.conf << EOL
+# Redirect to SSL
+<VirtualHost *:80>
+    ServerName ${MATECAT_SERVERNAME}
+    ServerAlias www.${MATECAT_SERVERNAME}
+    ServerAlias ${HOSTNAME}
+
+  Redirect permanent / https://${MATECAT_SERVERNAME}/
+</VirtualHost>
+
+## SSL site config
 <VirtualHost *:443>
 
     ServerAdmin webmaster@localhost
     ServerName ${MATECAT_SERVERNAME}
-
-    DocumentRoot /home/matecat/cattool
+    ServerAlias www.${MATECAT_SERVERNAME}
+    ServerAlias ${HOSTNAME}
+    DocumentRoot /home/${MATECAT_USER}/cattool
     DirectoryIndex index.php index.php3 index.html index.htm index.shtml
     <Directory />
         Options FollowSymLinks
         AllowOverride None
     </Directory>
 
-    SSLEngine On
-    SSLProtocol all -SSLv3 -SSLv2
-
-    SSLProxyEngine On
-
-    SSLCertificateFile /etc/apache2/ssl-cert/${MATECAT_SERVERNAME}.crt
-    SSLCertificateKeyFile /etc/apache2/ssl-cert/${MATECAT_SERVERNAME}.key
-
-
-    <Directory /home/matecat/cattool/ >
-
-            Options All
-            AllowOverride All
-	Require all granted
-
-            ExpiresActive On
-            ExpiresByType text/html "access plus 1 minute"
-            ExpiresByType text/css "access plus 1 minute"
-            ExpiresByType text/javascript "access plus 1 minute"
-            ExpiresByType image/gif "access plus 1 week"
-            ExpiresByType image/jpeg "access plus 1 week"
-            ExpiresByType image/jpg "access plus 1 week"
-            ExpiresByType image/png "access plus 1 week"
-            ExpiresByType image/vnd.microsoft.icon "access plus 1 week"
-            ExpiresByType image/ico "access plus 1 week"
-            ExpiresByType application/x-shockwave-flash "access plus 1 week"
-
-    </Directory>
-
-    php_flag register_globals off
-    php_flag magic_quotes_gpc off
-    ErrorLog /var/log/apache2/matecat.error.log
-    CustomLog /var/log/apache2/matecat.access.log combined
-    ServerSignature Off
-
-    <Location /sse/ >
-        ProxyPass http://localhost:7788/
-        ProxyPassReverse http://localhost:7788/
-    </Location>
-
-</VirtualHost>
-
-<VirtualHost *:443>
-
-    ServerAdmin webmaster@localhost
-    ServerName 0.ajax.${MATECAT_SERVERNAME}
-    ServerAlias 1..ajax.${MATECAT_SERVERNAME}
-    ServerAlias 2.ajax.${MATECAT_SERVERNAME}
-    ServerAlias 3.ajax.${MATECAT_SERVERNAME}
-
-    DocumentRoot /home/matecat/cattool
-    DirectoryIndex index.php index.php3 index.html index.htm index.shtml
-    <Directory />
-        Options FollowSymLinks
-        AllowOverride None
-    </Directory>
-
-    SSLEngine On
-    SSLProtocol all -SSLv3 -SSLv2
-
-    SSLProxyEngine On
+    SSLEngine		On
+    SSLProtocol         -all +TLSv1.2
+    SSLCipherSuite      ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384
+    SSLProxyEngine	On
 
     SSLCertificateFile /etc/apache2/ssl-cert/${MATECAT_SERVERNAME}.crt
     SSLCertificateKeyFile /etc/apache2/ssl-cert/${MATECAT_SERVERNAME}.key
 
-    <Directory /home/matecat/cattool/>
+
+    <Directory /home/${MATECAT_USER}/cattool/ >
 
             Options All
             AllowOverride All
-            Order allow,deny
-            allow from all
+            Require all granted
 
             ExpiresActive On
             ExpiresByType text/html "access plus 1 minute"
@@ -340,6 +359,10 @@ sudo cat>/etc/apache2/sites-available/matecat-ssl.conf << EOL
 </VirtualHost>
 EOL
 
+sudo a2dissite 000-default.conf
 sudo a2ensite matecat-ssl.conf
-sudo service apache2 restart
+echo "Restarting apache2 - activating the new configuration"
+sudo systemctl reload apache2
+
+echo "All done"
 
