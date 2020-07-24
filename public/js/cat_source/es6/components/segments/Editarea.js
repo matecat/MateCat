@@ -492,7 +492,7 @@ class Editarea extends React.Component {
 
     handleCursorMovement = (step, shift = false) =>{
         const {editorState} = this.state;
-        const newEditorState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift)
+        const newEditorState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift);
         this.setState({
             editorState: newEditorState
         })
