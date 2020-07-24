@@ -349,6 +349,7 @@ class Editarea extends React.Component {
                     data-sid={this.props.segment.sid}
                     tabIndex="-1"
                     onCopy={copyFragment}
+                    onCut={copyFragment}
                     onMouseUp={onMouseUpEvent}
                     onBlur={onBlurEvent}
                     onDragStart={this.onDragEvent}
@@ -720,7 +721,6 @@ class Editarea extends React.Component {
             const nbspSign = tagSignatures['nbsp'].encodedPlaceholder;
             const tabSign = tagSignatures['tab'].encodedPlaceholder
             cleanText = cleanText.replace(/°/gi, nbspSign).replace(/\t/gi, tabSign);
-            console.log('using sign')
             const plainTextClipboardFragment = DraftMatecatUtils.buildFragmentFromText(cleanText);
             const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(
                 plainTextClipboardFragment,
