@@ -23,6 +23,7 @@ const tagSignatures = {
         decodeNeeded: true,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
+        glossaryAvailable: false,
         style: 'tag-selfclosed tag-ph',
         showTooltip: true
     },
@@ -36,6 +37,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
+        glossaryAvailable: false,
         style: 'tag-open',
         showTooltip: false
     },
@@ -49,6 +51,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
+        glossaryAvailable: false,
         style: 'tag-close',
         showTooltip: false
     },
@@ -62,6 +65,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
+        glossaryAvailable: false,
         style: 'tag-selfclosed',
         showTooltip: false
     },
@@ -75,6 +79,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
+        glossaryAvailable: false,
         style: 'tag-selfclosed',
         showTooltip: false
     },
@@ -88,6 +93,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
+        glossaryAvailable: false,
         style: 'tag-selfclosed',
         showTooltip: false
     },
@@ -102,6 +108,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
+        glossaryAvailable: false,
         style: 'tag-selfclosed tag-nbsp',
         showTooltip: false
     },
@@ -116,6 +123,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
+        glossaryAvailable: false,
         style: 'tag-selfclosed tag-tab',
         showTooltip: false
     },
@@ -130,6 +138,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
+        glossaryAvailable: false,
         style: 'tag-selfclosed tag-cr',
         showTooltip: false
     },
@@ -144,6 +153,7 @@ const tagSignatures = {
         decodeNeeded: false,
         errorCheckAvailable: false,
         lexiqaAvailable: true,
+        glossaryAvailable: false,
         style: 'tag-selfclosed tag-lf',
         showTooltip: false
     }
@@ -191,6 +201,13 @@ const getNoLexiqaTag = () => {
     map(tagKey => {return tagSignatures[tagKey].type})
 };
 
+// Control params: glossaryAvailable
+const getNoGlossaryTag = () => {
+    return Object.keys(tagSignatures).
+    filter(tagKey =>{return !tagSignatures[tagKey].glossaryAvailable}).
+    map(tagKey => {return tagSignatures[tagKey].type})
+};
+
 // Control params: showTooltip
 const getTooltipTag = () => {
     return Object.keys(tagSignatures).
@@ -198,4 +215,4 @@ const getTooltipTag = () => {
     map(tagKey => {return tagSignatures[tagKey].type})
 };
 
-export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getBuildableTag, getSplitBlockTag, getTooltipTag};
+export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getNoGlossaryTag, getBuildableTag, getSplitBlockTag, getTooltipTag};
