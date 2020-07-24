@@ -313,8 +313,8 @@ class SegmentSource extends React.Component {
         //Lexiqa
         const { lexiqa  } = this.props.segment;
         const { lexiqa : prevLexiqa } = prevProps.segment;
-        if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source &&
-            (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) ) ) {
+        if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source && prevLexiqa && _.size(prevLexiqa) > 0 && prevLexiqa.source &&
+            (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa.source).equals(Immutable.fromJS(lexiqa.source)) ) ) {
             this.addLexiqaDecorator();
         } else if ((prevLexiqa && prevLexiqa.length > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.source ) ) {
             this.removeLexiqaDecorator()
