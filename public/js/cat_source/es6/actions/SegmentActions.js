@@ -771,6 +771,7 @@ const SegmentActions = {
     },
 
     addGlossaryItem: function ( source, target, comment, sid ) {
+        source = TextUtils.htmlEncode(source);
         return API.SEGMENT.addGlossaryItem(source, target, comment)
             .fail(function (  ) {
                 OfflineUtils.failedConnection( 0, 'addGlossaryItem' );
@@ -952,11 +953,10 @@ const SegmentActions = {
         this.openSideSegments();
     },
 
-    addPreloadedIssuesToSegment: function ( sid, issues ) {
+    addPreloadedIssuesToSegment: function ( issues ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
-            sid: sid,
-            issues: issues
+            versionsIssues: issues
         });
     },
 

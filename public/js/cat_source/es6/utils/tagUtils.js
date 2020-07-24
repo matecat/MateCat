@@ -625,7 +625,6 @@ const TAGS_UTILS =  {
     },
     // TAG MISMATCH
     markTagMismatch: function(tag_mismatch, sid) {
-        console.log("markTagMismatch---------------> ", sid);
         if( !_.isUndefined(tag_mismatch.source) && tag_mismatch.source.length > 0 ) {
             $('#segment-' + sid + ' .source span.locked.style-tag:not(.temp)').filter(function() {
                 let clone = $(this).clone();

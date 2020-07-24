@@ -163,3 +163,21 @@ ALIGNER_SEGMENT_CREATE[pid_set_name]  = "ch_pid_aligner_segment_create"
 ALIGNER_SEGMENT_CREATE[max_executors] = 5
 ALIGNER_SEGMENT_CREATE[redis_key]     = "aligner_segment_create_list"
 ALIGNER_SEGMENT_CREATE[loggerName]    = "aligner_segment_create.log"
+
+;;##################################
+;;##### Key Name GlossaryRead  #####
+;;##################################
+GLOSSARY_READ[queue_name]    = "glossary_read"
+GLOSSARY_READ[pid_set_name]  = "ch_pid_glossary_read"
+GLOSSARY_READ[max_executors] = 1
+GLOSSARY_READ[redis_key]     = "glossary_read"
+GLOSSARY_READ[loggerName]    = "glossary_read.log"
+
+;;###################################
+;;##### Key Name GlossaryWrite  #####
+;;###################################
+GLOSSARY_WRITE[queue_name]    = "glossary_write"
+GLOSSARY_WRITE[pid_set_name]  = "ch_pid_glossary_write"
+GLOSSARY_WRITE[max_executors] = 1
+GLOSSARY_WRITE[redis_key]     = "glossary_write"
+GLOSSARY_WRITE[loggerName]    = "glossary_write.log"

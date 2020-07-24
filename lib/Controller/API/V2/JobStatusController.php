@@ -80,7 +80,7 @@ class JobStatusController extends KleinController {
                             ], [ 'persistent' => true ]
                     );
                 } catch ( \Exception $e ) {
-                    $this->response->json( [ 'data' => true, 'unchangeble_segments' => $segments_id ] );
+                    $this->response->json( [ 'error_message' => $e->getMessage(), 'data' => true, 'unchangeble_segments' => $segments_id ] );
 
                     return;
                 }

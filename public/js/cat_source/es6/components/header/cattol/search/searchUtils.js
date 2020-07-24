@@ -178,11 +178,12 @@ let SearchUtils = {
 
     getSearchRegExp(textToMatch, ignoreCase, isExactMatch) {
         let ignoreFlag = (ignoreCase)? "" : "i";
+        textToMatch = TextUtils.escapeRegExp(textToMatch);
         let reg = new RegExp( '(' + textToMatch + ')', "g" + ignoreFlag );
         if (isExactMatch) {
-            reg = new RegExp( '\\b(' + textToMatch.replace( /\(/g, '\\(' ).replace( /\)/g, '\\)' ) + ')\\b', "g" + ignoreFlag );
+            reg = new RegExp( '\\b(' + textToMatch + ')\\b', "g" + ignoreFlag );
         }
-        return reg
+        return reg;
     },
 
     getMatchesInText: function(text, textToMatch, ignoreCase, isExactMatch) {
