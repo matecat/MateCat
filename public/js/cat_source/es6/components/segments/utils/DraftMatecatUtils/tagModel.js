@@ -215,4 +215,18 @@ const getTooltipTag = () => {
     map(tagKey => {return tagSignatures[tagKey].type})
 };
 
-export {tagSignatures, TagStruct, getErrorCheckTag, getNoLexiqaTag, getNoGlossaryTag, getBuildableTag, getSplitBlockTag, getTooltipTag};
+const getStyleForType = (type) => {
+    return Object.keys(tagSignatures).
+    filter(tagKey =>{return tagSignatures[tagKey].type === type}).
+    map(tagKey => {return tagSignatures[tagKey].style})
+}
+
+export {tagSignatures,
+    TagStruct,
+    getErrorCheckTag,
+    getNoLexiqaTag,
+    getNoGlossaryTag,
+    getBuildableTag,
+    getSplitBlockTag,
+    getTooltipTag,
+    getStyleForType};

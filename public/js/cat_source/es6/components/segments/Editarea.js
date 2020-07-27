@@ -435,12 +435,14 @@ class Editarea extends React.Component {
             acceptTagMenuSelection,
             handleCursorMovement
         } = this;
-        const {segment: {sourceTagMap, targetTagMap}} = this.props;
+        const {segment: {sourceTagMap, missingTagsInTarget}} = this.props;
 
         switch (command) {
             case 'toggle-tag-menu':
-                // Todo: prenderla dallo state
-                const tagSuggestions = checkForMissingTags(sourceTagMap, targetTagMap);
+                const tagSuggestions = {
+                    missingTags: missingTagsInTarget,
+                    sourceTags: sourceTagMap
+                }
                 openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
                 return 'handled';
             case 'close-tag-menu':
@@ -580,6 +582,7 @@ class Editarea extends React.Component {
 
         this.setState({
             editorState: editorState,
+            translation: DraftMatecatUtils.decodeSegment(editorState)
         }, () => {
             //updateTagsInEditorDebounced()
             if(contentChanged) this.updateTranslationDebounced();

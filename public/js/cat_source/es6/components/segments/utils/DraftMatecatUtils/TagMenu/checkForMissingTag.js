@@ -13,9 +13,9 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
     let filteredSourceTagMap = sourceTagMap.filter( tag => {
         return getErrorCheckTag().includes(tag.type)
     });
-    let filteredTargetTagMap = targetTagMap.filter( tag => {
+    let filteredTargetTagMap = targetTagMap ? targetTagMap.filter( tag => {
         return getErrorCheckTag().includes(tag.type)
-    });
+    }) : [];
 
     // Controlla quali tag del source non sono nel target
     let missingTagInTarget = filteredSourceTagMap.filter( tagInSource => {
