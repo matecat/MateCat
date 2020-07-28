@@ -405,9 +405,11 @@ class Editarea extends React.Component {
             if(displayPopover) return 'enter-press';
         }else if(e.key === 'Escape'){
             return 'close-tag-menu';
-        }else if(e.key === 'Tab' && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
-            return 'insert-tab-tag';
-        }else if( (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') && (isOptionKeyCommand(e) || e.altKey) && e.shiftKey){ // e.key is an &nbsp;
+        }else if(e.key === 'Tab'){
+            return e.shiftKey ? null : 'insert-tab-tag';
+        }else if( (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+            hasCommandModifier(e) &&
+            e.shiftKey){ // e.key is an &nbsp;
             return 'insert-nbsp-tag';
         }else if (e.key === 'ArrowLeft' && !hasCommandModifier(e) && !e.altKey) {
             if (e.shiftKey) {
