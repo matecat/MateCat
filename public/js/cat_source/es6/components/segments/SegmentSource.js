@@ -190,7 +190,8 @@ class SegmentSource extends React.Component {
     addSearchDecorator = () => {
         let { editorState } = this.state;
         let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
-        const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, searchParams.source,
+        const textToSearch = searchParams.source ? searchParams.source : "";
+        const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, textToSearch,
             searchParams, occurrencesInSearch.occurrences, currentInSearchIndex );
         this.decoratorsStructure = decorators;
         this.setState( {
