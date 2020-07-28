@@ -126,10 +126,10 @@ class SignupController extends AbstractStatefulKleinController {
         if ( empty( $errors ) ) {
             try {
                 if ( !Signup::forgotPassword( $email, $wanted_url ) ) {
-                    $errors[] = 'Email not found.';
+                    \Log::doJsonLog('Failed attempt to recover password with email ' . $email);
                 }
             } catch ( \Exception $exception ) {
-                $errors[] = 'Error in updating databatase.';
+                $errors[] = 'Error updating database.';
             }
         }
 
