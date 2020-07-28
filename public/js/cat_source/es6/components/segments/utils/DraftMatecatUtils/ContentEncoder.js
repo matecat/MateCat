@@ -611,9 +611,9 @@ export const activateGlossary = (editorState, decoratorStructure, glossary, text
     const generateGlossaryDecorator = (regex, sid) => {
         return {
             name: 'glossary',
-            strategy: (contentBlock, callback) => {
+            strategy: (contentBlock, callback, contentState) => {
                 if ( regex !== '') {
-                    findWithRegex(regex, contentBlock, callback);
+                    findWithRegex(regex,contentState, contentBlock, callback, 'glossary');
                 }
             },
             component: GlossaryComponent,
@@ -623,13 +623,15 @@ export const activateGlossary = (editorState, decoratorStructure, glossary, text
         };
     };
 
-    const findWithRegex = (regex, contentBlock, callback) => {
+    const findWithRegex = (regex, contentState, contentBlock, callback, decoratorName) => {
         const text = contentBlock.getText();
         let matchArr, start, end;
         while ((matchArr = regex.exec(text)) !== null) {
             start = matchArr.index;
             end = start + matchArr[0].length;
-            callback(start, end);
+            const canDecorate = DraftMatecatUtils.canDecorateRange(start, end, contentBlock, contentState, decoratorName);
+            if(canDecorate) callback(start, end);
+            //callback(start, end);
         }
     };
 

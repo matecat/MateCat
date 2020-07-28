@@ -9,7 +9,7 @@ import tagFromEntity from "./tagFromEntity";
 const matchTagInEditor = (editorState) => {
 
     let contentState = editorState.getCurrentContent();
-    if(!contentState.hasText()) return contentState.getPlainText();
+    if(!contentState.hasText()) return [];
 
     const entities = getEntities(editorState);
     let tagRange = [];

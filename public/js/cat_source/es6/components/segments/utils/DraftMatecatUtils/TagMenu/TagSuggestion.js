@@ -1,15 +1,10 @@
 import React, {Component} from 'react';
+import {getStyleForType} from "../tagModel";
+
 
 const TagSuggestion = React.forwardRef((props,ref) => {
 
-    let tagStyle = '';
-    if(props.suggestion.data.openTagId){
-        tagStyle = 'tag-close';
-    }else if(props.suggestion.data.closeTagId){
-        tagStyle = 'tag-open';
-    }else{
-        tagStyle = 'tag-selfclosed';
-    }
+    const tagStyle = getStyleForType(props.suggestion.type);
 
     return (
         <div

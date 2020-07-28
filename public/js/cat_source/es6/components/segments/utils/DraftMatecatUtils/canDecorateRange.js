@@ -1,4 +1,4 @@
-import {getNoLexiqaTag} from "./tagModel";
+import {getNoLexiqaTag, getNoGlossaryTag} from "./tagModel";
 
 
 const canDecorateRange = (rangeStart, rangeEnd, contentBlock, contentState, decoratorName) => {
@@ -11,6 +11,7 @@ const canDecorateRange = (rangeStart, rangeEnd, contentBlock, contentState, deco
                 if(checkLexiqaConditions(i, contentBlock, contentState)) canDecorate = false;
                 break;
             case 'glossary':
+                if(checkGlossaryConditions(i, contentBlock, contentState)) canDecorate = false;
                 break;
             default:
                 break;
@@ -32,4 +33,15 @@ const checkLexiqaConditions = (charPosition, contentBlock, contentState) => {
         entityType = entityInstance.getType()
     }
     return getNoLexiqaTag().includes(entityType);
+};
+
+// Exclude tag mapped to avoid glossary check
+const checkGlossaryConditions = (charPosition, contentBlock, contentState) => {
+    const entityKey = contentBlock.getEntityAt(charPosition);
+    let entityInstance, entityType;
+    if(entityKey) {
+        entityInstance = contentState.getEntity(entityKey);
+        entityType = entityInstance.getType()
+    }
+    return getNoGlossaryTag().includes(entityType);
 };

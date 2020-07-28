@@ -119,7 +119,8 @@ class Editarea extends React.Component {
     addSearchDecorator = () => {
         let { editorState } = this.state;
         let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
-        const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, searchParams.target,
+        const textToSearch = searchParams.target ? searchParams.target : "";
+        const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, textToSearch,
             searchParams, occurrencesInSearch.occurrences, currentInSearchIndex );
         this.decoratorsStructure = decorators;
         this.setState( {
@@ -405,9 +406,11 @@ class Editarea extends React.Component {
             if(displayPopover) return 'enter-press';
         }else if(e.key === 'Escape'){
             return 'close-tag-menu';
-        }else if(e.key === 'Tab' && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey){
-            return 'insert-tab-tag';
-        }else if( (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') && (isOptionKeyCommand(e) || e.altKey) && e.shiftKey){ // e.key is an &nbsp;
+        }else if(e.key === 'Tab'){
+            return e.shiftKey ? null : 'insert-tab-tag';
+        }else if( (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+            hasCommandModifier(e) &&
+            e.shiftKey){ // e.key is an &nbsp;
             return 'insert-nbsp-tag';
         }else if (e.key === 'ArrowLeft' && !hasCommandModifier(e) && !e.altKey) {
             if (e.shiftKey) {
@@ -435,12 +438,14 @@ class Editarea extends React.Component {
             acceptTagMenuSelection,
             handleCursorMovement
         } = this;
-        const {segment: {sourceTagMap, targetTagMap}} = this.props;
+        const {segment: {sourceTagMap, missingTagsInTarget}} = this.props;
 
         switch (command) {
             case 'toggle-tag-menu':
-                // Todo: prenderla dallo state
-                const tagSuggestions = checkForMissingTags(sourceTagMap, targetTagMap);
+                const tagSuggestions = {
+                    missingTags: missingTagsInTarget,
+                    sourceTags: sourceTagMap
+                }
                 openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
                 return 'handled';
             case 'close-tag-menu':
@@ -562,7 +567,7 @@ class Editarea extends React.Component {
         const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
-        const contentChanged = editorState.getCurrentContent() !== this.state.editorState.getCurrentContent();
+        const contentChanged = editorState.getCurrentContent().getPlainText() !== this.state.editorState.getCurrentContent().getPlainText();
         // if not on an entity, remove any previous selection highlight
         const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
         if(!entityKey) setClickedTagId();
@@ -580,6 +585,7 @@ class Editarea extends React.Component {
 
         this.setState({
             editorState: editorState,
+            translation: DraftMatecatUtils.decodeSegment(editorState)
         }, () => {
             //updateTagsInEditorDebounced()
             if(contentChanged) this.updateTranslationDebounced();
@@ -778,6 +784,8 @@ class Editarea extends React.Component {
                 );
                 this.setState({
                     editorState: editorStateWithFragment,
+                }, () => {
+                    this.updateTranslationDebounced();
                 });
                 return 'handled';
             } catch (err) {
