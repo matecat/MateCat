@@ -566,7 +566,7 @@ class Editarea extends React.Component {
         const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
-        const contentChanged = editorState.getCurrentContent() !== this.state.editorState.getCurrentContent();
+        const contentChanged = editorState.getCurrentContent().getPlainText() !== this.state.editorState.getCurrentContent().getPlainText();
         // if not on an entity, remove any previous selection highlight
         const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
         if(!entityKey) setClickedTagId();
@@ -783,6 +783,8 @@ class Editarea extends React.Component {
                 );
                 this.setState({
                     editorState: editorStateWithFragment,
+                }, () => {
+                    this.updateTranslationDebounced();
                 });
                 return 'handled';
             } catch (err) {
