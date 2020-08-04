@@ -1809,13 +1809,23 @@ class ProjectManager {
                                             $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ]
                                     );
 
-                                    //we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
-                                    //AND IF IT IS ONLY A CHAR? like "*" ?
-                                    //we can't distinguish if it is translated or not
-                                    //this means that we lose the tags id inside the target if different from source
-                                    $src = trim( strip_tags( html_entity_decode( $extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
-                                    $trg = trim( strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
+                                    //
+                                    // -----------------------------------------------
+                                    // NOTE 2020-06-16
+                                    // -----------------------------------------------
+                                    //
+                                    // before calling html_entity_decode function we convert
+                                    // all unicode entities with no corresponding HTML entity
+                                    //
+                                    $extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues($extract_external[ 'seg' ]);
+                                    $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ]);
 
+                                    // we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
+                                    // AND IF IT IS ONLY A CHAR? like "*" ?
+                                    // we can't distinguish if it is translated or not
+                                    // this means that we lose the tags id inside the target if different from source
+                                    $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded($extract_external[ 'seg' ]);
+                                    $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded($target_extract_external[ 'seg' ]);
 
                                     if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
@@ -2317,13 +2327,24 @@ class ProjectManager {
                         $this->filter
                 );
 
+                // Use QA to get target segment
+                $chunk = \Chunks_ChunkDao::getByJobID( $jid )[0];
+                $segment = (new Segments_SegmentDao())->getById($translation_row [ 0 ]);
+                $source = $segment->segment;
+                $target = $translation_row [ 2 ];
+                $check = new QA( $source, $target);
+                $check->setFeatureSet( $this->features );
+                $check->setSourceSegLang( $chunk->source );
+                $check->setTargetSegLang( $chunk->target );
+                $check->performConsistencyCheck();
+
                 /* WARNING do not change the order of the keys */
                 $sql_values = [
                         'id_segment'          => $translation_row [ 0 ],
                         'id_job'              => $jid,
                         'segment_hash'        => $translation_row [ 3 ],
                         'status'              => $iceLockArray[ 'status' ],
-                        'translation'         => $translation_row [ 2 ],
+                        'translation'         => $check->getTargetSeg(),
                         'locked'              => 0, // not allowed to change locked status for pre-translations
                         'match_type'          => $iceLockArray[ 'match_type' ],
                         'eq_word_count'       => $iceLockArray[ 'eq_word_count' ],
@@ -2895,12 +2916,7 @@ class ProjectManager {
         if ( $source != $target ) {
 
             // evaluate if different source and target should be considered translated
-            if ( empty( $target ) ) {
-                $differentSourceAndTargetIsTranslated = false;
-            } else {
-                $differentSourceAndTargetIsTranslated = true;
-            }
-
+            $differentSourceAndTargetIsTranslated = ( empty( $target ) ) ? false : true;
             $differentSourceAndTargetIsTranslated = $this->features->filter(
                     'filterDifferentSourceAndTargetIsTranslated',
                     $differentSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
@@ -2908,16 +2924,15 @@ class ProjectManager {
 
             return $differentSourceAndTargetIsTranslated;
             //return true;
-        } else {
-            // evaluate if identical source and target should be considered non translated
-            $identicalSourceAndTargetIsTranslated = false;
-            $identicalSourceAndTargetIsTranslated = $this->features->filter(
-                    'filterIdenticalSourceAndTargetIsTranslated',
-                    $identicalSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
-            );
-
-            return $identicalSourceAndTargetIsTranslated;
         }
-    }
 
+        // evaluate if identical source and target should be considered non translated
+        $identicalSourceAndTargetIsTranslated = false;
+        $identicalSourceAndTargetIsTranslated = $this->features->filter(
+                'filterIdenticalSourceAndTargetIsTranslated',
+                $identicalSourceAndTargetIsTranslated, $this->projectStructure, $xliff_trans_unit
+        );
+
+        return $identicalSourceAndTargetIsTranslated;
+    }
 }

@@ -371,7 +371,7 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                 align-items: center;
                 height: 100%;
                 font-size: 1.2em;
-                padding: 10px 6.5% 10px 5%;
+                padding: 15px 6.5% 15px 5%;
                 text-align: left;
                 background: #f2f4f7;
                 .found {
@@ -390,15 +390,39 @@ input#exec-cancel, input#exec-find, input#exec-find, button#exec-replace {
                 }
                 .search-result-buttons {
                     display: flex;
+                    p {
+                        padding: 8px 5px;
+                        margin-bottom: 0;
+                    }
                     .ui.basic.button {
                         width: 36px;
                         height: 36px;
                         padding: 0;
                         margin: 0;
                         line-height: 36px;
-                        margin-left: 5px;
+                        margin-left: 10px;
+                        position: relative;
+                        span {
+                            position: absolute;
+                            font-size: 12px;
+                            color: #878788;
+                            -webkit-transition: all 100ms ease-in;
+                            -moz-transition: all 100ms ease-in;
+                            visibility: hidden;
+                            width: 160px;
+                            left: -50px;
+                            top: 26px;
+                        }
                         &.disabled {
                             box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.15) inset !important;
+                            span {
+                                display: none;
+                            }
+                        }
+                        &:hover {
+                            span {
+                                visibility: visible;
+                            }
                         }
                     }
                 }

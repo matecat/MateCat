@@ -43,18 +43,26 @@ class CatUtils {
     /**
      * @return string[]
      */
-    public static function CJKTerminateChars() {
+    public static function CJKFullwidthPunctuationChars() {
         return [
+                '，',
                 '。',
                 '、',
-                '?',
-                '!',
-                ' ',
+                '！',
+                '？',
+                '：',
+                '；',
+                '「',
+                '」',
+                '『',
+                '』',
+                '（',
                 '）',
+                '—',
+                '《',
+                '》',
         ];
     }
-
-    // ----------------------------------------------------------------
 
     public static function placeholdamp( $s ) {
         $s = preg_replace( "/\&/", AMPPLACEHOLDER, $s );
@@ -583,9 +591,42 @@ class CatUtils {
     public static function unicode2chr( $o ) {
         if ( function_exists( 'mb_convert_encoding' ) ) {
             return mb_convert_encoding( '&#' . intval( $o ) . ';', 'UTF-8', 'HTML-ENTITIES' );
-        } else {
-            return chr( intval( $o ) );
         }
+
+        return chr( intval( $o ) );
+    }
+
+    /**
+     * This function converts Unicode entites with no corresponding HTML entity
+     * to their original value
+     *
+     * @param $str
+     *
+     * @return string|string[]
+     */
+    public static function restoreUnicodeEntitesToOriginalValues( $str ) {
+
+        $entities = [
+                "157" // https://www.codetable.net/decimal/157
+        ];
+
+        foreach ( $entities as $entity ) {
+            $value = self::unicode2chr( $entity );
+            $str   = str_replace( "&#" . $entity . ";", $value, $str );
+        }
+
+        return $str;
+    }
+
+    /**
+     * This function trims, strips tags from a html entity decoded string
+     *
+     * @param string $str
+     *
+     * @return string
+     */
+    public static function trimAndStripFromAnHtmlEntityDecoded( $str ) {
+        return trim( strip_tags( html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
     }
 
     /**

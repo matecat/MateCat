@@ -106,7 +106,7 @@ class glossaryController extends ajaxController {
             $config[ 'get_mt' ]      = null;
             $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
             $config[ 'num_result' ]  = 100; //do not want limit the results from glossary: set as a big number
-            
+
             if ( $this->newsegment && $this->newtranslation ) {
                 $config[ 'newsegment' ]     = $this->newsegment;
                 $config[ 'newtranslation' ] = $this->newtranslation;
@@ -141,7 +141,7 @@ class glossaryController extends ajaxController {
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][ ] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
         }
-        
+
     }
 
     protected function _get( $config ){
@@ -248,7 +248,7 @@ class glossaryController extends ajaxController {
 
             //fallback
             $config[ 'id_user' ] = $newUser->id;
-            
+
             $new_key        = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
             $new_key->tm    = 1;
             $new_key->glos  = 1;
@@ -320,7 +320,7 @@ class glossaryController extends ajaxController {
         $set_successful = true;
         if( array_search( false, $set_code, true ) ){
             //There's an error, for now skip, let's assume that are not errors
-          $set_successful = false;
+            $set_successful = false;
         }
 
         if ( $set_successful ) {
