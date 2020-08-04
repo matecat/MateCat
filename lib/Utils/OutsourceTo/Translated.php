@@ -128,7 +128,8 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 CURLOPT_HTTPGET        => true,
                 CURLOPT_TIMEOUT        => 10,
                 CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 5
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_FOLLOWLOCATION => true
         ];
     }
 
