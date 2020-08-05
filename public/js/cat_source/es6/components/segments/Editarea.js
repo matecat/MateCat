@@ -712,6 +712,8 @@ class Editarea extends React.Component {
                 );
                 this.setState({
                     editorState: clipboardEditorPasted,
+                },() => {
+                    this.updateTranslationDebounced();
                 });
                 // Paste fragment
                 return true;
@@ -734,6 +736,8 @@ class Editarea extends React.Component {
             );
             this.setState({
                 editorState: clipboardEditorPasted,
+            },() => {
+                this.updateTranslationDebounced();
             });
             // Paste fragment
             return true;
