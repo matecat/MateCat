@@ -135,7 +135,7 @@ class OutsourceVendor extends React.Component {
             return parseFloat(price * this.state.changeRates[current]/this.state.changeRates['EUR'])
                 .toFixed(2);
         } else {
-            return price;
+            return price.toString();
         }
     }
 
