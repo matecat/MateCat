@@ -257,7 +257,7 @@ class Editarea extends React.Component {
         if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.target &&
             (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) ) ) {
             this.addLexiqaDecorator();
-        } else if ((prevLexiqa && prevLexiqa.length > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.target ) ) {
+        } else if ((prevLexiqa && _.size(prevLexiqa) > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.target ) ) {
             this.removeLexiqaDecorator()
         }
     };

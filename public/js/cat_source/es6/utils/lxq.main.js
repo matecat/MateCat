@@ -590,7 +590,6 @@ LXQ.init  = function () {
                     }
                 }
             }
-            newout.reverse();
             return {out:out , newout:newout};
         };
 
