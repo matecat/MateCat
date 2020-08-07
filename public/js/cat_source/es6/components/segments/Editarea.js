@@ -190,7 +190,7 @@ class Editarea extends React.Component {
     setNewTranslation = (sid, translation) => {
         if ( sid === this.props.segment.sid) {
             const {editorState} = this.state;
-            const contentEncoded = DraftMatecatUtils.encodeContent(editorState, translation );
+            const contentEncoded = DraftMatecatUtils.encodeContent(editorState, DraftMatecatUtils.unescapeHTMLLeaveTags(translation) );
             // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
             let {editorState: newEditorState} =  contentEncoded;
             const newContentState = newEditorState.getCurrentContent();
