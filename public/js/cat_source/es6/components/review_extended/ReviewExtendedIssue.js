@@ -224,6 +224,7 @@ class ReviewExtendedIssue extends React.Component {
 						<b><span title="Type of severity">[{this.props.issue.severity.substring( 0, 3 )}]</span></b>
 					</div>
 					<div className="issue-activity-icon">
+                        {this.props.actions && (
 						<div className="icon-buttons">
 							<button className={"ui icon basic tiny button issue-note " + commentViewButtonClass} onClick={this.setCommentView.bind( this )} title="Comments">
 								<i className={iconCommentClass}/></button>
@@ -231,6 +232,7 @@ class ReviewExtendedIssue extends React.Component {
 								<button className="ui icon basic tiny button issue-delete" onClick={this.deleteIssue.bind( this )} title="Delete issue card"><i className="icon-trash-o icon"/>
 								</button>) : (null)}
 						</div>
+                        )}
 					</div>
 
 				</div>
