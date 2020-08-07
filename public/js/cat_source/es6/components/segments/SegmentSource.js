@@ -46,7 +46,7 @@ class SegmentSource extends React.Component {
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
                     getClickedTagId: getClickedTagId,
                     isTarget: false,
-                    // getSearchParams: this.getSearchParams
+                    getSearchParams: this.getSearchParams
                 }
             }
         ];
@@ -84,28 +84,28 @@ class SegmentSource extends React.Component {
         }
     }
 
-    // getSearchParams = () => {
-    //     const {inSearch,
-    //         currentInSearch,
-    //         searchParams,
-    //         occurrencesInSearch,
-    //         currentInSearchIndex
-    //     } = this.props.segment;
-    //     if ( inSearch && searchParams.source) {
-    //         return {
-    //             active: inSearch,
-    //             currentActive: currentInSearch,
-    //             textToReplace: searchParams.source,
-    //             params: searchParams,
-    //             occurrences : occurrencesInSearch.occurrences,
-    //             currentInSearchIndex
-    //         }
-    //     } else {
-    //         return {
-    //             active: false
-    //         }
-    //     }
-    // };
+    getSearchParams = () => {
+        const {inSearch,
+            currentInSearch,
+            searchParams,
+            occurrencesInSearch,
+            currentInSearchIndex
+        } = this.props.segment;
+        if ( inSearch && searchParams.source) {
+            return {
+                active: inSearch,
+                currentActive: currentInSearch,
+                textToReplace: searchParams.source,
+                params: searchParams,
+                occurrences : occurrencesInSearch.occurrences,
+                currentInSearchIndex
+            }
+        } else {
+            return {
+                active: false
+            }
+        }
+    };
 
     // Restore tagged source in draftJS after GuessTag
     setTaggedSource = (sid) => {
@@ -188,11 +188,11 @@ class SegmentSource extends React.Component {
     }
 
     addSearchDecorator = () => {
-        let { editorState } = this.state;
+        let { editorState, tagRange } = this.state;
         let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
         const textToSearch = searchParams.source ? searchParams.source : "";
         const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, textToSearch,
-            searchParams, occurrencesInSearch.occurrences, currentInSearchIndex );
+            searchParams, occurrencesInSearch.occurrences, currentInSearchIndex, tagRange );
         this.decoratorsStructure = decorators;
         this.setState( {
             editorState: newEditorState,

@@ -558,26 +558,27 @@ import CompoundDecorator from "../CompoundDecorator"
 // };
 
 //Search
-export const activateSearch = (editorState, decoratorStructure, text, params, occurrencesInSegment, currentIndex) => {
+export const activateSearch = (editorState, decoratorStructure, text, params, occurrencesInSegment, currentIndex, tagRange) => {
 
-    const generateSearchDecorator = (highlightTerm, occurrences, params, currentIndex) => {
+    const generateSearchDecorator = (highlightTerm, occurrences, params, currentIndex, tagRange) => {
         let regex = SearchUtils.getSearchRegExp(highlightTerm, params.ingnoreCase, params.exactMatch);
         return {
             name: 'search',
             strategy: (contentBlock, callback) => {
                 if (highlightTerm !== '') {
-                    findWithRegex(regex, contentBlock, occurrences, callback);
+                    findWithRegex(regex, contentBlock, occurrences, tagRange, callback);
                 }
             },
             component: SearchHighlight,
             props: {
                 occurrences,
-                currentIndex
+                currentIndex,
+                tagRange
             }
         };
     };
 
-    const findWithRegex = (regex, contentBlock, occurrences, callback) => {
+    const findWithRegex = (regex, contentBlock, occurrences, tagRange, callback) => {
         const text = contentBlock.getText();
         let matchArr, start, end;
         let index = 0;
@@ -587,16 +588,25 @@ export const activateSearch = (editorState, decoratorStructure, text, params, oc
             if ( occurrences[index] ) {
                 occurrences[index].start = start;
             }
-            callback(start, end);
+            !isTag(start, tagRange) && callback(start, end);
             index++;
         }
     };
-
+    const isTag = (start, tagRange) => {
+        let indexToAdd = 0;
+        //Note: The list of tags contains the indexes calculated with the ph tags in the text, while the list of occurrences does not.
+        var tag = tagRange.find((item)=>{
+            let isTag = start + indexToAdd > item.offset && start + indexToAdd < item.offset + item.length   ;
+            indexToAdd += item.length;
+            return isTag;
+        });
+        return !!tag;
+    };
     let search = text;
     let decorators = decoratorStructure.slice();
     let occurrencesClone = _.cloneDeep(occurrencesInSegment);
     _.remove(decorators, (decorator) => decorator.name === 'search');
-    decorators.push( generateSearchDecorator( search, occurrencesClone, params, currentIndex) );
+    decorators.push( generateSearchDecorator( search, occurrencesClone, params, currentIndex, tagRange) );
     // const newDecorator = new CompositeDecorator( decorators );
     const newDecorator = new CompoundDecorator( decorators );
     return {

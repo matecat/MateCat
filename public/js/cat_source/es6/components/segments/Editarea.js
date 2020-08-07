@@ -54,8 +54,8 @@ class Editarea extends React.Component {
                     isTarget: true,
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
-                    getClickedTagId: getClickedTagId
-                    // getSearchParams: this.getSearchParams //TODO: Make it general ?
+                    getClickedTagId: getClickedTagId,
+                    getSearchParams: this.getSearchParams //TODO: Make it general ?
                 }
             }
         ];
@@ -93,35 +93,35 @@ class Editarea extends React.Component {
         this.onCompositionStopDebounced = _.debounce(this.onCompositionStop, 1000);
     }
 
-    // getSearchParams = () => {
-    //     const {inSearch,
-    //         currentInSearch,
-    //         searchParams,
-    //         occurrencesInSearch,
-    //         currentInSearchIndex
-    //     } = this.props.segment;
-    //     if ( inSearch && searchParams.target) {
-    //         return {
-    //             active: inSearch,
-    //             currentActive: currentInSearch,
-    //             textToReplace: searchParams.target,
-    //             params: searchParams,
-    //             occurrences : occurrencesInSearch.occurrences,
-    //             currentInSearchIndex
-    //         }
-    //     } else {
-    //         return {
-    //             active: false
-    //         }
-    //     }
-    // };
+    getSearchParams = () => {
+        const {inSearch,
+            currentInSearch,
+            searchParams,
+            occurrencesInSearch,
+            currentInSearchIndex
+        } = this.props.segment;
+        if ( inSearch && searchParams.target) {
+            return {
+                active: inSearch,
+                currentActive: currentInSearch,
+                textToReplace: searchParams.target,
+                params: searchParams,
+                occurrences : occurrencesInSearch.occurrences,
+                currentInSearchIndex
+            }
+        } else {
+            return {
+                active: false
+            }
+        }
+    };
 
     addSearchDecorator = () => {
-        let { editorState } = this.state;
+        let { editorState, tagRange } = this.state;
         let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
         const textToSearch = searchParams.target ? searchParams.target : "";
         const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, textToSearch,
-            searchParams, occurrencesInSearch.occurrences, currentInSearchIndex );
+            searchParams, occurrencesInSearch.occurrences, currentInSearchIndex, tagRange );
         this.decoratorsStructure = decorators;
         this.setState( {
             editorState: newEditorState,
