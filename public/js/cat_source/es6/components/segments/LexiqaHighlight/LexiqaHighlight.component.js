@@ -47,7 +47,6 @@ class LexiqaHighlight extends Component {
         let {blockKey, start, end, warnings, isSource, sid} = this.props;
         // Every block starts from offset 0, so we have to check warnings's blockKey
         let warning = _.find(warnings, (warn) => warn.start === start && warn.end === end && warn.blockKey === blockKey);
-        // Todo check why myClass is missing sometimes
         if ( warning && warning.myClass ) {
             warning.messages = LexiqaUtils.buildTooltipMessages(warning, sid, isSource);
         }
@@ -59,14 +58,14 @@ class LexiqaHighlight extends Component {
     }
 
     render() {
-        const { children, sid } = this.props;
-        const {showTooltip} = this.state;
+        const { children, sid, getUpdatedSegmentInfo } = this.props;
+        const { showTooltip } = this.state;
+        const { segmentOpened } = getUpdatedSegmentInfo();
         const warning = this.getWarning();
-
         return warning ? <div className="lexiqahighlight"
                  onMouseEnter={() => this.showTooltip(300)}
                  onMouseLeave={() => this.hideTooltip(300)}>
-                {showTooltip && warning && <LexiqaTooltipInfo messages={warning.messages}/>}
+                {showTooltip && segmentOpened && warning && warning.messages && <LexiqaTooltipInfo messages={warning.messages}/>}
                 <span
                     style={{backgroundColor: warning.color}}
                 >

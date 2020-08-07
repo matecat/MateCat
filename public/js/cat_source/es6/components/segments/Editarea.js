@@ -163,7 +163,12 @@ class Editarea extends React.Component {
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), decodedTranslation, false);
         const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
-            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, updatedLexiqaWarnings, sid, false);
+            const { editorState : newEditorState, decorators } = activateLexiqa( editorState,
+                this.decoratorsStructure,
+                updatedLexiqaWarnings,
+                sid,
+                false,
+                this.getUpdatedSegmentInfo);
             this.decoratorsStructure = decorators;
             this.setState( {
                 editorState: newEditorState,
