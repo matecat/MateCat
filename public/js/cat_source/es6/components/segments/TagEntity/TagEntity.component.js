@@ -37,24 +37,24 @@ class TagEntity extends Component {
         const {selection} = children.props.children[0];
     };
 
-    // markSearch = (text) => {
-    //     let {active, currentActive, textToReplace, params, occurrences, currentInSearchIndex} = this.props.getSearchParams();
-    //     let currentOccurrence = _.find(occurrences, (occ) => occ.searchProgressiveIndex === currentInSearchIndex);
-    //     let isCurrent = (currentOccurrence && currentOccurrence.matchPosition >= this.props.start && currentOccurrence.matchPosition < this.props.end);
-    //     if ( active ) {
-    //         let regex = SearchUtils.getSearchRegExp(textToReplace, params.ingnoreCase, params.exactMatch);
-    //         var parts = text.split(regex);
-    //         for (var i = 1; i < parts.length; i += 2) {
-    //             if ( currentActive && isCurrent ) {
-    //                 parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 210 14)'}}>{parts[i]}</span>;
-    //             } else {
-    //                 parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 255 0)'}}>{parts[i]}</span>;
-    //             }
-    //         }
-    //         return parts;
-    //     }
-    //     return text;
-    // };
+    markSearch = (text, searchParams) => {
+        let {active, currentActive, textToReplace, params, occurrences, currentInSearchIndex} = searchParams;
+        let currentOccurrence = _.find(occurrences, (occ) => occ.searchProgressiveIndex === currentInSearchIndex);
+        let isCurrent = (currentOccurrence && currentOccurrence.matchPosition >= this.props.start && currentOccurrence.matchPosition < this.props.end);
+        if ( active ) {
+            let regex = SearchUtils.getSearchRegExp(textToReplace, params.ingnoreCase, params.exactMatch);
+            var parts = text.split(regex);
+            for (var i = 1; i < parts.length; i += 2) {
+                if ( currentActive && isCurrent ) {
+                    parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 210 14)'}}>{parts[i]}</span>;
+                } else {
+                    parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 255 0)'}}>{parts[i]}</span>;
+                }
+            }
+            return parts;
+        }
+        return text;
+    };
 
 
 
@@ -73,34 +73,54 @@ class TagEntity extends Component {
     }
 
     render() {
+        let searchParams = this.props.getSearchParams();
         const {selected, tagWarningStyle, tagStyle} = this.state;
         const {entityKey, offsetkey, blockKey, start, end, onClick, contentState, getClickedTagId} = this.props;
         const { children } = this.props.children.props;
         const {selection, forceSelection} = children[0];
         const {emitSelectionParameters, tooltipToggle} = this;
-        // let text = this.markSearch(children[0].props.text);
+
         const entity = contentState.getEntity(entityKey);
         const clickedTagId = getClickedTagId();
         const mirrorClickedStyle = entity.data.id && clickedTagId === entity.data.id ? 'clicked' : '';
         const showTooltip = this.state.showTooltip && getTooltipTag().includes(entity.type);
-
-        return <div className={"tag-container"}
-                    /*contentEditable="false"
-                    suppressContentEditableWarning={true}*/>
-            {showTooltip && <TooltipInfo text={entity.data.placeholder} isTag tagStyle={tagStyle}/>}
-            <span data-offset-key={offsetkey}
-                className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
-                unselectable="on"
-                suppressContentEditableWarning={true}
-                onMouseEnter={()=> tooltipToggle(true)}
-                onMouseLeave={() => tooltipToggle()}
-                onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
-                /*contentEditable="false"*/
-                onClick={() => onClick(start, end, entity.data.id)}>
+        if ( searchParams.active )  {
+            let text = this.markSearch(children[0].props.text, searchParams);
+            return <div className={"tag-container"}
+                /*contentEditable="false"
+                suppressContentEditableWarning={true}*/>
+                {showTooltip && <TooltipInfo text={entity.data.placeholder} isTag tagStyle={tagStyle}/>}
+                <span data-offset-key={offsetkey}
+                      className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
+                      unselectable="on"
+                      suppressContentEditableWarning={true}
+                      onMouseEnter={()=> tooltipToggle(true)}
+                      onMouseLeave={() => tooltipToggle()}
+                      onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
+                    /*contentEditable="false"*/
+                      onClick={() => onClick(start, end, entity.data.id)}>
+                {text}
+            </span>
+                <span style={{display:'none'}}>{children}</span>
+            </div>
+        } else {
+            return <div className={"tag-container"}
+                /*contentEditable="false"
+                suppressContentEditableWarning={true}*/>
+                {showTooltip && <TooltipInfo text={entity.data.placeholder} isTag tagStyle={tagStyle}/>}
+                <span data-offset-key={offsetkey}
+                      className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
+                      unselectable="on"
+                      suppressContentEditableWarning={true}
+                      onMouseEnter={()=> tooltipToggle(true)}
+                      onMouseLeave={() => tooltipToggle()}
+                      onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
+                    /*contentEditable="false"*/
+                      onClick={() => onClick(start, end, entity.data.id)}>
                 {children}
             </span>
-            {/*<span style={{display:'none'}}>{children}</span>*/}
-        </div>
+            </div>
+        }
     }
 
     updateTagStyle = () => {

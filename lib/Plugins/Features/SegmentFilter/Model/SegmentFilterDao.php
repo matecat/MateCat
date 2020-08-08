@@ -154,11 +154,13 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
 //                            'match_type' => \Constants_SegmentTranslationsMatchType::REPETITIONS,
 //                    ] );
                     break;
+
                 case 'mt':
                     $data = array_merge( $data, [
                             'match_type' => \Constants_SegmentTranslationsMatchType::MT,
                     ] );
                     break;
+
                 case 'matches':
                     $data = array_merge( $data, [
                             'match_type_100_public' => \Constants_SegmentTranslationsMatchType::_100_PUBLIC,
@@ -172,32 +174,44 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                             'match_type' => \Constants_SegmentTranslationsMatchType::_50_74,
                     ] );
                     break;
+
                 case 'fuzzies_75_84':
                     $data = array_merge( $data, [
                             'match_type' => \Constants_SegmentTranslationsMatchType::_75_84,
                     ] );
                     break;
+
                 case 'fuzzies_85_94':
                     $data = array_merge( $data, [
                             'match_type' => \Constants_SegmentTranslationsMatchType::_85_94,
                     ] );
                     break;
+
                 case 'fuzzies_95_99':
                     $data = array_merge( $data, [
                             'match_type' => \Constants_SegmentTranslationsMatchType::_95_99,
                     ] );
                     break;
-                case 'todo':
 
+                case 'todo':
                     $data = array_merge( $data, [
                             'status_new'   => Constants_TranslationStatus::STATUS_NEW,
                             'status_draft' => Constants_TranslationStatus::STATUS_DRAFT
                     ] );
+
                     if ( $chunk->getIsReview() ) {
                         $data = array_merge( $data, [
                                 'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
                         ] );
                     }
+
+                    if ( $chunk->isSecondPassReview() ) {
+                        $data = array_merge( $data, [
+                                'status_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                                'source_page'       => $chunk->getSourcePage()
+                        ] );
+                    }
+
                     break;
             }
 
@@ -257,9 +271,16 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         ];
     }
 
+    /**
+     * @param Chunks_ChunkStruct                             $chunk
+     * @param \Features\SegmentFilter\Model\FilterDefinition $filter
+     *
+     * @return \DataAccess_IDaoStruct[]
+     * @throws \Exception
+     */
     public static function findSegmentIdsForSample( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
 
-        $source_page = ReviewUtils::revisionNumberToSourcePage( $filter->revisionNumber() );
+        $source_page = $chunk->getSourcePage();
 
         if ( $filter->sampleSize() > 0 ) {
             $limit = self::__getLimit( $chunk, $filter, $source_page );
@@ -275,45 +296,55 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             case 'segment_length_high_to_low':
                 $sql = self::getSqlForSegmentLength( $limit, $where, 'high_to_low', $source_page );
                 break;
+
             case 'segment_length_low_to_high':
                 $sql = self::getSqlForSegmentLength( $limit, $where, 'low_to_high', $source_page );
                 break;
+
             case 'edit_distance_high_to_low':
                 $sql = self::getSqlForEditDistance( $limit, $where, 'high_to_low', $source_page );
                 break;
+
             case 'edit_distance_low_to_high':
                 $sql = self::getSqlForEditDistance( $limit, $where, 'low_to_high', $source_page );
                 break;
+
             case 'regular_intervals':
                 $sql = self::getSqlForRegularIntervals( $limit, $where, $source_page );
                 break;
+
             case 'unlocked':
                 $sql = self::getSqlForUnlocked( $where, $source_page );
                 break;
+
             case 'ice':
                 $sql = self::getSqlForIce( $where, $source_page );
                 break;
+
             case 'modified_ice':
                 $sql = self::getSqlForModifiedIce( $where, $source_page );
                 break;
+
             case 'repetitions':
                 $sql = self::getSqlForRepetition( $where, $source_page );
                 break;
-            case 'mt':
-                $sql = self::getSqlForMatchType( $where, $source_page );
-                break;
+
             case 'matches':
                 $sql = self::getSqlForMatches( $where, $source_page );
                 break;
+
+            case 'mt':
             case 'fuzzies_50_74':
             case 'fuzzies_75_84':
             case 'fuzzies_85_94':
             case 'fuzzies_95_99':
                 $sql = self::getSqlForMatchType( $where, $source_page );
                 break;
+
             case 'todo':
                 $sql = self::getSqlForTodo( $where, $data, $source_page);
                 break;
+
             default:
                 throw new \Exception( 'Sample type is not valid: ' . $filter->sampleType() );
                 break;
@@ -434,6 +465,11 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $sql;
     }
 
+    /**
+     * @param $source_page
+     *
+     * @return string
+     */
     public static function segmentTranslationEventsJoin( $source_page ) {
         if ( $source_page ) {
             return " LEFT JOIN (
@@ -450,9 +486,8 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
 
             ) ste ON ste.ste_id_segment = st.id_segment " ;
         }
-        else {
-            return ''; ;
-        }
+
+        return '';
     }
 
     public static function getSqlForUnlocked( $where, $source_page ) {
@@ -624,8 +659,16 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         $ste_join = self::segmentTranslationEventsJoin( $source_page ) ;
 
         $sql_condition = "";
-        if(array_key_exists("status_translated", $data))
+        $sql_sp = "";
+
+        if(array_key_exists("status_translated", $data)) {
             $sql_condition = " OR st.status = :status_translated ";
+        }
+
+        if(array_key_exists("status_approved", $data)) {
+            $sql_condition = " OR st.status = :status_approved ";
+            $sql_sp = " AND ste.source_page < :source_page";
+        }
 
         $sql = "
           SELECT st.id_segment AS id
@@ -637,12 +680,13 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
-           OR st.status = :status_draft $sql_condition)
+           OR st.status = :status_draft ".$sql_condition.")
 
-           $ste_join
-
+           ".$ste_join."
+           
            WHERE 1
-           $where->sql
+           ".$where->sql."
+           ".$sql_sp."
            ORDER BY st.id_segment
         ";
 

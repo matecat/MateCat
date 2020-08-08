@@ -199,7 +199,7 @@ class SearchModel {
                     $matchesTargetCount = count( $matchesTarget );
 
                     if ( $this->hasMatches( $matchesSource ) and $this->hasMatches( $matchesTarget ) ) {
-                        $vector[ 'sid_list' ][] = $id;
+                        $vector[ 'sid_list' ][] = strval($id);
                         $vector[ 'count' ]      = $vector[ 'count' ] + $matchesTargetCount + $matchesSourceCount;
                     }
                 }

@@ -781,8 +781,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
          * A more strict condition was added in order to check the translation mismatch
          *
          */
-        $bind_keys = [];
-
+        
         if ( $sid != null ) {
 
             $query = "

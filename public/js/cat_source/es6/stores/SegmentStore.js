@@ -525,11 +525,11 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     openSegmentIssuePanel: function(sid) {
         const index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
-        if ( ( this._segments.get(index).get('ice_locked') == 0  || ( this._segments.get(index).get('ice_locked') == 1 && this._segments.get(index).get('unlocked') ) ) ) {
+        // if ( ( this._segments.get(index).get('ice_locked') == 0  || ( this._segments.get(index).get('ice_locked') == 1 && this._segments.get(index).get('unlocked') ) ) ) {
             this._segments = this._segments.setIn([index, 'openIssues'], true);
-        } else {
-            this._segments = this._segments.setIn([index, 'openIssues'], false);
-        }
+        // } else {
+        //     this._segments = this._segments.setIn([index, 'openIssues'], false);
+        // }
     },
     closeSegmentIssuePanel: function() {
         this._segments = this._segments.map((segment)=>segment.set('openIssues', false));

@@ -290,7 +290,6 @@ class Search extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(this.props.active){
             if ( !prevProps.active ) {
-                window.dispatchEvent(new Event('resize')); // To resize content on VirtualList
                 if(this.sourceEl && this.state.focus){
                     this.sourceEl.focus();
                     this.setState({
@@ -311,7 +310,6 @@ class Search extends React.Component {
                 });
             }
         }else{
-            window.dispatchEvent(new Event('resize')); // To resize content on VirtualList
             $('body').removeClass("search-open");
             if(!this.state.focus){
                 this.setState({
