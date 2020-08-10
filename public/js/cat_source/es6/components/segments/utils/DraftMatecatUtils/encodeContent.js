@@ -1,10 +1,11 @@
 import createNewEntitiesFromMap from "./createNewEntitiesFromMap";
 import linkEntities from "./linkEntities";
 import beautifyEntities from "./beautifyEntities";
-import {EditorState} from 'draft-js';
+import {EditorState, Modifier} from 'draft-js';
 import splitOnTagPlaceholder from "./splitOnTagPlaceHolder";
 import removeNewLineInContentState from "./removeNewLineInContentState";
 import {getSplitBlockTag} from "./tagModel";
+import replaceOccurrences from "./replaceOccurrences";
 
 /**
  *
@@ -38,11 +39,17 @@ const encodeContent = (originalEditorState, plainText = '') => {
     editorState = EditorState.push(originalEditorState, contentState, 'change-block-data');
 
     // Replace each tag text with a placeholder
-    contentState = beautifyEntities(editorState);
+    // contentState = beautifyEntities(editorState);
+    editorState = beautifyEntities(editorState);
     //editorState = EditorState.push(editorState, contentState, 'insert-characters');
 
-    //
+    // Unescape residual html entities after tag identification
+    editorState = replaceOccurrences(editorState, '&lt;', '<');
+    editorState = replaceOccurrences(editorState, '&gt;', '>');
+
     const decorator = originalEditorState.getDecorator();
+    // We use ContentState to create a new Editor without history
+    contentState = editorState.getCurrentContent();
     editorState = EditorState.createWithContent(contentState, decorator);
 
     return {editorState, tagRange};

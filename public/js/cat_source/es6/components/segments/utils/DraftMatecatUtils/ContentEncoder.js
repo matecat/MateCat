@@ -777,7 +777,7 @@ export const activateQaCheckBlacklist = (editorState, decoratorStructure, qaChec
 };
 
 //Lexiqa
-export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, sid, isSource) => {
+export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, sid, isSource, getUpdatedSegmentInfo) => {
 
     const generateLexiqaDecorator = (warnings, sid, isSource, decoratorName) => {
         return {
@@ -795,7 +795,8 @@ export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, 
             props: {
                 warnings,
                 sid,
-                isSource
+                isSource,
+                getUpdatedSegmentInfo
             }
         };
     };

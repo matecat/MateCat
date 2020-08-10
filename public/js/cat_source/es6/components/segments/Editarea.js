@@ -163,7 +163,12 @@ class Editarea extends React.Component {
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), decodedTranslation, false);
         const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
-            const { editorState : newEditorState, decorators } = activateLexiqa( editorState, this.decoratorsStructure, updatedLexiqaWarnings, sid, false);
+            const { editorState : newEditorState, decorators } = activateLexiqa( editorState,
+                this.decoratorsStructure,
+                updatedLexiqaWarnings,
+                sid,
+                false,
+                this.getUpdatedSegmentInfo);
             this.decoratorsStructure = decorators;
             this.setState( {
                 editorState: newEditorState,
@@ -185,7 +190,7 @@ class Editarea extends React.Component {
     setNewTranslation = (sid, translation) => {
         if ( sid === this.props.segment.sid) {
             const {editorState} = this.state;
-            const contentEncoded = DraftMatecatUtils.encodeContent(editorState, translation );
+            const contentEncoded = DraftMatecatUtils.encodeContent(editorState, DraftMatecatUtils.unescapeHTMLLeaveTags(translation) );
             // this must be done to make the Undo action possible, otherwise encodeContent will delete all editor history
             let {editorState: newEditorState} =  contentEncoded;
             const newContentState = newEditorState.getCurrentContent();

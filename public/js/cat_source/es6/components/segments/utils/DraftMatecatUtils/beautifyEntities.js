@@ -8,7 +8,7 @@ import {
 /**
  *
  * @param editorState
- * @returns {ContentState} contentState - A a new ContentState in which entities are displayed as placeholder
+ * @returns {EditorState} editorState - A a new EditorState in which entities are displayed as placeholder
  */
 const beautifyEntities  = (editorState) => {
 
@@ -45,7 +45,7 @@ const beautifyEntities  = (editorState) => {
         // Update contentState
         editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
     });
-    return contentState;
+    return editorStateClone;
 };
 
 export default beautifyEntities;
