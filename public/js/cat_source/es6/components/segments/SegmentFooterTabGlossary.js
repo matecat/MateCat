@@ -136,8 +136,8 @@ class SegmentFooterTabGlossary extends React.Component {
     }
 
     setGlossaryItem() {
-        let source = this.source.textContent;
-        let target = this.target.textContent;
+        let source = this.source.textContent.trim();
+        let target = this.target.textContent.trim();
         if ( this.checkAddItemButton(source, target) ) {
             let self = this;
             let comment = (this.comment)? this.comment.textContent : null;
