@@ -40,13 +40,18 @@ let GlossaryUtils = {
 
         let intervals = [];
         let matches = [];
-        $.each( matchesObj, function ( index ) {
-            if (this[0].raw_segment) {
-                matches.push( this[0].raw_segment );
-            } else if (this[0].segment) {
-                matches.push( this[0].segment );
-            }
-        } );
+        try {
+            $.each( matchesObj, function ( index ) {
+                if ( this[0].raw_segment ) {
+                    matches.push( this[0].raw_segment );
+                } else if ( this[0].segment ) {
+                    matches.push( this[0].segment );
+                }
+            } );
+        } catch ( e ) {
+            console.error("Error in markGlossaryItemsInText");
+            return text;
+        }
 
         let matchesToRemove = this.findInclusiveMatches( matches ) ;
         matches = matches.sort(function(a, b){
@@ -131,7 +136,7 @@ let GlossaryUtils = {
 
         this.intervalsUnion = [];
         if ( intervals.length > 0 ) this.checkIntervalsUnions( intervals );
-        
+
         let markLength = this.startGlossaryMark.length + this.endGlossaryMark.length;
         let sourceString = text;
         let sourceReturn = text;
