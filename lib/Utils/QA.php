@@ -363,7 +363,7 @@ class QA {
          *  2 =>  'bad source xml',
          *  3 =>  'bad target xml',
          */
-            29   => "Should be < g ... > ... < /g >",
+            29   => "Critical issue: closing tags must come after opening tags.",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags."
 
     ];
