@@ -6,14 +6,10 @@ import findTagWithRegex from "../components/segments/utils/DraftMatecatUtils/fin
 const TAGS_UTILS =  {
     // TODO: move it in another module
     prepareTextToSend: function (text) {
+        text = text.replace(/</g, '&lt;').replace(/</g, '&gt;');
         var div =  document.createElement('div');
         var $div = $(div);
         $div.html(text);
-        $div = this.transformPlaceholdersHtml($div);
-
-        $div.find('span.space-marker').replaceWith(' ');
-        $div.find('span.rangySelectionBoundary').remove();
-        $div = this.encodeTagsWithHtmlAttribute($div);
         return TextUtils.view2rawxliff( $div.text() );
     },
 
@@ -475,14 +471,12 @@ const TAGS_UTILS =  {
         } else {
             TextUtils.setCursorPosition(elem[0]);
             CursorUtils.selectText(elem[0]);
-            this.removeSelectedClassToTags();
             elem.addClass('selected');
             if(UI.body.hasClass('tagmode-default-compressed')) {
                 $('.editor .tagModeToggle').click();
             }
         }
         if ( elem.closest('.source').length > 0 ) {
-            this.removeHighlightCorrespondingTags(elem.closest('.source'));
             this.highlightCorrespondingTags(elem);
             this.highlightEquivalentTaginSourceOrTarget(elem.closest('.source'), UI.editarea);
         } else {
@@ -508,7 +502,6 @@ const TAGS_UTILS =  {
         }
         let htmlEditarea = $.parseHTML(UI.editarea.html());
         if (htmlEditarea) {
-            this.removeHighlightCorrespondingTags(UI.editarea);
             let self = this;
             $.each(htmlEditarea, function (index) {
                 if($(this).hasClass('temp-highlight-tags')) {
@@ -543,7 +536,6 @@ const TAGS_UTILS =  {
      * @param containerHighlight
      */
     highlightEquivalentTaginSourceOrTarget: function(containerSearch, containerHighlight) {
-        this.removeHighlightCorrespondingTags(containerHighlight);
         let highlightedTag = containerSearch.find('.startTag.locked.highlight, .selfClosingTag.locked.highlight');
         if ( highlightedTag.length > 0 ) {
             let sourceTag, text;
@@ -615,45 +607,10 @@ const TAGS_UTILS =  {
         $(el).addClass('highlight');
     },
 
-    removeHighlightCorrespondingTags: function (segment$) {
-        segment$.find('.locked.highlight').removeClass('highlight');
-    },
 
     removeHighlightErrorsTags: function (segment$) {
         segment$.find('.locked.mismatch').removeClass('mismatch');
         segment$.find('.locked.order-error').removeClass('order-error');
-    },
-    // TAG MISMATCH
-    markTagMismatch: function(tag_mismatch, sid) {
-        if( !_.isUndefined(tag_mismatch.source) && tag_mismatch.source.length > 0 ) {
-            $('#segment-' + sid + ' .source span.locked.style-tag:not(.temp)').filter(function() {
-                let clone = $(this).clone();
-                clone.find('.inside-attribute').remove();
-                let tag = TextUtils.htmlEncode(clone.text())
-                return  tag_mismatch.source.indexOf(tag) !== -1;
-            }).last().addClass('temp');
-        }
-        if( !_.isUndefined(tag_mismatch.target) && tag_mismatch.target.length > 0 ) {
-            $('#segment-' + sid + ' .editarea span.locked.style-tag:not(.temp)').filter(function() {
-                let clone = $(this).clone();
-                clone.find('.inside-attribute').remove();
-                let tag = TextUtils.htmlEncode(clone.text())
-                return  tag_mismatch.target.indexOf(tag) !== -1;
-            }).last().addClass('temp');
-        }
-        // ??
-        $('#segment-' + sid + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
-        $('#segment-' + sid + ' span.locked.temp').addClass('mismatch').removeClass('temp');
-        $('#segment-' + sid + ' span.locked.mismatch-old').removeClass('mismatch-old');
-
-        $('#segment-' + sid + ' .editarea span.locked:not(.temp)').removeClass( 'order-error' );
-        if( !_.isUndefined(tag_mismatch.order) && tag_mismatch.order.length > 0 ) {
-            $( '#segment-' + sid + ' .editarea .locked.style-tag:not(.mismatch)' ).filter( function () {
-                let clone = $( this ).clone();
-                clone.find( '.inside-attribute' ).remove();
-                return TextUtils.htmlEncode(clone.text()) === tag_mismatch.order[0];
-            } ).addClass( 'order-error' );
-        }
     },
     /**
      *  Return the Regular expression to match all xliff source tags
@@ -750,62 +707,6 @@ const TAGS_UTILS =  {
     checkXliffTagsInText: function (text) {
         var reg = TagUtils.getXliffRegExpression();
         return reg.test(text);
-    },
-
-    /**
-     * It does the same as postProcessEditarea function but does not remove the cursor span
-     * @param text
-     * @returns {*}
-     */
-
-    cleanTextFromPlaceholdersSpan: function (text) {
-        var div =  document.createElement('div');
-        var $div = $(div);
-        $div.html(text);
-        $div = this.transformPlaceholdersHtml($div);
-        $div.find('span.space-marker').replaceWith(' ');
-        $div = this.encodeTagsWithHtmlAttribute($div);
-        return $div.text();
-    },
-    transformPlaceholdersHtml: function ($elem) {
-        var divs = $elem.find( 'div' );
-
-        if( divs.length ){
-            divs.each(function(){
-                $(this).find( 'br:not([class])' ).remove();
-                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
-            });
-        } else {
-            $elem.find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
-            $elem.find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
-            $elem.find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
-            $elem.find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
-        }
-
-        $elem.find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
-        $elem.find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
-
-        return $elem;
-    },
-
-    /**
-     * This function is called to return the tag inside ph attribute 'equiv-text' to base64
-     * @param $elem
-     * @returns {*}
-     */
-    encodeTagsWithHtmlAttribute: function ($elem) {
-        $elem.find('.inside-attribute').remove();
-        return $elem;
-    },
-
-    /**
-     * When you click on a tag, it is selected and the selected class is added (ui.events->382).
-     * Clicking on the edititarea to remove the tags with the selected class that otherwise are
-     * removed the first time you press the delete key (ui.editarea-> 51 )
-     */
-    removeSelectedClassToTags: function (  ) {
-        $('.targetarea .locked.selected').removeClass('selected');
-        $('.editor .source .locked').removeClass('selected');
     },
 
     _treatTagsAsBlock: function ( mainStr, transDecoded, replacementsMap ) {

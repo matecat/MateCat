@@ -355,10 +355,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'original_translation'], translation);
     },
 
-    removeLockTagsFromString(str) {
-        return TagUtils.cleanTextFromPlaceholdersSpan(str);
-    },
-
     addSegmentVersions(fid, sid, versions) {
         //If is a splitted segment the versions are added to the first of the split
         let index = this.getSegmentIndex(sid);

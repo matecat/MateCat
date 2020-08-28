@@ -85,7 +85,6 @@ class Segment extends React.Component {
             /**************************/
             //From EditAreaClick
             /*SegmentActions.closeTagsMenu();*/
-            TagUtils.removeHighlightCorrespondingTags(this.$section);
             if (UI.warningStopped) {
                 UI.warningStopped = false;
                 UI.checkWarnings(false);
@@ -421,7 +420,6 @@ class Segment extends React.Component {
         } else if ( !this.props.segment.opened ){
             this.openSegment();
             SegmentActions.setOpenSegment(this.props.segment.sid, this.props.fid);
-            TagUtils.removeSelectedClassToTags()
         }
     }
 
@@ -530,7 +528,6 @@ class Segment extends React.Component {
             });
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
             clearTimeout(this.timeoutScroll);
-            TagUtils.removeHighlightCorrespondingTags(this.$section);
             setTimeout(()=>{
                 if ( this.props.segment.openComments ) {
                     SegmentActions.closeSegmentComment(this.props.segment.sid);

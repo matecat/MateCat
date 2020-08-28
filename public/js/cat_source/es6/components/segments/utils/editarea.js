@@ -304,11 +304,6 @@ let EditArea = {
     postProcessEditarea: function(context, selector) {
         selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
         let area = $( selector, context ).clone();
-        area = TagUtils.transformPlaceholdersHtml(area);
-
-        area.find('span.space-marker').replaceWith(' ');
-        area.find('span.rangySelectionBoundary').remove();
-        area = TagUtils.encodeTagsWithHtmlAttribute(area);
         return TextUtils.view2rawxliff( area.text() );
     },
 };
