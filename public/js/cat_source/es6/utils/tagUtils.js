@@ -84,6 +84,19 @@ const TAGS_UTILS =  {
         return _str;
     },
 
+    // Same as decodePlaceholdersToTextSimple but transform placeholder to plain text
+    decodePlaceholdersToPlainText: function (str) {
+        let _str = str;
+
+        _str = _str.replace( config.lfPlaceholderRegex, '\n' )
+            .replace( config.crPlaceholderRegex, '\r' )
+            .replace( config.crlfPlaceholderRegex, '\r\n' )
+            .replace( config.tabPlaceholderRegex, '\t' )
+            .replace( config.nbspPlaceholderRegex, '°' )
+        return _str;
+    },
+
+
     transformTextForLockTags: function ( tx ) {
         let brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked style-tag \">$1</_plh_>";
         let brTx2 =  "<span contenteditable=\"false\" class=\"locked style-tag\">$1</span>";

@@ -60,11 +60,23 @@ export const unescapeHTMLLeaveTags = (escapedHTML) => {
 
 };
 
-export const decodePhTags = (text) => {
+export const decodeTagsToPlainText = (text) => {
+    let decoded = '';
+    //
     if(text){
-        return text.replace( /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi , (match, text) => {
+        // Match G - temporary until backend put IDs in closing tags </g>
+        decoded = TagUtils.matchTag(text)
+        // Match PH
+        decoded =  decoded.replace( /&lt;ph.*?equiv-text="base64:(.*?)"\/&gt;/gi , (match, text) => {
             return Base64.decode(text);
         });
+        // Match Others (x|bx|ex|bpt|ept|ph.*?|it|mrk)
+        decoded =  decoded.replace( /&lt;(?:x|bx|ex|bpt|ept|it|mrk).*?id="(.*?)".*?\/&gt;/gi , (match, text) => {
+            return text;
+        });
+        // Convert placeholder (nbsp, tab, lineFeed, carriageReturn)
+        decoded = TagUtils.decodePlaceholdersToPlainText(decoded)
+        return decoded;
     }
     return '';
 };
