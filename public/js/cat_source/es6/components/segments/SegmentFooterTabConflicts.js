@@ -27,7 +27,7 @@ class SegmentFooterTabConflicts extends React.Component {
     renderAlternatives(alternatives) {
         let segment = this.props.segment;
         let segment_id = this.props.segment.sid;
-        let escapedSegment = TagUtils.decodePlaceholdersToText(segment.segment);
+        let escapedSegment = TagUtils.decodePlaceholdersToTextSimple(segment.segment);
         // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
         let mainStr = TextUtils.htmlEncode(segment.translation).replace(/&amp;/g, "&");
         let html = [];
@@ -57,8 +57,8 @@ class SegmentFooterTabConflicts extends React.Component {
                 });
             }
 
-            let translation = TagUtils.decodePlaceholdersToText(TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)));
-            let source = TagUtils.decodePlaceholdersToText(TagUtils.transformTextForLockTags(escapedSegment));
+            let translation = TagUtils.decodePlaceholdersToTextSimple(TagUtils.decodeHtmlInTag(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj)));
+            let source = TagUtils.decodePlaceholdersToTextSimple(TagUtils.decodeHtmlInTag(escapedSegment));
             html.push(<ul className="graysmall" data-item={(index + 1)} key={'editable' + index} onDoubleClick={()=>self.chooseAlternative(this.translation)}>
                         <li className="sugg-source">
                             <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(source)}/>
@@ -76,7 +76,7 @@ class SegmentFooterTabConflicts extends React.Component {
 
         $.each(alternatives.not_editable, function(index1) {
             let diff_obj = TextUtils.execDiff(mainStr, this.translation);
-            let translation = TagUtils.transformTextForLockTags(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj));
+            let translation = TagUtils.decodeHtmlInTag(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj));
 
             html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.editable.length + 1)} key={'not-editable' + index1}  onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
                 <li className="sugg-source">

@@ -51,7 +51,6 @@
                 suggestion = currentContribution.translation;
             }
 
-            //Before send process with this.postProcessEditarea
             var target = segmentObj.translation;
             return APP.doRequest({
                 data: {

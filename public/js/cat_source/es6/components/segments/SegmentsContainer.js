@@ -272,7 +272,6 @@ class SegmentsContainer extends React.Component {
 			isReviewExtended={isReviewExtended}
 			reviewType={this.props.reviewType}
 			enableTagProjection={this.props.enableTagProjection}
-			decodeTextFn={TagUtils.decodeText}
 			tagLockEnabled={this.state.tagLockEnabled}
 			tagModesEnabled={this.props.tagModesEnabled}
 			speech2textEnabledFn={Speech2Text.enabled}

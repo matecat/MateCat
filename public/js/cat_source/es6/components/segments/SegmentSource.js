@@ -356,7 +356,7 @@ class SegmentSource extends React.Component {
     componentDidUpdate(prevProps) {
         this.afterRenderActions(prevProps);
         this.checkDecorators(prevProps);
-        this.forceSelectionToUnlockCopy()
+        this.forceSelectionToUnlockCopy();
     }
 
     allowHTML(string) {

@@ -217,7 +217,7 @@ class SegmentFooter extends React.Component {
                     id_segment = {this.props.sid}
                     translation={this.props.segment.translation}
                     segment={this.props.segment}
-                    decodeTextFn={this.props.decodeTextFn}/>;
+                    />;
                 break;
             default:
                 return ''

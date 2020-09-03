@@ -19,7 +19,6 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.undoInSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.undoInSegment();
-            /*SegmentActions.closeTagsMenu();*/
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.scrollToCurrentSegment();
@@ -218,12 +217,7 @@ $.extend(UI, {
 
         //###################################################
 
-		$("#outer").on('click', '.editor .source .locked,.editor .editarea .locked, ' +
-            '.editor .source .locked a,.editor .editarea .locked a', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            TagUtils.markSelectedTag( $( this ) );
-        }).on('keydown', function(e) {
+		$("#outer").on('keydown', function(e) {
             if((e.which === 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
                 $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
                 e.preventDefault();

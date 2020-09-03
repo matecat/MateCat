@@ -84,7 +84,6 @@ class Segment extends React.Component {
             // TODO Remove this block
             /**************************/
             //From EditAreaClick
-            /*SegmentActions.closeTagsMenu();*/
             if (UI.warningStopped) {
                 UI.warningStopped = false;
                 UI.checkWarnings(false);
@@ -104,9 +103,6 @@ class Segment extends React.Component {
             /************/
             UI.editStart = new Date();
             SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
-
-            //From EditAreaClick
-            TagUtils.checkTagProximity();
 
             window.location.hash = this.props.segment.sid;
 
@@ -671,7 +667,6 @@ class Segment extends React.Component {
                         segment={this.props.segment}
                         sid={this.props.segment.sid}
                         fid={this.props.fid}
-                        decodeTextFn={this.props.decodeTextFn}
                     />) : (null)}
                 </div>
 
