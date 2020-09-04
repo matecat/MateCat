@@ -121,7 +121,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         parsed_time_to_edit: ["00", "00", "00", "00"],
                         readonly: "false",
                         segment: splittedSourceAr[i],
-                        decodedSource : DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(segment.segment)),
+                        decodedSource : DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(segment.segment)),
                         segment_hash: segment.segment_hash,
                         original_sid: segment.sid,
                         sid: segment.sid + '-' + (i + 1),
@@ -129,9 +129,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         split_points_source: [],
                         status: status,
                         time_to_edit: "0",
-                        originalDecodedTranslation: DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(translation)),
+                        originalDecodedTranslation: DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(translation)),
                         translation: (translation) ? translation : '',
-                        decodedTranslation: DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(translation)),
+                        decodedTranslation: DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(translation)),
                         version: segment.version,
                         warning: "0",
                         warnings: {},
@@ -168,9 +168,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.currentInSearch = currentInSearch;
                 segment.occurrencesInSearch = occurrencesInSearch;
                 segment.searchParams = self.searchParams;
-                segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(segment.translation));
-                segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(segment.translation));
-                segment.decodedSource = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodePhTags(segment.segment));
+                segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(segment.translation));
+                segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(segment.translation));
+                segment.decodedSource = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(segment.segment));
                 newSegments.push(this);
             }
 

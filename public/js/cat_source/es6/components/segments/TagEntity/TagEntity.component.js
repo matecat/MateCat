@@ -134,14 +134,14 @@ class TagEntity extends Component {
     };
 
     selectCorrectStyle = () => {
-        const {entityKey, contentState, getUpdatedSegmentInfo} = this.props;
+        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL} = this.props;
         const entityInstance = contentState.getEntity(entityKey);
         const {segmentOpened} = getUpdatedSegmentInfo();
         let tagStyle = [];
 
         // Check for tag type
         const entityType = entityInstance.type;
-        const style = tagSignatures[entityType].style;
+        const style = isRTL && tagSignatures[entityType].styleRTL ? tagSignatures[entityType].styleRTL : tagSignatures[entityType].style;
         tagStyle.push(style);
         // Check if tag is in an active segment
         if(!segmentOpened) tagStyle.push('tag-inactive');

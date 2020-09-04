@@ -19,7 +19,7 @@ import {
 	cleanSegmentString,
 	unescapeHTML,
 	unescapeHTMLLeaveTags,
-	decodePhTags,
+	decodeTagsToPlainText,
 	formatText
 } from "./textUtils"
 
@@ -79,7 +79,7 @@ const DraftMatecatUtils = {
 	encodeContent,
 	decodeSegment,
 	replaceOccurrences,
-	decodePhTags,
+	decodeTagsToPlainText,
 	// General
 	insertText,
 	getSelectedText,
