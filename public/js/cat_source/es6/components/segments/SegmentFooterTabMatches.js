@@ -54,8 +54,8 @@ class SegmentFooterTabMatches extends React.Component {
             // Attention Bug: We are mixing the view mode and the raw data mode.
             // before doing a enanched  view you will need to add a data-original tag
             //
-            item.suggestionDecodedHtml = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(this.segment)));
-            item.translationDecodedHtml = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple( this.translation)));
+            item.suggestionDecodedHtml = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(this.segment), config.isSourceRTL));
+            item.translationDecodedHtml = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple( this.translation), config.isTargetRTL));
             item.sourceDiff = item.suggestionDecodedHtml;
 
             if (this.match !== "MT" && parseInt(this.match) > 74 && parseInt(this.match) < 100) {

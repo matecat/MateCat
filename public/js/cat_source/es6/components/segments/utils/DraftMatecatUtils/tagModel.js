@@ -39,6 +39,7 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-open',
+        styleRTL: 'tag-close',
         showTooltip: false
     },
     'gCl': {
@@ -53,6 +54,7 @@ const tagSignatures = {
         lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-close',
+        styleRTL: 'tag-open',
         showTooltip: false
     },
     'bx': {

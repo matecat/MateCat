@@ -46,7 +46,8 @@ class SegmentSource extends React.Component {
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
                     getClickedTagId: getClickedTagId,
                     isTarget: false,
-                    getSearchParams: this.getSearchParams
+                    getSearchParams: this.getSearchParams,
+                    isRTL: config.isSourceRTL
                 }
             }
         ];

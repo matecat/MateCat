@@ -55,7 +55,8 @@ class Editarea extends React.Component {
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
                     getClickedTagId: getClickedTagId,
-                    getSearchParams: this.getSearchParams //TODO: Make it general ?
+                    getSearchParams: this.getSearchParams, //TODO: Make it general ?
+                    isRTL: config.isTargetRTL
                 }
             }
         ];
