@@ -859,7 +859,7 @@ var UI = {
 
         var segment_status = segment.status;
 
-        var src_content = segment.segment.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+        var src_content = segment.updatedSource.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
         var trg_content = segment.translation.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
 
 		APP.doRequest({

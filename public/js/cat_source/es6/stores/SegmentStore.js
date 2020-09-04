@@ -323,6 +323,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( index === -1 ) return;
 
         this._segments = this._segments.setIn([index, 'decodedSource'], decodedSource);
+        this._segments = this._segments.setIn([index, 'updatedSource'], source);
         this._segments = this._segments.setIn([index, 'sourceTagMap'], tagMap);
     },
     modifiedTranslation(sid, modified) {
