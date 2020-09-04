@@ -55,7 +55,8 @@ class Editarea extends React.Component {
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
                     getClickedTagId: getClickedTagId,
-                    getSearchParams: this.getSearchParams //TODO: Make it general ?
+                    getSearchParams: this.getSearchParams, //TODO: Make it general ?
+                    isRTL: config.isTargetRTL
                 }
             }
         ];
@@ -451,7 +452,9 @@ class Editarea extends React.Component {
                     missingTags: missingTagsInTarget,
                     sourceTags: sourceTagMap
                 }
-                openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
+                if(tagSuggestions.sourceTags && tagSuggestions.sourceTags.length > 0){
+                    openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
+                }
                 return 'handled';
             case 'close-tag-menu':
                 closePopover();

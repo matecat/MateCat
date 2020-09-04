@@ -46,14 +46,19 @@ const replaceOccurrences  = (editorState, oldText, newText, index) => {
     });
 
     let contentState = editorState.getCurrentContent();
-
+    let lengthDiff = 0;
     //Itero i blocchi dove è presente il termine da sostituire e applico il Modifier
     selectionsToReplace.forEach(selectionState => {
+        let newSel = selectionState.merge({
+            anchorOffset: selectionState.anchorOffset - lengthDiff,
+            focusOffset: selectionState.focusOffset - lengthDiff,
+        });
         contentState = Modifier.replaceText(
             contentState,
-            selectionState,
+            newSel,
             newText
         );
+        lengthDiff +=  (selectionState.focusOffset - selectionState.anchorOffset) - newText.length
     });
 
     return EditorState.push(

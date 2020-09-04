@@ -48,7 +48,7 @@ const decodeSegment  = (editorState) => {
         // Update contentState
         editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
     });
-    return contentState.getPlainText();
+    return contentState.getPlainText().replaceAll('\n', config.lfPlaceholder);
 };
 
 export default decodeSegment;

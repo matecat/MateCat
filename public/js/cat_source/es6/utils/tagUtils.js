@@ -58,6 +58,18 @@ const TAGS_UTILS =  {
         return _str;
     },
 
+    // Same as decodePlaceholdersToTextSimple but transform placeholder to plain text
+    decodePlaceholdersToPlainText: function (str) {
+        let _str = str;
+
+        _str = _str.replace( config.lfPlaceholderRegex, '\n' )
+            .replace( config.crPlaceholderRegex, '\r' )
+            .replace( config.crlfPlaceholderRegex, '\r\n' )
+            .replace( config.tabPlaceholderRegex, '\t' )
+            .replace( config.nbspPlaceholderRegex, '°' )
+        return _str;
+    },
+
     /*transformTextForLockTags: function ( tx ) {
         let brTx1 = "<_plh_ contenteditable=\"false\" class=\"locked style-tag \">$1</_plh_>";
         let brTx2 =  "<span contenteditable=\"false\" class=\"locked style-tag\">$1</span>";
@@ -96,9 +108,9 @@ const TAGS_UTILS =  {
     },*/
 
     // Replace old function transformTextForLockTags
-    decodeHtmlInTag: function ( tx ) {
-        let brTx1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-open\">$1</_plh_>";
-        let brTx2 =  "<span contenteditable=\"false\" class=\"tag small tag-close\">$1</span>";
+    decodeHtmlInTag: function ( tx, isRTL = false ) {
+        let brTx1 = `<_plh_ contenteditable=\"false\" class=\"tag small ${isRTL ? 'tag-close' : 'tag-open'}\">$1</_plh_>`;
+        let brTx2 =  `<span contenteditable=\"false\" class=\"tag small ${isRTL ? 'tag-open' : 'tag-close'}\">$1</span>`;
         let brTx3 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-selfclosed\">$1</_plh_>";
         let brTxPlPh1 = "<_plh_ contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">$1</_plh_>";
         let brTxPlPh12 =  "<span contenteditable=\"false\" class=\"tag small tag-selfclosed tag-ph\">$1</span>";
