@@ -334,18 +334,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             this._segments = this._segments.setIn([index, 'originalDecodedTranslation'], segment.get('decodedTranslation'));
         }
     },
-    decodeSegmentsText: function () {
-        let self = this;
-        // this._segments = this._segments.map(segment => segment.set('decoded_translation', TagUtils.decodeText(segment.toJS(), segment.get('translation'))));
-        // this._segments = this._segments.map(segment => segment.set('decoded_source', TagUtils.decodeText(segment.toJS(), segment.get('segment'))));
-    },
     setSegmentAsTagged(sid) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'tagged'], true);
-        // let segment = this._segments.get(index);
-        // this._segments = this._segments.setIn([index, 'decoded_translation'], TagUtils.decodeText(segment.toJS(), segment.get('translation')));
-        // this._segments = this._segments.setIn([index, 'decoded_source'], TagUtils.decodeText(segment.toJS(), segment.get('segment')));
     },
 
     setSegmentOriginalTranslation(sid, fid, translation) {
@@ -353,10 +345,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( index === -1 ) return;
         translation = translation.replace(/amp;/g, "");
         this._segments = this._segments.setIn([index, 'original_translation'], translation);
-    },
-
-    removeLockTagsFromString(str) {
-        return TagUtils.cleanTextFromPlaceholdersSpan(str);
     },
 
     addSegmentVersions(fid, sid, versions) {
@@ -1129,13 +1117,6 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.REMOVE_MUTED_SEGMENTS:
             SegmentStore.removeAllMutedSegments();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
-            break;
-        case SegmentConstants.DISABLE_TAG_LOCK:
-        case SegmentConstants.ENABLE_TAG_LOCK:
-            SegmentStore.decodeSegmentsText();
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
-            // Todo remove this
-            SegmentStore.emitChange(action.actionType);
             break;
         case SegmentConstants.SET_SEGMENT_WARNINGS:  // LOCAL
             SegmentStore.setSegmentWarnings(action.sid, action.warnings, action.tagMismatch);

@@ -6,7 +6,6 @@ import React  from 'react';
 import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentActions  from '../../actions/SegmentActions';
-import GlossaryUtils  from './utils/glossaryUtils';
 import Immutable  from 'immutable';
 import TagUtils from "../../utils/tagUtils"
 
@@ -71,8 +70,8 @@ class SegmentFooterTabGlossary extends React.Component {
 
     deleteMatch(name, idMatch, event) {
         event.preventDefault();
-        let source = TagUtils.decodePlaceholdersToText(this.props.segment.glossary[name][0].segment);
-        let target = TagUtils.decodePlaceholdersToText(this.props.segment.glossary[name][0].translation);
+        let source = TagUtils.decodePlaceholdersToTextSimple(this.props.segment.glossary[name][0].segment);
+        let target = TagUtils.decodePlaceholdersToTextSimple(this.props.segment.glossary[name][0].translation);
         SegmentActions.deleteGlossaryItem(source, target, idMatch, name, this.props.id_segment);
     }
 
@@ -227,19 +226,19 @@ class SegmentFooterTabGlossary extends React.Component {
                                 { disabled ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'} className="trash" title="delete this row"
                                                         onClick={self.deleteMatch.bind(self, name, match.id)}/>}
                                 <span id={self.props.id_segment + '-tm-' + match.id + '-source'} className="suggestion_source"
-                                      dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText( leftTxt, true ))}/>
+                                      dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToTextSimple( leftTxt, true ))}/>
                             </li>
                             <li className="b sugg-target" onMouseDown={()=>self.copyItemInEditArea(rightTxt)}>
                             <span id={self.props.id_segment + '-tm-' + match.id + '-translation'} className="translation"
-                                  data-original={TagUtils.decodePlaceholdersToText( rightTxt, true )}
-                                  dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText(rightTxt, true))}
+                                  data-original={TagUtils.decodePlaceholdersToTextSimple( rightTxt, true )}
+                                  dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToTextSimple(rightTxt, true))}
                                   onKeyPress={self.updateGlossaryItem.bind(self, name)}/>
                             </li>
                             <li className="details">
                                 { ( !match.comment || match.comment === '') ? addCommentHtml :
                                     <div className="comment"
-                                         data-original={TagUtils.decodePlaceholdersToText( commentOriginal, true )}
-                                         dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToText(commentOriginal, true ))}
+                                         data-original={TagUtils.decodePlaceholdersToTextSimple( commentOriginal, true )}
+                                         dangerouslySetInnerHTML={self.allowHTML(TagUtils.decodePlaceholdersToTextSimple(commentOriginal, true ))}
                                         // onKeyPress={self.updateGlossaryItem.bind(self, name)}
                                     />
                                 }

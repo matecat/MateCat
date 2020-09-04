@@ -13,7 +13,6 @@ import AppDispatcher  from '../stores/AppDispatcher';
 import SegmentConstants  from '../constants/SegmentConstants';
 import EditAreaConstants  from '../constants/EditAreaConstants';
 import SegmentStore  from '../stores/SegmentStore';
-import GlossaryUtils  from '../components/segments/utils/glossaryUtils';
 import TranslationMatches  from '../components/segments/utils/translationMatches';
 import TagUtils from "../utils/tagUtils";
 import TextUtils from "../utils/textUtils";
@@ -307,15 +306,9 @@ const SegmentActions = {
 
     disableTagLock: function (  ) {
         UI.tagLockEnabled = false;
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.DISABLE_TAG_LOCK
-        });
     },
     enableTagLock: function (  ) {
         UI.tagLockEnabled = true;
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ENABLE_TAG_LOCK
-        });
     },
 
     setSegmentWarnings: function(sid, warnings, tagMismatch){
@@ -540,19 +533,6 @@ const SegmentActions = {
             id: sid,
         });
     },
-    /*showTagsMenu: function(sid) {
-        if ( !SegmentUtils.checkCurrentSegmentTPEnabled() ) {
-            AppDispatcher.dispatch({
-                actionType: SegmentConstants.OPEN_TAGS_MENU,
-                sid: sid,
-            });
-        }
-    },*/
-    /*closeTagsMenu: function() {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.CLOSE_TAGS_MENU
-        });
-    },*/
     undoInSegment: function() {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UNDO_TEXT

@@ -5,7 +5,6 @@
  */
 import React  from 'react';
 import EditArea  from './Editarea';
-import TagsMenu  from './TagsMenu';
 import TagUtils from '../../utils/tagUtils';
 import CursorUtils from '../../utils/cursorUtils';
 import Customizations from '../../utils/customizations';
@@ -13,8 +12,6 @@ import SegmentConstants  from '../../constants/SegmentConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import SegmentButtons  from './SegmentButtons';
 import SegmentWarnings  from './SegmentWarnings';
-import LXQ from '../../utils/lxq.main';
-import SearchUtils  from '../header/cattol/search/searchUtils';
 
 
 class SegmentTarget extends React.Component {
@@ -140,7 +137,7 @@ class SegmentTarget extends React.Component {
         var textAreaContainer = "";
         let issues = this.getAllIssues();
         if ( this.props.segment.edit_area_locked ) {
-            let currentTranslationVersion = TagUtils.decodeText(this.props.segment, this.props.segment.versions[0].translation);
+            let currentTranslationVersion = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(this.props.segment.versions[0].translation)));
             textAreaContainer = <div className="segment-text-area-container" data-mount="segment_text_area_container">
                 <div className="textarea-container" onClick={this.onClickEvent.bind( this )} onMouseUp={this.selectIssueText.bind(this)}
                      ref={(div)=> this.issuesHighlightArea = div}>
@@ -259,33 +256,18 @@ class SegmentTarget extends React.Component {
                 SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, newTranslation);
                 UI.segmentQA(UI.getSegmentById(this.props.segment.sid));
             }, 100);
+            // TODO: Change code with this (?)
+            // this.editArea.addMissingSourceTagsToTarget()
         }
 
     }
 
-    // markTranslation(translation) {
-    //     if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.target) {
-    //         translation = LXQ.highLightText(translation, this.props.segment.lexiqa.target, true, false, true );
-    //     }
-    //     if ( QaBlacklist.enabled() && this.props.segment.qaBlacklistGlossary && this.props.segment.qaBlacklistGlossary.length) {
-    //         translation = QaBlacklist.markBlacklistItemsInSegment(translation, this.props.segment.qaBlacklistGlossary);
-    //     }
-    //     if ( this.props.segment.search && _.size(this.props.segment.search) > 0 && this.props.segment.search.target) {
-    //         translation = SearchUtils.markText(translation, this.props.segment.search, false, this.props.segment.sid);
-    //     }
-    //     return translation
-    // }
-
     componentDidMount() {
-        /*SegmentStore.addListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);*/
-        /*SegmentStore.addListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);*/
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.addListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
     }
 
     componentWillUnmount() {
-        /*SegmentStore.removeListener(SegmentConstants.OPEN_TAGS_MENU, this.showTagsMenu);*/
-        /*SegmentStore.removeListener(SegmentConstants.CLOSE_TAGS_MENU, this.hideTagsMenu);*/
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
         SegmentStore.removeListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
 

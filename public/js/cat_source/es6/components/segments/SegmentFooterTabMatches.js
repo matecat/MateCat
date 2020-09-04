@@ -31,6 +31,7 @@ class SegmentFooterTabMatches extends React.Component {
             item.disabled = (this.id == '0') ? true : false;
             item.cb = this.created_by;
             item.segment = this.segment;
+            item.translation = this.translation;
             if ("sentence_confidence" in this &&
                 (
                     this.sentence_confidence !== "" &&
@@ -52,15 +53,13 @@ class SegmentFooterTabMatches extends React.Component {
             item.percentText = this.match;
 
             // Attention Bug: We are mixing the view mode and the raw data mode.
-            // before doing a enanched  view you will need to add a data-original tag
+            // before doing a enhanced  view you will need to add a data-original tag
             //
             item.suggestionDecodedHtml = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(this.segment), config.isSourceRTL));
             item.translationDecodedHtml = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple( this.translation), config.isTargetRTL));
             item.sourceDiff = item.suggestionDecodedHtml;
 
             if (this.match !== "MT" && parseInt(this.match) > 74 && parseInt(this.match) < 100) {
-                //let sourceDecoded = TagUtils.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
-                //let matchDecoded = TagUtils.removePhTagsWithEquivTextIntoText( this.segment );
                 // Clean text without tag and create tagsMap to replace tag after exec_diff
                 const {text: matchDecoded, tagsMap: matchTagsMap} = TagUtils.cleanTextFromTag( this.segment );
                 const {text: sourceDecoded, tagsMap: sourceTagsMap} = TagUtils.cleanTextFromTag( self.props.segment.segment );
@@ -103,7 +102,6 @@ class SegmentFooterTabMatches extends React.Component {
 
                 item.sourceDiff =  TextUtils.diffMatchPatch.diff_prettyHtml( diff_obj ) ;
                 item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
-                //item.sourceDiff = TagUtils.decodePlaceholdersToText(item.sourceDiff);
                 item.sourceDiff = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(item.sourceDiff)))
             }
 
@@ -117,62 +115,6 @@ class SegmentFooterTabMatches extends React.Component {
         });
         return matchesProcessed;
     }
-
-    /*processContributions(matches) {
-        var self = this;
-        var matchesProcessed = [];
-        // SegmentActions.createFooter(this.props.id_segment);
-        $.each(matches, function(index) {
-            if ( _.isUndefined(this.segment) || (this.segment === '') || (this.translation === '') ) return true;
-            var item = {};
-            item.id = this.id;
-            item.disabled = (this.id == '0') ? true : false;
-            item.cb = this.created_by;
-            item.segment = this.segment;
-            if ("sentence_confidence" in this &&
-                (
-                    this.sentence_confidence !== "" &&
-                    this.sentence_confidence !== 0 &&
-                    this.sentence_confidence !== "0" &&
-                    this.sentence_confidence !== null &&
-                    this.sentence_confidence !== false &&
-                    typeof this.sentence_confidence !== 'undefined'
-                )
-            ) {
-                item.suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
-            } else if (this.match != 'MT') {
-                item.suggestion_info = this.last_update_date;
-            } else {
-                item.suggestion_info = '';
-            }
-
-            item.percentClass = TranslationMatches.getPercentuageClass(this.match);
-            item.percentText = this.match;
-
-            // Attention Bug: We are mixing the view mode and the raw data mode.
-            // before doing a enanched  view you will need to add a data-original tag
-            //
-            item.suggestionDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText(this.segment));
-            item.translationDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText( this.translation));
-            item.sourceDiff = item.suggestionDecodedHtml;
-            if (this.match !== "MT" && parseInt(this.match) > 74) {
-                let sourceDecoded = TagUtils.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
-                let matchDecoded = TagUtils.removePhTagsWithEquivTextIntoText( this.segment );
-                let diff_obj = TextUtils.execDiff( matchDecoded, sourceDecoded );
-                item.sourceDiff =  TextUtils.diffMatchPatch.diff_prettyHtml( diff_obj ) ;
-                item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
-                item.sourceDiff = TagUtils.decodePlaceholdersToText(item.sourceDiff);
-            }
-            if ( !_.isUndefined(this.tm_properties) ) {
-                item.tm_properties = this.tm_properties;
-            }
-            let matchToInsert = self.processMatchCallback(item);
-            if ( matchToInsert ) {
-                matchesProcessed.push(item);
-            }
-        });
-        return matchesProcessed;
-    }*/
 
     /**
      * Used by the plugins to override matches
@@ -202,14 +144,8 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     deleteSuggestion(match, index) {
-        var source, target;
-        source = TextUtils.htmlDecode( match.segment );
-        var ul = $('.suggestion-item[data-id="'+ match.id +'"]');
-        if( config.brPlaceholdEnabled ){
-            target = EditAreaUtils.postProcessEditarea( ul, '.translation' );
-        } else {
-            target = $('.translation', ul).text();
-        }
+        var source = TextUtils.htmlDecode( match.segment );
+        var target = TextUtils.htmlDecode( match.translation );
         target = TextUtils.view2rawxliff(target);
         source = TextUtils.view2rawxliff(source);
         SegmentActions.deleteContribution(source, target, match.id, this.props.segment.original_sid);
