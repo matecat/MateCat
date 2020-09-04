@@ -451,7 +451,9 @@ class Editarea extends React.Component {
                     missingTags: missingTagsInTarget,
                     sourceTags: sourceTagMap
                 }
-                openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
+                if(tagSuggestions.sourceTags && tagSuggestions.sourceTags.length > 0){
+                    openPopover(tagSuggestions, getEditorRelativeSelectionOffset());
+                }
                 return 'handled';
             case 'close-tag-menu':
                 closePopover();
