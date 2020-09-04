@@ -108,7 +108,7 @@ let TranslationMatches = {
 
         if (currentSegment.contributions && currentSegment.contributions.matches.length > 0 && !callNewContributions) {
             if ( currentSegment.status === 'NEW' && currentSegment.translation === "" && currentSegment.opened ) {
-                setTimeout(()=>TranslationMatches.copySuggestionInEditarea(currentSegment, 1));
+                setTimeout(()=>this.useSuggestionInEditArea(currentSegment.sid));
             }
             return $.Deferred().resolve();
         }
