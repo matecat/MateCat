@@ -461,6 +461,9 @@
     cursor: pointer;
     &.active {
       font-weight: 700;
+      .tag-menu-suggestion-item {
+        background-color: #f2f5f7;
+      }
     }
     .tag-menu-suggestion-item {
       display: flex;
