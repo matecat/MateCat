@@ -760,7 +760,7 @@ class Editarea extends React.Component {
         const {editorState} = this.state;
         if (internalClipboard) {
             // Get plain text form internalClipboard fragment
-            const plainText = internalClipboard.map((block) => block.getText()).join('');
+            const plainText = internalClipboard.map((block) => block.getText()).join('\n');
             const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
             const fragment = JSON.stringify({
                 orderedMap: internalClipboard,
