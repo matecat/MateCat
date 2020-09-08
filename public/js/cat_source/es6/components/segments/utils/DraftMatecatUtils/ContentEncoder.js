@@ -805,6 +805,13 @@ export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, 
     _.remove(decorators, (decorator) => decorator.name === 'lexiqa');
     decorators.push( generateLexiqaDecorator( lexiqaWarnings, sid, isSource, 'lexiqa' ) );
     const newDecorator = new CompoundDecorator( decorators );
+
+    // Remove focus on source to avoid cursor jumping at beginning of target
+    if(isSource){
+        editorState = EditorState.acceptSelection(editorState, editorState.getSelection().merge({
+            hasFocus: false
+        }));
+    }
     return {
         editorState: EditorState.set( editorState, {decorator: newDecorator} ),
         decorators: decorators
