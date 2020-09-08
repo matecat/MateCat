@@ -469,16 +469,16 @@ class Editarea extends React.Component {
                 acceptTagMenuSelection();
                 return 'handled';
             case 'left-nav':
-                handleCursorMovement(-1);
+                handleCursorMovement(-1, false, config.isTargetRTL);
                 return 'handled';
             case 'left-nav-shift':
-                handleCursorMovement(-1, true);
+                handleCursorMovement(-1, true, config.isTargetRTL);
                 return 'handled';
             case 'right-nav':
-                handleCursorMovement(1);
+                handleCursorMovement(1, false, config.isTargetRTL);
                 return 'handled';
             case 'right-nav-shift':
-                handleCursorMovement(1, true);
+                handleCursorMovement(1, true, config.isTargetRTL);
                 return 'handled';
             case 'insert-tab-tag':
                 this.insertTagAtSelection('tab');
@@ -504,8 +504,9 @@ class Editarea extends React.Component {
         });
     }
 
-    handleCursorMovement = (step, shift = false) =>{
+    handleCursorMovement = (step, shift = false, isRTL = false) =>{
         const {editorState} = this.state;
+        step = isRTL ? step * -1 : step;
         const newEditorState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift);
         this.setState({
             editorState: newEditorState

@@ -16,6 +16,11 @@ import replaceOccurrences from "./replaceOccurrences";
 const encodeContent = (originalEditorState, plainText = '') => {
     // get tag's types on which every block will be splitted
     const excludedTags = getSplitBlockTag();
+
+    // sometimes there is no text between  <g id="n"> and </g> and backend merges them in <g id="n"/>
+    // We have to split g tag selfclosed in g tag open and g tag closed
+    plainText = plainText.replace(/&lt;g(.*?)id="(.*?)"(.*?)\/&gt;/gi, '&lt;g$1id="$2"$3&gt;&lt;\/g&gt;')
+
     // Create entities
     const entitiesFromMap = createNewEntitiesFromMap(originalEditorState, excludedTags, plainText);
     let {contentState, tagRange} = entitiesFromMap;
