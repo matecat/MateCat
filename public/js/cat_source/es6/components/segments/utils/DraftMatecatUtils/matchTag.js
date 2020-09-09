@@ -1,5 +1,5 @@
 import findTagWithRegex from "./findTagWithRegex";
-import {tagSignatures} from "./tagModel"
+import {tagSignatures, getErrorCheckTag} from "./tagModel"
 
 
 /**
@@ -62,6 +62,11 @@ const matchTag = (plainContent) => {
             i++;
         }
     });
+
+    // STEP 6 - Remove placeholder like nbsp, tab and LF/CR
+    selfClosingTags = selfClosingTags.filter(tag => {
+        return getErrorCheckTag().includes(tag.type);
+    })
 
     return [...openTags, ...closingTags, ...selfClosingTags];
 };
