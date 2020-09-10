@@ -10,7 +10,8 @@ import {
  * @param editorState - current editor state, can be empty
  * @param plainText - text where each entity applies
  * @param excludedTagsType - array of tags type. Entity won't be created for these tags.
- * @returns {ContentState}  contentState - A ContentState with each tag as an entity
+ * @returns {{ContentState, tagRange}} contentState - The object with the ContentState with each tag mapped as an entity
+ * and the array of the mapped tags.
  */
 const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = '') => {
     let contentState = editorState.getCurrentContent();
@@ -18,7 +19,7 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
     if(!contentState.hasText() || plainText !== ''){
         contentState = ContentState.createFromText(plainText);
     }
-    // Compute tag range
+    // Compute tag range ( all tags are included, also nbsp, tab, CR and LF)
     const tagRange = matchTag(contentState.getPlainText());
     // Apply each entity to the block where it belongs
     const blocks = contentState.getBlockMap();
@@ -53,7 +54,6 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
             }
         });
     });
-
     return {contentState, tagRange}
 };
 

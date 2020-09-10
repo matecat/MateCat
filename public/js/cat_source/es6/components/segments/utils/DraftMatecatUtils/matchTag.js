@@ -1,5 +1,5 @@
 import findTagWithRegex from "./findTagWithRegex";
-import {tagSignatures} from "./tagModel"
+import {tagSignatures, getErrorCheckTag} from "./tagModel"
 
 
 /**
