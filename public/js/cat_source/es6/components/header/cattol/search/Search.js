@@ -229,10 +229,6 @@ class Search extends React.Component {
                 id_segment: segment.original_sid,
                 status: segment.status,
                 caller: 'replace'
-            }, () => {
-                if ( next ) {
-                    SegmentActions.scrollToSegment( next )
-                }
             } );
         });
 
