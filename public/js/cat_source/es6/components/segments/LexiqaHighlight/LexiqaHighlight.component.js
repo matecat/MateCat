@@ -47,7 +47,7 @@ class LexiqaHighlight extends Component {
         let {blockKey, start, end, warnings, isSource, sid} = this.props;
         // Every block starts from offset 0, so we have to check warnings's blockKey
         let warning = _.find(warnings, (warn) => warn.start === start && warn.end === end && warn.blockKey === blockKey);
-        if ( warning && warning.myClass ) {
+        if ( warning && warning.myClass && warning.errorid ) {
             warning.messages = LexiqaUtils.buildTooltipMessages(warning, sid, isSource);
         }
         return warning;

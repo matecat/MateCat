@@ -196,10 +196,12 @@ class CatDecorator extends \AbstractDecorator {
 
         //check if language belongs to supported right-to-left languages ( decorate the HTML )
         $lang_handler = Langs_Languages::getInstance();
-        $this->template->isSourceRTL = $lang_handler->isRTL( $this->controller->source_code );
-        $this->template->isTargetRTL = $lang_handler->isRTL( $this->controller->target_code );
-        $this->template->source_rtl = ( $this->template->isSourceRTL ) ? ' rtl-source' : '';
-        $this->template->target_rtl = ( $this->template->isTargetRTL ) ? ' rtl-target' : '';
+        $isSourceRTL = $lang_handler->isRTL( $this->controller->source_code );
+        $isTargetRTL = $lang_handler->isRTL( $this->controller->target_code );
+        $this->template->isTargetRTL = $isTargetRTL;
+        $this->template->isSourceRTL = $isSourceRTL;
+        $this->template->source_rtl = $isSourceRTL ? ' rtl-source' : '';
+        $this->template->target_rtl = $isTargetRTL ? ' rtl-target' : '';
 
 
         //check if it is a composite language, for cjk check that accepts only ISO 639 code

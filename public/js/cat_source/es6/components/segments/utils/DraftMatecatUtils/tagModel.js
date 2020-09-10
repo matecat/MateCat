@@ -59,7 +59,7 @@ const tagSignatures = {
     },
     'bx': {
         type: 'bx',
-        regex: /&lt;bx.*?id="(.*?)".*?&gt;/gi,
+        regex: /&lt;bx.*?id="(.*?)".*?\/&gt;/gi,
         selfClosing: true,
         isClosure: false,
         placeholder: null,
@@ -73,7 +73,7 @@ const tagSignatures = {
     },
     'ex': {
         type: 'ex',
-        regex: /&lt;ex.*?id="(.*?)".*?&gt;/gi,
+        regex: /&lt;ex.*?id="(.*?)".*?\/&gt;/gi,
         selfClosing: true,
         isClosure: false,
         placeholder: null,

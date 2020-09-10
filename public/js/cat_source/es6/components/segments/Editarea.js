@@ -469,16 +469,16 @@ class Editarea extends React.Component {
                 acceptTagMenuSelection();
                 return 'handled';
             case 'left-nav':
-                handleCursorMovement(-1);
+                handleCursorMovement(-1, false, config.isTargetRTL);
                 return 'handled';
             case 'left-nav-shift':
-                handleCursorMovement(-1, true);
+                handleCursorMovement(-1, true, config.isTargetRTL);
                 return 'handled';
             case 'right-nav':
-                handleCursorMovement(1);
+                handleCursorMovement(1, false, config.isTargetRTL);
                 return 'handled';
             case 'right-nav-shift':
-                handleCursorMovement(1, true);
+                handleCursorMovement(1, true, config.isTargetRTL);
                 return 'handled';
             case 'insert-tab-tag':
                 this.insertTagAtSelection('tab');
@@ -496,16 +496,23 @@ class Editarea extends React.Component {
         const customTag = DraftMatecatUtils.structFromType(tagType);
         // If tag creation has failed, return
         if(!customTag) return;
-        const newEditorState = DraftMatecatUtils.insertEntityAtSelection(editorState, customTag);
+        // Start composition mode and remove lexiqa
+        editorSync.onComposition = true;
+        let newEditorState = this.disableDecorator(editorState, 'lexiqa');
+        newEditorState = DraftMatecatUtils.insertEntityAtSelection(newEditorState, customTag);
+
         this.setState({
             editorState: newEditorState
         }, () => {
             this.updateTranslationDebounced();
         });
+        // Stop composition mode
+        this.onCompositionStopDebounced();
     }
 
-    handleCursorMovement = (step, shift = false) =>{
+    handleCursorMovement = (step, shift = false, isRTL = false) =>{
         const {editorState} = this.state;
+        step = isRTL ? step * -1 : step;
         const newEditorState = DraftMatecatUtils.moveCursorJumpEntity(editorState, step, shift);
         this.setState({
             editorState: newEditorState
@@ -571,6 +578,12 @@ class Editarea extends React.Component {
         editorSync.onComposition = false;
     }
 
+    disableDecorator = (editorState, decoratorName) => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        return EditorState.set( editorState, {decorator} )
+    }
+
     onChange = (editorState) =>  {
         const {setClickedTagId} = this.props;
         const {displayPopover} = this.state;
@@ -583,10 +596,11 @@ class Editarea extends React.Component {
         if(contentChanged){
             console.log('contentChanged')
             editorSync.onComposition = true;
-            // remove lexiqa
+            editorState = this.disableDecorator(editorState, 'lexiqa')
+            /*// remove lexiqa
             _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'lexiqa');
             const decorator = new CompoundDecorator(this.decoratorsStructure);
-            editorState = EditorState.set( editorState, {decorator} )
+            editorState = EditorState.set( editorState, {decorator} )*/
         }
         // if opened, close TagsMenu
         if(displayPopover) closePopover();
@@ -635,7 +649,10 @@ class Editarea extends React.Component {
         if (!displayPopover) return;
         const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags];
         const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex];
-        const editorStateWithSuggestedTag = insertTag(selectedTag, editorState, triggerText);
+
+        editorSync.onComposition = true;
+        let newEditorState = this.disableDecorator(editorState, 'lexiqa')
+        const editorStateWithSuggestedTag = insertTag(selectedTag, newEditorState, triggerText);
 
         this.setState({
             editorState: editorStateWithSuggestedTag,
@@ -646,7 +663,7 @@ class Editarea extends React.Component {
         }, () => {
             this.updateTranslationDebounced();
         });
-
+        this.onCompositionStopDebounced();
     };
 
     openPopover = (suggestions, position) => {
@@ -673,7 +690,9 @@ class Editarea extends React.Component {
 
     onTagClick = (suggestionTag) => {
         const {editorState, triggerText} = this.state;
-        let editorStateWithSuggestedTag = insertTag(suggestionTag, editorState, triggerText);
+        editorSync.onComposition = true;
+        let newEditorState = this.disableDecorator(editorState, 'lexiqa')
+        let editorStateWithSuggestedTag = insertTag(suggestionTag, newEditorState, triggerText);
         this.setState({
             editorState: editorStateWithSuggestedTag,
             editorFocused: true,
@@ -684,6 +703,7 @@ class Editarea extends React.Component {
         }, () => {
             this.updateTranslationDebounced();
         });
+        this.onCompositionStopDebounced();
     };
 
     // Methods for TagMenu ---- END
@@ -759,7 +779,7 @@ class Editarea extends React.Component {
         const {editorState} = this.state;
         if (internalClipboard) {
             // Get plain text form internalClipboard fragment
-            const plainText = internalClipboard.map((block) => block.getText()).join('');
+            const plainText = internalClipboard.map((block) => block.getText()).join('\n');
             const entitiesMap = DraftMatecatUtils.getEntitiesInFragment(internalClipboard, editorState)
             const fragment = JSON.stringify({
                 orderedMap: internalClipboard,
@@ -772,6 +792,7 @@ class Editarea extends React.Component {
     onDragEvent = (e) => {
         editorSync.draggingFromEditArea = true;
     }
+
     onDragEnd = (e) => {
         editorSync.draggingFromEditArea = false;
     }
