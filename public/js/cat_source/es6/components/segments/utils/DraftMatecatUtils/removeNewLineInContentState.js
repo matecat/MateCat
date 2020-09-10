@@ -14,8 +14,10 @@ const removeNewLineInContentState = (editorState) => {
     let newLineMap = [];
     let blocks = contentState.getBlockMap();
     // these regex match only the first occurence in string
-    const newLineRegex = /##\$(_0A)\$##/;
+    const lineFeedRegex = /##\$(_0A)\$##/;
     const carriageReturnRegex = /##\$(_0D)\$##/;
+    const mixedCRLFRegex = /##\$_0D\$####\$_0A\$##/;
+
     // start replacing
     blocks.forEach( contentBlock => {
         // get block key
@@ -23,8 +25,12 @@ const removeNewLineInContentState = (editorState) => {
         // get block plain text
         let blockText = contentBlock.getText();
         let matchArray, selectionState;
+
         // find first tag inside block
-        while ((matchArray = newLineRegex.exec(blockText)) !== null || (matchArray = carriageReturnRegex.exec(blockText)) !== null) {
+        // Here it is important to respect this order of evaluation: CR+LF, CR, and LF
+        while ((matchArray = mixedCRLFRegex.exec(blockText)) !== null ||
+        (matchArray = carriageReturnRegex.exec(blockText)) !== null ||
+        (matchArray = lineFeedRegex.exec(blockText)) !== null) {
             // set selection on tag
             selectionState = new SelectionState({
                 anchorKey: blockKey,
@@ -32,12 +38,8 @@ const removeNewLineInContentState = (editorState) => {
                 focusKey: blockKey,
                 focusOffset: matchArray[0].length + matchArray.index
             });
-            // update blockText removing tag found
-            if(matchArray[1] === '_0A'){
-                blockText = blockText.replace(newLineRegex, '');
-            }else{
-                blockText = blockText.replace(carriageReturnRegex, '');
-            }
+            // update blockText removing the first occurrence of tag found
+            blockText = blockText.replace(matchArray[0], '');
             // remove encoded Tag from text for next scan
             contentState = Modifier.removeRange(
                 contentState,
@@ -46,6 +48,7 @@ const removeNewLineInContentState = (editorState) => {
             );
             // save blockRelative tag selection, where anchorOffset == focusOffset (collapsed)
             selectionState = contentState.getSelectionAfter();
+            // build map to use next as block's point of split
             newLineMap.push({selectionState, blockKey})
         }
     });
