@@ -63,11 +63,6 @@ const matchTag = (plainContent) => {
         }
     });
 
-    // STEP 6 - Remove placeholder like nbsp, tab and LF/CR
-    selfClosingTags = selfClosingTags.filter(tag => {
-        return getErrorCheckTag().includes(tag.type);
-    })
-
     return [...openTags, ...closingTags, ...selfClosingTags];
 };
 
