@@ -596,7 +596,7 @@ export const activateSearch = (editorState, decoratorStructure, text, params, oc
         let indexToAdd = 0;
         //Note: The list of tags contains the indexes calculated with the ph tags in the text, while the list of occurrences does not.
         var tag = tagRange.find((item)=>{
-            let isTag = start + indexToAdd > item.offset && start + indexToAdd < item.offset + item.length   ;
+            let isTag = start + indexToAdd >= item.offset && start + indexToAdd <= item.offset + item.length   ;
             indexToAdd += item.length;
             return isTag;
         });
