@@ -92,6 +92,7 @@ class Editarea extends React.Component {
         this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
         this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500);
         this.onCompositionStopDebounced = _.debounce(this.onCompositionStop, 1000);
+        this.focusEditorDebounced = _.debounce(this.focusEditor, 500);
     }
 
     getSearchParams = () => {
@@ -173,7 +174,7 @@ class Editarea extends React.Component {
             this.decoratorsStructure = decorators;
             this.setState( {
                 editorState: newEditorState,
-            } );
+            }, () => this.focusEditorDebounced );
         } else {
             this.removeLexiqaDecorator();
         }
@@ -311,6 +312,9 @@ class Editarea extends React.Component {
     // getSnapshotBeforeUpdate(prevProps) {}
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        if(!prevProps.segment.opened && this.props.segment.opened){
+            this.focusEditor();
+        }
         if(!editorSync.onComposition){
             this.checkDecorators(prevProps);
         }
