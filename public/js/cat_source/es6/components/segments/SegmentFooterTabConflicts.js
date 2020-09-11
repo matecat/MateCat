@@ -25,40 +25,18 @@ class SegmentFooterTabConflicts extends React.Component {
     }
 
     renderAlternatives(alternatives) {
-        let segment = this.props.segment;
-        let segment_id = this.props.segment.sid;
-        let escapedSegment = TagUtils.decodePlaceholdersToTextSimple(segment.segment);
-        // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
-        let mainStr = TextUtils.htmlEncode(segment.translation).replace(/&amp;/g, "&");
+        const segment = this.props.segment;
+        const segment_id = this.props.segment.sid;
         let html = [];
-        let self = this;
-        let replacementsMap;
+        const self = this;
+        const source = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(segment.segment)));
         $.each(alternatives.editable, function(index) {
-            // Decode the string from the server
-            let transDecoded = this.translation;
-            // Make the diff between the text with the same codification
-
-            [ mainStr, transDecoded, replacementsMap ] = TagUtils._treatTagsAsBlock( mainStr, transDecoded, [] );
-
-            let diff_obj = TextUtils.execDiff( mainStr, transDecoded );
-
-            //replace the original string in the diff object by the character placeholder
-            if (replacementsMap.length  > 0 ) {
-                Object.keys(diff_obj).forEach((element) => {
-                    if (replacementsMap[diff_obj[element][1]]) {
-                        diff_obj[element][1] = replacementsMap[diff_obj[element][1]];
-                    } else {
-                        Object.keys(replacementsMap).forEach((replaceElem) => {
-                            if (diff_obj[element][1].indexOf(replaceElem) !== -1) {
-                                diff_obj[element][1] = diff_obj[element][1].replace(replaceElem, replacementsMap[replaceElem]);
-                            }
-                        });
-                    }
-                });
-            }
-
-            let translation = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj))));
-            let source = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(escapedSegment)));
+            // Execute diff
+            let diff_obj = TagUtils.executeDiff( segment.translation, this.translation );
+            let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj);
+            translation = translation.replace(/&amp;/g, "&");
+            translation = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(translation)));
+            // No diff executed on source
             html.push(<ul className="graysmall" data-item={(index + 1)} key={'editable' + index} onDoubleClick={()=>self.chooseAlternative(this.translation)}>
                         <li className="sugg-source">
                             <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(source)}/>
@@ -75,12 +53,16 @@ class SegmentFooterTabConflicts extends React.Component {
         });
 
         $.each(alternatives.not_editable, function(index1) {
-            let diff_obj = TextUtils.execDiff(mainStr, this.translation);
-            let translation = TagUtils.decodeHtmlInTag(TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj));
-
-            html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.editable.length + 1)} key={'not-editable' + index1}  onDoubleClick={()=>self.chooseAlternative(escapedSegment)}>
+            // Execute diff
+            let diff_obj = TagUtils.executeDiff( segment.translation, this.translation );
+            // Restore Tags
+            let translation = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj);
+            translation = translation.replace(/&amp;/g, "&");
+            translation = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(translation)));
+            // No diff executed on source
+            html.push( <ul className="graysmall notEditable" data-item={(index1 + alternatives.editable.length + 1)} key={'not-editable' + index1}  onDoubleClick={()=>self.chooseAlternative(this.translation)}>
                 <li className="sugg-source">
-                    <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(escapedSegment)}/>
+                    <span id={segment_id + '-tm-' + this.id + '-source'} className="suggestion_source" dangerouslySetInnerHTML={self.allowHTML(source)}/>
                 </li>
                 <li className="b sugg-target">
                     {/*<span className="graysmall-message">{'CTRL+' + (index1 + alternatives.data.editable.length + 1)}</span>*/}
@@ -92,6 +74,7 @@ class SegmentFooterTabConflicts extends React.Component {
                 </li>
             </ul>);
         });
+
         return html;
     }
 

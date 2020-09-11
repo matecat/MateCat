@@ -503,5 +503,51 @@ const TAGS_UTILS =  {
 
     },
 
+    // Execute diff between two string also handling tags
+    executeDiff: function (item1, item2){
+        // Remove Tags from Main String
+        const {text: mainStr} = TagUtils.cleanTextFromTag(item1);
+        // Remove Tags from Alternative String
+        const {text: transDecoded, tagsMap: transDecodedTagsMap} = TagUtils.cleanTextFromTag(item2);
+        // Execute diff
+        let diffObj = TextUtils.execDiff( mainStr, transDecoded );
+        // Restore Tags
+        let totalLength = 0;
+        diffObj.forEach((diffItem, index) =>{
+            if(diffItem[0] <= 0){
+                let includedTags = [];
+                let newTotalLength = totalLength + diffItem[1].length;
+                let firstLoopTotalLength = newTotalLength;
+                // sort tags by offset because next check is executed consecutively
+                transDecodedTagsMap.sort((a, b) => {return a.offset-b.offset});
+                // get every tag included inside the original string slice
+                transDecodedTagsMap.forEach((tag) => {
+                    // offset+1 is for prepended Unicode Character 'ZERO WIDTH SPACE'
+                    if(tag.offset+1 <= firstLoopTotalLength && tag.offset+1 >= firstLoopTotalLength - diffItem[1].length){
+                        // add tag reference to work array
+                        includedTags.push(tag);
+                        // add tag's length (tag.offset is computed on the dirty string with all tags)
+                        firstLoopTotalLength += tag.match.length
+                    }
+                })
+                includedTags.forEach((includedTag) => {
+                    const relativeTagOffset = diffItem[1].length - (newTotalLength - (includedTag.offset+1))
+                    const strBefore = diffItem[1].slice(0 ,relativeTagOffset);
+                    const strAfter = diffItem[1].slice(relativeTagOffset);
+                    // insert tag
+                    const newString = strBefore + includedTag.match + strAfter
+                    // update total parsed length of the temp string
+                    newTotalLength += includedTag.match.length
+                    // update item inside diff_obj
+                    diffItem[1] = newString;
+                })
+                // update total parsed length of the complete string
+                totalLength += diffItem[1].length;
+            }
+        })
+
+        return diffObj;
+    }
+
 };
 module.exports =  TAGS_UTILS;
