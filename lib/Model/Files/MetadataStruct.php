@@ -5,8 +5,11 @@
  * Date: 09/09/2020
  * Time: 19:35
  */
+namespace Files;
 
-class Files_MetadataStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+use DataAccess_IDaoStruct;
+
+class MetadataStruct extends \DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     public $id ;
     public $id_project ;

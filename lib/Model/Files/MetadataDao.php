@@ -5,15 +5,19 @@
  * Date: 09/09/2020
  * Time: 19:34
  */
+namespace Files;
 
-class Files_MetadataDao extends DataAccess_AbstractDao {
+use Database;
+use Files\MetadataStruct as Files_MetadataStruct;
+
+class MetadataDao extends \DataAccess_AbstractDao {
     const TABLE = 'file_metadata' ;
 
     public function get($id_project, $id_file,  $key ) {
         $stmt = $this->_getStatementForCache(
                 "SELECT * FROM ".self::TABLE." WHERE " .
                 " id_project = :id_project " .
-                " id_file = :id_file " .
+                " AND id_file = :id_file " .
                 " AND `key` = :key "
         );
 
@@ -23,7 +27,7 @@ class Files_MetadataDao extends DataAccess_AbstractDao {
                 'key' => $key
         ) );
 
-        return @$result[0];
+        return @$result;
 
     }
 }

@@ -8,13 +8,14 @@
 
 namespace API\V3;
 
+use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 use API\V3\Json\FilesInfo;
 use Chunks_ChunkStruct;
 use Jobs_JobDao;
 use Projects_ProjectStruct;
-use Files_MetadataDao;
+use Files\MetadataDao as Files_MetadataDao;
 use Files_FileDao;
 
 
@@ -60,18 +61,14 @@ class FileInfoController extends KleinController {
     }
 
     public function getInstructions() {
-
-        /**
-         * get info for every file
-         */
         $id_file = $this->request->param( 'id_file' );
-        print $id_file;
         if(Files_FileDao::isFileInProject($id_file, $this->project->id)){
-            $fileInfo = Files_MetadataDao::get( $this->project->id, $id_file, 'instructions' );
-            return $fileInfo;
+            $metadataDao = new Files_MetadataDao;
+            $fileInfo = $metadataDao->get( $this->project->id, $id_file, 'instructions' );
+            $this->response->json($fileInfo);
+        } else {
+            throw new NotFoundException('File not found on this project');
         }
-
-
     }
 
 }
