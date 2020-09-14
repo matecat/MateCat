@@ -65,7 +65,11 @@ class FileInfoController extends KleinController {
         if(Files_FileDao::isFileInProject($id_file, $this->project->id)){
             $metadataDao = new Files_MetadataDao;
             $fileInfo = $metadataDao->get( $this->project->id, $id_file, 'instructions' );
-            $this->response->json($fileInfo);
+            if($fileInfo){
+                $this->response->json(['instructions' => $fileInfo->value]);
+            } else {
+                throw new NotFoundException('No instructions for this file');
+            }
         } else {
             throw new NotFoundException('File not found on this project');
         }

@@ -27,7 +27,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'key' => $key
         ) );
 
-        return @$result;
+        return @$result[0];
 
     }
 }
