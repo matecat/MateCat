@@ -14,6 +14,8 @@ use API\V3\Json\FilesInfo;
 use Chunks_ChunkStruct;
 use Jobs_JobDao;
 use Projects_ProjectStruct;
+use Files_MetadataDao;
+use Files_FileDao;
 
 
 class FileInfoController extends KleinController {
@@ -33,7 +35,7 @@ class FileInfoController extends KleinController {
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
             //those are not needed at moment, so avoid unnecessary queries
-//            $this->setProject( $Validator->getChunk()->getProject() );
+            $this->setProject( $Validator->getChunk()->getProject() );
 //            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
         $this->appendValidator( $Validator );
@@ -54,6 +56,21 @@ class FileInfoController extends KleinController {
          */
         $fileInfo = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk );
         $this->response->json( ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment ) );
+
+    }
+
+    public function getInstructions() {
+
+        /**
+         * get info for every file
+         */
+        $id_file = $this->request->param( 'id_file' );
+        print $id_file;
+        if(Files_FileDao::isFileInProject($id_file, $this->project->id)){
+            $fileInfo = Files_MetadataDao::get( $this->project->id, $id_file, 'instructions' );
+            return $fileInfo;
+        }
+
 
     }
 
