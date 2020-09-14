@@ -35,8 +35,8 @@ class FileInfoController extends KleinController {
         $Validator = new ChunkPasswordValidator( $this );
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
-            //those are not needed at moment, so avoid unnecessary queries
             $this->setProject( $Validator->getChunk()->getProject() );
+            //those are not needed at moment, so avoid unnecessary queries
 //            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
         $this->appendValidator( $Validator );
@@ -56,6 +56,16 @@ class FileInfoController extends KleinController {
          * get info for every file
          */
         $fileInfo = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk );
+        $metadataDao = new Files_MetadataDao;
+        foreach($fileInfo as &$file){
+            $instructions = $metadataDao->get( $this->project->id, $file->id_file, 'instructions' );
+            if($instructions){
+                $file->instructions = $instructions->value;
+            } else {
+                $file->instructions = null;
+            }
+        }
+        
         $this->response->json( ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment ) );
 
     }
@@ -64,9 +74,9 @@ class FileInfoController extends KleinController {
         $id_file = $this->request->param( 'id_file' );
         if(Files_FileDao::isFileInProject($id_file, $this->project->id)){
             $metadataDao = new Files_MetadataDao;
-            $fileInfo = $metadataDao->get( $this->project->id, $id_file, 'instructions' );
-            if($fileInfo){
-                $this->response->json(['instructions' => $fileInfo->value]);
+            $instructions = $metadataDao->get( $this->project->id, $id_file, 'instructions' );
+            if($instructions){
+                $this->response->json(['instructions' => $instructions->value]);
             } else {
                 throw new NotFoundException('No instructions for this file');
             }
