@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ceceba30f98f421b84829086d97e7a5a",
+    "content-hash": "34126075aa92c5fb1ae63d0e0d0dbf04",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.1",
+            "version": "v1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "6694074a3d67adbd33c33fdf3c9fa7cf4f31ced5"
+                "reference": "6deafafb6219828ed8417c088a585e1272c57cbb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/6694074a3d67adbd33c33fdf3c9fa7cf4f31ced5",
-                "reference": "6694074a3d67adbd33c33fdf3c9fa7cf4f31ced5",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/6deafafb6219828ed8417c088a585e1272c57cbb",
+                "reference": "6deafafb6219828ed8417c088a585e1272c57cbb",
                 "shasum": ""
             },
             "require": {
@@ -748,7 +748,7 @@
                 "search",
                 "text"
             ],
-            "time": "2020-09-15T12:18:15+00:00"
+            "time": "2020-09-15T13:47:37+00:00"
         },
         {
             "name": "monolog/monolog",
