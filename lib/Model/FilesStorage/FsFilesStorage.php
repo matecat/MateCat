@@ -218,7 +218,7 @@ class FsFilesStorage extends AbstractFilesStorage
 
         $tmpConvertedFilePath = $convertedFilePath;
         if ( !empty( $newFileName ) ) {
-            if ( !XliffFiles::isXliff( static::pathinfo_fix( $newFileName ) ) ) {
+            if ( !XliffFiles::isXliff( $newFileName ) ) {
                 $convertedExtension   = static::pathinfo_fix( $convertedFilePath, PATHINFO_EXTENSION );
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }

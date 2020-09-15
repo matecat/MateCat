@@ -593,7 +593,7 @@ class downloadFileController extends downloadController {
     public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
         $extension = AbstractFilesStorage::pathinfo_fix( $path );
-        if ( !XliffFiles::isXliff( $extension ) ) {
+        if ( !XliffFiles::isXliff( $path ) ) {
             return $documentContent;
         }
 

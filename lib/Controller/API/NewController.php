@@ -631,10 +631,10 @@ class NewController extends ajaxController {
      */
     private function getFileMetadata($filename) {
         $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( AbstractFilesStorage::pathinfo_fix($filename) );
-        $isGlossary    = XliffFiles::isGlossaryFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
-        $isTMX         = XliffFiles::isTMXFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
-        $getMemoryType = XliffFiles::getMemoryFileType( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $isXliff       = XliffFiles::isXliff( $filename );
+        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
+        $isTMX         = XliffFiles::isTMXFile( $filename );
+        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
 
         $forceXliff = $this->getFeatureSet()->filter(
                 'forceXLIFFConversion',
