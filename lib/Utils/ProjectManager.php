@@ -16,6 +16,7 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use Matecat\XliffParser\XliffParser;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectManager\ProjectManagerModel;
 use SubFiltering\Filter;
 use Teams\TeamStruct;
@@ -2739,7 +2740,7 @@ class ProjectManager {
 
     private function fileMustBeConverted( $filePathName, $forceXliff ) {
 
-        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $filePathName, $forceXliff );
+        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filePathName, $forceXliff, INIT::$FILTERS_ADDRESS );
 
         /**
          * Application misconfiguration.

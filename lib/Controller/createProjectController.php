@@ -3,6 +3,7 @@
 use ConnectedServices\GDrive as GDrive;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
 
 class createProjectController extends ajaxController {
@@ -413,7 +414,7 @@ class createProjectController extends ajaxController {
                 $this->userIsLogged,
                 $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
         );
-        $mustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $filename, $forceXliff );
+        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
 
         $metadata                      = [];
         $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];

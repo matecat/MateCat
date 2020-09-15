@@ -2,6 +2,7 @@
 
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 
 /**
  * Created by PhpStorm.
@@ -66,7 +67,7 @@ class ConversionHandler {
         $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION, $this->_userIsLogged, $file_path );
 
         //XLIFF Conversion management
-        $fileMustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $file_path, $forceXliff );
+        $fileMustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $file_path, $forceXliff, INIT::$FILTERS_ADDRESS );
 
         switch ( $fileMustBeConverted ) {
 
