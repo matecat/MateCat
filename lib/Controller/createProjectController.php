@@ -5,6 +5,7 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use ProjectQueue\Queue;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 class createProjectController extends ajaxController {
 
@@ -402,11 +403,11 @@ class createProjectController extends ajaxController {
      * @throws \TaskRunner\Exceptions\ReQueueException
      */
     private function getFileMetadata($filename) {
-        $info          = DetectProprietaryXliff::getInfo( $filename );
-        $isXliff       = DetectProprietaryXliff::isXliffExtension( AbstractFilesStorage::pathinfo_fix($filename) );
-        $isGlossary    = DetectProprietaryXliff::isGlossaryFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
-        $isTMX         = DetectProprietaryXliff::isTMXFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
-        $getMemoryType = DetectProprietaryXliff::getMemoryFileType( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $info          = XliffProprietaryDetect::getInfo( $filename );
+        $isXliff       = XliffFiles::isXliff( AbstractFilesStorage::pathinfo_fix($filename) );
+        $isGlossary    = XliffFiles::isGlossaryFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $isTMX         = XliffFiles::isTMXFile( AbstractFilesStorage::pathinfo_fix( $filename ) );
+        $getMemoryType = XliffFiles::getMemoryFileType( AbstractFilesStorage::pathinfo_fix( $filename ) );
 
         $forceXliff = $this->getFeatureSet()->filter(
                 'forceXLIFFConversion',

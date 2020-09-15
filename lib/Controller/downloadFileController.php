@@ -10,8 +10,10 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use XliffReplacer\XliffReplacerCallback;
 use XliffReplacer\XliffReplacerFactory;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 set_time_limit( 180 );
 
@@ -188,7 +190,7 @@ class downloadFileController extends downloadController {
                     $xliffFilePath = $params[ 'save_as' ];
                 }
 
-                $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
+                $fileType = XliffProprietaryDetect::getInfo( $xliffFilePath );
 
                 // instantiate parser
                 $xsp = new \Matecat\XliffParser\XliffParser();
@@ -591,7 +593,7 @@ class downloadFileController extends downloadController {
     public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
         $extension = AbstractFilesStorage::pathinfo_fix( $path );
-        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
+        if ( !XliffFiles::isXliff( $extension ) ) {
             return $documentContent;
         }
 
@@ -607,7 +609,7 @@ class downloadFileController extends downloadController {
         }
 
         //avoid in memory copy of very large files if possible
-        $detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
+        $detect_result = XliffProprietaryDetect::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
 
         //clean mrk tags for GlobalSight application compatibility
         //this should be a sax parser instead of in memory copy for every trans-unit

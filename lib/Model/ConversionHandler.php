@@ -91,7 +91,7 @@ class ConversionHandler {
                 $this->result[ 'code' ]     = -7; // No Good, Default
                 $this->result[ 'errors' ][] = [
                         "code"    => -7,
-                        "message" => 'Matecat Open-Source does not support ' . ucwords( DetectProprietaryXliff::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
+                        "message" => 'Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
                         'debug'   => AbstractFilesStorage::basename_fix( $this->file_name )
                 ];
 

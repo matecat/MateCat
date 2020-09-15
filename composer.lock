@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.2",
+            "version": "v1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "6deafafb6219828ed8417c088a585e1272c57cbb"
+                "reference": "71e4a3f86886612acebadc596eff36062b6f70a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/6deafafb6219828ed8417c088a585e1272c57cbb",
-                "reference": "6deafafb6219828ed8417c088a585e1272c57cbb",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/71e4a3f86886612acebadc596eff36062b6f70a1",
+                "reference": "71e4a3f86886612acebadc596eff36062b6f70a1",
                 "shasum": ""
             },
             "require": {
@@ -744,11 +744,11 @@
             "description": "A Xliff parser written in PHP",
             "homepage": "https://github.com/matecat/xliff-parser",
             "keywords": [
+                "parsing",
                 "php",
-                "search",
-                "text"
+                "xliff"
             ],
-            "time": "2020-09-15T13:47:37+00:00"
+            "time": "2020-09-15T14:53:15+00:00"
         },
         {
             "name": "monolog/monolog",
