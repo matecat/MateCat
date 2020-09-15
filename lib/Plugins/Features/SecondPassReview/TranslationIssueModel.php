@@ -29,7 +29,7 @@ class TranslationIssueModel extends \Features\ReviewExtended\TranslationIssueMod
         //
         // $this->chunkReview may not refer to the chunk review associated to issue source page
         //
-        $chunkReview    = ChunkReviewDao::findByIdJobAndSourcePage( $this->chunk->id, $this->issue->source_page );
+        $chunkReview    = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $this->chunk->id, $this->chunk->password, $this->issue->source_page );
         $final_revision = ( new SegmentTranslationEventDao() )
                 ->getFinalRevisionForSegmentAndSourcePage(
                         $chunkReview->id_job,

@@ -131,6 +131,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
                     issue={item}
                     key={item.id}
                     changeVisibility={this.changeVisibility.bind(this)}
+                    actions={( this.props.segment.ice_locked == 0  || ( this.props.segment.ice_locked == 1 && this.props.segment.unlocked)) }
                 />);
             } else {
                 issuesR1.push(<ReviewExtendedIssue
@@ -141,6 +142,7 @@ class ReviewExtendedIssuesContainer extends React.Component {
                     issue={item}
                     key={item.id}
                     changeVisibility={this.changeVisibility.bind(this)}
+                    actions={( this.props.segment.ice_locked == 0  || ( this.props.segment.ice_locked == 1 && this.props.segment.unlocked)) }
                 />)
             }
         });
