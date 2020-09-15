@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6dc9edda94134910047b034915b324c8",
+    "content-hash": "a42f730f3dfd58fb600b2dcb7c576c29",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -699,6 +699,55 @@
                 "text"
             ],
             "time": "2020-07-15T15:27:36+00:00"
+        },
+        {
+            "name": "matecat/xliff-parser",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/matecat/xliff-parser.git",
+                "reference": "a1fe07e7c8d5186a060dc3814c1818e31231f2db"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/a1fe07e7c8d5186a060dc3814c1818e31231f2db",
+                "reference": "a1fe07e7c8d5186a060dc3814c1818e31231f2db",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.15",
+                "fzaninotto/faker": "^1.8",
+                "phpstan/phpstan": "^0.11.12",
+                "phpunit/phpunit": "^8.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Matecat\\XliffParser\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mauro Cassani",
+                    "email": "maurocassani1978@gmail.com",
+                    "homepage": "https://github.com/mauretto78"
+                }
+            ],
+            "description": "A Xliff parser written in PHP",
+            "homepage": "https://github.com/matecat/xliff-parser",
+            "keywords": [
+                "php",
+                "search",
+                "text"
+            ],
+            "time": "2020-09-11T16:24:34+00:00"
         },
         {
             "name": "monolog/monolog",
