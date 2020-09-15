@@ -15,12 +15,11 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
+use Matecat\XliffParser\XliffParser;
 use ProjectManager\ProjectManagerModel;
 use SubFiltering\Filter;
 use Teams\TeamStruct;
 use Translators\TranslatorsModel;
-
-include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 class ProjectManager {
 
@@ -1738,10 +1737,10 @@ class ProjectManager {
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
 
-        $xliff_obj = new Xliff_Parser( $this->features );
+        $xliff_obj = new XliffParser();
 
         try {
-            $xliff = $xliff_obj->Xliff2Array( $xliff_file_content );
+            $xliff = $xliff_obj->xliffToArray( $xliff_file_content );
         } catch ( Exception $e ) {
             throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
         }

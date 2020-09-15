@@ -10,6 +10,7 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
+use XliffReplacer\XliffReplacerCallback;
 use XliffReplacer\XliffReplacerFactory;
 
 set_time_limit( 180 );
@@ -189,17 +190,25 @@ class downloadFileController extends downloadController {
 
                 $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
 
-                //instantiate parser
-                $xsp = XliffReplacerFactory::getInstance( $fileType, $data, $transUnits, $_target_lang );
-                $xsp->setFileDescriptors( $xliffFilePath, $outputPath );
+                // instantiate parser
+                $xsp = new \Matecat\XliffParser\XliffParser();
 
-                if ( $this->download_type == 'omegat' ) {
-                    $xsp->setSourceInTarget( true );
-                }
+                // instantiateXliffReplacerCallback
+                $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $_target_lang);
 
                 //run parsing
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation( $this->featureSet );
+                $xsp->replaceTranslation($xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $xliffReplacerCallback);
+
+
+
+//                if ( $this->download_type == 'omegat' ) {
+//                    $xsp->setSourceInTarget( true );
+//                }
+
+
+
+
 
                 //free memory
                 unset( $xsp );
