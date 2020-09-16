@@ -1,11 +1,13 @@
 import TextUtils from '../../../utils/textUtils';
 
-const EnventHandlers =  {
-    handleCopyEvent: function ( e ) {
+const EnventHandlers = {
+    handleCopyEvent: function (e) {
         let elem = $(e.target);
         let cloneTag, text;
-        if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
-            let tag = (elem.hasClass('inside-attribute')) ? elem.parent('span.locked') : elem.parent().parent('span.locked');
+        if (elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute')) {
+            let tag = elem.hasClass('inside-attribute')
+                ? elem.parent('span.locked')
+                : elem.parent().parent('span.locked');
             cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             text = cloneTag.text();
@@ -20,15 +22,15 @@ const EnventHandlers =  {
             e.preventDefault();
         }
     },
-    handleDragEvent: function ( e ) {
+    handleDragEvent: function (e) {
         let elem = $(e.target);
         let cloneTag, text;
-        if ( elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute') ) {
+        if (elem.hasClass('inside-attribute') || elem.parent().hasClass('inside-attribute')) {
             let tag = elem.closest('span.locked:not(.inside-attribute)');
             cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             text = TextUtils.htmlEncode(cloneTag.text());
-            text = TagUtils.transformTextForLockTags(text).trim()+ " ";
+            text = TagUtils.transformTextForLockTags(text).trim() + ' ';
             e.dataTransfer.clearData();
             e.dataTransfer.setData('text/plain', text);
             e.dataTransfer.setData('text/html', text);
@@ -38,12 +40,11 @@ const EnventHandlers =  {
             cloneTag = tag.clone();
             cloneTag.find('.inside-attribute').remove();
             text = TextUtils.htmlEncode(cloneTag.text());
-            text = TagUtils.transformTextForLockTags(text).trim() + " ";
+            text = TagUtils.transformTextForLockTags(text).trim() + ' ';
             e.dataTransfer.clearData();
             e.dataTransfer.setData('text/plain', text);
             e.dataTransfer.setData('text/html', text);
             console.log('text dragged', text);
-
         }
     },
 };

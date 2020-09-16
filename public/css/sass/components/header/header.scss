@@ -1,5 +1,5 @@
 header {
-  .revision-mark {
+    .revision-mark {
       /*float: left;
       position: relative;*/
       width: 24px;
@@ -22,5 +22,9 @@ header {
       &.revision-r2 {
           background: $approved2Green;
       }
-  }
+    }
+
+    #files-instructions svg {
+        display: block;
+    }
 }
