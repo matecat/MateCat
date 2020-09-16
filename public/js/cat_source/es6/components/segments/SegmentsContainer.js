@@ -411,7 +411,7 @@ class SegmentsContainer extends React.Component {
 		// if is the first segment of a file, add the 43px of the file header
 		const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
 		if (previousFileId !== segment.get('id_file')) {
-			basicSize += 43;
+			basicSize += 75;
 		}
 		// if it's last segment, add 150px of distance from footer
 		if (index === this.state.segments.size - 1) {
@@ -419,7 +419,7 @@ class SegmentsContainer extends React.Component {
 		}
 		// if it's collection type add 42px of header
 		if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
-			basicSize += 42;
+			basicSize += 49;
 		}
 		// add height for comments padding
 		basicSize += this.getCommentsPadding(index, segment);
