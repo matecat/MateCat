@@ -7,6 +7,7 @@ use DomainException;
 use INIT;
 use Matecat\SimpleS3\Client;
 use Matecat\SimpleS3\Components\Cache\RedisCache;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use RedisHandler;
 
 /**
@@ -217,7 +218,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      */
     private function getXliffDestination( $prefix, $xliffPath, $bucketName, $originalPath = false ) {
         if ( !$originalPath ) {
-            $fileType = \DetectProprietaryXliff::getInfo( $xliffPath );
+            $fileType = XliffProprietaryDetect::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
                 $force_extension = '.sdlxliff';
             }

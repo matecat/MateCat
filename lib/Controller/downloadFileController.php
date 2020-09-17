@@ -10,7 +10,10 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use XliffReplacer\XliffReplacerCallback;
 use XliffReplacer\XliffReplacerFactory;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 set_time_limit( 180 );
 
@@ -187,19 +190,27 @@ class downloadFileController extends downloadController {
                     $xliffFilePath = $params[ 'save_as' ];
                 }
 
-                $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
+                $fileType = XliffProprietaryDetect::getInfo( $xliffFilePath );
 
-                //instantiate parser
-                $xsp = XliffReplacerFactory::getInstance( $fileType, $data, $transUnits, $_target_lang );
-                $xsp->setFileDescriptors( $xliffFilePath, $outputPath );
+                // instantiate parser
+                $xsp = new \Matecat\XliffParser\XliffParser();
 
-                if ( $this->download_type == 'omegat' ) {
-                    $xsp->setSourceInTarget( true );
-                }
+                // instantiateXliffReplacerCallback
+                $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $_target_lang);
 
                 //run parsing
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation( $this->featureSet );
+                $xsp->replaceTranslation($xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $xliffReplacerCallback);
+
+
+
+//                if ( $this->download_type == 'omegat' ) {
+//                    $xsp->setSourceInTarget( true );
+//                }
+
+
+
+
 
                 //free memory
                 unset( $xsp );
@@ -581,8 +592,7 @@ class downloadFileController extends downloadController {
      */
     public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
-        $extension = AbstractFilesStorage::pathinfo_fix( $path );
-        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
+        if ( !XliffFiles::isXliff( $path ) ) {
             return $documentContent;
         }
 
@@ -598,7 +608,7 @@ class downloadFileController extends downloadController {
         }
 
         //avoid in memory copy of very large files if possible
-        $detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
+        $detect_result = XliffProprietaryDetect::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
 
         //clean mrk tags for GlobalSight application compatibility
         //this should be a sax parser instead of in memory copy for every trans-unit
