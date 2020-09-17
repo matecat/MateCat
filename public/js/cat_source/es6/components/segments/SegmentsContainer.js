@@ -633,7 +633,6 @@ class SegmentsContainer extends React.Component {
 
 		}
 		this.segmentContainerVisible = false;
-		$('#hiddenHtml section').css('display', 'none');
 	}
 
 	render() {
