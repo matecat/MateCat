@@ -14,5 +14,5 @@ class CreateTableFileMetadata extends AbstractMatecatMigration {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
     ' ];
 
-    public $sql_down = [ '' ];
+    public $sql_down = [ 'DROP TABLE `file_metadata`' ];
 }
