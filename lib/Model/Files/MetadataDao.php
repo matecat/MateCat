@@ -30,4 +30,38 @@ class MetadataDao extends \DataAccess_AbstractDao {
         return @$result[0];
 
     }
+
+    public function insert($id_project, $id_file, $key, $value) {
+        $sql = "INSERT INTO file_metadata " .
+                " ( id_project, id_file, `key`, `value` ) " .
+                " VALUES " .
+                " ( :id_project, :id_file, :key, :value ); ";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(  $sql );
+        $stmt->execute( array(
+                'id_project' => $id_project,
+                'id_file' => $id_file,
+                'key' => $key,
+                'value' => $value
+        ) );
+
+        return $this->get($id_project, $id_file, $key);
+    }
+
+
+    public function update($id_project, $id_file, $key, $value) {
+        $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key  ";
+
+                $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(  $sql );
+        $stmt->execute( array(
+                'id_project' => $id_project,
+                'id_file' => $id_file,
+                'key' => $key,
+                'value' => $value
+        ) );
+
+        return $this->get($id_project, $id_file, $key);
+    }
 }
