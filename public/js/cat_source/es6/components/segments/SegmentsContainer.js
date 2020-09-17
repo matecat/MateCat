@@ -223,11 +223,14 @@ class SegmentsContainer extends React.Component {
             />
         );
         if (segment.id_file !== currentFileId) {
-            let file = !!this.state.files ? _.find(this.state.files, (file) => file.id == segment.id_file) : false;
+            const file = !!this.state.files ? _.find(this.state.files, (file) => file.id == segment.id_file) : false;
             let classes = this.state.sideOpen ? 'slide-right' : '';
+            const isFirstSegment = this.state.files &&  segment.sid === this.state.files[0].first_segment;
+            classes = (isFirstSegment) ? classes + ' first-segment': classes;
             return (
                 <React.Fragment>
                     <div className={'projectbar ' + classes}>
+                        {file ? (
                         <div className={'projectbar-filename'}>
                             <span
                                 title={segment.filename}
@@ -241,6 +244,7 @@ class SegmentsContainer extends React.Component {
                                 {file.file_name}
                             </span>
                         </div>
+                        ) : null}
                         {file ? (
                             <div className="projectbar-wordcounter">
                                 <span>
@@ -278,6 +282,8 @@ class SegmentsContainer extends React.Component {
             let collectionTypeSeparator;
             if (collectionType && collectionsTypeArray.indexOf(collectionType) === -1) {
                 let classes = this.state.sideOpen ? 'slide-right' : '';
+                const isFirstSegment = this.state.files && segment.sid === this.state.files[0].first_segment;
+                classes = (isFirstSegment) ? classes + ' first-segment': classes;
                 collectionTypeSeparator = (
                     <div
                         className={'collection-type-separator ' + classes}
@@ -328,13 +334,15 @@ class SegmentsContainer extends React.Component {
             return 0;
         }
         let previousFileId = index === 0 ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
-
+        const isFirstSegment = this.state.files && segment.get('sid') === this.state.files[0].first_segment;
+        const fileDivHeight = 75;
+        const collectionDivHeight = isFirstSegment ? 35 : 50;
         let calculatedHeight = this.segmentsHeightsMap[segment.get('sid')];
 
         if (calculatedHeight && calculatedHeight.height > 0 && calculatedHeight.segment.equals(segment)) {
             let heightToAdd = 0;
             if (previousFileId !== segment.get('id_file')) {
-                heightToAdd = 43;
+                heightToAdd = fileDivHeight;
             }
             if (index === this.state.segments.size - 1) {
                 heightToAdd = heightToAdd + 150;
@@ -373,7 +381,7 @@ class SegmentsContainer extends React.Component {
 
         //Collection type
         if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
-            itemHeight = itemHeight + 49;
+            itemHeight = itemHeight + collectionDivHeight;
         }
         let height = itemHeight + commentsPadding;
 
@@ -386,7 +394,7 @@ class SegmentsContainer extends React.Component {
 
         //If is the first segment of a file add the file header
         if (previousFileId !== segment.get('id_file')) {
-            height = height + 75;
+            height = height + fileDivHeight;
         }
 
         if (index === this.state.segments.size - 1) {
