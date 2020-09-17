@@ -383,9 +383,11 @@ section.opened .warnings {
     color: #788190;
     display: flex;
     justify-content: flex-start;
-    padding: 30px 115px 10px 4.5%;
+    padding: 40px 115px 10px 4.5%;
     align-items: center;
-
+    &.first-segment {
+        padding-top: 25px;
+    }
     span.fileFormat {
         padding: 10px 15px 9px 47px;
         background-size: 25px !important;

@@ -335,7 +335,7 @@ class SegmentsContainer extends React.Component {
         }
         let previousFileId = index === 0 ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
         const isFirstSegment = this.state.files && segment.get('sid') === this.state.files[0].first_segment;
-        const fileDivHeight = 75;
+        const fileDivHeight =  isFirstSegment ? 60 :75;
         const collectionDivHeight = isFirstSegment ? 35 : 50;
         let calculatedHeight = this.segmentsHeightsMap[segment.get('sid')];
 
