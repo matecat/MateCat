@@ -173,12 +173,14 @@ section{
 .collection-type-separator {
     color: #777;
     font-size: 16px;
-    margin: 4px;
     float: left;
     width: 100%;
     box-shadow: none !important;
-    padding: 15px 116px 10px 90px;
+    padding: 20px 116px 10px 5%;
     text-align: left;
+    &.first-segment {
+        padding-top: 5px;
+    }
     &.slide-right {
         width: 75%;
     }
