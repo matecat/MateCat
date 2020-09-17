@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.31, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
@@ -865,6 +865,24 @@ CREATE TABLE `replace_events_current_version` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `revision_feedbacks`
+--
+
+DROP TABLE IF EXISTS `revision_feedbacks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `revision_feedbacks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_job` int(11) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `revision_number` int(1) NOT NULL,
+  `feedback` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `job_unique_key` (`id_job`,`password`,`revision_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `segment_notes`
 --
 
@@ -1068,7 +1086,7 @@ DROP TABLE IF EXISTS `show_clients`;
 /*!50001 DROP VIEW IF EXISTS `show_clients`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `show_clients` AS SELECT
+/*!50001 CREATE VIEW `show_clients` AS SELECT 
  1 AS `host_short`,
  1 AS `users`,
  1 AS `COUNT(*)`*/;
@@ -1247,7 +1265,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-11 14:03:34
+-- Dump completed on 2020-09-17 10:57:15
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1315,7 +1333,7 @@ GRANT DROP ON `matecat`.`jobs_stats` TO 'PEEWorker'@'%' IDENTIFIED BY 'matecat02
 
 USE `matecat`;
 
--- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.31, for Linux (x86_64)
 --
 -- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
@@ -1426,6 +1444,7 @@ INSERT INTO `phinxlog` VALUES (20190723092053,'2019-09-09 18:16:45','2019-09-09 
 INSERT INTO `phinxlog` VALUES (20190812091652,'2019-08-26 17:16:32','2019-08-26 17:16:32');
 INSERT INTO `phinxlog` VALUES (20191220115633,'2019-12-20 13:01:16','2019-12-20 13:01:16');
 INSERT INTO `phinxlog` VALUES (20200205155333,'2020-02-05 15:54:14','2020-02-05 15:54:14');
+INSERT INTO `phinxlog` VALUES (20200317141655,'2020-08-20 10:38:45','2020-08-20 10:38:45');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1437,5 +1456,4 @@ INSERT INTO `phinxlog` VALUES (20200205155333,'2020-02-05 15:54:14','2020-02-05 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-03-11 14:03:34
-
+-- Dump completed on 2020-09-17 10:57:15
