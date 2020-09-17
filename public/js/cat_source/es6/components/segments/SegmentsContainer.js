@@ -417,7 +417,7 @@ class SegmentsContainer extends React.Component {
 		// if is the first segment of a file, add the 43px of the file header
 		const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
         const isFirstSegment = this.state.files && segment.get('sid') === this.state.files[0].first_segment;
-        const fileDivHeight = 75;
+        const fileDivHeight =  isFirstSegment ? 60 :75;
         const collectionDivHeight = isFirstSegment ? 35 : 50;
         if (previousFileId !== segment.get('id_file')) {
 			basicSize += fileDivHeight;
