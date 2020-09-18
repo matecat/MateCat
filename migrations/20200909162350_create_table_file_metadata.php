@@ -10,9 +10,10 @@ class CreateTableFileMetadata extends AbstractMatecatMigration {
           `key` varchar(255) NOT NULL,
           `value` text NOT NULL,
           PRIMARY KEY (`id`),
-          KEY `id_file` (`id_file`)
+          KEY `id_file_idx` (`id_file`),
+          KEY `id_project_idx` (`id_project`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
     ' ];
 
-    public $sql_down = [ '' ];
+    public $sql_down = [ 'DROP TABLE `file_metadata`' ];
 }
