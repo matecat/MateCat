@@ -817,6 +817,15 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
+        $k_file = 0;
+        foreach($totalFilesStructure as $fid => $file_info){
+            if(isset($this->projectStructure['instructions'][$k_file]) && !empty($this->projectStructure['instructions'][$k_file])){
+                $this->_insertInstructions($fid, $this->projectStructure['instructions'][$k_file]);
+            }
+            $k_file++;
+        }
+
+
         if ( INIT::$VOLUME_ANALYSIS_ENABLED ) {
             $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL();
         }
@@ -2058,6 +2067,12 @@ class ProjectManager {
         $idFile = ProjectManagerModel::insertFile( $projectStructure, $file_name, $mime_type, $fileDateSha1Path );
 
         return $idFile;
+    }
+
+
+    protected function _insertInstructions( $fid, $value ) {
+        $metadataDao = new \Files\MetadataDao();
+        $metadataDao->insert( $this->projectStructure['id_project'], $fid, 'instructions', $value );
     }
 
     protected function _storeSegments( $fid ) {
