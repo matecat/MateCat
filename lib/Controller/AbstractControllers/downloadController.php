@@ -150,6 +150,7 @@ abstract class downloadController extends controller {
                 header( "Content-Disposition: attachment; filename=\"$this->_filename\"" ); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
                 header( "Expires: 0" );
                 header( "Connection: close" );
+                header( "Content-Length: " . strlen( $this->outputContent ) );
                 echo $this->outputContent;
                 exit;
             }
