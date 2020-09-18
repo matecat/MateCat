@@ -91,7 +91,7 @@ class downloadFileController extends downloadController {
         // if no job was found, check if the provided password is a password_review
         if ( empty( $jobData ) ) {
             $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, (int)$this->id_job );
-            $jobData = $this->job = $chunkReviewStruct->getChunk();
+            $jobData           = $this->job = $chunkReviewStruct->getChunk();
         }
 
         // check for Password correctness
@@ -196,20 +196,16 @@ class downloadFileController extends downloadController {
                 $xsp = new \Matecat\XliffParser\XliffParser();
 
                 // instantiateXliffReplacerCallback
-                $xliffReplacerCallback = new XliffReplacerCallback($this->featureSet, $_target_lang);
+                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $_target_lang );
 
                 //run parsing
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation($xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $xliffReplacerCallback);
-
+                $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $xliffReplacerCallback );
 
 
 //                if ( $this->download_type == 'omegat' ) {
 //                    $xsp->setSourceInTarget( true );
 //                }
-
-
-
 
 
                 //free memory
