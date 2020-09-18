@@ -198,15 +198,10 @@ class downloadFileController extends downloadController {
                 // instantiateXliffReplacerCallback
                 $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $_target_lang );
 
-                //run parsing
+                // run xliff replacer
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $xliffReplacerCallback );
-
-
-//                if ( $this->download_type == 'omegat' ) {
-//                    $xsp->setSourceInTarget( true );
-//                }
-
+                $setSourceInTarget = $this->download_type === 'omegat';
+                $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $setSourceInTarget, $xliffReplacerCallback );
 
                 //free memory
                 unset( $xsp );
