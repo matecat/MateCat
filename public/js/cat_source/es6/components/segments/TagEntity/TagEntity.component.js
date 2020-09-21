@@ -18,6 +18,7 @@ class TagEntity extends Component {
             },
             tagWarningStyle: '',
             showTooltip: false,
+            tagFocusedStyle: '',
             tagStyle
         };
     }
@@ -72,17 +73,29 @@ class TagEntity extends Component {
         clearInterval(this.warningCheck);
     }
 
+
+
     render() {
         let searchParams = this.props.getSearchParams();
-        const {selected, tagWarningStyle, tagStyle} = this.state;
-        const {entityKey, offsetkey, blockKey, start, end, onClick, contentState, getClickedTagId} = this.props;
+        const {selected, tagStyle, tagWarningStyle} = this.state;
+        const {entityKey, offsetkey, blockKey, start, end, onClick, contentState, getUpdatedSegmentInfo,getClickedTagInfo, isTarget} = this.props;
+        const {currentSelection} = getUpdatedSegmentInfo();
+        const {tagClickedInSource, clickedTagId} = getClickedTagInfo();
+        const {anchorOffset, focusOffset, anchorKey, hasFocus} = currentSelection;
         const { children } = this.props.children.props;
         const {selection, forceSelection} = children[0];
         const {emitSelectionParameters, tooltipToggle} = this;
 
         const entity = contentState.getEntity(entityKey);
-        const clickedTagId = getClickedTagId();
-        const mirrorClickedStyle = entity.data.id && clickedTagId === entity.data.id ? 'clicked' : '';
+
+        // Apply style on clicked tag and draggable tag, placed here for performance
+        const tagFocusedStyle = anchorOffset === start &&
+        focusOffset === end &&
+        anchorKey === blockKey &&
+        (tagClickedInSource && !isTarget || !tagClickedInSource && isTarget) &&
+        hasFocus ? 'tag-focused' : '';
+        const tagClickedStyle = entity.data.id && clickedTagId && clickedTagId === entity.data.id ? 'tag-clicked' : ''
+
         const showTooltip = this.state.showTooltip && getTooltipTag().includes(entity.type);
         if ( searchParams.active )  {
             let text = this.markSearch(children[0].props.text, searchParams);
@@ -91,7 +104,7 @@ class TagEntity extends Component {
                 suppressContentEditableWarning={true}*/>
                 {showTooltip && <TooltipInfo text={entity.data.placeholder} isTag tagStyle={tagStyle}/>}
                 <span data-offset-key={offsetkey}
-                      className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
+                      className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
                       unselectable="on"
                       suppressContentEditableWarning={true}
                       onMouseEnter={()=> tooltipToggle(true)}
@@ -109,7 +122,7 @@ class TagEntity extends Component {
                 suppressContentEditableWarning={true}*/>
                 {showTooltip && <TooltipInfo text={entity.data.placeholder} isTag tagStyle={tagStyle}/>}
                 <span data-offset-key={offsetkey}
-                      className={`tag ${tagStyle} ${tagWarningStyle} ${mirrorClickedStyle}`}
+                      className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
                       unselectable="on"
                       suppressContentEditableWarning={true}
                       onMouseEnter={()=> tooltipToggle(true)}
@@ -124,12 +137,9 @@ class TagEntity extends Component {
     }
 
     updateTagStyle = () => {
-        const {selectCorrectStyle, highlightOnWarnings} = this;
-        const tagStyle = selectCorrectStyle();
-        const tagWarningStyle = highlightOnWarnings();
         this.setState({
-            tagStyle,
-            tagWarningStyle
+            tagStyle: this.selectCorrectStyle(),
+            tagWarningStyle: this.highlightOnWarnings()
         })
     };
 
@@ -145,7 +155,6 @@ class TagEntity extends Component {
         tagStyle.push(style);
         // Check if tag is in an active segment
         if(!segmentOpened) tagStyle.push('tag-inactive');
-
         return tagStyle.join(' ');
     };
 

@@ -21,12 +21,12 @@ const TagSuggestion = React.forwardRef((props,ref) => {
                 {props.suggestion ?
                     (<div className={"tag-container"}>
                         <div
-                            className={`tag ${tagStyle}`}>
-                            <span className={`tag-placeholder`}>{props.suggestion.data.placeholder}</span>
+                            className={`tag ${tagStyle} tag-placeholder`}>
+                            <span>{props.suggestion.data.placeholder}</span>
                         </div>
                     </div>)
                     : 'No tags'}
-                <span className={`place-here-tips`}>Place here</span>
+                {/*<span className={`place-here-tips`}>Place here</span>*/}
             </div>
         </div>
     );

@@ -16,7 +16,7 @@ import {
     activateQaCheckBlacklist,
     activateSearch
 } from "./utils/DraftMatecatUtils/ContentEncoder";
-import {Modifier, Editor, EditorState, getDefaultKeyBinding, KeyBindingUtil} from "draft-js";
+import {Modifier, Editor, EditorState, getDefaultKeyBinding, KeyBindingUtil, ContentState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import CompoundDecorator from "./utils/CompoundDecorator"
@@ -32,6 +32,8 @@ import insertText from "./utils/DraftMatecatUtils/insertText";
 import {tagSignatures, TagStruct} from "./utils/DraftMatecatUtils/tagModel";
 import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
 import SegmentActions from "../../actions/SegmentActions";
+import getFragmentFromSelection
+    from "./utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection";
 
 const editorSync = {
     inTransitionToFocus: false,
@@ -44,7 +46,7 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo, getClickedTagId} = this;
+        const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo, getClickedTagInfo} = this;
 
         this.decoratorsStructure = [
             {
@@ -54,7 +56,7 @@ class Editarea extends React.Component {
                     isTarget: true,
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
-                    getClickedTagId: getClickedTagId,
+                    getClickedTagInfo: getClickedTagInfo,
                     getSearchParams: this.getSearchParams, //TODO: Make it general ?
                     isRTL: config.isTargetRTL
                 }
@@ -804,13 +806,25 @@ class Editarea extends React.Component {
     handleDrop = (selection, dataTransfer, isInternal) => {
         let {editorState} = this.state;
         const text = dataTransfer.getText();
+
+        // get selection of dragged text
+        const dragSelection = editorState.getSelection();
+        const dragSelectionLength = dragSelection.focusOffset - dragSelection.anchorOffset;
+        // get the fragment from current selection in editor (the highlighted tag)
+        let fragmentFromSelection = getFragmentFromSelection(editorState);
+        // Il fragment di draft NON FUNZIONA quindi lo ricostruisco
+        let tempFrag = DraftMatecatUtils.buildFragmentFromJson(fragmentFromSelection);
+
+        console.log('Entity check:before', DraftMatecatUtils.getEntities(editorState))
+
+        // set selection to drop point and check dropping zone
         editorState = EditorState.forceSelection(editorState, selection);
-        // Cannot drop anything on entities
+        // Check: Cannot drop anything on entities
         if(DraftMatecatUtils.selectionIsEntity(editorState)){
             return 'handled';
         }
-        // when drop is inside the same editor, use default behavior
         if(text && !editorSync.draggingFromEditArea) {
+            /*console.log('External drag', text)*/
             try {
                 const fragmentContent = JSON.parse(text);
                 let fragment = DraftMatecatUtils.buildFragmentFromJson(fragmentContent.orderedMap);
@@ -826,6 +840,52 @@ class Editarea extends React.Component {
                 });
                 return 'handled';
             } catch (err) {
+                return 'not-handled';
+            }
+        }else{
+            /*console.log('Internal drag')*/
+            // when drop is inside the same editor, use default behavior
+            // update: default behavior not working
+            try {
+                // remove drag selected range from editor state
+                let contentState = editorState.getCurrentContent();
+                contentState = Modifier.removeRange(
+                    contentState,
+                    dragSelection,
+                    dragSelection.isBackward ? 'backward' : 'forward'
+                );
+
+                // Aggiornala nel caso in cui sposti in avanti il drag nello stesso blocco
+                const dragBlockKey = dragSelection.getAnchorKey();
+                const dropBlockKey = selection.getAnchorKey();
+                selection = dragSelection.anchorOffset < selection.anchorOffset &&
+                dragBlockKey === dropBlockKey ?
+                    selection.merge({
+                        anchorOffset: selection.anchorOffset - dragSelectionLength,
+                        focusOffset: selection.focusOffset - dragSelectionLength,
+                    }) :
+                    selection
+
+                // Inserisci il fragment
+                contentState = Modifier.replaceWithFragment(
+                    contentState,
+                    selection,
+                    tempFrag
+                )
+
+                editorState = EditorState.push(editorState, contentState, 'insert-fragment');
+                editorState = EditorState.forceSelection(editorState, selection);
+
+                console.log('Entity check:after', DraftMatecatUtils.getEntities(editorState))
+                this.setState({
+                    editorState: editorState,
+                }, () => {
+                    this.updateTranslationDebounced();
+                    this.props.setClickedTagId();
+                });
+                return 'handled';
+            } catch (err) {
+                console.log(err)
                 return 'not-handled';
             }
         }
@@ -855,9 +915,9 @@ class Editarea extends React.Component {
         }
     };
 
-    getClickedTagId = () => {
-        const {clickedTagId} = this.props;
-        return clickedTagId;
+    getClickedTagInfo = () => {
+        const {clickedTagId, tagClickedInSource} = this.props;
+        return {clickedTagId, tagClickedInSource};
     };
 
     /**
@@ -889,13 +949,14 @@ class Editarea extends React.Component {
 
     getUpdatedSegmentInfo = () => {
         const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
-        const {tagRange} = this.state;
+        const {tagRange, editorState} = this.state;
         return{
             warnings,
             tagMismatch,
             tagRange,
             segmentOpened: opened,
-            missingTagsInTarget
+            missingTagsInTarget,
+            currentSelection: editorState.getSelection()
         }
     };
 
