@@ -42,32 +42,33 @@ class TagBox extends React.Component  {
 
         return (
             <div className={`tag-box`}
-                style={displayPopover ? popoverOpen : styles.popoverClosed}
-                ref={this.tagBox}>
-                {missingSuggestions && missingSuggestions.length > 0 &&
-                (<div className={`missing`}>
-                    <div className={`tag-box-heading`}>Missing source
-                        <div className={"tag-container"}>
+                style={displayPopover ? popoverOpen : styles.popoverClosed}>
+                <div className={`tag-box-inner`} ref={this.tagBox}>
+                    {missingSuggestions && missingSuggestions.length > 0 &&
+                    (<div className={`missing`}>
+                        <div className={`tag-box-heading`}>Missing source&nbsp;
+                            <div className={"tag-container"}>
                             <span
-                                className={`tag tag-selfclosed tag-mismatch-error`}>
+                                className={`tag tag-heading tag-selfclosed tag-mismatch-error`}>
                                 tags
                             </span>
+                            </div>
+                            &nbsp;in target
                         </div>
-                        in target
-                    </div>
-                    {missingSuggestions}
-                </div>)}
-                <div className={`all`}>
-                    <div className={`tag-box-heading`}>All
-                        <div className={"tag-container"}>
+                        {missingSuggestions}
+                    </div>)}
+                    <div className={`all`}>
+                        <div className={`tag-box-heading`}>All&nbsp;
+                            <div className={"tag-container"}>
                             <span
-                                className={`tag tag-selfclosed`}>
+                                className={`tag tag-heading tag-selfclosed`}>
                                 tags
                             </span>
+                            </div>
+                            &nbsp;available
                         </div>
-                        available
+                        {allSuggestions}
                     </div>
-                    {allSuggestions}
                 </div>
             </div>
         );
@@ -102,8 +103,7 @@ const styles = {
         boxSizing: 'border-box',
         maxWidth: '300px',
         boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.3)',
-        padding: '0 12px',
-        overflowY: 'scroll'
+        padding: '0 4px',
     },
     popoverClosed: {
         display: 'none',

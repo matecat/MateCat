@@ -52,9 +52,19 @@
   vertical-align: middle;
   word-break: break-all;
 
+  &:not(.tag-focused){
+    opacity: 0.75;
+    &:hover {
+      cursor: pointer;
+      transition: opacity 0.25s;
+      opacity: 1;
+    }
+  }
+
   span{
     &::selection{
       color: #fff;
+      background: transparent;
     }
   }
 
@@ -144,6 +154,7 @@
     }
     font-size: 12px;
     line-height: 1.3;
+    /*opacity: 1;*/
     &:after {
       left: -7px;
       border-right-width: 7px;
@@ -194,17 +205,31 @@
     }
   }
 
-  &.clicked {
-    cursor: grab;
+
+  &.tag-clicked {
     background-color: #2FB177;
-    &:active {
-      cursor: grabbing;
-    }
+    opacity: 1;
     &:before {
       border-left-color: #2FB177;
     }
     &:after {
       border-right-color: #2FB177;
+    }
+
+    &.tag-focused {
+      cursor: grab;
+      opacity: 1;
+      background-color: #0099CC;
+      /*box-shadow: 2px 0px 5px 2px #02c0ffa3*/
+      &:before {
+        border-left-color: #0099CC;
+      }
+      &:after {
+        border-right-color: #0099CC;
+      }
+      &:active {
+        cursor: grabbing;
+      }
     }
   }
 
@@ -228,9 +253,9 @@
     }
   }
 
-  &:not(.clicked):hover {
+  /*&:not(.tag-focused):hover {
     cursor: pointer;
-  }
+  }*/
 
   /* Inline tag */
   &.tag-nbsp{
@@ -430,6 +455,36 @@
 
 
 .tag-box {
+
+  .tag-box-inner {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 240px;
+    padding: 0 8px 8px 8px;
+    &::-webkit-scrollbar {
+      width: 4px
+    }
+    &::-webkit-scrollbar-track {
+      -webkit-border-radius: 10px;
+      border-radius: 10px;
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      /*background: #002b5c*/
+    }
+    &::-webkit-scrollbar-track-piece:end {
+      background: rgba(0, 0, 0, 0.1);
+      margin-bottom: 8px;
+      border-radius: 10px;
+    }
+    &::-webkit-scrollbar-track-piece:start {
+      background: rgba(0, 0, 0, 0.1);
+      margin-top: 44px;
+      border-radius: 10px;
+    }
+  }
+
+
   .tag-box-heading {
     width: 100%;
     padding: 1rem 0;
@@ -439,6 +494,11 @@
     background: #fff;
     align-items: center;
     cursor: default;
+    .tag {
+      &.tag-heading{
+        opacity: 1;
+      }
+    }
   }
 
   .all {
@@ -451,7 +511,7 @@
 
   .tag-menu-suggestion {
     border-bottom: 1px solid #e0e3e8;
-    padding: 8px 0;
+    padding: 4px 0;
     color: rgb(0, 85, 184);
     text-overflow: ellipsis;
     overflow: hidden;
@@ -459,10 +519,13 @@
     font-size: 14px;
     white-space: nowrap;
     cursor: pointer;
-    &.active {
+    &:hover, &.active {
+      background-color: #f2f5f7;
       font-weight: 700;
-      .tag-menu-suggestion-item {
-        background-color: #f2f5f7;
+      .tag-placeholder {
+        transition: opacity 0.25s;
+        opacity: 1;
+        cursor: pointer;
       }
     }
     .tag-menu-suggestion-item {
@@ -479,16 +542,14 @@
         &.tag-open {
           margin: 0 12px 0 0;
         }
-        .tag-placeholder {
-          display: block;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
+        &.tag-placeholder {
+          span {
+            display: block;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+          }
         }
-      }
-      &:hover {
-        background-color: #f2f5f7;
-        font-weight: 700;
       }
 
       .place-here-tips {

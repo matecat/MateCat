@@ -2710,6 +2710,9 @@ body.rtl-target .editor .editarea span {
 .graysmall:hover {
     background: $grey5;
     cursor: default;
+    .tag {
+        opacity: 1;
+    }
 }
 
 .graysmall.notEditable:hover {
