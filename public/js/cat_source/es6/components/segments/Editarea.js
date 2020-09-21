@@ -44,7 +44,7 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo, getClickedTagId} = this;
+        const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo, getClickedTagInfo} = this;
 
         this.decoratorsStructure = [
             {
@@ -54,7 +54,7 @@ class Editarea extends React.Component {
                     isTarget: true,
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
-                    getClickedTagId: getClickedTagId,
+                    getClickedTagInfo: getClickedTagInfo,
                     getSearchParams: this.getSearchParams, //TODO: Make it general ?
                     isRTL: config.isTargetRTL
                 }
@@ -855,9 +855,9 @@ class Editarea extends React.Component {
         }
     };
 
-    getClickedTagId = () => {
-        const {clickedTagId} = this.props;
-        return clickedTagId;
+    getClickedTagInfo = () => {
+        const {clickedTagId, tagClickedInSource} = this.props;
+        return {clickedTagId, tagClickedInSource};
     };
 
     /**
@@ -889,13 +889,14 @@ class Editarea extends React.Component {
 
     getUpdatedSegmentInfo = () => {
         const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
-        const {tagRange} = this.state;
+        const {tagRange, editorState} = this.state;
         return{
             warnings,
             tagMismatch,
             tagRange,
             segmentOpened: opened,
-            missingTagsInTarget
+            missingTagsInTarget,
+            currentSelection: editorState.getSelection()
         }
     };
 
