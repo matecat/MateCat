@@ -438,7 +438,7 @@ class SegmentSource extends React.Component {
         if (clickedTagId) setClickedTagId();
     };
 
-    onEntityClick = (start, end, id) => {
+    onEntityClick = (start, end, id, text) => {
         const {editorState} = this.state;
         const {setClickedTagId} = this.props;
         // Use _latestEditorState to get latest selection
@@ -455,15 +455,15 @@ class SegmentSource extends React.Component {
             );
             this.setState({editorState: newEditorState});
             // Highlight
-            setClickedTagId(id, true);
+            setClickedTagId(id, text, true);
         }catch (e) {
             console.log('Invalid selection')
         }
     };
 
     getClickedTagInfo = () => {
-        const {clickedTagId, tagClickedInSource} = this.props;
-        return {clickedTagId, tagClickedInSource};
+        const {clickedTagId, tagClickedInSource, clickedTagText} = this.props;
+        return {clickedTagId, tagClickedInSource, clickedTagText};
     };
 
     // Needed to "unlock" segment for a successful copy/paste or dragNdrop

@@ -892,7 +892,7 @@ class Editarea extends React.Component {
         return 'not-handled';
     }
 
-    onEntityClick = (start, end, id) => {
+    onEntityClick = (start, end, id, text) => {
         const {editorState} = this.state;
         const {setClickedTagId} = this.props;
         // Use _latestEditorState
@@ -909,15 +909,15 @@ class Editarea extends React.Component {
             );
             this.setState({editorState: newEditorState});
             // Highlight
-            setClickedTagId(id);
+            setClickedTagId(id, text);
         }catch (e) {
             console.log('Invalid selection')
         }
     };
 
     getClickedTagInfo = () => {
-        const {clickedTagId, tagClickedInSource} = this.props;
-        return {clickedTagId, tagClickedInSource};
+        const {clickedTagId, tagClickedInSource, clickedTagText} = this.props;
+        return {clickedTagId, tagClickedInSource, clickedTagText};
     };
 
     /**

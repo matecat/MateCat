@@ -215,6 +215,7 @@ class SegmentTarget extends React.Component {
                     readonly={this.props.readonly}
                     setClickedTagId={this.props.setClickedTagId}
                     clickedTagId={this.props.clickedTagId}
+                    clickedTagText={this.props.clickedTagText}
                     toggleFormatMenu={toggleFormatMenu}
                 />
                 {/*{ this.state.showTagsMenu ? (

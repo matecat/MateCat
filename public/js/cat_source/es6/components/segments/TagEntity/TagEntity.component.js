@@ -80,13 +80,14 @@ class TagEntity extends Component {
         const {selected, tagStyle, tagWarningStyle} = this.state;
         const {entityKey, offsetkey, blockKey, start, end, onClick, contentState, getUpdatedSegmentInfo,getClickedTagInfo, isTarget} = this.props;
         const {currentSelection} = getUpdatedSegmentInfo();
-        const {tagClickedInSource, clickedTagId} = getClickedTagInfo();
+        const {tagClickedInSource, clickedTagId, clickedTagText} = getClickedTagInfo();
         const {anchorOffset, focusOffset, anchorKey, hasFocus} = currentSelection;
         const { children } = this.props.children.props;
         const {selection, forceSelection} = children[0];
         const {emitSelectionParameters, tooltipToggle} = this;
 
-        const entity = contentState.getEntity(entityKey);
+        //const entity = contentState.getEntity(entityKey);
+        const {type: entityType, data: {id: entityId, placeholder: entityPlaceholder}} = contentState.getEntity(entityKey);
 
         // Apply style on clicked tag and draggable tag, placed here for performance
         const tagFocusedStyle = anchorOffset === start &&
@@ -94,15 +95,20 @@ class TagEntity extends Component {
         anchorKey === blockKey &&
         (tagClickedInSource && !isTarget || !tagClickedInSource && isTarget) &&
         hasFocus ? 'tag-focused' : '';
-        const tagClickedStyle = entity.data.id && clickedTagId && clickedTagId === entity.data.id ? 'tag-clicked' : ''
+        const tagClickedStyle = entityId &&
+        clickedTagId &&
+        clickedTagId === entityId &&
+        clickedTagText &&
+        clickedTagText === entityPlaceholder
+            ? 'tag-clicked' : ''
 
-        const showTooltip = this.state.showTooltip && getTooltipTag().includes(entity.type);
+        const showTooltip = this.state.showTooltip && getTooltipTag().includes(entityType);
         if ( searchParams.active )  {
             let text = this.markSearch(children[0].props.text, searchParams);
             return <div className={"tag-container"}
                 /*contentEditable="false"
                 suppressContentEditableWarning={true}*/>
-                {showTooltip && <TooltipInfo text={entity.data.placeholder} isTag tagStyle={tagStyle}/>}
+                {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
                 <span data-offset-key={offsetkey}
                       className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
                       unselectable="on"
@@ -111,7 +117,7 @@ class TagEntity extends Component {
                       onMouseLeave={() => tooltipToggle()}
                       onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                     /*contentEditable="false"*/
-                      onClick={() => onClick(start, end, entity.data.id)}>
+                      onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
                 {text}
             </span>
                 <span style={{display:'none'}}>{children}</span>
@@ -120,7 +126,7 @@ class TagEntity extends Component {
             return <div className={"tag-container"}
                 /*contentEditable="false"
                 suppressContentEditableWarning={true}*/>
-                {showTooltip && <TooltipInfo text={entity.data.placeholder} isTag tagStyle={tagStyle}/>}
+                {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
                 <span data-offset-key={offsetkey}
                       className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
                       unselectable="on"
@@ -129,7 +135,7 @@ class TagEntity extends Component {
                       onMouseLeave={() => tooltipToggle()}
                       onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                     /*contentEditable="false"*/
-                      onClick={() => onClick(start, end, entity.data.id)}>
+                      onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
                 {children}
             </span>
             </div>
