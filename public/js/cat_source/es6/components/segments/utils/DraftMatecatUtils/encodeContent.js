@@ -19,7 +19,7 @@ const encodeContent = (originalEditorState, plainText = '') => {
 
     // sometimes there is no text between  <g id="n"> and </g> and backend merges them in <g id="n"/>
     // We have to split g tag selfclosed in g tag open and g tag closed
-    plainText = plainText.replace(/&lt;g id="([^&gt]+?)"\s?\/&gt;/gi, '&lt;g id="$1"&gt;&lt;\/g&gt;')
+    plainText = plainText.replace(/&lt;g\sid="((?:(?!&gt;).)+?)"\s?\/&gt;/gi, '&lt;g id="$1"&gt;&lt;\/g&gt;')
     // Create entities
     const entitiesFromMap = createNewEntitiesFromMap(originalEditorState, excludedTags, plainText);
     let {contentState, tagRange} = entitiesFromMap;
