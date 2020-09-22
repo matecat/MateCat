@@ -13,13 +13,27 @@
  */
 
 const tagSignatures = {
-    'ph': {
-        type: 'ph',
-        regex: /&lt;ph.*?id=".*?".*?equiv-text="base64:(.*?)".*?&gt;/gi,
+    'phUber': {
+        type: 'phUber',
+        regex: /&lt;ph\sid="((?:(?!&gt;).)+?)"\sdataRef="((?:(?!&gt;).)+?)"\/&gt;/gi,
         selfClosing: true,
         isClosure: false,
         placeholder: null,
-        placeholderRegex: /&lt;ph.*?id="(?:.*?)".*?equiv-text="base64:(.*?)".*?&gt;/,
+        placeholderRegex: /&lt;ph\sid="(?:(?:(?!&gt;).)+?)"\sdataRef="((?:(?!&gt;).)+?)"\/&gt;/,
+        decodeNeeded: false,
+        errorCheckAvailable: true,
+        lexiqaAvailable: false,
+        glossaryAvailable: false,
+        style: 'tag-selfclosed tag-ph',
+        showTooltip: true
+    },
+    'ph': {
+        type: 'ph',
+        regex: /&lt;ph\sid="((?:(?!&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/gi,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: null,
+        placeholderRegex: /&lt;ph\sid="(?:(?:(?!&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/,
         decodeNeeded: true,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
