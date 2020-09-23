@@ -30,7 +30,7 @@ class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, getUpdatedSegmentInfo, getClickedTagId} = this;
+        const {onEntityClick, getUpdatedSegmentInfo, getClickedTagInfo} = this;
         this.originalSource = this.props.segment.segment;
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
@@ -44,7 +44,7 @@ class SegmentSource extends React.Component {
                 props: {
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
-                    getClickedTagId: getClickedTagId,
+                    getClickedTagInfo: getClickedTagInfo,
                     isTarget: false,
                     getSearchParams: this.getSearchParams,
                     isRTL: config.isSourceRTL
@@ -434,11 +434,11 @@ class SegmentSource extends React.Component {
     }
 
     onBlurEvent = () => {
-        const {setClickedTagId} = this.props;
-        setClickedTagId();
+        const {setClickedTagId, clickedTagId} = this.props;
+        if (clickedTagId) setClickedTagId();
     };
 
-    onEntityClick = (start, end, id) => {
+    onEntityClick = (start, end, id, text) => {
         const {editorState} = this.state;
         const {setClickedTagId} = this.props;
         // Use _latestEditorState to get latest selection
@@ -455,15 +455,15 @@ class SegmentSource extends React.Component {
             );
             this.setState({editorState: newEditorState});
             // Highlight
-            setClickedTagId(id);
+            setClickedTagId(id, text, true);
         }catch (e) {
             console.log('Invalid selection')
         }
     };
 
-    getClickedTagId = () => {
-        const {clickedTagId} = this.props;
-        return clickedTagId;
+    getClickedTagInfo = () => {
+        const {clickedTagId, tagClickedInSource, clickedTagText} = this.props;
+        return {clickedTagId, tagClickedInSource, clickedTagText};
     };
 
     // Needed to "unlock" segment for a successful copy/paste or dragNdrop
@@ -523,13 +523,14 @@ class SegmentSource extends React.Component {
 
     getUpdatedSegmentInfo= () => {
         const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
-        const {tagRange} = this.state;
+        const {tagRange, editorState} = this.state;
         return{
             warnings,
             tagMismatch,
             tagRange,
             segmentOpened: opened,
-            missingTagsInTarget
+            missingTagsInTarget,
+            currentSelection: editorState.getSelection()
         }
     }
 }

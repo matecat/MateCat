@@ -676,19 +676,19 @@ class SegmentsContainer extends React.Component {
         console.log('React component Error', e);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        this.lastListSize = this.state.segments.size;
-        if (this.state.scrollTo !== null && this.state.segments.size > 0) {
-            setTimeout(() => {
-                this.setState({
-                    scrollTo: null,
-                    scrollToSelected: false,
-                });
-            });
-        }
-        this.segmentContainerVisible = false;
-        $('#hiddenHtml section').css('display', 'none');
-    }
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		this.lastListSize = this.state.segments.size;
+		if (this.state.scrollTo !== null && this.state.segments.size > 0) {
+			setTimeout(() => {
+				this.setState({
+					scrollTo: null,
+					scrollToSelected: false
+				});
+			});
+
+		}
+		this.segmentContainerVisible = false;
+	}
 
 	render() {
 		let scrollToObject = this.getIndexToScroll();

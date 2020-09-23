@@ -127,6 +127,10 @@ class NewController extends ajaxController {
                 'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'get_public_matches' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'instructions'    => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_REQUIRE_ARRAY,
+                ]
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -580,6 +584,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
         $projectStructure[ 'due_date' ]                     = ( !isset( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
+        $projectStructure[ 'instructions' ]                 = $this->postInput[ 'instructions' ];
 
         if ( $this->user ) {
             $projectStructure[ 'userIsLogged' ] = true;
