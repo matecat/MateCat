@@ -25,7 +25,7 @@ import insertTag from "./utils/DraftMatecatUtils/TagMenu/insertTag";
 import matchTag from "./utils/DraftMatecatUtils/matchTag";
 import checkForMissingTags from "./utils/DraftMatecatUtils/TagMenu/checkForMissingTag";
 import updateEntityData from "./utils/DraftMatecatUtils/updateEntityData";
-const {hasCommandModifier, isOptionKeyCommand} = KeyBindingUtil;
+const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import insertText from "./utils/DraftMatecatUtils/insertText";
@@ -421,9 +421,14 @@ class Editarea extends React.Component {
         }else if(e.key === 'Tab'){
             return e.shiftKey ? null : 'insert-tab-tag';
         }else if( (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
-            hasCommandModifier(e) &&
-            e.shiftKey){ // e.key is an &nbsp;
-            return 'insert-nbsp-tag';
+            isCtrlKeyCommand(e) &&
+            e.shiftKey){
+            return 'insert-nbsp-tag'; // Windows
+        }else if( (e.key === ' ' || e.key === 'Spacebar' || e.key === ' ') &&
+            !e.shiftKey &&
+            e.altKey &&
+            isOptionKeyCommand(e)){
+            return 'insert-nbsp-tag'; // MacOS
         }else if (e.key === 'ArrowLeft' && !hasCommandModifier(e) && !e.altKey) {
             if (e.shiftKey) {
                 return 'left-nav-shift';
