@@ -135,15 +135,13 @@
     &:after{
       border:none;
     }
-    span{
-      span {
-        display: inline-block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 64px;
-        vertical-align: middle;
-      }
+    span[data-text="true"]{
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 64px;
+      vertical-align: middle;
     }
   }
 
