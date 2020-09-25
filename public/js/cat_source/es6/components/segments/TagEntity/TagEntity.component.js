@@ -100,12 +100,18 @@ class TagEntity extends Component {
         clickedTagId === entityId &&
         clickedTagText &&
         clickedTagText === entityPlaceholder
-            ? 'tag-clicked' : ''
+            ? 'tag-clicked' : '';
 
+        // show tooltip only on configured tag
         const showTooltip = this.state.showTooltip && getTooltipTag().includes(entityType);
+        // show tooltip only if text too long
+        const textSpanDisplayed = this.tagRef && this.tagRef.querySelector('span[data-text="true"]');
+        const shouldTooltipOnHover = textSpanDisplayed && textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth;
+
         if ( searchParams.active )  {
             let text = this.markSearch(children[0].props.text, searchParams);
             return <div className={"tag-container"}
+                        ref={(ref) => this.tagRef = ref}
                 /*contentEditable="false"
                 suppressContentEditableWarning={true}*/>
                 {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
@@ -113,10 +119,10 @@ class TagEntity extends Component {
                       className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
                       unselectable="on"
                       suppressContentEditableWarning={true}
-                      onMouseEnter={()=> tooltipToggle(true)}
+                      onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
                       onMouseLeave={() => tooltipToggle()}
                       onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
-                    /*contentEditable="false"*/
+                      /*contentEditable="false"*/
                       onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
                 {text}
             </span>
@@ -124,24 +130,25 @@ class TagEntity extends Component {
             </div>
         } else {
             return <div className={"tag-container"}
-                /*contentEditable="false"
-                suppressContentEditableWarning={true}*/>
-                {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
-                <span data-offset-key={offsetkey}
-                      className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
-                      unselectable="on"
-                      suppressContentEditableWarning={true}
-                      onMouseEnter={()=> tooltipToggle(true)}
-                      onMouseLeave={() => tooltipToggle()}
-                      onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
-                    /*contentEditable="false"*/
-                      onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
-                {children}
-            </span>
-            </div>
+                        ref={(ref) => this.tagRef = ref}
+                        /*contentEditable="false"
+                        suppressContentEditableWarning={true}*/>
+                        {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
+                        <span data-offset-key={offsetkey}
+                              className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
+                              unselectable="on"
+                              suppressContentEditableWarning={true}
+                              onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
+                              onMouseLeave={() => tooltipToggle()}
+                              onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
+                              /*contentEditable="false"*/
+                              onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
+                        {children}
+                    </span>
+                </div>
         }
     }
-
+    
     updateTagStyle = () => {
         this.setState({
             tagStyle: this.selectCorrectStyle(),

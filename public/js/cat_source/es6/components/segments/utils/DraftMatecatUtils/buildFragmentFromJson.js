@@ -2,17 +2,19 @@ import {ContentBlock, BlockMapBuilder, CharacterMetadata} from "draft-js";
 import Immutable  from 'immutable';
 
 const buildFragmentFromJson = (fragmentObject) => {
-    const {OrderedMap, List} = Immutable;
+    const {OrderedMap, List, OrderedSet} = Immutable;
 
     //const fragmentContent =  JSON.parse(text);
-    const fragmentMap = new OrderedMap(fragmentObject);
+    const fragmentMap = OrderedMap(fragmentObject);
 
     let blocks = [];
     fragmentMap.forEach((block) => {
         // Rebuild CharacterMetadata
         let charsArray = [];
         block.characterList.forEach(char => {
-            charsArray.push(new CharacterMetadata(char))
+            //const EMPTY_SET = OrderedSet();
+            const charStyle = OrderedSet(char.style);
+            charsArray.push(CharacterMetadata.create({style: charStyle, entity:char.entity}))
         });
         const charList = new List(charsArray);
 

@@ -21,6 +21,7 @@ class SegmentCommentsContainer extends React.Component {
         this.types = { sticky: 3, resolve: 2, comment: 1 };
         this.updateComments = this.updateComments.bind(this);
         this.setFocusOnInput = this.setFocusOnInput.bind(this);
+        this.setTeamUsers = this.setTeamUsers.bind(this);
     }
 
     closeComments(e) {
@@ -57,6 +58,12 @@ class SegmentCommentsContainer extends React.Component {
                 user: user,
             });
         }
+    }
+
+    setTeamUsers(users) {
+        this.setState({
+            teamUsers: users
+        })
     }
 
     getComments() {
@@ -291,6 +298,7 @@ class SegmentCommentsContainer extends React.Component {
         CommentsStore.addListener(CommentsConstants.ADD_COMMENT, this.updateComments);
         CommentsStore.addListener(CommentsConstants.STORE_COMMENTS, this.updateComments);
         CommentsStore.addListener(CommentsConstants.SET_FOCUS, this.setFocusOnInput);
+        CommentsStore.addListener(CommentsConstants.SET_TEAM_USERS, this.setTeamUsers);
         this.scrollToBottom();
         this.commentInput.focus();
     }
@@ -299,6 +307,7 @@ class SegmentCommentsContainer extends React.Component {
         CommentsStore.removeListener(CommentsConstants.ADD_COMMENT, this.updateComments);
         CommentsStore.removeListener(CommentsConstants.STORE_COMMENTS, this.updateComments);
         CommentsStore.removeListener(CommentsConstants.SET_FOCUS, this.setFocusOnInput);
+        CommentsStore.removeListener(CommentsConstants.SET_TEAM_USERS, this.setTeamUsers);
     }
 
     render() {
