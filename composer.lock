@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.154.5",
+            "version": "3.155.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "50b1ef32d51d80f35a691e13c34f67b920765c18"
+                "reference": "5a3afb3b3171a133a491d3457e1e7dcaa45ac954"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/50b1ef32d51d80f35a691e13c34f67b920765c18",
-                "reference": "50b1ef32d51d80f35a691e13c34f67b920765c18",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5a3afb3b3171a133a491d3457e1e7dcaa45ac954",
+                "reference": "5a3afb3b3171a133a491d3457e1e7dcaa45ac954",
                 "shasum": ""
             },
             "require": {
@@ -89,7 +89,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2020-09-17T18:22:25+00:00"
+            "time": "2020-09-24T18:13:54+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -202,16 +202,16 @@
         },
         {
             "name": "google/apiclient",
-            "version": "v2.7.1",
+            "version": "v2.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client.git",
-                "reference": "e748d1d5a51166754f13809d35f1fa162cbec530"
+                "reference": "9df720d72c59456b5466e3f66e1e78cfe422a5ba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/e748d1d5a51166754f13809d35f1fa162cbec530",
-                "reference": "e748d1d5a51166754f13809d35f1fa162cbec530",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/9df720d72c59456b5466e3f66e1e78cfe422a5ba",
+                "reference": "9df720d72c59456b5466e3f66e1e78cfe422a5ba",
                 "shasum": ""
             },
             "require": {
@@ -260,7 +260,7 @@
             "keywords": [
                 "google"
             ],
-            "time": "2020-09-08T16:38:08+00:00"
+            "time": "2020-09-18T20:02:04+00:00"
         },
         {
             "name": "google/apiclient-services",
@@ -301,16 +301,16 @@
         },
         {
             "name": "google/auth",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-auth-library-php.git",
-                "reference": "74cad289014f7ef747618480f6b59f6303357f34"
+                "reference": "173191f5defd1d9ae8bdfc28da31b63eb73dd34e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/74cad289014f7ef747618480f6b59f6303357f34",
-                "reference": "74cad289014f7ef747618480f6b59f6303357f34",
+                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/173191f5defd1d9ae8bdfc28da31b63eb73dd34e",
+                "reference": "173191f5defd1d9ae8bdfc28da31b63eb73dd34e",
                 "shasum": ""
             },
             "require": {
@@ -349,7 +349,7 @@
                 "google",
                 "oauth2"
             ],
-            "time": "2020-09-08T16:33:56+00:00"
+            "time": "2020-09-18T20:03:05+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.8",
+            "version": "v1.0.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "ecdaabff4aaf7fba5ccf0ea4591bf4ae99dbc36c"
+                "reference": "039d633e220799b75c0fab9e567d62c7ef5ab89c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/ecdaabff4aaf7fba5ccf0ea4591bf4ae99dbc36c",
-                "reference": "ecdaabff4aaf7fba5ccf0ea4591bf4ae99dbc36c",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/039d633e220799b75c0fab9e567d62c7ef5ab89c",
+                "reference": "039d633e220799b75c0fab9e567d62c7ef5ab89c",
                 "shasum": ""
             },
             "require": {
@@ -748,7 +748,7 @@
                 "php",
                 "xliff"
             ],
-            "time": "2020-09-18T10:39:49+00:00"
+            "time": "2020-09-25T12:11:20+00:00"
         },
         {
             "name": "monolog/monolog",

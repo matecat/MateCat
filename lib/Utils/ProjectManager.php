@@ -1747,10 +1747,10 @@ class ProjectManager {
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
 
-        $xliff_obj = new XliffParser();
+        $xliffParser = new XliffParser();
 
         try {
-            $xliff = $xliff_obj->xliffToArray( $xliff_file_content );
+            $xliff = $xliffParser->xliffToArray( $xliff_file_content );
         } catch ( Exception $e ) {
             throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
         }
