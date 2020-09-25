@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.154.6",
+            "version": "3.155.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "83a1382930359e4d4f4c9187239f059d5b282520"
+                "reference": "5a3afb3b3171a133a491d3457e1e7dcaa45ac954"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/83a1382930359e4d4f4c9187239f059d5b282520",
-                "reference": "83a1382930359e4d4f4c9187239f059d5b282520",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/5a3afb3b3171a133a491d3457e1e7dcaa45ac954",
+                "reference": "5a3afb3b3171a133a491d3457e1e7dcaa45ac954",
                 "shasum": ""
             },
             "require": {
@@ -89,7 +89,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2020-09-18T18:16:42+00:00"
+            "time": "2020-09-24T18:13:54+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.10",
+            "version": "v1.0.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "14a476b25c507d2420c64b0a8875573bbacd5fb5"
+                "reference": "039d633e220799b75c0fab9e567d62c7ef5ab89c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/14a476b25c507d2420c64b0a8875573bbacd5fb5",
-                "reference": "14a476b25c507d2420c64b0a8875573bbacd5fb5",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/039d633e220799b75c0fab9e567d62c7ef5ab89c",
+                "reference": "039d633e220799b75c0fab9e567d62c7ef5ab89c",
                 "shasum": ""
             },
             "require": {
@@ -748,7 +748,7 @@
                 "php",
                 "xliff"
             ],
-            "time": "2020-09-21T14:12:00+00:00"
+            "time": "2020-09-25T12:11:20+00:00"
         },
         {
             "name": "monolog/monolog",
