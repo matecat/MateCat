@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.12",
+            "version": "v1.0.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "d50a3404f4fb4593a70b0f1c975e9be9e809d62e"
+                "reference": "8789c3815978a6ea402e81156c13b2c06521ef18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/d50a3404f4fb4593a70b0f1c975e9be9e809d62e",
-                "reference": "d50a3404f4fb4593a70b0f1c975e9be9e809d62e",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/8789c3815978a6ea402e81156c13b2c06521ef18",
+                "reference": "8789c3815978a6ea402e81156c13b2c06521ef18",
                 "shasum": ""
             },
             "require": {
@@ -748,7 +748,7 @@
                 "php",
                 "xliff"
             ],
-            "time": "2020-09-24T10:34:45+00:00"
+            "time": "2020-09-24T13:28:12+00:00"
         },
         {
             "name": "monolog/monolog",
