@@ -5,15 +5,16 @@ const buildFragmentFromJson = (fragmentObject) => {
     const {OrderedMap, List, OrderedSet} = Immutable;
 
     //const fragmentContent =  JSON.parse(text);
-    const fragmentMap = new OrderedMap(fragmentObject);
+    const fragmentMap = OrderedMap(fragmentObject);
 
     let blocks = [];
     fragmentMap.forEach((block) => {
         // Rebuild CharacterMetadata
         let charsArray = [];
         block.characterList.forEach(char => {
-            const EMPTY_SET = OrderedSet();
-            charsArray.push(CharacterMetadata.create({style: EMPTY_SET, entity:char}))
+            //const EMPTY_SET = OrderedSet();
+            const charStyle = OrderedSet(char.style);
+            charsArray.push(CharacterMetadata.create({style: charStyle, entity:char.entity}))
         });
         const charList = new List(charsArray);
 
