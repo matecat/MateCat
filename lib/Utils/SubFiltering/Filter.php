@@ -12,6 +12,8 @@ namespace SubFiltering;
 use FeatureSet;
 use SubFiltering\Commons\Pipeline;
 use SubFiltering\Filters\CtrlCharsPlaceHoldToAscii;
+use SubFiltering\Filters\DataRefReplace;
+use SubFiltering\Filters\DataRefRestore;
 use SubFiltering\Filters\EncodeToRawXML;
 use SubFiltering\Filters\FromLayer2ToRawXML;
 use SubFiltering\Filters\FromViewNBSPToSpaces;
@@ -72,7 +74,10 @@ class Filter {
      */
     protected $_featureSet;
 
-    protected function __construct() {
+    protected $dataRefMap = [];
+
+    protected function __construct(array $dataRefMap = []) {
+        $this->dataRefMap = $dataRefMap;
     }
 
     /**
@@ -86,18 +91,19 @@ class Filter {
 
     /**
      * @param FeatureSet $featureSet
+     * @param array      $dataRefMap
      *
      * @return Filter
      * @throws \Exception
      */
-    public static function getInstance( FeatureSet $featureSet = null ) {
+    public static function getInstance( FeatureSet $featureSet = null, array $dataRefMap = [] ) {
 
         if ( $featureSet === null ) {
             $featureSet = new FeatureSet();
         }
 
         if ( static::$_INSTANCE === null ) {
-            static::$_INSTANCE = new Filter();
+            static::$_INSTANCE = new Filter($dataRefMap);
         }
 
         static::$_INSTANCE->_featureSet( $featureSet );
@@ -145,6 +151,7 @@ class Filter {
         $channel->addLast( new HtmlPlainTextDecoder() );
         $channel->addLast( new LtGtDoubleEncode() );
         $channel->addLast( new LtGtEncode() );
+        $channel->addLast( new DataRefReplace($this->dataRefMap) );
         /** @var $channel Pipeline */
         $channel = $this->_featureSet->filter( 'fromLayer1ToLayer2', $channel );
 
@@ -249,6 +256,7 @@ class Filter {
     public function fromLayer1ToLayer0( $segment ) {
 
         $channel = new Pipeline();
+        $channel->addLast( new DataRefRestore($this->dataRefMap) );
         $channel->addLast( new FromViewNBSPToSpaces() );
         $channel->addLast( new CtrlCharsPlaceHoldToAscii() );
         $channel->addLast( new MateCatCustomPHToStandardPH() );

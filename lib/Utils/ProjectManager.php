@@ -129,6 +129,7 @@ class ProjectManager {
                             ],
                             'job_segments'                 => [], //array of job_id => [  min_seg, max_seg  ]
                             'segments'                     => [], //array of files_id => segments[  ]
+                            'segments-original-data'       => [], //array of files_id => segments-original-data[  ]
                             'segments_metadata'            => [], //array of segments_metadata
                             'translations'                 => [],
                             'notes'                        => [],
@@ -549,9 +550,9 @@ class ProjectManager {
                 // make a cache package (with work/ only, empty orig/)
                 try {
                     $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
-                } catch ( \Exception $e ){
+                } catch ( \Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -230,
+                            "code"    => -230,
                             "message" => $e->getMessage()
                     ];
                 }
@@ -582,7 +583,7 @@ class ProjectManager {
             $this->_log( $e );
             //Zip file Handling
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                    "code" => $e->getCode(),
+                    "code"    => $e->getCode(),
                     "message" => $e->getMessage()
             ];
         }
@@ -621,7 +622,7 @@ class ProjectManager {
 
                 if ( AbstractFilesStorage::isOnS3() ) {
                     if ( null === $cachedXliffFilePathName ) {
-                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode(',', $_originalFileNames)    ), -6 );
+                        throw new Exception( sprintf( 'Key not found on S3 cache bucket for file %s.', implode( ',', $_originalFileNames ) ), -6 );
                     }
                 } else {
                     if ( !file_exists( $cachedXliffFilePathName ) ) {
@@ -680,23 +681,24 @@ class ProjectManager {
                             "code" => -13, "message" => $e->getMessage()
                     ];
                     //we can not write to disk!! Break project creation
-                }
-                // S3 EXCEPTIONS HERE
-                elseif ($e->getCode() == -200 ) {
+                } // S3 EXCEPTIONS HERE
+                elseif ( $e->getCode() == -200 ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                            "code" => -200,
+                            "code"    => -200,
                             "message" => $e->getMessage()
                     ];
-                } else if ($e->getCode() == 0 ) {
+                } else {
+                    if ( $e->getCode() == 0 ) {
 
-                    // check for 'Invalid copy source encoding' error
-                    $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
+                        // check for 'Invalid copy source encoding' error
+                        $copyErrorMsg = "<Message>Invalid copy source encoding.</Message>";
 
-                    if (strpos($e->getMessage(), $copyErrorMsg) !== false) {
-                        $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                                "code" => -200,
-                                "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
-                        ];
+                        if ( strpos( $e->getMessage(), $copyErrorMsg ) !== false ) {
+                            $this->projectStructure[ 'result' ][ 'errors' ][] = [
+                                    "code"    => -200,
+                                    "message" => 'There was a problem during the upload of your file(s). Please, try to rename your file(s) avoiding non-standard characters'
+                            ];
+                        }
                     }
                 }
                 $this->__clearFailedProject( $e );
@@ -752,7 +754,7 @@ class ProjectManager {
                     ]
             );
 
-            foreach( $totalFilesStructure as $fid => $empty ){
+            foreach ( $totalFilesStructure as $fid => $empty ) {
                 $this->_storeSegments( $fid );
             }
 
@@ -779,7 +781,7 @@ class ProjectManager {
 
                 //invalid Trans-unit value found empty ID
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
-                        "code" => $e->getCode(),
+                        "code"    => $e->getCode(),
                         "message" => $message,
                 ];
             } else {
@@ -1744,8 +1746,9 @@ class ProjectManager {
         $xliff_file_content = $this->getXliffFileContent( $file_info[ 'path_cached_xliff' ] );
         $mimeType           = $file_info[ 'mime_type' ];
 
-        //create Structure fro multiple files
+        // create Structure for multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
+        $this->projectStructure[ 'segments-original-data' ]->offsetSet( $fid, new ArrayObject( [] ) );
 
         $xliffParser = new XliffParser();
 
@@ -1791,6 +1794,19 @@ class ProjectManager {
 
                     $trans_unit_reference = self::sanitizedUnitId( $xliff_trans_unit[ 'attr' ][ 'id' ], $fid );
 
+                    // check if there is original data
+                    $segmentOriginalData = [];
+                    if ( isset( $xliff_trans_unit[ 'original-data' ] ) and !empty( $xliff_trans_unit[ 'original-data' ] ) ) {
+
+                        $segmentOriginalData = $xliff_trans_unit[ 'original-data' ];
+                        $dataRefMap          = [];
+                        foreach ( $segmentOriginalData as $datum ) {
+                            if ( isset( $datum[ 'attr' ][ 'id' ] ) ) {
+                                $dataRefMap[ $datum[ 'attr' ][ 'id' ] ] = $datum[ 'raw-content' ];
+                            }
+                        }
+                    }
+
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
@@ -1826,15 +1842,15 @@ class ProjectManager {
                                     // before calling html_entity_decode function we convert
                                     // all unicode entities with no corresponding HTML entity
                                     //
-                                    $extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues($extract_external[ 'seg' ]);
-                                    $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ]);
+                                    $extract_external[ 'seg' ]        = CatUtils::restoreUnicodeEntitesToOriginalValues( $extract_external[ 'seg' ] );
+                                    $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ] );
 
                                     // we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
                                     // AND IF IT IS ONLY A CHAR? like "*" ?
                                     // we can't distinguish if it is translated or not
                                     // this means that we lose the tags id inside the target if different from source
-                                    $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded($extract_external[ 'seg' ]);
-                                    $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded($target_extract_external[ 'seg' ]);
+                                    $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
+                                    $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
 
                                     if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
@@ -1882,6 +1898,19 @@ class ProjectManager {
                             ] );
 
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
+
+                            // segment original data
+                            if ( !empty( $dataRefMap ) ) {
+
+                                $dataRefReplacer = new \Matecat\XliffParser\XliffUtils\DataRefReplacer( $dataRefMap );
+
+                                $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
+                                        'map' => $dataRefMap,
+                                ] );
+
+                                $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
+                            }
+
 
                             //increment counter for word count
                             $this->files_word_count += $wordCount;
@@ -1953,6 +1982,19 @@ class ProjectManager {
                         ] );
 
                         $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
+
+                        // segment original data
+                        if ( !empty( $segmentOriginalData ) ) {
+
+                            $dataRefReplacer = new \Matecat\XliffParser\XliffUtils\DataRefReplacer( $segmentOriginalData );
+
+                            $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
+                                    'data'             => $segmentOriginalData,
+                                    'replaced_segment' => $dataRefReplacer->replace( $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) ),
+                            ] );
+
+                            $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
+                        }
 
                         //increment counter for word count
                         $this->files_word_count += $wordCount;
@@ -2042,8 +2084,8 @@ class ProjectManager {
             );
 
             // check if the files were moved
-            if (true !== $moved) {
-                throw new \Exception('Project creation failed. Please refresh page and retry.', -200);
+            if ( true !== $moved ) {
+                throw new \Exception( 'Project creation failed. Please refresh page and retry.', -200 );
             }
 
             $this->projectStructure[ 'file_id_list' ]->append( $fid );
@@ -2097,6 +2139,13 @@ class ProjectManager {
              * @var $this ->projectStructure[ 'segments' ][ $fid ][ $position ] Segments_SegmentStruct
              */
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
+
+            // persist original data map if present
+            if ( isset( $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ) ) {
+                /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
+                $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+                Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $segmentOriginalDataStruct->map );
+            }
 
             if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] ) ) {
                 $this->projectStructure[ 'file_segments_count' ] [ $fid ] = 0;
@@ -2343,11 +2392,11 @@ class ProjectManager {
                 );
 
                 // Use QA to get target segment
-                $chunk = \Chunks_ChunkDao::getByJobID( $jid )[0];
-                $segment = (new Segments_SegmentDao())->getById($translation_row [ 0 ]);
-                $source = $segment->segment;
-                $target = $translation_row [ 2 ];
-                $check = new QA( $source, $target);
+                $chunk   = \Chunks_ChunkDao::getByJobID( $jid )[ 0 ];
+                $segment = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
+                $source  = $segment->segment;
+                $target  = $translation_row [ 2 ];
+                $check   = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
                 $check->setSourceSegLang( $chunk->source );
                 $check->setTargetSegLang( $chunk->target );
