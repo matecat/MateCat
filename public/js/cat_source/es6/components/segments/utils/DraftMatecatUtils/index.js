@@ -39,7 +39,7 @@ import structFromName from "./tagFromTagType";
 import splitBlockAtSelection from "./splitBlockAtSelection";
 import getFragmentFromSelection from "./DraftSource/src/component/handlers/edit/getFragmentFromSelection";
 import buildFragmentFromText from "./buildFragmentFromText";
-import tagFromString from "./tagFromString";
+// import tagFromString from "./tagFromString";
 
 const DraftMatecatUtils = {
 	// Text utils
