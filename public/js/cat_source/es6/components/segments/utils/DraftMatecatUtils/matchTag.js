@@ -1,5 +1,5 @@
 import findTagWithRegex from "./findTagWithRegex";
-import {tagSignatures, getErrorCheckTag} from "./tagModel"
+import {tagSignatures} from "./tagModel"
 
 
 /**
@@ -15,27 +15,27 @@ const matchTag = (plainContent) => {
     // STEP 1 - Find all opening and save offset
     let tagMap;
     let openTags = [];
-    for (let key in tagSignatures) {
-        if(!tagSignatures[key].selfClosing && !tagSignatures[key].isClosure){
-            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagSignatures[key]);
+    for (let tagName in tagSignatures) {
+        if(!tagSignatures[tagName].selfClosing && !tagSignatures[tagName].isClosure){
+            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagName);
             openTags = [...openTags, ...tagMap]
         }
     }
 
     // STEP 2 - Find all closing and save offset
     let closingTags = [];
-    for (let key in tagSignatures) {
-        if(tagSignatures[key].isClosure){
-            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagSignatures[key]);
+    for (let tagName in tagSignatures) {
+        if(tagSignatures[tagName].isClosure){
+            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagName);
             closingTags = [...closingTags, ...tagMap]
         }
     }
 
     // STEP 3 - Find all self-closing tag and save offset
     let selfClosingTags = [];
-    for (let key in tagSignatures) {
-        if(tagSignatures[key].selfClosing){
-            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagSignatures[key]);
+    for (let tagName in tagSignatures) {
+        if(tagSignatures[tagName].selfClosing){
+            tagMap = findTagWithRegex(plainContentLineFeedEscaped, tagName);
             selfClosingTags = [...selfClosingTags, ...tagMap]
         }
     }
@@ -62,7 +62,6 @@ const matchTag = (plainContent) => {
             i++;
         }
     });
-
     return [...openTags, ...closingTags, ...selfClosingTags];
 };
 

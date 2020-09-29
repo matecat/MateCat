@@ -28,7 +28,7 @@ const buildFragmentFromJson = (fragmentObject) => {
             data: block.data,
         });
         // Add
-        blocks.push(new ContentBlock(newBlock))
+        blocks.push(newBlock)
     });
     // Create fragment
     return BlockMapBuilder.createFromArray(blocks);

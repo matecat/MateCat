@@ -55,7 +55,7 @@ const encodeContent = (originalEditorState, plainText = '') => {
 
     // Filter tags to remove nbsp, tab, CR, LF that will not be available in TagsMenu
     tagRange = tagRange.filter(tag => {
-        return getErrorCheckTag().includes(tag.type);
+        return getErrorCheckTag().includes(tag.data.name);
     })
     return {editorState, tagRange};
 };
