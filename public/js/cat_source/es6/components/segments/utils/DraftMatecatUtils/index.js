@@ -35,11 +35,11 @@ import getEntityStrategy from "./getEntityStrategy";
 import moveCursorJumpEntity from "./moveCursorJumpEntity";
 import selectionIsEntity from "./selectionIsEntity";
 import insertEntityAtSelection from "./insertEntityAtSelection";
-import structFromType from "./tagFromTagType";
+import structFromName from "./tagFromTagType";
 import splitBlockAtSelection from "./splitBlockAtSelection";
 import getFragmentFromSelection from "./DraftSource/src/component/handlers/edit/getFragmentFromSelection";
 import buildFragmentFromText from "./buildFragmentFromText";
-
+import tagFromString from "./tagFromString";
 
 const DraftMatecatUtils = {
 	// Text utils
@@ -53,7 +53,8 @@ const DraftMatecatUtils = {
 	matchTag,
 	decodeTagInfo,
 	tagFromEntity,
-	structFromType,
+	/*tagFromString,*/
+	structFromName,
 	// Entity Utils
 	getEntityStrategy,
 	getEntities,

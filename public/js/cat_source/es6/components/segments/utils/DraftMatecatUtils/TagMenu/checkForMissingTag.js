@@ -8,20 +8,26 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
             sourceTags: []
         }
     }
-
     // Rimuovo i tag non necessari (nbsp, \t, \r, \n)
     let filteredSourceTagMap = sourceTagMap.filter( tag => {
-        return getErrorCheckTag().includes(tag.type)
+        return getErrorCheckTag().includes(tag.data.name)
     });
     let filteredTargetTagMap = targetTagMap ? targetTagMap.filter( tag => {
-        return getErrorCheckTag().includes(tag.type)
+        return getErrorCheckTag().includes(tag.data.name)
     }) : [];
+
+    // Annullo gli id, i tag senza openTagId o closeTagId verranno riconosciuti quando inseriti a posteriori
+    /*filteredSourceTagMap = filteredSourceTagMap.map( tagInSource => {
+        tagInSource.data.openTagId = null
+        tagInSource.data.closeTagId = null
+        return tagInSource
+    })*/
 
     // Controlla quali tag del source non sono nel target
     let missingTagInTarget = filteredSourceTagMap.filter( tagInSource => {
         let notFound = true;
         filteredTargetTagMap.forEach( tagInTarget => {
-            if(tagInTarget.data.id === tagInSource.data.id && tagInTarget.type === tagInSource.type){
+            if(tagInTarget.data.id === tagInSource.data.id && tagInTarget.data.name === tagInSource.data.name){
                 notFound = false;
             }
         });

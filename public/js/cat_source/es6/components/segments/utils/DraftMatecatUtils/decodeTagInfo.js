@@ -3,7 +3,7 @@ import {getIdAttributeRegEx, unescapeHTML} from "./textUtils";
 
 /**
  *
- * @param tag
+ * @param tag, tagName
  * @returns {{id: string, content: string}}
  */
 
@@ -12,27 +12,29 @@ const decodeTagInfo = (tag) => {
         id: '',
         content: ''
     };
+    const {name: tagName, encodedText: tagEncodedText} = tag.data || {};
     // if Tag is defined
-    if(tag.type in tagSignatures) {
+    if(tagName in tagSignatures) {
+        const {placeholderRegex, decodeNeeded, placeholder: tagPlaceholder} = tagSignatures[tagName];
         // Catch ID attribute
-        const idMatch = getIdAttributeRegEx().exec(tag.data.encodedText);
+        const idMatch = getIdAttributeRegEx().exec(tagEncodedText);
         if(idMatch && idMatch.length > 1) {
             decodedTagData.id = decodedTagData.id + idMatch[1];
         }
         // Catch Content - if regex exists, try to search, else put placeholder
-        if(tagSignatures[tag.type].placeholderRegex){
-            const contentMatch = tagSignatures[tag.type].placeholderRegex.exec(tag.data.encodedText);
+        if(placeholderRegex){
+            const contentMatch = placeholderRegex.exec(tagEncodedText);
             if(contentMatch && contentMatch.length > 1) {
-                decodedTagData.content =  tagSignatures[tag.type].decodeNeeded ? atob(contentMatch[1]) : contentMatch[1];
+                decodedTagData.content =  decodeNeeded ? atob(contentMatch[1]) : contentMatch[1];
                 decodedTagData.content = unescapeHTML(decodedTagData.content);
-            }else if(tagSignatures[tag.type].placeholder){
-                decodedTagData.content = tagSignatures[tag.type].placeholder;
+            }else if(tagPlaceholder){
+                decodedTagData.content = tagSignatures[tagName].placeholder;
             }
         }else {
-            decodedTagData.content = tagSignatures[tag.type].placeholder;
+            decodedTagData.content = tagPlaceholder;
         }
     }else{
-        decodedTagData.content = '<>'
+        decodedTagData.content = '?'
     }
     return decodedTagData;
 };
