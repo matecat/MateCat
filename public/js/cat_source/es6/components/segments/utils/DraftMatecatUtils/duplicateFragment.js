@@ -11,7 +11,6 @@ const duplicateFragment = (fragment, editorState, entitiesMap = null) => {
     const contentState = editorState.getCurrentContent();
     // If entitiesMap exists, probably fragment come from another editor
     const entities = entitiesMap ? entitiesMap : getEntitiesInFragment(fragment, editorState);
-
     const newEntityKeys = {};
 
     let newEditorState = editorState;
@@ -20,6 +19,9 @@ const duplicateFragment = (fragment, editorState, entitiesMap = null) => {
     // Create a clone of all entities available in fragment using the ContentState of the current Editor
     Object.keys(entities).forEach((key) => {
         const entity = entities[key];
+        // Remove linked id
+        /*entity.data.openTagId = null;
+        entity.data.closeTagId = null;*/
         contentStateWithEntity = contentStateWithEntity.createEntity(
             entity.type,
             entity.mutability,
@@ -28,7 +30,6 @@ const duplicateFragment = (fragment, editorState, entitiesMap = null) => {
         // ...then match old entity keys with newly created keys
         newEntityKeys[key] = contentStateWithEntity.getLastCreatedEntityKey();
     });
-
     // Todo: Check on contentStateWithEntity: must be different from contentState to procede with a EditorState.push
     // Update editor history with new EditorState
     newEditorState = EditorState.push(newEditorState, contentStateWithEntity, 'adjust-depth');

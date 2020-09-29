@@ -22,15 +22,13 @@ import SegmentUtils from "../../utils/segmentUtils";
 import CompoundDecorator from "./utils/CompoundDecorator"
 import TagBox from "./utils/DraftMatecatUtils/TagMenu/TagBox";
 import insertTag from "./utils/DraftMatecatUtils/TagMenu/insertTag";
-import matchTag from "./utils/DraftMatecatUtils/matchTag";
 import checkForMissingTags from "./utils/DraftMatecatUtils/TagMenu/checkForMissingTag";
 import updateEntityData from "./utils/DraftMatecatUtils/updateEntityData";
 const {hasCommandModifier, isOptionKeyCommand, isCtrlKeyCommand} = KeyBindingUtil;
 import LexiqaUtils from "../../utils/lxq.main";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import insertText from "./utils/DraftMatecatUtils/insertText";
-import {tagSignatures, TagStruct} from "./utils/DraftMatecatUtils/tagModel";
-import structFromType from "./utils/DraftMatecatUtils/tagFromTagType";
+import {tagSignatures} from "./utils/DraftMatecatUtils/tagModel";
 import SegmentActions from "../../actions/SegmentActions";
 import getFragmentFromSelection
     from "./utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection";
@@ -502,9 +500,9 @@ class Editarea extends React.Component {
         }
     };
 
-    insertTagAtSelection = (tagType) => {
+    insertTagAtSelection = (tagName) => {
         const {editorState} = this.state;
-        const customTag = DraftMatecatUtils.structFromType(tagType);
+        const customTag = DraftMatecatUtils.structFromName(tagName);
         // If tag creation has failed, return
         if(!customTag) return;
         // Start composition mode and remove lexiqa
@@ -568,7 +566,7 @@ class Editarea extends React.Component {
         let newEditorState = editorState;
         let newTagRange = tagRange;
         // Cerco i tag attualmente presenti nell'editor
-        // Todo: Se ci sono altre entità oltre i tag nell'editor, aggiungere l'entityType alla chiamata
+        // Todo: Se ci sono altre entità oltre i tag nell'editor, aggiungere l'entityName alla chiamata
         const entities = DraftMatecatUtils.getEntities(editorState);
         if(tagRange.length !== entities.length){
             console.log('Aggiorno tutte le entità');
@@ -819,17 +817,14 @@ class Editarea extends React.Component {
         let fragmentFromSelection = getFragmentFromSelection(editorState);
         // Il fragment di draft NON FUNZIONA quindi lo ricostruisco
         let tempFrag = DraftMatecatUtils.buildFragmentFromJson(fragmentFromSelection);
-
-        console.log('Entity check:before', DraftMatecatUtils.getEntities(editorState))
-
         // set selection to drop point and check dropping zone
         editorState = EditorState.forceSelection(editorState, selection);
         // Check: Cannot drop anything on entities
         if(DraftMatecatUtils.selectionIsEntity(editorState)){
             return 'handled';
         }
+
         if(text && !editorSync.draggingFromEditArea) {
-            /*console.log('External drag', text)*/
             try {
                 const fragmentContent = JSON.parse(text);
                 let fragment = DraftMatecatUtils.buildFragmentFromJson(fragmentContent.orderedMap);
@@ -848,7 +843,6 @@ class Editarea extends React.Component {
                 return 'not-handled';
             }
         }else{
-            /*console.log('Internal drag')*/
             // when drop is inside the same editor, use default behavior
             // update: default behavior not working
             try {
@@ -881,7 +875,6 @@ class Editarea extends React.Component {
                 editorState = EditorState.push(editorState, contentState, 'insert-fragment');
                 editorState = EditorState.forceSelection(editorState, selection);
 
-                console.log('Entity check:after', DraftMatecatUtils.getEntities(editorState))
                 this.setState({
                     editorState: editorState,
                 }, () => {
@@ -967,6 +960,7 @@ class Editarea extends React.Component {
 
     formatSelection = (format) =>{
         const {editorState} = this.state;
+        // Todo: if selectionIsEntity return
         if(editorState.getSelection().isCollapsed()) {
             return;
         }

@@ -1,18 +1,23 @@
 import {getBuildableTag, tagSignatures, TagStruct} from "./tagModel";
 
-const structFromType = (tagType) => {
+const structFromName = (tagName) => {
     // if tag doesn't exists or is not one of [nbsp,tab, ...]
-    if(!getBuildableTag().includes(tagType)) return null;
+    // Todo: test offset & originalOffset
+
+    const tagType = tagSignatures[tagName].type;
+
+    if(!getBuildableTag().includes(tagName)) return null;
     let newTagStruct = new TagStruct(
         0,
-        tagSignatures[tagType].placeholder.length,
+        tagSignatures[tagName].placeholder.length,
         tagType
     );
-    newTagStruct.data.encodedText = tagSignatures[tagType].encodedPlaceholder;
-    newTagStruct.data.decodedText = tagSignatures[tagType].placeholder;
-    newTagStruct.data.placeholder = tagSignatures[tagType].placeholder;
+    newTagStruct.data.name = tagName;
+    newTagStruct.data.encodedText = tagSignatures[tagName].encodedPlaceholder;
+    newTagStruct.data.decodedText = tagSignatures[tagName].placeholder;
+    newTagStruct.data.placeholder = tagSignatures[tagName].placeholder;
     newTagStruct.data.originalOffset = 0;
 
     return newTagStruct;
 }
-export default structFromType;
+export default structFromName;

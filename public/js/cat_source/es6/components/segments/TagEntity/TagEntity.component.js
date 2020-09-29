@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
-import {tagSignatures, getTooltipTag, getNoLexiqaTag} from "../utils/DraftMatecatUtils/tagModel";
+import {tagSignatures, getTooltipTag} from "../utils/DraftMatecatUtils/tagModel";
 
 class TagEntity extends Component {
     constructor(props) {
         super(props);
 
         const tagStyle = this.selectCorrectStyle();
-
         this.state = {
             selected: false,
             selectionStateInputs: {
@@ -87,7 +86,7 @@ class TagEntity extends Component {
         const {emitSelectionParameters, tooltipToggle} = this;
 
         //const entity = contentState.getEntity(entityKey);
-        const {type: entityType, data: {id: entityId, placeholder: entityPlaceholder}} = contentState.getEntity(entityKey);
+        const {type: entityType, data: {id: entityId, placeholder: entityPlaceholder, name: entityName}} = contentState.getEntity(entityKey);
 
         // Apply style on clicked tag and draggable tag, placed here for performance
         const tagFocusedStyle = anchorOffset === start &&
@@ -103,7 +102,7 @@ class TagEntity extends Component {
             ? 'tag-clicked' : '';
 
         // show tooltip only on configured tag
-        const showTooltip = this.state.showTooltip && getTooltipTag().includes(entityType);
+        const showTooltip = this.state.showTooltip && getTooltipTag().includes(entityName);
         // show tooltip only if text too long
         const textSpanDisplayed = this.tagRef && this.tagRef.querySelector('span[data-text="true"]');
         const shouldTooltipOnHover = textSpanDisplayed && textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth;
@@ -164,7 +163,8 @@ class TagEntity extends Component {
 
         // Check for tag type
         const entityType = entityInstance.type;
-        const style = isRTL && tagSignatures[entityType].styleRTL ? tagSignatures[entityType].styleRTL : tagSignatures[entityType].style;
+        const entityName = entityInstance.data.name;
+        const style = isRTL && tagSignatures[entityName].styleRTL ? tagSignatures[entityName].styleRTL : tagSignatures[entityName].style;
         tagStyle.push(style);
         // Check if tag is in an active segment
         if(!segmentOpened) tagStyle.push('tag-inactive');
@@ -175,39 +175,54 @@ class TagEntity extends Component {
     highlightOnWarnings = () => {
         const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} = this.props;
         const {warnings, tagMismatch, tagRange, segmentOpened, missingTagsInTarget} = getUpdatedSegmentInfo();
-        const draftEntity = contentState.getEntity(entityKey);
+        //const draftEntity = contentState.getEntity(entityKey);
+        const {type: entityType, data: entityData} = contentState.getEntity(entityKey) || {};
+        const {id: entityId, encodedText, openTagId, closeTagId} = entityData || {};
+
         if(!segmentOpened || !tagMismatch) return;
         let tagWarningStyle = '';
         if(tagMismatch.target && tagMismatch.target.length > 0 && isTarget){
             let tagObject;
-            let tagInfo;
             // Todo: Check tag type and tag id instead of string
             tagMismatch.target.forEach(tagString => {
+                // build tag from string
                 //tagObject = DraftMatecatUtils.tagFromString(tagString);
-                //tagInfo = DraftMatecatUtils.decodeTagInfo(tagObject);
-                if(draftEntity.data.encodedText === tagString){
+                /*if(entityType === tagObject.type){
+                    // If tag is closure and openTagId/closeTagId are null, then the tag was added after initial rendering
+                    if(getClosureTag().includes(tagObject.type)){
+                        /!*if(!entityData.openTagId && !entityData.closeTagId){
+                            tagWarningStyle = 'tag-mismatch-error'
+                        }*!/
+                        tagWarningStyle = 'tag-mismatch-error'
+                    }else if(entityData.id === tagObject.data.id){
+                        tagWarningStyle = 'tag-mismatch-error'
+                    }
+                }*/
+                if(entityData.encodedText === tagString){
                     tagWarningStyle = 'tag-mismatch-error'
                 }
             });
         }else if(tagMismatch.source && tagMismatch.source.length > 0 && !isTarget && missingTagsInTarget){
             // Find tag and specific Tag ID in missing tags in target array
             const missingTagInError = missingTagsInTarget.filter( tag => {
-                return tag.data.encodedText === draftEntity.data.encodedText && tag.data.id === draftEntity.data.id
+                return tag.data.encodedText === encodedText && tag.data.id === entityId
             });
             // Array should contain only one item
             if(missingTagInError.length === 1) tagWarningStyle = 'tag-mismatch-error';
             /*tagMismatch.source.forEach(tagString => {
-                if(draftEntity.data.encodedText === tagString){
+                if(entityData.encodedText === tagString){
                     tagWarningStyle = 'tag-mismatch-error'
                 }
             });*/
         }else if(tagMismatch.order && isTarget){
             tagMismatch.order.forEach(tagString => {
-                if(draftEntity.data.encodedText === tagString){
+                if(entityData.encodedText === tagString){
                     tagWarningStyle = 'tag-mismatch-warning'
                 }
             });
-        }
+        }/*else if(entityData.id){
+            tagWarningStyle = 'tag-mismatch-error'
+        }*/
 
         return tagWarningStyle;
 
