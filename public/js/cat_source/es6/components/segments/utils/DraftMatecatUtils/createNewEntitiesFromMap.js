@@ -30,7 +30,7 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
             if (tag.offset < maxCharsInBlocks &&
                 (tag.offset + tag.length) <= maxCharsInBlocks &&
                 tag.offset >= (maxCharsInBlocks - contentBlock.getLength()) &&
-                !excludedTagsType.includes(tag.type)
+                !excludedTagsType.includes(tag.data.name)
             ) {
                 // Clone tag
                 const tagEntity = {...tag};
