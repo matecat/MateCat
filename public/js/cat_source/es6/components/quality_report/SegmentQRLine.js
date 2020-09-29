@@ -82,7 +82,7 @@ class SegmentQRLine extends React.Component {
                         <div className={'tte-container'}>
                             <b>TTE:</b>
                             <div>
-                                <div>{this.getTimeToEdit(this.props.tte)}"</div>
+                                <div>{this.getTimeToEdit(this.props.tte)}</div>
                             </div>
                         </div>
                     ) : null }
@@ -91,7 +91,7 @@ class SegmentQRLine extends React.Component {
                 <div className="segment-content qr-spec tte">
                     <b>TTE:</b>
                     <div>
-                        <div>{this.getTimeToEdit(this.props.tte)}"</div>
+                        <div>{this.getTimeToEdit(this.props.tte)}</div>
                     </div>
                 </div>
             ) : null }

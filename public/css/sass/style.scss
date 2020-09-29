@@ -1649,6 +1649,7 @@ body .footer.showMatches .sub-editor.open {
     text-align: left;
     min-height: 20px;
     background-color: #fff;
+    outline-color: $grey1;
 }
 
 .sub-editor .gl-search .search-source,
@@ -2387,6 +2388,7 @@ border-color: transparent;
 .editarea:focus {
     border: 1px solid #96C8DA;
     box-shadow: inset 0px 0px 2px 2px #96C8DA;
+    outline-color: #96C8DA;
 }
 
 body.rtl-target .editor .editarea span {
