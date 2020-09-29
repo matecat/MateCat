@@ -57,11 +57,11 @@ const tagSignatures = {
         showTooltip: false
     },
     'gCl': {
-        type: 'gCl',
+        type: 'g',
         regex: /&lt;(\/g)&gt;/gi,
         selfClosing: false,
         isClosure: true,
-        placeholder: '</>',
+        placeholder: '</g>',
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: true,
@@ -175,13 +175,14 @@ const tagSignatures = {
     }
 };
 
-function TagStruct(offset, length, type) {
-    this.offset = offset || -1;
-    this.length = length || 0;
-    this.type = type || null;
+function TagStruct(offset = -1, length = 0, type = null, name = null) {
+    this.offset = offset;
+    this.length = length;
+    this.type = type;
     this.mutability = 'IMMUTABLE';
     this.data = {
         id: null,
+        name: name,
         encodedText: null,
         decodedText: null,
         openTagId: null,
@@ -199,45 +200,57 @@ const getSplitBlockTag = () => {
 
 const getBuildableTag = () => {
     return Object.keys(tagSignatures).
-    filter(tagKey =>{return tagSignatures[tagKey].encodedPlaceholder}).
-    map(tagKey => {return tagSignatures[tagKey].type})
+    filter(tagKey => tagSignatures[tagKey].encodedPlaceholder)
 };
 
 // Control params: errorCheckAvailable
 const getErrorCheckTag = () => {
     return Object.keys(tagSignatures).
-    filter(tagKey =>{return tagSignatures[tagKey].errorCheckAvailable}).
-    map(tagKey => {return tagSignatures[tagKey].type})
+    filter(tagKey => tagSignatures[tagKey].errorCheckAvailable)
 };
 
 // Control params: lexiqaAvailable
 const getNoLexiqaTag = () => {
     return Object.keys(tagSignatures).
-    filter(tagKey =>{return !tagSignatures[tagKey].lexiqaAvailable}).
-    map(tagKey => {return tagSignatures[tagKey].type})
+    filter(tagKey => !tagSignatures[tagKey].lexiqaAvailable )
 };
 
 // Control params: glossaryAvailable
 const getNoGlossaryTag = () => {
     return Object.keys(tagSignatures).
-    filter(tagKey =>{return !tagSignatures[tagKey].glossaryAvailable}).
-    map(tagKey => {return tagSignatures[tagKey].type})
+    filter(tagKey => !tagSignatures[tagKey].glossaryAvailable)
 };
 
 // Control params: showTooltip
 const getTooltipTag = () => {
     return Object.keys(tagSignatures).
-    filter(tagKey =>{return tagSignatures[tagKey].showTooltip}).
-    map(tagKey => {return tagSignatures[tagKey].type})
+    filter(tagKey => tagSignatures[tagKey].showTooltip )
 };
 
-const getStyleForType = (type) => {
+const getStyleForName = (tagName) => {
     return Object.keys(tagSignatures).
-    filter(tagKey =>{return tagSignatures[tagKey].type === type}).
-    map(tagKey => {return tagSignatures[tagKey].style})
+    filter(tagKey => tagKey === tagName ).
+    map(tagKey => tagSignatures[tagKey].style)
 }
 
-export {tagSignatures,
+const getCorrectClosureTag = (tagType) => {
+    return Object.keys(tagSignatures).
+    filter(tagKey => {
+        return tagSignatures[tagKey].isClosure &&
+            tagSignatures[tagKey].type === tagType
+    })
+}
+
+const getCorrectTag = (tagType, isClosure = false) => {
+    return Object.keys(tagSignatures).
+    filter(tagKey => {
+        return tagSignatures[tagKey].isClosure === isClosure &&
+            tagSignatures[tagKey].type === tagType
+    })
+}
+
+export {
+    tagSignatures,
     TagStruct,
     getErrorCheckTag,
     getNoLexiqaTag,
@@ -245,4 +258,7 @@ export {tagSignatures,
     getBuildableTag,
     getSplitBlockTag,
     getTooltipTag,
-    getStyleForType};
+    getStyleForName,
+    getCorrectClosureTag,
+    getCorrectTag
+};

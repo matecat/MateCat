@@ -4,7 +4,7 @@
  * @param [entityType]
  * @returns {[]} An array of entities with each entity position
  */
-const getEntities = (editorState, entityType = null) => {
+const getEntities = (editorState, entityName = null) => {
     const content = editorState.getCurrentContent();
     const entities = [];
     content.getBlocksAsArray().forEach((block) => {
@@ -13,7 +13,8 @@ const getEntities = (editorState, entityType = null) => {
             (character) => {
                 if (character.getEntity() !== null) {
                     const entity = content.getEntity(character.getEntity());
-                    if (!entityType || (entityType && entity.getType() === entityType)) {
+                    const entityData = entity.getData();
+                    if (!entityName || (entityName && entityData.name && entityData.name === entityName)) {
                         selectedEntity = {
                             entityKey: character.getEntity(),
                             blockKey: block.getKey(),

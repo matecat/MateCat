@@ -27,21 +27,23 @@ export default canDecorateRange;
 // Exclude tag mapped to avoid lexiqa check
 const checkLexiqaConditions = (charPosition, contentBlock, contentState) => {
     const entityKey = contentBlock.getEntityAt(charPosition);
-    let entityInstance, entityType;
+    let entityInstance, entityData, tagName;
     if(entityKey) {
         entityInstance = contentState.getEntity(entityKey);
-        entityType = entityInstance.getType()
+        entityData = entityInstance.getData();
+        tagName = entityData.name;
     }
-    return getNoLexiqaTag().includes(entityType);
+    return getNoLexiqaTag().includes(tagName);
 };
 
 // Exclude tag mapped to avoid glossary check
 const checkGlossaryConditions = (charPosition, contentBlock, contentState) => {
     const entityKey = contentBlock.getEntityAt(charPosition);
-    let entityInstance, entityType;
+    let entityInstance, entityData, tagName;
     if(entityKey) {
         entityInstance = contentState.getEntity(entityKey);
-        entityType = entityInstance.getType()
+        entityData = entityInstance.getData();
+        tagName = entityData.name;
     }
-    return getNoGlossaryTag().includes(entityType);
+    return getNoGlossaryTag().includes(tagName);
 };

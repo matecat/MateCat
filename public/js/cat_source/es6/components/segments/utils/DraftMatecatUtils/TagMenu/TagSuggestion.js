@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
-import {getStyleForType} from "../tagModel";
+import {getStyleForName} from "../tagModel";
 
 
 const TagSuggestion = React.forwardRef((props,ref) => {
 
-    const tagStyle = getStyleForType(props.suggestion.type);
+    const tagStyle = getStyleForName(props.suggestion.data.name);
 
     return (
         <div
