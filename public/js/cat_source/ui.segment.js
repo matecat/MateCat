@@ -53,7 +53,8 @@
                     target: target,
                     source_lang: config.source_rfc,
                     target_lang: config.target_rfc,
-                    suggestion: suggestion
+                    suggestion: suggestion,
+                    id_segment: sid
                 }
             });
 
