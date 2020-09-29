@@ -17,6 +17,7 @@ use FilesStorage\S3FilesStorage;
 use Jobs\SplitQueue;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Matecat\XliffParser\XliffUtils\XliffVersionDetector;
 use ProjectManager\ProjectManagerModel;
 use SubFiltering\Filter;
 use Teams\TeamStruct;
@@ -818,6 +819,15 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
+
+        $k_file = 0;
+        foreach ( $totalFilesStructure as $fid => $file_info ) {
+            if ( isset( $this->projectStructure[ 'instructions' ][ $k_file ] ) && !empty( $this->projectStructure[ 'instructions' ][ $k_file ] ) ) {
+                $this->_insertInstructions( $fid, $this->projectStructure[ 'instructions' ][ $k_file ] );
+            }
+            $k_file++;
+        }
+
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED ) {
             $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL();
@@ -1744,7 +1754,8 @@ class ProjectManager {
         $xliffParser = new XliffParser();
 
         try {
-            $xliff = $xliffParser->xliffToArray( $xliff_file_content );
+            $xliff        = $xliffParser->xliffToArray( $xliff_file_content );
+            $xliffVersion = XliffVersionDetector::detect( $xliff_file_content );
         } catch ( Exception $e ) {
             throw new Exception( $file_info[ 'original_filename' ], $e->getCode(), $e );
         }
@@ -1815,62 +1826,64 @@ class ProjectManager {
                             if ( empty( $wordCount ) ) {
                                 $show_in_cattool = 0;
                             } else {
-                                $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
-                                $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
-                                $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
-                                $seg_source[ 'raw-content' ]       = $extract_external[ 'seg' ];
 
-                                if ( isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] ) ) {
-                                    $target_extract_external = $this->_strip_external(
-                                            $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ]
-                                    );
-
-                                    //
-                                    // -----------------------------------------------
-                                    // NOTE 2020-06-16
-                                    // -----------------------------------------------
-                                    //
-                                    // before calling html_entity_decode function we convert
-                                    // all unicode entities with no corresponding HTML entity
-                                    //
-                                    $extract_external[ 'seg' ]        = CatUtils::restoreUnicodeEntitesToOriginalValues( $extract_external[ 'seg' ] );
-                                    $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ] );
-
-                                    // we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
-                                    // AND IF IT IS ONLY A CHAR? like "*" ?
-                                    // we can't distinguish if it is translated or not
-                                    // this means that we lose the tags id inside the target if different from source
-                                    $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
-                                    $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
-
-                                    if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
-
-                                        $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
-
-                                        //add an empty string to avoid casting to int: 0001 -> 1
-                                        //useful for idiom internal xliff id
-                                        if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
-                                            $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
-                                        }
-
-                                        /**
-                                         * Trans-Unit
-                                         * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
-                                         */
-                                        $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
-                                                $seg_source[ 'mid' ],
-                                                new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
-                                        );
-
-                                        //seg-source and target translation can have different mrk id
-                                        //override the seg-source surrounding mrk-id with them of target
-                                        $seg_source[ 'mrk-ext-prec-tags' ] = $target_extract_external[ 'prec' ];
-                                        $seg_source[ 'mrk-ext-succ-tags' ] = $target_extract_external[ 'succ' ];
-
-                                    }
-
+                                if ( $xliffVersion === 1 ) {
+                                    $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
+                                    $seg_source[ 'mrk-ext-prec-tags' ] = $extract_external[ 'prec' ];
+                                    $seg_source[ 'mrk-ext-succ-tags' ] = $extract_external[ 'succ' ];
+                                    $seg_source[ 'raw-content' ]       = $extract_external[ 'seg' ];
                                 }
 
+                                if ( isset( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] ) ) {
+
+                                    if ( $xliffVersion === 1 ) {
+                                        $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'seg-target' ][ $position ][ 'raw-content' ] );
+
+                                        //
+                                        // -----------------------------------------------
+                                        // NOTE 2020-06-16
+                                        // -----------------------------------------------
+                                        //
+                                        // before calling html_entity_decode function we convert
+                                        // all unicode entities with no corresponding HTML entity
+                                        //
+                                        $extract_external[ 'seg' ]        = CatUtils::restoreUnicodeEntitesToOriginalValues( $extract_external[ 'seg' ] );
+                                        $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ] );
+
+                                        // we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
+                                        // AND IF IT IS ONLY A CHAR? like "*" ?
+                                        // we can't distinguish if it is translated or not
+                                        // this means that we lose the tags id inside the target if different from source
+                                        $src = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $extract_external[ 'seg' ] );
+                                        $trg = CatUtils::trimAndStripFromAnHtmlEntityDecoded( $target_extract_external[ 'seg' ] );
+
+                                        if ( $this->__isTranslated( $src, $trg, $xliff_trans_unit ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+
+                                            $target = $this->filter->fromRawXliffToLayer0( $target_extract_external[ 'seg' ] );
+
+                                            //add an empty string to avoid casting to int: 0001 -> 1
+                                            //useful for idiom internal xliff id
+                                            if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
+                                                $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
+                                            }
+
+                                            /**
+                                             * Trans-Unit
+                                             * @see http://docs.oasis-open.org/xliff/v1.2/os/xliff-core.html#trans-unit
+                                             */
+                                            $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet(
+                                                    $seg_source[ 'mid' ],
+                                                    new ArrayObject( [ 2 => $target, 4 => $xliff_trans_unit ] )
+                                            );
+
+                                            //seg-source and target translation can have different mrk id
+                                            //override the seg-source surrounding mrk-id with them of target
+                                            $seg_source[ 'mrk-ext-prec-tags' ] = $target_extract_external[ 'prec' ];
+                                            $seg_source[ 'mrk-ext-succ-tags' ] = $target_extract_external[ 'succ' ];
+
+                                        }
+                                    }
+                                }
                             }
 
                             $segStruct = new Segments_SegmentStruct( [
@@ -2100,6 +2113,12 @@ class ProjectManager {
         $idFile = ProjectManagerModel::insertFile( $projectStructure, $file_name, $mime_type, $fileDateSha1Path );
 
         return $idFile;
+    }
+
+
+    protected function _insertInstructions( $fid, $value ) {
+        $metadataDao = new \Files\MetadataDao();
+        $metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
     }
 
     protected function _storeSegments( $fid ) {
