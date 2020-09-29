@@ -7,19 +7,33 @@
         selfClosing: true if tag don't has a closing tag, like </g> for <g>
         isClosure: True if tag is a closure of another tag like </g>,
         placeholder: the string to display instead of encoded tag,
-        placeholderRegex: the regex to find equiv-text content inside the encoded tag
+        placeholderRegex: the regex to find equiv-text content inside the encoded tag. MUST be the first capturing group.
         decodeNeeded: True if equiv-text need decoding
     },
  */
 
 const tagSignatures = {
-    'phUber': {
-        type: 'phUber',
-        regex: /&lt;ph\sid="((?:(?!&gt;).)+?)"\sdataRef="((?:(?!&gt;).)+?)"\/&gt;/gi,
+    'ph1': {
+        type: 'ph',
+        regex: /&lt;ph\sid="((?:(?!dataRef|equiv-text|&gt).)+?)"\sdataRef="((?:(?!equiv-text|&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/gi,
         selfClosing: true,
         isClosure: false,
         placeholder: null,
-        placeholderRegex: /&lt;ph\sid="(?:(?:(?!&gt;).)+?)"\sdataRef="((?:(?!&gt;).)+?)"\/&gt;/,
+        placeholderRegex: /&lt;ph\sid="(?:(?:(?!dataRef|equiv-text|&gt).)+?)"\sdataRef="(?:(?:(?!equiv-text|&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/,
+        decodeNeeded: true,
+        errorCheckAvailable: true,
+        lexiqaAvailable: false,
+        glossaryAvailable: false,
+        style: 'tag-selfclosed tag-ph',
+        showTooltip: true
+    },
+    'ph2': {
+        type: 'ph',
+        regex: /&lt;ph\sid="((?:(?!&gt;|equiv-text|dataRef).)+?)"\sdataRef="((?:(?!&gt;|equiv-text).)+?)"\/&gt;/gi,
+        selfClosing: true,
+        isClosure: false,
+        placeholder: null,
+        placeholderRegex: /&lt;ph\sid="(?:(?:(?!dataRef|equiv-text|&gt;).)+?)"\sdataRef="((?:(?!&gt;|equiv-text).)+?)"\/&gt;/,
         decodeNeeded: false,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
@@ -29,11 +43,11 @@ const tagSignatures = {
     },
     'ph': {
         type: 'ph',
-        regex: /&lt;ph\sid="((?:(?!&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/gi,
+        regex: /&lt;ph\sid="((?:(?!equiv-text|dataRef|&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/gi,
         selfClosing: true,
         isClosure: false,
         placeholder: null,
-        placeholderRegex: /&lt;ph\sid="(?:(?:(?!&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/,
+        placeholderRegex: /&lt;ph\sid="(?:(?:(?!equiv-text|dataRef|&gt;).)+?)"\sequiv-text="base64:((?:(?!&gt;).)+?)"\/&gt;/,
         decodeNeeded: true,
         errorCheckAvailable: true,
         lexiqaAvailable: false,
