@@ -76,10 +76,6 @@ class Filter {
 
     protected $dataRefMap = [];
 
-    protected function __construct(array $dataRefMap = []) {
-        $this->dataRefMap = $dataRefMap;
-    }
-
     /**
      * Update/Add featureSet
      *
@@ -102,14 +98,24 @@ class Filter {
             $featureSet = new FeatureSet();
         }
 
-        if ( static::$_INSTANCE === null ) {
-            static::$_INSTANCE = new Filter($dataRefMap);
+        if ( static::$_INSTANCE === null  ) {
+            static::$_INSTANCE = new Filter();
+        }
+
+        if(!empty($dataRefMap)){
+            static::$_INSTANCE->setDataRefMap($dataRefMap);
         }
 
         static::$_INSTANCE->_featureSet( $featureSet );
 
         return static::$_INSTANCE;
+    }
 
+    /**
+     * @param array $dataRefMap
+     */
+    private function setDataRefMap(array $dataRefMap = []) {
+        $this->dataRefMap = $dataRefMap;
     }
 
     /**
