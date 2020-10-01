@@ -6,7 +6,7 @@ import findTagWithRegex from "../components/segments/utils/DraftMatecatUtils/fin
 const TAGS_UTILS =  {
     // TODO: move it in another module
     prepareTextToSend: function (text) {
-        text = text.replace(/</g, '&lt;').replace(/</g, '&gt;');
+        text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
         var div =  document.createElement('div');
         var $div = $(div);
         $div.html(text);
