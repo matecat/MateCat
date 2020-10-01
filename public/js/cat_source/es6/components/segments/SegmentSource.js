@@ -14,7 +14,7 @@ import {
     activateQaCheckGlossary,
     activateLexiqa
 } from "./utils/DraftMatecatUtils/ContentEncoder";
-import {Editor, EditorState} from "draft-js";
+import {Editor, EditorState, Modifier} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import DraftMatecatUtils from "./utils/DraftMatecatUtils";
@@ -24,7 +24,10 @@ import LexiqaUtils from "../../utils/lxq.main";
 import matchTag from "./utils/DraftMatecatUtils/matchTag";
 import updateLexiqaWarnings from "./utils/DraftMatecatUtils/updateLexiqaWarnings";
 import getFragmentFromSelection from "./utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection";
+import TagUtils from "../../utils/tagUtils";
+import {tagSignatures, getSplitPointTag} from "./utils/DraftMatecatUtils/tagModel";
 //import getFragmentFromSelection from 'draft-js/lib/getFragmentFromSelection';
+
 
 class SegmentSource extends React.Component {
 
@@ -34,8 +37,6 @@ class SegmentSource extends React.Component {
         this.originalSource = this.props.segment.segment;
         this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
-
-
         this.decoratorsStructure = [
             {
                 name: 'tags',
@@ -49,11 +50,9 @@ class SegmentSource extends React.Component {
                     getSearchParams: this.getSearchParams,
                     isRTL: config.isSourceRTL
                 }
-            }
-        ];
+            }];
         const decorator = new CompoundDecorator(this.decoratorsStructure);
         // const decorator = new CompositeDecorator(this.decoratorsStructure);
-
         // Initialise EditorState
         const plainEditorState = EditorState.createEmpty(decorator);
         // Escape html
@@ -64,14 +63,15 @@ class SegmentSource extends React.Component {
         // New EditorState with translation
         const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanSource);
         const {editorState, tagRange} =  contentEncoded;
-
         this.state = {
             source: cleanSource,
             editorState: editorState,
             editAreaClasses : ['targetarea'],
             tagRange: tagRange,
-            unlockedForCopy: false
+            unlockedForCopy: false,
+            editorStateBeforeSplit: editorState,
         };
+        this.splitPoint = this.props.segment.split_group ? this.props.segment.split_group.length -1:  0;
         this.onChange = (editorState) => {
             const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
             if(!entityKey) {
@@ -132,6 +132,7 @@ class SegmentSource extends React.Component {
         }
     }
 
+    // TODO: replaced by updateSplitNumberNew, remove
     updateSplitNumber() {
         if (this.props.segment.splitted) return;
         let numSplits = $(this.splitContainer).find('.splitpoint').length + 1;
@@ -149,6 +150,7 @@ class SegmentSource extends React.Component {
         $(this.splitContainer).find('.splitArea').blur();
     }
 
+    // TODO: replaced by addSplitTag, remove
     addSplitPoint(event) {
         if(window.getSelection().type === 'Range') return false;
         TextUtils.pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"/></span>');
@@ -156,13 +158,14 @@ class SegmentSource extends React.Component {
         this.updateSplitNumber();
     }
 
+    // TODO: replaced by splitSegmentNew, remove
     splitSegment(split) {
         let text = $(this.splitContainer).find('.splitArea').html();
         text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/gi, '##$_SPLIT$##');
         // Rimuovi lo span del vecchio split ( verrà ricalcolato con ##$_SPLIT_$## )
         text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
         // Remove split placeholer if inside tag
-        text = text.replace(/<span contenteditable="false" class=\"(.*?)tag(.*?)\">(.*?)##\$_SPLIT\$##(.*?)<\/span>/gi,
+        text = text.replace(/<span contenteditable="false" class=\"(.*?)tag(.*?)\">((?:(?!<\/span>).)*?)##\$_SPLIT\$##((?:(?!<\/span>).)*?)<\/span>/gi,
             '<span contenteditable="false" class="$1tag$2">$3$4</span>');
         text = TagUtils.prepareTextToSend(text);
         // let splitArray = text.split('##_SPLIT_##');
@@ -329,8 +332,11 @@ class SegmentSource extends React.Component {
     };
 
     componentDidMount() {
-        this.$source = $(this.source);
 
+        SegmentStore.addListener(SegmentConstants.CLOSE_SPLIT_SEGMENT, this.endSplitMode );
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
+
+        this.$source = $(this.source);
         if ( this.props.segment.inSearch ) {
             setTimeout(this.addSearchDecorator());
         }
@@ -341,23 +347,53 @@ class SegmentSource extends React.Component {
         if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source ) {
             setTimeout(this.addLexiqaDecorator());
         }
-
-        this.afterRenderActions();
-
+        /*this.afterRenderActions();*/
         this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType], this.openConcordance);
-        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
 
         setTimeout(()=>this.updateSourceInStore());
     }
 
     componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.CLOSE_SPLIT_SEGMENT, this.endSplitMode);
         this.$source.on('keydown', this.openConcordance);
     }
 
     componentDidUpdate(prevProps) {
-        this.afterRenderActions(prevProps);
+        /*this.afterRenderActions(prevProps);*/
         this.checkDecorators(prevProps);
         this.forceSelectionToUnlockCopy();
+        // Check if splitMode
+        if ( !prevProps.segment.openSplit && this.props.segment.openSplit ) {
+            // if segment splitted, rebuild its original content
+            if ( this.props.segment.splitted ) {
+                let segmentsSplit = this.props.segment.split_group;
+                let sourceHtml = '';
+                // join splitted segment content
+                segmentsSplit.forEach((sid, index)=>{
+                    let segment = SegmentStore.getSegmentByIdToJS(sid);
+                    if ( sid === this.props.segment.sid) {
+                        // if splitted wrap inside highlight span
+                        //sourceHtml += `##$_SPLITSTART$##${segment.segment}##$_SPLITEND$##`
+                        sourceHtml += segment.segment
+                    } else {
+                        // if not splitted, add only content
+                        sourceHtml += segment.segment
+                    }
+                    // add splitPoint after every segment content except for last one
+                    if(index !== segmentsSplit.length - 1){
+                        sourceHtml += '##$_SPLIT$##'
+                    }
+                });
+                // create a new editorState
+                const decorator = new CompoundDecorator(this.decoratorsStructure);
+                const plainEditorState = EditorState.createEmpty(decorator);
+                // add the content
+                const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, sourceHtml);
+                const {editorState: editorStateSplitGroup} =  contentEncoded;
+                // update current editorState
+                this.setState({editorState: editorStateSplitGroup})
+            }
+        }
     }
 
     allowHTML(string) {
@@ -365,20 +401,29 @@ class SegmentSource extends React.Component {
     }
 
     render() {
-
+        const {segment} = this.props;
         const {editorState} = this.state;
-        const {onChange, copyFragment} = this;
+        const {onChange, copyFragment, onBlurEvent, dragFragment, onDragEndEvent, addSplitTag, splitSegmentNew} = this;
+        // Set correct handlers
+        const handlers = !segment.openSplit ?
+            {
+                onCopy: copyFragment,
+                onBlur: onBlurEvent,
+                onDragStart: dragFragment,
+                onDragEnd: onDragEndEvent
+            } :
+            {
+                onClick: () => addSplitTag(),
+                onBlur: onBlurEvent
+            };
 
-        let html = <div ref={(source)=>this.source=source}
-                        className={"source item"}
-                        tabIndex={0}
-                        id={"segment-" + this.props.segment.sid +"-source"}
-                        data-original={this.originalSource}
-                        onCopy={copyFragment}
-                        onBlur={this.onBlurEvent}
-                        onDragStart={this.dragFragment}
-                        onDragEnd={this.onDragEndEvent}
-                    >
+        // Standard editor
+        const editorHtml = <div ref={(source)=>this.source=source}
+                                className={"source item"}
+                                tabIndex={0}
+                                id={"segment-" + segment.sid +"-source"}
+                                data-original={this.originalSource}
+                                {...handlers}>
             <Editor
                 editorState={editorState}
                 onChange={onChange}
@@ -386,51 +431,73 @@ class SegmentSource extends React.Component {
                 readOnly={false}
             />
         </div>;
-        if ( this.props.segment.openSplit ) {
-            if ( this.props.segment.splitted ) {
-                let segmentsSplit = this.props.segment.split_group;
-                let sourceHtml = '';
-                segmentsSplit.forEach((sid, index)=>{
-                    let segment = SegmentStore.getSegmentByIdToJS(sid);
-                    if ( sid === this.props.segment.sid) {
-                        sourceHtml += '<span class="currentSplittedSegment">'+TagUtils.transformPlaceholdersAndTagsNew(segment.segment)+'</span>';
-                    } else {
-                        sourceHtml+= TagUtils.transformPlaceholdersAndTagsNew(segment.segment);
-                    }
-                    if(index !== segmentsSplit.length - 1)
-                        sourceHtml += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
-                });
-                html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
-                    <div className="splitArea" contentEditable = "false"
-                         onClick={(e)=>this.addSplitPoint(e)}
-                         dangerouslySetInnerHTML={this.allowHTML(sourceHtml)}/>
-                    <div className="splitBar">
-                        <div className="buttons">
-                            <a className="ui button cancel-button cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
-                            <a className = {"ui primary button done btn-ok pull-right" } onClick={()=>this.splitSegment()}> Confirm </a>
-                        </div>
-                        <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
-                        </div>
-                    </div>
-                </div >;
-            } else {
-                html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
-                    <div className="splitArea" contentEditable = "false"
-                         onClick={(e)=>this.addSplitPoint(e)}
-                         dangerouslySetInnerHTML={this.allowHTML(TagUtils.transformPlaceholdersAndTagsNew(this.props.segment.segment))}/>
-                    <div className="splitBar">
-                        <div className="buttons">
-                            <a className="ui button cancel-button cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
-                            <a className = {"ui primary button done btn-ok pull-right disabled" } onClick={()=>this.splitSegment()}> Confirm </a>
-                        </div>
-                        <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
-                        </div>
-                    </div>
-                </div >;
-            }
-        }
-        return html;
 
+        // Wrap editor in splitContainer
+        return segment.openSplit ?
+            <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
+                {editorHtml}
+                <div className="splitBar">
+                    <div className="buttons">
+                        <a className="ui button cancel-button cancel btn-cancel" onClick={ ()=>SegmentActions.closeSplitSegment() }>Cancel</a >
+                        <a className = {`ui primary button done btn-ok pull-right ${!!this.splitPoint ? '' : 'disabled'}`} onClick={() => splitSegmentNew()}> Confirm </a>
+                    </div>
+                    {!!this.splitPoint && <div className="splitNum pull-right">
+                        Split in <span className="num">
+                        {this.splitPoint}
+                        </span> segment<span className="plural"/>
+                    </div>}
+                </div>
+            </div >
+            :
+            editorHtml;
+    }
+
+    disableDecorator = (editorState, decoratorName) => {
+        _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
+        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        return EditorState.set( editorState, {decorator} )
+    }
+
+    insertTagAtSelection = (tagName) => {
+        const {editorState} = this.state;
+        const customTag = DraftMatecatUtils.structFromName(tagName);
+        // If tag creation has failed, return
+        if(!customTag) return;
+        // remove lexiqa to avoid insertion error
+        let newEditorState = this.disableDecorator(editorState, 'lexiqa');
+        newEditorState = this.disableDecorator(editorState, 'split');
+        newEditorState = DraftMatecatUtils.insertEntityAtSelection(newEditorState, customTag);
+        this.setState({editorState: newEditorState});
+    }
+
+    addSplitTag = () => {
+        this.insertTagAtSelection('splitPoint');
+        this.updateSplitNumberNew(1);
+    }
+
+    updateSplitNumberNew = (step) => {
+        if (this.props.segment.splitted) return;
+        this.splitPoint += step;
+    }
+
+    splitSegmentNew = (split) => {
+        const {editorState} = this.state;
+        let text = DraftMatecatUtils.decodeSegment(editorState);
+        // Prepare text for backend
+        text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+        SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
+    }
+
+    endSplitMode = () => {
+        const {editorStateBeforeSplit} = this.state;
+        const {segment} = this.props;
+        this.splitPoint = segment.split_group ? segment.split_group.length -1:  0;
+        // TODO: why so much calls endSplitMode??
+        if(segment.openSplit){
+            this.setState({
+                editorState: editorStateBeforeSplit
+            });
+        }
     }
 
     onBlurEvent = () => {
@@ -440,26 +507,57 @@ class SegmentSource extends React.Component {
 
     onEntityClick = (start, end, id, text) => {
         const {editorState} = this.state;
-        const {setClickedTagId} = this.props;
-        // Use _latestEditorState to get latest selection
+        const {setClickedTagId, segment} = this.props;
+        const {isSplitPoint} = this;
         try{
-            // Selection
-            const selectionState = this.editor._latestEditorState.getSelection();
-            let newSelection = selectionState.merge({
+            // Get latest selection
+            let newSelection = this.editor._latestEditorState.getSelection();
+            // force selection on entity
+            newSelection = newSelection.merge({
                 anchorOffset: start,
                 focusOffset: end,
             });
-            const newEditorState = EditorState.forceSelection(
+            let newEditorState = EditorState.forceSelection(
                 editorState,
                 newSelection,
             );
-            this.setState({editorState: newEditorState});
-            // Highlight
+            const contentState = newEditorState.getCurrentContent();
+            // remove split tag
+            if(segment.openSplit && isSplitPoint(contentState, newSelection)){
+                const contentStateWithoutSplitPoint = Modifier.removeRange(
+                    contentState,
+                    newSelection,
+                    'forward'
+                );
+                // set selection before entity
+                newSelection = newSelection.merge({
+                    focusOffset: start,
+                });
+                newEditorState = EditorState.forceSelection(
+                    newEditorState,
+                    newSelection,
+                );
+                this.updateSplitNumberNew(-1);
+                newEditorState = EditorState.set(newEditorState, {currentContent: contentStateWithoutSplitPoint});
+            }
+            // update editorState
             setClickedTagId(id, text, true);
+            this.setState({editorState: newEditorState});
         }catch (e) {
-            console.log('Invalid selection')
+            console.log(e)
         }
     };
+
+    isSplitPoint = (contentState, selection) => {
+        const anchorKey = selection.getAnchorKey();
+        const anchorBlock = contentState.getBlockForKey(anchorKey);
+        const anchorOffset =  selection.getAnchorOffset();
+        const anchorEntityKey = anchorBlock.getEntityAt(anchorOffset);
+        const entityInstance = contentState.getEntity(anchorEntityKey);
+        const entityData = entityInstance.getData();
+        const tagName = entityData ? entityData.name : '';
+        return getSplitPointTag().includes(tagName);
+    }
 
     getClickedTagInfo = () => {
         const {clickedTagId, tagClickedInSource, clickedTagText} = this.props;
@@ -534,6 +632,7 @@ class SegmentSource extends React.Component {
         }
     }
 }
+
 function getEntityStrategy(mutability, callback) {
     return function (contentBlock, callback, contentState) {
         contentBlock.findEntityRanges(
@@ -548,4 +647,5 @@ function getEntityStrategy(mutability, callback) {
         );
     };
 }
+
 export default SegmentSource;

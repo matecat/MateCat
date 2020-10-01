@@ -9,10 +9,11 @@ const structFromName = (tagName) => {
     if(!getBuildableTag().includes(tagName)) return null;
     let newTagStruct = new TagStruct(
         0,
-        tagSignatures[tagName].placeholder.length,
-        tagType
+        tagSignatures[tagName].placeholder ? tagSignatures[tagName].placeholder.length : 0,
+        tagType,
+        tagName
     );
-    newTagStruct.data.name = tagName;
+    //newTagStruct.data.name = tagName;
     newTagStruct.data.encodedText = tagSignatures[tagName].encodedPlaceholder;
     newTagStruct.data.decodedText = tagSignatures[tagName].placeholder;
     newTagStruct.data.placeholder = tagSignatures[tagName].placeholder;

@@ -53,6 +53,7 @@ export const unescapeHTMLLeaveTags = (escapedHTML) => {
         return escapedHTML
             .replace(/&amp;/g,'&')
             .replace(/&nbsp;/g,' ')
+            .replace(/&#39;/g,'’')
             .replace(/&apos;/g,'\'')
             .replace(/&quot;/g,'\"');
     }

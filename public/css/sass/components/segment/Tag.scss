@@ -319,6 +319,35 @@
       }
     }
   }
+
+  &.tag-split{
+    font-size: 14px;
+    font-family: 'icomoon';
+    margin: 0 2px;
+    color: #08BEEC;
+    background: transparent;
+    &:before {
+      border:none;
+    }
+    &:after {
+      border:none;
+    }
+    span{
+      &::selection{
+        color: #002b5c;
+      }
+    }
+    &:hover{
+      &:after {
+        content: "\00d7";
+        color: red;
+        position: absolute;
+        font-size: 18px;
+        margin-left: -12px;
+        margin-top: -6px;
+      }
+    }
+  }
 }
 
 .tag-tooltip{

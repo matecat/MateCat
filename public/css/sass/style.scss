@@ -4463,6 +4463,10 @@ body.cattool .mgmt-table-mt .activemt {
     }
 }
 
+.splitContainer .source.item {
+    width: 100% !important;
+}
+
 .splitBar p,
 .splitBar .splitNum {
     float: left;
@@ -4470,7 +4474,7 @@ body.cattool .mgmt-table-mt .activemt {
 }
 
 .splitBar .splitNum {
-    display: none;
+    /*display: none;*/
     margin-top: 7px;
 }
 
@@ -5400,6 +5404,3 @@ header {
         }
     }
 }
-
-
-
