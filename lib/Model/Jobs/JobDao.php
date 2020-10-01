@@ -548,6 +548,32 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param $jobId
+     * @param $standard_analysis_wc
+     * @param $total_raw_wc
+     *
+     * @return int
+     */
+    public function updateStdWcAndTotalWc( $jobId, $standard_analysis_wc, $total_raw_wc ){
+        $query = "UPDATE jobs 
+                    SET total_raw_wc = :total_raw_wc, standard_analysis_wc = :standard_analysis_wc
+                    WHERE id= :id
+                ";
+
+        $values = [
+                'id' => $jobId,
+                'standard_analysis_wc' => $standard_analysis_wc,
+                'total_raw_wc' => $total_raw_wc,
+        ];
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $query );
+        $stmt->execute($values);
+
+        return $stmt->rowCount();
+    }
+
+    /**
      * @param Jobs_JobStruct $first_job
      * @param                $newPass
      *
