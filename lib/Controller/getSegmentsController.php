@@ -112,7 +112,11 @@ class getSegmentsController extends ajaxController {
             $seg[ 'source_chunk_lengths' ] = json_decode( $seg[ 'source_chunk_lengths' ], true );
             $seg[ 'target_chunk_lengths' ] = json_decode( $seg[ 'target_chunk_lengths' ], true );
 
-            $Filter           = \SubFiltering\Filter::getInstance( $this->featureSet );
+            // inject original data ref map (FOR XLIFF 2.0)
+            $data_ref_map = json_decode($seg['data_ref_map'], true);
+            $seg['data_ref_map'] = $data_ref_map;
+            $Filter = \SubFiltering\Filter::getInstance( $this->featureSet, null !== $data_ref_map ? $data_ref_map : [] );
+
             $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
                     CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
             );
