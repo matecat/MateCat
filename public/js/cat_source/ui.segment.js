@@ -6,7 +6,7 @@
          */
 
         startSegmentTagProjection: function (sid) {
-            UI.getSegmentTagsProjection().done(function(response) {
+            UI.getSegmentTagsProjection(sid).done(function(response) {
                 if (response.errors && !!(response.errors.length || response.errors.code) ) {
                     UI.processErrors(response.errors, 'getTagProjection');
                     SegmentActions.disableTPOnSegment();
@@ -30,7 +30,7 @@
          * Tag Projection: get the tag projection for the current segment
          * @returns translation with the Tag prjection
          */
-        getSegmentTagsProjection: function () {
+        getSegmentTagsProjection: function (sid) {
             var source = UI.currentSegment.find('.source').data('original');
             source = TextUtils.htmlDecode(source).replace(/&quot;/g, '\"');
             source = TextUtils.htmlDecode(source);
