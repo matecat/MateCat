@@ -187,6 +187,22 @@ const tagSignatures = {
         style: 'tag-selfclosed tag-lf',
         showTooltip: false
     }
+    ,
+    'splitPoint':{
+        type: 'splitpoint',
+        regex: /##\$_(SPLIT)\$##/g,
+        selfClosing: true,
+        isClosure: false,
+        placeholder:  '\uf03d', //'\u21F9', //⇹ content: "\f03d";
+        encodedPlaceholder: '##$_SPLIT$##',
+        placeholderRegex: null,
+        decodeNeeded: false,
+        errorCheckAvailable: false,
+        lexiqaAvailable: false,
+        glossaryAvailable: false,
+        style: 'tag-split',
+        showTooltip: false
+    }
 };
 
 function TagStruct(offset = -1, length = 0, type = null, name = null) {
@@ -210,6 +226,10 @@ function TagStruct(offset = -1, length = 0, type = null, name = null) {
 
 const getSplitBlockTag = () => {
     return ['lineFeed', 'carriageReturn']
+};
+
+const getSplitPointTag = () => {
+    return ['splitPoint']
 };
 
 const getBuildableTag = () => {
