@@ -1,35 +1,34 @@
-import ReviewExtendedCategorySelector  from './ReviewExtendedCategorySelector';
-import CommonUtils  from '../../utils/commonUtils';
+import ReviewExtendedCategorySelector from './ReviewExtendedCategorySelector';
+import CommonUtils from '../../utils/commonUtils';
 
-class ReviewExtendedIssuePanel extends React.Component{
-
+class ReviewExtendedIssuePanel extends React.Component {
     constructor(props) {
-        super( props );
-        this.issueCategoriesFlat = JSON.parse( config.lqa_flat_categories );
+        super(props);
+        this.issueCategoriesFlat = JSON.parse(config.lqa_flat_categories);
         this.state = {
             submitDisabled: false,
             categorySelectedIndex: 0,
             categorySelectedId: this.issueCategoriesFlat[0].id,
             enableArrows: false,
-            severityIndex:0
+            severityIndex: 0,
         };
-        this.issueCategories = JSON.parse( config.lqa_nested_categories ).categories;
+        this.issueCategories = JSON.parse(config.lqa_nested_categories).categories;
 
         this.handleShortcutsKeyDown = this.handleShortcutsKeyDown.bind(this);
         this.handleShortcutsKeyUp = this.handleShortcutsKeyUp.bind(this);
     }
     sendIssue(category, severity) {
-        if ( this.state.submitDisabled ) return;
+        if (this.state.submitDisabled) return;
         this.props.setCreationIssueLoader(true);
         this.setState({
-            submitDisabled : true
+            submitDisabled: true,
         });
         let data = [];
         let deferred = $.Deferred();
         let issue = {
-            'id_category'         : category.id,
-            'severity'            : severity,
-            'version'             : this.props.segmentVersion,
+            id_category: category.id,
+            severity: severity,
+            version: this.props.segmentVersion,
         };
 
         if (this.props.selection) {
@@ -46,127 +45,157 @@ class ReviewExtendedIssuePanel extends React.Component{
         }
 
         let segment = this.props.segment;
-        if ( segment.status.toLowerCase() !== 'approved' || segment.revision_number !== ReviewExtended.number ) {
+        if (segment.status.toLowerCase() !== 'approved' || segment.revision_number !== ReviewExtended.number) {
             segment.status = 'approved';
-            API.SEGMENT.setTranslation( segment )
-                .done(  ( response ) => {
+            API.SEGMENT.setTranslation(segment)
+                .done((response) => {
                     issue.version = response.translation.version_number;
                     SegmentActions.setStatus(segment.sid, segment.id_file, segment.status);
-                    SegmentActions.addClassToSegment(segment.sid , 'modified');
+                    SegmentActions.addClassToSegment(segment.sid, 'modified');
                     deferred.resolve();
-                } )
-                .fail( this.handleFail.bind( this ) );
-
+                })
+                .fail(this.handleFail.bind(this));
         } else {
             deferred.resolve();
         }
-		data.push(issue);
+        data.push(issue);
 
-		deferred.then( () => {
+        deferred.then(() => {
             SegmentActions.setStatus(segment.sid, segment.fid, segment.status);
             UI.currentSegment.data('modified', false);
-			SegmentActions.submitIssue(this.props.sid, data)
-				.done( ( data ) => {
+            SegmentActions.submitIssue(this.props.sid, data)
+                .done((data) => {
                     this.setState({
-                        submitDisabled : false
+                        submitDisabled: false,
                     });
                     this.props.submitIssueCallback();
                     this.props.setCreationIssueLoader(false);
-                    setTimeout( (  ) => {
+                    setTimeout(() => {
                         SegmentActions.issueAdded(this.props.sid, data.issue.id);
                     });
-                } )
-				.fail( (response) => this.handleFail(response.responseJSON) ) ;
-		});
-
+                })
+                .fail((response) => this.handleFail(response.responseJSON));
+        });
     }
 
     handleFail(response) {
-        if ( response.errors && response.errors[0].code === -2000 ) {
+        if (response.errors && response.errors[0].code === -2000) {
             UI.processErrors(response.errors, 'createIssue');
         } else {
-            CommonUtils.genericErrorAlertMessage() ;
+            CommonUtils.genericErrorAlertMessage();
         }
         this.props.setCreationIssueLoader(false);
         this.props.handleFail();
-        this.setState({ submitDone : false, submitDisabled : false });
+        this.setState({ submitDone: false, submitDisabled: false });
     }
 
     thereAreSubcategories() {
-        return this.issueCategories[0].subcategories && this.issueCategories[0].subcategories.length > 0 ||
-            this.issueCategories[1].subcategories && this.issueCategories[1].subcategories.length > 0;
+        return (
+            (this.issueCategories[0].subcategories && this.issueCategories[0].subcategories.length > 0) ||
+            (this.issueCategories[1].subcategories && this.issueCategories[1].subcategories.length > 0)
+        );
     }
 
     getCategoriesHtml() {
-
         let categoryComponents = [];
-        this.issueCategories.forEach(function(category, i) {
-            let selectedValue = "";
+        this.issueCategories.forEach(
+            function (category, i) {
+                let selectedValue = '';
 
-            categoryComponents.push(
-                <ReviewExtendedCategorySelector
-                    key={'category-selector-' + i}
-                    sendIssue={this.sendIssue.bind(this)}
-                    selectedValue={selectedValue}
-                    nested={false}
-                    category={category}
-                    sid={this.props.sid}
-                    active={this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id)}
-                    severityActiveIndex={(this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id))? this.state.severityIndex : null}
-                />);
-        }.bind(this));
+                categoryComponents.push(
+                    <ReviewExtendedCategorySelector
+                        key={'category-selector-' + i}
+                        sendIssue={this.sendIssue.bind(this)}
+                        selectedValue={selectedValue}
+                        nested={false}
+                        category={category}
+                        sid={this.props.sid}
+                        active={
+                            this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id)
+                        }
+                        severityActiveIndex={
+                            this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id)
+                                ? this.state.severityIndex
+                                : null
+                        }
+                    />
+                );
+            }.bind(this)
+        );
 
-        return <div>
-                    <div className="re-item-head pad-left-10">Type of issue</div>
-                    {categoryComponents}
-                </div>;
+        return (
+            <div>
+                <div className="re-item-head pad-left-10">Type of issue</div>
+                {categoryComponents}
+            </div>
+        );
     }
 
     getSubCategoriesHtml() {
         let categoryComponents = [];
-        this.issueCategories.forEach(function(category, i) {
-            let selectedValue = "";
-            let subcategoriesComponents = [];
+        this.issueCategories.forEach(
+            function (category, i) {
+                let selectedValue = '';
+                let subcategoriesComponents = [];
 
-            if ( category.subcategories.length > 0 ) {
-                category.subcategories.forEach( (category, ii) => {
-                    let key = '' + i + '-' + ii;
-                    let kk = 'category-selector-' + key ;
-                    let selectedValue = "";
+                if (category.subcategories.length > 0) {
+                    category.subcategories.forEach((category, ii) => {
+                        let key = '' + i + '-' + ii;
+                        let kk = 'category-selector-' + key;
+                        let selectedValue = '';
 
+                        subcategoriesComponents.push(
+                            <ReviewExtendedCategorySelector
+                                key={kk}
+                                selectedValue={selectedValue}
+                                sendIssue={this.sendIssue.bind(this)}
+                                nested={true}
+                                category={category}
+                                sid={this.props.sid}
+                                active={
+                                    this.state.enableArrows &&
+                                    parseInt(this.state.categorySelectedId) === parseInt(category.id)
+                                }
+                                severityActiveIndex={
+                                    this.state.enableArrows &&
+                                    parseInt(this.state.categorySelectedId) === parseInt(category.id)
+                                        ? this.state.severityIndex
+                                        : null
+                                }
+                            />
+                        );
+                    });
+                } else {
                     subcategoriesComponents.push(
                         <ReviewExtendedCategorySelector
-                            key={kk}
+                            key={'default'}
                             selectedValue={selectedValue}
                             sendIssue={this.sendIssue.bind(this)}
                             nested={true}
                             category={category}
                             sid={this.props.sid}
-                            active={this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id)}
-                            severityActiveIndex={(this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id))? this.state.severityIndex : null}
+                            active={
+                                this.state.enableArrows &&
+                                parseInt(this.state.categorySelectedId) === parseInt(category.id)
+                            }
+                            severityActiveIndex={
+                                this.state.enableArrows &&
+                                parseInt(this.state.categorySelectedId) === parseInt(category.id)
+                                    ? this.state.severityIndex
+                                    : null
+                            }
                         />
                     );
-                } );
-            } else {
-                subcategoriesComponents.push(
-                    <ReviewExtendedCategorySelector
-                        key={'default'}
-                        selectedValue={selectedValue}
-                        sendIssue={this.sendIssue.bind(this)}
-                        nested={true}
-                        category={category}
-                        sid={this.props.sid}
-                        active={this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id)}
-                        severityActiveIndex={(this.state.enableArrows && parseInt(this.state.categorySelectedId) === parseInt(category.id))? this.state.severityIndex : null}
-                    />
+                }
+                let html = (
+                    <div key={category.id}>
+                        <div className="re-item-head pad-left-10">{category.label}</div>
+                        {subcategoriesComponents}
+                    </div>
                 );
-            }
-            let html = <div key={category.id}>
-                <div className="re-item-head pad-left-10">{category.label}</div>
-                {subcategoriesComponents}
-            </div>;
-            categoryComponents.push(html);
-        }.bind(this));
+                categoryComponents.push(html);
+            }.bind(this)
+        );
 
         return categoryComponents;
     }
@@ -174,64 +203,72 @@ class ReviewExtendedIssuePanel extends React.Component{
         let idx = this.state.categorySelectedIndex;
         let length = this.issueCategoriesFlat.length;
         switch (direction) {
-            case 'next': return (idx + 1) % length;
-            case 'prev': return (idx === 0) && length - 1 || idx - 1;
-            default:     return idx;
+            case 'next':
+                return (idx + 1) % length;
+            case 'prev':
+                return (idx === 0 && length - 1) || idx - 1;
+            default:
+                return idx;
         }
     }
     getNextSeverityIndex(direction) {
         let idx = this.state.severityIndex;
         let length = this.issueCategoriesFlat[this.state.categorySelectedIndex].severities.length;
         switch (direction) {
-            case 'next': return (idx + 1) % length;
-            case 'prev': return (idx === 0) && length - 1 || idx - 1;
-            default:     return idx;
+            case 'next':
+                return (idx + 1) % length;
+            case 'prev':
+                return (idx === 0 && length - 1) || idx - 1;
+            default:
+                return idx;
         }
     }
     handleShortcutsKeyDown(e) {
         if (e.ctrlKey && e.altKey && !this.state.enableArrows) {
             this.setState({
-                enableArrows: true
+                enableArrows: true,
             });
         }
-        if ( this.state.enableArrows && e.code === "ArrowDown" ){
+        if (this.state.enableArrows && e.code === 'ArrowDown') {
             let index = this.getNextCategoryIndex('next');
             this.setState({
                 categorySelectedIndex: index,
                 categorySelectedId: this.issueCategoriesFlat[index].id,
-                severityIndex:0
+                severityIndex: 0,
             });
-        } else if ( this.state.enableArrows && e.code === "ArrowUp" ){
+        } else if (this.state.enableArrows && e.code === 'ArrowUp') {
             let index = this.getNextCategoryIndex('prev');
             this.setState({
                 categorySelectedIndex: index,
                 categorySelectedId: this.issueCategoriesFlat[index].id,
-                severityIndex:0
+                severityIndex: 0,
             });
-        } else if ( this.state.enableArrows && e.code === "ArrowLeft" ){
+        } else if (this.state.enableArrows && e.code === 'ArrowLeft') {
             let index = this.getNextSeverityIndex('prev');
             this.setState({
-                severityIndex:index
+                severityIndex: index,
             });
-        } else if ( this.state.enableArrows && e.code === "ArrowRight" ){
+        } else if (this.state.enableArrows && e.code === 'ArrowRight') {
             let index = this.getNextSeverityIndex('next');
             this.setState({
-                severityIndex:index
+                severityIndex: index,
             });
-        }
-        else if ( this.state.enableArrows && e.code === "Enter" ){
-            this.sendIssue(this.issueCategoriesFlat[this.state.categorySelectedIndex], this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[this.state.severityIndex].label);
-            setTimeout(()=>SegmentActions.setFocusOnEditArea(), 1000);
+        } else if (this.state.enableArrows && e.code === 'Enter') {
+            this.sendIssue(
+                this.issueCategoriesFlat[this.state.categorySelectedIndex],
+                this.issueCategoriesFlat[this.state.categorySelectedIndex].severities[this.state.severityIndex].label
+            );
+            setTimeout(() => SegmentActions.setFocusOnEditArea(), 1000);
         }
     }
 
     handleShortcutsKeyUp(e) {
-        if ( (!e.ctrlKey || !e.altKey) && this.state.enableArrows ) {
+        if ((!e.ctrlKey || !e.altKey) && this.state.enableArrows) {
             this.setState({
                 enableArrows: false,
                 categorySelectedIndex: 0,
                 categorySelectedId: this.issueCategoriesFlat[0].id,
-                severityIndex: 0
+                severityIndex: 0,
             });
         }
     }
@@ -252,16 +289,22 @@ class ReviewExtendedIssuePanel extends React.Component{
         if (this.thereAreSubcategories()) {
             html = this.getSubCategoriesHtml();
         } else {
-            html = this.getCategoriesHtml()
+            html = this.getCategoriesHtml();
         }
 
-        return<div className="re-issues-box re-to-create" >
-            {/*<h4 className="re-issues-box-title">Error list</h4>*/}
-            {/*<div className="mbc-triangle mbc-triangle-topleft"></div>*/}
-            <div className="re-list errors" id={"re-category-list-" + this.props.sid}  ref={(node)=>this.listElm=node}>
-                {html}
+        return (
+            <div className="re-issues-box re-to-create">
+                {/*<h4 className="re-issues-box-title">Error list</h4>*/}
+                {/*<div className="mbc-triangle mbc-triangle-topleft"></div>*/}
+                <div
+                    className="re-list errors"
+                    id={'re-category-list-' + this.props.sid}
+                    ref={(node) => (this.listElm = node)}
+                >
+                    {html}
+                </div>
             </div>
-        </div>
+        );
     }
 }
 
@@ -269,4 +312,4 @@ ReviewExtendedIssuePanel.defaultProps = {
     handleFail: function () {},
 };
 
-export default ReviewExtendedIssuePanel ;
+export default ReviewExtendedIssuePanel;
