@@ -1105,7 +1105,7 @@ DROP TABLE IF EXISTS `show_clients`;
 /*!50001 DROP VIEW IF EXISTS `show_clients`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `show_clients` AS SELECT 
+/*!50001 CREATE VIEW `show_clients` AS SELECT
  1 AS `host_short`,
  1 AS `users`,
  1 AS `COUNT(*)`*/;
