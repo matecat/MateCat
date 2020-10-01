@@ -49,7 +49,7 @@ class ProjectManager {
     protected $checkGlossary;
 
     /*
-       flag used to indicate TMX check status: 
+       flag used to indicate TMX check status:
        0-not to check, or check passed
        1-still checking, but no useful TM for this project have been found, so far (no one matches this project langpair)
      */
