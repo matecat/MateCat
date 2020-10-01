@@ -1172,6 +1172,7 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.CLOSE_SPLIT_SEGMENT:
             SegmentStore.closeSegmentsSplit();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(SegmentConstants.CLOSE_SPLIT_SEGMENT);
             break;
         case SegmentConstants.SET_CHOOSEN_SUGGESTION:
             SegmentStore.setChoosenSuggestion(action.sid, action.index);
