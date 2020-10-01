@@ -4,8 +4,7 @@ import {getStyleForName} from "../tagModel";
 
 const TagSuggestion = React.forwardRef((props,ref) => {
 
-    const tagStyle = getStyleForName(props.suggestion.data.name);
-
+    const tagStyle = getStyleForName(props.suggestion.data.name).join(' ');
     return (
         <div
             className={`tag-menu-suggestion ${props.isFocused ?  `active` : ''}`}

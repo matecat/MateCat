@@ -280,7 +280,7 @@ const getCorrectTag = (tagType, isClosure = false) => {
     filter(tagKey => {
         return tagSignatures[tagKey].isClosure === isClosure &&
             tagSignatures[tagKey].type === tagType
-    })
+    }).join()
 }
 
 export {
@@ -294,5 +294,6 @@ export {
     getTooltipTag,
     getStyleForName,
     getCorrectClosureTag,
-    getCorrectTag
+    getCorrectTag,
+    getSplitPointTag
 };
