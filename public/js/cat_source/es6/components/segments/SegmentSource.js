@@ -2,18 +2,20 @@
  * React Component .
 
  */
-import React from 'react';
-import SegmentStore from '../../stores/SegmentStore';
-import SegmentActions from '../../actions/SegmentActions';
-import GlossaryUtils from './utils/glossaryUtils';
-import QACheckGlossary from './utils/qaCheckGlossaryUtils';
-import SearchUtils from '../header/cattol/search/searchUtils';
-import TextUtils from '../../utils/textUtils';
-import Shortcuts from '../../utils/shortcuts';
-import EventHandlersUtils from './utils/eventsHandlersUtils';
+import React  from 'react';
+import SegmentStore  from '../../stores/SegmentStore';
+import SegmentActions  from '../../actions/SegmentActions';
+import GlossaryUtils  from './utils/glossaryUtils';
+import QACheckGlossary  from './utils/qaCheckGlossaryUtils';
+import SearchUtils  from '../header/cattol/search/searchUtils';
+import TextUtils  from '../../utils/textUtils';
+import Shortcuts  from '../../utils/shortcuts';
+import EventHandlersUtils  from './utils/eventsHandlersUtils';
 import LXQ from '../../utils/lxq.main';
 
+
 class SegmentSource extends React.Component {
+
     constructor(props) {
         super(props);
 
@@ -36,32 +38,31 @@ class SegmentSource extends React.Component {
             text = text.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
         }
 
-        let escapedSegment = TextUtils.htmlEncode(text.replace(/\"/g, '&quot;'));
+        let escapedSegment = TextUtils.htmlEncode(text.replace(/\"/g, "&quot;"));
         /* this is to show line feed in source too, because server side we replace \n with placeholders */
-        escapedSegment = escapedSegment.replace(config.lfPlaceholderRegex, '\n');
-        escapedSegment = escapedSegment.replace(config.crPlaceholderRegex, '\r');
-        escapedSegment = escapedSegment.replace(config.crlfPlaceholderRegex, '\r\n');
+        escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
+        escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+        escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
         return escapedSegment;
     }
 
     beforeRenderActions() {
         this.props.beforeRenderOrUpdate(this.props.segment.segment);
+
     }
 
     afterRenderActions(prevProps) {
-        let tagMismatchChanged =
-            !_.isUndefined(prevProps) && prevProps.segImmutable.get('tagMismatch')
-                ? !this.props.segImmutable.get('tagMismatch').equals(prevProps.segImmutable.get('tagMismatch'))
-                : true;
+        let tagMismatchChanged = (!_.isUndefined(prevProps) &&
+            prevProps.segImmutable.get('tagMismatch')) ? !this.props.segImmutable.get('tagMismatch').equals(prevProps.segImmutable.get('tagMismatch')): true;
         this.props.afterRenderOrUpdate(this.props.segment.segment, tagMismatchChanged);
         let self = this;
-        if (this.splitContainer) {
-            $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function (e) {
+        if ( this.splitContainer ) {
+            $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 $(this).remove();
                 self.updateSplitNumber();
-            });
+            })
         }
     }
 
@@ -91,7 +92,7 @@ class SegmentSource extends React.Component {
     }
 
     addSplitPoint(event) {
-        if (window.getSelection().type === 'Range') return false;
+        if(window.getSelection().type === 'Range') return false;
         TextUtils.pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"/></span>');
 
         this.updateSplitNumber();
@@ -99,10 +100,7 @@ class SegmentSource extends React.Component {
 
     splitSegment(split) {
         let text = $(this.splitContainer).find('.splitArea').html();
-        text = text.replace(
-            /<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/,
-            '##$_SPLIT$##'
-        );
+        text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/gi, '##$_SPLIT$##');
         text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
         text = TagUtils.prepareTextToSend(text);
         // let splitArray = text.split('##_SPLIT_##');
@@ -119,25 +117,21 @@ class SegmentSource extends React.Component {
     }
 
     markSearch(source) {
-        if (this.props.segment.inSearch) {
+        if ( this.props.segment.inSearch ) {
             return SearchUtils.markText(source, true, this.props.segment.sid);
         }
-        return source;
+        return source
     }
 
     markGlossary(source) {
-        if (this.props.segment.glossary && _.size(this.props.segment.glossary) > 0) {
+        if ( this.props.segment.glossary && _.size(this.props.segment.glossary) > 0 ) {
             return GlossaryUtils.markGlossaryItemsInText(source, this.props.segment.glossary, this.props.segment.sid);
         }
         return source;
     }
 
     markQaCheckGlossary(source) {
-        if (
-            QACheckGlossary.enabled() &&
-            this.props.segment.qaCheckGlossary &&
-            this.props.segment.qaCheckGlossary.length > 0
-        ) {
+        if (QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary && this.props.segment.qaCheckGlossary.length > 0) {
             return QACheckGlossary.markGlossaryUnusedMatches(source, this.props.segment.qaCheckGlossary);
         }
         return source;
@@ -146,7 +140,7 @@ class SegmentSource extends React.Component {
     markLexiqa(source) {
         let searchEnabled = this.props.segment.inSearch;
         if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
-            source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true);
+            source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
         }
         return source;
     }
@@ -154,11 +148,9 @@ class SegmentSource extends React.Component {
     openConcordance(e) {
         e.preventDefault();
         var selection = window.getSelection();
-        if (selection.type === 'Range') {
-            // something is selected
+        if (selection.type === 'Range') { // something is selected
             var str = selection.toString().trim();
-            if (str.length) {
-                // the trimmed string is not empty
+            if (str.length) { // the trimmed string is not empty
                 SegmentActions.openConcordance(this.props.segment.sid, str, false);
             }
         }
@@ -167,19 +159,14 @@ class SegmentSource extends React.Component {
     componentDidMount() {
         this.$source = $(this.source);
 
-        this.$source.on('click', 'mark.inGlossary', (e) => {
+        this.$source.on('click', 'mark.inGlossary',  ( e ) => {
             e.preventDefault();
             SegmentActions.activateTab(this.props.segment.sid, 'glossary');
         });
 
         this.afterRenderActions();
 
-        this.$source.on(
-            'keydown',
-            null,
-            Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType],
-            this.openConcordance
-        );
+        this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType], this.openConcordance);
     }
 
     componentWillUnmount() {
@@ -194,16 +181,10 @@ class SegmentSource extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (
-            QACheckGlossary.enabled() &&
-            this.props.segment.qaCheckGlossary &&
-            this.props.segment.qaCheckGlossary.length
-        ) {
-            $(this.source)
-                .find('.unusedGlossaryTerm')
-                .each((index, item) => QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
+        if ( QACheckGlossary.enabled() && this.props.segment.qaCheckGlossary &&  this.props.segment.qaCheckGlossary.length ) {
+            $(this.source).find('.unusedGlossaryTerm').each((index, item)=>QACheckGlossary.powerTipFn(item, this.props.segment.qaCheckGlossary));
         }
-        this.afterRenderActions(prevProps);
+        this.afterRenderActions(prevProps)
     }
 
     allowHTML(string) {
@@ -213,105 +194,60 @@ class SegmentSource extends React.Component {
     render() {
         let source = this.markSource();
 
-        let html = (
-            <div
-                ref={(source) => (this.source = source)}
-                className={'source item'}
-                tabIndex={0}
-                id={'segment-' + this.props.segment.sid + '-source'}
-                data-original={this.originalSource}
-                dangerouslySetInnerHTML={this.allowHTML(source)}
-                onCopy={this.onCopyEvent.bind(this)}
-                onDragStart={this.onDragEvent.bind(this)}
-            />
-        );
-        if (this.props.segment.openSplit) {
-            if (this.props.segment.splitted) {
+        let html = <div ref={(source)=>this.source=source}
+                        className={"source item"}
+                        tabIndex={0}
+                        id={"segment-" + this.props.segment.sid +"-source"}
+                        data-original={this.originalSource}
+                        dangerouslySetInnerHTML={ this.allowHTML(source) }
+                        onCopy={this.onCopyEvent.bind(this)}
+                        onDragStart={this.onDragEvent.bind(this)}
+        />;
+        if ( this.props.segment.openSplit ) {
+            if ( this.props.segment.splitted ) {
                 let segmentsSplit = this.props.segment.split_group;
                 let sourceHtml = '';
-                segmentsSplit.forEach((sid, index) => {
+                segmentsSplit.forEach((sid, index)=>{
                     let segment = SegmentStore.getSegmentByIdToJS(sid);
-                    if (sid === this.props.segment.sid) {
-                        sourceHtml +=
-                            '<span class="currentSplittedSegment">' +
-                            TagUtils.transformPlaceholdersAndTags(segment.segment) +
-                            '</span>';
+                    if ( sid === this.props.segment.sid) {
+                        sourceHtml += '<span class="currentSplittedSegment">'+TagUtils.transformPlaceholdersAndTags(segment.segment)+'</span>';
                     } else {
-                        sourceHtml += TagUtils.transformPlaceholdersAndTags(segment.segment);
+                        sourceHtml+= TagUtils.transformPlaceholdersAndTags(segment.segment);
                     }
-                    if (index !== segmentsSplit.length - 1)
+                    if(index !== segmentsSplit.length - 1)
                         sourceHtml += '<span class="splitpoint"><span class="splitpoint-delete"></span></span>';
                 });
-                html = (
-                    <div className="splitContainer" ref={(splitContainer) => (this.splitContainer = splitContainer)}>
-                        <div
-                            className="splitArea"
-                            contentEditable="false"
-                            onClick={(e) => this.addSplitPoint(e)}
-                            dangerouslySetInnerHTML={this.allowHTML(sourceHtml)}
-                        />
-                        <div className="splitBar">
-                            <div className="buttons">
-                                <a
-                                    className="ui button cancel-button cancel btn-cancel"
-                                    onClick={() => SegmentActions.closeSplitSegment()}
-                                >
-                                    Cancel
-                                </a>
-                                <a
-                                    className={'ui primary button done btn-ok pull-right'}
-                                    onClick={() => this.splitSegment()}
-                                >
-                                    {' '}
-                                    Confirm{' '}
-                                </a>
-                            </div>
-                            <div className="splitNum pull-right">
-                                {' '}
-                                Split in <span className="num">1 </span> segment
-                                <span className="plural" />
-                            </div>
+                html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
+                    <div className="splitArea" contentEditable = "false"
+                         onClick={(e)=>this.addSplitPoint(e)}
+                         dangerouslySetInnerHTML={this.allowHTML(sourceHtml)}/>
+                    <div className="splitBar">
+                        <div className="buttons">
+                            <a className="ui button cancel-button cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
+                            <a className = {"ui primary button done btn-ok pull-right" } onClick={()=>this.splitSegment()}> Confirm </a>
+                        </div>
+                        <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
                         </div>
                     </div>
-                );
+                </div >;
             } else {
-                html = (
-                    <div className="splitContainer" ref={(splitContainer) => (this.splitContainer = splitContainer)}>
-                        <div
-                            className="splitArea"
-                            contentEditable="false"
-                            onClick={(e) => this.addSplitPoint(e)}
-                            dangerouslySetInnerHTML={this.allowHTML(
-                                TagUtils.transformPlaceholdersAndTags(this.props.segment.segment)
-                            )}
-                        />
-                        <div className="splitBar">
-                            <div className="buttons">
-                                <a
-                                    className="ui button cancel-button cancel btn-cancel"
-                                    onClick={() => SegmentActions.closeSplitSegment()}
-                                >
-                                    Cancel
-                                </a>
-                                <a
-                                    className={'ui primary button done btn-ok pull-right disabled'}
-                                    onClick={() => this.splitSegment()}
-                                >
-                                    {' '}
-                                    Confirm{' '}
-                                </a>
-                            </div>
-                            <div className="splitNum pull-right">
-                                {' '}
-                                Split in <span className="num">1 </span> segment
-                                <span className="plural" />
-                            </div>
+                html =  <div className="splitContainer" ref={(splitContainer)=>this.splitContainer=splitContainer}>
+                    <div className="splitArea" contentEditable = "false"
+                         onClick={(e)=>this.addSplitPoint(e)}
+                         dangerouslySetInnerHTML={this.allowHTML(TagUtils.transformPlaceholdersAndTags(this.props.segment.segment))}/>
+                    <div className="splitBar">
+                        <div className="buttons">
+                            <a className="ui button cancel-button cancel btn-cancel" onClick={()=>SegmentActions.closeSplitSegment()}>Cancel</a >
+                            <a className = {"ui primary button done btn-ok pull-right disabled" } onClick={()=>this.splitSegment()}> Confirm </a>
+                        </div>
+                        <div className="splitNum pull-right"> Split in <span className="num">1 </span> segment<span className="plural"/>
                         </div>
                     </div>
-                );
+                </div >;
             }
         }
         return html;
+
     }
 }
 
