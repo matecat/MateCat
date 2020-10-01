@@ -2,6 +2,9 @@
 
 namespace FilesStorage;
 
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
+
 /**
  * Class FsFilesStorage
  *
@@ -55,7 +58,7 @@ class FsFilesStorage extends AbstractFilesStorage
             // the original does not exists
             // detect which type of xliff
             //check also for the extension, if already present do not force
-            $fileType = \DetectProprietaryXliff::getInfo( $xliffPath );
+            $fileType = XliffProprietaryDetect::getInfo( $xliffPath );
             if ( !$fileType[ 'proprietary' ] && $fileType[ 'info' ][ 'extension' ] != 'sdlxliff' ) {
                 $force_extension = '.sdlxliff';
             }
@@ -215,7 +218,7 @@ class FsFilesStorage extends AbstractFilesStorage
 
         $tmpConvertedFilePath = $convertedFilePath;
         if ( !empty( $newFileName ) ) {
-            if ( !\DetectProprietaryXliff::isXliffExtension( static::pathinfo_fix( $newFileName ) ) ) {
+            if ( !XliffFiles::isXliff( $newFileName ) ) {
                 $convertedExtension   = static::pathinfo_fix( $convertedFilePath, PATHINFO_EXTENSION );
                 $tmpConvertedFilePath = $newFileName . "." . $convertedExtension;
             }

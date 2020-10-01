@@ -2,7 +2,6 @@ import OfflineUtils from './offlineUtils';
 import MBC from './mbc.main';
 
 const CommonUtils = {
-
     millisecondsToTime(milli) {
         var seconds = Math.round((milli / 1000) % 60);
         var minutes = Math.floor((milli / (60 * 1000)) % 60);
@@ -19,34 +18,32 @@ const CommonUtils = {
         var rej = parseFloat(stats.REJECTED);
 
         // If second pass enabled
-        if ( config.secondRevisionsCount && stats.reviews ) {
-
-            var revWords1 = stats.reviews.find(function ( value ) {
+        if (config.secondRevisionsCount && stats.reviews) {
+            var revWords1 = stats.reviews.find(function (value) {
                 return value.revision_number === 1;
             });
 
-            var revWords2 = stats.reviews.find(function ( value ) {
+            var revWords2 = stats.reviews.find(function (value) {
                 return value.revision_number === 2;
             });
 
-            if ( revWords1 && _.round(parseFloat(revWords1.advancement_wc)) > 0 ) {
+            if (revWords1 && _.round(parseFloat(revWords1.advancement_wc)) > 0) {
                 app = parseFloat(revWords1.advancement_wc);
-            } else if ( revWords2 && _.round(parseFloat(revWords2.advancement_wc)) > 0 ) {
+            } else if (revWords2 && _.round(parseFloat(revWords2.advancement_wc)) > 0) {
                 app = parseFloat(revWords2.advancement_wc);
                 t = 'approved-2ndpass';
             }
         }
 
-
         if (tra) t = 'translated';
         if (dra) t = 'draft';
         if (rej) t = 'draft';
 
-        if( !tra && !dra && !rej && !app ){
+        if (!tra && !dra && !rej && !app) {
             t = 'draft';
         }
 
-        return t ;
+        return t;
     },
     levenshteinDistance(s1, s2) {
         //       discuss at: http://phpjs.org/functions/levenshtein/
@@ -74,7 +71,7 @@ const CommonUtils = {
         // BEGIN STATIC
         var split = false;
         try {
-            split = !('0')[0];
+            split = !'0'[0];
         } catch (e) {
             split = true; // Earlier IE may not support access by string index
         }
@@ -101,7 +98,7 @@ const CommonUtils = {
 
             for (s1_idx = 0; s1_idx < s1_len; s1_idx++) {
                 char_s1 = s1[s1_idx];
-                cost = (char_s1 == char_s2) ? 0 : 1;
+                cost = char_s1 == char_s2 ? 0 : 1;
                 var m_min = v0[s1_idx + 1] + 1;
                 var b = v1[s1_idx] + 1;
                 var c = v0[s1_idx] + cost;
@@ -120,7 +117,7 @@ const CommonUtils = {
         return v0[s1_len];
     },
     toTitleCase(str) {
-        return str.replace(/[\wwÀ-ÿЀ-џ]\S*/g, function(txt){
+        return str.replace(/[\wwÀ-ÿЀ-џ]\S*/g, function (txt) {
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
         });
     },
@@ -132,83 +129,83 @@ const CommonUtils = {
      */
     genericErrorAlertMessage() {
         return APP.alert({
-            msg: sprintf('There was an error while saving data to server, please try again. ' +
-                'If the problem persists please contact %s reporting the web address of the current browser tab.',
-                sprintf('<a href="mailto:%s">%s</a>', config.support_mail, config.support_mail ) )
+            msg: sprintf(
+                'There was an error while saving data to server, please try again. ' +
+                    'If the problem persists please contact %s reporting the web address of the current browser tab.',
+                sprintf('<a href="mailto:%s">%s</a>', config.support_mail, config.support_mail)
+            ),
         });
     },
 
-
-
     setBrowserHistoryBehavior() {
         let updateAppByPopState = () => {
-            var segment = UI.getSegmentById( this.parsedHash.segmentId );
+            var segment = UI.getSegmentById(this.parsedHash.segmentId);
             var currentSegment = SegmentStore.getCurrentSegment();
-            if ( currentSegment.sid === this.parsedHash.segmentId ) return;
-            if ( segment.length ) {
-                SegmentActions.openSegment( this.parsedHash.segmentId );
+            if (currentSegment.sid === this.parsedHash.segmentId) return;
+            if (segment.length) {
+                SegmentActions.openSegment(this.parsedHash.segmentId);
             } else {
                 if ($('section').length) {
-                    UI.pointBackToSegment( this.parsedHash.segmentId );
+                    UI.pointBackToSegment(this.parsedHash.segmentId);
                 }
             }
         };
         window.onpopstate = (ev) => {
-
-            if ( this.parsedHash.onlyActionRemoved( window.location.hash ) ) {
-                return ;
+            if (this.parsedHash.onlyActionRemoved(window.location.hash)) {
+                return;
             }
 
-            this.parsedHash = new ParsedHash( window.location.hash );
+            this.parsedHash = new ParsedHash(window.location.hash);
 
-            if ( this.parsedHash.hashCleanupRequired() ) {
+            if (this.parsedHash.hashCleanupRequired()) {
                 this.parsedHash.cleanupHash();
             }
 
             updateAppByPopState();
-
         };
 
-        this.parsedHash = new ParsedHash( window.location.hash );
+        this.parsedHash = new ParsedHash(window.location.hash);
         this.parsedHash.hashCleanupRequired() && this.parsedHash.cleanupHash();
     },
 
     goodbye(e) {
-
         this.clearStorage('contribution');
         //set dont_confirm_leave to 1 when you want the user to be able to leave without confirmation
-        let say_goodbye = ( leave_message ) => {
-
-            if ( typeof leave_message !== 'undefined' ) {
-                if ( !e ) e = window.event;
+        let say_goodbye = (leave_message) => {
+            if (typeof leave_message !== 'undefined') {
+                if (!e) e = window.event;
                 //e.cancelBubble is supported by IE - this will kill the bubbling process.
                 e.cancelBubble = true;
                 e.returnValue = leave_message;
                 //e.stopPropagation works in Firefox.
-                if ( e.stopPropagation ) {
+                if (e.stopPropagation) {
                     e.stopPropagation();
                     e.preventDefault();
                 }
                 //return works for Chrome and Safari
                 return leave_message;
             }
-
         };
-        if ( $( '#downloadProject' ).hasClass( 'disabled' ) || $( 'tr td a.downloading' ).length || $( '.popup-tm td.uploadfile.uploading' ).length ) {
-            return say_goodbye( 'You have a pending operation. Are you sure you want to quit?' );
+        if (
+            $('#downloadProject').hasClass('disabled') ||
+            $('tr td a.downloading').length ||
+            $('.popup-tm td.uploadfile.uploading').length
+        ) {
+            return say_goodbye('You have a pending operation. Are you sure you want to quit?');
         }
 
-        if ( OfflineUtils.offline ) {
-            if(UI.setTranslationTail.length) {
-                return say_goodbye( 'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. ' +
-                    'Do you want to proceed with the refresh ?' );
+        if (OfflineUtils.offline) {
+            if (UI.setTranslationTail.length) {
+                return say_goodbye(
+                    'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. ' +
+                        'Do you want to proceed with the refresh ?'
+                );
             }
         }
-
     },
 
     getIconClass: function (ext) {
-        switch ( ext ) {
+        switch (ext) {
             case 'doc':
             case 'dot':
             case 'docx':
@@ -244,41 +241,40 @@ const CommonUtils = {
             case 'sxc':
             case 'csv':
                 return 'extxls';
-            case  'txt':
+            case 'txt':
                 return 'exttxt';
-            case  'ttx':
-                return  'extttx';
-            case  'itd':
-                return  'extitd';
-            case  'xlf':
-                return  'extxlf';
-            case  'mif':
-                return  'extmif';
-            case  'idml':
-                return  'extidd';
-            case  'xtg':
-                return  'extqxp';
-            case  'xml':
-                return  'extxml';
-            case  'rc':
-                return  'extrcc';
-            case  'resx':
-                return  'extres';
-            case  'sgml':
-                return  'extsgl';
-            case  'sgm':
-                return  'extsgm';
-            case  'properties':
-                return  'extpro';
-            default :
+            case 'ttx':
+                return 'extttx';
+            case 'itd':
+                return 'extitd';
+            case 'xlf':
+                return 'extxlf';
+            case 'mif':
+                return 'extmif';
+            case 'idml':
+                return 'extidd';
+            case 'xtg':
+                return 'extqxp';
+            case 'xml':
+                return 'extxml';
+            case 'rc':
+                return 'extrcc';
+            case 'resx':
+                return 'extres';
+            case 'sgml':
+                return 'extsgl';
+            case 'sgm':
+                return 'extsgm';
+            case 'properties':
+                return 'extpro';
+            default:
                 return 'extxif';
-
-
         }
     },
 
     isLocalStorageNameSupported: function () {
-        var testKey = 'test', storage = window.localStorage;
+        var testKey = 'test',
+            storage = window.localStorage;
         try {
             storage.setItem(testKey, '1');
             storage.removeItem(testKey);
@@ -290,37 +286,40 @@ const CommonUtils = {
 
     /**
      * Local Storage manipulation
-      */
+     */
     // localStorageCurrentSegmentId: (config) ? "currentSegmentId-"+config.id_job+config.password : null,
     localStorageArray: [],
-    isSafari: (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0),
-    isPrivateSafari: () => (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0) && (!CommonUtils.isLocalStorageNameSupported()),
+    isSafari: navigator.userAgent.search('Safari') >= 0 && navigator.userAgent.search('Chrome') < 0,
+    isPrivateSafari: () =>
+        navigator.userAgent.search('Safari') >= 0 &&
+        navigator.userAgent.search('Chrome') < 0 &&
+        !CommonUtils.isLocalStorageNameSupported(),
     getLastSegmentFromLocalStorage: function () {
-        let localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
+        let localStorageCurrentSegmentId = 'currentSegmentId-' + config.id_job + config.password;
         return localStorage.getItem(localStorageCurrentSegmentId);
     },
     setLastSegmentFromLocalStorage: function (segmentId) {
-        let localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
+        let localStorageCurrentSegmentId = 'currentSegmentId-' + config.id_job + config.password;
         try {
             localStorage.setItem(localStorageCurrentSegmentId, segmentId);
         } catch (e) {
-            this.clearStorage("currentSegmentId");
+            this.clearStorage('currentSegmentId');
             localStorage.setItem(localStorageCurrentSegmentId, segmentId);
         }
     },
-    clearStorage: function(what) {
-        $.each(localStorage, function(k) {
-            if(k.substring(0, what.length) === what) {
+    clearStorage: function (what) {
+        $.each(localStorage, function (k) {
+            if (k.substring(0, what.length) === what) {
                 localStorage.removeItem(k);
             }
         });
     },
 
     addInStorage: function (key, val, operation) {
-        if(this.isPrivateSafari()) {
+        if (this.isPrivateSafari()) {
             let item = {
                 key: key,
-                value: val
+                value: val,
             };
             this.localStorageArray.push(item);
         } else {
@@ -333,10 +332,10 @@ const CommonUtils = {
         }
     },
     getFromStorage: function (key) {
-        if(this.isPrivateSafari()) {
+        if (this.isPrivateSafari()) {
             let foundVal = 0;
             $.each(this.localStorageArray, function (index) {
-                if(this.key === key) foundVal = this.value;
+                if (this.key === key) foundVal = this.value;
             });
             return foundVal || false;
         } else {
@@ -344,10 +343,10 @@ const CommonUtils = {
         }
     },
     removeFromStorage: function (key) {
-        if(this.isPrivateSafari()) {
+        if (this.isPrivateSafari()) {
             let foundIndex = 0;
             $.each(this.localStorageArray, function (index) {
-                if(this.key == key) foundIndex = index;
+                if (this.key == key) foundIndex = index;
             });
             this.localStorageArray.splice(foundIndex, 1);
         } else {
@@ -355,10 +354,10 @@ const CommonUtils = {
         }
     },
     addInSessionStorage: function (key, val, operation) {
-        if(this.isPrivateSafari()) {
+        if (this.isPrivateSafari()) {
             let item = {
                 key: key,
-                value: val
+                value: val,
             };
             this.localStorageArray.push(item);
         } else {
@@ -371,10 +370,10 @@ const CommonUtils = {
         }
     },
     getFromSessionStorage: function (key) {
-        if(this.isPrivateSafari()) {
+        if (this.isPrivateSafari()) {
             let foundVal = 0;
             $.each(this.localStorageArray, function (index) {
-                if(this.key === key) foundVal = this.value;
+                if (this.key === key) foundVal = this.value;
             });
             return foundVal || false;
         } else {
@@ -382,10 +381,10 @@ const CommonUtils = {
         }
     },
     removeFromSessionStorage: function (key) {
-        if(this.isPrivateSafari()) {
+        if (this.isPrivateSafari()) {
             let foundIndex = 0;
             $.each(this.localStorageArray, function (index) {
-                if(this.key == key) foundIndex = index;
+                if (this.key == key) foundIndex = index;
             });
             this.localStorageArray.splice(foundIndex, 1);
         } else {
@@ -395,89 +394,89 @@ const CommonUtils = {
     /******************************/
 };
 
-    const ParsedHash = function( hash ) {
-        var split ;
-        var actionSep = ',' ;
-        var chunkSep = '-';
-        var that = this ;
-        var _obj = {};
+const ParsedHash = function (hash) {
+    var split;
+    var actionSep = ',';
+    var chunkSep = '-';
+    var that = this;
+    var _obj = {};
 
-        var processObject = function( obj ) {
-            _obj = obj ;
-        };
+    var processObject = function (obj) {
+        _obj = obj;
+    };
 
-        var processString = function( hash ) {
-            if ( hash.indexOf('#') == 0 ) hash = hash.substr(1);
+    var processString = function (hash) {
+        if (hash.indexOf('#') == 0) hash = hash.substr(1);
 
-            if ( hash.indexOf( actionSep ) != -1 ) {
-                split = hash.split( actionSep );
+        if (hash.indexOf(actionSep) != -1) {
+            split = hash.split(actionSep);
 
-                _obj.segmentId = split[0];
-                _obj.action = split[1];
-            } else {
-                _obj.segmentId = hash ;
-                _obj.action = null;
-            }
-
-            if ( _obj.segmentId.indexOf( chunkSep ) != -1 ) {
-                split = hash.split( chunkSep );
-
-                _obj.splittedSegmentId = split[0];
-                _obj.chunkId = split[1];
-            }
-        };
-
-        if (typeof hash === 'string') {
-            processString( hash );
+            _obj.segmentId = split[0];
+            _obj.action = split[1];
         } else {
-            processObject( hash );
+            _obj.segmentId = hash;
+            _obj.action = null;
         }
 
-        this.segmentId = _obj.segmentId ;
-        this.action = _obj.action ;
-        this.splittedSegmentId = _obj.splittedSegmentId ;
-        this.chunkId = _obj.chunkId ;
+        if (_obj.segmentId.indexOf(chunkSep) != -1) {
+            split = hash.split(chunkSep);
 
-        this.isComment = function() {
-            return _obj.action == MBC.const.commentAction ;
-        };
-
-        this.toString = function() {
-            var hash = '';
-            if ( _obj.splittedSegmentId ) {
-                hash = _obj.splittedSegmentId + chunkSep + _obj.chunkId ;
-            } else {
-                hash = _obj.segmentId ;
-            }
-            if ( _obj.action ) {
-                hash = hash + actionSep + _obj.action ;
-            }
-            return hash ;
-        };
-
-        this.onlyActionRemoved = function( hash ) {
-            var current = new ParsedHash( hash );
-            var diff = this.toString().split( current.toString() );
-            return MBC.enabled() && (diff[1] == actionSep + MBC.const.commentAction) ;
-        };
-
-        this.hashCleanupRequired = function() {
-            return MBC.enabled() && this.isComment();
-        };
-
-        this.cleanupHash = function() {
-            notifyModules();
-            window.location.hash = CommonUtils.parsedHash.segmentId ;
-        };
-
-        var notifyModules = function() {
-            MBC.enabled() && that.isComment() && MBC.setLastCommentHash( that );
+            _obj.splittedSegmentId = split[0];
+            _obj.chunkId = split[1];
         }
     };
 
-    //TODO Move this
-String.prototype.splice = function( idx, rem, s ) {
-    return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
+    if (typeof hash === 'string') {
+        processString(hash);
+    } else {
+        processObject(hash);
+    }
+
+    this.segmentId = _obj.segmentId;
+    this.action = _obj.action;
+    this.splittedSegmentId = _obj.splittedSegmentId;
+    this.chunkId = _obj.chunkId;
+
+    this.isComment = function () {
+        return _obj.action == MBC.const.commentAction;
+    };
+
+    this.toString = function () {
+        var hash = '';
+        if (_obj.splittedSegmentId) {
+            hash = _obj.splittedSegmentId + chunkSep + _obj.chunkId;
+        } else {
+            hash = _obj.segmentId;
+        }
+        if (_obj.action) {
+            hash = hash + actionSep + _obj.action;
+        }
+        return hash;
+    };
+
+    this.onlyActionRemoved = function (hash) {
+        var current = new ParsedHash(hash);
+        var diff = this.toString().split(current.toString());
+        return MBC.enabled() && diff[1] == actionSep + MBC.const.commentAction;
+    };
+
+    this.hashCleanupRequired = function () {
+        return MBC.enabled() && this.isComment();
+    };
+
+    this.cleanupHash = function () {
+        notifyModules();
+        window.location.hash = CommonUtils.parsedHash.segmentId;
+    };
+
+    var notifyModules = function () {
+        MBC.enabled() && that.isComment() && MBC.setLastCommentHash(that);
+    };
+};
+
+//TODO Move this
+String.prototype.splice = function (idx, rem, s) {
+    return this.slice(0, idx) + s + this.slice(idx + Math.abs(rem));
 };
 
 module.exports = CommonUtils;
