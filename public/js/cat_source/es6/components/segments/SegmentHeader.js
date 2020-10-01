@@ -2,12 +2,11 @@
  * React Component .
 
  */
-import React  from 'react';
-import SegmentStore  from '../../stores/SegmentStore';
-import SegmentConstants  from '../../constants/SegmentConstants';
+import React from 'react';
+import SegmentStore from '../../stores/SegmentStore';
+import SegmentConstants from '../../constants/SegmentConstants';
 
 class SegmentHeader extends React.PureComponent {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -15,11 +14,10 @@ class SegmentHeader extends React.PureComponent {
             percentage: '',
             classname: '',
             createdBy: '',
-            visible: false
+            visible: false,
         };
         this.changePercentuage = this.changePercentuage.bind(this);
         this.hideHeader = this.hideHeader.bind(this);
-
     }
 
     changePercentuage(sid, perc, className, createdBy) {
@@ -29,7 +27,7 @@ class SegmentHeader extends React.PureComponent {
                 classname: className,
                 createdBy: createdBy,
                 visible: true,
-                autopropagated: false
+                autopropagated: false,
             });
         }
     }
@@ -38,7 +36,7 @@ class SegmentHeader extends React.PureComponent {
         if (this.props.sid == sid) {
             this.setState({
                 autopropagated: false,
-                visible: false
+                visible: false,
             });
         }
     }
@@ -46,7 +44,6 @@ class SegmentHeader extends React.PureComponent {
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_HEADER, this.changePercentuage);
         SegmentStore.addListener(SegmentConstants.HIDE_SEGMENT_HEADER, this.hideHeader);
-
     }
 
     componentWillUnmount() {
@@ -57,7 +54,7 @@ class SegmentHeader extends React.PureComponent {
     static getDerivedStateFromProps(props, state) {
         if (props.autopropagated) {
             return {
-                autopropagated: true
+                autopropagated: true,
             };
         }
         return null;
@@ -72,29 +69,28 @@ class SegmentHeader extends React.PureComponent {
         var percentageHtml = '';
         if (this.state.autopropagated) {
             autopropagated = <span className="repetition">Autopropagated</span>;
-        } else if ( this.props.repetition ) {
+        } else if (this.props.repetition) {
             autopropagated = <span className="repetition">Repetition</span>;
+        } else if (this.state.visible && this.state.percentage != '') {
+            percentageHtml = (
+                <h2
+                    title={'Created by ' + this.state.createdBy}
+                    className={' visible percentuage ' + this.state.classname}
+                >
+                    {this.state.percentage}
+                </h2>
+            );
         }
-        else if (this.state.visible && this.state.percentage != '') {
-            percentageHtml = <h2 title={"Created by " + this.state.createdBy}
-                                 className={" visible percentuage " + this.state.classname}>{this.state.percentage}</h2>;
 
-        }
-
-        return (this.props.segmentOpened) ? (
-            <div className="header toggle" id={"segment-" + this.props.sid + "-header"}>
+        return this.props.segmentOpened ? (
+            <div className="header toggle" id={'segment-' + this.props.sid + '-header'}>
                 {autopropagated}
                 {percentageHtml}
             </div>
-        ) : ( this.state.autopropagated || this.props.repetition ) ?
-            (
-                <div className={'header header-closed'}>
-                    {autopropagated}
-                </div>
-            ) : null;
+        ) : this.state.autopropagated || this.props.repetition ? (
+            <div className={'header header-closed'}>{autopropagated}</div>
+        ) : null;
     }
 }
 
 export default SegmentHeader;
-
-

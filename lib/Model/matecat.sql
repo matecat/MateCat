@@ -269,6 +269,25 @@ CREATE TABLE `engines` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `file_metadata`
+--
+
+DROP TABLE IF EXISTS `file_metadata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `file_metadata` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_project` bigint(20) NOT NULL,
+  `id_file` bigint(20) NOT NULL,
+  `key` varchar(255) NOT NULL,
+  `value` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_file_idx` (`id_file`),
+  KEY `id_project_idx` (`id_project`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `file_references`
 --
 
@@ -1265,7 +1284,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-09-18 14:34:21
+-- Dump completed on 2020-10-01 12:47:35
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1445,6 +1464,7 @@ INSERT INTO `phinxlog` VALUES (20190812091652,'2019-08-26 17:16:32','2019-08-26 
 INSERT INTO `phinxlog` VALUES (20191220115633,'2019-12-20 13:01:16','2019-12-20 13:01:16');
 INSERT INTO `phinxlog` VALUES (20200205155333,'2020-02-05 15:54:14','2020-02-05 15:54:14');
 INSERT INTO `phinxlog` VALUES (20200317141655,'2020-08-20 10:38:45','2020-08-20 10:38:45');
+INSERT INTO `phinxlog` VALUES (20200909162350,'2020-09-18 19:09:11','2020-09-18 19:09:11');
 /*!40000 ALTER TABLE `phinxlog` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1456,4 +1476,4 @@ INSERT INTO `phinxlog` VALUES (20200317141655,'2020-08-20 10:38:45','2020-08-20 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-09-18 14:34:21
+-- Dump completed on 2020-10-01 12:47:35

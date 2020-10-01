@@ -2,16 +2,15 @@
  * React Component .
 
  */
-import React  from 'react';
-import SegmentConstants  from '../../constants/SegmentConstants';
-import SegmentStore  from '../../stores/SegmentStore';
-import Immutable  from 'immutable';
-import TranslationMatches  from './utils/translationMatches';
-import TagUtils from "../../utils/tagUtils";
-import TextUtils from "../../utils/textUtils";
+import React from 'react';
+import SegmentConstants from '../../constants/SegmentConstants';
+import SegmentStore from '../../stores/SegmentStore';
+import Immutable from 'immutable';
+import TranslationMatches from './utils/translationMatches';
+import TagUtils from '../../utils/tagUtils';
+import TextUtils from '../../utils/textUtils';
 
 class SegmentFooterTabMatches extends React.Component {
-
     constructor(props) {
         super(props);
         this.suggestionShortcutLabel = 'CTRL+';
@@ -24,24 +23,23 @@ class SegmentFooterTabMatches extends React.Component {
         var self = this;
         var matchesProcessed = [];
         // SegmentActions.createFooter(this.props.id_segment);
-        $.each(matches, function(index) {
-            if ( _.isUndefined(this.segment) || (this.segment === '') || (this.translation === '') ) return true;
+        $.each(matches, function (index) {
+            if (_.isUndefined(this.segment) || this.segment === '' || this.translation === '') return true;
             var item = {};
             item.id = this.id;
-            item.disabled = (this.id == '0') ? true : false;
+            item.disabled = this.id == '0' ? true : false;
             item.cb = this.created_by;
             item.segment = this.segment;
-            if ("sentence_confidence" in this &&
-                (
-                    this.sentence_confidence !== "" &&
-                    this.sentence_confidence !== 0 &&
-                    this.sentence_confidence !== "0" &&
-                    this.sentence_confidence !== null &&
-                    this.sentence_confidence !== false &&
-                    typeof this.sentence_confidence !== 'undefined'
-                )
+            if (
+                'sentence_confidence' in this &&
+                this.sentence_confidence !== '' &&
+                this.sentence_confidence !== 0 &&
+                this.sentence_confidence !== '0' &&
+                this.sentence_confidence !== null &&
+                this.sentence_confidence !== false &&
+                typeof this.sentence_confidence !== 'undefined'
             ) {
-                item.suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
+                item.suggestion_info = 'Quality: <b>' + this.sentence_confidence + '</b>';
             } else if (this.match != 'MT') {
                 item.suggestion_info = this.last_update_date;
             } else {
@@ -54,22 +52,26 @@ class SegmentFooterTabMatches extends React.Component {
             // Attention Bug: We are mixing the view mode and the raw data mode.
             // before doing a enanched  view you will need to add a data-original tag
             //
-            item.suggestionDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText(this.segment));
-            item.translationDecodedHtml = TagUtils.transformTextForLockTags(TagUtils.decodePlaceholdersToText( this.translation));
+            item.suggestionDecodedHtml = TagUtils.transformTextForLockTags(
+                TagUtils.decodePlaceholdersToText(this.segment)
+            );
+            item.translationDecodedHtml = TagUtils.transformTextForLockTags(
+                TagUtils.decodePlaceholdersToText(this.translation)
+            );
             item.sourceDiff = item.suggestionDecodedHtml;
-            if (this.match !== "MT" && parseInt(this.match) > 74) {
-                let sourceDecoded = TagUtils.removePhTagsWithEquivTextIntoText( self.props.segment.segment );
-                let matchDecoded = TagUtils.removePhTagsWithEquivTextIntoText( this.segment );
-                let diff_obj = TextUtils.execDiff( matchDecoded, sourceDecoded );
-                item.sourceDiff =  TextUtils.diffMatchPatch.diff_prettyHtml( diff_obj ) ;
-                item.sourceDiff = item.sourceDiff.replace(/&amp;/g, "&");
+            if (this.match !== 'MT' && parseInt(this.match) > 74) {
+                let sourceDecoded = TagUtils.removePhTagsWithEquivTextIntoText(self.props.segment.segment);
+                let matchDecoded = TagUtils.removePhTagsWithEquivTextIntoText(this.segment);
+                let diff_obj = TextUtils.execDiff(matchDecoded, sourceDecoded);
+                item.sourceDiff = TextUtils.diffMatchPatch.diff_prettyHtml(diff_obj);
+                item.sourceDiff = item.sourceDiff.replace(/&amp;/g, '&');
                 item.sourceDiff = TagUtils.decodePlaceholdersToText(item.sourceDiff);
             }
-            if ( !_.isUndefined(this.tm_properties) ) {
+            if (!_.isUndefined(this.tm_properties)) {
                 item.tm_properties = this.tm_properties;
             }
             let matchToInsert = self.processMatchCallback(item);
-            if ( matchToInsert ) {
+            if (matchToInsert) {
                 matchesProcessed.push(item);
             }
         });
@@ -81,7 +83,7 @@ class SegmentFooterTabMatches extends React.Component {
      * @param item
      * @returns {*}
      */
-    processMatchCallback( item) {
+    processMatchCallback(item) {
         return item;
     }
 
@@ -94,7 +96,7 @@ class SegmentFooterTabMatches extends React.Component {
     suggestionDblClick(match, index) {
         var self = this;
         var ulDataItem = '.editor .tab.matches ul[data-item=';
-        setTimeout( () => {
+        setTimeout(() => {
             SegmentActions.setFocusOnEditArea();
             SegmentActions.disableTPOnSegment(this.props.segment);
             SegmentActions.setChoosenSuggestion(this.props.segment.original_sid, index);
@@ -105,10 +107,10 @@ class SegmentFooterTabMatches extends React.Component {
 
     deleteSuggestion(match, index) {
         var source, target;
-        source = TextUtils.htmlDecode( match.segment );
-        var ul = $('.suggestion-item[data-id="'+ match.id +'"]');
-        if( config.brPlaceholdEnabled ){
-            target = EditAreaUtils.postProcessEditarea( ul, '.translation' );
+        source = TextUtils.htmlDecode(match.segment);
+        var ul = $('.suggestion-item[data-id="' + match.id + '"]');
+        if (config.brPlaceholdEnabled) {
+            target = EditAreaUtils.postProcessEditarea(ul, '.translation');
         } else {
             target = $('.translation', ul).text();
         }
@@ -118,18 +120,19 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     getMatchInfo(match) {
-        return <ul className="graysmall-details">
-            <li className={'percent ' + match.percentClass}>
-                {match.percentText}
-            </li>
-            <li>
-                {match.suggestion_info}
-            </li>
-            <li className="graydesc">
-                Source:
-                <span className="bold" style={{fontSize: '14px'}}> {match.cb}</span>
-            </li>
-        </ul>;
+        return (
+            <ul className="graysmall-details">
+                <li className={'percent ' + match.percentClass}>{match.percentText}</li>
+                <li>{match.suggestion_info}</li>
+                <li className="graydesc">
+                    Source:
+                    <span className="bold" style={{ fontSize: '14px' }}>
+                        {' '}
+                        {match.cb}
+                    </span>
+                </li>
+            </ul>
+        );
     }
 
     componentDidMount() {
@@ -146,19 +149,23 @@ class SegmentFooterTabMatches extends React.Component {
      * Do not delete, overwritten by plugin
      */
     componentDidUpdate(prevProps) {
-        setTimeout(()=>SegmentActions.recomputeSegment(this.props.id_segment));
-        if ( !prevProps.segment.unlocked && this.props.segment.unlocked ) {
+        setTimeout(() => SegmentActions.recomputeSegment(this.props.id_segment));
+        if (!prevProps.segment.unlocked && this.props.segment.unlocked) {
             SegmentActions.getContribution(this.props.segment.sid);
         }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return ( (!_.isUndefined(nextProps.segment.contributions) || !_.isUndefined(this.props.segment.contributions)) &&
-            ((!_.isUndefined(nextProps.segment.contributions) && _.isUndefined(this.props.segment.contributions)) ||
-            !Immutable.fromJS(this.props.segment.contributions).equals(Immutable.fromJS(nextProps.segment.contributions)) )) ||
+        return (
+            ((!_.isUndefined(nextProps.segment.contributions) || !_.isUndefined(this.props.segment.contributions)) &&
+                ((!_.isUndefined(nextProps.segment.contributions) && _.isUndefined(this.props.segment.contributions)) ||
+                    !Immutable.fromJS(this.props.segment.contributions).equals(
+                        Immutable.fromJS(nextProps.segment.contributions)
+                    ))) ||
             this.props.active_class !== nextProps.active_class ||
             this.props.tab_class !== nextProps.tab_class ||
             this.props.segment.unlocked !== nextProps.segment.unlocked
+        );
     }
 
     allowHTML(string) {
@@ -168,56 +175,82 @@ class SegmentFooterTabMatches extends React.Component {
     render() {
         let matchesHtml = [];
         let self = this;
-        if (this.props.segment.contributions && this.props.segment.contributions.matches && this.props.segment.contributions.matches.length > 0) {
+        if (
+            this.props.segment.contributions &&
+            this.props.segment.contributions.matches &&
+            this.props.segment.contributions.matches.length > 0
+        ) {
             let tpmMatches = this.processContributions(this.props.segment.contributions.matches);
-            tpmMatches.forEach( function ( match, index ) {
-                var trashIcon = (match.disabled) ? '' : <span id={self.props.id_segment + '-tm-' + match.id + '-delete'}
-                                                              className="trash"
-                                                              title="delete this row"
-                                                              onClick={self.deleteSuggestion.bind( self, match, index )}/>;
-                var item =
-                    <ul key={match.id}
+            tpmMatches.forEach(function (match, index) {
+                var trashIcon = match.disabled ? (
+                    ''
+                ) : (
+                    <span
+                        id={self.props.id_segment + '-tm-' + match.id + '-delete'}
+                        className="trash"
+                        title="delete this row"
+                        onClick={self.deleteSuggestion.bind(self, match, index)}
+                    />
+                );
+                var item = (
+                    <ul
+                        key={match.id}
                         className="suggestion-item graysmall"
-                        data-item={(index + 1)}
+                        data-item={index + 1}
                         data-id={match.id}
                         data-original={match.segment}
-                        onDoubleClick={self.suggestionDblClick.bind( self, match, index + 1 )}>
+                        onDoubleClick={self.suggestionDblClick.bind(self, match, index + 1)}
+                    >
                         <li className="sugg-source">
-                        <span
-                            id={self.props.id_segment + '-tm-' + match.id + '-source'}
-                            className="suggestion_source"
-                            dangerouslySetInnerHTML={self.allowHTML( match.sourceDiff )}>
-                        </span>
+                            <span
+                                id={self.props.id_segment + '-tm-' + match.id + '-source'}
+                                className="suggestion_source"
+                                dangerouslySetInnerHTML={self.allowHTML(match.sourceDiff)}
+                            ></span>
                         </li>
                         <li className="b sugg-target">
-                        <span className="graysmall-message"> {self.suggestionShortcutLabel + (index + 1)}
-                        </span>
+                            <span className="graysmall-message"> {self.suggestionShortcutLabel + (index + 1)}</span>
                             <span
                                 id={self.props.id_segment + '-tm-' + match.id + '-translation'}
                                 className="translation"
-                                dangerouslySetInnerHTML={self.allowHTML( match.translationDecodedHtml )}>
-                        </span>
+                                dangerouslySetInnerHTML={self.allowHTML(match.translationDecodedHtml)}
+                            ></span>
                             {trashIcon}
                         </li>
-                        {self.getMatchInfo( match )}
-                    </ul>;
-                matchesHtml.push( item );
-            } );
-
-        } else if (this.props.segment.contributions && this.props.segment.contributions.matches && this.props.segment.contributions.matches.length === 0 ){
-            if((config.mt_enabled)&&(!config.id_translator)) {
-                matchesHtml.push( <ul key={0} className="graysmall message">
-                    <li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li>
-                </ul>);
+                        {self.getMatchInfo(match)}
+                    </ul>
+                );
+                matchesHtml.push(item);
+            });
+        } else if (
+            this.props.segment.contributions &&
+            this.props.segment.contributions.matches &&
+            this.props.segment.contributions.matches.length === 0
+        ) {
+            if (config.mt_enabled && !config.id_translator) {
+                matchesHtml.push(
+                    <ul key={0} className="graysmall message">
+                        <li>
+                            No matches could be found for this segment. Please, contact{' '}
+                            <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.
+                        </li>
+                    </ul>
+                );
             } else {
-                matchesHtml.push( <ul key={0} className="graysmall message">
-                    <li>No match found for this segment</li>
-                </ul>);
+                matchesHtml.push(
+                    <ul key={0} className="graysmall message">
+                        <li>No match found for this segment</li>
+                    </ul>
+                );
             }
         }
 
         let errors = [];
-        if (this.props.segment.contributions && this.props.segment.contributions.error && this.props.segment.contributions.errors.length > 0) {
+        if (
+            this.props.segment.contributions &&
+            this.props.segment.contributions.error &&
+            this.props.segment.contributions.errors.length > 0
+        ) {
             this.props.segment.contributions.errors.forEach((error, index) => {
                 let toAdd = false,
                     percentClass = '',
@@ -228,7 +261,7 @@ class SegmentFooterTabMatches extends React.Component {
                 switch (error.code) {
                     case '-2001':
                         toAdd = true;
-                        percentClass = "per-red";
+                        percentClass = 'per-red';
                         messageClass = 'error';
                         imgClass = 'error-img';
                         messageTypeText = 'Error: ';
@@ -241,39 +274,38 @@ class SegmentFooterTabMatches extends React.Component {
                         break;
                 }
                 if (toAdd) {
-
-                    let item = <ul className="engine-error-item graysmall">
-                        <li className="engine-error">
-                            <div className={imgClass}/>
-                            <span
-                                className={"engine-error-message " + messageClass}>{messageTypeText + ' ' + error.message}</span>
-                        </li>
-                    </ul>;
+                    let item = (
+                        <ul className="engine-error-item graysmall">
+                            <li className="engine-error">
+                                <div className={imgClass} />
+                                <span className={'engine-error-message ' + messageClass}>
+                                    {messageTypeText + ' ' + error.message}
+                                </span>
+                            </li>
+                        </ul>
+                    );
 
                     errors.push(item);
-
                 }
             });
-
         }
 
-
         return (
-        <div
-            key={"container_" + this.props.code}
-            className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
-            id={"segment-" + this.props.id_segment + "-" + this.props.tab_class}>
-            <div className="overflow">
-                { !_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
-                    matchesHtml
-                ): (
-                    <span className="loader loader_on"/>
-                )}
-
+            <div
+                key={'container_' + this.props.code}
+                className={'tab sub-editor ' + this.props.active_class + ' ' + this.props.tab_class}
+                id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
+            >
+                <div className="overflow">
+                    {!_.isUndefined(matchesHtml) && matchesHtml.length > 0 ? (
+                        matchesHtml
+                    ) : (
+                        <span className="loader loader_on" />
+                    )}
+                </div>
+                <div className="engine-errors">{errors}</div>
             </div>
-            <div className="engine-errors">{errors}</div>
-        </div>
-        )
+        );
     }
 }
 

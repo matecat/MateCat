@@ -834,6 +834,18 @@ class TMAnalysisWorker extends AbstractWorker {
                     [ 'id' => $_project_id ]
             );
 
+            // update chunks' standard_analysis_wc
+            $jobs = Projects_ProjectDao::findById($_project_id)->getChunks();
+            $numberOfJobs = count($jobs);
+
+            foreach ($jobs as $job){
+                \Jobs_JobDao::updateFields([
+                    'standard_analysis_wc' => round($project_totals[ 'st_wc' ]/$numberOfJobs)
+                ],[
+                    'id' => $job->id
+                ]);
+            }
+
             /*
              * Remove this job from the project list
              */

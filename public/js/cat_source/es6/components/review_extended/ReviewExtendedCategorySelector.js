@@ -37,7 +37,7 @@ class ReviewExtendedCategorySelector extends React.Component{
             "active" : this.props.active,
             classCatName: true
         });
-        if ( this.props.category.severities.length > 4 ) {
+        if ( this.props.category.severities.length > 5 ) {
             severities = this.props.category.severities.map((severity, i) =>{
                 return <div onClick={this.onChangeSelect.bind(this)}
                             className="item"  key={'value-' + severity.label}

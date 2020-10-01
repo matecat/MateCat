@@ -100,7 +100,7 @@ class SegmentSource extends React.Component {
 
     splitSegment(split) {
         let text = $(this.splitContainer).find('.splitArea').html();
-        text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/, '##$_SPLIT$##');
+        text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/gi, '##$_SPLIT$##');
         text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
         text = TagUtils.prepareTextToSend(text);
         // let splitArray = text.split('##_SPLIT_##');

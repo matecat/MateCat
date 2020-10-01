@@ -1562,10 +1562,10 @@ class ProjectManager {
 
         // init JobDao
         $jobDao = new Jobs_JobDao();
-
+      
         // job to split
         $jobToSplit = Jobs_JobDao::getByIdAndPassword( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
-
+      
         $translatorModel   = new TranslatorsModel( $jobToSplit );
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'uid' ] ) ) {

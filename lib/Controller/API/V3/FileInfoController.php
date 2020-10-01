@@ -65,7 +65,7 @@ class FileInfoController extends KleinController {
                 $file->instructions = null;
             }
         }
-        
+
         $this->response->json( ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment ) );
 
     }
@@ -80,6 +80,23 @@ class FileInfoController extends KleinController {
             } else {
                 throw new NotFoundException('No instructions for this file');
             }
+        } else {
+            throw new NotFoundException('File not found on this project');
+        }
+    }
+
+    public function setInstructions() {
+
+        $id_file = $this->request->param( 'id_file' );
+        $instructions = $this->request->param( 'instructions' );
+        if(Files_FileDao::isFileInProject($id_file, $this->project->id)){
+            $metadataDao = new Files_MetadataDao;
+            if($metadataDao->get( $this->project->id, $id_file, 'instructions' )){
+                $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );
+            } else {
+                $metadataDao->insert( $this->project->id, $id_file, 'instructions', $instructions );
+            }
+            $this->response->json(true);
         } else {
             throw new NotFoundException('File not found on this project');
         }

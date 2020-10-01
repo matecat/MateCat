@@ -205,8 +205,9 @@ class GetContributionWorker extends AbstractWorker {
                 //this should every time be ok because MT preserve tags, but we use the check on the errors
                 //for logic correctness
                 if ( !$QA->thereAreErrors() ) {
-                    $match[ 'raw_translation' ] = $QA->getTrgNormalized();
-                    $match[ 'translation' ]     = $Filter->fromLayer1ToLayer2( $match[ 'raw_translation' ] );
+                    $match[ 'raw_translation' ] = $QA->getTrgNormalized();                                    // DomDocument class forces the conversion of some entities like &#10;
+                    $match[ 'raw_translation' ] = $Filter->fromLayer2ToLayer1($match[ 'raw_translation' ]);   // Convert \n to decimal entity &#10;
+                    $match[ 'translation' ]     = $Filter->fromLayer1ToLayer2( $match[ 'raw_translation' ] ); // Convert &#10; to layer2 placeholder for the UI
                 } else {
                     $this->_doLog( $QA->getErrors() );
                 }
