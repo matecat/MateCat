@@ -2,6 +2,7 @@
 
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 
 /**
  * Created by PhpStorm.
@@ -66,7 +67,7 @@ class ConversionHandler {
         $forceXliff = $this->features->filter( 'forceXLIFFConversion', INIT::$FORCE_XLIFF_CONVERSION, $this->_userIsLogged, $file_path );
 
         //XLIFF Conversion management
-        $fileMustBeConverted = DetectProprietaryXliff::fileMustBeConverted( $file_path, $forceXliff );
+        $fileMustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $file_path, $forceXliff, INIT::$FILTERS_ADDRESS );
 
         switch ( $fileMustBeConverted ) {
 
@@ -90,7 +91,7 @@ class ConversionHandler {
                 $this->result[ 'code' ]     = -7; // No Good, Default
                 $this->result[ 'errors' ][] = [
                         "code"    => -7,
-                        "message" => 'Matecat Open-Source does not support ' . ucwords( DetectProprietaryXliff::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
+                        "message" => 'Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
                         'debug'   => AbstractFilesStorage::basename_fix( $this->file_name )
                 ];
 

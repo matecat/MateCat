@@ -592,7 +592,7 @@ class Utils {
             $fs    = FilesStorageFactory::create();
             $files = $fs->getFilesForJob( $jobId );
             foreach ( $files as $file ) {
-                $fileType = DetectProprietaryXliff::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
+                $fileType = \Matecat\XliffParser\XliffUtils\XliffProprietaryDetect::getInfo( $files[ 0 ][ 'xliffFilePath' ] );
                 if ( $fileType[ 'proprietary_short_name' ] !== 'matecat_converter' ) {
                     // If only one XLIFF is not created with MateCat Filters, we can't say
                     // that the project is entirely based on new Filters
