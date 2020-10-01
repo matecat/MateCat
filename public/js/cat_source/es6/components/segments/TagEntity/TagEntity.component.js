@@ -141,13 +141,16 @@ class TagEntity extends Component {
                               onMouseLeave={() => tooltipToggle()}
                               onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
                               /*contentEditable="false"*/
-                              onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
+                              onClick={(e) => {
+                                  e.stopPropagation()
+                                  onClick(start, end, entityId, entityPlaceholder)
+                              }}>
                         {children}
                     </span>
                 </div>
         }
     }
-    
+
     updateTagStyle = () => {
         this.setState({
             tagStyle: this.selectCorrectStyle(),
