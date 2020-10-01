@@ -40,6 +40,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $status_translator;
     public $status;
 
+    public $standard_analysis_wc;
+
     /**
      * Column 'completed' cannot be null, moreover it is BIT(1) and
      * PDO does not works well in this case without explicitly
