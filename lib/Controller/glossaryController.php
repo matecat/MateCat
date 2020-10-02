@@ -228,7 +228,8 @@ class glossaryController extends ajaxController {
 
     }
 
-    protected function _set( $config ){
+    protected function
+    _set( $config ){
 
         $this->result[ 'errors' ] = array();
 

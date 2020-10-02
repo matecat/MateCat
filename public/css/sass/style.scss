@@ -379,31 +379,62 @@ section.opened .warnings {
     display: block;
 }
 
-/*footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999999;}*/
-/*.editlog{margin-right:23px;}*/
-.projectbar p {
-    margin: 0 5px 0 0;
-    padding: 0;
-    float: left;
-}
+.projectbar {
+    color: #788190;
+    display: flex;
+    justify-content: flex-start;
+    padding: 40px 115px 10px 4.5%;
+    align-items: center;
+    &.first-segment {
+        padding-top: 25px;
+    }
+    span.fileFormat {
+        padding: 10px 15px 9px 47px;
+        background-size: 25px !important;
+        line-height: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .projectbar-filename {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        max-width: 80%;
+    }
+    .button-notes {
+        color: #fff !important;
+        font-weight: bold;
+        text-decoration: none;
+        padding: 6px 12px;
+        border-radius: 2px;
+        font-size: 16px;
+        background: $translatedBlue;
+        background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
+        background: linear-gradient(top, $translatedBlue, #119ec4);
+        user-select: none;
+        cursor: pointer;
+        min-width: 95px;
+        margin-left: 15px;
+        &:hover {
+            background-color: $translatedBlueHover;
+        }
+        svg {
+            display: block;
+            margin-top: 1px;
+            float: left;
+        }
+    }
+    .projectbar-wordcounter {
+        min-width: 140px;
+        display: list-item;
+        list-style-type: disc;
+        list-style-position: inside;
+        font-size: 16px;
+    }
 
-.projectbar ul {
-    margin: -5px 0 0 0;
-    padding: 0;
-    float: left;
-    border-right: 1px solid #333;
-}
-
-.projectbar li {
-    margin: 0 0px 0 0;
-    padding: 5px 10px;
-    float: left;
-    border-left: 1px solid #333;
-}
-
-.projectbar a {
-    color: #fff;
-    text-shadow: none;
 }
 
 #rejected.hidden {
@@ -724,6 +755,7 @@ section {
     float: left;
     width: 88%;
     margin-left: 5%;
+    min-width: 700px;
     //height: 100%;
     /*-webkit-transition: all 100ms ease-in;*/
     /*transition: all 100ms ease-in;*/
@@ -760,21 +792,6 @@ strong:first-child {
     position: absolute;
 }
 
-/*
-ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WILL BE ENABLED
-.projectbar h2{text-align:left;font-size:14px;float:left !important;margin:0 10px 0 25px !important;}
-*/
-.projectbar h2 {
-    text-align: left;
-    font-size: 14px;
-    float: left !important;
-    margin: 0 10px 0 0 !important;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    width: 100%;
-    overflow: hidden;
-}
-
 .filenameshow {
     max-height: 35px;
     height: 15px;
@@ -782,67 +799,14 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     overflow: hidden
 }
 
-.projectbar {
-    margin: 0 0 0 5%;
-    padding: 0;
-    height: 43px;
-    color: $grey1;
-    width: 88%;
-    font-size: 14px;
-}
 
-.projectbar li {
-    width: 33.1%;
-    float: left;
-    margin: 0;
-    padding: 0;
-    border-left: 1px solid #000;
-    display: block
-}
 
-.projectbar a {
-    color: #333;
-    margin: 12px 0px 0 0
-}
 
-.projectbar .top:hover, .projectbar .down:hover {
-    border: 1px solid #666
-}
-
-.projectbar .disabled {
-    border: 1px solid #ccc !important
-}
-
-.projectbar li {
-    border-right: none;
-    border-left: none;
-    padding-top: 18px;
-}
 
 .desc {
     font-size: 14px !important
 }
 
-.projectbar .filename {
-    display: block;
-
-    /*height: 18px;*/
-    max-height: 12px;
-
-    /*overflow: hidden;*/
-
-    /*
-		line-height: 18px;
-	*/
-}
-
-.projectbar .filename h2 {
-    display: block;
-    /*	overflow: hidden;
-
-		line-height: 18px;
-	*/
-}
 
 /*tools*/
 .tools {
@@ -1738,16 +1702,16 @@ body .footer.showMatches .sub-editor.open {
     margin-left: 30px;
 }
 
-.content {
-    float: left;
-    clear: both;
-    border: 1px solid #ccf;
-    border-top: none;
-    border-left: none;
-    background: #eef;
-    padding: 10px 20px 20px;
-    width: 400px;
-}
+//.content {
+//    float: left;
+//    clear: both;
+//    border: 1px solid #ccf;
+//    border-top: none;
+//    border-left: none;
+//    background: #eef;
+//    padding: 10px 20px 20px;
+//    width: 400px;
+//}
 
 .preview {
     font-family: Cambria, Arial, Helvetica, sans-serif !important;
@@ -3422,10 +3386,6 @@ section.opened.editor .status {
     }
 
     .editarea, .source { /* word-break: break-all */
-    }
-
-    .projectbar ul {
-        margin-left: 5px
     }
 
     .translated,

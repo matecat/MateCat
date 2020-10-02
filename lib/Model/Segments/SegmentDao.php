@@ -572,6 +572,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
+                    LEFT JOIN segment_original_data ON segments.id = segment_original_data.id_segment
                     WHERE id_job = :id_job
                         AND password = :password
                         AND show_in_cattool = 1
@@ -588,6 +589,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id =  id_job
+                    LEFT JOIN segment_original_data ON segments.id = segment_original_data.id_segment
                     WHERE id_job = :id_job
                         AND password = :password
                         AND show_in_cattool = 1
@@ -604,6 +606,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments
                         JOIN segment_translations ON id = id_segment
                         JOIN jobs ON jobs.id = id_job
+                        LEFT JOIN segment_original_data ON segments.id = segment_original_data.id_segment
                         WHERE id_job = :id_job
                             AND password = :password
                             AND show_in_cattool = 1
@@ -616,6 +619,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments
                         JOIN segment_translations ON id = id_segment
                         JOIN jobs ON jobs.id =  id_job
+                        LEFT JOIN segment_original_data ON segments.id = segment_original_data.id_segment
                         WHERE id_job = :id_job
                             AND password = :password
                             AND show_in_cattool = 1
@@ -645,6 +649,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 st.warning,
                 sts.source_chunk_lengths,
                 sts.target_chunk_lengths,
+                sod.map AS data_ref_map,
                 IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
                 , COALESCE( autopropagated_from, 0 ) as autopropagated_from
                 ,( SELECT COUNT( segment_hash )
@@ -660,6 +665,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 JOIN segment_translations st ON st.id_segment = s.id
                 JOIN jobs j ON j.id = st.id_job
                 LEFT JOIN segment_translations_splits sts ON sts.id_segment = s.id AND sts.id_job = :id_job
+                LEFT JOIN segment_original_data sod ON sod.id_segment = s.id
                 JOIN (
 
                   $subQuery

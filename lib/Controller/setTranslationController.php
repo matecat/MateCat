@@ -191,8 +191,8 @@ class setTranslationController extends ajaxController {
             $this->project = $this->chunk->getProject();
 
             $this->featureSet->loadForProject( $this->project );
-            $this->filter = Filter::getInstance( $this->featureSet );
 
+            $this->filter = Filter::getInstance( $this->featureSet, Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment) );
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING

@@ -28,6 +28,7 @@ window.CatToolStore = require('./stores/CatToolStore');
 
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 window.Header = require("./components/header/Header").default;
+window.FilesInstructions = require("./components/header/cattol/FilesInstructions").default;
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
 
 window.LanguageSelector = require('./components/languageSelector/LanguageSelector').default;

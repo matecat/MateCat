@@ -1,15 +1,14 @@
 const QaCheckGlossary = {
     enabled() {
-        return config.qa_check_glossary_enabled ;
+        return config.qa_check_glossary_enabled;
     },
     update(glossary) {
-        var mapped = {} ;
+        var mapped = {};
 
         // group by segment id
-        _.each( glossary.matches, function ( item ) {
-            mapped[ item.id_segment ] ? null : mapped[ item.id_segment ] = []  ;
-            mapped[ item.id_segment ].push( item.data );
-
+        _.each(glossary.matches, function (item) {
+            mapped[item.id_segment] ? null : (mapped[item.id_segment] = []);
+            mapped[item.id_segment].push(item.data);
         });
         SegmentActions.addQaCheckMatches(mapped)
     }

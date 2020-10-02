@@ -10,7 +10,10 @@ use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
 use LQA\ChunkReviewDao;
 use Matecat\SimpleS3\Client;
+use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use XliffReplacer\XliffReplacerCallback;
 use XliffReplacer\XliffReplacerFactory;
+use Matecat\XliffParser\Utils\Files as XliffFiles;
 
 set_time_limit( 180 );
 
@@ -88,7 +91,7 @@ class downloadFileController extends downloadController {
         // if no job was found, check if the provided password is a password_review
         if ( empty( $jobData ) ) {
             $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, (int)$this->id_job );
-            $jobData = $this->job = $chunkReviewStruct->getChunk();
+            $jobData           = $this->job = $chunkReviewStruct->getChunk();
         }
 
         // check for Password correctness
@@ -187,19 +190,18 @@ class downloadFileController extends downloadController {
                     $xliffFilePath = $params[ 'save_as' ];
                 }
 
-                $fileType = DetectProprietaryXliff::getInfo( $xliffFilePath );
+                $fileType = XliffProprietaryDetect::getInfo( $xliffFilePath );
 
-                //instantiate parser
-                $xsp = XliffReplacerFactory::getInstance( $fileType, $data, $transUnits, $_target_lang );
-                $xsp->setFileDescriptors( $xliffFilePath, $outputPath );
+                // instantiate parser
+                $xsp = new \Matecat\XliffParser\XliffParser();
 
-                if ( $this->download_type == 'omegat' ) {
-                    $xsp->setSourceInTarget( true );
-                }
+                // instantiateXliffReplacerCallback
+                $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $_target_lang );
 
-                //run parsing
+                // run xliff replacer
                 Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
-                $xsp->replaceTranslation( $this->featureSet );
+                $setSourceInTarget = $this->download_type === 'omegat';
+                $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $setSourceInTarget, $xliffReplacerCallback );
 
                 //free memory
                 unset( $xsp );
@@ -581,8 +583,7 @@ class downloadFileController extends downloadController {
      */
     public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
 
-        $extension = AbstractFilesStorage::pathinfo_fix( $path );
-        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ) {
+        if ( !XliffFiles::isXliff( $path ) ) {
             return $documentContent;
         }
 
@@ -598,7 +599,7 @@ class downloadFileController extends downloadController {
         }
 
         //avoid in memory copy of very large files if possible
-        $detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
+        $detect_result = XliffProprietaryDetect::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
 
         //clean mrk tags for GlobalSight application compatibility
         //this should be a sax parser instead of in memory copy for every trans-unit
