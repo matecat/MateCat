@@ -2144,6 +2144,7 @@ class ProjectManager {
     protected function _insertInstructions( $fid, $value ) {
         $metadataDao = new \Files\MetadataDao();
         $metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
+
     }
 
     protected function _storeSegments( $fid ) {
