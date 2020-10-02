@@ -3,7 +3,7 @@ import TextUtils from './textUtils';
 import {tagSignatures} from "../components/segments/utils/DraftMatecatUtils/tagModel";
 import findTagWithRegex from "../components/segments/utils/DraftMatecatUtils/findTagWithRegex";
 
-const TAGS_UTILS = {
+const TAGS_UTILS =  {
     // TODO: move it in another module
     prepareTextToSend: function (text) {
         text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -30,42 +30,14 @@ const TAGS_UTILS = {
     /*decodePlaceholdersToText: function (str) {
         let _str = str;
 
-        _str = _str
-            .replace(
-                config.lfPlaceholderRegex,
-                '<span class="monad marker softReturn ' + config.lfPlaceholderClass + '"><br /></span>'
-            )
-            .replace(
-                config.crPlaceholderRegex,
-                '<span class="monad marker softReturn ' + config.crPlaceholderClass + '"><br /></span>'
-            );
-        _str = _str
-            .replace(
-                config.lfPlaceholderRegex,
-                '<span class="monad marker softReturn ' +
-                    config.lfPlaceholderClass +
-                    '" contenteditable="false"><br /></span>'
-            )
-            .replace(
-                config.crPlaceholderRegex,
-                '<span class="monad marker softReturn ' +
-                    config.crPlaceholderClass +
-                    '" contenteditable="false"><br /></span>'
-            )
-            .replace(config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass + '" />')
-            .replace(
-                config.tabPlaceholderRegex,
-                '<span class="tab-marker monad marker ' +
-                    config.tabPlaceholderClass +
-                    '" contenteditable="false">&#8677;</span>'
-            )
-            .replace(
-                config.nbspPlaceholderRegex,
-                '<span class="nbsp-marker monad marker ' +
-                    config.nbspPlaceholderClass +
-                    '" contenteditable="false">&nbsp;</span>'
-            )
-            .replace(/(<\/span\>)$/gi, '</span><br class="end">'); // For rangy cursor after a monad marker
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
+            .replace( config.crPlaceholderRegex, '<span class="monad marker softReturn ' + config.crPlaceholderClass +'"><br /></span>' )
+        _str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+            .replace( config.crPlaceholderRegex, '<span class="monad marker softReturn ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
+            .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
+            .replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
+            .replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' )
+            .replace(/(<\/span\>)$/gi, "</span><br class=\"end\">"); // For rangy cursor after a monad marker
 
         return _str;
     },*/
@@ -189,53 +161,34 @@ const TAGS_UTILS = {
         let returnValue = tx;
         try {
             if (tx.indexOf('locked-inside') > -1) return tx;
-            let base64Array = [];
-            let phIDs = [];
-            tx = tx.replace(/&quot;/gi, '"');
+            let base64Array=[];
+            let phIDs =[];
+            tx = tx.replace( /&quot;/gi, '"' );
 
-            tx = tx.replace(/&lt;ph.*?id="(.*?)".*?&gt/gi, function (match, text) {
+            tx = tx.replace( /&lt;ph.*?id="(.*?)".*?&gt/gi, function (match, text) {
                 phIDs.push(text);
                 return match;
             });
 
-            tx = tx.replace(/&lt;ph.*?equiv-text="base64:.*?"(.*?\/&gt;)/gi, function (match, text) {
-                return match.replace(
-                    text,
-                    "<span contenteditable='false' class='locked locked-inside tag-html-container-close' >\"" +
-                        text +
-                        '</span>'
-                );
+            tx = tx.replace( /&lt;ph.*?equiv-text="base64:.*?"(.*?\/&gt;)/gi, function (match, text) {
+                return match.replace(text, "<span contenteditable='false' class='locked locked-inside tag-html-container-close' >\"" + text + "</span>");
             });
-            tx = tx.replace(/base64:(.*?)"/gi, function (match, text) {
-                if (phIDs.length === 0) return text;
+            tx = tx.replace( /base64:(.*?)"/gi , function (match, text) {
+                if ( phIDs.length === 0 ) return text;
                 base64Array.push(text);
                 let id = phIDs.shift();
-                return (
-                    "<span contenteditable='false' class='locked locked-inside inside-attribute' data-original='base64:" +
-                    text +
-                    "'><a>(" +
-                    id +
-                    ')</a>' +
-                    Base64.decode(text) +
-                    '</span>'
-                );
+                return "<span contenteditable='false' class='locked locked-inside inside-attribute' data-original='base64:" + text+ "'><a>("+ id + ")</a>" + Base64.decode(text) + "</span>";
             });
-            tx = tx.replace(/(&lt;ph.*?equiv-text=")/gi, function (match, text) {
-                if (base64Array.length === 0) return text;
+            tx = tx.replace( /(&lt;ph.*?equiv-text=")/gi, function (match, text) {
+                if ( base64Array.length === 0 ) return text;
                 let base = base64Array.shift();
-                return (
-                    "<span contenteditable='false' class='locked locked-inside tag-html-container-open' >" +
-                    text +
-                    'base64:' +
-                    base +
-                    '</span>'
-                );
+                return "<span contenteditable='false' class='locked locked-inside tag-html-container-open' >" + text + "base64:" + base + "</span>";
             });
             // delete(base64Array);
             returnValue = tx;
         } catch (e) {
-            console.error('Error parsing tag ph in transformTagsWithHtmlAttribute function');
-            returnValue = '';
+            console.error("Error parsing tag ph in transformTagsWithHtmlAttribute function");
+            returnValue = "";
         } finally {
             return returnValue;
         }
@@ -381,36 +334,40 @@ const TAGS_UTILS = {
      *  Return the Regular expression to match all xliff source tags
      */
     getXliffRegExpression: function () {
-        return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gim;
+        return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi;
     },
 
     /**
      * Add at the end of the target the missing tags
      * TODO: Remove this fn
      */
-    autoFillTagsInTarget: function (segmentObj) {
-        let sourceTags = segmentObj.segment.match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+    autoFillTagsInTarget: function ( segmentObj ) {
+
+        let sourceTags = segmentObj.segment
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
+
 
         let newhtml = segmentObj.translation;
 
-        let targetTags = segmentObj.translation.match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+        let targetTags = segmentObj.translation
+            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
 
-        if (targetTags == null) {
+        if(targetTags == null ) {
             targetTags = [];
         } else {
-            targetTags = targetTags.map(function (elem) {
-                return elem.replace(/<\/span>/gi, '').replace(/<span.*?>/gi, '');
+            targetTags = targetTags.map(function(elem) {
+                return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
             });
         }
 
-        let missingTags = sourceTags.map(function (elem) {
-            return elem.replace(/<\/span>/gi, '').replace(/<span.*?>/gi, '');
+        let missingTags = sourceTags.map(function(elem) {
+            return elem.replace(/<\/span>/gi, "").replace(/<span.*?>/gi, "");
         });
         //remove from source tags all the tags in target segment
-        for (let i = 0; i < targetTags.length; i++) {
+        for(let i = 0; i < targetTags.length; i++ ){
             let pos = missingTags.indexOf(targetTags[i]);
-            if (pos > -1) {
-                missingTags.splice(pos, 1);
+            if( pos > -1){
+                missingTags.splice(pos,1);
             }
         }
 
@@ -433,8 +390,9 @@ const TAGS_UTILS = {
      */
     hasDataOriginalTags: function (segmentSource) {
         var originalText = segmentSource;
-        var reg = new RegExp(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gim);
-        return !_.isUndefined(originalText) && reg.test(originalText);
+        var reg = new RegExp(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi);
+        return !_.isUndefined( originalText ) && reg.test( originalText );
+
     },
 
     /**
@@ -462,10 +420,10 @@ const TAGS_UTILS = {
         var placeholderPhRegEx = /(&lt;ph id="mtc_.*?\/&gt;)/g;
         var reverseMapElements = {};
 
-        var listMainStr = mainStr.match(placeholderPhRegEx);
+        var listMainStr = mainStr.match( placeholderPhRegEx );
 
-        if (listMainStr === null) {
-            return [mainStr, transDecoded, replacementsMap];
+        if( listMainStr === null ){
+            return [ mainStr, transDecoded, replacementsMap ];
         }
 
         /**
@@ -499,45 +457,50 @@ const TAGS_UTILS = {
          */
         var charCodePlaceholder = 57344;
 
-        listMainStr.forEach(function (element) {
-            var actualCharCode = String.fromCharCode(charCodePlaceholder);
+        listMainStr.forEach( function( element ) {
+
+            var actualCharCode = String.fromCharCode( charCodePlaceholder );
 
             /**
              * override because we already have an element in the map, so the content is the same
              * ( duplicated TAG, should be impossible but it's easy to cover the case ),
              * use such character
              */
-            if (reverseMapElements[element]) {
+            if ( reverseMapElements[element] ) {
                 actualCharCode = reverseMapElements[element];
             }
 
             replacementsMap[actualCharCode] = element;
             reverseMapElements[element] = actualCharCode; // fill the reverse map with the current element ( override if equal )
-            mainStr = mainStr.replace(element, actualCharCode);
+            mainStr = mainStr.replace( element, actualCharCode );
             charCodePlaceholder++;
-        });
+        } );
 
-        var listTransDecoded = transDecoded.match(placeholderPhRegEx);
-        if (listTransDecoded) {
-            listTransDecoded.forEach(function (element) {
-                var actualCharCode = String.fromCharCode(charCodePlaceholder);
+        var listTransDecoded = transDecoded.match( placeholderPhRegEx );
+        if ( listTransDecoded ) {
+
+
+            listTransDecoded.forEach( function ( element ) {
+
+                var actualCharCode = String.fromCharCode( charCodePlaceholder );
 
                 /**
                  * override because we already have an element in the map, so the content is the same
                  * ( tag is present in source and target )
                  * use such character
                  */
-                if (reverseMapElements[element]) {
+                if ( reverseMapElements[element] ) {
                     actualCharCode = reverseMapElements[element];
                 }
 
                 replacementsMap[actualCharCode] = element;
                 reverseMapElements[element] = actualCharCode; // fill the reverse map with the current element ( override if equal )
-                transDecoded = transDecoded.replace(element, actualCharCode);
+                transDecoded = transDecoded.replace( element, actualCharCode );
                 charCodePlaceholder++;
-            });
+            } );
         }
-        return [mainStr, transDecoded, replacementsMap];
+        return [ mainStr, transDecoded, replacementsMap ];
+
     },
 
     // Execute diff between two string also handling tags

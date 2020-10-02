@@ -16,6 +16,9 @@ import Speech2Text from '../../utils/speech2text';
 import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
 import SegmentPlaceholderLite from "./SegmentPlaceholderLite";
+import SegmentPlaceholderLite from "./SegmentPlaceholderLite";
+import FilesInstructionsModal from '../modals/FilesInstructionsModal';
+import CommonUtils from '../../utils/commonUtils';
 
 
 /*class SegmentPlaceholder extends React.Component {
@@ -164,25 +167,25 @@ class SegmentsContainer extends React.Component {
 		});
 	}
 
-	setLastSelectedSegment(sid) {
-		this.lastSelectedSegment = {
-			sid: sid
-		};
-	}
+    setLastSelectedSegment(sid) {
+        this.lastSelectedSegment = {
+            sid: sid,
+        };
+    }
 
-	setBulkSelection(sid, fid) {
-		if (_.isUndefined(this.lastSelectedSegment)) {
-			this.lastSelectedSegment = {
-				sid: sid
-			};
-		}
-		let from = Math.min(sid, this.lastSelectedSegment.sid);
-		let to = Math.max(sid, this.lastSelectedSegment.sid);
-		this.lastSelectedSegment = {
-			sid: sid
-		};
-		SegmentActions.setBulkSelectionInterval(from, to, fid);
-	}
+    setBulkSelection(sid, fid) {
+        if (_.isUndefined(this.lastSelectedSegment)) {
+            this.lastSelectedSegment = {
+                sid: sid,
+            };
+        }
+        let from = Math.min(sid, this.lastSelectedSegment.sid);
+        let to = Math.max(sid, this.lastSelectedSegment.sid);
+        this.lastSelectedSegment = {
+            sid: sid,
+        };
+        SegmentActions.setBulkSelectionInterval(from, to, fid);
+    }
 
 	scrollToSegment(sid) {
 		this.lastScrolled = sid;
@@ -190,149 +193,197 @@ class SegmentsContainer extends React.Component {
 		setTimeout(() => this.onScroll(), 500);
 	}
 
-	scrollToSelectedSegment(sid) {
-		this.setState({scrollTo: sid, scrollToSelected: true});
-		setTimeout(() => this.onScroll(), 500);
-	}
+    scrollToSelectedSegment(sid) {
+        this.setState({ scrollTo: sid, scrollToSelected: true });
+        setTimeout(() => this.onScroll(), 500);
+    }
 
-	getIndexToScroll() {
-		let position = (this.state.scrollToSelected) ? 'auto' : 'start';
-		if (this.state.scrollTo && this.state.segments.size > 0) {
-			const index = this.state.segments.findIndex((segment, index) => {
-				if (this.state.scrollTo.toString().indexOf("-") === -1) {
-					return parseInt(segment.get('sid')) === parseInt(this.state.scrollTo);
-				} else {
-					return segment.get('sid') === this.state.scrollTo;
-				}
-			});
+    getIndexToScroll() {
+        let position = this.state.scrollToSelected ? 'auto' : 'start';
+        if (this.state.scrollTo && this.state.segments.size > 0) {
+            const index = this.state.segments.findIndex((segment, index) => {
+                if (this.state.scrollTo.toString().indexOf('-') === -1) {
+                    return parseInt(segment.get('sid')) === parseInt(this.state.scrollTo);
+                } else {
+                    return segment.get('sid') === this.state.scrollTo;
+                }
+            });
 
-			let scrollTo;
-			if (this.state.scrollToSelected) {
-				scrollTo = (this.state.scrollTo < this.lastScrolled) ? index - 1 : index + 1;
-				scrollTo = (index > this.state.segments.size - 2 || index === 0) ? index : scrollTo;
-				this.lastScrolled = this.state.scrollTo;
-				return {scrollTo: scrollTo, position: position}
-			}
-			scrollTo = (index >= 2) ? index - 2 : (index === 0) ? 0 : index - 1;
-			scrollTo = (index > this.state.segments.size - 8) ? index : scrollTo;
-			if (scrollTo > 0 || scrollTo < this.state.segments.size - 8) { //if the opened segments is too big for the view dont show the previous
-				let scrollToHeight = this.getSegmentHeight(index);
-				let segmentBefore1 = this.getSegmentHeight(index - 1);
-				let segmentBefore2 = this.getSegmentHeight(index - 2);
-				let totalHeight = segmentBefore1 + segmentBefore2 + scrollToHeight;
-				if (totalHeight > this.state.window.height - 50) {
-					if (scrollToHeight + segmentBefore1 < this.state.window.height + 50) {
-						return {scrollTo: index - 1, position: position}
-					}
-					return {scrollTo: index, position: position}
-				}
-
-			}
-			return {scrollTo: scrollTo, position: position}
-		} else if (this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
-			const diff = this.state.segments.size - this.lastListSize;
-			return {scrollTo: this.lastUpdateObj.startIndex + diff, position: position}
-		}
-		return {scrollTo: null, position: null}
-	}
+            let scrollTo;
+            if (this.state.scrollToSelected) {
+                scrollTo = this.state.scrollTo < this.lastScrolled ? index - 1 : index + 1;
+                scrollTo = index > this.state.segments.size - 2 || index === 0 ? index : scrollTo;
+                this.lastScrolled = this.state.scrollTo;
+                return { scrollTo: scrollTo, position: position };
+            }
+            scrollTo = index >= 2 ? index - 2 : index === 0 ? 0 : index - 1;
+            scrollTo = index > this.state.segments.size - 8 ? index : scrollTo;
+            if (scrollTo > 0 || scrollTo < this.state.segments.size - 8) {
+                //if the opened segments is too big for the view dont show the previous
+                let scrollToHeight = this.getSegmentHeight(index);
+                let segmentBefore1 = this.getSegmentHeight(index - 1);
+                let segmentBefore2 = this.getSegmentHeight(index - 2);
+                let totalHeight = segmentBefore1 + segmentBefore2 + scrollToHeight;
+                if (totalHeight > this.state.window.height - 50) {
+                    if (scrollToHeight + segmentBefore1 < this.state.window.height + 50) {
+                        return { scrollTo: index - 1, position: position };
+                    }
+                    return { scrollTo: index, position: position };
+                }
+            }
+            return { scrollTo: scrollTo, position: position };
+        } else if (this.lastListSize < this.state.segments.size && this.scrollDirectionTop) {
+            const diff = this.state.segments.size - this.lastListSize;
+            return { scrollTo: this.lastUpdateObj.startIndex + diff, position: position };
+        }
+        return { scrollTo: null, position: null };
+    }
 
 	getSegmentByIndex(index) {
 		return this.state.segments.get(index);
 	}
 
-	getCollectionType(segment) {
-		let collectionType;
-		if (segment.notes) {
-			segment.notes.forEach(function (item, index) {
-				if (item.note && item.note !== "") {
-					if (item.note.indexOf("Collection Name: ") !== -1) {
-						let split = item.note.split(": ");
-						if (split.length > 1) {
-							collectionType = split[1];
-						}
-					}
-				}
-			});
-		}
-		return collectionType;
-	}
+    getCollectionType(segment) {
+        let collectionType;
+        if (segment.notes) {
+            segment.notes.forEach(function (item, index) {
+                if (item.note && item.note !== '') {
+                    if (item.note.indexOf('Collection Name: ') !== -1) {
+                        let split = item.note.split(': ');
+                        if (split.length > 1) {
+                            collectionType = split[1];
+                        }
+                    }
+                }
+            });
+        }
+        return collectionType;
+    }
 
-	getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
-		let isReviewExtended = !!(this.props.isReviewExtended);
+    openInstructionsModal(id_file) {
+        let props = {
+            showCurrent: true,
+            files: CatToolStore.getJobFilesInfo(),
+            currentFile: id_file,
+        };
+        let styleContainer = {
+            // minWidth: 600,
+            // minHeight: 400,
+            // maxWidth: 900,
+        };
+        APP.ModalWindow.showModalComponent(FilesInstructionsModal, props, 'File notes', styleContainer);
+    }
 
-		let segmentHeight = (!segment.opened && this.segmentsHeightsMap[segment.sid]) ? this.segmentsHeightsMap[segment.sid].height : this.lastOpenedHeight;
+    getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
+        let isReviewExtended = !!this.props.isReviewExtended;
 
-		let item = <Segment
-			key={segment.sid}
-			segment={segment}
-			segImmutable={segImmutable}
-			timeToEdit={this.state.timeToEdit}
-			fid={this.props.fid}
-			isReview={this.props.isReview}
-			isReviewExtended={isReviewExtended}
-			reviewType={this.props.reviewType}
-			enableTagProjection={this.props.enableTagProjection}
-			tagLockEnabled={this.state.tagLockEnabled}
-			tagModesEnabled={this.props.tagModesEnabled}
-			speech2textEnabledFn={Speech2Text.enabled}
-			setLastSelectedSegment={this.setLastSelectedSegment.bind(this)}
-			setBulkSelection={this.setBulkSelection.bind(this)}
-			sideOpen={this.state.sideOpen}
-			files={this.state.files}
-			height={segmentHeight}
-		/>;
-		if (segment.id_file !== currentFileId) {
-			let file = (!!this.state.files) ? _.find(this.state.files, (file) => file.id == segment.id_file) : false;
-			let classes = (this.state.sideOpen) ? 'slide-right' : '';
-			return <React.Fragment>
-				<ul className={"projectbar " + classes} data-job={"job-" + segment.id_file}>
-					<li className="filename">
-						<h2 title={segment.filename}>{segment.filename}</h2>
-					</li>
-					<li style={{textAlign: 'center', textIndent: '-20px'}}>
-						<strong/> [<span className="source-lang">{config.source_rfc}</span>] >
-						<strong/> [<span className="target-lang">{config.target_rfc}</span>]
-					</li>
-					{file ? (
-						<li className="wordcounter">Payable Words: <strong>{file.weighted_words}</strong>
-						</li>
-					) : null}
+        let segmentHeight =
+            !segment.opened && this.segmentsHeightsMap[segment.sid]
+                ? this.segmentsHeightsMap[segment.sid].height
+                : this.lastOpenedHeight;
 
-				</ul>
-				{collectionTypeSeparator}
-				{item}
-			</React.Fragment>
-		}
-		return <React.Fragment>
-			{collectionTypeSeparator}
-			{item}
-		</React.Fragment>;
-	}
+        let item = (
+            <Segment
+                key={segment.sid}
+                segment={segment}
+                segImmutable={segImmutable}
+                timeToEdit={this.state.timeToEdit}
+                fid={this.props.fid}
+                isReview={this.props.isReview}
+                isReviewExtended={isReviewExtended}
+                reviewType={this.props.reviewType}
+                enableTagProjection={this.props.enableTagProjection}
+                tagLockEnabled={this.state.tagLockEnabled}
+                tagModesEnabled={this.props.tagModesEnabled}
+                speech2textEnabledFn={Speech2Text.enabled}
+                setLastSelectedSegment={this.setLastSelectedSegment.bind(this)}
+                setBulkSelection={this.setBulkSelection.bind(this)}
+                sideOpen={this.state.sideOpen}
+                files={this.state.files}
+                height={segmentHeight}
+            />
+        );
+        if (segment.id_file !== currentFileId) {
+            const file = !!this.state.files ? _.find(this.state.files, (file) => file.id == segment.id_file) : false;
+            let classes = this.state.sideOpen ? 'slide-right' : '';
+            const isFirstSegment = this.state.files &&  segment.sid === this.state.files[0].first_segment;
+            classes = (isFirstSegment) ? classes + ' first-segment': classes;
+            return (
+                <React.Fragment>
+                    <div className={'projectbar ' + classes}>
+                        {file ? (
+                        <div className={'projectbar-filename'}>
+                            <span
+                                title={segment.filename}
+                                className={
+                                    'fileFormat ' +
+                                    CommonUtils.getIconClass(
+                                        file.file_name.split('.')[file.file_name.split('.').length - 1]
+                                    )
+                                }
+                            >
+                                {file.file_name}
+                            </span>
+                        </div>
+                        ) : null}
+                        {file ? (
+                            <div className="projectbar-wordcounter">
+                                <span>
+                                    Payable Words: <strong>{file.weighted_words}</strong>
+                                </span>
+                            </div>
+                        ) : null}
+                        {file && file.instructions ? (
+                            <div className={'button-notes'} onClick={() => this.openInstructionsModal(segment.id_file)}>
+                                <LinkIcon />
+                                <span>View notes</span>
+                            </div>
+                        ) : null}
+                    </div>
+                    {collectionTypeSeparator}
+                    {item}
+                </React.Fragment>
+            );
+        }
+        return (
+            <React.Fragment>
+                {collectionTypeSeparator}
+                {item}
+            </React.Fragment>
+        );
+    }
 
-	getSegments() {
-		let items = [];
-		let currentFileId = 0;
-		let collectionsTypeArray = [];
-		this.state.segments.forEach((segImmutable) => {
-			let segment = segImmutable.toJS();
-			let collectionType = this.getCollectionType(segment);
-			let collectionTypeSeparator;
-			if (collectionType && collectionsTypeArray.indexOf(collectionType) === -1) {
-				let classes = (this.state.sideOpen) ? 'slide-right' : '';
-				collectionTypeSeparator = <div className={"collection-type-separator " + classes}
-											   key={collectionType + segment.sid + (Math.random() * 10)}>
-					Collection Name: <b>{collectionType}</b></div>;
-				collectionsTypeArray.push(collectionType);
-				if (this.segmentsWithCollectionType.indexOf(segment.sid) === -1) {
-					this.segmentsWithCollectionType.push(segment.sid);
-				}
-			}
-			let item = this.getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator);
-			currentFileId = segment.id_file;
-			items.push(item);
-		});
-		return items;
-	}
+    getSegments() {
+        let items = [];
+        let currentFileId = 0;
+        let collectionsTypeArray = [];
+        this.state.segments.forEach((segImmutable) => {
+            let segment = segImmutable.toJS();
+            let collectionType = this.getCollectionType(segment);
+            let collectionTypeSeparator;
+            if (collectionType && collectionsTypeArray.indexOf(collectionType) === -1) {
+                let classes = this.state.sideOpen ? 'slide-right' : '';
+                const isFirstSegment = this.state.files && segment.sid === this.state.files[0].first_segment;
+                classes = (isFirstSegment) ? classes + ' first-segment': classes;
+                collectionTypeSeparator = (
+                    <div
+                        className={'collection-type-separator ' + classes}
+                        key={collectionType + segment.sid + Math.random() * 10}
+                    >
+                        Collection Name: <b>{collectionType}</b>
+                    </div>
+                );
+                collectionsTypeArray.push(collectionType);
+                if (this.segmentsWithCollectionType.indexOf(segment.sid) === -1) {
+                    this.segmentsWithCollectionType.push(segment.sid);
+                }
+            }
+            let item = this.getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator);
+            currentFileId = segment.id_file;
+            items.push(item);
+        });
+        return items;
+    }
 
 	getCommentsPadding(index, segment) {
 		if (index === 0 && this.state.sideOpen) {
@@ -365,8 +416,11 @@ class SegmentsContainer extends React.Component {
 		let basicSize = 0;
 		// if is the first segment of a file, add the 43px of the file header
 		const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
-		if (previousFileId !== segment.get('id_file')) {
-			basicSize += 43;
+        const isFirstSegment = this.state.files && segment.get('sid') === this.state.files[0].first_segment;
+        const fileDivHeight =  isFirstSegment ? 60 :75;
+        const collectionDivHeight = isFirstSegment ? 35 : 50;
+        if (previousFileId !== segment.get('id_file')) {
+			basicSize += fileDivHeight;
 		}
 		// if it's last segment, add 150px of distance from footer
 		if (index === this.state.segments.size - 1) {
@@ -374,7 +428,7 @@ class SegmentsContainer extends React.Component {
 		}
 		// if it's collection type add 42px of header
 		if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
-			basicSize += 42;
+			basicSize += collectionDivHeight;
 		}
 		// add height for comments padding
 		basicSize += this.getCommentsPadding(index, segment);
@@ -524,53 +578,53 @@ class SegmentsContainer extends React.Component {
 						}*/
 	};
 
-	onScroll() {
-		let scrollTop = this.scrollContainer.scrollTop();
-		let scrollBottom = this.scrollContainer.prop('scrollHeight') - (scrollTop + this.scrollContainer.height());
-		this.scrollDirectionTop = (scrollTop < this.lastScrollTop);
-		if (scrollBottom < 700 && !this.scrollDirectionTop) {
-			UI.getMoreSegments('after');
-		} else if (scrollTop < 500 && this.scrollDirectionTop) {
-			UI.getMoreSegments('before');
-		}
-		this.lastListSize = this.state.segments.size;
-		this.lastScrollTop = scrollTop;
-	}
+    onScroll() {
+        let scrollTop = this.scrollContainer.scrollTop();
+        let scrollBottom = this.scrollContainer.prop('scrollHeight') - (scrollTop + this.scrollContainer.height());
+        this.scrollDirectionTop = scrollTop < this.lastScrollTop;
+        if (scrollBottom < 700 && !this.scrollDirectionTop) {
+            UI.getMoreSegments('after');
+        } else if (scrollTop < 500 && this.scrollDirectionTop) {
+            UI.getMoreSegments('before');
+        }
+        this.lastListSize = this.state.segments.size;
+        this.lastScrollTop = scrollTop;
+    }
 
-	recomputeListSize(idFrom) {
-		const index = this.state.segments.findIndex((segment, index) => {
-			return segment.get('sid') === idFrom;
-		});
-		this.listRef.recomputeSizes(index);
-		this.segmentsHeightsMap[idFrom] ? this.segmentsHeightsMap[idFrom].height = 0 : null;
-		this.forceUpdate();
-	}
+    recomputeListSize(idFrom) {
+        const index = this.state.segments.findIndex((segment, index) => {
+            return segment.get('sid') === idFrom;
+        });
+        this.listRef.recomputeSizes(index);
+        this.segmentsHeightsMap[idFrom] ? (this.segmentsHeightsMap[idFrom].height = 0) : null;
+        this.forceUpdate();
+    }
 
-	forceUpdateSegments(segments) {
-		this.setState({
-			segments: segments,
-			splitGroup: splitGroup
-		});
-		this.forceUpdate();
-	}
+    forceUpdateSegments(segments) {
+        this.setState({
+            segments: segments,
+            splitGroup: splitGroup,
+        });
+        this.forceUpdate();
+    }
 
-	storeJobInfo(files) {
-		this.setState({
-			files: files
-		})
-	}
+    storeJobInfo(files) {
+        this.setState({
+            files: files,
+        });
+    }
 
-	componentDidMount() {
-		this.updateWindowDimensions();
-		this.scrollContainer = $(".article-segments-container > div");
-		window.addEventListener('resize', this.updateWindowDimensions);
-		SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
-		SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
-		SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
-		SegmentStore.addListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
-		SegmentStore.addListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
-		SegmentStore.addListener(SegmentConstants.OPEN_SIDE, this.openSide);
-		SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
+    componentDidMount() {
+        this.updateWindowDimensions();
+        this.scrollContainer = $('.article-segments-container > div');
+        window.addEventListener('resize', this.updateWindowDimensions);
+        SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
+        SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
+        SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
+        SegmentStore.addListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
+        SegmentStore.addListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
+        SegmentStore.addListener(SegmentConstants.OPEN_SIDE, this.openSide);
+        SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
 
 		SegmentStore.addListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
 		SegmentStore.addListener(SegmentConstants.FORCE_UPDATE, this.forceUpdateSegments);
@@ -590,18 +644,19 @@ class SegmentsContainer extends React.Component {
 		SegmentStore.removeListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
 		SegmentStore.addListener(SegmentConstants.FORCE_UPDATE, this.forceUpdateSegments);
 
-		CatToolStore.removeListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
+        CatToolStore.removeListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
+    }
 
-	}
-
-	shouldComponentUpdate(nextProps, nextState) {
-		return (!nextState.segments.equals(this.state.segments) ||
-			nextState.splitGroup !== this.state.splitGroup ||
-			nextState.tagLockEnabled !== this.state.tagLockEnabled ||
-			nextState.window !== this.state.window ||
-			(nextState.scrollTo && nextState.scrollTo !== this.state.scrollTo) ||
-			nextState.sideOpen !== this.state.sideOpen)
-	}
+    shouldComponentUpdate(nextProps, nextState) {
+        return (
+            !nextState.segments.equals(this.state.segments) ||
+            nextState.splitGroup !== this.state.splitGroup ||
+            nextState.tagLockEnabled !== this.state.tagLockEnabled ||
+            nextState.window !== this.state.window ||
+            (nextState.scrollTo && nextState.scrollTo !== this.state.scrollTo) ||
+            nextState.sideOpen !== this.state.sideOpen
+        );
+    }
 
 	updateWindowDimensions() {
 		let data = {};
@@ -617,9 +672,9 @@ class SegmentsContainer extends React.Component {
 		}
 	};
 
-	componentDidCatch(e) {
-		console.log("React component Error", e);
-	}
+    componentDidCatch(e) {
+        console.log('React component Error', e);
+    }
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
 		this.lastListSize = this.state.segments.size;

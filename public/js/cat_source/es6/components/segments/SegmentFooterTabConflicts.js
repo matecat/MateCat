@@ -2,12 +2,14 @@
  * React Component .
 
  */
-import React from 'react';
-import Immutable from 'immutable';
-import TagUtils from '../../utils/tagUtils';
-import TextUtils from '../../utils/textUtils';
+import React  from 'react';
+import Immutable  from 'immutable';
+import TagUtils from "../../utils/tagUtils";
+import TextUtils from "../../utils/textUtils";
+
 
 class SegmentFooterTabConflicts extends React.Component {
+
     constructor(props) {
         super(props);
     }
@@ -76,42 +78,42 @@ class SegmentFooterTabConflicts extends React.Component {
         return html;
     }
 
-    componentDidMount() {}
 
-    componentWillUnmount() {}
+    componentDidMount() {
+
+    }
+
+    componentWillUnmount() {
+
+    }
 
     allowHTML(string) {
         return { __html: string };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return (
-            this.props.active_class !== nextProps.active_class ||
-            this.props.tab_class !== nextProps.tab_class ||
-            ((!_.isUndefined(nextProps.segment.alternatives) || !_.isUndefined(this.props.segment.alternatives)) &&
-                ((!_.isUndefined(nextProps.segment.alternatives) && _.isUndefined(this.props.segment.alternatives)) ||
-                    !Immutable.fromJS(this.props.segment.alternatives).equals(
-                        Immutable.fromJS(nextProps.segment.alternatives)
-                    )))
-        );
+        return this.props.active_class !== nextProps.active_class || this.props.tab_class !== nextProps.tab_class ||
+            ( (!_.isUndefined(nextProps.segment.alternatives) || !_.isUndefined(this.props.segment.alternatives)) &&
+            ( (!_.isUndefined(nextProps.segment.alternatives) && _.isUndefined(this.props.segment.alternatives)) ||
+                !Immutable.fromJS(this.props.segment.alternatives).equals(Immutable.fromJS(nextProps.segment.alternatives)) ) )
     }
 
     render() {
         let html;
-        if (this.props.segment.alternatives && _.size(this.props.segment.alternatives) > 0) {
+        if ( this.props.segment.alternatives && _.size(this.props.segment.alternatives) > 0  ) {
             html = this.renderAlternatives(this.props.segment.alternatives);
             return (
-                <div
-                    key={'container_' + this.props.code}
-                    className={'tab sub-editor ' + this.props.active_class + ' ' + this.props.tab_class}
-                    id={'segment-' + this.props.id_segment + '-' + this.props.tab_class}
-                >
-                    <div className="overflow">{html}</div>
+                <div key={"container_" + this.props.code} className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
+                     id={"segment-" + this.props.id_segment + "-" + this.props.tab_class}>
+                    <div className="overflow">
+                        {html}
+                    </div>
                 </div>
-            );
+            )
         } else {
             return '';
         }
+
     }
 }
 

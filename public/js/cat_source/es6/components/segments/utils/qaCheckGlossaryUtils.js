@@ -1,9 +1,9 @@
 const QaCheckGlossary = {
     enabled() {
-        return config.qa_check_glossary_enabled;
+        return config.qa_check_glossary_enabled ;
     },
     update(glossary) {
-        var mapped = {};
+        var mapped = {} ;
 
         // group by segment id
         _.each(glossary.matches, function (item) {

@@ -1,3 +1,4 @@
+
 /**
  * React Component .
 
@@ -12,7 +13,9 @@ import SegmentStore  from '../../stores/SegmentStore';
 import SegmentButtons  from './SegmentButtons';
 import SegmentWarnings  from './SegmentWarnings';
 
+
 class SegmentTarget extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
@@ -31,7 +34,7 @@ class SegmentTarget extends React.Component {
     /*showTagsMenu(sid) {
         if ( this.props.segment.sid == sid ) {
             this.setState({
-                showTagsMenu: true,
+                showTagsMenu: true
             });
         }
     }*/
@@ -39,7 +42,7 @@ class SegmentTarget extends React.Component {
     /*hideTagsMenu() {
         if ( this.state.showTagsMenu ) {
             this.setState({
-                showTagsMenu: false,
+                showTagsMenu: false
             });
             //TODO Move it
             $('.tag-autocomplete-endcursor').remove();
@@ -49,7 +52,7 @@ class SegmentTarget extends React.Component {
     setOriginalTranslation(sid, translation) {
         if (this.props.segment.sid == sid) {
             this.setState({
-                originalTranslation: translation,
+                originalTranslation: translation
             });
         }
     }
@@ -62,30 +65,28 @@ class SegmentTarget extends React.Component {
 
     selectIssueText(event) {
         var selection = document.getSelection();
-        var container = $(this.issuesHighlightArea).find('.errorTaggingArea');
-        if (this.textSelectedInsideSelectionArea(selection, container)) {
+        var container = $(this.issuesHighlightArea).find('.errorTaggingArea') ;
+        if ( this.textSelectedInsideSelectionArea(selection, container ) )  {
             event.preventDefault();
             event.stopPropagation();
-            selection = CursorUtils.getSelectionData(selection, container);
-            SegmentActions.openIssuesPanel({ sid: this.props.segment.sid, selection: selection }, true);
-            setTimeout(() => {
+            selection = CursorUtils.getSelectionData( selection, container ) ;
+            SegmentActions.openIssuesPanel({ sid: this.props.segment.sid,  selection : selection }, true);
+            setTimeout(()=> {
                 SegmentActions.showIssuesMessage(this.props.segment.sid, 2);
             });
         } else {
             this.props.removeSelection();
-            setTimeout(() => {
+            setTimeout(()=> {
                 SegmentActions.showIssuesMessage(this.props.segment.sid, 0);
             });
         }
     }
 
-    textSelectedInsideSelectionArea(selection, container) {
-        return (
-            container.contents().text().indexOf(selection.focusNode.textContent) >= 0 &&
-            container.contents().text().indexOf(selection.anchorNode.textContent) >= 0 &&
-            selection.toString().length > 0
-        );
-    }
+    textSelectedInsideSelectionArea( selection, container ) {
+        return container.contents().text().indexOf(selection.focusNode.textContent)>=0 &&
+            container.contents().text().indexOf(selection.anchorNode.textContent)>=0 &&
+            selection.toString().length > 0 ;
+    };
 
     lockEditArea(event) {
         event.preventDefault();
@@ -98,7 +99,7 @@ class SegmentTarget extends React.Component {
     }
 
     allowHTML(string) {
-        return { __html: string };
+        return {__html: string};
     }
 
     sendTranslationUpdate() {
@@ -112,12 +113,12 @@ class SegmentTarget extends React.Component {
 
     getAllIssues() {
         let issues = [];
-        if (this.props.segment.versions) {
-            this.props.segment.versions.forEach(function (version) {
-                if (!_.isEmpty(version.issues)) {
-                    issues = issues.concat(version.issues);
+        if ( this.props.segment.versions ) {
+            this.props.segment.versions.forEach( function ( version ) {
+                if ( !_.isEmpty( version.issues ) ) {
+                    issues = issues.concat( version.issues );
                 }
-            });
+            } );
         }
         return issues;
     }
@@ -150,52 +151,35 @@ class SegmentTarget extends React.Component {
                 </div>
             </div>
         } else {
-            var s2tMicro = '';
-            var tagModeButton = '';
-            var tagCopyButton = '';
+            var s2tMicro = "";
+            var tagModeButton = "";
+            var tagCopyButton = "";
             var tagLockCustomizable;
-            if (this.props.segment.segment.match(/\&lt;.*?\&gt;/gi) && config.tagLockCustomizable) {
-                tagLockCustomizable = UI.tagLockEnabled ? (
-                    <a
-                        className="tagLockCustomize icon-lock"
-                        title="Toggle Tag Lock"
-                        onClick={() => SegmentActions.disableTagLock()}
-                    />
-                ) : (
-                    <a
-                        className="tagLockCustomize icon-unlocked3"
-                        title="Toggle Tag Lock"
-                        onClick={() => SegmentActions.enableTagLock()}
-                    />
-                );
+            if ((this.props.segment.segment.match(/\&lt;.*?\&gt;/gi) && config.tagLockCustomizable)) {
+                tagLockCustomizable = (UI.tagLockEnabled ?
+                    <a className="tagLockCustomize icon-lock" title="Toggle Tag Lock" onClick={()=>SegmentActions.disableTagLock()}/> :
+                    <a className="tagLockCustomize icon-unlocked3" title="Toggle Tag Lock" onClick={()=>SegmentActions.enableTagLock()}/>);
             }
+
 
             //Speeche2Text
             var s2t_enabled = this.props.speech2textEnabledFn();
             if (s2t_enabled) {
-                s2tMicro = (
-                    <div className="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
-                        <div className="micBg"></div>
-                        <div className="micBg2">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                version="1.1"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 20 20"
-                            >
-                                <g
-                                    className="svgMic"
-                                    transform="matrix(0.05555509,0,0,0.05555509,-3.1790007,-3.1109739)"
-                                    fill="#737373"
-                                >
-                                    <path d="m 290.991,240.991 c 0,26.392 -21.602,47.999 -48.002,47.999 l -11.529,0 c -26.4,0 -48.002,-21.607 -48.002,-47.999 l 0,-136.989 c 0,-26.4 21.602,-48.004 48.002,-48.004 l 11.529,0 c 26.4,0 48.002,21.604 48.002,48.004 l 0,136.989 z" />
-                                    <path d="m 342.381,209.85 -8.961,0 c -4.932,0 -8.961,4.034 -8.961,8.961 l 0,8.008 c 0,50.26 -37.109,91.001 -87.361,91.001 -50.26,0 -87.109,-40.741 -87.109,-91.001 l 0,-8.008 c 0,-4.927 -4.029,-8.961 -8.961,-8.961 l -8.961,0 c -4.924,0 -8.961,4.034 -8.961,8.961 l 0,8.008 c 0,58.862 40.229,107.625 96.07,116.362 l 0,36.966 -34.412,0 c -4.932,0 -8.961,4.039 -8.961,8.971 l 0,17.922 c 0,4.923 4.029,8.961 8.961,8.961 l 104.688,0 c 4.926,0 8.961,-4.038 8.961,-8.961 l 0,-17.922 c 0,-4.932 -4.035,-8.971 -8.961,-8.971 l -34.43,0 0,-36.966 c 55.889,-8.729 96.32,-57.5 96.32,-116.362 l 0,-8.008 c 0,-4.927 -4.039,-8.961 -8.961,-8.961 z" />
-                                </g>
-                            </svg>
-                        </div>
+                s2tMicro = <div className="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
+                    <div className="micBg"></div>
+                    <div className="micBg2">
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="20" height="20"
+                             viewBox="0 0 20 20">
+                            <g className="svgMic" transform="matrix(0.05555509,0,0,0.05555509,-3.1790007,-3.1109739)"
+                               fill="#737373">
+                                <path
+                                    d="m 290.991,240.991 c 0,26.392 -21.602,47.999 -48.002,47.999 l -11.529,0 c -26.4,0 -48.002,-21.607 -48.002,-47.999 l 0,-136.989 c 0,-26.4 21.602,-48.004 48.002,-48.004 l 11.529,0 c 26.4,0 48.002,21.604 48.002,48.004 l 0,136.989 z"/>
+                                <path
+                                    d="m 342.381,209.85 -8.961,0 c -4.932,0 -8.961,4.034 -8.961,8.961 l 0,8.008 c 0,50.26 -37.109,91.001 -87.361,91.001 -50.26,0 -87.109,-40.741 -87.109,-91.001 l 0,-8.008 c 0,-4.927 -4.029,-8.961 -8.961,-8.961 l -8.961,0 c -4.924,0 -8.961,4.034 -8.961,8.961 l 0,8.008 c 0,58.862 40.229,107.625 96.07,116.362 l 0,36.966 -34.412,0 c -4.932,0 -8.961,4.039 -8.961,8.971 l 0,17.922 c 0,4.923 4.029,8.961 8.961,8.961 l 104.688,0 c 4.926,0 8.961,-4.038 8.961,-8.961 l 0,-17.922 c 0,-4.932 -4.035,-8.971 -8.961,-8.971 l -34.43,0 0,-36.966 c 55.889,-8.729 96.32,-57.5 96.32,-116.362 l 0,-8.008 c 0,-4.927 -4.039,-8.961 -8.961,-8.961 z"/>
+                            </g>
+                        </svg>
                     </div>
-                );
+                </div>;
             }
 
             //Tag Mode Buttons
@@ -260,13 +244,13 @@ class SegmentTarget extends React.Component {
                         <li className="capitalize" title="Capitalize" onMouseDown={()=>this.editArea.formatSelection('capitalize')}/>
                     </ul>
                 </div>
-            );
+            </div>;
         }
         return textAreaContainer;
     }
 
     autoFillTagsInTarget(sid) {
-        if (_.isUndefined(sid) || sid === this.props.segment.sid) {
+        if ( _.isUndefined(sid) || sid === this.props.segment.sid ) {
             let newTranslation = TagUtils.autoFillTagsInTarget(this.props.segment);
             //lock tags and run again getWarnings
             setTimeout( (  )=> {
@@ -301,13 +285,10 @@ class SegmentTarget extends React.Component {
         }
 
         return (
-            <div
-                className="target item"
-                id={'segment-' + this.props.segment.sid + '-target'}
-                ref={(target) => (this.target = target)}
-            >
+            <div className="target item" id={"segment-" + this.props.segment.sid + "-target"} ref={(target)=>this.target=target}>
+
                 {this.getTargetArea(translation)}
-                <p className="warnings" />
+                <p className="warnings"/>
 
                 <SegmentButtons
                     disabled={buttonsDisabled}
@@ -315,9 +296,14 @@ class SegmentTarget extends React.Component {
                     updateTranslation={this.sendTranslationUpdate.bind(this)}
                 />
 
-                {this.props.segment.warnings ? <SegmentWarnings warnings={this.props.segment.warnings} /> : null}
+                {this.props.segment.warnings ?
+                    <SegmentWarnings
+                        warnings={this.props.segment.warnings}
+                    />
+                    : null
+                }
             </div>
-        );
+        )
     }
 
     toggleFormatMenu = (show) => {
