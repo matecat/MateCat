@@ -567,6 +567,18 @@ $reference = [
                 [
                         0 => 'atx',
                 ],
+        'application/vnd.apple.keynote'                                             =>
+                [
+                        0 => 'key'
+                ],
+        'application/vnd.apple.pages'                                             =>
+                [
+                        0 => 'pages'
+                ],
+        'application/vnd.apple.numbers'                                             =>
+                [
+                        0 => 'numbers'
+                ],
         'application/vnd.apple.installer+xml'                                       =>
                 [
                         0 => 'mpkg',
@@ -2981,7 +2993,9 @@ $reference = [
                         4         => 'list',
                         5         => 'log',
                         6         => 'in',
-                        7         => 'srt'
+                        7         => 'srt',
+                        8         => 'sbv',
+                        9         => 'vtt',
                 ],
         'text/prs.lines.tag'                                                        =>
                 [

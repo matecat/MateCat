@@ -316,6 +316,11 @@ class INIT {
     public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
     public static $SPELL_CHECK_ENABLED        = false;
     public static $SUPPORTED_FILE_TYPES       = [
+            'Apple'               => [
+                    'key' => ['','','extkey'],
+                    'pages' => ['','','extpag'],
+                    'numbers' => ['','','extnumb'],
+            ],
             'Office'              => [
                     'doc'  => [ '', '', 'extdoc' ],
                     'dot'  => [ '', '', 'extdoc' ],
@@ -397,6 +402,8 @@ class INIT {
                     'Android xml' => [ '', '', 'extxml' ],
                     'strings'     => [ '', '', 'extstr' ],
                     'srt'         => [ '', '', 'extsrt' ],
+                    'sbv'         => [ '', '', 'extsrt' ],
+                    'vtt'         => [ '', '', 'extsrt' ],
                     'wix'         => [ '', '', 'extwix' ],
                     'po'          => [ '', '', 'extpo' ],
                     'g'           => [ '', '', 'extg' ],
