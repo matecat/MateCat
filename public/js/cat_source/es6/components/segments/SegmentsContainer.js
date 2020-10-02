@@ -16,68 +16,9 @@ import Speech2Text from '../../utils/speech2text';
 import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
 import SegmentPlaceholderLite from "./SegmentPlaceholderLite";
-import SegmentPlaceholderLite from "./SegmentPlaceholderLite";
 import FilesInstructionsModal from '../modals/FilesInstructionsModal';
 import CommonUtils from '../../utils/commonUtils';
 
-
-/*class SegmentPlaceholder extends React.Component {
-	constructor(props) {
-		super(props);
-	}
-
-	elRef = null;
-
-	componentDidMount() {
-
-		const {sid} = this.props;
-
-		// Adeguamento larghezza container
-		// const segmentContainerOriginalWidth = this.elRef.getBoundingClientRect().width;
-		this.elRef.style.cssText = `width:${window.innerWidth - 10}px !important;`;
-
-		// Ottine source e target attualmente renderizzati
-		const source = this.elRef.getElementsByClassName('source')[0],
-			target = this.elRef.getElementsByClassName('target')[0];
-
-		// Ottieni le dimensioni del div "source"
-		const sourceBCR = source.getBoundingClientRect();
-
-		// Ottieni gli editor originali
-		const sourceEditor = source.getElementsByClassName('DraftEditor-root')[0];
-		const targetEditor = target.getElementsByClassName('DraftEditor-root')[0];
-
-		// L'editor è grande quando il div "source" che lo contiene
-		sourceEditor.style.cssText = `width:${sourceBCR.width}px !important;`;
-		const sourceEditorAdjustedBCR = sourceEditor.getBoundingClientRect();
-
-		// Aggiusto il target che è sempre più piccolo del source
-		targetEditor.style.cssText = `width:${sourceEditorAdjustedBCR.width}px !important;`;
-		const targetEditorAdjustedBCR = targetEditor.getBoundingClientRect();
-
-		// Verifico quale degli editor ha l'altezza più grande
-		let maxEditor = Math.max(sourceEditorAdjustedBCR.height, targetEditorAdjustedBCR.height);
-
-		// Aggiungi il padding esterno
-		const outerDivPadding = 33;
-
-		// Limita la grandezza minima dell'editor
-		const minEditorHeight = 90;
-
-		//
-		//console.log(`Computed ${sid}, height: ${maxEditor}`)
-		this.props.calc(Math.max(maxEditor + outerDivPadding, minEditorHeight));
-	}
-
-	render() {
-		const {component} = this.props;
-		return <div  className={'segment-container'} ref={el => this.elRef = el} style={{display: 'inline-block', width: '100%' /!*visibility:'hidden'*!/}}>
-			{component}
-		</div>
-	}
-}*/
-
-/*let segmentHeightCache = {};*/
 
 class SegmentsContainer extends React.Component {
 
