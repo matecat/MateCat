@@ -51,6 +51,8 @@ class SegmentsContainer extends React.Component {
 
 		this.lastScrollTop = 0;
 		this.segmentsHeightsMap = {};
+		this.segmentsHeightsMapPanelClose = {};
+		this.segmentsHeightsMapPanelOpen = {}
 		this.segmentsWithCollectionType = [];
 
 		this.scrollContainer;
@@ -67,14 +69,16 @@ class SegmentsContainer extends React.Component {
 
 	openSide() {
 		if (!this.state.sideOpen) {
-			this.segmentsHeightsMap = {};
+			this.segmentsHeightsMapPanelClose = {...this.segmentsHeightsMap};
+			this.segmentsHeightsMap = {...this.segmentsHeightsMapPanelOpen}
 			this.setState( {sideOpen: true} );
 		}
 	}
 
 	closeSide() {
 		if(this.state.sideOpen){
-			this.segmentsHeightsMap = {};
+			this.segmentsHeightsMapPanelOpen = {...this.segmentsHeightsMap};
+			this.segmentsHeightsMap = {...this.segmentsHeightsMapPanelClose};
 			this.setState({sideOpen: false});
 		}
 	}
@@ -612,6 +616,8 @@ class SegmentsContainer extends React.Component {
 				window: data
 			});
 			this.segmentsHeightsMap = {};
+			this.segmentsHeightsMapPanelClose ={};
+			this.segmentsHeightsMapPanelOpen={}
 		}
 	};
 
