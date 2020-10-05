@@ -877,12 +877,10 @@ const SegmentActions = {
 
     openIssuesPanel: function (data, openSegment) {
         if ( UI.openIssuesPanel(data, openSegment) ) {
-
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_ISSUES_PANEL,
                 data: data,
             });
-            this.openSideSegments();
         }
 
     },
@@ -930,7 +928,6 @@ const SegmentActions = {
             sid: sid,
             data: issueId
         });
-        this.openSideSegments();
     },
 
     addPreloadedIssuesToSegment: function ( issues ) {
@@ -1108,7 +1105,6 @@ const SegmentActions = {
         });
     },
     openSegmentComment(sid) {
-        this.openSideSegments();
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_COMMENTS,
             sid: sid

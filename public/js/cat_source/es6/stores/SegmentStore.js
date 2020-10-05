@@ -71,6 +71,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     consecutiveCopySourceNum: [],
     clipboardFragment: '',
     clipboardPlainText: '',
+    sideOpen: false,
     /**
      * Update all
      */
@@ -508,17 +509,27 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             errors: errors
         });
     },
-    // showTranslationsIssues: function() {
-    //     this._segments = this._segments.map((segment)=>segment.set('showIssues', true));
-    // },
+    closeSide: function() {
+        this.sideOpen = false;
+    },
+    openSide: function()  {
+        this.sideOpen = true;
+    },
+    isSideOpen: function (  ) {
+        return this.sideOpen;
+    },
+    segmentHasIssues: function ( sid ){
+        const segment = this.getSegmentByIdToJS(sid);
+        if ( !segment ) return false;
+        const versionWithIssues = segment.versions && segment.versions.find((item)=>item.issues && item.issues.length > 0);
+        return versionWithIssues && versionWithIssues.issues.length > 0
+
+    },
     openSegmentIssuePanel: function(sid) {
-        const index = this.getSegmentIndex(sid);
-        if ( index === -1 ) return;
-        // if ( ( this._segments.get(index).get('ice_locked') == 0  || ( this._segments.get(index).get('ice_locked') == 1 && this._segments.get(index).get('unlocked') ) ) ) {
-            this._segments = this._segments.setIn([index, 'openIssues'], true);
-        // } else {
-        //     this._segments = this._segments.setIn([index, 'openIssues'], false);
-        // }
+        // const index = this.getSegmentIndex(sid);
+        // if ( index === -1 ) return;
+        // this._segments = this._segments.setIn([index, 'openIssues'], true);
+        this._segments = this._segments.map((segment)=>segment.set('openIssues', true));
     },
     closeSegmentIssuePanel: function() {
         this._segments = this._segments.map((segment)=>segment.set('openIssues', false));
@@ -855,7 +866,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         }
         return;
     },
-    isSidePanelOpen: function() {
+    isSidePanelToOpen: function() {
         const commentOpen = this._segments.findIndex((segment)=>segment.get('openComments') === true);
         const issueOpen = this._segments.findIndex((segment)=>segment.get('openIssues') === true);
         return ( commentOpen !== -1 ||  issueOpen !== -1);
@@ -1136,31 +1147,48 @@ AppDispatcher.register(function (action) {
             SegmentStore.openSegmentIssuePanel(action.data.sid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(action.actionType, action.data);
+            if ( SegmentStore.isSidePanelToOpen() && !SegmentStore.sideOpen ) {
+                SegmentStore.openSide();
+                SegmentStore.emitChange(SegmentConstants.OPEN_SIDE, SegmentStore._segments);
+            }
             break;
         case SegmentConstants.CLOSE_ISSUES_PANEL:
             SegmentStore.closeSegmentIssuePanel();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(action.actionType);
-            if ( !SegmentStore.isSidePanelOpen() ) {
+            if ( !SegmentStore.isSidePanelToOpen() && SegmentStore.sideOpen) {
+                SegmentStore.closeSide();
                 SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
             }
             break;
         case SegmentConstants.CLOSE_SIDE:
             SegmentStore.closeSegmentIssuePanel();
-            SegmentStore.closeSegmentComments(action.sid);
+            SegmentStore.closeSegmentComments();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             SegmentStore.emitChange(action.actionType);
-            if ( !SegmentStore.isSidePanelOpen() ) {
+            if ( !SegmentStore.isSidePanelToOpen() && SegmentStore.sideOpen) {
+                SegmentStore.closeSide();
                 SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
+            }
+            break;
+        case SegmentConstants.OPEN_SIDE:
+            if ( SegmentStore.isSidePanelToOpen() && !SegmentStore.sideOpen) {
+                SegmentStore.openSide();
+                SegmentStore.emitChange(SegmentConstants.OPEN_SIDE, SegmentStore._segments);
             }
             break;
         case SegmentConstants.OPEN_COMMENTS:
             SegmentStore.openSegmentComments(action.sid);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            if ( SegmentStore.isSidePanelToOpen() && !SegmentStore.sideOpen) {
+                SegmentStore.openSide();
+                SegmentStore.emitChange(SegmentConstants.OPEN_SIDE, SegmentStore._segments);
+            }
             break;
         case SegmentConstants.CLOSE_COMMENTS:
             SegmentStore.closeSegmentComments(action.sid);
-            if ( !SegmentStore.isSidePanelOpen() ) {
+            if ( !SegmentStore.isSidePanelToOpen() && SegmentStore.sideOpen) {
+                SegmentStore.closeSide();
                 SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);
             }
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);

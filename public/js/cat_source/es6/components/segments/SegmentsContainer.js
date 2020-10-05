@@ -66,8 +66,10 @@ class SegmentsContainer extends React.Component {
 	}
 
 	openSide() {
-		this.segmentsHeightsMap = {};
-		this.setState({sideOpen: true});
+		if (!this.state.sideOpen) {
+			this.segmentsHeightsMap = {};
+			this.setState( {sideOpen: true} );
+		}
 	}
 
 	closeSide() {
