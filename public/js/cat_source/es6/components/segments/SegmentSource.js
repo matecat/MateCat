@@ -116,6 +116,7 @@ class SegmentSource extends React.Component {
             const {editorState, tagRange} =  contentEncoded;
             this.setState( {
                 editorState: editorState,
+                tagRange: tagRange
             } );
             setTimeout(()=>this.updateSourceInStore());        }
     };
