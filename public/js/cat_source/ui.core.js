@@ -851,7 +851,7 @@ var UI = {
 	    if ( UI.tagMenuOpen ) return;
 
 	    var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment));
-
+        if ( !segment ) return;
 		var dd = new Date();
 		var ts = dd.getTime();
 		var token = segment.sid + '-' + ts.toString();
