@@ -197,6 +197,8 @@ class Editarea extends React.Component {
             let {editorState: newEditorState} =  contentEncoded;
             const newContentState = newEditorState.getCurrentContent();
             newEditorState = EditorState.push(editorState, newContentState, 'insert-fragment');
+            // Force selection at the end of replaced block
+            newEditorState = EditorState.moveFocusToEnd(newEditorState);
             this.setState( {
                 translation: translation,
                 editorState: newEditorState,

@@ -1,7 +1,7 @@
 import createNewEntitiesFromMap from "./createNewEntitiesFromMap";
 import linkEntities from "./linkEntities";
 import beautifyEntities from "./beautifyEntities";
-import {EditorState} from 'draft-js';
+import {EditorState, SelectionState} from 'draft-js';
 import splitOnTagPlaceholder from "./splitOnTagPlaceHolder";
 import removeNewLineInContentState from "./removeNewLineInContentState";
 import {getErrorCheckTag, getSplitBlockTag} from "./tagModel";
@@ -14,6 +14,8 @@ import replaceOccurrences from "./replaceOccurrences";
  * @returns {*|EditorState} editorStateModified - An EditorState with all known tags treated as entities
  */
 const encodeContent = (originalEditorState, plainText = '') => {
+    // block history saving
+    originalEditorState = EditorState.set(originalEditorState, {allowUndo: false})
     // get tag's types on which every block will be splitted
     const excludedTags = getSplitBlockTag();
 
@@ -48,10 +50,8 @@ const encodeContent = (originalEditorState, plainText = '') => {
     editorState = replaceOccurrences(editorState, '&lt;', '<');
     editorState = replaceOccurrences(editorState, '&gt;', '>');
 
-    const decorator = originalEditorState.getDecorator();
-    // We use ContentState to create a new Editor without history
-    contentState = editorState.getCurrentContent();
-    editorState = EditorState.createWithContent(contentState, decorator);
+    // allow history saving
+    editorState = EditorState.set(editorState, {allowUndo: true})
 
     // Filter tags to remove nbsp, tab, CR, LF that will not be available in TagsMenu
     tagRange = tagRange.filter(tag => {
