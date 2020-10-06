@@ -35,7 +35,7 @@ class SegmentPlaceholderLite extends React.Component {
             editorStateSource,
             editorStateTarget
         };
-        this.onChange = () => {console.log('Placeholder!')}
+        this.onChange = () => {}
     }
 
     containerRef = null;
