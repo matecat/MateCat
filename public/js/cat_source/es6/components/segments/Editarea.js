@@ -89,7 +89,7 @@ class Editarea extends React.Component {
             clickedOnTag: false,
             triggerText: null
         };
-        this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
+        this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 100);
         this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500);
         this.onCompositionStopDebounced = _.debounce(this.onCompositionStop, 1000);
         this.focusEditorDebounced = _.debounce(this.focusEditor, 500);
@@ -230,7 +230,7 @@ class Editarea extends React.Component {
             const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange);
             //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
             SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags);
-            console.log('updatingTranslationInStore');
+            // console.log('updatingTranslationInStore');
             UI.registerQACheck();
         }
     };
@@ -619,7 +619,7 @@ class Editarea extends React.Component {
             translation: DraftMatecatUtils.decodeSegment(editorState)
         }, () => {
             //updateTagsInEditorDebounced()
-            if(contentChanged) this.updateTranslationDebounced();
+            if(contentChanged) this.updateTranslationInStore();
         });
         this.onCompositionStopDebounced()
     };

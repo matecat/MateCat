@@ -712,7 +712,7 @@ export const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheck
         }
         return re;
     };
-    console.log("Add Glossary check Decorator: ", sid,  qaCheckGlossary);
+    // console.log("Add Glossary check Decorator: ", sid,  qaCheckGlossary);
 
     let decorators = decoratorStructure.slice();
     const regex = createGlossaryRegex(qaCheckGlossary);
