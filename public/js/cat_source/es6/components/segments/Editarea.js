@@ -34,8 +34,7 @@ import getFragmentFromSelection
     from "./utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection";
 
 const editorSync = {
-    inTransitionToFocus: false,
-    editorFocused: false,
+    editorFocused: true,
     clickedOnTag: false,
     onComposition: false
 };
@@ -197,8 +196,6 @@ class Editarea extends React.Component {
             let {editorState: newEditorState} =  contentEncoded;
             const newContentState = newEditorState.getCurrentContent();
             newEditorState = EditorState.push(editorState, newContentState, 'insert-fragment');
-            // Force selection at the end of replaced block
-            newEditorState = EditorState.moveFocusToEnd(newEditorState);
             this.setState( {
                 translation: translation,
                 editorState: newEditorState,
@@ -285,9 +282,9 @@ class Editarea extends React.Component {
         }
         setTimeout(()=>{
             this.updateTranslationInStore();
-            /*if(this.props.segment.opened && this.editor){
-                this.editor.focus();
-            }*/
+            if(this.props.segment.opened){
+                this.focusEditor();
+            }
         });
     }
 
@@ -315,7 +312,11 @@ class Editarea extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if(!prevProps.segment.opened && this.props.segment.opened){
-            this.focusEditor();
+            const newEditorState = EditorState.moveFocusToEnd(this.state.editorState);
+            this.setState({editorState: newEditorState})
+        }else if(prevProps.segment.opened && !this.props.segment.opened){
+            const newEditorState = EditorState.moveSelectionToEnd(this.state.editorState);
+            this.setState({editorState: newEditorState})
         }
         if(!editorSync.onComposition){
             this.checkDecorators(prevProps);
@@ -339,7 +340,8 @@ class Editarea extends React.Component {
             handleKeyCommand,
             myKeyBindingFn,
             onMouseUpEvent,
-            onBlurEvent
+            onBlurEvent,
+            onFocus
         } = this;
 
         let lang = '';
@@ -368,6 +370,7 @@ class Editarea extends React.Component {
                     onDragStart={this.onDragEvent}
                     onDragEnd={this.onDragEnd}
                     onDrop={this.onDragEnd}
+                    onFocus={onFocus}
         >
             <Editor
                 lang={lang}
@@ -536,11 +539,11 @@ class Editarea extends React.Component {
     };
 
     onBlurEvent = () => {
-        // Hide Edit Toolbar
         const {toggleFormatMenu, setClickedTagId} = this.props;
+        editorSync.editorFocused = false;
+        // Hide Edit Toolbar
         toggleFormatMenu(false);
         setClickedTagId();
-
     };
 
     // Focus on editor trigger 2 onChange events
@@ -554,13 +557,9 @@ class Editarea extends React.Component {
         }
     };*/
 
-    /*onFocus = () => {
+    onFocus = () => {
         editorSync.editorFocused = true;
-        editorSync.inTransitionToFocus = true;
-        this.setState({
-            editorFocused: true,
-        });
-    };*/
+    };
 
     updateTagsInEditor = () => {
         console.log('Executing updateTagsInEditor');
@@ -597,34 +596,43 @@ class Editarea extends React.Component {
 
     onChange = (editorState) =>  {
         const {setClickedTagId} = this.props;
-        const {displayPopover} = this.state;
+        const {displayPopover, editorState: prevEditorState} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
-        const contentChanged = editorState.getCurrentContent().getPlainText() !== this.state.editorState.getCurrentContent().getPlainText();
+        const contentChanged = editorState.getCurrentContent().getPlainText() !==
+            prevEditorState.getCurrentContent().getPlainText();
         // if not on an entity, remove any previous selection highlight
         const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
+        // select no tag
         if(!entityKey) setClickedTagId();
-        // while onComposition, remove unwanted decorators like lexiqa
+        // if opened, close TagsMenu
+        if(displayPopover) closePopover();
         if(contentChanged){
             console.log('contentChanged')
             editorSync.onComposition = true;
-            editorState = this.disableDecorator(editorState, 'lexiqa')
-            /*// remove lexiqa
-            _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'lexiqa');
-            const decorator = new CompoundDecorator(this.decoratorsStructure);
-            editorState = EditorState.set( editorState, {decorator} )*/
+            // while onComposition, remove unwanted decorators like lexiqa
+            editorState = this.disableDecorator(editorState, 'lexiqa');
+            editorState = this.forceSelectionFocus(editorState);
+            this.setState({
+                editorState: editorState,
+                translation: DraftMatecatUtils.decodeSegment(editorState)
+            }, () => {
+                this.updateTranslationDebounced();
+            });
+        }else{
+            this.setState({editorState: editorState});
         }
-        // if opened, close TagsMenu
-        if(displayPopover) closePopover();
-
-        this.setState({
-            editorState: editorState,
-            translation: DraftMatecatUtils.decodeSegment(editorState)
-        }, () => {
-            //updateTagsInEditorDebounced()
-            if(contentChanged) this.updateTranslationDebounced();
-        });
         this.onCompositionStopDebounced()
     };
+
+    // fix cursor jump at the beginning
+    forceSelectionFocus = (editorState) => {
+        const currentSelection = editorState.getSelection();
+        if (!currentSelection.getHasFocus()) {
+            const selection = currentSelection.set('hasFocus', true);
+            editorState = EditorState.acceptSelection(editorState, selection);
+        }
+        return editorState;
+    }
 
     // Methods for TagMenu ---- START
     moveUpTagMenuSelection = () => {

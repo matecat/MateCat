@@ -800,7 +800,7 @@ export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, 
             }
         };
     };
-    console.log("Add Lexiqa Decorator: ", sid, lexiqaWarnings);
+    /*console.log("Add Lexiqa Decorator: ", sid, lexiqaWarnings);*/
     let decorators = decoratorStructure.slice();
     _.remove(decorators, (decorator) => decorator.name === 'lexiqa');
     decorators.push( generateLexiqaDecorator( lexiqaWarnings, sid, isSource, 'lexiqa' ) );
