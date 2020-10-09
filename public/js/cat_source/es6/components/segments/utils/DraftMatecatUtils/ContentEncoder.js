@@ -558,6 +558,7 @@ import CompoundDecorator from "../CompoundDecorator"
 // };
 
 //Search
+/*
 export const activateSearch = (editorState, decoratorStructure, text, params, occurrencesInSegment, currentIndex, tagRange) => {
 
     const generateSearchDecorator = (highlightTerm, occurrences, params, currentIndex, tagRange) => {
@@ -800,7 +801,7 @@ export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, 
             }
         };
     };
-    /*console.log("Add Lexiqa Decorator: ", sid, lexiqaWarnings);*/
+    /!*console.log("Add Lexiqa Decorator: ", sid, lexiqaWarnings);*!/
     let decorators = decoratorStructure.slice();
     _.remove(decorators, (decorator) => decorator.name === 'lexiqa');
     decorators.push( generateLexiqaDecorator( lexiqaWarnings, sid, isSource, 'lexiqa' ) );
@@ -817,3 +818,4 @@ export const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, 
         decorators: decorators
     }
 };
+*/

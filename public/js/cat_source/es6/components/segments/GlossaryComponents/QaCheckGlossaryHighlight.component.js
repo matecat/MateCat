@@ -1,6 +1,5 @@
 
 import React, {Component} from 'react';
-import SegmentActions from '../../../actions/SegmentActions';
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
 
 class QaCheckGlossaryHighlight extends Component {
@@ -18,13 +17,13 @@ class QaCheckGlossaryHighlight extends Component {
         })
     };
     render() {
-        const { children, sid } = this.props;
+        const { children, sid, onClickAction } = this.props;
         const {showTooltip} = this.state;
         return <div className="qaCheckGlossaryItem">
             {showTooltip && <TooltipInfo text={'Unused glossary term'}/>}
             <span onMouseEnter={() => this.tooltipToggle()}
                     onMouseLeave={() => this.tooltipToggle()}
-                onClick={()=>SegmentActions.activateTab(sid, 'glossary')}>
+                onClick={() => onClickAction(sid, 'glossary')}>
                 {children}
             </span>
         </div>

@@ -7,15 +7,8 @@ import SegmentConstants  from '../../constants/SegmentConstants';
 import EditAreaConstants  from '../../constants/EditAreaConstants';
 import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
-import Speech2Text from '../../utils/speech2text';
-
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-
-import {
-    activateLexiqa,
-    activateQaCheckBlacklist,
-    activateSearch
-} from "./utils/DraftMatecatUtils/ContentEncoder";
+import * as DraftMatecatConstants from "./utils/DraftMatecatUtils/editorConstants";
 import {Modifier, Editor, EditorState, getDefaultKeyBinding, KeyBindingUtil, ContentState} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
@@ -61,14 +54,11 @@ class Editarea extends React.Component {
         ];
         // const decorator = new CompositeDecorator(this.decoratorsStructure);
         const decorator = new CompoundDecorator(this.decoratorsStructure);
-
         // Escape html
         const translation =  DraftMatecatUtils.unescapeHTMLLeaveTags(this.props.translation);
-
         // If GuessTag is Enabled, clean translation from tags
         const cleanTranslation = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
             DraftMatecatUtils.cleanSegmentString(translation) : translation;
-
           // Inizializza Editor State con solo testo
         const plainEditorState = EditorState.createEmpty(decorator);
         const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, cleanTranslation);
@@ -121,39 +111,22 @@ class Editarea extends React.Component {
         let { editorState, tagRange } = this.state;
         let { searchParams, occurrencesInSearch, currentInSearchIndex } = this.props.segment;
         const textToSearch = searchParams.target ? searchParams.target : "";
-        const { editorState: newEditorState, decorators } = activateSearch( editorState, this.decoratorsStructure, textToSearch,
+        const { editorState: newEditorState, decorators } = DraftMatecatUtils.activateSearch( editorState, this.decoratorsStructure, textToSearch,
             searchParams, occurrencesInSearch.occurrences, currentInSearchIndex, tagRange );
+        // TODO: remove lexiqa decorator when search decorator is ON
         this.decoratorsStructure = decorators;
         this.setState( {
             editorState: newEditorState,
-        } );
-    };
-
-    removeSearchDecorator = () => {
-        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'search');
-        // const newDecorator = new CompositeDecorator( this.decoratorsStructure );
-        const decorator = new CompoundDecorator(this.decoratorsStructure);
-        this.setState( {
-            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
         } );
     };
 
     addQaBlacklistGlossaryDecorator = () => {
         let { editorState } = this.state;
         let { qaBlacklistGlossary, sid } = this.props.segment;
-        const { editorState : newEditorState, decorators } = activateQaCheckBlacklist( editorState, this.decoratorsStructure, qaBlacklistGlossary, sid );
+        const { editorState : newEditorState, decorators } = DraftMatecatUtils.activateQaCheckBlacklist( editorState, this.decoratorsStructure, qaBlacklistGlossary, sid );
         this.decoratorsStructure = decorators;
         this.setState( {
             editorState: newEditorState,
-        } );
-    };
-
-    removeQaBlacklistGlossaryDecorator = () => {
-        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'qaCheckBlacklist');
-        // const newDecorator = new CompositeDecorator( this.decoratorsStructure );
-        const decorator = new CompoundDecorator(this.decoratorsStructure);
-        this.setState( {
-            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
         } );
     };
 
@@ -164,7 +137,7 @@ class Editarea extends React.Component {
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), decodedTranslation, false);
         const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
-            const { editorState : newEditorState, decorators } = activateLexiqa( editorState,
+            const { editorState : newEditorState, decorators } = DraftMatecatUtils.activateLexiqa( editorState,
                 this.decoratorsStructure,
                 updatedLexiqaWarnings,
                 sid,
@@ -173,18 +146,10 @@ class Editarea extends React.Component {
             this.decoratorsStructure = decorators;
             this.setState( {
                 editorState: newEditorState,
-            }, () => this.focusEditorDebounced );
+            });
         } else {
-            this.removeLexiqaDecorator();
+            this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR);
         }
-    };
-
-    removeLexiqaDecorator = () => {
-        _.remove(this.decoratorsStructure, (decorator) => decorator.name === 'lexiqa');
-        const decorator = new CompoundDecorator(this.decoratorsStructure);
-        this.setState( {
-            editorState: EditorState.set( this.state.editorState, {decorator: decorator} ),
-        } );
     };
 
     //Receive the new translation and decode it for draftJS
@@ -244,7 +209,7 @@ class Editarea extends React.Component {
         {
             this.addSearchDecorator();
         } else if ( prevProps.segment.inSearch && !this.props.segment.inSearch ) {
-            this.removeSearchDecorator();
+            this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR);
         }
 
         //Qa Check Blacklist
@@ -254,7 +219,7 @@ class Editarea extends React.Component {
             (_.isUndefined(prevQaBlacklistGlossary) || !Immutable.fromJS(prevQaBlacklistGlossary).equals(Immutable.fromJS(qaBlacklistGlossary)) ) ) {
             this.addQaBlacklistGlossaryDecorator();
         } else if ((prevQaBlacklistGlossary && prevQaBlacklistGlossary.length > 0 ) && ( !qaBlacklistGlossary ||  qaBlacklistGlossary.length === 0 ) ) {
-            this.removeQaBlacklistGlossaryDecorator();
+            this.removeDecorator(DraftMatecatConstants.QA_BLACKLIST_DECORATOR);
         }
 
         //Lexiqa
@@ -264,12 +229,12 @@ class Editarea extends React.Component {
             (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) ) ) {
             this.addLexiqaDecorator();
         } else if ((prevLexiqa && _.size(prevLexiqa) > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.target ) ) {
-            this.removeLexiqaDecorator()
+            //this.removeLexiqaDecorator()
+            this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR);
         }
     };
 
     componentDidMount() {
-        //console.log(`componentDidMount@EditArea ${this.props.segment.sid}`)
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.setNewTranslation);
         SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
         SegmentStore.addListener(EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA, this.copyGlossaryToEditArea);
@@ -512,7 +477,7 @@ class Editarea extends React.Component {
         if(!customTag) return;
         // Start composition mode and remove lexiqa
         editorSync.onComposition = true;
-        let newEditorState = this.disableDecorator(editorState, 'lexiqa');
+        let newEditorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
         newEditorState = DraftMatecatUtils.insertEntityAtSelection(newEditorState, customTag);
 
         this.setState({
@@ -588,6 +553,12 @@ class Editarea extends React.Component {
         editorSync.onComposition = false;
     }
 
+    removeDecorator = (decoratorName) => {
+        this.setState( {
+            editorState: this.disableDecorator(this.state.editorState, decoratorName)
+        });
+    }
+
     disableDecorator = (editorState, decoratorName) => {
         _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
         const decorator = new CompoundDecorator(this.decoratorsStructure);
@@ -610,7 +581,7 @@ class Editarea extends React.Component {
             console.log('contentChanged')
             editorSync.onComposition = true;
             // while onComposition, remove unwanted decorators like lexiqa
-            editorState = this.disableDecorator(editorState, 'lexiqa');
+            editorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
             editorState = this.forceSelectionFocus(editorState);
             this.setState({
                 editorState: editorState,
@@ -670,7 +641,7 @@ class Editarea extends React.Component {
         const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex];
 
         editorSync.onComposition = true;
-        let newEditorState = this.disableDecorator(editorState, 'lexiqa')
+        let newEditorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR)
         const editorStateWithSuggestedTag = insertTag(selectedTag, newEditorState, triggerText);
 
         this.setState({
@@ -710,7 +681,7 @@ class Editarea extends React.Component {
     onTagClick = (suggestionTag) => {
         const {editorState, triggerText} = this.state;
         editorSync.onComposition = true;
-        let newEditorState = this.disableDecorator(editorState, 'lexiqa')
+        let newEditorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR)
         let editorStateWithSuggestedTag = insertTag(suggestionTag, newEditorState, triggerText);
         this.setState({
             editorState: editorStateWithSuggestedTag,

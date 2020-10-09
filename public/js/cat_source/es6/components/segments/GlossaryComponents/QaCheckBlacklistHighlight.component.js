@@ -1,6 +1,5 @@
 
 import React, {Component} from 'react';
-import SegmentActions from '../../../actions/SegmentActions';
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
 
 class QaCheckBlacklistHighlight extends Component {
