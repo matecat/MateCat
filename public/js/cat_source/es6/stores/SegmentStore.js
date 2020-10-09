@@ -1186,7 +1186,7 @@ AppDispatcher.register(function (action) {
             }
             break;
         case SegmentConstants.CLOSE_COMMENTS:
-            SegmentStore.closeSegmentComments(action.sid);
+            SegmentStore.closeSegmentComments();
             if ( !SegmentStore.isSidePanelToOpen() && SegmentStore.sideOpen) {
                 SegmentStore.closeSide();
                 SegmentStore.emitChange(SegmentConstants.CLOSE_SIDE, SegmentStore._segments);

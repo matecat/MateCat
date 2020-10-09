@@ -420,9 +420,9 @@ class SegmentsContainer extends React.Component {
 				const container = document.createElement("div", {});
 				document.body.appendChild(container);
 				const computeHeightAndUnmount = (h) => {
-					let height = h;
+					height = h;
 
-					height += this.getSegmentBasicSize(index, segment);
+					// height += this.getSegmentBasicSize(index, segment);
 
 					// save height
 					this.segmentsHeightsMap[segment.get('sid')] = {
@@ -442,7 +442,7 @@ class SegmentsContainer extends React.Component {
 			}
 		// --- Retrieve height from cache
 		}else{
-			height = this.segmentsHeightsMap[segment.get('sid')].height;
+			height = this.segmentsHeightsMap[segment.get('sid')].height + this.getSegmentBasicSize(index, segment);
 		}
 		return height
 

@@ -77,6 +77,8 @@ let CatToolActions = {
         AppDispatcher.dispatch({
             actionType: CattolConstants.CLOSE_SEARCH,
         });
+        setTimeout(()=>window.dispatchEvent(new Event('resize')));
+
     },
     startNotifications: function () {
         Notifications.start();

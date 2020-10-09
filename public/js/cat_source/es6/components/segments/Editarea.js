@@ -78,7 +78,7 @@ class Editarea extends React.Component {
             clickedOnTag: false,
             triggerText: null
         };
-        this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 500);
+        this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 100);
         this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500);
         this.onCompositionStopDebounced = _.debounce(this.onCompositionStop, 1000);
         this.focusEditorDebounced = _.debounce(this.focusEditor, 500);
@@ -194,7 +194,7 @@ class Editarea extends React.Component {
             const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange);
             //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
             SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags);
-            console.log('updatingTranslationInStore');
+            // console.log('updatingTranslationInStore');
             UI.registerQACheck();
         }
     };
@@ -229,7 +229,6 @@ class Editarea extends React.Component {
             (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) ) ) {
             this.addLexiqaDecorator();
         } else if ((prevLexiqa && _.size(prevLexiqa) > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.target ) ) {
-            //this.removeLexiqaDecorator()
             this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR);
         }
     };
@@ -578,7 +577,7 @@ class Editarea extends React.Component {
         // if opened, close TagsMenu
         if(displayPopover) closePopover();
         if(contentChanged){
-            console.log('contentChanged')
+            /*console.log('contentChanged')*/
             editorSync.onComposition = true;
             // while onComposition, remove unwanted decorators like lexiqa
             editorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
