@@ -39,6 +39,11 @@ import structFromName from "./tagFromTagType";
 import splitBlockAtSelection from "./splitBlockAtSelection";
 import getFragmentFromSelection from "./DraftSource/src/component/handlers/edit/getFragmentFromSelection";
 import buildFragmentFromText from "./buildFragmentFromText";
+import activateSearch from "./activateSearch";
+import activateLexiqa from "./activateLexiqa";
+import activateGlossary from "./activateGlossary";
+import activateQaCheckGlossary from "./activateQaCheckGlossary";
+import activateQaCheckBlacklist from "./activateQaCheckBlacklist";
 // import tagFromString from "./tagFromString";
 
 const DraftMatecatUtils = {
@@ -84,7 +89,13 @@ const DraftMatecatUtils = {
 	// General
 	insertText,
 	getSelectedText,
-	splitBlockAtSelection
+	splitBlockAtSelection,
+	// Decorators
+	activateSearch,
+	activateLexiqa,
+	activateGlossary,
+	activateQaCheckGlossary,
+	activateQaCheckBlacklist
 };
 
 module.exports = DraftMatecatUtils;

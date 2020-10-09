@@ -22,7 +22,7 @@ import SegmentUtils from "../utils/segmentUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
 import CopySourceModal from '../components/modals/CopySourceModal';
-import DraftMatecatUtils from "../components/segments/utils/DraftMatecatUtils";
+import {unescapeHTMLLeaveTags} from "../components/segments/utils/DraftMatecatUtils/textUtils";
 
 const SegmentActions = {
     /********* SEGMENTS *********/
@@ -395,7 +395,7 @@ const SegmentActions = {
             let source = currentSegment.segment;
             let sid = currentSegment.sid;
             // Escape html
-            source = DraftMatecatUtils.unescapeHTMLLeaveTags(source);
+            source = unescapeHTMLLeaveTags(source);
             SegmentActions.replaceEditAreaTextContent( sid, source );
             SegmentActions.modifiedTranslation( sid, true );
             UI.segmentQA( UI.currentSegment );

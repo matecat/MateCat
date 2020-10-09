@@ -50,6 +50,9 @@ const encodeContent = (originalEditorState, plainText = '') => {
     editorState = replaceOccurrences(editorState, '&lt;', '<');
     editorState = replaceOccurrences(editorState, '&gt;', '>');
 
+    // Move selection at the end without focusing (for source)
+    editorState = EditorState.moveSelectionToEnd(editorState);
+
     // allow history saving
     editorState = EditorState.set(editorState, {allowUndo: true})
 

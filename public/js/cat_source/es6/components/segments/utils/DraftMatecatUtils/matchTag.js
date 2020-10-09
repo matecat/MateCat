@@ -61,6 +61,11 @@ const matchTag = (plainContent) => {
             }
             i++;
         }
+        // Set orphan closures
+        if(!closingTag.data.openTagId && !closingTag.data.closeTagId){
+            closingTag.data.placeholder = '?';
+        }
+
     });
     return [...openTags, ...closingTags, ...selfClosingTags];
 };
