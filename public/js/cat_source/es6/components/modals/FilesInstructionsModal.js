@@ -43,7 +43,7 @@ class FilesInstructionsModal extends React.Component {
                                 className="transition"
                                 dangerouslySetInnerHTML={{
                                     __html: converter.makeHtml(
-                                        TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br />\n'))
+                                        TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br>\n'))
                                     ),
                                 }}
                             />
@@ -69,7 +69,7 @@ class FilesInstructionsModal extends React.Component {
                     <p
                         dangerouslySetInnerHTML={{
                             __html: converter.makeHtml(
-                                TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br />\n'))
+                                TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br>\n'))
                             ),
                         }}
                     />
