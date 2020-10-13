@@ -544,7 +544,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
             } catch ( PDOException $e ) {
                 Log::doJsonLog( "Segment import - DB Error: " . $e->getMessage() );
-                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
+                throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - " . var_export( $chunk, true ), -2 );
             }
 
         }
