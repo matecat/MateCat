@@ -46,6 +46,7 @@
     "react-window": "^1.8.3",
     "semantic-ui": "^2.4.1",
     "showdown": "^1.9.1",
+    "xss": "^1.0.8",
     "sprintf-js": "^1.1.1"
   },
   "devDependencies": {
