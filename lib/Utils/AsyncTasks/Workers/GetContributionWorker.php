@@ -186,10 +186,9 @@ class GetContributionWorker extends AbstractWorker {
      *
      * @throws \Exception
      */
-    public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct,
-                                        FeatureSet $featureSet, $targetLang ) {
+    public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
-        $Filter = Filter::getInstance( $featureSet );
+        $Filter = Filter::getInstance( $featureSet, json_decode($contributionStruct->dataRefMap, true) );
 
         foreach ( $matches as &$match ) {
             $match[ 'target' ] = $targetLang;
