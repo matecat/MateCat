@@ -19,6 +19,8 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
 
     public $jobStruct;
 
+    public $dataRefMap;
+
     public $projectStruct;
 
     public $contexts = [
