@@ -381,8 +381,12 @@ class Editarea extends React.Component {
             if(displayPopover) return 'up-arrow-press';
         }else if(e.key === 'ArrowDown' && !hasCommandModifier(e)){
             if(displayPopover) return 'down-arrow-press';
-        }else if(e.key === 'Enter' && !hasCommandModifier(e)){
-            if(displayPopover) return 'enter-press';
+        }else if(e.key === 'Enter'){
+            if( (e.altKey && e.ctrlKey) || (e.ctrlKey && isOptionKeyCommand(e) && e.shiftKey)){
+                return 'add-issue'
+            } else if(displayPopover && !hasCommandModifier(e) ) {
+                return 'enter-press';
+            }
         }else if(e.key === 'Escape'){
             return 'close-tag-menu';
         }else if(e.key === 'Tab'){
@@ -463,6 +467,8 @@ class Editarea extends React.Component {
                 return 'handled';
             case 'insert-nbsp-tag':
                 this.insertTagAtSelection('nbsp');
+                return 'handled';
+            case 'add-issue':
                 return 'handled';
             default:
                 return 'not-handled';
