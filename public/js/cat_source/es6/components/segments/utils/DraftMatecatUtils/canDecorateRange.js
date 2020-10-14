@@ -4,7 +4,7 @@ import {getNoLexiqaTag, getNoGlossaryTag} from "./tagModel";
 const canDecorateRange = (rangeStart, rangeEnd, contentBlock, contentState, decoratorName) => {
     let i = rangeStart;
     let canDecorate = true;
-    while(i <= rangeEnd){
+    while(i < rangeEnd){
         // Place conditions here...
         switch (decoratorName) {
             case 'lexiqa':
