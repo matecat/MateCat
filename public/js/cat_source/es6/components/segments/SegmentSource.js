@@ -104,8 +104,10 @@ class SegmentSource extends React.Component {
     // Restore tagged source in draftJS after GuessTag
     setTaggedSource = (sid) => {
         if ( sid === this.props.segment.sid) {
+            // Escape html
+            const translation =  DraftMatecatUtils.unescapeHTMLLeaveTags(this.props.segment.segment);
             // TODO: get taggedSource from store
-            const contentEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, this.props.segment.segment );
+            const contentEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, translation );
             const {editorState, tagRange} =  contentEncoded;
             this.setState( {
                 editorState: editorState,
