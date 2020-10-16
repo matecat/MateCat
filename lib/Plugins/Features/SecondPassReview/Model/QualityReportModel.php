@@ -28,7 +28,7 @@ class QualityReportModel extends \Features\ReviewExtended\Model\QualityReportMod
 
             $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
                     'revision_number' => $revisionNumber,
-                    'feedback'        => $feedback['feedback'],
+                    'feedback'        => ($feedback and isset($feedback['feedback'])) ? $feedback['feedback'] : null,
                     'is_pass'         => !!$chunk_review->is_pass,
                     'score'           => $chunkReviewModel->getScore(),
                     'reviewer_name'   => $this->getReviewerName()

@@ -104,7 +104,7 @@ class QualitySummary {
 
         $result = [
                 'revision_number'            => $revisionNumber,
-                'feedback'                   => $feedback['feedback'],
+                'feedback'                   => ($feedback and isset($feedback['feedback'])) ? $feedback['feedback'] : null,
                 'model_version'              => ( $model_version ? (int)$model_version : null ),
                 'equivalent_class'           => $jStruct->getQualityInfo(),
                 'is_pass'                    => $is_pass,
