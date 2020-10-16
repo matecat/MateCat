@@ -52,9 +52,9 @@ class RevisionFactory {
     public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
         if ( $this->_isSecondPass() ) {
             return new ChunkReviewModel( $chunkReviewStruct );
-        } else {
-            return $this->revision->getChunkReviewModel( $chunkReviewStruct );
         }
+
+        return $this->revision->getChunkReviewModel( $chunkReviewStruct );
     }
 
     /**
