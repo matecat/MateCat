@@ -346,6 +346,7 @@ class Editarea extends React.Component {
                 handleKeyCommand={handleKeyCommand}
                 keyBindingFn={myKeyBindingFn}
                 handleDrop={this.handleDrop}
+                spellCheck={true}
             />
             <TagBox
                 displayPopover={displayPopover}
