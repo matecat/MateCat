@@ -303,7 +303,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'translation'], translation);
     },
-    updateTranslation(sid, translation, decodedTranslation, tagMap, missingTagsInTarget) {
+    updateTranslation(sid, translation, decodedTranslation, tagMap, missingTagsInTarget, lxqDecodedTranslation) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         let segment = this._segments.get(index);
@@ -318,14 +318,17 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'decodedTranslation'], decodedTranslation);
         this._segments = this._segments.setIn([index, 'targetTagMap'], tagMap);
         this._segments = this._segments.setIn([index, 'missingTagsInTarget'], missingTagsInTarget);
+        this._segments = this._segments.setIn([index, 'lxqDecodedTranslation'], lxqDecodedTranslation);
     },
-    updateSource(sid, source, decodedSource, tagMap) {
+    updateSource(sid, source, decodedSource, tagMap, lxqDecodedSource) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
 
         this._segments = this._segments.setIn([index, 'decodedSource'], decodedSource);
         this._segments = this._segments.setIn([index, 'updatedSource'], source);
         this._segments = this._segments.setIn([index, 'sourceTagMap'], tagMap);
+        this._segments = this._segments.setIn([index, 'lxqDecodedSource'], lxqDecodedSource);
+
     },
     modifiedTranslation(sid, modified) {
         const index = this.getSegmentIndex(sid);
@@ -989,11 +992,16 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(action.actionType, action.id, action.translation);
             break;
         case SegmentConstants.UPDATE_TRANSLATION:
-            SegmentStore.updateTranslation(action.id, action.translation, action.decodedTranslation, action.tagMap, action.missingTagsInTarget);
+            SegmentStore.updateTranslation(action.id,
+                action.translation,
+                action.decodedTranslation,
+                action.tagMap,
+                action.missingTagsInTarget,
+                action.lxqDecodedTranslation);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.UPDATE_SOURCE:
-            SegmentStore.updateSource(action.id, action.source, action.decodedSource, action.tagMap);
+            SegmentStore.updateSource(action.id, action.source, action.decodedSource, action.tagMap, action.lxqDecodedSource);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.MODIFIED_TRANSLATION:

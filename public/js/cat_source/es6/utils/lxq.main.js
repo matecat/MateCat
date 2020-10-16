@@ -96,8 +96,8 @@ const LXQ = {
 
         if ( !segObj ) return;
 
-        var sourcetext =  segObj.decodedSource;
-        var translation = segObj.decodedTranslation;
+        var sourcetext =  segObj.lxqDecodedSource;
+        var translation = segObj.lxqDecodedTranslation;
 
 
         var returnUrl = window.location.href.split( '#' )[0] + '#' + id_segment;

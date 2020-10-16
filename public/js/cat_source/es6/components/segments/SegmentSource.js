@@ -221,8 +221,8 @@ class SegmentSource extends React.Component {
 
     addLexiqaDecorator = () => {
         let { editorState } = this.state;
-        let { lexiqa, sid, decodedTranslation } = this.props.segment;
-        let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.source), decodedTranslation, true);
+        let { lexiqa, sid, lxqDecodedSource } = this.props.segment;
+        let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.source), lxqDecodedSource, true);
         const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
             const { editorState : newEditorState, decorators } = DraftMatecatUtils.activateLexiqa( editorState,
@@ -245,7 +245,8 @@ class SegmentSource extends React.Component {
             const {editorState, tagRange} = this.state;
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
-            SegmentActions.updateSource(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState), plainText, tagRange);
+            const lxqDecodedSource = DraftMatecatUtils.prepareTextForLexiqa(editorState);
+            SegmentActions.updateSource(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState), plainText, tagRange, lxqDecodedSource);
         }
     };
 

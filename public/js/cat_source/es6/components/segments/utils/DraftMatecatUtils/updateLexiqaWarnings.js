@@ -1,3 +1,4 @@
+import getEntities from "./getEntities";
 
 const updateLexiqaWarnings = (editorState, warnings) => {
 
@@ -5,16 +6,24 @@ const updateLexiqaWarnings = (editorState, warnings) => {
     const blocks = contentState.getBlockMap();
     let maxCharsInBlocks = 0;
     let updatedWarnings = [];
-
+    const entities = getEntities(editorState)
     blocks.forEach((loopedContentBlock) => {
         const firstBlockKey = contentState.getFirstBlock().getKey();
         const loopedBlockKey = loopedContentBlock.getKey();
         // Add current block length
         const newLineChar = loopedBlockKey !== firstBlockKey ? 1 : 0;
         maxCharsInBlocks += loopedContentBlock.getLength() + newLineChar;
+        const entitiesInBlock = entities.filter( ent => ent.blockKey === loopedBlockKey);
        _.each(warnings, warn => {
             // Todo: warnings between 2 block are now ignored
             const alreadyScannedChars = maxCharsInBlocks - loopedContentBlock.getLength();
+            // remove offset added by '<' and '>' that wrap tags preceding current warning
+            entitiesInBlock.forEach( ent => {
+                if( ent.start < warn.start && ent.end <= warn.start ) {
+                    warn.start -= 2;
+                    warn.end-= 2;
+                }
+            })
             if (warn.start < maxCharsInBlocks &&
                 warn.end <= maxCharsInBlocks &&
                 (warn.start >= alreadyScannedChars || warn.start === alreadyScannedChars -1)) {
@@ -31,7 +40,7 @@ const updateLexiqaWarnings = (editorState, warnings) => {
                 }
                 const relativeEnd = relativeStart + warnLength;
                 const warnUpdated = _.cloneDeep(warn);
-                warnUpdated.start = relativeStart;
+                warnUpdated.start = relativeStart; // to remove '<' and '>' that wrap
                 warnUpdated.end = relativeEnd;
                 // Add blockKey needed in decorator to find correct warning
                 warnUpdated.blockKey = loopedBlockKey;

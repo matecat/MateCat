@@ -44,6 +44,7 @@ import activateLexiqa from "./activateLexiqa";
 import activateGlossary from "./activateGlossary";
 import activateQaCheckGlossary from "./activateQaCheckGlossary";
 import activateQaCheckBlacklist from "./activateQaCheckBlacklist";
+import prepareTextForLexiqa from "./prepareTextForLexiqa";
 // import tagFromString from "./tagFromString";
 
 const DraftMatecatUtils = {
@@ -95,7 +96,8 @@ const DraftMatecatUtils = {
 	activateLexiqa,
 	activateGlossary,
 	activateQaCheckGlossary,
-	activateQaCheckBlacklist
+	activateQaCheckBlacklist,
+	prepareTextForLexiqa
 };
 
 module.exports = DraftMatecatUtils;
