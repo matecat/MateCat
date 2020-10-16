@@ -36,7 +36,6 @@ class Revise_FeedbackDAO extends DataAccess_AbstractDao {
 
     /**
      * @param $id_job
-     * @param $password
      * @param $revision_number
      *
      * @return DataAccess_IDaoStruct
@@ -54,7 +53,10 @@ class Revise_FeedbackDAO extends DataAccess_AbstractDao {
         ];
 
         $stmt = $this->database->getConnection()->prepare( $query );
+        $object = $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), $values );
 
-        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), $values )[0];
+        if(isset($object[0])){
+            return $object[0];
+        }
     }
 }
