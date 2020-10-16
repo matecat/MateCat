@@ -1,6 +1,7 @@
 import CommonUtils from '../../utils/commonUtils';
 import TextUtils from '../../utils/textUtils';
 import showdown from 'showdown';
+import xss from 'xss';
 class FilesInstructionsModal extends React.Component {
     constructor(props) {
         super(props);
@@ -42,8 +43,8 @@ class FilesInstructionsModal extends React.Component {
                             <div
                                 className="transition"
                                 dangerouslySetInnerHTML={{
-                                    __html: converter.makeHtml(
-                                        TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br />\n'))
+                                    __html: xss(converter.makeHtml(
+                                        TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br>\n')))
                                     ),
                                 }}
                             />
@@ -68,8 +69,8 @@ class FilesInstructionsModal extends React.Component {
                 <div className="instructions-container">
                     <p
                         dangerouslySetInnerHTML={{
-                            __html: converter.makeHtml(
-                                TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br />\n'))
+                            __html: xss(converter.makeHtml(
+                                TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br>\n')))
                             ),
                         }}
                     />

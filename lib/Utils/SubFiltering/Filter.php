@@ -102,10 +102,7 @@ class Filter {
             static::$_INSTANCE = new Filter();
         }
 
-        if(!empty($dataRefMap)){
-            static::$_INSTANCE->setDataRefMap($dataRefMap);
-        }
-
+        static::$_INSTANCE->setDataRefMap($dataRefMap);
         static::$_INSTANCE->_featureSet( $featureSet );
 
         return static::$_INSTANCE;

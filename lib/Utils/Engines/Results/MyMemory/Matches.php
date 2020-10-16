@@ -133,8 +133,10 @@ class Engines_Results_MyMemory_Matches {
     }
 
     /**
-     * @param $string
-     * @param $layerNum
+     * @param       $string
+     * @param       $layerNum
+     *
+     * @param array $dataRefMap
      *
      * @return mixed
      * @throws Exception

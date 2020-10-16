@@ -111,7 +111,8 @@ class Chunk extends \API\V2\Json\Chunk {
                 'stats'                   => $this->_getStats( $jobStats ),
                 'outsource'               => $outsource,
                 'translator'              => $translator,
-                'total_raw_wc'            => (int)$chunk->total_raw_wc
+                'total_raw_wc'            => (int)$chunk->total_raw_wc,
+                'standard_wc'             => (float)$chunk->standard_analysis_wc
         ];
 
         if ( $featureSet->hasRevisionFeature() ) {
