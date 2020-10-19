@@ -1929,17 +1929,10 @@ class ProjectManager {
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
 
                             // segment original data
-                            if ( !empty( $dataRefMap ) ) {
-
-                                $dataRefReplacer = new \Matecat\XliffParser\XliffUtils\DataRefReplacer( $dataRefMap );
-
-                                $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
-                                        'map' => $dataRefMap,
-                                ] );
-
-                                $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
-                            }
-
+                            // if its empty pass create a Segments_SegmentOriginalDataStruct with no data
+                            $segmentOriginalDataStructMap = (!empty( $dataRefMap )) ? ['map' => $dataRefMap]: [];
+                            $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct($segmentOriginalDataStructMap);
+                            $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
 
                             //increment counter for word count
                             $this->files_word_count += $wordCount;
@@ -2171,9 +2164,9 @@ class ProjectManager {
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
             // persist original data map if present
-            if ( isset( $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ) ) {
-                /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
-                $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
+            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            if(isset($segmentOriginalDataStruct->map)){
                 Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $segmentOriginalDataStruct->map );
             }
 
