@@ -171,17 +171,9 @@ class commentController extends ajaxController {
     }
 
     private function sendEmail() {
-        // TODO: fix this, replace the need for referer with a server side
-        // function to build translate or revise paths based on job and
-        // segmnt ids.
 
-        if ( empty( $_SERVER[ 'HTTP_REFERER' ] ) ) {
-            Log::doJsonLog( 'Skipping email due to missing referrer link' );
+        $url = $this->buildReferrerUrl();
 
-            return;
-        }
-        @list( $url, $anchor ) = explode( '#', $_SERVER[ 'HTTP_REFERER' ] );
-        $url .= '#' . $this->struct->id_segment;
         Log::doJsonLog( $url );
 
         $project_data = $this->projectData();
@@ -200,6 +192,57 @@ class commentController extends ajaxController {
 
             $email->send();
         }
+    }
+
+    /**
+     * This function builds url to link in the mail,
+     * and replaces $_SERVER['HTTP_REFERER']
+     *
+     * @return string
+     */
+    private function buildReferrerUrl() {
+        $project = Projects_ProjectDao::findById($this->job->id_project);
+
+        $url = \INIT::$HTTPHOST;
+        $url .= DIRECTORY_SEPARATOR;
+        $url .= $this->getReferrerUrlJobType();
+        $url .= DIRECTORY_SEPARATOR;
+        $url .= $project->name;
+        $url .= DIRECTORY_SEPARATOR;
+        $url .= $this->job->source. '-' .$this->job->target;
+        $url .= DIRECTORY_SEPARATOR;
+        $url .= $this->job->id . '-' . $this->getReferrerUrlPassword();
+        $url .= '#' . $this->struct->id_segment;
+
+        return $url;
+    }
+
+    /**
+     * @return string
+     */
+    private function getReferrerUrlJobType(){
+        if($this->struct->source_page == 1){
+            return 'translate';
+        }
+
+        if($this->struct->source_page == 2){
+            return 'revise';
+        }
+
+        return 'revise'.($this->struct->source_page-1);
+    }
+
+    /**
+     * @return string
+     */
+    private function getReferrerUrlPassword() {
+        if($this->struct->source_page == 1){
+            return $this->job->password;
+        }
+
+        $qa = \Features\ReviewExtended\Model\ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($this->job->id, $this->job->password, $this->struct->source_page);
+
+        return $qa->review_password;
     }
 
     private function projectData() {
