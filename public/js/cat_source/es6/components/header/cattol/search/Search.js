@@ -220,7 +220,7 @@ class Search extends React.Component {
         }
 
         SegmentActions.replaceCurrentSearch(this.state.search.replaceTarget);
-        let segment = SegmentStore.getSegmentByIdToJS( this.state.occurrencesList[this.state.featuredSearchResult] );
+        const segment = SegmentStore.getSegmentByIdToJS( this.state.occurrencesList[this.state.featuredSearchResult] );
 
         setTimeout(()=> {
             this.updateAfterReplace(segment.original_sid);

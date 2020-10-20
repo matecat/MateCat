@@ -174,11 +174,14 @@ class Editarea extends React.Component {
         let { searchParams, occurrencesInSearch, currentInSearchIndex, currentInSearch } = this.props.segment;
         if ( currentInSearch && searchParams.target ) {
             let index = _.findIndex(occurrencesInSearch.occurrences, (item)=>item.searchProgressiveIndex === currentInSearchIndex);
+            const newEditorState = DraftMatecatUtils.replaceOccurrences(this.state.editorState, searchParams.target, text, index)
             this.setState( {
-                editorState: DraftMatecatUtils.replaceOccurrences(this.state.editorState, searchParams.target, text, index)
-            } );
+                editorState: newEditorState,
+                translation: DraftMatecatUtils.decodeSegment(newEditorState)
+            }, () => {
+                this.updateTranslationDebounced();
+            });
         }
-        setTimeout(()=>this.updateTranslationInStore());
     };
 
     updateTranslationInStore = () => {
