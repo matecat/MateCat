@@ -173,9 +173,7 @@ class commentController extends ajaxController {
     private function sendEmail() {
 
         $url = $this->buildReferrerUrl();
-
         Log::doJsonLog( $url );
-
         $project_data = $this->projectData();
 
         foreach ( $this->users_mentioned as $user_mentioned ) {
