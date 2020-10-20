@@ -179,10 +179,12 @@ class Editarea extends React.Component {
                 editorState: newEditorState,
                 translation: DraftMatecatUtils.decodeSegment(newEditorState)
             }, () => {
-                this.updateTranslationDebounced();
+                this.updateTranslationInStore();
             });
         }
     };
+
+
 
     updateTranslationInStore = () => {
         if ( this.state.translation !== '' ) {
