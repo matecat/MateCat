@@ -179,8 +179,8 @@ class commentController extends ajaxController {
     private function sendEmail() {
 
         $url = JobUrlBuilder::create( $this->job->id, $this->job->password, [
-                'id_segment'      => $this->struct->id_segment,
-                'revision_number' => $this->struct->revision_number
+            'id_segment'      => $this->struct->id_segment,
+            'revision_number' => $this->struct->revision_number
         ] );
 
         Log::doJsonLog( $url );
