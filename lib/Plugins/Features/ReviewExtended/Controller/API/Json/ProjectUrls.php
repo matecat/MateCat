@@ -30,11 +30,8 @@ class ProjectUrls extends \API\V2\Json\ProjectUrls {
             foreach ( $reviews as $review ) {
                 $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $review->source_page );
                 $reviseUrl      = Routes::revise(
-                        $record[ 'name' ],
                         $record[ 'jid' ],
                         $review->review_password,
-                        $record[ 'source' ],
-                        $record[ 'target' ],
                         [ 'revision_number' => $revisionNumber ]
                 );
 
