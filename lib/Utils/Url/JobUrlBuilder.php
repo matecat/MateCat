@@ -7,27 +7,27 @@ use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobStruct;
 use Projects_ProjectDao;
 
-class UrlBuilder {
+class JobUrlBuilder {
 
     /**
      * Build the job url from job id/password
      *
      * Optional parameters:
-     * - segment id
-     * - revision number (could be 1 or 2)
+     * - id_segment
+     * - revision_number (could be 1 or 2)
      *
      * Returns null in case of wrong parameters
      *
      * @param int    $jobId
      * @param string $jobPassword
-     * @param null   $segmentId
-     * @param null   $revisionNumber
+     * @param array  $options
      *
      * @return string
+     * @throws \Exception
      */
-    public static function getJobUrl( $jobId, $jobPassword, $segmentId = null, $revisionNumber = null ) {
+    public static function create( $jobId, $jobPassword, $options = [] ) {
 
-        // 1. find job
+        // 1. find the job
         $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
         if(!$job){
             return null;
@@ -39,8 +39,8 @@ class UrlBuilder {
             return null;
         }
 
-        // 3. get jobType and password
-        $sourcePage = ReviewUtils::revisionNumberToSourcePage( $revisionNumber );
+        // 3. get job type and password
+        $sourcePage = ReviewUtils::revisionNumberToSourcePage( isset($options['revision_number']) ? $options['revision_number'] : null );
         $jobType    = self::getJobType( $sourcePage );
         $password   = self::getPassword( $job, $sourcePage );
 
@@ -48,7 +48,7 @@ class UrlBuilder {
             return null;
         }
 
-        $url = \INIT::$HTTPHOST;
+        $url = self::httpHost($options);
         $url .= DIRECTORY_SEPARATOR;
         $url .= $jobType;
         $url .= DIRECTORY_SEPARATOR;
@@ -58,11 +58,34 @@ class UrlBuilder {
         $url .= DIRECTORY_SEPARATOR;
         $url .= $job->id . '-' . $password;
 
-        if ( $segmentId ) {
-            $url .= '#' . $segmentId;
+        // 4. add segment id only if belongs to the job
+        if ( isset($options['id_segment']) ) {
+            if ( ($job->job_first_segment <= $options['id_segment']) and ($options['id_segment'] <= $job->job_last_segment) ) {
+                $url .= '#' . $options['id_segment'];
+            }
         }
 
         return $url;
+    }
+
+    /**
+     * @param $params
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    private static function httpHost( $params ) {
+        $host = \INIT::$HTTPHOST;
+
+        if ( !empty( $params[ 'http_host' ] ) ) {
+            $host = $params[ 'http_host' ];
+        }
+
+        if ( empty( $host ) ) {
+            throw new \Exception( 'HTTP_HOST is not set ' );
+        }
+
+        return $host;
     }
 
     /**
@@ -93,17 +116,19 @@ class UrlBuilder {
     }
 
     /**
-     * @param Jobs_JobStruct $jobs_JobStruct
+     * Get the correct password for job url
+     *
+     * @param Jobs_JobStruct $job
      * @param                $sourcePage
      *
      * @return string|null
      */
-    private static function getPassword( Jobs_JobStruct $jobs_JobStruct, $sourcePage ) {
+    private static function getPassword( Jobs_JobStruct $job, $sourcePage ) {
         if ( $sourcePage == 1 ) {
-            return $jobs_JobStruct->password;
+            return $job->password;
         }
 
-        $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $jobs_JobStruct->id, $jobs_JobStruct->password, $sourcePage );
+        $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $job->id, $job->password, $sourcePage );
         if(!$qa){
             return null;
         }
