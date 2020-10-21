@@ -1,30 +1,26 @@
-import getEntities from "./getEntities";
 
 const prepareTextForLexiqa = (editorState) => {
     const currentContent = editorState.getCurrentContent();
     const plainContent = currentContent.getPlainText();
-    const entities = getEntities(editorState);
-    // sort ascending
-    entities.sort((a, b) => {return a.start-b.start});
-    // update intervals to absolute
-    let prevBlock, currentBlock;
-    let prevBlockKey = '';
     let lengthParsed = 0;
-    const updatedEntities = entities.map( ent => {
-        prevBlockKey = prevBlockKey || ent.blockKey; // assign only whn empty
-        prevBlock = prevBlock || currentContent.getBlockForKey(prevBlockKey).getText();
-        if(prevBlockKey !== ent.blockKey) {
-            lengthParsed += prevBlock.length + 1;
-            currentBlock = currentContent.getBlockForKey(ent.blockKey).getText();
-            prevBlockKey = ent.blockKey;
-            prevBlock = currentBlock;
-        }
-        return {
-            start: ent.start + lengthParsed,
-            end: ent.end + lengthParsed
-        }
+    let updatedEntities = []
+    const blocks = currentContent.getBlocksAsArray();
+    // update intervals to absolute
+    blocks.forEach(block => {
+        block.findEntityRanges((character) => {
+                return character.getEntity() !== null;
+        },
+        (start, end) => {
+            updatedEntities.push({
+                start: start + lengthParsed,
+                end: end + lengthParsed
+            });
+        });
+        // add parsed content length
+        lengthParsed += block.getText().length + 1;
     })
-    // start replacing
+
+    // wrap every tag in '<' and '>'
     let newText = plainContent;
     let replaceCount = 0;
     updatedEntities.forEach( ent => {
@@ -34,7 +30,6 @@ const prepareTextForLexiqa = (editorState) => {
         newText = `${pre}<${middle}>${post}`;
         replaceCount += 2;
     })
-
     return newText;
 }
 

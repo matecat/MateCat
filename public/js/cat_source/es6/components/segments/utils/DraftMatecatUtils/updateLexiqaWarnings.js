@@ -19,7 +19,7 @@ const updateLexiqaWarnings = (editorState, warnings) => {
             const alreadyScannedChars = maxCharsInBlocks - loopedContentBlock.getLength();
             // remove offset added by '<' and '>' that wrap tags preceding current warning
             entitiesInBlock.forEach( ent => {
-                if( ent.start < warn.start && ent.end <= warn.start ) {
+                if( (ent.start + alreadyScannedChars) < warn.start && (ent.end + alreadyScannedChars) <= warn.start ) {
                     warn.start -= 2;
                     warn.end-= 2;
                 }
@@ -48,7 +48,6 @@ const updateLexiqaWarnings = (editorState, warnings) => {
             }
         });
     });
-
     return updatedWarnings;
 };
 
