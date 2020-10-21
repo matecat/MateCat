@@ -1,6 +1,7 @@
 <?php
 
 use DataAccess\ShapelessConcreteStruct;
+use Url\UrlBuilder;
 
 class commentController extends ajaxController {
 
@@ -14,6 +15,9 @@ class commentController extends ajaxController {
 
     private $job;
 
+    /**
+     * @var Comments_CommentStruct
+     */
     private $struct;
     private $new_record;
     private $current_user;
@@ -32,6 +36,7 @@ class commentController extends ajaxController {
                 'id_segment'  => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'username'    => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'source_page' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'revision_number' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'message'     => [ 'filter' => FILTER_UNSAFE_RAW ],
                 'first_seg'   => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'last_seg'    => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
@@ -143,6 +148,7 @@ class commentController extends ajaxController {
         $this->struct->full_name   = $this->__postInput[ 'username' ];
         $this->struct->source_page = $this->__postInput[ 'source_page' ];
         $this->struct->message     = $this->__postInput[ 'message' ];
+        $this->struct->revision_number = $this->__postInput[ 'revision_number' ];
         $this->struct->email       = $this->getEmail();
         $this->struct->uid         = $this->getUid();
 
@@ -172,7 +178,8 @@ class commentController extends ajaxController {
 
     private function sendEmail() {
 
-        $url = $this->buildReferrerUrl();
+        $url = UrlBuilder::getJobUrl($this->job->id, $this->job->password, $this->struct->id_segment, $this->struct->revision_number);
+
         Log::doJsonLog( $url );
         $project_data = $this->projectData();
 
@@ -190,57 +197,6 @@ class commentController extends ajaxController {
 
             $email->send();
         }
-    }
-
-    /**
-     * This function builds url to link in the mail,
-     * and replaces $_SERVER['HTTP_REFERER']
-     *
-     * @return string
-     */
-    private function buildReferrerUrl() {
-        $project = Projects_ProjectDao::findById($this->job->id_project);
-
-        $url = \INIT::$HTTPHOST;
-        $url .= DIRECTORY_SEPARATOR;
-        $url .= $this->getReferrerUrlJobType();
-        $url .= DIRECTORY_SEPARATOR;
-        $url .= $project->name;
-        $url .= DIRECTORY_SEPARATOR;
-        $url .= $this->job->source. '-' .$this->job->target;
-        $url .= DIRECTORY_SEPARATOR;
-        $url .= $this->job->id . '-' . $this->getReferrerUrlPassword();
-        $url .= '#' . $this->struct->id_segment;
-
-        return $url;
-    }
-
-    /**
-     * @return string
-     */
-    private function getReferrerUrlJobType(){
-        if($this->struct->source_page == 1){
-            return 'translate';
-        }
-
-        if($this->struct->source_page == 2){
-            return 'revise';
-        }
-
-        return 'revise'.($this->struct->source_page-1);
-    }
-
-    /**
-     * @return string
-     */
-    private function getReferrerUrlPassword() {
-        if($this->struct->source_page == 1){
-            return $this->job->password;
-        }
-
-        $qa = \Features\ReviewExtended\Model\ChunkReviewDao::findByIdJobAndPasswordAndSourcePage($this->job->id, $this->job->password, $this->struct->source_page);
-
-        return $qa->review_password;
     }
 
     private function projectData() {
