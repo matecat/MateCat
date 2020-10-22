@@ -1823,10 +1823,10 @@ class ProjectManager {
 
                     // check if there is original data
                     $segmentOriginalData = [];
-                    if ( isset( $xliff_trans_unit[ 'original-data' ] ) and !empty( $xliff_trans_unit[ 'original-data' ] ) ) {
+                    $dataRefMap          = [];
 
+                    if ( isset( $xliff_trans_unit[ 'original-data' ] ) and !empty( $xliff_trans_unit[ 'original-data' ] ) ) {
                         $segmentOriginalData = $xliff_trans_unit[ 'original-data' ];
-                        $dataRefMap          = [];
                         foreach ( $segmentOriginalData as $datum ) {
                             if ( isset( $datum[ 'attr' ][ 'id' ] ) ) {
                                 $dataRefMap[ $datum[ 'attr' ][ 'id' ] ] = $datum[ 'raw-content' ];
