@@ -137,7 +137,7 @@ const tagSignatures = {
         placeholderRegex: null,
         decodeNeeded: false,
         errorCheckAvailable: false,
-        lexiqaAvailable: true,
+        lexiqaAvailable: false,
         glossaryAvailable: false,
         style: 'tag-selfclosed tag-nbsp',
         showTooltip: false
