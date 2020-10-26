@@ -102,7 +102,7 @@ class SegmentsContainer extends React.Component {
 					const lastHeight = this.segmentsHeightsMap[oldLastSid].height;
 					this.segmentsHeightsMap[oldLastSid] = {
 						segment: oldLastSegment,
-						height: lastHeight - 150
+						height: lastHeight
 					};
 				}
 			}

@@ -635,7 +635,7 @@ LXQ.init  = function () {
             }
 
             ranges.newout.map(function (range) {
-                if (range.start !== range.end ) {
+                if (text && range.start !== range.end ) {
                     if (range.start < text.length && !range.ignore) {
                         var dataErrors = '', multiple;
                         //calculate the color
