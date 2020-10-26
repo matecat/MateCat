@@ -507,23 +507,25 @@ const SegmentActions = {
         });
     },
 
-    updateTranslation: function(sid, translation, decodedTranslation, tagMap, missingTagsInTarget) {
+    updateTranslation: function(sid, translation, decodedTranslation, tagMap, missingTagsInTarget, lxqDecodedTranslation) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UPDATE_TRANSLATION,
             id: sid,
             translation: translation,
             decodedTranslation,
             tagMap,
-            missingTagsInTarget
+            missingTagsInTarget,
+            lxqDecodedTranslation
         });
     },
-    updateSource: function(sid, source, decodedSource, tagMap) {
+    updateSource: function(sid, source, decodedSource, tagMap, lxqDecodedSource) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UPDATE_SOURCE,
             id: sid,
             source: source,
             decodedSource,
-            tagMap
+            tagMap,
+            lxqDecodedSource
         });
     },
     lockEditArea : function ( sid, fid ) {

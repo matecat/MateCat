@@ -70,7 +70,7 @@ class SegmentPlaceholderLite extends React.Component {
 
     render() {
         const segmentPlaceholder = this.getSegmentStructure();
-        return <div  className={'segment-container'} ref={el => this.containerRef = el} style={{display: 'inline-block', width: '100%'}}>
+        return <div  className={'segment-container segment-placeholder'} ref={el => this.containerRef = el} style={{display: 'inline-block', width: '100%'}}>
             {segmentPlaceholder}
         </div>
     }
@@ -80,7 +80,7 @@ class SegmentPlaceholderLite extends React.Component {
         const {editorStateSource, editorStateTarget} = this.state;
         const {onChange} = this;
 
-        return <section className={`status-draft hasTagsToggle hasTagsAutofill ${sideOpen ? 'slide-right' : ''}`}>
+        return <section className={`status-draft ${sideOpen ? 'slide-right' : ''}`}>
             <div className="sid">
                 <div className="txt">0000000</div>
                 <div className="txt segment-add-inBulk">
@@ -96,7 +96,7 @@ class SegmentPlaceholderLite extends React.Component {
 
             <div className="body">
                 <div className="header toggle"> </div>
-                <div className="text segment-body-content">
+                <div className="text segment-body-content" style={{'boxSizing': 'content-box'}}>
                     <div className="wrap">
                         <div className="outersource">
                             <div className="source item" tabIndex="0">
@@ -113,7 +113,7 @@ class SegmentPlaceholderLite extends React.Component {
                             </div>
                             <div className="target item">
                                 <div className="textarea-container">
-                                    <div className="targetarea editarea" spellCheck="true">
+                                    <div className="targetarea editarea" spellCheck="true" >
                                         <Editor
                                             editorState={editorStateTarget}
                                             onChange={onChange}

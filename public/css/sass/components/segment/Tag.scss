@@ -40,7 +40,14 @@
   position: relative;
   display: inline-block;
 }
-
+.segment-placeholder .tag {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 64px;
+  vertical-align: middle;
+}
 .tag {
   position: relative;
   display: inline-block;

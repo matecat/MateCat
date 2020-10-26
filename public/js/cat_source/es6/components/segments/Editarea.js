@@ -25,6 +25,7 @@ import {tagSignatures} from "./utils/DraftMatecatUtils/tagModel";
 import SegmentActions from "../../actions/SegmentActions";
 import getFragmentFromSelection
     from "./utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection";
+import getEntities from "./utils/DraftMatecatUtils/getEntities";
 
 const editorSync = {
     editorFocused: true,
@@ -132,9 +133,9 @@ class Editarea extends React.Component {
 
     addLexiqaDecorator = () => {
         let { editorState } = this.state;
-        let { lexiqa, sid, decodedTranslation } = this.props.segment;
+        let { lexiqa, sid, lxqDecodedTranslation, targetTagMap } = this.props.segment;
         // passare la decoded translation con i tag <g id='1'> e non 1
-        let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), decodedTranslation, false);
+        let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), lxqDecodedTranslation, false);
         const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
             const { editorState : newEditorState, decorators } = DraftMatecatUtils.activateLexiqa( editorState,
@@ -174,12 +175,17 @@ class Editarea extends React.Component {
         let { searchParams, occurrencesInSearch, currentInSearchIndex, currentInSearch } = this.props.segment;
         if ( currentInSearch && searchParams.target ) {
             let index = _.findIndex(occurrencesInSearch.occurrences, (item)=>item.searchProgressiveIndex === currentInSearchIndex);
+            const newEditorState = DraftMatecatUtils.replaceOccurrences(this.state.editorState, searchParams.target, text, index)
             this.setState( {
-                editorState: DraftMatecatUtils.replaceOccurrences(this.state.editorState, searchParams.target, text, index)
-            } );
+                editorState: newEditorState,
+                translation: DraftMatecatUtils.decodeSegment(newEditorState)
+            }, () => {
+                this.updateTranslationInStore();
+            });
         }
-        setTimeout(()=>this.updateTranslationInStore());
     };
+
+
 
     updateTranslationInStore = () => {
         if ( this.state.translation !== '' ) {
@@ -192,8 +198,9 @@ class Editarea extends React.Component {
             const currentTagRange = DraftMatecatUtils.matchTagInEditor(editorState);
             // Add missing tag to store for highlight warnings on tags
             const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange);
+            const lxqDecodedTranslation = DraftMatecatUtils.prepareTextForLexiqa(editorState);
             //const currentTagRange = matchTag(decodedSegment); //deactivate if updateTagsInEditor is active
-            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags);
+            SegmentActions.updateTranslation(segment.sid, decodedSegment, plainText, currentTagRange, missingTags, lxqDecodedTranslation);
             // console.log('updatingTranslationInStore');
             UI.registerQACheck();
         }
@@ -346,6 +353,7 @@ class Editarea extends React.Component {
                 handleKeyCommand={handleKeyCommand}
                 keyBindingFn={myKeyBindingFn}
                 handleDrop={this.handleDrop}
+                spellCheck={true}
             />
             <TagBox
                 displayPopover={displayPopover}
