@@ -451,6 +451,9 @@ class CatUtils {
      */
     public static function segment_raw_word_count( $string, $source_lang = 'en-US', Filter $filter = null ) {
 
+        //first two letter of code lang
+        $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];
+
         $string = self::clean_raw_string_4_word_count( $string, $source_lang, $filter );
 
         /**
@@ -471,6 +474,13 @@ class CatUtils {
         $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
 
         /**
+         * Remove english possessive word count
+         */
+        if( $source_lang_two_letter == "en" ){
+            $string = str_replace( ' s ', ' ', $string );
+        }
+
+        /**
          * Now reset chars
          */
         $string = str_replace( [ "¯", '¸' ], [ '-', '_' ], $string );
@@ -482,12 +492,9 @@ class CatUtils {
             return 0;
         }
 
-        //first two letter of code lang
-        $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];
+
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
-
             $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
-
         } else {
 
             $words_array = preg_split( '/[\s]+/u', $string );
