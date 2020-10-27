@@ -1,6 +1,6 @@
 /**
  * React Component for the editarea.
- 
+
  */
 import React from 'react';
 import $ from 'jquery';
@@ -184,6 +184,12 @@ class Editarea extends React.Component {
             this.pastedAction = {
                 length: txt.length,
             };
+            setTimeout(() => {
+                let textToSend = this.editAreaRef.innerHTML;
+                if (textToSend === '') {
+                    SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, null, textToSend);
+                }
+            });
         }
     }
     onDragEvent(e) {
