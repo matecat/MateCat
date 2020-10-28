@@ -25,8 +25,8 @@ class MetaDataController extends KleinController {
         }
 
         $result[ 'metadata' ] = [
-                'project' => $this->getProjectInfo( $job->getProject() ), // project metadata
-                'job'     => $this->getJobMetaData( $job ),                   // job metadata
+                'project' => $this->getProjectInfo( $job->getProject() ),   // project metadata
+                'job'     => $this->getJobMetaData( $job ),                 // job metadata
                 'files'   => $this->getJobFilesMetaData( $job ),            // job files metadata
         ];
 
@@ -61,8 +61,8 @@ class MetaDataController extends KleinController {
     private function getProjectInfo( \Projects_ProjectStruct $project ) {
 
         $metadata = [];
-
         $projectMetadataDao = new \Projects_MetadataDao();
+
         foreach ( $projectMetadataDao->allByProjectId( (int)$project->id ) as $metadatum ) {
             $metadata[ $metadatum->key ] = $metadatum->value;
         }
@@ -78,8 +78,8 @@ class MetaDataController extends KleinController {
     private function getJobMetaData( \Jobs_JobStruct $job ) {
 
         $metadata = [];
-
         $jobMetaDataDao = new MetadataDao();
+
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password ) as $metadatum ) {
             $metadata[ $metadatum->key ] = $metadatum->value;
         }
