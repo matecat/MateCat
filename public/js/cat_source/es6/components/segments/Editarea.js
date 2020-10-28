@@ -9,7 +9,7 @@ import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from "./utils/DraftMatecatUtils/editorConstants";
-import {Modifier, Editor, EditorState, getDefaultKeyBinding, KeyBindingUtil, ContentState} from "draft-js";
+import {Modifier, Editor, EditorState, getDefaultKeyBinding, KeyBindingUtil, ContentState, CompositeDecorator} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import CompoundDecorator from "./utils/CompoundDecorator"
@@ -53,8 +53,8 @@ class Editarea extends React.Component {
                 }
             }
         ];
-        // const decorator = new CompositeDecorator(this.decoratorsStructure);
-        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        const decorator = new CompositeDecorator(this.decoratorsStructure);
+        //const decorator = new CompoundDecorator(this.decoratorsStructure);
         // Escape html
         const translation =  DraftMatecatUtils.unescapeHTMLLeaveTags(this.props.translation);
         // If GuessTag is Enabled, clean translation from tags
@@ -569,7 +569,8 @@ class Editarea extends React.Component {
 
     disableDecorator = (editorState, decoratorName) => {
         _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
-        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        //const decorator = new CompoundDecorator(this.decoratorsStructure);
+        const decorator = new CompositeDecorator(this.decoratorsStructure);
         return EditorState.set( editorState, {decorator} )
     }
 

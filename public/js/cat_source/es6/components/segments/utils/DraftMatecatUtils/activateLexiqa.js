@@ -1,6 +1,6 @@
 import LexiqaHighlight from "../../LexiqaHighlight/LexiqaHighlight.component";
 import CompoundDecorator from "../CompoundDecorator";
-import { EditorState } from 'draft-js';
+import {CompositeDecorator, EditorState} from 'draft-js';
 import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
 import canDecorateRange from "./canDecorateRange";
@@ -30,7 +30,9 @@ const activateLexiqa = (editorState, decoratorStructure, lexiqaWarnings, sid, is
     let decorators = decoratorStructure.slice();
     _.remove(decorators, (decorator) => decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR);
     decorators.push( generateLexiqaDecorator( lexiqaWarnings, sid, isSource, DraftMatecatConstants.LEXIQA_DECORATOR ) );
-    const newDecorator = new CompoundDecorator( decorators );
+    //const newDecorator = new CompoundDecorator( decorators );
+    const newDecorator = new CompositeDecorator( decorators );
+
 
     // Remove focus on source to avoid cursor jumping at beginning of target
     if(isSource){

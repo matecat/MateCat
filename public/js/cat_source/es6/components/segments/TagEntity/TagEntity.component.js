@@ -5,25 +5,14 @@ import {tagSignatures, getTooltipTag} from "../utils/DraftMatecatUtils/tagModel"
 class TagEntity extends Component {
     constructor(props) {
         super(props);
-
         const tagStyle = this.selectCorrectStyle();
         this.state = {
-            selected: false,
-            selectionStateInputs: {
-                anchorOffset: null,
-                focusOffset: null,
-                anchorKey: '',
-                focusKey: '',
-            },
             tagWarningStyle: '',
             showTooltip: false,
             tagFocusedStyle: '',
             tagStyle
         };
     }
-
-    emitSelectionParameters = (blockKey, selection, forceSelection) => {
-    };
 
     tooltipToggle = (show = false) => {
         // this will trigger a rerender in the main Editor Component
@@ -32,31 +21,21 @@ class TagEntity extends Component {
         })
     };
 
-    highlightTag = () => {
-        const {start, end, children} = this.props;
-        const {selection} = children.props.children[0];
-    };
-
     markSearch = (text, searchParams) => {
         let {active, currentActive, textToReplace, params, occurrences, currentInSearchIndex} = searchParams;
         let currentOccurrence = _.find(occurrences, (occ) => occ.searchProgressiveIndex === currentInSearchIndex);
         let isCurrent = (currentOccurrence && currentOccurrence.matchPosition >= this.props.start && currentOccurrence.matchPosition < this.props.end);
         if ( active ) {
             let regex = SearchUtils.getSearchRegExp(textToReplace, params.ingnoreCase, params.exactMatch);
-            var parts = text.split(regex);
-            for (var i = 1; i < parts.length; i += 2) {
-                if ( currentActive && isCurrent ) {
-                    parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 210 14)'}}>{parts[i]}</span>;
-                } else {
-                    parts[i] = <span key={i} style={{backgroundColor: 'rgb(255 255 0)'}}>{parts[i]}</span>;
-                }
+            let parts = text.split(regex);
+            for (let i = 1; i < parts.length; i += 2) {
+                let color = currentActive && isCurrent ? 'rgb(255 210 14)' : 'rgb(255 255 0)';
+                parts[i] = <span key={i} style={{backgroundColor: color}}>{parts[i]}</span>;
             }
             return parts;
         }
         return text;
     };
-
-
 
     componentDidMount() {
         this.warningCheck = setInterval(
@@ -72,20 +51,15 @@ class TagEntity extends Component {
         clearInterval(this.warningCheck);
     }
 
-
-
     render() {
-        let searchParams = this.props.getSearchParams();
-        const {selected, tagStyle, tagWarningStyle} = this.state;
-        const {entityKey, offsetkey, blockKey, start, end, onClick, contentState, getUpdatedSegmentInfo,getClickedTagInfo, isTarget} = this.props;
+        const {children, entityKey, blockKey, start, end, onClick, contentState, getUpdatedSegmentInfo, getClickedTagInfo, getSearchParams, isTarget} = this.props;
+        const {tagStyle, tagWarningStyle} = this.state;
+        const {tooltipToggle, markSearch} = this;
         const {currentSelection} = getUpdatedSegmentInfo();
-        const {tagClickedInSource, clickedTagId, clickedTagText} = getClickedTagInfo();
         const {anchorOffset, focusOffset, anchorKey, hasFocus} = currentSelection;
-        const { children } = this.props.children.props;
-        const {selection, forceSelection} = children[0];
-        const {emitSelectionParameters, tooltipToggle} = this;
+        const {tagClickedInSource, clickedTagId, clickedTagText} = getClickedTagInfo();
 
-        //const entity = contentState.getEntity(entityKey);
+        let searchParams = getSearchParams();
         const {type: entityType, data: {id: entityId, placeholder: entityPlaceholder, name: entityName}} = contentState.getEntity(entityKey);
 
         // Apply style on clicked tag and draggable tag, placed here for performance
@@ -106,49 +80,21 @@ class TagEntity extends Component {
         // show tooltip only if text too long
         const textSpanDisplayed = this.tagRef && this.tagRef.querySelector('span[data-text="true"]');
         const shouldTooltipOnHover = textSpanDisplayed && textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth;
+        const decoratedText = Array.isArray(children) ? children[0].props.text : children.props.decoratedText;
 
-        if ( searchParams.active )  {
-            let text = this.markSearch(children[0].props.text, searchParams);
-            return <div className={"tag-container"}
-                        ref={(ref) => this.tagRef = ref}
-                /*contentEditable="false"
-                suppressContentEditableWarning={true}*/>
-                {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
-                <span data-offset-key={offsetkey}
-                      className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
-                      unselectable="on"
-                      suppressContentEditableWarning={true}
-                      onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
-                      onMouseLeave={() => tooltipToggle()}
-                      onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
-                      /*contentEditable="false"*/
-                      onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
-                {text}
+        return <div className={'tag-container'}
+                    ref={(ref) => this.tagRef = ref}>
+            {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
+            <span className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
+                unselectable="on"
+                suppressContentEditableWarning={true}
+                onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
+                onMouseLeave={() => tooltipToggle()}
+                onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
+                {searchParams.active && markSearch(decoratedText, searchParams)}
+                {searchParams.active ? <span style={{display: 'none'}}>{children}</span> : children}
             </span>
-                <span style={{display:'none'}}>{children}</span>
-            </div>
-        } else {
-            return <div className={"tag-container"}
-                        ref={(ref) => this.tagRef = ref}
-                        /*contentEditable="false"
-                        suppressContentEditableWarning={true}*/>
-                        {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
-                        <span data-offset-key={offsetkey}
-                              className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
-                              unselectable="on"
-                              suppressContentEditableWarning={true}
-                              onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
-                              onMouseLeave={() => tooltipToggle()}
-                              onDoubleClick={() => emitSelectionParameters(blockKey, selection, forceSelection)}
-                              /*contentEditable="false"*/
-                              onClick={(e) => {
-                                  e.stopPropagation()
-                                  onClick(start, end, entityId, entityPlaceholder)
-                              }}>
-                        {children}
-                    </span>
-                </div>
-        }
+        </div>
     }
 
     updateTagStyle = () => {

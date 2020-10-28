@@ -1,6 +1,6 @@
 import GlossaryComponent from "../../GlossaryComponents/GlossaryHighlight.component";
 import CompoundDecorator from "../CompoundDecorator";
-import { EditorState } from 'draft-js';
+import {CompositeDecorator, EditorState} from 'draft-js';
 import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
 import canDecorateRange from "./canDecorateRange";
@@ -54,8 +54,8 @@ export const activateGlossary = (editorState, decoratorStructure, glossary, text
     const regex = createGlossaryRegex(glossary, text);
     _.remove(decorators, (decorator) => decorator.name === DraftMatecatConstants.GLOSSARY_DECORATOR);
     decorators.push( generateGlossaryDecorator( regex, sid ) );
-    // const newDecorator = new CompositeDecorator( decorators );
-    const newDecorator = new CompoundDecorator( decorators );
+    const newDecorator = new CompositeDecorator( decorators );
+    //const newDecorator = new CompoundDecorator( decorators );
     return {
         editorState: EditorState.set( editorState, {decorator: newDecorator} ),
         decorators: decorators

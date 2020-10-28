@@ -1,5 +1,5 @@
 import CompoundDecorator from "../CompoundDecorator";
-import { EditorState } from 'draft-js';
+import {CompositeDecorator, EditorState} from 'draft-js';
 import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
 import QaCheckGlossaryHighlight from "../../GlossaryComponents/QaCheckGlossaryHighlight.component";
@@ -47,7 +47,8 @@ const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheckGlossar
     const regex = createGlossaryRegex(qaCheckGlossary);
     _.remove(decorators, (decorator) => decorator.name === DraftMatecatConstants.QA_GLOSSARY_DECORATOR);
     decorators.push( generateGlossaryDecorator( regex, sid ) );
-    const newDecorator = new CompoundDecorator( decorators );
+    //const newDecorator = new CompoundDecorator( decorators );
+    const newDecorator = new CompositeDecorator( decorators );
     return {
         editorState: EditorState.set( editorState, {decorator: newDecorator} ),
         decorators: decorators

@@ -8,7 +8,7 @@ import SegmentStore  from '../../stores/SegmentStore';
 import SegmentActions  from '../../actions/SegmentActions';
 import TextUtils  from '../../utils/textUtils';
 import Shortcuts  from '../../utils/shortcuts';
-import {Editor, EditorState, Modifier} from "draft-js";
+import {CompositeDecorator, Editor, EditorState, Modifier} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import DraftMatecatUtils from "./utils/DraftMatecatUtils";
@@ -44,8 +44,8 @@ class SegmentSource extends React.Component {
                     isRTL: config.isSourceRTL
                 }
             }];
-        const decorator = new CompoundDecorator(this.decoratorsStructure);
-        // const decorator = new CompositeDecorator(this.decoratorsStructure);
+        //const decorator = new CompoundDecorator(this.decoratorsStructure);
+        const decorator = new CompositeDecorator(this.decoratorsStructure);
         // Initialise EditorState
         const plainEditorState = EditorState.createEmpty(decorator);
         // Escape html
@@ -347,7 +347,8 @@ class SegmentSource extends React.Component {
                     }
                 });
                 // create a new editorState
-                const decorator = new CompoundDecorator(this.decoratorsStructure);
+                //const decorator = new CompoundDecorator(this.decoratorsStructure);
+                const decorator = new CompositeDecorator(this.decoratorsStructure);
                 const plainEditorState = EditorState.createEmpty(decorator);
                 // add the content
                 const contentEncoded = DraftMatecatUtils.encodeContent(plainEditorState, sourceHtml);
@@ -416,7 +417,8 @@ class SegmentSource extends React.Component {
 
     disableDecorator = (editorState, decoratorName) => {
         _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
-        const decorator = new CompoundDecorator(this.decoratorsStructure);
+        //const decorator = new CompoundDecorator(this.decoratorsStructure);
+        const decorator = new CompositeDecorator(this.decoratorsStructure);
         return EditorState.set( editorState, {decorator} )
     }
 
