@@ -159,10 +159,18 @@ class TagEntity extends Component {
     };
 
     selectCorrectStyle = () => {
-        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL} = this.props;
+        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL, isTarget, start, end, getClickedTagInfo} = this.props;
         const entityInstance = contentState.getEntity(entityKey);
-        const {segmentOpened} = getUpdatedSegmentInfo();
+        const {segmentOpened, currentSelection} = getUpdatedSegmentInfo();
+        const {tagClickedInSource} = getClickedTagInfo();
+        const {anchorOffset, focusOffset, hasFocus} = currentSelection;
         let tagStyle = [];
+
+        // Apply style on clicked tag and draggable tag, placed here for performance
+        anchorOffset <= start &&
+        focusOffset >= end &&
+        (tagClickedInSource && !isTarget || !tagClickedInSource && isTarget) &&
+        hasFocus && tagStyle.push('tag-focused');
 
         // Check for tag type
         const entityType = entityInstance.type;
