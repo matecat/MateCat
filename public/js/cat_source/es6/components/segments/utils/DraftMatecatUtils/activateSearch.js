@@ -4,7 +4,7 @@ import {CompositeDecorator, EditorState} from 'draft-js';
 import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
 
-const activateSearch = (editorState, decoratorStructure, text, params, occurrencesInSegment, currentIndex, tagRange) => {
+const activateSearch = (text, params, occurrencesInSegment, currentIndex, tagRange) => {
 
     const generateSearchDecorator = (highlightTerm, occurrences, params, currentIndex, tagRange) => {
         let regex = SearchUtils.getSearchRegExp(highlightTerm, params.ingnoreCase, params.exactMatch);
@@ -40,16 +40,8 @@ const activateSearch = (editorState, decoratorStructure, text, params, occurrenc
     };
 
     let search = text;
-    let decorators = decoratorStructure.slice();
     let occurrencesClone = _.cloneDeep(occurrencesInSegment);
-    _.remove(decorators, (decorator) => decorator.name === DraftMatecatConstants.SEARCH_DECORATOR);
-    decorators.push( generateSearchDecorator( search, occurrencesClone, params, currentIndex, tagRange) );
-     const newDecorator = new CompositeDecorator( decorators );
-    //const newDecorator = new CompoundDecorator( decorators );
-    return {
-        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
-        decorators: decorators
-    }
+    return generateSearchDecorator( search, occurrencesClone, params, currentIndex, tagRange);
 };
 
 export default activateSearch;

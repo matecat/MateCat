@@ -5,7 +5,7 @@ import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
 import canDecorateRange from "./canDecorateRange";
 
-export const activateGlossary = (editorState, decoratorStructure, glossary, text, sid, segmentAction) => {
+export const activateGlossary = (editorState, glossary, text, sid, segmentAction) => {
 
     const generateGlossaryDecorator = (regex, sid) => {
         return {
@@ -50,16 +50,8 @@ export const activateGlossary = (editorState, decoratorStructure, glossary, text
         return re;
     };
 
-    let decorators = decoratorStructure.slice();
     const regex = createGlossaryRegex(glossary, text);
-    _.remove(decorators, (decorator) => decorator.name === DraftMatecatConstants.GLOSSARY_DECORATOR);
-    decorators.push( generateGlossaryDecorator( regex, sid ) );
-    const newDecorator = new CompositeDecorator( decorators );
-    //const newDecorator = new CompoundDecorator( decorators );
-    return {
-        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
-        decorators: decorators
-    }
+    return generateGlossaryDecorator( regex, sid )
 };
 
 export default activateGlossary;

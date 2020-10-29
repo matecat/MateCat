@@ -1,6 +1,7 @@
 /**
  * Decorators
  * */
+export const TAGS_DECORATOR = 'tags';
 export const LEXIQA_DECORATOR = 'lexiqa';
 export const GLOSSARY_DECORATOR = 'glossary';
 export const QA_GLOSSARY_DECORATOR = 'qaCheckGlossary';

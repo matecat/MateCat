@@ -4,7 +4,7 @@ import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
 import QaCheckGlossaryHighlight from "../../GlossaryComponents/QaCheckGlossaryHighlight.component";
 
-const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheckGlossary, text, sid) => {
+const activateQaCheckGlossary = (qaCheckGlossary, text, sid) => {
 
     const generateGlossaryDecorator = (regex, sid) => {
         return {
@@ -43,16 +43,8 @@ const activateQaCheckGlossary = (editorState, decoratorStructure, qaCheckGlossar
         return re;
     };
 
-    let decorators = decoratorStructure.slice();
     const regex = createGlossaryRegex(qaCheckGlossary);
-    _.remove(decorators, (decorator) => decorator.name === DraftMatecatConstants.QA_GLOSSARY_DECORATOR);
-    decorators.push( generateGlossaryDecorator( regex, sid ) );
-    //const newDecorator = new CompoundDecorator( decorators );
-    const newDecorator = new CompositeDecorator( decorators );
-    return {
-        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
-        decorators: decorators
-    }
+    return enerateGlossaryDecorator( regex, sid )
 };
 
 export default activateQaCheckGlossary;

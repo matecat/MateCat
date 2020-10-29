@@ -90,7 +90,10 @@ class TagEntity extends Component {
                 suppressContentEditableWarning={true}
                 onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
                 onMouseLeave={() => tooltipToggle()}
-                onClick={() => onClick(start, end, entityId, entityPlaceholder)}>
+                onClick={(e) => {
+                    e.stopPropagation()
+                    onClick(start, end, entityId, entityPlaceholder)
+                }}>
                 {searchParams.active && markSearch(decoratedText, searchParams)}
                 {searchParams.active ? <span style={{display: 'none'}}>{children}</span> : children}
             </span>

@@ -4,7 +4,7 @@ import * as DraftMatecatConstants from "./editorConstants";
 import _ from "lodash";
 import QaCheckBlacklistHighlight from "../../GlossaryComponents/QaCheckBlacklistHighlight.component";
 
-const activateQaCheckBlacklist = (editorState, decoratorStructure, qaCheckGlossary) => {
+const activateQaCheckBlacklist = (qaCheckGlossary) => {
 
     const generateGlossaryDecorator = (regex) => {
         return {
@@ -42,17 +42,9 @@ const activateQaCheckBlacklist = (editorState, decoratorStructure, qaCheckGlossa
         return re;
     };
 
-    let decorators = decoratorStructure.slice();
     console.log("Add Blacklist Decorator: ", qaCheckGlossary);
     const regex = createGlossaryRegex(qaCheckGlossary);
-    _.remove(decorators, (decorator) => decorator.name === DraftMatecatConstants.QA_BLACKLIST_DECORATOR);
-    decorators.push( generateGlossaryDecorator( regex ) );
-    //const newDecorator = new CompoundDecorator( decorators );
-    const newDecorator = new CompositeDecorator( decorators );
-    return {
-        editorState: EditorState.set( editorState, {decorator: newDecorator} ),
-        decorators: decorators
-    }
+    return generateGlossaryDecorator( regex )
 };
 
 export default activateQaCheckBlacklist;
