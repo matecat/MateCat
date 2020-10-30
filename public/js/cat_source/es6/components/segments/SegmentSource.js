@@ -212,7 +212,7 @@ class SegmentSource extends React.Component {
                 sid,
                 true,
                 this.getUpdatedSegmentInfo);
-            _.remove(decorators, (decorator) => decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR);
+            _.remove(this.decoratorsStructure, (decorator) => decorator.name === DraftMatecatConstants.LEXIQA_DECORATOR);
             this.decoratorsStructure.push(newDecorator);
         } else {
             this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR);
