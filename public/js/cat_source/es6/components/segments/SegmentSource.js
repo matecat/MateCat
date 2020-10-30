@@ -65,17 +65,6 @@ class SegmentSource extends React.Component {
             editorStateBeforeSplit: editorState,
         };
         this.splitPoint = this.props.segment.split_group ? this.props.segment.split_group.length -1:  0;
-        this.onChange = (editorState) => {
-            const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
-            if(!entityKey) {
-                this.props.setClickedTagId();
-                // Accept updated selection only
-                const newEditorSelection = EditorState.acceptSelection(this.state.editorState, editorState.getSelection())
-                this.setState({
-                    editorState: newEditorSelection
-                })
-            }
-        }
     }
 
     getSearchParams = () => {
@@ -309,7 +298,6 @@ class SegmentSource extends React.Component {
     };
 
     componentDidMount() {
-
         SegmentStore.addListener(SegmentConstants.CLOSE_SPLIT_SEGMENT, this.endSplitMode );
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
         this.$source = $(this.source);
@@ -324,7 +312,6 @@ class SegmentSource extends React.Component {
 
     componentDidUpdate(prevProps) {
         this.checkDecorators(prevProps);
-        this.forceSelectionToUnlockCopy();
         // Check if splitMode
         if ( !prevProps.segment.openSplit && this.props.segment.openSplit ) {
             // if segment splitted, rebuild its original content
@@ -364,10 +351,24 @@ class SegmentSource extends React.Component {
         return { __html: string };
     }
 
+    onChange = (editorState) => {
+        const { editorState: prevEditorState } = this.state;
+        const entityKey = DraftMatecatUtils.selectionIsEntity(editorState);
+        if(!entityKey) {
+            this.props.setClickedTagId();
+        }
+        this.setState({
+            editorState
+        })
+
+    }
+
+    preventEdit = () => 'handled';
+
     render() {
         const {segment} = this.props;
         const {editorState} = this.state;
-        const {onChange, copyFragment, onBlurEvent, dragFragment, onDragEndEvent, addSplitTag, splitSegmentNew} = this;
+        const {onChange, copyFragment, onBlurEvent, dragFragment, onDragEndEvent, addSplitTag, splitSegmentNew, preventEdit} = this;
         // Set correct handlers
         const handlers = !segment.openSplit ?
             {
@@ -393,6 +394,13 @@ class SegmentSource extends React.Component {
                 onChange={onChange}
                 ref={(el) => this.editor = el}
                 readOnly={false}
+                handleBeforeInput={preventEdit}
+                handlePastedText={preventEdit}
+                handleDrop={preventEdit}
+                handleReturn={preventEdit}
+                handleKeyCommand={preventEdit}
+                handleDroppedFiles={preventEdit}
+                handlePastedFiles={preventEdit}
             />
         </div>;
 
@@ -431,7 +439,6 @@ class SegmentSource extends React.Component {
             _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
         }
     }
-
 
     insertTagAtSelection = (tagName) => {
         const {editorState} = this.state;
@@ -540,26 +547,6 @@ class SegmentSource extends React.Component {
         const {clickedTagId, tagClickedInSource, clickedTagText} = this.props;
         return {clickedTagId, tagClickedInSource, clickedTagText};
     };
-
-    // Needed to "unlock" segment for a successful copy/paste or dragNdrop
-    forceSelectionToUnlockCopy = () => {
-        if(this.props.segment.opened && !this.state.unlockedForCopy){
-            const {editorState} = this.state;
-            const selectionState = editorState.getSelection();
-            let newSelection = selectionState.merge({
-                anchorOffset: 0,
-                focusOffset: 0,
-            });
-            const newEditorState = EditorState.forceSelection(
-                editorState,
-                newSelection
-            );
-            this.setState({
-                editorState: newEditorState,
-                unlockedForCopy: true
-            });
-        }
-    }
 
     copyFragment = (e) => {
         const internalClipboard = this.editor.getClipboard();
