@@ -401,6 +401,7 @@ var UI = {
         });
         this.removeCacheObjects();
         SegmentStore.removeAllSegments();
+        SegmentActions.closeSideSegments();
         $('#outer').empty();
     },
 
