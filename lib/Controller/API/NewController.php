@@ -130,7 +130,8 @@ class NewController extends ajaxController {
                 'instructions'    => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
-                ]
+                ],
+                'project_info'       => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $filterArgs = $this->featureSet->filter( 'filterNewProjectInputFilters', $filterArgs, $this->userIsLogged );
@@ -807,6 +808,11 @@ class NewController extends ajaxController {
             $this->postInput[ 'metadata' ] = html_entity_decode( $this->postInput[ 'metadata' ] );
             $this->metadata                = json_decode( $this->postInput[ 'metadata' ], $assoc, $depth );
             Log::doJsonLog( "Passed parameter metadata as json string." );
+        }
+
+        // project_info
+        if ( !empty( $this->postInput[ 'project_info' ] ) ) {
+            $this->metadata[ 'project_info' ] = $this->postInput[ 'project_info' ];
         }
 
         //override metadata with explicitly declared keys ( we maintain metadata for backward compatibility )

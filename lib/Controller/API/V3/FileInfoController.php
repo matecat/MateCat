@@ -58,12 +58,12 @@ class FileInfoController extends KleinController {
         $fileInfo = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk );
         $metadataDao = new Files_MetadataDao;
         foreach($fileInfo as &$file){
-            $instructions = $metadataDao->get( $this->project->id, $file->id_file, 'instructions' );
-            if($instructions){
-                $file->instructions = $instructions->value;
-            } else {
-                $file->instructions = null;
+            $metadata = [];
+            foreach ( $metadataDao->getByJobIdProjectAndIdFile( $this->project->id, $file->id_file ) as $metadatum ) {
+                $metadata[ $metadatum->key ] = $metadatum->value;
             }
+
+            $file->metadata = $metadata;
         }
 
         $this->response->json( ( new FilesInfo() )->render( $fileInfo, $this->chunk->job_first_segment, $this->chunk->job_last_segment ) );

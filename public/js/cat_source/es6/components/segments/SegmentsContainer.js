@@ -14,7 +14,7 @@ import CatToolConstants from '../../constants/CatToolConstants';
 import Speech2Text from '../../utils/speech2text';
 import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
-import FilesInstructionsModal from '../modals/FilesInstructionsModal';
+import JobMetadataModal from '../modals/JobMetadataModal';
 import CommonUtils from '../../utils/commonUtils';
 
 class SegmentsContainer extends React.Component {
@@ -189,7 +189,7 @@ class SegmentsContainer extends React.Component {
             // minHeight: 400,
             // maxWidth: 900,
         };
-        APP.ModalWindow.showModalComponent(FilesInstructionsModal, props, 'File notes', styleContainer);
+        APP.ModalWindow.showModalComponent(JobMetadataModal, props, 'File notes', styleContainer);
     }
 
     getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
@@ -252,7 +252,7 @@ class SegmentsContainer extends React.Component {
                                 </span>
                             </div>
                         ) : null}
-                        {file && file.instructions ? (
+                        {file && file.metadata && file.metadata.instructions ? (
                             <div className={'button-notes'} onClick={() => this.openInstructionsModal(segment.id_file)}>
                                 <LinkIcon />
                                 <span>View notes</span>
