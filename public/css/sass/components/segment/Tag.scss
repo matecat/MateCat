@@ -40,7 +40,14 @@
   position: relative;
   display: inline-block;
 }
-
+.segment-placeholder .tag {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 64px;
+  vertical-align: middle;
+}
 .tag {
   position: relative;
   display: inline-block;
@@ -51,6 +58,18 @@
   color: #fff;
   vertical-align: middle;
   word-break: break-all;
+
+  &.tag-focused {
+    &.tag-open {
+      box-shadow: 3px -1px 0px 4px #CCE2FF;
+    }
+    &.tag-close {
+      box-shadow: -3px -1px 0px 4px #CCE2FF;
+    }
+    &.tag-selfclosed {
+      box-shadow: 0px -1px 0px 4px #CCE2FF;
+    }
+  }
 
   &:not(.tag-focused){
     opacity: 0.75;

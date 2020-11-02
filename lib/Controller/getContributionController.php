@@ -103,6 +103,8 @@ class getContributionController extends ajaxController {
         //get Job Info, we need only a row of jobs ( split )
         $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
 
+        $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap($this->id_segment);
+
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
 
@@ -113,6 +115,7 @@ class getContributionController extends ajaxController {
 
         $contributionRequest                    = new \Contribution\ContributionRequestStruct();
         $contributionRequest->user              = $this->user;
+        $contributionRequest->dataRefMap        = $dataRefMap;
         $contributionRequest->contexts          = [
                 'context_before' => $this->context_before,
                 'segment'        => $this->text,

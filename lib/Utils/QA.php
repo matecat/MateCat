@@ -350,7 +350,8 @@ class QA {
          */
             1200 => 'Symbol mismatch',
 
-            1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
+//            1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
+            1300 => 'Self-closing tags should be placed outside of regular tags.',
 
             2000 => 'Smart count plural forms mismatch',
             2001 => '%smartcount tag count mismatch',

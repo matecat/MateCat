@@ -58,6 +58,8 @@ class SegmentsContainer extends React.Component {
 		this.scrollContainer;
 		this.segmentContainerVisible = false;
 		this.index = this.props.startSegmentId;
+
+		this.domContainer = document.getElementById('outer');
 	}
 
 	splitSegments(segments, splitGroup) {
@@ -100,7 +102,7 @@ class SegmentsContainer extends React.Component {
 					const lastHeight = this.segmentsHeightsMap[oldLastSid].height;
 					this.segmentsHeightsMap[oldLastSid] = {
 						segment: oldLastSegment,
-						height: lastHeight - 150
+						height: lastHeight
 					};
 				}
 			}
@@ -418,7 +420,7 @@ class SegmentsContainer extends React.Component {
 			// if not available in cache, compute height
 			if (components && Object.keys(components).length) {
 				const container = document.createElement("div", {});
-				document.body.appendChild(container);
+				this.domContainer.appendChild(container);
 				const computeHeightAndUnmount = (h) => {
 					height = h;
 

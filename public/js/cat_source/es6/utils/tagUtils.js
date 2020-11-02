@@ -65,7 +65,7 @@ const TAGS_UTILS =  {
         _str = _str.replace( config.lfPlaceholderRegex, '\n' )
             .replace( config.crPlaceholderRegex, '\r' )
             .replace( config.crlfPlaceholderRegex, '\r\n' )
-            .replace( config.tabPlaceholderRegex, '\t' )
+            .replace( config.tabPlaceholderRegex, '⇥' )
             .replace( config.nbspPlaceholderRegex, '°' )
         return _str;
     },

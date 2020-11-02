@@ -36,9 +36,9 @@ export const activateGlossary = (editorState, glossary, text, sid, segmentAction
     };
 
     const createGlossaryRegex = (glossaryObj, text) => {
-        const matches = _.map(glossaryObj, ( elem ) => (elem[0].raw_segment) ? elem[0].raw_segment: elem[0].segment);
         let re;
         try {
+            const matches = _.map(glossaryObj, ( elem ) => (elem[0].raw_segment) ? elem[0].raw_segment: elem[0].segment);
             re = new RegExp( '\\b(' + matches.join('|') + ')\\b', "gi" );
             //If source languace is Cyrillic or CJK
             if ( config.isCJK) {

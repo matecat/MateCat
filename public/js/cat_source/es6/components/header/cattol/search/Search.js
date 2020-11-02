@@ -74,7 +74,9 @@ class Search extends React.Component {
             featuredSearchResult: data.featuredSearchResult,
             searchReturn: true
         });
-        setTimeout(()=>SegmentActions.openSegment(this.state.occurrencesList[data.featuredSearchResult]));
+        setTimeout(()=>{
+            !_.isUndefined(this.state.occurrencesList[data.featuredSearchResult]) && SegmentActions.openSegment(this.state.occurrencesList[data.featuredSearchResult])
+        });
     }
 
     updateSearch() {
@@ -220,11 +222,11 @@ class Search extends React.Component {
         }
 
         SegmentActions.replaceCurrentSearch(this.state.search.replaceTarget);
-        let segment = SegmentStore.getSegmentByIdToJS( this.state.occurrencesList[this.state.featuredSearchResult] );
 
         setTimeout(()=> {
+            const segment = SegmentStore.getSegmentByIdToJS( this.state.occurrencesList[this.state.featuredSearchResult] );
             this.updateAfterReplace(segment.original_sid);
-            let next = this.state.occurrencesList[this.state.featuredSearchResult];
+            // let next = this.state.occurrencesList[this.state.featuredSearchResult];
             UI.setTranslation( {
                 id_segment: segment.original_sid,
                 status: segment.status,
