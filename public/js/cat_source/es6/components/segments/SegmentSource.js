@@ -21,7 +21,6 @@ import getFragmentFromSelection from "./utils/DraftMatecatUtils/DraftSource/src/
 import TagUtils from "../../utils/tagUtils";
 import {getSplitPointTag} from "./utils/DraftMatecatUtils/tagModel";
 
-
 class SegmentSource extends React.Component {
 
     constructor(props) {
@@ -63,6 +62,12 @@ class SegmentSource extends React.Component {
             tagRange: tagRange,
             unlockedForCopy: false,
             editorStateBeforeSplit: editorState,
+            activeDecorators: {
+                [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+                [DraftMatecatConstants.GLOSSARY_DECORATOR]: false,
+                [DraftMatecatConstants.QA_GLOSSARY_DECORATOR]: false,
+                [DraftMatecatConstants.SEARCH_DECORATOR]: false
+            }
         };
         this.splitPoint = this.props.segment.split_group ? this.props.segment.split_group.length -1:  0;
     }
@@ -230,53 +235,56 @@ class SegmentSource extends React.Component {
     };
 
     checkDecorators = (prevProps) => {
-        let decoratorChanged = false;
         const { inSearch, searchParams, currentInSearch, currentInSearchIndex } = this.props.segment;
+        const { activeDecorators: prevActiveDecorators, editorState} = this.state;
+        const activeDecorators = {...prevActiveDecorators}
 
         if(!inSearch){
             //Glossary
             const { glossary } = this.props.segment;
             const { glossary : prevGlossary } = prevProps.segment;
-            if ( glossary && _.size(glossary) > 0 && (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ) ) {
+            if ( glossary && _.size(glossary) > 0 &&
+                (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) || !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] )) {
+                activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
                 this.addGlossaryDecorator();
-                decoratorChanged = true;
             } else if ( _.size(prevGlossary) > 0 && ( !glossary || _.size(glossary) === 0 ) ) {
+                activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
                 this.removeDecorator(DraftMatecatConstants.GLOSSARY_DECORATOR)
-                decoratorChanged = true;
             }
 
             //Qa Check Glossary
             const { qaCheckGlossary } = this.props.segment;
             const { qaCheckGlossary : prevQaCheckGlossary } = prevProps.segment;
-            if ( qaCheckGlossary && qaCheckGlossary.length > 0 && (_.isUndefined(prevQaCheckGlossary) || !Immutable.fromJS(prevQaCheckGlossary).equals(Immutable.fromJS(qaCheckGlossary)) ) ) {
+            if ( qaCheckGlossary && qaCheckGlossary.length > 0 &&
+                (_.isUndefined(prevQaCheckGlossary) || !Immutable.fromJS(prevQaCheckGlossary).equals(Immutable.fromJS(qaCheckGlossary)) ) ) {
                 this.addQaCheckGlossaryDecorator();
-                decoratorChanged = true;
+                activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = true
             } else if ( (prevQaCheckGlossary && prevQaCheckGlossary.length > 0 ) && ( !qaCheckGlossary ||  qaCheckGlossary.length === 0 ) ) {
                 this.removeDecorator(DraftMatecatConstants.QA_GLOSSARY_DECORATOR);
-                decoratorChanged = true;
+                activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = false
             }
 
             //Lexiqa
             const { lexiqa  } = this.props.segment;
             const { lexiqa : prevLexiqa } = prevProps.segment;
-            if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.source && prevLexiqa && _.size(prevLexiqa) > 0 && prevLexiqa.source &&
-                (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa.source).equals(Immutable.fromJS(lexiqa.source)) ) ) {
+            const currentLexiqaSource = lexiqa && lexiqa.source && _.size(lexiqa.source)
+            const prevLexiqaSource = prevLexiqa && prevLexiqa.source && _.size(prevLexiqa.source)
+            const lexiqaChanged = prevLexiqaSource && currentLexiqaSource && !Immutable.fromJS(prevLexiqa.source).equals(Immutable.fromJS(lexiqa.source))
+
+            if(currentLexiqaSource && (!prevLexiqaSource || lexiqaChanged || !prevActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR])){
+                activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
                 this.addLexiqaDecorator();
-                decoratorChanged = true;
-            } else if ((prevLexiqa && prevLexiqa.length > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.source ) ) {
+            }else if(prevLexiqaSource && !currentLexiqaSource){
+                activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
                 this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR);
-                decoratorChanged = true;
             }
 
-            //Search
+            // Search
             if ( prevProps.segment.inSearch) {
+                activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
                 this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR);
-                decoratorChanged = true;
             }
         }else{
-
-            // Cleanup all decorators
-            this.removeDecorator();
             //Search
             if (searchParams.source && (
                 (!prevProps.segment.inSearch) ||  //Before was not active
@@ -284,15 +292,21 @@ class SegmentSource extends React.Component {
                 (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== currentInSearch ) ||   //Before was the current
                 (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== currentInSearchIndex ) ) )   //There are more occurrences and the current change
             {
+                // Cleanup all decorators
+                this.removeDecorator();
+                activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]= false,
+                activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR]= false,
+                activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR]= false,
                 this.addSearchDecorator();
-                decoratorChanged = true;
+                activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR]= true
             }
         }
 
-        if(decoratorChanged){
+        if(!_.isEqual(prevActiveDecorators, activeDecorators)){
             const decorator = new CompositeDecorator( this.decoratorsStructure );
             this.setState( {
-                editorState: EditorState.set( this.state.editorState, {decorator} )
+                editorState: EditorState.set( editorState, {decorator} ),
+                activeDecorators
             });
         }
     };

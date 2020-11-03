@@ -78,7 +78,12 @@ class Editarea extends React.Component {
             popoverPosition: {},
             editorFocused: true,
             clickedOnTag: false,
-            triggerText: null
+            triggerText: null,
+            activeDecorators: {
+                [DraftMatecatConstants.LEXIQA_DECORATOR]: false,
+                [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
+                [DraftMatecatConstants.SEARCH_DECORATOR]: false
+            }
         };
         this.updateTranslationDebounced = _.debounce(this.updateTranslationInStore, 100);
         this.updateTagsInEditorDebounced = _.debounce(updateTagsInEditor, 500);
@@ -200,43 +205,43 @@ class Editarea extends React.Component {
     };
 
     checkDecorators = (prevProps) => {
-        let decoratorChanged = false;
         const { inSearch } = this.props.segment;
+        const sid = this.props.segment.sid
+        const { activeDecorators: prevActiveDecorators, editorState} = this.state;
+        const activeDecorators = {...prevActiveDecorators}
 
         if(!inSearch){
+
             //Qa Check Blacklist
             const { qaBlacklistGlossary } = this.props.segment;
             const { qaBlacklistGlossary : prevQaBlacklistGlossary } = prevProps.segment;
             if ( qaBlacklistGlossary && qaBlacklistGlossary.length > 0 &&
                 (_.isUndefined(prevQaBlacklistGlossary) || !Immutable.fromJS(prevQaBlacklistGlossary).equals(Immutable.fromJS(qaBlacklistGlossary)) ) ) {
+                activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = true
                 this.addQaBlacklistGlossaryDecorator();
-                decoratorChanged = true;
             } else if ((prevQaBlacklistGlossary && prevQaBlacklistGlossary.length > 0 ) && ( !qaBlacklistGlossary ||  qaBlacklistGlossary.length === 0 ) ) {
+                activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = false
                 this.removeDecorator(DraftMatecatConstants.QA_BLACKLIST_DECORATOR);
-                decoratorChanged = true;
             }
 
             //Lexiqa
+            const lexiqaActive = _.find(this.decoratorsStructure, (dec) => dec.name === DraftMatecatConstants.LEXIQA_DECORATOR);
             const { lexiqa  } = this.props.segment;
             const { lexiqa : prevLexiqa } = prevProps.segment;
             if ( lexiqa && _.size(lexiqa) > 0 && lexiqa.target &&
-                (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) ) ) {
+                (_.isUndefined(prevLexiqa) || !Immutable.fromJS(prevLexiqa).equals(Immutable.fromJS(lexiqa)) || !lexiqaActive) ) {
+                activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
                 this.addLexiqaDecorator();
-                decoratorChanged = true;
             } else if ((prevLexiqa && _.size(prevLexiqa) > 0 ) && ( !lexiqa ||  _.size(lexiqa) === 0 || !lexiqa.target ) ) {
+                activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
                 this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR);
-                decoratorChanged = true;
             }
-
             //Search
             if ( prevProps.segment.inSearch) {
+                activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
                 this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR);
-                decoratorChanged = true;
             }
-
         }else{
-            // Cleanup all decorators
-            this.removeDecorator();
             //Search
             if (this.props.segment.searchParams.target && (
                 (!prevProps.segment.inSearch) ||  //Before was not active
@@ -244,15 +249,20 @@ class Editarea extends React.Component {
                 (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== this.props.segment.currentInSearch ) ||   //Before was the current
                 (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== this.props.segment.currentInSearchIndex ) ) )   //There are more occurrences and the current change
             {
+                // Cleanup all decorators
+                this.removeDecorator();
+                activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]= false,
+                activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]= false,
                 this.addSearchDecorator();
-                decoratorChanged = true;
+                activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
             }
         }
 
-        if(decoratorChanged){
+        if(!_.isEqual(prevActiveDecorators, activeDecorators)){
             const decorator = new CompositeDecorator( this.decoratorsStructure );
             this.setState( {
-                editorState: EditorState.set( this.state.editorState, {decorator} )
+                editorState: EditorState.set( editorState, {decorator} ),
+                activeDecorators
             });
         }
 
