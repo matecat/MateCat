@@ -120,7 +120,7 @@ API.JOB = {
             async: true,
             type: "GET",
             xhrFields: { withCredentials: true },
-            url : APP.getRandomUrl() + "api/v3/metadata/" + idJob + '/' + password
+            url : APP.getRandomUrl() + "api/v3/jobs/" + idJob + '/' + password + "/metadata"
         });
     }
 };
