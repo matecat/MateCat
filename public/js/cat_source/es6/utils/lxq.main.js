@@ -117,36 +117,22 @@ const LXQ = {
             function ( err, result ) {
                 if ( !err ) {
                     var noVisibleErrorsFound = false, source_val, target_val;
-                    //myWindow.location =result.qaurl;
-                    var segObj = SegmentStore.getSegmentByIdToJS(id_segment, segment.sid);
                     if ( result.hasOwnProperty( 'qaData' ) && result.qaData.length > 0 ) {
 
                         //highlight the segments
                         // source_val = $( ".source", segment ).html();
 
-                        var highlights = {
-                            source: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                mspolicheck: [],
-                                glossary: [],
-                                blacklist: []
-                            },
-                            target: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                mspolicheck: [],
-                                glossary: [],
-                                blacklist: []
-                            }
+                        var highlights = {};
+                        var errorsMap =  {
+                            numbers: [],
+                            punctuation: [],
+                            spaces: [],
+                            urls: [],
+                            spelling: [],
+                            specialchardetect: [],
+                            mspolicheck: [],
+                            glossary: [],
+                            blacklist: []
                         };
                         var newWarnings = {};
                         newWarnings[id_segment] = {};
@@ -160,11 +146,14 @@ const LXQ = {
                             newWarnings[id_segment][qadata.errorid] = qadata;
                             if ( !qadata.ignored ) {
                                 qadata.color = LXQ.colors[qadata.category];
+                                var category = qadata.category;
                                 if ( qadata.insource ) {
-                                    highlights.source[qadata.category].push( qadata );
+                                    highlights.source = (highlights.source) ? highlights.source : errorsMap;
+                                    highlights.source[category].push( qadata );
                                 }
                                 else {
-                                    highlights.target[qadata.category].push( qadata );
+                                    highlights.target = (highlights.target) ? highlights.target : errorsMap;
+                                    highlights.target[category].push( qadata );
                                 }
                             }
                         } );
@@ -180,8 +169,7 @@ const LXQ = {
                         if ( !(LXQ.getVisibleWarningsCountForSegment( id_segment ) > 0) ) {
                             noVisibleErrorsFound = true;
                         }
-                    }
-                    else {
+                    } else {
                         //do something else
                         noVisibleErrorsFound = true;
 
@@ -230,76 +218,47 @@ const LXQ = {
                         }
 
                         //highlight the respective segments here
-                        var highlights = {
-                            source: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                mspolicheck: [],
-                                glossary: [],
-                                blacklist: []
-                            },
-                            target: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                mspolicheck: [],
-                                glossary: [],
-                                blacklist: []
-                            }
+                        var highlights = {};
+                        var errorsMap =  {
+                            numbers: [],
+                            punctuation: [],
+                            spaces: [],
+                            urls: [],
+                            spelling: [],
+                            specialchardetect: [],
+                            mspolicheck: [],
+                            glossary: [],
+                            blacklist: []
                         };
 
-                        let seg = UI.getSegmentById( element.segid );
-                        if ( seg.length === 0) return;
-                        let translation = "";
-                        if (seg.length>0) {
-                            translation = TextUtils.htmlEncode($( UI.targetContainerSelector(), seg ).html());
-                        }
+                        let seg = SegmentStore.getSegmentByIdToJS( element.segid );
+                        if ( !seg) return;
+
                         LXQ.lexiqaData.lexiqaWarnings[element.segid] = {};
-
-
                         results.results[element.segid].forEach( function ( qadata ) {
                             LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] = qadata;
 
                             if ( !qadata.ignored ) {
                                 qadata.color = LXQ.colors[qadata.category];
-                                if (seg.length>0) {
-                                    if ( qadata.insource ) {
-                                        highlights.source[qadata.category].push( qadata );
-                                    }
-                                    else {
-                                        if ( qadata.end <= translation.length )
-                                            highlights.target[qadata.category].push( qadata );
-
-                                    }
+                                if ( qadata.insource ) {
+                                    highlights.source = (highlights.source) ? highlights.source : errorsMap;
+                                    highlights.source[qadata.category].push( qadata );
                                 }
+                                else {
+                                    highlights.target = (highlights.target) ? highlights.target : errorsMap;
+                                    highlights.target[qadata.category].push( qadata );
+                                }
+
                             }
                         } );
-                        if ( LXQ.getVisibleWarningsCountForSegment( element.segid ) > 0 ) {
-                            errorCnt++;
-                        }
-                        else {
+                        if ( !LXQ.getVisibleWarningsCountForSegment( element.segid ) > 0 ) {
                             LXQ.removeSegmentWarning(element.segid);
                         }
-                        if ( !UI.segmentIsLoaded( element.segid ) )
-                            return; //this segment has not been loaded yet...
-
-                        LXQ.shouldHighlighWarningsForSegment( element.segid, element.show );
-
                         SegmentActions.addLexiqaHighlight(element.segid, highlights);
                     } );
 
                     LXQ.updateWarningsUI();
 
-                }
-                else {
-                    results.qaurl = "#";
                 }
 
                 if ( LXQ.enabled() ) {
@@ -799,24 +758,6 @@ LXQ.init  = function () {
             });
         };
 
-
-        var shouldHighlighWarningsForSegment = function (segId,value) {
-            //return true;
-            //var segId = UI.getSegmentId(seg);
-            if (segId!==false){
-            if (!LXQ.lexiqaData.segmentsInfo.hasOwnProperty(segId))
-                LXQ.lexiqaData.segmentsInfo[segId]= {};
-            if (!LXQ.lexiqaData.segmentsInfo[segId].hasOwnProperty('showHighlighting'))
-                LXQ.lexiqaData.segmentsInfo[segId].showHighlighting = true;
-            if (value!==undefined)
-                LXQ.lexiqaData.segmentsInfo[segId].showHighlighting = value;
-
-            return LXQ.lexiqaData.segmentsInfo[segId].showHighlighting ;
-            }
-            else{
-                return false;
-            }
-        };
         var getVisibleWarningsCountForSegment = function(segment) {
             var segId ;
             if (typeof segment ==='string') {
@@ -895,7 +836,6 @@ LXQ.init  = function () {
             getRanges: getRanges,
             colors: colors,
             buildTooltipMessages: buildTooltipMessages,
-            shouldHighlighWarningsForSegment: shouldHighlighWarningsForSegment,
             getVisibleWarningsCountForSegment:getVisibleWarningsCountForSegment,
             ignoreError: ignoreError,
             redoHighlighting:redoHighlighting,
