@@ -162,6 +162,10 @@ class CreateProjectTask extends Command {
             throw new \Exception( 'There is not a user associated with email [' . $userEmail . '].' );
         }
 
+        if(!isset($user->getUserTeams()[0])){
+            throw new \Exception( 'There is not a group associated with user [' . $user->fullName() . '].' );
+        }
+
         return $user;
     }
 
