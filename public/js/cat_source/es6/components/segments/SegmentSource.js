@@ -235,6 +235,7 @@ class SegmentSource extends React.Component {
     };
 
     checkDecorators = (prevProps) => {
+        let changedDecorator = false;
         const { inSearch, searchParams, currentInSearch, currentInSearchIndex } = this.props.segment;
         const { activeDecorators: prevActiveDecorators, editorState} = this.state;
         const activeDecorators = {...prevActiveDecorators}
@@ -246,9 +247,11 @@ class SegmentSource extends React.Component {
             if ( glossary && _.size(glossary) > 0 &&
                 (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) || !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] )) {
                 activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
+                changedDecorator = true
                 this.addGlossaryDecorator();
             } else if ( _.size(prevGlossary) > 0 && ( !glossary || _.size(glossary) === 0 ) ) {
                 activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false
+                changedDecorator = true
                 this.removeDecorator(DraftMatecatConstants.GLOSSARY_DECORATOR)
             }
 
@@ -258,8 +261,10 @@ class SegmentSource extends React.Component {
             if ( qaCheckGlossary && qaCheckGlossary.length > 0 &&
                 (_.isUndefined(prevQaCheckGlossary) || !Immutable.fromJS(prevQaCheckGlossary).equals(Immutable.fromJS(qaCheckGlossary)) ) ) {
                 this.addQaCheckGlossaryDecorator();
+                changedDecorator = true
                 activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = true
             } else if ( (prevQaCheckGlossary && prevQaCheckGlossary.length > 0 ) && ( !qaCheckGlossary ||  qaCheckGlossary.length === 0 ) ) {
+                changedDecorator = true
                 this.removeDecorator(DraftMatecatConstants.QA_GLOSSARY_DECORATOR);
                 activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] = false
             }
@@ -273,15 +278,18 @@ class SegmentSource extends React.Component {
 
             if(currentLexiqaSource && (!prevLexiqaSource || lexiqaChanged || !prevActiveDecorators[DraftMatecatConstants.LEXIQA_DECORATOR])){
                 activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = true
+                changedDecorator = true
                 this.addLexiqaDecorator();
             }else if(prevLexiqaSource && !currentLexiqaSource){
                 activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false
+                changedDecorator = true
                 this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR);
             }
 
             // Search
             if ( prevProps.segment.inSearch) {
                 activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
+                changedDecorator = true
                 this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR);
             }
         }else{
@@ -299,10 +307,11 @@ class SegmentSource extends React.Component {
                 activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR]= false,
                 this.addSearchDecorator();
                 activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR]= true
+                changedDecorator = true
             }
         }
 
-        if(!_.isEqual(prevActiveDecorators, activeDecorators)){
+        if(changedDecorator){
             const decorator = new CompositeDecorator( this.decoratorsStructure );
             this.setState( {
                 editorState: EditorState.set( editorState, {decorator} ),

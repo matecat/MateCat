@@ -31,10 +31,9 @@ const decodeSegment  = (editorState) => {
         const tagEntity = entitiesInEditor.filter( entity => entity.entityKey === key)[0];
         const {encodedText} = tagEntity.entity.data;
         // Get block-based selection
-        const selectionState = new SelectionState({
-            anchorKey: tagEntity.blockKey,
+        let selectionState = SelectionState.createEmpty(tagEntity.blockKey)
+        selectionState = selectionState.merge({
             anchorOffset: tagEntity.start,
-            focusKey: tagEntity.blockKey,
             focusOffset: tagEntity.end
         });
         // Replace text of entity with original text and delete entity key
