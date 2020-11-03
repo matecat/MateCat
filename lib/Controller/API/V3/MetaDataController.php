@@ -92,11 +92,11 @@ class MetaDataController extends KleinController {
     /**
      * @param \Jobs_JobStruct $job
      *
-     * @return \ArrayObject
+     * @return array
      */
     private function getJobFilesMetaData( \Jobs_JobStruct $job ) {
 
-        $metadata         = new \ArrayObject();
+        $metadata         = [];
         $filesMetaDataDao = new \Files\MetadataDao();
 
         foreach ( $job->getFiles() as $file ) {
@@ -111,7 +111,7 @@ class MetaDataController extends KleinController {
             $metadataObject->filename = $file->filename;
             $metadataObject->data = $metadatum;
 
-            $metadata->append($metadataObject);
+            $metadata[] = $metadataObject;
         }
 
         return $metadata;
