@@ -24,11 +24,12 @@ class MetaDataController extends KleinController {
             throw new NotFoundException( 'Job not found.' );
         }
 
-        $result[ 'metadata' ] = [
-                'project' => $this->getProjectInfo( $job->getProject() ),   // project metadata
-                'job'     => $this->getJobMetaData( $job ),                 // job metadata
-                'files'   => $this->getJobFilesMetaData( $job ),            // job files metadata
-        ];
+        $metadata = new \stdClass();
+        $metadata->project = $this->getProjectInfo( $job->getProject() );
+        $metadata->job = $this->getJobMetaData( $job );
+        $metadata->files = $this->getJobFilesMetaData( $job );
+
+        $result[ 'metadata' ] = $metadata;
 
         $this->response->json( $result );
     }
@@ -56,15 +57,15 @@ class MetaDataController extends KleinController {
     /**
      * @param \Projects_ProjectStruct $project
      *
-     * @return |null
+     * @return \stdClass
      */
     private function getProjectInfo( \Projects_ProjectStruct $project ) {
 
-        $metadata = [];
-        $projectMetadataDao = new \Projects_MetadataDao();
+        $metadata = new \stdClass();
 
-        foreach ( $projectMetadataDao->allByProjectId( (int)$project->id ) as $metadatum ) {
-            $metadata[ $metadatum->key ] = $metadatum->value;
+        foreach ( $project->getMetadata() as $metadatum ) {
+            $key = $metadatum->key;
+            $metadata->$key = $metadatum->value;
         }
 
         return $metadata;
@@ -73,15 +74,16 @@ class MetaDataController extends KleinController {
     /**
      * @param \Jobs_JobStruct $job
      *
-     * @return array
+     * @return \stdClass
      */
     private function getJobMetaData( \Jobs_JobStruct $job ) {
 
-        $metadata = [];
+        $metadata = new \stdClass();
         $jobMetaDataDao = new MetadataDao();
 
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password ) as $metadatum ) {
-            $metadata[ $metadatum->key ] = $metadatum->value;
+            $key = $metadatum->key;
+            $metadata->$key = $metadatum->value;
         }
 
         return $metadata;
@@ -98,16 +100,18 @@ class MetaDataController extends KleinController {
         $filesMetaDataDao = new \Files\MetadataDao();
 
         foreach ( $job->getFiles() as $file ) {
-            $metadatum = [];
+            $metadatum = new \stdClass();
             foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id ) as $meta ) {
-                $metadatum[ $meta->key ] = $meta->value;
+                $key = $meta->key;
+                $metadatum->$key = $meta->value;
             }
 
-            $metadata[] = [
-                'id' => $file->id,
-                'filename' => $file->filename,
-                'data' => $metadatum
-            ];
+            $metadataObject = new \stdClass();
+            $metadataObject->id = $file->id;
+            $metadataObject->filename = $file->filename;
+            $metadataObject->data = $metadatum;
+
+            $metadata[] = $metadataObject;
         }
 
         return $metadata;
