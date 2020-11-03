@@ -252,9 +252,9 @@ let SearchUtils = {
             searchResultsDictionary[sid] = item;
             return item;
         });
-        console.log("SearchResults", searchResults);
-        console.log("occurrencesList", occurrencesList);
-        console.log("searchResultsDictionary", searchResultsDictionary);
+        // console.log("SearchResults", searchResults);
+        // console.log("occurrencesList", occurrencesList);
+        // console.log("searchResultsDictionary", searchResultsDictionary);
         return {
             searchParams: searchParams,
             searchResults: searchResults,

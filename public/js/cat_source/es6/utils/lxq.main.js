@@ -374,7 +374,7 @@ LXQ.init  = function () {
           if (file.segments && LXQ.hasOwnProperty('lexiqaData') && LXQ.lexiqaData.hasOwnProperty('lexiqaWarnings')) {
             _.each(file.segments, function (segment, i) {
                   if (LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(segment.sid)) {
-                      console.log('in loadmore segments, segment: '+segment.sid+' already has qa info...');
+                      // console.log('in loadmore segments, segment: '+segment.sid+' already has qa info...');
                       //clean up and redo powertip on any glossaries/blacklists
                       LXQ.redoHighlighting(segment.sid,true);
                       LXQ.redoHighlighting(segment.sid,false);

@@ -900,11 +900,9 @@ AppDispatcher.register(function (action) {
             SegmentStore.updateAll(action.segments);
             if ( action.idToOpen ) {
                 SegmentStore.openSegment(action.idToOpen);
+                SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.idToOpen);
             }
             SegmentStore.emitChange(action.actionType, SegmentStore._segments);
-            if ( action.idToOpen ) {
-                SegmentStore.emitChange(SegmentConstants.OPEN_SEGMENT, action.sid);
-            }
             if ( SegmentStore.searchOccurrences.length > 0 ) {// Search Active
                 SegmentStore.emitChange(SegmentConstants.UPDATE_SEARCH);
             }
@@ -979,14 +977,6 @@ AppDispatcher.register(function (action) {
             SegmentStore.setPropagation(action.id, action.fid, action.propagation, action.from);
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
-        // case SegmentConstants.REPLACE_TRANSLATION:
-        //     let trans = SegmentStore.replaceTranslation(action.id, action.translation);
-        //     if ( action.pastedLength ) {
-        //         SegmentStore.emitChange(SegmentConstants.UPDATE_CURSOR, action.id, action.pastedLength);
-        //     }
-        //     SegmentStore.emitChange(action.actionType, action.id, trans);
-        //     SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
-        //     break;
         case SegmentConstants.REPLACE_TRANSLATION:
             SegmentStore.replaceTranslation(action.id, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, action.translation);

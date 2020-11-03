@@ -100,7 +100,8 @@ class Segment extends React.Component {
             UI.editStart = new Date();
             SegmentActions.getGlossaryForSegment(this.props.segment.sid, this.props.fid, this.props.segment.segment);
 
-            window.location.hash = this.props.segment.sid;
+            // window.location.hash = this.props.segment.sid;
+            history.replaceState(null, null, document.location.pathname + '#' + this.props.segment.sid);
 
         }
     }
