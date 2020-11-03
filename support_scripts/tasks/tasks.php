@@ -6,6 +6,7 @@ require( PROJECT_ROOT . 'inc/Bootstrap.php' );
 Bootstrap::start();
 
 use CommandLineTasks\CopyFilesFromS3Task;
+use CommandLineTasks\CreateProjectTask;
 use CommandLineTasks\CreateTeamMembershipTask;
 use CommandLineTasks\CreateTeamTask;
 use CommandLineTasks\DumpSchemaTask;
@@ -31,5 +32,6 @@ $app->add( new AirbnbOutsourceToHTS() );
 $app->add( new CopyFilesFromS3Task() );
 $app->add( new FindElementInS3CacheTask() );
 $app->add( new FixChunkReviewRecordCounts() );
+$app->add( new CreateProjectTask() );
 
 $app->run();
