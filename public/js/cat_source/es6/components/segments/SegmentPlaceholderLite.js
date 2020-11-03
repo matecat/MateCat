@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import CompoundDecorator from "./utils/CompoundDecorator";
 import DraftMatecatUtils from "./utils/DraftMatecatUtils";
 import SegmentUtils from "../../utils/segmentUtils";
-import {Editor, EditorState} from "draft-js";
+import {CompositeDecorator, Editor, EditorState} from "draft-js";
 
 class SegmentPlaceholderLite extends React.Component {
     constructor(props) {
@@ -14,7 +14,8 @@ class SegmentPlaceholderLite extends React.Component {
                 component: TagEntity,
             }
         ];
-        const decorator = new CompoundDecorator(this.decoratorsStructureSource);
+        //const decorator = new CompoundDecorator(this.decoratorsStructureSource);
+        const decorator = new CompositeDecorator(this.decoratorsStructureSource);
         // --- Prepare Source
         const plainEditorStateSource = EditorState.createEmpty(decorator);
         const source =  DraftMatecatUtils.unescapeHTMLLeaveTags(this.props.segment.segment);
@@ -182,15 +183,13 @@ class TagEntity extends Component {
     }
 
     render() {
-        const {offsetkey} = this.props;
-        const { children } = this.props.children.props;
+        const { children } = this.props;
         const {tagStyle} = this.state;
 
         return <div className={"tag-container"}
                     contentEditable="false"
                     suppressContentEditableWarning={true}>
-            <span data-offset-key={offsetkey}
-                  className={`tag ${tagStyle} `}
+            <span className={`tag ${tagStyle} `}
                   unselectable="on"
                   suppressContentEditableWarning={true}
                   >

@@ -35,10 +35,9 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
                 // Clone tag
                 const tagEntity = {...tag};
                 // Each block start with offset = 0 so we have to adapt selection
-                const selectionState = new SelectionState({
-                    anchorKey: contentBlock.getKey(),
+                let selectionState = SelectionState.createEmpty(contentBlock.getKey())
+                selectionState = selectionState.merge({
                     anchorOffset: (tag.offset - (maxCharsInBlocks - contentBlock.getLength())),
-                    focusKey: contentBlock.getKey(),
                     focusOffset: ((tag.offset + tag.length) - (maxCharsInBlocks - contentBlock.getLength()))
                 });
                 // Create entity
