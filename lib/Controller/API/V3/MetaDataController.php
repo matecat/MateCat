@@ -29,9 +29,7 @@ class MetaDataController extends KleinController {
         $metadata->job = $this->getJobMetaData( $job );
         $metadata->files = $this->getJobFilesMetaData( $job );
 
-        $result[ 'metadata' ] = $metadata;
-
-        $this->response->json( $result );
+        $this->response->json( $metadata );
     }
 
     /**
