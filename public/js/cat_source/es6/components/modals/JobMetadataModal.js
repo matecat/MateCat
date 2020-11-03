@@ -1,11 +1,12 @@
 import CommonUtils from '../../utils/commonUtils';
 import TextUtils from '../../utils/textUtils';
 import showdown from 'showdown';
-import xss from 'xss';
-class FilesInstructionsModal extends React.Component {
+
+class JobMetadataModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {};
+        this.converter = new showdown.Converter();
         // this.instructions =
         //     '**Client:** Product - Rider  \n' +
         //     '**Domain:** UI  \n' +
@@ -14,11 +15,11 @@ class FilesInstructionsModal extends React.Component {
     }
 
     createFileList() {
-        const converter = new showdown.Converter();
         const { currentFile } = this.props;
         return this.props.files.map((file) => {
-            const currentClass = currentFile && currentFile === file.id ? 'current active' : '';
-            if (file.instructions) {
+            let currentClass = currentFile && currentFile === file.id ? 'current' : '';
+            currentClass = this.props.files.lenght > 1 ? ( currentClass + " active") : currentClass;
+            if (file.metadata && file.metadata.instructions) {
                 return (
                     <div key={'file' + file.id}>
                         <div className={'title ' + currentClass}>
@@ -43,9 +44,7 @@ class FilesInstructionsModal extends React.Component {
                             <div
                                 className="transition"
                                 dangerouslySetInnerHTML={{
-                                    __html: xss(converter.makeHtml(
-                                        TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br>\n')))
-                                    ),
+                                    __html: this.getHtml(file.metadata.instructions),
                                 }}
                             />
                         </div>
@@ -58,25 +57,25 @@ class FilesInstructionsModal extends React.Component {
     }
 
     createSingleFile() {
-        const converter = new showdown.Converter();
-        converter.setOption('simpleLineBreaks', false);
         const file = this.props.files.find((file) => file.id === this.props.currentFile);
         return (
             <div className="matecat-modal-text">
                 <div className={'description'}>
-                    <p>Please read the following notes and references carefully:</p>
+                    <h3>Please read the following notes and references carefully:</h3>
                 </div>
                 <div className="instructions-container">
                     <p
                         dangerouslySetInnerHTML={{
-                            __html: xss(converter.makeHtml(
-                                TextUtils.replaceUrl(file.instructions.replace(/[ ]*\n/g, '<br>\n')))
-                            ),
+                            __html: this.getHtml(file.metadata.instructions),
                         }}
                     />
                 </div>
             </div>
         );
+    }
+
+    getHtml(text) {
+        return TextUtils.replaceUrl(text.replace(/[ ]*\n/g, '<br>\n'))
     }
 
     componentDidMount() {
@@ -86,20 +85,37 @@ class FilesInstructionsModal extends React.Component {
     render() {
         return (
             <div className="instructions-modal">
+
                 <div className="matecat-modal-middle">
                     {this.props.showCurrent ? (
                         this.createSingleFile()
                     ) : (
                         <div className="matecat-modal-text">
-                            <h2>Files instructions</h2>
-                            <div
-                                className="ui styled fluid accordion"
-                                ref={(acc) => {
-                                    this.accordion = acc;
-                                }}
-                            >
-                                {this.createFileList()}
-                            </div>
+                            { this.props.projectInfo && (
+                                <div>
+                                    <h2>Project instructions</h2>
+                                    <div className='instructions-container'>
+                                        <p
+                                            dangerouslySetInnerHTML={{
+                                                __html: this.getHtml(this.props.projectInfo),
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            { this.props.files && this.props.files.find((file)=>file.metadata.instructions) && (
+                                <div>
+                                    <h2>Files instructions</h2>
+                                    <div
+                                        className="ui styled fluid accordion"
+                                        ref={(acc) => {
+                                            this.accordion = acc;
+                                        }}
+                                    >
+                                        {this.createFileList()}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -108,7 +124,7 @@ class FilesInstructionsModal extends React.Component {
     }
 }
 
-export default FilesInstructionsModal;
+export default JobMetadataModal;
 
 const CurrentIcon = () => {
     return (
