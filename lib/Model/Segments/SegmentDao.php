@@ -572,7 +572,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
-                    LEFT JOIN segment_original_data ON segments.id = segment_original_data.id_segment
                     WHERE id_job = :id_job
                         AND password = :password
                         AND show_in_cattool = 1
@@ -589,7 +588,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     FROM segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id =  id_job
-                    LEFT JOIN segment_original_data ON segments.id = segment_original_data.id_segment
                     WHERE id_job = :id_job
                         AND password = :password
                         AND show_in_cattool = 1
@@ -606,7 +604,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments
                         JOIN segment_translations ON id = id_segment
                         JOIN jobs ON jobs.id = id_job
-                        LEFT JOIN segment_original_data ON segments.id = segment_original_data.id_segment
                         WHERE id_job = :id_job
                             AND password = :password
                             AND show_in_cattool = 1
@@ -619,7 +616,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                         FROM segments
                         JOIN segment_translations ON id = id_segment
                         JOIN jobs ON jobs.id =  id_job
-                        LEFT JOIN segment_original_data ON segments.id = segment_original_data.id_segment
                         WHERE id_job = :id_job
                             AND password = :password
                             AND show_in_cattool = 1

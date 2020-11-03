@@ -1562,10 +1562,10 @@ class ProjectManager {
 
         // init JobDao
         $jobDao = new Jobs_JobDao();
-      
+
         // job to split
         $jobToSplit = Jobs_JobDao::getByIdAndPassword( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
-      
+
         $translatorModel   = new TranslatorsModel( $jobToSplit );
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'uid' ] ) ) {
@@ -1823,10 +1823,10 @@ class ProjectManager {
 
                     // check if there is original data
                     $segmentOriginalData = [];
-                    if ( isset( $xliff_trans_unit[ 'original-data' ] ) and !empty( $xliff_trans_unit[ 'original-data' ] ) ) {
+                    $dataRefMap          = [];
 
+                    if ( isset( $xliff_trans_unit[ 'original-data' ] ) and !empty( $xliff_trans_unit[ 'original-data' ] ) ) {
                         $segmentOriginalData = $xliff_trans_unit[ 'original-data' ];
-                        $dataRefMap          = [];
                         foreach ( $segmentOriginalData as $datum ) {
                             if ( isset( $datum[ 'attr' ][ 'id' ] ) ) {
                                 $dataRefMap[ $datum[ 'attr' ][ 'id' ] ] = $datum[ 'raw-content' ];
@@ -1929,17 +1929,10 @@ class ProjectManager {
                             $this->projectStructure[ 'segments' ][ $fid ]->append( $segStruct );
 
                             // segment original data
-                            if ( !empty( $dataRefMap ) ) {
-
-                                $dataRefReplacer = new \Matecat\XliffParser\XliffUtils\DataRefReplacer( $dataRefMap );
-
-                                $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
-                                        'map' => $dataRefMap,
-                                ] );
-
-                                $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
-                            }
-
+                            // if its empty pass create a Segments_SegmentOriginalDataStruct with no data
+                            $segmentOriginalDataStructMap = (!empty( $dataRefMap )) ? ['map' => $dataRefMap]: [];
+                            $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct($segmentOriginalDataStructMap);
+                            $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
 
                             //increment counter for word count
                             $this->files_word_count += $wordCount;
@@ -2144,6 +2137,7 @@ class ProjectManager {
     protected function _insertInstructions( $fid, $value ) {
         $metadataDao = new \Files\MetadataDao();
         $metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'instructions', $value );
+
     }
 
     protected function _storeSegments( $fid ) {
@@ -2170,9 +2164,9 @@ class ProjectManager {
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
             // persist original data map if present
-            if ( isset( $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ) ) {
-                /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
-                $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
+            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            if(isset($segmentOriginalDataStruct->map)){
                 Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $segmentOriginalDataStruct->map );
             }
 
@@ -2768,7 +2762,7 @@ class ProjectManager {
      * @throws \Exception
      */
     private function insertSegmentNotesForFile() {
-        $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
+        $this->projectStructure = $this->features->filter( 'handleJsonNotesBeforeInsert', $this->projectStructure );
         ProjectManagerModel::bulkInsertSegmentNotes( $this->projectStructure[ 'notes' ] );
     }
 

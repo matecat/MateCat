@@ -1,6 +1,7 @@
 <?php
 
 use DataAccess\ShapelessConcreteStruct;
+use Url\JobUrlBuilder;
 
 class commentController extends ajaxController {
 
@@ -14,6 +15,9 @@ class commentController extends ajaxController {
 
     private $job;
 
+    /**
+     * @var Comments_CommentStruct
+     */
     private $struct;
     private $new_record;
     private $current_user;
@@ -26,16 +30,17 @@ class commentController extends ajaxController {
         parent::__construct();
 
         $filterArgs = [
-                '_sub'        => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'id_client'   => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'id_job'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_segment'  => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'username'    => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'source_page' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'message'     => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'first_seg'   => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'last_seg'    => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'password'    => [
+                '_sub'            => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'id_client'       => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'id_job'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_segment'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'username'        => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'source_page'     => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'revision_number' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'message'         => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'first_seg'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'last_seg'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password'        => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
@@ -138,13 +143,14 @@ class commentController extends ajaxController {
     private function prepareCommentData() {
         $this->struct = new Comments_CommentStruct();
 
-        $this->struct->id_segment  = $this->__postInput[ 'id_segment' ];
-        $this->struct->id_job      = $this->__postInput[ 'id_job' ];
-        $this->struct->full_name   = $this->__postInput[ 'username' ];
-        $this->struct->source_page = $this->__postInput[ 'source_page' ];
-        $this->struct->message     = $this->__postInput[ 'message' ];
-        $this->struct->email       = $this->getEmail();
-        $this->struct->uid         = $this->getUid();
+        $this->struct->id_segment      = $this->__postInput[ 'id_segment' ];
+        $this->struct->id_job          = $this->__postInput[ 'id_job' ];
+        $this->struct->full_name       = $this->__postInput[ 'username' ];
+        $this->struct->source_page     = $this->__postInput[ 'source_page' ];
+        $this->struct->message         = $this->__postInput[ 'message' ];
+        $this->struct->revision_number = $this->__postInput[ 'revision_number' ];
+        $this->struct->email           = $this->getEmail();
+        $this->struct->uid             = $this->getUid();
 
         $user_mentions            = $this->resolveUserMentions();
         $user_team_mentions       = $this->resolveTeamMentions();
@@ -171,19 +177,13 @@ class commentController extends ajaxController {
     }
 
     private function sendEmail() {
-        // TODO: fix this, replace the need for referer with a server side
-        // function to build translate or revise paths based on job and
-        // segmnt ids.
 
-        if ( empty( $_SERVER[ 'HTTP_REFERER' ] ) ) {
-            Log::doJsonLog( 'Skipping email due to missing referrer link' );
+        $url = JobUrlBuilder::create( $this->job->id, $this->job->password, [
+            'id_segment'      => $this->struct->id_segment,
+            'revision_number' => $this->struct->revision_number
+        ] );
 
-            return;
-        }
-        @list( $url, $anchor ) = explode( '#', $_SERVER[ 'HTTP_REFERER' ] );
-        $url .= '#' . $this->struct->id_segment;
         Log::doJsonLog( $url );
-
         $project_data = $this->projectData();
 
         foreach ( $this->users_mentioned as $user_mentioned ) {

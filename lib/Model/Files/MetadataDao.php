@@ -13,6 +13,27 @@ use Files\MetadataStruct as Files_MetadataStruct;
 class MetadataDao extends \DataAccess_AbstractDao {
     const TABLE = 'file_metadata' ;
 
+    /**
+     * @param $id_project
+     * @param $id_file
+     *
+     * @return \DataAccess_IDaoStruct[]
+     */
+    public function getByJobIdProjectAndIdFile( $id_project, $id_file ) {
+        $stmt = $this->_getStatementForCache(
+                "SELECT * FROM ".self::TABLE." WHERE " .
+                " id_project = :id_project " .
+                " AND id_file = :id_file "
+        );
+
+        $result = $this->_fetchObject( $stmt, new Files_MetadataStruct(), array(
+                'id_project' => $id_project,
+                'id_file' => $id_file,
+        ) );
+
+        return @$result;
+    }
+
     public function get($id_project, $id_file,  $key ) {
         $stmt = $this->_getStatementForCache(
                 "SELECT * FROM ".self::TABLE." WHERE " .

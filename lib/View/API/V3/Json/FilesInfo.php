@@ -37,7 +37,7 @@ class FilesInfo {
                     'file_name'      => $fileInfo->file_name,
                     'raw_words'      => $fileInfo->raw_words,
                     'weighted_words' => $fileInfo->weighted_words,
-                    'instructions'   => $fileInfo->instructions,
+                    'metadata'       => $fileInfo->metadata,
             ];
         }
 
