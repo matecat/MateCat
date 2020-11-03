@@ -32,12 +32,7 @@ class QAComponent extends React.Component {
 
         let segmentId = this.state.navigationList[newIndex];
 
-        let $segment = SegmentStore.getSegmentByIdToJS(segmentId);
-
         if (segmentId) {
-            if ($segment) {
-                window.location.hash = segmentId;
-            }
             SegmentActions.openSegment(segmentId);
         }
         this.setState({
@@ -49,12 +44,7 @@ class QAComponent extends React.Component {
 
         let segmentId = list[0];
 
-        let $segment = SegmentStore.getSegmentByIdToJS(segmentId);
-
         if (segmentId) {
-            if ($segment) {
-                window.location.hash = $segment.sid;
-            }
             setTimeout(function (  ) {
                 SegmentActions.scrollToSegment( segmentId );
             });

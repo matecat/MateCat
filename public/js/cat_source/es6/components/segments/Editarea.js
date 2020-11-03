@@ -561,7 +561,7 @@ class Editarea extends React.Component {
     };
 
     updateTagsInEditor = () => {
-        console.log('Executing updateTagsInEditor');
+        // console.log('Executing updateTagsInEditor');
         const {editorState, tagRange} = this.state;
         let newEditorState = editorState;
         let newTagRange = tagRange;
@@ -740,7 +740,7 @@ class Editarea extends React.Component {
         const {editorState} = this.state;
         const internalClipboard = this.editor.getClipboard();
         if (internalClipboard) {
-            console.log('Fragment --> ',internalClipboard )
+            // console.log('Fragment --> ',internalClipboard )
             const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(internalClipboard, editorState);
             this.onChange(clipboardEditorPasted);
             this.setState({

@@ -60,13 +60,15 @@ class SegmentPlaceholderLite extends React.Component {
         targetEditor.style.cssText = `width:${sourceEditorAdjustedBCR.width}px !important;`;
         const targetEditorAdjustedBCR = targetEditor.getBoundingClientRect();
         // Get which editor is bigger
-        let maxEditor = Math.max(sourceEditorAdjustedBCR.height, targetEditorAdjustedBCR.height);
+        // let maxEditor = Math.max(sourceEditorAdjustedBCR.height, targetEditorAdjustedBCR.height);
+        let maxEditor = sourceEditorAdjustedBCR.height > targetEditorAdjustedBCR.height ? sourceEditorAdjustedBCR.height : targetEditorAdjustedBCR.height;
         // Add outer padding
         const outerDivPadding = 33;
         // Set min Editor height
         const minEditorHeight = 90;
         // console.log(`Computed ${sid}, height: ${maxEditor}`)
-        this.props.computeHeight(Math.max(maxEditor + outerDivPadding, minEditorHeight));
+        const computedH = maxEditor + outerDivPadding > minEditorHeight ? maxEditor + outerDivPadding : minEditorHeight;
+        this.props.computeHeight(computedH);
     }
 
     render() {

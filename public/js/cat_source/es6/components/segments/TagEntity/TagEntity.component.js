@@ -12,20 +12,28 @@ class TagEntity extends Component {
             tagFocusedStyle: '',
             tagStyle
         };
+        this.warningCheck;
+        this.startChecks = this.startChecks.bind(this);
     }
+
+    emitSelectionParameters = (blockKey, selection, forceSelection) => {
+    };
 
     tooltipToggle = (show = false) => {
         // this will trigger a rerender in the main Editor Component
         this.setState({
             showTooltip: show
-        })
+        });
     };
 
     markSearch = (text, searchParams) => {
-        let {active, currentActive, textToReplace, params, occurrences, currentInSearchIndex} = searchParams;
+        let { active, currentActive, textToReplace, params, occurrences, currentInSearchIndex } = searchParams;
         let currentOccurrence = _.find(occurrences, (occ) => occ.searchProgressiveIndex === currentInSearchIndex);
-        let isCurrent = (currentOccurrence && currentOccurrence.matchPosition >= this.props.start && currentOccurrence.matchPosition < this.props.end);
-        if ( active ) {
+        let isCurrent =
+            currentOccurrence &&
+            currentOccurrence.matchPosition >= this.props.start &&
+            currentOccurrence.matchPosition < this.props.end;
+        if (active) {
             let regex = SearchUtils.getSearchRegExp(textToReplace, params.ingnoreCase, params.exactMatch);
             let parts = text.split(regex);
             for (let i = 1; i < parts.length; i += 2) {
@@ -37,14 +45,16 @@ class TagEntity extends Component {
         return text;
     };
 
+    startChecks() {
+        if (!this.warningCheck) {
+            this.warningCheck = setInterval(() => {
+                this.updateTagStyle();
+            }, 500);
+        }
+    }
+
     componentDidMount() {
-        this.warningCheck = setInterval(
-            () => {
-                //this.highlightOnWarnings()
-                this.updateTagStyle()
-            },
-            500
-        );
+        this.startChecks();
     }
 
     componentWillUnmount() {
@@ -110,24 +120,28 @@ class TagEntity extends Component {
     selectCorrectStyle = () => {
         const {entityKey, contentState, getUpdatedSegmentInfo, isRTL, isTarget, start, end, getClickedTagInfo} = this.props;
         const entityInstance = contentState.getEntity(entityKey);
-        const {segmentOpened, currentSelection} = getUpdatedSegmentInfo();
-        const {tagClickedInSource} = getClickedTagInfo();
-        const {anchorOffset, focusOffset, hasFocus} = currentSelection;
+        const { segmentOpened, currentSelection } = getUpdatedSegmentInfo();
+        const { tagClickedInSource } = getClickedTagInfo();
+        const { anchorOffset, focusOffset, hasFocus } = currentSelection;
         let tagStyle = [];
 
         // Apply style on clicked tag and draggable tag, placed here for performance
         anchorOffset <= start &&
-        focusOffset >= end &&
-        (tagClickedInSource && !isTarget || !tagClickedInSource && isTarget) &&
-        hasFocus && tagStyle.push('tag-focused');
+            focusOffset >= end &&
+            ((tagClickedInSource && !isTarget) || (!tagClickedInSource && isTarget)) &&
+            hasFocus &&
+            tagStyle.push('tag-focused');
 
         // Check for tag type
         const entityType = entityInstance.type;
         const entityName = entityInstance.data.name;
-        const style = isRTL && tagSignatures[entityName].styleRTL ? tagSignatures[entityName].styleRTL : tagSignatures[entityName].style;
+        const style =
+            isRTL && tagSignatures[entityName].styleRTL
+                ? tagSignatures[entityName].styleRTL
+                : tagSignatures[entityName].style;
         tagStyle.push(style);
         // Check if tag is in an active segment
-        if(!segmentOpened) tagStyle.push('tag-inactive');
+        if (!segmentOpened) tagStyle.push('tag-inactive');
         return tagStyle.join(' ');
     };
 
