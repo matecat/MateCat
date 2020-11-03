@@ -61,6 +61,29 @@ class TeamDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param $uid
+     *
+     * @return \DataAccess_IDaoStruct
+     */
+    public function findByUid($uid){
+        $query = "SELECT * FROM teams t
+            join teams_users tu on tu.id_team = t.id
+            join users u on u.uid = tu.uid
+            where u.uid = :uid
+            ;";
+
+        $stmt          = $this->_getStatementForCache( $query );
+        $teamQuery     = new TeamStruct();
+
+        return $this->_fetchObject( $stmt,
+                $teamQuery,
+                [
+                    'uid' => $uid,
+                ]
+        )[ 0 ];
+    }
+
+    /**
      * @param Users_UserStruct $user
      *
      * @return TeamStruct

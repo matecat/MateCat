@@ -7,9 +7,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
-use Teams\TeamDao;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
-class CopyProjectTask extends Command {
+class CreateProjectTask extends Command {
 
     /**
      * @return array
@@ -35,7 +35,7 @@ class CopyProjectTask extends Command {
 
     protected function configure() {
         $this
-                ->setName( 'project:copy' )
+                ->setName( 'project:create' )
                 ->setDescription( 'Creates n copies of a project.' )
                 ->setHelp( "This command allows you to create n copies of a project from a file." )
                 ->addArgument( 'file_path', InputArgument::REQUIRED, 'Input file path' )
@@ -45,6 +45,9 @@ class CopyProjectTask extends Command {
     }
 
     protected function execute( InputInterface $input, OutputInterface $output ) {
+
+        // IO Helper
+        $io = new SymfonyStyle($input, $output);
 
         // arguments
         $filePath  = $input->getArgument( 'file_path' );
@@ -56,16 +59,30 @@ class CopyProjectTask extends Command {
         $source = $this->askForLanguage( 'Please enter the source language [default: English]: ', 'English', $input, $output );
         $target = $this->askForLanguage( 'Please enter the target language [default: Italian]: ', 'Italian', $input, $output );
 
-        // validate file_path
-        $this->validateFilePath( $filePath );
+        // check if file exists
+        $this->checkFilePath( $filePath );
 
         // get user
-        $this->validateUser( $user );
+        $user = $this->getUser( $userEmail );
+
+        // get idTeam
+        $idTeam = $user->getUserTeams()[0]->id;
+
+        // get apiKey
+        $apiKey = $this->getApiKey( $user->getUid() );
 
         // make MC curl
         $numberOfIteration = $counter + $copies - 1;
         for ( $i = $counter; $i <= $numberOfIteration; $i++ ) {
-            $this->createProject( $i, $source, $target, $idTeam, $filePath );
+            $io->title("Creating project from file: " . $filePath  . " (".$i."/".$numberOfIteration.")");
+            $project = $this->createProject( $i, $source, $target, $apiKey, $idTeam, $filePath );
+            $response = $project['response'];
+
+            if( $response['status'] === 'OK' and $response['message'] === 'Success' ){
+                $io->success('Project was created with success. Analyze URL: ' . $response['analyze_url']);
+            } else {
+                $io->error('An error occurred during the creation of the project.');
+            }
         }
     }
 
@@ -126,43 +143,60 @@ class CopyProjectTask extends Command {
      *
      * @throws \Exception
      */
-    private function validateFilePath( $filePath ) {
+    private function checkFilePath( $filePath ) {
         if ( !file_exists( $filePath ) ) {
             throw new \Exception( 'File [' . $filePath . '] does not exists.' );
         }
     }
 
     /**
-     * @param $idTeam
+     * @param $userEmail
      *
+     * @return \Users_UserStruct
      * @throws \Exception
      */
-    private function validateIdTeam( $idTeam ) {
-        $team = ( new TeamDao() )->findById( $idTeam );
+    private function getUser( $userEmail ) {
+        $user = (new \Users_UserDao())->getByEmail($userEmail);
 
-        if ( !$team ) {
-            throw new \Exception( 'There is not a team with ID ' . $idTeam . '.' );
+        if ( !$user ) {
+            throw new \Exception( 'There is not a user associated with email [' . $userEmail . '].' );
         }
+
+        return $user;
+    }
+
+    /**
+     * @param $uid
+     *
+     * @return string
+     * @throws \Exception
+     */
+    private function getApiKey( $uid ) {
+        $apiKey = (new \ApiKeys_ApiKeyDao())->getByUid($uid);
+
+        if ( !$apiKey ) {
+            throw new \Exception( 'There is not a valid API Key associated with User ID [' . $uid . '].' );
+        }
+
+        return $apiKey->api_key.'-'.$apiKey->api_secret;
     }
 
     /**
      * @param $index
      * @param $source
      * @param $target
+     * @param $apiKey
      * @param $idTeam
      * @param $filePath
      *
-     * @return mixed
+     * @return array
      */
-    private function createProject( $index, $source, $target, $idTeam, $filePath ) {
+    private function createProject( $index, $source, $target, $apiKey, $idTeam, $filePath ) {
         sleep( 2 );
 
         $fileName     = 'T' . sprintf( "%02d", $index ) . '-' . $target;
-        $url          = \INIT::$ROOT . "/api/new";
-        $xMatecatKey  = 'ZTY4ODODkzMWOTNmMjOD-YzMzZjMTZiN2NWU2ZDYz';
+        $url          = \INIT::$CLI_HTTP_HOST . "/api/v1/new";
         $privateTmKey = 'new';
-
-        echo "Creating project: " . $filePath . "\n";
 
         //set postfields
         $postfields                         = [];
@@ -180,27 +214,28 @@ class CopyProjectTask extends Command {
         $postfields[ "pretranslate_100" ]   = 0;
 
         $ch = curl_init();
+
         //set parameters
         curl_setopt( $ch, CURLOPT_URL, $url );
         curl_setopt( $ch, CURLOPT_POST, true );
         curl_setopt( $ch, CURLOPT_POSTFIELDS, $postfields );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt( $ch, CURLOPT_TIMEOUT, 600 ); //timeout in seconds
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, [ 'x-matecat-key: ' . $xMatecatKey ] );
+        curl_setopt( $ch, CURLOPT_TIMEOUT, 600 );
+        curl_setopt( $ch, CURLOPT_HTTPHEADER, [ 'x-matecat-key: ' . $apiKey ] );
         curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0 );
         curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0 );
 
-        //upload
         $body = curl_exec( $ch );
+        $error = curl_error( $ch );
 
-        print_r( $body );
-        print_r( curl_error( $ch ) );
-
-        //parse response
-        //close connection
         curl_close( $ch );
 
-        return json_decode( $body, true );
+        return [
+            'url'      => $url,
+            'error'    => $error,
+            'request'  => $postfields,
+            'response' => json_decode( $body, true )
+        ];
     }
 
     /**
