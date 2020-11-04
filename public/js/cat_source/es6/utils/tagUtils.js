@@ -283,6 +283,7 @@ const TAGS_UTILS =  {
                 while(i < openings.length && notFound) {
                     if(closingTag.offset > openings[i].offset && !openings[i].closeTagId ){
                         notFound = !notFound;
+                        openings[i].closeTagId = true;
                         // Closing tag has no ID, so take the one available inside open tag
                         closingTag.id = openings[i].id;
                     }
