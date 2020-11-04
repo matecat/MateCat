@@ -1,16 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- */
 
+use Features\ReviewExtended\Model\ChunkReviewDao;
 
-/**
- * Abstract class for all html views
- *
- * Date: 27/01/14
- * Time: 18.56
- *
- */
 abstract class viewController extends controller {
 
     /**
@@ -225,10 +216,52 @@ abstract class viewController extends controller {
      * @return bool
      */
     public static function isRevision() {
+
+        $isRevision = self::getIsRevisionFromIdJobAndPassword();
+
+        if(null === $isRevision){
+            $isRevision = self::getIsRevisionFromRequestUri();
+        }
+
+        return $isRevision;
+    }
+
+    /**
+     * @return bool|null
+     */
+    private static function getIsRevisionFromIdJobAndPassword(){
+        $jid = static::getInstance()->jid;
+        $receivedPassword = static::getInstance()->received_password;
+
+        $job = Jobs_JobDao::getByIdAndPassword($jid, $receivedPassword);
+
+        if($job){
+           return false;
+        }
+
+        $revision = ChunkReviewDao::findByReviewPasswordAndJobId($receivedPassword, $jid);
+
+        if($revision){
+            return true;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    private static function getIsRevisionFromRequestUri(){
+
+        if(!isset($_SERVER[ 'REQUEST_URI' ])){
+            return false;
+        }
+
         $_from_url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
 
         return strpos( $_from_url[ 'path' ], "/revise" ) === 0;
     }
+
 
     protected function render404( $customTemplate = '404.html' ) {
         $this->renderCustomHTTP( $customTemplate, 404 );
