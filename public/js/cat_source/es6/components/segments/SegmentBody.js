@@ -161,7 +161,6 @@ class SegmentBody extends React.Component {
                             readonly={this.props.readonly}
                             openSegment={this.props.openSegment}
                             removeSelection={this.props.removeSelection}
-                            height={this.props.height}
                             setClickedTagId={this.setClickedTagId}
                             clickedTagId={this.state.clickedTagId}
                             clickedTagText={this.state.clickedTagText}

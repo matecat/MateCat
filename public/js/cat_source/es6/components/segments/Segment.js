@@ -432,6 +432,11 @@ class Segment extends React.Component {
             });
             setTimeout(()=>{UI.setCurrentSegment()},0);
         }
+
+        this.height = this.section.clientHeight;
+        if ( !this.props.segment.opened ) {
+            this.props.updateHeight( this.props.segImmutable, this.section.clientHeight );
+        }
     }
 
 
@@ -447,7 +452,15 @@ class Segment extends React.Component {
     }
 
     componentDidUpdate() {
+        if ( !this.props.segment.opened ) {
+            setTimeout(()=> {
+                if (this.section) {
+                    this.props.updateHeight( this.props.segImmutable, this.section.clientHeight );
+                    this.height = this.section.clientHeight;
+                }
+            });
 
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -458,7 +471,6 @@ class Segment extends React.Component {
             nextState.readonly !== this.state.readonly ||
             nextState.selectedTextObj !== this.state.selectedTextObj ||
             nextProps.sideOpen !== this.props.sideOpen ||
-            nextProps.height !== this.props.height ||
             nextState.showActions !== this.state.showActions
         );
     }
@@ -599,7 +611,6 @@ class Segment extends React.Component {
                         isReviewExtended={this.props.isReviewExtended}
                         reviewType={this.props.reviewType}
                         isReviewImproved={this.props.isReviewImproved}
-                        height={this.props.height}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

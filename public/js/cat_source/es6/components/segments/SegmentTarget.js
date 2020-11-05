@@ -21,33 +21,12 @@ class SegmentTarget extends React.Component {
         this.state = {
             originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
                 : this.props.segment.translation),
-            /*showTagsMenu: false,*/
             showFormatMenu: false
         };
         this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
-        /*this.showTagsMenu = this.showTagsMenu.bind(this);*/
-        /*this.hideTagsMenu = this.hideTagsMenu.bind(this);*/
         this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this);
 
     }
-
-    /*showTagsMenu(sid) {
-        if ( this.props.segment.sid == sid ) {
-            this.setState({
-                showTagsMenu: true
-            });
-        }
-    }*/
-
-    /*hideTagsMenu() {
-        if ( this.state.showTagsMenu ) {
-            this.setState({
-                showTagsMenu: false
-            });
-            //TODO Move it
-            $('.tag-autocomplete-endcursor').remove();
-        }
-    }*/
 
     setOriginalTranslation(sid, translation) {
         if (this.props.segment.sid == sid) {
@@ -91,8 +70,6 @@ class SegmentTarget extends React.Component {
     lockEditArea(event) {
         event.preventDefault();
         if ( !this.props.segment.edit_area_locked ) {
-            // this.sendTranslationUpdate();
-        } else {
             SegmentActions.showIssuesMessage(this.props.segment.sid, 0);
         }
         SegmentActions.lockEditArea(this.props.segment.sid, this.props.segment.fid);
@@ -100,15 +77,6 @@ class SegmentTarget extends React.Component {
 
     allowHTML(string) {
         return {__html: string};
-    }
-
-    sendTranslationUpdate() {
-        if (this.editArea && this.props.segment.modified ) {
-            // TODO Force update editarea
-            // let textToSend = this.editArea.editAreaRef.innerHTML;
-            // let sid = this.props.segment.sid;
-            // SegmentActions.replaceEditAreaTextContent(sid, textToSend);
-        }
     }
 
     getAllIssues() {
@@ -218,13 +186,6 @@ class SegmentTarget extends React.Component {
                     clickedTagText={this.props.clickedTagText}
                     toggleFormatMenu={toggleFormatMenu}
                 />
-                {/*{ this.state.showTagsMenu ? (
-
-                    <TagsMenu segment={this.props.segment}
-                              height={this.props.height}
-                    />
-
-                ): null}*/}
                 {s2tMicro}
                 <div className="original-translation" style={{display: 'none'}}
                      dangerouslySetInnerHTML={this.allowHTML(this.state.originalTranslation)}/>
@@ -293,7 +254,6 @@ class SegmentTarget extends React.Component {
                 <SegmentButtons
                     disabled={buttonsDisabled}
                     {...this.props}
-                    updateTranslation={this.sendTranslationUpdate.bind(this)}
                 />
 
                 {this.props.segment.warnings ?

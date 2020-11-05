@@ -13,7 +13,6 @@ import Segment from './Segment';
 import SegmentConstants from '../../constants/SegmentConstants';
 import CatToolConstants from '../../constants/CatToolConstants';
 import Speech2Text from '../../utils/speech2text';
-import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
 import SegmentPlaceholderLite from "./SegmentPlaceholderLite";
 import JobMetadataModal from '../modals/JobMetadataModal';
@@ -226,11 +225,6 @@ class SegmentsContainer extends React.Component {
     getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
         let isReviewExtended = !!this.props.isReviewExtended;
 
-        let segmentHeight =
-            !segment.opened && this.segmentsHeightsMap[segment.sid]
-                ? this.segmentsHeightsMap[segment.sid].height
-                : this.lastOpenedHeight;
-
         let item = (
             <Segment
                 key={segment.sid}
@@ -249,7 +243,13 @@ class SegmentsContainer extends React.Component {
                 setBulkSelection={this.setBulkSelection.bind(this)}
                 sideOpen={this.state.sideOpen}
                 files={this.state.files}
-                height={segmentHeight}
+				updateHeight={(segment, height)=>{
+					console.log("Update height for segment : ", segment.get('sid'), ' height' , height);
+					this.segmentsHeightsMap[segment.get('sid')] = {
+						segment: segment,
+						height: height
+					};
+				}}
             />
         );
         if (segment.id_file !== currentFileId) {
@@ -448,83 +448,7 @@ class SegmentsContainer extends React.Component {
 		}
 		return height
 
-		/*
 
-						if (!this.segmentContainerVisible) {
-							$('#hiddenHtml section').css('display', 'block');
-						}
-						let segment = this.getSegmentByIndex(index);
-						if (!segment) {
-							return 0;
-						}
-
-
-						let previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
-						let calculatedHeight = this.segmentsHeightsMap[segment.get('sid')];
-						if (calculatedHeight && calculatedHeight.height > 0 && calculatedHeight.segment.equals(segment)) {
-							let heightToAdd = 0;
-							if (previousFileId !== segment.get('id_file')) {
-								heightToAdd = 43;
-							}
-							if (index === this.state.segments.size - 1) {
-								heightToAdd = heightToAdd + 150;
-							}
-							return calculatedHeight.height + heightToAdd;
-						}
-
-						let itemHeight = 0;
-						let commentsPadding = this.getCommentsPadding(index, segment);
-						if (segment.get('opened')) {
-							let $segment = $('#segment-' + segment.get('sid'));
-							if (($segment.length && $segment.hasClass('opened')) || ($segment.length === 0 && this.lastOpenedHeight)) {
-								itemHeight = ($segment.length) ? $segment.outerHeight() + 20 : this.lastOpenedHeight;
-								itemHeight = itemHeight - 23; //Add private resources div
-								this.lastOpenedHeight = itemHeight
-							}
-						}
-
-
-						if (itemHeight === 0) {
-							if (this.state.sideOpen) {
-								$('#hiddenHtml section').addClass('slide-right');
-							} else {
-								$('#hiddenHtml section').removeClass('slide-right');
-							}
-							let source = $('#hiddenHtml .source');
-							source.html(segment.get('segment'));
-							const sourceHeight = source.outerHeight();
-
-
-							let target = $('#hiddenHtml .targetarea');
-							target.html(segment.get('translation'));
-							const targetHeight = target.closest('.target').outerHeight();
-
-							source.html('');
-							target.html('');
-							itemHeight = Math.max(sourceHeight + 12, targetHeight + 12, 89);
-						}
-
-						//Collection type
-						if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
-							itemHeight = itemHeight + 42;
-						}
-						let height = itemHeight + commentsPadding;
-
-						if (!segment.get('opened')) {
-							this.segmentsHeightsMap[segment.get('sid')] = {
-								segment: segment,
-								height: height
-							};
-						}
-
-						//If is the first segment of a file add the file header
-						if (previousFileId !== segment.get('id_file')) {
-							height = height + 43;
-						}
-
-						if (index === this.state.segments.size - 1) {
-							height = height + 150;
-						}*/
 	};
 
     onScroll() {
@@ -544,8 +468,8 @@ class SegmentsContainer extends React.Component {
         const index = this.state.segments.findIndex((segment, index) => {
             return segment.get('sid') === idFrom;
         });
-        this.listRef.recomputeSizes(index);
-        this.segmentsHeightsMap[idFrom] ? (this.segmentsHeightsMap[idFrom].height = 0) : null;
+		this.segmentsHeightsMap[idFrom] ? (this.segmentsHeightsMap[idFrom].height = 0) : null;
+		this.listRef.recomputeSizes(index);
         this.forceUpdate();
     }
 
@@ -695,31 +619,6 @@ class SegmentsContainer extends React.Component {
 
 	}
 }
-
-// let defaultScroll = VirtualList.prototype.scrollTo;
-
-// VirtualList.prototype.scrollTo = function (value) {
-//     console.log("VirtualList.prototype.scrollTo:"  + value);
-//     function scrollTo(element, direction, to, duration) {
-//         if (duration <= 0) return;
-//         const difference = to - element[direction];
-//         const perTick = difference / duration * 5;
-//         setTimeout(function () {
-//             element[direction] = element[direction] + perTick;
-//             if (element[direction] === to) return;
-//             scrollTo(element, direction, to, duration - 5);
-//         }, 5);
-//     }
-//     if ( VirtualList.prototype.scrollTo.animateScroll ) {
-//         const scrollDirection = this.props.scrollDirection === void 0 ? 'vertical' : this.props.scrollDirection;
-//         if ( scrollDirection === 'vertical' ) {
-//             scrollTo( this.rootNode, 'scrollTop', value, 15 );
-//         } else scrollTo( this.rootNode, 'scrollLeft', value, 15 );
-//     } else {
-//         defaultScroll.call(this, value);
-//     }
-//     VirtualList.prototype.scrollTo.animateScroll = true;
-// };
 
 SegmentsContainer.propTypes = {
 	segments: PropTypes.array,
