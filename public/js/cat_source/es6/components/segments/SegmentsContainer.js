@@ -91,6 +91,7 @@ class SegmentsContainer extends React.Component {
 	renderSegments(segments) {
 		// VirtualList.prototype.animateScroll = false;
 		// Update previous last segment height inside segmentsHeightsMap
+
 		if(this.state.segments.size !== segments.size){
 			const oldLastSegment = this.getSegmentByIndex(this.state.segments.size - 1);
 			const newLastSegment = segments.get(segments.size - 1);
@@ -244,7 +245,6 @@ class SegmentsContainer extends React.Component {
                 sideOpen={this.state.sideOpen}
                 files={this.state.files}
 				updateHeight={(segment, height)=>{
-					console.log("Update height for segment : ", segment.get('sid'), ' height' , height);
 					this.segmentsHeightsMap[segment.get('sid')] = {
 						segment: segment,
 						height: height

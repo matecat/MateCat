@@ -138,7 +138,6 @@ class Editarea extends React.Component {
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), lxqDecodedTranslation, false);
         const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
         if ( ranges.length > 0 ) {
-            console.log('ranges')
             const newDecorator = DraftMatecatUtils.activateLexiqa( editorState,
                 updatedLexiqaWarnings,
                 sid,
@@ -576,7 +575,6 @@ class Editarea extends React.Component {
         // Todo: Se ci sono altre entità oltre i tag nell'editor, aggiungere l'entityName alla chiamata
         const entities = DraftMatecatUtils.getEntities(editorState);
         if(tagRange.length !== entities.length){
-            console.log('Aggiorno tutte le entità');
             const lastSelection = editorState.getSelection();
             // Aggiorna i tag presenti
             const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
