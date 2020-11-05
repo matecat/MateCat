@@ -188,7 +188,7 @@ $.extend(UI, {
             }
             API.JOB.getJobMetadata(config.id_job, config.password).done( function ( jobMetadata ) {
                 var fileInstructions = response.files.find((file) => file.metadata && file.metadata.instructions && file.metadata.instructions !== '');
-                var projectInfo = jobMetadata.metadata.project && jobMetadata.metadata.project.project_info ? jobMetadata.metadata.project.project_info : undefined;
+                var projectInfo = jobMetadata.project && jobMetadata.project.project_info ? jobMetadata.project.project_info : undefined;
                 if (fileInstructions || projectInfo) {
                     ReactDOM.render(
                         React.createElement(JobMetadata, {
