@@ -255,7 +255,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct
      */
-    public function getIsTOrR1OrR2( $jid, $password, $ttl = 3600 ) {
+    public function isTOrR1OrR2( $jid, $password, $ttl = 3600 ) {
 
         $sql = "SELECT 
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.password=:password) as t,

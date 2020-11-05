@@ -2,38 +2,37 @@
 
 namespace Validator;
 
+use DataAccess\ShapelessConcreteStruct;
 use LQA\ChunkReviewDao;
 use Validator\Contracts\ValidatorInterface;
 use Validator\Contracts\ValidatorObject;
+use Validator\Exception\LogicException;
+use Validator\Exception\WrongParamsException;
 
 class JobValidator implements ValidatorInterface {
 
     /**
      * @inheritDoc
      */
-    public function validate( array $params = [] ) {
-
-        $validatorObject = new ValidatorObject();
+    public function validate( ValidatorObject $object, array $params = [] ) {
 
         if ( !isset( $params[ 'jid' ] ) ) {
-            $validatorObject->addError( 'Missing jid parameter' );
+            throw new WrongParamsException('Missing jid parameter');
         }
 
         if ( !isset( $params[ 'password' ] ) ) {
-            $validatorObject->addError( 'Missing password parameter' );
+            throw new WrongParamsException('Missing jid parameter');
         }
 
-        if ( !$validatorObject->isValid() ) {
-            return $validatorObject;
-        }
-
-        $data = (new ChunkReviewDao())->getIsTOrR1OrR2( $params[ 'jid' ], $params[ 'password' ] );
-        $validatorObject->setData( $data );
+        /** @var ShapelessConcreteStruct $data */
+        $data = (new ChunkReviewDao())->isTOrR1OrR2( $params[ 'jid' ], $params[ 'password' ] );
 
         if ( $data->t == 0 and $data->r1 == 0 and $data->r2 == 0 ) {
-            $validatorObject->addError( 'Invalid combination jid/password' );
+            throw new LogicException( 'Invalid combination jid/password' );
         }
 
-        return $validatorObject;
+        $object->hydrateFromObject($data);
+
+        return $object;
     }
 }

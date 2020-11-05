@@ -2,59 +2,43 @@
 
 namespace Validator\Contracts;
 
-class ValidatorObject {
+use DataAccess\ArrayAccessTrait;
+
+abstract class ValidatorObject implements \ArrayAccess {
+
+    use ArrayAccessTrait;
 
     /**
-     * @var array
+     * @param \stdClass $object
      */
-    private $errors = [];
-
-    /**
-     * @var object
-     */
-    private $data;
-
-    /**
-     * @param array $errors
-     */
-    public function setErrors( $errors ) {
-        foreach ($errors as $error){
-            $this->addError($error);
+    public function hydrateFromObject(\stdClass $object){
+        foreach (get_object_vars($object) as $key => $value){
+            $this->$key = $value;
         }
     }
 
     /**
-     * @param $error
+     * Magic setter
+     *
+     * @param $name
+     * @param $value
      */
-    public function addError( $error ) {
-        $this->errors[] = $error;
+    public function __set( $name, $value ) {
+        $this->$name = $value;
     }
 
     /**
-     * @return array
+     * Magic getter
+     *
+     * @param $name
+     *
+     * @return mixed
      */
-    public function getErrors() {
-        return $this->errors;
-    }
+    public function __get( $name ) {
+        if ( !property_exists( $this, $name ) ) {
+            return null;
+        }
 
-    /**
-     * @return bool
-     */
-    public function isValid(){
-        return empty($this->errors);
-    }
-
-    /**
-     * @param $data
-     */
-    public function setData( $data ) {
-        $this->data = $data;
-    }
-
-    /**
-     * @return object
-     */
-    public function getData() {
-        return $this->data;
+        return $this->$name;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-use Features\ReviewExtended\Model\ChunkReviewDao;
+use Validator\JobValidatorObject;
 
 abstract class viewController extends controller {
 
@@ -100,10 +100,10 @@ abstract class viewController extends controller {
     /**
      * Return the content in the right format, it tell to the child class to execute template vars inflating
      *
-     * @see controller::finalize
-     *
      * @return mixed|void
      * @throws Exception
+     * @see controller::finalize
+     *
      */
     public function finalize() {
 
@@ -112,7 +112,7 @@ abstract class viewController extends controller {
             $this->setTemplateVars();
             $this->featureSet->run( 'appendDecorators', $this, $this->template );
             $this->setTemplateFinalVars();
-        } catch ( Exception $ignore ){
+        } catch ( Exception $ignore ) {
             Log::doJsonLog( $ignore );
         }
 
@@ -130,7 +130,9 @@ abstract class viewController extends controller {
 
         $this->logPageCall();
 
-        if( isset( $ignore ) ) throw $ignore;
+        if ( isset( $ignore ) ) {
+            throw $ignore;
+        }
 
     }
 
@@ -219,7 +221,7 @@ abstract class viewController extends controller {
 
         $isRevision = self::getIsRevisionFromIdJobAndPassword();
 
-        if(null === $isRevision){
+        if ( null === $isRevision ) {
             $isRevision = self::getIsRevisionFromRequestUri();
         }
 
@@ -229,27 +231,30 @@ abstract class viewController extends controller {
     /**
      * @return bool|null
      */
-    private static function getIsRevisionFromIdJobAndPassword(){
+    private static function getIsRevisionFromIdJobAndPassword() {
 
-        $jid = static::getInstance()->jid;
+        $jid              = static::getInstance()->jid;
         $receivedPassword = static::getInstance()->received_password;
 
         $jobValidator = new \Validator\JobValidator();
-        $validatorObject = $jobValidator->validate([
-            'jid' => $jid,
-            'password' => $receivedPassword
-        ]);
 
-        if(!$validatorObject->isValid()){
+        try {
+            /** @var JobValidatorObject $validatorObject */
+            $validatorObject = $jobValidator->validate( new JobValidatorObject(), [
+                    'jid'      => $jid,
+                    'password' => $receivedPassword
+            ] );
+
+            if ( $validatorObject->t == 1 ) {
+                return false;
+            }
+
+            if ( $validatorObject->r1 == 1 or $validatorObject->r2 == 1 ) {
+                return true;
+            }
+
+        } catch ( \Exception $exception ) {
             return null;
-        }
-
-        if($validatorObject->getData()->t == 1){
-            return false;
-        }
-
-        if($validatorObject->getData()->r1  == 1 or $validatorObject->getData()->r2 == 1){
-            return true;
         }
 
         return null;
@@ -258,9 +263,9 @@ abstract class viewController extends controller {
     /**
      * @return bool
      */
-    private static function getIsRevisionFromRequestUri(){
+    private static function getIsRevisionFromRequestUri() {
 
-        if(!isset($_SERVER[ 'REQUEST_URI' ])){
+        if ( !isset( $_SERVER[ 'REQUEST_URI' ] ) ) {
             return false;
         }
 
@@ -285,7 +290,7 @@ abstract class viewController extends controller {
     /**
      * Create an instance of skeleton PHPTAL template
      *
-     * @param  PHPTAL|string $skeleton_file
+     * @param PHPTAL|string $skeleton_file
      */
     protected function makeTemplate( $skeleton_file ) {
         try {
