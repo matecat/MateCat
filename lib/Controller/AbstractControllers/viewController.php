@@ -230,18 +230,25 @@ abstract class viewController extends controller {
      * @return bool|null
      */
     private static function getIsRevisionFromIdJobAndPassword(){
+
         $jid = static::getInstance()->jid;
         $receivedPassword = static::getInstance()->received_password;
 
-        $job = Jobs_JobDao::getByIdAndPassword($jid, $receivedPassword);
+        $jobValidator = new \Validator\JobValidator();
+        $validatorObject = $jobValidator->validate([
+            'jid' => $jid,
+            'password' => $receivedPassword
+        ]);
 
-        if($job){
-           return false;
+        if(!$validatorObject->isValid()){
+            return null;
         }
 
-        $revision = ChunkReviewDao::findByReviewPasswordAndJobId($receivedPassword, $jid);
+        if($validatorObject->getData()->t == 1){
+            return false;
+        }
 
-        if($revision){
+        if($validatorObject->getData()->r1  == 1 or $validatorObject->getData()->r2 == 1){
             return true;
         }
 
