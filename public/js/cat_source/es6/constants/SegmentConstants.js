@@ -5,10 +5,8 @@
 import keyMirror  from 'keymirror';
 
 module.exports = keyMirror({
-    HIGHLIGHT_EDITAREA: null,
     RENDER_SEGMENTS: null,
     ADD_SEGMENTS: null,
-    SPLIT_SEGMENT: null,
     ADD_SEGMENT_CLASS: null,
     ADD_SEGMENTS_CLASS: null,
     REMOVE_SEGMENT_CLASS: null,
@@ -41,8 +39,6 @@ module.exports = keyMirror({
     CHANGE_GLOSSARY: null,
     DELETE_FROM_GLOSSARY: null,
     ADD_GLOSSARY_ITEM: null,
-    SET_SEGMENT_ORIGINAL_TRANSLATION: null,
-    // MOUNT_TRANSLATIONS_ISSUES: null,
     SET_SEGMENT_TAGGED: null,
     SHOW_SELECTION: null,
     OPEN_ISSUES_PANEL: null,

@@ -19,21 +19,10 @@ class SegmentTarget extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            originalTranslation: (this.props.segment.original_translation ? this.props.segment.original_translation
-                : this.props.segment.translation),
             showFormatMenu: false
         };
-        this.setOriginalTranslation = this.setOriginalTranslation.bind(this);
         this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this);
 
-    }
-
-    setOriginalTranslation(sid, translation) {
-        if (this.props.segment.sid == sid) {
-            this.setState({
-                originalTranslation: translation
-            });
-        }
     }
 
     onClickEvent(event) {
@@ -90,13 +79,6 @@ class SegmentTarget extends React.Component {
         }
         return issues;
     }
-
-    formatSelection(action) {
-        UI.formatSelection(action);
-        // SegmentActions.modifiedTranslation(this.props.segment.sid, null, true);
-        // this.sendTranslationWithoutUpdate();
-    }
-
     getTargetArea(translation) {
         const {segment} = this.props;
         const {showFormatMenu} = this.state;
@@ -187,8 +169,6 @@ class SegmentTarget extends React.Component {
                     toggleFormatMenu={toggleFormatMenu}
                 />
                 {s2tMicro}
-                <div className="original-translation" style={{display: 'none'}}
-                     dangerouslySetInnerHTML={this.allowHTML(this.state.originalTranslation)}/>
                 <div className="toolbar">
                     {config.isReview && ReviewExtended.enabled() ? (
                         <a href="#" className="revise-lock-editArea" onClick={this.lockEditArea.bind(this)} title="Highlight text and assign an issue to the selected text."/>
@@ -225,12 +205,12 @@ class SegmentTarget extends React.Component {
     }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
+
         SegmentStore.addListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, this.setOriginalTranslation);
+
         SegmentStore.removeListener(SegmentConstants.FILL_TAGS_IN_TARGET, this.autoFillTagsInTarget);
 
     }

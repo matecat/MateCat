@@ -492,7 +492,6 @@ class SegmentsContainer extends React.Component {
         this.scrollContainer = $('.article-segments-container > div');
         window.addEventListener('resize', this.updateWindowDimensions);
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
-        SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
         SegmentStore.addListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
         SegmentStore.addListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
@@ -507,7 +506,6 @@ class SegmentsContainer extends React.Component {
 	componentWillUnmount() {
 		window.removeEventListener('resize', this.updateWindowDimensions);
 		SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
-		SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
 		SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
 		SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
 		SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);

@@ -991,6 +991,8 @@ class Editarea extends React.Component {
         const newEditorState = insertText(editorState, selectedText);
         this.setState({
             editorState: newEditorState
+        },() => {
+            this.updateTranslationDebounced();
         });
     };
 

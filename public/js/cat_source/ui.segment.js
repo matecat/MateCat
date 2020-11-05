@@ -30,7 +30,6 @@
                 SegmentActions.autoFillTagsInTarget(sid);
                 OfflineUtils.startOfflineMode();
             }).always(function () {
-                SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
                 UI.registerQACheck();
             });
         },

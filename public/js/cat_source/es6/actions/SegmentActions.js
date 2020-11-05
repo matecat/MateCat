@@ -288,22 +288,6 @@ const SegmentActions = {
             fid: fid,
         });
     },
-    /**
-     * Set the original translation of a segment.
-     * Used to create the revision trackChanges
-     * @param sid
-     * @param fid
-     * @param originalTranslation
-     */
-    addOriginalTranslation: function (sid, fid, originalTranslation) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION,
-            id: sid,
-            fid: fid,
-            originalTranslation: originalTranslation
-        });
-    },
-
     disableTagLock: function (  ) {
         UI.tagLockEnabled = false;
     },
@@ -486,12 +470,6 @@ const SegmentActions = {
         });
     },
     /******************* EditArea ************/
-    highlightEditarea: function(sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.HIGHLIGHT_EDITAREA,
-            id: sid
-        });
-    },
     modifiedTranslation: function (sid, status) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.MODIFIED_TRANSLATION,
