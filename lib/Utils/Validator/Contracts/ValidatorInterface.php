@@ -2,12 +2,6 @@
 
 namespace Validator\Contracts;
 
-use Features\ReviewExtended\Model\ChunkReviewDao;
-use Features\ReviewExtended\ReviewUtils;
-use Jobs_JobStruct;
-use Projects_ProjectDao;
-use Validator\Exception\WrongParamsException;
-
 interface ValidatorInterface {
 
     /**
