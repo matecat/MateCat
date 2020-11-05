@@ -44,7 +44,7 @@ const activateQaCheckGlossary = (qaCheckGlossary, text, sid) => {
     };
 
     const regex = createGlossaryRegex(qaCheckGlossary);
-    return enerateGlossaryDecorator( regex, sid )
+    return generateGlossaryDecorator( regex, sid )
 };
 
 export default activateQaCheckGlossary;
