@@ -211,7 +211,7 @@ class SegmentSource extends React.Component {
         let { lexiqa, sid, lxqDecodedSource } = this.props.segment;
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.source), lxqDecodedSource, true);
         const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
-        if ( ranges.length > 0 ) {
+        if ( updatedLexiqaWarnings.length > 0 ) {
             const newDecorator = DraftMatecatUtils.activateLexiqa( editorState,
                 updatedLexiqaWarnings,
                 sid,
@@ -456,7 +456,7 @@ class SegmentSource extends React.Component {
 
     removeDecorator = (decoratorName) => {
         if(!decoratorName){
-            // Tutto tranne i tag
+            // All decorators except tags
             _.remove(this.decoratorsStructure, (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR);
         }else{
             _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
