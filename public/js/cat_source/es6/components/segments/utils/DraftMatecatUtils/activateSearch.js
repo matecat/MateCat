@@ -35,7 +35,7 @@ const activateSearch = (text, params, occurrencesInSegment, currentIndex, tagRan
                 occurrences[index].start = start;
             }
             //!isTag(start, tagRange) && callback(start, end)
-            const multipart = handleTagInside(start, end, contentBlock, callback)
+            handleTagInside(start, end, contentBlock, callback)
             index++;
         }
     };
