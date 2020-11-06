@@ -1,23 +1,20 @@
-import React, {Component} from 'react';
+import React, {PureComponent, Component} from 'react';
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
 import {tagSignatures, getTooltipTag} from "../utils/DraftMatecatUtils/tagModel";
+import SegmentStore from "../../../stores/SegmentStore";
+import SegmentConstants from "../../../constants/SegmentConstants";
 
-class TagEntity extends Component {
+class TagEntity extends PureComponent {
     constructor(props) {
         super(props);
-        const tagStyle = this.selectCorrectStyle();
         this.state = {
-            tagWarningStyle: '',
             showTooltip: false,
+            tagStyle: '',
             tagFocusedStyle: '',
-            tagStyle
+            tagWarningStyle: ''
         };
-        this.warningCheck;
-        this.startChecks = this.startChecks.bind(this);
+        this.warningCheck = null;
     }
-
-    emitSelectionParameters = (blockKey, selection, forceSelection) => {
-    };
 
     tooltipToggle = (show = false) => {
         // this will trigger a rerender in the main Editor Component
@@ -45,20 +42,39 @@ class TagEntity extends Component {
         return text;
     };
 
-    startChecks() {
-        if (!this.warningCheck) {
+    startChecks = (sid, focused) => {
+        const { sid:  currentSid } = this.props.getUpdatedSegmentInfo();
+        if (sid === currentSid && !this.warningCheck && focused){
+            this.warningCheck = setInterval(() => {
+                this.updateTagStyle();
+            }, 500);
+        } else if (this.warningCheck && sid === currentSid && !focused) {
+            clearInterval(this.warningCheck);
+            this.warningCheck = null;
+            this.updateTagStyle();
+        }
+    }
+
+    componentDidMount() {
+        const { segmentOpened } = this.props.getUpdatedSegmentInfo();
+        SegmentStore.addListener(SegmentConstants.SEGMENT_FOCUSED, this.startChecks);
+        // Update style once
+        this.updateTagStyle();
+    }
+
+    componentDidUpdate() {
+        const { segmentOpened } = this.props.getUpdatedSegmentInfo();
+        // if segment already opened, start interval anyway
+        if (segmentOpened && !this.warningCheck){
             this.warningCheck = setInterval(() => {
                 this.updateTagStyle();
             }, 500);
         }
     }
 
-    componentDidMount() {
-        this.startChecks();
-    }
-
     componentWillUnmount() {
         clearInterval(this.warningCheck);
+        SegmentStore.removeListener(SegmentConstants.SEGMENT_FOCUSED, this.startChecks);
     }
 
     render() {
@@ -91,7 +107,6 @@ class TagEntity extends Component {
         const textSpanDisplayed = this.tagRef && this.tagRef.querySelector('span[data-text="true"]');
         const shouldTooltipOnHover = textSpanDisplayed && textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth;
         const decoratedText = Array.isArray(children) ? children[0].props.text : children.props.decoratedText;
-
         return <div className={'tag-container'}
                     ref={(ref) => this.tagRef = ref}>
             {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
@@ -118,23 +133,12 @@ class TagEntity extends Component {
     };
 
     selectCorrectStyle = () => {
-        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL, isTarget, start, end, getClickedTagInfo} = this.props;
+        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL} = this.props;
         const entityInstance = contentState.getEntity(entityKey);
-        const { segmentOpened, currentSelection } = getUpdatedSegmentInfo();
-        const { tagClickedInSource } = getClickedTagInfo();
-        const { anchorOffset, focusOffset, hasFocus } = currentSelection;
-        let tagStyle = [];
-
-        // Apply style on clicked tag and draggable tag, placed here for performance
-        anchorOffset <= start &&
-            focusOffset >= end &&
-            ((tagClickedInSource && !isTarget) || (!tagClickedInSource && isTarget)) &&
-            hasFocus &&
-            tagStyle.push('tag-focused');
-
+        const { segmentOpened } = getUpdatedSegmentInfo();
+        const tagStyle = [];
         // Check for tag type
-        const entityType = entityInstance.type;
-        const entityName = entityInstance.data.name;
+        const {data: { name: entityName}} = entityInstance;
         const style =
             isRTL && tagSignatures[entityName].styleRTL
                 ? tagSignatures[entityName].styleRTL
@@ -149,7 +153,6 @@ class TagEntity extends Component {
     highlightOnWarnings = () => {
         const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} = this.props;
         const {warnings, tagMismatch, tagRange, segmentOpened, missingTagsInTarget} = getUpdatedSegmentInfo();
-        //const draftEntity = contentState.getEntity(entityKey);
         const {type: entityType, data: entityData} = contentState.getEntity(entityKey) || {};
         const {id: entityId, encodedText, openTagId, closeTagId} = entityData || {};
 
@@ -202,6 +205,5 @@ class TagEntity extends Component {
 
     };
 }
-
 
 export default TagEntity;

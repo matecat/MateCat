@@ -1139,7 +1139,15 @@ const SegmentActions = {
             fragment,
             plainText
         });
+    },
+    focusOnSegment: function (sid, focused = false) {
+        AppDispatcher.dispatch({
+            actionType: EditAreaConstants.SEGMENT_FOCUSED,
+            focused,
+            sid
+        });
     }
+
 
 };
 
