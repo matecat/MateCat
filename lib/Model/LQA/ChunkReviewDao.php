@@ -4,6 +4,7 @@ namespace LQA;
 
 use Chunks_ChunkStruct;
 use Constants;
+use DataAccess\ShapelessConcreteStruct;
 use DataAccess_IDaoStruct;
 
 class ChunkReviewDao extends \DataAccess_AbstractDao {
@@ -240,6 +241,37 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
         return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ChunkReviewStruct(), $_parameters );
 
+    }
+
+    /**
+     * Return a ShapelessConcreteStruct with 3 boolean fields (1/0):
+     * - t
+     * - r1
+     * - r2
+     *
+     * @param     $jid
+     * @param     $password
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct
+     */
+    public function isTOrR1OrR2( $jid, $password, $ttl = 3600 ) {
+
+        $sql = "SELECT 
+            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.password=:password) as t,
+            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 2) as r1,
+            (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 3) as r2
+        from jobs where id = :jid;";
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $parameters = [
+                'password' => $password,
+                'jid'      => $jid
+        ];
+
+        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $parameters )[0];
     }
 
     /**

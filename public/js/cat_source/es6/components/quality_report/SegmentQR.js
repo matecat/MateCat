@@ -65,7 +65,7 @@ class SegmentQR extends React.Component {
                     label: 'Tag mismatch',
                 },
                 MISMATCH: {
-                    label: 'Tag mismatch',
+                    label: 'Character mismatch',
                 },
             },
             icons: {

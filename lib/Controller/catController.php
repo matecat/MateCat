@@ -19,7 +19,7 @@ class catController extends viewController {
     protected $received_password;
 
     private   $cid             = "";
-    private   $jid             = "";
+    protected $jid             = "";
     protected $password        = "";
     protected $review_password = "";
     private   $create_date     = "";
