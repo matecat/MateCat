@@ -69,11 +69,11 @@ if ( ReviewSimple.enabled() ) {
             addOriginalTranslation: function ( d, id_segment ) {
                 var segment = SegmentStore.getSegmentByIdToJS(id_segment);
                 var originalTrans = (d.original) ? d.original : segment.translation;
-                if ( originalTrans && originalTrans !== '' ) {
-                    setTimeout( function () {
-                        SegmentActions.addOriginalTranslation( id_segment, null, originalTrans );
-                    } );
-                }
+                // if ( originalTrans && originalTrans !== '' ) {
+                //     setTimeout( function () {
+                //         SegmentActions.addOriginalTranslation( id_segment, null, originalTrans );
+                //     } );
+                // }
                 UI.setReviewErrorData( d.error_data, $( '#segment-' + id_segment ) );
                 setTimeout( function () {
                     UI.trackChanges( xEditarea );

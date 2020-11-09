@@ -1072,7 +1072,6 @@ var UI = {
                 data.translation.segment = segment;
                 $(document).trigger('translation:change', data.translation);
                 data.segment = segment;
-                SegmentActions.addOriginalTranslation(segment.sid, null, TextUtils.htmlEncode(translation));
                 $(document).trigger('setTranslation:success', data);
                 if (config.alternativesEnabled ) {
                     UI.getTranslationMismatches(id_segment);
