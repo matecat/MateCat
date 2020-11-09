@@ -1,4 +1,4 @@
-import {getErrorCheckTag} from "../tagModel";
+import { getErrorCheckTag } from "../tagModel";
 
 const checkForMissingTags = (sourceTagMap, targetTagMap) => {
 
@@ -8,7 +8,7 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
             sourceTags: []
         }
     }
-    // Rimuovo i tag non necessari (nbsp, \t, \r, \n)
+    // Remove unnecessary tags (nbsp, \t, \r, \n)
     let filteredSourceTagMap = sourceTagMap.filter( tag => {
         return getErrorCheckTag().includes(tag.data.name)
     });
@@ -16,53 +16,33 @@ const checkForMissingTags = (sourceTagMap, targetTagMap) => {
         return getErrorCheckTag().includes(tag.data.name)
     }) : [];
 
-    // Annullo gli id, i tag senza openTagId o closeTagId verranno riconosciuti quando inseriti a posteriori
+    // Remove IDs, so tags without openTagId or closeTagId will be recognised when inserted while typing
     /*filteredSourceTagMap = filteredSourceTagMap.map( tagInSource => {
         tagInSource.data.openTagId = null
         tagInSource.data.closeTagId = null
         return tagInSource
     })*/
 
-    // Controlla quali tag del source non sono nel target
+    // Check which source's tags are missing in target
     let missingTagInTarget = filteredSourceTagMap.filter( tagInSource => {
-        let notFound = true;
+        let found = false;
+        const {data: { id: idSourceTag, name: nameSourceTag, decodedText: decodedTextSourceTag}} = tagInSource;
         filteredTargetTagMap.forEach( tagInTarget => {
-            if(tagInTarget.data.id === tagInSource.data.id && tagInTarget.data.name === tagInSource.data.name){
-                notFound = false;
+            const {data: { id: idTargetTag, name: nameTargetTag, decodedText: decodedTextTargetTag}} = tagInTarget;
+            // ph tags doesn't have fixed ID from BE, it will be recomputed on every page refresh
+            if(nameSourceTag === 'ph' &&  nameSourceTag === nameTargetTag && decodedTextTargetTag === decodedTextSourceTag){
+                found = true
+            }else if(nameSourceTag !== 'ph' && idTargetTag === idSourceTag && nameTargetTag === nameSourceTag){
+                found = true;
             }
         });
-        return notFound;
-    });
-/*
-
-    // Prendo gli id delle chiusure presenti nei missing tag (quelle che hanno openTagId)
-    // in modo ordinato in base agli offset, e rimuovo quelli che assegno dai missing tag
-    let availableKey = missingTagInTarget
-        .filter(tag => tag.data.openTagId)
-        .map(tag =>{ return tag.data.id})
-        .reverse();
-
-
-    // Ad ogni chiusura non referenziata, assegno il primo id disponibile tra quelli delle chiusure mancanti
-    let reassignedIds = [];
-    filteredTargetTagMap.forEach( (unreferencedClosure, index) => {
-        if(availableKey.length > 0 && !unreferencedClosure.data.id){
-            const id = availableKey.pop();
-            reassignedIds.push(id)
-            console.log('Reassigning the key #', id)
-            filteredTargetTagMap[index].data.id = id;
-        }
+        return !found;
     });
 
-    //ritorna tutti TRANNE le chiusure riassegnate (quelli con openTagId e data.id contenuto in reassignedIds)
-    missingTagInTarget = missingTagInTarget.filter( missingTag => {
-        return !(reassignedIds.includes(missingTag.data.id) &&  missingTag.data.openTagId)
-    });
-*/
     // Sort tag by offset
     missingTagInTarget.sort((a, b) => {return a.offset-b.offset});
     filteredSourceTagMap.sort((a, b) => {return a.offset-b.offset});
-    //checkTags
+
     return {
         missingTags: [...missingTagInTarget],
         sourceTags: [...filteredSourceTagMap]

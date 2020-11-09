@@ -25,7 +25,6 @@ import {tagSignatures} from "./utils/DraftMatecatUtils/tagModel";
 import SegmentActions from "../../actions/SegmentActions";
 import getFragmentFromSelection
     from "./utils/DraftMatecatUtils/DraftSource/src/component/handlers/edit/getFragmentFromSelection";
-import getEntities from "./utils/DraftMatecatUtils/getEntities";
 
 const editorSync = {
     editorFocused: true,
@@ -134,10 +133,10 @@ class Editarea extends React.Component {
     addLexiqaDecorator = () => {
         let { editorState } = this.state;
         let { lexiqa, sid, lxqDecodedTranslation, targetTagMap } = this.props.segment;
-        // passare la decoded translation con i tag <g id='1'> e non 1
+        // pass decoded translation with tags like <g id='1'>
         let ranges = LexiqaUtils.getRanges(_.cloneDeep(lexiqa.target), lxqDecodedTranslation, false);
         const updatedLexiqaWarnings = updateLexiqaWarnings(editorState, ranges);
-        if ( ranges.length > 0 ) {
+        if ( updatedLexiqaWarnings.length > 0 ) {
             const newDecorator = DraftMatecatUtils.activateLexiqa( editorState,
                 updatedLexiqaWarnings,
                 sid,
@@ -179,8 +178,6 @@ class Editarea extends React.Component {
             });
         }
     };
-
-
 
     updateTranslationInStore = () => {
         const translation = DraftMatecatUtils.decodeSegment(this.state.editorState)
@@ -396,21 +393,30 @@ class Editarea extends React.Component {
         if(this.editor) this.editor.focus();
     }
 
+    typeTextInEditor = (textToInsert) => {
+        const {editorState} = this.state;
+        editorSync.onComposition = true;
+        let newEditorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
+        newEditorState = DraftMatecatUtils.insertText(newEditorState, textToInsert);
+        this.setState(prevState => ({
+            activeDecorators: {
+                ...prevState.activeDecorators,
+                [DraftMatecatConstants.LEXIQA_DECORATOR]: false
+            },
+            editorState: newEditorState,
+            triggerText: textToInsert
+        }), () => {
+            this.onCompositionStopDebounced()
+        })
+    }
+
     myKeyBindingFn = (e) => {
         const {displayPopover} = this.state;
         if((e.key === 't' || e.key === '™') && (isOptionKeyCommand(e) || e.altKey) && !e.shiftKey) {
-            this.setState({
-                triggerText: null
-            });
+            this.setState({triggerText: null});
             return 'toggle-tag-menu';
         }else if(e.key === '<' && !hasCommandModifier(e)) {
-            const textToInsert = '<';
-            const {editorState} = this.state;
-            const newEditorState = DraftMatecatUtils.insertText(editorState, textToInsert);
-            this.setState({
-                editorState: newEditorState,
-                triggerText: textToInsert
-            });
+            this.typeTextInEditor('<')
             return 'toggle-tag-menu';
         }else if(e.key === 'ArrowUp' && !hasCommandModifier(e)){
             if(displayPopover) return 'up-arrow-press';
@@ -519,14 +525,18 @@ class Editarea extends React.Component {
         editorSync.onComposition = true;
         let newEditorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
         newEditorState = DraftMatecatUtils.insertEntityAtSelection(newEditorState, customTag);
-
-        this.setState({
+        this.setState(prevState => ({
+            activeDecorators: {
+                ...prevState.activeDecorators,
+                [DraftMatecatConstants.LEXIQA_DECORATOR]: false
+            },
             editorState: newEditorState
-        }, () => {
+        }), () => {
+            // Reactivate decorators
             this.updateTranslationDebounced();
-        });
-        // Stop composition mode
-        this.onCompositionStopDebounced();
+            // Stop composition mode
+            this.onCompositionStopDebounced();
+        })
     }
 
     handleCursorMovement = (step, shift = false, isRTL = false) =>{
@@ -567,7 +577,6 @@ class Editarea extends React.Component {
     };
 
     updateTagsInEditor = () => {
-        // console.log('Executing updateTagsInEditor');
         const {editorState, tagRange} = this.state;
         let newEditorState = editorState;
         let newTagRange = tagRange;
@@ -594,13 +603,13 @@ class Editarea extends React.Component {
 
     removeDecorator = (decoratorName) => {
         if(!decoratorName){
-            // Tutto tranne i tag
             _.remove(this.decoratorsStructure, (decorator) => decorator.name !== DraftMatecatConstants.TAGS_DECORATOR);
         }else{
             _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
         }
     }
 
+    // has to be followed by a setState for editorState
     disableDecorator = (editorState, decoratorName) => {
         _.remove(this.decoratorsStructure, (decorator) => decorator.name === decoratorName);
         //const decorator = new CompoundDecorator(this.decoratorsStructure);
@@ -621,19 +630,25 @@ class Editarea extends React.Component {
         // if opened, close TagsMenu
         if(displayPopover) closePopover();
         if(contentChanged){
-            /*console.log('contentChanged')*/
+            // Stop checking decorators while typing...
             editorSync.onComposition = true;
-            // while onComposition, remove unwanted decorators like lexiqa
+            // ...remove unwanted decorators like lexiqa...
             editorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
             editorState = this.forceSelectionFocus(editorState);
-            this.setState({
-                editorState: editorState }, () => {
+            this.setState(prevState => ({
+                activeDecorators: {
+                    ...prevState.activeDecorators,
+                    [DraftMatecatConstants.LEXIQA_DECORATOR]: false
+                },
+                editorState: editorState
+            }), () => {
+                // Reactivate decorators
                 this.updateTranslationDebounced();
-            });
+            })
         }else{
             this.setState({editorState: editorState});
+            this.onCompositionStopDebounced()
         }
-        this.onCompositionStopDebounced()
     };
 
     // fix cursor jump at the beginning
@@ -680,21 +695,27 @@ class Editarea extends React.Component {
         if (!displayPopover) return;
         const mergeAutocompleteSuggestions = [...missingTags, ...sourceTags];
         const selectedTag = mergeAutocompleteSuggestions[focusedTagIndex];
-
+        // Start typing
         editorSync.onComposition = true;
+        // Remove lexiqa while typing
         let newEditorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR)
         const editorStateWithSuggestedTag = insertTag(selectedTag, newEditorState, triggerText);
-
-        this.setState({
+        this.setState(prevState => ({
+            activeDecorators: {
+                ...prevState.activeDecorators,
+                [DraftMatecatConstants.LEXIQA_DECORATOR]: false
+            },
             editorState: editorStateWithSuggestedTag,
             displayPopover: false,
             clickedTag: selectedTag,
             clickedOnTag: true,
             triggerText: null
-        }, () => {
+        }), () => {
+            // Reactivate decorators
             this.updateTranslationDebounced();
-        });
-        this.onCompositionStopDebounced();
+            // Stop typing
+            this.onCompositionStopDebounced();
+        })
     };
 
     openPopover = (suggestions, position) => {
@@ -721,20 +742,28 @@ class Editarea extends React.Component {
 
     onTagClick = (suggestionTag) => {
         const {editorState, triggerText} = this.state;
+        // Start typing...
         editorSync.onComposition = true;
+        // Disable lexiqa while typing
         let newEditorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR)
         let editorStateWithSuggestedTag = insertTag(suggestionTag, newEditorState, triggerText);
-        this.setState({
+        this.setState(prevState => ({
+            activeDecorators: {
+                ...prevState.activeDecorators,
+                [DraftMatecatConstants.LEXIQA_DECORATOR]: false
+            },
             editorState: editorStateWithSuggestedTag,
             editorFocused: true,
             clickedOnTag: true,
             clickedTag: suggestionTag,
             displayPopover: false,
             triggerText: null
-        }, () => {
+        }), () => {
+            // Reactivate decorators
             this.updateTranslationDebounced();
-        });
-        this.onCompositionStopDebounced();
+            // Stop typing
+            this.onCompositionStopDebounced();
+        })
     };
 
     // Methods for TagMenu ---- END
@@ -743,7 +772,6 @@ class Editarea extends React.Component {
         const {editorState} = this.state;
         const internalClipboard = this.editor.getClipboard();
         if (internalClipboard) {
-            // console.log('Fragment --> ',internalClipboard )
             const clipboardEditorPasted = DraftMatecatUtils.duplicateFragment(internalClipboard, editorState);
             this.onChange(clipboardEditorPasted);
             this.setState({

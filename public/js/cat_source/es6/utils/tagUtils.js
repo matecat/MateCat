@@ -253,8 +253,8 @@ const TAGS_UTILS =  {
     // Associate tag of type g with integer id
     matchTag: function (tx) {
         let returnValue = tx;
-        const openRegex =  new RegExp('&lt;g.*?id="(.*?)".*?&gt;', 'gi');
-        const closeRegex =  new RegExp('&lt;(\/g)&gt;', 'gi');
+        const openRegex = tagSignatures['g'].regex ;
+        const closeRegex =  tagSignatures['gCl'].regex;
         try {
             let openingMatchArr;
             let openings = [];
