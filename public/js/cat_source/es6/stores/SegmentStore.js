@@ -1196,6 +1196,9 @@ AppDispatcher.register(function (action) {
         case EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD:
             SegmentStore.copyFragmentToClipboard(action.fragment, action.plainText);
             break;
+        case SegmentConstants.SEGMENT_FOCUSED:
+            SegmentStore.emitChange(SegmentConstants.SEGMENT_FOCUSED, action.sid, action.focused)
+            break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);
     }

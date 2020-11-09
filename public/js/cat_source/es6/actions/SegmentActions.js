@@ -1117,7 +1117,15 @@ const SegmentActions = {
             fragment,
             plainText
         });
+    },
+    focusOnSegment: function (sid, focused = false) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SEGMENT_FOCUSED,
+            focused,
+            sid
+        });
     }
+
 
 };
 
