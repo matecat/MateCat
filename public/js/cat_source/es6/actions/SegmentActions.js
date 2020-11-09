@@ -1142,7 +1142,7 @@ const SegmentActions = {
     },
     focusOnSegment: function (sid, focused = false) {
         AppDispatcher.dispatch({
-            actionType: EditAreaConstants.SEGMENT_FOCUSED,
+            actionType: SegmentConstants.SEGMENT_FOCUSED,
             focused,
             sid
         });

@@ -4,7 +4,7 @@ import {tagSignatures, getTooltipTag} from "../utils/DraftMatecatUtils/tagModel"
 import SegmentStore from "../../../stores/SegmentStore";
 import SegmentConstants from "../../../constants/SegmentConstants";
 
-class TagEntity extends PureComponent {
+class TagEntity extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -56,7 +56,6 @@ class TagEntity extends PureComponent {
     }
 
     componentDidMount() {
-        const { segmentOpened } = this.props.getUpdatedSegmentInfo();
         SegmentStore.addListener(SegmentConstants.SEGMENT_FOCUSED, this.startChecks);
         // Update style once
         this.updateTagStyle();
