@@ -286,6 +286,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'translation'], translation);
     },
+    updateOriginalTranslation(sid, translation) {
+        const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        const newTrans = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(translation))
+        this._segments = this._segments.setIn([index, 'originalDecodedTranslation'], newTrans);
+        this._segments = this._segments.setIn([index, 'decodedTranslation'], newTrans);
+    },
     updateTranslation(sid, translation, decodedTranslation, tagMap, missingTagsInTarget, lxqDecodedTranslation) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
@@ -945,6 +952,9 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.SET_SEGMENT_PROPAGATION:
             SegmentStore.setPropagation(action.id, action.fid, action.propagation, action.from);
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
+            break;
+        case SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION:
+            SegmentStore.updateOriginalTranslation(action.id, action.originalTranslation);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
             SegmentStore.replaceTranslation(action.id, action.translation);

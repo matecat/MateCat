@@ -246,7 +246,7 @@ const SegmentActions = {
         for (var i = 0, len = propagatedSegments.length; i < len; i++) {
             var sid = propagatedSegments[i];
             if ( sid !== segmentId && SegmentStore.getSegmentByIdToJS(sid)) {
-
+                SegmentActions.updateOriginalTranslation(sid, segment.translation);
                 SegmentActions.replaceEditAreaTextContent( sid, segment.translation );
                 //Tag Projection: disable it if enable
                 SegmentActions.setSegmentAsTagged( sid );
@@ -494,6 +494,20 @@ const SegmentActions = {
             tagMap,
             missingTagsInTarget,
             lxqDecodedTranslation
+        });
+    },
+    /**
+     * Set the original translation of a segment.
+     * Used to create the revision trackChanges
+     * @param sid
+     * @param fid
+     * @param originalTranslation
+     */
+    updateOriginalTranslation: function (sid, originalTranslation) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION,
+            id: sid,
+            originalTranslation: originalTranslation
         });
     },
     updateSource: function(sid, source, decodedSource, tagMap, lxqDecodedSource) {
