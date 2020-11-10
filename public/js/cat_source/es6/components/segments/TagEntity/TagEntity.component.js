@@ -132,16 +132,23 @@ class TagEntity extends Component {
     };
 
     selectCorrectStyle = () => {
-        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL} = this.props;
+        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL, isTarget, start, end, getClickedTagInfo} = this.props;
         const entityInstance = contentState.getEntity(entityKey);
-        const { segmentOpened } = getUpdatedSegmentInfo();
+        const { tagClickedInSource } = getClickedTagInfo();
+        const { segmentOpened, currentSelection } = getUpdatedSegmentInfo();
         const tagStyle = [];
         // Check for tag type
         const {data: { name: entityName}} = entityInstance;
+        const { anchorOffset, focusOffset, hasFocus } = currentSelection;
         const style =
             isRTL && tagSignatures[entityName].styleRTL
                 ? tagSignatures[entityName].styleRTL
                 : tagSignatures[entityName].style;
+        anchorOffset <= start &&
+            focusOffset >= end &&
+            ((tagClickedInSource && !isTarget) || (!tagClickedInSource && isTarget)) &&
+            hasFocus &&
+            tagStyle.push('tag-focused');
         tagStyle.push(style);
         // Check if tag is in an active segment
         if (!segmentOpened) tagStyle.push('tag-inactive');
