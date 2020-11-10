@@ -65,7 +65,7 @@ class Segment extends React.Component {
     }
 
     openSegment() {
-        SegmentActions.focusOnSegment(this.props.segment.sid, true)
+        setTimeout(( ) =>{ SegmentActions.focusOnSegment(this.props.segment.sid, true); });
         if ( !this.$section.length ) return;
         if (!this.checkIfCanOpenSegment()) {
             if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
@@ -479,7 +479,7 @@ class Segment extends React.Component {
 
 
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
-            SegmentActions.focusOnSegment(this.props.segment.sid)
+            setTimeout(( ) =>{ SegmentActions.focusOnSegment(this.props.segment.sid); });
             clearTimeout(this.timeoutScroll);
             setTimeout(()=>{
                 SegmentActions.saveSegmentBeforeClose(this.props.segment);
