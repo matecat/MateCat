@@ -72,7 +72,7 @@ class TagEntity extends Component {
     }
 
     componentWillUnmount() {
-        clearInterval(this.warningCheck);
+        this.warningCheck && clearInterval(this.warningCheck);
         SegmentStore.removeListener(SegmentConstants.SEGMENT_FOCUSED, this.startChecks);
     }
 

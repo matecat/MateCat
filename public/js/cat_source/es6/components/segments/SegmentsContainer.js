@@ -3,7 +3,7 @@
 
  */
 import React from 'react';
-import ReactDOM from "react-dom";
+import ReactDOMServer from 'react-dom/server';
 import PropTypes from 'prop-types';
 import VirtualList from 'react-tiny-virtual-list';
 import SegmentStore from '../../stores/SegmentStore';
@@ -14,9 +14,9 @@ import SegmentConstants from '../../constants/SegmentConstants';
 import CatToolConstants from '../../constants/CatToolConstants';
 import Speech2Text from '../../utils/speech2text';
 import Immutable from 'immutable';
-import SegmentPlaceholderLite from "./SegmentPlaceholderLite";
 import JobMetadataModal from '../modals/JobMetadataModal';
 import CommonUtils from '../../utils/commonUtils';
+import TagUtils from "../../utils/tagUtils";
 
 
 class SegmentsContainer extends React.Component {
@@ -244,12 +244,6 @@ class SegmentsContainer extends React.Component {
                 setBulkSelection={this.setBulkSelection.bind(this)}
                 sideOpen={this.state.sideOpen}
                 files={this.state.files}
-				updateHeight={(segment, height)=>{
-					this.segmentsHeightsMap[segment.get('sid')] = {
-						segment: segment,
-						height: height
-					};
-				}}
             />
         );
         if (segment.id_file !== currentFileId) {
@@ -419,28 +413,18 @@ class SegmentsContainer extends React.Component {
 		}else if( !this.segmentsHeightsMap[segment.get('sid')] || this.segmentsHeightsMap[segment.get('sid')].height === 0 ){
 			// if not available in cache, compute height
 			if (components && Object.keys(components).length) {
+				// console.time("start calc Height" + segment.get('sid'));
 				const container = document.createElement("div", {});
+				const html = getSegmentStructure(segment.toJS(), this.state.sideOpen)
+				container.innerHTML = ReactDOMServer.renderToStaticMarkup(html);
 				this.domContainer.appendChild(container);
-				const computeHeightAndUnmount = (h) => {
-					height = h;
-
-					// height += this.getSegmentBasicSize(index, segment);
-
-					// save height
-					this.segmentsHeightsMap[segment.get('sid')] = {
-						segment: segment,
-						height: height
-					};
-					ReactDOM.unmountComponentAtNode(container);
-					container.parentNode.removeChild(container);
-
+				height = container.getElementsByTagName('section')[0].clientHeight + 8;
+				this.segmentsHeightsMap[segment.get('sid')] = {
+					segment: segment,
+					height: height
 				};
-				const segmentObject = segment.toJS();
-				ReactDOM.render(<SegmentPlaceholderLite sid={sid}
-														segment={segmentObject}
-														computeHeight={computeHeightAndUnmount}
-														sideOpen={this.state.sideOpen}/>, container);
-				//ReactDOM.render(<SegmentPlaceholder sid={sid} component={components[index]} calc={computeHeightAndUnmount}/>, container);
+				container.parentNode.removeChild(container);
+				// console.timeEnd("start calc Height" + segment.get('sid'));
 			}
 		// --- Retrieve height from cache
 		}else{
@@ -629,6 +613,82 @@ SegmentsContainer.defaultProps = {
 	splitGroup: [],
 	timeToEdit: ""
 };
+
+const getSegmentStructure = (segment, sideOpen) => {
+
+	const source = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(segment.segment), config.isSourceRTL))
+	const target = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(segment.translation), config.isSourceRTL))
+
+	return <section className={`status-draft ${sideOpen ? 'slide-right' : ''}`} ref={(section)=>this.section=section}>
+		<div className="sid">
+			<div className="txt">0000000</div>
+			<div className="txt segment-add-inBulk">
+				<input type="checkbox"/>
+			</div>
+			<div className="actions">
+				<button className="split" title="Click to split segment">
+					<i className="icon-split"> </i>
+				</button>
+				<p className="split-shortcut">CTRL + S</p>
+			</div>
+		</div>
+
+		<div className="body">
+			<div className="header toggle"> </div>
+			<div className="text segment-body-content" style={{'boxSizing': 'content-box'}}>
+				<div className="wrap">
+					<div className="outersource">
+						<div className="source item" tabIndex="0" dangerouslySetInnerHTML={{ __html: source }}/>
+						<div className="copy" title="Copy source to target">
+							<a href="#"> </a>
+							<p>CTRL+I</p>
+						</div>
+						<div className="target item">
+							<div className="textarea-container">
+								<div className="targetarea editarea" spellCheck="true" dangerouslySetInnerHTML={{ __html: target }}/>
+								<div className="toolbar">
+									<a className="revise-qr-link" title="Segment Quality Report." target="_blank"
+									   href="#">QR</a>
+									<a href="#" className="tagModeToggle "
+									   title="Display full/short tags">
+										<span className="icon-chevron-left"> </span>
+										<span className="icon-tag-expand"> </span>
+										<span className="icon-chevron-right"> </span>
+									</a>
+									<a href="#" className="autofillTag"
+									   title="Copy missing tags from source to target"> </a>
+									<ul className="editToolbar">
+										<li className="uppercase" title="Uppercase"> </li>
+										<li className="lowercase" title="Lowercase"> </li>
+										<li className="capitalize" title="Capitalized"> </li>
+									</ul>
+								</div>
+							</div>
+							<p className="warnings"> </p>
+							<ul className="buttons toggle">
+								<li>
+									<a href="#" className="translated"> Translated </a>
+									<p>CTRL ENTER</p>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div className="status-container">
+					<a href="#" className="status no-hover"> </a>
+				</div>
+			</div>
+			<div className="timetoedit" data-raw-time-to-edit="0"> </div>
+			<div className="edit-distance">Edit Distance:</div>
+		</div>
+		<div className="segment-side-buttons">
+			<div data-mount="translation-issues-button" className="translation-issues-button"> </div>
+		</div>
+		<div className="segment-side-container"> </div>
+	</section>
+}
+
+
 
 export default SegmentsContainer;
 

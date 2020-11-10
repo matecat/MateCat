@@ -49,7 +49,7 @@ header .wrapper {
 .text .source.item,
 .text .target.item,
 .white li {
-    width: 45.5%;
+    width: 45%;
     table-layout: fixed;
     float: left;
     padding: 3px 1%;
@@ -1291,6 +1291,7 @@ section .body > .text {
     position: relative;
     float: left;
     min-height: 88px;
+    height: 100%;
 }
 
 /*.text {
@@ -1307,6 +1308,11 @@ body #file section:not(.editor) {
     background: $grey3;
     cursor: pointer;
     border: 1px solid $grey2 !important;
+    height: 100%;
+
+    .body {
+        height: 100%;
+    }
 }
 
 #file section:not(.editor) .text:first-child {
@@ -4592,7 +4598,7 @@ section .segment-side-buttons {
 
 /*Editor Toggle*/
 .editor .toggle {
-    display: inline-block;
+    //display: inline-block;
     margin-right: 0;
     z-index: 0;
     position: relative;

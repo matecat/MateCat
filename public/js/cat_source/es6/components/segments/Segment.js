@@ -432,11 +432,6 @@ class Segment extends React.Component {
             });
             setTimeout(()=>{UI.setCurrentSegment()},0);
         }
-
-        this.height = this.section.clientHeight;
-        if ( !this.props.segment.opened ) {
-            this.props.updateHeight( this.props.segImmutable, this.section.clientHeight );
-        }
     }
 
 
@@ -448,18 +443,6 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
         SegmentStore.removeListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdateSegment);
-    }
-
-    componentDidUpdate() {
-        if ( !this.props.segment.opened ) {
-            setTimeout(()=> {
-                if (this.section) {
-                    this.props.updateHeight( this.props.segImmutable, this.section.clientHeight );
-                    this.height = this.section.clientHeight;
-                }
-            });
-
-        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
