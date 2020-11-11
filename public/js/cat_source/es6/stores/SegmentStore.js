@@ -149,7 +149,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                         inSearch: inSearch,
                         currentInSearch: currentInSearch,
                         occurrencesInSearch: occurrencesInSearch,
-                        searchParams: self.searchParams
+                        searchParams: self.searchParams,
+                        updatedSource: splittedSourceAr[i]
                     };
                     newSegments.push(segData);
                     segData = null;
@@ -172,6 +173,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
                 segment.originalDecodedTranslation = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(segment.translation));
                 segment.decodedTranslation = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(segment.translation));
                 segment.decodedSource = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(segment.segment));
+                segment.updatedSource = segment.segment
                 newSegments.push(this);
             }
 

@@ -206,8 +206,7 @@ class SegmentTarget extends React.Component {
             //Text Area
             textAreaContainer = <div className="textarea-container">
 
-
-                <EditArea
+                {this.props.segment.opened ? (<EditArea
                     ref={(ref) => this.editArea = ref}
                     segment={this.props.segment}
                     translation={translation}
@@ -217,14 +216,11 @@ class SegmentTarget extends React.Component {
                     clickedTagId={this.props.clickedTagId}
                     clickedTagText={this.props.clickedTagText}
                     toggleFormatMenu={toggleFormatMenu}
-                />
-                {/*{ this.state.showTagsMenu ? (
+                />) : (
+                    <div className={'targetarea'}
+                         dangerouslySetInnerHTML={{ __html: TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple( this.props.segment.translation), config.isTargetRTL)) }}/>
+                )}
 
-                    <TagsMenu segment={this.props.segment}
-                              height={this.props.height}
-                    />
-
-                ): null}*/}
                 {s2tMicro}
                 <div className="original-translation" style={{display: 'none'}}
                      dangerouslySetInnerHTML={this.allowHTML(this.state.originalTranslation)}/>
