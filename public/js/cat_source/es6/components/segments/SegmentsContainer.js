@@ -57,7 +57,7 @@ class SegmentsContainer extends React.Component {
 		this.scrollContainer;
 		this.segmentContainerVisible = false;
 		this.index = this.props.startSegmentId;
-
+		this.lastOpenedHeight = '200';
 		this.domContainer = document.getElementById('outer');
 	}
 
@@ -418,7 +418,7 @@ class SegmentsContainer extends React.Component {
 				const html = getSegmentStructure(segment.toJS(), this.state.sideOpen)
 				container.innerHTML = ReactDOMServer.renderToStaticMarkup(html);
 				this.domContainer.appendChild(container);
-				height = container.getElementsByTagName('section')[0].clientHeight + 8;
+				height = container.getElementsByTagName('section')[0].clientHeight;
 				this.segmentsHeightsMap[segment.get('sid')] = {
 					segment: segment,
 					height: height

@@ -480,6 +480,7 @@ class Segment extends React.Component {
         }
         return null;
     }
+    componentDidUpdate(){}
 
     render() {
         let job_marker = "";
