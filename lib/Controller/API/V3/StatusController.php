@@ -35,23 +35,23 @@ class StatusController extends KleinController {
      * @var array
      */
     private $totalsInitStructure = [
-            "TOTAL_PAYABLE"       => [ 0, "0" ],
-            "REPETITIONS"         => [ 0, "0" ],
-            "MT"                  => [ 0, "0" ],
-            "NEW"                 => [ 0, "0" ],
-            "TM_100"              => [ 0, "0" ],
-            "TM_100_PUBLIC"       => [ 0, "0" ],
-            "TM_75_99"            => [ 0, "0" ],
-            "TM_75_84"            => [ 0, "0" ],
-            "TM_85_94"            => [ 0, "0" ],
-            "TM_95_99"            => [ 0, "0" ],
-            "TM_50_74"            => [ 0, "0" ],
-            "INTERNAL_MATCHES"    => [ 0, "0" ],
-            "ICE"                 => [ 0, "0" ],
-            "NUMBERS_ONLY"        => [ 0, "0" ],
-            "eq_word_count"       => [ 0, "0" ],
-            "standard_word_count" => [ 0, "0" ],
-            "raw_word_count"      => [ 0, "0" ],
+            "TOTAL_PAYABLE"       => 0,
+            "REPETITIONS"         => 0,
+            "MT"                  => 0,
+            "NEW"                 => 0,
+            "TM_100"              => 0,
+            "TM_100_PUBLIC"       => 0,
+            "TM_75_99"            => 0,
+            "TM_75_84"            => 0,
+            "TM_85_94"            => 0,
+            "TM_95_99"            => 0,
+            "TM_50_74"            => 0,
+            "INTERNAL_MATCHES"    => 0,
+            "ICE"                 => 0,
+            "NUMBERS_ONLY"        => 0,
+            "eq_word_count"       => 0,
+            "standard_word_count" => 0,
+            "raw_word_count"      => 0,
     ];
 
     /**
@@ -74,14 +74,14 @@ class StatusController extends KleinController {
             throw new NotFoundException( 'Error during rendering of project metadata' );
         }
 
-        // build jobs metadata array
-        foreach ( $this->project->getJobs() as $job ) {
-            try {
-                $metadata->jobs[] = $this->renderJobMetadata( $job );
-            } catch ( \Exception $exception ) {
-                throw new NotFoundException( 'Error during rendering of job with id ' . $job->id );
-            }
-        }
+//        // build jobs metadata array
+//        foreach ( $this->project->getJobs() as $job ) {
+//            try {
+//                $metadata->jobs[] = $this->renderJobMetadata( $job );
+//            } catch ( \Exception $exception ) {
+//                throw new NotFoundException( 'Error during rendering of job with id ' . $job->id );
+//            }
+//        }
 
         $this->response->json( $metadata );
     }
@@ -119,6 +119,7 @@ class StatusController extends KleinController {
         $projectMetaData          = new \stdClass();
         $projectMetaData->status  = $this->getProjectStatusAnalysis();
         $projectMetaData->summary = $this->getProjectSummary();
+        $projectMetaData->details = $this->getProjectDetails();
         $projectMetaData->analyze = $this->getAnalyzeLink();
 
         return $projectMetaData;
@@ -158,7 +159,6 @@ class StatusController extends KleinController {
         $_total_wc_tm_analysis            = 0;
         $_total_wc_standard_analysis      = 0;
         $_matecat_price_per_word          = 0.03; //(dollari) se indipendente dalla combinazione metterlo nel config
-        $_standard_price_per_word         = 0.10; //(dollari) se indipendente dalla combinazione metterlo nel config
 
         //VERY Expensive cycle ± 0.7 s for 27650 segments ( 150k words )
         foreach ( $this->projectResultSet as $segInfo ) {
@@ -168,7 +168,7 @@ class StatusController extends KleinController {
             }
 
             if ( $_total_wc_fast_analysis == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
-                $_total_wc_fast_analysis = $segInfo[ 'fast_analysis_wc' ];
+                $_total_wc_fast_analysis = (float)$segInfo[ 'fast_analysis_wc' ];
             }
 
             if ( $_total_wc_standard_fast_analysis == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
@@ -190,18 +190,13 @@ class StatusController extends KleinController {
                 $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ] = $this->totalsInitStructure;
             }
 
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ $keyValue ][ 0 ]             = +$words;
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ $keyValue ][ 1 ]             = $this->numberToPrint( $this->chunksTotalsCache[ $keyValue ][ 0 ] );
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'eq_word_count' ][ 0 ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'eq_word_count' ][ 1 ]       = $this->numberToPrint( $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'eq_word_count' ][ 0 ] );
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'standard_word_count' ][ 0 ] += $segInfo[ 'standard_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'standard_word_count' ][ 1 ] = $this->numberToPrint( $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'standard_word_count' ][ 0 ] );
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'raw_word_count' ][ 0 ]      += $segInfo[ 'raw_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'raw_word_count' ][ 1 ]      = $this->numberToPrint( $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'raw_word_count' ][ 0 ] );
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 0 ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 1 ]       = $this->numberToPrint( $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ][ 0 ] );
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'FILENAME' ]                 = $segInfo[ 'filename' ];
-
+            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'id' ]                  = $segInfo[ 'id_file' ];
+            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ $keyValue ]             = +$words;
+            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
+            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
+            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
         }
 
         if ( $_total_wc_standard_analysis == 0 and $this->project->status_analysis == Constants_ProjectStatus::STATUS_FAST_OK ) {
@@ -231,98 +226,55 @@ class StatusController extends KleinController {
             $_total_wc_tm_analysis = $_total_wc_fast_analysis;
         }
 
-        // Useless???
-        if ( $_total_wc_fast_analysis > 0 ) {
-            $discount_wc = round( 100 * $_total_wc_tm_analysis / $_total_wc_fast_analysis );
-        }
-
-        $discount_wc = 0;
-
-        $standard_wc_time = $_total_wc_standard_analysis / \INIT::$ANALYSIS_WORDS_PER_DAYS;
-        $tm_wc_time       = $_total_wc_tm_analysis / \INIT::$ANALYSIS_WORDS_PER_DAYS;
-        $fast_wc_time     = $_total_wc_fast_analysis / \INIT::$ANALYSIS_WORDS_PER_DAYS;
-
-        $standard_wc_unit = 'day';
-        $tm_wc_unit       = 'day';
-        $fast_wc_unit     = 'day';
-
-        if ( $standard_wc_time > 0 and $standard_wc_time < 1 ) {
-            $standard_wc_time *= 8; //convert to hours (1 work day = 8 hours)
-            $standard_wc_unit = 'hour';
-        }
-        if ( $standard_wc_time > 0 and $standard_wc_time < 1 ) {
-            $standard_wc_time *= 60; //convert to minutes
-            $standard_wc_unit = 'minute';
-        }
-
-        if ( $tm_wc_time > 0 and $tm_wc_time < 1 ) {
-            $tm_wc_time *= 8; //convert to hours (1 work day = 8 hours)
-            $tm_wc_unit = 'hour';
-        }
-
-        if ( $tm_wc_time > 0 and $tm_wc_time < 1 ) {
-            $tm_wc_time *= 60; //convert to minutes
-            $tm_wc_unit = 'minute';
-        }
-
-        if ( $fast_wc_time > 0 and $fast_wc_time < 1 ) {
-            $fast_wc_time *= 8; //convert to hours (1 work day = 8 hours)
-            $fast_wc_unit = 'hour';
-        }
-
-        if ( $fast_wc_time > 0 and $fast_wc_time < 1 ) {
-            $fast_wc_time *= 60; //convert to minutes
-            $fast_wc_unit = 'minute';
-        }
-
-        if ( $standard_wc_time > 1 ) {
-            $standard_wc_unit .= 's';
-        }
-
-        if ( $fast_wc_time > 1 ) {
-            $fast_wc_unit .= 's';
-        }
-
-        if ( $tm_wc_time > 1 ) {
-            $tm_wc_unit .= 's';
-        }
-
-        $matecat_fee  = ( $_total_wc_fast_analysis - $_total_wc_tm_analysis ) * $_matecat_price_per_word;
-        $standard_fee = ( $_total_wc_standard_analysis - $_total_wc_tm_analysis ) * $_standard_price_per_word;
-        $discount     = round( $standard_fee - $matecat_fee );
-
-        $summary                        = [];
-        $summary[ 'NAME' ]              = $this->project->name;
-        $summary[ 'IN_QUEUE_BEFORE' ]   = $this->othersInQueue;
-        $summary[ 'STATUS' ]            = $this->project->status_analysis;
-        $summary[ 'TOTAL_SEGMENTS' ]    = count( $this->projectResultSet );
-        $summary[ 'SEGMENTS_ANALYZED' ] = $_total_segments_analyzed;
-        $summary[ 'TOTAL_STANDARD_WC' ] = $_total_wc_standard_analysis;
-        $summary[ 'TOTAL_FAST_WC' ]     = $_total_wc_fast_analysis;
-        $summary[ 'TOTAL_TM_WC' ]       = $_total_wc_tm_analysis;
-        $summary[ 'TOTAL_RAW_WC' ]      = $_total_raw_wc;
-        $summary[ 'TOTAL_PAYABLE' ]     = $_total_wc_tm_analysis;
-
-        if ( $this->project->status_analysis == 'FAST_OK' or $this->project->status_analysis == "DONE" ) {
-            $summary[ 'PAYABLE_WC_TIME' ] = $this->numberToPrint( $tm_wc_time );
-            $summary[ 'PAYABLE_WC_UNIT' ] = $tm_wc_unit;
-        } else {
-            $summary[ 'PAYABLE_WC_TIME' ] = $this->numberToPrint( $fast_wc_time );
-            $summary[ 'PAYABLE_WC_UNIT' ] = $fast_wc_unit;
-        }
-
-        $summary[ 'FAST_WC_TIME' ]     = $this->numberToPrint( $fast_wc_time );
-        $summary[ 'FAST_WC_UNIT' ]     = $fast_wc_unit;
-        $summary[ 'TM_WC_TIME' ]       = $this->numberToPrint( $tm_wc_time );
-        $summary[ 'TM_WC_UNIT' ]       = $tm_wc_unit;
-        $summary[ 'STANDARD_WC_TIME' ] = $this->numberToPrint( $standard_wc_time );
-        $summary[ 'STANDARD_WC_UNIT' ] = $standard_wc_unit;
-        $summary[ 'USAGE_FEE' ]        = $this->numberToPrint( $matecat_fee );
-        $summary[ 'PRICE_PER_WORD' ]   = $this->numberToPrint( $_matecat_price_per_word );
-        $summary[ 'DISCOUNT' ]         = $this->numberToPrint( $discount );
-        $summary[ 'DISCOUNT_WC' ]      = $this->numberToPrint( $discount_wc );
+        $summary                              = [];
+        $summary[ 'NAME' ]                    = $this->project->name;
+        $summary[ 'IN_QUEUE_BEFORE' ]         = $this->othersInQueue;
+        $summary[ 'STATUS' ]                  = $this->project->status_analysis;
+        $summary[ 'TOTAL_SEGMENTS' ]          = count( $this->projectResultSet );
+        $summary[ 'SEGMENTS_ANALYZED' ]       = $_total_segments_analyzed;
+        $summary[ 'TOTAL_STANDARD_WC' ]       = $_total_wc_standard_analysis;
+        $summary[ 'TOTAL_FAST_WC' ]           = $_total_wc_fast_analysis;
+        $summary[ 'TOTAL_TM_WC' ]             = $_total_wc_tm_analysis;
+        $summary[ 'TOTAL_RAW_WC' ]            = $_total_raw_wc;
+        $summary[ 'TOTAL_PAYABLE' ]           = $_total_wc_tm_analysis;
+        $summary[ 'PRICE_PER_WORD' ]          = $_matecat_price_per_word;
+        $summary[ 'PRICE_PER_WORD_CURRENCY' ] = "USD";
 
         return $summary;
+    }
+
+    /**
+     * @return \stdClass
+     */
+    private function getProjectDetails() {
+        $details = new \stdClass();
+        $details->files = $this->getProjectFiles();
+        $details->totals = $this->getProjectTotals();
+
+        return $details;
+    }
+
+    /**
+     * @return array
+     */
+    private function getProjectFiles(){
+        return array_values($this->chunksTotalsCache);
+    }
+
+    /**
+     * @return \stdClass
+     */
+    private function getProjectTotals() {
+
+        $totals            = new \stdClass();
+
+        foreach ( $this->chunksTotalsCache as $id => $chunk ) {
+            foreach ( array_keys( $this->totalsInitStructure ) as $key ) {
+                $totals->$key += $chunk[$key];
+            }
+        }
+
+        return $totals;
     }
 
     /**
@@ -335,76 +287,6 @@ class StatusController extends KleinController {
                 'id_project'   => $this->project->id,
                 'password'     => $this->project->password,
         ] );
-    }
-
-    /**
-     * @param \Jobs_JobStruct $job
-     *
-     * @return \stdClass
-     * @throws \Exception
-     */
-    private function renderJobMetadata( \Jobs_JobStruct $job ) {
-        $jobMetaData               = new \stdClass();
-        $jobMetaData->job_id       = $job->id;
-        $jobMetaData->job_password = $job->password;
-        $jobMetaData->langpairs    = $job->source . '|' . $job->target;
-        $jobMetaData->quality      = $this->getJobQualityData( $job );
-        $jobMetaData->totals       = $this->getJobTotals();
-        $jobMetaData->urls         = $this->getJobUrls( $job );
-
-        return $jobMetaData;
-    }
-
-    /**
-     * @param \Jobs_JobStruct $job
-     *
-     * @return array
-     * @throws \ReflectionException
-     */
-    private function getJobQualityData( \Jobs_JobStruct $job ) {
-        $jobQA = new \Revise_JobQA(
-                $job->id,
-                $job->password,
-                \Jobs_JobDao::getEquivalentWordTotal( $job->id, $job->password ),
-                new \Constants_Revise
-        );
-
-        $jobQA->retrieveJobErrorTotals();
-        $jobVote = $jobQA->evalJobVote();
-
-        return [
-                'overall' => $jobVote[ 'minText' ],
-                'details' => $jobQA->getQaData(),
-        ];
-    }
-
-    /**
-     * @return \stdClass
-     */
-    private function getJobTotals() {
-
-        $totals            = new \stdClass();
-        $totals->chunks    = $this->chunksTotalsCache;
-        $totals->aggregate = $this->totalsInitStructure;
-
-
-        foreach ( $totals->chunks as $id => $chunk ) {
-            foreach ( array_keys( $this->totalsInitStructure ) as $key ) {
-                $totals->aggregate[ $key ][ 0 ] += $chunk[ $key ][ 0 ];
-                $totals->aggregate[ $key ][ 1 ] = $this->numberToPrint( $totals->aggregate[ $key ][ 0 ] );
-            }
-        }
-
-        return $totals;
-    }
-
-    /**
-     * @param int $number
-     *
-     * @return string
-     */
-    private function numberToPrint( $number ) {
-        return number_format( $number, 0, ".", "," );
     }
 
     /**
