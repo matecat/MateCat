@@ -9,6 +9,7 @@ import Shortcuts  from '../../utils/shortcuts';
 import LXQ from '../../utils/lxq.main';
 import SegmentTarget from "./SegmentTarget";
 import EditArea from "./Editarea";
+import SegmentWrapper from "./SegmentWrapper";
 
 
 class SegmentBody extends React.Component {
@@ -137,26 +138,22 @@ class SegmentBody extends React.Component {
                 <div className="wrap">
                     <div className="outersource">
 
-                        {this.props.segment.opened ? (
-                            <SegmentSource
-                                segment={this.props.segment}
-                                segImmutable={this.props.segImmutable}
-                                setClickedTagId={this.setClickedTagId}
-                                clickedTagId={this.state.clickedTagId}
-                                clickedTagText={this.state.clickedTagText}
-                                tagClickedInSource={this.state.tagClickedInSource}
-                            />
-                        ) : (
-                            <div className={'source item'}
-                                 dangerouslySetInnerHTML={{ __html: TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple( this.props.segment.segment), config.isTargetRTL)) }}/>
-                        )}
+                        <SegmentWrapper
+                            segment={this.props.segment}
+                            segImmutable={this.props.segImmutable}
+                            setClickedTagId={this.setClickedTagId}
+                            clickedTagId={this.state.clickedTagId}
+                            clickedTagText={this.state.clickedTagText}
+                            tagClickedInSource={this.state.tagClickedInSource}/>
 
 
                         <div className="copy" title="Copy source to target" onClick={(e)=>this.copySource(e)}>
                             <a href="#"/>
                             <p>{copySourceShortcuts.toUpperCase()}</p>
                         </div>
-                        <SegmentTarget
+
+                        <SegmentWrapper
+                            isTarget
                             segment={this.props.segment}
                             segImmutable={this.props.segImmutable}
                             enableTagProjection={this.props.enableTagProjection}
