@@ -357,6 +357,116 @@ let SearchUtils = {
     updateFeaturedResult(value) {
         this.featuredSearchResult = value;
     },
+
+    prepareTextToReplace(text) {
+        var LTPLACEHOLDER = '##LESSTHAN##';
+        var GTPLACEHOLDER = '##GREATERTHAN##';
+        let spanArray = [];
+        // text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
+        // text = text.replace(/(&lt;[/]*(span|mark|a).*?&gt;)/g, function ( match, text ) {
+        //     spanArray.push(text);
+        //     return "$&";
+        // });
+        text = text.replace(/>/g, function (match, index) {
+            return GTPLACEHOLDER;
+        });
+        text = text.replace(/</g, function (match, index) {
+            return LTPLACEHOLDER;
+        });
+        let tagsIntervals = [];
+        let matchFind = 0;
+        let regGtp = new RegExp(GTPLACEHOLDER, 'g');
+        text = text.replace(regGtp, function (match, index) {
+            let interval = { end: index };
+            tagsIntervals.push(interval);
+            matchFind++;
+            return match;
+        });
+        matchFind = 0;
+        let regLtp = new RegExp(LTPLACEHOLDER, 'g');
+        text = text.replace(regLtp, function (match, index) {
+            if (tagsIntervals[matchFind] && tagsIntervals[matchFind].end) {
+                tagsIntervals[matchFind].start = index;
+            }
+            matchFind++;
+            return match;
+        });
+        return {
+            text: text,
+            tagsIntervals: tagsIntervals,
+            tagsArray: spanArray,
+        };
+    },
+
+    restoreTextAfterReplace(text, tagsArray) {
+        // text = text.replace(/(\$&)/g, function ( match, text ) {
+        //     return tagsArray.shift();
+        // });
+        text = text.replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        //console.log('-- text3: ' + text);
+        text = text.replace(/##GREATERTHAN##/g, '>').replace(/##LESSTHAN##/g, '<');
+        return text;
+    },
+
+    markText: function (textToMark, isSource, sid) {
+        if (this.occurrencesList.indexOf(sid) === -1) return textToMark;
+        let reg;
+        const isCurrent = this.occurrencesList[this.featuredSearchResult] === sid;
+        const occurrences = this.searchResultsDictionary[sid].occurrences;
+        let params = this.searchParams;
+
+        let searchMarker = 'searchMarker';
+        let ignoreCase = params['match-case'] ? '' : 'i';
+        if (this.searchMode === 'source&target') {
+            let txt = isSource ? params.source : params.target;
+            txt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt));
+            reg = new RegExp('(' + txt + ')', 'g' + ignoreCase);
+        } else if ((!_.isUndefined(params.source) && isSource) || (!_.isUndefined(params.target) && !isSource)) {
+            let txt = params.source ? params.source : params.target;
+            let regTxt = TextUtils.escapeRegExp(TextUtils.htmlEncode(txt));
+            // regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
+
+            reg = new RegExp('(' + regTxt + ')', 'g' + ignoreCase);
+
+            if (params['exact-match']) {
+                reg = new RegExp('\\b(' + regTxt + ')\\b', 'g' + ignoreCase);
+            }
+
+            // Finding double spaces
+            if (txt === '  ') {
+                reg = new RegExp(/(&nbsp; )/, 'gi');
+            }
+        }
+
+        let { text, tagsIntervals, tagsArray } = this.prepareTextToReplace(textToMark);
+
+        let matchIndex = 0;
+        text = TextUtils.htmlEncode(text);
+        text = text.replace(reg, (match, text, index) => {
+            let intervalSpan = _.find(tagsIntervals, (item) => index > item.start && index < item.end);
+            if (!intervalSpan) {
+                let className =
+                    isCurrent &&
+                    occurrences[matchIndex] &&
+                    occurrences[matchIndex].searchProgressiveIndex === this.featuredSearchResult
+                        ? searchMarker + ' currSearchItem'
+                        : searchMarker;
+                matchIndex++;
+                return (
+                    '##LESSTHAN##mark class="' +
+                    className +
+                    '"##GREATERTHAN##' +
+                    match +
+                    '##LESSTHAN##/mark##GREATERTHAN##'
+                );
+            } else {
+                return match;
+            }
+        });
+        text = TextUtils.htmlDecode(text);
+        text = this.restoreTextAfterReplace(text, tagsArray);
+        return text;
+    },
     resetSearch: function() {
         this.searchResults = [];
         this.occurrencesList = [];

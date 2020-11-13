@@ -670,6 +670,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         }
         return false;
     },
+    setTagProjectionStatus: function(enabled) {
+        this._segments = this._segments.map((segment)=>segment.set('tpEnabled', enabled));
+        this._segments = this._segments.map((segment)=>segment.set('tagged', !this.hasSegmentTagProjectionEnabled(segment.toJS())));
+    },
     /**
      *
      * @param current_sid
@@ -1210,6 +1214,12 @@ AppDispatcher.register(function (action) {
             break;
         case SegmentConstants.SEGMENT_FOCUSED:
             SegmentStore.emitChange(SegmentConstants.SEGMENT_FOCUSED, action.sid, action.focused)
+            break;
+        case SegmentConstants.SET_GUESS_TAGS:
+            SegmentStore.setTagProjectionStatus(action.enabled);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            const current = SegmentStore.getCurrentSegment();
+            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, current.sid);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

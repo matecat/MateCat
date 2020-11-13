@@ -17,6 +17,7 @@ import Immutable from 'immutable';
 import JobMetadataModal from '../modals/JobMetadataModal';
 import CommonUtils from '../../utils/commonUtils';
 import TagUtils from "../../utils/tagUtils";
+import SegmentUtils from "../../utils/segmentUtils";
 
 
 class SegmentsContainer extends React.Component {
@@ -108,11 +109,16 @@ class SegmentsContainer extends React.Component {
 			}
 		}
 
+		if ( this.state.guessTagEnabled !== config.tag_projection_enabled ) {
+			this.segmentsHeightsMap = {};
+		}
+
 		let splitGroup = [];
 		this.setState({
 			segments: segments,
 			splitGroup: splitGroup,
 			timeToEdit: config.time_to_edit_enabled,
+			guessTagEnabled: config.tag_projection_enabled
 		});
 	}
 
@@ -616,8 +622,15 @@ SegmentsContainer.defaultProps = {
 
 const getSegmentStructure = (segment, sideOpen) => {
 
-	const source = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(segment.segment), config.isSourceRTL))
-	const target = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(segment.translation), config.isSourceRTL))
+	let source = segment.segment;
+	let target = segment.translation;
+	if ( SegmentUtils.checkCurrentSegmentTPEnabled(segment) ) {
+		source = TagUtils.removeAllTags(source);
+		target = TagUtils.removeAllTags(target);
+	}
+
+	source = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(source), config.isSourceRTL))
+	target = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(target), config.isSourceRTL))
 
 	return <section className={`status-draft ${sideOpen ? 'slide-right' : ''}`} ref={(section)=>this.section=section}>
 		<div className="sid">

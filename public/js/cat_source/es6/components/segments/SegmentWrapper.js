@@ -16,7 +16,12 @@ class SegmentWrapper extends React.Component {
             return isTarget ? <SegmentTarget {...this.props}/> : <SegmentSource {...this.props}/>
         }
 
-        return <SimpleEditor sid={segment.sid} text={isTarget ? segment.translation : segment.segment} isTarget={isTarget}/>
+        return <SimpleEditor
+                    sid={segment.sid}
+                    segment={segment}
+                    text={isTarget ? segment.translation : segment.segment}
+                    isTarget={isTarget}
+                />
     }
 }
 

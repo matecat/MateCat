@@ -270,6 +270,12 @@ const SegmentActions = {
             from: from
         });
     },
+    changeTagProjectionStatus: function ( enabled ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_GUESS_TAGS,
+            enabled: enabled
+        });
+    },
     /**
      * Disable the Tag Projection, for example after clicking on the Translation Matches
      */

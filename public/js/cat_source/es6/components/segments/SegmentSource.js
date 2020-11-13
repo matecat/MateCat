@@ -99,9 +99,14 @@ class SegmentSource extends React.Component {
     setTaggedSource = (sid) => {
         if ( sid === this.props.segment.sid) {
             // Escape html
+
             const translation =  DraftMatecatUtils.unescapeHTMLLeaveTags(this.props.segment.segment);
+
+            // If GuessTag enabled, clean string from tag
+            const cleanSource = SegmentUtils.checkCurrentSegmentTPEnabled(this.props.segment) ?
+                DraftMatecatUtils.cleanSegmentString(translation) : translation;
             // TODO: get taggedSource from store
-            const contentEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, translation );
+            const contentEncoded = DraftMatecatUtils.encodeContent( this.state.editorState, cleanSource );
             const {editorState, tagRange} =  contentEncoded;
             this.setState( {
                 editorState: editorState,

@@ -79,16 +79,17 @@
             var data = {
                 'tag_projection': true
             };
+            SegmentActions.changeTagProjectionStatus(true);
             $.ajax({
                 url: path,
                 type: 'POST',
                 data : data,
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
-                UI.render({
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
-                });
-                UI.checkWarnings(false);
+                // UI.render({
+                //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                // });
+                // UI.checkWarnings(false);
             });
 
         },
@@ -104,16 +105,17 @@
             var data = {
                 'tag_projection': false
             };
+            SegmentActions.changeTagProjectionStatus(false);
             $.ajax({
                 url: path,
                 type: 'POST',
                 data : data,
                 xhrFields: { withCredentials: true }
             }).done( function( data ) {
-                UI.render({
-                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
-                });
-                UI.checkWarnings(false);
+                // UI.render({
+                //     segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                // });
+                // UI.checkWarnings(false);
             });
 
         },
