@@ -186,16 +186,19 @@ $.extend(UI, {
             if (segment) {
                 UI.updateJobMenu(segment);
             }
-
-            var fileInstructions = response.files.find((file) => file.instructions && file.instructions !== '');
-            if (fileInstructions) {
-                ReactDOM.render(
-                    React.createElement(FilesInstructions, {
-                        files: response.files,
-                    }),
-                    document.getElementById('files-instructions')
-                );
-            }
+            API.JOB.getJobMetadata(config.id_job, config.password).done( function ( jobMetadata ) {
+                var fileInstructions = response.files.find((file) => file.metadata && file.metadata.instructions && file.metadata.instructions !== '');
+                var projectInfo = jobMetadata.project && jobMetadata.project.project_info ? jobMetadata.project.project_info : undefined;
+                if (fileInstructions || projectInfo) {
+                    ReactDOM.render(
+                        React.createElement(JobMetadata, {
+                            files: response.files,
+                            projectInfo: projectInfo
+                        }),
+                        document.getElementById('files-instructions')
+                    );
+                }
+            });
         });
     },
     updateJobMenu: function (segment) {

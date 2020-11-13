@@ -65,6 +65,7 @@ class Segment extends React.Component {
     }
 
     openSegment() {
+        setTimeout(( ) =>{ SegmentActions.focusOnSegment(this.props.segment.sid, true); });
         if ( !this.$section.length ) return;
         if (!this.checkIfCanOpenSegment()) {
             if (UI.projectStats && UI.projectStats.TRANSLATED_PERC_FORMATTED === 0) {
@@ -418,7 +419,6 @@ class Segment extends React.Component {
     componentDidMount() {
         this.$section = $(this.section);
         document.addEventListener('keydown', this.handleKeyDown);
-        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
@@ -437,17 +437,12 @@ class Segment extends React.Component {
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.handleKeyDown);
-        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
         SegmentStore.removeListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdateSegment);
-    }
-
-    componentDidUpdate() {
-
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -458,7 +453,6 @@ class Segment extends React.Component {
             nextState.readonly !== this.state.readonly ||
             nextState.selectedTextObj !== this.state.selectedTextObj ||
             nextProps.sideOpen !== this.props.sideOpen ||
-            nextProps.height !== this.props.height ||
             nextState.showActions !== this.state.showActions
         );
     }
@@ -478,6 +472,7 @@ class Segment extends React.Component {
 
 
         } else if (prevProps.segment.opened && !this.props.segment.opened) {
+            setTimeout(( ) =>{ SegmentActions.focusOnSegment(this.props.segment.sid); });
             clearTimeout(this.timeoutScroll);
             setTimeout(()=>{
                 SegmentActions.saveSegmentBeforeClose(this.props.segment);
@@ -485,6 +480,7 @@ class Segment extends React.Component {
         }
         return null;
     }
+    componentDidUpdate(){}
 
     render() {
         let job_marker = "";
@@ -599,7 +595,6 @@ class Segment extends React.Component {
                         isReviewExtended={this.props.isReviewExtended}
                         reviewType={this.props.reviewType}
                         isReviewImproved={this.props.isReviewImproved}
-                        height={this.props.height}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

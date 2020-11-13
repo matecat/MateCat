@@ -226,6 +226,7 @@ MBC.init = function() {
                 id_client: config.id_client,
                 id_job: config.id_job,
                 id_segment: sid,
+                revision_number: config.revisionNumber,
                 username: getUsername(),
                 password: config.password,
                 source_page: getSourcePage(),

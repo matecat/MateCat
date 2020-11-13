@@ -113,5 +113,14 @@ API.JOB = {
             xhrFields: { withCredentials: true },
             url : APP.getRandomUrl() + "api/v3/feedback"
         });
+    },
+
+    getJobMetadata: function (idJob, password) {
+        return $.ajax({
+            async: true,
+            type: "GET",
+            xhrFields: { withCredentials: true },
+            url : APP.getRandomUrl() + "api/v3/jobs/" + idJob + '/' + password + "/metadata"
+        });
     }
 };

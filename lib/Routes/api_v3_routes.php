@@ -12,6 +12,7 @@ $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
     route( '/files', 'GET', '\API\V3\FileInfoController', 'getInfo' );
     route( '/file/[:id_file]/instructions', 'GET', '\API\V3\FileInfoController', 'getInstructions' );
     route( '/file/[:id_file]/instructions', 'POST', '\API\V3\FileInfoController', 'setInstructions' );
+    route( '/metadata', 'GET', '\API\V3\MetaDataController', 'index' );
 } );
 
 $klein->with('/api/v3/teams', function() {

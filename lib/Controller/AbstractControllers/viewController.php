@@ -1,16 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- */
 
+use Validator\JobValidatorObject;
 
-/**
- * Abstract class for all html views
- *
- * Date: 27/01/14
- * Time: 18.56
- *
- */
 abstract class viewController extends controller {
 
     /**
@@ -109,10 +100,10 @@ abstract class viewController extends controller {
     /**
      * Return the content in the right format, it tell to the child class to execute template vars inflating
      *
-     * @see controller::finalize
-     *
      * @return mixed|void
      * @throws Exception
+     * @see controller::finalize
+     *
      */
     public function finalize() {
 
@@ -121,7 +112,7 @@ abstract class viewController extends controller {
             $this->setTemplateVars();
             $this->featureSet->run( 'appendDecorators', $this, $this->template );
             $this->setTemplateFinalVars();
-        } catch ( Exception $ignore ){
+        } catch ( Exception $ignore ) {
             Log::doJsonLog( $ignore );
         }
 
@@ -139,7 +130,9 @@ abstract class viewController extends controller {
 
         $this->logPageCall();
 
-        if( isset( $ignore ) ) throw $ignore;
+        if ( isset( $ignore ) ) {
+            throw $ignore;
+        }
 
     }
 
@@ -225,10 +218,62 @@ abstract class viewController extends controller {
      * @return bool
      */
     public static function isRevision() {
+
+        $isRevision = self::getIsRevisionFromIdJobAndPassword();
+
+        if ( null === $isRevision ) {
+            $isRevision = self::getIsRevisionFromRequestUri();
+        }
+
+        return $isRevision;
+    }
+
+    /**
+     * @return bool|null
+     */
+    private static function getIsRevisionFromIdJobAndPassword() {
+
+        $jid              = static::getInstance()->jid;
+        $receivedPassword = static::getInstance()->received_password;
+
+        $jobValidator = new \Validator\JobValidator();
+
+        try {
+            /** @var JobValidatorObject $validatorObject */
+            $validatorObject = $jobValidator->validate( new JobValidatorObject(), [
+                    'jid'      => $jid,
+                    'password' => $receivedPassword
+            ] );
+
+            if ( $validatorObject->t == 1 ) {
+                return false;
+            }
+
+            if ( $validatorObject->r1 == 1 or $validatorObject->r2 == 1 ) {
+                return true;
+            }
+
+        } catch ( \Exception $exception ) {
+            return null;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    private static function getIsRevisionFromRequestUri() {
+
+        if ( !isset( $_SERVER[ 'REQUEST_URI' ] ) ) {
+            return false;
+        }
+
         $_from_url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
 
         return strpos( $_from_url[ 'path' ], "/revise" ) === 0;
     }
+
 
     protected function render404( $customTemplate = '404.html' ) {
         $this->renderCustomHTTP( $customTemplate, 404 );
@@ -245,7 +290,7 @@ abstract class viewController extends controller {
     /**
      * Create an instance of skeleton PHPTAL template
      *
-     * @param  PHPTAL|string $skeleton_file
+     * @param PHPTAL|string $skeleton_file
      */
     protected function makeTemplate( $skeleton_file ) {
         try {

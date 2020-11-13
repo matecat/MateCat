@@ -3,6 +3,8 @@
 // This namespace was initially intended to contain all React components,
 // but I found this is not a good practice since the dot may create troubles.
 // Underscores seem to be a better convention.
+import JobMetadata from "./components/header/cattol/JobMetadata";
+
 window.MC = {} ;
 
 window.classnames = require('classnames');
@@ -28,7 +30,7 @@ window.CatToolStore = require('./stores/CatToolStore');
 
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 window.Header = require("./components/header/Header").default;
-window.FilesInstructions = require("./components/header/cattol/FilesInstructions").default;
+window.JobMetadata = require("./components/header/cattol/JobMetadata").default;
 window.AnalyzeMain = require('./components/analyze/AnalyzeMain').default;
 
 window.LanguageSelector = require('./components/languageSelector/LanguageSelector').default;
@@ -54,6 +56,8 @@ window.DQFModal = require('./components/modals/DQFModal').default;
 window.ShortCutsModal = require('./components/modals/ShortCutsModal').default;
 window.CreateTeamModal = require('./components/modals/CreateTeam').default;
 window.ModifyTeamModal = require('./components/modals/ModifyTeam').default;
+window.ModifyTeamModal = require('./components/modals/ModifyTeam').default;
+window.JobMetadataModal = require('./components/modals/JobMetadataModal').default;
 /*****/
 
 

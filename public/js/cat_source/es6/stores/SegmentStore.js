@@ -181,23 +181,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         return newSegments;
     },
 
-    splitSegment(oldSid, newSegments, fid, splitGroup) {
-        var index = this._segments.findIndex(function (segment, index) {
-            return (segment.get('sid') == oldSid);
-        });
-        if (index > -1) {
-
-            newSegments.forEach(function (element) {
-                element.split_group = splitGroup;
-            });
-
-            newSegments = Immutable.fromJS(newSegments);
-            this._segments = this._segments.splice(index, 1, ...newSegments);
-        } else {
-            this.removeSplit(oldSid, newSegments, fid, splitGroup);
-        }
-    },
-
     openSegment(sid) {
         var index = this.getSegmentIndex(sid);
         this.closeSegments();
@@ -305,6 +288,13 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'translation'], translation);
     },
+    updateOriginalTranslation(sid, translation) {
+        const index = this.getSegmentIndex(sid);
+        if ( index === -1 ) return;
+        const newTrans = DraftMatecatUtils.unescapeHTML(DraftMatecatUtils.decodeTagsToPlainText(translation))
+        this._segments = this._segments.setIn([index, 'originalDecodedTranslation'], newTrans);
+        this._segments = this._segments.setIn([index, 'decodedTranslation'], newTrans);
+    },
     updateTranslation(sid, translation, decodedTranslation, tagMap, missingTagsInTarget, lxqDecodedTranslation) {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
@@ -345,13 +335,6 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         var index = this.getSegmentIndex(sid);
         if ( index === -1 ) return;
         this._segments = this._segments.setIn([index, 'tagged'], true);
-    },
-
-    setSegmentOriginalTranslation(sid, fid, translation) {
-        var index = this.getSegmentIndex(sid);
-        if ( index === -1 ) return;
-        translation = translation.replace(/amp;/g, "");
-        this._segments = this._segments.setIn([index, 'original_translation'], translation);
     },
 
     addSegmentVersions(fid, sid, versions) {
@@ -945,13 +928,6 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.SCROLL_TO_SEGMENT:
             SegmentStore.emitChange(action.actionType, action.sid);
             break;
-        case SegmentConstants.SPLIT_SEGMENT:
-            SegmentStore.splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);
-            SegmentStore.emitChange(action.actionType, SegmentStore._segments, action.splitGroup, action.fid);
-            break;
-        case SegmentConstants.HIGHLIGHT_EDITAREA:
-            SegmentStore.emitChange(action.actionType, action.id);
-            break;
         case SegmentConstants.ADD_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.newClass);
             break;
@@ -978,6 +954,9 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.SET_SEGMENT_PROPAGATION:
             SegmentStore.setPropagation(action.id, action.fid, action.propagation, action.from);
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
+            break;
+        case SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION:
+            SegmentStore.updateOriginalTranslation(action.id, action.originalTranslation);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
             SegmentStore.replaceTranslation(action.id, action.translation);
@@ -1064,18 +1043,10 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.RENDER_GLOSSARY:
             SegmentStore.emitChange(action.actionType, action.sid, action.segment);
             break;
-        // case SegmentConstants.MOUNT_TRANSLATIONS_ISSUES:
-        //     SegmentStore.showTranslationsIssues();
-        //     SegmentStore.emitChange(action.actionType);
-        //     break;
         case SegmentConstants.SET_SEGMENT_TAGGED:
             SegmentStore.setSegmentAsTagged(action.id, action.fid);
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, action.id);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
-            break;
-        case SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION:
-            SegmentStore.setSegmentOriginalTranslation(action.id, action.fid, action.originalTranslation);
-            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION, action.id, action.originalTranslation);
             break;
         case SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES:
             let seg = SegmentStore.addSegmentVersions(action.fid, action.sid, action.versions);
@@ -1088,10 +1059,6 @@ AppDispatcher.register(function (action) {
             _.each(action.versionsIssues, function ( issues, segmentId ) {
                 SegmentStore.addSegmentPreloadedIssues(segmentId, issues);
             });
-
-            // if ( seg ) {
-            //     SegmentStore.emitChange(action.actionType, action.sid, seg.toJS());
-            // }
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
             break;
         case SegmentConstants.ADD_TAB_INDEX:
@@ -1240,6 +1207,9 @@ AppDispatcher.register(function (action) {
             break;
         case EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD:
             SegmentStore.copyFragmentToClipboard(action.fragment, action.plainText);
+            break;
+        case SegmentConstants.SEGMENT_FOCUSED:
+            SegmentStore.emitChange(SegmentConstants.SEGMENT_FOCUSED, action.sid, action.focused)
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

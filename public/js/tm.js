@@ -21,6 +21,10 @@
             UI.setDropDown();
             UI.initOptionsTip();
             UI.initTmxTooltips();
+            //Fix: When you move to a page using the browser arrow the checkbox seems to be not checked
+            $("#activetm").find("tr:not(.new) input[checked]").prop('checked', true);
+
+
             UI.checkTMKeysUpdateChecks();
             UI.checkCrossLanguageSettings();
             $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {

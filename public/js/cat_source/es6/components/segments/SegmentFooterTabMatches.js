@@ -139,7 +139,6 @@ class SegmentFooterTabMatches extends React.Component {
             SegmentActions.disableTPOnSegment(this.props.segment);
             SegmentActions.setChoosenSuggestion(this.props.segment.original_sid, index);
             TranslationMatches.copySuggestionInEditarea(this.props.segment, index);
-            SegmentActions.highlightEditarea(self.props.id_segment);
         }, 200);
     }
 

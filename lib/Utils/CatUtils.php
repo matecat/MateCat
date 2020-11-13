@@ -211,26 +211,26 @@ class CatUtils {
      * @param array $job_stats
      *
      * @return array
+     * @throws Exception
      */
     protected static function _performanceEstimationTime( array $job_stats ) {
 
         $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $job_stats[ 'id' ] );
-        if ( !empty( $last_10_worked_ids ) ) {
+        if ( !empty( $last_10_worked_ids ) and count($last_10_worked_ids) === 10 ) {
+
             //perform check on performance if single segment are set to check or globally Forced
             // Calculating words per hour and estimated completion
             $estimation_temp = Translations_SegmentTranslationDao::getEQWLastHour( $job_stats[ 'id' ], $last_10_worked_ids );
-            if ( $estimation_temp[ 0 ][ 'data_validity' ] == 1 ) {
-                $job_stats[ 'WORDS_PER_HOUR' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
-                // 7.2 hours
-                // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
-                // 1 h 32 m
-                // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
-                $job_stats[ 'ESTIMATED_COMPLETION' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
-            }
+
+            $job_stats[ 'WORDS_PER_HOUR' ] = number_format( $estimation_temp[ 0 ][ 'words_per_hour' ], 0, '.', ',' );
+            // 7.2 hours
+            // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
+            // 1 h 32 m
+            // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
+            $job_stats[ 'ESTIMATED_COMPLETION' ] = date( "z\d G\h i\m", ( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ] ) * 3600 / ( !empty( $estimation_temp[ 0 ][ 'words_per_hour' ] ) ? $estimation_temp[ 0 ][ 'words_per_hour' ] : 1 ) - 3600 );
         }
 
         return $job_stats;
-
     }
 
     /**
@@ -451,6 +451,9 @@ class CatUtils {
      */
     public static function segment_raw_word_count( $string, $source_lang = 'en-US', Filter $filter = null ) {
 
+        //first two letter of code lang
+        $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];
+
         $string = self::clean_raw_string_4_word_count( $string, $source_lang, $filter );
 
         /**
@@ -471,6 +474,13 @@ class CatUtils {
         $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
 
         /**
+         * Remove english possessive word count
+         */
+        if( $source_lang_two_letter == "en" ){
+            $string = str_replace( ' s ', ' ', $string );
+        }
+
+        /**
          * Now reset chars
          */
         $string = str_replace( [ "¯", '¸' ], [ '-', '_' ], $string );
@@ -482,12 +492,9 @@ class CatUtils {
             return 0;
         }
 
-        //first two letter of code lang
-        $source_lang_two_letter = explode( "-", $source_lang )[ 0 ];
+
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
-
             $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
-
         } else {
 
             $words_array = preg_split( '/[\s]+/u', $string );

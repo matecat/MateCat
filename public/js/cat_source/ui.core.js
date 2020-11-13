@@ -564,48 +564,7 @@ var UI = {
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly:not(.ice-locked)').length;
 	},
-    formatSelection: function(op) {
-        var str = CursorUtils.getSelectionHtml();
-        var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
-        var newStr = '';
-        var selection$ = $("<div/>").html(str);
-        var rightString = selection$.html();
 
-        $.each($.parseHTML(rightString), function(index) {
-			var toAdd, d, jump, capStr;
-            if(this.nodeName == '#text') {
-				d = this.data;
-				jump = ((!index)&&(!selection$));
-				capStr = CommonUtils.toTitleCase(d);
-				if(jump) {
-					capStr = d.charAt(0) + CommonUtils.toTitleCase(d).slice(1);
-				}
-				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
-				newStr += toAdd;
-			}
-            else if(this.nodeName == 'LXQWARNING') {
-                d = this.childNodes[0].data;
-                jump = ((!index)&&(!selection$));
-				capStr = CommonUtils.toTitleCase(d);
-				if(jump) {
-					capStr = d.charAt(0) + CommonUtils.toTitleCase(d).slice(1);
-				}
-                toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
-				newStr += toAdd;
-            }
-            else {
-				newStr += this.outerHTML;
-			}
-		});
-
-
-        CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
-
-
-        $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
-        $('.editor .editarea .formatSelection-placeholder').remove();
-        $('.editor .editarea').trigger('afterFormatSelection');
-    },
     setTimeToEdit: function(sid) {
         let $segment = UI.getSegmentById(sid);
         this.editStop = new Date();
@@ -1113,7 +1072,6 @@ var UI = {
                 data.translation.segment = segment;
                 $(document).trigger('translation:change', data.translation);
                 data.segment = segment;
-                SegmentActions.addOriginalTranslation(segment.sid, null, TextUtils.htmlEncode(translation));
                 $(document).trigger('setTranslation:success', data);
                 if (config.alternativesEnabled ) {
                     UI.getTranslationMismatches(id_segment);

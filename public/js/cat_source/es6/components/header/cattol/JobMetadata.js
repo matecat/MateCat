@@ -1,6 +1,6 @@
-import FilesInstructionsModal from '../../modals/FilesInstructionsModal';
+import JobMetadataModal from '../../modals/JobMetadataModal';
 import SegmentStore from '../../../stores/SegmentStore';
-class FilesInstructions extends React.Component {
+class JobMetadata extends React.Component {
     constructor(props) {
         super(props);
 
@@ -11,6 +11,7 @@ class FilesInstructions extends React.Component {
         let props = {
             currentFile: currentSegment ? currentSegment.id_file : null,
             files: this.props.files,
+            projectInfo: this.props.projectInfo
         };
         let styleContainer = {
             minWidth: 600,
@@ -18,7 +19,7 @@ class FilesInstructions extends React.Component {
             maxWidth: 900,
         };
         APP.ModalWindow.showModalComponent(
-            FilesInstructionsModal,
+            JobMetadataModal,
             props,
             'Job instructions and references',
             styleContainer
@@ -45,4 +46,4 @@ class FilesInstructions extends React.Component {
     }
 }
 
-export default FilesInstructions;
+export default JobMetadata;

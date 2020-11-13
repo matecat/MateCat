@@ -996,9 +996,10 @@ class Editarea extends React.Component {
     };
 
     getUpdatedSegmentInfo = () => {
-        const {segment: { warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
+        const {segment: { sid, warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
         const {tagRange, editorState} = this.state;
         return{
+            sid,
             warnings,
             tagMismatch,
             tagRange,
@@ -1019,6 +1020,8 @@ class Editarea extends React.Component {
         const newEditorState = insertText(editorState, selectedText);
         this.setState({
             editorState: newEditorState
+        },() => {
+            this.updateTranslationDebounced();
         });
     };
 
@@ -1063,6 +1066,7 @@ function getEntityStrategy(mutability, callback) {
         );
     };
 }
+
 
 
 export default Editarea ;
