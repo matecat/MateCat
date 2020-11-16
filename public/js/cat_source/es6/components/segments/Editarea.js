@@ -210,7 +210,7 @@ class Editarea extends React.Component {
 
             //Qa Check Blacklist
             const { qaBlacklistGlossary } = this.props.segment;
-            const { qaBlacklistGlossary : prevQaBlacklistGlossary } = prevProps.segment;
+            const prevQaBlacklistGlossary = prevProps ? prevProps.segment.qaBlacklistGlossary: undefined;
             if ( qaBlacklistGlossary && qaBlacklistGlossary.length > 0 &&
                 (_.isUndefined(prevQaBlacklistGlossary) || !Immutable.fromJS(prevQaBlacklistGlossary).equals(Immutable.fromJS(qaBlacklistGlossary)) ) ) {
                 activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR] = true
@@ -224,7 +224,7 @@ class Editarea extends React.Component {
 
             //Lexiqa
             const { lexiqa  } = this.props.segment;
-            const { lexiqa : prevLexiqa } = prevProps.segment;
+            const prevLexiqa = prevProps ? prevProps.segment.lexiqa: undefined;
             const currentLexiqaTarget = lexiqa && lexiqa.target && _.size(lexiqa.target)
             const prevLexiqaTarget = prevLexiqa && prevLexiqa.target && _.size(prevLexiqa.target)
             const lexiqaChanged = prevLexiqaTarget && currentLexiqaTarget && !Immutable.fromJS(prevLexiqa.target).equals(Immutable.fromJS(lexiqa.target))
@@ -239,7 +239,7 @@ class Editarea extends React.Component {
                 this.removeDecorator(DraftMatecatConstants.LEXIQA_DECORATOR);
             }
             //Search
-            if ( prevProps.segment.inSearch) {
+            if ( prevProps && prevProps.segment.inSearch ) {
                 activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
                 changedDecorator = true
                 this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR);
@@ -247,6 +247,7 @@ class Editarea extends React.Component {
         }else{
             //Search
             if (this.props.segment.searchParams.target && (
+                !prevProps ||
                 (!prevProps.segment.inSearch) ||  //Before was not active
                 (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(this.props.segment.searchParams))) ||//Before was active but some params change
                 (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== this.props.segment.currentInSearch ) ||   //Before was the current
@@ -276,6 +277,7 @@ class Editarea extends React.Component {
         SegmentStore.addListener(EditAreaConstants.REPLACE_SEARCH_RESULTS, this.replaceCurrentSearch);
         SegmentStore.addListener(EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA, this.copyGlossaryToEditArea);
         setTimeout(()=>{
+            this.checkDecorators();
             this.updateTranslationInStore();
             if(this.props.segment.opened){
                 this.focusEditor();

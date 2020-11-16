@@ -239,7 +239,7 @@ class SegmentSource extends React.Component {
         }
     };
 
-    checkDecorators = (prevProps) => {
+     checkDecorators = (prevProps) => {
         let changedDecorator = false;
         const { inSearch, searchParams, currentInSearch, currentInSearchIndex } = this.props.segment;
         const { activeDecorators: prevActiveDecorators, editorState} = this.state;
@@ -248,7 +248,7 @@ class SegmentSource extends React.Component {
         if(!inSearch){
             //Glossary
             const { glossary } = this.props.segment;
-            const { glossary : prevGlossary } = prevProps.segment;
+            const prevGlossary = prevProps ? prevProps.segment.glossary: undefined;
             if ( glossary && _.size(glossary) > 0 &&
                 (_.isUndefined(prevGlossary) || !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) || !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] )) {
                 activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
@@ -262,7 +262,7 @@ class SegmentSource extends React.Component {
 
             //Qa Check Glossary
             const { qaCheckGlossary } = this.props.segment;
-            const { qaCheckGlossary : prevQaCheckGlossary } = prevProps.segment;
+            const prevQaCheckGlossary = prevProps ? prevProps.segment.qaCheckGlossary: undefined;
             if ( qaCheckGlossary && qaCheckGlossary.length > 0 &&
                 (_.isUndefined(prevQaCheckGlossary) || !Immutable.fromJS(prevQaCheckGlossary).equals(Immutable.fromJS(qaCheckGlossary)) ) ) {
                 this.addQaCheckGlossaryDecorator();
@@ -276,7 +276,7 @@ class SegmentSource extends React.Component {
 
             //Lexiqa
             const { lexiqa  } = this.props.segment;
-            const { lexiqa : prevLexiqa } = prevProps.segment;
+            const prevLexiqa = prevProps ? prevProps.segment.lexiqa: undefined;
             const currentLexiqaSource = lexiqa && lexiqa.source && _.size(lexiqa.source)
             const prevLexiqaSource = prevLexiqa && prevLexiqa.source && _.size(prevLexiqa.source)
             const lexiqaChanged = prevLexiqaSource && currentLexiqaSource && !Immutable.fromJS(prevLexiqa.source).equals(Immutable.fromJS(lexiqa.source))
@@ -292,7 +292,7 @@ class SegmentSource extends React.Component {
             }
 
             // Search
-            if ( prevProps.segment.inSearch) {
+            if ( prevProps && prevProps.segment.inSearch) {
                 activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = false
                 changedDecorator = true
                 this.removeDecorator(DraftMatecatConstants.SEARCH_DECORATOR);
@@ -300,7 +300,8 @@ class SegmentSource extends React.Component {
         }else{
             //Search
             if (searchParams.source && (
-                (!prevProps.segment.inSearch) ||  //Before was not active
+                !prevProps|| // was not mounted
+                !prevProps.segment.inSearch ||  //Before was not active
                 (prevProps.segment.inSearch && !Immutable.fromJS(prevProps.segment.searchParams).equals(Immutable.fromJS(searchParams))) ||//Before was active but some params change
                 (prevProps.segment.inSearch && prevProps.segment.currentInSearch !== currentInSearch ) ||   //Before was the current
                 (prevProps.segment.inSearch && prevProps.segment.currentInSearchIndex !== currentInSearchIndex ) ) )   //There are more occurrences and the current change
@@ -330,7 +331,10 @@ class SegmentSource extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_TAGGED, this.setTaggedSource);
         this.$source = $(this.source);
         this.$source.on('keydown', null, Shortcuts.cattol.events.searchInConcordance.keystrokes[Shortcuts.shortCutsKeyType], this.openConcordance);
-        setTimeout(()=>this.updateSourceInStore());
+        setTimeout(()=>{
+            this.checkDecorators();
+            this.updateSourceInStore()
+        });
     }
 
     componentWillUnmount() {

@@ -276,8 +276,7 @@ class SegmentFooterTabGlossary extends React.Component {
         if ( prevState.openComment !== this.state.openComment && this.state.openComment ) {
             this.comment.focus();
         }
-        setTimeout(()=>SegmentActions.recomputeSegment(this.props.id_segment));
-        // setTimeout(()=>this.setTotalMatchesInTab( this.props.segment.glossary), 0 );
+        // setTimeout(()=>SegmentActions.recomputeSegment(this.props.id_segment));
     }
 
     allowHTML(string) {
