@@ -9,7 +9,6 @@ use API\V2\Validators\LoginValidator;
 use API\V2\Validators\ProjectPasswordValidator;
 use Constants_ProjectStatus;
 use Projects_ProjectDao;
-use TmKeyManagement_TmKeyStruct;
 use Url\JobUrlBuilder;
 
 class StatusController extends KleinController {
@@ -153,7 +152,7 @@ class StatusController extends KleinController {
      * @throws \Exception
      */
     private function getProjectMemoryKeys() {
-        $tmKeys = [];
+        $tmKeys  = [];
         $jobKeys = $this->project->getChunks()[ 0 ]->getClientKeys( $this->user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
 
         foreach ( $jobKeys as $tmKey ) {
@@ -196,7 +195,6 @@ class StatusController extends KleinController {
         $_total_raw_wc                    = 0;
         $_total_wc_tm_analysis            = 0;
         $_total_wc_standard_analysis      = 0;
-        $_matecat_price_per_word          = 0.03; //(dollari) se indipendente dalla combinazione metterlo nel config
 
         //VERY Expensive cycle ± 0.7 s for 27650 segments ( 150k words )
         foreach ( $this->projectResultSet as $segInfo ) {
