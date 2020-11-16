@@ -430,6 +430,7 @@ class SegmentsContainer extends React.Component {
 					height: height
 				};
 				container.parentNode.removeChild(container);
+				return height + this.getSegmentBasicSize(index, segment);
 				// console.timeEnd("start calc Height" + segment.get('sid'));
 			}
 		// --- Retrieve height from cache
