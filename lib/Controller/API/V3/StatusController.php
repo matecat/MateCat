@@ -74,14 +74,14 @@ class StatusController extends KleinController {
             throw new NotFoundException( 'Error during rendering of project metadata' );
         }
 
-//        // build jobs metadata array
-//        foreach ( $this->project->getJobs() as $job ) {
-//            try {
-//                $metadata->jobs[] = $this->renderJobMetadata( $job );
-//            } catch ( \Exception $exception ) {
-//                throw new NotFoundException( 'Error during rendering of job with id ' . $job->id );
-//            }
-//        }
+        // build jobs metadata array
+        foreach ( $this->project->getChunks() as $chunk ) {
+            try {
+                $metadata->chunks[] = $this->renderChunkMetadata( $chunk );
+            } catch ( \Exception $exception ) {
+                throw new NotFoundException( 'Error during rendering of job with id ' . $chunk->id );
+            }
+        }
 
         $this->response->json( $metadata );
     }
@@ -119,7 +119,6 @@ class StatusController extends KleinController {
         $projectMetaData          = new \stdClass();
         $projectMetaData->status  = $this->getProjectStatusAnalysis();
         $projectMetaData->summary = $this->getProjectSummary();
-        $projectMetaData->details = $this->getProjectDetails();
         $projectMetaData->analyze = $this->getAnalyzeLink();
 
         return $projectMetaData;
@@ -186,17 +185,17 @@ class StatusController extends KleinController {
             // save chunks totals data in $this->chunksTotalsCache for getJobTotals() function
             $keyValue = $this->getTotalsArrayKeyName( $segInfo[ 'match_type' ] );
 
-            if ( !isset( $totals->chunks[ $segInfo[ 'id_file' ] ] ) ) {
-                $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ] = $this->totalsInitStructure;
+            if ( !isset( $totals->chunks[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ] ) ) {
+                $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ] = $this->totalsInitStructure;
             }
 
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'id' ]                  = $segInfo[ 'id_file' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ $keyValue ]             = +$words;
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
-            $this->chunksTotalsCache[ $segInfo[ 'id_file' ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
+            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'id' ]                  = $segInfo[ 'id_file' ];
+            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ $keyValue ]             = +$words;
+            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
+            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
+            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'TOTAL_PAYABLE' ]       += $segInfo[ 'eq_word_count' ];
+            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ]            = $segInfo[ 'filename' ];
         }
 
         if ( $_total_wc_standard_analysis == 0 and $this->project->status_analysis == Constants_ProjectStatus::STATUS_FAST_OK ) {
@@ -244,12 +243,30 @@ class StatusController extends KleinController {
     }
 
     /**
+     * @param \Chunks_ChunkStruct $chunk
+     *
+     * @return \stdClass
+     * @throws \Exception
+     */
+    private function renderChunkMetadata( \Chunks_ChunkStruct $chunk ) {
+
+        $chunkMetadata            = new \stdClass();
+        $chunkMetadata->id        = $chunk->id;
+        $chunkMetadata->password  = $chunk->password;
+        $chunkMetadata->langpairs = $chunk->source . '|' . $chunk->target;
+        $chunkMetadata->details   = $this->getChunkDetails($chunk->id);
+        $chunkMetadata->urls      = $this->getChunkUrls( $chunk );
+
+        return $chunkMetadata;
+    }
+
+    /**
      * @return \stdClass
      */
-    private function getProjectDetails() {
+    private function getChunkDetails($chunkId) {
         $details = new \stdClass();
-        $details->files = $this->getProjectFiles();
-        $details->totals = $this->getProjectTotals();
+        $details->files = $this->getProjectFiles($chunkId);
+        $details->totals = $this->getProjectTotals($chunkId);
 
         return $details;
     }
@@ -257,20 +274,20 @@ class StatusController extends KleinController {
     /**
      * @return array
      */
-    private function getProjectFiles(){
-        return array_values($this->chunksTotalsCache);
+    private function getProjectFiles($chunkId) {
+        return array_values( $this->chunksTotalsCache[$chunkId] );
     }
 
     /**
      * @return \stdClass
      */
-    private function getProjectTotals() {
+    private function getProjectTotals($chunkId) {
 
-        $totals            = new \stdClass();
+        $totals = new \stdClass();
 
-        foreach ( $this->chunksTotalsCache as $id => $chunk ) {
+        foreach ( $this->chunksTotalsCache[$chunkId] as $id => $chunk ) {
             foreach ( array_keys( $this->totalsInitStructure ) as $key ) {
-                $totals->$key += $chunk[$key];
+                $totals->$key += $chunk[ $key ];
             }
         }
 
@@ -352,7 +369,7 @@ class StatusController extends KleinController {
      * @return array
      * @throws \Exception
      */
-    private function getJobUrls( \Jobs_JobStruct $job ) {
+    private function getChunkUrls( \Jobs_JobStruct $job ) {
         return [
                 'translation' => JobUrlBuilder::create( $job->id, $job->password ),
                 'revision1'   => JobUrlBuilder::create( $job->id, $job->password, [ 'revision_number' => 1 ] ),
