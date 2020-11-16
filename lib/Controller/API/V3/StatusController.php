@@ -5,8 +5,11 @@ namespace API\V3;
 use Analysis\AnalysisDao;
 use API\V2\Exceptions\NotFoundException;
 use API\V2\KleinController;
+use API\V2\Validators\LoginValidator;
+use API\V2\Validators\ProjectPasswordValidator;
 use Constants_ProjectStatus;
 use Projects_ProjectDao;
+use TmKeyManagement_TmKeyStruct;
 use Url\JobUrlBuilder;
 
 class StatusController extends KleinController {
@@ -27,7 +30,7 @@ class StatusController extends KleinController {
     private $othersInQueue;
 
     /**
-     * @var
+     * @var array
      */
     private $chunksTotalsCache;
 
@@ -53,6 +56,14 @@ class StatusController extends KleinController {
             "standard_word_count" => 0,
             "raw_word_count"      => 0,
     ];
+
+    /**
+     * Validation callbacks
+     */
+    public function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+        $this->appendValidator( new ProjectPasswordValidator( $this ) );
+    }
 
     /**
      * @throws NotFoundException
@@ -101,6 +112,7 @@ class StatusController extends KleinController {
         }
 
         $this->projectResultSet = AnalysisDao::getProjectStatsVolumeAnalysis( $id_project );
+
         try {
             $amqHandler         = new \AMQHandler();
             $segmentsBeforeMine = $amqHandler->getActualForQID( $this->project->id );
@@ -116,12 +128,39 @@ class StatusController extends KleinController {
      * @throws \Exception
      */
     private function renderProjectMetadata() {
-        $projectMetaData          = new \stdClass();
-        $projectMetaData->status  = $this->getProjectStatusAnalysis();
-        $projectMetaData->summary = $this->getProjectSummary();
-        $projectMetaData->analyze = $this->getAnalyzeLink();
+        $projectMetaData              = new \stdClass();
+        $projectMetaData->engines     = $this->getProjectEngines();
+        $projectMetaData->memory_keys = $this->getProjectMemoryKeys();
+        $projectMetaData->status      = $this->getProjectStatusAnalysis();
+        $projectMetaData->summary     = $this->getProjectSummary();
+        $projectMetaData->analyze     = $this->getAnalyzeLink();
 
         return $projectMetaData;
+    }
+
+    /**
+     * @return array
+     */
+    private function getProjectEngines() {
+        return [
+                'id_tms_engine' => (int)$this->project->getChunks()[ 0 ]->id_tms,
+                'id_mt_engine'  => (int)$this->project->getChunks()[ 0 ]->id_mt_engine,
+        ];
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    private function getProjectMemoryKeys() {
+        $tmKeys = [];
+        $jobKeys = $this->project->getChunks()[ 0 ]->getClientKeys( $this->user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+
+        foreach ( $jobKeys as $tmKey ) {
+            $tmKeys[][ $tmKey->name ] = $tmKey->key;
+        }
+
+        return $tmKeys;
     }
 
     /**
@@ -225,19 +264,17 @@ class StatusController extends KleinController {
             $_total_wc_tm_analysis = $_total_wc_fast_analysis;
         }
 
-        $summary                              = [];
-        $summary[ 'NAME' ]                    = $this->project->name;
-        $summary[ 'IN_QUEUE_BEFORE' ]         = $this->othersInQueue;
-        $summary[ 'STATUS' ]                  = $this->project->status_analysis;
-        $summary[ 'TOTAL_SEGMENTS' ]          = count( $this->projectResultSet );
-        $summary[ 'SEGMENTS_ANALYZED' ]       = $_total_segments_analyzed;
-        $summary[ 'TOTAL_STANDARD_WC' ]       = $_total_wc_standard_analysis;
-        $summary[ 'TOTAL_FAST_WC' ]           = $_total_wc_fast_analysis;
-        $summary[ 'TOTAL_TM_WC' ]             = $_total_wc_tm_analysis;
-        $summary[ 'TOTAL_RAW_WC' ]            = $_total_raw_wc;
-        $summary[ 'TOTAL_PAYABLE' ]           = $_total_wc_tm_analysis;
-        $summary[ 'PRICE_PER_WORD' ]          = $_matecat_price_per_word;
-        $summary[ 'PRICE_PER_WORD_CURRENCY' ] = "USD";
+        $summary                        = [];
+        $summary[ 'NAME' ]              = $this->project->name;
+        $summary[ 'IN_QUEUE_BEFORE' ]   = $this->othersInQueue;
+        $summary[ 'STATUS' ]            = $this->project->status_analysis;
+        $summary[ 'TOTAL_SEGMENTS' ]    = count( $this->projectResultSet );
+        $summary[ 'SEGMENTS_ANALYZED' ] = $_total_segments_analyzed;
+        $summary[ 'TOTAL_STANDARD_WC' ] = $_total_wc_standard_analysis;
+        $summary[ 'TOTAL_FAST_WC' ]     = $_total_wc_fast_analysis;
+        $summary[ 'TOTAL_TM_WC' ]       = $_total_wc_tm_analysis;
+        $summary[ 'TOTAL_RAW_WC' ]      = $_total_raw_wc;
+        $summary[ 'TOTAL_PAYABLE' ]     = $_total_wc_tm_analysis;
 
         return $summary;
     }
@@ -250,12 +287,14 @@ class StatusController extends KleinController {
      */
     private function renderChunkMetadata( \Chunks_ChunkStruct $chunk ) {
 
-        $chunkMetadata            = new \stdClass();
-        $chunkMetadata->id        = $chunk->id;
-        $chunkMetadata->password  = $chunk->password;
-        $chunkMetadata->langpairs = $chunk->source . '|' . $chunk->target;
-        $chunkMetadata->details   = $this->getChunkDetails($chunk->id);
-        $chunkMetadata->urls      = $this->getChunkUrls( $chunk );
+        $chunkMetadata           = new \stdClass();
+        $chunkMetadata->id       = $chunk->id;
+        $chunkMetadata->password = $chunk->password;
+        $chunkMetadata->source   = $chunk->source;
+        $chunkMetadata->source   = $chunk->source;
+        $chunkMetadata->target   = $chunk->target;
+        $chunkMetadata->details  = $this->getChunkDetails( $chunk->id );
+        $chunkMetadata->urls     = $this->getChunkUrls( $chunk );
 
         return $chunkMetadata;
     }
@@ -263,10 +302,10 @@ class StatusController extends KleinController {
     /**
      * @return \stdClass
      */
-    private function getChunkDetails($chunkId) {
-        $details = new \stdClass();
-        $details->files = $this->getProjectFiles($chunkId);
-        $details->totals = $this->getProjectTotals($chunkId);
+    private function getChunkDetails( $chunkId ) {
+        $details         = new \stdClass();
+        $details->files  = $this->getProjectFiles( $chunkId );
+        $details->totals = $this->getProjectTotals( $chunkId );
 
         return $details;
     }
@@ -274,18 +313,18 @@ class StatusController extends KleinController {
     /**
      * @return array
      */
-    private function getProjectFiles($chunkId) {
-        return array_values( $this->chunksTotalsCache[$chunkId] );
+    private function getProjectFiles( $chunkId ) {
+        return array_values( $this->chunksTotalsCache[ $chunkId ] );
     }
 
     /**
      * @return \stdClass
      */
-    private function getProjectTotals($chunkId) {
+    private function getProjectTotals( $chunkId ) {
 
         $totals = new \stdClass();
 
-        foreach ( $this->chunksTotalsCache[$chunkId] as $id => $chunk ) {
+        foreach ( $this->chunksTotalsCache[ $chunkId ] as $id => $chunk ) {
             foreach ( array_keys( $this->totalsInitStructure ) as $key ) {
                 $totals->$key += $chunk[ $key ];
             }
