@@ -1,3 +1,4 @@
+import {getXliffRegExpression} from './tagModel';
 /**
  *
  * @param segmentString
@@ -9,14 +10,6 @@ export const cleanSegmentString = (segmentString) => {
         return segmentString.replace(regExp, '');
     }
     return segmentString;
-};
-
-/**
- *
- * @returns {RegExp}
- */
-export const getXliffRegExpression = () => {
-    return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi; // group, multiline, case-insensitive
 };
 
 export const getIdAttributeRegEx = () => {

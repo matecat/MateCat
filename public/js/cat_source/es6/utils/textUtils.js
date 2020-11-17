@@ -358,23 +358,8 @@ const TEXT_UTILS = {
     placehold_xliff_tags(segment) {
         let LTPLACEHOLDER = '##LESSTHAN##';
         let GTPLACEHOLDER = '##GREATERTHAN##';
-        segment = segment.replace(/<(g\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/g)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(x\s*.*?\/)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(bx\s*.*?\/)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(ex\s*.*?\/)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(bpt\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/bpt)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(ept\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/ept)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(ph\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/it)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(mrk\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/mrk)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
+        segment = segment.replace(/&lt;/gi, LTPLACEHOLDER );
+        segment = segment.replace(/&gt;/gi, GTPLACEHOLDER);
         return segment;
     },
     view2rawxliff(segment) {
@@ -386,7 +371,6 @@ const TEXT_UTILS = {
         //segment=htmlDecode(segment);
         segment = this.placehold_xliff_tags(segment);
         segment = this.htmlEncode(segment);
-
         segment = this.restore_xliff_tags(segment);
 
         return segment;

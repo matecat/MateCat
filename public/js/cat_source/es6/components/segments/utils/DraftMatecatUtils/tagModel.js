@@ -283,6 +283,10 @@ const getCorrectTag = (tagType, isClosure = false) => {
     }).join()
 }
 
+const getXliffRegExpression = () => {
+    return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s((?!&lt;|<).)*?&gt;)/gmi;
+}
+
 export {
     tagSignatures,
     TagStruct,
@@ -295,5 +299,6 @@ export {
     getStyleForName,
     getCorrectClosureTag,
     getCorrectTag,
-    getSplitPointTag
+    getSplitPointTag,
+    getXliffRegExpression
 };

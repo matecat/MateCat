@@ -6,6 +6,7 @@ import React  from 'react';
 import SegmentSource  from './SegmentSource';
 import TagUtils  from '../../utils/tagUtils';
 import Shortcuts  from '../../utils/shortcuts';
+import {getXliffRegExpression} from './utils/DraftMatecatUtils/tagModel'
 import LXQ from '../../utils/lxq.main';
 import SegmentTarget from "./SegmentTarget";
 import EditArea from "./Editarea";
@@ -64,13 +65,13 @@ class SegmentBody extends React.Component {
     }
 
     hasSourceOrTargetTags() {
-        var regExp = TagUtils.getXliffRegExpression();
+        var regExp = getXliffRegExpression();
         var sourceTags = this.props.segment.segment.match( regExp );
         return sourceTags && sourceTags.length > 0 ;
     }
 
     hasMissingTargetTags() {
-        var regExp = TagUtils.getXliffRegExpression();
+        var regExp = getXliffRegExpression();
         var sourceTags = this.props.segment.segment.match( regExp );
         if ( !sourceTags || sourceTags.length === 0 ) {
             return false;

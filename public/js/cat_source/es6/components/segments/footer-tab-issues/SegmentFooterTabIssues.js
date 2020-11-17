@@ -43,21 +43,21 @@ class SegmentFooterTabIssues extends React.Component {
         // SegmentStore.removeListener( SegmentConstants.TRANSLATION_EDITED, this.trackChanges );
     }
 
-    trackChanges(sid, editareaText) {
-        let text = TextUtils.htmlEncode(TagUtils.prepareTextToSend(editareaText));
-        if (this.state.segment.sid === sid && this.state.oldTranslation !== text) {
-            UI.setDisabledOfButtonApproved(this.props.sid, true);
-            this.setState({
-                translation: text,
-                isChangedTextarea: true,
-            });
-        } else {
-            UI.setDisabledOfButtonApproved(this.props.sid);
-            this.setState({
-                isChangedTextarea: false,
-            });
-        }
-    }
+    // trackChanges(sid, editareaText) {
+    //     let text = TextUtils.htmlEncode(TagUtils.prepareTextToSend(editareaText));
+    //     if (this.state.segment.sid === sid && this.state.oldTranslation !== text) {
+    //         UI.setDisabledOfButtonApproved(this.props.sid, true);
+    //         this.setState({
+    //             translation: text,
+    //             isChangedTextarea: true,
+    //         });
+    //     } else {
+    //         UI.setDisabledOfButtonApproved(this.props.sid);
+    //         this.setState({
+    //             isChangedTextarea: false,
+    //         });
+    //     }
+    // }
 
     segmentOpened(sid, segment) {
         let issues = [];

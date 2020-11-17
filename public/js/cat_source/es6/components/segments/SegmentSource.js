@@ -153,20 +153,6 @@ class SegmentSource extends React.Component {
         this.updateSplitNumber();
     }
 
-    // TODO: replaced by splitSegmentNew, remove
-    splitSegment(split) {
-        let text = $(this.splitContainer).find('.splitArea').html();
-        text = text.replace(/<span class=\"splitpoint\"><span class=\"splitpoint-delete\"><\/span><\/span>/gi, '##$_SPLIT$##');
-        // Rimuovi lo span del vecchio split ( verrà ricalcolato con ##$_SPLIT_$## )
-        text = text.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
-        // Remove split placeholer if inside tag
-        text = text.replace(/<span contenteditable="false" class=\"(.*?)tag(.*?)\">((?:(?!<\/span>).)*?)##\$_SPLIT\$##((?:(?!<\/span>).)*?)<\/span>/gi,
-            '<span contenteditable="false" class="$1tag$2">$3$4</span>');
-        text = TagUtils.prepareTextToSend(text);
-        // let splitArray = text.split('##_SPLIT_##');
-        SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
-    }
-
     // markLexiqa(source) {
     //     let searchEnabled = this.props.segment.inSearch;
     //     if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
