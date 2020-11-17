@@ -27,7 +27,6 @@ class SegmentSource extends React.Component {
         super(props);
         const {onEntityClick, getUpdatedSegmentInfo, getClickedTagInfo} = this;
         this.originalSource = this.props.segment.segment;
-        this.afterRenderActions = this.afterRenderActions.bind(this);
         this.openConcordance = this.openConcordance.bind(this);
         this.decoratorsStructure = [
             {
@@ -114,52 +113,6 @@ class SegmentSource extends React.Component {
             } );
             setTimeout(()=>this.updateSourceInStore());        }
     };
-
-    afterRenderActions(prevProps) {
-        let self = this;
-        if ( this.splitContainer ) {
-            $(this.splitContainer).on('mousedown', '.splitArea .splitpoint', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                $(this).remove();
-                self.updateSplitNumber();
-            })
-        }
-    }
-
-    // TODO: replaced by updateSplitNumberNew, remove
-    updateSplitNumber() {
-        if (this.props.segment.splitted) return;
-        let numSplits = $(this.splitContainer).find('.splitpoint').length + 1;
-        let splitnum = $(this.splitContainer).find('.splitNum');
-        $(splitnum).find('.num').text(numSplits);
-        this.splitNum = numSplits;
-        if (numSplits > 1) {
-            $(splitnum).find('.plural').text('s');
-            $(this.splitContainer).find('.btn-ok').removeClass('disabled');
-        } else {
-            $(splitnum).find('.plural').text('');
-            splitnum.hide();
-            $(this.splitContainer).find('.btn-ok').addClass('disabled');
-        }
-        $(this.splitContainer).find('.splitArea').blur();
-    }
-
-    // TODO: replaced by addSplitTag, remove
-    addSplitPoint(event) {
-        if(window.getSelection().type === 'Range') return false;
-        TextUtils.pasteHtmlAtCaret('<span class="splitpoint"><span class="splitpoint-delete"/></span>');
-
-        this.updateSplitNumber();
-    }
-
-    // markLexiqa(source) {
-    //     let searchEnabled = this.props.segment.inSearch;
-    //     if (LXQ.enabled() && this.props.segment.lexiqa && this.props.segment.lexiqa.source && !searchEnabled) {
-    //         source = LXQ.highLightText(source, this.props.segment.lexiqa.source, true, true, true );
-    //     }
-    //     return source;
-    // }
 
     openConcordance(e) {
         e.preventDefault();

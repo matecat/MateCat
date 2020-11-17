@@ -1269,7 +1269,7 @@ var UI = {
 
     },
 
-    // Project completion override this metod
+    // Project completion override this method
     handleClickOnReadOnly : function(section) {
         if ( TextUtils.justSelecting('readonly') )   return;
         clearTimeout(UI.selectingReadonly);
