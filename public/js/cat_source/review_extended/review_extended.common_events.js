@@ -10,7 +10,7 @@ if (ReviewExtended.enabled()) {
     $( window ).on( 'segmentOpened', function ( e, data ) {
         var panelClosed = localStorage.getItem(ReviewExtended.localStoragePanelClosed) === 'true';
         if (config.isReview && !panelClosed ) {
-            SegmentActions.openIssuesPanel({sid: data.segmentId}, false)
+            setTimeout(()=>SegmentActions.openIssuesPanel({sid: data.segmentId}, false));
         }
         UI.getSegmentVersionsIssuesHandler(data.segmentId);
     } );
