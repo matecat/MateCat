@@ -362,7 +362,18 @@ class Segment extends React.Component {
         }
     }
 
-    removeSelection() {
+    openRevisionPanel =  (data) => {
+        if ( parseInt(data.sid) === parseInt(this.props.segment.sid) && ( this.props.segment.ice_locked == 0 || ( this.props.segment.ice_locked == 1 && this.props.segment.unlocked ) ) ) {
+            this.setState( {
+                selectedTextObj : data.selection
+            } );
+        } else {
+            this.setState({
+                selectedTextObj: null
+            });
+        }
+    }
+    removeSelection =() => {
         var selection = document.getSelection();
         if ( this.section.contains( selection.anchorNode ) ) {
             selection.removeAllRanges();
@@ -427,6 +438,8 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
         SegmentStore.addListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdateSegment);
 
+        //Review
+        SegmentStore.addListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
         if ( this.props.segment.opened) {
             setTimeout(()=>{
                 this.openSegment();
@@ -444,6 +457,8 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
         SegmentStore.removeListener(SegmentConstants.OPEN_SEGMENT, this.openSegmentFromAction);
         SegmentStore.removeListener(SegmentConstants.FORCE_UPDATE_SEGMENT, this.forceUpdateSegment);
+        //Review
+        SegmentStore.removeListener(SegmentConstants.OPEN_ISSUES_PANEL, this.openRevisionPanel);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
