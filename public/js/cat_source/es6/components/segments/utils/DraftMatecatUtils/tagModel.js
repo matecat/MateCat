@@ -284,7 +284,7 @@ const getCorrectTag = (tagType, isClosure = false) => {
 }
 
 const getXliffRegExpression = () => {
-    return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s((?!&lt;|<).)*?&gt;)/gmi;
+    return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*((?!&lt;|<).)*?&gt;)/gmi;
 }
 
 export {
