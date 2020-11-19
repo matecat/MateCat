@@ -177,7 +177,7 @@ const tagSignatures = {
         regex: /##\$(_0A)\$##/g,
         selfClosing: true,
         isClosure: false,
-        placeholder: '\\n',
+        placeholder: '\n',
         encodedPlaceholder: '##$_0A$##',
         placeholderRegex: null,
         decodeNeeded: false,
