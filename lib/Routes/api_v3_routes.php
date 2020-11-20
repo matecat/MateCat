@@ -7,7 +7,7 @@
  */
 
 $klein->with( '/api/v3/projects', function () {
-    route( '/status/[:id_project]/[:password]', 'GET', '\API\V3\StatusController', 'index' );
+    route( '/analysis/status/[:id_project]/[:password]', 'GET', '\API\V3\StatusController', 'index' );
 } );
 
 $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
