@@ -711,4 +711,31 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $stmt->rowCount();
     }
 
+    /**
+     * get the sum of equivalent word count of segment translations of a job
+     *
+     * @param     $id_job
+     * @param     $password
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct
+     */
+    public static function getEquivalentWordTotal($id_job, $password , $ttl = 0 ) {
+
+        $thisDao = new self();
+        $conn    = Database::obtain()->getConnection();
+        $query = "select 
+                sum(st.eq_word_count) as s
+                from segment_translations st
+                join jobs j on j.id = st.id_job 
+                where j.id = :id_job
+                and j.password = :password;";
+        $stmt    = $conn->prepare($query  );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+                'id_job'     => $id_job,
+                'password' => $password
+        ] )[ 0 ];
+
+    }
 }
