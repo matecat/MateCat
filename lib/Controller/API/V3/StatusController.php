@@ -156,7 +156,7 @@ class StatusController extends KleinController {
         $jobKeys = $this->project->getChunks()[ 0 ]->getClientKeys( $this->user, \TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
 
         foreach ( $jobKeys as $tmKey ) {
-            $tmKeys[][ $tmKey->name ] = $tmKey->key;
+            $tmKeys[][ trim($tmKey->name) ] = trim($tmKey->key);
         }
 
         return $tmKeys;
@@ -222,12 +222,12 @@ class StatusController extends KleinController {
             // save chunks totals data in $this->chunksTotalsCache for getJobTotals() function
             $keyValue = $this->getTotalsArrayKeyName( $segInfo[ 'match_type' ] );
 
-            if ( !isset( $totals->chunks[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ] ) ) {
+            if ( !isset( $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ] ) ) {
                 $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ] = $this->totalsInitStructure;
             }
 
             $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'id' ]                  = $segInfo[ 'id_file' ];
-            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ $keyValue ]             = +$words;
+            $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ $keyValue ]             += $words;
             $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'eq_word_count' ]       += $segInfo[ 'eq_word_count' ];
             $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'standard_word_count' ] += $segInfo[ 'standard_word_count' ];
             $this->chunksTotalsCache[ $segInfo[ 'jid' ] ][ $segInfo[ 'id_file' ] ][ 'raw_word_count' ]      += $segInfo[ 'raw_word_count' ];
