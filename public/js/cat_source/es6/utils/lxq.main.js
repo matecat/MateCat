@@ -148,11 +148,11 @@ const LXQ = {
                                 qadata.color = LXQ.colors[qadata.category];
                                 var category = qadata.category;
                                 if ( qadata.insource ) {
-                                    highlights.source = (highlights.source) ? highlights.source : { ...errorsMap };
+                                    highlights.source = (highlights.source) ? highlights.source : _.cloneDeep(errorsMap);
                                     highlights.source[category].push( qadata );
                                 }
                                 else {
-                                    highlights.target = highlights.target ? highlights.target : { ...errorsMap };
+                                    highlights.target = highlights.target ? highlights.target : _.cloneDeep(errorsMap);
                                     highlights.target[category].push( qadata );
                                 }
                             }
