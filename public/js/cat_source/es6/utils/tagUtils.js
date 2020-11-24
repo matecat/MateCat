@@ -185,6 +185,8 @@ const TAGS_UTILS =  {
                     }
                     i++;
                 }
+                // display every orphan closure as '?'
+                if(notFound) closingTag.id = '?'
             });
 
             tx = tx.replace( openRegex, function () {
