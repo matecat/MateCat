@@ -1,11 +1,12 @@
 .DraftEditor-root{
   .public-DraftEditor-content > div > div{
+
     // everything
     &:not(:last-child) {
       .public-DraftStyleDefault-block {
         & > * {
-          &:last-child{
-            &:after{
+          &:last-child {
+            &:after {
               content:'\21B5'; //↵
               padding: 0 4px;
               font-size: 14px;
@@ -15,24 +16,19 @@
         }
       }
     }
-    // Case <br>
+    // hide <br> line
     &:not(:last-child) {
       .public-DraftStyleDefault-block {
         & > span {
           &:only-child[data-offset-key]{
-            &:before{
-              content:'\21B5'; //↵
-              padding: 0 4px;
-              font-size: 14px;
-              color: #08BEEC;
-            }
-            &:after{
-              display:none;
+            br {
+              display: none;
             }
           }
         }
       }
     }
+
   }
 }
 
