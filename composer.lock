@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.159.0",
+            "version": "3.163.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "56785395913fe4253202d0da9055c2da87ac0a59"
+                "reference": "d3f51c57f17581d79151c9b5265e131391bd191f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/56785395913fe4253202d0da9055c2da87ac0a59",
-                "reference": "56785395913fe4253202d0da9055c2da87ac0a59",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d3f51c57f17581d79151c9b5265e131391bd191f",
+                "reference": "d3f51c57f17581d79151c9b5265e131391bd191f",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.159.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.163.0"
             },
-            "time": "2020-11-09T17:18:56+00:00"
+            "time": "2020-11-18T19:12:41+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -215,16 +215,16 @@
         },
         {
             "name": "google/apiclient",
-            "version": "v2.8.1",
+            "version": "v2.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client.git",
-                "reference": "c8f6d09f50f859fa9457104bb0fb72c893804ede"
+                "reference": "81696e6206322e38c643cfcc96c4494ccfef8a32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/c8f6d09f50f859fa9457104bb0fb72c893804ede",
-                "reference": "c8f6d09f50f859fa9457104bb0fb72c893804ede",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/81696e6206322e38c643cfcc96c4494ccfef8a32",
+                "reference": "81696e6206322e38c643cfcc96c4494ccfef8a32",
                 "shasum": ""
             },
             "require": {
@@ -278,9 +278,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client/issues",
-                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.8.1"
+                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.8.3"
             },
-            "time": "2020-10-27T23:20:13+00:00"
+            "time": "2020-11-17T17:33:35+00:00"
         },
         {
             "name": "google/apiclient-services",
@@ -756,16 +756,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.35",
+            "version": "v1.0.38",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "78c4427a2cd61c3617d49e289808e175e5dae00b"
+                "reference": "4aea89cc9d37c0ec29a72205deca4397c009b0fa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/78c4427a2cd61c3617d49e289808e175e5dae00b",
-                "reference": "78c4427a2cd61c3617d49e289808e175e5dae00b",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/4aea89cc9d37c0ec29a72205deca4397c009b0fa",
+                "reference": "4aea89cc9d37c0ec29a72205deca4397c009b0fa",
                 "shasum": ""
             },
             "require": {
@@ -801,9 +801,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.35"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.38"
             },
-            "time": "2020-11-09T18:11:04+00:00"
+            "time": "2020-11-19T10:47:15+00:00"
         },
         {
             "name": "monolog/monolog",
