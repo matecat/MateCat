@@ -2967,7 +2967,7 @@ $reference = [
                         0         => 'html',
                         1         => 'htm',
                 ],
-        'text/markdow'                                                              =>
+        'text/markdown'                                                              =>
                 [
                         0 => 'md',
                 ],
