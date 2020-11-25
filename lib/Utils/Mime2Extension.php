@@ -2967,6 +2967,10 @@ $reference = [
                         0         => 'html',
                         1         => 'htm',
                 ],
+        'text/markdown'                                                              =>
+                [
+                        0 => 'md',
+                ],
         'text/n3'                                                                   =>
                 [
                         0 => 'n3',
@@ -3134,6 +3138,10 @@ $reference = [
         'text/x-po'                                                                 =>
                 [
                         0 => 'po'
+                ],
+        'text/x-python'                                                             =>
+                [
+                        0 => 'md'
                 ],
         'text/x-gettext-translation'                                                =>
                 [
