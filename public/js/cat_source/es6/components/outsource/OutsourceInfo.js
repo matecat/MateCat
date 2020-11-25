@@ -168,7 +168,7 @@ class OutsourceInfo extends React.Component {
                                     <i className="big icon-envelope-o middle aligned icon" />
                                     <div className="content">
                                         <div className="header">Send us an email:</div>
-                                        <a className="description">info@matecat.com</a>
+                                        <a className="description" href="mailto:info@matecat.com">info@matecat.com</a>
                                     </div>
                                 </div>
                                 <div className="item open-chat">
