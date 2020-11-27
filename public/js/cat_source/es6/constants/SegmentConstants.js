@@ -58,6 +58,7 @@ module.exports = keyMirror({
     TOGGLE_SEGMENT_ON_BULK: null,
     REMOVE_SEGMENTS_ON_BULK: null,
     SET_UNLOCKED_SEGMENT: null,
+    SET_UNLOCKED_SEGMENTS: null,
     SET_BULK_SELECTION_INTERVAL : null,
     SET_BULK_SELECTION_SEGMENTS: null,
     SET_MUTED_SEGMENTS:null,

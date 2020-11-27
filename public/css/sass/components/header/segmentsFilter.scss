@@ -354,9 +354,9 @@ section.muted .segment-side-buttons {
                         color: black;
                         display: flex;
                         justify-content: space-between;
-                        width: 135px;
                         .clear-filter, .select-all-filter {
                             display: inline;
+                            min-width: 65px;
                             button {
                                 background: none;
                                 color: grey;
