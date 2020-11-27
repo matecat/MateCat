@@ -343,6 +343,7 @@ class SegmentSource extends React.Component {
         // Set correct handlers
         const handlers = !segment.openSplit ?
             {
+                onCut: (e) => {e.preventDefault()},
                 onCopy: copyFragment,
                 onBlur: onBlurEvent,
                 onDragStart: dragFragment,
@@ -363,6 +364,7 @@ class SegmentSource extends React.Component {
             <Editor
                 editorState={editorState}
                 onChange={onChange}
+                onCut={preventEdit}
                 ref={(el) => this.editor = el}
                 readOnly={false}
                 handleBeforeInput={preventEdit}
