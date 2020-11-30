@@ -2785,6 +2785,9 @@ tr.disabled td {
   margin-bottom: 5px;
   width: 100%;
   padding-left: 9px;
+  &.checkbox-label{
+    width: auto;
+  }
 }
 
 .insert-tm input {
@@ -2813,8 +2816,8 @@ tr.disabled td {
 }
 
 .insert-tm input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+  width: 13px;
+  height: 13px;
 }
 
 .insert-tm {
