@@ -170,10 +170,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
 
             // realign MT Spaces
-            $check = new \PostProcess( $this->_matches[ 0 ][ 'raw_segment' ], $suggestion );
-            $check->setFeatureSet( $this->featureSet );
-            $check->setSourceSegLang( $queueElement->params->source );
-            $check->setTargetSegLang( $queueElement->params->target );
+            $check = $this->initPostProcess( $this->_matches[ 0 ][ 'raw_segment' ], $suggestion, $queueElement->params->source, $queueElement->params->target );
             $check->realignMTSpaces();
 
             //this should every time be ok because MT preserve tags, but we use the check on the errors
@@ -183,8 +180,7 @@ class TMAnalysisWorker extends AbstractWorker {
         } else {
 
             // Otherwise try to perform only the tagCheck
-            $check = new \PostProcess( $queueElement->params->segment, $suggestion );
-            $check->setFeatureSet( $this->featureSet );
+            $check = $this->initPostProcess( $queueElement->params->segment, $suggestion, $queueElement->params->source, $queueElement->params->target );
             $check->performTagCheckOnly();
 
             //_TimeStampMsg( $check->getErrors() );
@@ -200,8 +196,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         // perform a consistency check as setTranslation does
         // in order to add spaces to translation if needed
-        $check = new \PostProcess( $queueElement->params->segment, $suggestion );
-        $check->setFeatureSet( $this->featureSet );
+        $check = $this->initPostProcess( $queueElement->params->segment, $suggestion, $queueElement->params->source, $queueElement->params->target );
         $check->performConsistencyCheck();
         $suggestion = $check->getTargetSeg();
         $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
@@ -256,6 +251,28 @@ class TMAnalysisWorker extends AbstractWorker {
                 'queue_element' => $queueElement
         ] );
 
+    }
+
+    /**
+     * Init a \PostProcess instance.
+     * This method forces to set source/target languages
+     *
+     * @TODO we may consider to change QA constructor adding source/target languages to it
+     *
+     * @param $source_seg
+     * @param $target_seg
+     * @param $source_lang
+     * @param $target_lang
+     *
+     * @return \PostProcess
+     */
+    private function initPostProcess( $source_seg, $target_seg, $source_lang, $target_lang ) {
+        $check = new \PostProcess( $source_seg, $target_seg );
+        $check->setFeatureSet( $this->featureSet );
+        $check->setSourceSegLang( $source_lang );
+        $check->setTargetSegLang( $target_lang );
+
+        return $check;
     }
 
     /**
@@ -835,15 +852,15 @@ class TMAnalysisWorker extends AbstractWorker {
             );
 
             // update chunks' standard_analysis_wc
-            $jobs = Projects_ProjectDao::findById($_project_id)->getChunks();
-            $numberOfJobs = count($jobs);
+            $jobs         = Projects_ProjectDao::findById( $_project_id )->getChunks();
+            $numberOfJobs = count( $jobs );
 
-            foreach ($jobs as $job){
-                \Jobs_JobDao::updateFields([
-                    'standard_analysis_wc' => round($project_totals[ 'st_wc' ]/$numberOfJobs)
-                ],[
-                    'id' => $job->id
-                ]);
+            foreach ( $jobs as $job ) {
+                \Jobs_JobDao::updateFields( [
+                        'standard_analysis_wc' => round( $project_totals[ 'st_wc' ] / $numberOfJobs )
+                ], [
+                        'id' => $job->id
+                ] );
             }
 
             /*
