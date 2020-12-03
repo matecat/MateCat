@@ -408,6 +408,9 @@ class Editarea extends React.Component {
             editorState: newEditorState,
             triggerText: textToInsert
         }), () => {
+            // Update translation
+            this.updateTranslationDebounced();
+            // Reactivate decorators
             this.onCompositionStopDebounced()
         })
     }
