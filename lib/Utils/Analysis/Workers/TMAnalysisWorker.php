@@ -460,7 +460,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $tmsEngine = Engine::getInstance( $id_tms );
         $mtEngine  = Engine::getInstance( $id_mt_engine );
 
-        if ( $mtEngine instanceof \Engines_MyMemory || $mtEngine instanceof \Engines_MMT ) {
+        if ( $mtEngine instanceof \Engines_MyMemory ) {
 
             $_config[ 'get_mt' ] = true;
 //            $_config[ 'mt_only' ] = true;
