@@ -1247,7 +1247,7 @@ class QA {
     protected function _loadDom( $xmlString, $targetErrorType ) {
         libxml_use_internal_errors( true );
         $dom           = new DOMDocument( '1.0', 'utf-8' );
-        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>", LIBXML_NOENT );
+        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>" );
         if ( $trg_xml_valid === false ) {
 
             $errorList = libxml_get_errors();
@@ -2119,9 +2119,12 @@ class QA {
     public function getTrgNormalized() {
 
         if ( !$this->thereAreErrors() ) {
+
+            $this->normalizedTrgDOM->preserveWhiteSpace = false;
+
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
-            preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement, LIBXML_NOEMPTYTAG ), $matches );
+            preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement ), $matches );
 
             /**
              * Why i do this?? I'm replacing Placeholders of non printable chars
@@ -2277,7 +2280,7 @@ class QA {
                     case self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ]:
                         $this->_addError( self::ERR_TAB_MISMATCH );
                         break;
-                    case '*':
+                    case '\*':
                         $this->_addError( self::ERR_STARSIGN_MISMATCH );
                         break;
                 }
