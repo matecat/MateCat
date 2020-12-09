@@ -2121,14 +2121,7 @@ class QA {
         if ( !$this->thereAreErrors() ) {
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
-            preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement ), $matches );
-
-//            try {
-//                throw new Exception();
-//            } catch ( Exception $e ){
-//                Log::doJsonLog( "\n" . $this->trgDom->saveXML() );
-//                Log::doJsonLog( $e->getTraceAsString() . "\n\n");
-//            }
+            preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement, LIBXML_NOEMPTYTAG ), $matches );
 
             /**
              * Why i do this?? I'm replacing Placeholders of non printable chars
