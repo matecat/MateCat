@@ -319,25 +319,6 @@ class setTranslationController extends ajaxController {
         $pipeline->addLast( new FromViewNBSPToSpaces() ); //nbsp are not valid xml entities we have to remove them before the QA check ( Invalid DOM )
         $pipeline->addLast( new SprintfToPH() );
 
-
-
-        $featureSet = new FeatureSet();
-        $featureSet->loadFromString( "translation_versions,review_extended,mmt,airbnb" );
-        $__postInput["segment" ] = "Xml string with <x/> and <g></g> let's see what happen.";
-        $__postInput["translation" ] = "String Xml con <x/> e <g></g> vediamo che fa.";
-
-
-        $check = new QA( $__postInput[ 'segment' ] , $__postInput[ 'translation' ]  );
-        $check->setFeatureSet( $featureSet );
-        $check->setSourceSegLang( "en-US" );
-        $check->setTargetSegLang( "it-IT" );
-        $check->performConsistencyCheck();
-        $targetNormalized = $check->getTrgNormalized();
-
-
-
-
-
         $check = new QA( $pipeline->transform( $this->__postInput[ 'segment' ] ), $pipeline->transform( $this->__postInput[ 'translation' ] ) );
         $check->setFeatureSet( $this->featureSet );
         $check->setSourceSegLang( $this->chunk->source );
