@@ -707,9 +707,11 @@ TRG;
         $check->setSourceSegLang( "en-US" );
         $check->setTargetSegLang( "it-IT" );
         $check->performConsistencyCheck();
+
         $targetNormalized = $check->getTrgNormalized();
 
         $this->assertEquals( $targetNormalized, $translation );
+        $this->assertEquals( $check->getTargetSeg(), $translation );
     }
 }
 

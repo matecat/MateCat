@@ -1030,7 +1030,7 @@ class QA {
      * @return string
      */
     public function getTargetSeg() {
-        return $this->target_seg;
+        return str_replace(self::$emptyHtmlTagsPlaceholder, '', $this->target_seg);
     }
 
     public function getDomMaps() {
