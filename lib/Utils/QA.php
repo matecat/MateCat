@@ -427,6 +427,10 @@ class QA {
 
     protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1,2})\$##/u';
 
+    protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
+
+    protected static $regexForEmptyHtmlTags = '/<([a-zA-Z0-9._-]+)[\s](.*?)><\/\1[\s]*>/u';
+
 
     const ERROR   = 'ERROR';
     const WARNING = 'WARNING';
@@ -849,34 +853,8 @@ class QA {
          *
          * @see getTrgNormalized
          */
-        preg_match_all( self::$regexpAscii, $source_seg, $matches_src );
-        preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
-
-//        Log::doJsonLog($source_seg);
-//        Log::doJsonLog($target_seg);
-
-        if ( !empty( $matches_src[ 1 ] ) ) {
-            $test_src = $source_seg;
-            foreach ( $matches_src[ 1 ] as $v ) {
-                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
-                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
-            }
-            //Source Content wrong use placeholded one
-            $source_seg = $test_src;
-        }
-
-        if ( !empty( $matches_trg[ 1 ] ) ) {
-            $test_trg = $target_seg;
-            foreach ( $matches_trg[ 1 ] as $v ) {
-                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
-                $test_trg = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_trg, 1 );
-            }
-            //Target Content wrong use placeholded one
-            $target_seg = $test_trg;
-        }
-
-//        Log::hexDump($source_seg);
-//        Log::hexDump($target_seg);
+        $source_seg = $this->replaceAscii($source_seg);
+        $target_seg = $this->replaceAscii($target_seg);
 
         /**
          * Do it again for entities because
@@ -886,12 +864,69 @@ class QA {
          * does not works for not printable chars
          *
          */
-        preg_match_all( self::$regexpEntity, $source_seg, $matches_src );
-        preg_match_all( self::$regexpEntity, $target_seg, $matches_trg );
+        $source_seg = $this->replaceEntities($source_seg);
+        $target_seg = $this->replaceEntities($target_seg);
 
-        if ( !empty( $matches_src[ 1 ] ) ) {
-            $test_src = $source_seg;
-            foreach ( $matches_src[ 1 ] as $v ) {
+        /**
+         * We insert a default placeholder inside empty html tags to avoid saveXML() function invoked by getTrgNormalized()
+         * to contract them.
+         *
+         * Example:
+         *
+         * <g id="23"></g> would be contracted to <g ="23"/>
+         */
+        $source_seg = $this->fillEmptyHTMLTagsWithPlaceholder($source_seg);
+        $target_seg = $this->fillEmptyHTMLTagsWithPlaceholder($target_seg);
+
+        $this->source_seg = $source_seg;
+        $this->target_seg = $target_seg;
+
+        $this->srcDom = $this->_loadDom( $source_seg, self::ERR_SOURCE );
+        $this->trgDom = $this->_loadDom( $target_seg, self::ERR_TARGET );
+
+        if ( $this->thereAreErrors() ) {
+            $this->_getTagDiff();
+        }
+
+        $this->_resetDOMMaps();
+
+    }
+
+    /**
+     * @param $seg
+     *
+     * @return string|string[]|null
+     */
+    private function replaceAscii($seg){
+
+        preg_match_all( self::$regexpAscii, $seg, $matches );
+
+        if ( !empty( $matches[ 1 ] ) ) {
+            $test_src = $seg;
+            foreach ( $matches[ 1 ] as $v ) {
+                $key      = "" . sprintf( "%02X", ord( $v ) ) . "";
+                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) . '}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
+            }
+
+            // Source Content wrong use placeholded one
+            $seg = $test_src;
+        }
+
+        return $seg;
+    }
+
+    /**
+     * @param $seg
+     *
+     * @return string|string[]|null
+     */
+    private function replaceEntities($seg) {
+
+        preg_match_all( self::$regexpEntity, $seg, $matches );
+
+        if ( !empty( $matches[ 1 ] ) ) {
+            $test_src = $seg;
+            foreach ( $matches[ 1 ] as $v ) {
                 $byte = sprintf( "%02X", hexdec( $v ) );
                 if ( $byte[ 0 ] == '0' ) {
                     $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
@@ -905,49 +940,33 @@ class QA {
                 }
 
             }
+
             //Source Content wrong use placeholded one
-            $source_seg = $test_src;
+            $seg = $test_src;
         }
 
-        if ( !empty( $matches_trg[ 1 ] ) ) {
-            $test_trg = $target_seg;
-            foreach ( $matches_trg[ 1 ] as $v ) {
-                $byte = sprintf( "%02X", hexdec( $v ) );
-                if ( $byte[ 0 ] == '0' ) {
-                    $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
-                } else {
-                    $regexp = '/&#x(' . $byte . ');/u';
-                }
+        return $seg;
+    }
 
-                $key = "" . sprintf( "%02X", hexdec( $v ) ) . "";
-                if ( array_key_exists( $key, self::$asciiPlaceHoldMap ) ) {
-                    $test_trg = preg_replace( $regexp, self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_trg );
-                }
+    /**
+     * @param $seg
+     *
+     * @return string|string[]
+     */
+    private function fillEmptyHTMLTagsWithPlaceholder($seg) {
 
+        preg_match_all( self::$regexForEmptyHtmlTags, $seg, $matches );
+
+        if ( !empty( $matches[ 0 ] ) ) {
+            foreach ($matches[ 0 ]  as $match){
+                $matches = explode("><", $match);
+                $replacedHtmlTag = $matches[0].'>'.self::$emptyHtmlTagsPlaceholder.'<'.$matches[1];
+
+                $seg = str_replace($match, $replacedHtmlTag, $seg);
             }
-            //Target Content wrong use placeholded one
-            $target_seg = $test_trg;
         }
 
-//        Log::doJsonLog($_POST);
-//        Log::doJsonLog($source_seg);
-//        Log::doJsonLog($target_seg);
-//        Log::hexDump($source_seg);
-//        Log::hexDump($target_seg);
-
-        $this->source_seg = $source_seg;
-        $this->target_seg = $target_seg;
-
-        $this->srcDom = $this->_loadDom( $source_seg, self::ERR_SOURCE );
-        $this->trgDom = $this->_loadDom( $target_seg, self::ERR_TARGET );
-
-
-        if ( $this->thereAreErrors() ) {
-            $this->_getTagDiff();
-        }
-
-        $this->_resetDOMMaps();
-
+        return $seg;
     }
 
     /**
@@ -1012,7 +1031,7 @@ class QA {
      * @return string
      */
     public function getTargetSeg() {
-        return $this->target_seg;
+        return str_replace(self::$emptyHtmlTagsPlaceholder, '', $this->target_seg);
     }
 
     public function getDomMaps() {
@@ -1248,7 +1267,7 @@ class QA {
     protected function _loadDom( $xmlString, $targetErrorType ) {
         libxml_use_internal_errors( true );
         $dom           = new DOMDocument( '1.0', 'utf-8' );
-        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>", LIBXML_NOENT );
+        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>" );
         if ( $trg_xml_valid === false ) {
 
             $errorList = libxml_get_errors();
@@ -2120,16 +2139,15 @@ class QA {
     public function getTrgNormalized() {
 
         if ( !$this->thereAreErrors() ) {
+
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement ), $matches );
 
-//            try {
-//                throw new Exception();
-//            } catch ( Exception $e ){
-//                Log::doJsonLog( "\n" . $this->trgDom->saveXML() );
-//                Log::doJsonLog( $e->getTraceAsString() . "\n\n");
-//            }
+            /**
+             * Remove placeholder from empty HTML tags
+             */
+            $matches[ 1 ] = str_replace(self::$emptyHtmlTagsPlaceholder, '', $matches[ 1 ]);
 
             /**
              * Why i do this?? I'm replacing Placeholders of non printable chars
@@ -2240,7 +2258,7 @@ class QA {
     protected function _checkSymbolConsistency() {
 
         $symbols = [
-                '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '*'
+                '€', '@', '&amp;', '£', '%', '=', self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ], '\\*'
         ];
 
         $specialSymbols = [ '$', '#' ];
@@ -2285,7 +2303,7 @@ class QA {
                     case self::$asciiPlaceHoldMap[ '09' ][ 'placeHold' ]:
                         $this->_addError( self::ERR_TAB_MISMATCH );
                         break;
-                    case '*':
+                    case '\\*':
                         $this->_addError( self::ERR_STARSIGN_MISMATCH );
                         break;
                 }
