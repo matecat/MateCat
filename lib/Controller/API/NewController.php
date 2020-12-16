@@ -617,6 +617,12 @@ class NewController extends ajaxController {
 
         $this->projectStructure = $projectStructure;
 
+        try {
+            json_encode( $projectStructure );
+            Utils::raiseJsonExceptionError();
+        } catch ( Exception $exception ) {
+            Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString() . "\n\n" . var_export( $projectStructure, true ), 'JSON Encode error in new project API controller.' );
+        }
 
         Queue::sendProject( $projectStructure );
 
