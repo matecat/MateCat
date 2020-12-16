@@ -26,7 +26,11 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
     let maxCharsInBlocks = 0;
     blocks.forEach((contentBlock) => {
         maxCharsInBlocks += contentBlock.getLength();
+        let lengthDiff = 0;
+        tagRange.sort((a, b) => {return a.offset-b.offset});
+
         tagRange.forEach( tag =>{
+
             if (tag.offset < maxCharsInBlocks &&
                 (tag.offset + tag.length) <= maxCharsInBlocks &&
                 tag.offset >= (maxCharsInBlocks - contentBlock.getLength()) &&
@@ -37,23 +41,38 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
                 // Each block start with offset = 0 so we have to adapt selection
                 let selectionState = SelectionState.createEmpty(contentBlock.getKey())
                 selectionState = selectionState.merge({
-                    anchorOffset: (tag.offset - (maxCharsInBlocks - contentBlock.getLength())),
-                    focusOffset: ((tag.offset + tag.length) - (maxCharsInBlocks - contentBlock.getLength()))
+                    anchorOffset: (tag.offset - (maxCharsInBlocks - contentBlock.getLength())) - lengthDiff,
+                    focusOffset: ((tag.offset + tag.length) - (maxCharsInBlocks - contentBlock.getLength())) - lengthDiff
                 });
                 // Create entity
                 const {type, mutability, data} = tagEntity;
                 const contentStateWithEntity = contentState.createEntity(type, mutability, data);
                 const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-                // pply entity on the previous selection
-                contentState = Modifier.applyEntity(
+
+                const inlineStyle = contentBlock.getInlineStyleAt(tag.offset);
+                //const inlineStyle = editorState.getCurrentInlineStyle();
+
+                // apply entity on the previous selection
+                /*contentState = Modifier.applyEntity(
                     contentState,
                     selectionState,
                     entityKey
+                );*/
+                // Beautify
+                contentState = Modifier.replaceText(
+                    contentState,
+                    selectionState,
+                    data.placeholder,
+                    inlineStyle,
+                    entityKey
                 );
+
+                lengthDiff +=  (selectionState.focusOffset - selectionState.anchorOffset) - data.placeholder.length;
             }
         });
     });
     return {contentState, tagRange}
 };
+
 
 export default createNewEntitiesFromMap;
