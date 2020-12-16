@@ -967,7 +967,7 @@ var UI = {
         try {
             // Attention, to be modified when we will lock tags
             translation = TagUtils.prepareTextToSend( segment.translation );
-            sourceSegment = TagUtils.prepareTextToSend( segment.segment );
+            sourceSegment = TagUtils.prepareTextToSend( segment.updatedSource );
         } catch ( e ) {
             var indexSegment = UI.executingSetTranslation.indexOf(id_segment);
             if (indexSegment > -1) {
