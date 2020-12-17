@@ -1266,7 +1266,7 @@ class QA {
     protected function _loadDom( $xmlString, $targetErrorType ) {
         libxml_use_internal_errors( true );
         $dom           = new DOMDocument( '1.0', 'utf-8' );
-        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>" );
+        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>", LIBXML_NOENT );
         if ( $trg_xml_valid === false ) {
 
             $errorList = libxml_get_errors();
@@ -1869,6 +1869,24 @@ class QA {
         $dom = new DOMDocument;
         libxml_use_internal_errors(true);
 
+
+        //$sourceBxExGTagMap = $this->extractBxExGTagMap($this->source_seg);
+        $targetBxExGTagMap = $this->extractBxExGTagMap($this->target_seg);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         @$dom->loadHTML($this->target_seg);
         $g = $dom->getElementsByTagName ( 'g' );
 
@@ -1887,6 +1905,111 @@ class QA {
 
         libxml_clear_errors();
     }
+
+    /**
+     * Extract a map of <g>, <bx> and <ex> tag(s) (including nested tags)
+     *
+     * @param $string
+     *
+     * @return array
+     */
+    private function extractBxExGTagMap($string) {
+
+        $map = [];
+
+        $dom = new DOMDocument;
+        libxml_use_internal_errors(true);
+
+        @$dom->loadHTML($string);
+        $html = $dom->getElementsByTagName ( 'body' );
+
+        for ($i=0;$i<$html->length;$i++) {
+            /** @var DOMElement $node */
+            $node = $html->item( $i );
+
+            for ($k=0;$k<$node->childNodes->length;$k++){
+
+                $nodeName = $node->childNodes->item($k)->nodeName;
+
+                // first level of <p> <ex> or <bx>
+                if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ){
+                    $element = new \stdClass();
+                    $element->name = $nodeName;
+                    $element->children = [];
+
+                    $map[$k][] = $element;
+                }
+
+                // check for nested <bx> or <ex> inside <g>
+                if( $nodeName === 'g'  ){
+                    $gNode = $node->childNodes->item($k);
+
+                    for ($j=0;$j<$gNode->childNodes->length;$j++){
+
+                        $nodeName = $gNode->childNodes->item($j)->nodeName;
+
+                        // first level of <p> <ex> or <bx>
+                        if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ){
+                            $element = new \stdClass();
+                            $element->name = $nodeName;
+                            $element->children = [];
+
+                            $map[$k][$j]->children[] = $element;
+                        }
+
+                        // check for nested <bx> or <ex> inside <g>
+                        if( $nodeName === 'g'  ){
+                            $jNode = $gNode->childNodes->item($j);
+
+                            for ($a=0;$a<$jNode->childNodes->length;$a++){
+
+                                $nodeName = $jNode->childNodes->item($a)->nodeName;
+
+                                // first level of <p> <ex> or <bx>
+                                if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ){
+                                    $element = new \stdClass();
+                                    $element->name = $nodeName;
+                                    $element->children = [];
+
+                                    $map[$k][$j]->children[$a]->children[] = $element;
+                                }
+
+                                // check for nested <bx> or <ex> inside <g>
+                                if( $nodeName === 'g'  ){
+                                    $yNode = $jNode->childNodes->item($a);
+
+                                    for ($b=0;$b<$yNode->childNodes->length;$b++){
+                                        $nodeName = $yNode->childNodes->item($b)->nodeName;
+
+                                        // first level of <p> <ex> or <bx>
+                                        if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ){
+                                            $element = new \stdClass();
+                                            $element->name = $nodeName;
+                                            $element->children = [];
+
+                                            $map[$k][$j]->children[$a]->children[$b]->children[] = $element;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $map;
+    }
+
+    private function fdsfds(\DOMElement $node) {
+
+
+    }
+
+
+
+
+
 
     /**
      * Find in a DOMDocument an Element by its Reference
