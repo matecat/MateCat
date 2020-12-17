@@ -635,7 +635,7 @@ CREATE TABLE `project_metadata` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` bigint(20) NOT NULL,
   `key` varchar(255) NOT NULL,
-  `value` varchar(255) NOT NULL,
+  `value` varchar(2048) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_project_and_key` (`id_project`,`key`) USING BTREE,
   KEY `id_project` (`id_project`) USING BTREE
@@ -1300,7 +1300,7 @@ USE `matecat`;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-12-16 14:47:23
+-- Dump completed on 2020-12-17 16:20:22
 
 
 INSERT INTO `engines` VALUES (10,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
@@ -1494,4 +1494,4 @@ INSERT INTO `phinxlog` VALUES (20200921145329,'2020-10-07 18:30:10','2020-10-07 
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-12-16 14:47:23
+-- Dump completed on 2020-12-17 16:20:22
