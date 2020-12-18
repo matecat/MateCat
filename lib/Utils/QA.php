@@ -428,7 +428,7 @@ class QA {
 
     protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
 
-    protected static $regexForEmptyHtmlTags = '/<([a-zA-Z0-9._-]+)[\s](.*?)><\/\1[\s]*>/u';
+    protected static $regexForEmptyHtmlTags = '/<([^ >]+)[^>]*>*</\1>/u';
 
 
     const ERROR   = 'ERROR';
@@ -1866,48 +1866,42 @@ class QA {
      */
     protected function _checkBxAndExInsideG() {
 
-        $dom = new DOMDocument;
-        libxml_use_internal_errors(true);
-
-
-        //$sourceBxExGTagMap = $this->extractBxExGTagMap($this->source_seg);
+        // compare source and target tags maps
+        $sourceBxExGTagMap = $this->extractBxExGTagMap($this->source_seg);
         $targetBxExGTagMap = $this->extractBxExGTagMap($this->target_seg);
 
+        // if the two maps are equals no error will be triggered
+        if($sourceBxExGTagMap !== $targetBxExGTagMap) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-        @$dom->loadHTML($this->target_seg);
-        $g = $dom->getElementsByTagName ( 'g' );
-
-        for ($i=0;$i<$g->length;$i++){
-            /** @var DOMElement $node */
-            $node = $g->item($i);
-
-            for ($k=0;$k<$node->childNodes->length;$k++){
-                $nodeName = $node->childNodes->item($k)->nodeName;
-
-                if( $nodeName === 'ex' or $nodeName === 'bx' ){
-                    $this->_addError( self::ERR_EX_BX_NESTED_IN_G );
-                }
-            }
         }
 
-        libxml_clear_errors();
+        //$this->_addError( self::ERR_EX_BX_NESTED_IN_G );
     }
 
     /**
      * Extract a map of <g>, <bx> and <ex> tag(s) (including nested tags)
+     *
+     * Example:
+     *
+     * <g id="1"><bx id="2"/>Uber</g> Eats n'est pas responsable des contenus tiers.
+     *
+     * is reduced to:
+     *
+     * array (
+     *   0 =>
+     *       stdClass::__set_state(array(
+     *           'name' => 'g',
+     *           'children' =>
+     *               array (
+     *                   0 =>
+     *                       stdClass::__set_state(array(
+     *                           'name' => 'bx',
+     *                           'children' => array (),
+     *                       )),
+     *                   ),
+     *               )
+     *          ),
+     *       )
      *
      * @param $string
      *
@@ -1924,76 +1918,14 @@ class QA {
         $html = $dom->getElementsByTagName ( 'body' );
 
         for ($i=0;$i<$html->length;$i++) {
+
             /** @var DOMElement $node */
             $node = $html->item( $i );
 
             for ($k=0;$k<$node->childNodes->length;$k++){
-
-                $nodeName = $node->childNodes->item($k)->nodeName;
-
-                // first level of <p> <ex> or <bx>
-                if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ){
-                    $element = new \stdClass();
-                    $element->name = $nodeName;
-                    $element->children = [];
-
-                    $map[$k][] = $element;
-                }
-
-                // check for nested <bx> or <ex> inside <g>
-                if( $nodeName === 'g'  ){
-                    $gNode = $node->childNodes->item($k);
-
-                    for ($j=0;$j<$gNode->childNodes->length;$j++){
-
-                        $nodeName = $gNode->childNodes->item($j)->nodeName;
-
-                        // first level of <p> <ex> or <bx>
-                        if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ){
-                            $element = new \stdClass();
-                            $element->name = $nodeName;
-                            $element->children = [];
-
-                            $map[$k][$j]->children[] = $element;
-                        }
-
-                        // check for nested <bx> or <ex> inside <g>
-                        if( $nodeName === 'g'  ){
-                            $jNode = $gNode->childNodes->item($j);
-
-                            for ($a=0;$a<$jNode->childNodes->length;$a++){
-
-                                $nodeName = $jNode->childNodes->item($a)->nodeName;
-
-                                // first level of <p> <ex> or <bx>
-                                if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ){
-                                    $element = new \stdClass();
-                                    $element->name = $nodeName;
-                                    $element->children = [];
-
-                                    $map[$k][$j]->children[$a]->children[] = $element;
-                                }
-
-                                // check for nested <bx> or <ex> inside <g>
-                                if( $nodeName === 'g'  ){
-                                    $yNode = $jNode->childNodes->item($a);
-
-                                    for ($b=0;$b<$yNode->childNodes->length;$b++){
-                                        $nodeName = $yNode->childNodes->item($b)->nodeName;
-
-                                        // first level of <p> <ex> or <bx>
-                                        if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ){
-                                            $element = new \stdClass();
-                                            $element->name = $nodeName;
-                                            $element->children = [];
-
-                                            $map[$k][$j]->children[$a]->children[$b]->children[] = $element;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                $element = $this->appendBxExGTagMapElement($node->childNodes->item($k));
+                if($element){
+                    $map[$k] = $element;
                 }
             }
         }
@@ -2001,15 +1933,34 @@ class QA {
         return $map;
     }
 
-    private function fdsfds(\DOMElement $node) {
+    /**
+     * @param DOMNode $node
+     *
+     * @return stdClass|null
+     */
+    private function appendBxExGTagMapElement( DOMNode $node) {
 
+        $element = null;
+        $nodeName = $node->nodeName;
 
+        if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ) {
+            $element           = new \stdClass();
+            $element->name     = $nodeName;
+            $element->children = [];
+        }
+
+        if( $nodeName === 'g'  ){
+            for ($j=0;$j<$node->childNodes->length;$j++){
+                $children = $this->appendBxExGTagMapElement($node->childNodes->item($j));
+
+                if($children){
+                    $element->children[] = $children;
+                }
+            }
+        }
+
+        return $element;
     }
-
-
-
-
-
 
     /**
      * Find in a DOMDocument an Element by its Reference
