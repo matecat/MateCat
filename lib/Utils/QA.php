@@ -1876,7 +1876,7 @@ class QA {
     }
 
     /**
-     * Extract a map of <g>, <bx> and <ex> tag(s) (including nested tags)
+     * Extract a specific map of <g>, <bx> and <ex> tag(s) (including nested tags)
      *
      * Example:
      *
