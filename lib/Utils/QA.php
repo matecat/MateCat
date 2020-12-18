@@ -951,7 +951,7 @@ class QA {
      */
     private function fillEmptyHTMLTagsWithPlaceholder($seg) {
 
-        preg_match_all('/<([^ >]+)[^>]*>*<\/\1>/', $seg, $matches);
+        preg_match_all('/<([^ >]+)[^>]*><\/\1>/', $seg, $matches);
 
         if ( !empty( $matches[ 0 ] ) ) {
             foreach ($matches[ 0 ]  as $match){
