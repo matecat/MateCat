@@ -428,9 +428,6 @@ class QA {
 
     protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
 
-    protected static $regexForEmptyHtmlTags = '/<([a-zA-Z0-9._-]+)[\s](.*?)><\/\1[\s]*>/u';
-
-
     const ERROR   = 'ERROR';
     const WARNING = 'WARNING';
     const INFO    = 'INFO';
@@ -954,7 +951,7 @@ class QA {
      */
     private function fillEmptyHTMLTagsWithPlaceholder($seg) {
 
-        preg_match_all( self::$regexForEmptyHtmlTags, $seg, $matches );
+        preg_match_all('/<([^ >]+)[^>]*>*<\/\1>/', $seg, $matches);
 
         if ( !empty( $matches[ 0 ] ) ) {
             foreach ($matches[ 0 ]  as $match){
@@ -1266,7 +1263,7 @@ class QA {
     protected function _loadDom( $xmlString, $targetErrorType ) {
         libxml_use_internal_errors( true );
         $dom           = new DOMDocument( '1.0', 'utf-8' );
-        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>" );
+        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>", LIBXML_NOENT );
         if ( $trg_xml_valid === false ) {
 
             $errorList = libxml_get_errors();
