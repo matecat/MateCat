@@ -428,9 +428,6 @@ class QA {
 
     protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
 
-    protected static $regexForEmptyHtmlTags = '/<([^ >]+)[^>]*>*</\1>/u';
-
-
     const ERROR   = 'ERROR';
     const WARNING = 'WARNING';
     const INFO    = 'INFO';
@@ -954,7 +951,7 @@ class QA {
      */
     private function fillEmptyHTMLTagsWithPlaceholder($seg) {
 
-        preg_match_all( self::$regexForEmptyHtmlTags, $seg, $matches );
+        preg_match_all('/<([^ >]+)[^>]*><\/\1>/', $seg, $matches);
 
         if ( !empty( $matches[ 0 ] ) ) {
             foreach ($matches[ 0 ]  as $match){
