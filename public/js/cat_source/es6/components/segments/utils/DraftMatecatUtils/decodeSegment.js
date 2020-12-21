@@ -7,18 +7,17 @@ import {
 /**
  *
  * @param editorState
- * @returns {string}
+ * @returns {}
  */
 const decodeSegment  = (editorState) => {
 
 
     let contentState = editorState.getCurrentContent();
-    // Se non c'è niente da decodare ritorna così
-    if(!contentState.hasText()) return contentState.getPlainText();
+    if(!contentState.hasText()) return {entities: [], decodedSegment: contentState.getPlainText()}
 
     const inlineStyle = editorState.getCurrentInlineStyle();
     const entities = getEntities(editorState); //start - end
-    const entityKeys =  entities.map( entity => entity.entityKey);
+    const entityKeys = entities.map( entity => entity.entityKey);
 
     let lengthDiff = 0;
 
@@ -49,7 +48,8 @@ const decodeSegment  = (editorState) => {
 
         lengthDiff +=  (selectionState.focusOffset - selectionState.anchorOffset) - encodedText.length
     });
-    return contentState.getPlainText().replace(/\n/gi, config.lfPlaceholder);
+    const decodedSegment = contentState.getPlainText().replace(/\n/gi, config.lfPlaceholder);
+    return { entitiesRange: entities, decodedSegment }
 };
 
 export default decodeSegment;

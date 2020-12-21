@@ -24,10 +24,12 @@ const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = ''
     // Apply each entity to the block where it belongs
     const blocks = contentState.getBlockMap();
     let maxCharsInBlocks = 0;
+    tagRange.sort((a, b) => {return a.offset-b.offset});
+
     blocks.forEach((contentBlock) => {
         maxCharsInBlocks += contentBlock.getLength();
         let lengthDiff = 0;
-        tagRange.sort((a, b) => {return a.offset-b.offset});
+
 
         tagRange.forEach( tag =>{
 

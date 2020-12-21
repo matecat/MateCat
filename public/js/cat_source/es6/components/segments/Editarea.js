@@ -180,15 +180,14 @@ class Editarea extends React.Component {
     };
 
     updateTranslationInStore = () => {
-        const translation = DraftMatecatUtils.decodeSegment(this.state.editorState)
-        if ( translation !== '' ) {
+        const {decodedSegment, entitiesRange} = DraftMatecatUtils.decodeSegment(this.state.editorState)
+        if ( decodedSegment !== '' ) {
             const {segment, segment: {sourceTagMap}} = this.props;
-            const {editorState, tagRange} = this.state;
-            const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
+            const {editorState} = this.state;
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
             // Match tag without compute tag id
-            const currentTagRange = DraftMatecatUtils.matchTagInEditor(editorState);
+            const currentTagRange = DraftMatecatUtils.matchTagInEditor(editorState, entitiesRange);
             // Add missing tag to store for highlight warnings on tags
             const {missingTags} = checkForMissingTags(sourceTagMap, currentTagRange);
             const lxqDecodedTranslation = DraftMatecatUtils.prepareTextForLexiqa(editorState);
@@ -591,7 +590,7 @@ class Editarea extends React.Component {
         if(tagRange.length !== entities.length){
             const lastSelection = editorState.getSelection();
             // Aggiorna i tag presenti
-            const decodedSegment = DraftMatecatUtils.decodeSegment(editorState);
+            const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState);
             newTagRange = DraftMatecatUtils.matchTag(decodedSegment); // range update
             // Aggiornamento live dei collegamenti tra i tag non self-closed
             newEditorState = updateEntityData(editorState, newTagRange, lastSelection, entities);
@@ -623,6 +622,45 @@ class Editarea extends React.Component {
     }
 
     onChange = (editorState) =>  {
+
+        const {setClickedTagId} = this.props;
+        const {displayPopover, editorState: prevEditorState, activeDecorators} = this.state;
+        const {closePopover, updateTagsInEditorDebounced} = this;
+
+        const contentChanged = editorState.getCurrentContent().getPlainText() !==
+            prevEditorState.getCurrentContent().getPlainText();
+
+        // if not on an entity, remove any previous selection highlight
+        const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
+        // select no tag
+        if(!entityKey) setClickedTagId();
+        // if opened, close TagsMenu
+        if(displayPopover) closePopover();
+        if(contentChanged){
+            // Stop checking decorators while typing...
+            editorSync.onComposition = true;
+            // ...remove unwanted decorators like lexiqa...
+            if(activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]){
+                editorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
+            }
+            editorState = this.forceSelectionFocus(editorState);
+            this.setState(prevState => ({
+                activeDecorators: {
+                    ...prevState.activeDecorators,
+                    [DraftMatecatConstants.LEXIQA_DECORATOR]: false
+                },
+                editorState: editorState
+            }), () => {
+                // Reactivate decorators
+                this.updateTranslationDebounced();
+            })
+        }else{
+            this.setState({editorState: editorState});
+            this.onCompositionStopDebounced()
+        }
+    }
+
+    /*_onChange = (editorState) =>  {
         const {setClickedTagId} = this.props;
         const {displayPopover, editorState: prevEditorState} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
@@ -654,7 +692,7 @@ class Editarea extends React.Component {
             this.setState({editorState: editorState});
             this.onCompositionStopDebounced()
         }
-    };
+    };*/
 
     // fix cursor jump at the beginning
     forceSelectionFocus = (editorState) => {

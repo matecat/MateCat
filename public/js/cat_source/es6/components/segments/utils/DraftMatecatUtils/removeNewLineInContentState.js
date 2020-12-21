@@ -32,10 +32,9 @@ const removeNewLineInContentState = (editorState) => {
         (matchArray = carriageReturnRegex.exec(blockText)) !== null ||
         (matchArray = lineFeedRegex.exec(blockText)) !== null) {
             // set selection on tag
-            selectionState = new SelectionState({
-                anchorKey: blockKey,
+            let selectionState = SelectionState.createEmpty(blockKey)
+            selectionState = selectionState.merge({
                 anchorOffset: matchArray.index,
-                focusKey: blockKey,
                 focusOffset: matchArray[0].length + matchArray.index
             });
             // update blockText removing the first occurrence of tag found

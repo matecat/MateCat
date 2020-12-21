@@ -174,7 +174,8 @@ class SegmentSource extends React.Component {
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
             const lxqDecodedSource = DraftMatecatUtils.prepareTextForLexiqa(editorState);
-            SegmentActions.updateSource(this.props.segment.sid, DraftMatecatUtils.decodeSegment(this.state.editorState), plainText, tagRange, lxqDecodedSource);
+            const {decodedSegment} = DraftMatecatUtils.decodeSegment(editorState)
+            SegmentActions.updateSource(this.props.segment.sid, decodedSegment, plainText, tagRange, lxqDecodedSource);
         }
     };
 
@@ -439,7 +440,7 @@ class SegmentSource extends React.Component {
 
     splitSegmentNew = (split) => {
         const {editorState} = this.state;
-        let text = DraftMatecatUtils.decodeSegment(editorState);
+        let {decodedSegment: text} = DraftMatecatUtils.decodeSegment(editorState);
         // Prepare text for backend
         text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
         SegmentActions.splitSegment(this.props.segment.original_sid, text, split);
