@@ -14,66 +14,85 @@ import {
  * and the array of the mapped tags.
  */
 const createNewEntitiesFromMap = (editorState, excludedTagsType,  plainText = '') => {
-    let contentState = editorState.getCurrentContent();
-    // If editor content is empty, create new content from plainText
-    if(!contentState.hasText() || plainText !== ''){
-        contentState = ContentState.createFromText(plainText);
-    }
+
     // Compute tag range ( all tags are included, also nbsp, tab, CR and LF)
-    const tagRange = matchTag(contentState.getPlainText());
+    const tagRange = matchTag(plainText); // absolute offset
     // Apply each entity to the block where it belongs
-    const blocks = contentState.getBlockMap();
     let maxCharsInBlocks = 0;
     tagRange.sort((a, b) => {return a.offset-b.offset});
 
-    blocks.forEach((contentBlock) => {
+    const offsetWithEntities = [];
+    let slicedLength = 0;
+
+    // Executre replace with placeholder and adapt offsets
+    tagRange.forEach( tagEntity => {
+        const {placeholder, encodedText} = tagEntity.data;
+        const start = tagEntity.offset - slicedLength;
+        const end  = start + encodedText.length;
+        offsetWithEntities.push({start, tag: tagEntity})
+
+        plainText = plainText.slice(0,start) + placeholder + plainText.slice(end);
+        slicedLength +=  (end - start) - placeholder.length;
+    })
+
+    // Escape html char
+    let positionToSubtract = 0;
+    plainText = plainText.replace(/&lt;/gi, () => {
+        positionToSubtract+= 3;
+        return '<';
+    });
+    plainText = plainText.replace(/&gt;/gi, () => {
+        positionToSubtract+= 3;
+        return '>';
+    });
+
+    if(positionToSubtract > 0) {
+        offsetWithEntities.map(tag => {
+            tag.start -= positionToSubtract;
+            return tag;
+        })
+    }
+
+    // New contentState without entities
+    let plainContentState = ContentState.createFromText(plainText);
+    const blocks = plainContentState.getBlockMap();
+
+    blocks.forEach(contentBlock => {
         maxCharsInBlocks += contentBlock.getLength();
-        let lengthDiff = 0;
 
+        offsetWithEntities.forEach( tagEntity =>{
+            const {start, tag} = tagEntity;
 
-        tagRange.forEach( tag =>{
-
-            if (tag.offset < maxCharsInBlocks &&
-                (tag.offset + tag.length) <= maxCharsInBlocks &&
-                tag.offset >= (maxCharsInBlocks - contentBlock.getLength()) &&
+            if (start < maxCharsInBlocks &&
+                (start + tag.data.placeholder.length) <= maxCharsInBlocks &&
+                start >= (maxCharsInBlocks - contentBlock.getLength()) &&
                 !excludedTagsType.includes(tag.data.name)
-            ) {
+            ){
                 // Clone tag
                 const tagEntity = {...tag};
+                const blockLength = contentBlock.getLength();
                 // Each block start with offset = 0 so we have to adapt selection
                 let selectionState = SelectionState.createEmpty(contentBlock.getKey())
                 selectionState = selectionState.merge({
-                    anchorOffset: (tag.offset - (maxCharsInBlocks - contentBlock.getLength())) - lengthDiff,
-                    focusOffset: ((tag.offset + tag.length) - (maxCharsInBlocks - contentBlock.getLength())) - lengthDiff
+                    anchorOffset: (start - (maxCharsInBlocks - blockLength)),
+                    focusOffset: ((start + tag.data.placeholder.length) - (maxCharsInBlocks - blockLength))
                 });
                 // Create entity
                 const {type, mutability, data} = tagEntity;
-                const contentStateWithEntity = contentState.createEntity(type, mutability, data);
+                const contentStateWithEntity = plainContentState.createEntity(type, mutability, data);
                 const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
 
-                const inlineStyle = contentBlock.getInlineStyleAt(tag.offset);
-                //const inlineStyle = editorState.getCurrentInlineStyle();
-
-                // apply entity on the previous selection
-                /*contentState = Modifier.applyEntity(
-                    contentState,
+                // apply entity
+                plainContentState = Modifier.applyEntity(
+                    contentStateWithEntity,
                     selectionState,
-                    entityKey
-                );*/
-                // Beautify
-                contentState = Modifier.replaceText(
-                    contentState,
-                    selectionState,
-                    data.placeholder,
-                    inlineStyle,
                     entityKey
                 );
-
-                lengthDiff +=  (selectionState.focusOffset - selectionState.anchorOffset) - data.placeholder.length;
             }
-        });
-    });
-    return {contentState, tagRange}
+        })
+    })
+
+    return {contentState: plainContentState, tagRange}
 };
 
 

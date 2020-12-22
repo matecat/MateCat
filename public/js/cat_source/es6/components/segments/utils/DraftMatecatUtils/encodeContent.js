@@ -47,8 +47,8 @@ const encodeContent = (originalEditorState, plainText = '') => {
     //editorState = EditorState.push(editorState, contentState, 'insert-characters');
 
     // Unescape residual html entities after tag identification
-    editorState = replaceOccurrences(editorState, '&lt;', '<');
-    editorState = replaceOccurrences(editorState, '&gt;', '>');
+    //editorState = replaceOccurrences(editorState, '&lt;', '<');
+    //editorState = replaceOccurrences(editorState, '&gt;', '>');
 
     // Move selection at the end without focusing (for source)
     editorState = EditorState.moveSelectionToEnd(editorState);
