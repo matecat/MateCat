@@ -15,41 +15,29 @@ const decodeSegment  = (editorState) => {
     let contentState = editorState.getCurrentContent();
     if(!contentState.hasText()) return {entities: [], decodedSegment: contentState.getPlainText()}
 
-    const inlineStyle = editorState.getCurrentInlineStyle();
-    const entities = getEntities(editorState); //start - end
-    const entityKeys = entities.map( entity => entity.entityKey);
+    const entities = getEntities(editorState).sort((a, b) => a.start-b.start); //start - end
 
-    let lengthDiff = 0;
+    // Adapt offset from block to absolute
+    const blocks = contentState.getBlockMap();
+    let plainEditorText = contentState.getPlainText();
+    let totalBlocksLength = 0;
+    let slicedLength = 0;
+    blocks.forEach( block => {
+        entities.forEach( tagEntity => {
+            const {encodedText} = tagEntity.entity.data;
+            // add previous block length and previous replace length diff
+            const start = tagEntity.start + totalBlocksLength - slicedLength;
+            const end  = tagEntity.end + totalBlocksLength - slicedLength;
+            plainEditorText = plainEditorText.slice(0,start) + encodedText + plainEditorText.slice(end);
+            slicedLength +=  (end - start) - encodedText.length;
+        })
+        // Block lenght plus newline char
+        totalBlocksLength += block.getLength() + 1
+    })
 
-    entityKeys.forEach( key => {
-        // Update entities and blocks cause previous cycle updated offsets
-        // LAZY NOTE: entity.start and entity.end are block-based
-        //let entitiesInEditor = getEntities(editorStateClone);
-        // Filter only looped tag and get data
-        // Todo: add check on tag array length
-        const tagEntity = entities.filter( entity => entity.entityKey === key)[0];
-        const {encodedText} = tagEntity.entity.data;
-        // Get block-based selection
-        let selectionState = SelectionState.createEmpty(tagEntity.blockKey)
-        selectionState = selectionState.merge({
-            anchorOffset: tagEntity.start - lengthDiff,
-            focusOffset: tagEntity.end - lengthDiff
-        });
-        // Replace text of entity with original text and delete entity key
-        contentState = Modifier.replaceText(
-            contentState,
-            selectionState,
-            encodedText,
-            inlineStyle,
-            null
-        );
-        // Update contentState
-        //editorStateClone = EditorState.set(editorStateClone, {currentContent: contentState});
+    const decodedSegmentPlain = plainEditorText.replace(/\n/gi, config.lfPlaceholder);
 
-        lengthDiff +=  (selectionState.focusOffset - selectionState.anchorOffset) - encodedText.length
-    });
-    const decodedSegment = contentState.getPlainText().replace(/\n/gi, config.lfPlaceholder);
-    return { entitiesRange: entities, decodedSegment }
+    return { entitiesRange: entities, decodedSegment: decodedSegmentPlain }
 };
 
 export default decodeSegment;
