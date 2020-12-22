@@ -1,5 +1,6 @@
 <?php
 
+use BxExG\Mapper;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\RestoreXliffTagsForView;
 
@@ -248,6 +249,8 @@ class QA {
     const ERR_SYMBOL_MISMATCH = 1200;
 
     const ERR_EX_BX_NESTED_IN_G = 1300;
+    const ERR_EX_BX_WRONG_POSITION = 1301;
+    const ERR_EX_BX_COUNT_MISMATCH = 1302;
 
     const SMART_COUNT_PLURAL_MISMATCH = 2000;
     const SMART_COUNT_MISMATCH = 2001;
@@ -351,6 +354,8 @@ class QA {
             1200 => 'Symbol mismatch',
 
             1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
+            1301 => 'Wrong <ex> and/or <bx> placement',
+            1302 => '<ex>, <bx> and/or <g> total count mismatch',
 
             2000 => 'Smart count plural forms mismatch',
             2001 => '%smartcount tag count mismatch',
@@ -490,11 +495,25 @@ class QA {
                         'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ] );
                 break;
+            case self::ERR_EX_BX_COUNT_MISMATCH:
+                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_COUNT_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_COUNT_MISMATCH )
+                ] );
+                break;
             case self::ERR_EX_BX_NESTED_IN_G:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
                         'outcome' => self::ERR_EX_BX_NESTED_IN_G,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
+                ] );
+                break;
+            case self::ERR_EX_BX_WRONG_POSITION:
+                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_WRONG_POSITION,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_WRONG_POSITION ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_WRONG_POSITION )
                 ] );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
@@ -1860,103 +1879,17 @@ class QA {
 
     /**
      * Perform a check for <bx> and/or <ex> tag(s) inside a <g> tag
+     *
+     * Please see the corresponding documentation on \BxExG\Validator class
      */
     protected function _checkBxAndExInsideG() {
 
-        // compare source and target tags maps
-        $sourceBxExGTagMap = $this->extractBxExGTagMap($this->source_seg);
-        $targetBxExGTagMap = $this->extractBxExGTagMap($this->target_seg);
+        $bxExGValidator = new \BxExG\Validator($this);
+        $errors = $bxExGValidator->validate();
 
-        // if the two maps are equals no error will be triggered
-        if($sourceBxExGTagMap !== $targetBxExGTagMap) {
-
+        foreach ($errors as $error){
+            $this->_addError( $error );
         }
-
-        //$this->_addError( self::ERR_EX_BX_NESTED_IN_G );
-    }
-
-    /**
-     * Extract a specific map of <g>, <bx> and <ex> tag(s) (including nested tags)
-     *
-     * Example:
-     *
-     * <g id="1"><bx id="2"/>Uber</g> Eats n'est pas responsable des contenus tiers.
-     *
-     * is reduced to:
-     *
-     * array (
-     *   0 =>
-     *       stdClass::__set_state(array(
-     *           'name' => 'g',
-     *           'children' =>
-     *               array (
-     *                   0 =>
-     *                       stdClass::__set_state(array(
-     *                           'name' => 'bx',
-     *                           'children' => array (),
-     *                       )),
-     *                   ),
-     *               )
-     *          ),
-     *       )
-     *
-     * @param $string
-     *
-     * @return array
-     */
-    private function extractBxExGTagMap($string) {
-
-        $map = [];
-
-        $dom = new DOMDocument;
-        libxml_use_internal_errors(true);
-
-        @$dom->loadHTML($string);
-        $html = $dom->getElementsByTagName ( 'body' );
-
-        for ($i=0;$i<$html->length;$i++) {
-
-            /** @var DOMElement $node */
-            $node = $html->item( $i );
-
-            for ($k=0;$k<$node->childNodes->length;$k++){
-                $element = $this->appendBxExGTagMapElement($node->childNodes->item($k));
-                if($element){
-                    $map[$k] = $element;
-                }
-            }
-        }
-
-        return $map;
-    }
-
-    /**
-     * @param DOMNode $node
-     *
-     * @return stdClass|null
-     */
-    private function appendBxExGTagMapElement( DOMNode $node) {
-
-        $element = null;
-        $nodeName = $node->nodeName;
-
-        if( $nodeName === 'g' or $nodeName === 'ex' or $nodeName === 'bx' ) {
-            $element           = new \stdClass();
-            $element->name     = $nodeName;
-            $element->children = [];
-        }
-
-        if( $nodeName === 'g'  ){
-            for ($j=0;$j<$node->childNodes->length;$j++){
-                $children = $this->appendBxExGTagMapElement($node->childNodes->item($j));
-
-                if($children){
-                    $element->children[] = $children;
-                }
-            }
-        }
-
-        return $element;
     }
 
     /**
