@@ -1138,10 +1138,9 @@ const SegmentActions = {
             plainText
         });
     },
-    focusOnSegment: function (sid, focused = false) {
+    editAreaChanged: function (sid) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.SEGMENT_FOCUSED,
-            focused,
+            actionType: EditAreaConstants.EDIT_AREA_CHANGED,
             sid
         });
     }

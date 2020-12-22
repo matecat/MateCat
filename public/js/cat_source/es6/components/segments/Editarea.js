@@ -603,6 +603,8 @@ class Editarea extends React.Component {
 
     onCompositionStop = () => {
         editorSync.onComposition = false;
+        // Tell tags to update themself
+        setTimeout(( ) =>{ SegmentActions.editAreaChanged(this.props.segment.sid); });
     }
 
     removeDecorator = (decoratorName) => {

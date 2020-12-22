@@ -1104,6 +1104,7 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.SET_SEGMENT_WARNINGS: // LOCAL
             SegmentStore.setSegmentWarnings(action.sid, action.warnings, action.tagMismatch);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_WARNINGS, action.sid);
             break;
         case SegmentConstants.UPDATE_GLOBAL_WARNINGS:
             SegmentStore.updateGlobalWarnings(action.warnings);
@@ -1212,14 +1213,14 @@ AppDispatcher.register(function (action) {
         case EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD:
             SegmentStore.copyFragmentToClipboard(action.fragment, action.plainText);
             break;
-        case SegmentConstants.SEGMENT_FOCUSED:
-            SegmentStore.emitChange(SegmentConstants.SEGMENT_FOCUSED, action.sid, action.focused)
-            break;
         case SegmentConstants.SET_GUESS_TAGS:
             SegmentStore.setTagProjectionStatus(action.enabled);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             const current = SegmentStore.getCurrentSegment();
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, current.sid);
+            break;
+        case EditAreaConstants.EDIT_AREA_CHANGED:
+            SegmentStore.emitChange(EditAreaConstants.EDIT_AREA_CHANGED, action.sid);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

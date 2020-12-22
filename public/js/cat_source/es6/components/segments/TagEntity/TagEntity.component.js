@@ -3,17 +3,18 @@ import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
 import {tagSignatures, getTooltipTag} from "../utils/DraftMatecatUtils/tagModel";
 import SegmentStore from "../../../stores/SegmentStore";
 import SegmentConstants from "../../../constants/SegmentConstants";
+import EditAreaConstants from "../../../constants/EditAreaConstants";
 
 class TagEntity extends Component {
     constructor(props) {
         super(props);
         this.state = {
             showTooltip: false,
-            tagStyle: '',
+            tagStyle: this.selectCorrectStyle(),
+            tagWarningStyle: this.highlightOnWarnings(),
             tagFocusedStyle: '',
-            tagWarningStyle: ''
         };
-        this.warningCheck = null;
+
     }
 
     tooltipToggle = (show = false) => {
@@ -42,38 +43,27 @@ class TagEntity extends Component {
         return text;
     };
 
-    startChecks = (sid, focused) => {
+    startChecksOnDemand = (sid, focused) => {
         const { sid:  currentSid } = this.props.getUpdatedSegmentInfo();
-        if (sid === currentSid && !this.warningCheck && focused){
-            this.warningCheck = setInterval(() => {
-                this.updateTagStyle();
-            }, 500);
-        } else if (this.warningCheck && sid === currentSid && !focused) {
-            clearInterval(this.warningCheck);
-            this.warningCheck = null;
+        if (sid === currentSid ){
             this.updateTagStyle();
         }
     }
 
     componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.SEGMENT_FOCUSED, this.startChecks);
-        // Update style once
-        this.updateTagStyle();
+        //console.log('mount', this.props.start, this.props.end)
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_WARNINGS, this.updateWarningTagStyle);
+        SegmentStore.addListener(EditAreaConstants.EDIT_AREA_CHANGED, this.updateTagStyle);
     }
 
     componentDidUpdate() {
-        const { segmentOpened } = this.props.getUpdatedSegmentInfo();
-        // if segment already opened, start interval anyway
-        if (segmentOpened && !this.warningCheck){
-            this.warningCheck = setInterval(() => {
-                this.updateTagStyle();
-            }, 500);
-        }
+        //console.log('update')
     }
 
     componentWillUnmount() {
-        this.warningCheck && clearInterval(this.warningCheck);
-        SegmentStore.removeListener(SegmentConstants.SEGMENT_FOCUSED, this.startChecks);
+        //console.log('unmount', this.props.start, this.props.end)
+        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_WARNINGS, this.updateWarningTagStyle);
+        SegmentStore.removeListener(EditAreaConstants.EDIT_AREA_CHANGED, this.updateTagStyle);
     }
 
     render() {
@@ -126,7 +116,12 @@ class TagEntity extends Component {
 
     updateTagStyle = () => {
         this.setState({
-            tagStyle: this.selectCorrectStyle(),
+            tagStyle: this.selectCorrectStyle()
+        })
+    };
+
+    updateWarningTagStyle = () => {
+        this.setState({
             tagWarningStyle: this.highlightOnWarnings()
         })
     };
