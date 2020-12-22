@@ -5,10 +5,8 @@
 import keyMirror  from 'keymirror';
 
 module.exports = keyMirror({
-    HIGHLIGHT_EDITAREA: null,
     RENDER_SEGMENTS: null,
     ADD_SEGMENTS: null,
-    SPLIT_SEGMENT: null,
     ADD_SEGMENT_CLASS: null,
     ADD_SEGMENTS_CLASS: null,
     REMOVE_SEGMENT_CLASS: null,
@@ -22,6 +20,8 @@ module.exports = keyMirror({
     REPLACE_SOURCE: null,
     MODIFIED_TRANSLATION: null,
     UPDATE_TRANSLATION: null,
+    SET_SEGMENT_ORIGINAL_TRANSLATION: null,
+    UPDATE_SOURCE: null,
     ADD_EDITAREA_CLASS: null,
     TRANSLATION_EDITED: null,
     UPDATE_ALL_SEGMENTS:null,
@@ -40,8 +40,6 @@ module.exports = keyMirror({
     CHANGE_GLOSSARY: null,
     DELETE_FROM_GLOSSARY: null,
     ADD_GLOSSARY_ITEM: null,
-    SET_SEGMENT_ORIGINAL_TRANSLATION: null,
-    // MOUNT_TRANSLATIONS_ISSUES: null,
     SET_SEGMENT_TAGGED: null,
     SHOW_SELECTION: null,
     OPEN_ISSUES_PANEL: null,
@@ -65,8 +63,6 @@ module.exports = keyMirror({
     REMOVE_MUTED_SEGMENTS: null,
     FIND_CONCORDANCE: null,
     CONCORDANCE_RESULT: null,
-    DISABLE_TAG_LOCK: null,
-    ENABLE_TAG_LOCK: null,
     SET_SEGMENT_WARNINGS: null,
     UPDATE_GLOBAL_WARNINGS: null,
     QA_LEXIQA_ISSUES: null,
@@ -102,5 +98,7 @@ module.exports = keyMirror({
     UPDATE_CURSOR: null,
     FORCE_UPDATE: null,
     FORCE_UPDATE_SEGMENT: null,
-    UPDATE_SEARCH: null
+    UPDATE_SEARCH: null,
+    SEGMENT_FOCUSED: null,
+    SET_GUESS_TAGS: null
 });
