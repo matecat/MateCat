@@ -1962,6 +1962,9 @@ class ProjectManager {
                             //increment counter for word count
                             $this->files_word_count += $wordCount;
 
+                            //increment the counter for not empty segments
+                            $_fileCounter_Show_In_Cattool += $show_in_cattool;
+
                         } // end foreach seg-source
 
                         if ( self::notesAllowedByMimeType( $mimeType ) ) {
@@ -2022,8 +2025,8 @@ class ProjectManager {
                             $segmentHash = md5($dataRefReplacer->replace($xliff_trans_unit[ 'source' ][ 'raw-content' ]));
 
                             $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
-                                'data'             => $segmentOriginalData,
-                                'replaced_segment' => $dataRefReplacer->replace( $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) ),
+                                    'data'             => $segmentOriginalData,
+                                    'replaced_segment' => $dataRefReplacer->replace( $this->filter->fromRawXliffToLayer0( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ) ),
                             ] );
 
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
@@ -2046,13 +2049,10 @@ class ProjectManager {
                         //increment counter for word count
                         $this->files_word_count += $wordCount;
 
+                        //increment the counter for not empty segments
+                        $_fileCounter_Show_In_Cattool += $show_in_cattool;
                     }
-
                 }
-
-                //increment the counter for not empty segments
-                $_fileCounter_Show_In_Cattool += $show_in_cattool;
-
             }
 
             $this->total_segments += count( $xliff_file[ 'trans-units' ] );

@@ -617,7 +617,6 @@ class NewController extends ajaxController {
 
         $this->projectStructure = $projectStructure;
 
-
         Queue::sendProject( $projectStructure );
 
         $this->_pollForCreationResult();
