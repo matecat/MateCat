@@ -217,6 +217,11 @@ class SegmentsFilter extends React.Component {
         SegmentActions.setBulkSelectionSegments(this.state.segmentsArray.slice(0));
     }
 
+    unlockAllSegments(event) {
+        event.stopPropagation();
+        SegmentActions.unlockSegments(this.state.segmentsArray.slice(0));
+    }
+
     setFilter(data, state) {
         if ( _.isUndefined(state) ) {
             this.setState({
@@ -440,6 +445,11 @@ class SegmentsFilter extends React.Component {
                             <div className="select-all-filter">
                                 <button href="#" ref={(button)=>this.selectAllButton=button} onClick={(event)=>this.selectAllSegments(event)}>Select All</button>
                             </div>
+                            ): (null)}
+                            {this.state.filteredCount > 0 && this.state.samplingType === 'ice' ? (
+                                <div className="select-all-filter">
+                                    <button href="#" ref={(button)=>this.unlockIce=button} onClick={(event)=>this.unlockAllSegments(event)} >Unlock All</button>
+                                </div>
                             ): (null)}
                         </div>
                         ) : (null)}

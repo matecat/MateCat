@@ -442,6 +442,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         this._segments = this._segments.setIn([index, 'unlocked'], unlocked);
     },
 
+    unlockSegments: function ( segments ) {
+        segments.forEach((sid)=>{
+            let index = this.getSegmentIndex(sid);
+            if (index === -1) return;
+            this._segments = this._segments.setIn([index, 'unlocked'], true);
+        });
+    },
+
     setConcordanceMatches: function (sid, matches, errors) {
         const index = this.getSegmentIndex(sid);
         if (index === -1) return;
@@ -1103,6 +1111,10 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.SET_UNLOCKED_SEGMENT:
             SegmentStore.setUnlockedSegment(action.sid, action.fid, action.unlocked);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments, action.fid);
+            break;
+        case SegmentConstants.SET_UNLOCKED_SEGMENTS:
+            SegmentStore.unlockSegments(action.segments);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             break;
         case SegmentConstants.SET_MUTED_SEGMENTS:
             SegmentStore.setMutedSegments(action.segmentsArray);

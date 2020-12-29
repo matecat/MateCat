@@ -203,6 +203,16 @@
     ,
         {
             "localized":[{
+                "en":"Bihari"
+            }],
+            "isocode":"bh",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"bh-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Bislama"
             }],
             "isocode":"bi",
@@ -1074,6 +1084,16 @@
     ,
         {
             "localized":[{
+                "en":"Kashmiri"
+            }],
+            "isocode":"ks",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ks-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Kazakh"
             }],
             "isocode":"kk",
@@ -1636,6 +1656,16 @@
     ,
         {
             "localized":[{
+                "en":"Pali"
+            }],
+            "isocode":"pi",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"pi-IN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Punjabi"
             }],
             "isocode":"pa",
@@ -1833,6 +1863,16 @@
             "enabled":false,
             "rtl":false,
             "rfc3066code":"sg-SG"
+        }
+    ,
+	{
+            "localized":[{
+                "en":"Sanskrit"
+            }],
+            "isocode":"sa",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"sa-IN"
         }
     ,
         {
