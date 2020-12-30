@@ -1,121 +1,193 @@
-/*
- ==============================
-        LEXIQA OVERRIDES
- ==============================
- */
 
-#lexiqabox {   
-    text-align: center;
-    width: 60px;
-    padding-top: 6px;
-    margin-right: -10px;
-}
-
-#lexiqabox .numbererror {
-    background-color: #efda35;
-    color: #333;
-    border: 1px solid #fff;
-    font-weight: bold;
-    margin-left: 4px;
-    margin-top: 4px;
-}
 
 /*
  ==============================
-        POWERTIP STYLING
+        Tooltip STYLING
  ==============================
  */
-#powerTip {
-	/*background-color: #efefef;
-    color: #333;
-    border: 1px solid #efefef;
-	border-radius: 0; 
-	font-family: 'Open Sans', sans-serif;*/
-	/*font-weight: 100;
-	font-size: 0.8rem;*/
-    /*background-color: #4D4D4D;*/
-	line-height: 1.5rem;
-	padding: 0;
-    /*border: 1px solid #046380;*/
-    /*-webkit-transform: scale(1,1);
-            transform: scale(1,1);
-    -webkit-transition-property: -webkit-transform;
-    transition-property: -webkit-transform;
-    transition-property: transform;
-    transition-property: transform, -webkit-transform;
-    -webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
-            transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);*/
-}
-
-#powerTip .tooltip-error-wrapper {
+.lexiqa-tooltip {
+    position: absolute;
+    z-index: 1001;
+    padding: 0 4px;
+    bottom: 32px;
+    left:50%;
+    transform: translateX(-50%);
+    width: max-content; //240px;
+    background-color: #fff;
+    border-radius: 4px;
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: column;
+    -webkit-box-pack: justify;
+    -moz-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: flex-end;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    font-size: 12px;
+    -webkit-box-shadow: 0px 2px 4px 0px rgba(34, 36, 38, 0.12), 0px 2px 10px 0px rgba(34, 36, 38, 0.15);
+    -moz-box-shadow: 0px 2px 4px 0px rgba(34, 36, 38, 0.12), 0px 2px 10px 0px rgba(34, 36, 38, 0.15);
+    box-shadow: 0px 2px 4px 0px rgba(34, 36, 38, 0.12), 0px 2px 10px 0px rgba(34, 36, 38, 0.15);
+    &:after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -10px;
+        box-shadow: 4px 4px 4px 0px rgba(34, 36, 38, 0.12), 8px 8px 10px 0px rgba(34, 36, 38, 0.15); //1px 1px 2px 0px rgba(34, 36, 38, 0.12)
+        width: 14px;
+        height: 14px;
+        transform: rotate(45deg) translateX(-50%);
+        background: #ffffff;
+    }
+
+    .tooltip-error-wrapper {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -webkit-flex-direction: column;
         -ms-flex-direction: column;
-            flex-direction: column;
-    -webkit-flex-wrap: wrap;
+        flex-direction: column;
+        -webkit-flex-wrap: wrap;
         -ms-flex-wrap: wrap;
-            flex-wrap: wrap;
-}
-
-#powerTip .tooltip-error-container {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: horizontal;
-    -webkit-box-direction: normal;
-    -webkit-flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .tooltip-error-container {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-orient: horizontal;
+        -webkit-box-direction: normal;
+        -webkit-flex-direction: row;
         -ms-flex-direction: row;
-            flex-direction: row;
-    -webkit-flex-wrap: wrap;
+        flex-direction: row;
+        -webkit-flex-wrap: wrap;
         -ms-flex-wrap: wrap;
-            flex-wrap: wrap;
-    -webkit-box-align: end;
-    -webkit-align-items: flex-end;
-        -ms-flex-align: end;
-            align-items: flex-end;
-    -webkit-box-pack: end;
-    -webkit-justify-content: flex-end;
-        -ms-flex-pack: end;
-            justify-content: flex-end;
-    max-width: 100%;
-    /*border-bottom: 1px solid #fff;*/
-}
+        flex-wrap: wrap;
+        -webkit-box-align: center;
+        -webkit-align-items: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: justify;
+        -moz-box-pack: justify;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        width: 100%;
+        line-height: 1.45;
+        /*border-bottom: 1px solid #fff;*/
+        .tooltip-error-category {
+            padding: 0.5rem;
+            max-width: 148px;
+            &::first-letter {
+                text-transform: capitalize;
+            }
+        }
+        .tooltip-error-ignore {
+            color: #757575;
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 0 4px 4px 0;
+            padding-left: 10px;
+            height: 40px;
+            &:hover {
+                color: #525252;
+            }
+            .icon-cancel-circle:before {
+                line-height: 40px;
+                float: left;
+                font-size: 18px;
+            }
+            .tooltip-error-ignore-text {
+                margin-left: 5px;
+                margin-right: 10px;
+                float: left;
+                line-height: 40px;
+            }
+        }
+        &:not(:first-child) {
+            border-top: 1px solid rgba(255, 255, 255, 0.36);
+        }
 
-#powerTip .tooltip-error-category {
-    padding: 0.5rem;
+    }
 }
+/*
+ ==============================
+        Highlight STYLING
+ ==============================
+ */
+.lexiqahighlight {
+    display: inline-block;
+    position: relative;
+    /*
+     ******
+     Display and visibility helpers
+     ******
+     */
+    .lxq-hide {
+        display: none !important;
+    }
 
-#powerTip .tooltip-error-ignore {
-    color: #757575;
-    text-decoration: none;
-    cursor: pointer;
-    border-radius: 0 4px 4px 0;
-    padding-left: 10px;
-    height: 40px;
-}
+    .lxq-visible {
+        display: block !important;
+    }
 
-#powerTip .tooltip-error-ignore:hover {
-    color: #525252;
-}
-.tooltip-error-container:not(:first-child) {
-    border-top: 1px solid rgba(255, 255, 255, 0.36);
-}
+    .n0 {
+        background-color: #D08053;
+    }
 
-.tooltip-error-ignore .icon-cancel-circle:before {
-    line-height: 40px;
-    float: left;
-    font-size: 18px;
-}
+    .p0 {
+        background-color: #65C783
+    }
 
-.tooltip-error-ignore-text {
-    margin-left: 5px;
-    margin-right: 10px;
-    float: left;
-    line-height: 40px;
+    .c0 {
+        background-color: #65C783;
+    }
+
+    .u0 {
+        background-color: #b8a300;
+    }
+
+    .s0 {
+        background-color: #38C0C5;
+    }
+
+    .l0 {
+        background-color: #B792E6;
+    }
+
+    .b0 {
+        text-decoration: line-through;
+    }
+
+    .g0 {
+        text-decoration: underline;
+    }
+
+    .d0 {
+        border-bottom: 2px red dotted;
+    }
+
+    .o0 {
+        background-color: rgba(#209FAA, .75);
+    }
+
+    .m {
+        background-color: #EA92B8;
+    }
+
+    .m, .l0, .p0, .c0, .u0, .s0 .g0 {
+        padding: 0.1rem 0.2rem;
+    }
+
+    /*.m, .l1, .l2, .l3, .l4, .n1, .n2, .n3, .n4, .p1, .p2, .p2sub1, .p2sub2, .p3, .p3sub1, .p4, .p5, .p6, .p7, .p8,
+    .c1, .c2, .c3, .c2sub1, .c3sub1, .c4, .c5, .u1, .u2, .u3, .u4, .u5, .s1, .s2, .s3, .s3sub1, .s3sub1, .s4, .s5 {
+        padding: 0.1rem 0.2rem;
+    }*/
 }

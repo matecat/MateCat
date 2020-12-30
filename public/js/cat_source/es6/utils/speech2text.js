@@ -121,7 +121,7 @@ Speech2Text.init  = function () {
 
                 if (Speech2Text.shouldEmptyTargetElement( segment )) {
                     Speech2Text.finalTranscript = '';
-                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), UI.getSegmentFileId(Speech2Text.targetElement), '');
+                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(Speech2Text.targetElement), '');
                     // Speech2Text.targetElement.html('');
                 } else {
 
@@ -187,8 +187,8 @@ Speech2Text.init  = function () {
                     var html  = Speech2Text.linebreak(Speech2Text.finalTranscript)
                         + Speech2Text.linebreak(Speech2Text.interimTranscript);
                     let sid = UI.getSegmentId(Speech2Text.targetElement);
-                    SegmentActions.replaceEditAreaTextContent(sid, UI.getSegmentFileId(Speech2Text.targetElement), html);
-                    SegmentActions.modifiedTranslation(sid, null, true);
+                    SegmentActions.replaceEditAreaTextContent(sid, html);
+                    SegmentActions.modifiedTranslation(sid, true);
                 }
             },
             linebreak: function (s) {

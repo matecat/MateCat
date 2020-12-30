@@ -22,10 +22,8 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component{
         e.preventDefault();
         e.stopPropagation();
         $(this.button).addClass('open');
-        SegmentActions.closeIssuesPanel();
-        if (!this.props.open) {
-            SegmentActions.openIssuesPanel({sid: this.props.sid}, true);
-        }
+        SegmentActions.openIssuesPanel({sid: this.props.sid}, true);
+
 
     }
 

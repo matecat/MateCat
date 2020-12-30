@@ -38,7 +38,6 @@ class AnalyzeChunksResume extends React.Component {
 		let job = project.get('jobs').find((item) => {
 			return item.get('id') == id;
 		});
-		console.log(id)
 		ModalsActions.openSplitJobModal(job, project, UI.reloadAnalysis);
 	}
 

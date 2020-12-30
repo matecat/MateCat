@@ -49,7 +49,7 @@ header .wrapper {
 .text .source.item,
 .text .target.item,
 .white li {
-    width: 45.5%;
+    width: 45%;
     table-layout: fixed;
     float: left;
     padding: 3px 1%;
@@ -1291,6 +1291,7 @@ section .body > .text {
     position: relative;
     float: left;
     min-height: 88px;
+    height: 100%;
 }
 
 /*.text {
@@ -1307,6 +1308,9 @@ body #file section:not(.editor) {
     background: $grey3;
     cursor: pointer;
     border: 1px solid $grey2 !important;
+    .body {
+        height: 100%;
+    }
 }
 
 #file section:not(.editor) .text:first-child {
@@ -2195,10 +2199,10 @@ section.editor.slide-right .sid {
     /*display: inline-block;*/
     /*float:right;*/
     width: 100%;
-    height: 96%;
+    //height: 96%;
     min-height: 54px;
     resize: none;
-    overflow: hidden;
+    //overflow: hidden;
     margin: 2px 0 0px -11px;
     padding: 5px;
     color: #4d4d4f;
@@ -2278,9 +2282,6 @@ body.archived section {
 section.readonly .status-container a.status:hover,
 body.archived section .status-container a.status:hover {
     cursor: default !important;
-}
-.editarea div:last-child {
-    margin-bottom: -22px !important;
 }
 
 .editor .editarea {
@@ -2677,15 +2678,18 @@ body.rtl-target .editor .editarea span {
 .graysmall:hover {
     background: $grey5;
     cursor: default;
+    .tag {
+        opacity: 1;
+    }
 }
 
 .graysmall.notEditable:hover {
     /*background: #999;*/
 }
 
-.graysmall:hover li span {
+/*.graysmall:hover li span {
     color: #000 !important
-}
+}*/
 
 .sub-editor.glossary .glossary-item {
     float: right;
@@ -3830,7 +3834,7 @@ section .toolbar .autofillTag {
     float: left;
     font-size: 60%;
     text-decoration: none;
-    display: none;
+    display: block;
 }
 
 .editToolbar {
@@ -4463,6 +4467,10 @@ body.cattool .mgmt-table-mt .activemt {
     }
 }
 
+.splitContainer .source.item {
+    width: 100% !important;
+}
+
 .splitBar p,
 .splitBar .splitNum {
     float: left;
@@ -4470,7 +4478,7 @@ body.cattool .mgmt-table-mt .activemt {
 }
 
 .splitBar .splitNum {
-    display: none;
+    /*display: none;*/
     margin-top: 7px;
 }
 
@@ -4588,7 +4596,7 @@ section .segment-side-buttons {
 
 /*Editor Toggle*/
 .editor .toggle {
-    display: inline-block;
+    //display: inline-block;
     margin-right: 0;
     z-index: 0;
     position: relative;
@@ -5400,6 +5408,3 @@ header {
         }
     }
 }
-
-
-
