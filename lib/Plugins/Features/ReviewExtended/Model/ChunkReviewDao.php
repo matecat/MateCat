@@ -11,6 +11,7 @@ namespace Features\ReviewExtended\Model;
 use Chunks_ChunkStruct;
 use Constants;
 use Database;
+use LQA\ChunkReviewStruct;
 
 class ChunkReviewDao extends \LQA\ChunkReviewDao {
 
@@ -153,34 +154,20 @@ class ChunkReviewDao extends \LQA\ChunkReviewDao {
     }
 
     /**
-     * @param int   $id
-     * @param array $data
+     * @param ChunkReviewStruct $chunkReview
+     * @param array             $data
      *
-     * @return int|void
+     * @return bool
+     * @throws \Exception
      */
-    public function passFailCountsAtomicUpdate( $id, $data = [] ) {
+    public function passFailCountsAtomicUpdate( ChunkReviewStruct $chunkReview, $data = [] ) {
 
-        $sql = "UPDATE 
-        qa_chunk_reviews
-        SET 
-        is_pass = :is_pass,
-        penalty_points = penalty_points + :penalty_points,
-        reviewed_words_count = reviewed_words_count + :reviewed_words_count,
-        advancement_wc = advancement_wc + :advancement_wc,
-        total_tte = total_tte + :total_tte
-        WHERE id = :id";
+        $chunkReview->is_pass              = $data[ 'is_pass' ];
+        $chunkReview->penalty_points       = $chunkReview->penalty_points + $data[ 'penalty_points' ];
+        $chunkReview->reviewed_words_count = $chunkReview->reviewed_words_count + $data[ 'reviewed_words_count' ];
+        $chunkReview->advancement_wc       = $chunkReview->advancement_wc + $data[ 'advancement_wc' ];
+        $chunkReview->total_tte            = $chunkReview->total_tte + $data[ 'total_tte' ];
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id'                   => $id,
-                'is_pass'              => $data[ 'is_pass' ],
-                'penalty_points'       => $data[ 'penalty_points' ],
-                'reviewed_words_count' => $data[ 'reviewed_words_count' ],
-                'advancement_wc'       => $data[ 'advancement_wc' ],
-                'total_tte'            => $data[ 'total_tte' ],
-        ] );
-
-        return $stmt->rowCount();
+        return ChunkReviewDao::updateStruct( $chunkReview, [ 'fields' => [ 'is_pass', 'penalty_points', 'reviewed_words_count', 'advancement_wc', 'total_tte' ] ] );
     }
 }
