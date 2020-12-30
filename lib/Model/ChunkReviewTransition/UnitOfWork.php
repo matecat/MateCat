@@ -101,7 +101,7 @@ class UnitOfWork implements IUnitOfWork {
 
         $chunkReviewDao = new ChunkReviewDao();
 
-        // just one UPDATE for each ChunkReview
+        // just ONE UPDATE for each ChunkReview
         foreach ( $data as $id => $datum ) {
 
             $chunkReview = $chunkReviewDao->findById( $id );
@@ -112,13 +112,13 @@ class UnitOfWork implements IUnitOfWork {
             $datum[ 'advancement_wc' ]       = $this->recheckDatum( $chunkReview, $datum, 'advancement_wc' );
             $datum[ 'total_tte' ]            = $this->recheckDatum( $chunkReview, $datum, 'total_tte' );
 
-            $chunkReviewDao->passFailCountsAtomicUpdate( $id, $datum );
+            $chunkReviewDao->passFailCountsAtomicUpdate( $chunkReview, $datum );
         }
     }
 
     /**
      * @param ChunkReviewStruct $chunkReview
-     * @param                   $datum
+     * @param array             $datum
      *
      * @return bool
      * @throws \Exception
@@ -134,6 +134,7 @@ class UnitOfWork implements IUnitOfWork {
 
     /**
      * This method does not allow to update a ChunkReviewStruct field to a negative value
+     * (in case of negative values this method set them to 0)
      *
      * @param ChunkReviewStruct $chunkReview
      * @param array             $datum
