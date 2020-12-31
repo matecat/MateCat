@@ -102,6 +102,29 @@ class BxExGValidatorTest extends AbstractTest {
     /**
      * @test
      */
+    public function noErrorsIfGArePlacedInDifferentPositions() {
+
+        $source = '<g id="1">Grafik 2.3 – </g>2021 yılı finansal <g id="2">fizibilite ve planlanan, bileşen 2.3</g>';
+        $target = 'Graph 2.3 - Financial appraisal vs. planned for 2021, component 2.3<g id="1"></g><g id="2"></g> ';
+
+        $qa        = new QA( $source, $target );
+        $validator = new \BxExG\Validator( $qa );
+
+        $this->assertEmpty( $validator->validate() );
+
+        // test string with tags in reverse order
+        $source = 'Graph 2.3 - Financial appraisal vs. planned for 2021, component 2.3<g id="1"></g><g id="2"></g> ';
+        $target = '<g id="1">Grafik 2.3 – </g>2021 yılı finansal <g id="2">fizibilite ve planlanan, bileşen 2.3</g>';
+
+        $qa        = new QA( $source, $target );
+        $validator = new \BxExG\Validator( $qa );
+
+        $this->assertEmpty( $validator->validate() );
+    }
+
+    /**
+     * @test
+     */
     public function noErrorsIfGArePlacedInEscapedTags() {
 
         $source = '&lt;div&gt; <g id="1">La mamma è andata a fare la spesa</g> &lt;/div&gt;';

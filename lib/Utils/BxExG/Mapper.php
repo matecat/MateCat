@@ -35,13 +35,13 @@ class Mapper {
                     for ( $a = 0; $a < $childNode->childNodes->length; $a++ ) {
                         $element = self::appendBxExGTagMapElement( $childNode->childNodes->item( $a ) );
                         if ( $element->name ) {
-                            $map[ $k ] = $element;
+                            $map[] = $element;
                         }
                     }
                 } else {
                     $element = self::appendBxExGTagMapElement( $childNode );
                     if ( $element->name ) {
-                        $map[ $k ] = $element;
+                        $map[] = $element;
                     }
                 }
             }
