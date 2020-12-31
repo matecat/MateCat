@@ -84,4 +84,34 @@ class BxExGValidatorTest extends AbstractTest {
         $this->assertCount( 1, $validator->validate() );
         $this->assertEquals( 1301, $validator->validate()[ 0 ] );
     }
+
+    /**
+     * @test
+     */
+    public function noErrorsIfGArePlacedInDifferentOrder() {
+
+        $source = 'Click <g id="1">si puà connettere un encoder magnetico</g> per la saldatura a quota';
+        $target = '<g id="1">Se puede conectar un codificador magnético</g> a WELDAUTO para soldadura en altura. ';
+
+        $qa        = new QA( $source, $target );
+        $validator = new \BxExG\Validator( $qa );
+
+        $this->assertEmpty( $validator->validate() );
+    }
+
+    /**
+     * @test
+     */
+    public function noErrorsIfGArePlacedInEscapedTags() {
+
+        $source = '&lt;div&gt; <g id="1">La mamma è andata a fare la spesa</g> &lt;/div&gt;';
+        $target = '&lt;div&gt; La mamma è andata a fare <g id="1">la spesa</g> &lt;/div&gt;';
+
+        $qa        = new QA( $source, $target );
+        $validator = new \BxExG\Validator( $qa );
+
+        $this->assertEmpty( $validator->validate() );
+    }
 }
+
+
