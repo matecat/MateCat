@@ -27,9 +27,22 @@ class Mapper {
             $node = $html->item( $i );
 
             for ( $k = 0; $k < $node->childNodes->length; $k++ ) {
-                $element = self::appendBxExGTagMapElement( $node->childNodes->item( $k ) );
-                if ( $element->name ) {
-                    $map[ $k ] = $element;
+
+                $childNode = $node->childNodes->item( $k );
+
+                // if the tag is wrapper in <p> a further loop is needed
+                if ( $childNode->nodeName === 'p' ) {
+                    for ( $a = 0; $a < $childNode->childNodes->length; $a++ ) {
+                        $element = self::appendBxExGTagMapElement( $childNode->childNodes->item( $a ) );
+                        if ( $element->name ) {
+                            $map[] = $element;
+                        }
+                    }
+                } else {
+                    $element = self::appendBxExGTagMapElement( $childNode );
+                    if ( $element->name ) {
+                        $map[] = $element;
+                    }
                 }
             }
         }
