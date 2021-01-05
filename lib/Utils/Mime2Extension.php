@@ -571,6 +571,18 @@ $reference = [
                 [
                         0 => 'mpkg',
                 ],
+        'application/vnd.apple.keynote'                                             =>
+                [
+                        0 => 'key',
+                ],
+        'application/vnd.apple.pages'                                             =>
+                [
+                        0 => 'pages',
+                ],
+        'application/vnd.apple.numbers'                                             =>
+                [
+                        0 => 'numbers',
+                ],
         'application/vnd.apple.mpegurl'                                             =>
                 [
                         0 => 'm3u8',
@@ -2712,6 +2724,7 @@ $reference = [
                         0         => 'jpeg',
                         1         => 'jpg',
                         2         => 'jpe',
+                        3         => 'jfif',
                 ],
         'image/ktx'                                                                 =>
                 [
@@ -2985,7 +2998,8 @@ $reference = [
                         4         => 'list',
                         5         => 'log',
                         6         => 'in',
-                        7         => 'srt'
+                        7         => 'srt',
+                        8         => 'sbv',
                 ],
         'text/prs.lines.tag'                                                        =>
                 [
@@ -3084,6 +3098,10 @@ $reference = [
         'text/vnd.wap.wmlscript'                                                    =>
                 [
                         0 => 'wmls',
+                ],
+        'text/vtt'                                                                  =>
+                [
+                        0 => 'vtt',
                 ],
         'text/x-asm'                                                                =>
                 [

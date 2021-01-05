@@ -1,5 +1,6 @@
 <?php
 
+use BxExG\Mapper;
 use SubFiltering\Filters\LtGtEncode;
 use SubFiltering\Filters\RestoreXliffTagsForView;
 
@@ -248,6 +249,8 @@ class QA {
     const ERR_SYMBOL_MISMATCH = 1200;
 
     const ERR_EX_BX_NESTED_IN_G = 1300;
+    const ERR_EX_BX_WRONG_POSITION = 1301;
+    const ERR_EX_BX_COUNT_MISMATCH = 1302;
 
     const SMART_COUNT_PLURAL_MISMATCH = 2000;
     const SMART_COUNT_MISMATCH = 2001;
@@ -350,8 +353,9 @@ class QA {
          */
             1200 => 'Symbol mismatch',
 
-//            1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
-            1300 => 'Self-closing tags should be placed outside of regular tags.',
+            1300 => 'Found nested <ex> and/or <bx> tag(s) inside a <g> tag',
+            1301 => 'Wrong <ex> and/or <bx> placement',
+            1302 => '<ex>, <bx> and/or <g> total count mismatch',
 
             2000 => 'Smart count plural forms mismatch',
             2001 => '%smartcount tag count mismatch',
@@ -364,7 +368,7 @@ class QA {
          *  2 =>  'bad source xml',
          *  3 =>  'bad target xml',
          */
-            29   => "Critical issue: closing tags must come after opening tags.",
+            29   => "Should be < g ... > ... < /g >",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags."
 
     ];
@@ -429,9 +433,6 @@ class QA {
 
     protected static $emptyHtmlTagsPlaceholder = '##$$##______EMPTY_HTML_TAG______##$$##';
 
-    protected static $regexForEmptyHtmlTags = '/<([a-zA-Z0-9._-]+)[\s](.*?)><\/\1[\s]*>/u';
-
-
     const ERROR   = 'ERROR';
     const WARNING = 'WARNING';
     const INFO    = 'INFO';
@@ -494,11 +495,25 @@ class QA {
                         'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ] );
                 break;
+            case self::ERR_EX_BX_COUNT_MISMATCH:
+                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_COUNT_MISMATCH ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_COUNT_MISMATCH )
+                ] );
+                break;
             case self::ERR_EX_BX_NESTED_IN_G:
                 $this->exceptionList[ self::ERROR ][] = errObject::get( [
                         'outcome' => self::ERR_EX_BX_NESTED_IN_G,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
+                ] );
+                break;
+            case self::ERR_EX_BX_WRONG_POSITION:
+                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                        'outcome' => self::ERR_EX_BX_WRONG_POSITION,
+                        'debug'   => $this->_errorMap[ self::ERR_EX_BX_WRONG_POSITION ],
+                        'tip'     => $this->_getTipValue( self::ERR_EX_BX_WRONG_POSITION )
                 ] );
                 break;
             case self::ERR_UNCLOSED_X_TAG:
@@ -955,7 +970,7 @@ class QA {
      */
     private function fillEmptyHTMLTagsWithPlaceholder($seg) {
 
-        preg_match_all( self::$regexForEmptyHtmlTags, $seg, $matches );
+        preg_match_all('/<([^ >]+)[^>]*><\/\1>/', $seg, $matches);
 
         if ( !empty( $matches[ 0 ] ) ) {
             foreach ($matches[ 0 ]  as $match){
@@ -1267,7 +1282,7 @@ class QA {
     protected function _loadDom( $xmlString, $targetErrorType ) {
         libxml_use_internal_errors( true );
         $dom           = new DOMDocument( '1.0', 'utf-8' );
-        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>" );
+        $trg_xml_valid = @$dom->loadXML( "<root>$xmlString</root>", LIBXML_NOENT );
         if ( $trg_xml_valid === false ) {
 
             $errorList = libxml_get_errors();
@@ -1864,29 +1879,17 @@ class QA {
 
     /**
      * Perform a check for <bx> and/or <ex> tag(s) inside a <g> tag
+     *
+     * Please see the corresponding documentation on \BxExG\Validator class
      */
     protected function _checkBxAndExInsideG() {
 
-        $dom = new DOMDocument;
-        libxml_use_internal_errors(true);
+        $bxExGValidator = new \BxExG\Validator($this);
+        $errors = $bxExGValidator->validate();
 
-        @$dom->loadHTML($this->target_seg);
-        $g = $dom->getElementsByTagName ( 'g' );
-
-        for ($i=0;$i<$g->length;$i++){
-            /** @var DOMElement $node */
-            $node = $g->item($i);
-
-            for ($k=0;$k<$node->childNodes->length;$k++){
-                $nodeName = $node->childNodes->item($k)->nodeName;
-
-                if( $nodeName === 'ex' or $nodeName === 'bx' ){
-                    $this->_addError( self::ERR_EX_BX_NESTED_IN_G );
-                }
-            }
+        foreach ($errors as $error){
+            $this->_addError( $error );
         }
-
-        libxml_clear_errors();
     }
 
     /**
