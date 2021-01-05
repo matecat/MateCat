@@ -281,8 +281,7 @@ class SegmentQR extends React.Component {
 
     decodeTextAndTransformTags(text) {
         if (text) {
-            let decodedText = TagUtils.decodePlaceholdersToText(text);
-            decodedText = TagUtils.transformTextForLockTags(decodedText);
+            let decodedText = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(text)));
             return decodedText;
         }
         return text;

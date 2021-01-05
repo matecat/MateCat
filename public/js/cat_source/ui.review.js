@@ -1,7 +1,7 @@
 /*
  Component: ui.review
  */
-Review = {
+var Review = {
     enabled : function() {
         return (config.enableReview && !!config.isReview);
     },

@@ -150,29 +150,6 @@ const TEXT_UTILS = {
         }
         return array;
     },
-
-    transformDiffArrayToHtml: function (diff) {
-        let diffTxt = '';
-        let self = this;
-        $.each(diff, function (index) {
-            if (this[0] == -1) {
-                let rootElem = $(document.createElement('div'));
-                let newElem = $.parseHTML('<span class="deleted"/>');
-                $(newElem).text(self.htmlDecode(this[1]));
-                rootElem.append(newElem);
-                diffTxt += $(rootElem).html();
-            } else if (this[0] == 1) {
-                let rootElem = $(document.createElement('div'));
-                let newElem = $.parseHTML('<span class="added"/>');
-                $(newElem).text(self.htmlDecode(this[1]));
-                rootElem.append(newElem);
-                diffTxt += $(rootElem).html();
-            } else {
-                diffTxt += this[1];
-            }
-        });
-        return this.restorePlaceholders(diffTxt);
-    },
     replacePlaceholder: function (string) {
         return string
             .replace(config.lfPlaceholderRegex, 'softReturnMonad')
@@ -208,173 +185,14 @@ const TEXT_UTILS = {
     escapeRegExp(str) {
         return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
     },
-    insertNodeAtCursor(node) {
-        try {
-            var range, html;
-            if (window.getSelection && window.getSelection().getRangeAt) {
-                if (window.getSelection().type == 'Caret' || UI.isFirefox) {
-                    range = window.getSelection().getRangeAt(0);
-                    range.insertNode(node);
-                    this.setCursorAfterNode(range, node);
-                }
-            } else if (document.selection && document.selection.createRange) {
-                range = document.selection.createRange();
-                html = node.nodeType == 3 ? node.data : node.outerHTML;
-                range.pasteHTML(html);
-            }
-        } catch (e) {
-            console.error('Fail to insert node at cursor', e);
-        }
-    },
-    insertTextAtCursor(text) {
-        var sel, range, html;
-        if (window.getSelection) {
-            sel = window.getSelection();
-            if (sel.getRangeAt && sel.rangeCount) {
-                range = sel.getRangeAt(0);
-                range.deleteContents();
-                range.insertNode(document.createTextNode(text));
-            }
-        } else if (document.selection && document.selection.createRange) {
-            document.selection.createRange().text = text;
-        }
-    },
 
-    setCursorAfterNode(range, node) {
-        range.setStartAfter(node);
-        range.setEndAfter(node);
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(range);
-    },
-
-    pasteHtmlAtCaret(html, selectPastedContent) {
-        var sel, range;
-        let __ignoreSelection = (range) => {
-            if (range.startContainer == range.endContainer && range.startContainer == document) {
-                return true;
-            }
-        };
-        if (window.getSelection) {
-            // IE9 and non-IE
-            sel = window.getSelection();
-
-            if (sel.getRangeAt && sel.rangeCount) {
-                range = sel.getRangeAt(0);
-
-                if (__ignoreSelection(range)) return;
-
-                range.deleteContents();
-
-                // Range.createContextualFragment() would be useful here but is
-                // only relatively recently standardized and is not supported in
-                // some browsers (IE9, for one)
-                var el = document.createElement('div');
-                el.innerHTML = html;
-                var frag = document.createDocumentFragment(),
-                    node,
-                    lastNode;
-                while ((node = el.firstChild)) {
-                    lastNode = frag.appendChild(node);
-                }
-                var firstNode = frag.firstChild;
-                range.insertNode(frag);
-
-                // Preserve the selection
-                if (lastNode) {
-                    range = range.cloneRange();
-                    range.setStartAfter(lastNode);
-                    if (selectPastedContent) {
-                        range.setStartBefore(firstNode);
-                    } else {
-                        range.collapse(true);
-                    }
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                }
-            }
-        } else if ((sel = document.selection) && sel.type != 'Control') {
-            // IE < 9
-            var originalRange = sel.createRange();
-            originalRange.collapse(true);
-            sel.createRange().pasteHTML(html);
-            if (selectPastedContent) {
-                range = sel.createRange();
-                range.setEndPoint('StartToStart', originalRange);
-                range.select();
-            }
-        }
-    },
-    setCursorPosition(el, pos) {
-        var isDetatched = $(el).parents('body').length == 0;
-        if (isDetatched) return;
-
-        pos = pos || 0;
-
-        var range = document.createRange();
-
-        var sel = window.getSelection();
-
-        if (pos == 'end') {
-            range.setStartAfter(el);
-        } else {
-            console.debug('setCursorPosition setting start at pos', el, pos);
-            range.setStart(el, pos);
-        }
-
-        range.collapse(true);
-
-        sel.removeAllRanges();
-
-        sel.addRange(range);
-
-        if (typeof el[0] != 'undefined') {
-            console.debug('setCursorPosition setting focus');
-            el.focus();
-        }
-    },
-    removeSelectedText() {
-        if (window.getSelection || document.getSelection) {
-            var oSelection = (window.getSelection ? window : document).getSelection();
-            if (oSelection.type == 'Caret' && oSelection.extentOffset != oSelection.baseOffset) {
-                oSelection.deleteFromDocument();
-            } else if (oSelection.type == 'Range') {
-                var ss = $(oSelection.baseNode).parent()[0];
-                var ssParentTag = $(oSelection.baseNode).closest('.locked.selfClosingTag')[0];
-                if ($(ss).hasClass('selected')) {
-                    $(ss).remove();
-                } else if (ssParentTag) {
-                    $(ssParentTag).remove();
-                } else {
-                    oSelection.deleteFromDocument();
-                    oSelection.collapseToStart();
-                }
-            }
-        } else {
-            document.selection.clear();
-        }
-    },
-
+    ///*************************************************************************
     // test jsfiddle http://jsfiddle.net/YgKDu/
     placehold_xliff_tags(segment) {
         let LTPLACEHOLDER = '##LESSTHAN##';
         let GTPLACEHOLDER = '##GREATERTHAN##';
-        segment = segment.replace(/<(g\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/g)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(x\s*.*?\/)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(bx\s*.*?\/)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(ex\s*.*?\/)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(bpt\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/bpt)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(ept\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/ept)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(ph\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/ph)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(it\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/it)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(mrk\s*.*?)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
-        segment = segment.replace(/<(\/mrk)>/gi, LTPLACEHOLDER + '$1' + GTPLACEHOLDER);
+        segment = segment.replace(/&lt;/gi, LTPLACEHOLDER );
+        segment = segment.replace(/&gt;/gi, GTPLACEHOLDER);
         return segment;
     },
     view2rawxliff(segment) {
@@ -386,7 +204,6 @@ const TEXT_UTILS = {
         //segment=htmlDecode(segment);
         segment = this.placehold_xliff_tags(segment);
         segment = this.htmlEncode(segment);
-
         segment = this.restore_xliff_tags(segment);
 
         return segment;
@@ -401,6 +218,7 @@ const TEXT_UTILS = {
         segment = segment.replace(re_gt, '>');
         return segment;
     },
+    ///*************************************************************************
 
     cleanupHTMLCharsForDiff(string) {
         return this.replacePlaceholder(string.replace(/&nbsp;/g, ''));
@@ -483,15 +301,6 @@ const TEXT_UTILS = {
 
         return this.restorePlaceholders(diffTxt);
     },
-    getDiffPatch(source, target) {
-        var diff = this.diffMatchPatch.diff_main(
-            this.cleanupHTMLCharsForDiff(source),
-            this.cleanupHTMLCharsForDiff(target)
-        );
-
-        this.diffMatchPatch.diff_cleanupSemantic(diff);
-        return diff;
-    },
 
     execDiff: function (mainStr, cfrStr) {
         let _str = cfrStr;
@@ -512,15 +321,12 @@ const TEXT_UTILS = {
         return diff_obj;
     },
 
-    justSelecting: function (what) {
+    justSelecting: function () {
         if (window.getSelection().isCollapsed) return false;
-        var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
-        if (what == 'editarea') {
-            return selContainer.hasClass('editarea') && !selContainer.is(UI.editarea);
-        } else if (what == 'readonly') {
-            return selContainer.hasClass('area') || selContainer.hasClass('source');
-        }
+        return selContainer.hasClass('area') || selContainer.hasClass('source');
     },
+
+    //Change with TagUtils.decodePlaceholdersToPlainText
     clenaupTextFromPleaceholders: function (text) {
         text = text
             .replace(config.crPlaceholderRegex, '\r')

@@ -91,13 +91,12 @@ $.extend(UI, {
             if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
                 SegmentFilter.openFilter();
             }
-            UI.checkWarnings(true);
+            setTimeout(function () {UI.checkWarnings(true)}, 1000);
         });
 
         $('html').trigger('start');
 
         if (LXQ.enabled()) {
-            $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();
         }
         CatToolActions.startNotifications();

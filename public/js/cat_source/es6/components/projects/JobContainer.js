@@ -740,7 +740,6 @@ class JobContainer extends React.Component {
         var self = this;
         $(this.iconsButton).dropdown();
         this.initTooltips();
-        console.log('Updated Job : ' + this.props.job.get('id'));
         if (this.updated) {
             this.container.classList.add('updated-job');
             setTimeout(function () {

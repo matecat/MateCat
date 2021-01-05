@@ -79,13 +79,13 @@ window.QaCheckGlossary = require('./components/segments/utils/qaCheckGlossaryUti
 window.SearchUtils = require('./components/header/cattol/search/searchUtils');
 window.TagUtils = require('./utils/tagUtils');
 window.TextUtils = require('./utils/textUtils');
-window.EditAreaUtils = require('./components/segments/utils/editarea');
 window.CommonUtils = require('./utils/commonUtils');
 window.CursorUtils = require('./utils/cursorUtils');
 window.OfflineUtils = require('./utils/offlineUtils');
 window.Shortcuts = require('./utils/shortcuts');
 window.Customizations = require('./utils/customizations');
 window.SegmentUtils = require('./utils/segmentUtils');
+window.DraftMatecatUtils = require('./components/segments/utils/DraftMatecatUtils');
 
 window.LXQ = require('./utils/lxq.main');
 window.MBC = require('./utils/mbc.main');

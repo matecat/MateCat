@@ -3,6 +3,7 @@
 
  */
 import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 import PropTypes from 'prop-types';
 import VirtualList from 'react-tiny-virtual-list';
 import SegmentStore from '../../stores/SegmentStore';
@@ -12,78 +13,114 @@ import Segment from './Segment';
 import SegmentConstants from '../../constants/SegmentConstants';
 import CatToolConstants from '../../constants/CatToolConstants';
 import Speech2Text from '../../utils/speech2text';
-import TagUtils from '../../utils/tagUtils';
 import Immutable from 'immutable';
 import JobMetadataModal from '../modals/JobMetadataModal';
 import CommonUtils from '../../utils/commonUtils';
+import TagUtils from "../../utils/tagUtils";
+import SegmentUtils from "../../utils/segmentUtils";
+
 
 class SegmentsContainer extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            segments: Immutable.fromJS([]),
-            splitGroup: [],
-            timeToEdit: config.time_to_edit_enabled,
-            scrollTo: this.props.startSegmentId,
-            scrollToSelected: false,
-            window: {
-                width: 0,
-                height: 0,
-            },
-            sideOpen: false,
-            files: CatToolStore.getJobFilesInfo(),
-        };
-        this.renderSegments = this.renderSegments.bind(this);
-        this.updateAllSegments = this.updateAllSegments.bind(this);
-        this.splitSegments = this.splitSegments.bind(this);
-        this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
-        this.scrollToSegment = this.scrollToSegment.bind(this);
-        this.scrollToSelectedSegment = this.scrollToSelectedSegment.bind(this);
-        this.openSide = this.openSide.bind(this);
-        this.closeSide = this.closeSide.bind(this);
-        this.recomputeListSize = this.recomputeListSize.bind(this);
-        this.forceUpdateSegments = this.forceUpdateSegments.bind(this);
-        this.storeJobInfo = this.storeJobInfo.bind(this);
 
-        this.lastScrollTop = 0;
-        this.segmentsHeightsMap = {};
-        this.segmentsWithCollectionType = [];
+	constructor(props) {
+		super(props);
+		this.state = {
+			segments: Immutable.fromJS([]),
+			splitGroup: [],
+			timeToEdit: config.time_to_edit_enabled,
+			scrollTo: this.props.startSegmentId,
+			scrollToSelected: false,
+			window: {
+				width: 0,
+				height: 0,
+			},
+			sideOpen: false,
+			files: CatToolStore.getJobFilesInfo()
+		};
+		this.renderSegments = this.renderSegments.bind(this);
+		this.updateAllSegments = this.updateAllSegments.bind(this);
+		this.splitSegments = this.splitSegments.bind(this);
+		this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+		this.scrollToSegment = this.scrollToSegment.bind(this);
+		this.scrollToSelectedSegment = this.scrollToSelectedSegment.bind(this);
+		this.openSide = this.openSide.bind(this);
+		this.closeSide = this.closeSide.bind(this);
+		this.recomputeListSize = this.recomputeListSize.bind(this);
+		this.forceUpdateSegments = this.forceUpdateSegments.bind(this);
+		this.storeJobInfo = this.storeJobInfo.bind(this);
 
-        this.scrollContainer;
-        this.segmentContainerVisible = false;
-        this.index = this.props.startSegmentId;
-    }
+		this.lastScrollTop = 0;
+		this.segmentsHeightsMap = {};
+		this.segmentsHeightsMapPanelClose = {};
+		this.segmentsHeightsMapPanelOpen = {}
+		this.segmentsWithCollectionType = [];
 
-    splitSegments(segments, splitGroup) {
-        this.setState({
-            segments: segments,
-            splitGroup: splitGroup,
-        });
-    }
+		this.scrollContainer;
+		this.segmentContainerVisible = false;
+		this.index = this.props.startSegmentId;
+		this.lastOpenedHeight = '200';
+		this.domContainer = document.getElementById('outer');
+	}
 
-    openSide() {
-        this.segmentsHeightsMap = {};
-        this.setState({ sideOpen: true });
-    }
+	splitSegments(segments, splitGroup) {
+		this.setState({
+			segments: segments,
+			splitGroup: splitGroup
+		});
+	}
 
-    closeSide() {
-        this.segmentsHeightsMap = {};
-        this.setState({ sideOpen: false });
-    }
+	openSide() {
+		if (!this.state.sideOpen) {
+			this.segmentsHeightsMapPanelClose = {...this.segmentsHeightsMap};
+			this.segmentsHeightsMap = {...this.segmentsHeightsMapPanelOpen}
+			this.setState( {sideOpen: true} );
+		}
+	}
 
-    updateAllSegments() {
-        this.forceUpdate();
-    }
+	closeSide() {
+		if(this.state.sideOpen){
+			this.segmentsHeightsMapPanelOpen = {...this.segmentsHeightsMap};
+			this.segmentsHeightsMap = {...this.segmentsHeightsMapPanelClose};
+			this.setState({sideOpen: false});
+		}
+	}
 
-    renderSegments(segments) {
-        // VirtualList.prototype.animateScroll = false;
-        let splitGroup = [];
-        this.setState({
-            segments: segments,
-            splitGroup: splitGroup,
-            timeToEdit: config.time_to_edit_enabled,
-        });
-    }
+	updateAllSegments() {
+		this.forceUpdate();
+	}
+
+	renderSegments(segments) {
+		// VirtualList.prototype.animateScroll = false;
+		// Update previous last segment height inside segmentsHeightsMap
+
+		if(this.state.segments.size !== segments.size){
+			const oldLastSegment = this.getSegmentByIndex(this.state.segments.size - 1);
+			const newLastSegment = segments.get(segments.size - 1);
+			if(oldLastSegment && newLastSegment){
+				const oldLastSid = oldLastSegment.get('sid');
+				const newLastSid = newLastSegment.get('sid');
+				if(oldLastSid !== newLastSid && this.segmentsHeightsMap[oldLastSid]){
+					const lastHeight = this.segmentsHeightsMap[oldLastSid].height;
+					this.segmentsHeightsMap[oldLastSid] = {
+						segment: oldLastSegment,
+						height: lastHeight
+					};
+				}
+			}
+		}
+
+		if ( this.state.guessTagEnabled !== config.tag_projection_enabled ) {
+			this.segmentsHeightsMap = {};
+		}
+
+		let splitGroup = [];
+		this.setState({
+			segments: segments,
+			splitGroup: splitGroup,
+			timeToEdit: config.time_to_edit_enabled,
+			guessTagEnabled: config.tag_projection_enabled
+		});
+	}
 
     setLastSelectedSegment(sid) {
         this.lastSelectedSegment = {
@@ -105,11 +142,11 @@ class SegmentsContainer extends React.Component {
         SegmentActions.setBulkSelectionInterval(from, to, fid);
     }
 
-    scrollToSegment(sid) {
-        this.lastScrolled = sid;
-        this.setState({ scrollTo: sid, scrollToSelected: false });
-        setTimeout(() => this.onScroll(), 500);
-    }
+	scrollToSegment(sid) {
+		this.lastScrolled = sid;
+		this.setState({scrollTo: sid, scrollToSelected: false});
+		setTimeout(() => this.onScroll(), 500);
+	}
 
     scrollToSelectedSegment(sid) {
         this.setState({ scrollTo: sid, scrollToSelected: true });
@@ -157,9 +194,9 @@ class SegmentsContainer extends React.Component {
         return { scrollTo: null, position: null };
     }
 
-    getSegmentByIndex(index) {
-        return this.state.segments.get(index);
-    }
+	getSegmentByIndex(index) {
+		return this.state.segments.get(index);
+	}
 
     getCollectionType(segment) {
         let collectionType;
@@ -195,11 +232,6 @@ class SegmentsContainer extends React.Component {
     getSegment(segment, segImmutable, currentFileId, collectionTypeSeparator) {
         let isReviewExtended = !!this.props.isReviewExtended;
 
-        let segmentHeight =
-            !segment.opened && this.segmentsHeightsMap[segment.sid]
-                ? this.segmentsHeightsMap[segment.sid].height
-                : this.lastOpenedHeight;
-
         let item = (
             <Segment
                 key={segment.sid}
@@ -211,7 +243,6 @@ class SegmentsContainer extends React.Component {
                 isReviewExtended={isReviewExtended}
                 reviewType={this.props.reviewType}
                 enableTagProjection={this.props.enableTagProjection}
-                decodeTextFn={TagUtils.decodeText}
                 tagLockEnabled={this.state.tagLockEnabled}
                 tagModesEnabled={this.props.tagModesEnabled}
                 speech2textEnabledFn={Speech2Text.enabled}
@@ -219,7 +250,6 @@ class SegmentsContainer extends React.Component {
                 setBulkSelection={this.setBulkSelection.bind(this)}
                 sideOpen={this.state.sideOpen}
                 files={this.state.files}
-                height={segmentHeight}
             />
         );
         if (segment.id_file !== currentFileId) {
@@ -304,105 +334,113 @@ class SegmentsContainer extends React.Component {
         return items;
     }
 
-    getCommentsPadding(index, segment) {
-        if (index === 0) {
-            let segment1 = this.getSegmentByIndex(1);
-            let segment2 = this.getSegmentByIndex(2);
+	getCommentsPadding(index, segment) {
+		if (index === 0 && this.state.sideOpen) {
+			let segment1 = this.getSegmentByIndex(1);
+			let segment2 = this.getSegmentByIndex(2);
 
-            if (segment.get('openComments')) {
-                let comments = CommentsStore.getCommentsBySegment(segment.get('original_sid'));
-                if (index === 0 && comments.length === 0) return 110;
-                else if (index === 0 && comments.length > 0) return 270;
-            } else if (segment1 && segment1.get('openComments')) {
-                let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
-                if (comments.length === 0) return 100;
-                else if (comments.length > 0) return 150;
-            } else if (segment2 && segment2.get('openComments')) {
-                let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
-                if (comments.length > 0) return 100;
-            }
-        }
-        return 0;
-    }
+			if (segment.get('openComments')) {
+				let comments = CommentsStore.getCommentsBySegment(segment.get('original_sid'));
+				if (index === 0 && comments.length === 0)
+					return 110;
+				else if (index === 0 && comments.length > 0)
+					return 270;
+			} else if (segment1 && segment1.get('openComments')) {
+				let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
+				if (comments.length === 0)
+					return 40;
+				else if (comments.length > 0)
+					return 140;
+			} else if (segment2 && segment2.get('openComments')) {
+				let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
+				if (comments.length > 0)
+					return 50;
+			}
+		}
+		return 0;
+	}
 
-    getSegmentHeight(index) {
-        if (!this.segmentContainerVisible) {
-            $('#hiddenHtml section').css('display', 'block');
-        }
-        let segment = this.getSegmentByIndex(index);
-        if (!segment) {
-            return 0;
-        }
-        let previousFileId = index === 0 ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
+
+	getSegmentBasicSize = (index, segment) => {
+		let basicSize = 0;
+		// if is the first segment of a file, add the 43px of the file header
+		const previousFileId = (index === 0) ? 0 : this.getSegmentByIndex(index - 1).get('id_file');
         const isFirstSegment = this.state.files && segment.get('sid') === this.state.files[0].first_segment;
         const fileDivHeight =  isFirstSegment ? 60 :75;
         const collectionDivHeight = isFirstSegment ? 35 : 50;
-        let calculatedHeight = this.segmentsHeightsMap[segment.get('sid')];
-
-        if (calculatedHeight && calculatedHeight.height > 0 && calculatedHeight.segment.equals(segment)) {
-            let heightToAdd = 0;
-            if (previousFileId !== segment.get('id_file')) {
-                heightToAdd = fileDivHeight;
-            }
-            if (index === this.state.segments.size - 1) {
-                heightToAdd = heightToAdd + 150;
-            }
-            return calculatedHeight.height + heightToAdd;
-        }
-
-        let itemHeight = 0;
-        let commentsPadding = this.getCommentsPadding(index, segment);
-        if (segment.get('opened')) {
-            let $segment = $('#segment-' + segment.get('sid'));
-            if (($segment.length && $segment.hasClass('opened')) || ($segment.length === 0 && this.lastOpenedHeight)) {
-                itemHeight = $segment.length ? $segment.outerHeight() + 20 : this.lastOpenedHeight;
-                itemHeight = itemHeight - 23; //Add private resources div
-                this.lastOpenedHeight = itemHeight;
-            }
-        }
-        if (itemHeight === 0) {
-            if (this.state.sideOpen) {
-                $('#hiddenHtml section').addClass('slide-right');
-            } else {
-                $('#hiddenHtml section').removeClass('slide-right');
-            }
-            let source = $('#hiddenHtml .source');
-            source.html(segment.get('decoded_source'));
-            const sourceHeight = source.outerHeight();
-
-            let target = $('#hiddenHtml .targetarea');
-            target.html(segment.get('decoded_translation'));
-            const targetHeight = target.closest('.target').outerHeight();
-
-            source.html('');
-            target.html('');
-            itemHeight = Math.max(sourceHeight + 12, targetHeight + 12, 89);
-        }
-
-        //Collection type
-        if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
-            itemHeight = itemHeight + collectionDivHeight;
-        }
-        let height = itemHeight + commentsPadding;
-
-        if (!segment.get('opened')) {
-            this.segmentsHeightsMap[segment.get('sid')] = {
-                segment: segment,
-                height: height,
-            };
-        }
-
-        //If is the first segment of a file add the file header
         if (previousFileId !== segment.get('id_file')) {
-            height = height + fileDivHeight;
-        }
+			basicSize += fileDivHeight;
+		}
+		// if it's last segment, add 150px of distance from footer
+		if (index === this.state.segments.size - 1) {
+			basicSize += 150;
+		}
+		// if it's collection type add 42px of header
+		if (this.segmentsWithCollectionType.indexOf(segment.get('sid')) !== -1) {
+			basicSize += collectionDivHeight;
+		}
+		// add height for comments padding
+		basicSize += this.getCommentsPadding(index, segment);
+		return basicSize;
+	};
 
-        if (index === this.state.segments.size - 1) {
-            height = height + 150;
-        }
+	getSegmentHeight = (index, components) => {
+		const segment = this.getSegmentByIndex(index);
 
-        return height;
-    }
+		// --- No segment
+		if (!segment) {
+			return 0;
+		}
+
+		const sid = segment.get('sid');
+
+		// --- Compute basic segment size for first render
+		let height = 90;
+		height += this.getSegmentBasicSize(index, segment);
+
+
+		// --- Compute height for opened segment
+		if (segment.get('opened')) {
+			const $segment = $('#segment-' + segment.get('sid'));
+			//  if mounted and opened
+			if ($segment.length && $segment.hasClass('opened')) {
+				height = $segment.outerHeight() + 20;
+				// add private resources div
+				height = height - 23;
+				height += this.getSegmentBasicSize(index, segment);
+				this.lastOpenedHeight = height
+			}else if ($segment.length === 0 && this.lastOpenedHeight){ // if umounted (not visible) and cached
+				height = this.lastOpenedHeight
+			}
+
+			return height;
+		// --- Compute real height for the first time
+		// --- this computed value won't be available until next call to getSegmentHeight
+		}else if( !this.segmentsHeightsMap[segment.get('sid')] || this.segmentsHeightsMap[segment.get('sid')].height === 0 ){
+			// if not available in cache, compute height
+			if (components && Object.keys(components).length) {
+				// console.time("start calc Height" + segment.get('sid'));
+				const container = document.createElement("div", {});
+				const html = getSegmentStructure(segment.toJS(), this.state.sideOpen)
+				container.innerHTML = ReactDOMServer.renderToStaticMarkup(html);
+				this.domContainer.appendChild(container);
+				height = container.getElementsByTagName('section')[0].clientHeight;
+				this.segmentsHeightsMap[segment.get('sid')] = {
+					segment: segment,
+					height: height
+				};
+				container.parentNode.removeChild(container);
+				return height + this.getSegmentBasicSize(index, segment);
+				// console.timeEnd("start calc Height" + segment.get('sid'));
+			}
+		// --- Retrieve height from cache
+		}else{
+			height = this.segmentsHeightsMap[segment.get('sid')].height + this.getSegmentBasicSize(index, segment);
+		}
+		return height
+
+
+	};
 
     onScroll() {
         let scrollTop = this.scrollContainer.scrollTop();
@@ -421,8 +459,8 @@ class SegmentsContainer extends React.Component {
         const index = this.state.segments.findIndex((segment, index) => {
             return segment.get('sid') === idFrom;
         });
-        this.listRef.recomputeSizes(index);
-        this.segmentsHeightsMap[idFrom] ? (this.segmentsHeightsMap[idFrom].height = 0) : null;
+		this.segmentsHeightsMap[idFrom] ? (this.segmentsHeightsMap[idFrom].height = 0) : null;
+		this.listRef.recomputeSizes(index);
         this.forceUpdate();
     }
 
@@ -445,30 +483,28 @@ class SegmentsContainer extends React.Component {
         this.scrollContainer = $('.article-segments-container > div');
         window.addEventListener('resize', this.updateWindowDimensions);
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
-        SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
         SegmentStore.addListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
         SegmentStore.addListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
         SegmentStore.addListener(SegmentConstants.OPEN_SIDE, this.openSide);
         SegmentStore.addListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
 
-        SegmentStore.addListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
-        SegmentStore.addListener(SegmentConstants.FORCE_UPDATE, this.forceUpdateSegments);
-        CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
-    }
+		SegmentStore.addListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
+		SegmentStore.addListener(SegmentConstants.FORCE_UPDATE, this.forceUpdateSegments);
+		CatToolStore.addListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
+	}
 
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.updateWindowDimensions);
-        SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
-        SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
-        SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
-        SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
-        SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
-        SegmentStore.removeListener(SegmentConstants.OPEN_SIDE, this.openSide);
-        SegmentStore.removeListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
+	componentWillUnmount() {
+		window.removeEventListener('resize', this.updateWindowDimensions);
+		SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
+		SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
+		SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SEGMENT, this.scrollToSegment);
+		SegmentStore.removeListener(SegmentConstants.SCROLL_TO_SELECTED_SEGMENT, this.scrollToSelectedSegment);
+		SegmentStore.removeListener(SegmentConstants.OPEN_SIDE, this.openSide);
+		SegmentStore.removeListener(SegmentConstants.CLOSE_SIDE, this.closeSide);
 
-        SegmentStore.removeListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
-        SegmentStore.addListener(SegmentConstants.FORCE_UPDATE, this.forceUpdateSegments);
+		SegmentStore.removeListener(SegmentConstants.RECOMPUTE_SIZE, this.recomputeListSize);
+		SegmentStore.addListener(SegmentConstants.FORCE_UPDATE, this.forceUpdateSegments);
 
         CatToolStore.removeListener(CatToolConstants.STORE_FILES_INFO, this.storeJobInfo);
     }
@@ -484,123 +520,189 @@ class SegmentsContainer extends React.Component {
         );
     }
 
-    updateWindowDimensions() {
-        this.segmentsHeightsMap = {};
+	updateWindowDimensions() {
+		let data = {};
 
-        let data = {};
-        data.width = window.innerWidth;
-        data.height = window.innerHeight - $('header').innerHeight() - $('footer').innerHeight();
+		data.width = window.innerWidth;
+		data.height = window.innerHeight - $('header').innerHeight() - $('footer').innerHeight();
 
-        this.setState({
-            window: data,
-        });
-    }
+		if(this.state.window.width !== data.width || this.state.window.height !== data.height ){
+			this.setState({
+				window: data
+			});
+			this.segmentsHeightsMap = {};
+			this.segmentsHeightsMapPanelClose ={};
+			this.segmentsHeightsMapPanelOpen={}
+		}
+	};
 
     componentDidCatch(e) {
         console.log('React component Error', e);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        this.lastListSize = this.state.segments.size;
-        if (this.state.scrollTo !== null && this.state.segments.size > 0) {
-            setTimeout(() => {
-                this.setState({
-                    scrollTo: null,
-                    scrollToSelected: false,
-                });
-            });
-        }
-        this.segmentContainerVisible = false;
-        $('#hiddenHtml section').css('display', 'none');
-    }
+	componentDidUpdate(prevProps, prevState, snapshot) {
+		this.lastListSize = this.state.segments.size;
+		if (this.state.scrollTo !== null && this.state.segments.size > 0) {
+			setTimeout(() => {
+				this.setState({
+					scrollTo: null,
+					scrollToSelected: false
+				});
+			});
 
-    render() {
-        let scrollToObject = this.getIndexToScroll();
-        let items = this.getSegments();
-        let width = this.state.window.width;
-        return (
-            <VirtualList
-                ref={(list) => (this.listRef = list)}
-                width={width}
-                height={this.state.window.height}
-                style={{ overflowX: 'hidden' }}
-                estimatedItemSize={80}
-                overscanCount={10}
-                itemCount={items.length}
-                itemSize={(index) => this.getSegmentHeight(index)}
-                scrollToAlignment={scrollToObject.position}
-                scrollToIndex={scrollToObject.scrollTo}
-                // scrollOffset={1000}
-                onScroll={(number, event) => this.onScroll()}
-                renderItem={({ index, style }) => {
-                    let styleCopy = Object.assign({}, style);
-                    if (index === 0) {
-                        let segment = this.getSegmentByIndex(index);
-                        let segment1 = this.getSegmentByIndex(1);
-                        let segment2 = this.getSegmentByIndex(2);
+		}
+		this.segmentContainerVisible = false;
+	}
 
-                        if (segment.get('openComments')) {
-                            let comments = CommentsStore.getCommentsBySegment(segment.get('original_sid'));
-                            if (index === 0 && comments.length === 0) styleCopy.marginTop = '110px';
-                            else if (index === 0 && comments.length > 0) styleCopy.marginTop = '270px';
-                        } else if (segment1 && segment1.get('openComments')) {
-                            let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
-                            if (comments.length === 0) styleCopy.marginTop = '40px';
-                            else if (comments.length > 0) styleCopy.marginTop = '100px';
-                        } else if (segment2 && segment2.get('openComments')) {
-                            let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
-                            if (comments.length === 0) styleCopy.marginTop = '20px';
-                            else if (comments.length > 0) styleCopy.marginTop = '50px';
-                        }
-                    }
-                    return (
-                        <div className={'segment-container'} key={index} style={styleCopy}>
-                            {items[index]}
-                        </div>
-                    );
-                }}
-                onItemsRendered={(obj) => (this.lastUpdateObj = obj)}
-            />
-        );
-    }
+	render() {
+		let scrollToObject = this.getIndexToScroll();
+		let items = this.getSegments();
+		let width = this.state.window.width;
+		return <VirtualList
+			ref={(list) => this.listRef = list}
+			width={width}
+			height={this.state.window.height}
+			style={{overflowX: 'hidden'}}
+			estimatedItemSize={80}
+			overscanCount={10}
+			itemCount={items.length}
+			itemSize={(index) => this.getSegmentHeight(index, items)}
+			scrollToAlignment={scrollToObject.position}
+			scrollToIndex={scrollToObject.scrollTo}
+			// scrollOffset={1000}
+			onScroll={(number, event) => this.onScroll()}
+			renderItem={({index, style}) => {
+				let styleCopy = Object.assign({}, style);
+				if (index === 0) {
+					let segment = this.getSegmentByIndex(index);
+					let segment1 = this.getSegmentByIndex(1);
+					let segment2 = this.getSegmentByIndex(2);
+
+					if (segment.get('openComments')) {
+						let comments = CommentsStore.getCommentsBySegment(segment.get('original_sid'));
+						if (index === 0 && comments.length === 0)
+							styleCopy.marginTop = '110px';
+						else if (index === 0 && comments.length > 0)
+							styleCopy.marginTop = '270px';
+					} else if (segment1 && segment1.get('openComments')) {
+						let comments = CommentsStore.getCommentsBySegment(segment1.get('original_sid'));
+						if (comments.length === 0)
+							styleCopy.marginTop = '40px';
+						else if (comments.length > 0)
+							styleCopy.marginTop = '140px';
+					} else if (segment2 && segment2.get('openComments')) {
+						let comments = CommentsStore.getCommentsBySegment(segment2.get('original_sid'));
+						if (comments.length === 0)
+							styleCopy.marginTop = '20px';
+						else if (comments.length > 0)
+							styleCopy.marginTop = '50px';
+					}
+				}
+				return <div className={'segment-container'} key={index} style={styleCopy}>
+					{items[index]}
+				</div>;
+			}}
+			onItemsRendered={(obj) => this.lastUpdateObj = obj}
+		/>
+
+
+	}
 }
 
-// let defaultScroll = VirtualList.prototype.scrollTo;
-
-// VirtualList.prototype.scrollTo = function (value) {
-//     console.log("VirtualList.prototype.scrollTo:"  + value);
-//     function scrollTo(element, direction, to, duration) {
-//         if (duration <= 0) return;
-//         const difference = to - element[direction];
-//         const perTick = difference / duration * 5;
-//         setTimeout(function () {
-//             element[direction] = element[direction] + perTick;
-//             if (element[direction] === to) return;
-//             scrollTo(element, direction, to, duration - 5);
-//         }, 5);
-//     }
-//     if ( VirtualList.prototype.scrollTo.animateScroll ) {
-//         const scrollDirection = this.props.scrollDirection === void 0 ? 'vertical' : this.props.scrollDirection;
-//         if ( scrollDirection === 'vertical' ) {
-//             scrollTo( this.rootNode, 'scrollTop', value, 15 );
-//         } else scrollTo( this.rootNode, 'scrollLeft', value, 15 );
-//     } else {
-//         defaultScroll.call(this, value);
-//     }
-//     VirtualList.prototype.scrollTo.animateScroll = true;
-// };
-
 SegmentsContainer.propTypes = {
-    segments: PropTypes.array,
-    splitGroup: PropTypes.array,
-    timeToEdit: PropTypes.string,
+	segments: PropTypes.array,
+	splitGroup: PropTypes.array,
+	timeToEdit: PropTypes.string
 };
 
 SegmentsContainer.defaultProps = {
-    segments: [],
-    splitGroup: [],
-    timeToEdit: '',
+	segments: [],
+	splitGroup: [],
+	timeToEdit: ""
 };
+
+const getSegmentStructure = (segment, sideOpen) => {
+
+	let source = segment.segment;
+	let target = segment.translation;
+	if ( SegmentUtils.checkCurrentSegmentTPEnabled(segment) ) {
+		source = TagUtils.removeAllTags(source);
+		target = TagUtils.removeAllTags(target);
+	}
+
+	source = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(source), config.isSourceRTL))
+	target = TagUtils.matchTag(TagUtils.decodeHtmlInTag(TagUtils.decodePlaceholdersToTextSimple(target), config.isSourceRTL))
+
+	return <section className={`status-draft ${sideOpen ? 'slide-right' : ''}`} ref={(section)=>this.section=section}>
+		<div className="sid">
+			<div className="txt">0000000</div>
+			<div className="txt segment-add-inBulk">
+				<input type="checkbox"/>
+			</div>
+			<div className="actions">
+				<button className="split" title="Click to split segment">
+					<i className="icon-split"> </i>
+				</button>
+				<p className="split-shortcut">CTRL + S</p>
+			</div>
+		</div>
+
+		<div className="body">
+			<div className="header toggle"> </div>
+			<div className="text segment-body-content" style={{'boxSizing': 'content-box'}}>
+				<div className="wrap">
+					<div className="outersource">
+						<div className="source item" tabIndex="0" dangerouslySetInnerHTML={{ __html: source }}/>
+						<div className="copy" title="Copy source to target">
+							<a href="#"> </a>
+							<p>CTRL+I</p>
+						</div>
+						<div className="target item">
+							<div className="textarea-container">
+								<div className="targetarea editarea" spellCheck="true" dangerouslySetInnerHTML={{ __html: target }}/>
+								<div className="toolbar">
+									<a className="revise-qr-link" title="Segment Quality Report." target="_blank"
+									   href="#">QR</a>
+									<a href="#" className="tagModeToggle "
+									   title="Display full/short tags">
+										<span className="icon-chevron-left"> </span>
+										<span className="icon-tag-expand"> </span>
+										<span className="icon-chevron-right"> </span>
+									</a>
+									<a href="#" className="autofillTag"
+									   title="Copy missing tags from source to target"> </a>
+									<ul className="editToolbar">
+										<li className="uppercase" title="Uppercase"> </li>
+										<li className="lowercase" title="Lowercase"> </li>
+										<li className="capitalize" title="Capitalized"> </li>
+									</ul>
+								</div>
+							</div>
+							<p className="warnings"> </p>
+							<ul className="buttons toggle">
+								<li>
+									<a href="#" className="translated"> Translated </a>
+									<p>CTRL ENTER</p>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div className="status-container">
+					<a href="#" className="status no-hover"> </a>
+				</div>
+			</div>
+			<div className="timetoedit" data-raw-time-to-edit="0"> </div>
+			<div className="edit-distance">Edit Distance:</div>
+		</div>
+		<div className="segment-side-buttons">
+			<div data-mount="translation-issues-button" className="translation-issues-button"> </div>
+		</div>
+		<div className="segment-side-container"> </div>
+	</section>
+}
+
+
 
 export default SegmentsContainer;
 
