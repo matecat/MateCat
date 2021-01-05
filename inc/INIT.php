@@ -400,6 +400,8 @@ class INIT {
                     'Android xml' => [ '', '', 'extxml' ],
                     'strings'     => [ '', '', 'extstr' ],
                     'srt'         => [ '', '', 'extsrt' ],
+                    'sbv'         => [ '', '', 'extsbv' ],
+                    'vtt'         => [ '', '', 'extvtt' ],
                     'wix'         => [ '', '', 'extwix' ],
                     'po'          => [ '', '', 'extpo' ],
                     'g'           => [ '', '', 'extg' ],
