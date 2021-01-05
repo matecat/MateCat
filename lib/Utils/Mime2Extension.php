@@ -571,6 +571,18 @@ $reference = [
                 [
                         0 => 'mpkg',
                 ],
+        'application/vnd.apple.keynote'                                             =>
+                [
+                        0 => 'key',
+                ],
+        'application/vnd.apple.pages'                                             =>
+                [
+                        0 => 'pages',
+                ],
+        'application/vnd.apple.numbers'                                             =>
+                [
+                        0 => 'numbers',
+                ],
         'application/vnd.apple.mpegurl'                                             =>
                 [
                         0 => 'm3u8',
