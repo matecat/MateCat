@@ -371,6 +371,7 @@ class INIT {
                     'gif'  => [ '', '', 'extimg' ],
                     'jpeg' => [ '', '', 'extimg' ],
                     'jpg'  => [ '', '', 'extimg' ],
+                    'jfif'  => [ '', '', 'extimg' ],
                     'tiff' => [ '', '', 'extimg' ]
             ],
             "Interchange Formats" => [
@@ -397,6 +398,8 @@ class INIT {
                     'Android xml' => [ '', '', 'extxml' ],
                     'strings'     => [ '', '', 'extstr' ],
                     'srt'         => [ '', '', 'extsrt' ],
+                    'sbv'         => [ '', '', 'extsbv' ],
+                    'vtt'         => [ '', '', 'extvtt' ],
                     'wix'         => [ '', '', 'extwix' ],
                     'po'          => [ '', '', 'extpo' ],
                     'g'           => [ '', '', 'extg' ],
