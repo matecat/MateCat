@@ -98,5 +98,6 @@ module.exports = keyMirror({
     FORCE_UPDATE: null,
     FORCE_UPDATE_SEGMENT: null,
     UPDATE_SEARCH: null,
-    SET_GUESS_TAGS: null
+    SET_GUESS_TAGS: null,
+    HIGHLIGHT_TAGS: null
 });

@@ -1138,10 +1138,20 @@ const SegmentActions = {
             plainText
         });
     },
-    editAreaChanged: function (sid) {
+    editAreaChanged: function (sid, isTarget) {
         AppDispatcher.dispatch({
             actionType: EditAreaConstants.EDIT_AREA_CHANGED,
-            sid
+            sid,
+            isTarget
+        });
+    },
+    highlightTags: function (tagId, tagPlaceholder, entityKey, isTarget) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.HIGHLIGHT_TAGS,
+            tagId,
+            tagPlaceholder,
+            entityKey,
+            isTarget
         });
     }
 

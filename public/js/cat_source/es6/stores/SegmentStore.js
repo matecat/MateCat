@@ -1220,7 +1220,10 @@ AppDispatcher.register(function (action) {
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_TAGGED, current.sid);
             break;
         case EditAreaConstants.EDIT_AREA_CHANGED:
-            SegmentStore.emitChange(EditAreaConstants.EDIT_AREA_CHANGED, action.sid);
+            SegmentStore.emitChange(EditAreaConstants.EDIT_AREA_CHANGED, action.sid, action.isTarget);
+            break;
+        case SegmentConstants.HIGHLIGHT_TAGS:
+            SegmentStore.emitChange(SegmentConstants.HIGHLIGHT_TAGS, action.tagId, action.tagPlaceholder, action.entityKey, action.isTarget);
             break;
         default:
             SegmentStore.emitChange(action.actionType, action.sid, action.data);

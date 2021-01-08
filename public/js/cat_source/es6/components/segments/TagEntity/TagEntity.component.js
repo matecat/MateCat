@@ -1,27 +1,35 @@
-import React, {PureComponent, Component} from 'react';
+import React, {Component} from 'react';
 import TooltipInfo from "../TooltipInfo/TooltipInfo.component";
 import {tagSignatures, getTooltipTag} from "../utils/DraftMatecatUtils/tagModel";
 import SegmentStore from "../../../stores/SegmentStore";
 import SegmentConstants from "../../../constants/SegmentConstants";
 import EditAreaConstants from "../../../constants/EditAreaConstants";
+import SegmentActions from "../../../actions/SegmentActions";
 
 class TagEntity extends Component {
+
     constructor(props) {
         super(props);
+
+        const {entityKey, contentState} = this.props;
+        const {data: {name: entityName}} = contentState.getEntity(entityKey);
+
         this.state = {
             showTooltip: false,
             tagStyle: this.selectCorrectStyle(),
-            tagWarningStyle: this.highlightOnWarnings(),
-            tagFocusedStyle: '',
+            tagWarningStyle: '',
+            tooltipAvailable: getTooltipTag().includes(entityName),
+            shouldTooltipOnHover: false,
+            clicked: false,
+            focused: false
         };
-
+        this.updateTagStyleDebounced = _.debounce(this.updateTagStyle, 500);
+        this.updateTagWarningStyleDebounced = _.debounce(this.updateTagWarningStyle, 500);
     }
 
     tooltipToggle = (show = false) => {
         // this will trigger a rerender in the main Editor Component
-        this.setState({
-            showTooltip: show
-        });
+        this.setState({showTooltip: show});
     };
 
     markSearch = (text, searchParams) => {
@@ -43,115 +51,161 @@ class TagEntity extends Component {
         return text;
     };
 
-    startChecksOnDemand = (sid, focused) => {
-        const { sid:  currentSid } = this.props.getUpdatedSegmentInfo();
-        if (sid === currentSid ){
-            this.updateTagStyle();
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_WARNINGS, this.updateTagWarningStyleDebounced);
+        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_TAGS, this.highlightTags);
+        SegmentStore.addListener(EditAreaConstants.EDIT_AREA_CHANGED, this.updateTagStyleDebounced);
+        const textSpanDisplayed = this.tagRef && this.tagRef.querySelector('span[data-text="true"]');
+        const shouldTooltipOnHover = textSpanDisplayed && textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth;
+        this.setState({shouldTooltipOnHover})
+    }
+
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const entityChanged = this.props.entityKey !== nextProps.entityKey;
+        const styleChanged = this.state.tagStyle !== nextState.tagStyle;
+        const warningChanged = this.state.tagWarningStyle !== nextState.tagWarningStyle;
+        const tooltipChanged = this.state.showTooltip !== nextState.showTooltip ||
+            this.state.shouldTooltipOnHover !== nextState.shouldTooltipOnHover;
+        return entityChanged || styleChanged || warningChanged || tooltipChanged;
+    }
+
+
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevProps.entitykey !== this.props.entityKey){
+            const textSpanDisplayed = this.tagRef && this.tagRef.querySelector('span[data-text="true"]');
+            const shouldTooltipOnHover = textSpanDisplayed && textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth;
+            if(shouldTooltipOnHover !== this.state.shouldTooltipOnHover){
+                this.setState({shouldTooltipOnHover})
+            }
         }
     }
 
-    componentDidMount() {
-        //console.log('mount', this.props.start, this.props.end)
-        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_WARNINGS, this.updateWarningTagStyle);
-        SegmentStore.addListener(EditAreaConstants.EDIT_AREA_CHANGED, this.updateTagStyle);
-    }
-
-    componentDidUpdate() {
-        //console.log('update')
-    }
-
     componentWillUnmount() {
-        //console.log('unmount', this.props.start, this.props.end)
-        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_WARNINGS, this.updateWarningTagStyle);
-        SegmentStore.removeListener(EditAreaConstants.EDIT_AREA_CHANGED, this.updateTagStyle);
+        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_WARNINGS, this.updateTagWarningStyleDebounced);
+        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_TAGS, this.highlightTags);
+        SegmentStore.removeListener(EditAreaConstants.EDIT_AREA_CHANGED, this.updateTagStyleDebounced);
     }
 
     render() {
-        const {children, entityKey, blockKey, start, end, onClick, contentState, getUpdatedSegmentInfo, getClickedTagInfo, getSearchParams, isTarget} = this.props;
-        const {tagStyle, tagWarningStyle} = this.state;
+        const {children, entityKey, blockKey, start, end, onClick: onClickAction, contentState, getUpdatedSegmentInfo, getSearchParams, isTarget} = this.props;
+        const {tagStyle, tagWarningStyle, tooltipAvailable, showTooltip, shouldTooltipOnHover} = this.state;
         const {tooltipToggle, markSearch} = this;
-        const {currentSelection} = getUpdatedSegmentInfo();
-        const {anchorOffset, focusOffset, anchorKey, hasFocus} = currentSelection;
-        const {tagClickedInSource, clickedTagId, clickedTagText} = getClickedTagInfo();
 
+        const {sid, openSplit} = getUpdatedSegmentInfo();
         let searchParams = getSearchParams();
+
         const {type: entityType, data: {id: entityId, placeholder: entityPlaceholder, name: entityName}} = contentState.getEntity(entityKey);
-
-        // Apply style on clicked tag and draggable tag, placed here for performance
-        const tagFocusedStyle = anchorOffset === start &&
-        focusOffset === end &&
-        anchorKey === blockKey &&
-        (tagClickedInSource && !isTarget || !tagClickedInSource && isTarget) &&
-        hasFocus ? 'tag-focused' : '';
-        const tagClickedStyle = entityId &&
-        clickedTagId &&
-        clickedTagId === entityId &&
-        clickedTagText &&
-        clickedTagText === entityPlaceholder
-            ? 'tag-clicked' : '';
-
-        // show tooltip only on configured tag
-        const showTooltip = this.state.showTooltip && getTooltipTag().includes(entityName);
-        // show tooltip only if text too long
-        const textSpanDisplayed = this.tagRef && this.tagRef.querySelector('span[data-text="true"]');
-        const shouldTooltipOnHover = textSpanDisplayed && textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth;
         const decoratedText = Array.isArray(children) ? children[0].props.text : children.props.decoratedText;
+
         return <div className={'tag-container'}
                     ref={(ref) => this.tagRef = ref}>
-            {showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
-            <span className={`tag ${tagStyle} ${tagWarningStyle} ${tagClickedStyle} ${tagFocusedStyle}`}
+            {tooltipAvailable && showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
+            <span className={`tag ${tagStyle} ${tagWarningStyle}`}
+                data-offset-key={this.props.offsetkey}
                 unselectable="on"
                 suppressContentEditableWarning={true}
                 onMouseEnter={()=> tooltipToggle(shouldTooltipOnHover)}
                 onMouseLeave={() => tooltipToggle()}
                 onClick={(e) => {
-                    e.stopPropagation()
-                    onClick(start, end, entityId, entityPlaceholder)
+                    e.stopPropagation();
+                    this.onClickBound(entityId, entityPlaceholder);
+                    !openSplit && setTimeout(() =>{
+                        SegmentActions.highlightTags(entityId, entityPlaceholder, entityKey);
+                    })
                 }}>
                 {searchParams.active && markSearch(decoratedText, searchParams)}
                 {searchParams.active ? <span style={{display: 'none'}}>{children}</span> : children}
             </span>
+
         </div>
     }
 
-    updateTagStyle = () => {
+    onClickBound = (entityId, entityPlaceholder) =>{
+        const {start, end, onClick: onClickAction} = this.props;
+        onClickAction(start, end, entityId, entityPlaceholder);
+    }
+
+    highlightTags = (tagId, tagPlaceholder, triggerEntityKey) => {
+        const {entityKey, contentState} = this.props;
+        const {clicked} = this.state;
+        const {data: {id: entityId, placeholder: entityPlaceholder}} = contentState.getEntity(entityKey);
+        // Turn OFF
+        if(clicked && (!tagId || tagId !== entityId)){
+            this.setState({
+                tagStyle: this.selectCorrectStyle(),
+                clicked: false,
+                focused: false,
+            })
+        }else if(entityKey === triggerEntityKey){
+            this.setState({
+                tagStyle: this.selectCorrectStyle(tagId, tagPlaceholder, true),
+                clicked: true,
+                focused: true
+            })
+        }else if(tagId === entityId && entityPlaceholder === tagPlaceholder && entityKey !== triggerEntityKey) {
+            this.setState({
+                tagStyle: this.selectCorrectStyle(tagId, tagPlaceholder),
+                clicked: true,
+                focused: false
+            })
+        }
+    };
+
+    updateTagStyle = (sid, isTarget) => {
+        if(!this.props.isTarget && isTarget) return;
+        const {selectCorrectStyle} = this;
         this.setState({
-            tagStyle: this.selectCorrectStyle()
+            tagStyle: selectCorrectStyle()
         })
     };
 
-    updateWarningTagStyle = () => {
-        this.setState({
-            tagWarningStyle: this.highlightOnWarnings()
-        })
+    updateTagWarningStyle = (sid, isTarget) => {
+        const {tagWarningStyle: prevTagWarningStyle} = this.state;
+        const tagWarningStyle = this.highlightOnWarnings();
+        if(prevTagWarningStyle !== tagWarningStyle){
+            this.setState({tagWarningStyle})
+        }
     };
 
-    selectCorrectStyle = () => {
-        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL, isTarget, start, end, getClickedTagInfo} = this.props;
-        const entityInstance = contentState.getEntity(entityKey);
-        const { tagClickedInSource } = getClickedTagInfo();
-        const { segmentOpened, currentSelection } = getUpdatedSegmentInfo();
-        const tagStyle = [];
-        // Check for tag type
-        const {data: { name: entityName}} = entityInstance;
-        const { anchorOffset, focusOffset, hasFocus } = currentSelection;
-        const style =
-            isRTL && tagSignatures[entityName].styleRTL
-                ? tagSignatures[entityName].styleRTL
-                : tagSignatures[entityName].style;
-        anchorOffset <= start &&
-            focusOffset >= end &&
-            ((tagClickedInSource && !isTarget) || (!tagClickedInSource && isTarget)) &&
-            hasFocus &&
-            tagStyle.push('tag-focused');
-        tagStyle.push(style);
+
+    selectCorrectStyle = (clickedTagId= null, clickedTagText= null, focused = false) => {
+        const {entityKey, contentState, getUpdatedSegmentInfo, isRTL, isTarget, start, end, blockKey} = this.props;
+        const {currentSelection: {anchorOffset, focusOffset, anchorKey, hasFocus}, segmentOpened} = getUpdatedSegmentInfo();
+        const {data: {id: entityId, placeholder: entityPlaceholder, name: entityName}} = contentState.getEntity(entityKey);
+
+        // Basic style accordin to language direction
+        const baseStyle = isRTL && tagSignatures[entityName].styleRTL
+            ? tagSignatures[entityName].styleRTL
+            : tagSignatures[entityName].style;
+
         // Check if tag is in an active segment
-        if (!segmentOpened) tagStyle.push('tag-inactive');
-        return tagStyle.join(' ');
+        const tagInactive = !segmentOpened ? 'tag-inactive' : ''
+
+        // Click
+        const tagClicked = entityId &&
+        clickedTagId &&
+        clickedTagId === entityId &&
+        clickedTagText &&
+        clickedTagText === entityPlaceholder
+            ? 'tag-clicked' : ''; // green
+
+        // Focus
+        /*const tagFocused = anchorOffset === start &&
+        focusOffset === end &&
+        anchorKey === blockKey &&
+        (tagClickedInSource && !isTarget || !tagClickedInSource && isTarget) &&
+        hasFocus ? 'tag-focused' : ''; // blue with shadow*/
+
+        const tagFocused = focused ? 'tag-focused' : ''; // blue with shadow
+
+        return `${baseStyle} ${tagInactive} ${tagClicked} ${tagFocused}`.trim();
     };
 
 
     highlightOnWarnings = () => {
+        //console.log('highlightOnWarnings')
         const {getUpdatedSegmentInfo, contentState, entityKey, isTarget} = this.props;
         const {warnings, tagMismatch, tagRange, segmentOpened, missingTagsInTarget} = getUpdatedSegmentInfo();
         const {type: entityType, data: entityData} = contentState.getEntity(entityKey) || {};

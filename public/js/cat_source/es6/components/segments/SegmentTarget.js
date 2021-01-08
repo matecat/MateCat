@@ -164,9 +164,6 @@ class SegmentTarget extends React.Component {
                     translation={translation}
                     locked={this.props.locked}
                     readonly={this.props.readonly}
-                    setClickedTagId={this.props.setClickedTagId}
-                    clickedTagId={this.props.clickedTagId}
-                    clickedTagText={this.props.clickedTagText}
                     toggleFormatMenu={toggleFormatMenu}
                 />
                 {s2tMicro}

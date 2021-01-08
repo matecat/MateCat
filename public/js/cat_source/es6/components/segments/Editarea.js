@@ -9,7 +9,16 @@ import SegmentStore  from '../../stores/SegmentStore';
 import Immutable  from 'immutable';
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import * as DraftMatecatConstants from "./utils/DraftMatecatUtils/editorConstants";
-import {Modifier, Editor, EditorState, getDefaultKeyBinding, KeyBindingUtil, ContentState, CompositeDecorator} from "draft-js";
+import {
+    Modifier,
+    Editor,
+    EditorState,
+    getDefaultKeyBinding,
+    KeyBindingUtil,
+    ContentState,
+    CompositeDecorator,
+    convertToRaw
+} from "draft-js";
 import TagEntity from "./TagEntity/TagEntity.component";
 import SegmentUtils from "../../utils/segmentUtils";
 import CompoundDecorator from "./utils/CompoundDecorator"
@@ -36,7 +45,7 @@ class Editarea extends React.Component {
 
     constructor(props) {
         super(props);
-        const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo, getClickedTagInfo} = this;
+        const {onEntityClick, updateTagsInEditor, getUpdatedSegmentInfo} = this;
 
         this.decoratorsStructure = [
             {
@@ -47,7 +56,6 @@ class Editarea extends React.Component {
                     isTarget: true,
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
-                    getClickedTagInfo: getClickedTagInfo,
                     getSearchParams: this.getSearchParams, //TODO: Make it general ?
                     isRTL: config.isTargetRTL
                 }
@@ -180,10 +188,11 @@ class Editarea extends React.Component {
     };
 
     updateTranslationInStore = () => {
-        const {decodedSegment, entitiesRange} = DraftMatecatUtils.decodeSegment(this.state.editorState)
+
+        const {editorState} = this.state;
+        const {segment, segment: {sourceTagMap}} = this.props;
+        const {decodedSegment, entitiesRange} = DraftMatecatUtils.decodeSegment(editorState)
         if ( decodedSegment !== '' ) {
-            const {segment, segment: {sourceTagMap}} = this.props;
-            const {editorState} = this.state;
             let contentState = editorState.getCurrentContent();
             let plainText = contentState.getPlainText();
             // Match tag without compute tag id
@@ -254,8 +263,8 @@ class Editarea extends React.Component {
             {
                 // Cleanup all decorators
                 this.removeDecorator();
-                activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]= false,
-                activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]= false,
+                activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR]= false
+                activeDecorators[DraftMatecatConstants.QA_BLACKLIST_DECORATOR]= false
                 this.addSearchDecorator();
                 activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
                 changedDecorator = true            }
@@ -558,11 +567,10 @@ class Editarea extends React.Component {
     };
 
     onBlurEvent = () => {
-        const {toggleFormatMenu, setClickedTagId} = this.props;
+        const {toggleFormatMenu} = this.props;
         editorSync.editorFocused = false;
         // Hide Edit Toolbar
         toggleFormatMenu(false);
-        setClickedTagId();
     };
 
     // Focus on editor trigger 2 onChange events
@@ -602,9 +610,11 @@ class Editarea extends React.Component {
     };
 
     onCompositionStop = () => {
-        editorSync.onComposition = false;
-        // Tell tags to update themself
-        setTimeout(( ) =>{ SegmentActions.editAreaChanged(this.props.segment.sid); });
+        if(editorSync.onComposition) {
+            editorSync.onComposition = false;
+            // Tell tags to update themself
+            setTimeout(( ) =>{ SegmentActions.editAreaChanged(this.props.segment.sid, true); });
+        }
     }
 
     removeDecorator = (decoratorName) => {
@@ -624,8 +634,7 @@ class Editarea extends React.Component {
     }
 
     onChange = (editorState) =>  {
-
-        const {setClickedTagId} = this.props;
+        //console.log('onChange')
         const {displayPopover, editorState: prevEditorState, activeDecorators} = this.state;
         const {closePopover, updateTagsInEditorDebounced} = this;
 
@@ -633,9 +642,10 @@ class Editarea extends React.Component {
             prevEditorState.getCurrentContent().getPlainText();
 
         // if not on an entity, remove any previous selection highlight
-        const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
+        const {entityKey} = DraftMatecatUtils.selectionIsEntity(editorState);
         // select no tag
-        if(!entityKey) setClickedTagId();
+        if(!entityKey) setTimeout(() =>{SegmentActions.highlightTags();});
+
         // if opened, close TagsMenu
         if(displayPopover) closePopover();
         if(contentChanged){
@@ -655,46 +665,16 @@ class Editarea extends React.Component {
             }), () => {
                 // Reactivate decorators
                 this.updateTranslationDebounced();
+                this.onCompositionStopDebounced()
             })
         }else{
-            this.setState({editorState: editorState});
-            this.onCompositionStopDebounced()
-        }
-    }
-
-    /*_onChange = (editorState) =>  {
-        const {setClickedTagId} = this.props;
-        const {displayPopover, editorState: prevEditorState} = this.state;
-        const {closePopover, updateTagsInEditorDebounced} = this;
-        const contentChanged = editorState.getCurrentContent().getPlainText() !==
-            prevEditorState.getCurrentContent().getPlainText();
-        // if not on an entity, remove any previous selection highlight
-        const entityKey = DraftMatecatUtils.selectionIsEntity(editorState)
-        // select no tag
-        if(!entityKey) setClickedTagId();
-        // if opened, close TagsMenu
-        if(displayPopover) closePopover();
-        if(contentChanged){
-            // Stop checking decorators while typing...
-            editorSync.onComposition = true;
-            // ...remove unwanted decorators like lexiqa...
-            editorState = this.disableDecorator(editorState, DraftMatecatConstants.LEXIQA_DECORATOR);
-            editorState = this.forceSelectionFocus(editorState);
             this.setState(prevState => ({
-                activeDecorators: {
-                    ...prevState.activeDecorators,
-                    [DraftMatecatConstants.LEXIQA_DECORATOR]: false
-                },
                 editorState: editorState
             }), () => {
-                // Reactivate decorators
-                this.updateTranslationDebounced();
+                this.onCompositionStopDebounced()
             })
-        }else{
-            this.setState({editorState: editorState});
-            this.onCompositionStopDebounced()
         }
-    };*/
+    }
 
     // fix cursor jump at the beginning
     forceSelectionFocus = (editorState) => {
@@ -915,9 +895,8 @@ class Editarea extends React.Component {
         // set selection to drop point and check dropping zone
         editorState = EditorState.forceSelection(editorState, selection);
         // Check: Cannot drop anything on entities
-        if(DraftMatecatUtils.selectionIsEntity(editorState)){
-            return 'handled';
-        }
+        const {onEdge} = DraftMatecatUtils.selectionIsEntity(editorState);
+        if(onEdge) return 'handled';
 
         if(text && !editorSync.draggingFromEditArea) {
             try {
@@ -974,7 +953,7 @@ class Editarea extends React.Component {
                     editorState: editorState,
                 }, () => {
                     this.updateTranslationDebounced();
-                    this.props.setClickedTagId();
+                    setTimeout(() =>{ SegmentActions.highlightTags(); });
                 });
                 return 'handled';
             } catch (err) {
@@ -987,7 +966,6 @@ class Editarea extends React.Component {
 
     onEntityClick = (start, end, id, text) => {
         const {editorState} = this.state;
-        const {setClickedTagId} = this.props;
         // Use _latestEditorState
         try{
             // Selection
@@ -1002,15 +980,9 @@ class Editarea extends React.Component {
             );
             this.setState({editorState: newEditorState});
             // Highlight
-            setClickedTagId(id, text);
         }catch (e) {
             console.log('Invalid selection')
         }
-    };
-
-    getClickedTagInfo = () => {
-        const {clickedTagId, tagClickedInSource, clickedTagText} = this.props;
-        return {clickedTagId, tagClickedInSource, clickedTagText};
     };
 
     /**
@@ -1041,7 +1013,7 @@ class Editarea extends React.Component {
     };
 
     getUpdatedSegmentInfo = () => {
-        const {segment: { sid, warnings, tagMismatch, opened, missingTagsInTarget}} = this.props;
+        const {segment: { sid, warnings, tagMismatch, opened, missingTagsInTarget, openSplit}} = this.props;
         const {tagRange, editorState} = this.state;
         return{
             sid,
@@ -1050,7 +1022,8 @@ class Editarea extends React.Component {
             tagRange,
             segmentOpened: opened,
             missingTagsInTarget,
-            currentSelection: editorState.getSelection()
+            currentSelection: editorState.getSelection(),
+            openSplit
         }
     };
 
