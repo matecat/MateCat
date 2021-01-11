@@ -15,23 +15,25 @@ const decodeSegment  = (editorState) => {
     let contentState = editorState.getCurrentContent();
     if(!contentState.hasText()) return {entities: [], decodedSegment: contentState.getPlainText()}
 
-    const entities = getEntities(editorState).sort((a, b) => a.start-b.start); //start - end
-
+    const entities = getEntities(editorState); // already consecutive
     // Adapt offset from block to absolute
     const blocks = contentState.getBlockMap();
     let plainEditorText = contentState.getPlainText();
     let totalBlocksLength = 0;
     let slicedLength = 0;
     blocks.forEach( block => {
+        const blockKey = block.getKey();
         entities.forEach( tagEntity => {
-            const {encodedText} = tagEntity.entity.data;
-            // add previous block length and previous replace length diff
-            const start = tagEntity.start + totalBlocksLength - slicedLength;
-            const end  = tagEntity.end + totalBlocksLength - slicedLength;
-            plainEditorText = plainEditorText.slice(0,start) + encodedText + plainEditorText.slice(end);
-            slicedLength +=  (end - start) - encodedText.length;
+            if(tagEntity.blockKey === blockKey){
+                const {encodedText} = tagEntity.entity.data;
+                // add previous block length and previous replace length diff
+                const start = tagEntity.start + totalBlocksLength - slicedLength;
+                const end  = tagEntity.end + totalBlocksLength - slicedLength;
+                plainEditorText = plainEditorText.slice(0,start) + encodedText + plainEditorText.slice(end);
+                slicedLength +=  (end - start) - encodedText.length;
+            }
         })
-        // Block lenght plus newline char
+        // Block length plus newline char
         totalBlocksLength += block.getLength() + 1
     })
 
