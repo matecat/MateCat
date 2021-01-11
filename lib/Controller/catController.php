@@ -22,6 +22,7 @@ class catController extends viewController {
     protected $jid             = "";
     protected $password        = "";
     protected $review_password = "";
+    protected $currentPassword = "";
     private   $create_date     = "";
 
     private $start_time = 0.00;
@@ -360,6 +361,7 @@ class catController extends viewController {
             $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
             $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
             $this->template->password            = $this->password;
+            $this->template->currentPassword     = $this->currentPassword;
 
             throw new AuthorizationError( "Forbidden, Job archived/cancelled." );
 
