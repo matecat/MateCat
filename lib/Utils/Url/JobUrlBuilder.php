@@ -10,6 +10,43 @@ use Projects_ProjectDao;
 class JobUrlBuilder {
 
     /**
+     * Build the job url from Jobs_JobStruct
+     *
+     * Optional parameters:
+     * - id_segment
+     * - httphost
+     *
+     * Returns null in case of wrong parameters
+     *
+     * @param Jobs_JobStruct $jobs_JobStruct
+     * @param array  $options
+     *
+     * @return JobUrlStruct
+     * @throws \Exception
+     */
+    public static function createFromJobStruct( Jobs_JobStruct $jobs_JobStruct, $options = [] ) {
+    }
+
+    /**
+     * Build the job url from job id/password
+     *
+     * Optional parameters:
+     * - id_segment
+     * - httphost
+     *
+     * Returns null in case of wrong parameters
+     *
+     * @param int    $jobId
+     * @param string $jobPassword
+     * @param array  $options
+     *
+     * @return JobUrlStruct
+     * @throws \Exception
+     */
+    public static function createFromCredentials( $jobId, $jobPassword, $options = [] ) {
+    }
+
+    /**
      * Build the job url from job id/password
      *
      * Optional parameters:
@@ -29,26 +66,26 @@ class JobUrlBuilder {
 
         // 1. find the job
         $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
-        if(!$job){
+        if ( !$job ) {
             return null;
         }
 
         // 2. find the correlated project
         $project = Projects_ProjectDao::findById( $job->id_project );
-        if(!$project){
+        if ( !$project ) {
             return null;
         }
 
         // 3. get job type and password
-        $sourcePage = ReviewUtils::revisionNumberToSourcePage( isset($options['revision_number']) ? $options['revision_number'] : null );
+        $sourcePage = ReviewUtils::revisionNumberToSourcePage( isset( $options[ 'revision_number' ] ) ? $options[ 'revision_number' ] : null );
         $jobType    = self::getJobType( $sourcePage );
         $password   = self::getPassword( $job, $sourcePage );
 
-        if(!$jobType or !$password){
+        if ( !$jobType or !$password ) {
             return null;
         }
 
-        $url = self::httpHost($options);
+        $url = self::httpHost( $options );
         $url .= DIRECTORY_SEPARATOR;
         $url .= $jobType;
         $url .= DIRECTORY_SEPARATOR;
@@ -59,9 +96,9 @@ class JobUrlBuilder {
         $url .= $job->id . '-' . $password;
 
         // 4. add segment id only if belongs to the job
-        if ( isset($options['id_segment']) ) {
-            if ( ($job->job_first_segment <= $options['id_segment']) and ($options['id_segment'] <= $job->job_last_segment) ) {
-                $url .= '#' . $options['id_segment'];
+        if ( isset( $options[ 'id_segment' ] ) ) {
+            if ( ( $job->job_first_segment <= $options[ 'id_segment' ] ) and ( $options[ 'id_segment' ] <= $job->job_last_segment ) ) {
+                $url .= '#' . $options[ 'id_segment' ];
             }
         }
 
@@ -119,7 +156,7 @@ class JobUrlBuilder {
      * Get the correct password for job url
      *
      * @param Jobs_JobStruct $job
-     * @param                $sourcePage
+     * @param int            $sourcePage
      *
      * @return string|null
      */
@@ -129,7 +166,7 @@ class JobUrlBuilder {
         }
 
         $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $job->id, $job->password, $sourcePage );
-        if(!$qa){
+        if ( !$qa ) {
             return null;
         }
 
