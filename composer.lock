@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.158.22",
+            "version": "3.168.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "0aae6d7d0e9fc40ace69ed7f7785d7ddab4dabd0"
+                "reference": "842621099b1de31ec6efd7535b8b343397c6e0ec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/0aae6d7d0e9fc40ace69ed7f7785d7ddab4dabd0",
-                "reference": "0aae6d7d0e9fc40ace69ed7f7785d7ddab4dabd0",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/842621099b1de31ec6efd7535b8b343397c6e0ec",
+                "reference": "842621099b1de31ec6efd7535b8b343397c6e0ec",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.158.22"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.168.0"
             },
-            "time": "2020-11-06T19:13:12+00:00"
+            "time": "2020-12-08T19:17:21+00:00"
         },
         {
             "name": "defuse/php-encryption",
@@ -215,16 +215,16 @@
         },
         {
             "name": "google/apiclient",
-            "version": "v2.8.1",
+            "version": "v2.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client.git",
-                "reference": "c8f6d09f50f859fa9457104bb0fb72c893804ede"
+                "reference": "81696e6206322e38c643cfcc96c4494ccfef8a32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/c8f6d09f50f859fa9457104bb0fb72c893804ede",
-                "reference": "c8f6d09f50f859fa9457104bb0fb72c893804ede",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client/zipball/81696e6206322e38c643cfcc96c4494ccfef8a32",
+                "reference": "81696e6206322e38c643cfcc96c4494ccfef8a32",
                 "shasum": ""
             },
             "require": {
@@ -278,9 +278,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client/issues",
-                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.8.1"
+                "source": "https://github.com/googleapis/google-api-php-client/tree/v2.8.3"
             },
-            "time": "2020-10-27T23:20:13+00:00"
+            "time": "2020-11-17T17:33:35+00:00"
         },
         {
             "name": "google/apiclient-services",
@@ -703,16 +703,16 @@
         },
         {
             "name": "matecat/whole-text-finder",
-            "version": "v1.0.12",
+            "version": "v1.0.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/whole-text-finder.git",
-                "reference": "c8919c71a58ab169b881326d59d7bce093551d9a"
+                "reference": "47c636cebf074a7bd6e66b5ab45c74e31227d933"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/c8919c71a58ab169b881326d59d7bce093551d9a",
-                "reference": "c8919c71a58ab169b881326d59d7bce093551d9a",
+                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/47c636cebf074a7bd6e66b5ab45c74e31227d933",
+                "reference": "47c636cebf074a7bd6e66b5ab45c74e31227d933",
                 "shasum": ""
             },
             "require": {
@@ -750,22 +750,22 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/whole-text-finder/issues",
-                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.12"
+                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.13"
             },
-            "time": "2020-07-15T15:27:36+00:00"
+            "time": "2020-12-02T14:48:07+00:00"
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v1.0.33",
+            "version": "v1.0.40",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "e5355a54f74d8f5643925eaf809ebb5f39c87cb4"
+                "reference": "86787503e98672777eaf3efae5ac487fa3a1bdaa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/e5355a54f74d8f5643925eaf809ebb5f39c87cb4",
-                "reference": "e5355a54f74d8f5643925eaf809ebb5f39c87cb4",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/86787503e98672777eaf3efae5ac487fa3a1bdaa",
+                "reference": "86787503e98672777eaf3efae5ac487fa3a1bdaa",
                 "shasum": ""
             },
             "require": {
@@ -801,9 +801,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.33"
+                "source": "https://github.com/matecat/xliff-parser/tree/v1.0.40"
             },
-            "time": "2020-11-09T09:01:52+00:00"
+            "time": "2020-12-09T15:52:15+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -2246,16 +2246,16 @@
         },
         {
             "name": "onelogin/php-saml",
-            "version": "2.18.1",
+            "version": "2.19.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/onelogin/php-saml.git",
-                "reference": "a4619e04e8e4b958a941a02125d1d9314ba5f0b3"
+                "reference": "cc6d4e7ef77b57125c3758fe5fbf21aa7e9a2628"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/a4619e04e8e4b958a941a02125d1d9314ba5f0b3",
-                "reference": "a4619e04e8e4b958a941a02125d1d9314ba5f0b3",
+                "url": "https://api.github.com/repos/onelogin/php-saml/zipball/cc6d4e7ef77b57125c3758fe5fbf21aa7e9a2628",
+                "reference": "cc6d4e7ef77b57125c3758fe5fbf21aa7e9a2628",
                 "shasum": ""
             },
             "require": {
@@ -2263,7 +2263,7 @@
                 "ext-dom": "*",
                 "ext-mcrypt": "*",
                 "ext-openssl": "*",
-                "php": ">=5.3.2"
+                "php": ">=5.3.2 <7.2"
             },
             "require-dev": {
                 "pdepend/pdepend": "1.1.0",
@@ -2300,7 +2300,7 @@
                 "issues": "https://github.com/onelogin/php-saml/issues",
                 "source": "https://github.com/onelogin/php-saml/"
             },
-            "time": "2019-11-25T17:31:38+00:00"
+            "time": "2020-11-26T18:47:56+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",

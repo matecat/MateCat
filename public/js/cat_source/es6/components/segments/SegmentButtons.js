@@ -107,7 +107,7 @@ class SegmentButton extends React.Component {
                 </a>
                 <p>
                     {UI.isMac ? 'CMD' : 'CTRL'}
-                    SHIFT+ENTER
+                    +SHIFT+ENTER
                 </p>
             </li>
         ) : null;
@@ -202,7 +202,7 @@ class SegmentButton extends React.Component {
                     </a>
                     <p>
                         {UI.isMac ? 'CMD' : 'CTRL'}
-                        SHIFT+ENTER
+                        +SHIFT+ENTER
                     </p>
                 </li>
             ) : null;

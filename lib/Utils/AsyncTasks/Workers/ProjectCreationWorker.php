@@ -68,7 +68,19 @@ class ProjectCreationWorker extends AbstractWorker {
 
     }
 
+    /**
+     * @param QueueElement $queueElement
+     *
+     * @throws \Exception
+     */
     protected function _createProject( QueueElement $queueElement ){
+
+        if( empty( $queueElement->params ) ){
+            $msg = "\n\n Error Project Creation  \n\n " . var_export( $queueElement, true );
+            \Utils::sendErrMailReport( $msg );
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  empty params found." );
+            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  empty params found.", self::ERR_REQUEUE_END );
+        }
 
         $this->projectStructure = new RecursiveArrayObject( json_decode( $queueElement->params, true ) );
         $projectManager = new ProjectManager( $this->projectStructure );

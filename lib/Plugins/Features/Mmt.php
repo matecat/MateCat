@@ -486,6 +486,7 @@ class Mmt extends BaseFeature {
             $newEngineStruct->uid                                    = $logged_user->uid;
             $newEngineStruct->type                                   = Constants_Engines::MT;
             $newEngineStruct->extra_parameters[ 'MMT-License' ]      = $data->engineData[ 'secret' ];
+            $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ]      = $data->engineData[ 'pretranslate' ];
 
             return $newEngineStruct;
         }

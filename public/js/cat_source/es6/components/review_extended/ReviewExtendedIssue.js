@@ -128,7 +128,6 @@ class ReviewExtendedIssue extends React.Component {
         }
 
         var data = {
-            rebutted: true,
             message: this.state.comment_text,
             source_page: config.isReview ? config.revisionNumber + 1 : 1, // TODO: move this to UI property
         };
