@@ -156,9 +156,12 @@ class TagEntity extends Component {
     updateTagStyle = (sid, isTarget) => {
         if(!this.props.isTarget && isTarget) return;
         const {selectCorrectStyle} = this;
-        this.setState({
-            tagStyle: selectCorrectStyle()
-        })
+        const newStyle = selectCorrectStyle();
+        if(newStyle !== this.state.tagStyle){
+            this.setState({
+                tagStyle: newStyle
+            })
+        }
     };
 
     updateTagWarningStyle = (sid, isTarget) => {
