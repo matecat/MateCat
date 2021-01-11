@@ -1,7 +1,5 @@
 <?php
 
-use Validator\JobValidatorObject;
-
 abstract class viewController extends controller {
 
     /**
@@ -219,61 +217,16 @@ abstract class viewController extends controller {
      */
     public static function isRevision() {
 
-        $isRevision = self::getIsRevisionFromIdJobAndPassword();
+        $jid        = static::getInstance()->jid;
+        $password   = static::getInstance()->received_password;
+        $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
 
         if ( null === $isRevision ) {
-            $isRevision = self::getIsRevisionFromRequestUri();
+            $isRevision = CatUtils::getIsRevisionFromRequestUri();
         }
 
         return $isRevision;
     }
-
-    /**
-     * @return bool|null
-     */
-    private static function getIsRevisionFromIdJobAndPassword() {
-
-        $jid              = static::getInstance()->jid;
-        $receivedPassword = static::getInstance()->received_password;
-
-        $jobValidator = new \Validator\JobValidator();
-
-        try {
-            /** @var JobValidatorObject $validatorObject */
-            $validatorObject = $jobValidator->validate( new JobValidatorObject(), [
-                    'jid'      => $jid,
-                    'password' => $receivedPassword
-            ] );
-
-            if ( $validatorObject->t == 1 ) {
-                return false;
-            }
-
-            if ( $validatorObject->r1 == 1 or $validatorObject->r2 == 1 ) {
-                return true;
-            }
-
-        } catch ( \Exception $exception ) {
-            return null;
-        }
-
-        return null;
-    }
-
-    /**
-     * @return bool
-     */
-    private static function getIsRevisionFromRequestUri() {
-
-        if ( !isset( $_SERVER[ 'REQUEST_URI' ] ) ) {
-            return false;
-        }
-
-        $_from_url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
-
-        return strpos( $_from_url[ 'path' ], "/revise" ) === 0;
-    }
-
 
     protected function render404( $customTemplate = '404.html' ) {
         $this->renderCustomHTTP( $customTemplate, 404 );

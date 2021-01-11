@@ -65,9 +65,16 @@ abstract class ajaxController extends controller {
      * @return bool
      */
     public static function isRevision() {
-        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
-        $is_revision_url = strpos( $_from_url['path'] , "/revise" ) === 0;
-        return $is_revision_url;
+
+        $jid        = static::getInstance()->jid;
+        $password   = static::getInstance()->currentPassword;
+        $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+
+        if ( null === $isRevision ) {
+            $isRevision = CatUtils::getIsRevisionFromReferer();
+        }
+
+        return $isRevision;
     }
 
     public function parseIDSegment() {
