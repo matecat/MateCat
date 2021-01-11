@@ -22,7 +22,6 @@ class JobUrlBuilder {
      * @param array          $options
      *
      * @return JobUrlStruct
-     * @throws \Exception
      */
     public static function createFromJobStruct( Jobs_JobStruct $job, $options = [] ) {
 
@@ -80,7 +79,6 @@ class JobUrlBuilder {
      * @param array  $options
      *
      * @return JobUrlStruct
-     * @throws \Exception
      */
     public static function createFromCredentials( $jobId, $jobPassword, $options = [] ) {
 

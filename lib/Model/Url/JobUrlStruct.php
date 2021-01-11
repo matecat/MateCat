@@ -6,6 +6,7 @@ use Features\ReviewExtended\ReviewUtils;
 
 class JobUrlStruct {
 
+    // STATUS LABELS
     const LABEL_T  = 't';
     const LABEL_R1 = 'r1';
     const LABEL_R2 = 'r2';
@@ -55,10 +56,16 @@ class JobUrlStruct {
      * @param array  $passwords
      * @param null   $httpHost
      * @param null   $segmentId
-     *
-     * @throws \Exception
      */
-    public function __construct( $jid, $projectName, $source, $target, array $passwords = [], $httpHost = null, $segmentId = null ) {
+    public function __construct(
+            $jid,
+            $projectName,
+            $source,
+            $target,
+            array $passwords = [],
+            $httpHost = null,
+            $segmentId = null
+    ) {
         $this->jid         = $jid;
         $this->projectName = $projectName;
         $this->source      = $source;
@@ -83,8 +90,6 @@ class JobUrlStruct {
      * set $this->urls from provided password
      *
      * @param null $httpHost
-     *
-     * @throws \Exception
      */
     private function setUrls($httpHost = null) {
         // loop passwords array
@@ -129,17 +134,12 @@ class JobUrlStruct {
      * @param null $httpHost
      *
      * @return mixed
-     * @throws \Exception
      */
     private function httpHost( $httpHost = null ) {
         $host = \INIT::$HTTPHOST;
 
         if ( !empty( $httpHost ) ) {
             $host = $httpHost;
-        }
-
-        if ( empty( $host ) ) {
-            throw new \Exception( 'HTTP_HOST is not set ' );
         }
 
         return $host;
