@@ -57,7 +57,8 @@ class Editarea extends React.Component {
                     onClick: onEntityClick,
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
                     getSearchParams: this.getSearchParams, //TODO: Make it general ?
-                    isRTL: config.isTargetRTL
+                    isRTL: config.isTargetRTL,
+                    sid: this.props.segment.sid
                 }
             }
         ];
@@ -111,7 +112,8 @@ class Editarea extends React.Component {
                 textToReplace: searchParams.target,
                 params: searchParams,
                 occurrences : occurrencesInSearch.occurrences,
-                currentInSearchIndex
+                currentInSearchIndex,
+                isTarget: true
             }
         } else {
             return {

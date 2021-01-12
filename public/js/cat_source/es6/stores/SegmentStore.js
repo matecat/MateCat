@@ -1204,19 +1204,21 @@ AppDispatcher.register(function (action) {
         case SegmentConstants.ADD_SEARCH_RESULTS:
             SegmentStore.addSearchResult(action.occurrencesList, action.searchResultsDictionary, action.currentIndex, action.text);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
-            _.forEach(action.segments, (sid) => {
+            action.occurrencesList.filter((v, i, a) => a.indexOf(v) === i).forEach((sid) => {
                 SegmentStore.emitChange(SegmentConstants.ADD_SEARCH_RESULTS, sid);
             });
             break;
         case SegmentConstants.REMOVE_SEARCH_RESULTS:
             SegmentStore.removeSearchResults();
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
+            SegmentStore.emitChange(SegmentConstants.REMOVE_SEARCH_RESULTS, SegmentStore._segments);
             break;
         case SegmentConstants.ADD_CURRENT_SEARCH:
             let currentSegment = SegmentStore.addCurrentSearchSegment(action.currentIndex);
             SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments);
             if ( currentSegment ) {
                 SegmentStore.emitChange(SegmentConstants.FORCE_UPDATE_SEGMENT, currentSegment.get('sid'));
+                SegmentStore.emitChange(SegmentConstants.ADD_CURRENT_SEARCH, currentSegment.get('sid'), currentSegment.get('currentInSearchIndex'));
             }
             break;
         case EditAreaConstants.REPLACE_SEARCH_RESULTS:

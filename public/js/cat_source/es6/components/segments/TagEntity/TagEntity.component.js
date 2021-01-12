@@ -21,7 +21,8 @@ class TagEntity extends Component {
             tooltipAvailable: getTooltipTag().includes(entityName),
             shouldTooltipOnHover: false,
             clicked: false,
-            focused: false
+            focused: false,
+            searchParams: this.props.getSearchParams()
         };
         this.updateTagStyleDebounced = _.debounce(this.updateTagStyle, 500);
         this.updateTagWarningStyleDebounced = _.debounce(this.updateTagWarningStyle, 500);
@@ -51,10 +52,48 @@ class TagEntity extends Component {
         return text;
     };
 
+    addSearchParams = (sid) => {
+        const {getSearchParams, isTarget} = this.props;
+        if ( sid !== this.props.sid ) return;
+
+        let searchParams = getSearchParams();
+        if (searchParams.active && ((searchParams.isTarget && isTarget) || (!searchParams.isTarget && !isTarget))) {
+            console.log("Add Search");
+            this.setState( {
+                searchParams
+            } );
+        }
+    }
+
+    updateSearchParams = (sid, currentInSearchIndex) => {
+        const {getSearchParams} = this.props;
+        if ( sid !== this.props.sid || sid === this.props.sid && !this.state.searchParams.active) return;
+        console.log("Update Search");
+        let searchParamsNew = getSearchParams();
+        searchParamsNew.currentInSearchIndex = currentInSearchIndex;
+        this.setState({
+            searchParams: searchParamsNew
+        })
+    }
+
+    removeSearchParams = () => {
+        if ( this.state.searchParams.active) {
+            console.log("Remove Search");
+            const {getSearchParams} = this.props;
+            let searchParams = getSearchParams();
+            this.setState( {
+                searchParams
+            } );
+        }
+    }
+
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_WARNINGS, this.updateTagWarningStyleDebounced);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_TAGS, this.highlightTags);
         SegmentStore.addListener(EditAreaConstants.EDIT_AREA_CHANGED, this.updateTagStyleDebounced);
+        SegmentStore.addListener(SegmentConstants.ADD_SEARCH_RESULTS, this.addSearchParams);
+        SegmentStore.addListener(SegmentConstants.ADD_CURRENT_SEARCH, this.updateSearchParams);
+        SegmentStore.addListener(SegmentConstants.REMOVE_SEARCH_RESULTS, this.removeSearchParams);
         const textSpanDisplayed = this.tagRef && this.tagRef.querySelector('span[data-text="true"]');
         const shouldTooltipOnHover = textSpanDisplayed && textSpanDisplayed.offsetWidth < textSpanDisplayed.scrollWidth;
         this.setState({shouldTooltipOnHover})
@@ -62,12 +101,14 @@ class TagEntity extends Component {
 
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const searchChange = (this.state.searchParams.active !== nextState.searchParams.active) ||
+            (nextState.searchParams.active && nextState.searchParams.currentInSearchIndex !== this.state.searchParams.currentInSearchIndex);
         const entityChanged = this.props.entityKey !== nextProps.entityKey;
         const styleChanged = this.state.tagStyle !== nextState.tagStyle;
         const warningChanged = this.state.tagWarningStyle !== nextState.tagWarningStyle;
         const tooltipChanged = this.state.showTooltip !== nextState.showTooltip ||
             this.state.shouldTooltipOnHover !== nextState.shouldTooltipOnHover;
-        return entityChanged || styleChanged || warningChanged || tooltipChanged;
+        return entityChanged || styleChanged || warningChanged || tooltipChanged || searchChange;
     }
 
 
@@ -86,15 +127,18 @@ class TagEntity extends Component {
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_WARNINGS, this.updateTagWarningStyleDebounced);
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_TAGS, this.highlightTags);
         SegmentStore.removeListener(EditAreaConstants.EDIT_AREA_CHANGED, this.updateTagStyleDebounced);
+        SegmentStore.removeListener(SegmentConstants.ADD_SEARCH_RESULTS, this.addSearchParams);
+        SegmentStore.removeListener(SegmentConstants.ADD_CURRENT_SEARCH, this.updateSearchParams);
+        SegmentStore.removeListener(SegmentConstants.REMOVE_SEARCH_RESULTS, this.removeSearchParams);
     }
 
     render() {
-        const {children, entityKey, blockKey, start, end, onClick: onClickAction, contentState, getUpdatedSegmentInfo, getSearchParams, isTarget} = this.props;
-        const {tagStyle, tagWarningStyle, tooltipAvailable, showTooltip, shouldTooltipOnHover} = this.state;
+        const {children, entityKey, blockKey, start, end, contentState, getUpdatedSegmentInfo, isTarget} = this.props;
+        const {tagStyle, tagWarningStyle, tooltipAvailable, showTooltip, shouldTooltipOnHover, searchParams} = this.state;
         const {tooltipToggle, markSearch} = this;
 
         const {sid, openSplit} = getUpdatedSegmentInfo();
-        let searchParams = getSearchParams();
+
 
         const {type: entityType, data: {id: entityId, placeholder: entityPlaceholder, name: entityName}} = contentState.getEntity(entityKey);
         const decoratedText = Array.isArray(children) ? children[0].props.text : children.props.decoratedText;

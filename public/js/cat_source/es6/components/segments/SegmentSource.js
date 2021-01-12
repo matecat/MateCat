@@ -38,7 +38,8 @@ class SegmentSource extends React.Component {
                     getUpdatedSegmentInfo: getUpdatedSegmentInfo,
                     isTarget: false,
                     getSearchParams: this.getSearchParams,
-                    isRTL: config.isSourceRTL
+                    isRTL: config.isSourceRTL,
+                    sid: this.props.segment.sid
                 }
             }];
         //const decorator = new CompoundDecorator(this.decoratorsStructure);
@@ -84,7 +85,8 @@ class SegmentSource extends React.Component {
                 textToReplace: searchParams.source,
                 params: searchParams,
                 occurrences : occurrencesInSearch.occurrences,
-                currentInSearchIndex
+                currentInSearchIndex,
+                isTarget: false
             }
         } else {
             return {
