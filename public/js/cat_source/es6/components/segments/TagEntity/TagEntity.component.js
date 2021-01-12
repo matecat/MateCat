@@ -286,13 +286,33 @@ class TagEntity extends Component {
                     tagWarningStyle = 'tag-mismatch-error'
                 }
             });
-        }else if(tagMismatch.source && tagMismatch.source.length > 0 && !isTarget && missingTagsInTarget){
+        }else if(tagMismatch.source && tagMismatch.source.length > 0 && !isTarget/* && missingTagsInTarget*/){
             // Find tag and specific Tag ID in missing tags in target array
-            const missingTagInError = missingTagsInTarget.filter( tag => {
+            /*const missingTagInError = missingTagsInTarget.filter( tag => {
                 return tag.data.encodedText === encodedText && tag.data.id === entityId
+            });*/
+
+            tagMismatch.source.forEach(tagString => {
+                // build tag from string
+                //tagObject = DraftMatecatUtils.tagFromString(tagString);
+                /*if(entityType === tagObject.type){
+                    // If tag is closure and openTagId/closeTagId are null, then the tag was added after initial rendering
+                    if(getClosureTag().includes(tagObject.type)){
+                        /!*if(!entityData.openTagId && !entityData.closeTagId){
+                            tagWarningStyle = 'tag-mismatch-error'
+                        }*!/
+                        tagWarningStyle = 'tag-mismatch-error'
+                    }else if(entityData.id === tagObject.data.id){
+                        tagWarningStyle = 'tag-mismatch-error'
+                    }
+                }*/
+                if(entityData.encodedText === tagString){
+                    tagWarningStyle = 'tag-mismatch-error'
+                }
             });
+
             // Array should contain only one item
-            if(missingTagInError.length === 1) tagWarningStyle = 'tag-mismatch-error';
+            //if(missingTagInError.length === 1) tagWarningStyle = 'tag-mismatch-error';
             /*tagMismatch.source.forEach(tagString => {
                 if(entityData.encodedText === tagString){
                     tagWarningStyle = 'tag-mismatch-error'
