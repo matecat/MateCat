@@ -56,10 +56,8 @@ class TagEntity extends Component {
     addSearchParams = (sid) => {
         const {getSearchParams, isTarget} = this.props;
         if ( sid !== this.props.sid ) return;
-
         let searchParams = getSearchParams();
         if (searchParams.active && ((searchParams.isTarget && isTarget) || (!searchParams.isTarget && !isTarget))) {
-            console.log("Add Search");
             this.setState( {
                 searchParams
             } );
@@ -69,7 +67,6 @@ class TagEntity extends Component {
     updateSearchParams = (sid, currentInSearchIndex) => {
         const {getSearchParams} = this.props;
         if ( sid !== this.props.sid || sid === this.props.sid && !this.state.searchParams.active) return;
-        console.log("Update Search");
         let searchParamsNew = getSearchParams();
         searchParamsNew.currentInSearchIndex = currentInSearchIndex;
         this.setState({
@@ -79,7 +76,6 @@ class TagEntity extends Component {
 
     removeSearchParams = () => {
         if ( this.state.searchParams.active) {
-            console.log("Remove Search");
             const {getSearchParams} = this.props;
             let searchParams = getSearchParams();
             this.setState( {
@@ -251,7 +247,6 @@ class TagEntity extends Component {
         hasFocus ? 'tag-focused' : ''; // blue with shadow*/
 
         const tagFocused = focused ? 'tag-focused' : ''; // blue with shadow
-        console.log("Calculate component style!");
         return `${baseStyle} ${tagInactive} ${tagClicked} ${tagFocused}`.trim();
     };
 
