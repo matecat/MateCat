@@ -1061,7 +1061,8 @@ var UI = {
             id_after: idAfter,
             by_status: false,
             revision_number: config.revisionNumber,
-            guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment)
+            guess_tag_used: !SegmentUtils.checkCurrentSegmentTPEnabled(segment),
+            current_password: config.currentPassword
         };
         if(isSplitted) {
             SegmentActions.setStatus(segment.original_sid, null, status);
