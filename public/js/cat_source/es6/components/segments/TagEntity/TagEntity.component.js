@@ -22,7 +22,8 @@ class TagEntity extends Component {
             shouldTooltipOnHover: false,
             clicked: false,
             focused: false,
-            searchParams: this.props.getSearchParams()
+            searchParams: this.props.getSearchParams(),
+            entityKey: this.props.entityKey
         };
         this.updateTagStyleDebounced = _.debounce(this.updateTagStyle, 500);
         this.updateTagWarningStyleDebounced = _.debounce(this.updateTagWarningStyle, 500);
@@ -136,7 +137,7 @@ class TagEntity extends Component {
         const {children, entityKey, blockKey, start, end, contentState, getUpdatedSegmentInfo, isTarget} = this.props;
         const {tagStyle, tagWarningStyle, tooltipAvailable, showTooltip, shouldTooltipOnHover, searchParams} = this.state;
         const {tooltipToggle, markSearch} = this;
-
+        const style = (this.props.entityKey === this.state.entityKey) ? tagStyle : this.selectCorrectStyle();
         const {sid, openSplit} = getUpdatedSegmentInfo();
 
 
@@ -145,8 +146,8 @@ class TagEntity extends Component {
 
         return <div className={'tag-container'}
                     ref={(ref) => this.tagRef = ref}>
-            {tooltipAvailable && showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={tagStyle}/>}
-            <span className={`tag ${tagStyle} ${tagWarningStyle}`}
+            {tooltipAvailable && showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={style}/>}
+            <span className={`tag ${style} ${tagWarningStyle}`}
                 data-offset-key={this.props.offsetkey}
                 unselectable="on"
                 suppressContentEditableWarning={true}
@@ -181,18 +182,21 @@ class TagEntity extends Component {
                 tagStyle: this.selectCorrectStyle(),
                 clicked: false,
                 focused: false,
+                entityKey
             })
         }else if(entityKey === triggerEntityKey){
             this.setState({
                 tagStyle: this.selectCorrectStyle(tagId, tagPlaceholder, true),
                 clicked: true,
-                focused: true
+                focused: true,
+                entityKey
             })
         }else if(tagId === entityId && entityPlaceholder === tagPlaceholder && entityKey !== triggerEntityKey) {
             this.setState({
                 tagStyle: this.selectCorrectStyle(tagId, tagPlaceholder),
                 clicked: true,
-                focused: false
+                focused: false,
+                entityKey
             })
         }
     };
@@ -203,7 +207,8 @@ class TagEntity extends Component {
         const newStyle = selectCorrectStyle();
         if(newStyle !== this.state.tagStyle){
             this.setState({
-                tagStyle: newStyle
+                tagStyle: newStyle,
+                entityKey: this.props.entityKey
             })
         }
     };
@@ -246,7 +251,7 @@ class TagEntity extends Component {
         hasFocus ? 'tag-focused' : ''; // blue with shadow*/
 
         const tagFocused = focused ? 'tag-focused' : ''; // blue with shadow
-
+        console.log("Calculate component style!");
         return `${baseStyle} ${tagInactive} ${tagClicked} ${tagFocused}`.trim();
     };
 
