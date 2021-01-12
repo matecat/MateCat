@@ -14,13 +14,27 @@
 abstract class ajaxController extends controller {
 
     /**
+     * ------------------------------------------
+     * Note 2021-01-12
+     * ------------------------------------------
+     *
+     * This field refers to the current job password
+     * which is actually needed by isRevision() function.
+     *
+     * In near future we possibly should remote it
+     *
+     * @var string|null
+     */
+    protected $received_password;
+
+    /**
      * Carry the result from Executed Controller Action and returned in json format to the Client
      *
      * @var array
      */
     protected $result = [ "errors" => [], "data" => [] ];
-
     protected $id_segment;
+
     protected $split_num = null;
 
     /**
@@ -47,6 +61,16 @@ abstract class ajaxController extends controller {
 
         $this->featureSet = new FeatureSet();
 
+        $filterArgs = array(
+                'current_password' => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+        );
+
+        $__postInput   = (object)filter_input_array( INPUT_POST, $filterArgs );
+
+        $this->received_password = $__postInput->current_password;
     }
 
     /**
@@ -66,8 +90,8 @@ abstract class ajaxController extends controller {
      */
     public static function isRevision() {
 
-        $jid        = static::getInstance()->jid;
-        $password   = static::getInstance()->currentPassword;
+        $jid        = static::getInstance()->id_job;
+        $password   = static::getInstance()->received_password;
         $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
 
         if ( null === $isRevision ) {

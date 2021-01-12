@@ -267,6 +267,8 @@ class catController extends viewController {
             $this->review_password = $this->password;
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
         }
+
+        $this->currentPassword = $this->review_password;
     }
 
     protected function _saveActivity(){
@@ -305,6 +307,7 @@ class catController extends viewController {
         if( $this->job_archived ) parent::makeTemplate( 'job_archived.html' );
 
         $this->template->jid = $this->jid;
+        $this->template->currentPassword = $this->currentPassword;
 
         $this->template->id_team = null;
 
@@ -361,7 +364,6 @@ class catController extends viewController {
             $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
             $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
             $this->template->password            = $this->password;
-            $this->template->currentPassword     = $this->currentPassword;
 
             throw new AuthorizationError( "Forbidden, Job archived/cancelled." );
 

@@ -17,25 +17,27 @@ class deleteContributionController extends ajaxController {
         parent::__construct();
 
         $filterArgs = [
-                'source_lang' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'target_lang' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'seg'         => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'tra'         => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'id_match'    => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'password'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'id_job'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'source_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'      => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'seg'              => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'tra'              => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'id_match'         => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password'         => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'current_password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'id_job'           => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
         ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->source_lang   = $__postInput[ 'source_lang' ];
-        $this->target_lang   = $__postInput[ 'target_lang' ];
-        $this->source        = trim( $__postInput[ 'seg' ] );
-        $this->target        = trim( $__postInput[ 'tra' ] );
-        $this->id_translator = trim( $__postInput[ 'id_translator' ] ); //no more used
-        $this->password      = trim( $__postInput[ 'password' ] );
-        $this->id_match      = $__postInput[ 'id_match' ];
-        $this->id_job        = $__postInput[ 'id_job' ];
+        $this->source_lang       = $__postInput[ 'source_lang' ];
+        $this->target_lang       = $__postInput[ 'target_lang' ];
+        $this->source            = trim( $__postInput[ 'seg' ] );
+        $this->target            = trim( $__postInput[ 'tra' ] );
+        $this->id_translator     = trim( $__postInput[ 'id_translator' ] ); //no more used
+        $this->password          = trim( $__postInput[ 'password' ] );
+        $this->received_password = trim( $__postInput[ 'current_password' ] );
+        $this->id_match          = $__postInput[ 'id_match' ];
+        $this->id_job            = $__postInput[ 'id_job' ];
 
     }
 

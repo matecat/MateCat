@@ -21,15 +21,23 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
                 'filter' => FILTER_SANITIZE_STRING,
                 'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ),
+            'current_password'    => array(
+                    'filter' => FILTER_SANITIZE_STRING,
+                    'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ),
         );
 
-        $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+        $this->id_job = $__postInput['id_job'];
+        $this->password = $__postInput['password'];
+        $this->received_password = $__postInput['current_password'];
     }
 
     public function doAction() {
         $this->chunk = Chunks_ChunkDao::getByIdAndPassword(
-            $this->__postInput['id_job'],
-            $this->__postInput['password']
+            $this->id_job,
+            $this->password
         );
 
         if ( $this->chunk ) {
