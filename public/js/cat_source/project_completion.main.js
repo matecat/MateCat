@@ -42,7 +42,8 @@ if ( ProjectCompletion.enabled() ) {
         var data = {
             action   : 'Features_ProjectCompletion_SetChunkCompleted',
             id_job   : config.id_job,
-            password : config.password
+            password : config.password,
+            current_password: config.currentPassword
         }
 
         previousButtonState = button.val() ;
