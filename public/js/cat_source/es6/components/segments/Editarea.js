@@ -81,7 +81,7 @@ class Editarea extends React.Component {
             // TagMenu
             autocompleteSuggestions: [],
             focusedTagIndex: 0,
-            displayPopover: true,
+            displayPopover: false,
             popoverPosition: {},
             editorFocused: true,
             clickedOnTag: false,
