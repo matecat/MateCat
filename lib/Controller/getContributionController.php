@@ -4,15 +4,15 @@ use Contribution\Request;
 
 class getContributionController extends ajaxController {
 
+    protected $id_job;
+    protected $password;
     protected $id_segment;
     protected $id_client;
     private   $concordance_search;
     private   $switch_languages;
-    private   $id_job;
     private   $num_results;
     private   $text;
     private   $id_translator;
-    private   $password;
 
     protected $context_before;
     protected $context_after;

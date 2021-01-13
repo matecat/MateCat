@@ -19,9 +19,8 @@ abstract class ajaxController extends controller {
      * ------------------------------------------
      *
      * This field refers to the current job password
-     * which is actually needed by isRevision() function.
-     *
-     * In near future we possibly should remote it
+     * which is actually needed by isRevision() function
+     * In near future we should remote it
      *
      * @var string|null
      */
@@ -90,19 +89,24 @@ abstract class ajaxController extends controller {
      */
     public static function isRevision() {
 
-        $jid        = static::getInstance()->id_job;
-        $password   = static::getInstance()->received_password;
-        $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+        $controller = static::getInstance();
 
-        if ( null === $isRevision ) {
-            $isRevision = CatUtils::getIsRevisionFromReferer();
+        if (isset($controller->id_job) and isset($controller->received_password)){
+            $jid        = $controller->id_job;
+            $password   = $controller->received_password;
+            $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+
+            if ( null === $isRevision ) {
+                $isRevision = CatUtils::getIsRevisionFromReferer();
+            }
+
+            return $isRevision;
         }
 
-        return $isRevision;
+        return CatUtils::getIsRevisionFromReferer();
     }
 
     public function parseIDSegment() {
         @list( $this->id_segment, $this->split_num ) = explode( "-", $this->id_segment );
     }
-
 }

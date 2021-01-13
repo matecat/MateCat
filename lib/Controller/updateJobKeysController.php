@@ -9,6 +9,12 @@
 
 class updateJobKeysController extends ajaxController {
 
+    // for self::isRevision()
+    // controller MUST have those two protected properties
+    // @TODO remove this in the near future
+    protected $received_password;
+    protected $id_job;
+
     private $job_id;
     private $job_pass;
 
@@ -47,9 +53,10 @@ class updateJobKeysController extends ajaxController {
         $_postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //assign variables
+        $this->id_job            = $_postInput[ 'job_id' ];
+        $this->received_password = $_postInput[ 'current_password' ];
         $this->job_id            = $_postInput[ 'job_id' ];
         $this->job_pass          = $_postInput[ 'job_pass' ];
-        $this->received_password = $_postInput[ 'current_password' ];
         $this->tm_keys           = $_postInput[ 'data' ]; // this will be filtered inside the TmKeyManagement class
         $this->only_private      = !$_postInput[ 'get_public_matches' ];
 
@@ -81,15 +88,7 @@ class updateJobKeysController extends ajaxController {
         }
 
         $this->readLoginInfo();
-
-        if ( self::isRevision() ) {
-            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->user->email == $this->jobData[ 'owner' ] ) {
-            $this->userRole = TmKeyManagement_Filter::OWNER;
-        }
-
     }
-
 
     /**
      * When Called it perform the controller action to retrieve/manipulate data
@@ -97,6 +96,14 @@ class updateJobKeysController extends ajaxController {
      * @return mixed
      */
     function doAction() {
+
+        // moved here because self::isRevision() in constructor
+        // generates an infinite loop
+        if ( self::isRevision() ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif ( $this->user->email == $this->jobData[ 'owner' ] ) {
+            $this->userRole = TmKeyManagement_Filter::OWNER;
+        }
 
         //if some error occured, stop execution.
         if ( count( @$this->result[ 'errors' ] ) ) {

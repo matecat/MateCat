@@ -217,15 +217,21 @@ abstract class viewController extends controller {
      */
     public static function isRevision() {
 
-        $jid        = static::getInstance()->jid;
-        $password   = static::getInstance()->received_password;
-        $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+        $controller = static::getInstance();
 
-        if ( null === $isRevision ) {
-            $isRevision = CatUtils::getIsRevisionFromRequestUri();
+        if (isset($controller->id_job) and isset($controller->received_password)){
+            $jid        = $controller->jid;
+            $password   = $controller->received_password;
+            $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+
+            if ( null === $isRevision ) {
+                $isRevision = CatUtils::getIsRevisionFromRequestUri();
+            }
+
+            return $isRevision;
         }
 
-        return $isRevision;
+        return CatUtils::getIsRevisionFromRequestUri();
     }
 
     protected function render404( $customTemplate = '404.html' ) {

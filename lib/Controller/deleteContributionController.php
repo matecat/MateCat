@@ -2,14 +2,14 @@
 
 class deleteContributionController extends ajaxController {
 
-    private $id_job;
+    protected $id_job;
+    protected $password;
     private $id_match;
     private $target;
     private $source;
     private $source_lang;
     private $target_lang;
     private $id_translator;
-    private $password;
     private $tm_keys;
 
     public function __construct() {

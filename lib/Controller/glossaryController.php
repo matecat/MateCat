@@ -10,9 +10,9 @@
 
 class glossaryController extends ajaxController {
 
+    protected $id_job;
+    protected $password;
     private $exec;
-    private $id_job;
-    private $password;
     private $segment;
     private $newsegment;
     private $translation;
@@ -20,6 +20,7 @@ class glossaryController extends ajaxController {
     private $comment;
     private $automatic;
     private $id_match;
+
     /**
      * @var Engines_MyMemory
      */
