@@ -2,6 +2,7 @@
 
 use LQA\ChunkReviewDao;
 use SubFiltering\Filter;
+use Validator\JobValidatorObject;
 
 define( "LTPLACEHOLDER", "##LESSTHAN##" );
 define( "GTPLACEHOLDER", "##GREATERTHAN##" );
@@ -216,7 +217,7 @@ class CatUtils {
     protected static function _performanceEstimationTime( array $job_stats ) {
 
         $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDs( $job_stats[ 'id' ] );
-        if ( !empty( $last_10_worked_ids ) and count($last_10_worked_ids) === 10 ) {
+        if ( !empty( $last_10_worked_ids ) and count( $last_10_worked_ids ) === 10 ) {
 
             //perform check on performance if single segment are set to check or globally Forced
             // Calculating words per hour and estimated completion
@@ -476,7 +477,7 @@ class CatUtils {
         /**
          * Remove english possessive word count
          */
-        if( $source_lang_two_letter == "en" ){
+        if ( $source_lang_two_letter == "en" ) {
             $string = str_replace( ' s ', ' ', $string );
         }
 
@@ -877,5 +878,76 @@ class CatUtils {
 
     }
 
+    /**
+     * Check if a job is revision from a jid/password combination
+     * (password could refer to a T, R1 or R2 job)
+     *
+     * @param $jid
+     * @param $password
+     *
+     * @return bool|null
+     */
+    public static function getIsRevisionFromIdJobAndPassword( $jid, $password ) {
+
+        $jobValidator = new \Validator\JobValidator();
+
+        try {
+            /** @var JobValidatorObject $validatorObject */
+            $validatorObject = $jobValidator->validate( new JobValidatorObject(), [
+                    'jid'      => $jid,
+                    'password' => $password
+            ] );
+
+            if ( $validatorObject->t == 1 ) {
+                return false;
+            }
+
+            if ( $validatorObject->r1 == 1 or $validatorObject->r2 == 1 ) {
+                return true;
+            }
+
+        } catch ( \Exception $exception ) {
+            return null;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function getIsRevisionFromRequestUri() {
+
+        if ( !isset( $_SERVER[ 'REQUEST_URI' ] ) ) {
+            return false;
+        }
+
+        $_from_url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+
+        return self::isARevisePath( $_from_url[ 'path' ] );
+    }
+
+    /**
+     * @return bool
+     */
+    public static function getIsRevisionFromReferer() {
+
+        if ( !isset( $_SERVER[ 'HTTP_REFERER' ] ) ) {
+            return false;
+        }
+
+        $_from_url = parse_url( @$_SERVER[ 'HTTP_REFERER' ] );
+
+        return self::isARevisePath( $_from_url[ 'path' ] );
+    }
+
+    /**
+     * @param string $path
+     *
+     * @return bool
+     */
+    private static function isARevisePath( $path ) {
+        return strpos( $path, "/revise" ) === 0;
+    }
 }
 

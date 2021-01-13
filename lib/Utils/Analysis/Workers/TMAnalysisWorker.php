@@ -917,7 +917,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_doLog( $e->getMessage() );
         }
 
-        $this->_incrementAnalyzedCount( $elementQueue->params->pid, 0, 0 );
+        $this->_incrementAnalyzedCount( $elementQueue->params->pid, $elementQueue->params->raw_word_count, $elementQueue->params->raw_word_count );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $elementQueue->params->pid );
         $this->_tryToCloseProject( $elementQueue->params->pid );
 

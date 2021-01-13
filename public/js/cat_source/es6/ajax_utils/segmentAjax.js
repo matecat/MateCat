@@ -27,7 +27,8 @@ API.SEGMENT = {
             context_after: contextAfter,
             id_after: idAfter,
             time_to_edit: time_to_edit,
-            revision_number: config.revisionNumber
+            revision_number: config.revisionNumber,
+            current_password: config.currentPassword
             // id_translator: id_translator,
         };
         return $.ajax({
@@ -95,7 +96,8 @@ API.SEGMENT = {
             automatic: true,
             translation: null,
             id_job: config.id_job,
-            password: config.password
+            password: config.password,
+            current_password: config.currentPassword
         };
         return $.ajax({
             data: data,
@@ -114,7 +116,8 @@ API.SEGMENT = {
             translation: null,
             from_target: fromTarget,
             id_job: config.id_job,
-            password: config.password
+            password: config.password,
+            current_password: config.currentPassword
         };
         return $.ajax({
             data: data,
@@ -236,7 +239,8 @@ API.SEGMENT = {
             num_results: UI.numMatchesResults,
             id_translator: config.id_translator,
             password: config.password,
-            id_client: config.id_client
+            id_client: config.id_client,
+            current_password: config.currentPassword
         };
         return $.ajax({
             async: true,
@@ -273,7 +277,8 @@ API.SEGMENT = {
             id_before: idBefore,
             context_after: contextAfter,
             id_after: idAfter,
-            id_client: config.id_client
+            id_client: config.id_client,
+            current_password: config.currentPassword
         };
 
         return $.ajax({
