@@ -19,7 +19,6 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.undoInSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.undoInSegment();
-            SegmentActions.closeTagsMenu();
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.gotoCurrent.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.scrollToCurrentSegment();
@@ -102,13 +101,6 @@ $.extend(UI, {
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.copyContribution3.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
-        }).on('keydown.shortcuts', null, Shortcuts.cattol.events.addNextTag.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            var currentSegment = SegmentStore.getCurrentSegment();
-            if ((UI.tagLockEnabled) && TagUtils.hasDataOriginalTags(currentSegment.segment)) {
-                SegmentActions.showTagsMenu(currentSegment.sid);
-            }
         }).on('keydown.shortcuts', null, Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType], function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -218,12 +210,7 @@ $.extend(UI, {
 
         //###################################################
 
-		$("#outer").on('click', '.editor .source .locked,.editor .editarea .locked, ' +
-            '.editor .source .locked a,.editor .editarea .locked a', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            TagUtils.markSelectedTag( $( this ) );
-        }).on('keydown', function(e) {
+		$("#outer").on('keydown', function(e) {
             if((e.which === 27) && ($('.modal[data-name=confirmAutopropagation]').length)) {
                 $('.modal[data-name=confirmAutopropagation] .btn-ok').click();
                 e.preventDefault();

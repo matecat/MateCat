@@ -9,19 +9,20 @@
  * TodoActions
  */
 
-import AppDispatcher from '../stores/AppDispatcher';
-import SegmentConstants from '../constants/SegmentConstants';
-import SegmentStore from '../stores/SegmentStore';
-import GlossaryUtils from '../components/segments/utils/glossaryUtils';
-import TranslationMatches from '../components/segments/utils/translationMatches';
-import TagUtils from '../utils/tagUtils';
-import TextUtils from '../utils/textUtils';
-import OfflineUtils from '../utils/offlineUtils';
-import CommonUtils from '../utils/commonUtils';
-import SegmentUtils from '../utils/segmentUtils';
+import AppDispatcher  from '../stores/AppDispatcher';
+import SegmentConstants  from '../constants/SegmentConstants';
+import EditAreaConstants  from '../constants/EditAreaConstants';
+import SegmentStore  from '../stores/SegmentStore';
+import TranslationMatches  from '../components/segments/utils/translationMatches';
+import TagUtils from "../utils/tagUtils";
+import TextUtils from "../utils/textUtils";
+import OfflineUtils from "../utils/offlineUtils";
+import CommonUtils from "../utils/commonUtils";
+import SegmentUtils from "../utils/segmentUtils";
 import QaCheckGlossary from '../components/segments/utils/qaCheckGlossaryUtils';
 import QaCheckBlacklist from '../components/segments/utils/qaCheckBlacklistUtils';
 import CopySourceModal from '../components/modals/CopySourceModal';
+import {unescapeHTMLLeaveTags} from "../components/segments/utils/DraftMatecatUtils/textUtils";
 
 const SegmentActions = {
     /********* SEGMENTS *********/
@@ -32,7 +33,7 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_SEGMENTS,
             segments: segments,
-            idToOpen: idToOpen,
+            idToOpen: idToOpen
         });
     },
     splitSegments: function (oldSid, newSegments, splitGroup, fid) {
@@ -41,23 +42,23 @@ const SegmentActions = {
             oldSid: oldSid,
             newSegments: newSegments,
             splitGroup: splitGroup,
-            fid: fid,
+            fid: fid
         });
     },
-    splitSegment: function (sid, text) {
-        API.SEGMENT.splitSegment(sid, text)
+    splitSegment: function(sid, text)  {
+        API.SEGMENT.splitSegment(sid , text)
             .done(function (response) {
-                if (response.errors.length) {
+                if(response.errors.length) {
                     var notification = {
                         title: 'Error',
                         text: d.errors[0].message,
-                        type: 'error',
+                        type: 'error'
                     };
                     APP.addNotification(notification);
                 } else {
                     UI.unmountSegments();
                     UI.render({
-                        segmentToOpen: sid.split('-')[0],
+                        segmentToOpen: sid.split('-')[0]
                     });
                 }
             })
@@ -65,7 +66,7 @@ const SegmentActions = {
                 var notification = {
                     title: 'Error',
                     text: d.errors[0].message,
-                    type: 'error',
+                    type: 'error'
                 };
                 APP.addNotification(notification);
             });
@@ -74,33 +75,40 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENTS,
             segments: segments,
-            where: where,
+            where: where
         });
     },
 
     updateAllSegments: function () {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.UPDATE_ALL_SEGMENTS,
+            actionType: SegmentConstants.UPDATE_ALL_SEGMENTS
         });
     },
 
-    addSearchResultToSegments: function (occurrencesList, searchResultsDictionary, currentIndex) {
+    addSearchResultToSegments: function (occurrencesList, searchResultsDictionary, currentIndex, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEARCH_RESULTS,
             occurrencesList,
             searchResultsDictionary,
             currentIndex,
+            text
         });
     },
     changeCurrentSearchSegment: function (currentIndex) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_CURRENT_SEARCH,
-            currentIndex,
+            currentIndex
         });
     },
     removeSearchResultToSegments: function () {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.REMOVE_SEARCH_RESULTS,
+            actionType: SegmentConstants.REMOVE_SEARCH_RESULTS
+        });
+    },
+    replaceCurrentSearch: function(text) {
+        AppDispatcher.dispatch({
+            actionType: EditAreaConstants.REPLACE_SEARCH_RESULTS,
+            text: text
         });
     },
 
@@ -109,50 +117,50 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_OPEN_SEGMENT,
             sid: sid,
-            fid: fid,
+            fid: fid
         });
     },
 
-    openSegment: function (sid) {
+    openSegment:  function (sid) {
         const segment = SegmentStore.getSegmentByIdToJS(sid);
 
-        if (segment) {
+        if ( segment ) {
             //Check first if the segment is in the view
-            if (UI.isReadonlySegment(segment)) {
+            if ( UI.isReadonlySegment(segment) ) {
                 UI.readonlyClickDisplay();
                 return;
             }
-            let $segment =
-                segment.splitted && sid.indexOf('-') === -1 ? UI.getSegmentById(sid + '-1') : UI.getSegmentById(sid);
-            if ($segment.length === 0) {
+            let $segment = (segment.splitted && sid.indexOf('-') === -1) ? UI.getSegmentById(sid + "-1") : UI.getSegmentById(sid);
+            if ( $segment.length === 0 ) {
                 this.scrollToSegment(sid, this.openSegment);
                 return;
             }
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_SEGMENT,
-                sid: sid,
+                sid: sid
             });
             UI.updateJobMenu(segment);
         } else {
             UI.unmountSegments();
             UI.render({
                 firstLoad: false,
-                segmentToOpen: sid,
+                segmentToOpen: sid
             });
         }
+
     },
-    closeSegment: function (sid, fid) {
+    closeSegment: function ( sid, fid ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_SEGMENT,
         });
         this.closeIssuesPanel();
     },
     saveSegmentBeforeClose: function (segment) {
-        if (UI.translationIsToSaveBeforeClose(segment)) {
+        if ( UI.translationIsToSaveBeforeClose( segment ) ) {
             return UI.setTranslation({
                 id_segment: segment.sid,
-                status: segment.status.toLowerCase() === 'new' ? 'draft' : segment.status,
-                caller: 'autosave',
+                status: (segment.status.toLowerCase() === 'new') ? 'draft' : segment.status ,
+                caller: 'autosave'
             });
         } else {
             var deferred = $.Deferred();
@@ -165,56 +173,49 @@ const SegmentActions = {
     },
     scrollToSegment: function (sid, callback) {
         const segment = SegmentStore.getSegmentByIdToJS(sid);
-        if (
-            segment &&
-            (SegmentStore.segmentScrollableToCenter(sid) ||
-                UI.noMoreSegmentsAfter ||
-                config.last_job_segment == sid ||
-                SegmentStore._segments.size < UI.moreSegNum ||
-                SegmentStore.getLastSegmentId() === config.last_job_segment)
-        ) {
+        if ( segment && (SegmentStore.segmentScrollableToCenter(sid) || UI.noMoreSegmentsAfter || config.last_job_segment == sid || SegmentStore._segments.size < UI.moreSegNum || SegmentStore.getLastSegmentId() === config.last_job_segment) ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.SCROLL_TO_SEGMENT,
                 sid: sid,
             });
             if (callback) {
-                setTimeout(() => callback.apply(this, [sid]));
+                setTimeout(()=>callback.apply(this, [sid]));
             }
         } else {
             UI.unmountSegments();
             UI.render({
                 firstLoad: false,
-                segmentToOpen: sid,
-            }).done(() => callback && setTimeout(() => callback.apply(this, [sid]), 1000));
+                segmentToOpen: sid
+            }).done(()=> callback && setTimeout(()=>callback.apply(this, [sid]), 1000));
         }
     },
     addClassToSegment: function (sid, newClass) {
-        setTimeout(function () {
+        setTimeout( function () {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.ADD_SEGMENT_CLASS,
                 id: sid,
-                newClass: newClass,
+                newClass: newClass
             });
         }, 0);
     },
 
     removeClassToSegment: function (sid, className) {
-        setTimeout(function () {
+        setTimeout( function () {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
                 id: sid,
-                className: className,
+                className: className
             });
-        }, 0);
+        }, 0)
     },
 
     setStatus: function (sid, fid, status) {
-        if (sid) {
+        if ( sid ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.SET_SEGMENT_STATUS,
                 id: sid,
                 fid: fid,
-                status: status,
+                status: status
             });
         }
     },
@@ -226,7 +227,7 @@ const SegmentActions = {
             fid: fid,
             perc: perc,
             className: className,
-            createdBy: createdBy,
+            createdBy: createdBy
         });
     },
 
@@ -234,28 +235,29 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.HIDE_SEGMENT_HEADER,
             id: sid,
-            fid: fid,
+            fid: fid
         });
     },
 
-    propagateTranslation: function (segmentId, propagatedSegments, status) {
+    propagateTranslation: function(segmentId, propagatedSegments, status) {
         let segment = SegmentStore.getSegmentByIdToJS(segmentId);
-        if (segment.splitted > 2) return false;
+        if ( segment.splitted > 2 ) return false;
 
         for (var i = 0, len = propagatedSegments.length; i < len; i++) {
             var sid = propagatedSegments[i];
-            if (sid !== segmentId && SegmentStore.getSegmentByIdToJS(sid)) {
-                SegmentActions.replaceEditAreaTextContent(sid, null, segment.translation);
+            if ( sid !== segmentId && SegmentStore.getSegmentByIdToJS(sid)) {
+                SegmentActions.updateOriginalTranslation(sid, segment.translation);
+                SegmentActions.replaceEditAreaTextContent( sid, segment.translation );
                 //Tag Projection: disable it if enable
-                SegmentActions.setSegmentAsTagged(sid);
-                SegmentActions.setStatus(sid, null, status); // now the status, too, is propagated
-                SegmentActions.setSegmentPropagation(sid, null, true, segment.sid);
-                SegmentActions.modifiedTranslation(sid, null, false);
+                SegmentActions.setSegmentAsTagged( sid );
+                SegmentActions.setStatus( sid, null, status ); // now the status, too, is propagated
+                SegmentActions.setSegmentPropagation( sid, null, true, segment.sid );
+                SegmentActions.modifiedTranslation( sid, false );
             }
             SegmentActions.setAlternatives(sid, undefined);
         }
 
-        SegmentActions.setSegmentPropagation(segmentId, null, false);
+        SegmentActions.setSegmentPropagation( segmentId, null, false );
         SegmentActions.setAlternatives(segmentId, undefined);
     },
 
@@ -265,15 +267,21 @@ const SegmentActions = {
             id: sid,
             fid: fid,
             propagation: propagation,
-            from: from,
+            from: from
+        });
+    },
+    changeTagProjectionStatus: function ( enabled ) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_GUESS_TAGS,
+            enabled: enabled
         });
     },
     /**
      * Disable the Tag Projection, for example after clicking on the Translation Matches
      */
     disableTPOnSegment: function (segmentObj) {
-        var currentSegment = segmentObj ? segmentObj : SegmentStore.getCurrentSegment();
-        var tagProjectionEnabled = TagUtils.hasDataOriginalTags(currentSegment.segment) && !currentSegment.tagged;
+        var currentSegment = (segmentObj) ? segmentObj : SegmentStore.getCurrentSegment();
+        var tagProjectionEnabled = TagUtils.hasDataOriginalTags( currentSegment.segment )  && !currentSegment.tagged;
         if (SegmentUtils.checkTPEnabled() && tagProjectionEnabled) {
             SegmentActions.setSegmentAsTagged(currentSegment.sid, currentSegment.id_file);
             UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged');
@@ -286,152 +294,132 @@ const SegmentActions = {
             fid: fid,
         });
     },
-    /**
-     * Set the original translation of a segment.
-     * Used to create the revision trackChanges
-     * @param sid
-     * @param fid
-     * @param originalTranslation
-     */
-    addOriginalTranslation: function (sid, fid, originalTranslation) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION,
-            id: sid,
-            fid: fid,
-            originalTranslation: originalTranslation,
-        });
-    },
-
-    disableTagLock: function () {
+    disableTagLock: function (  ) {
         UI.tagLockEnabled = false;
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.DISABLE_TAG_LOCK,
-        });
     },
-    enableTagLock: function () {
+    enableTagLock: function (  ) {
         UI.tagLockEnabled = true;
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ENABLE_TAG_LOCK,
-        });
     },
 
-    setSegmentWarnings: function (sid, warnings, tagMismatch) {
+    setSegmentWarnings: function(sid, warnings, tagMismatch){
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_WARNINGS,
             sid: sid,
             warnings: warnings,
-            tagMismatch: tagMismatch,
+            tagMismatch: tagMismatch
         });
     },
 
-    updateGlobalWarnings: function (warnings) {
+    updateGlobalWarnings: function(warnings){
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UPDATE_GLOBAL_WARNINGS,
-            warnings: warnings,
+            warnings: warnings
         });
     },
 
-    qaComponentsetLxqIssues: function (issues) {
+    qaComponentsetLxqIssues: function ( issues ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.QA_LEXIQA_ISSUES,
-            warnings: issues,
+            warnings: issues
         });
     },
-    setChoosenSuggestion: function (sid, index) {
+    setChoosenSuggestion: function( sid, index) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_CHOOSEN_SUGGESTION,
             sid: sid,
-            index: index,
+            index: index
         });
     },
-    addQaCheckMatches: function (sid, matches) {
+    addQaCheckMatches: function(matches) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_QA_CHECK_MATCHES,
-            sid: sid,
             matches: matches,
         });
     },
-    addQaBlacklistMatches: function (sid, matches) {
+    addQaBlacklistMatches: function(sid, matches) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_QA_BLACKLIST_MATCHES,
             sid: sid,
-            matches: matches,
+            matches: matches
         });
     },
-    addLexiqaHighlight: function (sid, matches, type) {
+    addLexiqaHighlight: function(sid, matches, type) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_LXQ_HIGHLIGHT,
             sid: sid,
             matches: matches,
-            type: type,
+            type: type
         });
     },
-    selectNextSegmentDebounced: _.debounce(() => {
+    selectNextSegmentDebounced:  _.debounce(() => {
         SegmentActions.selectNextSegment();
     }, 100),
 
-    selectNextSegment: function (sid) {
+    selectNextSegment: function(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SELECT_SEGMENT,
             sid: sid,
-            direction: 'next',
+            direction: 'next'
         });
     },
-    selectPrevSegmentDebounced: _.debounce(() => {
+    selectPrevSegmentDebounced:  _.debounce(() => {
         SegmentActions.selectPrevSegment();
     }, 100),
-    selectPrevSegment: function (sid) {
+    selectPrevSegment: function(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SELECT_SEGMENT,
             sid: sid,
-            direction: 'prev',
+            direction: 'prev'
         });
     },
-    openSelectedSegment: function () {
+    openSelectedSegment: function( ) {
         let sid = SegmentStore.getSelectedSegmentId();
-        if (sid) {
-            this.openSegment(sid);
+        if ( sid ) {
+            this.openSegment( sid );
         }
     },
-    copySourceToTarget: function () {
+    copySourceToTarget: function(  ) {
         let currentSegment = SegmentStore.getCurrentSegment();
 
-        if (currentSegment) {
-            let source = currentSegment.decoded_source;
+        if ( currentSegment ) {
+            let source = currentSegment.segment;
             let sid = currentSegment.sid;
-            SegmentActions.replaceEditAreaTextContent(sid, null, source);
-            SegmentActions.modifiedTranslation(sid, null, true);
-            UI.segmentQA(UI.currentSegment);
+            // Escape html
+            source = unescapeHTMLLeaveTags(source);
+            SegmentActions.replaceEditAreaTextContent( sid, source );
+            SegmentActions.modifiedTranslation( sid, true );
+            UI.segmentQA( UI.currentSegment );
 
-            if (config.translation_matches_enabled) {
-                SegmentActions.setChoosenSuggestion(sid, null);
+            if ( config.translation_matches_enabled ) {
+                SegmentActions.setChoosenSuggestion( sid, null );
             }
 
-            if (!config.isReview) {
+            if ( !config.isReview ) {
                 var alreadyCopied = false;
-                $.each(SegmentStore.consecutiveCopySourceNum, function (index) {
-                    if (this === sid) alreadyCopied = true;
-                });
-                if (!alreadyCopied) {
-                    SegmentStore.consecutiveCopySourceNum.push(this.currentSegmentId);
+                $.each( SegmentStore.consecutiveCopySourceNum, function ( index ) {
+                    if ( this === sid ) alreadyCopied = true;
+                } );
+                if ( !alreadyCopied ) {
+                    SegmentStore.consecutiveCopySourceNum.push( this.currentSegmentId );
                 }
-                if (SegmentStore.consecutiveCopySourceNum.length > 2) {
+                if ( SegmentStore.consecutiveCopySourceNum.length > 2 ) {
                     this.copyAllSources();
                 }
             }
         }
     },
-    copyAllSources: function () {
-        if (typeof Cookies.get('source_copied_to_target-' + config.id_job + '-' + config.password) == 'undefined') {
+    copyAllSources: function() {
+        if(typeof Cookies.get('source_copied_to_target-' + config.id_job + "-" + config.password) == 'undefined') {
             var props = {
                 confirmCopyAllSources: SegmentActions.continueCopyAllSources.bind(this),
-                abortCopyAllSources: SegmentActions.abortCopyAllSources.bind(this),
+                abortCopyAllSources: SegmentActions.abortCopyAllSources.bind(this)
             };
 
-            APP.ModalWindow.showModalComponent(CopySourceModal, props, 'Copy source to ALL segments');
+            APP.ModalWindow.showModalComponent(CopySourceModal, props, "Copy source to ALL segments");
         } else {
             SegmentStore.consecutiveCopySourceNum = [];
         }
+
     },
     continueCopyAllSources: function () {
         SegmentStore.consecutiveCopySourceNum = [];
@@ -444,152 +432,147 @@ const SegmentActions = {
                 action: 'copyAllSource2Target',
                 id_job: config.id_job,
                 pass: config.password,
-                revision_number: config.revisionNumber,
+                revision_number: config.revisionNumber
             },
-            error: function () {
+            error: function() {
                 var notification = {
                     title: 'Error',
                     text: 'Error copying all sources to target. Try again!',
                     type: 'error',
-                    position: 'bl',
+                    position: "bl"
                 };
                 APP.addNotification(notification);
                 UI.render({
-                    segmentToOpen: UI.currentSegmentId,
+                    segmentToOpen: UI.currentSegmentId
                 });
             },
-            success: function (d) {
-                if (d.errors.length) {
+            success: function(d) {
+                if(d.errors.length) {
                     APP.closePopup();
                     var notification = {
                         title: 'Error',
                         text: d.errors[0].message,
                         type: 'error',
-                        position: 'bl',
+                        position: "bl"
                     };
                     APP.addNotification(notification);
                 } else {
                     UI.unmountSegments();
                     UI.render({
-                        segmentToOpen: UI.currentSegmentId,
+                        segmentToOpen: UI.currentSegmentId
                     });
                 }
-            },
+
+            }
         });
     },
     abortCopyAllSources: function () {
         SegmentStore.consecutiveCopySourceNum = [];
     },
-    recomputeSegment: function (sid) {
+    recomputeSegment: function(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RECOMPUTE_SIZE,
-            sid: sid,
+            sid: sid
         });
     },
     /******************* EditArea ************/
-    highlightEditarea: function (sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.HIGHLIGHT_EDITAREA,
-            id: sid,
-        });
-    },
-    modifiedTranslation: function (sid, fid, status, translation) {
+    modifiedTranslation: function (sid, status) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.MODIFIED_TRANSLATION,
             sid: sid,
-            fid: fid,
-            status: status,
-            translation: translation,
+            status: status
         });
-        let $segment = UI.getSegmentById(sid);
-        $segment.trigger('modified');
     },
-    replaceEditAreaTextContent: function (sid, fid, text, pastedLength) {
+    replaceEditAreaTextContent: function(sid, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_TRANSLATION,
             id: sid,
-            fid: fid,
-            translation: text,
-            pastedLength: pastedLength,
+            translation: text
         });
     },
 
-    updateTranslation: function (sid, text) {
+    updateTranslation: function(sid, translation, decodedTranslation, tagMap, missingTagsInTarget, lxqDecodedTranslation) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.UPDATE_TRANSLATION,
             id: sid,
-            translation: text,
+            translation: translation,
+            decodedTranslation,
+            tagMap,
+            missingTagsInTarget,
+            lxqDecodedTranslation
         });
     },
-
-    addClassToEditArea: function (sid, fid, className) {
+    /**
+     * Set the original translation of a segment.
+     * Used to create the revision trackChanges
+     * @param sid
+     * @param fid
+     * @param originalTranslation
+     */
+    updateOriginalTranslation: function (sid, originalTranslation) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.ADD_EDITAREA_CLASS,
+            actionType: SegmentConstants.SET_SEGMENT_ORIGINAL_TRANSLATION,
             id: sid,
-            fid: fid,
-            className: className,
+            originalTranslation: originalTranslation
         });
     },
-    lockEditArea: function (sid, fid) {
+    updateSource: function(sid, source, decodedSource, tagMap, lxqDecodedSource) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UPDATE_SOURCE,
+            id: sid,
+            source: source,
+            decodedSource,
+            tagMap,
+            lxqDecodedSource
+        });
+    },
+    lockEditArea : function ( sid, fid ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.LOCK_EDIT_AREA,
             fid: fid,
             id: sid,
         });
     },
-    showTagsMenu: function (sid) {
-        if (!SegmentUtils.checkCurrentSegmentTPEnabled()) {
-            AppDispatcher.dispatch({
-                actionType: SegmentConstants.OPEN_TAGS_MENU,
-                sid: sid,
-            });
-        }
-    },
-    closeTagsMenu: function () {
+    undoInSegment: function() {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.CLOSE_TAGS_MENU,
+            actionType: SegmentConstants.UNDO_TEXT
         });
     },
-    undoInSegment: function () {
+    redoInSegment: function() {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.UNDO_TEXT,
+            actionType: SegmentConstants.REDO_TEXT
         });
     },
-    redoInSegment: function () {
+    setFocusOnEditArea: function() {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.REDO_TEXT,
+            actionType: SegmentConstants.FOCUS_EDITAREA
         });
     },
-    setFocusOnEditArea: function () {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.FOCUS_EDITAREA,
-        });
-    },
-    autoFillTagsInTarget: function (sid) {
+    autoFillTagsInTarget: function(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.FILL_TAGS_IN_TARGET,
-            sid: sid,
+            sid: sid
         });
     },
     copyTagProjectionInCurrentSegment(sid, translation) {
         if (!_.isUndefined(translation) && translation.length > 0) {
-            SegmentActions.replaceEditAreaTextContent(sid, null, translation);
+            SegmentActions.replaceEditAreaTextContent( sid, translation );
         }
     },
     /************ SPLIT ****************/
-    openSplitSegment: function (sid) {
-        if (OfflineUtils.offline) {
+    openSplitSegment: function(sid) {
+        if ( OfflineUtils.offline ) {
             APP.alert('Split is disabled in Offline Mode');
             return;
         }
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_SPLIT_SEGMENT,
-            sid: sid,
+            sid: sid
         });
     },
-    closeSplitSegment: function () {
+    closeSplitSegment: function() {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.CLOSE_SPLIT_SEGMENT,
+            actionType: SegmentConstants.CLOSE_SPLIT_SEGMENT
         });
     },
     /************ FOOTER ***************/
@@ -598,7 +581,7 @@ const SegmentActions = {
             actionType: SegmentConstants.REGISTER_TAB,
             tab: tab,
             visible: visible,
-            open: open,
+            open: open
         });
     },
     setSegmentContributions: function (sid, fid, contributions, errors) {
@@ -607,7 +590,7 @@ const SegmentActions = {
             sid: sid,
             fid: fid,
             matches: contributions,
-            errors: errors,
+            errors: errors
         });
     },
     setSegmentCrossLanguageContributions: function (sid, fid, contributions, errors) {
@@ -616,39 +599,39 @@ const SegmentActions = {
             sid: sid,
             fid: fid,
             matches: contributions,
-            errors: errors,
+            errors: errors
         });
     },
     setAlternatives: function (sid, alternatives) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_ALTERNATIVES,
             sid: sid,
-            alternatives: alternatives,
+            alternatives: alternatives
         });
     },
     chooseContribution: function (sid, index) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CHOOSE_CONTRIBUTION,
             sid: sid,
-            index: index,
+            index: index
         });
     },
-    deleteContribution: function (source, target, matchId, sid) {
+    deleteContribution: function(source, target, matchId, sid) {
         TranslationMatches.setDeleteSuggestion(source, target, matchId, sid).done((data) => {
             if (data.errors.length === 0) {
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.DELETE_CONTRIBUTION,
                     sid: sid,
-                    matchId: matchId,
+                    matchId: matchId
                 });
             }
         });
     },
-    renderSegmentGlossary: function (sid, segment) {
+    renderSegmentGlossary: function(sid, segment) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_GLOSSARY,
             sid: sid,
-            segment: segment,
+            segment: segment
         });
     },
 
@@ -656,27 +639,28 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_TAB,
             sid: sid,
-            data: tab,
+            data: tab
         });
     },
-    closeTabs: function (sid) {
+    closeTabs: function ( sid ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_TABS,
             sid: sid,
-            data: null,
+            data: null
         });
     },
 
-    setTabOpen: function (sid, tabName) {
+    setTabOpen: function (sid, tabName ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_DEFAULT_TAB,
-            tabName: tabName,
+            tabName: tabName
         });
     },
 
-    getGlossaryMatch: function (text) {
-        return API.SEGMENT.getGlossaryMatch(text).fail(function () {
-            OfflineUtils.failedConnection(0, 'glossary');
+    getGlossaryMatch: function ( text ) {
+        return API.SEGMENT.getGlossaryMatch(text)
+            .fail(function (  ) {
+                OfflineUtils.failedConnection( 0, 'glossary' );
         });
     },
 
@@ -687,26 +671,24 @@ const SegmentActions = {
     //         });
     // },
     getGlossaryForSegment: function (sid, fid, text) {
-        let requestes = [
-            {
-                sid: sid,
-                fid: fid,
-                text: text,
-            },
-        ];
+        let requestes = [{
+            sid: sid,
+            fid: fid,
+            text: text
+        }];
         let nextSegment = SegmentStore.getNextSegment(sid, fid);
         if (nextSegment) {
             requestes.push({
                 sid: nextSegment.sid,
                 fid: nextSegment.fid,
-                text: nextSegment.segment,
+                text: nextSegment.segment
             });
             let nextSegmentUntranslated = SegmentStore.getNextSegment(sid, fid, 8);
             if (nextSegmentUntranslated && requestes[1].sid != nextSegmentUntranslated.sid) {
                 requestes.push({
                     sid: nextSegmentUntranslated.sid,
                     fid: nextSegmentUntranslated.fid,
-                    text: nextSegmentUntranslated.segment,
+                    text: nextSegmentUntranslated.segment
                 });
             }
         }
@@ -721,7 +703,7 @@ const SegmentActions = {
                             actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
                             sid: request.sid,
                             fid: request.fid,
-                            glossary: response.data.matches.length !== 0 ? response.data.matches : {},
+                            glossary: response.data.matches.length !== 0 ? response.data.matches : {}
                         });
                     })
                     .fail(function (error) {
@@ -729,18 +711,19 @@ const SegmentActions = {
                     });
             }
         }
+
     },
 
     searchGlossary: function (sid, fid, text, fromTarget) {
         text = TagUtils.removeAllTags(TextUtils.htmlEncode(text));
-        text = text.replace(/\"/g, '');
+        text = text.replace(/\"/g, "");
         API.SEGMENT.getGlossaryMatch(text, fromTarget)
-            .done((response) => {
+            .done(response => {
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.SET_GLOSSARY_TO_CACHE,
                     sid: sid,
                     fid: fid,
-                    glossary: response.data.matches.length !== 0 ? response.data.matches : {},
+                    glossary: response.data.matches.length !== 0 ? response.data.matches : {}
                 });
             })
             .fail(function () {
@@ -748,66 +731,59 @@ const SegmentActions = {
             });
     },
 
-    deleteGlossaryItem: function (source, target, id, name, sid) {
+    deleteGlossaryItem: function ( source, target, id, name, sid ) {
         return API.SEGMENT.deleteGlossaryItem(source, target, id)
-            .fail(function () {
-                OfflineUtils.failedConnection(0, 'deleteGlossaryItem');
-            })
-            .done(function (data) {
+            .fail(function (  ) {
+                OfflineUtils.failedConnection( 0, 'deleteGlossaryItem' );
+            }).done(function ( data ) {
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
                     sid: sid,
-                    message: 'A glossary item has been deleted',
+                    message: 'A glossary item has been deleted'
                 });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.DELETE_FROM_GLOSSARY,
                     sid: sid,
                     matchId: id,
-                    name: name,
+                    name: name
                 });
             });
     },
 
-    addGlossaryItem: function (source, target, comment, sid) {
+    addGlossaryItem: function ( source, target, comment, sid ) {
         source = TextUtils.htmlEncode(source);
         return API.SEGMENT.addGlossaryItem(source, target, comment)
-            .fail(function () {
-                OfflineUtils.failedConnection(0, 'addGlossaryItem');
-            })
-            .done(function (response) {
+            .fail(function (  ) {
+                OfflineUtils.failedConnection( 0, 'addGlossaryItem' );
+            }).done(function ( response ) {
                 let msg;
-                if (response.data.created_tm_key) {
+                if ( response.data.created_tm_key ) {
                     msg = 'A Private TM Key has been created for this job';
                 } else {
-                    msg = response.errors.length ? response.errors[0].message : 'A glossary item has been added';
+                    msg = (response.errors.length) ? response.errors[0].message : 'A glossary item has been added';
                 }
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
                     sid: sid,
-                    message: msg,
+                    message: msg
                 });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
                     sid: sid,
-                    match:
-                        response.data.matches.length !== 0
-                            ? response.data.matches[source.replace(/\'/g, '&apos;')]
-                            : {},
-                    name: source.replace(/\'/g, '&apos;'),
+                    match: response.data.matches.length !== 0 ? response.data.matches[source.replace(/\'/g, '&apos;')] : {},
+                    name: source.replace(/\'/g, '&apos;')
                 });
             });
     },
-
-    updateGlossaryItem: function (idItem, source, target, newTranslation, comment, name, sid) {
+    updateGlossaryItem: function ( idItem, source, target, newTranslation, comment, name, sid ) {
         return API.SEGMENT.updateGlossaryItem(idItem, source, target, newTranslation, comment)
-            .fail(function () {
-                OfflineUtils.failedConnection(0, 'updateGlossaryItem');
-            })
-            .done(function (response) {
+            .fail(function (  ) {
+                OfflineUtils.failedConnection( 0, 'updateGlossaryItem' );
+            }).done( function ( response ) {
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
                     sid: sid,
-                    message: 'A glossary item has been updated',
+                    message: 'A glossary item has been updated'
                 });
                 AppDispatcher.dispatch({
                     actionType: SegmentConstants.CHANGE_GLOSSARY,
@@ -816,12 +792,12 @@ const SegmentActions = {
                     name: name,
                     comment: comment,
                     target_note: comment,
-                    translation: newTranslation,
+                    translation: newTranslation
                 });
-            });
+            } );
     },
 
-    updateGlossaryData(data) {
+    updateGlossaryData (data) {
         if (QaCheckGlossary.enabled() && data.glossary) {
             QaCheckGlossary.update(data.glossary);
         }
@@ -830,25 +806,33 @@ const SegmentActions = {
         }
     },
 
-    setTabIndex: function (sid, tab, index) {
+    copyGlossaryItemInEditarea: function (glossaryTranslation, segment) {
+        AppDispatcher.dispatch({
+            actionType: EditAreaConstants.COPY_GLOSSARY_IN_EDIT_AREA,
+            segment: segment,
+            glossaryTranslation: glossaryTranslation
+        });
+    },
+
+    setTabIndex: function ( sid, tab, index ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_TAB_INDEX,
             sid: sid,
             tab: tab,
-            data: index,
+            data: index
         });
     },
 
-    openConcordance: function (sid, currentSelectedText, inTarget) {
+    openConcordance: function(sid, currentSelectedText, inTarget) {
         SegmentActions.activateTab(sid, 'concordances');
-        SegmentActions.findConcordance(sid, { text: currentSelectedText, inTarget: inTarget });
+        SegmentActions.findConcordance(sid, {text: currentSelectedText, inTarget: inTarget});
     },
 
-    findConcordance: function (sid, data) {
+    findConcordance: function ( sid, data ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.FIND_CONCORDANCE,
             sid: sid,
-            data: data,
+            data: data
         });
     },
 
@@ -862,7 +846,7 @@ const SegmentActions = {
         TranslationMatches.getContribution(sid, 0, force);
     },
 
-    getContributionsSuccess: function (data, sid) {
+    getContributionsSuccess: function(data, sid) {
         TranslationMatches.processContributions(data, sid);
     },
 
@@ -870,15 +854,15 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CONCORDANCE_RESULT,
             sid: sid,
-            matches: data.matches,
+            matches: data.matches
         });
     },
 
-    modifyTabVisibility: function (tabName, visible) {
+    modifyTabVisibility: function(tabName, visible) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.MODIFY_TAB_VISIBILITY,
             tabName: tabName,
-            visible: visible,
+            visible: visible
         });
     },
 
@@ -887,18 +871,18 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_SELECTION,
             sid: sid,
-            data: data,
+            data: data
         });
     },
 
     openIssuesPanel: function (data, openSegment) {
-        if (UI.openIssuesPanel(data, openSegment)) {
+        if ( UI.openIssuesPanel(data, openSegment) ) {
             AppDispatcher.dispatch({
                 actionType: SegmentConstants.OPEN_ISSUES_PANEL,
                 data: data,
             });
-            this.openSideSegments();
         }
+
     },
 
     closeIssuesPanel: function () {
@@ -909,20 +893,20 @@ const SegmentActions = {
         localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
     },
 
-    closeSegmentIssuePanel: function (sid) {
+    closeSegmentIssuePanel: function ( sid ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_ISSUES_PANEL,
-            sid: sid,
+            sid: sid
         });
         localStorage.setItem(ReviewExtended.localStoragePanelClosed, true);
         this.scrollToSegment(sid);
     },
 
-    showIssuesMessage: function (sid, type) {
+    showIssuesMessage: function ( sid, type ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SHOW_ISSUE_MESSAGE,
             sid: sid,
-            data: type,
+            data: type
         });
     },
 
@@ -930,27 +914,26 @@ const SegmentActions = {
         return UI.submitIssues(sid, data, diff);
     },
 
-    issueAdded: function (sid, issueId) {
+    issueAdded: function ( sid, issueId ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ISSUE_ADDED,
             sid: sid,
-            data: issueId,
+            data: issueId
         });
     },
 
-    openIssueComments: function (sid, issueId) {
+    openIssueComments: function ( sid, issueId ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_ISSUE_COMMENT,
             sid: sid,
-            data: issueId,
+            data: issueId
         });
-        this.openSideSegments();
     },
 
-    addPreloadedIssuesToSegment: function (issues) {
+    addPreloadedIssuesToSegment: function ( issues ) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ADD_SEGMENT_PRELOADED_ISSUES,
-            versionsIssues: issues,
+            versionsIssues: issues
         });
     },
 
@@ -959,7 +942,7 @@ const SegmentActions = {
             actionType: SegmentConstants.ADD_SEGMENT_VERSIONS_ISSUES,
             fid: fid,
             sid: sid,
-            versions: versions,
+            versions: versions
         });
     },
 
@@ -967,11 +950,11 @@ const SegmentActions = {
         UI.deleteIssue(issue, sid, dontShowMessage);
     },
 
-    confirmDeletedIssue: function (sid, issue_id) {
+    confirmDeletedIssue: function (sid,issue_id) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.ISSUE_DELETED,
             sid: sid,
-            data: issue_id,
+            data: issue_id
         });
     },
 
@@ -979,71 +962,71 @@ const SegmentActions = {
         return UI.submitComment(sid, idIssue, data);
     },
 
-    showApproveAllModalWarnirng: function () {
+    showApproveAllModalWarnirng: function (  ) {
         var props = {
-            text: 'It was not possible to approve all segments. There are some segments that have not been translated.',
-            successText: 'Ok',
-            successCallback: function () {
+            text: "It was not possible to approve all segments. There are some segments that have not been translated.",
+            successText: "Ok",
+            successCallback: function() {
                 APP.ModalWindow.onCloseModal();
-            },
+            }
         };
-        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning');
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
     },
-    showTranslateAllModalWarnirng: function () {
+    showTranslateAllModalWarnirng: function (  ) {
         var props = {
-            text: 'It was not possible to translate all segments.',
-            successText: 'Ok',
-            successCallback: function () {
+            text: "It was not possible to translate all segments.",
+            successText: "Ok",
+            successCallback: function() {
                 APP.ModalWindow.onCloseModal();
-            },
+            }
         };
-        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, 'Warning');
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Warning");
     },
-    approveFilteredSegments: function (segmentsArray) {
+    approveFilteredSegments: function(segmentsArray) {
         if (segmentsArray.length >= 500) {
             var subArray = segmentsArray.slice(0, 499);
-            var todoArray = segmentsArray.slice(500, segmentsArray.length - 1);
-            return this.approveFilteredSegments(subArray).then(() => {
+            var todoArray = segmentsArray.slice(500, segmentsArray.length-1);
+            return this.approveFilteredSegments(subArray).then( ( ) => {
                 return this.approveFilteredSegments(todoArray);
             });
         } else {
-            return API.SEGMENT.approveSegments(segmentsArray).then((response) => {
-                this.checkUnchangebleSegments(response, segmentsArray, 'APPROVED');
+            return API.SEGMENT.approveSegments(segmentsArray).then( ( response ) => {
+                this.checkUnchangebleSegments(response, segmentsArray, "APPROVED");
                 setTimeout(CatToolActions.updateFooterStatistics(), 2000);
             });
         }
     },
-    translateFilteredSegments: function (segmentsArray) {
+    translateFilteredSegments: function(segmentsArray) {
         if (segmentsArray.length >= 500) {
             var subArray = segmentsArray.slice(0, 499);
             var todoArray = segmentsArray.slice(499, segmentsArray.length);
-            return this.translateFilteredSegments(subArray).then(() => {
+            return this.translateFilteredSegments(subArray).then((  ) => {
                 return this.translateFilteredSegments(todoArray);
             });
         } else {
-            return API.SEGMENT.translateSegments(segmentsArray).then((response) => {
-                this.checkUnchangebleSegments(response, segmentsArray, 'TRANSLATED');
+            return API.SEGMENT.translateSegments(segmentsArray).then( ( response ) => {
+                this.checkUnchangebleSegments(response, segmentsArray, "TRANSLATED");
                 setTimeout(CatToolActions.updateFooterStatistics(), 2000);
             });
         }
     },
-    checkUnchangebleSegments: function (response, status) {
+    checkUnchangebleSegments: function(response, status) {
         if (response.unchangeble_segments.length > 0) {
-            if (status === 'APPROVED') {
+            if ( status ===  'APPROVED') {
                 this.showTranslateAllModalWarnirng();
             } else {
                 this.showApproveAllModalWarnirng();
             }
         }
     },
-    bulkChangeStatusCallback: function (segmentsArray, status) {
+    bulkChangeStatusCallback: function( segmentsArray, status) {
         if (segmentsArray.length > 0) {
-            segmentsArray.forEach((item) => {
+            segmentsArray.forEach( ( item ) => {
                 var segment = SegmentStore.getSegmentByIdToJS(item);
-                if (segment) {
+                if ( segment ) {
                     SegmentActions.setStatus(item, segment.id_file, status);
-                    SegmentActions.modifiedTranslation(item, segment.id_file, false);
-                    SegmentActions.disableTPOnSegment(segment);
+                    SegmentActions.modifiedTranslation(item, false);
+                    SegmentActions.disableTPOnSegment( segment )
                 }
             });
             setTimeout(CatToolActions.reloadSegmentFilter, 500);
@@ -1053,23 +1036,24 @@ const SegmentActions = {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.TOGGLE_SEGMENT_ON_BULK,
             fid: fid,
-            sid: sid,
+            sid: sid
         });
     },
 
-    removeSegmentsOnBulk: function () {
+    removeSegmentsOnBulk: function() {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REMOVE_SEGMENTS_ON_BULK,
         });
     },
 
-    setSegmentLocked(segment, fid, unlocked) {
+    setSegmentLocked( segment, fid, unlocked) {
+
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_UNLOCKED_SEGMENT,
             fid: fid,
             sid: segment.sid,
-            unlocked: unlocked,
-        });
+            unlocked: unlocked
+        }, );
 
         if (!unlocked) {
             //TODO: move this to SegmentActions
@@ -1078,8 +1062,9 @@ const SegmentActions = {
                 this.toggleSegmentOnBulk(segment.sid, fid);
             }
         } else {
-            CommonUtils.addInStorage('unlocked-' + segment.sid, true);
+            CommonUtils.addInStorage('unlocked-'+ segment.sid, true);
             SegmentActions.openSegment(segment.sid);
+
         }
     },
 
@@ -1099,53 +1084,52 @@ const SegmentActions = {
             actionType: SegmentConstants.SET_BULK_SELECTION_INTERVAL,
             from: from,
             to: to,
-            fid: fid,
+            fid: fid
         });
     },
     setBulkSelectionSegments(segmentsArray) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_BULK_SELECTION_SEGMENTS,
-            segmentsArray: segmentsArray,
+            segmentsArray: segmentsArray
         });
     },
     setMutedSegments(segmentsArray) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_MUTED_SEGMENTS,
-            segmentsArray: segmentsArray,
+            segmentsArray: segmentsArray
         });
     },
     removeAllMutedSegments() {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.REMOVE_MUTED_SEGMENTS,
+            actionType: SegmentConstants.REMOVE_MUTED_SEGMENTS
         });
     },
 
     openSideSegments() {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.OPEN_SIDE,
+            actionType: SegmentConstants.OPEN_SIDE
         });
     },
     closeSideSegments() {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.CLOSE_SIDE,
+            actionType: SegmentConstants.CLOSE_SIDE
         });
     },
     openSegmentComment(sid) {
-        this.openSideSegments();
         AppDispatcher.dispatch({
             actionType: SegmentConstants.OPEN_COMMENTS,
-            sid: sid,
+            sid: sid
         });
     },
     closeSegmentComment(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.CLOSE_COMMENTS,
-            sid: sid,
+            sid: sid
         });
     },
     gotoNextSegment() {
         let next = SegmentStore.getNextSegment();
-        if (next) {
+        if ( next ) {
             SegmentActions.openSegment(next.sid);
         } else {
             this.closeSegment();
@@ -1158,6 +1142,22 @@ const SegmentActions = {
     setNextUntranslatedSegmentFromServer(sid) {
         SegmentStore.nextUntranslatedFromServer = sid;
     },
+    copyFragmentToClipboard: function (fragment, plainText) {
+        AppDispatcher.dispatch({
+            actionType: EditAreaConstants.COPY_FRAGMENT_TO_CLIPBOARD,
+            fragment,
+            plainText
+        });
+    },
+    focusOnSegment: function (sid, focused = false) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SEGMENT_FOCUSED,
+            focused,
+            sid
+        });
+    }
+
+
 };
 
 module.exports = SegmentActions;

@@ -15,7 +15,6 @@ module.exports = function(grunt) {
     //     basePath + '../css/scss/segment-notes.scss',
     //     basePath + '../css/project-completion-feature.css',
     //     basePath + '../css/editlog.css',
-	//     basePath + '../css/lxq-style.css',
 	//     basePath + '../css/lexiqa.css',
     // ];
 
@@ -31,7 +30,6 @@ module.exports = function(grunt) {
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
 	    cssBase + 'jquery.powertip.min.css',
-	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
         cssBase + 'sass/*.scss',
         cssBase + 'sass/commons/*.scss',
@@ -60,7 +58,7 @@ module.exports = function(grunt) {
     var es2015Preset = require('babel-preset-env');
     var reactPreset = require('babel-preset-react');
     var babelstage2 = require('babel-preset-stage-2');
-
+    var sass = require('node-sass');
 
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
@@ -210,8 +208,8 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery-dateFormat.min.js',
                     // basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/diff_match_patch.js',
-                    basePath + 'lib/rangy-core.js',
-                    basePath + 'lib/rangy-selectionsaverestore.js',
+                    // basePath + 'lib/rangy-core.js',
+                    // basePath + 'lib/rangy-selectionsaverestore.js',
                     basePath + 'lib/base64.min.js',
                     basePath + 'lib/moment.min.js',
                     basePath + 'lib/lokijs.min.js',
@@ -221,7 +219,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/imagesloaded.min.js',
                     basePath + 'lib/jquery.atwho.min.js',
                     basePath + 'lib/jquery.caret.min.js',
-                    gruntDir + 'semantic/dist/semantic.min.js'
+                    basePath + 'lib/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
             },
@@ -257,14 +255,14 @@ module.exports = function(grunt) {
                     basePath + 'lib/fileupload/locale.js',
                     <!-- The main application script -->
                     basePath + 'lib/fileupload/main.js',
-                    gruntDir + 'semantic/dist/semantic.min.js'
+                    basePath + 'lib/semantic.min.js'
                 ],
                 dest: buildPath + 'libs_upload.js'
             },
 
             semantic: {
                 src: [
-                    gruntDir + 'semantic/dist/semantic.min.js'
+                    basePath + 'lib/semantic.min.js'
                 ],
                 dest: buildPath + 'semantic.js'
             },
@@ -308,26 +306,6 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            /*react_libs: {
-                files: [
-                    basePath + 'cat_source/es6/react-libs.js'
-                ],
-                tasks: ['browserify:libs'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
-            },
-            react: {
-                files: [
-                    basePath + 'cat_source/es6/!**!/!*.js'
-                ],
-                tasks: ['browserify:components'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
-            },*/
             js: {
                 files: [
                     basePath + 'cat_source/*.js',
@@ -381,6 +359,7 @@ module.exports = function(grunt) {
         sass: {
             distCommon: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -391,6 +370,7 @@ module.exports = function(grunt) {
             },
             distCattol: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -401,6 +381,7 @@ module.exports = function(grunt) {
             },
             distUpload: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -411,6 +392,7 @@ module.exports = function(grunt) {
             },
             distManage: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -421,6 +403,7 @@ module.exports = function(grunt) {
             },
             distAnalyze: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -431,6 +414,7 @@ module.exports = function(grunt) {
             },
             distQR: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
@@ -441,6 +425,7 @@ module.exports = function(grunt) {
             },
             distIcons: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
                     includePaths: [ cssBase ]
                 },
@@ -451,8 +436,9 @@ module.exports = function(grunt) {
             },
             distSemantic: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
-                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+                    includePaths: [ cssBase ]
                 },
                 src: [
                     cssBase + 'sass/vendor_mc/semantic/matecat_semantic.scss'
@@ -461,25 +447,15 @@ module.exports = function(grunt) {
             },
             distLegacy: {
                 options : {
+                    implementation: sass,
                     sourceMap : true,
-                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+                    includePaths: [ cssBase ]
                 },
                 src: [
                     cssBase + 'sass/legacy-misc.scss'
                 ],
                 dest: cssBase + 'build/legacy-misc.css'
             }
-            // ,
-            // distStyleOld: {
-            //     options : {
-            //         sourceMap : true,
-            //         includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
-            //     },
-            //     src: [
-            //         cssBase + 'sass/style.scss'
-            //     ],
-            //     dest: cssBase + 'build/style.css'
-            // }
         },
         jshint: {
             options: {

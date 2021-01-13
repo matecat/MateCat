@@ -12,7 +12,7 @@ var UI = {
 			return false;
 		} else {
             var segment = SegmentStore.getCurrentSegment();
-            currSegment = jobMenu.find('.currSegment');
+            var currSegment = jobMenu.find('.currSegment');
             if (segment) {
                 currSegment.removeClass('disabled');
             } else {
@@ -169,8 +169,8 @@ var UI = {
             propagate: propagation,
             autoPropagation: options.autoPropagation
         }, optStr.callback);
-        SegmentActions.removeClassToSegment(options.segment_id, 'saved');
-        SegmentActions.modifiedTranslation(options.segment_id, null, false);
+
+         SegmentActions.modifiedTranslation(options.segment_id, false);
     },
 
     getSegmentId: function (segment) {
@@ -357,7 +357,7 @@ var UI = {
     // Update the translations if job is splitted
 	getUpdates: function() {
 		if (UI.chunkedSegmentsLoaded()) {
-			lastUpdateRequested = UI.lastUpdateRequested;
+			var lastUpdateRequested = UI.lastUpdateRequested;
 			UI.lastUpdateRequested = new Date();
 			APP.doRequest({
 				data: {
@@ -385,7 +385,7 @@ var UI = {
 
 	updateSegments: function(segments) {
 		$.each(segments, function() {
-			SegmentActions.replaceEditAreaTextContent(this.sid, null, this.translation);
+			SegmentActions.replaceEditAreaTextContent(this.sid, this.translation);
             SegmentActions.setStatus(this.sid, null, this.status.lowercase());
 		});
 	},
@@ -401,6 +401,7 @@ var UI = {
         });
         this.removeCacheObjects();
         SegmentStore.removeAllSegments();
+        SegmentActions.closeSideSegments();
         $('#outer').empty();
     },
 
@@ -432,7 +433,6 @@ var UI = {
 
 			if (articleToAdd) {
                 $('#outer').append(newFile);
-                $('#outer').append('   <div id="hiddenHtml" style="width: 100%; visibility: hidden; overflow-y: scroll;box-sizing: content-box;">' + self.getSegmentStructure()  + '</div>' );
                 $('#outer').append('   <div id="loader-getMoreSegments"/>' );
             }
 			segments = segments.concat(this.segments);
@@ -508,13 +508,13 @@ var UI = {
                 if (d.errors.length) {
                     UI.processErrors(d.errors, 'setTranslation');
                 } else {
-                    UI.detectTranslationAlternatives(d);
+                    UI.detectTranslationAlternatives(d, id_segment);
                 }
             }
         });
     },
 
-    detectTranslationAlternatives: function(d) {
+    detectTranslationAlternatives: function(d, id_segment) {
         /**
          *
          * the three rows below are commented because business logic has changed, now auto-propagation info
@@ -531,8 +531,9 @@ var UI = {
          *
          */
         var sameContentIndex = -1;
+        var segmentObj = SegmentStore.getSegmentByIdToJS(id_segment)
         $.each(d.data.editable, function(ind) {
-            if( this.translation == TextUtils.htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+            if( this.translation === segmentObj.translation ) {
                 sameContentIndex = ind;
             }
         });
@@ -541,7 +542,7 @@ var UI = {
         let sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if( this.translation == TextUtils.htmlEncode(EditAreaUtils.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
+            if( this.translation === segmentObj.translation ) {
                 sameContentIndex1 = ind;
             }
         });
@@ -554,62 +555,16 @@ var UI = {
         });
         if(numAlt) {
             // UI.renderAlternatives(d);
-            SegmentActions.setAlternatives(UI.getSegmentId(UI.currentSegment), d.data);
-            SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment), 'alternatives');
-            SegmentActions.setTabIndex(UI.getSegmentId(UI.currentSegment), 'alternatives', numAlt);
+            SegmentActions.setAlternatives(id_segment, d.data);
+            SegmentActions.activateTab(id_segment, 'alternatives');
+            SegmentActions.setTabIndex(id_segment, 'alternatives', numAlt);
         }
     },
 
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly:not(.ice-locked)').length;
 	},
-    formatSelection: function(op) {
-        var str = CursorUtils.getSelectionHtml();
-        var rangeInsert = CursorUtils.insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
-        var newStr = '';
-        var selection$ = $("<div/>").html(str);
-        var rightString = selection$.html();
 
-        $.each($.parseHTML(rightString), function(index) {
-			var toAdd, d, jump, capStr;
-            if(this.nodeName == '#text') {
-				d = this.data;
-				jump = ((!index)&&(!selection$));
-				capStr = CommonUtils.toTitleCase(d);
-				if(jump) {
-					capStr = d.charAt(0) + CommonUtils.toTitleCase(d).slice(1);
-				}
-				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
-				newStr += toAdd;
-			}
-            else if(this.nodeName == 'LXQWARNING') {
-                d = this.childNodes[0].data;
-                jump = ((!index)&&(!selection$));
-				capStr = CommonUtils.toTitleCase(d);
-				if(jump) {
-					capStr = d.charAt(0) + CommonUtils.toTitleCase(d).slice(1);
-				}
-                toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
-				newStr += toAdd;
-            }
-            else {
-				newStr += this.outerHTML;
-			}
-		});
-        if (LXQ.enabled()) {
-            $.powerTip.destroy($('.tooltipa',this.currentSegment));
-            $.powerTip.destroy($('.tooltipas',this.currentSegment));
-            CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
-            LXQ.reloadPowertip(this.currentSegment);
-        }
-        else {
-            CursorUtils.replaceSelectedHtml(newStr, rangeInsert);
-        }
-
-        $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
-        $('.editor .editarea .formatSelection-placeholder').remove();
-        $('.editor .editarea').trigger('afterFormatSelection');
-    },
     setTimeToEdit: function(sid) {
         let $segment = UI.getSegmentById(sid);
         this.editStop = new Date();
@@ -856,20 +811,15 @@ var UI = {
 	    if ( UI.tagMenuOpen ) return;
 
 	    var segment = SegmentStore.getSegmentByIdToJS(UI.getSegmentId($segment));
-
+        if ( !segment ) return;
 		var dd = new Date();
-		ts = dd.getTime();
+		var ts = dd.getTime();
 		var token = segment.sid + '-' + ts.toString();
 
-        segment_status = segment.status;
+        var segment_status = segment.status;
 
-		if( config.brPlaceholdEnabled ){
-			src_content = TagUtils.prepareTextToSend(segment.decoded_source);
-			trg_content = TagUtils.prepareTextToSend(segment.decoded_translation);
-		} else {
-			src_content = segment.decoded_source;
-			trg_content = segment.translation;
-		}
+        var src_content = segment.updatedSource.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+        var trg_content = segment.translation.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
 
 		APP.doRequest({
 			data: {
@@ -892,7 +842,7 @@ var UI = {
                 }else{
                     SegmentActions.setSegmentWarnings(segment.original_sid, {}, {});
                 }
-                $(document).trigger('getWarning:local:success', { resp : d, segment: UI.getSegmentById( segment.sid )    }) ;
+                $(document).trigger('getWarning:local:success', { resp : d, segment: segment    }) ;
 			}
 		}, 'local');
 
@@ -901,7 +851,7 @@ var UI = {
     translationIsToSave : function( segment ) {
         // add to setTranslation tail
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
-        var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
+        var emptyTranslation = ( segment && segment.translation.length === 0 );
 
         return ( !alreadySet && !emptyTranslation );
     },
@@ -909,7 +859,7 @@ var UI = {
     translationIsToSaveBeforeClose : function( segment ) {
         // add to setTranslation tail
         var alreadySet = this.alreadyInSetTranslationTail( segment.sid );
-        var emptyTranslation = ( segment && segment.decoded_translation.length === 0 );
+        var emptyTranslation = ( segment && segment.translation.length === 0 );
 
         return ( !alreadySet && !emptyTranslation && segment.modified && ( segment.status === config.status_labels.NEW.toUpperCase() || segment.status === config.status_labels.DRAFT.toUpperCase() ) );
     },
@@ -1001,7 +951,7 @@ var UI = {
         var status = options.status;
         var caller = options.caller;
         var propagate = options.propagate;
-        var sourceSegment;
+        var sourceSegment, translation;
         this.executingSetTranslation.push(id_segment);
         var reqArguments = arguments;
 		var segment = SegmentStore.getSegmentByIdToJS(id_segment);
@@ -1016,8 +966,8 @@ var UI = {
 		caller = (typeof caller == 'undefined') ? false : caller;
         try {
             // Attention, to be modified when we will lock tags
-            translation = TagUtils.prepareTextToSend( segment.decoded_translation );
-            sourceSegment = TagUtils.prepareTextToSend( segment.segment );
+            translation = TagUtils.prepareTextToSend( segment.translation );
+            sourceSegment = TagUtils.prepareTextToSend( segment.updatedSource );
         } catch ( e ) {
             var indexSegment = UI.executingSetTranslation.indexOf(id_segment);
             if (indexSegment > -1) {
@@ -1071,7 +1021,7 @@ var UI = {
         if(!propagate) {
             this.tempReqArguments.propagate = false;
         }
-        reqData = this.tempReqArguments;
+        var reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
         if (callback_to_execute) {
             callback_to_execute.call(this);
@@ -1123,8 +1073,10 @@ var UI = {
                 data.translation.segment = segment;
                 $(document).trigger('translation:change', data.translation);
                 data.segment = segment;
-                SegmentActions.addOriginalTranslation(segment.sid, null, TextUtils.htmlEncode(translation));
                 $(document).trigger('setTranslation:success', data);
+                if (config.alternativesEnabled ) {
+                    UI.getTranslationMismatches(id_segment);
+                }
 			}
 		});
 	},
@@ -1318,7 +1270,7 @@ var UI = {
 
     },
 
-    // Project completion override this metod
+    // Project completion override this method
     handleClickOnReadOnly : function(section) {
         if ( TextUtils.justSelecting('readonly') )   return;
         clearTimeout(UI.selectingReadonly);
