@@ -46,7 +46,7 @@
 }
 .tag {
   position: relative;
-  display: inline-block;
+  display: block;
   padding: 0 2px;
   background: #002b5c;
   font-size: 13px;
@@ -54,7 +54,7 @@
   color: #fff;
   vertical-align: middle;
   word-break: break-all;
-
+  max-width: 11px;
   &.tag-focused {
     &.tag-open {
       box-shadow: 3px -1px 0px 4px #CCE2FF;
@@ -144,6 +144,7 @@
     background: #AEBDCD;
     margin: 0 1px;
     padding: 0 4px;
+    max-width: unset;
     &:before {
       border:none;
     }
@@ -162,12 +163,14 @@
 
   /* Used in TM */
   &.small {
+    font-size: 12px;
+    line-height: 1.3;
+    display: inline-block;
+    /*opacity: 1;*/
     &:hover{
       cursor: default !important;
     }
-    font-size: 12px;
-    line-height: 1.3;
-    /*opacity: 1;*/
+
     &:after {
       left: -7px;
       border-right-width: 7px;
@@ -203,6 +206,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 64px;
+      top: 0;
     }
   }
 
@@ -523,6 +527,9 @@
       background: rgba(0, 0, 0, 0.1);
       margin-top: 44px;
       border-radius: 10px;
+    }
+    .tag-heading {
+      max-width: unset;
     }
   }
 
