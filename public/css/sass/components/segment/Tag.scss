@@ -46,7 +46,7 @@
 }
 .tag {
   position: relative;
-  display: block;
+  display: inline-block;
   padding: 0 2px;
   background: #002b5c;
   font-size: 13px;
@@ -54,7 +54,7 @@
   color: #fff;
   vertical-align: middle;
   word-break: break-all;
-  max-width: 11px;
+  //max-width: 11px;
   &.tag-focused {
     //&.tag-open {
     //  box-shadow: 3px -1px 0px 4px #CCE2FF;

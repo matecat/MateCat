@@ -105,7 +105,8 @@ class TagEntity extends Component {
         const warningChanged = this.state.tagWarningStyle !== nextState.tagWarningStyle;
         const tooltipChanged = this.state.showTooltip !== nextState.showTooltip ||
             this.state.shouldTooltipOnHover !== nextState.shouldTooltipOnHover;
-        return entityChanged || styleChanged || warningChanged || tooltipChanged || searchChange;
+        const childrenChange = nextProps.children[0].props.selection && nextProps.children[0].props.selection.equals( this.props.children[0].props.selection);
+        return entityChanged || styleChanged || warningChanged || tooltipChanged || searchChange || childrenChange;
     }
 
 
