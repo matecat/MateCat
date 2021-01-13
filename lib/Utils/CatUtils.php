@@ -1,6 +1,7 @@
 <?php
 
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use SubFiltering\Filter;
 use Validator\JobValidatorObject;
 
@@ -948,6 +949,56 @@ class CatUtils {
      */
     private static function isARevisePath( $path ) {
         return strpos( $path, "/revise" ) === 0;
+    }
+
+    /**
+     * Get a job from a combination of ID and ANY password (t,r1 or r2)
+     *
+     * @param $jobId
+     * @param $jobPassword
+     *
+     * @return \DataAccess_IDaoStruct|Jobs_JobStruct
+     */
+    public static function getJobFromIdAndAnyPassword( $jobId, $jobPassword ) {
+        $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
+
+        if ( !$job ) {
+            /** @var ChunkReviewStruct $chunkReview */
+            $chunkReview = \Features\ReviewExtended\Model\ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
+
+            if ( !$chunkReview ) {
+                return null;
+            }
+
+            $job = $chunkReview->getChunk();
+        }
+
+        return $job;
+    }
+
+    /**
+     * Get the correct password for job url
+     *
+     * If source_page is 1, the translation password is returned.
+     *
+     * Otherwise the function try to return the corresponding review_password
+     *      *
+     * @param Jobs_JobStruct $job
+     * @param int            $sourcePage
+     *
+     * @return string|null
+     */
+    public static function getJobPassword( Jobs_JobStruct $job, $sourcePage = 1 ) {
+        if ( $sourcePage <= 1 ) {
+            return $job->password;
+        }
+
+        $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $job->id, $job->password, $sourcePage );
+        if ( !$qa ) {
+            return null;
+        }
+
+        return $qa->review_password;
     }
 }
 

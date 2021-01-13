@@ -182,6 +182,7 @@ class commentController extends ajaxController {
                 'id_segment'      => $this->struct->id_segment,
         ]);
 
+        $url = null;
         if($this->struct->revision_number === 1){
             $url = $jobUrlStruct->getReviseUrl();
         } elseif($this->struct->revision_number === 2){

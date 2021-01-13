@@ -2,9 +2,7 @@
 
 namespace Url;
 
-use Features\ReviewExtended\Model\ChunkReviewDao;
 use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
 
 class JobUrlBuilder {
@@ -40,7 +38,7 @@ class JobUrlBuilder {
         ];
 
         foreach ( $sourcePages as $label => $sourcePage ) {
-            $passwords[ $label ] = self::getPassword( $job, $sourcePage );
+            $passwords[ $label ] = \CatUtils::getJobPassword( $job, $sourcePage );
         }
 
         // 4. httpHost
@@ -83,55 +81,11 @@ class JobUrlBuilder {
     public static function createFromCredentials( $jobId, $jobPassword, $options = [] ) {
 
         // 1. find the job
-        $job = self::getJobFromIdAndAnyPassword( $jobId, $jobPassword );
+        $job = \CatUtils::getJobFromIdAndAnyPassword( $jobId, $jobPassword );
         if ( !$job ) {
             return null;
         }
 
         return self::createFromJobStruct( $job, $options );
-    }
-
-    /**
-     * @param $jobId
-     * @param $jobPassword
-     *
-     * @return \DataAccess_IDaoStruct|Jobs_JobStruct
-     */
-    private static function getJobFromIdAndAnyPassword( $jobId, $jobPassword ) {
-        $job = \Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
-
-        if ( !$job ) {
-            /** @var ChunkReviewStruct $chunkReview */
-            $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
-
-            if ( !$chunkReview ) {
-                return null;
-            }
-
-            $job = $chunkReview->getChunk();
-        }
-
-        return $job;
-    }
-
-    /**
-     * Get the correct password for job url
-     *
-     * @param Jobs_JobStruct $job
-     * @param int            $sourcePage
-     *
-     * @return string|null
-     */
-    private static function getPassword( Jobs_JobStruct $job, $sourcePage ) {
-        if ( $sourcePage == 1 ) {
-            return $job->password;
-        }
-
-        $qa = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $job->id, $job->password, $sourcePage );
-        if ( !$qa ) {
-            return null;
-        }
-
-        return $qa->review_password;
     }
 }

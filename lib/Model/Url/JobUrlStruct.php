@@ -92,9 +92,10 @@ class JobUrlStruct {
      * @param null $httpHost
      */
     private function setUrls($httpHost = null) {
+
         // loop passwords array
         foreach ( $this->passwords as $label => $password ) {
-            if ( $this->isLabelAllowed( $label ) ) {
+            if ( $password and $this->isLabelAllowed( $label ) ) {
 
                 switch ( $label ) {
                     default:
@@ -125,7 +126,7 @@ class JobUrlStruct {
                     $url .= '#' . $this->segmentId;
                 }
 
-                $this->passwords[ $label ] = $url;
+                $this->urls[ $label ] = $url;
             }
         }
     }
@@ -175,7 +176,7 @@ class JobUrlStruct {
     /**
      * @return mixed
      */
-    public function getTranslateUrl() {
+    public function getTranslationUrl() {
         return $this->urls[ self::LABEL_T ];
     }
 
@@ -183,14 +184,14 @@ class JobUrlStruct {
      * @return mixed
      */
     public function getReviseUrl() {
-        return $this->urls[ self::LABEL_R1 ];
+        return (isset($this->urls[ self::LABEL_R1 ])) ? $this->urls[ self::LABEL_R1 ] : null;
     }
 
     /**
      * @return mixed
      */
     public function getRevise2Url() {
-        return $this->urls[ self::LABEL_R2 ];
+        return (isset($this->urls[ self::LABEL_R2 ])) ? $this->urls[ self::LABEL_R2 ] : null;
     }
 
     /**
