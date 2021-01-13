@@ -56,15 +56,15 @@
   word-break: break-all;
   max-width: 11px;
   &.tag-focused {
-    &.tag-open {
-      box-shadow: 3px -1px 0px 4px #CCE2FF;
-    }
-    &.tag-close {
-      box-shadow: -3px -1px 0px 4px #CCE2FF;
-    }
-    &.tag-selfclosed {
-      box-shadow: 0px -1px 0px 4px #CCE2FF;
-    }
+    //&.tag-open {
+    //  box-shadow: 3px -1px 0px 4px #CCE2FF;
+    //}
+    //&.tag-close {
+    //  box-shadow: -3px -1px 0px 4px #CCE2FF;
+    //}
+    //&.tag-selfclosed {
+    //  box-shadow: 0px -1px 0px 4px #CCE2FF;
+    //}
   }
 
   &:not(.tag-focused){
