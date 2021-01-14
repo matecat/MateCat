@@ -106,7 +106,8 @@ class TagEntity extends Component {
         const tooltipChanged = this.state.showTooltip !== nextState.showTooltip ||
             this.state.shouldTooltipOnHover !== nextState.shouldTooltipOnHover;
         const childrenChange = nextProps.children[0].props.selection && nextProps.children[0].props.selection.equals( this.props.children[0].props.selection);
-        return entityChanged || styleChanged || warningChanged || tooltipChanged || searchChange || childrenChange;
+        // return entityChanged || styleChanged || warningChanged || tooltipChanged || searchChange || childrenChange;
+        return true;
     }
 
 
@@ -141,10 +142,8 @@ class TagEntity extends Component {
         const {type: entityType, data: {id: entityId, placeholder: entityPlaceholder, name: entityName}} = contentState.getEntity(entityKey);
         const decoratedText = Array.isArray(children) ? children[0].props.text : children.props.decoratedText;
 
-        return <div className={'tag-container'}
-                    ref={(ref) => this.tagRef = ref}>
-            {tooltipAvailable && showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={style}/>}
-            <span className={`tag ${style} ${tagWarningStyle}`}
+        return <span ref={(ref) => this.tagRef = ref}
+                  className={`tag ${style} ${tagWarningStyle}`}
                 data-offset-key={this.props.offsetkey}
                 unselectable="on"
                 suppressContentEditableWarning={true}
@@ -157,11 +156,10 @@ class TagEntity extends Component {
                         SegmentActions.highlightTags(entityId, entityPlaceholder, entityKey);
                     })
                 }}>
+                {tooltipAvailable && showTooltip && <TooltipInfo text={entityPlaceholder} isTag tagStyle={style}/>}
                 {searchParams.active && markSearch(decoratedText, searchParams)}
                 {searchParams.active ? <span style={{display: 'none'}}>{children}</span> : children}
             </span>
-
-        </div>
     }
 
     onClickBound = (entityId, entityPlaceholder) =>{
@@ -239,13 +237,6 @@ class TagEntity extends Component {
         clickedTagText &&
         clickedTagText === entityPlaceholder
             ? 'tag-clicked' : ''; // green
-
-        // Focus
-        /*const tagFocused = anchorOffset === start &&
-        focusOffset === end &&
-        anchorKey === blockKey &&
-        (tagClickedInSource && !isTarget || !tagClickedInSource && isTarget) &&
-        hasFocus ? 'tag-focused' : ''; // blue with shadow*/
 
         const tagFocused = focused ? 'tag-focused' : ''; // blue with shadow
         return `${baseStyle} ${tagInactive} ${tagClicked} ${tagFocused}`.trim();
