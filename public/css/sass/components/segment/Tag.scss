@@ -237,7 +237,6 @@
       cursor: grab;
       opacity: 1;
       background-color: #0099CC;
-      /*box-shadow: 2px 0px 5px 2px #02c0ffa3*/
       &:before {
         border-left-color: #0099CC;
       }
@@ -248,8 +247,23 @@
         cursor: grabbing;
       }
     }
-  }
 
+  }
+  &.tag-selected {
+    cursor: grab;
+    opacity: 1;
+    background-color: #0099CC;
+    box-shadow: 2px 0px 5px 2px #02c0ffa3;
+    &:before {
+      border-left-color: #0099CC;
+    }
+    &:after {
+      border-right-color: #0099CC;
+    }
+    &:active {
+      cursor: grabbing;
+    }
+  }
   &.tag-mismatch-error {
     background-color: #E02020;
     &:before {

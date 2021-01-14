@@ -815,7 +815,7 @@ class Editarea extends React.Component {
         const {fragment: clipboardFragment, plainText: clipboardPlainText} = SegmentStore.getFragmentFromClipboard();
         // if text in standard clipboard matches the the plainClipboard saved in store proceed using fragment
         // otherwise we're handling an external copy
-        if(clipboardFragment && text && clipboardPlainText === text) {
+        if(clipboardFragment && text && clipboardPlainText.replace(/\n/g, '') === text.replace(/\n/g, '')) {
             try {
                 const fragmentContent = JSON.parse(clipboardFragment);
                 let fragment = DraftMatecatUtils.buildFragmentFromJson(fragmentContent.orderedMap);
@@ -1024,7 +1024,7 @@ class Editarea extends React.Component {
             tagRange,
             segmentOpened: opened,
             missingTagsInTarget,
-            currentSelection: editorState.getSelection(),
+            currentSelection: (this.editor) ? this.editor._latestEditorState.getSelection() : editorState.getSelection(),
             openSplit
         }
     };
