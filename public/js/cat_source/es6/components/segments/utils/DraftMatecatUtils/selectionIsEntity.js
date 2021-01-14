@@ -4,7 +4,7 @@ const selectionIsEntity = (editorState) => {
     const anchorKey = currentSelection.getAnchorKey();
     const focusKey = currentSelection.getFocusKey();
     //entity is never on two different block
-    if(focusKey !== anchorKey) return null;
+    if(focusKey !== anchorKey) return {entityKey: null, onEdge: null};
     const anchorOffset =  currentSelection.getAnchorOffset();
     const anchorBlock = contentState.getBlockForKey(anchorKey);
     let anchorEntityKey = anchorBlock.getEntityAt(anchorOffset);
